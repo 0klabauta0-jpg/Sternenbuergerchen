@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1190 - Mission Runtime Index und HUD-Deltas (implementiert im Arbeitsstand)
+- Ergebnis: Der Tactical-Controller durchsucht und sortiert direkte Missionskinder nicht mehr bei jedem Friendly-/Enemy-/Fireteam-Lookup. Der neue read-only `MissionRuntimeIndex` baut die Mitgliedschaft nur bei Root-Aenderungen neu. Leichte HUD-Surfaces und Heavy-Revisionen je Fireteam sind getrennt; der Security-Hotpath verwendet keinen kompletten JSON-Snapshotvergleich mehr.
+- Verifikation: TASK_1190 16/16; TASK_1152 18/18; TASK_1157 35 Checks. In der TASK_1187-Serie (3 kalt, 5 warm) liegen Controller-p99 bei 0.228-0.316 ms und Light-HUD-p99 bei 4.092-4.845 ms.
+- Naechster Schritt: Gleichartige same-tick LOS-Geometrieabfragen zwischen Contact Tracking und Enemy Security nur mit einem Cache-an/aus-Oracle memoizieren.
+
+---
+
 ## TASK_1179 - Ground Mission Objective Playthrough (implementiert im Arbeitsstand)
 - Ergebnis: Der Singleplayer-Standard `grid_sweep` laeuft jetzt von Homebase ueber Drop und Take bis Objective-Sieg und Debrief. Alpha-LZ, Stationszugang und zentrale Rampe sind fuer A*/HPA legal authoriert.
 - Verifikation: TASK_1179 18/18 gruen.

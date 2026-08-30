@@ -23,6 +23,8 @@ const MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT: GDScript = preload("res://scripts/miss
 const MISSION_RELEASE_RECAPTURE_SERVICE_SCRIPT: GDScript = preload("res://scripts/mission/mission_release_recapture_service.gd")
 const MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_dropship_effect_adapter.gd")
 const MISSION_FIRETEAM_RUNTIME_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_fireteam_runtime_state.gd")
+const MISSION_RUNTIME_INDEX_SCRIPT: GDScript = preload("res://scripts/tactical/mission_runtime_index.gd")
+const MISSION_HUD_READ_MODEL_SCRIPT: GDScript = preload("res://scripts/tactical/mission_hud_read_model.gd")
 const AIR_ASSET_STATUS_SCRIPT: GDScript = preload("res://scripts/mission/air_asset_status.gd")
 const AIR_ASSET_THREAT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/combat/air_asset_threat_resolver.gd")
 const MISSION_COMMAND_INPUT_GUARD_SCRIPT: GDScript = preload("res://scripts/mission/mission_command_input_guard.gd")
@@ -460,6 +462,8 @@ signal planning_state_changed(planning_state)
 @export var alpha_flow_driver_path: NodePath
 @export var bravo_flow_driver_path: NodePath
 @export var charlie_flow_driver_path: NodePath
+@export var mission_runtime_index_path: NodePath
+@export var mission_hud_read_model_path: NodePath
 @export var target_marker_path: NodePath
 @export var objective_point_path: NodePath
 @export var command_feedback_label_path: NodePath
@@ -477,6 +481,8 @@ var _command_matrix_icon_cache: Dictionary = {}
 var _primary_view_bridge = MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT.new()
 var _dropship_effect_adapter = MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT.new()
 var _mission_fireteam_runtime_state = MISSION_FIRETEAM_RUNTIME_STATE_SCRIPT.new()
+var _mission_runtime_index = null
+var _mission_hud_read_model = null
 var _command_input_guard = MISSION_COMMAND_INPUT_GUARD_SCRIPT.new()
 var _selection_adapter = FIRETEAM_SELECTION_ADAPTER_SCRIPT.new()
 
@@ -711,6 +717,7 @@ var _last_planning_state_issue: String = ""
 func _ready() -> void:
 	set_process(true)
 	set_process_unhandled_input(true)
+	_ensure_mission_runtime_read_models()
 	_last_target_position = _get_target_position()
 	if not _has_lz_position:
 		_lz_position = _last_target_position
@@ -3115,30 +3122,34 @@ func refresh_fireteam_security_state() -> bool:
 	_ensure_fireteam_security_controller()
 	if _fireteam_security_controller == null:
 		return false
-	var previous_snapshot_text: String = JSON.stringify(get_fireteam_security_snapshot())
+	var security_changed: bool = false
 	for fireteam_id_variant in _get_available_fireteam_ids():
 		var fireteam_id: String = String(fireteam_id_variant)
+		var previous_state: Dictionary = Dictionary(_fireteam_security_controller.call("get_fireteam_state", fireteam_id)).duplicate(true)
 		var behavior_profile_dict: Dictionary = get_active_behavior_profile(fireteam_id)
 		if not _is_fireteam_runtime_active(fireteam_id) or behavior_profile_dict.is_empty():
 			_fireteam_security_controller.call("reset_fireteam", fireteam_id)
 			_clear_fireteam_security_facing_meta(fireteam_id)
-			continue
-		_fireteam_security_controller.call(
-			"update_fireteam_state",
-			fireteam_id,
-			_get_fireteam_units(fireteam_id, true),
-			_resolve_fireteam_leader_for_behavior(fireteam_id),
-			behavior_profile_dict,
-			get_fireteam_movement_state(fireteam_id),
-			Dictionary(_suppression_state_by_fireteam.get(fireteam_id, {})).duplicate(true),
-			Dictionary(_ad_hoc_order_controller.call("get_active_order", fireteam_id)) if _ad_hoc_order_controller != null else {},
-			get_fireteam_contact_snapshot(fireteam_id),
-			_get_area_execution_security_context(fireteam_id)
-		)
-		_apply_fireteam_security_facing_from_state(Dictionary(_fireteam_security_controller.call("get_fireteam_state", fireteam_id)))
+		else:
+			_fireteam_security_controller.call(
+				"update_fireteam_state",
+				fireteam_id,
+				_get_fireteam_units(fireteam_id, true),
+				_resolve_fireteam_leader_for_behavior(fireteam_id),
+				behavior_profile_dict,
+				get_fireteam_movement_state(fireteam_id),
+				Dictionary(_suppression_state_by_fireteam.get(fireteam_id, {})).duplicate(true),
+				Dictionary(_ad_hoc_order_controller.call("get_active_order", fireteam_id)) if _ad_hoc_order_controller != null else {},
+				get_fireteam_contact_snapshot(fireteam_id),
+				_get_area_execution_security_context(fireteam_id)
+			)
+			_apply_fireteam_security_facing_from_state(Dictionary(_fireteam_security_controller.call("get_fireteam_state", fireteam_id)))
+		var next_state: Dictionary = Dictionary(_fireteam_security_controller.call("get_fireteam_state", fireteam_id)).duplicate(true)
+		if previous_state != next_state:
+			security_changed = true
+			_record_fireteam_security_revision(fireteam_id)
 	_sync_unit_overwatch_badges()
-	var next_snapshot_text: String = JSON.stringify(get_fireteam_security_snapshot())
-	if previous_snapshot_text == next_snapshot_text:
+	if not security_changed:
 		return false
 	_refresh_order_visuals()
 	_refresh_fireteam_status_panel()
@@ -3904,6 +3915,7 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
 	var scope_started_usec: int = 0
+	_record_mission_hud_light_read_state()
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
 	_apply_block_labels()
@@ -18477,42 +18489,60 @@ func _sync_unit_overwatch_badges() -> void:
 			unit.set_meta("overwatch_cooldown_remaining_ticks", int(ready_state.get("cooldown_remaining_ticks", 0)))
 
 
-func _get_all_friendly_units(include_hidden: bool = true) -> Array:
+func _ensure_mission_runtime_read_models() -> void:
 	var mission_root: Node = get_parent()
-	if mission_root == null:
-		return []
+	if _mission_runtime_index == null:
+		_mission_runtime_index = get_node_or_null(mission_runtime_index_path)
+		if _mission_runtime_index == null:
+			_mission_runtime_index = get_node_or_null("../MissionRuntimeIndex")
+		if _mission_runtime_index == null:
+			_mission_runtime_index = MISSION_RUNTIME_INDEX_SCRIPT.new()
+	if _mission_runtime_index != null and _mission_runtime_index.has_method("bind_mission_root"):
+		_mission_runtime_index.call("bind_mission_root", mission_root, get_local_command_team_id())
+	if _mission_hud_read_model == null:
+		_mission_hud_read_model = get_node_or_null(mission_hud_read_model_path)
+		if _mission_hud_read_model == null:
+			_mission_hud_read_model = get_node_or_null("../MissionHudReadModel")
+		if _mission_hud_read_model == null:
+			_mission_hud_read_model = MISSION_HUD_READ_MODEL_SCRIPT.new()
 
-	var result: Array = []
-	var local_team_id: String = get_local_command_team_id()
-	for child in mission_root.get_children():
-		if not child.has_method("get_team_id") or not child.has_method("get_unit_id") or not child.has_method("get_fireteam_id"):
-			continue
-		if String(child.call("get_team_id")).strip_edges() != local_team_id:
-			continue
-		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible:
-			continue
-		result.append(child)
 
-	result.sort_custom(Callable(self, "_sort_unit_nodes_for_cards"))
-	return result
+func _record_mission_hud_light_read_state() -> void:
+	_ensure_mission_runtime_read_models()
+	if _mission_hud_read_model == null or not _mission_hud_read_model.has_method("set_light_state"):
+		return
+	_mission_hud_read_model.call("set_light_state", "command_feedback", _last_command_text)
+	_mission_hud_read_model.call("set_light_state", "selection", Array(_selected_fireteam_ids))
+	_mission_hud_read_model.call("set_light_state", "selected_tile", {
+		"selected": _has_selected_tile,
+		"grid": _selected_tile_grid_position,
+	})
+
+
+func _record_fireteam_security_revision(fireteam_id: String) -> void:
+	_ensure_mission_runtime_read_models()
+	if _mission_hud_read_model != null and _mission_hud_read_model.has_method("mark_fireteam_heavy_state_changed"):
+		_mission_hud_read_model.call("mark_fireteam_heavy_state_changed", fireteam_id)
+
+
+func get_mission_runtime_index_diagnostics() -> Dictionary:
+	_ensure_mission_runtime_read_models()
+	return Dictionary(_mission_runtime_index.call("get_diagnostics_snapshot")) if _mission_runtime_index != null and _mission_runtime_index.has_method("get_diagnostics_snapshot") else {}
+
+
+func get_mission_hud_read_model_snapshot() -> Dictionary:
+	_ensure_mission_runtime_read_models()
+	return Dictionary(_mission_hud_read_model.call("get_diagnostics_snapshot")) if _mission_hud_read_model != null and _mission_hud_read_model.has_method("get_diagnostics_snapshot") else {}
+
+
+func _get_all_friendly_units(include_hidden: bool = true) -> Array:
+	_ensure_mission_runtime_read_models()
+	return Array(_mission_runtime_index.call("get_friendly_units", include_hidden)) if _mission_runtime_index != null else []
 
 
 func _get_all_enemy_units(include_hidden: bool = true) -> Array:
-	var mission_root: Node = get_parent()
-	if mission_root == null:
-		return []
-	var result: Array = []
-	var local_team_id: String = get_local_command_team_id()
-	for child in mission_root.get_children():
-		if not child.has_method("get_team_id") or not child.has_method("get_unit_id"):
-			continue
-		var child_team_id: String = String(child.call("get_team_id")).strip_edges()
-		if child_team_id == local_team_id or child_team_id.is_empty() or child_team_id == "team_unused":
-			continue
-		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible:
-			continue
-		result.append(child)
-	return result
+	_ensure_mission_runtime_read_models()
+	return Array(_mission_runtime_index.call("get_enemy_units", include_hidden)) if _mission_runtime_index != null else []
 
 
 func _build_unit_presence_audit_entries(units: Array, unit_registry) -> Array:
@@ -18619,12 +18649,8 @@ func _get_fireteam_units(fireteam_id: String, include_hidden: bool = true) -> Ar
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return []
-	var result: Array = []
-	for unit in _get_all_friendly_units(include_hidden):
-		if String(unit.call("get_fireteam_id")).strip_edges().to_lower() != normalized_fireteam_id:
-			continue
-		result.append(unit)
-	return result
+	_ensure_mission_runtime_read_models()
+	return Array(_mission_runtime_index.call("get_fireteam_units", normalized_fireteam_id, include_hidden)) if _mission_runtime_index != null else []
 
 
 func _resolve_fireteam_team_id_from_units(units: Array) -> String:
@@ -18675,18 +18701,10 @@ func _resolve_fireteam_leader_for_behavior(fireteam_id: String):
 		var active_lead = mission_combat_driver.call("get_current_fireteam_lead_unit", normalized_fireteam_id)
 		if active_lead != null:
 			return active_lead
-	var mission_root: Node = get_parent()
-	if mission_root == null:
-		return _get_selection_anchor_for_fireteam(normalized_fireteam_id)
 	var best_unit = null
 	var best_leadership: float = -1.0
-	var local_team_id: String = get_local_command_team_id()
-	for unit in mission_root.get_children():
-		if unit == null or not unit.has_method("get_team_id") or not unit.has_method("get_fireteam_id"):
-			continue
-		if String(unit.call("get_team_id")).strip_edges() != local_team_id:
-			continue
-		if String(unit.call("get_fireteam_id")).strip_edges().to_lower() != normalized_fireteam_id:
+	for unit in _get_fireteam_units(normalized_fireteam_id, true):
+		if unit == null:
 			continue
 		var is_fit: bool = not unit.has_method("get_vital_state") or String(unit.call("get_vital_state")) == "fit"
 		if not is_fit:
@@ -19149,20 +19167,12 @@ func _is_all_fireteams_selected() -> bool:
 
 
 func _get_available_fireteam_ids() -> PackedStringArray:
+	_ensure_mission_runtime_read_models()
 	var available_fireteam_ids: PackedStringArray = []
 	var mission_setup: Node = get_node_or_null("../MissionSetup")
 	if mission_setup != null:
-		for fireteam_id_variant in PackedStringArray(mission_setup.get("selected_team_fireteam_ids")):
-			var configured_fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
-			if configured_fireteam_id.is_empty() or available_fireteam_ids.has(configured_fireteam_id):
-				continue
-			available_fireteam_ids.append(configured_fireteam_id)
-	for unit in _get_all_friendly_units(true):
-		var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
-		if fireteam_id.is_empty() or available_fireteam_ids.has(fireteam_id):
-			continue
-		available_fireteam_ids.append(fireteam_id)
-	return available_fireteam_ids
+		available_fireteam_ids = PackedStringArray(mission_setup.get("selected_team_fireteam_ids"))
+	return PackedStringArray(_mission_runtime_index.call("get_available_fireteam_ids", available_fireteam_ids)) if _mission_runtime_index != null else available_fireteam_ids
 
 
 func _get_displayable_fireteam_ids() -> PackedStringArray:

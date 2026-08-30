@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1190 - Mission Runtime Index und HUD-Deltas
+- Status: implementiert und headless regressionsgeprueft
+- Aenderung: `MissionRuntimeIndex` cached die direkten Mission-Units als sortierte Friendly-/Enemy-/Fireteam-Lookups und invalidiert ausschließlich bei einer Root-Membership-Aenderung. Der Tactical-Controller verwendet den Index fuer Friendly-, Enemy-, Fireteam- und Fireteam-ID-Lookups; er bleibt ein abgeleiteter Lookup und besitzt keine Gameplay-Wahrheit.
+- HUD: `MissionHudReadModel` trennt leichte Command-/Selection-/Tile-Revisionen von breiten Heavy-Revisionen je Fireteam. Ein Security-Refresh vergleicht den betroffenen Fireteam-State direkt statt vorher/nachher den kompletten Snapshot per JSON zu serialisieren. Direkter Tile-Feedback bleibt synchron im bestehenden UI-Aufruf sichtbar.
+- Lokale Pruefung: TASK_1190 16/16, TASK_1152 18/18 und TASK_1157 35 Checks gruen. Die vollstaendige TASK_1187-Messserie (3 Kalt-/5 Warmlauefe, Godot 4.6.2, Ryzen 7 7800X3D) bestand als Measurement-Runner: `controller.execution_updates_usec` p99 0.228-0.316 ms (Ziel <= 4 ms) und `controller.hud_light_usec` p99 4.092-4.845 ms (Ziel <= 16.7 ms).
+- Risiken/offen: Die Serie markiert weiterhin die getrennten Combat-/Simulation-p99-Budgets sowie die einmalige LZ-Eingabe als ueberschritten. `terrain.fow_work_usec` lag in 2/8 Laeufen ueber 2 ms (2.057/2.897 ms); Dynamic Overlay war in einem Lauf ueber 1 ms. Diese Messbefunde sind nicht durch Task 1190 verdeckt und bleiben fuer die nachfolgenden Slices offen.
+
 ### TASK_1189 - FOW Dirty Region Fan-out
 - Status: implementiert, skaliert und headless regressionsgeprueft
 - Aenderung: `FogOfWarSystem` plant bei Observer-Bewegung nur alte/neue Sichtregionen, sammelt deren Kandidaten und wertet sie in begrenzten Scheiben aus. Der alte Full-Scan bleibt fuer Erstaufbau, Terrainrevision und Force als Oracle erhalten. Die publizierte Team-Sicht bleibt bis zum Abschluss unveraendert; danach liefert eine Revision mit Tile-Delta den neuen atomaren Stand.

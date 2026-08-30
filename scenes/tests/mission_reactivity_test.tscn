@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -23,6 +23,8 @@
 [ext_resource type="Script" path="res://scripts/tests/phase_controller.gd" id="21_phase_controller"]
 [ext_resource type="Script" path="res://scripts/tests/mission_map_camera_controller.gd" id="22_camera"]
 [ext_resource type="Script" path="res://scripts/ui/tactical_event_log_panel.gd" id="23_event_log"]
+[ext_resource type="Script" path="res://scripts/tactical/mission_runtime_index.gd" id="24_runtime_index"]
+[ext_resource type="Script" path="res://scripts/tactical/mission_hud_read_model.gd" id="25_hud_read_model"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -656,11 +658,19 @@ text = "SE"
 text = "LZ offen\nApproach NW\nDrop wartend"
 autowrap_mode = 3
 
+[node name="MissionRuntimeIndex" type="Node" parent="."]
+script = ExtResource("24_runtime_index")
+
+[node name="MissionHudReadModel" type="Node" parent="."]
+script = ExtResource("25_hud_read_model")
+
 [node name="TacticalController" type="Node" parent="."]
 script = ExtResource("11_input")
 alpha_flow_driver_path = NodePath("../AlphaFlowDriver")
 bravo_flow_driver_path = NodePath("../BravoFlowDriver")
 charlie_flow_driver_path = NodePath("../CharlieFlowDriver")
+mission_runtime_index_path = NodePath("../MissionRuntimeIndex")
+mission_hud_read_model_path = NodePath("../MissionHudReadModel")
 target_marker_path = NodePath("../TargetMarker")
 objective_point_path = NodePath("../MapRoot/objective_point")
 command_feedback_label_path = NodePath("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/CommandFeedbackLabel")
