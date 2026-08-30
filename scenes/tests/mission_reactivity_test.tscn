@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -25,6 +25,7 @@
 [ext_resource type="Script" path="res://scripts/ui/tactical_event_log_panel.gd" id="23_event_log"]
 [ext_resource type="Script" path="res://scripts/tactical/mission_runtime_index.gd" id="24_runtime_index"]
 [ext_resource type="Script" path="res://scripts/tactical/mission_hud_read_model.gd" id="25_hud_read_model"]
+[ext_resource type="Script" path="res://scripts/mission/combat_visibility_cache.gd" id="26_visibility_cache"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -254,6 +255,9 @@ wave_delay_seconds = 18.0
 first_wave_delay_seconds = 0.0
 unit_registry_path = NodePath("../UnitRegistry")
 
+[node name="CombatVisibilityCache" type="Node" parent="."]
+script = ExtResource("26_visibility_cache")
+
 [node name="CombatLoopDriver" type="Node" parent="."]
 script = ExtResource("10_combat")
 contact_range = 220.0
@@ -265,6 +269,7 @@ enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../Enem
 respawn_manager_path = NodePath("../RespawnManager")
 enemy_wave_controller_path = NodePath("../EnemyWaveController")
 terrain_registry_path = NodePath("../TerrainRegistry")
+combat_visibility_cache_path = NodePath("../CombatVisibilityCache")
 
 [node name="ObjectiveStatusView" type="Node" parent="."]
 script = ExtResource("16_objective_view")

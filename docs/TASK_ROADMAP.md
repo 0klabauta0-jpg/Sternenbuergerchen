@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1191 - Gemeinsamer Combat-Visibility-Cache (implementiert im Arbeitsstand)
+- Ergebnis: Eine ticklokale, abgeleitete `CombatVisibilityCache`-Node teilt reine Terrain-Occlusion zwischen Contact Tracking, Enemy Security und Fire-Decision-Resolver. Ihre Key-Reihenfolge bleibt absichtlich source-/target-gerichtet; Weltpositionen sichern Wall-Segment-LoS auch innerhalb derselben Grid-Zelle ab. Gameplay-Entscheidungen und Snapshots bleiben außerhalb des Caches.
+- Verifikation: TASK_1191 11/11, mit 16v12/600 Ticks, aktiver Bewegung, sichtbaren Cache-Hits und bit-exaktem Cache-an/aus-Oracle; TASK_162 23/23 und TASK_208 57/57 gruen. TASK_202 22/2 ist auf `dd69cbffc` identisch rot; TASK_543 erreichte im historischen Meta-Gesamtpfad keinen Abschluss und ist nicht als gruen gewertet.
+- Naechster Schritt: Synthetische First-Contact-/First-Fire-Abkuerzungen aus dem normalen Meta-Flow in eine explizite Release-Fixture auslagern, damit der Produktpfad keine Testmutationen enthaelt.
+
+---
+
 ## TASK_1190 - Mission Runtime Index und HUD-Deltas (implementiert im Arbeitsstand)
 - Ergebnis: Der Tactical-Controller durchsucht und sortiert direkte Missionskinder nicht mehr bei jedem Friendly-/Enemy-/Fireteam-Lookup. Der neue read-only `MissionRuntimeIndex` baut die Mitgliedschaft nur bei Root-Aenderungen neu. Leichte HUD-Surfaces und Heavy-Revisionen je Fireteam sind getrennt; der Security-Hotpath verwendet keinen kompletten JSON-Snapshotvergleich mehr.
 - Verifikation: TASK_1190 16/16; TASK_1152 18/18; TASK_1157 35 Checks. In der TASK_1187-Serie (3 kalt, 5 warm) liegen Controller-p99 bei 0.228-0.316 ms und Light-HUD-p99 bei 4.092-4.845 ms.

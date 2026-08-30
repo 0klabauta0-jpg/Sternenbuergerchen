@@ -1,6 +1,7 @@
 extends Node
 
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
+const COMBAT_VISIBILITY_CACHE_SCRIPT: GDScript = preload("res://scripts/mission/combat_visibility_cache.gd")
 const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/overwatch_controller.gd")
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
@@ -117,6 +118,7 @@ signal combat_resolved(mission_result: Dictionary)
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
 @export var terrain_registry_path: NodePath
+@export var combat_visibility_cache_path: NodePath
 @export var tactical_controller_path: NodePath
 @export var preview_mode: bool = false
 @export var combat_tick_budget_debug_enabled: bool = false
@@ -771,6 +773,7 @@ func get_combat_hotpath_audit_snapshot() -> Dictionary:
 	var active_enemy_units: Array = _get_active_enemy_units()
 	var combat_friendly_units: Array = _get_friendly_combat_units()
 	var combat_enemy_units: Array = _get_enemy_combat_units()
+	var visibility_cache_audit: Dictionary = _get_combat_visibility_cache_audit()
 	return {
 		"authority_root": "SimulationRoot",
 		"combat_driver_role": "authoritative_tick_subscriber",
@@ -792,7 +795,12 @@ func get_combat_hotpath_audit_snapshot() -> Dictionary:
 		"last_contact_tracking_scan_pair_count": _last_contact_tracking_scan_pair_count,
 		"last_contact_tracking_los_check_count": _last_contact_tracking_los_check_count,
 		"last_contact_tracking_los_cache_hit_count": _last_contact_tracking_los_cache_hit_count,
-		"contact_tracking_los_cache_status": "not_implemented",
+		"contact_tracking_los_cache_status": String(visibility_cache_audit.get("cache_status", "unavailable")),
+		"visibility_cache_asked_pair_count": int(visibility_cache_audit.get("asked_pair_count", 0)),
+		"visibility_cache_actual_los_check_count": int(visibility_cache_audit.get("actual_los_check_count", 0)),
+		"visibility_cache_hit_count": int(visibility_cache_audit.get("cache_hit_count", 0)),
+		"visibility_cache_tactics_rebuild_count": _enemy_team_tactics_rebuild_count,
+		"visibility_cache": visibility_cache_audit,
 		"last_fire_candidate_pair_scan_count": _last_fire_candidate_pair_scan_count,
 		"spatial_bucket_status": "diagnostic_next_step_not_runtime_filter",
 		"spatial_bucket_cell_size": COMBAT_HOTPATH_AUDIT_BUCKET_CELL_SIZE,
@@ -801,6 +809,32 @@ func get_combat_hotpath_audit_snapshot() -> Dictionary:
 		"tactical_visual_refresh_count": _tactical_combat_visual_refresh_count,
 		"tactical_visual_refresh_pending": _tactical_combat_visual_refresh_pending,
 		"tactical_visual_refresh_suppressed_count": _tactical_combat_visual_refresh_suppressed_count,
+	}
+
+
+func _begin_combat_visibility_cache_tick(tick: int) -> void:
+	var cache = get_node_or_null(combat_visibility_cache_path)
+	if cache != null and cache.has_method("begin_tick"):
+		cache.call("begin_tick", tick)
+
+
+func _get_combat_visibility_system():
+	var cache = get_node_or_null(combat_visibility_cache_path)
+	if cache != null and cache.has_method("has_line_of_sight_between_nodes") and cache.has_method("has_line_of_sight_between_points"):
+		return cache
+	return _los_system
+
+
+func _get_combat_visibility_cache_audit() -> Dictionary:
+	var cache = get_node_or_null(combat_visibility_cache_path)
+	if cache != null and cache.has_method("get_audit_snapshot"):
+		return Dictionary(cache.call("get_audit_snapshot")).duplicate(true)
+	return {
+		"cache_status": "unavailable",
+		"derived_only": true,
+		"asked_pair_count": 0,
+		"actual_los_check_count": 0,
+		"cache_hit_count": 0,
 	}
 
 
@@ -1367,6 +1401,7 @@ func _on_tick_processed(tick: int) -> void:
 		_close_hotpath_unit_cache_scope()
 		return
 	_refresh_hotpath_unit_cache_for_tick()
+	_begin_combat_visibility_cache_tick(tick)
 	var profile_enabled: bool = combat_tick_budget_debug_enabled
 	var tick_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var profile_scopes: Dictionary = {}
@@ -2863,7 +2898,7 @@ func _has_valid_los(attacker, target) -> bool:
 	var los_range: float = _get_effective_range(target)
 	if _uses_weapon_range_for_contact_detection(attacker):
 		los_range = maxf(los_range, _get_weapon_attack_range(attacker, target))
-	return _los_system.has_line_of_sight_between_nodes(attacker, target, los_range, _get_terrain_registry())
+	return bool(_get_combat_visibility_system().call("has_line_of_sight_between_nodes", attacker, target, los_range, _get_terrain_registry()))
 
 
 func _uses_weapon_range_for_contact_detection(attacker) -> bool:
@@ -2887,6 +2922,7 @@ func _update_contact_tracking() -> void:
 	_last_contact_tracking_scan_pair_count = 0
 	_last_contact_tracking_los_check_count = 0
 	_last_contact_tracking_los_cache_hit_count = 0
+	var cache_hit_count_before: int = int(_get_combat_visibility_cache_audit().get("cache_hit_count", 0))
 	for friendly in active_friendlies:
 		if friendly == null or not friendly.has_method("get_fireteam_id") or not friendly.has_method("get_unit_id"):
 			continue
@@ -2911,6 +2947,7 @@ func _update_contact_tracking() -> void:
 				"last_known_position": (enemy as Node2D).global_position if enemy is Node2D else Vector2.ZERO,
 				"detection_complete": _is_detection_complete(attacker_id, enemy_unit_id),
 			})
+	_last_contact_tracking_los_cache_hit_count = maxi(0, int(_get_combat_visibility_cache_audit().get("cache_hit_count", 0)) - cache_hit_count_before)
 	var did_change: bool = bool(
 		_contact_tracker.call(
 			"update",
@@ -3292,7 +3329,7 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"contact_range": contact_range,
 		"base_damage_multiplier": base_damage_multiplier,
 		"spotted_contact_hit_chance_malus": SPOTTED_CONTACT_HIT_CHANCE_MALUS,
-		"los_system": _los_system,
+		"los_system": _get_combat_visibility_system(),
 		"terrain_registry": _get_terrain_registry(),
 		"check_discipline_break": Callable(self, "_check_discipline_break"),
 		"can_return_fire": Callable(self, "_can_unit_return_fire"),
@@ -3947,7 +3984,7 @@ func _build_enemy_watched_unit_ids(units: Array, state: Dictionary) -> PackedStr
 				continue
 			if to_target.length() > float(assignment.get("weapon_range_world", 0.0)):
 				continue
-			if not _los_system.has_line_of_sight_between_nodes(enemy, friendly, float(assignment.get("weapon_range_world", 0.0)), _get_terrain_registry()):
+			if not bool(_get_combat_visibility_system().call("has_line_of_sight_between_nodes", enemy, friendly, float(assignment.get("weapon_range_world", 0.0)), _get_terrain_registry())):
 				continue
 			result.append(friendly_id)
 	return result
@@ -4357,7 +4394,7 @@ func _score_enemy_cover_tile(unit, tile, focus_position: Vector2) -> float:
 	var attack_range: float = _get_weapon_attack_range(unit, null)
 	if attack_range > 0.0 and tile_position.distance_to(focus_position) > attack_range:
 		return -1000.0
-	if not _los_system.has_line_of_sight_between_points(tile_position, focus_position, attack_range, _get_terrain_registry()):
+	if not bool(_get_combat_visibility_system().call("has_line_of_sight_between_points", tile_position, focus_position, attack_range, _get_terrain_registry())):
 		return -1000.0
 	var unit_position: Vector2 = (unit as Node2D).global_position if unit is Node2D else tile_position
 	var cover_score: float = clampf(float(tile.cover_value) / 100.0, 0.0, 1.0)
@@ -4872,7 +4909,7 @@ func _enemy_should_hold_position(enemy) -> bool:
 			continue
 
 		var attack_range: float = _get_weapon_attack_range(enemy, friendly)
-		if not _los_system.has_line_of_sight_between_nodes(enemy, friendly, attack_range, _get_terrain_registry()):
+		if not bool(_get_combat_visibility_system().call("has_line_of_sight_between_nodes", enemy, friendly, attack_range, _get_terrain_registry())):
 			continue
 
 		if (enemy as Node2D).global_position.distance_to((friendly as Node2D).global_position) <= maxf(enemy_engage_distance, attack_range):
