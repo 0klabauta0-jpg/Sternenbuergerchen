@@ -32206,10 +32206,6 @@ func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase
 			speed_factor = POST_DROP_SECURITY_MOVE_SPEED_FACTOR
 		else:
 			used_cover_positions.append(anchor_position)
-		_set_unit_map_facing_angle(unit, sector_angle)
-		if unit is Node:
-			(unit as Node).set_meta("post_drop_security_active", true)
-			(unit as Node).set_meta("post_drop_security_radius_tiles", POST_DROP_SECURITY_RADIUS_TILES)
 		if unit.has_method("show_event_text"):
 			unit.call("show_event_text", "SEC 360", Color(0.58, 0.92, 1.0, 1.0), 2.4)
 		var command = UNIT_COMMAND_SCRIPT.new()
@@ -32231,8 +32227,6 @@ func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase
 		_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 		if not bool(command.call("is_valid")):
 			continue
-		if unit.has_method("assign_unit_command"):
-			unit.call("assign_unit_command", command)
 		var command_dict: Dictionary = command.to_dict()
 		command_dict["requeue_until_target"] = command_type == UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
 		command_dict["security_mode"] = POST_DROP_SECURITY_MODE
@@ -32376,13 +32370,6 @@ func _append_behavior_modifier_fields(command_dict: Dictionary, modifiers: Dicti
 		command_dict["take_area_control_required"] = bool(modifiers.get("take_area_control_required", true))
 
 
-func _set_unit_map_facing_angle(unit, facing_angle: float) -> void:
-	if unit == null or not (unit is Node):
-		return
-	(unit as Node).set_meta("facing_angle", facing_angle)
-	(unit as Node).set_meta("map_facing_angle", facing_angle)
-
-
 func _apply_fireteam_security_facing_from_state(security_state: Dictionary) -> void:
 	if security_state.is_empty() or not bool(security_state.get("is_active", false)):
 		_clear_fireteam_security_facing_meta(String(security_state.get("fireteam_id", "")))
@@ -32455,10 +32442,6 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 		if unit.has_method("get_team_id"):
 			command.team_id = String(unit.call("get_team_id"))
 		command.target_position = unit_position
-		_set_unit_map_facing_angle(unit, sector_angle)
-		if unit is Node:
-			(unit as Node).set_meta("security_facing_angle", sector_angle)
-			(unit as Node).set_meta("security_facing_active", true)
 		command.move_speed_factor = 0.0
 		command.cover_score = 0.0
 		if unit.has_method("get_cover_score"):
@@ -32477,8 +32460,6 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 		_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 		if not bool(command.call("is_valid")):
 			continue
-		if unit.has_method("assign_unit_command"):
-			unit.call("assign_unit_command", command)
 		var command_dict: Dictionary = command.to_dict()
 		command_dict["requeue_until_target"] = false
 		command_dict["security_mode"] = "360"
@@ -33175,8 +33156,6 @@ func _issue_area_defense_unit_command(fireteam_id: String, assignment: Dictionar
 	_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 	if not bool(command.call("is_valid")):
 		return false
-	if unit.has_method("assign_unit_command"):
-		unit.call("assign_unit_command", command)
 	var command_dict: Dictionary = command.to_dict()
 	command_dict["requeue_until_target"] = not hold_position
 	_append_behavior_modifier_fields(command_dict, modifiers)
@@ -33359,8 +33338,6 @@ func _issue_area_attack_unit_command(fireteam_id: String, assignment: Dictionary
 	_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 	if not bool(command.call("is_valid")):
 		return false
-	if unit.has_method("assign_unit_command"):
-		unit.call("assign_unit_command", command)
 	var command_dict: Dictionary = command.to_dict()
 	command_dict["requeue_until_target"] = not hold_position
 	_append_behavior_modifier_fields(command_dict, modifiers)

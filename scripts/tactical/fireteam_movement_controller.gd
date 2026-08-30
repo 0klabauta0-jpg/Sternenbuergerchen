@@ -1968,8 +1968,6 @@ func _enqueue_unit_command(
 	command.fire_status = _resolve_unit_command_fire_status(command.command_type, command.source_command_type, command.weapon_posture, command.fire_rule)
 	if not bool(command.call("is_valid")):
 		return false
-	if unit != null and unit.has_method("assign_unit_command"):
-		unit.call("assign_unit_command", command)
 	var command_dict: Dictionary = command.to_dict()
 	_append_behavior_modifier_fields(command_dict, behavior_modifiers)
 	_append_navigation_context_fields(command_dict, navigation_context)

@@ -84,6 +84,8 @@ var _last_terrain_move_debug_by_unit_id: Dictionary = {}
 var _last_discarded_move_command: Dictionary = {}
 var _discarded_move_command_count: int = 0
 var _discarded_move_command_counts_by_reason: Dictionary = {}
+var _latest_command_token_by_unit_id: Dictionary = {}
+var _committed_command_token_by_unit_id: Dictionary = {}
 var _known_units_by_id: Dictionary = {}
 var _peer_team_assignments: Dictionary = {1: "team_alpha"}
 var _peer_role_assignments: Dictionary = {1: "commander"}
@@ -166,16 +168,20 @@ func enqueue_command(cmd: Dictionary) -> void:
 		push_warning("SimulationRoot.enqueue_command expects a Dictionary command.")
 		return
 
-	var command_token: String = String(cmd.get("command_token", "")).strip_edges()
+	var queued_command: Dictionary = cmd.duplicate(true)
+	var command_token: String = String(queued_command.get("command_token", "")).strip_edges()
+	var unit_id: String = String(queued_command.get("unit_id", "")).strip_edges()
+	if not command_token.is_empty() and not unit_id.is_empty():
+		_latest_command_token_by_unit_id[unit_id] = command_token
 	if not command_token.is_empty():
 		for index in range(command_queue.size()):
-			var queued_command: Dictionary = Dictionary(command_queue[index])
-			if String(queued_command.get("command_token", "")).strip_edges() != command_token:
+			var pending_command: Dictionary = Dictionary(command_queue[index])
+			if String(pending_command.get("command_token", "")).strip_edges() != command_token:
 				continue
-			command_queue[index] = cmd.duplicate(true)
+			command_queue[index] = queued_command
 			return
 
-	command_queue.append(cmd)
+	command_queue.append(queued_command)
 
 
 func enqueue_effect(effect: Dictionary) -> void:
@@ -1816,6 +1822,26 @@ func _apply_unit_command_status(cmd: Dictionary, unit = null) -> void:
 		return
 
 	target_unit.call("assign_unit_command", command)
+	var command_token: String = String(cmd.get("command_token", "")).strip_edges()
+	var unit_id: String = String(cmd.get("unit_id", "")).strip_edges()
+	if not command_token.is_empty() and not unit_id.is_empty():
+		_committed_command_token_by_unit_id[unit_id] = command_token
+	_apply_unit_command_facing(cmd, target_unit)
+
+
+func _apply_unit_command_facing(cmd: Dictionary, unit) -> void:
+	if unit == null or not (unit is Node) or not cmd.has("facing_angle"):
+		return
+	var facing_value: Variant = cmd.get("facing_angle", null)
+	if not (typeof(facing_value) == TYPE_FLOAT or typeof(facing_value) == TYPE_INT):
+		return
+	var unit_node: Node = unit as Node
+	var facing_angle: float = float(facing_value)
+	unit_node.set_meta("facing_angle", facing_angle)
+	unit_node.set_meta("map_facing_angle", facing_angle)
+	if cmd.has("security_mode"):
+		unit_node.set_meta("security_facing_angle", facing_angle)
+		unit_node.set_meta("security_facing_active", true)
 
 
 func _apply_move_command_with_terrain(
@@ -1937,17 +1963,24 @@ func _is_stale_tokenized_move_command(cmd: Dictionary, unit) -> bool:
 	var command_token: String = String(cmd.get("command_token", "")).strip_edges()
 	if command_token.is_empty():
 		return false
+	var unit_id: String = String(cmd.get("unit_id", "")).strip_edges()
+	var latest_token: String = String(_latest_command_token_by_unit_id.get(unit_id, "")).strip_edges()
+	if not latest_token.is_empty() and latest_token != command_token:
+		return true
 	if unit == null or not unit.has_method("get_current_unit_command"):
 		return false
 	var current_command = unit.call("get_current_unit_command")
 	if current_command == null:
-		return true
+		return false
 	var current_token: String = ""
 	if typeof(current_command) == TYPE_DICTIONARY:
 		current_token = String(Dictionary(current_command).get("command_token", "")).strip_edges()
 	elif current_command is Object:
 		current_token = String(current_command.get("command_token")).strip_edges()
-	return current_token != command_token
+	if current_token == command_token:
+		return false
+	var committed_token: String = String(_committed_command_token_by_unit_id.get(unit_id, "")).strip_edges()
+	return committed_token.is_empty() or committed_token != current_token
 
 
 func _record_discarded_move_command(cmd: Dictionary, reason: String, details: Dictionary = {}) -> void:
