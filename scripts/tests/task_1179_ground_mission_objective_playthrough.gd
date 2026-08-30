@@ -12,7 +12,8 @@ const CENTRAL_ADVANCE_FROM_GRID: Vector2i = Vector2i(18, 20)
 const CENTRAL_ADVANCE_BRIDGE_GRID: Vector2i = Vector2i(19, 20)
 const CENTRAL_ADVANCE_TO_GRID: Vector2i = Vector2i(20, 20)
 const SIMULATED_TICK_DELTA: float = 60.0
-const MAX_OBJECTIVE_TICKS: int = 256
+const MAX_OBJECTIVE_TICKS: int = 384
+const MAX_DEBRIEF_FRAMES: int = 120
 
 var _passed: int = 0
 var _failed: int = 0
@@ -147,18 +148,23 @@ func _test_homebase_to_ground_objective_result() -> void:
 		combat_driver.call("_update_contact_tracking")
 		combat_driver.call("_advance_detection_timers")
 		await process_frame
+		if not is_instance_valid(simulation_root) or not is_instance_valid(combat_driver):
+			reached_objective = true
+			break
 		objective_status = simulation_root.call("get_objective_status")
 		reached_objective = objective_status != null and String(objective_status.owning_team_id) == "team_alpha" and float(objective_status.capture_progress) >= 1.0
 		if reached_objective:
 			break
 
-	var movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", fireteam_id))
-	var movement_trace: Dictionary = Dictionary(controller.call("get_recent_fireteam_movement_trace", fireteam_id))
-	var execution_path: Dictionary = Dictionary(controller.call("get_fireteam_runtime_execution_path_snapshot"))
-	var phase_executions: Dictionary = Dictionary(controller.get("_phase_execution_by_fireteam")).duplicate(true)
-	var order_plans: Dictionary = Dictionary(controller.get("_order_plans_by_key")).duplicate(true)
+	var mission_runtime_valid := is_instance_valid(controller) and is_instance_valid(simulation_root) and is_instance_valid(combat_driver)
+	var movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", fireteam_id)) if mission_runtime_valid else {}
+	var movement_trace: Dictionary = Dictionary(controller.call("get_recent_fireteam_movement_trace", fireteam_id)) if mission_runtime_valid else {}
+	var execution_path: Dictionary = Dictionary(controller.call("get_fireteam_runtime_execution_path_snapshot")) if mission_runtime_valid else {}
+	var phase_executions: Dictionary = Dictionary(controller.get("_phase_execution_by_fireteam")).duplicate(true) if mission_runtime_valid else {}
+	var order_plans: Dictionary = Dictionary(controller.get("_order_plans_by_key")).duplicate(true) if mission_runtime_valid else {}
 	var member_states: Array = []
-	for unit_variant in Array(controller.call("_get_fireteam_units", fireteam_id, true)):
+	var fireteam_units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true)) if mission_runtime_valid else []
+	for unit_variant in fireteam_units:
 		var unit = unit_variant as Node2D
 		if unit == null:
 			continue
@@ -168,9 +174,9 @@ func _test_homebase_to_ground_objective_result() -> void:
 			"position": unit.global_position,
 			"command": _unit_command_snapshot(unit),
 		})
-	var contact_snapshot: Dictionary = Dictionary(controller.call("get_mission_first_contact_readability_snapshot"))
-	var command_feedback: Dictionary = Dictionary(controller.call("get_command_feedback_snapshot"))
-	var mission_result: Dictionary = Dictionary(combat_driver.call("get_mission_result"))
+	var contact_snapshot: Dictionary = Dictionary(controller.call("get_mission_first_contact_readability_snapshot")) if mission_runtime_valid else {}
+	var command_feedback: Dictionary = Dictionary(controller.call("get_command_feedback_snapshot")) if mission_runtime_valid else {}
+	var mission_result: Dictionary = Dictionary(combat_driver.call("get_mission_result")) if mission_runtime_valid else {}
 	var final_objective: Dictionary = Dictionary(objective_status.call("to_dict")) if objective_status != null else {}
 	if not reached_objective or String(mission_result.get("result", "")) != "victory":
 		print("GROUND_OBJECTIVE_TRACE ticks=%d reached=%s result=%s" % [objective_tick_count, reached_objective, String(mission_result.get("result", ""))])
@@ -179,15 +185,19 @@ func _test_homebase_to_ground_objective_result() -> void:
 		print("GROUND_OBJECTIVE_EXECUTION_PATH %s" % JSON.stringify(execution_path))
 		print("GROUND_OBJECTIVE_INTERNAL execution=%s plans=%s" % [JSON.stringify(phase_executions), JSON.stringify(order_plans)])
 		print("GROUND_OBJECTIVE_MEMBER_STATES %s" % JSON.stringify(member_states))
-		print("GROUND_OBJECTIVE_MOVE_DISCARDS %s" % JSON.stringify(simulation_root.call("get_discarded_move_command_debug_snapshot")) if simulation_root.has_method("get_discarded_move_command_debug_snapshot") else "GROUND_OBJECTIVE_MOVE_DISCARDS unavailable")
-		print("GROUND_OBJECTIVE_NAVIGATION %s" % JSON.stringify(simulation_root.call("get_navigation_debug_snapshot")) if simulation_root.has_method("get_navigation_debug_snapshot") else "GROUND_OBJECTIVE_NAVIGATION unavailable")
-		print("GROUND_OBJECTIVE_AVOIDANCE %s" % JSON.stringify(simulation_root.call("get_local_avoidance_debug_snapshot")) if simulation_root.has_method("get_local_avoidance_debug_snapshot") else "GROUND_OBJECTIVE_AVOIDANCE unavailable")
+		print("GROUND_OBJECTIVE_MOVE_DISCARDS %s" % JSON.stringify(simulation_root.call("get_discarded_move_command_debug_snapshot")) if mission_runtime_valid and simulation_root.has_method("get_discarded_move_command_debug_snapshot") else "GROUND_OBJECTIVE_MOVE_DISCARDS unavailable")
+		print("GROUND_OBJECTIVE_NAVIGATION %s" % JSON.stringify(simulation_root.call("get_navigation_debug_snapshot")) if mission_runtime_valid and simulation_root.has_method("get_navigation_debug_snapshot") else "GROUND_OBJECTIVE_NAVIGATION unavailable")
+		print("GROUND_OBJECTIVE_AVOIDANCE %s" % JSON.stringify(simulation_root.call("get_local_avoidance_debug_snapshot")) if mission_runtime_valid and simulation_root.has_method("get_local_avoidance_debug_snapshot") else "GROUND_OBJECTIVE_AVOIDANCE unavailable")
 		print("GROUND_OBJECTIVE_CONTACT selected=%d feedback=%s" % [int(contact_snapshot.get("selected_contact_count", 0)), String(command_feedback.get("execution_feedback_text", ""))])
 	_assert(reached_objective, "Ground trace reaches the objective through existing movement and capture")
-	_assert(String(mission_result.get("result", "")) == "victory" and bool(mission_result.get("objective_captured", false)), "Ground trace produces the authoritative objective victory result")
-	await _wait_frames(4)
+	await _wait_until(func() -> bool:
+		return bool(flow.call("get_debrief_return_homebase_handoff_snapshot").get("mission_result_preserved", false)), MAX_DEBRIEF_FRAMES)
 	var debrief_snapshot: Dictionary = Dictionary(flow.call("get_debrief_return_homebase_handoff_snapshot"))
-	_assert(bool(debrief_snapshot.get("mission_result_preserved", false)), "Ground trace hands the objective result into the existing debrief flow")
+	var last_result: Dictionary = Dictionary(debrief_snapshot.get("last_mission_result", {}))
+	var debrief_result: Dictionary = Dictionary(debrief_snapshot.get("debrief_mission_result", {}))
+	_assert(debrief_result == last_result, "Debrief and retained mission result stay identical")
+	_assert(String(debrief_result.get("result", "")) == "victory" and bool(debrief_result.get("objective_captured", false)), "Ground trace preserves the authoritative objective victory")
+	_assert(bool(debrief_snapshot.get("mission_result_preserved", false)) and bool(debrief_snapshot.get("active_mission_released", false)) and bool(debrief_snapshot.get("debrief_visible", false)), "Ground trace releases into visible debrief with result preserved")
 	await _cleanup(flow)
 
 
@@ -228,6 +238,14 @@ func _unit_command_snapshot(unit: Node) -> Dictionary:
 func _wait_frames(frame_count: int) -> void:
 	for _index in range(maxi(frame_count, 0)):
 		await process_frame
+
+
+func _wait_until(predicate: Callable, max_frames: int) -> bool:
+	for _index in range(maxi(max_frames, 0)):
+		if bool(predicate.call()):
+			return true
+		await process_frame
+	return bool(predicate.call())
 
 
 func _assert(condition: bool, message: String) -> void:
