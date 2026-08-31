@@ -13,11 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1201 - FOW Stability (VERIFIED_NO_CODE)
+- Ergebnis: Auf unveraenderter Produktion `f657ad68860d9ccb9be7ebb1f85ec1a2bae29060` besteht FoW in der aktuellen 3-cold/5-warm-Serie 8/8 mit p99 `1653-1978 usec <=2000`; Dynamic p99 liegt in 8/8 bei 2 usec. P06.2-P06.6 werden wegen der No-Code-Entscheidung uebersprungen.
+- Verifikation: TASK-1189 25/25, TASK-224 25/25, TASK-225 34/34, TASK-1188 31/31 (8696 Frames/60004 ms, Proxy p99 4817 usec <=8 ms). Produktionsdiff gegen `d319e3c` ist fuer `scripts data scenes project.godot` leer.
+- Einordnung: Die fruehere P05-Serie mit FoW-p99 `[2073,2047,2286,2766,2198,2447,2149,2411]` bleibt historische Evidence; die aktuelle 8/8-Serie ist aktuelle Gate-Evidence und Messvarianz, kein Codefix. Parallel laufende fremde Smoke-Prozesse schliessen freie Exklusivlast aus. Release bleibt blockiert.
+- Naechster Schritt: TASK-1202/P07 integrierter automatischer Release-Gate-/Reparaturschleifen-Slice.
+
+---
+
 ## TASK_1200 - Dynamic Overlay Stability (implementiert; Gate bestanden)
 - Ergebnis: Auf Produktions-/Mess-SHA `d319e3c2b268ca900fd65da8e17c3bbb137c9e59` wurde der Dynamic-Order-Pfad auf einen read-only sortierten eindeutigen Relevanzindex, Dirty-Refresh und einen relevanten Single-Pass begrenzt. Live-Orientation-Schwerpunkt/erste Richtung bleiben erhalten; Gameplay-Truth bleibt unveraendert.
 - Verifikation: TASK-1200 44/44, TASK-1188 31/31 (p99 5380 usec <= 8 ms), TASK-225 34/34, TASK-1157 35/35 und `git diff --check` gruen. Cold-Control Dynamic p99 3 usec/Max 79 usec; die offizielle 3-cold/5-warm-Serie besteht in 8/8 mit p99 3-3 usec und Max 12-372 usec.
-- Grenzen: Proxy p99 bleibt unter 5 ms, Proxy p95 liegt aber in 8/8 ueber 3 ms; FoW liegt in 8/8 Laeufen ueber 2 ms und benoetigt TASK-1201 P06. FullHD-Zusatz-Smoke ist keine TASK-1193-Manuell-Evidence. Release bleibt blockiert.
-- Naechster Schritt: TASK-1201 P06 echter FoW-Reparaturslice.
+- Grenzen: Proxy p99 bleibt unter 5 ms, Proxy p95 liegt aber in 8/8 ueber 3 ms; die historische P05-FoW-Serie lag in 8/8 ueber 2 ms, waehrend TASK-1201 auf unveraenderter Produktion aktuelle 8/8 PASS als Messvarianz bestaetigt. FullHD-Zusatz-Smoke ist keine TASK-1193-Manuell-Evidence. Release bleibt blockiert.
+- Naechster Schritt: TASK-1202/P07.
 
 ---
 
