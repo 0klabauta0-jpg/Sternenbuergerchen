@@ -16,6 +16,22 @@ var _asked_pair_count: int = 0
 var _actual_los_check_count: int = 0
 var _cache_hit_count: int = 0
 var _range_rejected_count: int = 0
+var _profile_enabled: bool = false
+var _profile_scope_active: bool = false
+var _profile_usec: Dictionary = {}
+var _profile_counts: Dictionary = {}
+
+func set_debug_profiling_enabled(enabled: bool) -> void:
+	_profile_enabled = enabled
+	_profile_scope_active = false
+	_profile_usec.clear()
+	_profile_counts.clear()
+
+func set_debug_profile_scope_active(active: bool) -> void:
+	_profile_scope_active = active and _profile_enabled
+
+func get_debug_profile_snapshot() -> Dictionary:
+	return {"enabled": _profile_enabled, "scope_active": _profile_scope_active, "counts": _profile_counts.duplicate(true), "usec": _profile_usec.duplicate(true), "derived_only": true, "read_only": true, "snapshot_serialized": false}
 
 
 func begin_tick(simulation_tick: int) -> void:
@@ -104,14 +120,27 @@ func _resolve_terrain_occlusion(
 	terrain_registry,
 	occlusion_compute: Callable
 ) -> bool:
+	var profile_active: bool = _profile_enabled and _profile_scope_active
+	var started_usec: int = Time.get_ticks_usec() if profile_active else 0
 	var key: String = _build_cache_key(source_id, target_id, source_position, target_position, terrain_registry)
+	if profile_active: _record_profile("cache_key_build", started_usec)
+	var lookup_started_usec: int = Time.get_ticks_usec() if profile_active else 0
 	if _results_by_key.has(key):
 		_cache_hit_count += 1
+		if profile_active: _record_profile("los_cache_lookup", lookup_started_usec)
 		return bool(_results_by_key[key])
+	if profile_active: _record_profile("los_cache_lookup", lookup_started_usec)
+	var terrain_started_usec: int = Time.get_ticks_usec() if profile_active else 0
 	_actual_los_check_count += 1
 	var has_clear_geometry: bool = bool(occlusion_compute.call()) if occlusion_compute.is_valid() else _los_system.has_line_of_sight_between_points(source_position, target_position, -1.0, terrain_registry)
+	if profile_active: _record_profile("terrain_los_evaluation", terrain_started_usec)
 	_results_by_key[key] = has_clear_geometry
 	return has_clear_geometry
+
+func _record_profile(name: String, started_usec: int) -> void:
+	if not (_profile_enabled and _profile_scope_active): return
+	_profile_counts[name] = int(_profile_counts.get(name, 0)) + 1
+	_profile_usec[name] = int(_profile_usec.get(name, 0)) + maxi(0, Time.get_ticks_usec() - started_usec)
 
 
 func _build_cache_key(source_id: String, target_id: String, source_position: Vector2, target_position: Vector2, terrain_registry) -> String:
