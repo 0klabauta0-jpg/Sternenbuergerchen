@@ -144,6 +144,7 @@ func _test_homebase_to_ground_objective_result() -> void:
 	for tick_index in range(MAX_OBJECTIVE_TICKS):
 		objective_tick_count = tick_index + 1
 		simulation_root.call("_physics_process", SIMULATED_TICK_DELTA)
+		controller.call("_update_fireteam_suppression", SIMULATED_TICK_DELTA)
 		controller.call("_update_active_phase_execution", SIMULATED_TICK_DELTA)
 		combat_driver.call("_update_contact_tracking")
 		combat_driver.call("_advance_detection_timers")
