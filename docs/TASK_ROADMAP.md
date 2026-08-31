@@ -13,6 +13,20 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1195 - Tactical Performance Status und Weiterarbeit (dokumentiert)
+- Ergebnis: Ein neuer responsiver HTML-Bericht fasst die 27 integrierten Commits seit dem alten Review-Stand, TASK 1182-1194, die acht Messlaeufe auf `bb655c16f849bbb4d7b03a03bd38f070795baaf2`, den weiterhin blockierten Release und die getrennten Folgepakete zusammen.
+- Plan: Der ausfuehrbare Folgeplan beginnt mit einem tick-lokalen, read-only Combat-Kandidatenindex aus den bereits berechneten Contact Observations. Der zusaetzliche Luna-Masterplan `docs/superpowers/plans/2026-08-31-luna-tactical-performance-release-recovery-orchestrator.md` fuehrt diesen Slice und die anschliessenden Combat-, Simulation-, Dynamic-Overlay-, FoW-, Gate-, Manuell- und Closeout-Pakete als zehn serielle Gates zusammen.
+- Naechster Schritt: Einen Dirigenten-Chat mit dem Luna-Masterplan starten und TASK_1196 nach `docs/superpowers/plans/2026-08-31-combat-observed-candidate-index.md` ausfuehren; erst nach bitgenauem Gameplay-Oracle und neuer 3-Kalt-/5-Warmserie genau einen weiteren Hotspot auswaehlen.
+
+---
+
+## TASK_1194 - Tactical Performance Budget Reduction (teilweise implementiert)
+- Ergebnis: Tactical-Reports zeigen Combat-/Simulation-Subscopes. Der autoritative Combat-Driver nutzt eine zielunabhaengige effektive Waffenreichweite pro Angreifer wieder; die LZ-Arming-Aktion aktualisiert die UI nur einmal.
+- Vollserie: Auf `bb655c16f849bbb4d7b03a03bd38f070795baaf2` ist LZ-Input in 8/8 Laeufen gruen (p95 73,053-78,532 ms). Combat-p99 112,873-120,213 ms und Simulation-p99 114,534-121,511 ms bleiben in 8/8 Laeufen rot. Dynamic Overlay besteht 4/8, FoW 6/8; Unit Proxy, Frame Script und die uebrigen automatischen Enforcer sind gruen.
+- Naechster Schritt: Paarfindung im Combat durch Wiederverwendung bereits beobachteter Kandidaten reduzieren. Budgets bleiben unveraendert; Rendering/FoW und menschliche 128x128-Evidenz werden nicht in diesen Combat-Slice gemischt.
+
+---
+
 ## TASK_1193 - Tactical Release Acceptance Gate (implementiert; Release blockiert)
 - Ergebnis: Der gemeinsame Gate fuehrt den realen Ground-Playthrough, Architektur-/Deeplink-Regressionen, die 128x128-/256x256-Skalenpruefung, den breiten Performance-Gate und die Tactical-Map-Messung aus. `128x128` ist die groesste automatisiert unterstuetzte Release-Kandidatenkarte; `256x256` bleibt vor einem echten Fensterprofil gesperrt.
 - Ehrlichkeit: Alle acht automatischen Enforcer waren im Gate-Lauf auf `d86c7f2fa0ea6487464c30dd526ef2555c130674` gruen. Der Gate endet dennoch mit `blocked`, weil Combat-p99 110,940 ms, Simulation-p99 112,198 ms und LZ-Input-p95 156,668 ms ihre harten Budgets reissen und eine reale SHA-gebundene 128x128-Manuell-Evidenz fehlt. Synthetische First-Exchange-Fixtures zaehlen explizit nicht.

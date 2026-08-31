@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1195 - Tactical Performance Status Report
+- Status: Dokumentation erstellt und lokal geprueft
+- Evidenzbasis: Der neue Bericht ist an `integration/core-foundation` auf `bb655c16f849bbb4d7b03a03bd38f070795baaf2` gebunden. Der Branch ist mit `origin/integration/core-foundation` synchron; seit dem alten Review-SHA `29e81d82516708b7f609f4163e32710cad559ebf` umfasst die Strecke 27 Commits, 142 geaenderte Dateien und laut Diffstat 5.960 Einfuegungen / 932 Loeschungen.
+- Bericht: `docs/reports/STERNENBUERGERCHEN_TACTICAL_PERFORMANCE_STATUS_UND_WEITERARBEIT_2026-08-31.html` trennt erledigte Tasks 1182-1194, die acht SHA-identischen Gate-Laeufe, aktuelle Budgetstatus, Release-Blocker und Folgepakete. Der naechste empfohlene Slice ist ein tick-lokaler, read-only Combat-Kandidatenindex aus den bereits berechneten Contact Observations.
+- Folgeplan: `docs/superpowers/plans/2026-08-31-combat-observed-candidate-index.md` beschreibt TASK_1196 mit failing Verifier, Index-an/aus-Gameplay-Oracle, kleinem Produktionsslice, Kaltmessung, 3-Kalt-/5-Warmserie, Commit-Grenzen und deterministischer Wahl genau eines weiteren Hotspots.
+- Luna-Orchestrierung: `docs/superpowers/plans/2026-08-31-luna-tactical-performance-release-recovery-orchestrator.md` ist eine kopierfertige Dirigenten-Anweisung mit zehn strikt seriellen Paketen. Luna `low` ist Standard; `medium`/`high` sind nur nach reproduzierten Eskalationsbedingungen erlaubt. Jedes Paket besitzt Branch, Worktree, Dateikorridor, Mikroaktionen, Tests, Mess-Gate, Commit-/Integrationsgrenze und Handoff. Routinearbeit laeuft ohne Rueckfrage; echte 128x128-Manuellevidenz und eine spaetere Main-/Release-Autorisierung bleiben ausdrueckliche Stopps.
+- Lokale Pruefung: `html-validate` 0 Fehler; alle 14 lokalen `href`-Vorkommen mit 12 eindeutigen Zielen vorhanden; 10 eindeutige HTML-IDs; Browser-Konsole 0 Fehler; Desktop- und 390-px-Mobildarstellung visuell geprueft; Navigation und Kopieraktion ausgefuehrt. Der TASK-1196-Plan bleibt mit 3 Task-Bloecken, 17 Einzelschritten und 38 balancierten Code-Fences geprueft. Der neue Luna-Masterplan meldet `PLAN_VALIDATION_OK`: Pakete 01-10, 76 Checkboxes, 78 balancierte Code-Fences, 962 Zeilen und keine Platzhaltertreffer; `git diff --check` gruen.
+- Risiken/offen: TASK_1195 aendert keinen Runtime-Code und wiederholt deshalb nicht die teure Performance-Vollserie. Release bleibt blockiert: Combat/Simulation sind in 8/8 Laeufen rot, Dynamic Overlay in 4/8 und FoW in 2/8; echte SHA-gebundene 128x128-Manuell-Evidenz fehlt weiterhin.
+
 ### TASK_1193 - Tactical Release Acceptance Gate
 - Status: Gate implementiert; Release nicht freigegeben
 - Entscheidung: `128x128` ist die groesste automatisiert unterstuetzte Release-Kandidatenkarte. `256x256` bleibt logische Profil-/Streaming-Evidenz und ist ohne eigenen Viewport-/Visual-Profiler- und Spielercheck nicht release-faehig.
