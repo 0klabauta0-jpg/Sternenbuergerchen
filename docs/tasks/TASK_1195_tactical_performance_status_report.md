@@ -32,6 +32,9 @@ der Folgearbeit klar voneinander trennt.
   `docs/reports/`.
 - Ein detaillierter, TDD-faehiger Folgeplan fuer den naechsten kleinen
   Combat-Performance-Slice unter `docs/superpowers/plans/`.
+- Eine kopierfertige Dirigenten-Anweisung mit zehn seriellen, Luna-tauglichen
+  Paketen, Modellrouting, Worktree-/Git-Gates, Reparaturschleifen und
+  eindeutigen menschlichen Freigabegrenzen.
 - Aktualisierung von `docs/IMPLEMENTATION_STATUS.md` nach erfolgreicher
   Dokumentpruefung.
 - Keine Aenderung an Runtime-Code, Budgets, Gameplay oder Release-Status.
@@ -46,6 +49,9 @@ der Folgearbeit klar voneinander trennt.
   menschliche Playtest-Evidenz in eigene Pakete.
 - Der erste empfohlene Slice besitzt einen ausfuehrbaren Plan mit exakten
   Dateien, Interfaces, Tests, Gates und Commit-Grenzen.
+- Der Gesamtpfad TASK 1196 bis zum Release-Closeout ist in zehn kleine Pakete
+  mit Luna `low` als Standard, messwertbasierter Eskalation und kopierbaren
+  Handoff-Bloecken zerlegt.
 - Das HTML funktioniert direkt per `file://`, bei Desktop- und Mobilbreite und
   ohne externe Ressourcen.
 
@@ -60,8 +66,10 @@ der Folgearbeit klar voneinander trennt.
 
 - `docs/reports/STERNENBUERGERCHEN_TACTICAL_PERFORMANCE_STATUS_UND_WEITERARBEIT_2026-08-31.html`
 - `docs/superpowers/plans/2026-08-31-combat-observed-candidate-index.md`
+- `docs/superpowers/plans/2026-08-31-luna-tactical-performance-release-recovery-orchestrator.md`
 - `docs/tasks/TASK_1195_tactical_performance_status_report.md`
 - `docs/IMPLEMENTATION_STATUS.md`
+- `docs/TASK_ROADMAP.md`
 
 ## Lokale Pruefung
 
@@ -70,6 +78,8 @@ git diff --check
 ```
 
 Zusaetzlich werden HTML-Struktur, interne Links, JavaScript-Konsole,
-Desktopdarstellung, Mobilbreite und Druckansicht geprueft. Die Performance-
-Vollserie wird nicht erneut ausgefuehrt, weil dieser Task keinen Runtime-Code
-aendert und der Bericht exakt an den bereits gemessenen SHA gebunden ist.
+Desktopdarstellung, Mobilbreite und Druckansicht geprueft. Beide Plaene werden
+auf Paket-/Taskanzahl, Checkboxen, Code-Fences, Modellrouting, exakte
+Dateikorridore und Platzhalter geprueft. Die Performance-Vollserie wird nicht
+erneut ausgefuehrt, weil dieser Task keinen Runtime-Code aendert und der
+Bericht exakt an den bereits gemessenen SHA gebunden ist.

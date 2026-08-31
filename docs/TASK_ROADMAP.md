@@ -15,8 +15,8 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ## TASK_1195 - Tactical Performance Status und Weiterarbeit (dokumentiert)
 - Ergebnis: Ein neuer responsiver HTML-Bericht fasst die 27 integrierten Commits seit dem alten Review-Stand, TASK 1182-1194, die acht Messlaeufe auf `bb655c16f849bbb4d7b03a03bd38f070795baaf2`, den weiterhin blockierten Release und die getrennten Folgepakete zusammen.
-- Plan: Der ausfuehrbare Folgeplan beginnt mit einem tick-lokalen, read-only Combat-Kandidatenindex aus den bereits berechneten Contact Observations. Simulation-Command-Attribution, Dynamic Overlay/FoW und menschliche Playtest-Evidenz bleiben eigene Pakete.
-- Naechster Schritt: TASK_1196 seriell nach `docs/superpowers/plans/2026-08-31-combat-observed-candidate-index.md` ausfuehren; erst nach bitgenauem Gameplay-Oracle und neuer 3-Kalt-/5-Warmserie genau einen weiteren Hotspot auswaehlen.
+- Plan: Der ausfuehrbare Folgeplan beginnt mit einem tick-lokalen, read-only Combat-Kandidatenindex aus den bereits berechneten Contact Observations. Der zusaetzliche Luna-Masterplan `docs/superpowers/plans/2026-08-31-luna-tactical-performance-release-recovery-orchestrator.md` fuehrt diesen Slice und die anschliessenden Combat-, Simulation-, Dynamic-Overlay-, FoW-, Gate-, Manuell- und Closeout-Pakete als zehn serielle Gates zusammen.
+- Naechster Schritt: Einen Dirigenten-Chat mit dem Luna-Masterplan starten und TASK_1196 nach `docs/superpowers/plans/2026-08-31-combat-observed-candidate-index.md` ausfuehren; erst nach bitgenauem Gameplay-Oracle und neuer 3-Kalt-/5-Warmserie genau einen weiteren Hotspot auswaehlen.
 
 ---
 
