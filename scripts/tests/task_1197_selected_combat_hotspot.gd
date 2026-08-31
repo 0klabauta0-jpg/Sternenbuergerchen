@@ -1,5 +1,15 @@
 extends SceneTree
 const HARNESS_SCRIPT: GDScript = preload("res://scripts/tests/simulation_combat_ai_tick_budget_harness.gd")
+class RegistryDouble extends RefCounted:
+	var grid_offset: int
+	func _init(offset: int) -> void:
+		grid_offset = offset
+	func get_revision() -> int:
+		return 7
+	func world_to_grid(position: Vector2) -> Vector2i:
+		return Vector2i(roundi(position.x) + grid_offset, roundi(position.y))
+	func get_height_at_world(_position: Vector2) -> int:
+		return grid_offset
 var passed := 0
 var failed := 0
 func _init() -> void: call_deferred("_run")
@@ -81,6 +91,17 @@ func _test_direct_cache_invalidation(cache: Node, terrain_registry: Node) -> voi
 	cache.call("has_line_of_sight_between_points", source.global_position, target.global_position, -1.0, terrain_registry, "a|b", "c", compute)
 	cache.call("has_line_of_sight_between_points", source.global_position, target.global_position, -1.0, terrain_registry, "a", "b|c", compute)
 	_assert(int(calls["count"]) == 9, "structured pair identity prevents delimiter collisions")
+	var registry_a := RegistryDouble.new(0)
+	var registry_b := RegistryDouble.new(100)
+	cache.call("begin_tick", 17)
+	var identity_calls := {"count": 0}
+	var visible_geometry := func() -> bool:
+		identity_calls["count"] = int(identity_calls["count"]) + 1
+		return identity_calls["count"] == 1
+	var first_identity_result = cache.call("has_line_of_sight_between_points", source.global_position, target.global_position, -1.0, registry_a, "identity_source", "identity_target", visible_geometry)
+	var second_identity_result = cache.call("has_line_of_sight_between_points", source.global_position, target.global_position, -1.0, registry_b, "identity_source", "identity_target", visible_geometry)
+	_assert(int(identity_calls["count"]) == 2, "same-tick registry identity change reruns geometry")
+	_assert(bool(first_identity_result) and not bool(second_identity_result), "same-tick registry identity change does not reuse Registry A")
 	source.free()
 	target.free()
 
