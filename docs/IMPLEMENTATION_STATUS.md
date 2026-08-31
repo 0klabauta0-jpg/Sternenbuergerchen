@@ -1,11 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1201 - FOW Stability (P06, VERIFIED_NO_CODE)
+- Status: `VERIFIED_NO_CODE`; keine Runtime-, Test- oder Phaseninstrumentierungsaenderung. Basis/Mess-SHA `f657ad68860d9ccb9be7ebb1f85ec1a2bae29060`; Produktionsdiff gegen P05 `d319e3c...f657ad6` fuer `scripts data scenes project.godot` leer.
+- Umgebung: Godot 4.6.2 official, Ryzen 7 7800X3D, 64 GB, Windows 10 19045. 3-cold/5-warm: FoW p99 `[1653,1638,1679,1913,1909,1810,1863,1978]` usec, 8/8 PASS <=2000; Dynamic p99 2 usec in 8/8. Proxy p99 `[2921,3083,3089,3117,3117,3110,3153,3010]` usec.
+- Vertraege: TASK-1189 25/25 (128x128/256x256 Dirty-/Bounded-/Atomic-/Oracle-Pfade je 350.00 ms <=350), TASK-224 25/25, TASK-225 34/34, TASK-1188 31/31 mit 8696 Frames/60004 ms und Proxy p99 4817 usec <=8 ms. Keine Optimierung war erlaubt oder erforderlich; P06.2-P06.6 sind uebersprungen.
+- Grenzen: Fremde `housing_medium_placement_smoke_test`-Prozesse liefen parallel; keine Exklusivlastbehauptung. Der native Cold-Fehlversuch ohne JSON war ausschliesslich ein historischer P05/TASK-1200-Versuch und nicht Teil der P06-Serie; in P06 gab es keine verworfenen oder wiederholten gueltigen Laeufe. Release bleibt blockiert; TASK-1193-Manuell-Evidence fehlt. Naechster Schritt: TASK-1202/P07.
+
 ### TASK_1200 - Dynamic Overlay Stability (P05)
 - Status: implementiert, verifiziert und gemessen; Release bleibt blockiert.
 - Produktions-/Mess-SHA `d319e3c2b268ca900fd65da8e17c3bbb137c9e59`, Basis `9027f2a97793a53d3af2f9936f3496de291c50d9`; Godot 4.6.2 official auf Ryzen 7 7800X3D/64 GB/Windows 10 19045.
 - Aenderung: Read-only sortierter eindeutiger Relevanzindex, Dirty-Refresh und relevanter Single-Pass fuer Dynamic-Order-Signaturen; Live-Orientation-Schwerpunkt/erste Richtung bleiben erhalten. Keine Gameplay-, Snapshot- oder Multiplayer-Truth.
 - Verifikation: TASK-1200 44/44, TASK-1188 31/31 (p99 5380 usec <= 8 ms), TASK-225 34/34, TASK-1157 35/35, `git diff --check` gruen. Cold-Control 6247 Frames/165077 ms, Dynamic p99 3 usec, Max 79 usec. Offizielle Serie: Dynamic p99 3-3 usec in 8/8, Max 12-372 usec; Proxy p99 3544-3834 usec unter 5 ms, Proxy p95 aber in 8/8 ueber 3 ms.
-- Grenzen: FoW p99 liegt in 8/8 Laeufen ueber 2 ms und ist echter TASK-1201/P06-Reparaturbedarf. Ein transienter Cold-Fehlversuch (native exit -1, kein JSON, fremder Godot-Lauf) wurde verworfen. FullHD-Zusatz-Smoke war unauffaellig, ersetzt aber keine TASK-1193-Manuell-Evidence. Naechster Schritt: TASK-1201.
+- Grenzen: Historische P05-FoW-p99-Werte lagen in 8/8 ueber 2 ms; TASK-1201 bestaetigt auf unveraenderter Produktion aktuelle 8/8 PASS als Messvarianz und `VERIFIED_NO_CODE`. Ein transienter Cold-Fehlversuch (native exit -1, kein JSON, fremder Godot-Lauf) wurde verworfen. FullHD-Zusatz-Smoke war unauffaellig, ersetzt aber keine TASK-1193-Manuell-Evidence. Naechster Schritt: TASK-1202/P07.
 
 ### TASK_1199 - Dominant Simulation Slice (P04)
 - Status: implementiert, gemessen und regressionsgeprueft; Release bleibt blockiert.
