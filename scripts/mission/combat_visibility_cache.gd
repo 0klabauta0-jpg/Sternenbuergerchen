@@ -131,13 +131,24 @@ func _resolve_terrain_occlusion(
 	occlusion_compute: Callable
 ) -> bool:
 	var profile_active: bool = _profile_enabled and _profile_scope_active
-	var started_usec: int = Time.get_ticks_usec() if profile_active else 0
-	var key: String = _build_cache_key(source_id, target_id, source_position, target_position, terrain_registry)
-	if profile_active: _record_profile("cache_key_build", started_usec)
 	var lookup_started_usec: int = Time.get_ticks_usec() if profile_active else 0
+	var registry_identity: int = _resolve_registry_identity(terrain_registry)
+	var revisions: Dictionary = _resolve_terrain_revisions(terrain_registry)
+	var by_target: Dictionary = _cache_key_reuse_by_pair.get(source_id, {})
+	var structured = by_target.get(target_id, null)
+	if _cache_key_optimization_enabled and structured is Dictionary and bool(structured.get("result_ready", false)) and structured.get("source_position", Vector2.INF) == source_position and structured.get("target_position", Vector2.INF) == target_position and int(structured.get("registry_identity", -2)) == registry_identity and structured.get("revisions", {}) == revisions:
+		_cache_hit_count += 1
+		if profile_active: _record_profile("los_cache_lookup", lookup_started_usec)
+		return bool(structured.get("result", false))
+	var started_usec: int = Time.get_ticks_usec() if profile_active else 0
+	var key: String = _build_cache_key(source_id, target_id, source_position, target_position, terrain_registry, registry_identity, revisions)
+	if profile_active: _record_profile("cache_key_build", started_usec)
 	if _results_by_key.has(key):
 		_cache_hit_count += 1
 		if profile_active: _record_profile("los_cache_lookup", lookup_started_usec)
+		if _cache_key_optimization_enabled:
+			by_target[target_id] = {"source_position": source_position, "target_position": target_position, "registry_identity": registry_identity, "revisions": revisions.duplicate(), "result": bool(_results_by_key[key]), "result_ready": true, "key": key}
+			_cache_key_reuse_by_pair[source_id] = by_target
 		return bool(_results_by_key[key])
 	if profile_active: _record_profile("los_cache_lookup", lookup_started_usec)
 	var terrain_started_usec: int = Time.get_ticks_usec() if profile_active else 0
@@ -145,6 +156,9 @@ func _resolve_terrain_occlusion(
 	var has_clear_geometry: bool = bool(occlusion_compute.call()) if occlusion_compute.is_valid() else _los_system.has_line_of_sight_between_points(source_position, target_position, -1.0, terrain_registry)
 	if profile_active: _record_profile("terrain_los_evaluation", terrain_started_usec)
 	_results_by_key[key] = has_clear_geometry
+	if _cache_key_optimization_enabled:
+		by_target[target_id] = {"source_position": source_position, "target_position": target_position, "registry_identity": registry_identity, "revisions": revisions.duplicate(), "result": has_clear_geometry, "result_ready": true, "key": key}
+		_cache_key_reuse_by_pair[source_id] = by_target
 	return has_clear_geometry
 
 func _record_profile(name: String, started_usec: int) -> void:
@@ -153,27 +167,26 @@ func _record_profile(name: String, started_usec: int) -> void:
 	_profile_usec[name] = int(_profile_usec.get(name, 0)) + maxi(0, Time.get_ticks_usec() - started_usec)
 
 
-func _build_cache_key(source_id: String, target_id: String, source_position: Vector2, target_position: Vector2, terrain_registry) -> String:
+func _build_cache_key(source_id: String, target_id: String, source_position: Vector2, target_position: Vector2, terrain_registry, registry_identity: int = -1, revisions: Dictionary = {}) -> String:
 	if _cache_key_optimization_enabled:
-		var registry_identity: int = _resolve_registry_identity(terrain_registry)
-		var revisions: Dictionary = _resolve_terrain_revisions(terrain_registry)
 		var by_target: Dictionary = _cache_key_reuse_by_pair.get(source_id, {})
 		var cached_variant = by_target.get(target_id, null)
 		if cached_variant is Dictionary and cached_variant.get("source_position", Vector2.INF) == source_position and cached_variant.get("target_position", Vector2.INF) == target_position and int(cached_variant.get("registry_identity", -2)) == registry_identity and cached_variant.get("revisions", {}) == revisions:
 			return String(cached_variant.get("key", ""))
-		var key: String = _format_cache_key(source_id, target_id, source_position, target_position, terrain_registry, revisions)
-		by_target[target_id] = {"source_position": source_position, "target_position": target_position, "registry_identity": registry_identity, "revisions": revisions.duplicate(), "key": key}
+		var key: String = _format_cache_key(source_id, target_id, source_position, target_position, terrain_registry, registry_identity, revisions)
+		by_target[target_id] = {"source_position": source_position, "target_position": target_position, "registry_identity": registry_identity, "revisions": revisions.duplicate(), "result_ready": false, "key": key}
 		_cache_key_reuse_by_pair[source_id] = by_target
 		return key
-	return _format_cache_key(source_id, target_id, source_position, target_position, terrain_registry, _resolve_terrain_revisions(terrain_registry))
+	return _format_cache_key(source_id, target_id, source_position, target_position, terrain_registry, registry_identity, revisions)
 
-func _format_cache_key(source_id: String, target_id: String, source_position: Vector2, target_position: Vector2, terrain_registry, revisions: Dictionary) -> String:
+func _format_cache_key(source_id: String, target_id: String, source_position: Vector2, target_position: Vector2, terrain_registry, registry_identity: int, revisions: Dictionary) -> String:
 	var source_grid: Vector2i = _world_to_grid(terrain_registry, source_position)
 	var target_grid: Vector2i = _world_to_grid(terrain_registry, target_position)
 	var source_height_class: int = _height_at_world(terrain_registry, source_position)
 	var target_height_class: int = _height_at_world(terrain_registry, target_position)
-	return "tick:%d|source:%s|target:%s|source_grid:%d,%d|target_grid:%d,%d|source_height:%d|target_height:%d|terrain_revision:%d|cover_revision:%d|navigation_revision:%d|source_position:%s|target_position:%s" % [
+	return "tick:%d|registry:%d|source:%s|target:%s|source_grid:%d,%d|target_grid:%d,%d|source_height:%d|target_height:%d|terrain_revision:%d|cover_revision:%d|navigation_revision:%d|source_position:%s|target_position:%s" % [
 		_current_tick,
+		registry_identity,
 		source_id,
 		target_id,
 		source_grid.x,
@@ -190,8 +203,8 @@ func _format_cache_key(source_id: String, target_id: String, source_position: Ve
 	]
 
 func _resolve_registry_identity(terrain_registry) -> int:
-	if terrain_registry != null and terrain_registry.has_method("get_instance_id"):
-		return int(terrain_registry.call("get_instance_id"))
+	if terrain_registry is Object:
+		return int(terrain_registry.get_instance_id())
 	return -1
 
 
