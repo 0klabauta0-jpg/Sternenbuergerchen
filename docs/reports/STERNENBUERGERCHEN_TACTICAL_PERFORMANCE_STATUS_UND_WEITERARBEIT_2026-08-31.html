@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="SHA-gebundener Arbeitsstands- und Folgeplanbericht für SternenBuergerchen nach TASK 1182 bis 1194.">
+  <link rel="icon" href="data:,">
+  <title>SternenBürgerchen — Tactical Performance Status</title>
+  <style>
+    :root {
+      --bg: #071118;
+      --bg-2: #0a1821;
+      --panel: #10232d;
+      --panel-2: #142c37;
+      --line: #294650;
+      --text: #effbf9;
+      --muted: #a7bac0;
+      --cyan: #62e7df;
+      --cyan-2: #1ca6a5;
+      --green: #7ce0a8;
+      --amber: #ffcc6e;
+      --red: #ff7e79;
+      --violet: #b9a9ff;
+      --radius: 18px;
+      --shadow: 0 22px 60px rgba(0, 0, 0, .28);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 86% -5%, rgba(28, 166, 165, .2), transparent 34rem),
+        radial-gradient(circle at -5% 42%, rgba(185, 169, 255, .1), transparent 28rem),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    a { color: var(--cyan); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code {
+      padding: .1rem .34rem;
+      color: #caf8f4;
+      background: rgba(98, 231, 223, .08);
+      border: 1px solid rgba(98, 231, 223, .16);
+      border-radius: 6px;
+      overflow-wrap: anywhere;
+    }
+    button {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 9px 13px;
+      color: var(--text);
+      background: #0c1b23;
+      font: inherit;
+      font-weight: 760;
+      cursor: pointer;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    button:hover { transform: translateY(-1px); border-color: var(--cyan-2); }
+    button.primary { color: #021416; background: var(--cyan); border-color: var(--cyan); }
+    .shell { width: min(1460px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 72px; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(26px, 5vw, 58px);
+      border: 1px solid var(--line);
+      border-radius: 29px;
+      background: linear-gradient(145deg, rgba(20, 44, 55, .98), rgba(7, 17, 24, .97));
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -120px;
+      width: 390px;
+      height: 390px;
+      border: 1px solid rgba(98, 231, 223, .2);
+      border-radius: 50%;
+      box-shadow: inset 0 0 90px rgba(98, 231, 223, .08);
+      pointer-events: none;
+    }
+    .eyebrow { color: var(--cyan); font-size: .78rem; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { max-width: 1030px; margin: 10px 0 14px; font-size: clamp(2.1rem, 5.5vw, 4.9rem); line-height: .97; letter-spacing: -.05em; }
+    h2 { margin: 0 0 12px; font-size: clamp(1.5rem, 3vw, 2.25rem); letter-spacing: -.03em; }
+    h3 { margin: 0 0 8px; font-size: 1.08rem; }
+    p { margin: .35rem 0 .9rem; }
+    .lede { max-width: 980px; color: #cadadd; font-size: clamp(1rem, 1.8vw, 1.23rem); }
+    .toolbar, .pill-row, .legend { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .toolbar { margin-top: 22px; }
+    .pill, .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, .025);
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 780;
+    }
+    .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .good { color: var(--green); border-color: rgba(124, 224, 168, .36); }
+    .warn { color: var(--amber); border-color: rgba(255, 204, 110, .36); }
+    .bad { color: var(--red); border-color: rgba(255, 126, 121, .36); }
+    .info { color: var(--cyan); border-color: rgba(98, 231, 223, .36); }
+    .violet { color: var(--violet); border-color: rgba(185, 169, 255, .36); }
+    nav {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      margin: 20px 0;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(7, 17, 24, .92);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .2);
+    }
+    nav a { flex: 0 0 auto; padding: 8px 11px; color: var(--muted); font-size: .84rem; font-weight: 760; text-decoration: none; border-radius: 9px; }
+    nav a:hover, nav a:focus { color: var(--text); background: var(--panel-2); }
+    section { scroll-margin-top: 82px; }
+    .section-head { display: flex; justify-content: space-between; gap: 18px; align-items: end; margin: 36px 0 14px; }
+    .section-head p { max-width: 780px; margin: 0; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; }
+    .card {
+      grid-column: span 4;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(150deg, rgba(20, 44, 55, .92), rgba(12, 27, 35, .9));
+      box-shadow: 0 12px 28px rgba(0, 0, 0, .13);
+    }
+    .card.half { grid-column: span 6; }
+    .card.wide { grid-column: span 8; }
+    .card.full { grid-column: 1 / -1; }
+    .kpi { margin: 8px 0; font-size: clamp(1.8rem, 4vw, 3.15rem); font-weight: 880; line-height: 1; letter-spacing: -.045em; }
+    .subtle { color: var(--muted); }
+    .small { font-size: .84rem; }
+    .callout { padding: 16px 18px; border-left: 4px solid var(--cyan); border-radius: 11px; background: rgba(98, 231, 223, .06); }
+    .callout.warnline { border-left-color: var(--amber); background: rgba(255, 204, 110, .06); }
+    .callout.badline { border-left-color: var(--red); background: rgba(255, 126, 121, .06); }
+    .tight { margin: 8px 0 0; padding-left: 20px; }
+    .tight li { margin: 5px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { padding: 11px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+    tr:last-child td { border-bottom: 0; }
+    .table-wrap { overflow-x: auto; }
+    .metric { white-space: nowrap; }
+    .bar { min-width: 155px; }
+    .bar-track { height: 8px; overflow: hidden; margin-top: 6px; border-radius: 999px; background: #071117; }
+    .bar-fill { display: block; width: var(--w); max-width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--cyan-2), var(--red)); }
+    .bar-fill.full { --w: 100%; }
+    .mt-14 { margin-top: 14px; }
+    .package-title { margin-top: 10px; }
+    .timeline { display: grid; gap: 11px; }
+    .timeline-item { display: grid; grid-template-columns: minmax(95px, 135px) minmax(0, 1fr); gap: 14px; padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: #0c1b23; }
+    .timeline-id { color: var(--cyan); font-weight: 850; }
+    .timeline-item strong { display: block; margin-bottom: 4px; }
+    .flow { display: grid; grid-template-columns: repeat(6, minmax(145px, 1fr)); gap: 9px; margin: 0; padding: 0; list-style: none; }
+    .flow-step { position: relative; min-height: 122px; padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: #0c1b23; }
+    .flow-step:not(:last-child)::after { content: "→"; position: absolute; z-index: 2; right: -12px; top: 50%; color: var(--cyan); transform: translateY(-50%); }
+    .flow-step strong { display: block; margin: 6px 0 4px; }
+    .step-no { display: grid; place-items: center; width: 30px; height: 30px; color: var(--cyan); background: rgba(98, 231, 223, .11); border-radius: 50%; font-weight: 850; }
+    .package { position: relative; overflow: hidden; }
+    .package::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--line); }
+    .package[data-state="next"]::before { background: var(--cyan); }
+    .package[data-state="later"]::before { background: var(--violet); }
+    .package[data-state="human"]::before { background: var(--amber); }
+    .package-head { display: flex; gap: 10px; align-items: start; justify-content: space-between; }
+    .file-list { margin: 10px 0 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 11px; background: #09171e; color: #c6d8dc; font-size: .82rem; }
+    details { border: 1px solid var(--line); border-radius: 13px; background: rgba(10, 24, 33, .78); }
+    details + details { margin-top: 10px; }
+    summary { cursor: pointer; padding: 14px 16px; font-weight: 800; }
+    details > div { padding: 0 16px 16px; }
+    .source-list { columns: 2; column-gap: 30px; }
+    .source-list li { margin-bottom: 7px; break-inside: avoid; }
+    .toast { position: fixed; right: 18px; bottom: 18px; z-index: 30; display: none; padding: 11px 14px; border: 1px solid var(--line); border-radius: 11px; color: var(--text); background: #0c1b23; box-shadow: var(--shadow); }
+    .toast.show { display: block; }
+    footer { margin-top: 38px; padding: 20px 4px; color: var(--muted); font-size: .84rem; border-top: 1px solid var(--line); }
+    @media (max-width: 1040px) {
+      .card, .card.wide { grid-column: span 6; }
+      .card.full { grid-column: 1 / -1; }
+      .flow { grid-template-columns: repeat(3, 1fr); }
+      .flow-step:nth-child(3)::after { display: none; }
+    }
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 20px, 1460px); padding-top: 10px; }
+      .hero { border-radius: 20px; }
+      .card, .card.half, .card.wide, .card.full { grid-column: 1 / -1; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 6px; }
+      .timeline-item { grid-template-columns: 1fr; gap: 5px; }
+      .flow { grid-template-columns: 1fr; }
+      .flow-step:not(:last-child)::after { content: "↓"; right: 50%; top: auto; bottom: -17px; transform: translateX(50%); }
+      .source-list { columns: 1; }
+      .table-wrap { overflow: visible; }
+      table.responsive thead { display: none; }
+      table.responsive, table.responsive tbody, table.responsive tr, table.responsive td { display: block; width: 100%; }
+      table.responsive tr { padding: 11px 0; border-bottom: 1px solid var(--line); }
+      table.responsive td { display: grid; grid-template-columns: minmax(108px, 37%) 1fr; gap: 10px; padding: 5px 0; border: 0; }
+      table.responsive td::before { content: attr(data-label); color: var(--muted); font-size: .68rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+    }
+    @media print {
+      :root { color-scheme: light; }
+      body { color: #142027; background: white; }
+      .shell { width: 100%; padding: 0; }
+      .hero, .card, .timeline-item, .flow-step, details { color: #142027; background: white; box-shadow: none; break-inside: avoid; }
+      nav, .toolbar, .toast { display: none !important; }
+      a { color: #066d73; }
+      code { color: #183d42; background: #eef8f7; }
+      .subtle, .section-head p, footer { color: #4c5f68; }
+      details > div { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div class="eyebrow">Arbeitsstand · Messbericht · Vorschlag</div>
+      <h1>Tactical Performance: Was erledigt ist und wie es weitergeht</h1>
+      <p class="lede">Dieser Bericht ersetzt den alten Review nicht historisch, aber er ist die neue maßgebliche Momentaufnahme für den gepushten Integrationsstand nach TASK 1182 bis 1194. Er trennt sauber zwischen implementiert, automatisiert verifiziert, gemessen, noch blockiert und menschlich abzunehmen.</p>
+      <div class="pill-row">
+        <span class="status good">Integration gepusht</span>
+        <span class="status good">8/8 Enforcer grün</span>
+        <span class="status bad">Release blockiert</span>
+        <span class="status info">128×128 Kandidat</span>
+        <span class="status warn">256×256 zurückgehalten</span>
+      </div>
+      <div class="toolbar">
+        <button class="primary" id="copy-summary" type="button">Kurzfassung kopieren</button>
+        <button id="print-report" type="button">Drucken / PDF</button>
+        <a class="pill" href="../superpowers/plans/2026-08-31-combat-observed-candidate-index.md">Detailplan öffnen</a>
+      </div>
+    </header>
+
+    <nav aria-label="Berichtsnavigation">
+      <a href="#kurzfassung">Kurzfassung</a>
+      <a href="#gemacht">Was gemacht wurde</a>
+      <a href="#messwerte">Messwerte</a>
+      <a href="#blocker">Blocker</a>
+      <a href="#weiter">Weiterarbeit</a>
+      <a href="#terra">Terra-Ablauf</a>
+      <a href="#evidenz">Evidenz</a>
+    </nav>
+
+    <section id="kurzfassung">
+      <div class="section-head">
+        <div><div class="eyebrow">01 · Kurzfassung</div><h2>Die Lage in einem Satz</h2></div>
+        <p>Die Architektur- und Funktionsbasis ist deutlich belastbarer, die taktische Karte reagiert besser, aber Combat und der inklusive Simulationstick liegen noch weit über dem harten 8-ms-Ziel.</p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <div class="subtle small">Commits seit altem Review-Stand</div>
+          <div class="kpi">27</div>
+          <p>Von <code>29e81d825</code> bis <code>bb655c16f</code>.</p>
+        </article>
+        <article class="card">
+          <div class="subtle small">Geänderte Dateien</div>
+          <div class="kpi">142</div>
+          <p><code>+5.960</code> / <code>−932</code> Zeilen laut Git-Diffstat.</p>
+        </article>
+        <article class="card">
+          <div class="subtle small">Release-Gate</div>
+          <div class="kpi">BLOCKED</div>
+          <p>Das ist ein korrektes Ergebnis, kein kaputter Gate.</p>
+        </article>
+        <article class="card wide">
+          <div class="callout">
+            <strong>Empfehlung: als Nächstes nur den Combat-Kandidatenpfad bearbeiten.</strong>
+            <p>Der Fire-Decision-Pfad sucht pro Tick erneut durch mögliche Paare, obwohl Contact Tracking dieselben Beobachtungen bereits ermittelt hat. Ein tick-lokaler, read-only Kandidatenindex ist der kleinste plausible Slice mit gutem Vorher-/Nachher-Nachweis. Simulation, Rendering und FoW bleiben getrennte Folgepakete.</p>
+          </div>
+        </article>
+        <article class="card">
+          <h3>Git-Wahrheit</h3>
+          <p><code>integration/core-foundation</code><br><code>bb655c16f849bbb4d7b03a03bd38f070795baaf2</code></p>
+          <span class="status good">origin synchron</span>
+        </article>
+      </div>
+    </section>
+
+    <section id="gemacht">
+      <div class="section-head">
+        <div><div class="eyebrow">02 · Was wir gemacht haben</div><h2>Von sauberem Checkout bis strengem Release-Gate</h2></div>
+        <p>Die 27 Commits sind kein einzelner Performance-Patch, sondern eine kontrollierte Kette: erst Test- und Authority-Grundlagen, dann messbare Hotpath-Slices, anschließend ein ehrlicher Release-Gate.</p>
+      </div>
+      <div class="timeline">
+        <article class="timeline-item">
+          <div class="timeline-id">TASK 1182–1184</div>
+          <div><strong>Checkout, Verifier und echter Missionspfad stabilisiert</strong>Netfox-Autoloads wurden checkout-stabil gemacht, Verifier-Fehler propagieren zuverlässig als Exit-Code, und der echte <code>grid_sweep</code>-Objective-/Debrief-Pfad wurde deterministischer und read-only an der Handoff-Grenze.</div>
+        </article>
+        <article class="timeline-item">
+          <div class="timeline-id">TASK 1185–1186</div>
+          <div><strong>Input- und Gameplay-Autorität bereinigt</strong>Kamera, Tactical Controller und Thought-Hold besitzen eindeutige Input-Actions. Fireteam-/Combat-Produzenten mutieren nicht mehr vorab, sondern reichen Commands und Effects an <code>SimulationRoot</code> weiter. Damit ist der gemessene Pfad architektonisch belastbarer.</div>
+        </article>
+        <article class="timeline-item">
+          <div class="timeline-id">TASK 1187</div>
+          <div><strong>Einen echten Tactical-Frame-Budgetvertrag geschaffen</strong>Der Harness misst <code>grid_sweep</code>, 16v12 Combat, mindestens 600 Ticks, lange Process-Frames, Invocation Counter, Quantile, Maxima und klare Budgetstatus. Rote Werte bleiben sichtbar und werden nicht durch einen „grünen Messrunner“ verschleiert.</div>
+        </article>
+        <article class="timeline-item">
+          <div class="timeline-id">TASK 1188–1190</div>
+          <div><strong>Visual-, FoW- und HUD-Hotpaths gezielt reduziert</strong>Unit-Proxies wurden revision-getrieben und node-gecached, FoW arbeitet mit begrenzten Dirty-Regionen und atomaren Deltas, Mission-Unit-Lookups laufen über einen abgeleiteten Index und schwere HUD-Flächen besitzen getrennte Revisionen.</div>
+        </article>
+        <article class="timeline-item">
+          <div class="timeline-id">TASK 1191</div>
+          <div><strong>Terrain-Sicht im Combat pro Tick geteilt</strong><code>CombatVisibilityCache</code> memoisiert nur Terrain-Occlusion und bleibt abgeleitet. Ein Cache-an/aus-Oracle über 600 Ticks belegt identische Kontakte, Feuerereignisse, Treffer, Unit-State und Missionsresultat.</div>
+        </article>
+        <article class="timeline-item">
+          <div class="timeline-id">TASK 1192–1193</div>
+          <div><strong>Synthetische Fixture isoliert und Release-Regeln hart gemacht</strong>Der künstliche First-Exchange-Aufbau liegt nicht mehr im normalen Meta-Flow und ist als <code>synthetic_fixture=true</code> markiert. Der Release-Gate verlangt acht grüne Enforcer, grüne harte Budgets und echte SHA-gebundene 128×128-Manuellevidenz.</div>
+        </article>
+        <article class="timeline-item">
+          <div class="timeline-id">TASK 1194</div>
+          <div><strong>Ersten Combat-Slice und LZ-Doppelrefresh behoben</strong>Die Messung zeigt jetzt Combat-/Simulation-Subscopes. Effektive Waffenreichweite wird im autoritativen Driver pro Angreifer wiederverwendet. Die LZ-Arming-Aktion aktualisiert die UI nur einmal; in der vollständigen 8er-Serie liegt LZ-Input nun in 8/8 Läufen unter 100 ms.</div>
+        </article>
+      </div>
+    </section>
+
+    <section id="messwerte">
+      <div class="section-head">
+        <div><div class="eyebrow">03 · Messwerte</div><h2>Vollserie auf dem gepushten SHA</h2></div>
+        <p>Drei Kalt- plus fünf Warmläufe auf Godot 4.6.2 und dem deklarierten Ryzen-7-7800X3D-Profil. Gezeigt werden Spannweiten über alle acht Läufe, nicht der beste Einzelwert.</p>
+      </div>
+      <div class="card full">
+        <div class="table-wrap">
+          <table class="responsive">
+            <thead><tr><th>Scope</th><th>Gemessene Spannweite</th><th>Budget</th><th>Serie</th><th>Einordnung</th></tr></thead>
+            <tbody>
+              <tr><td data-label="Scope" class="metric"><code>combat.total_tick</code> p99</td><td data-label="Spannweite">112,873–120,213 ms</td><td data-label="Budget">≤ 8 ms</td><td data-label="Serie"><span class="status bad">0/8 pass</span></td><td data-label="Einordnung"><div class="bar"><span>≈ 14–15× Ziel</span><div class="bar-track"><span class="bar-fill full"></span></div></div></td></tr>
+              <tr><td data-label="Scope" class="metric"><code>simulation.total_tick</code> p99</td><td data-label="Spannweite">114,534–121,511 ms</td><td data-label="Budget">≤ 8 ms</td><td data-label="Serie"><span class="status bad">0/8 pass</span></td><td data-label="Einordnung">Inklusive synchronem Tick-Signal und Combat-Arbeit.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>fire_find_contact_pair</code> p99</td><td data-label="Spannweite">37,813–42,701 ms</td><td data-label="Budget">Diagnose</td><td data-label="Serie"><span class="status warn">Hotspot</span></td><td data-label="Einordnung">Direkter nächster Kandidat.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>combat_fire_decision</code> p99</td><td data-label="Spannweite">44,844–49,686 ms</td><td data-label="Budget">Diagnose</td><td data-label="Serie"><span class="status warn">Hotspot</span></td><td data-label="Einordnung">Enthält Paarfindung und Feuerentscheidung.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>contact_tracking</code> p99</td><td data-label="Spannweite">20,599–22,512 ms</td><td data-label="Budget">Diagnose</td><td data-label="Serie"><span class="status violet">Folgekandidat</span></td><td data-label="Einordnung">Hat Beobachtungen bereits vor der Feuerentscheidung.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>enemy_team_tactics</code> p99</td><td data-label="Spannweite">24,498–29,670 ms</td><td data-label="Budget">Diagnose</td><td data-label="Serie"><span class="status violet">Folgekandidat</span></td><td data-label="Einordnung">Erst nach Combat-Kandidatenindex neu bewerten.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>tick_signal_emit</code> p99</td><td data-label="Spannweite">113,217–120,590 ms</td><td data-label="Budget">Diagnose</td><td data-label="Serie"><span class="status warn">inklusive</span></td><td data-label="Einordnung">Belegt, dass Simulation-p99 vor allem Subscriber-Arbeit enthält.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>command_queue</code> p99</td><td data-label="Spannweite">53,561–57,656 ms</td><td data-label="Budget">Diagnose</td><td data-label="Serie"><span class="status warn">attribuieren</span></td><td data-label="Einordnung">Vor einer Optimierung nach Command-Typ aufschlüsseln.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>interaction.lz_input</code> p95</td><td data-label="Spannweite">73,053–78,532 ms</td><td data-label="Budget">≤ 100 ms</td><td data-label="Serie"><span class="status good">8/8 pass</span></td><td data-label="Einordnung">TASK 1194 hat den offenen LZ-Budgetblocker geschlossen.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>terrain.dynamic_overlay</code> p99</td><td data-label="Spannweite">0,943–1,037 ms</td><td data-label="Budget">≤ 1 ms</td><td data-label="Serie"><span class="status warn">4/8 pass</span></td><td data-label="Einordnung">Knapp, schwankend, separates Rendering-Paket.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>terrain.fow_work</code> p99</td><td data-label="Spannweite">1,549–2,106 ms</td><td data-label="Budget">≤ 2 ms</td><td data-label="Serie"><span class="status warn">6/8 pass</span></td><td data-label="Einordnung">Nahe am Ziel, nicht mit Combat vermischen.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>unit_proxy_sync</code> p99</td><td data-label="Spannweite">3,025–3,390 ms</td><td data-label="Budget">≤ 5 ms</td><td data-label="Serie"><span class="status good">8/8 pass</span></td><td data-label="Einordnung">Der Proxy-Slice ist stabil grün.</td></tr>
+              <tr><td data-label="Scope" class="metric"><code>frame_script_total</code> p99</td><td data-label="Spannweite">3,873–4,516 ms</td><td data-label="Budget">≤ 16,7 ms</td><td data-label="Serie"><span class="status good">8/8 pass</span></td><td data-label="Einordnung">Gesamtscript-Frame bleibt in dieser Serie deutlich grün.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="grid mt-14">
+        <article class="card half">
+          <h3>Was TASK 1194 konkret verbessert hat</h3>
+          <ul class="tight">
+            <li>Vergleichbarer Diagnose-Lauf: Fire Decision <code>52,900 → 45,263 ms</code>.</li>
+            <li>Vergleichbarer Diagnose-Lauf: Pair Search <code>45,121 → 38,282 ms</code>.</li>
+            <li>LZ-UI-Refresh exakt einmal pro Arming-Aktion.</li>
+            <li>LZ p95 in der Vollserie nun <code>73,053–78,532 ms</code>.</li>
+          </ul>
+        </article>
+        <article class="card half">
+          <h3>Was die Werte nicht beweisen</h3>
+          <ul class="tight">
+            <li>Keinen Release: Combat und Simulation bleiben rot.</li>
+            <li>Keine 256×256-Freigabe: dafür fehlen Viewport-/Visual-Profiler- und Spielerchecks.</li>
+            <li>Keinen GPU-Nachweis: der Harness ist headless.</li>
+            <li>Keine Manuellevidenz: ein Agent darf sie nicht synthetisieren.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="blocker">
+      <div class="section-head">
+        <div><div class="eyebrow">04 · Release-Blocker</div><h2>Warum trotz grüner Tests noch kein Release folgt</h2></div>
+        <p>Alle acht Enforcer haben technisch bestanden. Der Gate wertet anschließend die harten Budgetstatus und die menschliche Evidenz aus – und blockiert deshalb korrekt.</p>
+      </div>
+      <div class="grid">
+        <article class="card half">
+          <h3>Automatische Enforcer: 8/8 grün</h3>
+          <div class="pill-row">
+            <span class="status good">TASK 1179</span><span class="status good">TASK 1192</span><span class="status good">TASK 284</span><span class="status good">TASK 832</span><span class="status good">TASK 868</span><span class="status good">TASK 411</span><span class="status good">TASK 222</span><span class="status good">TASK 1187</span>
+          </div>
+          <p class="subtle small">„Runner bestanden“ bedeutet: Tests und Messvertrag liefen. Es bedeutet nicht: jedes Budget ist grün.</p>
+        </article>
+        <article class="card half">
+          <h3>Harte Gate-Fehler</h3>
+          <ul class="tight">
+            <li><code>combat.total_tick_usec</code> in 8/8 Läufen überschritten.</li>
+            <li><code>simulation.total_tick_usec</code> in 8/8 Läufen überschritten.</li>
+            <li><code>terrain.dynamic_overlay_usec</code> in 4/8 Läufen überschritten.</li>
+            <li><code>terrain.fow_work_usec</code> in 2/8 Läufen überschritten.</li>
+            <li><code>tactical_release_manual_playtest_evidence.md</code> fehlt.</li>
+          </ul>
+        </article>
+        <article class="card full">
+          <div class="callout badline">
+            <strong>Wichtigste technische Schlussfolgerung</strong>
+            <p><code>simulation.total_tick</code> und <code>tick_signal_emit</code> haben fast dieselbe p99-Spannweite. Ein großer „SimulationRoot-Refactor“ wäre daher jetzt die falsche erste Reaktion: Zuerst muss die synchron im Tick-Signal laufende Combat-Arbeit sinken. Die Command Queue wird parallel genauer attribuiert, aber nicht blind umgebaut.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="weiter">
+      <div class="section-head">
+        <div><div class="eyebrow">05 · Vorschlag</div><h2>Weiterarbeit in getrennten, messbaren Paketen</h2></div>
+        <p>Jedes Paket endet mit eigener Regression, eigener Messung und eigener Entscheidung. Kein Big-Bang-Refactor und keine Vermischung von Combat, Rendering und menschlicher Abnahme.</p>
+      </div>
+      <div class="grid">
+        <article class="card wide package" data-state="next">
+          <div class="package-head"><div><span class="status info">als Nächstes</span><h3 class="package-title">Paket A — Observed Combat Candidate Index</h3></div><strong>P0</strong></div>
+          <p>Contact Tracking berechnet die sichtbaren Beobachtungen bereits, bevor der Fire-Decision-Pfad erneut mögliche Paare durchsucht. Daraus entsteht pro Tick ein rein abgeleiteter Angreifer→Ziel-ID-Index. Er schränkt nur die Kandidaten ein; LOS, Range, Detection, Fire Rules, Fairness und Damage bleiben unverändert.</p>
+          <ul class="tight">
+            <li><strong>Eingang:</strong> acht SHA-identische Baseline-Läufe und bitgenauer Index-an/aus-Oracle.</li>
+            <li><strong>Erfolg:</strong> identisches Gameplay, weniger oder gleich viele Pair Evaluations, kein >5-%-Rückschritt bei Pair Search.</li>
+            <li><strong>Gate:</strong> ein Kaltlauf, danach 3 kalt + 5 warm.</li>
+          </ul>
+          <div class="file-list"><code>mission_combat_loop_driver.gd</code> · <code>combat_fire_decision_resolver.gd</code> · <code>task_1196_combat_observed_candidate_index.gd</code></div>
+          <p><a href="../superpowers/plans/2026-08-31-combat-observed-candidate-index.md">Vollständigen TDD-Plan für Terra öffnen</a></p>
+        </article>
+        <article class="card package" data-state="later">
+          <div class="package-head"><div><span class="status violet">danach nach Messung</span><h3 class="package-title">Paket B — nächster exklusiver Combat-Hotspot</h3></div><strong>P1</strong></div>
+          <p>Nach Paket A wird genau ein Pfad ausgewählt: Cache-Key/Allocation, Contact-Fan-out oder Enemy-Tactics-Revision. Die Reihenfolge wird nicht vorab erfunden, sondern aus der neuen 8er-Serie abgeleitet.</p>
+          <div class="file-list"><code>combat_visibility_cache.gd</code> oder Contact-/Tactics-Dateien – nur der gemessene Gewinner.</div>
+        </article>
+        <article class="card half package" data-state="later">
+          <div class="package-head"><div><span class="status violet">separat</span><h3 class="package-title">Paket C — Simulation Command Attribution</h3></div><strong>P1</strong></div>
+          <p><code>command_queue</code> liegt bei 53,561–57,656 ms p99. Vor jeder Optimierung werden Command-Typ, Anzahl und exklusive Bearbeitungszeit instrumentiert. Erst dann wird ein einzelner Command-Pfad verändert.</p>
+          <div class="file-list"><code>simulation_root.gd</code> · <code>tactical_map_frame_budget_harness.gd</code> · neuer fokussierter Verifier</div>
+        </article>
+        <article class="card half package" data-state="later">
+          <div class="package-head"><div><span class="status violet">separat</span><h3 class="package-title">Paket D — Dynamic Overlay &amp; FoW Varianz</h3></div><strong>P2</strong></div>
+          <p>Beide Scopes sind nahe am Budget. Zuerst wird dieselbe Serie ohne Combat-Codeänderung wiederholt. Bleibt die Varianz rot, folgen getrennte Allokations-/Signatur- bzw. Slice-Optimierungen. Budgets werden nicht angehoben.</p>
+          <div class="file-list"><code>terrain_map_3d_view.gd</code> · <code>fog_of_war_system.gd</code> · bestehende TASK-1189-Oracles</div>
+        </article>
+        <article class="card full package" data-state="human">
+          <div class="package-head"><div><span class="status warn">menschlicher Gate</span><h3 class="package-title">Paket E — 128×128 Fensterprofil und Playtest</h3></div><strong>Release</strong></div>
+          <p>Erst wenn die automatischen Budgets auf einem festen SHA grün sind, folgt der echte FullHD-Spielercheck mit Godot Profiler, Visual Profiler, Monitoren und Stutter-Beobachtung. Die Datei muss <code>result: PASS</code>, Prüfer, SHA, <code>map_size: 128x128</code>, First Move/Contact/Fire, Stutter Check und <code>synthetic_fixture: false</code> enthalten.</p>
+          <div class="callout warnline"><strong>Nicht automatisierbar:</strong> Der Bericht und Terra können den Ablauf vorbereiten, aber keinen menschlichen Prüfer vortäuschen.</div>
+        </article>
+      </div>
+    </section>
+
+    <section id="terra">
+      <div class="section-head">
+        <div><div class="eyebrow">06 · Arbeitsmodus für Terra</div><h2>Serieller Ablauf ohne unnötige Rückfragen</h2></div>
+        <p>Die Routineentscheidungen sind im Plan vorab festgelegt. Gestoppt wird nur bei Gameplay-Abweichung, neuem Architekturproblem, nicht reproduzierbarer Baseline oder notwendiger menschlicher Evidenz.</p>
+      </div>
+      <ol class="flow" aria-label="Empfohlene Arbeitssequenz">
+        <li class="flow-step"><span class="step-no">1</span><strong>Branch &amp; Rot-Test</strong><span class="subtle small">TASK-1196-Worktree, failing Oracle, keine Produktivänderung.</span></li>
+        <li class="flow-step"><span class="step-no">2</span><strong>Index bauen</strong><span class="subtle small">Tick-lokal, IDs-only, read-only, nicht serialisiert.</span></li>
+        <li class="flow-step"><span class="step-no">3</span><strong>Gameplay-Oracles</strong><span class="subtle small">Index an/aus bitgenau plus Authority-/Tactics-Regressionen.</span></li>
+        <li class="flow-step"><span class="step-no">4</span><strong>Kaltmessung</strong><span class="subtle small">Schneller Stop bei Regression oder fehlender Wirkung.</span></li>
+        <li class="flow-step"><span class="step-no">5</span><strong>3+5 Serie</strong><span class="subtle small">Spannweiten vergleichen, nicht Bestwert auswählen.</span></li>
+        <li class="flow-step"><span class="step-no">6</span><strong>Nächstes Paket</strong><span class="subtle small">Genau einen neuen Hotspot aus Evidenz wählen.</span></li>
+      </ol>
+      <div class="grid mt-14">
+        <article class="card half">
+          <h3>Vorab genehmigte Routine</h3>
+          <ul class="tight">
+            <li>Task-Branch/Worktree von <code>integration/core-foundation</code>.</li>
+            <li>Fokussierte Tests, Godot-Importe und Performance-Messungen.</li>
+            <li>Kleine Commits für Verifier, Produktivslice und Evidenz.</li>
+            <li>Lokales Merge in den Integrationsbranch nach grünen Gates.</li>
+          </ul>
+        </article>
+        <article class="card half">
+          <h3>Echte Stop-Bedingungen</h3>
+          <ul class="tight">
+            <li>Index an/aus erzeugt unterschiedliche Gameplay-Snapshots.</li>
+            <li>Neuer Script-/Leak-/Authority-Fehler.</li>
+            <li>Pair Search verschlechtert sich um mehr als 5 %.</li>
+            <li>Scope verlangt neue Architektur statt kleinem Slice.</li>
+            <li>Menschlicher Fenster-/Playtest muss real durchgeführt werden.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="evidenz">
+      <div class="section-head">
+        <div><div class="eyebrow">07 · Evidenz und Grenzen</div><h2>Worauf der Bericht basiert</h2></div>
+        <p>Alle aktuellen Statusaussagen sind an den Integrations-SHA gebunden. Historische Berichte bleiben nützlich, sind aber für den heutigen Performance- und Release-Status nachgeordnet.</p>
+      </div>
+      <details open>
+        <summary>Primäre Repository-Quellen</summary>
+        <div>
+          <ul class="source-list">
+            <li><a href="../tasks/TASK_1187_tactical_map_frame_budget.md">TASK 1187 Tactical Map Frame Budget</a></li>
+            <li><a href="../tasks/TASK_1188_unit_proxy_dirty_sync.md">TASK 1188 Unit Proxy Dirty Sync</a></li>
+            <li><a href="../tasks/TASK_1189_fow_dirty_region_fanout.md">TASK 1189 FoW Dirty Region Fan-out</a></li>
+            <li><a href="../tasks/TASK_1190_mission_runtime_index_hud_delta.md">TASK 1190 Runtime Index und HUD-Deltas</a></li>
+            <li><a href="../tasks/TASK_1191_shared_combat_visibility_cache.md">TASK 1191 Combat Visibility Cache</a></li>
+            <li><a href="../tasks/TASK_1192_release_first_exchange_fixture.md">TASK 1192 Fixture Isolation</a></li>
+            <li><a href="../tasks/TASK_1193_tactical_release_acceptance.md">TASK 1193 Release Acceptance</a></li>
+            <li><a href="../tasks/TASK_1194_tactical_performance_budget_reduction.md">TASK 1194 Performance Budget Reduction</a></li>
+            <li><a href="../../data/performance_budget_contract.json">Performance Budget Contract</a></li>
+            <li><a href="../IMPLEMENTATION_STATUS.md">Implementation Status</a></li>
+          </ul>
+        </div>
+      </details>
+      <details>
+        <summary>Messlauf und Reproduzierbarkeit</summary>
+        <div>
+          <p>Der vollständige TASK-1193-Lauf wurde am 31.08.2026 auf <code>bb655c16f849bbb4d7b03a03bd38f070795baaf2</code> ausgeführt. Alle acht Mess-JSONs tragen denselben SHA. Maschine: deklarierte Baseline Ryzen 7 7800X3D, 64 GB, Windows 10 19045; Engine: Godot 4.6.2 stable.</p>
+          <p>Der aktuelle TASK-1195-Dokumentationsbranch verändert keine Runtime. Deshalb wird die teure Vollserie nicht auf einem reinen Dokument-SHA wiederholt; die Messwerte bleiben ausdrücklich an <code>bb655c16f</code> gebunden.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Bekannte Grenzen</summary>
+        <div>
+          <ul class="tight">
+            <li>Headless-Messung liefert keine GPU-/Viewport-Freigabe.</li>
+            <li>Quantile sind maschinenabhängig; Projektbudgets bleiben trotzdem der Gate-Vertrag.</li>
+            <li>Einzelne kalte Diagnosewerte dürfen nicht als Release-Evidenz verwendet werden.</li>
+            <li>Die manuelle 128×128-Evidenz fehlt weiterhin.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <footer>
+      <strong>SternenBürgerchen · Tactical Performance Status und Weiterarbeit</strong><br>
+      Erstellt für <code>integration/core-foundation</code> · Evidenz-SHA <code>bb655c16f</code> · Berichtstask <code>TASK_1195</code> · Stand 31.08.2026
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Kopiert.</div>
+  <script>
+    (() => {
+      const summary = [
+        "SternenBuergerchen Tactical Performance – Stand 31.08.2026",
+        "Branch/SHA: integration/core-foundation @ bb655c16f",
+        "Git: 27 Commits seit 29e81d825, Remote synchron",
+        "Gate: 8/8 Enforcer gruen, Release trotzdem blockiert",
+        "Combat p99: 112,873–120,213 ms bei 8 ms Budget",
+        "Simulation p99: 114,534–121,511 ms bei 8 ms Budget",
+        "LZ-Input p95: 73,053–78,532 ms, 8/8 gruen",
+        "Dynamic Overlay: 4/8 gruen; FoW: 6/8 gruen",
+        "Naechster Schritt: tick-lokaler observed Combat Candidate Index mit Index-an/aus-Oracle und 3+5 Nachmessung",
+        "Manuelle 128x128-Playtest-Evidenz fehlt weiterhin."
+      ].join("\n");
+      const toast = document.getElementById("toast");
+      const notify = (message) => {
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.setTimeout(() => toast.classList.remove("show"), 1700);
+      };
+      document.getElementById("copy-summary").addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(summary);
+          notify("Kurzfassung kopiert.");
+        } catch (_) {
+          const area = document.createElement("textarea");
+          area.value = summary;
+          document.body.appendChild(area);
+          area.select();
+          document.execCommand("copy");
+          area.remove();
+          notify("Kurzfassung kopiert.");
+        }
+      });
+      document.getElementById("print-report").addEventListener("click", () => window.print());
+    })();
+  </script>
+</body>
+</html>
