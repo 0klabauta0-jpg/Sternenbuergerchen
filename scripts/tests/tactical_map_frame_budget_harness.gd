@@ -167,6 +167,7 @@ func _collect_tick_samples(samples: Dictionary, simulation_root: Node, combat_dr
 	var simulation: Dictionary = Dictionary(simulation_root.call("get_runtime_tick_budget_debug_snapshot"))
 	_record(samples, "simulation.total_tick_usec", simulation.get("total_tick_usec", null))
 	_record_snapshot_scopes(samples, "simulation_scope", Dictionary(simulation.get("scopes_usec", {})))
+	_record_command_attribution_samples(samples, simulation)
 	var combat: Dictionary = Dictionary(combat_driver.call("get_combat_tick_budget_debug_snapshot"))
 	var scopes: Dictionary = Dictionary(combat.get("scopes_usec", {}))
 	_record(samples, "combat.total_tick_usec", combat.get("total_tick_usec", null))
@@ -176,6 +177,26 @@ func _collect_tick_samples(samples: Dictionary, simulation_root: Node, combat_dr
 	var audit: Dictionary = Dictionary(combat.get("hotpath_audit", {}))
 	_record(samples, "combat.los_pair_count", audit.get("last_contact_tracking_los_check_count", null))
 	_record(samples, "combat.los_cache_hit_count", audit.get("last_contact_tracking_los_cache_hit_count", null))
+
+
+func _record_command_attribution_samples(samples: Dictionary, simulation: Dictionary) -> void:
+	for field in ["command_type_usec", "command_type_count", "command_requeue_count"]:
+		var values: Dictionary = Dictionary(simulation.get(field, {}))
+		var normalized_values: Dictionary = {}
+		for type_variant in values.keys():
+			var normalized_type: String = String(type_variant).strip_edges().to_lower()
+			if normalized_type.is_empty():
+				normalized_type = "unknown"
+			normalized_values[normalized_type] = values[type_variant]
+		var normalized_types: Array[String] = []
+		for normalized_type_variant in normalized_values.keys():
+			normalized_types.append(String(normalized_type_variant))
+		normalized_types.sort()
+		for normalized_type in normalized_types:
+			var sample_name: String = "simulation_command.%s.%s" % [field, normalized_type]
+			if not samples.has(sample_name):
+				samples[sample_name] = []
+			_record(samples, sample_name, normalized_values.get(normalized_type, null))
 
 
 func _collect_large_combat_fixture_samples(samples: Dictionary, fixture: Dictionary) -> void:

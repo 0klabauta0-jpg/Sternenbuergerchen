@@ -143,6 +143,9 @@ var _navigation_last_tick_queries: Array = []
 var _navigation_most_expensive_query: Dictionary = {}
 var _navigation_last_path_metrics: Dictionary = {}
 var _runtime_tick_budget_debug_snapshot: Dictionary = {}
+var _runtime_command_type_count: Dictionary = {}
+var _runtime_command_type_usec: Dictionary = {}
+var _runtime_command_requeue_count: Dictionary = {}
 var _local_avoidance_resolver = LOCAL_AVOIDANCE_RESOLVER_SCRIPT.new()
 var _bottleneck_reservation_resolver = BOTTLENECK_RESERVATION_RESOLVER_SCRIPT.new()
 var _multiplayer_command_contract = MULTIPLAYER_COMMAND_CONTRACT_SCRIPT.new()
@@ -291,6 +294,11 @@ func set_runtime_tick_budget_debug_enabled(enabled: bool) -> void:
 	runtime_tick_budget_debug_enabled = enabled
 	if not runtime_tick_budget_debug_enabled:
 		_runtime_tick_budget_debug_snapshot.clear()
+		_runtime_command_type_count.clear()
+		_runtime_command_type_usec.clear()
+		_runtime_command_requeue_count.clear()
+		_runtime_command_ordering_usec = 0
+		_runtime_command_apply_usec = 0
 
 
 func get_runtime_tick_budget_debug_snapshot() -> Dictionary:
@@ -305,6 +313,9 @@ func _record_runtime_tick_budget_debug_snapshot(delta: float, tick_started_usec:
 		"total_tick_usec": Time.get_ticks_usec() - tick_started_usec,
 		"scopes_usec": profile_scopes.duplicate(true),
 		"command_count": command_count,
+		"command_type_count": _runtime_command_type_count.duplicate(true),
+		"command_type_usec": _runtime_command_type_usec.duplicate(true),
+		"command_requeue_count": _runtime_command_requeue_count.duplicate(true),
 		"effect_count": effect_count,
 		"command_queue_after_tick": command_queue.size(),
 		"effect_queue_after_tick": effects_queue.size(),
@@ -935,7 +946,11 @@ func _physics_process(delta: float) -> void:
 	var command_count: int = commands.size()
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
-	_process_commands(commands, delta)
+		_process_commands_profiled(commands, delta)
+		profile_scopes["command_ordering_usec"] = _runtime_command_ordering_usec
+		profile_scopes["command_apply_usec"] = _runtime_command_apply_usec
+	else:
+		_process_commands(commands, delta)
 	if profile_enabled:
 		profile_scopes["command_queue_usec"] = Time.get_ticks_usec() - scope_started_usec
 
@@ -1541,6 +1556,39 @@ func _process_commands(commands: Array, delta: float) -> void:
 
 	for cmd in ordered_commands:
 		_apply_command(cmd, delta)
+
+
+var _runtime_command_ordering_usec: int = 0
+var _runtime_command_apply_usec: int = 0
+
+func _process_commands_profiled(commands: Array, delta: float) -> void:
+	_runtime_command_type_count.clear()
+	_runtime_command_type_usec.clear()
+	_runtime_command_requeue_count.clear()
+	var ordering_started_usec: int = Time.get_ticks_usec()
+	var ordered_commands: Array = _order_payloads(commands)
+	_runtime_command_ordering_usec = Time.get_ticks_usec() - ordering_started_usec
+	var apply_loop_started_usec: int = Time.get_ticks_usec()
+	for cmd in ordered_commands:
+		var command_type: String = _normalize_runtime_command_type(cmd)
+		_runtime_command_type_count[command_type] = int(_runtime_command_type_count.get(command_type, 0)) + 1
+		if not _runtime_command_requeue_count.has(command_type):
+			_runtime_command_requeue_count[command_type] = 0
+		var queue_size_before: int = command_queue.size()
+		var apply_started_usec: int = Time.get_ticks_usec()
+		_apply_command(cmd, delta)
+		var apply_usec: int = Time.get_ticks_usec() - apply_started_usec
+		_runtime_command_type_usec[command_type] = int(_runtime_command_type_usec.get(command_type, 0)) + apply_usec
+		if command_queue.size() > queue_size_before:
+			_runtime_command_requeue_count[command_type] = int(_runtime_command_requeue_count.get(command_type, 0)) + 1
+	_runtime_command_apply_usec = Time.get_ticks_usec() - apply_loop_started_usec
+
+
+func _normalize_runtime_command_type(cmd: Variant) -> String:
+	if typeof(cmd) != TYPE_DICTIONARY:
+		return "unknown"
+	var command_type: String = String((cmd as Dictionary).get("command_type", (cmd as Dictionary).get("type", ""))).strip_edges().to_lower()
+	return command_type if not command_type.is_empty() else "unknown"
 
 
 func _process_effects(effects: Array, delta: float) -> void:
