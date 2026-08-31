@@ -1850,7 +1850,7 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 	if unit.has_method("refresh_terrain_readability"):
 		unit.call("refresh_terrain_readability")
 	if bool(cmd.get("requeue_until_target", true)):
-		enqueue_command(cmd.duplicate(true))
+		enqueue_command(cmd)
 
 
 func _apply_unit_command_status(cmd: Dictionary, unit = null) -> void:
@@ -1938,7 +1938,7 @@ func _apply_move_command_with_terrain(
 		unit_node.call("refresh_terrain_readability")
 
 	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
-		enqueue_command(cmd.duplicate(true))
+		enqueue_command(cmd)
 
 
 func _apply_move_command_with_terrain_avoidance(
@@ -1997,7 +1997,7 @@ func _apply_move_command_with_terrain_avoidance(
 		unit_node.call("refresh_terrain_readability")
 
 	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
-		enqueue_command(cmd.duplicate(true))
+		enqueue_command(cmd)
 
 
 func _store_unit_facing_from_positions(unit, from_position: Vector2, to_position: Vector2) -> void:
