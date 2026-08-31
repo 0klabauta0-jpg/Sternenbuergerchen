@@ -123,6 +123,16 @@ signal combat_resolved(mission_result: Dictionary)
 @export var preview_mode: bool = false
 @export var combat_tick_budget_debug_enabled: bool = false
 @export var flank_vulnerability_enabled: bool = false
+var use_observed_fire_candidate_index: bool = true
+
+func set_use_observed_fire_candidate_index(enabled: bool) -> void:
+	use_observed_fire_candidate_index = enabled
+
+func get_resolver_target_evaluation_count() -> int:
+	return _resolver_target_evaluation_count
+
+func _record_resolver_target_evaluation(_attacker, _target) -> void:
+	_resolver_target_evaluation_count += 1
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
@@ -135,6 +145,7 @@ var _current_tick: int = 0
 var _fire_candidate_target_ids_by_attacker_id: Dictionary = {}
 var _fire_candidate_index_tick: int = -1
 var _fire_candidate_index_pair_count: int = 0
+var _resolver_target_evaluation_count: int = 0
 var _next_attack_tick: int = 1
 var _last_event_text: String = "Combat waiting"
 var _mission_started_at_msec: int = 0
@@ -3393,6 +3404,11 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"get_weapon_attack_range": Callable(self, "_get_weapon_attack_range"),
 		"get_attack_area_context": Callable(self, "_get_attack_area_context_for_fireteam"),
 	}
+	if combat_tick_budget_debug_enabled:
+		context["record_target_evaluation"] = Callable(self, "_record_resolver_target_evaluation")
+	if use_observed_fire_candidate_index and _fire_candidate_index_tick == _current_tick:
+		context["observed_target_ids_by_attacker_id"] = _fire_candidate_target_ids_by_attacker_id
+		context["use_observed_fire_candidate_index"] = true
 	for key in extra.keys():
 		context[key] = extra[key]
 	return context
