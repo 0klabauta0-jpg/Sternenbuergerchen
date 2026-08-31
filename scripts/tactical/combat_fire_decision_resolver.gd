@@ -338,6 +338,28 @@ static func is_target_attackable(attacker, target, context: Dictionary) -> bool:
 	var effective_attack_range: float = _get_effective_attack_range(attacker, target, context)
 	if debug_enabled:
 		_record_hotspot(context, "range_attackability", started_usec)
+	var prevalidation: Dictionary = Dictionary(context.get("observed_los_prevalidation", {}))
+	var attacker_id: String = _get_unit_id(attacker)
+	var target_id: String = _get_unit_id(target)
+	var prevalidated_pairs: Dictionary = Dictionary(prevalidation.get("pairs", {}))
+	var prevalidated_targets: Dictionary = Dictionary(prevalidated_pairs.get(attacker_id, {}))
+	var entry: Dictionary = prevalidated_targets.get(target_id, {})
+	var current_distance: float = attacker.global_position.distance_to(target.global_position)
+	var valid_prevalidation: bool = (
+		bool(prevalidation.get("enabled", false))
+		and bool(prevalidation.get("context_valid", false))
+		and int(prevalidation.get("current_tick", -1)) == int(prevalidation.get("validation_tick", -2))
+		and not entry.is_empty()
+		and bool(entry.get("clear", false))
+		and entry.get("source_position", Vector2.INF) == attacker.global_position
+		and entry.get("target_position", Vector2.INF) == target.global_position
+		and current_distance <= float(entry.get("validated_range", -1.0))
+		and current_distance <= effective_attack_range
+	)
+	if valid_prevalidation:
+		var reuse_callback: Callable = context.get("record_observed_terrain_los_reuse", Callable())
+		if reuse_callback.is_valid(): reuse_callback.call(attacker, target, entry)
+		return true
 	var result := bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, effective_attack_range, context.get("terrain_registry", null)))
 	return result
 
