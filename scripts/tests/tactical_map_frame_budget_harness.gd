@@ -74,10 +74,14 @@ func run(scene_tree: SceneTree, options: Dictionary = {}) -> Dictionary:
 		simulation_root = mission.get_node_or_null("SimulationRoot") if mission != null else null
 		combat_driver = mission.get_node_or_null("CombatLoopDriver") if mission != null else null
 		if primary_view != null and controller != null:
+			controller.call("set_mission_visible_frame_timing_debug_enabled", true)
 			var spawn_position: Vector2 = Vector2(controller.call("get_mission_marker_world_position", "spawn_alpha", Vector2.ZERO))
+			var lz_ui_refresh_before: Dictionary = Dictionary(controller.call("get_mission_ui_refresh_timing_debug_snapshot"))
 			var lz_input_started_usec: int = Time.get_ticks_usec()
 			controller.call("_on_mission_dropship_card_set_lz_pressed", craft_id)
 			_record(samples, "interaction.lz_input_usec", Time.get_ticks_usec() - lz_input_started_usec)
+			var lz_ui_refresh_after: Dictionary = Dictionary(controller.call("get_mission_ui_refresh_timing_debug_snapshot"))
+			_record(samples, "interaction.lz_input_ui_refresh_count", int(lz_ui_refresh_after.get("invocation_count", -1)) - int(lz_ui_refresh_before.get("invocation_count", -1)))
 			var planning_emit_started_usec: int = Time.get_ticks_usec()
 			var lz_placed: bool = bool(controller.call("_place_lz_from_screen_position", primary_view.call("world_to_screen_position", spawn_position))) if spawn_position != Vector2.ZERO else false
 			_record(samples, "interaction.planning_emit_usec", Time.get_ticks_usec() - planning_emit_started_usec)
@@ -162,9 +166,11 @@ func _collect_frame_samples(samples: Dictionary, primary_view: Node, controller:
 func _collect_tick_samples(samples: Dictionary, simulation_root: Node, combat_driver: Node) -> void:
 	var simulation: Dictionary = Dictionary(simulation_root.call("get_runtime_tick_budget_debug_snapshot"))
 	_record(samples, "simulation.total_tick_usec", simulation.get("total_tick_usec", null))
+	_record_snapshot_scopes(samples, "simulation_scope", Dictionary(simulation.get("scopes_usec", {})))
 	var combat: Dictionary = Dictionary(combat_driver.call("get_combat_tick_budget_debug_snapshot"))
 	var scopes: Dictionary = Dictionary(combat.get("scopes_usec", {}))
 	_record(samples, "combat.total_tick_usec", combat.get("total_tick_usec", null))
+	_record_snapshot_scopes(samples, "combat_scope", scopes)
 	_record(samples, "combat.contact_tracking_usec", scopes.get("contact_tracking_usec", null))
 	_record(samples, "combat.enemy_security_usec", scopes.get("enemy_security_usec", null))
 	var audit: Dictionary = Dictionary(combat.get("hotpath_audit", {}))
@@ -181,12 +187,25 @@ func _collect_large_combat_fixture_samples(samples: Dictionary, fixture: Diction
 			var combat: Dictionary = Dictionary(tick_record.get("combat", {}))
 			_record(samples, "simulation.total_tick_usec", simulation.get("total_tick_usec", null))
 			_record(samples, "combat.total_tick_usec", combat.get("total_tick_usec", null))
+			_record_snapshot_scopes(samples, "simulation_scope", Dictionary(simulation.get("scopes_usec", {})))
 			var combat_scopes: Dictionary = Dictionary(combat.get("scopes_usec", {}))
+			_record_snapshot_scopes(samples, "combat_scope", combat_scopes)
 			_record(samples, "combat.contact_tracking_usec", combat_scopes.get("contact_tracking_usec", null))
 			_record(samples, "combat.enemy_security_usec", combat_scopes.get("enemy_security_usec", null))
 			var audit: Dictionary = Dictionary(combat.get("hotpath_audit", {}))
 			_record(samples, "combat.los_pair_count", audit.get("last_contact_tracking_los_check_count", null))
 			_record(samples, "combat.los_cache_hit_count", audit.get("last_contact_tracking_los_cache_hit_count", null))
+
+
+func _record_snapshot_scopes(samples: Dictionary, scope_namespace: String, scopes: Dictionary) -> void:
+	for scope_name_variant in scopes.keys():
+		var scope_name: String = String(scope_name_variant).strip_edges()
+		if scope_name.is_empty():
+			continue
+		var report_scope_name: String = "%s.%s" % [scope_namespace, scope_name]
+		if not samples.has(report_scope_name):
+			samples[report_scope_name] = []
+		_record(samples, report_scope_name, scopes.get(scope_name_variant, null))
 
 
 func _build_fog_of_war_probe_state() -> Dictionary:
@@ -204,7 +223,7 @@ func _new_samples() -> Dictionary:
 		"frame_script_total_usec", "terrain.unit_proxy_sync_usec", "terrain.fow_work_usec", "terrain.dynamic_overlay_usec",
 		"controller.execution_updates_usec", "controller.hud_light_usec", "controller.hud_heavy_usec",
 		"combat.contact_tracking_usec", "combat.enemy_security_usec", "combat.los_pair_count", "combat.los_cache_hit_count",
-		"simulation.total_tick_usec", "combat.total_tick_usec", "interaction.first_visible_frame_usec", "interaction.lz_input_usec",
+		"simulation.total_tick_usec", "combat.total_tick_usec", "interaction.first_visible_frame_usec", "interaction.lz_input_usec", "interaction.lz_input_ui_refresh_count",
 		"interaction.planning_emit_usec", "interaction.lz_action_usec", "interaction.lz_and_deboard_msec",
 	]:
 		samples[scope_name] = []
