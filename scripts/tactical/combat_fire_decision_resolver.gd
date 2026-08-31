@@ -9,28 +9,35 @@ static func find_first_contact_pair(context: Dictionary) -> Dictionary:
 	var friendly_units: Array = Array(context.get("friendly_units", []))
 	var enemy_units: Array = Array(context.get("enemy_units", []))
 	var friendly_team_id: String = String(context.get("friendly_team_id", ""))
+	var decision_context: Dictionary = context
+	# Only the authoritative driver enables this: its range callback depends on
+	# the attacker and terrain scale, not on the candidate target. Other resolver
+	# users retain their original target-sensitive callback semantics.
+	if bool(context.get("cache_effective_attack_range_by_attacker", false)):
+		decision_context = context.duplicate()
+		decision_context["precomputed_effective_attack_ranges"] = {}
 	for friendly in friendly_units:
 		if not _can_unit_seek_target(friendly):
 			continue
-		var enemy = pick_target_from_units(friendly, enemy_units, context)
+		var enemy = pick_target_from_units(friendly, enemy_units, decision_context)
 		if enemy == null:
 			continue
 		var f_id: String = String(friendly.call("get_unit_id"))
 		var e_id: String = String(enemy.call("get_unit_id"))
-		var start_detection: Callable = context.get("start_detection", Callable())
+		var start_detection: Callable = decision_context.get("start_detection", Callable())
 		if start_detection.is_valid():
 			start_detection.call(friendly, f_id, e_id)
-		var is_detection_complete: Callable = context.get("is_detection_complete", Callable())
+		var is_detection_complete: Callable = decision_context.get("is_detection_complete", Callable())
 		if is_detection_complete.is_valid() and not bool(is_detection_complete.call(f_id, e_id)):
 			continue
 		var fireteam_id: String = ""
 		if friendly.has_method("get_fireteam_id"):
 			fireteam_id = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
-		var contact_entry: Dictionary = _call_contact_state(context, fireteam_id, e_id)
+		var contact_entry: Dictionary = _call_contact_state(decision_context, fireteam_id, e_id)
 		var detection_state: String = String(contact_entry.get("detection_state", "confirmed")).strip_edges().to_lower()
 		if detection_state != "spotted" and detection_state != "confirmed":
 			continue
-		if not can_unit_attack(friendly, context):
+		if not can_unit_attack(friendly, decision_context):
 			continue
 		return {
 			"attacker": friendly,
@@ -43,15 +50,15 @@ static func find_first_contact_pair(context: Dictionary) -> Dictionary:
 	for enemy in enemy_units:
 		if not can_enemy_attack(enemy):
 			continue
-		var friendly = pick_target_from_units(enemy, friendly_units, context)
+		var friendly = pick_target_from_units(enemy, friendly_units, decision_context)
 		if friendly == null:
 			continue
 		var en_id: String = String(enemy.call("get_unit_id"))
 		var fr_id: String = String(friendly.call("get_unit_id"))
-		var start_detection_enemy: Callable = context.get("start_detection", Callable())
+		var start_detection_enemy: Callable = decision_context.get("start_detection", Callable())
 		if start_detection_enemy.is_valid():
 			start_detection_enemy.call(enemy, en_id, fr_id)
-		var is_detection_complete_enemy: Callable = context.get("is_detection_complete", Callable())
+		var is_detection_complete_enemy: Callable = decision_context.get("is_detection_complete", Callable())
 		if is_detection_complete_enemy.is_valid() and not bool(is_detection_complete_enemy.call(en_id, fr_id)):
 			continue
 		return {
@@ -362,11 +369,16 @@ static func _get_weapon_attack_range(attacker, target, context: Dictionary) -> f
 
 
 static func _get_effective_attack_range(attacker, target, context: Dictionary) -> float:
+	var attacker_id: String = _get_unit_id(attacker)
+	var precomputed_ranges: Dictionary = Dictionary(context.get("precomputed_effective_attack_ranges", {}))
+	if not attacker_id.is_empty() and precomputed_ranges.has(attacker_id):
+		return maxf(float(precomputed_ranges.get(attacker_id, 0.0)), 0.0)
 	var weapon_range: float = _get_weapon_attack_range(attacker, target, context)
 	var range_factor: float = _get_engagement_range_factor(attacker)
-	if range_factor <= 0.0:
-		return weapon_range
-	return weapon_range * range_factor
+	var effective_range: float = weapon_range if range_factor <= 0.0 else weapon_range * range_factor
+	if bool(context.get("cache_effective_attack_range_by_attacker", false)) and not attacker_id.is_empty():
+		precomputed_ranges[attacker_id] = effective_range
+	return effective_range
 
 
 static func _get_engagement_range_factor(unit) -> float:

@@ -610,6 +610,7 @@ var _fireteam_security_refresh_time_remaining: float = 0.0
 var _mission_visible_frame_timing_debug_enabled: bool = false
 var _mission_visible_frame_timing_debug_snapshot: Dictionary = {}
 var _mission_ui_refresh_timing_debug_snapshot: Dictionary = {}
+var _mission_ui_refresh_timing_debug_invocation_count: int = 0
 var _mission_runtime_surface_timing_debug_snapshot: Dictionary = {}
 var _lz_drop_timing_debug_enabled: bool = false
 var _lz_drop_timing_debug_snapshot: Dictionary = {}
@@ -5090,6 +5091,7 @@ func set_mission_visible_frame_timing_debug_enabled(enabled: bool) -> void:
 	if not enabled:
 		_mission_visible_frame_timing_debug_snapshot.clear()
 		_mission_ui_refresh_timing_debug_snapshot.clear()
+		_mission_ui_refresh_timing_debug_invocation_count = 0
 		_mission_runtime_surface_timing_debug_snapshot.clear()
 
 
@@ -5132,10 +5134,12 @@ func _record_mission_visible_frame_timing_snapshot(frame_started_usec: int, scop
 
 
 func _record_mission_ui_refresh_timing_snapshot(refresh_started_usec: int, scopes_usec: Dictionary) -> void:
+	_mission_ui_refresh_timing_debug_invocation_count += 1
 	_mission_ui_refresh_timing_debug_snapshot = {
 		"enabled": _mission_visible_frame_timing_debug_enabled,
 		"total_usec": Time.get_ticks_usec() - refresh_started_usec,
 		"scopes_usec": scopes_usec.duplicate(true),
+		"invocation_count": _mission_ui_refresh_timing_debug_invocation_count,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,
@@ -11594,7 +11598,7 @@ func select_mission_dropship_fireteam(craft_id: String, fireteam_id: String) -> 
 	return true
 
 
-func _select_mission_dropship_craft(craft_id: String, should_emit_signal: bool = true) -> bool:
+func _select_mission_dropship_craft(craft_id: String, should_emit_signal: bool = true, should_refresh_ui: bool = true) -> bool:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	var current_craft_id: String = _mission_drop_craft_id.strip_edges()
 	if _is_drop_sequence_active() and normalized_craft_id != current_craft_id:
@@ -11610,8 +11614,9 @@ func _select_mission_dropship_craft(craft_id: String, should_emit_signal: bool =
 	if not _is_drop_sequence_active():
 		_drop_ship_requested = false
 	_last_command_text = "DROPSHIP SELECTED: %s" % _mission_drop_display_name
-	_refresh_button_state()
-	_update_ui()
+	if should_refresh_ui:
+		_refresh_button_state()
+		_update_ui()
 	if should_emit_signal:
 		_emit_planning_state_changed()
 	return true
@@ -12789,10 +12794,11 @@ func _on_mission_dropship_card_set_lz_pressed(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
 		return
-	if not _select_mission_dropship_craft(normalized_craft_id, false):
+	if not _select_mission_dropship_craft(normalized_craft_id, false, false):
 		return
 	if not _can_edit_planning():
 		_last_command_text = "OBSERVER MODE"
+		_refresh_button_state()
 		_update_ui()
 		return
 	_is_lz_placement_armed = true

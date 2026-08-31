@@ -168,6 +168,7 @@ var _remote_contact_snapshot: Array = []
 var _combat_outcome_by_fire_event_id: Dictionary = {}
 var _next_fire_event_sequence: int = 1
 var _combat_tick_budget_debug_snapshot: Dictionary = {}
+var _combat_fire_decision_debug_scopes_usec: Dictionary = {}
 var _last_contact_decision_diagnostics: Dictionary = {}
 var _suppress_fire_outcome_diagnostic_count: int = 0
 var _suppress_fire_outcome_diagnostic_by_fireteam: Dictionary = {}
@@ -1502,6 +1503,9 @@ func _on_tick_processed(tick: int) -> void:
 		_try_enqueue_attacks(simulation_root)
 		if profile_enabled:
 			profile_scopes["combat_fire_decision_usec"] = Time.get_ticks_usec() - scope_started_usec
+			for fire_scope_name_variant in _combat_fire_decision_debug_scopes_usec.keys():
+				var fire_scope_name: String = String(fire_scope_name_variant)
+				profile_scopes[fire_scope_name] = int(_combat_fire_decision_debug_scopes_usec.get(fire_scope_name_variant, 0))
 	elif profile_enabled:
 		profile_scopes["combat_fire_decision_usec"] = 0
 	if profile_enabled:
@@ -1666,10 +1670,20 @@ func _request_respawn_for_unit(unit, unit_id: String) -> void:
 
 
 func _try_enqueue_attacks(simulation_root: Node) -> void:
+	var profile_enabled: bool = combat_tick_budget_debug_enabled
+	if profile_enabled:
+		_combat_fire_decision_debug_scopes_usec.clear()
+	var scope_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var contact_pair: Dictionary = _find_first_contact_pair()
+	if profile_enabled:
+		_combat_fire_decision_debug_scopes_usec["fire_find_contact_pair_usec"] = Time.get_ticks_usec() - scope_started_usec
 	if contact_pair.is_empty():
+		if profile_enabled:
+			scope_started_usec = Time.get_ticks_usec()
 		_clear_contact_visuals()
 		_record_contact_decision_diagnostics("no_contact_pair", {"candidate": _build_first_fire_candidate_diagnostic()})
+		if profile_enabled:
+			_combat_fire_decision_debug_scopes_usec["fire_no_contact_diagnostic_usec"] = Time.get_ticks_usec() - scope_started_usec
 		return
 
 	var attacker = contact_pair["attacker"]
@@ -1689,12 +1703,24 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	_set_contact_visuals(attacker, target)
 	_update_status_label("contact")
 	if _current_tick < _next_attack_tick:
+		if profile_enabled:
+			scope_started_usec = Time.get_ticks_usec()
 		_record_contact_decision_diagnostics("cooldown", _build_contact_pair_decision_diagnostic(contact_pair))
+		if profile_enabled:
+			_combat_fire_decision_debug_scopes_usec["fire_cooldown_diagnostic_usec"] = Time.get_ticks_usec() - scope_started_usec
 		return
 
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	var decision: Dictionary = COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("build_damage_effect", contact_pair, _build_fire_decision_context())
+	if profile_enabled:
+		_combat_fire_decision_debug_scopes_usec["fire_build_damage_effect_usec"] = Time.get_ticks_usec() - scope_started_usec
 	if decision.is_empty():
+		if profile_enabled:
+			scope_started_usec = Time.get_ticks_usec()
 		_record_contact_decision_diagnostics("no_damage_effect", _build_contact_pair_decision_diagnostic(contact_pair))
+		if profile_enabled:
+			_combat_fire_decision_debug_scopes_usec["fire_no_damage_effect_diagnostic_usec"] = Time.get_ticks_usec() - scope_started_usec
 		return
 	var actual_target = decision.get("target", target)
 	var actual_target_id: String = String(decision.get("target_id", target_id))
@@ -3329,6 +3355,7 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"contact_range": contact_range,
 		"base_damage_multiplier": base_damage_multiplier,
 		"spotted_contact_hit_chance_malus": SPOTTED_CONTACT_HIT_CHANCE_MALUS,
+		"cache_effective_attack_range_by_attacker": true,
 		"los_system": _get_combat_visibility_system(),
 		"terrain_registry": _get_terrain_registry(),
 		"check_discipline_break": Callable(self, "_check_discipline_break"),
