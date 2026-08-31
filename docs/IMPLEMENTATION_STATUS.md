@@ -1,5 +1,11 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1198 - Simulation Command Attribution (P03)
+- Status: Diagnose abgeschlossen; keine Optimierung und keine Release-Freigabe.
+- Die offizielle 3-Kalt-/5-Warm-Serie auf `f84e7173fa2c7b255f5dac44fb2e85827229af2e` lieferte 8/8 Exit-0-Reports mit identischem SHA. Haupt-Scopes haben je 1200 Samples, `move_to_position` 204 und `hold_position` 350 conditional Samples. `command_queue_usec` p99: `66917,65097,68009,64018,63376,62608,62986,61257` (Range `61257–68009`, Median `63697`); Ordering: `29,27,29,29,33,29,29,28` (Range `27–33`, Median `29`); Apply: `66895,65065,67985,63987,63343,62577,62955,61228` (Range `61228–67985`, Median `63665`).
+- Command-Typen: `move_to_position` p99 `68407,69209,84284,67180,65820,79321,63413,60882` (Range `60882–84284`, Median `67793.5`), `hold_position` `2126,2070,2709,2230,2249,2305,2421,2102` (Range `2070–2709`, Median `2239.5`). Tick-Signal: `121134,117298,123024,117556,117661,117797,116420,112988` (Range `112988–123024`, Median `117608.5`); Simulation total: `122229,118298,126398,118745,119152,119801,117426,113832` (Range `113832–126398`, Median `118948.5`). Typzähler p99 überall `4/4`, Requeue p99 überall `1/0`; die Typzeiten sind conditional und nicht additiv.
+- Der erste Kaltlauf auf `193c7362276a64af16f6fd7821e1f82c9ac82ed1` ist wegen fehlender Attribution im großen Fixture verworfen. Tests: TASK-1198 24/24, TASK-162 23/23, TASK-166 15/15, TASK-168 20/20, TASK-501 10/10, TASK-218 81/81. P04/TASK-1199 bearbeitet deterministisch `move_to_position` im Command-Apply-Pfad: Ordering unterschreitet 25 %, `67793.5 / 63665` überschreitet 40 %; der Signalpfad wird deshalb nicht gewählt. Budgets bleiben rot.
+
 ### TASK_1197 - Selected combat hotspot (Task 3)
 - Status: Effect-Gate PASS; Evidence auf unverändertem Produktions-SHA `24f340d59dddd8ef59d69e617d3eac895eadeda4`.
 - Die 3-cold/5-warm-Serie lieferte acht SHA-identische Exit-0-JSON-Zeilen. Pair Search p99 Median `32826.5` usec (min/max `30095/39599`) liegt 14.2374 % unter P01 `38276`. Contact `20885` (+4.3676 %, unter 5-%-Ceiling `21011.55`), Enemy-Tactics `23693.5` (-3.8745 %, unter `25880.925`) und Fire-Decision `39995` (-10.3070 %, unter `46820.55`) bestehen ebenfalls.

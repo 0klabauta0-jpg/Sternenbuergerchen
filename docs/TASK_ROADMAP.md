@@ -13,6 +13,15 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1198 - Simulation Command Attribution (diagnostisch abgeschlossen)
+- Ergebnis: SimulationRoot-Command-Verarbeitung ist nach Ordering, Apply und Command-Typen messbar aufgeschlüsselt. Die Instrumentierung bleibt read-only, nicht serialisiert und ändert keine Autorität oder Requeue-Semantik.
+- Evidenz: Auf `f84e7173fa2c7b255f5dac44fb2e85827229af2e` sind acht SHA-identische Exit-0-Reports dokumentiert. Haupt-Scopes umfassen 1200 Samples; `move_to_position` 204 und `hold_position` 350 conditional Samples. Die vollständigen Werte stehen in `docs/tasks/TASK_1198_simulation_command_attribution.md` und `docs/IMPLEMENTATION_STATUS.md`.
+- Auswahl: Nach den Regeln des Masterplans wird ausschließlich der `move_to_position`-Command-Apply-Pfad für TASK 1199 gewählt: Ordering `29 / 63697` liegt unter 25 %, `move_to_position` `67793.5 / 63665` über 40 % und ist in 8/8 Läufen dominant. Der Signalpfad wird nicht parallel ausgewählt.
+- Hinweis: Der erste Kaltlauf auf `193c736...` wurde wegen unvollständiger Fixture-Sampling-Abdeckung verworfen. Simulation- und Release-Budgets bleiben überschritten; kein Release-GO.
+- Nächster Schritt: TASK 1199 nach dem P04-Vertrag, weiterhin strikt seriell.
+
+---
+
 ## TASK_1195 - Tactical Performance Status und Weiterarbeit (dokumentiert)
 - Ergebnis: Ein neuer responsiver HTML-Bericht fasst die 27 integrierten Commits seit dem alten Review-Stand, TASK 1182-1194, die acht Messlaeufe auf `bb655c16f849bbb4d7b03a03bd38f070795baaf2`, den weiterhin blockierten Release und die getrennten Folgepakete zusammen.
 - Plan: Der ausfuehrbare Folgeplan beginnt mit einem tick-lokalen, read-only Combat-Kandidatenindex aus den bereits berechneten Contact Observations. Der zusaetzliche Luna-Masterplan `docs/superpowers/plans/2026-08-31-luna-tactical-performance-release-recovery-orchestrator.md` fuehrt diesen Slice und die anschliessenden Combat-, Simulation-, Dynamic-Overlay-, FoW-, Gate-, Manuell- und Closeout-Pakete als zehn serielle Gates zusammen.
