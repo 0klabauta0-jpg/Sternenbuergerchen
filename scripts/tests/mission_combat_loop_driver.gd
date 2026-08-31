@@ -182,6 +182,7 @@ var _remote_contact_snapshot: Array = []
 var _combat_outcome_by_fire_event_id: Dictionary = {}
 var _next_fire_event_sequence: int = 1
 var _combat_tick_budget_debug_snapshot: Dictionary = {}
+var _combat_hotspot_profile: Dictionary = {"counts": {}, "usec": {}}
 var _combat_fire_decision_debug_scopes_usec: Dictionary = {}
 var _last_contact_decision_diagnostics: Dictionary = {}
 var _suppress_fire_outcome_diagnostic_count: int = 0
@@ -777,6 +778,31 @@ func set_combat_tick_budget_debug_enabled(enabled: bool) -> void:
 	combat_tick_budget_debug_enabled = enabled
 	if not combat_tick_budget_debug_enabled:
 		_combat_tick_budget_debug_snapshot.clear()
+	_combat_hotspot_profile = {"counts": {}, "usec": {}}
+	var cache = get_node_or_null(combat_visibility_cache_path)
+	if cache != null and cache.has_method("set_debug_profiling_enabled"):
+		cache.call("set_debug_profiling_enabled", enabled)
+
+func get_combat_hotspot_debug_snapshot() -> Dictionary:
+	var snapshot := _combat_hotspot_profile.duplicate(true)
+	var cache = get_node_or_null(combat_visibility_cache_path)
+	if cache != null and cache.has_method("get_debug_profile_snapshot"):
+		snapshot["visibility_cache"] = Dictionary(cache.call("get_debug_profile_snapshot"))
+	snapshot["enabled"] = combat_tick_budget_debug_enabled
+	snapshot["derived_only"] = true
+	snapshot["read_only"] = true
+	snapshot["snapshot_serialized"] = false
+	return snapshot
+
+func _record_combat_hotspot(name: String, elapsed_usec: int) -> void:
+	if not combat_tick_budget_debug_enabled:
+		return
+	var counts: Dictionary = _combat_hotspot_profile.get("counts", {})
+	var usec: Dictionary = _combat_hotspot_profile.get("usec", {})
+	counts[name] = int(counts.get(name, 0)) + 1
+	usec[name] = int(usec.get(name, 0)) + elapsed_usec
+	_combat_hotspot_profile["counts"] = counts
+	_combat_hotspot_profile["usec"] = usec
 
 
 func get_combat_tick_budget_debug_snapshot() -> Dictionary:
@@ -3185,7 +3211,10 @@ func _get_contact_enemy_type(enemy) -> String:
 
 func _find_first_contact_pair() -> Dictionary:
 	var friendly_units: Array = _prioritize_standard_attack_fireteam_fairness(_get_friendly_combat_units())
-	return Dictionary(
+	var cache = get_node_or_null(combat_visibility_cache_path)
+	if combat_tick_budget_debug_enabled and cache != null and cache.has_method("set_debug_profile_scope_active"):
+		cache.call("set_debug_profile_scope_active", true)
+	var result := Dictionary(
 		COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call(
 			"find_first_contact_pair",
 			_build_fire_decision_context(
@@ -3196,6 +3225,9 @@ func _find_first_contact_pair() -> Dictionary:
 			)
 		)
 	).duplicate(true)
+	if cache != null and cache.has_method("set_debug_profile_scope_active"):
+		cache.call("set_debug_profile_scope_active", false)
+	return result
 
 
 func _prioritize_standard_attack_fireteam_fairness(units: Array) -> Array:
@@ -3406,6 +3438,8 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 	}
 	if combat_tick_budget_debug_enabled:
 		context["record_target_evaluation"] = Callable(self, "_record_resolver_target_evaluation")
+		context["combat_hotspot_debug_enabled"] = true
+		context["record_combat_hotspot"] = Callable(self, "_record_combat_hotspot")
 	if use_observed_fire_candidate_index and _fire_candidate_index_tick == _current_tick:
 		context["observed_target_ids_by_attacker_id"] = _fire_candidate_target_ids_by_attacker_id
 		context["use_observed_fire_candidate_index"] = true

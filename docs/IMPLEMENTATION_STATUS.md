@@ -1,5 +1,10 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1197 - Selected combat hotspot (Task 3)
+- Status: Effect-Gate PASS; Evidence auf unverändertem Produktions-SHA `24f340d59dddd8ef59d69e617d3eac895eadeda4`.
+- Die 3-cold/5-warm-Serie lieferte acht SHA-identische Exit-0-JSON-Zeilen. Pair Search p99 Median `32826.5` usec (min/max `30095/39599`) liegt 14.2374 % unter P01 `38276`. Contact `20885` (+4.3676 %, unter 5-%-Ceiling `21011.55`), Enemy-Tactics `23693.5` (-3.8745 %, unter `25880.925`) und Fire-Decision `39995` (-10.3070 %, unter `46820.55`) bestehen ebenfalls.
+- Combat-Gesamt `97210` und Simulation-Gesamt `98802.5` usec bleiben budgetüberschritten; keine Release-Freigabe. Direkte Gates: TASK-1197 35/35, TASK-1196 12/12, TASK-1191 12/12, TASK-162 23/23, TASK-208 57/57, TASK-218 81/81. Nächstes Paket: TASK-1198 Command-Type-Attribution.
+
 ### TASK_1196 - Combat observed candidate index (Task 3)
 
 - Same-series `combat_scope.enemy_team_tactics_usec` p99 values (usec): `26351, 23876, 25094, 24608, 23346, 22949, 25116, 24689`; exact range `22949–26351`. Fire-find-contact-pair `36057–40881` remains larger than enemy-team-tactics and contact-tracking, so Rule 1 selects exactly `CombatVisibilityCache`.

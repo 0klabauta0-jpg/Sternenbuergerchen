@@ -299,32 +299,54 @@ static func pick_target_from_units(attacker, targets: Array, context: Dictionary
 	return best_target
 
 static func _filter_targets_for_attacker(attacker, targets: Array, context: Dictionary) -> Array:
+	var debug_enabled: bool = bool(context.get("combat_hotspot_debug_enabled", false))
+	var filter_started_usec: int = Time.get_ticks_usec() if debug_enabled else 0
 	if not bool(context.get("use_observed_fire_candidate_index", false)):
+		if debug_enabled: _record_hotspot(context, "candidate_filter", filter_started_usec)
 		return targets
 	var attacker_id: String = _get_unit_id(attacker)
 	var by_attacker: Dictionary = Dictionary(context.get("observed_target_ids_by_attacker_id", {}))
 	if attacker_id.is_empty() or not by_attacker.has(attacker_id):
+		if debug_enabled: _record_hotspot(context, "candidate_filter", filter_started_usec)
 		return targets
 	var allowed_ids := PackedStringArray(by_attacker.get(attacker_id, PackedStringArray()))
 	var filtered: Array = []
 	for target in targets:
 		if allowed_ids.has(_get_unit_id(target)):
 			filtered.append(target)
+	if debug_enabled:
+		_record_hotspot(context, "candidate_filter", filter_started_usec)
 	return filtered
 
 
 static func is_target_attackable(attacker, target, context: Dictionary) -> bool:
+	var debug_enabled: bool = bool(context.get("combat_hotspot_debug_enabled", false))
+	var started_usec: int = Time.get_ticks_usec() if debug_enabled else 0
 	if target == null or not can_target_receive_attack(target):
+		if debug_enabled: _record_hotspot(context, "range_attackability", started_usec)
 		return false
 	if attacker == null:
+		if debug_enabled: _record_hotspot(context, "range_attackability", started_usec)
 		return false
 	if _get_team_id(attacker) == _get_team_id(target):
+		if debug_enabled: _record_hotspot(context, "range_attackability", started_usec)
 		return false
 	var los_system = context.get("los_system", null)
 	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
+		if debug_enabled: _record_hotspot(context, "range_attackability", started_usec)
 		return false
 	var effective_attack_range: float = _get_effective_attack_range(attacker, target, context)
-	return bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, effective_attack_range, context.get("terrain_registry", null)))
+	if debug_enabled:
+		_record_hotspot(context, "range_attackability", started_usec)
+	var result := bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, effective_attack_range, context.get("terrain_registry", null)))
+	return result
+
+static func _record_hotspot(context: Dictionary, name: String, started_usec: int) -> void:
+	if not bool(context.get("combat_hotspot_debug_enabled", false)):
+		return
+	var callback: Callable = context.get("record_combat_hotspot", Callable())
+	if callback.is_valid():
+		callback.call(name, maxi(0, Time.get_ticks_usec() - started_usec))
 
 
 static func can_target_receive_attack(unit) -> bool:

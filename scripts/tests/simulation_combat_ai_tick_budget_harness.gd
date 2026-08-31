@@ -126,8 +126,8 @@ func _make_combat_context(scene_parent: Node, scenario_id: String, friendly_coun
 	combat_driver.contact_range = 360.0
 	combat_driver.enemy_engage_distance = 320.0
 	combat_driver.ticks_between_attacks = 1
-	combat_driver.combat_tick_budget_debug_enabled = true
 	scene.add_child(combat_driver)
+	combat_driver.set_combat_tick_budget_debug_enabled(true)
 	return {
 		"scene": scene,
 		"unit_registry": unit_registry,
