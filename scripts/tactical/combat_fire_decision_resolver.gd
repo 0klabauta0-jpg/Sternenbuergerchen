@@ -19,7 +19,7 @@ static func find_first_contact_pair(context: Dictionary) -> Dictionary:
 	for friendly in friendly_units:
 		if not _can_unit_seek_target(friendly):
 			continue
-		var enemy = pick_target_from_units(friendly, enemy_units, decision_context)
+		var enemy = pick_target_from_units(friendly, _filter_targets_for_attacker(friendly, enemy_units, decision_context), decision_context)
 		if enemy == null:
 			continue
 		var f_id: String = String(friendly.call("get_unit_id"))
@@ -50,7 +50,7 @@ static func find_first_contact_pair(context: Dictionary) -> Dictionary:
 	for enemy in enemy_units:
 		if not can_enemy_attack(enemy):
 			continue
-		var friendly = pick_target_from_units(enemy, friendly_units, decision_context)
+		var friendly = pick_target_from_units(enemy, _filter_targets_for_attacker(enemy, friendly_units, decision_context), decision_context)
 		if friendly == null:
 			continue
 		var en_id: String = String(enemy.call("get_unit_id"))
@@ -285,7 +285,10 @@ static func _can_unit_seek_target(unit) -> bool:
 static func pick_target_from_units(attacker, targets: Array, context: Dictionary):
 	var best_target = null
 	var best_score: float = -INF
+	var record_target_evaluation: Callable = context.get("record_target_evaluation", Callable())
 	for target in targets:
+		if record_target_evaluation.is_valid():
+			record_target_evaluation.call(attacker, target)
 		if not is_target_attackable(attacker, target, context):
 			continue
 		var score: float = _score_attack_target(attacker, target, context)
@@ -294,6 +297,20 @@ static func pick_target_from_units(attacker, targets: Array, context: Dictionary
 		best_target = target
 		best_score = score
 	return best_target
+
+static func _filter_targets_for_attacker(attacker, targets: Array, context: Dictionary) -> Array:
+	if not bool(context.get("use_observed_fire_candidate_index", false)):
+		return targets
+	var attacker_id: String = _get_unit_id(attacker)
+	var by_attacker: Dictionary = Dictionary(context.get("observed_target_ids_by_attacker_id", {}))
+	if attacker_id.is_empty() or not by_attacker.has(attacker_id):
+		return targets
+	var allowed_ids := PackedStringArray(by_attacker.get(attacker_id, PackedStringArray()))
+	var filtered: Array = []
+	for target in targets:
+		if allowed_ids.has(_get_unit_id(target)):
+			filtered.append(target)
+	return filtered
 
 
 static func is_target_attackable(attacker, target, context: Dictionary) -> bool:

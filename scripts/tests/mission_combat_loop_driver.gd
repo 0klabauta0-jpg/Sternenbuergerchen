@@ -123,6 +123,16 @@ signal combat_resolved(mission_result: Dictionary)
 @export var preview_mode: bool = false
 @export var combat_tick_budget_debug_enabled: bool = false
 @export var flank_vulnerability_enabled: bool = false
+var use_observed_fire_candidate_index: bool = true
+
+func set_use_observed_fire_candidate_index(enabled: bool) -> void:
+	use_observed_fire_candidate_index = enabled
+
+func get_resolver_target_evaluation_count() -> int:
+	return _resolver_target_evaluation_count
+
+func _record_resolver_target_evaluation(_attacker, _target) -> void:
+	_resolver_target_evaluation_count += 1
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
@@ -132,6 +142,10 @@ var _combat_finished: bool = false
 var _winning_team_id: String = ""
 var _last_contact: Dictionary = {}
 var _current_tick: int = 0
+var _fire_candidate_target_ids_by_attacker_id: Dictionary = {}
+var _fire_candidate_index_tick: int = -1
+var _fire_candidate_index_pair_count: int = 0
+var _resolver_target_evaluation_count: int = 0
 var _next_attack_tick: int = 1
 var _last_event_text: String = "Combat waiting"
 var _mission_started_at_msec: int = 0
@@ -2948,6 +2962,9 @@ func _update_contact_tracking() -> void:
 	_last_contact_tracking_scan_pair_count = 0
 	_last_contact_tracking_los_check_count = 0
 	_last_contact_tracking_los_cache_hit_count = 0
+	_fire_candidate_target_ids_by_attacker_id.clear()
+	_fire_candidate_index_tick = _current_tick
+	_fire_candidate_index_pair_count = 0
 	var cache_hit_count_before: int = int(_get_combat_visibility_cache_audit().get("cache_hit_count", 0))
 	for friendly in active_friendlies:
 		if friendly == null or not friendly.has_method("get_fireteam_id") or not friendly.has_method("get_unit_id"):
@@ -2956,6 +2973,7 @@ func _update_contact_tracking() -> void:
 		var attacker_id: String = String(friendly.call("get_unit_id")).strip_edges()
 		if fireteam_id.is_empty() or attacker_id.is_empty():
 			continue
+		_fire_candidate_target_ids_by_attacker_id[attacker_id] = PackedStringArray()
 		for enemy in active_enemies:
 			_last_contact_tracking_scan_pair_count += 1
 			_last_contact_tracking_los_check_count += 1
@@ -2964,6 +2982,11 @@ func _update_contact_tracking() -> void:
 			var enemy_unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
 			if enemy_unit_id.is_empty():
 				continue
+			var target_ids := PackedStringArray(_fire_candidate_target_ids_by_attacker_id.get(attacker_id, PackedStringArray()))
+			if not target_ids.has(enemy_unit_id):
+				target_ids.append(enemy_unit_id)
+				_fire_candidate_target_ids_by_attacker_id[attacker_id] = target_ids
+				_fire_candidate_index_pair_count += 1
 			_start_or_continue_detection(friendly, attacker_id, enemy_unit_id)
 			contact_observations.append({
 				"fireteam_id": fireteam_id,
@@ -2973,6 +2996,10 @@ func _update_contact_tracking() -> void:
 				"last_known_position": (enemy as Node2D).global_position if enemy is Node2D else Vector2.ZERO,
 				"detection_complete": _is_detection_complete(attacker_id, enemy_unit_id),
 			})
+	for attacker_id_variant in _fire_candidate_target_ids_by_attacker_id.keys():
+		var sorted_target_ids := PackedStringArray(_fire_candidate_target_ids_by_attacker_id[attacker_id_variant])
+		sorted_target_ids.sort()
+		_fire_candidate_target_ids_by_attacker_id[attacker_id_variant] = sorted_target_ids
 	_last_contact_tracking_los_cache_hit_count = maxi(0, int(_get_combat_visibility_cache_audit().get("cache_hit_count", 0)) - cache_hit_count_before)
 	var did_change: bool = bool(
 		_contact_tracker.call(
@@ -2988,6 +3015,14 @@ func _update_contact_tracking() -> void:
 	var tactical_controller = _get_tactical_controller()
 	if tactical_controller != null and tactical_controller.has_method("refresh_contact_overlay"):
 		tactical_controller.call("refresh_contact_overlay")
+
+func get_fire_candidate_index_debug_snapshot() -> Dictionary:
+	var pairs_by_attacker_id: Dictionary = {}
+	for attacker_id_variant in _fire_candidate_target_ids_by_attacker_id.keys():
+		var attacker_id: String = String(attacker_id_variant)
+		pairs_by_attacker_id[attacker_id] = PackedStringArray(_fire_candidate_target_ids_by_attacker_id.get(attacker_id_variant, PackedStringArray()))
+	return {"tick": _fire_candidate_index_tick, "candidate_attacker_count": pairs_by_attacker_id.size(), "candidate_pair_count": _fire_candidate_index_pair_count, "pairs_by_attacker_id": pairs_by_attacker_id, "derived_only": true, "read_only": true, "snapshot_serialized": false}
+
 
 
 func _advance_flank_vulnerability_state() -> void:
@@ -3369,6 +3404,11 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"get_weapon_attack_range": Callable(self, "_get_weapon_attack_range"),
 		"get_attack_area_context": Callable(self, "_get_attack_area_context_for_fireteam"),
 	}
+	if combat_tick_budget_debug_enabled:
+		context["record_target_evaluation"] = Callable(self, "_record_resolver_target_evaluation")
+	if use_observed_fire_candidate_index and _fire_candidate_index_tick == _current_tick:
+		context["observed_target_ids_by_attacker_id"] = _fire_candidate_target_ids_by_attacker_id
+		context["use_observed_fire_candidate_index"] = true
 	for key in extra.keys():
 		context[key] = extra[key]
 	return context

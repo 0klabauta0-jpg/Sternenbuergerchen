@@ -1,5 +1,11 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1196 - Combat observed candidate index (Task 3)
+
+- Same-series `combat_scope.enemy_team_tactics_usec` p99 values (usec): `26351, 23876, 25094, 24608, 23346, 22949, 25116, 24689`; exact range `22949–26351`. Fire-find-contact-pair `36057–40881` remains larger than enemy-team-tactics and contact-tracking, so Rule 1 selects exactly `CombatVisibilityCache`.
+
+- Measurement completed on SHA `0b5fbbf32b317282938a9cbb850b17261f34ed1e`, Ryzen 7 7800X3D / 64 GB / Windows 10 19045 / Godot 4.6.2. Cold diagnostic and 3-cold/5-warm series exited 0; eight SHA-identical stdout JSON results. Oracle/regressions: TASK-1196 12/12, TASK-1191 12/12, TASK-162 23/23, TASK-208 57/57; resolver `legacy=3535`, `indexed=3535` (non-degradation only). Exact p99 ranges (usec): combat total `107998–111972`; simulation total `109227–113078`; fire-find-contact-pair `36057–40881`; contact tracking `19240–20403`; combat fire decision `42386–47341`. Total budgets remain exceeded. Independent cold plausibility command_queue p99 was 53255 usec; Rule 1 still precedes Rule 4 because Combat has not fallen in the release/budget sense and fire-find-contact-pair remains the largest exclusive Combat scope. After a budget-relevant Combat reduction, command-type attribution is required before SimulationRoot optimization. Next package exactly `CombatVisibilityCache` key/allocation-cost specification. Dynamic Overlay/FoW remain separate.
+
 ### TASK_1195 - Tactical Performance Status Report
 - Status: Dokumentation erstellt und lokal geprueft
 - Evidenzbasis: Der neue Bericht ist an `integration/core-foundation` auf `bb655c16f849bbb4d7b03a03bd38f070795baaf2` gebunden. Der Branch ist mit `origin/integration/core-foundation` synchron; seit dem alten Review-SHA `29e81d82516708b7f609f4163e32710cad559ebf` umfasst die Strecke 27 Commits, 142 geaenderte Dateien und laut Diffstat 5.960 Einfuegungen / 932 Loeschungen.
