@@ -124,24 +124,9 @@ signal combat_resolved(mission_result: Dictionary)
 @export var combat_tick_budget_debug_enabled: bool = false
 @export var flank_vulnerability_enabled: bool = false
 var use_observed_fire_candidate_index: bool = true
-var use_observed_los_prevalidation: bool = true
-var _observed_los_prevalidation_pairs: Dictionary = {}
-var _observed_los_prevalidation_reuse_count: int = 0
-var _observed_los_prevalidation_validation_tick: int = -1
-var _observed_los_prevalidation_registry_identity: int = -1
-var _observed_los_prevalidation_revisions: Dictionary = {}
 
 func set_use_observed_fire_candidate_index(enabled: bool) -> void:
 	use_observed_fire_candidate_index = enabled
-
-func set_use_observed_los_prevalidation(enabled: bool) -> void:
-	use_observed_los_prevalidation = enabled
-	if not enabled:
-		_observed_los_prevalidation_pairs.clear()
-		_observed_los_prevalidation_reuse_count = 0
-
-func get_observed_los_prevalidation_reuse_count() -> int:
-	return _observed_los_prevalidation_reuse_count
 
 func get_resolver_target_evaluation_count() -> int:
 	return _resolver_target_evaluation_count
@@ -2976,7 +2961,9 @@ func _has_valid_los(attacker, target) -> bool:
 	if not target.has_method("get_vital_state") or String(target.call("get_vital_state")) != "fit":
 		return false
 
-	var los_range: float = _get_contact_los_range(attacker, target)
+	var los_range: float = _get_effective_range(target)
+	if _uses_weapon_range_for_contact_detection(attacker):
+		los_range = maxf(los_range, _get_weapon_attack_range(attacker, target))
 	return bool(_get_combat_visibility_system().call("has_line_of_sight_between_nodes", attacker, target, los_range, _get_terrain_registry()))
 
 
@@ -3004,11 +2991,6 @@ func _update_contact_tracking() -> void:
 	_fire_candidate_target_ids_by_attacker_id.clear()
 	_fire_candidate_index_tick = _current_tick
 	_fire_candidate_index_pair_count = 0
-	_observed_los_prevalidation_pairs.clear()
-	_observed_los_prevalidation_validation_tick = _current_tick
-	var registry = _get_terrain_registry()
-	_observed_los_prevalidation_registry_identity = int(registry.get_instance_id()) if registry is Object else -1
-	_observed_los_prevalidation_revisions = _terrain_revision_signature(registry)
 	var cache_hit_count_before: int = int(_get_combat_visibility_cache_audit().get("cache_hit_count", 0))
 	for friendly in active_friendlies:
 		if friendly == null or not friendly.has_method("get_fireteam_id") or not friendly.has_method("get_unit_id"):
@@ -3026,10 +3008,6 @@ func _update_contact_tracking() -> void:
 			var enemy_unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
 			if enemy_unit_id.is_empty():
 				continue
-			if use_observed_fire_candidate_index and use_observed_los_prevalidation and friendly is Node2D and enemy is Node2D:
-				var observed_targets: Dictionary = _observed_los_prevalidation_pairs.get(attacker_id, {})
-				observed_targets[enemy_unit_id] = {"source_position": friendly.global_position, "target_position": enemy.global_position, "validated_range": _get_contact_los_range(friendly, enemy), "clear": true}
-				_observed_los_prevalidation_pairs[attacker_id] = observed_targets
 			var target_ids := PackedStringArray(_fire_candidate_target_ids_by_attacker_id.get(attacker_id, PackedStringArray()))
 			if not target_ids.has(enemy_unit_id):
 				target_ids.append(enemy_unit_id)
@@ -3439,7 +3417,6 @@ func _get_fireteam_contact_state(fireteam_id: String, enemy_unit_id: String) -> 
 
 
 func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
-	var observed_los_prevalidation: Dictionary = _build_observed_los_prevalidation_context()
 	var context: Dictionary = {
 		"friendly_team_id": friendly_team_id,
 		"contact_range": contact_range,
@@ -3458,8 +3435,6 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"get_effective_range": Callable(self, "_get_effective_range"),
 		"get_weapon_attack_range": Callable(self, "_get_weapon_attack_range"),
 		"get_attack_area_context": Callable(self, "_get_attack_area_context_for_fireteam"),
-		"observed_los_prevalidation": observed_los_prevalidation,
-		"record_observed_terrain_los_reuse": Callable(self, "_record_observed_los_reuse"),
 	}
 	if combat_tick_budget_debug_enabled:
 		context["record_target_evaluation"] = Callable(self, "_record_resolver_target_evaluation")
@@ -3471,32 +3446,6 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 	for key in extra.keys():
 		context[key] = extra[key]
 	return context
-
-func _record_observed_los_reuse(_attacker, _target, _entry) -> void:
-	_observed_los_prevalidation_reuse_count += 1
-
-func _build_observed_los_prevalidation_context() -> Dictionary:
-	var registry = _get_terrain_registry()
-	var enabled: bool = use_observed_los_prevalidation and use_observed_fire_candidate_index
-	var registry_identity: int = int(registry.get_instance_id()) if registry is Object else -1
-	var revisions: Dictionary = _terrain_revision_signature(registry)
-	return {
-		"enabled": enabled,
-		"context_valid": enabled and _fire_candidate_index_tick == _current_tick and _observed_los_prevalidation_validation_tick == _current_tick and _observed_los_prevalidation_registry_identity == registry_identity and _observed_los_prevalidation_revisions == revisions,
-		"current_tick": _current_tick,
-		"validation_tick": _observed_los_prevalidation_validation_tick,
-		"pairs": _observed_los_prevalidation_pairs,
-	}
-
-func _terrain_revision_signature(registry) -> Dictionary:
-	var revision: int = int(registry.call("get_revision")) if registry != null and registry.has_method("get_revision") else -1
-	return {"terrain_revision": revision, "cover_revision": revision, "navigation_revision": revision}
-
-func _get_contact_los_range(attacker, target) -> float:
-	var los_range: float = _get_effective_range(target)
-	if _uses_weapon_range_for_contact_detection(attacker):
-		los_range = maxf(los_range, _get_weapon_attack_range(attacker, target))
-	return los_range
 
 
 func _get_attack_area_context_for_fireteam(fireteam_id: String) -> Dictionary:
