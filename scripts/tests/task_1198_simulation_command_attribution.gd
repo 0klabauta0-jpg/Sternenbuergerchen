@@ -24,6 +24,16 @@ func _run() -> void:
 	_assert(Array(harness_samples.get("simulation_command.command_type_usec.move_to_position", [])).size() == 1 and is_equal_approx(float(Array(harness_samples["simulation_command.command_type_usec.move_to_position"])[0]), 17.0), "harness timing sample value is preserved")
 	_assert(Array(harness_samples.get("simulation_command.command_type_count.move_to_position", [])).size() == 1 and is_equal_approx(float(Array(harness_samples["simulation_command.command_type_count.move_to_position"])[0]), 2.0), "harness count sample value is preserved")
 	_assert(Array(harness_samples.get("simulation_command.command_requeue_count.move_to_position", [])).size() == 1 and is_equal_approx(float(Array(harness_samples["simulation_command.command_requeue_count.move_to_position"])[0]), 1.0), "harness requeue sample value is preserved")
+	var large_samples: Dictionary = {}
+	tactical_harness.call("_collect_large_combat_fixture_samples", large_samples, {"runs": [{"ticks": [{"simulation": {
+		"total_tick_usec": 99,
+		"command_type_usec": {"Move_To_Position": 23},
+		"command_type_count": {"Move_To_Position": 4},
+		"command_requeue_count": {"Move_To_Position": 2},
+	}, "combat": {}}]}]})
+	_assert(Array(large_samples.get("simulation_command.command_type_usec.move_to_position", [])).has(23.0), "large fixture exports timing namespace")
+	_assert(Array(large_samples.get("simulation_command.command_type_count.move_to_position", [])).has(4.0), "large fixture exports count namespace")
+	_assert(Array(large_samples.get("simulation_command.command_requeue_count.move_to_position", [])).has(2.0), "large fixture exports requeue namespace")
 	var context: Dictionary = harness.call("_make_combat_context", root, "task1198", 2, 1, 1, false)
 	await process_frame
 	var simulation_root: Node = context.get("simulation_root")

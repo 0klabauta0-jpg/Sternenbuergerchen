@@ -207,6 +207,7 @@ func _collect_large_combat_fixture_samples(samples: Dictionary, fixture: Diction
 			var simulation: Dictionary = Dictionary(tick_record.get("simulation", {}))
 			var combat: Dictionary = Dictionary(tick_record.get("combat", {}))
 			_record(samples, "simulation.total_tick_usec", simulation.get("total_tick_usec", null))
+			_record_command_attribution_samples(samples, simulation)
 			_record(samples, "combat.total_tick_usec", combat.get("total_tick_usec", null))
 			_record_snapshot_scopes(samples, "simulation_scope", Dictionary(simulation.get("scopes_usec", {})))
 			var combat_scopes: Dictionary = Dictionary(combat.get("scopes_usec", {}))
