@@ -46,7 +46,7 @@ func _run() -> void:
 	_assert(not bool(cache.get("scope_active", true)), "cache scope closed")
 	for key in ["cache_key_build", "los_cache_lookup", "terrain_los_evaluation"]: _assert(int(cache_counts.get(key, 0)) > 0, key + " counted")
 	_assert(int(cache_counts.get("cache_key_build", 0)) <= int(counts.get("range_attackability", 0)), "cache keys bounded by attackability")
-	_assert(int(cache_counts.get("los_cache_lookup", 0)) >= int(cache_counts.get("cache_key_build", 0)), "lookup covers key builds")
+	_assert(int(cache_counts.get("los_cache_lookup", 0)) == int(cache_counts.get("cache_key_build", 0)), "lookup matches keys")
 	_assert(int(cache_counts.get("terrain_los_evaluation", 0)) <= int(cache_counts.get("los_cache_lookup", 0)), "terrain bounded by lookup")
 	_assert(bool(enabled.get("derived_only", false)), "derived")
 	_assert(bool(enabled.get("read_only", false)), "read-only")
