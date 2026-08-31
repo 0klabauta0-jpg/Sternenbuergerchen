@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1199 - Dominant Simulation Slice (P04)
+- Status: implementiert, gemessen und regressionsgeprueft; Release bleibt blockiert.
+- Grundlage: `bd8c2f4b343f0655898629001ca470253ee7cb77`; immutable Mess-/Produktions-SHA `c738a43bdade08ac26b836875b3d42a5121c3d8d`.
+- Aenderung: Exakt drei Movement-Requeue-Call-Sites geben `cmd` direkt an `enqueue_command()` weiter. Dessen eigene Deep-Copy-Grenze bleibt unveraendert. Authority, UI-Truth, Snapshots und Verhalten bleiben unveraendert.
+- Evidence: TASK-1199 RED 17/18 (nur oracle 0 rot), danach GREEN 18/18. TASK-1198 24/24, TASK-162 23/23, TASK-166 15/15, TASK-168 20/20, TASK-501 10/10 und `git diff --check` gruen.
+- 3-cold/5-warm: acht Exit-0-JSON-Laeufe mit exaktem SHA, je 1200 Main-Samples, 204 `move_to_position`-Timing-Samples und 350 `hold_position`-Timing-Samples; movement command-count p99 `4`, movement requeue-count p99 `1` je Lauf. Vollstaendige P04-Werte: total `[116920,117860,118206,117230,118188,118024,118014,114867]`, Range `114867-118206`, Baseline/Median `118948.5/117937`, Delta `-0.850 %`; queue `[63745,64496,64109,62769,64255,64162,64667,62877]`, Range `62769-64667`, Baseline/Median `63697/64135.5`, Delta `+0.688 %`; ordering `[30,28,29,30,30,29,29,28]`, Range `28-30`, Baseline/Median `29/29`, Delta `0 %`; apply `[63723,64475,64080,62745,64222,64140,64644,62853]`, Range `62745-64644`, Baseline/Median `63665/64110`, Delta `+0.699 %`; tick `[116088,116988,116873,116404,117143,117019,116976,113908]`, Range `113908-117143`, Baseline/Median `117608.5/116924.5`, Delta `-0.582 %`; move timing `[67967,65362,66744,65734,64791,64115,66822,67013]`, Range `64115-67967`, Baseline/Median `67793.5/66239`, Delta `-2.293 %`; hold timing `[2179,2106,2335,2167,2099,2166,2189,2180]`, Range `2099-2335`, Baseline/Median `2239.5/2173`, Delta `-2.969 %`. Gate PASS: keine andere Median-Regression `>5%`.
+- Folge/Risiko: Enger P04-Slice, kein Release-GO. Release bleibt wegen bestehender Budgets und fehlender echter TASK-1193-128x128-Manuell-Evidence blockiert. Naechster Schritt: TASK_1200.
+
 ### TASK_1198 - Simulation Command Attribution (P03)
 - Status: Diagnose abgeschlossen; keine Optimierung und keine Release-Freigabe.
 - Die offizielle 3-Kalt-/5-Warm-Serie auf `f84e7173fa2c7b255f5dac44fb2e85827229af2e` lieferte 8/8 Exit-0-Reports mit identischem SHA. Haupt-Scopes haben je 1200 Samples, `move_to_position` 204 und `hold_position` 350 conditional Samples. `command_queue_usec` p99: `66917,65097,68009,64018,63376,62608,62986,61257` (Range `61257–68009`, Median `63697`); Ordering: `29,27,29,29,33,29,29,28` (Range `27–33`, Median `29`); Apply: `66895,65065,67985,63987,63343,62577,62955,61228` (Range `61228–67985`, Median `63665`).

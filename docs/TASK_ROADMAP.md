@@ -13,12 +13,20 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1199 - Dominant Simulation Slice (implementiert; Gate bestanden)
+- Ergebnis: Auf der Basis `bd8c2f4b343f0655898629001ca470253ee7cb77` und dem immutable Mess-/Produktions-SHA `c738a43bdade08ac26b836875b3d42a5121c3d8` geben exakt drei Movement-Requeue-Call-Sites `cmd` direkt an `enqueue_command()` weiter. Die Deep-Copy-Grenze in `enqueue_command()` bleibt die einzige autoritative Queue-Speicherkopie; Authority, UI-Truth, Snapshots und Verhalten bleiben unveraendert.
+- Verifikation: TASK-1199 RED 17/18, danach 18/18 gruen; TASK-1198 24/24, TASK-162 23/23, TASK-166 15/15, TASK-168 20/20, TASK-501 10/10 und `git diff --check` gruen. Die offizielle 3-cold/5-warm-Serie liefert acht Exit-0-JSON-Laeufe mit exakt demselben SHA, je 1200 Main-Samples, 204 `move_to_position`-Timing-Samples und 350 `hold_position`-Timing-Samples; movement command-count p99 `4` und movement requeue-count p99 `1` je Lauf. Cold-Control: move timing p99 `64329`, hold timing p99 `2071`, movement command-count p99 `4`, requeue-count p99 `1`.
+- Gate: P04 reduziert den Move-Median von `67793.5` auf `66239` usec (-2.293 %). Vollstaendige P04-Wertreihen, Ranges, Baselines und Deltas stehen in der TASK-1199-Datei. Es gibt keine andere Median-Regression `>5%`; die groesste ist Apply mit +0.699 %. Die Optimierung ist eng begrenzt und kein Gesamtbudget-Nachweis.
+- Release/Folge: Release bleibt wegen bestehender Combat-/Simulation-/Interaktionsbudgets und fehlender echter TASK-1193-128x128-Manuell-Evidence blockiert. Naechster Schritt ist TASK_1200.
+
+---
+
 ## TASK_1198 - Simulation Command Attribution (diagnostisch abgeschlossen)
 - Ergebnis: SimulationRoot-Command-Verarbeitung ist nach Ordering, Apply und Command-Typen messbar aufgeschlüsselt. Die Instrumentierung bleibt read-only, nicht serialisiert und ändert keine Autorität oder Requeue-Semantik.
 - Evidenz: Auf `f84e7173fa2c7b255f5dac44fb2e85827229af2e` sind acht SHA-identische Exit-0-Reports dokumentiert. Haupt-Scopes umfassen 1200 Samples; `move_to_position` 204 und `hold_position` 350 conditional Samples. Die vollständigen Werte stehen in `docs/tasks/TASK_1198_simulation_command_attribution.md` und `docs/IMPLEMENTATION_STATUS.md`.
 - Auswahl: Nach den Regeln des Masterplans wird ausschließlich der `move_to_position`-Command-Apply-Pfad für TASK 1199 gewählt: Ordering `29 / 63697` liegt unter 25 %, `move_to_position` `67793.5 / 63665` über 40 % und ist in 8/8 Läufen dominant. Der Signalpfad wird nicht parallel ausgewählt.
 - Hinweis: Der erste Kaltlauf auf `193c736...` wurde wegen unvollständiger Fixture-Sampling-Abdeckung verworfen. Simulation- und Release-Budgets bleiben überschritten; kein Release-GO.
-- Nächster Schritt: TASK 1199 nach dem P04-Vertrag, weiterhin strikt seriell.
+- Nächster Schritt: TASK 1200 nach dem P05-Vertrag, weiterhin strikt seriell.
 
 ---
 
