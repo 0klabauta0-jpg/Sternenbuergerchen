@@ -1,6 +1,6 @@
 # TASK_1194 - Tactical Performance Budget Reduction
 
-## Status: IN ARBEIT
+## Status: TEILWEISE UMGESETZT
 
 ## Ziel / Problem
 
@@ -52,6 +52,22 @@ gelockert oder erzeugt.
 2. Betroffene Gameplay-/Authority-Regressionen und TASK_1187-Messlauf.
 3. TASK_1193-Acceptance-Gate erst nach der Optimierung erneut ausfuehren.
 4. `git diff --check` vor jedem Commit.
+
+## Messstand 2026-08-31
+
+- SHA-gebundener einzelner kalter TASK-1187-Lauf auf
+  `743c6de14185b7767d2f721b2b7f795ff7ebb187`: Combat-Tick p99 `113.140 ms`,
+  Simulation-Tick p99 `114.630 ms`, Fire-Decision p99 `43.820 ms` und
+  Paar-Suche p99 `36.660 ms`.
+- Gegen den vor der Range-Cache-Aenderung aufgenommenen Diagnose-Lauf sank die
+  Fire-Decision von `52.900 ms` auf `45.263 ms` und die Paar-Suche von
+  `45.121 ms` auf `38.282 ms`; kalte Einzellaufe bleiben schwankungsbehaftet
+  und sind kein Release-Nachweis.
+- Der echte TASK-1194-Verifier ist `6/6` gruen. TASK-284 (`66/66`) und
+  TASK-1192 (`10/10`) sind ebenfalls gruen.
+- Die harten Combat-/Simulation-Budgets sind weiterhin ueberschritten. Die
+  Release-Freigabe bleibt daher ebenso wie die erforderliche menschliche
+  128x128-Playtest-Evidenz blockiert.
 
 ## Nicht-Ziele
 
