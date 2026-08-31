@@ -1,12 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1200 - Dynamic Overlay Stability (P05)
+- Status: implementiert, verifiziert und gemessen; Release bleibt blockiert.
+- Produktions-/Mess-SHA `d319e3c2b268ca900fd65da8e17c3bbb137c9e59`, Basis `9027f2a97793a53d3af2f9936f3496de291c50d9`; Godot 4.6.2 official auf Ryzen 7 7800X3D/64 GB/Windows 10 19045.
+- Aenderung: Read-only sortierter eindeutiger Relevanzindex, Dirty-Refresh und relevanter Single-Pass fuer Dynamic-Order-Signaturen; Live-Orientation-Schwerpunkt/erste Richtung bleiben erhalten. Keine Gameplay-, Snapshot- oder Multiplayer-Truth.
+- Verifikation: TASK-1200 44/44, TASK-1188 31/31 (p99 5380 usec <= 8 ms), TASK-225 34/34, TASK-1157 35/35, `git diff --check` gruen. Cold-Control 6247 Frames/165077 ms, Dynamic p99 3 usec, Max 79 usec. Offizielle Serie: Dynamic p99 3-3 usec in 8/8, Max 12-372 usec; Proxy p99 3544-3834 usec unter 5 ms, Proxy p95 aber in 8/8 ueber 3 ms.
+- Grenzen: FoW p99 liegt in 8/8 Laeufen ueber 2 ms und ist echter TASK-1201/P06-Reparaturbedarf. Ein transienter Cold-Fehlversuch (native exit -1, kein JSON, fremder Godot-Lauf) wurde verworfen. FullHD-Zusatz-Smoke war unauffaellig, ersetzt aber keine TASK-1193-Manuell-Evidence. Naechster Schritt: TASK-1201.
+
 ### TASK_1199 - Dominant Simulation Slice (P04)
 - Status: implementiert, gemessen und regressionsgeprueft; Release bleibt blockiert.
 - Grundlage: `bd8c2f4b343f0655898629001ca470253ee7cb77`; immutable Mess-/Produktions-SHA `c738a43bdade08ac26b836875b3d42a5121c3d8d`.
 - Aenderung: Exakt drei Movement-Requeue-Call-Sites geben `cmd` direkt an `enqueue_command()` weiter. Dessen eigene Deep-Copy-Grenze bleibt unveraendert. Authority, UI-Truth, Snapshots und Verhalten bleiben unveraendert.
 - Evidence: TASK-1199 RED 17/18 (nur oracle 0 rot), danach GREEN 18/18. TASK-1198 24/24, TASK-162 23/23, TASK-166 15/15, TASK-168 20/20, TASK-501 10/10 und `git diff --check` gruen.
 - 3-cold/5-warm: acht Exit-0-JSON-Laeufe mit exaktem SHA, je 1200 Main-Samples, 204 `move_to_position`-Timing-Samples und 350 `hold_position`-Timing-Samples; movement command-count p99 `4`, movement requeue-count p99 `1` je Lauf. Vollstaendige P04-Werte: total `[116920,117860,118206,117230,118188,118024,118014,114867]`, Range `114867-118206`, Baseline/Median `118948.5/117937`, Delta `-0.850 %`; queue `[63745,64496,64109,62769,64255,64162,64667,62877]`, Range `62769-64667`, Baseline/Median `63697/64135.5`, Delta `+0.688 %`; ordering `[30,28,29,30,30,29,29,28]`, Range `28-30`, Baseline/Median `29/29`, Delta `0 %`; apply `[63723,64475,64080,62745,64222,64140,64644,62853]`, Range `62745-64644`, Baseline/Median `63665/64110`, Delta `+0.699 %`; tick `[116088,116988,116873,116404,117143,117019,116976,113908]`, Range `113908-117143`, Baseline/Median `117608.5/116924.5`, Delta `-0.582 %`; move timing `[67967,65362,66744,65734,64791,64115,66822,67013]`, Range `64115-67967`, Baseline/Median `67793.5/66239`, Delta `-2.293 %`; hold timing `[2179,2106,2335,2167,2099,2166,2189,2180]`, Range `2099-2335`, Baseline/Median `2239.5/2173`, Delta `-2.969 %`. Gate PASS: keine andere Median-Regression `>5%`.
-- Folge/Risiko: Enger P04-Slice, kein Release-GO. Release bleibt wegen bestehender Budgets und fehlender echter TASK-1193-128x128-Manuell-Evidence blockiert. Naechster Schritt: TASK_1200.
+- Folge/Risiko: Enger P04-Slice, kein Release-GO. Release bleibt wegen bestehender Budgets und fehlender echter TASK-1193-128x128-Manuell-Evidence blockiert. TASK-1200 ist abgeschlossen; naechster Schritt ist TASK-1201 P06.
 
 ### TASK_1198 - Simulation Command Attribution (P03)
 - Status: Diagnose abgeschlossen; keine Optimierung und keine Release-Freigabe.

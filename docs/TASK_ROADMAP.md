@@ -13,11 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1200 - Dynamic Overlay Stability (implementiert; Gate bestanden)
+- Ergebnis: Auf Produktions-/Mess-SHA `d319e3c2b268ca900fd65da8e17c3bbb137c9e59` wurde der Dynamic-Order-Pfad auf einen read-only sortierten eindeutigen Relevanzindex, Dirty-Refresh und einen relevanten Single-Pass begrenzt. Live-Orientation-Schwerpunkt/erste Richtung bleiben erhalten; Gameplay-Truth bleibt unveraendert.
+- Verifikation: TASK-1200 44/44, TASK-1188 31/31 (p99 5380 usec <= 8 ms), TASK-225 34/34, TASK-1157 35/35 und `git diff --check` gruen. Cold-Control Dynamic p99 3 usec/Max 79 usec; die offizielle 3-cold/5-warm-Serie besteht in 8/8 mit p99 3-3 usec und Max 12-372 usec.
+- Grenzen: Proxy p99 bleibt unter 5 ms, Proxy p95 liegt aber in 8/8 ueber 3 ms; FoW liegt in 8/8 Laeufen ueber 2 ms und benoetigt TASK-1201 P06. FullHD-Zusatz-Smoke ist keine TASK-1193-Manuell-Evidence. Release bleibt blockiert.
+- Naechster Schritt: TASK-1201 P06 echter FoW-Reparaturslice.
+
+---
+
 ## TASK_1199 - Dominant Simulation Slice (implementiert; Gate bestanden)
 - Ergebnis: Auf der Basis `bd8c2f4b343f0655898629001ca470253ee7cb77` und dem immutable Mess-/Produktions-SHA `c738a43bdade08ac26b836875b3d42a5121c3d8` geben exakt drei Movement-Requeue-Call-Sites `cmd` direkt an `enqueue_command()` weiter. Die Deep-Copy-Grenze in `enqueue_command()` bleibt die einzige autoritative Queue-Speicherkopie; Authority, UI-Truth, Snapshots und Verhalten bleiben unveraendert.
 - Verifikation: TASK-1199 RED 17/18, danach 18/18 gruen; TASK-1198 24/24, TASK-162 23/23, TASK-166 15/15, TASK-168 20/20, TASK-501 10/10 und `git diff --check` gruen. Die offizielle 3-cold/5-warm-Serie liefert acht Exit-0-JSON-Laeufe mit exakt demselben SHA, je 1200 Main-Samples, 204 `move_to_position`-Timing-Samples und 350 `hold_position`-Timing-Samples; movement command-count p99 `4` und movement requeue-count p99 `1` je Lauf. Cold-Control: move timing p99 `64329`, hold timing p99 `2071`, movement command-count p99 `4`, requeue-count p99 `1`.
 - Gate: P04 reduziert den Move-Median von `67793.5` auf `66239` usec (-2.293 %). Vollstaendige P04-Wertreihen, Ranges, Baselines und Deltas stehen in der TASK-1199-Datei. Es gibt keine andere Median-Regression `>5%`; die groesste ist Apply mit +0.699 %. Die Optimierung ist eng begrenzt und kein Gesamtbudget-Nachweis.
-- Release/Folge: Release bleibt wegen bestehender Combat-/Simulation-/Interaktionsbudgets und fehlender echter TASK-1193-128x128-Manuell-Evidence blockiert. Naechster Schritt ist TASK_1200.
+- Release/Folge: Release bleibt wegen bestehender Combat-/Simulation-/Interaktionsbudgets und fehlender echter TASK-1193-128x128-Manuell-Evidence blockiert. TASK-1200 ist abgeschlossen; naechster Schritt ist TASK-1201 P06.
 
 ---
 

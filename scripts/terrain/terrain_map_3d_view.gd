@@ -1191,6 +1191,14 @@ var _mission_status_payload_skip_count: int = 0
 var _order_visual_signature: String = ""
 var _order_dynamic_visual_signature: String = ""
 var _last_dynamic_order_visual_refresh_msec: int = 0
+var _dynamic_relevant_unit_ids: PackedStringArray = PackedStringArray()
+var _dynamic_relevant_unit_by_id: Dictionary = {}
+var _dynamic_sources_dirty: bool = true
+var _dynamic_signature_build_count: int = 0
+var _dynamic_signature_unit_scan_count: int = 0
+var _dynamic_order_rebuild_count: int = 0
+var _dynamic_order_skip_count: int = 0
+var _dynamic_unit_source_signatures: Dictionary = {}
 var _fire_sector_los_cache: Dictionary = {}
 var _fire_sector_los_cache_signature: String = ""
 
@@ -1245,6 +1253,8 @@ func _process(delta: float) -> void:
 
 func configure_from_map(terrain_map_data) -> void:
 	_terrain_map_data = terrain_map_data
+	_dynamic_unit_source_signatures.clear()
+	_dynamic_sources_dirty = true
 	_order_visual_signature = ""
 	_order_dynamic_visual_signature = ""
 	_fire_sector_los_cache.clear()
@@ -1259,6 +1269,8 @@ func render_map(terrain_map_data = null) -> void:
 	_visual_streaming_refresh_queued = false
 	if terrain_map_data != null:
 		_terrain_map_data = terrain_map_data
+		_dynamic_unit_source_signatures.clear()
+		_dynamic_sources_dirty = true
 		_order_visual_signature = ""
 		_order_dynamic_visual_signature = ""
 		_fire_sector_los_cache.clear()
@@ -1409,6 +1421,8 @@ func set_unit_nodes(unit_nodes: Array) -> void:
 		if unit is Node:
 			_unit_nodes.append(unit)
 	_sync_unit_proxies(true)
+	_rebuild_dynamic_relevant_index()
+	_dynamic_sources_dirty = true
 
 
 func set_selected_grid_positions(grid_positions: Array) -> void:
@@ -1449,6 +1463,8 @@ func set_order_visual_payload(order_payload: Dictionary) -> void:
 		return
 	_order_visual_signature = next_signature
 	_order_payload = order_payload.duplicate(true)
+	_rebuild_dynamic_relevant_index()
+	_dynamic_sources_dirty = true
 	if previous_marker_scale_world_noise_active != _is_release_first_exchange_combat_marker_scale_world_noise_active() or previous_fire_lane_readability_active != _is_release_first_exchange_fire_lane_readability_active():
 		_refresh_tile_grid_materials_for_release_polish()
 	if _order_payload.has("contact_density_heatmap_enabled"):
@@ -1457,6 +1473,7 @@ func set_order_visual_payload(order_payload: Dictionary) -> void:
 			_set_contact_density_heatmap_enabled_internal(contact_density_enabled, true)
 	_order_dynamic_visual_signature = _build_order_dynamic_visual_signature()
 	_rebuild_order_visuals()
+	_dynamic_sources_dirty = false
 	if previous_insertion_residue_declutter_active != _is_release_firefight_insertion_residue_declutter_active() and not _drop_payload.is_empty():
 		_rebuild_drop_visuals()
 	_request_viewport_redraw()
@@ -1606,6 +1623,9 @@ func _slice_last_dictionary_entries(entries: Array, limit: int) -> Array:
 func _refresh_dynamic_order_visuals_if_needed() -> void:
 	if _order_payload.is_empty() or _order_root == null:
 		return
+	if not _dynamic_sources_dirty:
+		_dynamic_order_skip_count += 1
+		return
 	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
 	var orientation_fireteam_ids: PackedStringArray = _get_valid_fireteam_orientation_payload_ids(_order_payload)
 	if (
@@ -1613,13 +1633,15 @@ func _refresh_dynamic_order_visuals_if_needed() -> void:
 		and orientation_fireteam_ids.is_empty()
 		and not bool(_order_payload.get("fire_sector_overlay_enabled", false))
 		and not bool(_order_payload.get("los_debug_overlay_enabled", false))
-	):
+		):
+		_dynamic_sources_dirty = false
 		return
 	var now_msec: int = Time.get_ticks_msec()
 	if now_msec - _last_dynamic_order_visual_refresh_msec < DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC:
 		return
 	_last_dynamic_order_visual_refresh_msec = now_msec
 	var next_signature: String = _build_order_dynamic_visual_signature()
+	_dynamic_sources_dirty = false
 	if next_signature == _order_dynamic_visual_signature:
 		return
 	_order_dynamic_visual_signature = next_signature
@@ -1628,38 +1650,78 @@ func _refresh_dynamic_order_visuals_if_needed() -> void:
 
 
 func _build_order_dynamic_visual_signature() -> String:
+	_dynamic_signature_build_count += 1
 	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
 	var orientation_fireteam_ids: PackedStringArray = _get_valid_fireteam_orientation_payload_ids(_order_payload)
 	if selected_fireteam_ids.is_empty() and orientation_fireteam_ids.is_empty():
+		_dynamic_sources_dirty = false
 		return ""
 	var parts: PackedStringArray = PackedStringArray()
 	if not selected_fireteam_ids.is_empty():
 		parts.append("selected:%s" % ",".join(selected_fireteam_ids))
-		parts.append("fire:%s:%s" % [str(bool(_order_payload.get("fire_sector_overlay_enabled", false))), _get_fire_sector_visual_mode()])
-		parts.append("los_debug:%s:%d" % [str(bool(_order_payload.get("los_debug_overlay_enabled", false))), _contact_payload_apply_count])
-		for unit in _unit_nodes:
-			if unit == null or not (unit is Node2D):
-				continue
-			var fireteam_id: String = _get_unit_fireteam_id(unit)
-			if fireteam_id.is_empty() or not selected_fireteam_ids.has(fireteam_id):
-				continue
-			if not _is_unit_world_visible(unit):
-				continue
-			var unit_id: String = _get_unit_id(unit)
-			var unit_position: Vector2 = (unit as Node2D).global_position
-			var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
-			var rotation_y: float = float(proxy.rotation_degrees.y) if proxy != null and is_instance_valid(proxy) else 0.0
-			parts.append("%s:%s:%.1f,%.1f:%.1f" % [
-				unit_id,
-				fireteam_id,
-				unit_position.x,
-				unit_position.y,
-				rotation_y,
-			])
+	parts.append("fire:%s:%s" % [str(bool(_order_payload.get("fire_sector_overlay_enabled", false))), _get_fire_sector_visual_mode()])
+	parts.append("los_debug:%s:%d" % [str(bool(_order_payload.get("los_debug_overlay_enabled", false))), _contact_payload_apply_count])
+	var orientation_position_sums: Dictionary = {}
+	var orientation_directions: Dictionary = {}
+	var orientation_counts: Dictionary = {}
+	for unit_id_variant in _dynamic_relevant_unit_ids:
+		_dynamic_signature_unit_scan_count += 1
+		var unit = _dynamic_relevant_unit_by_id.get(String(unit_id_variant), null)
+		if unit == null or not (unit is Node2D):
+			continue
+		var fireteam_id: String = _get_unit_fireteam_id(unit)
+		if fireteam_id.is_empty() or (not selected_fireteam_ids.has(fireteam_id) and not orientation_fireteam_ids.has(fireteam_id)):
+			continue
+		if not _is_unit_world_visible(unit):
+			continue
+		var unit_id: String = _get_unit_id(unit)
+		var unit_position: Vector2 = (unit as Node2D).global_position
+		var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
+		var rotation_y: float = float(proxy.rotation_degrees.y) if proxy != null and is_instance_valid(proxy) else 0.0
+		parts.append("%s:%s:%.1f,%.1f:%.1f" % [unit_id, fireteam_id, unit_position.x, unit_position.y, rotation_y])
+		if orientation_fireteam_ids.has(fireteam_id):
+			orientation_position_sums[fireteam_id] = Vector2(orientation_position_sums.get(fireteam_id, Vector2.ZERO)) + unit_position
+			if not orientation_directions.has(fireteam_id):
+				var facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
+				if facing_direction.length_squared() <= 0.0001:
+					facing_direction = _resolve_unit_motion_or_target_direction(proxy, unit, unit_position)
+				if facing_direction.length_squared() > 0.0001:
+					orientation_directions[fireteam_id] = facing_direction.normalized()
+			orientation_counts[fireteam_id] = int(orientation_counts.get(fireteam_id, 0)) + 1
 	if not orientation_fireteam_ids.is_empty():
-		parts.append("orientation:%s" % _build_live_fireteam_orientation_signature(orientation_fireteam_ids))
+		for orientation_id in orientation_fireteam_ids:
+			var count: int = int(orientation_counts.get(String(orientation_id), 0))
+			if count <= 0:
+				parts.append("orientation:%s:none" % String(orientation_id))
+				continue
+			var centroid: Vector2 = Vector2(orientation_position_sums[String(orientation_id)]) / float(count)
+			var heading: Vector2 = Vector2(orientation_directions.get(String(orientation_id), Vector2.ZERO))
+			parts.append("orientation:%s:%.1f,%.1f:%.4f" % [String(orientation_id), centroid.x, centroid.y, heading.angle() if heading.length_squared() > 0.0001 else 0.0])
 	parts.sort()
 	return "|".join(parts)
+
+
+func _rebuild_dynamic_relevant_index() -> void:
+	_dynamic_relevant_unit_ids.clear()
+	_dynamic_relevant_unit_by_id.clear()
+	_dynamic_unit_source_signatures.clear()
+	var relevant_fireteams: Dictionary = {}
+	var seen_unit_ids: Dictionary = {}
+	for fireteam_id_variant in _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray())):
+		relevant_fireteams[String(fireteam_id_variant).strip_edges().to_lower()] = true
+	for fireteam_id_variant in _get_valid_fireteam_orientation_payload_ids(_order_payload):
+		relevant_fireteams[String(fireteam_id_variant).strip_edges().to_lower()] = true
+	for unit in _unit_nodes:
+		if unit == null or not is_instance_valid(unit):
+			continue
+		var unit_id: String = _get_unit_id(unit)
+		var fireteam_id: String = _get_unit_fireteam_id(unit)
+		if unit_id.is_empty() or seen_unit_ids.has(unit_id) or not relevant_fireteams.has(fireteam_id):
+			continue
+		seen_unit_ids[unit_id] = true
+		_dynamic_relevant_unit_by_id[unit_id] = unit
+		_dynamic_relevant_unit_ids.append(unit_id)
+	_dynamic_relevant_unit_ids.sort()
 
 
 func _get_valid_fireteam_orientation_payload_ids(order_payload: Dictionary) -> PackedStringArray:
@@ -1716,6 +1778,7 @@ func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedSt
 	if bool(_order_payload.get("los_debug_overlay_enabled", false)) or bool(_order_payload.get("fire_sector_overlay_enabled", false)):
 		_order_dynamic_visual_signature = _build_order_dynamic_visual_signature()
 		_rebuild_order_visuals()
+		_dynamic_sources_dirty = false
 	_request_viewport_redraw()
 
 
@@ -2417,6 +2480,12 @@ func get_render_snapshot() -> Dictionary:
 		"area_order_tile_marker_count": _area_order_tile_marker_count,
 		"waypoint_tile_marker_count": _waypoint_tile_marker_count,
 		"order_selected_fireteam_ids": Array(_get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))),
+		"dynamic_signature_build_count": _dynamic_signature_build_count,
+		"dynamic_signature_unit_scan_count": _dynamic_signature_unit_scan_count,
+		"dynamic_order_rebuild_count": _dynamic_order_rebuild_count,
+		"dynamic_order_skip_count": _dynamic_order_skip_count,
+		"dynamic_signature": _order_dynamic_visual_signature,
+		"dynamic_relevant_unit_ids": Array(_dynamic_relevant_unit_ids),
 		"order_phase_index": int(_order_payload.get("phase_index", 0)),
 		"movement_style_visual_count": _movement_style_visual_count,
 		"movement_bound_marker_count": _movement_bound_marker_count,
@@ -6289,6 +6358,7 @@ func _update_drop_visual_motion() -> void:
 
 
 func _rebuild_order_visuals() -> void:
+	_dynamic_order_rebuild_count += 1
 	_clear_children(_order_root)
 	_clear_children(_feedback_bubble_hud_root)
 	_area_order_count = 0
@@ -10772,6 +10842,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	var missing_unit_model_count: int = 0
 	var fow_hidden_unit_proxy_count: int = 0
 	var changed: bool = false
+	var dynamic_structural_change: bool = false
 	for unit in _unit_nodes:
 		if not is_instance_valid(unit):
 			continue
@@ -10792,6 +10863,8 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		var proxy_visual_signature: String = String(proxy.get_meta("unit_visual_signature", "")) if proxy != null and is_instance_valid(proxy) else ""
 		var visual_signature_changed: bool = not proxy_visual_signature.is_empty() and proxy_visual_signature != unit_visual_signature
 		if proxy == null or force_rebuild or not is_instance_valid(proxy) or visual_signature_changed:
+			if _dynamic_relevant_unit_by_id.has(unit_id):
+				dynamic_structural_change = true
 			if proxy != null and is_instance_valid(proxy):
 				proxy.queue_free()
 			_unit_proxy_runtime_by_id.erase(unit_id)
@@ -10989,6 +11062,8 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		_unit_proxies_by_id.erase(unit_id)
 		_unit_proxy_runtime_by_id.erase(unit_id)
 		_unit_proxy_contact_direction_by_unit_id.erase(unit_id)
+		if _dynamic_relevant_unit_by_id.has(unit_id):
+			dynamic_structural_change = true
 		changed = true
 	if _unit_texture_count != unit_texture_count:
 		changed = true
@@ -11058,12 +11133,30 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	_world_label_declutter_unit_badge_suppressed_count = world_label_declutter_unit_badge_suppressed_count
 	if _missing_unit_model_count != missing_unit_model_count:
 		changed = true
-	_missing_unit_model_count = missing_unit_model_count
+		_missing_unit_model_count = missing_unit_model_count
 	if _fow_hidden_unit_proxy_count != fow_hidden_unit_proxy_count:
 		changed = true
 	_fow_hidden_unit_proxy_count = fow_hidden_unit_proxy_count
+	_update_dynamic_source_dirty_state()
+	if dynamic_structural_change:
+		_rebuild_dynamic_relevant_index()
+		_dynamic_sources_dirty = true
 	if changed:
 		_request_viewport_redraw()
+
+
+func _update_dynamic_source_dirty_state() -> void:
+	for unit_id_variant in _dynamic_relevant_unit_ids:
+		var unit_id: String = String(unit_id_variant)
+		var unit = _dynamic_relevant_unit_by_id.get(unit_id, null)
+		if unit == null or not is_instance_valid(unit) or not (unit is Node2D):
+			continue
+		var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
+		var source_signature: String = "%s|%.2f,%.2f|%.2f|%s" % [unit_id, (unit as Node2D).global_position.x, (unit as Node2D).global_position.y, float(proxy.rotation_degrees.y) if proxy != null and is_instance_valid(proxy) else 0.0, str(_is_unit_world_visible(unit))]
+		var previous_signature: String = String(_dynamic_unit_source_signatures.get(unit_id, ""))
+		if not previous_signature.is_empty() and previous_signature != source_signature:
+			_dynamic_sources_dirty = true
+		_dynamic_unit_source_signatures[unit_id] = source_signature
 
 
 func _get_unit_runtime_posture_snapshot(unit: Node) -> Dictionary:
