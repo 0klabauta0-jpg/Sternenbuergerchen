@@ -87,3 +87,20 @@ Am 2026-09-01 hat der Nutzer trotz des nicht verfuegbaren Performance-Gates ausd
 Direktvertrag, Verhaltensorakel, Snapshot-/Autoritaetsgrenze, exakte Counter sowie Kandidaten-/Evidenz-SHAs und normale Reverts bleiben unveraendert. Die Entscheidung erlaubt die serielle Analyse durch die formalen B-/C-Ausschluesse und P09 fortzusetzen, beweist aber keine Performanceverbesserung und erteilt keine Release-Freigabe.
 
 Der Analyseprototyp bleibt revertiert. Eine spaetere Produktionsimplementierung muss als eigener Task von einer frischen `integration/core-foundation`-Basis mit eigener Vertragspruefung und gueltiger gepaarter Performance-Evidenz starten. Keine Integration, kein Merge, kein Release und kein Deployment sind hiermit autorisiert.
+
+## P07 — Formale Ausschlussentscheidung Variante B
+
+P06 ist net-null: Der Variante-A-Prototyp, seine Evidenz und die Produktions-/Testinstrumentierung wurden normal revertiert. Die geprüften Net-null-Dateien haben am P07-Start exakt folgende SHA-256-Hashes:
+
+| Datei | SHA-256 |
+|---|---|
+| `scripts/mission/combat_visibility_cache.gd` | `C70366BAE26CAF2E6037A47B080623BBE1B660F5193D801777BDD4B9B130BC9B` |
+| `scripts/tests/task_1206_combat_contact_visibility_architecture_analysis.gd` | `2FFE682F7F13216AFFB7A14B394005432F0F1A4ADD33F39C5A9ECF420932BE41` |
+| `scripts/tests/run_task_1187_tactical_map_frame_budget.ps1` | `4B6793EE992977B678CCF920595C076BD66244389940FFFEA56B4CA2BB78D741` |
+| `scripts/tests/tactical_map_frame_budget_harness.gd` | `E473B40945F90650DF4B750284AB5AF0F1A0D7555D5B7048F83D53A45E714C93` |
+
+Der formale B-Status lautet `EXCLUDED_TOPOLOGY_RATIO`. Die eingefrorene P03-Eligibility-Regel ergibt exakt: `contact_unique_ordered_pair_count / exact_cross_consumer_hit_count = 95215 / 3898 = 24.43 > 4.0`.
+
+Damit ist `CACHE_INTERNAL_STRUCTURED_REUSE` vor jeder Implementierung ausgeschlossen. B-Kandidat, RED/GREEN-Vertrag, vollständige Acht-Paar-Serie und sämtliche Performance-Gates sind `not-run`, weil die frühe Ausschlussentscheidung der plan-prescribed path ist. Es werden keine historischen Variante-B-Werte als same-build gepaarte Evidenz präsentiert.
+
+Für dieses P07-Paket existieren weder Kandidaten-Commit noch Revert, weil kein Kandidat erstellt wurde. Runtime- und Testdateien bleiben unangetastet. Die frühere menschliche Auswahl von `SHARED_TICK_RESULT_CONTRACT` bleibt eine menschliche, ungemessene Richtung; B's Ausschluss wird nicht in einen Performance-Pass umgedeutet.
