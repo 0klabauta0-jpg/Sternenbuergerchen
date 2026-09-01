@@ -59,6 +59,9 @@ func _compute_visibility() -> bool:
 	return true
 
 func _run() -> void:
+	if OS.get_cmdline_user_args().has("--task1206-variant-a-evidence"):
+		await _run_variant_a_evidence()
+		return
 	if OS.get_cmdline_user_args().has("--task1206-topology-evidence"):
 		await _run_topology_evidence()
 		return
@@ -315,7 +318,79 @@ func _run_topology_evidence() -> void:
 	print("TASK1206_TOPOLOGY_JSON=" + JSON.stringify(evidence))
 	quit(0)
 
-func _run_topology_fixture(harness_script: GDScript, topology_enabled: bool) -> Dictionary:
+func _run_variant_a_evidence() -> void:
+	var sha := OS.get_environment("STERNENBUERGERCHEN_GIT_SHA")
+	if sha.is_empty():
+		push_error("STERNENBUERGERCHEN_GIT_SHA is required")
+		quit(1)
+		return
+	var harness_script: GDScript = preload("res://scripts/tests/simulation_combat_ai_tick_budget_harness.gd")
+	seed(1206)
+	var control: Dictionary = await _run_topology_fixture(harness_script, false)
+	seed(1206)
+	var topology: Dictionary = await _run_topology_fixture(harness_script, true)
+	seed(1206)
+	var variant: Dictionary = await _run_topology_fixture(harness_script, false, "shared_tick_result_contract", true)
+	if not bool(control.get("ok", false)) or not bool(topology.get("ok", false)) or not bool(variant.get("ok", false)):
+		push_error("TASK1206 Variant A fixture failed")
+		quit(1)
+		return
+	var control_oracle := String(control.get("oracle_hash", ""))
+	var topology_oracle := String(topology.get("oracle_hash", ""))
+	var variant_oracle := String(variant.get("oracle_hash", ""))
+	if control_oracle != topology_oracle or control_oracle != variant_oracle:
+		push_error("TASK1206 Variant A oracle mismatch")
+		quit(1)
+		return
+	var topology_snapshot: Dictionary = topology.get("topology", {})
+	var variant_snapshot: Dictionary = variant.get("topology", {})
+	if (
+		String(variant_snapshot.get("variant", "")) != "shared_tick_result_contract"
+		or not bool(variant_snapshot.get("enabled", false))
+		or bool(variant_snapshot.get("topology_enabled", true))
+		or variant_snapshot.has("shared_tick_results")
+		or variant_snapshot.has("result")
+	):
+		push_error("TASK1206 Variant A snapshot contract mismatch")
+		quit(1)
+		return
+	var topology_costs: Dictionary = topology_snapshot.get("costs", {})
+	var signature_cost: Dictionary = topology_costs.get("signature_key_build", {})
+	var terrain_cost: Dictionary = topology_costs.get("terrain_los", {})
+	var signature_count := int(signature_cost.get("count", 0))
+	var terrain_count := int(terrain_cost.get("count", 0))
+	var terrain_usec := int(terrain_cost.get("usec", 0))
+	var reuse_count := int(variant_snapshot.get("shared_result_reuse_count", 0))
+	var estimated_saved_terrain_usec := 0
+	if terrain_count > 0:
+		estimated_saved_terrain_usec = roundi(float(terrain_usec) * float(reuse_count) / float(terrain_count))
+	var saved_signature_key_usec := int(signature_cost.get("usec", 0))
+	var result_materialization_usec := int(variant_snapshot.get("result_materialization_usec", 0))
+	var cost_gate_rhs_usec := saved_signature_key_usec + estimated_saved_terrain_usec
+	var evidence := {
+		"schema": "sternenbuergerchen.task1206.variant_a_cost.v1",
+		"git_sha": sha,
+		"ticks": 600,
+		"variant": "shared_tick_result_contract",
+		"control_gameplay_oracle_sha256": control_oracle,
+		"topology_gameplay_oracle_sha256": topology_oracle,
+		"variant_gameplay_oracle_sha256": variant_oracle,
+		"oracle_match": true,
+		"topology": topology_snapshot,
+		"variant_snapshot": variant_snapshot,
+		"baseline_signature_key_count": signature_count,
+		"baseline_terrain_los_count": terrain_count,
+		"saved_terrain_los_call_count": maxi(0, signature_count - terrain_count),
+		"saved_signature_key_usec": saved_signature_key_usec,
+		"estimated_saved_terrain_los_usec": estimated_saved_terrain_usec,
+		"result_materialization_usec": result_materialization_usec,
+		"cost_gate_rhs_usec": cost_gate_rhs_usec,
+		"cost_gate_pass": result_materialization_usec < cost_gate_rhs_usec,
+	}
+	print("TASK1206_VARIANT_A_JSON=" + JSON.stringify(evidence))
+	quit(0)
+
+func _run_topology_fixture(harness_script: GDScript, topology_enabled: bool, variant: String = "off", variant_enabled: bool = false) -> Dictionary:
 	var harness = harness_script.new()
 	var context: Dictionary = harness.call("_make_combat_context", root, "task1206_topology", 16, 12, 4, true)
 	await process_frame
@@ -324,7 +399,7 @@ func _run_topology_fixture(harness_script: GDScript, topology_enabled: bool) -> 
 	var scene: Node = context.get("scene")
 	if driver == null or simulation_root == null or scene == null:
 		return {"ok": false, "oracle_hash": ""}
-	driver.call("set_task1206_analysis_configuration", "off", false, topology_enabled)
+	driver.call("set_task1206_analysis_configuration", variant, variant_enabled, topology_enabled)
 	simulation_root.call("set_unit_minimum_spacing_enabled", false)
 	harness.call("_prime_state", context, true)
 	for _tick in range(600):
@@ -334,7 +409,7 @@ func _run_topology_fixture(harness_script: GDScript, topology_enabled: bool) -> 
 	hash_ctx.start(HashingContext.HASH_SHA256)
 	hash_ctx.update(canonical.to_utf8_buffer())
 	var result := {"ok": true, "oracle_hash": hash_ctx.finish().hex_encode()}
-	if topology_enabled:
+	if topology_enabled or variant_enabled:
 		result["topology"] = Dictionary(driver.call("get_task1206_visibility_analysis_snapshot", true))
 	scene.free()
 	return result
