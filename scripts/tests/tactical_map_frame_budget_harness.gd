@@ -48,6 +48,7 @@ func run(scene_tree: SceneTree, options: Dictionary = {}) -> Dictionary:
 	if primary_view == null or controller == null or simulation_root == null or combat_driver == null:
 		await _cleanup(scene_tree, flow)
 		return _build_failed_report("mission_runtime_missing", samples, setup_started_usec)
+	_configure_task1206_driver(combat_driver)
 
 	primary_view.call("set_runtime_frame_timing_debug_enabled", true)
 	controller.call("set_mission_visible_frame_timing_debug_enabled", true)
@@ -73,6 +74,7 @@ func run(scene_tree: SceneTree, options: Dictionary = {}) -> Dictionary:
 		controller = mission.get_node_or_null("TacticalController") if mission != null else null
 		simulation_root = mission.get_node_or_null("SimulationRoot") if mission != null else null
 		combat_driver = mission.get_node_or_null("CombatLoopDriver") if mission != null else null
+		_configure_task1206_driver(combat_driver)
 		if primary_view != null and controller != null:
 			controller.call("set_mission_visible_frame_timing_debug_enabled", true)
 			var spawn_position: Vector2 = Vector2(controller.call("get_mission_marker_world_position", "spawn_alpha", Vector2.ZERO))
@@ -137,6 +139,15 @@ func run(scene_tree: SceneTree, options: Dictionary = {}) -> Dictionary:
 	})
 	await _cleanup(scene_tree, flow)
 	return report
+
+
+func _configure_task1206_driver(driver: Node) -> void:
+	if driver == null or not driver.has_method("set_task1206_analysis_configuration"):
+		return
+	var variant := OS.get_environment("STERNENBUERGERCHEN_TASK1206_VARIANT").strip_edges().to_lower()
+	var enabled := OS.get_environment("STERNENBUERGERCHEN_TASK1206_ENABLED") == "1"
+	var topology_enabled := OS.get_environment("STERNENBUERGERCHEN_TASK1206_TOPOLOGY") == "1"
+	driver.call("set_task1206_analysis_configuration", variant, enabled, topology_enabled)
 
 
 func _collect_frame_samples(samples: Dictionary, primary_view: Node, controller: Node, last_fow_work_invocation_count: int) -> int:
@@ -274,6 +285,11 @@ func _build_report(samples: Dictionary, metadata: Dictionary) -> Dictionary:
 		"mode": "Measure",
 		"measurement_only": true,
 		"git_sha": OS.get_environment("STERNENBUERGERCHEN_GIT_SHA"),
+		"task1206": {
+			"variant": OS.get_environment("STERNENBUERGERCHEN_TASK1206_VARIANT").strip_edges().to_lower(),
+			"enabled": OS.get_environment("STERNENBUERGERCHEN_TASK1206_ENABLED") == "1",
+			"topology_enabled": OS.get_environment("STERNENBUERGERCHEN_TASK1206_TOPOLOGY") == "1",
+		},
 		"engine": Engine.get_version_info(),
 		"machine_profile": {
 			"declared_baseline_cpu": "Ryzen 7 7800X3D",

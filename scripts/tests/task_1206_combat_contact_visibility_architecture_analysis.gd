@@ -215,6 +215,7 @@ func _run() -> void:
 		driver.free()
 		quit(1)
 		return
+	print("TASK1206_PAIRED_RUNNER_CONTRACT_OK")
 
 	print("TASK1206_RESULT: %d passed, %d failed" % [_passed, _failed])
 	driver.free()
