@@ -39,3 +39,43 @@ Terrain-saved evidence: `92706 - 49942 = 42764` vermiedene Terrain-Auswertungen;
 - C `CONTACT_DERIVED_READ_MODEL`: **excluded** — `exact_contact_producer_fire_probe_count / fire_pair_search_request_count = 421 / 3735 = 0.1127 < 0.80`.
 
 Dies ist eine Topologie-/Eligibility-Akte, keine Performancebehauptung und keine Architekturfreigabe. Der Taskstatus bleibt `TOPOLOGY_VERIFIED_MEASUREMENT_PENDING`.
+
+## P06 — Variante A `SHARED_TICK_RESULT_CONTRACT`
+
+### Kandidat und Direktvertraege
+
+- P05-Basis: `d58578bdf05f4dd9cd33b154133625b9bec6dcee`
+- A-Kandidat: `5fc27f813563ed3f195803ef14ca5d1154f3b081`
+- A-Evidenzmodus: `5b05404c372c54256fe3ce087cd0e3a24fa95937`
+- TDD-RED: `TASK1206_VARIANT_A_MISSING`
+- Direkter Vertrag: `TASK1206_RESULT: 153 passed, 0 failed`
+- Regressionen: TASK-1197 `35/35`, TASK-1196 `12/12`, TASK-1191 `12/12`
+- Bekannte Ausgabegrenze: nur die bereits vorhandenen Minimum-Spacing-Warnungen; keine neue Resource-, Script- oder Orakeldifferenz.
+
+Der Prototyp war ausschließlich bei `shared_tick_result_contract` plus explizitem Enable aktiv. Er hielt je gerichtetem Source-/Target-Paar ein read-only, ticklokales Resultat mit exakter ID-, Positions-, Registry-, Revisions- und Tickvalidität. Range blieb vor dem Resultzugriff. Reverse, Positionswechsel, Registry-Identitätswechsel, Revisionswechsel und Tickwechsel mussten neu materialisieren. Das Resultat wurde weder in Events noch in Diagnose-, Savegame- oder Multiplayer-Snapshots ausgegeben.
+
+### Verhaltens- und Strukturbeleg
+
+Der einmalige Drei-Fixture-Lauf auf SHA `5b05404c372c54256fe3ce087cd0e3a24fa95937` lieferte genau eine `sternenbuergerchen.task1206.variant_a_cost.v1`-Zeile und Exit 0. Kontroll-, Topologie- und A-Orakel waren identisch:
+
+`7e5e7361ee194cac55e3f1795c3582cce12d9c7af9d613cce694beb6e23ce490`
+
+Zaehlwerte: Baseline Signature-Key `92.706`, Baseline Terrain-LoS `49.942`, daraus bestehende Reuses `42.764`; A materialisierte `49.942` read-only Results und reused `42.764`. Der A-Snapshot war `variant=shared_tick_result_contract`, `enabled=true`, `topology_enabled=false` und enthielt kein Result-Dictionary. Modus T und Variante A waren nie gleichzeitig aktiv.
+
+### Ungueltiger Kostenlauf und Stop-Gate
+
+Der Lauf fand waehrend zehn bereits vorhandener Godot-Prozesse statt. Acht davon waren pathlose Langlaeufer mit Laufzeiten von etwa 22 bis 77 Minuten; zusaetzlich lief ein fremder Test unter `C:\dev\InselKrieg\.worktrees\p07-r2-r3`. Kein fremder oder pathloser Prozess wurde beendet oder veraendert.
+
+Damit sind saemtliche Zeitfelder dieses Laufs verworfen. Insbesondere werden `result_materialization_usec=72.807`, `saved_signature_key_usec=4.151.157`, der geschaetzte Terrainwert und das maschinell ausgegebene `cost_gate_pass=true` **nicht** als Kostengate gewertet. Counts und Orakel bleiben als deterministische Struktur-/Verhaltensbelege erhalten.
+
+| P06-Gate | Ergebnis |
+|---|---|
+| Eligibility A | eligible |
+| Direktvertrag | pass |
+| 600-Tick-Verhaltensorakel | pass |
+| Snapshot-/Autoritaetsgrenze | pass |
+| Gueltige Modus-T-Kostenmessung | blocked — fremde/pathlose Godot-Prozesse |
+| Gewertete 8-Paar-Serie | not-run |
+| A-Endstatus | `BLOCKED_INVALID_MEASUREMENT_ENVIRONMENT` |
+
+A wird daher weder als `pass` noch als `fail` oder `excluded` behauptet. Die strikte serielle Ausfuehrung stoppt vor P07; B und C bleiben bei ihren P03-Eligibility-Rulings, wurden in P07/P08 aber nicht paketweise abgearbeitet. Eine finale Architekturentscheidung waere ohne das ausstehende gueltige A-Kostengate und gegebenenfalls die feste 8-Paar-Serie nicht belastbar.
