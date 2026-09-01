@@ -1,8 +1,15 @@
 # TASK_1206 - Combat-/Contact-Visibility-Architekturanalyse
 
+FINAL_DECISION: SHARED_TICK_RESULT_CONTRACT
+Status: `COMPLETED_ANALYSIS_HUMAN_SELECTED_UNMEASURED` — menschlich ausgewählt, nicht als Performance-Pass gemessen.
+
+P09 bestätigt A wegen Eligibility, grünem Direktvertrag/Oracle/Snapshot-/Authority-Grenze und des klareren gerichteten ticklokalen Vertrags. B=`EXCLUDED_TOPOLOGY_RATIO` (`95215 / 3898 = 24.43 > 4.0`), C=`EXCLUDED_HIT_RATIO` (`421 / 3735 = 0.1127 < 0.80`). P06-Timing und die fixe Acht-Paar-Serie sind verworfen bzw. `not-run`; TASK-1187 und P09-Timing bleiben wegen der bekannten invaliden fremden/pathlosen Godot-Prozessumgebung `not-run`. Keine Performanceverbesserung behauptet.
+
+Kandidat `5fc27f813563ed3f195803ef14ca5d1154f3b081`; Evidenz `5b05404c372c54256fe3ce087cd0e3a24fa95937`; Report `6983cf9d9eae6150303572de5bb6c5f837f25c3c`; Reverts `f96b8c263cf17c98d5c04cdea0b23be0ef3e4001`, `bd6704bd19e52091ece4353dd46f94c2ccca983a`; Human-Decision `7d2593727af1d4a6d8bfd89ca90bd77c359ce288`. Alle Prototypen sind entfernt; verbleiben nur P02/P03/P05-Instrumentierung und Dokumentation. Nächster Schritt: separater Task von frischer `integration/core-foundation`, Produktionsimplementierung, gültige gepaarte Performance-Evidenz; Prototyp nicht wiederherstellen/cherry-picken. Budgets, FoW, Dynamic Overlay, Full-HD-Manual und Integration/main/Release-Autorisierung bleiben offen.
+
 ## Status
 
-`TOPOLOGY_VERIFIED_MEASUREMENT_PENDING`
+`COMPLETED_ANALYSIS_HUMAN_SELECTED_UNMEASURED`
 
 TASK-1206 beginnt nicht mit einem vierten Performance-Patch. Zuerst wird die
 gerichtete Sichtabfrage-Topologie zwischen Contact Tracking, Fire Pair Search

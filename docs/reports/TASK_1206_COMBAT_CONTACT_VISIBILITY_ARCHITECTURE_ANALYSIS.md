@@ -1,4 +1,25 @@
-# TASK-1206 P03 — Topologie-Evidenz
+# TASK-1206 — Combat-/Contact-Visibility-Architekturanalyse
+
+FINAL_DECISION: SHARED_TICK_RESULT_CONTRACT
+Status: `COMPLETED_ANALYSIS_HUMAN_SELECTED_UNMEASURED`
+
+Die Entscheidung ist eine ausdrückliche menschliche Auswahl, kein gemessener Performance-Pass. P06s Timing ist wegen der invaliden fremden/pathlosen Godot-Prozessumgebung verworfen; die feste Acht-Paar-Serie sowie TASK-1187/P09-Timing sind `not-run`. Es gibt keine Performanceverbesserungs- oder Releasebehauptung.
+
+## P09-Schlussfolgerung
+
+Der Nutzer wählte `SHARED_TICK_RESULT_CONTRACT`, weil A eligible war und Direktvertrag, Orakel, Snapshot-/Autoritätsgrenze und exakte Counter grün waren; außerdem bietet A den klareren expliziten gerichteten ticklokalen Vertrag. Performance bleibt unbekannt. B ist `EXCLUDED_TOPOLOGY_RATIO`: `95215 / 3898 = 24.43 > 4.0`. C ist `EXCLUDED_HIT_RATIO`: `421 / 3735 = 0.1127 < 0.80`.
+
+A-Kandidat `5fc27f813563ed3f195803ef14ca5d1154f3b081`, Evidenz `5b05404c372c54256fe3ce087cd0e3a24fa95937`, Report `6983cf9d9eae6150303572de5bb6c5f837f25c3c`, Evidenz-Revert `f96b8c263cf17c98d5c04cdea0b23be0ef3e4001`, Kandidaten-Revert `bd6704bd19e52091ece4353dd46f94c2ccca983a`, Human-Decision-Commit `7d2593727af1d4a6d8bfd89ca90bd77c359ce288`. Alle Architekturprototypen sind entfernt; der Analysezweig enthält nur P02/P03/P05-Instrumentierung und Dokumentation.
+
+Die ungültige Messumgebung, alle Combat-/Simulation-/Command-Budgets, FoW-Varianz, Dynamic Overlay, echte 128x128-Full-HD-Manualevidenz sowie Autorisierung für Integration, main und Release bleiben offen. Das exakte nächste Vorgehen ist ein separater Implementierungstask von frischer `integration/core-foundation` für eine produktionsreife `SHARED_TICK_RESULT_CONTRACT`-Implementierung; danach ist gültige gepaarte Performance-Evidenz einzuholen. Den Analyseprototyp nicht wiederherstellen oder cherry-picken.
+
+## Direkte funktionale Regressionen
+
+Seriell ausgeführt, jeweils Exit 0: TASK-1206 `134/134` plus `TASK1206_TOPOLOGY_CONTRACT_OK` und `TASK1206_PAIRED_RUNNER_CONTRACT_OK`; TASK-1197 `35/35`; TASK-1196 `12/12`; TASK-1191 `12/12`; TASK-162 `23/23`; TASK-208 `57/57`; TASK-218 `81/81`. Nur bekannte Minimum-Spacing-Warnungen; keine Resource-/Script-/Parser-/Fixturefehler.
+
+## Net-null-Belege
+
+`scripts/mission/combat_visibility_cache.gd` `C70366BAE26CAF2E6037A47B080623BBE1B660F5193D801777BDD4B9B130BC9B`; `scripts/tests/mission_combat_loop_driver.gd` `74D814BC112ADE6A5C1CF3628763F36048C1848F3DD9ECC457E026FE4701A6ED`; `scripts/tactical/combat_fire_decision_resolver.gd` `65C85B9AA01CAB9E492F0C84EF2B6DF430142E5AA8AF9CC595831267302151BE`; TASK-1206-Verifier `2FFE682F7F13216AFFB7A14B394005432F0F1A4ADD33F39C5A9ECF420932BE41`; paired runner `4B6793EE992977B678CCF920595C076BD66244389940FFFEA56B4CA2BB78D741`; harness `E473B40945F90650DF4B750284AB5AF0F1A0D7555D5B7048F83D53A45E714C93`.
 
 ## Laufumgebung
 
@@ -38,7 +59,7 @@ Terrain-saved evidence: `92706 - 49942 = 42764` vermiedene Terrain-Auswertungen;
 - B `CACHE_INTERNAL_STRUCTURED_REUSE`: **excluded** — `contact_unique_ordered_pair_count / exact_cross_consumer_hit_count = 95215 / 3898 = 24.43 > 4.0`.
 - C `CONTACT_DERIVED_READ_MODEL`: **excluded** — `exact_contact_producer_fire_probe_count / fire_pair_search_request_count = 421 / 3735 = 0.1127 < 0.80`.
 
-Dies ist eine Topologie-/Eligibility-Akte, keine Performancebehauptung und keine Architekturfreigabe. Der Taskstatus bleibt `TOPOLOGY_VERIFIED_MEASUREMENT_PENDING`.
+Dies ist eine Topologie-/Eligibility-Akte, keine Performancebehauptung und keine Architekturfreigabe. Zum Zeitpunkt des P03-Belegs blieb der Taskstatus `TOPOLOGY_VERIFIED_MEASUREMENT_PENDING`; dieser Zwischenstatus wurde in P09 abgelöst.
 
 ## P06 — Variante A `SHARED_TICK_RESULT_CONTRACT`
 
