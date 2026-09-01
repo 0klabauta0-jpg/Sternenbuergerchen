@@ -36,10 +36,6 @@ var _task1206_pair_consumers: Dictionary = {}
 var _task1206_producers: Dictionary = {}
 var _task1206_validity: Dictionary = {}
 var _task1206_producer_meta: Dictionary = {}
-var _shared_tick_results: Dictionary = {}
-var _result_materialization_count: int = 0
-var _result_materialization_usec: int = 0
-var _shared_result_reuse_count: int = 0
 
 func _task1206_signature(source_id: String, target_id: String, source_position: Vector2, target_position: Vector2, terrain_registry) -> String:
 	return "tick:%d|source:%s|target:%s|sp:%s|tp:%s|registry:%d|revisions:%s" % [_current_tick, source_id, target_id, str(source_position), str(target_position), _resolve_registry_identity(terrain_registry), str(_resolve_terrain_revisions(terrain_registry))]
@@ -64,7 +60,7 @@ func configure_task1206_analysis(variant: String, enabled: bool, topology_enable
 func get_task1206_analysis_snapshot(include_pair_dump: bool = false) -> Dictionary:
 	var consumer_snapshot := _task1206_consumers.duplicate(true)
 	for tag in consumer_snapshot: consumer_snapshot[tag].erase("_pairs")
-	var result := {"variant": _task1206_variant, "enabled": _task1206_enabled, "topology_enabled": _task1206_topology_enabled, "derived_only": true, "read_only": true, "snapshot_serialized": false, "consumers": consumer_snapshot, "overlap": _task1206_overlap.duplicate(true), "validity": _task1206_validity.duplicate(true), "costs": _task1206_costs.duplicate(true), "range_rejected_count": _range_rejected_count, "result_materialization_count": _result_materialization_count, "result_materialization_usec": _result_materialization_usec, "shared_result_reuse_count": _shared_result_reuse_count}
+	var result := {"variant": _task1206_variant, "enabled": _task1206_enabled, "topology_enabled": _task1206_topology_enabled, "derived_only": true, "read_only": true, "snapshot_serialized": false, "consumers": consumer_snapshot, "overlap": _task1206_overlap.duplicate(true), "validity": _task1206_validity.duplicate(true), "costs": _task1206_costs.duplicate(true), "range_rejected_count": _range_rejected_count}
 	if include_pair_dump:
 		result["pair_dump"] = _task1206_pairs.slice(0, TASK1206_PAIR_DUMP_LIMIT)
 	return result
@@ -80,7 +76,6 @@ func _reset_task1206_diagnostics() -> void:
 	_task1206_producers.clear()
 	_task1206_producer_meta.clear()
 	_task1206_validity.clear()
-	_shared_tick_results.clear(); _result_materialization_count = 0; _result_materialization_usec = 0; _shared_result_reuse_count = 0
 	for name in ["direction", "tick", "source_position", "target_position", "registry_identity", "registry_revision"]: _task1206_validity[name] = {"count": 0, "consumers": {"contact_tracking": 0, "fire_pair_search": 0, "enemy_security": 0, "enemy_team_tactics": 0, "other_combat": 0}}
 
 func _task1206_record_cost(name: String, elapsed: int, consumer_tag: String = "other_combat") -> void:
@@ -110,7 +105,6 @@ func set_debug_profile_scope_active(active: bool) -> void:
 func set_cache_key_optimization_enabled(enabled: bool) -> void:
 	_cache_key_optimization_enabled = enabled
 	_cache_key_reuse_by_pair.clear()
-	_shared_tick_results.clear()
 
 func is_cache_key_optimization_enabled() -> bool:
 	return _cache_key_optimization_enabled
@@ -124,57 +118,11 @@ func begin_tick(simulation_tick: int) -> void:
 		return
 	_current_tick = simulation_tick
 	_results_by_key.clear()
-	_shared_tick_results.clear()
 	_cache_key_reuse_by_pair.clear()
 	_asked_pair_count = 0
 	_actual_los_check_count = 0
 	_cache_hit_count = 0
 	_range_rejected_count = 0
-
-func _task1206_get_shared_tick_result(source_position: Vector2, target_position: Vector2, terrain_registry, source_id: String, target_id: String, occlusion_compute: Callable = Callable()) -> Dictionary:
-	if _task1206_variant != "shared_tick_result_contract" or not _task1206_enabled:
-		return {}
-	var registry_identity := _resolve_registry_identity(terrain_registry)
-	var terrain_revision := int(_resolve_terrain_revisions(terrain_registry).get("terrain_revision", -1))
-	var by_target: Dictionary = _shared_tick_results.get(source_id, {})
-	var candidate_variant = by_target.get(target_id, null)
-	if candidate_variant is Dictionary:
-		var candidate: Dictionary = candidate_variant
-		var exact_match: bool = (
-			int(candidate.get("tick", -2)) == _current_tick
-			and String(candidate.get("source_id", "")) == source_id
-			and String(candidate.get("target_id", "")) == target_id
-			and candidate.get("source_position", Vector2.INF) == source_position
-			and candidate.get("target_position", Vector2.INF) == target_position
-			and int(candidate.get("registry_identity", -2)) == registry_identity
-			and int(candidate.get("terrain_revision", -2)) == terrain_revision
-		)
-		if exact_match:
-			_cache_hit_count += 1
-			_shared_result_reuse_count += 1
-			return candidate
-	_actual_los_check_count += 1
-	var clear: bool = bool(occlusion_compute.call()) if occlusion_compute.is_valid() else _los_system.has_line_of_sight_between_points(source_position, target_position, -1.0, terrain_registry)
-	var started := Time.get_ticks_usec()
-	var result := {
-		"tick": _current_tick,
-		"source_id": source_id,
-		"target_id": target_id,
-		"source_position": source_position,
-		"target_position": target_position,
-		"registry_identity": registry_identity,
-		"terrain_revision": terrain_revision,
-		"clear": clear,
-		"derived_only": true,
-		"read_only": true,
-		"snapshot_serialized": false,
-	}
-	result.make_read_only()
-	by_target[target_id] = result
-	_shared_tick_results[source_id] = by_target
-	_result_materialization_count += 1
-	_result_materialization_usec += maxi(0, Time.get_ticks_usec() - started)
-	return result
 
 
 func has_line_of_sight_between_nodes(
@@ -261,9 +209,6 @@ func _resolve_terrain_occlusion(
 	occlusion_compute: Callable,
 	consumer_tag: String = "other_combat"
 ) -> bool:
-	if _task1206_variant == "shared_tick_result_contract" and _task1206_enabled:
-		var shared_result := _task1206_get_shared_tick_result(source_position, target_position, terrain_registry, source_id, target_id, occlusion_compute)
-		return bool(shared_result.get("clear", false))
 	var topology_active := _task1206_topology_enabled
 	var normalized_tag := consumer_tag if TASK1206_CONSUMERS.has(consumer_tag) else "other_combat"
 	var pair_id := _task1206_signature(source_id, target_id, source_position, target_position, terrain_registry)
