@@ -29,6 +29,9 @@ func _compute_visibility() -> bool:
 	return true
 
 func _run() -> void:
+	if OS.get_cmdline_user_args().has("--task1206-topology-evidence"):
+		await _run_topology_evidence()
+		return
 	var cache = CACHE_SCRIPT.new()
 	var cache_api := [
 		"configure_task1206_analysis",
@@ -181,3 +184,73 @@ func _run() -> void:
 	print("TASK1206_RESULT: %d passed, %d failed" % [_passed, _failed])
 	driver.free()
 	quit(1 if _failed > 0 else 0)
+
+func _run_topology_evidence() -> void:
+	var sha := OS.get_environment("STERNENBUERGERCHEN_GIT_SHA")
+	if sha.is_empty():
+		push_error("STERNENBUERGERCHEN_GIT_SHA is required")
+		quit(1)
+		return
+	var harness_script: GDScript = preload("res://scripts/tests/simulation_combat_ai_tick_budget_harness.gd")
+	seed(1206)
+	var control: Dictionary = await _run_topology_fixture(harness_script, false)
+	seed(1206)
+	var measured: Dictionary = await _run_topology_fixture(harness_script, true)
+	if not bool(control.get("ok", false)) or not bool(measured.get("ok", false)):
+		push_error("TASK1206 topology fixture failed")
+		quit(1)
+		return
+	if String(control.get("oracle_hash", "")) != String(measured.get("oracle_hash", "")):
+		push_error("TASK1206 topology/control oracle mismatch")
+		quit(1)
+		return
+	var topology: Dictionary = Dictionary(measured.get("topology", {}))
+	var consumers: Dictionary = Dictionary(topology.get("consumers", {}))
+	var expected_consumers := ["contact_tracking", "fire_pair_search", "enemy_security", "enemy_team_tactics", "other_combat"]
+	var actual_consumers: Array = consumers.keys(); actual_consumers.sort()
+	var sorted_expected := expected_consumers.duplicate(); sorted_expected.sort()
+	if actual_consumers != sorted_expected:
+		push_error("TASK1206 consumer schema mismatch")
+		quit(1)
+		return
+	var pair_dump_size := Array(topology.get("pair_dump", [])).size()
+	if pair_dump_size > 32:
+		push_error("TASK1206 pair dump exceeds 32")
+		quit(1)
+		return
+	var evidence := {
+		"schema": "sternenbuergerchen.task1206.visibility_topology.v1",
+		"git_sha": sha,
+		"ticks": 600,
+		"aggregates": topology,
+		"pair_dump_size": pair_dump_size,
+		"canonical_gameplay_oracle_sha256": measured.get("oracle_hash", ""),
+		"control_gameplay_oracle_sha256": control.get("oracle_hash", ""),
+		"oracle_match": true
+	}
+	print("TASK1206_TOPOLOGY_JSON=" + JSON.stringify(evidence))
+	quit(0)
+
+func _run_topology_fixture(harness_script: GDScript, topology_enabled: bool) -> Dictionary:
+	var harness = harness_script.new()
+	var context: Dictionary = harness.call("_make_combat_context", root, "task1206_topology", 16, 12, 4, true)
+	await process_frame
+	var driver: Node = context.get("combat_driver")
+	var simulation_root: Node = context.get("simulation_root")
+	var scene: Node = context.get("scene")
+	if driver == null or simulation_root == null or scene == null:
+		return {"ok": false, "oracle_hash": ""}
+	driver.call("set_task1206_analysis_configuration", "off", false, topology_enabled)
+	simulation_root.call("set_unit_minimum_spacing_enabled", false)
+	harness.call("_prime_state", context, true)
+	for _tick in range(600):
+		simulation_root.call("_physics_process", 0.1)
+	var canonical := JSON.stringify({"contacts": driver.call("get_contact_snapshot"), "detection": driver.get("_detection_progress"), "fire_events": driver.call("get_fire_event_snapshot"), "enemy_security": driver.call("get_enemy_security_snapshot"), "enemy_tactics": driver.call("get_enemy_team_tactics_snapshot"), "mission_result": driver.call("get_mission_result")})
+	var hash_ctx := HashingContext.new()
+	hash_ctx.start(HashingContext.HASH_SHA256)
+	hash_ctx.update(canonical.to_utf8_buffer())
+	var result := {"ok": true, "oracle_hash": hash_ctx.finish().hex_encode()}
+	if topology_enabled:
+		result["topology"] = Dictionary(driver.call("get_task1206_visibility_analysis_snapshot", true))
+	scene.free()
+	return result

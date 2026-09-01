@@ -2,7 +2,7 @@
 
 ## Status
 
-`DESIGN_REVIEW_PENDING`
+`TOPOLOGY_VERIFIED_MEASUREMENT_PENDING`
 
 TASK-1206 beginnt nicht mit einem vierten Performance-Patch. Zuerst wird die
 gerichtete Sichtabfrage-Topologie zwischen Contact Tracking, Fire Pair Search
