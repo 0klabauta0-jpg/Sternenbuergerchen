@@ -104,3 +104,13 @@ Der formale B-Status lautet `EXCLUDED_TOPOLOGY_RATIO`. Die eingefrorene P03-Elig
 Damit ist `CACHE_INTERNAL_STRUCTURED_REUSE` vor jeder Implementierung ausgeschlossen. B-Kandidat, RED/GREEN-Vertrag, vollständige Acht-Paar-Serie und sämtliche Performance-Gates sind `not-run`, weil die frühe Ausschlussentscheidung der plan-prescribed path ist. Es werden keine historischen Variante-B-Werte als same-build gepaarte Evidenz präsentiert.
 
 Für dieses P07-Paket existieren weder Kandidaten-Commit noch Revert, weil kein Kandidat erstellt wurde. Runtime- und Testdateien bleiben unangetastet. Die frühere menschliche Auswahl von `SHARED_TICK_RESULT_CONTRACT` bleibt eine menschliche, ungemessene Richtung; B's Ausschluss wird nicht in einen Performance-Pass umgedeutet.
+
+## P08 — Formale Ausschlussentscheidung Variante C
+
+P07 ist net-null. Die für diesen Übergang geprüften Net-null-Dateien behalten die bestätigten Hashes: `mission_combat_loop_driver.gd` `74D814BC112ADE6A5C1CF3628763F36048C1848F3DD9ECC457E026FE4701A6ED`, `combat_fire_decision_resolver.gd` `65C85B9AA01CAB9E492F0C84EF2B6DF430142E5AA8AF9CC595831267302151BE` und `task_1206_combat_contact_visibility_architecture_analysis.gd` `2FFE682F7F13216AFFB7A14B394005432F0F1A4ADD33F39C5A9ECF420932BE41`.
+
+Der formale C-Status lautet `EXCLUDED_HIT_RATIO`. Die eingefrorenen P03-Counter ergeben exakt: `exact_contact_producer_fire_probe_count / fire_pair_search_request_count = 421 / 3735 = 0.1127 < 0.80`. Nach der genehmigten 80-Prozent-Regel ist `CONTACT_DERIVED_READ_MODEL` daher vor jeder Implementierung ausgeschlossen.
+
+C-Kandidat, Implementierung, Direktvertrag/-evidenz, RED/GREEN-Vertrag, Read-Model-/Miss-Reason-Evidence, Reverse-/Range-Validierung, die vollständige Acht-Paar-Serie sowie sämtliche Performance-Gates sind `not-run`, weil die frühe Ausschlussentscheidung der plan-prescribed path ist. Es wurde keine Reverse-Reuse- oder Symmetrie-Inferenz vorgenommen.
+
+Für dieses P08-Paket existieren weder Kandidaten-Commit noch Revert, weil kein Kandidat erstellt wurde. Runtime-, Test-, Driver- und Resolver-Dateien bleiben unangetastet; der Laufzeit-/Teststatus bleibt net-null. Die frühere menschliche Auswahl von `SHARED_TICK_RESULT_CONTRACT` bleibt eine menschliche, ungemessene Richtung und wird durch den C-Ausschluss nicht in einen Performance-Pass umgedeutet.
