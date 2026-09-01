@@ -78,4 +78,12 @@ Damit sind saemtliche Zeitfelder dieses Laufs verworfen. Insbesondere werden `re
 | Gewertete 8-Paar-Serie | not-run |
 | A-Endstatus | `BLOCKED_INVALID_MEASUREMENT_ENVIRONMENT` |
 
-A wird daher weder als `pass` noch als `fail` oder `excluded` behauptet. Die strikte serielle Ausfuehrung stoppt vor P07; B und C bleiben bei ihren P03-Eligibility-Rulings, wurden in P07/P08 aber nicht paketweise abgearbeitet. Eine finale Architekturentscheidung waere ohne das ausstehende gueltige A-Kostengate und gegebenenfalls die feste 8-Paar-Serie nicht belastbar.
+### HUMAN_SELECTED_UNMEASURED — ausdrueckliche Architekturentscheidung
+
+Der P06-Messstatus bleibt `BLOCKED_INVALID_MEASUREMENT_ENVIRONMENT`. A wird nicht als gemessener `pass`, `fail` oder `excluded` klassifiziert; alle Zeitfelder bleiben verworfen und die feste Acht-Paar-Serie bleibt `not-run`.
+
+Am 2026-09-01 hat der Nutzer trotz des nicht verfuegbaren Performance-Gates ausdruecklich `SHARED_TICK_RESULT_CONTRACT` als Architektur-Richtung gewaehlt. Dies ist eine menschliche Architekturentscheidung und kein Performancebeleg.
+
+Direktvertrag, Verhaltensorakel, Snapshot-/Autoritaetsgrenze, exakte Counter sowie Kandidaten-/Evidenz-SHAs und normale Reverts bleiben unveraendert. Die Entscheidung erlaubt die serielle Analyse durch die formalen B-/C-Ausschluesse und P09 fortzusetzen, beweist aber keine Performanceverbesserung und erteilt keine Release-Freigabe.
+
+Der Analyseprototyp bleibt revertiert. Eine spaetere Produktionsimplementierung muss als eigener Task von einer frischen `integration/core-foundation`-Basis mit eigener Vertragspruefung und gueltiger gepaarter Performance-Evidenz starten. Keine Integration, kein Merge, kein Release und kein Deployment sind hiermit autorisiert.
