@@ -338,7 +338,7 @@ static func is_target_attackable(attacker, target, context: Dictionary) -> bool:
 	var effective_attack_range: float = _get_effective_attack_range(attacker, target, context)
 	if debug_enabled:
 		_record_hotspot(context, "range_attackability", started_usec)
-	var result := bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, effective_attack_range, context.get("terrain_registry", null)))
+	var result := _has_tagged_visibility_nodes(los_system, attacker, target, effective_attack_range, context.get("terrain_registry", null), "fire_pair_search")
 	return result
 
 static func _record_hotspot(context: Dictionary, name: String, started_usec: int) -> void:
@@ -560,7 +560,12 @@ static func _resolve_los_state(attacker, target, context: Dictionary) -> String:
 	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
 		return "unknown"
 	var terrain_registry = context.get("terrain_registry", null)
-	return "clear" if bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, -1.0, terrain_registry)) else "blocked"
+	return "clear" if _has_tagged_visibility_nodes(los_system, attacker, target, -1.0, terrain_registry, "other_combat") else "blocked"
+
+static func _has_tagged_visibility_nodes(los_system, attacker, target, max_range: float, terrain_registry, consumer_tag: String) -> bool:
+	if los_system.has_method("get_task1206_analysis_snapshot"):
+		return bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, max_range, terrain_registry, Callable(), consumer_tag))
+	return bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, max_range, terrain_registry))
 
 
 static func _get_target_cover_score(target, context: Dictionary) -> int:

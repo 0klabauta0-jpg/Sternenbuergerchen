@@ -865,6 +865,18 @@ func _get_combat_visibility_system():
 		return cache
 	return _los_system
 
+func _has_tagged_visibility_nodes(source: Node2D, target: Node2D, max_range: float, consumer_tag: String) -> bool:
+	var system = _get_combat_visibility_system()
+	if system.has_method("get_task1206_analysis_snapshot"):
+		return bool(system.call("has_line_of_sight_between_nodes", source, target, max_range, _get_terrain_registry(), Callable(), consumer_tag))
+	return bool(system.call("has_line_of_sight_between_nodes", source, target, max_range, _get_terrain_registry()))
+
+func _has_tagged_visibility_points(source: Vector2, target: Vector2, max_range: float, consumer_tag: String) -> bool:
+	var system = _get_combat_visibility_system()
+	if system.has_method("get_task1206_analysis_snapshot"):
+		return bool(system.call("has_line_of_sight_between_points", source, target, max_range, _get_terrain_registry(), "", "", Callable(), consumer_tag))
+	return bool(system.call("has_line_of_sight_between_points", source, target, max_range, _get_terrain_registry()))
+
 
 func _get_combat_visibility_cache_audit() -> Dictionary:
 	var cache = get_node_or_null(combat_visibility_cache_path)
@@ -877,6 +889,17 @@ func _get_combat_visibility_cache_audit() -> Dictionary:
 		"actual_los_check_count": 0,
 		"cache_hit_count": 0,
 	}
+
+func set_task1206_analysis_configuration(variant: String, enabled: bool, topology_enabled: bool) -> void:
+	var cache = get_node_or_null(combat_visibility_cache_path)
+	if cache != null and cache.has_method("configure_task1206_analysis"):
+		cache.call("configure_task1206_analysis", variant, enabled, topology_enabled)
+
+func get_task1206_visibility_analysis_snapshot(include_pair_dump: bool = false) -> Dictionary:
+	var cache = get_node_or_null(combat_visibility_cache_path)
+	if cache == null or not cache.has_method("get_task1206_analysis_snapshot"):
+		return {}
+	return Dictionary(cache.call("get_task1206_analysis_snapshot", include_pair_dump)).duplicate(true)
 
 
 func get_contact_snapshot() -> Array:
@@ -2964,7 +2987,7 @@ func _has_valid_los(attacker, target) -> bool:
 	var los_range: float = _get_effective_range(target)
 	if _uses_weapon_range_for_contact_detection(attacker):
 		los_range = maxf(los_range, _get_weapon_attack_range(attacker, target))
-	return bool(_get_combat_visibility_system().call("has_line_of_sight_between_nodes", attacker, target, los_range, _get_terrain_registry()))
+	return _has_tagged_visibility_nodes(attacker, target, los_range, "contact_tracking")
 
 
 func _uses_weapon_range_for_contact_detection(attacker) -> bool:
@@ -4085,7 +4108,7 @@ func _build_enemy_watched_unit_ids(units: Array, state: Dictionary) -> PackedStr
 				continue
 			if to_target.length() > float(assignment.get("weapon_range_world", 0.0)):
 				continue
-			if not bool(_get_combat_visibility_system().call("has_line_of_sight_between_nodes", enemy, friendly, float(assignment.get("weapon_range_world", 0.0)), _get_terrain_registry())):
+			if not _has_tagged_visibility_nodes(enemy, friendly, float(assignment.get("weapon_range_world", 0.0)), "enemy_security"):
 				continue
 			result.append(friendly_id)
 	return result
@@ -4495,7 +4518,7 @@ func _score_enemy_cover_tile(unit, tile, focus_position: Vector2) -> float:
 	var attack_range: float = _get_weapon_attack_range(unit, null)
 	if attack_range > 0.0 and tile_position.distance_to(focus_position) > attack_range:
 		return -1000.0
-	if not bool(_get_combat_visibility_system().call("has_line_of_sight_between_points", tile_position, focus_position, attack_range, _get_terrain_registry())):
+	if not _has_tagged_visibility_points(tile_position, focus_position, attack_range, "enemy_team_tactics"):
 		return -1000.0
 	var unit_position: Vector2 = (unit as Node2D).global_position if unit is Node2D else tile_position
 	var cover_score: float = clampf(float(tile.cover_value) / 100.0, 0.0, 1.0)
@@ -5010,7 +5033,7 @@ func _enemy_should_hold_position(enemy) -> bool:
 			continue
 
 		var attack_range: float = _get_weapon_attack_range(enemy, friendly)
-		if not bool(_get_combat_visibility_system().call("has_line_of_sight_between_nodes", enemy, friendly, attack_range, _get_terrain_registry())):
+		if not _has_tagged_visibility_nodes(enemy, friendly, attack_range, "other_combat"):
 			continue
 
 		if (enemy as Node2D).global_position.distance_to((friendly as Node2D).global_position) <= maxf(enemy_engage_distance, attack_range):

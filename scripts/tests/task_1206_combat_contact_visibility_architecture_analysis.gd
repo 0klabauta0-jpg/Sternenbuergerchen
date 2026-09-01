@@ -65,7 +65,7 @@ func _run() -> void:
 	_assert(initial_driver_snapshot == initial_snapshot, "driver bridge matches initial cache snapshot")
 	_assert(String(initial_driver_snapshot.get("variant", "")) == "off" and not bool(initial_driver_snapshot.get("enabled", true)), "driver bridge is initially default-off")
 	cache.call("begin_tick", 41)
-	driver.call("set_task1206_analysis_configuration", "shared_tick_result_contract", true, true)
+	driver.call("set_task1206_analysis_configuration", "shared_tick_result_contract", false, true)
 	cache.call("begin_tick", 41)
 	_terrain_calls = 0
 	cache.call("has_line_of_sight_between_points", Vector2(10, 10), Vector2(20, 10), -1.0, registry, "alpha", "bravo", compute, "contact_tracking")
@@ -79,6 +79,14 @@ func _run() -> void:
 	var overlap: Dictionary = topology.get("overlap", {})
 	var costs: Dictionary = topology.get("costs", {})
 	var expected_costs := ["cache_lookup", "entry_write", "signature_key_build", "terrain_los"]
+	var frozen_cost_tags := ["contact_tracking", "enemy_security", "enemy_team_tactics", "fire_pair_search", "other_combat"]
+	var expected_cost_consumer_counts := {
+		"signature_key_build": {"contact_tracking": 1, "enemy_security": 1, "enemy_team_tactics": 0, "fire_pair_search": 1, "other_combat": 0},
+		"cache_lookup": {"contact_tracking": 1, "enemy_security": 1, "enemy_team_tactics": 0, "fire_pair_search": 1, "other_combat": 0},
+		"entry_write": {"contact_tracking": 1, "enemy_security": 1, "enemy_team_tactics": 0, "fire_pair_search": 0, "other_combat": 0},
+		"terrain_los": {"contact_tracking": 1, "enemy_security": 1, "enemy_team_tactics": 0, "fire_pair_search": 0, "other_combat": 0},
+	}
+	var expected_cost_totals := {"signature_key_build": 3, "cache_lookup": 3, "entry_write": 2, "terrain_los": 2}
 	var actual_costs: Array = costs.keys()
 	actual_costs.sort()
 	_assert(actual_costs == expected_costs, "cost groups are exactly the frozen four")
@@ -88,9 +96,26 @@ func _run() -> void:
 	for cost_name in ["signature_key_build", "cache_lookup", "entry_write", "terrain_los"]:
 		var cost_group: Dictionary = costs.get(cost_name, {})
 		_assert(cost_group.has("count") and cost_group.has("usec"), "cost group exposes count/usec: %s" % cost_name)
+		_assert(int(cost_group.get("count", -1)) == int(expected_cost_totals[cost_name]), "exact global cost count: %s" % cost_name)
 	_assert(int(costs.get("terrain_los", {}).get("count", 0)) == 2 and _terrain_calls == 2, "exact pair and reverse evaluate terrain once each")
 	_assert(int(topology.get("range_rejected_count", overlap.get("range_rejected_count", 0))) == 1 and _terrain_calls == 2, "range reject avoids terrain call")
 	_assert(int(overlap.get("exact_cross_consumer_hit_count", 0)) == 1, "exact cross-consumer hit is counted")
+	_assert(int(overlap.get("exact_contact_producer_fire_probe_count", 0)) == 1, "contact producer fire probe is counted")
+	_assert(int(overlap.get("missing_producer_count", 0)) == 0, "producer attribution is complete")
+	cache.call("has_line_of_sight_between_points", Vector2(10, 10), Vector2(21, 10), -1.0, registry, "alpha", "bravo", compute, "contact_tracking")
+	for cost_name in expected_costs:
+		var nested: Dictionary = costs[cost_name].get("consumers", {})
+		var nested_tags: Array = nested.keys(); nested_tags.sort()
+		_assert(nested_tags == frozen_cost_tags, "cost consumer tags: %s" % cost_name)
+		for tag in frozen_cost_tags:
+			_assert(nested[tag] is Dictionary and nested[tag].has("count") and nested[tag].has("usec"), "cost consumer count/usec: %s/%s" % [cost_name, tag])
+			_assert(int(nested[tag]["count"]) == int(expected_cost_consumer_counts[cost_name][tag]), "exact consumer cost count: %s/%s" % [cost_name, tag])
+		var count_sum := 0; var usec_sum := 0
+		for tag in frozen_cost_tags: count_sum += int(nested[tag]["count"]); usec_sum += int(nested[tag]["usec"])
+		_assert(count_sum == int(costs[cost_name]["count"]) and usec_sum == int(costs[cost_name]["usec"]), "cost totals reconcile: %s" % cost_name)
+	var registry_same_revision := RegistryDouble.new()
+	cache.call("has_line_of_sight_between_points", Vector2(10, 10), Vector2(20, 10), -1.0, registry_same_revision, "alpha", "bravo", compute, "contact_tracking")
+	_assert(_terrain_calls == 4, "registry identity invalidates same-revision reuse")
 	var expected_tags := ["contact_tracking", "enemy_security", "enemy_team_tactics", "fire_pair_search", "other_combat"]
 	var actual_tags: Array = consumers.keys()
 	actual_tags.sort()
@@ -110,9 +135,48 @@ func _run() -> void:
 	cache.call("has_line_of_sight_between_points", Vector2(11, 10), Vector2(20, 10), -1.0, registry, "alpha", "bravo", compute, "contact_tracking")
 	var bounded_dump: Dictionary = cache.call("get_task1206_analysis_snapshot", true)
 	var pair_dump = bounded_dump.get("pair_dump", [])
-	_assert(_terrain_calls == 5, "source position, registry revision and tick invalidate reuse")
+	var validity: Dictionary = bounded_dump.get("validity", {})
+	var frozen_validity_metrics := ["direction", "registry_identity", "registry_revision", "source_position", "target_position", "tick"]
+	var actual_validity_metrics: Array = validity.keys()
+	actual_validity_metrics.sort()
+	_assert(actual_validity_metrics == frozen_validity_metrics, "validity metrics are exactly the frozen six")
+	var expected_validity_counts := {
+		"direction": 1,
+		"registry_identity": 2,
+		"registry_revision": 1,
+		"source_position": 1,
+		"target_position": 2,
+		"tick": 1,
+	}
+	var expected_validity_consumer_counts := {
+		"direction": {"contact_tracking": 0, "enemy_security": 1, "enemy_team_tactics": 0, "fire_pair_search": 0, "other_combat": 0},
+		"registry_identity": {"contact_tracking": 2, "enemy_security": 0, "enemy_team_tactics": 0, "fire_pair_search": 0, "other_combat": 0},
+		"registry_revision": {"contact_tracking": 1, "enemy_security": 0, "enemy_team_tactics": 0, "fire_pair_search": 0, "other_combat": 0},
+		"source_position": {"contact_tracking": 1, "enemy_security": 0, "enemy_team_tactics": 0, "fire_pair_search": 0, "other_combat": 0},
+		"target_position": {"contact_tracking": 2, "enemy_security": 0, "enemy_team_tactics": 0, "fire_pair_search": 0, "other_combat": 0},
+		"tick": {"contact_tracking": 1, "enemy_security": 0, "enemy_team_tactics": 0, "fire_pair_search": 0, "other_combat": 0},
+	}
+	for metric in frozen_validity_metrics:
+		var validity_group: Dictionary = validity.get(metric, {})
+		_assert(int(validity_group.get("count", -1)) == int(expected_validity_counts[metric]), "exact validity count: %s" % metric)
+		var validity_consumers: Dictionary = validity_group.get("consumers", {})
+		var actual_validity_tags: Array = validity_consumers.keys()
+		actual_validity_tags.sort()
+		_assert(actual_validity_tags == frozen_cost_tags, "validity consumer tags: %s" % metric)
+		for tag in frozen_cost_tags:
+			_assert(int(validity_consumers.get(tag, -1)) == int(expected_validity_consumer_counts[metric][tag]), "exact validity consumer count: %s/%s" % [metric, tag])
+	_assert(_terrain_calls == 7, "source position, registry revision and tick invalidate reuse")
 	_assert(cache.call("get_task1206_analysis_snapshot").get("pair_dump", null) == null, "normal snapshot has no pair dump")
 	_assert(pair_dump is Array and pair_dump.size() <= 32, "explicit pair dump is bounded to 32")
+	cache.call("configure_task1206_analysis", "off", false, false)
+	cache.call("has_line_of_sight_between_points", Vector2(10, 10), Vector2(200, 10), 5.0, registry, "off_source", "off_target", compute, "contact_tracking")
+	var off_snapshot: Dictionary = cache.call("get_task1206_analysis_snapshot")
+	var off_consumers: Dictionary = off_snapshot.get("consumers", {})
+	var off_costs: Dictionary = off_snapshot.get("costs", {})
+	_assert(int(off_snapshot.get("overlap", {}).get("range_rejected_count", 0)) == 0, "default-off overlap diagnostics stay inert")
+	_assert(int(off_consumers.get("contact_tracking", {}).get("request_count", 0)) == 0, "default-off consumer diagnostics stay inert")
+	_assert(int(off_costs.get("cache_lookup", {}).get("count", 0)) == 0 and int(off_costs.get("terrain_los", {}).get("count", 0)) == 0, "default-off costs stay inert")
+	print("TASK1206_TOPOLOGY_CONTRACT_OK")
 
 	print("TASK1206_RESULT: %d passed, %d failed" % [_passed, _failed])
 	driver.free()
