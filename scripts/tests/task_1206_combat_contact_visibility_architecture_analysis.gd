@@ -24,6 +24,36 @@ func _assert(condition: bool, message: String) -> void:
 		_failed += 1
 		push_error("FAIL: %s" % message)
 
+func _task1206_paired_runner_contract_is_present() -> bool:
+	var runner_path := "res://scripts/tests/run_task_1187_tactical_map_frame_budget.ps1"
+	var harness_path := "res://scripts/tests/tactical_map_frame_budget_harness.gd"
+	if not FileAccess.file_exists(runner_path) or not FileAccess.file_exists(harness_path):
+		return false
+	var source := FileAccess.get_file_as_string(runner_path) + "\n" + FileAccess.get_file_as_string(harness_path)
+	var required_tokens := [
+		"Task1206Variant",
+		"Task1206Paired",
+		"QuietWindowSeconds",
+		"STERNENBUERGERCHEN_TASK1206_VARIANT",
+		"STERNENBUERGERCHEN_TASK1206_ENABLED",
+		"STERNENBUERGERCHEN_TASK1206_TOPOLOGY",
+		"TASK_1206_VISIBILITY_AB_JSON=",
+		"sternenbuergerchen.task1206.visibility_ab.v1",
+		"pair_count = 8",
+		"off,on,on,off,on,off,off,on,off,on,on,off,on,off,off,on",
+		"scopes.\"combat.total_tick_usec\".p99",
+		"scopes.\"combat_scope.combat_fire_decision_usec\".p99",
+		"scopes.\"combat_scope.fire_find_contact_pair_usec\".p99",
+		"scopes.\"combat.contact_tracking_usec\".p99",
+		"scopes.\"combat_scope.enemy_team_tactics_usec\".p99",
+		"scopes.\"simulation.total_tick_usec\".p99",
+		"scopes.\"simulation_scope.command_queue_usec\".p99",
+	]
+	for token in required_tokens:
+		if not source.contains(token):
+			return false
+	return true
+
 func _compute_visibility() -> bool:
 	_terrain_calls += 1
 	return true
@@ -180,6 +210,11 @@ func _run() -> void:
 	_assert(int(off_consumers.get("contact_tracking", {}).get("request_count", 0)) == 0, "default-off consumer diagnostics stay inert")
 	_assert(int(off_costs.get("cache_lookup", {}).get("count", 0)) == 0 and int(off_costs.get("terrain_los", {}).get("count", 0)) == 0, "default-off costs stay inert")
 	print("TASK1206_TOPOLOGY_CONTRACT_OK")
+	if not _task1206_paired_runner_contract_is_present():
+		print("TASK1206_PAIRED_RUNNER_CONTRACT_MISSING")
+		driver.free()
+		quit(1)
+		return
 
 	print("TASK1206_RESULT: %d passed, %d failed" % [_passed, _failed])
 	driver.free()
