@@ -1,0 +1,46 @@
+{
+  "schema": "sternenbuergerchen.html_workbench.v1",
+  "report_id": "neustart_2026_09_12",
+  "title": "Sternenbürgerchen · Zwei Leute. Ein Schiff. Eine Zukunft.",
+  "exported_at": "2026-09-12T17:27:30.140Z",
+  "controls": {
+    "start": "Zwei NPCs, ein menschlicher Commander",
+    "ship": "Kleines eigenes Shuttle",
+    "loss": "Verwundung und Wiederaufbau ohne frühen Permadeath",
+    "pause": "Noch offen",
+    "base": "Ausbauslots zuerst",
+    "travel": "Regionswechsel mit sichtbarer Reise",
+    "air": "Gemeint ist vor allem Weltraum / Orbit",
+    "visual": "Rostwelt mit Space-Opera-Formen",
+    "size": "Noch offen",
+    "multi": "Solo zuerst, Koop später",
+    "engine": "Geprüfte 4.6.2 als Ausgangspunkt",
+    "review_status": "direction_fits",
+    "next_focus": "world",
+    "read_vision": true,
+    "read_plan": true,
+    "read_decisions": true
+  },
+  "notes": {
+    "start": "",
+    "ship": "",
+    "loss": "",
+    "pause": "Echtzeit mit pause im single wie im multiplayer",
+    "base": "",
+    "travel": "",
+    "air": "",
+    "visual": "",
+    "size": "das gebiet um z.B. den außenposten/bunker etc",
+    "multi": "",
+    "engine": "",
+    "general": ""
+  },
+  "active_choices": {},
+  "computed": {},
+  "metadata": {
+    "reference_sha": "3cae5a216d380b58fef92724540e95fbc49bde7e",
+    "document_status": "review_draft",
+    "commander_confirmed": true,
+    "implementation_started": false
+  }
+}

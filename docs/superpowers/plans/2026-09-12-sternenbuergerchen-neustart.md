@@ -2,7 +2,7 @@
 
 > **Für ausführende Agenten:** Diesen Plan nach dem Review abschnittsweise umsetzen. N0 klärt nur noch die für den nächsten Spielweg nötigen Details. Checkboxen bezeichnen zukünftige Arbeit, keine bereits implementierte Software. Die Nutzerantworten vom 12.09.2026 ersetzen widersprechende Annahmen der ersten Fassung.
 
-**Ziel:** Als Commander mit zwei bis drei befreundeten NPCs, einer sichtbaren kleinen Basis und wenigen Schiffen eine eigene Raumfahrtorganisation aufbauen. Kleine Aufträge finanzieren Räume, Ausrüstung, Forschung und neue Crew. Boden- und Raumoperationen sowie Koop und PvP gehören zum Kernziel.
+**Ziel:** Als Commander mit zwei befreundeten NPCs, einer sichtbaren kleinen Basis und einem eigenen kleinen Startshuttle eine eigene Raumfahrtorganisation aufbauen. Kleine Aufträge finanzieren Räume, Ausrüstung, Forschung und neue Crew. Boden- und Raumoperationen sowie Koop und PvP gehören zum Kernziel.
 
 **Architektur:** Ein neues, minimales Godot-Projekt mit `SimulationRoot` als einziger Mutationsstelle. Singleplayer und Netzwerkspieler schicken Befehle durch denselben autoritativen Eingang. Das Altprojekt bleibt Referenz für gezielt übernommene Daten, Assets und Erfahrungen.
 
@@ -10,13 +10,13 @@
 
 **Spec:** [Analyse, Spielvision und Entscheidungs-Workbench](../../reports/STERNENBUERGERCHEN_NEUSTART_2026-09-12.html).
 
-**Stand:** 12.09.2026, zweite Fassung nach Nutzerantworten. Der Auftrag umfasst Analyse, Plan und HTML. Weder neues Spielprojekt noch Runtime-Funktionen oder Modellkonvertierungen sind damit bereits umgesetzt.
+**Stand:** 12.09.2026, dritte Fassung nach Nutzerantworten und dem Reviewexport von 17:27 UTC. Der Auftrag umfasst Analyse, Plan und HTML. Weder neues Spielprojekt noch Runtime-Funktionen oder Modellkonvertierungen sind damit bereits umgesetzt.
 
 ## 1. Was wir aufbauen
 
 Der Spieler führt Teams und Schiffe als Commander. Eine kleine Freundesgruppe wohnt zunächst in einer bescheidenen Basis auf der marsartigen Rostwelt. Jeder benötigt ein eigenes Bett. Am Anfang reicht ein kleiner Satellitenbergungsauftrag oder Mini-Bunker; später bewältigt die gewachsene Organisation die große Außenpostenoperation aus dem Altprojekt.
 
-Der verbindende Kreislauf lautet: In der Basis vorbereiten → Auftrag wählen → Crew und Fracht verladen → Einsatzkarte laden → erkunden, kämpfen oder arbeiten → zurückkehren → verkaufen, forschen, herstellen und ausbauen. Die Station bietet früh einen einfachen Markt. Die Basis ist ein räumlicher Bedienzugang: Werkbank oder Maschine anklicken, einen verfügbaren geeigneten NPC zuweisen und an dessen Arbeitsplatz das passende Herstellungsmenü öffnen.
+Der verbindende Kreislauf lautet: In der Basis vorbereiten → Auftrag wählen → Crew und Fracht verladen → sichtbarer Reiseübergang → Einsatzkarte laden → erkunden, kämpfen oder arbeiten → zurückkehren → verkaufen, forschen, herstellen und ausbauen. Die Station bietet früh einen einfachen Markt. Die Basis ist ein räumlicher Bedienzugang: Werkbank oder Maschine anklicken, einen verfügbaren geeigneten NPC zuweisen und an dessen Arbeitsplatz das passende Herstellungsmenü öffnen.
 
 Bodenkampf ist ein Teil dieses Spiels. Mining und Bergung finden am Boden und im Weltall statt; Hauling, Raumkampf, Reparatur und Transport verbinden die Tätigkeiten. Erfahrene NPCs können zunehmend umfassende Commander-Aufträge ausführen. Bessere Crew benötigt im PvP mehr Punkte; Koop und faire Gegeneinanderspiele werden früh praktisch nachgewiesen.
 
@@ -32,14 +32,14 @@ Bodenkampf ist ein Teil dieses Spiels. Mining und Bergung finden am Boden und im
 
 | Datum | Thema | Nutzerentscheidung / Status |
 | --- | --- | --- |
-| 12.09.2026 | Steuerung und Start | Bestätigt: Commander für Teams und Schiffe; zwei bis drei befreundete NPCs. Die genaue Startzahl bleibt ein kleiner Balanceparameter. |
+| 12.09.2026 | Steuerung und Start | Bestätigt: Commander für Teams und Schiffe; zwei befreundete NPCs. Der nachgereichte Review konkretisiert die frühere Spanne 2–3 auf zwei. |
 | 12.09.2026 | Basis | Bestätigt: kleiner sichtbarer Ausgangsort von N1 an; Bett je Mitglied; Räume an Verbindern beziehungsweise Slots bauen. Keine beliebige freie Gebäudeplatzierung. |
 | 12.09.2026 | Ausbau | Bestätigt: Schlafplätze, Waffenkammer, Forschung, Lager und Herstellung; Bauten kosten Geld/Material, fortgeschrittene Technik gegebenenfalls zusätzlich Blueprints und schaltet neue Möglichkeiten frei. |
 | 12.09.2026 | Arbeit in der Basis | Bestätigt: Objekt anklicken, geeigneten NPC zuweisen, am Arbeitsplatz das zugehörige Menü nutzen. Herstellung bindet die Person; ohne Arbeiter oder bei Spielpause stoppt ihr Fortschritt. |
 | 12.09.2026 | Verluste | Bestätigt: kein dauerhafter Tod durch Kampf; Respawn nach Wartezeit, danach erneut zum Einsatz transportierbar. Verwundung, Evakuierung und Reparatur sind gewünscht. Andere Abgangsgründe sind noch kein beschlossenes System. |
-| 12.09.2026 | Zeit | Bestätigt: Pause. Die alte Annahme „Echtzeit ohne Pause“ gilt für den Neustart nicht mehr. Netzwerk-Pausenregeln bleiben abzustimmen. |
+| 12.09.2026 | Zeit | Bestätigt: Echtzeit mit Pause im Singleplayer und Multiplayer. Die alte Annahme „Echtzeit ohne Pause“ gilt für den Neustart nicht mehr. Netzwerk-Pausenregeln bleiben abzustimmen. |
 | 12.09.2026 | Wirtschaft | Bestätigt: früher Kauf/Verkauf über eine vereinfachte Raumstation; Blueprints, Materialien und Einrichtungen bilden gemeinsam den Herstellungsfortschritt. |
-| 12.09.2026 | Welt | Bestätigt: keine nahtlose Reise nötig; zunächst eine marsartige Rostwelt mit getrennt geladenen Außenposten-, Handels- und Bunkerkarten. Taktische Außenbereiche erlauben weit entfernte Landezonen und Patrouillenumgehung. |
+| 12.09.2026 | Welt | Bestätigt: keine nahtlose Reise nötig; zunächst eine marsartige Rostwelt mit Space-Opera-Formen und getrennt geladenen Außenposten-, Handels- und Bunkerkarten. Sichtbare Reiseübergänge verbinden die Orte. Gemeint ist jeweils das großzügige Gelände um den Einsatzort. Taktische Außenbereiche erlauben weit entfernte Landezonen und Patrouillenumgehung. |
 | 12.09.2026 | Raumarbeit | Bestätigt: „in der Luft“ meint Weltall. Große Operationskarten mit Asteroiden suchen, scannen und abbauen; die Crewfähigkeit bestimmt den nötigen Umfang einzelner Anweisungen. |
 | 12.09.2026 | Multiplayer | Bestätigt: Koop und PvP sind wichtig; stärkere Crew kostet mehr Einsatzpunkte. Die konkrete Formel und weitere Kostenbestandteile sind offen. |
 | 12.09.2026 | Schiffe und Stil | Bestätigt: wenige benötigte Schiffsmuster, Kenney-Grundlage und schönere Landschaft. Die bereitgestellten Schiffsdateien liegen als FBX/OBJ vor; ihre Übernahme setzt geklärte Nutzungsrechte und technische Eignung voraus. |
@@ -47,12 +47,16 @@ Bodenkampf ist ein Teil dieses Spiels. Mining und Bergung finden am Boden und im
 
 | Noch zu konkretisieren | Zeitpunkt | Arbeitsvorschlag, noch nicht bestätigt |
 | --- | --- | --- |
-| Startschiff und Eigentum | N0 vor N1 | Gebrauchter kleiner Mehrzwecker für Personen und Fracht; an der beschriebenen Rolle orientiert. Eigenständiger deutscher Name, konkretes Modell, Besitz/Pacht und Reparaturkosten offen. |
+| Eigenes Startshuttle: Ausführung | N0 vor N1 | Eigenes kleines Shuttle ist im Review bestätigt. Offen bleiben Modell, deutscher Name, Kapazität, Reparaturkosten und Wiederbeschaffung; ein gebrauchtes Mehrzweckmodell ist ein Vorschlag. |
 | Respawn und Rücktransport | N0 vor N2 | Respawnort, Dauer, Ausrüstungsfolgen und Kosten des erneuten Transports mit einem kleinen Bunkerdurchlauf abstimmen; alte Sekundenwerte nicht automatisch übernehmen. |
 | Multiplayer-Pause und Besitz | N0 vor N1a | Host führt die Simulation; synchronisierte Host- oder gemeinsame Pause im Koop, fest vereinbarte Pause im PvP. Kein Spieler friert nur für sich die taktische Zeit ein. Kampagnenbesitz und Befehlsrechte ausdrücklich festlegen. |
 | PvP-Punktebudget | N2 | Fähigkeiten zählen wie gewünscht; Schiffe und Ausrüstung zusätzlich zu bewerten ist ein Vorschlag. Budget, Siegziel und mitgebrachte Kampagnencrew konkret festlegen. |
 | Kartenausdehnung und Leistung | N0-Probe, N7-Abnahme | Größe aus Anflug, Patrouillenreichweite und sinnvollen Umwegen bestimmen; Zielhardware und Messbudgets festhalten. Kein verpflichtendes 2×2-km-Gebiet. |
 | Herkunft der Schiffsmodelle | Vor Modellübernahme | Quellen und Nutzbarkeit des ausgewählten Subsets prüfen. Eindeutschen von Namen klärt die Herkunft oder Nutzungsrechte der Modelle nicht. |
+
+**Übermittelter Review:** [Normalisierter Export vom 12.09.2026, 17:27:30 UTC](../../reports/reviews/neustart_2026_09_12_review_172730.json). Status „Richtung passt, Details offen“; Vision, Plan und Entscheidungen gelesen; nächster Schwerpunkt „Landschaft und Weltgröße“. Zwei NPCs und ein eigenes kleines Shuttle sind damit gesetzt. Die Freitextnotiz konkretisiert Pause ausdrücklich für Singleplayer und Multiplayer. „Solo zuerst, Koop später“ beschreibt die Umsetzung: N1 lokal, danach N1a/N2 frühe Netz-/Koop-/PvP-Proben. Die zuvor ausdrücklich gewünschten beiden Multiplayer-Modi bleiben Kernanforderungen. Der aus der ersten HTML-Fassung stammende Export ist unverändert in seinen Bedeutungswerten archiviert; HTML-Entities und Markdown-Escapes der Nachricht wurden für gültiges JSON entfernt.
+
+**Nächste gestalterische Vertiefung:** Ein Außenposten-/Bunkergebiet der Rostwelt mit Landung außerhalb der Gefahrenzone, Patrouillenräumen, Anmarsch und Innenzugang konkretisieren. Großzügigkeit anhand dieser Wege beurteilen; weder ein ganzer Planet noch eine feste Kilometerzahl ist vorgegeben. Sichtbare Reiseübergänge verbinden die getrennten Orte. Das ist ein Planungsfokus, noch keine gebaute Karte oder Engineprüfung.
 
 Diese Details blockieren die weitere Planarbeit nicht. N0 entscheidet nur Abhängigkeiten des nächsten Schritts; übernommene Werte bleiben in Daten änderbar.
 
@@ -87,7 +91,7 @@ Personen, Schiffe und besuchte Karten behalten stabile IDs. Kartenwechsel erzeug
 - [ ] Neuen Zielpfad und Branch festhalten; Godot-Executable per vollständigem Pfad und Versionsausgabe prüfen. Import-/Exportversion getrennt vom vorhandenen 4.6.1-Projekt dokumentieren.
 - [ ] Host-Autorität, Kampagnen-/Sitzungsbesitz, Crew-Befehlsrechte, Verbindungsabbruch und Pausenregel für N1a/N2 knapp festlegen. Keine allein auf später verschobene Multiplayer-Architektur.
 - [ ] Produktstart, stabile IDs, Commands und versioniertes Save an einem minimalen Zustand erproben; keine Übernahme des gesamten alten Gerüsts.
-- [ ] Rostwelt-Stilreferenz auswählen: Kenney-Silhouetten, ausgearbeitete Höhen, Felsen, Bodenmaterialien und Licht; zuerst ein kleiner sichtbarer Ausschnitt.
+- [ ] Rostwelt-Stilreferenz mit Space-Opera-Formen konkretisieren: Kenney-Silhouetten, ausgearbeitete Höhen, Felsen, Bodenmaterialien und Licht; zuerst ein kleiner sichtbarer Ausschnitt.
 - [ ] Größenprobe mit entfernten Landezonen, Patrouillenraum und Kamerabewegung entwerfen; Zielhardware, Frame-/Simulationszeit, Ladezeit und Speicher als Messgrößen festhalten.
 - [ ] Modellverzeichnisse nur für das benötigte Startsubset sichten; vor Übernahme Herkunft, Geometrie und tatsächliche Spielrolle festhalten.
 - [ ] Kenney-Quelle `C:\Users\bjoer\Pictures\Kenney Game Assets All-in-1 3.4.0` für das kleine Basisset nutzen; benötigte Assets kuratiert ins neue Projekt kopieren und Originale erhalten.
@@ -97,10 +101,10 @@ Personen, Schiffe und besuchte Karten behalten stabile IDs. Kartenwechsel erzeug
 
 ## 5. N1 – Freundesgruppe, kleine Basis und erster Satellit
 
-**Ergebnis:** Ein vollständiger erster Auftrag beginnt und endet in einer sichtbaren kleinen Basis. Zwei oder drei benannte NPCs wohnen dort; Transport ist zunächst ein erklärter Übergang.
+**Ergebnis:** Ein vollständiger erster Auftrag beginnt und endet in einer sichtbaren kleinen Basis. Zwei benannte NPCs wohnen dort und besitzen ein kleines Shuttle; Transport verbindet die Karten zunächst über einen sichtbaren, verständlichen Reiseübergang.
 
-- [ ] Basiskern mit Anschlussplätzen, einem Bett pro Startmitglied, kleinem Lager und einfacher Werkbank zeigen. Die genaue Startzahl aus N0 übernehmen.
-- [ ] Anfangsausrüstung, nutzbaren kleinen Mehrzwecktransport und Satellitenbergung auf einer geladenen Rostwelt-Karte anlegen.
+- [ ] Basiskern mit Anschlussplätzen, einem Bett pro Startmitglied, kleinem Lager und einfacher Werkbank zeigen. Für die bestätigten zwei NPCs zwei Betten vorsehen.
+- [ ] Anfangsausrüstung, nutzbares eigenes kleines Shuttle und Satellitenbergung auf einer geladenen Rostwelt-Karte anlegen.
 - [ ] Auftrag in der Basis annehmen, Crew/Cargo vorbereiten, zur Landezone reisen, bewegen, bergen und zurückkehren können.
 - [ ] Nähe, Arbeitsdauer und Frachtgrenzen prüfen; Abbruch, Rückzug und bereits geladene Beute ausdrücklich behandeln.
 - [ ] Einmalige Auszahlung und einen Blueprint sichtbar machen. Die Werkbank per Klick öffnen, geeigneten verfügbaren NPC zuweisen und nach dessen Ankunft ein einfaches Rezept oder eine kleine Reparatur ausführen. Der Arbeiter bleibt währenddessen gebunden; Spezialwerkstätten folgen N3.
@@ -139,7 +143,7 @@ Personen, Schiffe und besuchte Karten behalten stabile IDs. Kartenwechsel erzeug
 - [ ] Räume an freie Anschlussplätze des Basiskerns oder weiterer Verbinder setzen; Kosten, Bauzeit, Voraussetzungen und spätere Funktion vor dem Bau anzeigen.
 - [ ] Schlafplätze, Lager und einfache Werkbank erweitern; zusätzliche Schlafräume, Waffenkammer, Forschungsraum und Spezialwerkstatt bauen. Gebäude, Maschinen und hochwertige Technik bei Bedarf an Blueprints binden.
 - [ ] Baukosten, Slot- und Bettreservierung zentral committen. Ein neues Mitglied benötigt ein verfügbares Bett; parallele Koop-Aktionen dürfen denselben Platz nicht doppelt vergeben.
-- [ ] Bewerber über Einsatzerfolge/Ruf anbieten; Fähigkeiten, Aufgaben und Belastung zeigen. Wachstum etwa von 2–3 auf 4 und 6 Personen ist ein Balancevorschlag.
+- [ ] Bewerber über Einsatzerfolge/Ruf anbieten; Fähigkeiten, Aufgaben und Belastung zeigen. Wachstum von den bestätigten 2 auf etwa 4 und 6 Personen ist ein Balancevorschlag.
 - [ ] Forschung/Blueprint + passende Maschine + geeigneter Arbeiter am Arbeitsplatz + Material + Kosten + Dauer mit wenigen wirksamen Rezepten verbinden. Maschinen öffnen per Objektklick ihr Kontextmenü; Marktmaterial hält den Kreis vor Mining nutzbar.
 - [ ] Rekrutierung, Einsatzlernen, Erholung, Raumzustand und Produktion speichern; die wachsende Fähigkeit in der vereinbarten PvP-Punktebewertung abbilden.
 

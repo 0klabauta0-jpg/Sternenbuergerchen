@@ -1,7 +1,7 @@
 # Neustart: Spielvision, Analyse und Arbeitsplan
 
 ## Ziel und Anlass
-Der Nutzer möchte seine ursprüngliche und fortentwickelte Commander-Spielidee rekonstruieren und einen vollständigen Neustart planen: zwei bis drei befreundete NPCs, sichtbare Slotbasis, Aufträge, Crew-Wachstum, Wirtschaft, Boden und Raum sowie Koop/PvP. Zunächst eine Rostwelt mit getrennten, taktisch ausreichend großen Einsatzkarten. Lieferumfang ist Analyse, Entwicklungsplan und lokale interaktive HTML, keine aktuelle Gameplay-Implementierung.
+Der Nutzer möchte seine ursprüngliche und fortentwickelte Commander-Spielidee rekonstruieren und einen vollständigen Neustart planen: zwei befreundete NPCs, eigenes kleines Shuttle, sichtbare Slotbasis, Aufträge, Crew-Wachstum, Wirtschaft, Boden und Raum sowie Koop/PvP. Zunächst eine Rostwelt mit getrennten, taktisch ausreichend großen Einsatzkarten. Lieferumfang ist Analyse, Entwicklungsplan und lokale interaktive HTML, keine aktuelle Gameplay-Implementierung.
 
 ## Arbeitsbasis
 - `integration/core-foundation` auf `3cae5a216d380b58fef92724540e95fbc49bde7e`.
@@ -50,3 +50,12 @@ Keine neue Godot-Messung oder vollständige Codeprüfung. Historische Performanc
 - Alte v1-Notizen einschließlich Kartengrößenkommentar bleiben erhalten; alte Auswahlwerte überschreiben keine bestätigten Entscheidungen. Neue Parameter/Notizen überstehen Reload, JSON-Download/Text und Import-Roundtrip. Ungültiger Import verändert vorhandene Notizen nicht.
 - Unabhängiger Inhaltsreview: Schiffskatalog bedarfsabhängig gehalten, Multiplayer-Abnahmen N6–N8 mit dem Plan angeglichen und zusätzliche Rettungs-/Reparatur-Auftragsketten von frühen Kernfunktionen unterschieden.
 - Prüfartefakte liegen außerhalb des Repositorys unter `C:\Users\bjoer\.codex\visualizations\2026\09\12\01a09651-a457-70e0-8d66-a5d15acc6f31\neustart-pruefung\revision-2`. Testnotizen im isolierten Prüfprofil entfernt.
+
+
+## Revision 3: übermittelter Review vom 12.09.2026, 17:27 UTC
+- Ursache: Der Nutzer hat den Export aus der ersten HTML-Fassung übermittelt. Auswahlfelder, Freitext und bereits bestätigte Gesprächsentscheidungen werden zusammengeführt; keine automatische Rücknahme von Koop/PvP durch ein älteres Dropdown.
+- Zwei NPCs und eigenes kleines Shuttle festgelegt. Echtzeit mit Pause ausdrücklich im Singleplayer und Multiplayer; genaue gemeinsame Pausenberechtigung bleibt offen. Kartenmaßstab meint das Gelände um Außenposten/Bunker; sichtbare Reiseübergänge und Rostwelt mit Space-Opera-Formen aufgenommen.
+- Reviewstatus „Richtung passt, Details offen“, alle drei Lesemarkierungen und Fokus „Landschaft und Weltgröße“ festgehalten. Solo zuerst bedeutet N1 lokal, anschließend N1a/N2; Koop/PvP bleiben Kernziele. Die Enginewahl ist kein bereits erfolgter Versionsnachweis.
+- Der semantisch unveränderte Export ist unter `docs/reports/reviews/neustart_2026_09_12_review_172730.json` archiviert. Nur HTML-Entities und Markdown-Escapes der übermittelten Darstellung wurden normalisiert. HTML, Plan und Status synchronisiert; keine Runtime geändert.
+- Prüfung 12.09.2026, 17:33 UTC: Desktop/Mobile ohne Überbreite, 13 Kapitel, 14 festgehaltene Themen und 5 Detailparameter. Tatsächlichen Nutzerdatensatz importiert: Notizen, Durchsicht und Fokus korrekt übernommen; aufgezeichnete Entscheidungen bleiben geschützt. Reload, JSON-Download/Text, Import-Roundtrip, ungültiger Import, lokale Quelllinks, Bilder und Bedienfunktionen bestanden; keine Browserfehler oder externen Anfragen.
+- Unabhängiger Review korrigierte letzte offene Startzahl-/Eigentumsformulierungen in N1, Schiffstabelle und Entscheidungsabschnitt. Prüfbilder/-bericht liegen im bisherigen externen Prüfverzeichnis unter `revision-3`.
