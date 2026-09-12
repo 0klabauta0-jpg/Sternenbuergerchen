@@ -1,0 +1,8 @@
+.godot/
+.superpowers/
+output/
+*.tmp
+*.log
+*.exe
+*.pck
+
