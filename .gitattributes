@@ -1,0 +1,2 @@
+# Keep the original Kenney license texts byte-for-byte, including source whitespace.
+assets/licenses/*.txt -text -whitespace

@@ -1,8 +1,9 @@
 .godot/
 .superpowers/
 output/
+assets/local/
 *.tmp
 *.log
 *.exe
 *.pck
-
+*.blend1
