@@ -1,3 +1,16 @@
+# N4 · gemeinsame Crew über echte Produktprozesse
+
+13.09.2026: `tests/network_run.ps1 -Visual -Port 28149` verwendet jetzt den aktuellen gemeinsamen N4-Commandweg aus `internet_process_probe.gd`. Die bisherige N2-Zwangstrennung Host/Ida und Gast/Jaro ist absichtlich abgelöst; `network_probe.gd` bleibt ein kompatibler LAN-Einstieg.
+
+**62/62 Produktfensterchecks bestanden (Host32/Gast30).** Zwei echte `scenes/game.tscn`-Instanzen, ENet, isolierte Karrierepfade; Hostzeit12×, Netzwerk und Snapshots in Echtzeit. Geprüft: Gast bewegt beide Figuren, Host besetzt Jaro, doppelte Anfrage genau einmal, kein PvP, Ortsprüfung für Handel, gemeinsame Pause, echte Save/Load-Wiederherstellung mit steigender Revision, Disconnect/Rejoin, gefertigte und aus dem erreichbaren Lager angelegte Rüstung, tatsächlich laufendes Boarding, Gast-Launch → Orbit → Reise → Landung → Kauf aus gemeinsamen Credits. Schema4 und vollständige Host-/Gast-Snapshots stimmen in Pause, Restore und Abschluss überein. Alle Enginefehlerlogs leer.
+
+Evidenz: `C:/Users/bjoer/AppData/Local/Temp/sternen-internet-002ab527671241daa73174fff5ac1b82`. Sechs Bilder `host/guest-paused/restored/final.png` sind tatsächliche Viewport-Captures. Zusätzlicher gleicher Headless-ENet-Lauf56/56: `C:/Users/bjoer/AppData/Local/Temp/sternen-internet-83c94edc0a764702b93b1f5168600b4e`.
+
+Die Internet-Gateway-Lifecycle-/Einladungsprüfung besteht separat15/15. Authentifizierung übernimmt weiter die tatsächliche Snapshotversion; Verbindungsabsender kommen ausschließlich vom Multiplayer-Peer. Geteilte Crewrechte benötigen keine Aufweichung des Gateways. Der öffentliche N4-WSS-Status steht in `tests/internet_report.md`.
+
+---
+
+## Historische N2/N3-Abnahme (vor Änderung der Koop- und Reisebedienung)
 # N2 — echte Produktprozesse, Suche und Raumkontakt
 
 Die aktuelle Abnahme benutzt `tests/network_run.ps1 -Visual -Port 28073`: zwei echte Godot4.6.2-Produktprozesse mit `scenes/game.tscn`, ENet-Verbindung und vollständig isolierten Savepfaden. `game.simulation_seed=3` legt ausschließlich den Startwert des produktiven Zufallsgenerators fest; keine Mission, Geometrie, Gesundheit oder Auszahlung wird für Erfolg injiziert. Autoritative Zeit läuft beschleunigt; Netzwerk und Snapshot-Takt bleiben echte Echtzeit.

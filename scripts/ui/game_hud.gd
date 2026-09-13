@@ -7,13 +7,14 @@ signal action_requested(action: String, payload: Dictionary)
 const Icons=preload("res://scripts/ui/hud_icons.gd")
 const Catalog=preload("res://scripts/core/catalog.gd")
 const GroundContext=preload("res://scripts/ui/ground_context.gd")
+const ShipContext=preload("res://scripts/ui/ship_context.gd")
 
 const INK := Color("101d27")
 const PAPER := Color("eee8da")
 const MUTED := Color("a3b3b8")
 const AMBER := Color("efab6f")
 const CYAN := Color("86c5c2")
-const REGIONS := {"base": "HEIMAT / ROSTGRENZE", "rust": "ROSTGRENZE / SUCHGEBIET", "station": "ORBIT / HANDELSSTATION", "space":"ORBIT / RAUMKONTAKT","bunker_surface":"WACHTPOSTEN / OBERFLÄCHE","bunker_depths":"BUNKER / UNTERGRUND","distribution":"KNOTENWERK / VERTEILZENTRUM","tradepost":"STAUBMARKT / HANDELSPOSTEN"}
+const REGIONS := {"orbit":"ROSTWELT / ORBIT","base": "HEIMAT / ROSTGRENZE", "rust": "ROSTGRENZE / SUCHGEBIET", "station": "ORBIT / HANDELSSTATION", "space":"ORBIT / RAUMKONTAKT","bunker_surface":"WACHTPOSTEN / OBERFLÄCHE","bunker_depths":"BUNKER / UNTERGRUND","distribution":"KNOTENWERK / VERTEILZENTRUM","tradepost":"STAUBMARKT / HANDELSPOSTEN"}
 
 var selected_unit := "ida"
 var selected_units: Array[String]=["ida"]
@@ -28,6 +29,7 @@ var _network: Label
 var _context_title: Label
 var _context_text: RichTextLabel
 var _context_actions: GridContainer
+var _action_scroll: ScrollContainer
 var _hint: Label
 var _log: Label
 var _toast: Label
@@ -60,6 +62,8 @@ var _ship_value: Label
 var _cargo_value: Label
 var _quick_actions: Dictionary={}
 var _crew_caption: Label
+var _dossier: Window
+var _dossier_unit := "ida"
 
 func _ready() -> void:
 	_root = Control.new()
@@ -94,6 +98,7 @@ func _ready() -> void:
 	_build_footer()
 	_build_travel()
 	_build_network()
+	_build_dossier()
 	set_process(true)
 
 func _style(color: Color, radius: int = 8, border: Color = Color("33464e")) -> StyleBoxFlat:
@@ -168,7 +173,7 @@ func _build_crew() -> void:
 	_crew_caption=_label("CREW / 01 GEWÄHLT",11,AMBER)
 	_crew_caption.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	header.add_child(_crew_caption)
-	_icon_button("contracts","Charakterbogen der gewählten Figur",func():choose_unit(selected_unit,true),header,24)
+	_icon_button("contracts","Dossier und Ausrüstung öffnen",func():open_dossier(selected_unit),header,24)
 	_icon_button("target","Zur gewählten Figur",func():action_requested.emit("focus_unit",{"unit_id":selected_unit}),header,24)
 	var cards:=HBoxContainer.new()
 	cards.add_theme_constant_override("separation",6)
@@ -181,6 +186,11 @@ func _build_crew() -> void:
 		button.expand_icon=true
 		button.add_theme_constant_override("icon_max_width",40)
 		button.add_theme_font_size_override("font_size",12)
+		button.tooltip_text = "Klick: auswählen · Doppelklick: Dossier und Ausrüstung"
+		button.gui_input.connect(func(event: InputEvent):
+			if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed and event.double_click:
+				open_dossier(id)
+				button.accept_event())
 		_crew_buttons[id]=button
 	_network=Label.new();_network.hide();column.add_child(_network)
 
@@ -216,7 +226,12 @@ func _build_context() -> void:
 	_context_actions=GridContainer.new()
 	_context_actions.columns=2
 	_context_actions.add_theme_constant_override("separation",7)
-	column.add_child(_context_actions)
+	_action_scroll=ScrollContainer.new()
+	_action_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	_action_scroll.custom_minimum_size.y=190
+	column.add_child(_action_scroll)
+	_context_actions.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	_action_scroll.add_child(_context_actions)
 	_hint=_label("",12,MUTED)
 	_hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_hint)
@@ -265,6 +280,21 @@ func set_invitation(invitation:String) -> void:
 func open_network(internet:bool=true) -> void:
 	_network_window.open(internet)
 
+func _build_dossier() -> void:
+	_dossier = load("res://scripts/ui/crew_dossier.gd").new()
+	add_child(_dossier)
+	_dossier.action_requested.connect(func(action: String, payload: Dictionary):action_requested.emit(action,payload))
+
+func open_dossier(id: String) -> void:
+	if not _state.get("crew",{}).has(id): return
+	_dossier_unit = id
+	choose_unit(id,false)
+	_dossier.present(_state,id)
+	_dossier.open_for(id)
+
+func present_command_result(result: Dictionary) -> void:
+	if is_instance_valid(_dossier): _dossier.present_result(result)
+
 func choose_unit(id: String, focus: bool) -> void:
 	selected_unit=id
 	selected_units=[id]
@@ -308,14 +338,14 @@ func set_direct_mode(enabled: bool) -> void:
 
 func set_connection(text: String, guest: bool) -> void:
 	_network.text=text
-	if guest and not _guest: choose_unit("jaro",false)
 	_guest=guest
-	_pause.disabled=guest
-	_pause.tooltip_text="Der Host steuert die gemeinsame Pause." if guest else "Leertaste: Pause / Weiter"
+	_pause.disabled=false
+	_pause.tooltip_text="Gemeinsame Pause / Weiter [Leertaste]"
 
 func present(state: Dictionary) -> void:
 	_state=state
 	if state.is_empty(): return
+	if is_instance_valid(_dossier) and _dossier.visible: _dossier.present(state,_dossier_unit)
 	var region: String=state.get("region","base")
 	if region != _last_region:
 		_last_region=region
@@ -336,10 +366,10 @@ func present(state: Dictionary) -> void:
 	for id: String in _crew_buttons:
 		var unit: Dictionary=state.get("crew",{}).get(id,{})
 		var assignment: String=unit.get("assignment","idle")
-		var work_label: String={"idle":"Bereit", "work":"Werkstatt", "salvage":"Bergung", "boarding":"Zum Shuttle", "moving":"Unterwegs", "aboard":"Pilotin" if id=="ida" else "Geschützturm","gather":"Gewinnung","downed":"Rückkehr %d s" % int(unit.get("respawn_remaining",0))}.get(assignment,assignment)
+		var work_label: String={"idle":"Bereit", "work":"Werkstatt", "salvage":"Bergung", "boarding":"Zum Shuttle", "moving":"Unterwegs", "aboard":_seat_label(str(unit.get("seat",""))),"gather":"Gewinnung","downed":"Rückkehr %d s" % int(unit.get("respawn_remaining",0))}.get(assignment,assignment)
 		var button: Button=_crew_buttons[id]
 		var owns: bool=_owns(id)
-		var owner_label: String="DU" if owns else "HOST" if _guest else "GAST"
+		var owner_label: String="CREW" if owns else ""
 		button.text=("● " if id in selected_units else "○ ")+str(unit.get("name",id))+"  "+owner_label+"\n"+work_label
 		button.add_theme_stylebox_override("normal",_style(Color("304d53") if id in selected_units else Color("243640"),5,CYAN if id in selected_units else Color("33464e")))
 	var entries: Array=state.get("log",[])
@@ -361,7 +391,7 @@ func _rebuild_actions() -> void:
 		_context_actions.remove_child(child)
 		child.queue_free()
 	_action_buttons.clear()
-	_context_actions.columns=3 if selection_id in ["market","workbench"] else 1 if selection_id=="storage" else 2
+	_context_actions.columns=1 if selection_id=="storage" else 2
 	_worker.visible=selection_id in ["workbench","satellite"]
 	if GroundContext.build(self,selection_id): return
 	match selection_id:
@@ -369,7 +399,8 @@ func _rebuild_actions() -> void:
 			_add_command("accept_contract","Auftrag annehmen","accept_contract")
 			_add_command("claim_contract","Bergung abgeben","claim_contract")
 		"workbench":
-			for id: String in ["toolkit","repair","helmet","armor","cutter"]:
+			for id: String in Catalog.recipes():
+				if id=="upgrade_workbench":continue
 				if Catalog.recipes().has(id): _add_command(id,str(Catalog.recipes()[id].label),"assign_work",{"recipe_id":id},true)
 			_add_command("upgrade_workbench","Werkbank auf Stufe 2 ausbauen","upgrade_workbench",{},true)
 			_add_command("cancel_work","Abbrechen","cancel_work")
@@ -378,33 +409,21 @@ func _rebuild_actions() -> void:
 			_add_command("salvage","Hingehen und bergen","salvage",{},true)
 			_add_command("cancel_salvage","Bergung abbrechen","cancel_salvage")
 		"shuttle":
-			_icon_button("target","Shuttle zeigen",func():action_requested.emit("focus_object",{"object_id":"shuttle"}),_context_actions)
-			_add_command("rust","Zur Absturzstelle","travel",{"destination":"rust"})
-			_add_command("base","Heimfliegen","travel",{"destination":"base"})
-			_add_command("station","Zur Handelsstation","travel",{"destination":"station"})
-			for destination:String in ["bunker_surface","distribution","tradepost"]:
-				_add_command(destination,REGIONS[destination],"travel",{"destination":destination})
-			if _state.get("rental",{}).get("active",false):_add_command("return_rental","Mietschiff zurückgeben","return_rental")
+			ShipContext.build(self)
 		"market":
-			for item: String in ["scrap","parts"]:
-				var label: String="Metall" if item=="scrap" else "Bauteil"
-				_add_command("buy_"+item,label+" kaufen (+1)","trade",{"side":"buy","item":item,"amount":1})
-				_add_command("sell_"+item,label+" verkaufen (−1)","trade",{"side":"sell","item":item,"amount":1})
-			_add_command("sell_toolkit","Werkzeugkit verkaufen","trade",{"side":"sell","item":"toolkit","amount":1})
-			_add_command("sell_cutter","Schneider verkaufen","trade",{"side":"sell","item":"cutter","amount":1})
-			for item:String in ["armor","helmet"]:
+			for item: String in Catalog.prices():
 				_add_command("buy_"+item,Catalog.item_name(item)+" kaufen","trade",{"side":"buy","item":item,"amount":1})
-			for item:String in ["ore","alloy"]:
 				_add_command("sell_"+item,Catalog.item_name(item)+" verkaufen","trade",{"side":"sell","item":item,"amount":1})
 			if _state.get("region","")=="station":_add_command("rent_ship","Geier mieten · 900 Credits / 20 Spielminuten","rent_ship",{"ship_id":"vulture"})
 		"storage":
 			_hint.text="Güter aus dem Shuttle werden zu Hause ins Lager übernommen."
-			for item: String in ["scrap","parts","toolkit","cutter","helmet","armor","ore","alloy"]:
+			for item: String in Catalog.ITEMS:
 				var row:=HBoxContainer.new()
 				_context_actions.add_child(row)
 				_add_command("load_"+item,_item_name(item),"transfer",{"item":item,"amount":1,"direction":"load"},false,row)
 				_add_command("unload_"+item,"Ausladen","transfer",{"item":item,"amount":1,"direction":"unload"},false,row)
 		"ida","jaro":
+			_button("Dossier & Ausrüstung",func():open_dossier(selected_unit),_context_actions,48)
 			_add_command("equip_helmet","Instandgesetzten Helm aus dem Lager ausrüsten","equip",{"item":"helmet"},true)
 			for item:String in ["armor","toolkit","cutter"]:
 				_add_command("equip_"+item,Catalog.item_name(item)+" aus dem Lager ausrüsten","equip",{"item":item},true)
@@ -447,17 +466,23 @@ func _update_context() -> void:
 	if not _worker.disabled: _worker.select(0 if selected_unit=="ida" else 1)
 	for index: int in range(2):
 		_worker.set_item_disabled(index,not _owns("ida" if index==0 else "jaro"))
-	var height: float={"workbench":410,"market":455,"storage":575,"shuttle":480,"satellite":305,"contracts":250,"ida":520,"jaro":520}.get(selection_id,310)
+	var height: float={"workbench":500,"market":530,"storage":530,"shuttle":500,"satellite":305,"contracts":250,"ida":520,"jaro":520}.get(selection_id,310)
+	_action_scroll.custom_minimum_size.y=minf(210,maxf(48,_context_actions.get_combined_minimum_size().y))
 	_context_panel.offset_top=-height-50
 	_context_panel.offset_bottom=-50
+	if selection_id.begins_with("bed_"):
+		_context_title.text="Unterkunft / Schlafplatz"
+		_context_text.text="Zwei belegte Betten und vier zusätzliche Plätze an den Wänden."
+		_hint.text="Neue Crew folgt mit Bewerbern und Rekrutierung."
+		return
 	if GroundContext.present(self,selection_id): return
 	match selection_id:
 		"contracts":
 			_context_title.text="Ein Signal im Staub"
 			_context_text.text="Ein abgestürzter Satellit sendet noch. Bringe seine Blackbox nach Hause.\n\n[b]260 Credits + Bauplan: Schneider[/b]"
-			_disable("accept_contract",contract.status!="available" or _guest)
-			_disable("claim_contract",int(inventory.blackbox)<1 or contract.status=="claimed" or _guest)
-			_hint.text="Der Host koordiniert die Aufträge." if _guest else "Abgeben, sobald die Blackbox im Basislager liegt."
+			_disable("accept_contract",contract.status!="available")
+			_disable("claim_contract",int(inventory.blackbox)<1 or contract.status=="claimed")
+			_hint.text="Abgeben, sobald die Blackbox im Basislager liegt."
 		"workbench":
 			_context_title.text="Werkstatt · Stufe "+str(_state.get("base",{}).get("workbench_tier",1))
 			_context_text.text="Verfügbar im Lager: [b]%d Metall · %d Bauteile[/b]\nArbeiter für den nächsten Auftrag:" % [int(inventory.scrap),int(inventory.parts)]
@@ -468,7 +493,7 @@ func _update_context() -> void:
 				_show_progress(work,"Werkbank")
 			_disable("cancel_work",not busy or (busy and not _owns(work.unit_id)))
 			if _action_buttons.has("upgrade_workbench"):
-				_action_buttons.upgrade_workbench.disabled=busy or _guest or int(_state.get("base",{}).get("workbench_tier",1))>=2
+				_action_buttons.upgrade_workbench.disabled=busy or int(_state.get("base",{}).get("workbench_tier",1))>=2
 
 		"satellite":
 			_context_title.text="Abgestürzter Satellit"
@@ -477,36 +502,33 @@ func _update_context() -> void:
 			if not _owns(selected_unit): blocked="Diese Figur gehört dem anderen Commander."
 			elif actor.assignment!="idle": blocked="Die gewählte Person ist bereits im Einsatz."
 			elif _state.wreck_remaining<=0: blocked="Wrack vollständig geborgen."
+			elif contract.status in ["recovered","claimed"]:
+				var equipment:Dictionary=actor.get("equipment",{})
+				if not (equipment.get("tool","")=="cutter" or (equipment.get("tool","")=="multitool" and equipment.get("attachment","")=="salvage_attachment")):
+					blocked="Weitere Bergung erfordert einen Schneider oder ein Multi-Tool mit Berge-Aufsatz."
 			_disable("salvage",salvage.active or not blocked.is_empty())
 			_disable("cancel_salvage",not salvage.active or (salvage.active and not _owns(salvage.unit_id)))
 			_hint.text=blocked
 			if salvage.active: _show_progress(salvage,"Bergung")
 		"shuttle":
-			_context_title.text=str(_state.ship.get("name","Entersäbel"))
-			_context_text.text="[b]Zustand %d %% · Fracht %d / %d[/b]\nAn Bord: %s\nIda: Pilotin · Jaro: Geschützturm\nZur Station kann ein Piratenkontakt auftreten." % [int(_state.ship.condition),_cargo_used(),int(_state.ship.capacity),_items(cargo)]
-			var blocked: String="Der Host entscheidet über die gemeinsame Reise." if _guest else "Laufende Arbeit zuerst beenden oder abbrechen." if work.active or salvage.active else ""
-			for key: String in ["base","rust","station","bunker_surface","distribution","tradepost"]:
-				_disable(key,_state.region==key or _state.region in ["space","bunker_depths"] or _state.travel.active or not blocked.is_empty() or (key=="rust" and contract.status=="available"))
-			_disable("return_rental",_guest or _state.region not in ["base","station"])
-			if _state.get("rental",{}).get("active",false):_context_text.text+="\nMiete: %d s verbleiben" % int(_state.rental.remaining)
-			_hint.text=blocked if not blocked.is_empty() else "Für die Absturzstelle zuerst den Auftrag annehmen." if contract.status=="available" else "Reiseziel wählen."
+			ShipContext.present(self)
 		"market":
 			_context_title.text="Markt / "+REGIONS.get(_state.region,_state.region)
 			_context_text.text="[b]%d Credits · Fracht %d / %d[/b]\nAn Bord: %s" % [int(_state.credits),_cargo_used(),int(_state.ship.capacity),_items(cargo)]
-			_hint.text="Handel übernimmt der Host." if _guest else "Einkäufe kommen ins Shuttle. Zu Hause wird automatisch ausgeladen."
-			_disable("rent_ship",_guest or int(_state.credits)<900 or bool(_state.get("rental",{}).get("active",false)))
+			_hint.text="Einkäufe kommen in die Schiffsfracht. Am Heimatdock über das Lager oder Dossier ausladen."
+			_disable("rent_ship",int(_state.credits)<900 or bool(_state.get("rental",{}).get("active",false)))
 			if _state.region=="station":_context_text.text+="\nGeier: 900 Cr für 20 Spielminuten. Mehr Fracht und Wrackertrag."
 
 		"storage":
 			_context_title.text="Basislager"
 			_context_text.text="[b]Im Lager[/b]  "+_items(inventory)+"\n\n[b]Im Shuttle[/b]  "+_items(cargo)
 			_hint.text="Je Klick ein Gut. Ausladen macht eine Verladung rückgängig."
-			for item: String in ["scrap","parts","toolkit","cutter","helmet","armor","ore","alloy"]:
-				_disable("load_"+item,_guest or int(inventory[item])<=0 or _cargo_used()>=int(_state.ship.capacity) or _state.travel.active)
-				_disable("unload_"+item,_guest or int(cargo[item])<=0 or _state.travel.active)
+			for item: String in Catalog.ITEMS:
+				_disable("load_"+item,int(inventory[item])<=0 or _cargo_used()>=int(_state.ship.capacity) or _state.travel.active)
+				_disable("unload_"+item,int(cargo[item])<=0 or _state.travel.active)
 		"bed_ida","bed_jaro":
 			_context_title.text="Ein Platz für "+("Ida" if selection_id=="bed_ida" else "Jaro")
-			_context_text.text="Fest reserviertes Bett.\n\nZwei Freunde, zwei Schlafplätze. Mehr Crew braucht später weiteren Wohnraum."
+			_context_text.text="Fest reserviertes Bett.\n\nVier weitere Schlafplätze stehen bereit. Neue Crew folgt mit Rekrutierung."
 		"kitchen":
 			_context_title.text="Aufenthalt & Küche"
 			_context_text.text="Gemeinsamer Tisch, etwas Warmes und der nächste Auftrag.\n\nDer Auftragscomputer steht in der ruhigen Ecke dieses Raums."
@@ -514,30 +536,24 @@ func _update_context() -> void:
 			_context_title.text="Freier Andockplatz"
 			_context_text.text="Hier kann die Basis später weiterwachsen.\n\nVorgesehen: zusätzliche Unterkünfte, Forschung oder eine größere Werkstatt. Der Modulbau folgt in einer späteren Stufe."
 		_:
-			_context_title.text="Gruppe · "+str(selected_units.size()) if selected_units.size()>1 and not _direct_mode else str(actor.get("name",selected_unit))
-			var skills: Dictionary=actor.get("skills",{})
+			_context_title.text="Gruppe · "+str(selected_units.size()) if selected_units.size()>1 else str(actor.get("name",selected_unit))
 			var gear: Dictionary=actor.get("equipment",{})
-			var assignment: String=str(actor.get("assignment","idle"))
-			var status_label: String={"idle":"Bereit","work":"In der Werkstatt","salvage":"Bergung","boarding":"Auf dem Weg zum Schiff","aboard":"An Bord","gather":"Materialgewinnung","downed":"Wiederherstellung"}.get(assignment,assignment)
-			_context_text.text="[b]CREWAKTE / "+str(actor.get("name",selected_unit))+"[/b]\n"+("Pilotin & Technikerin" if selected_unit=="ida" else "Turmschütze & Bergungshelfer")+"\n\nTechnik %d   ·   Pilot %d   ·   Geschütz %d\n\nHelm: %s\nWerkzeug: %s\nStatus: %s" % [int(skills.get("tech",actor.get("skill",0))),int(skills.get("pilot",0)),int(skills.get("gunnery",0)),_item_name(str(gear.get("helmet","Basishelm"))),_item_name(str(gear.get("tool","Grundwerkzeug"))),status_label]
-			var effects:Dictionary=Catalog.skill_effects(actor)
-			_context_text.text+="\nRüstung: %s\nGesundheit: %d / 100\n\n[b]WIRKUNG[/b]\nBodentreffer: %d · Turmtreffer: %d\nFlugtempo: +%d %% · Schutz: %d %%\nAbbau- / Bergezeit: ×%.2f" % [_item_name(str(gear.get("armor",""))),int(actor.get("health",100)),int(effects.get("ground_damage",10)),int(effects.get("turret_damage",7)),roundi((float(effects.get("flight_multiplier",1))-1)*100),roundi(float(effects.get("armor_reduction",0))*100),1.0/maxf(float(effects.get("gather_multiplier",1)),0.01)]
-			_hint.text="Technik schaltet Rezepte frei. Erfahrung, Traits und Beziehungen folgen."
-			if float(actor.get("respawn_remaining",0))>0:_hint.text="Wiederherstellung: %.1f s. Pause hält auch diesen Timer an." % float(actor.respawn_remaining)
-			for item:String in ["armor","toolkit","cutter"]:_disable("equip_"+item,not _owns(selected_unit) or _state.region!="base" or int(inventory.get(item,0))<=0 or actor.get("assignment","idle")!="idle")
-			_disable("equip_helmet",not _owns(selected_unit) or _state.region!="base" or int(inventory.get("helmet",0))<=0 or actor.get("assignment","idle")!="idle")
+			_context_text.text="[b]%d / 100 Gesundheit[/b]\n%s\n\nHelm: %s\nRüstung: %s\nWerkzeug: %s" % [int(actor.get("health",100)),_seat_label(str(actor.get("seat",""))) if actor.get("assignment","")=="aboard" else str(actor.get("assignment","idle")).replace("idle","Bereit"),_item_name(str(gear.get("helmet",""))),_item_name(str(gear.get("armor",""))),_item_name(str(gear.get("tool","")))]
+			_hint.text="Doppelklick auf das Porträt: Dossier, Ausrüstung und Rucksack öffnen."
+			for item: String in ["helmet","armor","toolkit","cutter"]:
+				_disable("equip_"+item,_state.region!="base" or int(inventory.get(item,0))<=0 or actor.get("assignment","idle")!="idle")
 
 func set_recipe_details(recipes: Dictionary,prices: Dictionary) -> void:
 	_recipes=recipes
 	_prices=prices
 	if _state.is_empty(): return
 	if selection_id=="workbench":
-		for id: String in ["toolkit","repair","helmet","armor","cutter","upgrade_workbench"]:
+		for id: String in recipes:
 			if not recipes.has(id) or not _action_buttons.has(id): continue
 			var recipe: Dictionary=recipes[id]
 			var reason: String=_recipe_blocked(id,recipe)
 			var button: Button=_action_buttons[id]
-			var caption: String={"toolkit":"Werkzeugkit","repair":"Reparieren","helmet":"Helm richten","armor":"Rüstung","cutter":"Schneider","upgrade_workbench":"Werkbank II"}[id]
+			var caption: String={"toolkit":"Werkzeugkit","repair":"Reparieren","helmet":"Helm richten","armor":"Rüstung","cutter":"Schneider","upgrade_workbench":"Werkbank II","mining_attachment":"Mining-Aufsatz","salvage_attachment":"Berge-Aufsatz"}.get(id,Catalog.item_name(id))
 			var short_reason: String="Belegt" if _state.work.active else "Stufe "+str(recipe.get("tier",1)) if int(_state.get("base",{}).get("workbench_tier",1))<int(recipe.get("tier",1)) else "Bauplan fehlt" if not id in _state.blueprints and id!="upgrade_workbench" else "Technik "+str(recipe.min_skill) if int(_state.crew[selected_unit].skill)<int(recipe.min_skill) else "Gesperrt"
 			button.text=caption+"\n"+(str(int(recipe.duration))+" s" if reason.is_empty() else short_reason)
 			button.add_theme_font_size_override("font_size",12)
@@ -554,11 +570,11 @@ func set_recipe_details(recipes: Dictionary,prices: Dictionary) -> void:
 			if not prices.has(item):continue
 			var amount: int=int(prices[item][side])
 			_action_buttons[key].text=_item_name(item)+"\n"+("−" if side=="buy" else "+")+str(amount)+" Cr"
-			var blocked: bool=_guest or _state.travel.active
+			var blocked: bool=_state.travel.active
 			if side=="buy": blocked=blocked or int(_state.credits)<amount or _cargo_used()>=int(_state.ship.capacity)
 			else: blocked=blocked or int(_state.cargo[item])<=0
 			_action_buttons[key].disabled=blocked
-			_action_buttons[key].tooltip_text="Der Host handelt." if _guest else "Kein Bestand an Bord." if side=="sell" and int(_state.cargo[item])<=0 else "Nicht genug Credits oder Frachtraum." if blocked else "Eine Einheit handeln"
+			_action_buttons[key].tooltip_text="Kein Bestand an Bord." if side=="sell" and int(_state.cargo[item])<=0 else "Nicht genug Credits oder Frachtraum." if blocked else "Eine Einheit handeln"
 
 func _items(items: Dictionary) -> String:
 	var parts: PackedStringArray=[]
@@ -567,6 +583,7 @@ func _items(items: Dictionary) -> String:
 	return " · ".join(parts) if not parts.is_empty() else "leer"
 
 func _item_name(id: String) -> String:
+	if id in Catalog.ITEMS:return Catalog.item_name(id)
 	return {"scrap":"Metall","parts":"Bauteile","toolkit":"Werkzeugkit","cutter":"Schneider","blackbox":"Blackbox","armor":"Schutzrüstung","ore":"Erz","alloy":"Legierung","helmet":"Instandgesetzter Helm","basic_helmet":"Basishelm","basic_tool":"Grundwerkzeug","":"nicht ausgerüstet"}.get(id,id)
 
 func _disable(key: String, value: bool) -> void:
@@ -593,7 +610,7 @@ func _process(delta: float) -> void:
 func _show_help() -> void:
 	var dialog:=AcceptDialog.new()
 	dialog.title="So beginnt die erste Reise"
-	dialog.dialog_text="Auftragscomputer → Auftrag → Shuttle → Suchgebiet.\nSuchflug starten → Radarimpuls → Kontakt anfliegen → landen.\nAm gefundenen Satelliten eine Person bergen lassen, heimfliegen und abgeben.\nWerkstatt: Person und Auftrag wählen; bessere Rezepte brauchen Stufe II.\nCrewakte: Fähigkeiten und Ausrüstung im Menü oder neben der Crewleiste.\n\nLinksklick: auswählen · Rahmen: mehrere Figuren\nRechtsklick: Laufziel; im Flug: Ausweichziel auf der Ebene\nWASD / Pfeile / mittlere Maus: ausschließlich Kamera\nV: Figurenfolge / freie Crewansicht · Home: Überblick · Rad: Zoom\nLeertaste: Pause · F5: Speichern · F9: Laden\n\nPiraten: Turm auf Angriff stellen oder Rückzug wählen.\nKoop: Host fliegt mit Ida; Gast führt Jaro und den Geschützturm."
+	dialog.dialog_text="Auftragscomputer → Auftrag annehmen.\nCrew wählen und rechts aufs Schiff: einsteigen nach Fähigkeiten.\nUmschalt+Rechtsklick: Plätze selbst zuweisen.\nAbheben → In den Orbit → Reisekarte → Ort wählen.\nAm Ziel schwebend ankommen → anfliegen → landen → aussteigen.\nRadar: Signale suchen; erst Nähe zeigt den Fund.\n\nDoppelklick auf Crewporträt: Dossier, Ausrüstung, Rucksack.\nWerkbank: Person und Rezept; neue Werkzeuge brauchen Material.\nMulti-Tool + passender Aufsatz: Erz oder Wrack gewinnen.\nMedgun: Ladung im Rucksack und verletzte Person in Reichweite.\n\nLinksklick: Auswahl · Rahmen: Gruppe · Rechtsklick: Ziel\nWASD / Pfeile / mittlere Maus: Kamera · Umschalt: schneller\nV: Figurenfolge · Home: Überblick · Rad: Zoom\nLeertaste: gemeinsame Pause · F5/F9: Host speichert/lädt\n\nKoop: Beide Commander dürfen die gesamte Crew befehligen."
 	add_child(dialog)
 	dialog.confirmed.connect(dialog.queue_free)
 	dialog.canceled.connect(dialog.queue_free)
@@ -604,7 +621,7 @@ func _build_objective() -> void:
 	var row:=HBoxContainer.new()
 	row.add_theme_constant_override("separation",10)
 	column.add_child(row)
-	_objective_button=_icon_button("contracts","Auftrag zeigen",func():action_requested.emit("inspect_object",{"object_id":_objective_id}),row,34)
+	_objective_button=_icon_button("contracts","Auftrag zeigen",func():action_requested.emit("travel_chart",{}) if _objective_id=="travel_chart" else action_requested.emit("inspect_object",{"object_id":_objective_id}),row,34)
 	_objective=_label("",13,PAPER)
 	_objective.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	_objective.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -617,7 +634,9 @@ func _update_objective() -> void:
 	_objective_id="contracts"
 	var text: String="Erster Auftrag · 260 Credits + Bauplan"
 	var action: String="Auftragskonsole zeigen"
-	if _state.region in ["station","distribution","tradepost"]:
+	if _state.region=="orbit":
+		text="Im Orbit · Ort auf der Reisekarte wählen";action="Reisekarte öffnen";_objective_id="travel_chart"
+	elif _state.region in ["station","distribution","tradepost"]:
 		text={"station":"Handelsstation · Güter liegen im Shuttle","distribution":"Verteilzentrum · Handel, Wachen und Funde","tradepost":"Staubmarkt · Handel und Erkundung"}[_state.region];action="Markt öffnen";_objective_id="market"
 	elif _state.region=="rust":
 		var found: bool=bool(_state.get("discovery",{}).get("satellite_found",false))
@@ -634,7 +653,7 @@ func _update_objective() -> void:
 	elif status=="claimed": text="Bauplan erhalten · Schneider herstellen";action="Werkbank öffnen";_objective_id="workbench"
 	_objective.text=text
 	_objective_button.tooltip_text=action
-	_objective_button.icon=Icons.texture(_objective_id)
+	_objective_button.icon=Icons.texture("orbit" if _objective_id=="travel_chart" else _objective_id)
 	var name: String=str(_state.crew[selected_unit].name)
 	_activity.text="Kamera folgt "+name+" · Rechtsklick: Laufziel · WASD: Kamera" if _direct_mode else str(selected_units.size())+" gewählt · RMT Laufziel · WASD Kamera"
 	if str(_state.ship.get("mode","landed"))=="flying": _activity.text="RMT Flugziel · WASD Kamera · Leertaste Pause"
@@ -642,6 +661,7 @@ func _update_objective() -> void:
 		if job.get("active",false):
 			_activity.text=str(_state.crew[job.unit_id].name)+" · "+(_recipe_name(job.recipe_id) if job.has("recipe_id") else "Bergung")+" · "+("pausiert" if _state.paused else "auf dem Weg" if job.get("phase","")=="walking" else "in Arbeit")
 	_controls.text="Linksklick: wählen  ·  Rechtsklick: Laufziel  ·  WASD: Kamera  ·  V: Ansicht  ·  Leertaste: Pause"
+	if str(_state.ship.get("mode","landed"))=="flying":_controls.text="Linksklick: wählen  ·  Rechtsklick: Flugziel  ·  WASD: Kamera  ·  V: Ansicht  ·  Leertaste: Pause"
 
 func dismiss_context() -> void:
 	selection_kind="object";selection_id=""
@@ -650,7 +670,7 @@ func dismiss_context() -> void:
 
 func _owns(id: String) -> bool:
 	if not _state.get("crew",{}).has(id): return false
-	return id=="jaro" if _guest else int(_state.crew[id].owner)==1
+	return true
 
 func _cargo_used() -> int:
 	var amount:=0
@@ -666,7 +686,6 @@ func _recipe_blocked(id: String,recipe: Dictionary) -> String:
 	if not _owns(selected_unit): return "Person gehört dem anderen Commander"
 	if actor.assignment!="idle": return str(actor.name)+" ist bereits im Einsatz"
 	if id=="upgrade_workbench" and int(_state.get("base",{}).get("workbench_tier",1))>=2: return "Werkbank bereits auf Stufe II"
-	if id=="upgrade_workbench" and _guest: return "Der Host entscheidet über den Ausbau"
 	if int(_state.get("base",{}).get("workbench_tier",1))<int(recipe.get("tier",1)): return "Werkbank Stufe %d erforderlich" % int(recipe.get("tier",1))
 	if not id in _state.blueprints and id!="upgrade_workbench": return "Bauplan fehlt · zuerst die Blackbox bergen"
 	if int(actor.skill)<int(recipe.min_skill): return "Technik %d nötig · %s hat %d" % [int(recipe.min_skill),str(actor.name),int(actor.skill)]
@@ -691,7 +710,7 @@ func _menu_action(id: int) -> void:
 			dialog.popup_centered(Vector2i(750,600))
 		5: _show_help()
 		6: action_requested.emit("quit",{})
-		7: choose_unit(selected_unit,true)
+		7: open_dossier(selected_unit)
 		8: action_requested.emit("main_menu",{})
 
 func _metric(parent: Node,icon: String,hint: String) -> Label:
@@ -733,3 +752,6 @@ func _build_quick_actions() -> void:
 	for id: String in ["contracts","workbench","storage","shuttle","market"]:
 		var label: String={"contracts":"Auftragskonsole","workbench":"Werkbank","storage":"Lager","shuttle":"Entersäbel · Shuttle","market":"Stationsmarkt"}[id]
 		_quick_actions[id]=_icon_button(id,label,func():action_requested.emit("inspect_object",{"object_id":id}),column,30)
+
+func _seat_label(seat: String) -> String:
+	return {"pilot":"Pilot", "gunner":"Turmschütze", "passenger_1":"Passagier", "passenger_2":"Passagier"}.get(seat,"An Bord")

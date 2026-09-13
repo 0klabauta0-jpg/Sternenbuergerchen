@@ -4,6 +4,7 @@ class_name RestartWorld
 signal object_selected(kind: String, id: String)
 signal ground_clicked(position: Vector2)
 signal units_selected(ids: Array[String])
+signal context_clicked(kind: String, id: String, screen: Vector2)
 
 const Geo = preload("res://scripts/world/world_geometry.gd")
 const Terrain = preload("res://scripts/world/world_terrain.gd")
@@ -29,6 +30,7 @@ var _selected_kind := ""
 var _selected_id := ""
 var _dragging := false
 var _destination: MeshInstance3D
+var _destination_label: Label3D
 var _destination_age := 10.0
 var _flying := false
 var _flight_camera_follow := false
@@ -109,7 +111,7 @@ func present(state: Dictionary) -> void:
 	_flying = str(state.get("ship",{}).get("mode","landed")) == "flying" or (bool(state.get("travel",{}).get("active",false)) and str(state.get("travel",{}).get("phase","")) == "flying")
 	_orbit.present(_map,_objects,state)
 	_ground.present(_map,_objects,_units,state)
-	if _flying and not was_flying and _region in ["rust","space","bunker_surface","distribution","tradepost"]:
+	if _flying and not was_flying and _region in ["base","rust","station","orbit","space","bunker_surface","distribution","tradepost"]:
 		_flight_camera_follow=true
 	for id in _units:
 		(_units[id] as Node3D).visible = crew.has(id) and not _flying and str(crew.get(id,{}).get("assignment","idle")) != "aboard"
@@ -127,7 +129,10 @@ func _process(delta: float) -> void:
 		var vertical := float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN)) - float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP))
 		var right := _camera.global_basis.x
 		var forward := Vector3(_camera.global_basis.z.x,0,_camera.global_basis.z.z).normalized()
-		_focus += (right*horizontal+forward*vertical)*delta*_zoom*0.55
+		# Keep fine movement when close; cross the visible area quickly when zoomed out.
+		var camera_speed := maxf(22.0,_zoom*0.9)
+		if Input.is_physical_key_pressed(KEY_SHIFT): camera_speed *= 1.7
+		_focus += (right*horizontal+forward*vertical).limit_length(1.0)*delta*camera_speed
 		if absf(horizontal)+absf(vertical)>0:
 			_follow_delay = 1.0
 			_flight_camera_follow=false
@@ -147,6 +152,7 @@ func _process(delta: float) -> void:
 	if is_instance_valid(_destination):
 		_destination.visible = _destination_age < 3.0
 		_destination.scale = Vector3.ONE * (1.0 + sin(_destination_age*5.0)*0.1)
+		_destination_label.visible = _destination.visible
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -154,17 +160,22 @@ func _unhandled_input(event: InputEvent) -> void:
 			_dragging = event.pressed
 			get_viewport().set_input_as_handled()
 		elif event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_zoom = clampf(_zoom*0.9,19,_max_zoom())
+			_zoom = clampf(_zoom*0.85,19,_max_zoom())
 			get_viewport().set_input_as_handled()
 		elif event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_zoom = clampf(_zoom/0.9,19,_max_zoom())
+			_zoom = clampf(_zoom/0.85,19,_max_zoom())
 			get_viewport().set_input_as_handled()
 		elif event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+			var hit := _hit_at(event.position)
+			if not hit.is_empty():
+				var collider: Object = hit.collider
+				if collider.has_meta("id") and str(collider.get_meta("id"))=="shuttle":
+					context_clicked.emit("object","shuttle",event.position)
+					get_viewport().set_input_as_handled()
+					return
 			var at: Variant = _ground_at(event.position)
 			if at != null:
 				ground_clicked.emit(Vector2(at.x,at.z))
-				_destination.position = Vector3(at.x,0.09,at.z)
-				_destination_age = 0.0
 				get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and _dragging:
 		var factor := _zoom / maxf(get_viewport().get_visible_rect().size.y,1)
@@ -194,8 +205,13 @@ func focus_object(id: String) -> void:
 		_flight_camera_follow=id=="shuttle"
 
 func focus_home() -> void:
-	_flight_camera_follow=_region in ["rust","space","bunker_surface","distribution","tradepost"]
+	_flight_camera_follow=_region in ["base","rust","station","orbit","space","bunker_surface","distribution","tradepost"]
 	match _region:
+		"base":
+			var ship: Dictionary=_snapshot.get("ship",{})
+			var coords: Array=ship.get("position",[2,0])
+			_focus=Vector3(coords[0],0,coords[1]) if ship.get("mode","")=="flying" else Vector3(2,0,-1)
+			_zoom=78.0 if ship.get("mode","")=="flying" else 48.0
 		"rust":
 			var coords: Array = _snapshot.get("ship",{}).get("position",[-210,180])
 			_focus = Vector3(coords[0],0,coords[1])
@@ -203,7 +219,7 @@ func focus_home() -> void:
 		"station":
 			_focus = Vector3(0,0,0)
 			_zoom = 70.0
-		"space":
+		"space","orbit":
 			var coords: Array = _snapshot.get("ship",{}).get("position",[-85,0])
 			_focus = Vector3(coords[0]+35,0,coords[1]-8)
 			_zoom = 145.0
@@ -219,7 +235,14 @@ func focus_home() -> void:
 			_zoom = 48.0
 
 func _max_zoom() -> float:
-	return minf(650,Catalog.bounds(_region)*2.0) if _region in ["rust","distribution","bunker_surface","tradepost"] else 300.0 if _region=="space" else 180.0
+	return minf(950,Catalog.bounds(_region)*2.0) if _region in ["base","rust","distribution","bunker_surface","tradepost"] else 400.0 if _region in ["space","orbit"] else 180.0
+
+func mark_destination(at: Vector2, flight: bool) -> void:
+	if not is_instance_valid(_destination): return
+	_destination.position = Vector3(at.x,0.09,at.y)
+	_destination_age = 0.0
+	_destination_label.position = Vector3(at.x,2.0,at.y)
+	_destination_label.text = "FLUGZIEL AUF DIESER KARTE" if flight else "LAUFZIEL"
 
 func set_selection(kind: String, id: String) -> void:
 	_selected_kind = kind
@@ -274,9 +297,10 @@ func _build_map() -> void:
 	_orbit=OrbitProjection.new()
 	_ground=GroundProjection.new()
 	_destination = Geo.ring(_map,0.65,Color("f6d497"))
+	_destination_label = Geo.label(_map,"",Vector3.ZERO,Color("f6d497"),18)
 	_destination_age = 10.0
-	_environment.background_color = Color("091624") if _region in ["station","space","bunker_depths"] else Color("839ba6")
-	_environment.fog_enabled = _region not in ["station","space","bunker_depths"]
+	_environment.background_color = Color("091624") if _region in ["station","space","orbit","bunker_depths"] else Color("839ba6")
+	_environment.fog_enabled = _region not in ["station","space","orbit","bunker_depths"]
 	focus_home()
 
 func _create_unit(id: String, data: Dictionary) -> void:
@@ -314,15 +338,17 @@ func _update_camera() -> void:
 	_camera.look_at(target,Vector3.UP)
 
 func _pick(screen: Vector2) -> void:
-	var origin := _camera.project_ray_origin(screen)
-	var query := PhysicsRayQueryParameters3D.create(origin,origin+_camera.project_ray_normal(screen)*1800)
-	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
-		return
+	var hit := _hit_at(screen)
+	if hit.is_empty(): return
 	var collider: Object = hit.collider
 	if collider.has_meta("id") and str(collider.get_meta("kind")) != "ground":
 		object_selected.emit(str(collider.get_meta("kind")),str(collider.get_meta("id")))
 		get_viewport().set_input_as_handled()
+
+func _hit_at(screen: Vector2) -> Dictionary:
+	var origin := _camera.project_ray_origin(screen)
+	var query := PhysicsRayQueryParameters3D.create(origin,origin+_camera.project_ray_normal(screen)*1800)
+	return get_world_3d().direct_space_state.intersect_ray(query)
 
 func _ground_at(screen: Vector2) -> Variant:
 	return Plane(Vector3.UP,0).intersects_ray(_camera.project_ray_origin(screen),_camera.project_ray_normal(screen))

@@ -1,3 +1,18 @@
+# N4 · abschließender öffentlicher Internetlauf
+
+13.09.2026, Godot4.6.2, `tests/internet_run.ps1 -Public -Port 28148`: **70/70 Checks bestanden (Host31/Gast39)**. Zwei echte Prozesse kommunizierten durch einen tatsächlich gestarteten Cloudflare Quick Tunnel über öffentliche WSS. Evidenz: `C:/Users/bjoer/AppData/Local/Temp/sternen-internet-eaae30024c1a416cbe2cad35b2cc0482`.
+
+Falscher Einladungsschlüssel, abweichendes Schema und Protokoll wurden vom Host tatsächlich abgewiesen, ohne Snapshot/Commandzugriff. Danach geteilte gesamte Crew, echtes Gehen, einmalige doppelte Anfrage, weiterhin kein PvP, Pause, reale Save-Wiederherstellung, monotone Revision und Reconnect. Gefertigte Rüstung wurde am Lagerzugang angelegt; beide Figuren liefen in ihre tatsächlichen Sitze. Der Gast führte Launch → Orbit → interplanetare Reise → Landung → gemeinsamen Kauf aus. Schema4, Rüstung, neue Region und verbrauchte Credits wurden auf dem Gast bestätigt. Alle drei vollständigen Snapshotpaare sind identisch; beide Enginefehlerlogs leer.
+
+Die produktive Authentifizierung verwendet weiterhin das tatsächliche Snapshot-Schema. Keine neuen Autoritätsausnahmen waren nötig; Sessiontexte zeigen nun geteilte Crewrechte. Der portable Tunnelhelfer wurde am Ende gestoppt, die temporäre Einladung gelöscht. Keine System-DNS-/Routeränderung und keine Abschaltung der TLS-Prüfung. Zwei getrennte Heimnetze bleiben als physischer Aufbau ungeprüft; dieser Lauf bestätigt echten öffentlichen Relayverkehr vom lokalen Rechner. Quick Tunnel bleibt ein temporärer früher Dienst ohne Verfügbarkeitsgarantie.
+
+Vorherige Versuche werden ausdrücklich nicht als saubere Läufe gezählt: ein75s-DNS-Timeout vor Einladungsfreigabe; ein70/70-Lauf mit parallel beschädigtem UTF8-Coreimport; ein weiterer70/70-Lauf mit Race beim Lesen noch unvollständiger Test-Evidenz. Die Probe veröffentlicht JSON nun über temporäre Datei und Rename; der abschließende Lauf oben bestand einschließlich strenger Logprüfung. Dieser Harnessfix ändert keinen Produktzustand.
+
+Zusätzlich:15/15 Gateway-Lifecycle-/Malformed-Invitechecks;62/62 echte ENet-Produktfensterchecks siehe `tests/network_report.md`. Drei bestätigte APIchecks und22 native Dossier-Mausprüfungen siehe `tests/crew_dossier_report.md`.
+
+---
+
+## Historische N3-Internetabnahme
 # Internet-Koop-Abnahme · 13.09.2026
 
 Godot **4.6.2.stable.official.71f334935**, portabler offizieller cloudflared **2026.9.1**, aktueller Core **Schema 3**. Keine Kern-, UI-, Welt- oder game.gd-Änderungen durch diesen Teilauftrag; keine normale Nutzerkarriere verwendet.

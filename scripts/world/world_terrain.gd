@@ -2,10 +2,11 @@ extends RefCounted
 ## Broad open Mars valleys, layered mesas and batched small rocks.
 const Geo = preload("res://scripts/world/world_geometry.gd")
 const Catalog = preload("res://scripts/core/catalog.gd")
+const Layout = preload("res://scripts/core/world_layout.gd")
 const Space = preload("res://scripts/world/world_space.gd")
 
 static func build(parent: Node3D, region: String) -> void:
-	if region in ["station","space"]:
+	if region in ["station","space","orbit"]:
 		Space.build(parent,region)
 		return
 	if region == "bunker_depths":
@@ -15,33 +16,11 @@ static func build(parent: Node3D, region: String) -> void:
 	rng.seed = {"base":812,"rust":901,"bunker_surface":972,"distribution":1048,"tradepost":1135}.get(region,901)
 	var half := Catalog.bounds(region)
 	_ground(parent,rng,half)
-	var clear_radius := 49.0 if region == "base" else 25.0
-	var points: Array = Catalog.landmarks(region).values()
-	# Geography is authored independently of hidden contact positions.
-	# Keep wide valleys between the mesa groups; low stones are visual only.
-	var mesa_count := 34 if region == "base" else 92 if half>=400 else 66
-	for i in range(mesa_count):
-		var point := Vector2(rng.randf_range(-half*0.92,half*0.92),rng.randf_range(-half*0.92,half*0.92))
-		if region == "base" and point.length() < clear_radius: continue
-		if _facility_clear(region,point): continue
-		var blocked := false
-		for landmark: Array in points:
-			if point.distance_to(Vector2(landmark[0],landmark[1])) < 31: blocked=true
-		for spec: Dictionary in Catalog.obstacles(region).values():
-			if _obstacle_rect(spec).grow(35).has_point(point): blocked=true
-		if blocked: continue
-		var radius := rng.randf_range(8,20) if region == "base" else rng.randf_range(11,29)
-		var height := radius*rng.randf_range(0.65,1.5)
-		_mesa(parent,point,radius,height,rng)
-	# Surrounding escarpments reinforce scale from every camera bearing.
-	for i in range(18):
-		var angle := TAU*i/18.0
-		var point := Vector2(cos(angle),sin(angle))*half*0.99
-		_mesa(parent,point,rng.randf_range(22,42),rng.randf_range(26,48),rng,true)
-	if region == "base":
-		for data in [Vector4(-45,-28,14,13),Vector4(-53,22,13,11),Vector4(46,-42,17,18),Vector4(16,-62,21,24)]:
-			_mesa(parent,Vector2(data.x,data.y),data.z,data.w,rng)
-	_scatter(parent,rng,half,region)
+	for spec: Dictionary in Layout.rocks(region):
+		if str(spec.kind)!="mesa":continue
+		var rock_rng:=RandomNumberGenerator.new();rock_rng.seed=int(spec.seed)
+		_mesa(parent,Vector2(spec.center[0],spec.center[1]),float(spec.radius),float(spec.height),rock_rng)
+	_scatter(parent,region)
 
 static func _ground(parent: Node3D, rng: RandomNumberGenerator, half: float) -> void:
 	var st := SurfaceTool.new()
@@ -68,42 +47,16 @@ static func _ground(parent: Node3D, rng: RandomNumberGenerator, half: float) -> 
 	parent.add_child(node)
 	Geo.collider(parent,"ground","ground",Vector3(half*2,0.2,half*2),Vector3(0,-0.2,0))
 
-static func _scatter(parent: Node3D, rng: RandomNumberGenerator, half: float, region: String) -> void:
-	var transforms: Array[Transform3D] = []
-	for i in range(650 if region == "base" else 3000 if half>=400 else 1800):
-		var point := Vector2(rng.randf_range(-half,half),rng.randf_range(-half,half))
-		if region == "base" and point.length() < 43: continue
-		if _facility_clear(region,point): continue
-		var blocked:=false
-		for landmark: Array in Catalog.landmarks(region).values():
-			if point.distance_to(Vector2(landmark[0],landmark[1]))<9: blocked=true
-		for spec: Dictionary in Catalog.obstacles(region).values():
-			if _obstacle_rect(spec).grow(2).has_point(point): blocked=true
-		if blocked: continue
-		var scale := rng.randf_range(0.25,1.7)
-		var basis := Basis(Vector3.UP,rng.randf_range(0,TAU)).scaled(Vector3(scale,scale*rng.randf_range(0.3,0.7),scale*0.7))
-		transforms.append(Transform3D(basis,Vector3(point.x,scale*0.18,point.y)))
-	var mesh := CylinderMesh.new()
-	mesh.top_radius=0.5
-	mesh.bottom_radius=1.0
-	mesh.height=1.0
-	mesh.radial_segments=5
-	var batch := MultiMesh.new()
-	batch.transform_format=MultiMesh.TRANSFORM_3D
-	batch.mesh=mesh
-	batch.instance_count=transforms.size()
-	for i in range(transforms.size()): batch.set_instance_transform(i,transforms[i])
-	var node := MultiMeshInstance3D.new()
-	node.multimesh=batch
-	node.material_override=Geo.material(Color("b8845f"))
-	parent.add_child(node)
-
-static func _facility_clear(region: String, point: Vector2) -> bool:
-	return (region=="distribution" and Rect2(-125,-110,265,260).has_point(point)) or (region=="bunker_surface" and Rect2(-80,-110,155,215).has_point(point)) or (region=="tradepost" and Rect2(-44,-44,80,86).has_point(point))
-
-static func _obstacle_rect(spec: Dictionary) -> Rect2:
-	var size:=Vector2(spec.size[0],spec.size[1])
-	return Rect2(Vector2(spec.center[0],spec.center[1])-size*0.5,size)
+static func _scatter(parent: Node3D, region: String) -> void:
+	var transforms: Array[Transform3D]=[]
+	for spec: Dictionary in Layout.rocks(region):
+		if str(spec.kind)!="stone":continue
+		var dimensions:=Vector3(spec.size[0],spec.height,spec.size[1])
+		transforms.append(Transform3D(Basis.IDENTITY.scaled(dimensions),Vector3(spec.center[0],spec.height/2,spec.center[1])))
+	var mesh:=CylinderMesh.new();mesh.top_radius=0.30;mesh.bottom_radius=0.5;mesh.height=1.0;mesh.radial_segments=6
+	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.mesh=mesh;batch.instance_count=transforms.size()
+	for i in range(transforms.size()):batch.set_instance_transform(i,transforms[i])
+	var node:=MultiMeshInstance3D.new();node.multimesh=batch;node.material_override=Geo.material(Color("b8845f"));parent.add_child(node)
 
 static func _mesa(parent: Node3D, point: Vector2, radius: float, height: float, rng: RandomNumberGenerator, distant: bool = false) -> void:
 	var count := 9

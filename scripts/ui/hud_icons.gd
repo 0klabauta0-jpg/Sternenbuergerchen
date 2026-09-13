@@ -2,6 +2,13 @@ extends RefCounted
 ## Original 24px line icons; rendered as vectors, no font glyph dependencies.
 static var _cache: Dictionary={}
 const SHAPES := {
+	"orbit":"<circle cx='12' cy='12' r='5'/><ellipse cx='12' cy='12' rx='11' ry='4' transform='rotate(-35 12 12)'/><circle cx='3' cy='17' r='2'/>",
+	"multitool":"<path d='M3 8h13l5 4-5 3H9l-1 7H4l1-10H3zM16 8V4h5'/>",
+	"medgun":"<path d='M3 8h14v8H9l-1 6H4l1-10H3zM17 10h5M10 5v8M6 9h8'/>",
+	"med_charge":"<path d='M7 2h10v20H7zM12 7v10M9 12h6'/>",
+	"backpack":"<path d='M5 7h14v15H5zM8 7V3h8v4M8 13h8v6H8zM3 10v8m18-8v8'/>",
+	"mining_attachment":"<path d='M3 8q9-10 18 0M12 4v10M8 14h8v7H8z'/>",
+	"salvage_attachment":"<path d='M6 13h12v9H6zM8 13 3 3m13 10 5-10M12 13V1'/>",
 	"network":"<circle cx='12' cy='12' r='9'/><path d='M3 12h18M12 3c-5 6-5 12 0 18M12 3c5 6 5 12 0 18'/>",
 	"back":"<path d='m10 4-8 8 8 8M2 12h20'/>",
 	"armor":"<path d='m4 3 5-2 3 4 3-4 5 2-2 8 2 10-8 2-8-2 2-10zM8 10h8M8 15h8'/>",

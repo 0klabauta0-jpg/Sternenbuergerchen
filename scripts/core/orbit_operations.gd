@@ -6,18 +6,10 @@ var log_event: Callable
 func bind(state: Dictionary, logger: Callable) -> void:s=state;log_event=logger
 func dispatch(c: Dictionary,sender: int) -> String:
 	var kind: String=c.type
-	if kind!="fire_turret" and kind!="equip" and sender!=1:return "Nur der Host führt das Shuttle."
 	if s.travel.active:return "Crew befindet sich auf Reise."
 	match kind:
-		"launch":
-			if not s.region in ["rust","bunker_surface","distribution","tradepost"] or s.ship.mode!="landed":return "Start ist auf der Rostkarte möglich."
-			if s.work.active or s.salvage.active:return "Laufende Arbeit zuerst beenden."
-			for id: String in s.crew:
-				s.crew[id].assignment="boarding";s.crew[id].target=s.ship.position.duplicate()
-			s.travel={"active":true,"from":s.region,"to":s.region,"remaining":0.0,"total":0.0,"phase":"boarding","kind":"launch","encounter_decided":true,"encounter_roll":99}
-			log_event.call("Crew geht zum Shuttle für den Suchflug.")
 		"ship_move":
-			if not s.region in ["rust","space","bunker_surface","distribution","tradepost"] or s.ship.mode!="flying":return "Das Shuttle ist nicht im freien Flug."
+			if not s.region in ["base","station","orbit","rust","space","bunker_surface","distribution","tradepost"] or s.ship.mode!="flying":return "Das Shuttle ist nicht im freien Flug."
 			if not _point(c.get("position"),Catalog.bounds(s.region)):return "Flugziel liegt außerhalb der Karte."
 			s.ship.target=c.position.duplicate()
 		"radar_scan":
@@ -26,15 +18,14 @@ func dispatch(c: Dictionary,sender: int) -> String:
 				s.discovery.radar_scanned=true;s.discovery.signals=Catalog.radar_contacts()
 				log_event.call("Radar: drei unbekannte Kontakte. Zur Identifikation nahe heranfliegen.")
 		"land":
-			if not s.region in ["rust","bunker_surface","distribution","tradepost"] or s.ship.mode!="flying":return "Landung ist hier nicht möglich."
-			var navigation=preload("res://scripts/core/ground_navigation.gd")
-			if not navigation.walkable(s.region,_v(s.ship.position)):return "Landefläche blockiert. Weiter entfernt landen."
-			for offset in [-3.7,3.7]:
-				if not navigation.walkable(s.region,_v(s.ship.position)+Vector2(offset,3.8)):return "Landefläche blockiert. Weiter entfernt landen."
-			land_here();log_event.call("Entersäbel gelandet. Crew kann aussteigen.")
+			if not Catalog.destination_info().has(s.region) or s.ship.mode!="flying":return "Landung ist hier nicht möglich."
+			var candidate: Dictionary=s.ship.duplicate(true)
+			candidate.mode="landed";candidate.yaw=0.0
+			if not preload("res://scripts/core/ground_navigation.gd").landing_clear(s.region,candidate):return "Landefläche oder Zugang blockiert. Weiter entfernt landen."
+			land_here();log_event.call("Schiff gelandet. Crew kann ausdrücklich aussteigen.")
 		"fire_turret":
 			if not s.encounter.active:return "Kein Raumkontakt aktiv."
-			if s.crew.jaro.owner!=sender:return "Nur Jaros Commander bedient den Turm."
+			if s.ship.model=="vulture" or s.ship.roles.gunner.is_empty() or s.crew[s.ship.roles.gunner].assignment!="aboard":return "Ein besetzter Kampfturm wird benötigt."
 			if not c.get("target_id") is String or not c.target_id in ["pirate",""]:return "Unbekanntes Turmziel."
 			s.encounter.turret_target=c.target_id
 		"flee":
@@ -42,25 +33,7 @@ func dispatch(c: Dictionary,sender: int) -> String:
 			if s.encounter.escape_remaining>0:return "Rückzug läuft bereits."
 			s.encounter.escape_remaining=7.0;s.encounter.turret_target=""
 			log_event.call("Pilot leitet Rückzug ein. Flug bleibt ausweichbar.")
-		"equip":return equip(c,sender)
 		_:return "Unbekannter Flugauftrag."
-	return ""
-func equip(c: Dictionary,sender: int) -> String:
-	if s.region!="base":return "Ausrüstung wird im Basislager gewechselt."
-	var id: Variant=c.get("unit_id")
-	var item: Variant=c.get("item")
-	if not id is String or not s.crew.has(id):return "Person nicht gefunden."
-	if s.crew[id].owner!=sender:return "Diese Person gehört dem anderen Spieler."
-	if s.crew[id].assignment!="idle":return "Person ist bereits gebunden."
-	if not item is String or not item in ["helmet","toolkit","cutter","armor"]:return "Ungeeignete Ausrüstung."
-	if s.inventory[item]<1:return "Ausrüstung fehlt im Lager."
-	var slot: String=item if item in ["helmet","armor"] else "tool"
-	var previous: String=s.crew[id].equipment[slot]
-	if previous==item:return "Ausrüstung ist bereits angelegt."
-	s.inventory[item]-=1
-	if previous in ["helmet","toolkit","cutter","armor"]:s.inventory[previous]+=1
-	s.crew[id].equipment[slot]=item
-	log_event.call(s.crew[id].name+" hat "+Catalog.item_name(item)+" angelegt.")
 	return ""
 func roll_station_contact() -> int:
 	s.random_seed=(int(s.random_seed)*48271)%2147483647
@@ -73,16 +46,13 @@ func board_crew() -> void:
 	for id: String in s.crew:
 		s.crew[id].assignment="aboard";s.crew[id].position=s.ship.position.duplicate();s.crew[id].target=s.ship.position.duplicate()
 func land_here() -> void:
-	s.ship.mode="landed";s.ship.target=s.ship.position.duplicate()
-	var offset: float=-3.7
-	var bound: float=Catalog.bounds(s.region)
-	for id: String in s.crew:
-		s.crew[id].position=[clampf(s.ship.position[0]+offset,-bound,bound),clampf(s.ship.position[1]+3.8,-bound,bound)]
-		s.crew[id].target=s.crew[id].position.duplicate();s.crew[id].assignment="idle";offset+=7.4
+	s.ship.mode="landed";s.ship.yaw=0.0;s.ship.target=s.ship.position.duplicate()
 func tick(delta: float) -> String:
 	if s.ship.mode!="flying":return ""
 	var position: Vector2=_v(s.ship.position)
-	position=position.move_toward(_v(s.ship.target),(36.0 if s.region=="space" else 42.0)*Catalog.skill_effects(s.crew.ida).flight_multiplier*delta)
+	var direction: Vector2=_v(s.ship.target)-position
+	if direction.length()>0.1:s.ship.yaw=atan2(-direction.x,-direction.y)
+	position=position.move_toward(_v(s.ship.target),(36.0 if s.region=="space" else 42.0)*Catalog.skill_effects(s.crew[s.ship.roles.pilot]).flight_multiplier*delta)
 	s.ship.position=[position.x,position.y];board_crew()
 	if s.region=="rust" and s.discovery.radar_scanned:
 		for contact: Dictionary in s.discovery.signals:
@@ -100,9 +70,10 @@ func tick(delta: float) -> String:
 	enemy=enemy.move_toward(position,18.0*delta)
 	e.enemy.position=[enemy.x,enemy.y];e.enemy.target=s.ship.position.duplicate()
 	var distance: float=position.distance_to(enemy)
+	if e.turret_target=="pirate":s.ship.turret_yaw=atan2(position.x-enemy.x,position.y-enemy.y)
 	e.fire_cooldown=maxf(0,e.fire_cooldown-delta);e.enemy_cooldown=maxf(0,e.enemy_cooldown-delta)
-	if e.turret_target=="pirate" and distance<=125.0 and e.fire_cooldown<=0:
-		e.enemy.hull=maxf(0,e.enemy.hull-Catalog.skill_effects(s.crew.jaro).turret_damage);e.fire_cooldown=0.8
+	if e.turret_target=="pirate" and s.ship.model!="vulture" and not s.ship.roles.gunner.is_empty() and distance<=125.0 and e.fire_cooldown<=0:
+		e.enemy.hull=maxf(0,e.enemy.hull-Catalog.skill_effects(s.crew[s.ship.roles.gunner]).turret_damage);e.fire_cooldown=0.8
 	if e.enemy.hull<=0:
 		e.active=false;e.status="won";e.turret_target=""
 		log_event.call("Freibeuter ausgeschaltet. Reise wird fortgesetzt.")

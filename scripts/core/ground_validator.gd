@@ -9,7 +9,8 @@ static func validate(s: Dictionary) -> String:
 	if not rental.get("active") is bool or not rental.get("expired") is bool or not Numbers.number(rental.get("remaining"),0,1200):return "Mietstatus ungültig."
 	if rental.expired!=(rental.active and rental.remaining==0) or (not rental.active and rental.remaining!=0):return "Mietzeit widersprüchlich."
 	if s.ship.get("model")!=("vulture" if rental.active else "cutlass") or s.ship.get("name")!=("Geier" if rental.active else "Entersäbel") or s.ship.capacity!=(40 if rental.active else 12):return "Mietschiff widersprüchlich."
-	if s.ship.mode=="flying" and not s.region in ["rust","space","bunker_surface","distribution","tradepost"]:return "Flug auf dieser Karte ungültig."
+	if s.ship.mode=="flying" and not s.region in ["base","station","orbit","rust","space","bunker_surface","distribution","tradepost"]:return "Flug auf dieser Karte ungültig."
+	if s.ship.mode=="landed" and not Nav.landing_clear("bunker_surface" if s.region=="bunker_depths" else s.region,s.ship):return "Gelandeter Rumpf in Weltgeometrie."
 	if not s.get("resources") is Dictionary or s.resources.size()!=Catalog.resource_sites().size():return "Fundstellen fehlen."
 	for id: String in Catalog.resource_sites():
 		if not s.resources.get(id) is Dictionary or not Numbers.whole(s.resources[id].get("remaining"),0,Catalog.resource_sites()[id].stock):return "Fundbestand ungültig."
@@ -40,8 +41,8 @@ static func validate(s: Dictionary) -> String:
 	elif activity.unit_id!="" or activity.site_id!="" or activity.total!=0 or activity.remaining!=0 or activity.phase!="idle":return "Inaktive Gewinnung inkonsistent."
 	for id: String in s.crew:
 		var unit: Dictionary=s.crew[id]
-		if s.ship.mode=="landed":
-			if not Nav.walkable(s.region,Vector2(unit.position[0],unit.position[1])) or not Nav.walkable(s.region,Vector2(unit.target[0],unit.target[1])):return "Person innerhalb eines Hindernisses."
+		if s.ship.mode=="landed" and unit.assignment!="aboard":
+			if not Nav.walkable(s.region,Vector2(unit.position[0],unit.position[1]),s.ship) or not Nav.walkable(s.region,Vector2(unit.target[0],unit.target[1]),s.ship):return "Person innerhalb eines Hindernisses."
 		if not unit.equipment.get("armor") in ["","armor"] or not Numbers.number(unit.get("health"),0,100) or not Numbers.number(unit.get("respawn_remaining"),0,20) or not Numbers.number(unit.get("attack_cooldown"),0,1) or not unit.get("attack_target") is String:return "Gesundheit/Ausrüstung ungültig."
 		if (unit.health==0)!=(unit.assignment=="downed") or (unit.health>0 and unit.respawn_remaining!=0) or (unit.health==0 and unit.respawn_remaining<=0):return "Verwundung widersprüchlich."
 		if unit.assignment=="downed" and (s.travel.active or s.ship.mode!="landed" or not _same(unit.position,unit.target)):return "Verwundete Person im Flug."

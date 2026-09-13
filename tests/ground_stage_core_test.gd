@@ -1,4 +1,5 @@
 extends SceneTree
+const Journey=preload("res://tests/n4_test_journey.gd")
 const Core=preload("res://scripts/core/simulation_root.gd")
 const Catalog=preload("res://scripts/core/catalog.gd")
 const Nav=preload("res://scripts/core/ground_navigation.gd")
@@ -19,9 +20,7 @@ func fresh() -> void:
 	if is_instance_valid(sim):sim.free()
 	sim=Core.new(1);sim.auto_tick=false;root.add_child(sim)
 func trip(destination: String) -> void:
-	check(cmd("travel",{"destination":destination}).ok,"travel "+destination)
-	sim.advance(150)
-	if sim.snapshot().encounter.active:cmd("flee");sim.advance(10)
+	check(Journey.trip(sim,destination),"explicit N4 journey "+destination)
 	check(sim.snapshot().region==destination,"arrived "+destination)
 func roundtrip(label: String) -> void:
 	var saved: Dictionary=sim.save_game("user://n3-roundtrip.json")
@@ -33,22 +32,18 @@ func roundtrip(label: String) -> void:
 		var after: Dictionary=sim.snapshot();before.revision=after.revision
 		check(_equivalent(before,after),label+" complete state preserved")
 func fly_to(point: Array,scan: bool=false) -> void:
-	check(cmd("launch").ok,"local launch")
-	sim.advance(10)
-	if scan:check(cmd("radar_scan").ok,"scan")
-	check(cmd("ship_move",{"position":point}).ok,"fly to point")
-	sim.advance(35)
-	check(cmd("land").ok,"land beside site")
+	check(Journey.site(sim,point,scan),"board, fly and land outside site")
 func move_both(point: Array) -> void:
 	for id in ["ida","jaro"]:check(cmd("move",{"unit_id":id,"position":point}).ok,"walk "+id)
 	sim.advance(45)
 func run() -> void:
 	fresh()
-	check(sim.snapshot().schema_version==3,"schema3 ground stage")
+	check(sim.snapshot().schema_version==4,"schema4 retains ground stage")
 	var saved: Dictionary=sim.save_game("user://n3-initial.json")
 	check(saved.ok,"initial save: "+saved.reason)
 	check(cmd("assign_work",{"unit_id":"ida","recipe_id":"armor"}).ok,"armor recipe is available")
 	sim.advance(30)
+	cmd("move",{"unit_id":"ida","position":Catalog.interaction_point("base","storage")});sim.advance(20)
 	check(cmd("equip",{"unit_id":"ida","item":"armor"}).ok,"crafted armor is wearable")
 	check(is_equal_approx(Catalog.skill_effects(sim.snapshot().crew.ida).armor_reduction,0.35),"armor has explicit actual reduction")
 	check(Catalog.skill_effects(sim.snapshot().crew.jaro).ground_damage>Catalog.skill_effects(sim.snapshot().crew.ida).ground_damage,"gunnery changes ground damage")
@@ -106,7 +101,7 @@ func run() -> void:
 	check(sim.snapshot().crew.ida.health==100 and sim.snapshot().crew.ida.assignment=="idle","timed recovery preserves crew")
 	# Flak only damages ships inside its actual airborne radius.
 	fresh();trip("bunker_surface")
-	cmd("launch");sim.advance(10)
+	Journey.board(sim);cmd("launch");sim.advance(0.1)
 	cmd("ship_move",{"position":[-24,-10]});sim.advance(3)
 	check(not cmd("land").ok,"cannot land with ship centered in a physical wall")
 	# A target inside a wall remains legal in flight but cannot become a ground landing.
@@ -119,7 +114,10 @@ func run() -> void:
 	cmd("toggle_pause");sim.advance(25)
 	check(sim.snapshot().region=="base" and sim.snapshot().ship.condition==50,"AA defeat safely rescues ship and crew")
 	# A real earning route proves the rental is attainable without fixture credits.
-	fresh();trip("rust")
+	fresh()
+	# Tool fixture isolates this finite extraction/rental regression; crafting/equip tested separately.
+	sim._state.crew.ida.equipment.tool="multitool";sim._state.crew.ida.equipment.attachment="mining_attachment"
+	trip("rust")
 	check(not cmd("gather",{"unit_id":"ida","site_id":"mining_site"}).ok,"hidden mining cannot be ordered")
 	for batch in 2:
 		fly_to([-300,-210],true)
@@ -137,6 +135,7 @@ func run() -> void:
 	check(sim.snapshot().credits==120 and sim.snapshot().ship.capacity==40 and sim.snapshot().ship.model=="vulture","rental charged once and changes actual ship")
 	roundtrip("active rental")
 	check(sim.submit(request).ok and sim.snapshot().credits==120,"rental receipt survives reload without another charge")
+	sim._state.crew.ida.equipment.attachment="salvage_attachment"
 	trip("rust");fly_to([310,250],true)
 	check(cmd("gather",{"unit_id":"ida","site_id":"derelict"}).ok,"rental salvages discovered wreck")
 	sim.advance(15)
@@ -152,48 +151,43 @@ func run() -> void:
 	check(sim.snapshot().rental.expired and sim.snapshot().ship.capacity==40 and sim.snapshot().cargo.alloy==18,"expiry on remote map preserves cargo and safe return")
 	roundtrip("expired remote rental")
 	trip("station")
+	check(cmd("return_rental").ok,"explicit safe rental handover")
 	check(not sim.snapshot().rental.active and sim.snapshot().ship.model=="cutlass" and sim.snapshot().inventory.alloy==18 and sim.snapshot().cargo.alloy==0,"safe rental handover preserves excess cargo")
 	# Newly independent maps, market and ownership commands.
 	trip("distribution");check(cmd("trade",{"side":"buy","item":"scrap","amount":1}).ok,"distribution has real market")
 	trip("tradepost");sim.set_guest(7)
-	check(not cmd("gather",{"unit_id":"jaro","site_id":"tradepost_cache"}).ok,"host cannot order guest worker")
+	check(cmd("gather",{"unit_id":"jaro","site_id":"tradepost_cache"}).ok,"host can order guest worker")
+	check(cmd("cancel_gather",{},7).ok,"guest cancels shared gathering")
 	check(cmd("gather",{"unit_id":"jaro","site_id":"tradepost_cache"},7).ok,"guest can gather its own unit")
-	check(not cmd("cancel_gather").ok,"host cannot cancel guest gathering")
-	sim.advance(50)
+	check(cmd("cancel_gather").ok,"host cancels shared gathering")
+	cmd("gather",{"unit_id":"jaro","site_id":"tradepost_cache"},7)
+	sim.advance(80)
 	check(sim.snapshot().cargo.parts==2,"distant tradepost cache yields actual parts")
 	roundtrip("guest progress")
 	fresh();trip("bunker_surface");sim.set_guest(7)
 	var ownership_before: Dictionary=sim.snapshot()
-	check(not cmd("attack",{"unit_id":"jaro","target_id":"surface_guard"}).ok and sim.snapshot()==ownership_before,"foreign ground attack rejects atomically")
-	check(not cmd("attack",{"unit_id":"ida","target_id":"surface_guard"},7).ok,"guest cannot fire host weapon")
+	check(cmd("attack",{"unit_id":"jaro","target_id":"surface_guard"}).ok,"host may command guest ground attack")
+	check(cmd("attack",{"unit_id":"ida","target_id":"surface_guard"},7).ok,"guest can command host ground attack")
 	check(cmd("attack",{"unit_id":"jaro","target_id":"surface_guard"},7).ok,"guest controls its own ground attack")
 	cmd("toggle_pause");roundtrip("guest attack paused")
-	_test_migration_and_corruption()
+	fresh();trip("bunker_surface")
+	sim._state.crew.ida.position=[-12,-5];sim._state.crew.ida.target=[-12,-5];sim._state.crew.ida.health=1.0
+	sim._state.ground.enemies.bunker_surface.surface_guard.cooldown=0.0
+	check(cmd("board",{"unit_id":"ida","role":"pilot"}).ok,"boarding inside danger starts physical route")
+	sim.advance(0.05)
+	check(sim.snapshot().crew.ida.assignment=="downed" and sim.snapshot().ship.seats.pilot.is_empty(),"boarding is vulnerable and wound releases reservation")
+	roundtrip("wounded boarding")
+	_test_corruption()
 	var report:=FileAccess.open("res://output/ground-stage-core.json",FileAccess.WRITE)
 	if report!=null:
-		report.store_string(JSON.stringify({"checks":checks,"failures":failures,"engine":Engine.get_version_info().string,"scope":"Authoritative schema3 core; real commands and simulation time, separate test saves, no normal campaign"},"  "));report.close()
+		report.store_string(JSON.stringify({"checks":checks,"failures":failures,"engine":Engine.get_version_info().string,"scope":"Authoritative schema4 with N3 ground mechanics; real commands and simulation time, separate test saves, no normal campaign"},"  "));report.close()
 	print("GROUND_STAGE ",checks," checks; ",failures," failures")
 	sim.free();quit(1 if failures else 0)
 
-func _test_migration_and_corruption() -> void:
+func _test_corruption() -> void:
 	fresh()
-	cmd("assign_work",{"unit_id":"ida","recipe_id":"toolkit"});sim.advance(0.5)
-	var original: Dictionary=sim.snapshot()
-	var legacy: Dictionary=original.duplicate(true);legacy.schema_version=2
-	for key in ["ground","resources","rental"]:legacy.erase(key)
-	for item in ["armor","ore","alloy"]:legacy.inventory.erase(item);legacy.cargo.erase(item)
-	legacy.blueprints.erase("armor");legacy.ship.erase("model");legacy.ship.erase("name")
-	for unit: Dictionary in legacy.crew.values():
-		for key in ["health","respawn_remaining","attack_target","attack_cooldown"]:unit.erase(key)
-		unit.equipment.erase("armor")
-	var file:=FileAccess.open("user://n3-legacy-v2.json",FileAccess.WRITE)
-	file.store_string(JSON.stringify({"schema_version":2,"state":legacy,"receipts":{}}));file.close()
-	check(sim.load_game("user://n3-legacy-v2.json").ok and sim.snapshot().schema_version==3,"strict v2 migration")
-	check(sim.snapshot().credits==original.credits and sim.snapshot().inventory.parts==original.inventory.parts,"v2 migration preserves career")
-	check(sim.snapshot().work.reserved==original.work.reserved and sim.snapshot().work.active,"v2 migration preserves work reservation")
-	sim.advance(20);check(sim.snapshot().inventory.toolkit==1,"v2 reserved output completes exactly once")
 	for mutation in ["armor","health","stock","rental","enemy","activity","underground_void","wrong_flight_region"]:
-		var broken: Dictionary={"schema_version":3,"state":sim.snapshot(),"receipts":{}}
+		var broken: Dictionary={"schema_version":4,"state":sim.snapshot(),"receipts":{}}
 		match mutation:
 			"armor":broken.state.crew.ida.equipment.armor="godmode"
 			"health":broken.state.crew.ida.health=-1
@@ -207,7 +201,7 @@ func _test_migration_and_corruption() -> void:
 			"wrong_flight_region":
 				broken.state.ship.mode="flying"
 				for unit: Dictionary in broken.state.crew.values():unit.assignment="aboard";unit.position=broken.state.ship.position.duplicate();unit.target=unit.position.duplicate()
-		check(not Validator.validate(broken).is_empty(),"invalid v3 "+mutation+" rejected")
+		check(not Validator.validate(broken).is_empty(),"invalid schema4 "+mutation+" rejected")
 
 func _equivalent(a: Variant,b: Variant) -> bool:
 	if a is Dictionary and b is Dictionary:

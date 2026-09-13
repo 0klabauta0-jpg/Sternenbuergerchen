@@ -360,7 +360,7 @@ func _on_peer_connected(peer_id: int) -> void:
 	_guest_id = peer_id
 	_simulation.set_guest(peer_id)
 	_last_revision = -1
-	_set_message("Koop · Host führt Ida · Gast führt Jaro")
+	_set_message("Koop · beide Spieler führen die gesamte Crew")
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	if not _guest_mode and peer_id == _guest_id and _simulation != null:
@@ -370,7 +370,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 
 func _on_connected_to_server() -> void:
 	_connected = true
-	_set_message("Koop · du führst Jaro · gemeinsame Sitzung beim Host")
+	_set_message("Koop · gemeinsame Crew · Sitzung beim Host")
 
 func _on_connection_failed() -> void:
 	_connected = false

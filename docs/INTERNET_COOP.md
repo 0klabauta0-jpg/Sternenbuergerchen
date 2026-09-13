@@ -1,6 +1,6 @@
 # Temporärer Internet-Koop · 13.09.2026
 
-Das Spiel kann einen zweiten Commander über eine öffentliche WSS-Einladung verbinden. Host und Gast benutzen weiterhin denselben Session-Gateway und autoritativen `SimulationRoot.submit(command, sender)`. Der Host führt Ida und gemeinsame Transaktionen, der Gast Jaro. Die neue Stufe verwendet Schema 3; der Handshake liest die Version aus dem tatsächlichen Snapshot.
+Das Spiel kann einen zweiten Commander über eine öffentliche WSS-Einladung verbinden. Host und Gast benutzen weiterhin denselben Session-Gateway und autoritativen `SimulationRoot.submit(command, sender)`. Beide verbundenen Commander führen sämtliche Crew, Arbeit, Schiff, Handel und gemeinsame Pause. Der Host bleibt Simulations-, Sitzungs- und Dateiautorität. N4 verwendet Schema4; der Handshake liest die Version aus dem tatsächlichen Snapshot.
 
 ## Bedienung und portabler Helfer
 
@@ -32,7 +32,7 @@ Einladungen sind Zugangsdaten. Sie erscheinen nicht in Statusmeldungen, Karriere
 
 Vor `peer_connected`, Besitzvergabe, Snapshots und RPC-Zugriff läuft SceneMultiplayer-Authentifizierung: gemeinsames Protokoll, tatsächliches Snapshot-Schema, frische 256-Bit-Challenge und gegenseitiger HMAC-SHA256-Nachweis des Einladungsschlüssels. Eine aufgezeichnete Antwort gilt nicht für die nächste Challenge. Gleichzeitige Anmeldeversuche sind begrenzt; es existiert genau ein bestätigter Gastplatz. Timeout: acht Sekunden. Objektdekodierung bleibt ausgeschaltet. Grundlage: [SceneMultiplayer 4.6](https://docs.godotengine.org/en/4.6/classes/class_scenemultiplayer.html).
 
-Nach Anmeldung wird der Absender ausschließlich aus der Verbindung abgeleitet. Der Kern prüft Besitz, Ressourcen, Pause, Spielregeln und Idempotenz wie im LAN. Internetbefehle sind zusätzlich auf 4096 Byte und 30 Pakete pro Sekunde begrenzt; darüber erfolgt eine Gateway-Ablehnung ohne Kernmutation. Snapshots werden wie zuvor bei geänderter Revision maximal zehnmal pro Sekunde gesendet. WebSocket-/Weiterleitungspuffer sind auf 1 MiB begrenzt. Das ist kein allgemeiner Last- oder DDoS-Nachweis.
+Nach Anmeldung wird der Absender ausschließlich aus der Verbindung abgeleitet. Der Kern prüft Sitzungsmitgliedschaft, Ressourcen, Tätigkeits-/Sitzbindungen, Pause, Spielregeln und Idempotenz wie im LAN. owner ist in N4 keine Crew-Befehlssperre; gemeinsame Rechte ermöglichen kein PvP. Internetbefehle sind zusätzlich auf 4096 Byte und 30 Pakete pro Sekunde begrenzt; darüber erfolgt eine Gateway-Ablehnung ohne Kernmutation. Snapshots werden wie zuvor bei geänderter Revision maximal zehnmal pro Sekunde gesendet. WebSocket-/Weiterleitungspuffer sind auf 1 MiB begrenzt. Das ist kein allgemeiner Last- oder DDoS-Nachweis.
 
 ## DNS und TLS
 
@@ -59,6 +59,6 @@ WebRTC wäre eine andere Transportbasis, benötigt für native Godot-Programme a
 ./tests/network_run.ps1 -Port 28128
 ```
 
-Die Runner starten nur eigene Prozesse, verwenden neue Tempordner und isolieren APPDATA. Beide Internetvarianten verwenden einen tatsächlich öffentlichen Cloudflare-Tunnel. `-ForceDnsFallback` wählt gezielt den produktiven Fallback, ohne Verbindungsbestätigung oder Spielzustand vorzugeben. Der funktionale Test benutzt echte Corebefehle und vergangene Simulationszeit: Eigentum, gefälschter Sender, identische doppelte Receipt, gemeinsame Pause, monotone Save-Restore-Revision, Reconnect, reale Armor-Herstellung/Ausrüstung und Reise nach tradepost. Drei vollständige Snapshot-Paare werden verglichen.
+Die Runner starten nur eigene Prozesse, verwenden neue Tempordner und isolieren APPDATA. Beide Internetvarianten verwenden einen tatsächlich öffentlichen Cloudflare-Tunnel. `-ForceDnsFallback` wählt gezielt den produktiven Fallback, ohne Verbindungsbestätigung oder Spielzustand vorzugeben. Der funktionale Test benutzt echte Corebefehle und vergangene Simulationszeit: gemeinsame Befehle für beide Figuren, kein PvP, identische doppelte Receipt, gemeinsame Pause, monotone Save-Restore-Revision, Reconnect, reale Rüstungsherstellung am Lagerzugang, tatsächliches Einsteigen und Gastbefehle für Launch/Orbit/Reise/Landung/Handel. Drei vollständige Snapshot-Paare werden verglichen.
 
-Ergebnisse und lokale Evidenzpfade stehen in [internet_report.md](../tests/internet_report.md). Zwei Prozesse auf diesem Rechner durchlaufen tatsächlich das öffentliche Internet; ein unabhängiges zweites Heimnetz und dessen eigene Firewall/Provider wurden damit noch nicht abgenommen.
+Aktuell N4:70/70 öffentliche WSS-Checks,62/62 ENet-Produktfensterchecks und15/15 Gatewaychecks. Der separat erzwungene produktive DNS-/TLS-Ersatzweg ist ein historischer N3-Nachweis; er wurde nicht als zusätzliche N4-Abnahme gezählt. Ergebnisse und lokale Evidenzpfade stehen in [internet_report.md](../tests/internet_report.md). Zwei Prozesse auf diesem Rechner durchlaufen tatsächlich das öffentliche Internet; ein unabhängiges zweites Heimnetz und dessen eigene Firewall/Provider wurden damit noch nicht abgenommen.

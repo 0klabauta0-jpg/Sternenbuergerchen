@@ -1,6 +1,7 @@
 extends RefCounted
 ## Selectable station models and set dressing, keyed by the shared catalog IDs.
 const Geo = preload("res://scripts/world/world_geometry.gd")
+const Ship = preload("res://scripts/world/world_ship.gd")
 const Rooms = preload("res://scripts/world/world_rooms.gd")
 const GroundSites = preload("res://scripts/world/world_ground_sites.gd")
 const TITLES := {"workbench":"WERKBANK", "storage":"LAGER", "contracts":"AUFTRÄGE", "shuttle":"ENTERSÄBEL · SHUTTLE", "market":"HANDEL", "satellite":"SATELLITENWRACK", "bed_ida":"IDA", "bed_jaro":"JARO", "kitchen":"KÜCHE / AUFENTHALT", "expansion_a":"MODULFLÄCHE A", "expansion_b":"MODULFLÄCHE B", "pirate":"FREIBEUTER"}
@@ -21,7 +22,7 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 		var collision := Vector3(1.8,2,1.8)
 		var label_height := 2.3
 		match id:
-			"bed_ida", "bed_jaro":
+			"bed_ida", "bed_jaro", "bed_3", "bed_4", "bed_5", "bed_6":
 				Geo.asset(root,"bed-single",Vector3(0,0.05,-0.2),Vector3(1.45,0.85,2.6),PI)
 				collision = Vector3(1.5,0.9,2.6)
 				label_height = 1.3
@@ -38,27 +39,11 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 				Geo.asset(root,"computer",Vector3(0,0.05,-0.45),Vector3(1.2,1.9,1.2))
 				_beacon(root,Vector3(0,1.8,-0.4),Color("77d9d2"))
 			"shuttle":
-				if region != "space":
-					var pad := Node3D.new()
-					parent.add_child(pad)
-					pad.position = root.position
-					_landing_pad(pad)
-				var craft := Geo.asset(root,"craft_cargoA",Vector3(0,0.35,0),Vector3(4.8,2.4,7.35),-0.25)
-				craft.name = "Craft"
-				# Landing feet touch the pad under the actual cargo ship hull.
-				for x in [-1.45,1.45]:
-					for z in [-1.7,1.7]:
-						Geo.box(craft,Vector3(x,-0.15,z),Vector3(0.25,0.4,0.85),Color("465662"),0.5)
-				collision = Vector3(5.7,3.0,8.0)
-				label_height = 3.4
-				var stations := Node3D.new()
-				stations.name = "CrewStations"
-				craft.add_child(stations)
-				Geo.cylinder(stations,Vector3(0,2.1,-0.35),0.58,0.45,Color("485e63"),10)
-				Geo.asset(stations,"white_astronaut",Vector3(0,2.25,-0.35),Vector3(0.5,0.85,0.4),PI)
-				for side in [-0.4,0.4]:
-					Geo.box(stations,Vector3(side,2.48,-1.05),Vector3(0.12,0.13,1.1),Color("718684"))
-				stations.visible=false
+				if region not in ["space","orbit"]:
+					var pad:=Node3D.new(); parent.add_child(pad); pad.position=root.position; _landing_pad(pad)
+				Ship.build(root,"cutlass")
+				collision=Vector3(7.5,3.6,11.0)
+				label_height=4.6
 			"pirate":
 				var craft := Geo.asset(root,"freibeuter",Vector3(0,0.35,0),Vector3(8,2,7.5))
 				craft.name = "Craft"
@@ -137,18 +122,18 @@ static func _ore(root: Node3D) -> void:
 	Geo.cylinder(root,Vector3(0,0.06,0),7.3,0.12,Color("766454"),9)
 	for i in range(12):
 		var angle:=i*2.39
-		var radius:=2.0+float(i%4)*1.2
+		var radius:=1.2+float(i%4)*0.8
 		var rock:=Geo.cylinder(root,Vector3(cos(angle)*radius,0.45+float(i%3)*0.35,sin(angle)*radius),1.2+float(i%3)*0.3,1.3+float(i%3)*0.55,Color("736a62"),5)
 		rock.rotation=Vector3(0.1*i,0.8*i,0.13)
 		Geo.box(rock,Vector3(0,0.7,0),Vector3(0.35,0.35,1.3),Color("75b5ad"),0.45)
 
 static func _ship_wreck(root: Node3D) -> void:
 	Geo.cylinder(root,Vector3(0,0.055,0),10.0,0.11,Color("625649"),9)
-	var hull:=Geo.asset(root,"craft_cargoA",Vector3(0,0.5,0),Vector3(8,4,13),0.6)
+	var hull:=Geo.asset(root,"craft_cargoA",Vector3(0,0.5,0),Vector3(7,3.5,11),0.5)
 	hull.rotation.z=0.26
 	Geo._tint(hull,Geo.material(Color("65706c"),0.25))
 	for i in range(10):
-		var piece:=Geo.box(root,Vector3(sin(i*2.1)*8,0.3,cos(i*1.7)*7),Vector3(1.4+float(i%3),0.45,0.8),Color("a08a69"))
+		var piece:=Geo.box(root,Vector3(sin(i*2.1)*5.5,0.3,cos(i*1.7)*5.4),Vector3(1.0+float(i%3)*0.45,0.45,0.8),Color("a08a69"))
 		piece.rotation.y=i*0.84
 
 static func _landing_pad(root: Node3D) -> void:
@@ -168,6 +153,7 @@ static func _wreck(root: Node3D) -> void:
 	root.add_child(debris)
 	debris.rotation = Vector3(0.18,0.32,0.13)
 	debris.position.y = 1.05
+	debris.scale=Vector3.ONE*0.85
 	Geo.cylinder(debris,Vector3(0,0.4,0),1.45,2.8,Color("778b8c"),8)
 	Geo.box(debris,Vector3(0,1.95,0),Vector3(1.65,0.3,1.65),Color("cfb18b"),0.4)
 	Geo.box(debris,Vector3(0,0.2,0),Vector3(10.5,0.2,0.35),Color("687f86"),0.4)
@@ -182,7 +168,7 @@ static func _wreck(root: Node3D) -> void:
 	dish.rotation.z = 0.5
 	_beacon(root,Vector3(0,3.6,0),Color("e5a568"))
 	for i in range(6):
-		var piece := Geo.box(root,Vector3(-5+i*1.9,0.18,3.2+sin(i)*1.2),Vector3(0.8,0.35,0.6),Color("606d70"))
+		var piece := Geo.box(root,Vector3(-5+i*1.9,0.18,2.3+sin(i)*0.5),Vector3(0.8,0.35,0.6),Color("606d70"))
 		piece.rotation.y = i*0.9
 
 static func _beacon(parent: Node3D, at: Vector3, color: Color) -> void:

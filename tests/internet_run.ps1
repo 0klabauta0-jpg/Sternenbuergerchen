@@ -1,4 +1,4 @@
-param([switch]$Public, [switch]$ForceDnsFallback, [int]$Port = 28119)
+param([switch]$Public, [switch]$ForceDnsFallback, [switch]$Lan, [switch]$Visual, [int]$Port = 28119)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $engine = 'C:\Users\bjoer\AppData\Local\Programs\Godot\Godot_v4.6.2-stable_win64_console.exe'
@@ -10,7 +10,12 @@ try {
     $env:APPDATA = Join-Path $runRoot 'appdata'
     New-Item -ItemType Directory -Path $env:APPDATA | Out-Null
     $baseArguments = @('--headless','--path',('"'+$projectRoot+'"'),'--script','res://tests/internet_process_probe.gd','--',('--port='+$Port),('"--output='+$runRoot+'"'))
+    if ($Visual) { $baseArguments = @($baseArguments | Where-Object { $_ -ne '--headless' }) + '--visual' }
     if ($Public) { $baseArguments += '--public' }
+    if ($Lan) {
+        if ($Public -or $ForceDnsFallback) { throw 'LAN cannot be combined with public WSS.' }
+        $baseArguments += '--lan'
+    }
     if ($ForceDnsFallback) {
         if (-not $Public) { throw 'Forced DNS fallback requires the real public tunnel.' }
         $baseArguments += '--force-dns-fallback'
@@ -32,6 +37,11 @@ try {
         if ($result.failed -ne 0) { throw "$roleName has failed checks." }
         $errorsText = Get-Content -LiteralPath (Join-Path $runRoot ($roleName+'-error.log')) -Raw
         if ($errorsText -match '(SCRIPT ERROR|ERROR:)') { throw "$roleName has engine errors." }
+        if ($Visual) {
+            foreach ($stage in @('paused','restored','final')) {
+                if (-not (Test-Path -LiteralPath (Join-Path $runRoot ($roleName+'-'+$stage+'.png')))) { throw "Missing product capture $roleName $stage" }
+            }
+        }
         Write-Output "$roleName checks=$($result.checks.Count) failed=$($result.failed)"
     }
     foreach ($pair in @(@('paused','guest-paused'),@('restored','guest-restored'),@('host-final','guest-final'))) {
@@ -39,7 +49,7 @@ try {
         $right = Get-Content -LiteralPath (Join-Path $runRoot ($pair[1]+'.json')) -Raw | ConvertFrom-Json
         if (($left | ConvertTo-Json -Depth 100 -Compress) -ne ($right | ConvertTo-Json -Depth 100 -Compress)) { throw "Full snapshot mismatch: $($pair[0])" }
     }
-    Write-Output "INTERNET_PASS public=$Public evidence=$runRoot"
+    Write-Output "NETWORK_PASS public=$Public lan=$Lan evidence=$runRoot"
 } catch {
     foreach ($roleName in @('host','guest')) {
         foreach ($suffix in @('.log','-error.log')) {

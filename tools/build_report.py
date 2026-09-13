@@ -1,4 +1,4 @@
-"""Build the dated N3 game plan as standalone HTML with available real captures.
+"""Build the dated N4 game plan as standalone HTML with available real captures.
 
 The tracked template contains no local ship images or models. A fresh clone can
 generate the text report; captures from the documented window probes enrich it.
@@ -12,18 +12,22 @@ import struct
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "output"
 SHOTS = [
-    ('n3-main-menu.png', 'Das wiederverwendete Menümotiv mit der sitzenden Frau; Karriere und Koop im neuen Menü.'),
-    ('rooms-orbit/base.png', 'Die Heimat aus vier Räumen. Die beiden freien Andockplätze sind bisher vorbereitet, noch nicht bebaubar.'),
-    ('ground-world/armor.png', 'Ida mit sichtbarem Schutzsatz aus Brust- und Schulterteilen; Jaro trägt die einfache Ausgangsausrüstung.'),
-    ('n3-armor-profile.png', 'Die Crewakte nennt aktuelle Fähigkeiten, Gesundheit und echte Ausrüstung. Erfahrungszuwachs folgt später.'),
-    ('ground-world/rust-mining.png', 'Im großen Suchgebiet: Erz entdecken, landen, abbauen und mit begrenztem Frachtraum heimbringen.'),
-    ('ground-world/rust-wreck.png', 'Ein zusätzliches Schiffwrack liefert endliche Schiffslegierung. Die Crew arbeitet am Fundort.'),
-    ('ground-world/geier.png', 'Geier: das in Blender vereinfachte Mietschiff mit zwei Bergungsarmen und größerem Frachtraum.'),
-    ('ground-world/bunker-surface.png', 'Bunkeroberfläche mit Flak, einfachem Wächter, Lastenaufzug und durchsichtiger Vorderwand.'),
-    ('ground-world/bunker-depths.png', 'Das Untergeschoss wird separat geladen. Die erste Fassung hat Zentralgang, Lager und Sicherheitsraum.'),
-    ('ground-world/distribution.png', 'Das Verteilzentrum: mehrere Hallen und ein Ladehof als erste spielbare Struktur für Handel und Kampf.'),
-    ('ground-world/tradepost.png', 'Der kleine Handelsposten auf einer eigenen Karte. Ein weiterer Materialfund liegt abseits im Gelände.'),
-    ('rooms-orbit/space-contact.png', 'Der vorhandene zufällige Raumkontakt: Freibeuter und Entersäbel auf einer festen Flugebene.'),
+    ('n3-main-menu.png', 'Das erhaltene Hauptmenümotiv mit der sitzenden Frau; dieses Motiv bleibt gegenüber N3 unverändert.'),
+    ('n4-base.png', 'Aktuelle Heimat mit vier getrennten Räumen, sechs Betten und durchsichtigen Frontwänden. Ausbauplätze sind vorbereitet, noch nicht bebaubar.'),
+    ('n4-workshop.png', 'Die Werkstatt zeigt passende Arbeit, Zutaten und die tatsächlich eingesetzte Person. Im vollständigen Spielweg entsteht ein Rucksack aus Startmaterial.'),
+    ('n4-crew-dossier.png', 'Das echte Dossier: sichtbare Figur, fünf Slots und getrennte Bestände. Dieser Rucksack wurde in der Mausprobe regulär hergestellt und ausgerüstet.'),
+    ('n4-world/crew-equipment.png', 'Darstellungsprobe der riggebundenen Rüstung, des Rucksacks und Handwerkzeugs; Gegenstände für diese Bildprobe gezielt bereitgestellt, nicht als erspielter Fortschritt ausgegeben.'),
+    ('n4-world/entersaebel.png', 'Die überarbeitete Entersäbel: vereinfachte Kontur und Fahrwerk. Originaldatei erhalten; Umbau lokal in Blender.'),
+    ('n4-manual-seats.png', 'Manuell gewählte Plätze haben Vorrang: Hier pilotiert Jaro, während Ida den freien Turm übernimmt. Beide bleiben bis zum Start an Bord.'),
+    ('n4-travel-chart.png', 'Die echte Reisekarte mit benannten Orten, Gebietsgrößen und vorläufigem Begegnungsrisiko.'),
+    ('n4-world/orbit.png', 'Der Orbit ist eine eigene geladene Raumkarte. Von hier wird der Zielanflug angefordert.'),
+    ('n4-rust-arrival.png', 'Ankunft im Suchgebiet: Das Schiff schwebt am Rand. Lokaler Flug, Landung und Aussteigen bleiben eigene Befehle.'),
+    ('n4-satellite.png', 'Die erste Blackbox wurde im vollständigen Produktweg geborgen. Weitere Verwertung benötigt passende Ausrüstung.'),
+    ('n4-world/bunker_surface.png', 'Bunkeroberfläche mit geschlossener Hülle, erkennbarer Eingangsöffnung, Flak und Lastenaufzug.'),
+    ('n4-world/distribution.png', 'Verteilzentrum auf einer vergrößerten Einzelkarte: Hallen, Ladehof und getrennte Funktionsbereiche.'),
+    ('n4-world/tradepost.png', 'Eigener kleiner Handelsposten mit Modulen und Versorgung; die große Umgebung enthält einen weiteren Fund.'),
+    ('n4-market.png', 'Ankunft, Landung, Aussteigen und regulärer Einkauf von Multi-Tool und Salvage-Aufsatz im Freihafen Meridian.'),
+    ('n4-world/space-contact.png', 'Separat geladener Piratenkontakt, über eine tatsächliche Reise ausgelöst. Der Turm verwendet den besetzten Schützenplatz.'),
 ]
 
 

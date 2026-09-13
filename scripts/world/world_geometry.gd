@@ -93,6 +93,8 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 	var path := "res://assets/curated/%s/%s.glb" % [pack,name]
 	if name == "craft_cargoA" and ResourceLoader.exists("res://assets/local/entersaebel.glb"):
 		path = "res://assets/local/entersaebel.glb"
+	if name == "craft_cargoA" and ResourceLoader.exists("res://assets/local/entersaebel_n4/entersaebel.glb"):
+		path = "res://assets/local/entersaebel_n4/entersaebel.glb"
 	if name == "freibeuter":
 		path = "res://assets/local/freibeuter/freibeuter.glb" if ResourceLoader.exists("res://assets/local/freibeuter/freibeuter.glb") else "res://assets/curated/space/craft_cargoA.glb"
 	if name == "geier":
@@ -106,7 +108,9 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 	var bounds := _bounds(instance, Transform3D.IDENTITY)
 	var ratio := Vector3(dimensions.x / maxf(bounds.size.x, 0.001), dimensions.y / maxf(bounds.size.y, 0.001), dimensions.z / maxf(bounds.size.z, 0.001))
 	if name in ["craft_cargoA","freibeuter","geier"]:
-		ratio = Vector3.ONE * dimensions.z / maxf(bounds.size.z,0.001)
+		# Preserve the model silhouette while fitting the agreed horizontal footprint,
+		# including the curated fallback when private source models are absent.
+		ratio = Vector3.ONE * minf(dimensions.x/maxf(bounds.size.x,0.001),dimensions.z/maxf(bounds.size.z,0.001))
 	if name == "white_astronaut":
 		ratio = Vector3.ONE * dimensions.y / maxf(bounds.size.y,0.001)
 	instance.scale = ratio

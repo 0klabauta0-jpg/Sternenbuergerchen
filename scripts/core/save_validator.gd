@@ -18,13 +18,13 @@ static func _items(value: Variant) -> bool:
 	return true
 
 static func validate(payload: Variant) -> String:
-	if not payload is Dictionary or payload.get("schema_version") != 3: return "Unbekanntes Speicherformat."
+	if not payload is Dictionary or payload.get("schema_version") != 4: return "Unbekanntes Speicherformat."
 	var value: Variant = payload.get("state")
 	if not value is Dictionary: return "Zustand fehlt."
 	var s: Dictionary = value
-	if s.get("schema_version") != 3 or not whole(s.get("revision"),0,1000000000000): return "Version oder Revision ungültig."
+	if s.get("schema_version") != 4 or not whole(s.get("revision"),0,1000000000000): return "Version oder Revision ungültig."
 	if not number(s.get("time"),0.0,1000000000000.0) or not s.get("paused") is bool: return "Zeit ungültig."
-	if not s.get("region") in ["base","rust","station","space","bunker_surface","bunker_depths","distribution","tradepost"]: return "Region ungültig."
+	if not s.get("region") in ["base","rust","station","space","orbit","bunker_surface","bunker_depths","distribution","tradepost"]: return "Region ungültig."
 	if not whole(s.get("credits"),0,1000000000) or not _items(s.get("inventory")) or not _items(s.get("cargo")): return "Bestand ungültig."
 	if not s.get("ship") is Dictionary or not number(s.ship.get("condition"),0,100) or not whole(s.ship.get("capacity"),1,1000): return "Shuttle ungültig."
 	var cargo_count: int = 0
@@ -46,6 +46,9 @@ static func validate(payload: Variant) -> String:
 		if not unit.get("assignment") in ["idle","work","salvage","boarding","aboard","gather","downed"]: return "Zuweisung ungültig."
 	if not s.get("contract") is Dictionary or not s.contract.get("status") in ["available","active","recovered","claimed"] or s.contract.get("reward") != 260: return "Auftrag ungültig."
 	var blackboxes: int = int(s.inventory.blackbox) + int(s.cargo.blackbox)
+	for unit: Dictionary in s.crew.values():
+		if not unit.get("backpack") is Dictionary or not _items(unit.backpack.get("items")):return "Rucksackbestand ungültig."
+		blackboxes+=int(unit.backpack.items.blackbox)
 	if blackboxes != (1 if s.contract.status == "recovered" else 0): return "Blackbox und Auftrag widersprechen sich."
 	if unique.has("cutter") != (s.contract.status == "claimed"): return "Bauplan und Auszahlung widersprechen sich."
 	for key: String in ["work","salvage","travel"]:
@@ -70,19 +73,14 @@ static func validate(payload: Variant) -> String:
 	var stage_error: String=_stage_valid(s)
 	if not stage_error.is_empty():return stage_error
 	if travel.active:
-		if work.active or salvage.active or travel.from!=s.region or not travel.to in ["base","rust","station","bunker_surface","distribution","tradepost"] or not travel.phase in ["boarding","flying"]:return "Reise ungültig."
-		if travel.kind=="launch":
-			if not s.region in ["rust","bunker_surface","distribution","tradepost"] or travel.to!=s.region or travel.total!=0 or travel.phase!="boarding":return "Start ungültig."
-		elif travel.from==travel.to or travel.total!=5:return "Reisezeit ungültig."
-		for unit_id: String in s.crew:
-			if s.crew[unit_id].assignment != "boarding" or not _same_position(s.crew[unit_id].target,s.ship.position): return "Crew fehlt am Shuttle."
+		if work.active or salvage.active or travel.from!=s.region or travel.phase!="flying" or travel.total!=5 or not travel.to in ["orbit","base","rust","station","bunker_surface","distribution","tradepost"]:return "Reise ungültig."
+		if travel.kind=="orbit" and (travel.to!="orbit" or not Catalog.destination_info().has(travel.from)):return "Orbitaufstieg ungültig."
+		if travel.kind=="intermap" and travel.from!="orbit":return "Ortsreise braucht Orbit."
 	elif travel.phase != "idle" or travel.from != "" or travel.to != "" or travel.remaining != 0 or travel.total != 0: return "Inaktive Reise inkonsistent."
 	for unit_id: String in s.crew:
 		var assignment: String = s.crew[unit_id].assignment
 		if assignment == "work" and (not work.active or work.unit_id != unit_id): return "Verwaiste Arbeitsbindung."
 		if assignment == "salvage" and (not salvage.active or salvage.unit_id != unit_id): return "Verwaiste Bergungsbindung."
-		if assignment == "boarding" and not travel.active: return "Verwaiste Reisebindung."
-		if assignment=="aboard" and (s.ship.mode!="flying" or travel.active):return "Verwaiste Bordrolle."
 	if not s.get("log") is Array or s.log.size() > 30: return "Log ungültig."
 	for entry: Variant in s.log:
 		if not entry is String or entry.length() > 500: return "Logeintrag ungültig."
@@ -104,9 +102,10 @@ static func _materials_equal(first: Dictionary, second: Dictionary) -> bool:
 static func _stage_valid(s: Dictionary) -> String:
 	if not whole(s.get("random_seed"),1,2147483646):return "Zufallszustand ungültig."
 	if not s.get("base") is Dictionary or not whole(s.base.get("workbench_tier"),1,2):return "Werkbankstufe ungültig."
-	if not s.ship.get("mode") in ["landed","flying"] or not position_valid(s.ship.get("position"),320 if s.region=="bunker_depths" else Catalog.bounds(s.region)) or not position_valid(s.ship.get("target"),320 if s.region=="bunker_depths" else Catalog.bounds(s.region)):return "Flugzustand ungültig."
-	if not s.ship.get("roles") is Dictionary or s.ship.roles.get("pilot")!="ida" or s.ship.roles.get("gunner")!="jaro":return "Bordrollen ungültig."
-	if not s.travel.get("kind") in ["intermap","launch"] or not s.travel.get("encounter_decided") is bool or not whole(s.travel.get("encounter_roll"),-1,99):return "Reisewurf ungültig."
+	if not s.ship.get("mode") in ["landed","flying"] or not position_valid(s.ship.get("position"),Catalog.bounds("bunker_surface") if s.region=="bunker_depths" else Catalog.bounds(s.region)) or not position_valid(s.ship.get("target"),Catalog.bounds("bunker_surface") if s.region=="bunker_depths" else Catalog.bounds(s.region)):return "Flugzustand ungültig."
+	var crew_error: String=preload("res://scripts/core/crew_validator.gd").validate(s)
+	if not crew_error.is_empty():return crew_error
+	if not s.travel.get("kind") in ["intermap","orbit","legacy"] or not s.travel.get("encounter_decided") is bool or not whole(s.travel.get("encounter_roll"),-1,99):return "Reisewurf ungültig."
 	if s.travel.active and (not s.travel.encounter_decided or s.travel.encounter_roll<0):return "Reisewurf fehlt."
 	if s.work.active and s.base.workbench_tier<Catalog.recipes()[s.work.recipe_id].tier:return "Rezeptstufe ungültig."
 	for id: String in s.crew:
@@ -115,8 +114,8 @@ static func _stage_valid(s: Dictionary) -> String:
 		for skill: String in ["pilot","gunnery","tech"]:
 			if not whole(unit.skills.get(skill),0,10):return "Fähigkeit ungültig."
 		if unit.skill!=unit.skills.tech:return "Technikprofil widersprüchlich."
-		if not unit.equipment.get("helmet") in ["","basic_helmet","helmet"] or not unit.equipment.get("tool") in ["","toolkit","cutter"]:return "Ausrüstung ungültig."
-		if s.ship.mode=="flying" and not s.travel.active and (unit.assignment!="aboard" or not _same_position(unit.position,s.ship.position)):return "Bordposition ungültig."
+		if not unit.equipment.get("helmet") in ["","basic_helmet","helmet"] or not unit.equipment.get("tool") in ["","toolkit","cutter","multitool","medgun"]:return "Ausrüstung ungültig."
+		if s.ship.mode=="flying" and (unit.assignment!="aboard" or not _same_position(unit.position,s.ship.position)):return "Bordposition ungültig."
 	if not s.get("discovery") is Dictionary:return "Erkundung fehlt."
 	var d: Dictionary=s.discovery
 	if not d.get("radar_scanned") is bool or not d.get("satellite_found") is bool or not d.get("signals") is Array:return "Radar ungültig."
@@ -136,11 +135,11 @@ static func _stage_valid(s: Dictionary) -> String:
 	if s.salvage.active and (not d.satellite_found or s.ship.mode!="landed"):return "Bergung ohne Landung/Entdeckung."
 	if not s.get("encounter") is Dictionary:return "Raumkontakt fehlt."
 	var e: Dictionary=s.encounter
-	if not e.get("active") is bool or not e.get("status") in ["none","active","won","escaped","rescued"] or not e.get("pending_destination") in ["","station"] or not e.get("enemy") is Dictionary or not e.get("turret_target") in ["","pirate"]:return "Raumkontakt ungültig."
+	if not e.get("active") is bool or not e.get("status") in ["none","active","won","escaped","rescued"] or not e.get("pending_destination") in ["","base","rust","station","bunker_surface","distribution","tradepost"] or not e.get("enemy") is Dictionary or not e.get("turret_target") in ["","pirate"]:return "Raumkontakt ungültig."
 	for timer: String in ["fire_cooldown","enemy_cooldown","escape_remaining"]:
 		if not number(e.get(timer),0,20):return "Kampfzeit ungültig."
 	if e.active!=(e.status=="active") or e.active!=(s.region=="space"):return "Raumkontaktstatus widersprüchlich."
-	if e.active and (s.ship.mode!="flying" or s.travel.active or e.pending_destination!="station"):return "Raumflug inkonsistent."
+	if e.active and (s.ship.mode!="flying" or s.travel.active or e.pending_destination.is_empty()):return "Raumflug inkonsistent."
 	if e.status!="none":
 		if e.enemy.get("id")!="pirate" or e.enemy.get("name")!="Freibeuter" or e.enemy.get("model")!="buccaneer" or not position_valid(e.enemy.get("position"),240) or not position_valid(e.enemy.get("target"),240) or not number(e.enemy.get("hull"),0,40) or e.enemy.get("max_hull")!=40:return "Gegner ungültig."
 	elif not e.enemy.is_empty():return "Gegner ohne Kontakt."

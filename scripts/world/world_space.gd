@@ -22,6 +22,8 @@ static func build(parent: Node3D, region: String) -> void:
 			Geo.box(parent,Vector3(0,-0.25,axis),Vector3(480,0.025,0.06),Color("172c3b"))
 		Geo.collider(parent,"ground","ground",Vector3(480,0.2,480),Vector3(0,-0.4,0))
 	_planet(parent,region)
+	if region=="orbit":
+		Geo.label(parent,"ROSTWELT / ORBIT",Vector3(0,0,-18),Color("80a2b2"),24)
 	var rng := RandomNumberGenerator.new()
 	rng.seed=552
 	var batch := MultiMesh.new()
@@ -51,7 +53,7 @@ static func _planet(parent: Node3D, region: String) -> void:
 	planet.mesh=sphere
 	planet.material_override=Geo.material(Color("9b6952"))
 	parent.add_child(planet)
-	planet.position=Vector3(-150,-145,-140) if region=="station" else Vector3(-270,-175,-310)
+	planet.position=Vector3(-150,-145,-140) if region=="station" else Vector3(-165,-135,-70) if region=="orbit" else Vector3(-270,-175,-310)
 
 static func beam(parent: Node3D, from: Vector3, to: Vector3, color: Color) -> MeshInstance3D:
 	var line := Geo.box(parent,(from+to)/2,Vector3(0.28,0.28,maxf(from.distance_to(to),0.01)),color)

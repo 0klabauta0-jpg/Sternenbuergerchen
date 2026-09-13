@@ -1,6 +1,21 @@
 # Sternenbürgerchen — Neustart
 
-## Aktuelle Erweiterung N3 · 13.09.2026
+## Aktuelle Erweiterung N4 · 13.09.2026
+
+N4 verbindet gemeinsame Crewführung, echte Einsteigewege, ausdrückliche Reisephasen und persönliche Ausrüstung. Figuren laufen durch Türen und um gemeinsam definierte Möbel-, Fels-, Wand- und Schiffsumrisse. Die Basis behält vier Räume; zwei belegte und vier vorbereitete Betten sind sichtbar, ohne bereits Rekrutierung zu liefern. Die Außenkarten sind mindestens960×960m groß; das Verteilzentrum misst1280×1280m. Alle Karten werden weiterhin einzeln geladen.
+
+Ausgewählte Figuren steigen per Rechtsklick am erreichbaren Schiffszugang ein. Der Kern reserviert freie Plätze nach Fähigkeiten; manuelle Pilot-/Turm-/Passagierzuweisung hat Vorrang. Ein besetzter Pilot und die tatsächlich eingestiegene gesamte Crew sind Voraussetzung zum Abheben. Danach folgen lokaler Flug, ausdrücklicher Orbitaufstieg, Zielwahl auf der Reisekarte, schwebende Ankunft am Kartenrand, Landung und eigener Aussteigebefehl. Reisebegegnungen verwenden einen einmalig gespeicherten, zielabhängigen Wurf. Sieg oder Rückzug setzt die gewählte Reise fort; Niederlage führt zur Notbergung ohne dauerhaften Verlust.
+
+Beide verbundenen Commander dürfen sämtliche Crew, Schiff, Arbeit, Handel und gemeinsame Pause befehligen. Der Host bleibt einzige Simulations-, Sitzungs- und Dateiautorität. Herkunftsfelder an Figuren sperren in Koop keine Befehle. Unbekannte Absender, unzulässige Ziele, fehlende Materialien und doppelte Anfragen werden weiterhin autoritativ geprüft; PvP ist nicht implementiert.
+
+Ein Doppelklick auf das Porträt öffnet ein Dossier mit der tatsächlichen weißen Figur. Fünf Plätze zeigen Helm, Rüstung, Werkzeug, Aufsatz und Rucksack. Drag-and-drop bewegt echte Gegenstände zwischen zulässigen Slots, Basislager, Fracht und persönlichem Rucksack unter Nähe- und Kapazitätsprüfung. Der Rucksack ist kauf-/herstellbar und bietet acht Einzelplätze. Multi-Tool samt Mining-/Salvage-Aufsatz eröffnet Handgewinnung; die Medgun benötigt endliche Med-Ladungen im eigenen Rucksack und heilt oder reaktiviert eine erreichbare Figur. Die erste Blackbox-Bergung bleibt ohne diese neue Ausrüstung möglich.
+
+Schema4 migriert zuerst streng validierte v1/v2/v3-Karrieren unter Erhalt von Beständen, laufender Arbeit, Sitzungsbelegen und freigeschalteten Inhalten. Internet-Koop bleibt die temporäre öffentliche WSS-Lösung, ENet/LAN bleibt verfügbar. Zweiter Haushalt, Langzeitbetrieb und stabile Vermittlungsräume sind eigene Betriebsgrenzen.
+
+Arbeitsbranch: `codex/rostgrenze-crew-reise-ausruestung`. Verbindlicher Vertrag: [N4_CREW_TRAVEL.md](contracts/N4_CREW_TRAVEL.md), Aufgabe: [N4_CREW_TRAVEL_EQUIPMENT.md](tasks/N4_CREW_TRAVEL_EQUIPMENT.md), aktueller Prüfstand: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md). Der aktuelle N4-Produktdurchlauf besteht mit76/76 Prüfungen; abschließende Steuerungs-/Fenster- und Paketprüfung werden getrennt geführt. Frühere Etappen gelten als historische Abnahmen.
+
+**Vom Nutzer ausdrücklich als nächster Ausbau gewählt:** begehbare Schiffsinnenräume mit Schnittansicht und sichtbaren Wegen zwischen Cockpit, Turm sowie Lade-/Betankungsplätzen. N4 endet bei den Einsteigewegen und abstrahierten Sitzen. Unabhängig gleichzeitig simulierte Regionen, Rekrutierung, tatsächlich baubare Erweiterungsslots, Forschung, volle XP-/Trait-/Beziehungssysteme und PvP bleiben offen.
+## Historische Erweiterung N3 · 13.09.2026
 
 N3 erweitert den Aufbau um kauf- und herstellbare Rüstung mit tatsächlichem Schadensschutz, weit auseinanderliegende Mining-/Wrackfundstellen auf der größeren Rostkarte und die nur mietbare Vulture „Geier“ als erreichbares Sparziel. Der Satellit ist nach der Blackbox weiter bis zur Erschöpfung bergbar. Endliche Ressourcen, Geld, Ausrüstung und Mietzeit werden autoritativ und speicherbar geführt.
 
@@ -14,7 +29,7 @@ Arbeitsbranch: `codex/rostgrenze-internet-aussenposten`. Aktuelle Abnahme: [N3_A
 
 ## Historische Erweiterung N2 · 13.09.2026
 
-Die folgenden Absätze bewahren die damaligen Entscheidungen und Etappennamen. Ihr Umsetzungsstand ist durch N3 oben fortgeschrieben; alte Zukunftsformulierungen sind keine aktuelle Funktionsliste.
+Die folgenden Absätze bewahren die damaligen Entscheidungen und Etappennamen. Ihr Umsetzungsstand ist durch N4 oben fortgeschrieben; alte Zukunftsformulierungen sind keine aktuelle Funktionsliste.
 
 Unterkünfte, Lager, Werkstatt sowie Küche/Aufenthalt mit Auftragscomputer erhalten getrennte Räume und einen gemeinsamen Gang. Etwas weiterer Kamerablick, größere Rostlandschaft und freie Andockflächen bereiten späteren Slot-Ausbau vor. Die Werkbank beginnt auf Stufe 1 mit einfacher Herstellung und Reparatur; bessere Maschinen ermöglichen höherwertige Rezepte.
 

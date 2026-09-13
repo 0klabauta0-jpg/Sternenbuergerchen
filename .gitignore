@@ -7,3 +7,5 @@ assets/local/
 *.exe
 *.pck
 *.blend1
+__pycache__/
+*.pyc

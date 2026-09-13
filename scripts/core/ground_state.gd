@@ -1,7 +1,7 @@
 extends RefCounted
-const Catalog=preload("res://scripts/core/catalog.gd")
-const GroundCatalog=preload("res://scripts/core/ground_catalog.gd")
-const Nav=preload("res://scripts/core/ground_navigation.gd")
+const Catalog=preload("res://scripts/core/legacy_catalog_v3.gd")
+const GroundCatalog=preload("res://scripts/core/legacy_ground_catalog_v3.gd")
+const Nav=preload("res://scripts/core/legacy_navigation_v3.gd")
 static func empty_activity() -> Dictionary:
 	return {"active":false,"unit_id":"","site_id":"","remaining":0.0,"total":0.0,"phase":"idle"}
 static func extend(s: Dictionary) -> void:

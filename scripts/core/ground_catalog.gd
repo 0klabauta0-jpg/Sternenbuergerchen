@@ -1,5 +1,5 @@
 extends RefCounted
-const REGIONS: Array[String]=["base","rust","station","space","bunker_surface","bunker_depths","distribution","tradepost"]
+const REGIONS: Array[String]=["base","rust","station","space","orbit","bunker_surface","bunker_depths","distribution","tradepost"]
 const DESTINATIONS: Array[String]=["base","rust","station","bunker_surface","distribution","tradepost"]
 static func landmarks(region: String) -> Dictionary:
 	match region:
@@ -36,4 +36,4 @@ static func obstacles(region: String) -> Dictionary:
 	return {}
 static func skill_effects(unit: Dictionary) -> Dictionary:
 	var tool: String=unit.equipment.tool
-	return {"ground_damage":10.0+2.0*unit.skills.gunnery,"turret_damage":7.0+unit.skills.gunnery,"flight_multiplier":1.0+0.04*unit.skills.pilot,"gather_multiplier":(1.0+0.1*unit.skills.tech)*(1.35 if tool=="cutter" else (1.2 if tool=="toolkit" else 1.0)),"armor_reduction":(0.35 if unit.equipment.get("armor","")=="armor" else 0.0)+(0.05 if unit.equipment.helmet=="helmet" else 0.0),"tech_level":unit.skills.tech}
+	return {"ground_damage":10.0+2.0*unit.skills.gunnery,"turret_damage":7.0+unit.skills.gunnery,"flight_multiplier":1.0+0.04*unit.skills.pilot,"gather_multiplier":(1.0+0.1*unit.skills.tech)*(1.35 if tool=="cutter" else (1.2 if tool=="toolkit" else (1.25 if tool=="multitool" and not unit.equipment.get("attachment","").is_empty() else 1.0))),"armor_reduction":(0.35 if unit.equipment.get("armor","")=="armor" else 0.0)+(0.05 if unit.equipment.helmet=="helmet" else 0.0),"tech_level":unit.skills.tech}

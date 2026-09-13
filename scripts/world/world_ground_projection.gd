@@ -3,6 +3,7 @@ extends RefCounted
 const Geo = preload("res://scripts/world/world_geometry.gd")
 const Landmarks = preload("res://scripts/world/world_landmarks.gd")
 const Armor = preload("res://scripts/world/world_armor.gd")
+const Equipment = preload("res://scripts/world/world_equipment.gd")
 const Space = preload("res://scripts/world/world_space.gd")
 const Nav = preload("res://scripts/core/ground_navigation.gd")
 var previous: Dictionary={}
@@ -66,6 +67,7 @@ func present(map: Node3D, objects: Dictionary, units: Dictionary, state: Diction
 	for id in state.crew:
 		if not units.has(id): continue
 		var unit: Dictionary=state.crew[id]
+		Equipment.present(units[id],unit.get("equipment",{}))
 		var target:=str(unit.get("attack_target",""))
 		if objects.has(target) and float(unit.get("attack_cooldown",0))>float(previous.get("crew",{}).get(id,{}).get("attack_cooldown",99))+0.05:
 			_shot(map,(units[id] as Node3D).position+Vector3.UP*1.2,(objects[target] as Node3D).position+Vector3.UP*1.4,Color("a0e9d0"),time)

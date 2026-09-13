@@ -68,7 +68,7 @@ func _update_mode()->void:
 	_copy.visible = internet
 	_address.placeholder_text = "Einladungslink des Hosts einfügen" if internet else "LAN-Adresse, z. B. 192.168.1.42"
 	_address.secret = internet
-	_help.text = "Host öffnen → Einladung kopieren → Freund fügt sie ein.\nDer Host muss das Spiel geöffnet lassen." if internet else "Host führt Ida, Gast Jaro. Im selben Netzwerk genügt die lokale IP-Adresse des Hosts."
+	_help.text = "Host öffnen → Einladung kopieren → Freund fügt sie ein.\nDer Host muss das Spiel geöffnet lassen." if internet else "Beide Spieler steuern die gesamte Crew gemeinsam. Im selben Netzwerk genügt die lokale IP-Adresse des Hosts."
 
 func present(status:String,invitation:String)->void:
 	if not is_instance_valid(_status):return

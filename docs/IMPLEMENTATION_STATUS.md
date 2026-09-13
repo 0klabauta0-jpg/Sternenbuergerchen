@@ -1,6 +1,36 @@
 # Umsetzungsstand · 13.09.2026
 
-## Aktueller Stand N3 · Außenposten, Ausrüstung und Internet-Koop
+## Aktueller Stand N4 · Crew, Wege, Reise und Ausrüstung
+
+N4 ist implementiert; der vollständige aktuelle Produktfensterdurchlauf besteht mit76/76 Prüfungen. Abschließende Steuerungs-/Fenster- und Paketprüfung werden getrennt geführt; die private Windows-N4-Auslieferung ist [separat geprüft](WINDOWS_DELIVERY.md). Verbindlich sind [N4_CREW_TRAVEL.md](contracts/N4_CREW_TRAVEL.md) und die [N4-Aufgabe](tasks/N4_CREW_TRAVEL_EQUIPMENT.md). N3 und frühere Ergebnisse stehen weiter unten ausdrücklich als Historie.
+
+Die Crew läuft um dieselben Möbel, Wände, Felsen und gelandeten Schiffsumrisse, die sichtbar dargestellt werden. Einsteigen erfolgt am erreichbaren Zugang mit reserviertem Platz. Automatik verteilt freie Rollen nach Fähigkeiten und bewahrt vorhandene Reservierungen; manuelle Rollen bleiben möglich. Abheben sammelt niemanden automatisch ein. Lokaler Flug → Orbit → benannter Zielort → schwebende Ankunft → Landung → Aussteigen sind getrennte Schritte. Rückkehr entlädt die Fracht nicht automatisch; direkte Lager-/Frachtbewegung erfordert das Heimatdock und eine Figur am Zugang oder an Bord.
+
+Beide Koopspieler dürfen alle vorhandenen Figuren und gemeinsamen Gameplayaktionen steuern. Die Hostautorität und Mitglieds-/Transaktionsprüfung bleiben bestehen. Dossier und echte Drag-and-drop-Ausrüstung, kauf-/herstellbarer8er-Rucksack, Multi-Tool mit Aufsätzen sowie Medgun mit verbrauchbaren Ladungen ergänzen die bisherigen Rezepte und Kämpfe. Werkzeugregeln gelten für neue Gewinnungsaufträge; die erste Blackbox bleibt ohne Zusatztool erreichbar. Für weitere Satellitenverwertung und Wracks genügt auch der höherwertige Schneider. Flak, endliche Ressourcen, Rüstung und ausdrücklich zurückzugebende Geier-Miete bleiben aktiv.
+
+Alle Orte sind einzeln geladene Karten: Basis/Rostgebiet/Bunkeroberfläche/Handelsposten jeweils960×960m, Verteilzentrum1280×1280m, Station160×160m, Untergrund128×128m, Orbit und Raumkontakt jeweils480×480m. Die Fläche sagt nichts über vollständig begehbaren Innenraum aus. Figuren wechseln die Region gemeinsam; vier abstrahierte Sitze sind noch kein begehbares Schiffsinnere.
+
+### Bestätigte N4-Prüfungen
+
+| Prüfung | Bestanden | Nachweis |
+|---|---:|---|
+| Autoritativer Kern einschließlich Migration und Navigation | 601 | 57 Crew/Reise +67 Migration +153 Navigation +104 Grundlauf +73 Orbit +147 Boden; [Kernvertrag](contracts/N4_CREW_TRAVEL.md) |
+| Welt | 142 | bestätigte Welt-Teilabnahme N4 |
+| Schiffsumrisse | 21 | bestätigte Umriss-Teilabnahme N4 |
+| Ersatzmodelle ohne lokale Schiffsdaten | 8 | bestätigte Fallback-Teilabnahme N4 |
+| Vollständiger aktueller Produktfensterweg | 76 | `output/n4-product-result.json` |
+| Dossier, tatsächliche native Maus-/Fensterbedienung | 22 | [Dossierbericht](../tests/crew_dossier_report.md) |
+| Zwei echte ENet-Produktfenster | 62 | [Netzwerkbericht](../tests/network_report.md) |
+| Öffentliche WSS, zwei echte Prozesse | 70 | [Internetbericht](../tests/internet_report.md) |
+| Gateway, Einladungsprüfung und Freigabe | 15 | `tests/internet_gateway_test.gd` |
+| Save-Lebenszyklus, vier tatsächliche Produktstarts | 12 | [Speicherbericht](../tests/save_lifecycle_report.md) |
+
+Die sechs Kernläufe sind grün. Die aktuellen ENet-/WSS-Läufe vergleichen vollständige Host-/Gast-Snapshots bei Pause, Restore und Abschluss; die abschließenden Enginefehlerlogs sind leer. Öffentliche WSS bedeutet hier tatsächlichen öffentlichen Tunnelverkehr zwischen zwei Prozessen auf diesem Rechner, keinen Nachweis zweier unabhängiger Haushalte. Der produktive DNS-/TLS-Ersatzweg wurde in N3 separat geprüft; N4 behauptet dafür keinen zusätzlichen eigenen Lauf.
+
+Validierte v1/v2/v3-Saves werden auf4 migriert. Laufende Arbeit, Inventare und Anfragebelege bleiben erhalten. Neue Geometrie kann alte blockierte Positionen auf sichere Punkte korrigieren; diese räumliche Anpassung wird gemeldet. Navigation nutzt gecachte Wege und gemeinsame Hindernisse, verspricht aber weder global kürzeste Pfade noch durchgehend kurze Suchzeiten; Einzelheiten und die lokal gemessene Planungsspitze stehen im Kernvertrag.
+
+**Nächster bestätigter Ausbau:** begehbare Schiffsinnenräume mit Schnittansicht, Cockpit-/Turmwegen und Lade-/Betankungsplätzen. Weiter offen: simultane unabhängige Regionssimulation, zusätzliche Crew/Rekrutierung, baubare Erweiterungsplätze/Module, Forschung, XP, Traits, Beziehungen/Moral, umfassende medizinische Evakuierung, weitergehende taktische KI, Raumberufe und PvP. Technische Tests ersetzen keine menschliche Verständlichkeits-/Spielspaßabnahme. Das private Windows-N4-Paket ist lokal fertig und separat geprüft; das N3-Paket bleibt historisch.
+## Historischer Stand N3 · Außenposten, Ausrüstung und Internet-Koop
 
 N3 ist als kleine spielbare Erweiterung implementiert. Der bisherige Aufbau erhält Rüstung aus Herstellung oder Handel mit tatsächlicher Schadensreduktion, endliche Erz-/Wrackgewinnung, die nur mietbare Geier, einfachen Bodenkampf und einen pausierbaren 20-Sekunden-Respawn ohne dauerhaften Verlust. Flak schädigt nahe fliegende Schiffe; sichere entfernte Landung und Bodenangriff sind möglich. Die Crewakte erklärt die wirkenden Werte und Ausrüstung; das erhaltene historische Hauptmenümotiv ist wieder eingebunden.
 
@@ -14,7 +44,7 @@ Internet-Koop wurde mit zwei echten Godot-Prozessen über einen öffentlichen WS
 
 ## Historischer Stand N2 · Räume und Orbit
 
-Die folgenden Ergebnisse und Grenzen dokumentieren die vorige Stufe. Aktuelle Funktionen und Abnahme stehen ausschließlich im N3-Abschnitt oben.
+Die folgenden Ergebnisse und Grenzen dokumentieren die vorige Stufe. Aktuelle Funktionen und Abnahme stehen ausschließlich im N4-Abschnitt oben.
 
 Die Stufe **Räume, Suche und erster Raumkontakt** ist implementiert und technisch geprüft. Vier getrennte Basisräume, sichtbare Ausbauflächen, größere einzeln geladene Karten, ein Stationsdock, Radarentdeckung, planarer Schiffskampf gegen einen zufälligen Freibeuter, Jaros Geschützturm, Werkbankstufen und die erste Crewakte erweitern den bisherigen Spielkreis.
 
@@ -28,7 +58,7 @@ Der Gesamtplan mit echten Spielbildern ist privat veröffentlicht: [Sternenbürg
 
 ## Historischer Stand N0/N1 · 12.09.2026
 
-Die folgenden Ergebnisse beschreiben die ursprüngliche Stufe. Für aktuelle Funktionen und Grenzen gelten der N3-Abschnitt oben und die N3-Abnahme.
+Die folgenden Ergebnisse beschreiben die ursprüngliche Stufe. Für aktuelle Funktionen und Grenzen gelten der N4-Abschnitt oben und die aktuelle N4-Abnahme.
 
 12.09.2026 — Erste spielbare Neustartstufe N0/N1 umgesetzt; N1a als lokaler Zwei-Prozess-Nachweis bestanden. Eigenes Godot-4.6.2-Projekt, Start über `Spielen.cmd`.
 
@@ -58,4 +88,4 @@ Die N1-Karten verwendeten offene Bewegungsflächen und feste Anflugpunkte. Wänd
 
 Koop war mit zwei lokalen Prozessen und Loopback geprüft. Internetvermittlung, Matchmaking, vollständige Netzglättung, weitere Gäste und kompetitive Pausenregeln waren nicht abgenommen. Bereits damals führte der Host Ida und gemeinsame Transaktionen/Pause/Reise, der Gast Jaro; Abbruch pausierte und gab den Gastplatz zurück. Die Clientansicht blieb bei Verbindungsverlust auf dem letzten bestätigten Stand.
 
-Die N1-UX war implementiert und technisch geprüft; menschliche Verständlichkeits- und Spielspaßtests standen aus. Als weiterer Bauabschnitt waren Bunker, Kampf und Genesung vorgesehen. Ihr heute gelieferter kleiner Umfang und die weiterhin offenen Ausbau-/Crewziele stehen im N3-Abschnitt oben.
+Die N1-UX war implementiert und technisch geprüft; menschliche Verständlichkeits- und Spielspaßtests standen aus. Als weiterer Bauabschnitt waren Bunker, Kampf und Genesung vorgesehen. Ihr heute gelieferter kleiner Umfang und die weiterhin offenen Ausbau-/Crewziele stehen im N4-Abschnitt oben.

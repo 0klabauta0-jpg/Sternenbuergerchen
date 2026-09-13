@@ -1,4 +1,41 @@
-# Privater Windows-Testbuild N3 · 13.09.2026
+# Privater Windows-Testbuild N4 · 13.09.2026
+
+N4-Release mit Godot4.6.2 und Dateiversion0.4.0.0 wurde aus dem eingefrorenen Arbeitsstand exportiert. Das lokale Paket enthält Engine und eingebetteten PCK, die drei tatsächlichen lokalen Schiffsmodelle, portables offizielles cloudflared2026.9.1, Lizenztexte, deutsche N4-Anleitung und ein SHA-256-Manifest. Keine Installation von Godot ist beim Freund nötig. Kein Upload zu Git oder Site.
+
+**Lokale Auslieferungsprüfung bestanden.** Reguläre Release-EXE, eingebetteter PCK und frisch entpacktes ZIP wurden isoliert geprüft; die N4-Laufzeit wurde während der Lieferprüfung nicht verändert.
+
+- ZIP: `output/Sternenbuergerchen-Windows-N4.zip`,60.829.873Bytes; SHA-256 `8b1e1b05610f1d0af3d14f02f7e3255d3104ddb5ca11ffc3b14e193fc0dcf6e8`.
+- EXE:109.801.512Bytes; SHA-256 `2ee124c94d44bf214f113601426ad145669b36d9d991c6d6f2c04662fe103e5e`.
+- Build-ID: `N4-20260913-2ee124c94d44`.
+- Unveränderter Helfer SHA-256: `2837888cc0f5d58f15b6dc478376de90b4d3ba5241c7947455d1e0a0df429712`.
+- Isolierter Ordner ohne Projektdateien: `C:/Users/bjoer/AppData/Local/Temp/sternen-windows-n4-c6716f256bb14085bc9a97fe9cce8ec5`.
+- Dauerhafte Belege: `output/windows-n4-delivery/`; Exportlog `output/windows-n4-export.log`.
+
+Bereits bestätigt: Export Exit0 ohne Enginefehler; externer headless Assettest aus genau dem eingebetteten EXE-PCK9/9, darunter `assets/local/entersaebel_n4/entersaebel.glb` mit12 Meshes statt des alten Modells. Freibeuter und Geier sind ebenfalls die lokalen Originalableitungen. Das ZIP wurde frisch entpackt:12 Nutzdateien stimmen mit dem Manifest überein; zusammen mit BUILD.json enthält es13 Dateien, keinen Spielstand, keine Einladung und keine project.godot.
+
+## Tatsächliche N4-Auslieferungsprüfung
+
+Alle Starts verwenden neue eigene APPDATA-Unterordner und einen Paketordner ohne Checkout oder lose Projektressourcen. Die normale Nutzerkarriere bleibt unberührt.
+
+1. Reguläre Release-EXE: echtes Hauptmenü, anschließend separater Start der tatsächlichen Game-Szene über den vorhandenen `--host`-Einstieg; beide Exit0, Fehlerlogs leer. [Menü](../output/windows-n4-delivery/standalone-menu.png), [Game](../output/windows-n4-delivery/standalone-game.png).
+2. Derselbe eingebettete EXE-PCK mit einer externen temporären Godot4.6.2-Probe:22/22 Prüfungen. Tatsächlicher Menübutton lädt das Spiel; Schema4, Basiswelt, Maskierung, Helfer und drei lokale Schiffmodelle geprüft. [Ergebnis](../output/windows-n4-delivery/portable-result.json), [Schiffe](../output/windows-n4-delivery/portable-ships.png).
+3. Externe Dossierprobe gegen genau diesen PCK:22/22 native Mausprüfungen, kombiniertes finales Log ohne Enginefehler. Echter Drag-and-drop von gefertigten Gegenständen, Quelle/Ziel, Mengen, gefülltem Rucksack und Rückgabe. Die Probe hält ausschließlich ihr eigenes natives Testfenster im Vordergrund und liefert vollständige Mouse-Ereignisse nach dem Warp. Vorher fehlende Hoverzuordnung wurde als Eingabeharnessproblem isoliert; keine Spielbefehle oder Bestände werden für Erfolg gesetzt. [Dossier](../output/windows-n4-delivery/portable-dossier.png), [Log](../output/windows-n4-delivery/dossier-final.log).
+4. Separater headless Assettest gegen den EXE-PCK:9/9. Richtige lokale Modellpfade, vorhandene Meshes, passende horizontale Abmessungen und Bodenkontakt. [Log](../output/windows-n4-delivery/asset.log).
+5. Fertiges ZIP frisch entpackt: alle12 Manifestdateien bytegenau/SHA-256 bestätigt, nur13 Archivdateien inklusive Manifest. Die daraus gestartete Release-EXE bootet headless mit Exit0 und leerem Fehlerlog. Gebündeltes cloudflared meldet tatsächlich2026.9.1. [ZIP-Metadaten](../output/windows-n4-delivery/zip.json).
+
+| Tatsächliches Modell aus dem N4-Paket | Meshes | Dreiecke |
+|---|---:|---:|
+| Überarbeitete Entersäbel, `assets/local/entersaebel_n4/entersaebel.glb` | 12 | 15.705 |
+| Freibeuter | 1 | 13.945 |
+| Geier | 1 | 17.998 |
+
+Alle finalen Bilder wurden angesehen. Das Release-Template erlaubt keinen externen Script-Mainloop; deshalb werden reguläre EXE-Starts und ergänzende Prüfungen ihres PCK durch die passende Godot-Konsole getrennt ausgewiesen. Kein Testcode wurde in das Produkt eingebaut. Das ZIP bleibt unverändert bei dem oben genannten Hash.
+
+Öffentliche WSS70/70 und ENet62/62 wurden vor dem Export als eigene N4-Prozessprüfungen bestanden. Dies ist kein zusätzlicher öffentlicher Netzlauf der exportierten EXE und keine Abnahme eines zweiten Haushalts. Windows x86_64/OpenGL3.3, nicht signiert; weitere Hardware und dauerhafter Vermittlungsbetrieb bleiben ungeprüft. Der reguläre Savepfad ist `%APPDATA%/SternenBuergerchen-Neustart/campaign.json`.
+`output/windows/` enthält jetzt N4. Das N3-ZIP und seine historische Prüfung bleiben unten dokumentiert; die N3-Protokolle liegen weiterhin unter `output/windows-delivery/`.
+
+---
+## Historischer privater Windows-Testbuild N3 · 13.09.2026
 
 Der portable Release-Export liegt ausschließlich lokal unter `output/windows/`; das fertige Paket ist [Sternenbuergerchen-Windows-N3.zip](../output/Sternenbuergerchen-Windows-N3.zip), **60.094.436 Byte** (rund 57,3 MiB). Es wurde nicht zu Git oder zur Site hochgeladen.
 

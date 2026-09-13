@@ -13,6 +13,8 @@ var world: Node3D
 var hud: CanvasLayer
 var session: Node
 var expedition: CanvasLayer
+var boarding_menu: PopupMenu
+var travel_chart: Window
 var save_path: String = SAVE_PATH
 var load_on_start: bool = true
 var simulation_seed: int = -1
@@ -49,6 +51,7 @@ func _ready() -> void:
 	world.object_selected.connect(_on_object_selected)
 	world.ground_clicked.connect(_on_ground_clicked)
 	world.units_selected.connect(_on_units_selected)
+	world.context_clicked.connect(_on_context_clicked)
 	hud.command_requested.connect(send_command)
 	hud.action_requested.connect(_on_action)
 	expedition=ExpeditionScript.new()
@@ -56,11 +59,19 @@ func _ready() -> void:
 	add_child(expedition)
 	expedition.command_requested.connect(send_command)
 	expedition.action_requested.connect(_on_action)
+	boarding_menu=preload("res://scripts/ui/boarding_menu.gd").new()
+	add_child(boarding_menu)
+	boarding_menu.command_requested.connect(send_command)
+	boarding_menu.action_requested.connect(_on_action)
+	travel_chart=preload("res://scripts/ui/travel_chart.gd").new()
+	add_child(travel_chart)
+	travel_chart.command_requested.connect(send_command)
 	simulation.notice.connect(hud.notify)
 	session.connection_changed.connect(func(message: String): hud.notify(message))
 	if session.has_signal("invitation_ready"):
 		session.invitation_ready.connect(func(_invitation:String):hud.notify("Einladung bereit. Im Koop-Fenster kopieren und deinem Freund schicken."))
 	session.command_result.connect(func(result: Dictionary):
+		hud.present_command_result(result)
 		if not result.get("ok",false): hud.notify(str(result.get("reason","Befehl abgelehnt"))))
 	get_tree().auto_accept_quit=false
 	for argument: String in OS.get_cmdline_user_args():
@@ -85,6 +96,7 @@ func send_command(command: Dictionary) -> Dictionary:
 	var payload: Dictionary=command.duplicate(true)
 	payload["request_id"]="ui-%s-%s-%s" % [OS.get_process_id(),Time.get_ticks_usec(),_counter]
 	var result: Dictionary=session.dispatch(payload)
+	hud.present_command_result(result)
 	if result.get("pending",false): hud.notify("Befehl wird beim Host geprüft …")
 	if not result.get("ok",false): hud.notify(str(result.get("reason","Befehl abgelehnt")))
 	_refresh()
@@ -102,7 +114,8 @@ func _on_object_selected(kind: String,id: String) -> void:
 func _on_ground_clicked(position: Vector2) -> void:
 	var state: Dictionary=session.current_snapshot()
 	if str(state.get("ship",{}).get("mode","landed"))=="flying":
-		send_command({"type":"ship_move","position":[position.x,position.y]})
+		var flight_result := send_command({"type":"ship_move","position":[position.x,position.y]})
+		if flight_result.get("ok",false) and not flight_result.get("pending",false): world.mark_destination(position,true)
 		return
 	var selection: Array[String]=[]
 	if _direct_mode: selection.append(str(hud.selected_unit))
@@ -110,16 +123,35 @@ func _on_ground_clicked(position: Vector2) -> void:
 	var ids: Array[String]=_owned_units(selection)
 	for index: int in range(ids.size()):
 		var offset: float=(float(index)-float(ids.size()-1)*0.5)*1.4
-		send_command({"type":"move","unit_id":ids[index],"position":[position.x+offset,position.y]})
-	if ids.is_empty(): hud.notify("Diese Crew gehört dem anderen Commander.")
+		var move_result := send_command({"type":"move","unit_id":ids[index],"position":[position.x+offset,position.y]})
+		if move_result.get("ok",false) and not move_result.get("pending",false): world.mark_destination(position,false)
+	if ids.is_empty(): hud.notify("Wähle zuerst eine Person oder Gruppe aus.")
 
 func _owned_units(ids: Array[String]) -> Array[String]:
 	var result: Array[String]=[]
 	var crew: Dictionary=session.current_snapshot().get("crew",{})
 	for id: String in ids:
-		if crew.has(id) and ((session.is_guest() and id=="jaro") or (not session.is_guest() and int(crew[id].owner)==1)):
+		if crew.has(id):
 			result.append(id)
 	return result
+
+func _on_context_clicked(_kind: String, id: String, screen: Vector2) -> void:
+	if id!="shuttle":return
+	var state: Dictionary=session.current_snapshot()
+	if str(state.get("ship",{}).get("mode","landed"))=="flying":
+		_on_object_selected("object","shuttle")
+		return
+	var ids: Array[String]=_owned_units(hud.selected_units)
+	var already_inside:=true
+	for unit_id: String in ids:
+		if state.crew[unit_id].get("assignment","")!="aboard":already_inside=false
+	if Input.is_physical_key_pressed(KEY_SHIFT) or already_inside:
+		boarding_menu.open_for(state,ids,screen)
+	elif not ids.is_empty():_board_selected(ids)
+
+func _board_selected(ids: Array) -> void:
+	# The core chooses the best available skills and reserves the whole group atomically.
+	send_command({"type":"board_crew","unit_ids":ids.duplicate()})
 
 func _on_units_selected(ids: Array[String]) -> void:
 	var owned: Array[String]=_owned_units(ids)
@@ -129,6 +161,18 @@ func _on_units_selected(ids: Array[String]) -> void:
 
 func _on_action(action: String,payload: Dictionary) -> void:
 	match action:
+		"boarding_menu":
+			boarding_menu.open_for(session.current_snapshot(),_owned_units(hud.selected_units),get_viewport().get_mouse_position())
+		"board_selected":_board_selected(payload.get("ids",hud.selected_units))
+		"disembark_selected":
+			var state: Dictionary=session.current_snapshot()
+			for id: String in state.get("crew",{}):
+				if state.crew[id].get("assignment","")=="aboard":send_command({"type":"disembark","unit_id":id})
+		"travel_chart":travel_chart.open_chart(session.current_snapshot())
+		"equip_item","unequip_item","backpack_transfer","use_medgun","transfer":
+			var command: Dictionary=payload.duplicate(true)
+			command.type=action
+			send_command(command)
 		"save":
 			if session.is_guest(): hud.notify("Der Host speichert die gemeinsame Karriere."); return
 			var result: Dictionary=simulation.save_game(save_path)
@@ -215,6 +259,7 @@ func _refresh() -> void:
 	hud.set_connection(session.status_text(),session.is_guest())
 	if session.has_method("internet_invitation"):hud.set_invitation(session.internet_invitation())
 	hud.present(session.current_snapshot())
+	if is_instance_valid(travel_chart) and travel_chart.visible:travel_chart.present(session.current_snapshot())
 	hud.set_recipe_details(Catalog.recipes(),Catalog.prices())
 	if is_instance_valid(expedition): expedition.present(session.current_snapshot(),session.is_guest())
 

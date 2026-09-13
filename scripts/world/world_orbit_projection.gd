@@ -1,6 +1,7 @@
 extends RefCounted
 ## Snapshot-only contact, ship and confirmed-shot projection.
 const Geo = preload("res://scripts/world/world_geometry.gd")
+const Ship = preload("res://scripts/world/world_ship.gd")
 const Space = preload("res://scripts/world/world_space.gd")
 var markers: Dictionary = {}
 var beams: Array[Dictionary] = []
@@ -18,31 +19,13 @@ func present(map: Node3D, objects: Dictionary, state: Dictionary) -> void:
 	if objects.has("shuttle"):
 		var root: Node3D=objects.shuttle
 		var model:=str(ship.get("model","cutlass"))
-		if str(root.get_meta("ship_model","cutlass"))!=model:
-			var old:=root.get_node("Craft")
-			root.remove_child(old); old.queue_free()
-			var replacement:=Geo.asset(root,"geier" if model=="vulture" else "craft_cargoA",Vector3(0,0.35,0),Vector3(4.8,2.4,8.4 if model=="vulture" else 7.35))
-			replacement.name="Craft"
-			var stations:=Node3D.new(); stations.name="CrewStations"; replacement.add_child(stations)
-			if model=="cutlass":
-				Geo.cylinder(stations,Vector3(0,2.1,-0.35),0.58,0.45,Color("485e63"),10)
-				Geo.asset(stations,"white_astronaut",Vector3(0,2.25,-0.35),Vector3(0.5,0.85,0.4),PI)
-			root.set_meta("ship_model",model)
+		Ship.present(root,ship,state.get("crew",{}))
 		(root.get_node("Title") as Label3D).text=str(ship.get("name","Entersäbel")).to_upper()+ (" · MIETSCHIFF" if model=="vulture" else " · SHUTTLE")
 		if ship.has("position"):
 			var coords: Array=ship.position
 			root.position=Vector3(coords[0],0,coords[1])
-		var craft := root.get_node("Craft") as Node3D
-		craft.position.y=4.0 if airborne else 0.35
-		craft.scale=Vector3.ONE*(2.0 if region=="space" else 1.0)
-		if ship.has("target") and ship.has("position"):
-			var direction := Vector2(ship.target[0]-ship.position[0],ship.target[1]-ship.position[1])
-			if direction.length()>0.05: craft.rotation.y=atan2(-direction.x,-direction.y)
-		var stations:=craft.get_node_or_null("CrewStations") as Node3D
-		if stations!=null: stations.visible=region=="space"
-		(root.get_node("Title") as Label3D).position.y=10 if region=="space" else 7 if airborne else 3.4
+		(root.get_node("Title") as Label3D).position.y=8.4 if airborne else 4.5
 		Geo.set_pickable(root,true)
-		_ship_pick_shape(root,2.0 if region=="space" else 1.0,4.0 if airborne else 0.0)
 	if objects.has("satellite"):
 		var known:=bool(state.get("discovery",{}).get("satellite_found",false))
 		(objects.satellite as Node3D).visible=known
@@ -64,10 +47,6 @@ func present(map: Node3D, objects: Dictionary, state: Dictionary) -> void:
 			_ship_pick_shape(pirate,1.6,4.0)
 			var toward: Vector3=(objects.shuttle as Node3D).position-pirate.position
 			if toward.length()>0.05: craft.rotation.y=atan2(-toward.x,-toward.z)
-			var player_craft: Node3D=objects.shuttle.get_node("Craft")
-			var turret: Node3D=player_craft.get_node("CrewStations")
-			if str(encounter.get("turret_target",""))=="pirate":
-				turret.rotation.y=atan2(toward.x,toward.z)-player_craft.rotation.y
 			var title:=pirate.get_node("Title") as Label3D
 			title.text="FREIBEUTER · %d/%d" % [int(enemy.hull),int(enemy.max_hull)]
 			title.position.y=8.3
@@ -116,7 +95,7 @@ func _confirmed_shots(map: Node3D, objects: Dictionary, state: Dictionary) -> vo
 	if previous.is_empty() or str(previous.get("region",""))!="space": return
 	var now: Dictionary=state.encounter
 	var old: Dictionary=previous.get("encounter",{})
-	var player: Vector3=(objects.shuttle as Node3D).position+Vector3(0,8.7,0)
+	var player: Vector3=(objects.shuttle as Node3D).position+Vector3(0,7.35,0)
 	var enemy: Vector3=(objects.pirate as Node3D).position+Vector3(0,5.5,0)
 	if float(now.fire_cooldown)>float(old.get("fire_cooldown",0))+0.05 and str(now.get("turret_target",""))!="":
 		var beam:=Space.beam(map,player,enemy,Color("83e8e1"))
