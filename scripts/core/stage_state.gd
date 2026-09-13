@@ -1,5 +1,5 @@
 extends RefCounted
-const Catalog=preload("res://scripts/core/catalog.gd")
+const Catalog=preload("res://scripts/core/legacy_catalog_v2.gd")
 static func empty_encounter() -> Dictionary:
 	return {"active":false,"status":"none","pending_destination":"","enemy":{},"turret_target":"","fire_cooldown":0.0,"enemy_cooldown":0.0,"escape_remaining":0.0}
 static func extend(s: Dictionary, seed_value: int=-1) -> void:

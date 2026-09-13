@@ -2,6 +2,11 @@ extends RefCounted
 ## Original 24px line icons; rendered as vectors, no font glyph dependencies.
 static var _cache: Dictionary={}
 const SHAPES := {
+	"network":"<circle cx='12' cy='12' r='9'/><path d='M3 12h18M12 3c-5 6-5 12 0 18M12 3c5 6 5 12 0 18'/>",
+	"back":"<path d='m10 4-8 8 8 8M2 12h20'/>",
+	"armor":"<path d='m4 3 5-2 3 4 3-4 5 2-2 8 2 10-8 2-8-2 2-10zM8 10h8M8 15h8'/>",
+	"mining":"<path d='M3 8q9-10 18 0M12 4 6 22M16 9l6 10-8 3-3-7z'/>",
+	"elevator":"<path d='M3 2h18v20H3zM12 5l-4 4m4-4 4 4M12 19l-4-4m4 4 4-4'/>",
 	"crew":"<circle cx='12' cy='8' r='4'/><path d='M4 22v-4c0-5 16-5 16 0v4M8 4l-2 5 2 4h8l2-4-2-5'/>",
 	"target":"<circle cx='12' cy='12' r='7'/><circle cx='12' cy='12' r='2'/><path d='M12 1v5m0 12v5M1 12h5m12 0h5'/>",
 	"contracts":"<path d='M6 3h12v18H6zM9 7h6m-6 4h6m-6 4h3'/>",

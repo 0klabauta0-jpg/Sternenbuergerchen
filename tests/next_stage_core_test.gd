@@ -17,8 +17,8 @@ func cmd(kind: String,data: Dictionary = {},sender: int = 1) -> Dictionary:
 	return sim.submit(c,sender)
 func run() -> void:
 	sim=Core.new(1);sim.auto_tick=false;root.add_child(sim)
-	check(sim.snapshot().schema_version==2,"schema2 extensions and migration exist")
-	if sim.snapshot().schema_version!=2:
+	check(sim.snapshot().schema_version==3,"schema2 extensions and migration exist")
+	if sim.snapshot().schema_version!=3:
 		sim.free();quit(1);return
 	check(sim.snapshot().base.workbench_tier==1,"simple starting workbench")
 	check(sim.snapshot().crew.ida.skills.pilot>sim.snapshot().crew.jaro.skills.pilot,"different actual crew profiles")
@@ -100,6 +100,8 @@ func run() -> void:
 	cmd("assign_work",{"unit_id":"ida","recipe_id":"toolkit"});sim.advance(0.5)
 	var legacy_state: Dictionary=sim.snapshot()
 	legacy_state.schema_version=1
+	for item in ["armor","ore","alloy"]:legacy_state.inventory.erase(item);legacy_state.cargo.erase(item)
+	legacy_state.blueprints.erase("armor")
 	for key: String in ["base","random_seed","discovery","encounter"]:legacy_state.erase(key)
 	legacy_state.inventory.erase("helmet");legacy_state.cargo.erase("helmet")
 	legacy_state.blueprints.erase("helmet");legacy_state.blueprints.erase("upgrade_workbench")
@@ -150,6 +152,8 @@ func run() -> void:
 	check(not sim.load_game("user://n2-invalid.json").ok and sim.snapshot()==before,"out-of-bounds saved ship cannot mutate campaign")
 	var paid_v1: Dictionary=sim.snapshot()
 	paid_v1.schema_version=1
+	for item in ["armor","ore","alloy"]:paid_v1.inventory.erase(item);paid_v1.cargo.erase(item)
+	paid_v1.blueprints.erase("armor")
 	for key: String in ["base","random_seed","discovery","encounter"]:paid_v1.erase(key)
 	paid_v1.inventory.erase("helmet");paid_v1.cargo.erase("helmet")
 	paid_v1.blueprints.erase("helmet");paid_v1.blueprints.erase("upgrade_workbench")

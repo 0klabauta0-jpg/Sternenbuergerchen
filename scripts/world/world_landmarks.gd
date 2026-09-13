@@ -2,6 +2,7 @@ extends RefCounted
 ## Selectable station models and set dressing, keyed by the shared catalog IDs.
 const Geo = preload("res://scripts/world/world_geometry.gd")
 const Rooms = preload("res://scripts/world/world_rooms.gd")
+const GroundSites = preload("res://scripts/world/world_ground_sites.gd")
 const TITLES := {"workbench":"WERKBANK", "storage":"LAGER", "contracts":"AUFTRÄGE", "shuttle":"ENTERSÄBEL · SHUTTLE", "market":"HANDEL", "satellite":"SATELLITENWRACK", "bed_ida":"IDA", "bed_jaro":"JARO", "kitchen":"KÜCHE / AUFENTHALT", "expansion_a":"MODULFLÄCHE A", "expansion_b":"MODULFLÄCHE B", "pirate":"FREIBEUTER"}
 
 static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dictionary:
@@ -10,6 +11,7 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 		Rooms.base(parent)
 	elif region == "station":
 		Rooms.station(parent)
+	GroundSites.build(parent,region)
 	for id in landmarks:
 		var at: Array = landmarks[id]
 		var root := Node3D.new()
@@ -84,8 +86,32 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 				Geo.asset(root,"crate-wide",Vector3(3.0,0.05,-1),Vector3(1.8,1.1,1.5),PI/2)
 				collision = Vector3(4,2.4,2.5)
 				label_height = 3.1
+			"mining_site":
+				_ore(root)
+				collision=Vector3(11,3.6,9)
+				label_height=4.2
+			"derelict", "distribution_wreck":
+				_ship_wreck(root)
+				collision=Vector3(15,4,16)
+				label_height=5.0
+			"bunker_entry", "elevator":
+				_lift(root)
+				collision=Vector3(7.5,0.3,7.5)
+				label_height=1.0
+			"aa_turret":
+				# Enemy geometry and confirmed health are supplied by GroundProjection.
+				collision=Vector3(4,3.8,4)
+				label_height=4.3
+			"surface_cache", "bunker_cache", "distribution_cache", "tradepost_cache":
+				Geo.asset(root,"crate-wide",Vector3(-0.7,0.05,-0.5),Vector3(2.2,1.1,1.6))
+				Geo.asset(root,"crate-small",Vector3(1.4,0.05,0.1),Vector3(1.1,0.85,1.1))
+				_beacon(root,Vector3(-0.7,1.3,-0.4),Color("b6d597"))
+				collision=Vector3(4,1.8,2.6)
+			"bunker_terminal":
+				Geo.asset(root,"computer-wide",Vector3(0,0.05,-0.5),Vector3(3.2,2.0,1.5))
+				collision=Vector3(3.5,2.3,2.0)
 		Geo.collider(root,"object",str(id),collision)
-		var title := Geo.label(root,TITLES.get(id,str(id)),Vector3(0,label_height,0),Color("dce8df"),20 if str(id).begins_with("bed") else 23)
+		var title := Geo.label(root,site_title(str(id)),Vector3(0,label_height,0),Color("dce8df"),20 if str(id).begins_with("bed") else 23)
 		if str(id).begins_with("bed"):
 			title.visible = false
 		title.name = "Title"
@@ -94,6 +120,36 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 		selection.visible = false
 		nodes[id] = root
 	return nodes
+
+static func site_title(id: String) -> String:
+	return {"mining_site":"ERZVORKOMMEN","derelict":"VERLASSENES SCHIFFSWRACK","bunker_entry":"LASTENAUFZUG · ABWÄRTS","elevator":"LASTENAUFZUG · AUFWÄRTS","aa_turret":"FLAKGESCHÜTZ","surface_cache":"MATERIALKISTEN","bunker_cache":"LEGIERUNGSLAGER","bunker_terminal":"SICHERHEITSTERMINAL","distribution_cache":"FRACHTDEPOT","distribution_wreck":"BERGEDOCK / WRACK","tradepost_cache":"VERLASSENES DEPOT"}.get(id,TITLES.get(id,id))
+
+static func _lift(root: Node3D) -> void:
+	Geo.box(root,Vector3(0,0.035,0),Vector3(7.5,0.07,7.5),Color("354f58"))
+	Geo.box(root,Vector3(0,0.085,0),Vector3(6.3,0.03,6.3),Color("849993"))
+	for x in [-3.4,3.4]:
+		Geo.box(root,Vector3(x,1.3,-3.4),Vector3(0.35,2.6,0.35),Color("c4b58c"))
+		Geo.box(root,Vector3(x,0.105,0),Vector3(0.20,0.02,6.7),Color("e0bd78"))
+		_beacon(root,Vector3(x,2.75,-3.4),Color("8ddaca"))
+	Geo.box(root,Vector3(0,0.105,0),Vector3(0.12,0.02,6.3),Color("506966"))
+
+static func _ore(root: Node3D) -> void:
+	Geo.cylinder(root,Vector3(0,0.06,0),7.3,0.12,Color("766454"),9)
+	for i in range(12):
+		var angle:=i*2.39
+		var radius:=2.0+float(i%4)*1.2
+		var rock:=Geo.cylinder(root,Vector3(cos(angle)*radius,0.45+float(i%3)*0.35,sin(angle)*radius),1.2+float(i%3)*0.3,1.3+float(i%3)*0.55,Color("736a62"),5)
+		rock.rotation=Vector3(0.1*i,0.8*i,0.13)
+		Geo.box(rock,Vector3(0,0.7,0),Vector3(0.35,0.35,1.3),Color("75b5ad"),0.45)
+
+static func _ship_wreck(root: Node3D) -> void:
+	Geo.cylinder(root,Vector3(0,0.055,0),10.0,0.11,Color("625649"),9)
+	var hull:=Geo.asset(root,"craft_cargoA",Vector3(0,0.5,0),Vector3(8,4,13),0.6)
+	hull.rotation.z=0.26
+	Geo._tint(hull,Geo.material(Color("65706c"),0.25))
+	for i in range(10):
+		var piece:=Geo.box(root,Vector3(sin(i*2.1)*8,0.3,cos(i*1.7)*7),Vector3(1.4+float(i%3),0.45,0.8),Color("a08a69"))
+		piece.rotation.y=i*0.84
 
 static func _landing_pad(root: Node3D) -> void:
 	Geo.cylinder(root,Vector3(0,0.015,0),6.4,0.035,Color("736d60"),8)

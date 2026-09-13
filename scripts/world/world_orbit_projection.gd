@@ -17,6 +17,18 @@ func present(map: Node3D, objects: Dictionary, state: Dictionary) -> void:
 	var airborne := str(ship.get("mode","landed"))=="flying"
 	if objects.has("shuttle"):
 		var root: Node3D=objects.shuttle
+		var model:=str(ship.get("model","cutlass"))
+		if str(root.get_meta("ship_model","cutlass"))!=model:
+			var old:=root.get_node("Craft")
+			root.remove_child(old); old.queue_free()
+			var replacement:=Geo.asset(root,"geier" if model=="vulture" else "craft_cargoA",Vector3(0,0.35,0),Vector3(4.8,2.4,8.4 if model=="vulture" else 7.35))
+			replacement.name="Craft"
+			var stations:=Node3D.new(); stations.name="CrewStations"; replacement.add_child(stations)
+			if model=="cutlass":
+				Geo.cylinder(stations,Vector3(0,2.1,-0.35),0.58,0.45,Color("485e63"),10)
+				Geo.asset(stations,"white_astronaut",Vector3(0,2.25,-0.35),Vector3(0.5,0.85,0.4),PI)
+			root.set_meta("ship_model",model)
+		(root.get_node("Title") as Label3D).text=str(ship.get("name","Entersäbel")).to_upper()+ (" · MIETSCHIFF" if model=="vulture" else " · SHUTTLE")
 		if ship.has("position"):
 			var coords: Array=ship.position
 			root.position=Vector3(coords[0],0,coords[1])

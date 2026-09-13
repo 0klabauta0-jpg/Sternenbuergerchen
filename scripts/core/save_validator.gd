@@ -18,13 +18,13 @@ static func _items(value: Variant) -> bool:
 	return true
 
 static func validate(payload: Variant) -> String:
-	if not payload is Dictionary or payload.get("schema_version") != 2: return "Unbekanntes Speicherformat."
+	if not payload is Dictionary or payload.get("schema_version") != 3: return "Unbekanntes Speicherformat."
 	var value: Variant = payload.get("state")
 	if not value is Dictionary: return "Zustand fehlt."
 	var s: Dictionary = value
-	if s.get("schema_version") != 2 or not whole(s.get("revision"),0,1000000000000): return "Version oder Revision ungültig."
+	if s.get("schema_version") != 3 or not whole(s.get("revision"),0,1000000000000): return "Version oder Revision ungültig."
 	if not number(s.get("time"),0.0,1000000000000.0) or not s.get("paused") is bool: return "Zeit ungültig."
-	if not s.get("region") in ["base","rust","station","space"]: return "Region ungültig."
+	if not s.get("region") in ["base","rust","station","space","bunker_surface","bunker_depths","distribution","tradepost"]: return "Region ungültig."
 	if not whole(s.get("credits"),0,1000000000) or not _items(s.get("inventory")) or not _items(s.get("cargo")): return "Bestand ungültig."
 	if not s.get("ship") is Dictionary or not number(s.ship.get("condition"),0,100) or not whole(s.ship.get("capacity"),1,1000): return "Shuttle ungültig."
 	var cargo_count: int = 0
@@ -43,7 +43,7 @@ static func validate(payload: Variant) -> String:
 		var unit: Dictionary = s.crew[unit_id]
 		if unit.get("id") != unit_id or not unit.get("name") is String or not whole(unit.get("skill"),0,10) or not whole(unit.get("owner"),1,2147483647): return "Personendaten ungültig."
 		if not position_valid(unit.get("position"),Catalog.bounds(s.region)) or not position_valid(unit.get("target"),Catalog.bounds(s.region)): return "Personenposition ungültig."
-		if not unit.get("assignment") in ["idle","work","salvage","boarding","aboard"]: return "Zuweisung ungültig."
+		if not unit.get("assignment") in ["idle","work","salvage","boarding","aboard","gather","downed"]: return "Zuweisung ungültig."
 	if not s.get("contract") is Dictionary or not s.contract.get("status") in ["available","active","recovered","claimed"] or s.contract.get("reward") != 260: return "Auftrag ungültig."
 	var blackboxes: int = int(s.inventory.blackbox) + int(s.cargo.blackbox)
 	if blackboxes != (1 if s.contract.status == "recovered" else 0): return "Blackbox und Auftrag widersprechen sich."
@@ -70,9 +70,9 @@ static func validate(payload: Variant) -> String:
 	var stage_error: String=_stage_valid(s)
 	if not stage_error.is_empty():return stage_error
 	if travel.active:
-		if work.active or salvage.active or travel.from!=s.region or not travel.to in ["base","rust","station"] or not travel.phase in ["boarding","flying"]:return "Reise ungültig."
+		if work.active or salvage.active or travel.from!=s.region or not travel.to in ["base","rust","station","bunker_surface","distribution","tradepost"] or not travel.phase in ["boarding","flying"]:return "Reise ungültig."
 		if travel.kind=="launch":
-			if s.region!="rust" or travel.to!="rust" or travel.total!=0 or travel.phase!="boarding":return "Start ungültig."
+			if not s.region in ["rust","bunker_surface","distribution","tradepost"] or travel.to!=s.region or travel.total!=0 or travel.phase!="boarding":return "Start ungültig."
 		elif travel.from==travel.to or travel.total!=5:return "Reisezeit ungültig."
 		for unit_id: String in s.crew:
 			if s.crew[unit_id].assignment != "boarding" or not _same_position(s.crew[unit_id].target,s.ship.position): return "Crew fehlt am Shuttle."
@@ -90,7 +90,7 @@ static func validate(payload: Variant) -> String:
 	for key: Variant in payload.receipts:
 		var receipt: Variant = payload.receipts[key]
 		if not key is String or not receipt is Dictionary or not receipt.get("ok") is bool or not receipt.get("reason") is String or not receipt.get("request_id") is String or receipt.request_id.is_empty(): return "Anfragebeleg ungültig."
-	return ""
+	return preload("res://scripts/core/ground_validator.gd").validate(s)
 
 static func _same_position(first: Array, second: Array) -> bool:
 	return is_equal_approx(float(first[0]),float(second[0])) and is_equal_approx(float(first[1]),float(second[1]))
@@ -104,7 +104,7 @@ static func _materials_equal(first: Dictionary, second: Dictionary) -> bool:
 static func _stage_valid(s: Dictionary) -> String:
 	if not whole(s.get("random_seed"),1,2147483646):return "Zufallszustand ungültig."
 	if not s.get("base") is Dictionary or not whole(s.base.get("workbench_tier"),1,2):return "Werkbankstufe ungültig."
-	if not s.ship.get("mode") in ["landed","flying"] or not position_valid(s.ship.get("position"),Catalog.bounds(s.region)) or not position_valid(s.ship.get("target"),Catalog.bounds(s.region)):return "Flugzustand ungültig."
+	if not s.ship.get("mode") in ["landed","flying"] or not position_valid(s.ship.get("position"),320 if s.region=="bunker_depths" else Catalog.bounds(s.region)) or not position_valid(s.ship.get("target"),320 if s.region=="bunker_depths" else Catalog.bounds(s.region)):return "Flugzustand ungültig."
 	if not s.ship.get("roles") is Dictionary or s.ship.roles.get("pilot")!="ida" or s.ship.roles.get("gunner")!="jaro":return "Bordrollen ungültig."
 	if not s.travel.get("kind") in ["intermap","launch"] or not s.travel.get("encounter_decided") is bool or not whole(s.travel.get("encounter_roll"),-1,99):return "Reisewurf ungültig."
 	if s.travel.active and (not s.travel.encounter_decided or s.travel.encounter_roll<0):return "Reisewurf fehlt."
@@ -126,10 +126,10 @@ static func _stage_valid(s: Dictionary) -> String:
 	for contact: Variant in d.signals:
 		if not contact is Dictionary or not contact.get("id") in ["signal_01","signal_02","signal_03"] or seen.has(contact.id):return "Kontakt ungültig."
 		seen[contact.id]=true
-		if not position_valid(contact.get("position"),320) or not contact.get("identified") is bool or not contact.get("label") is String:return "Kontaktdaten ungültig."
+		if not position_valid(contact.get("position"),480) or not contact.get("identified") is bool or not contact.get("label") is String:return "Kontaktdaten ungültig."
 		var index: int=int(str(contact.id).right(2))-1
 		if not _same_position(contact.position,Catalog.radar_contacts()[index].position):return "Kontaktposition ungültig."
-		var kind: String="unknown" if not contact.identified else ("satellite" if contact.id=="signal_01" else "debris")
+		var kind: String="unknown" if not contact.identified else ("satellite" if contact.id=="signal_01" else ("mining_site" if contact.id=="signal_02" else "derelict"))
 		if contact.get("kind")!=kind:return "Kontaktidentität ungültig."
 		if kind=="satellite":found=true
 	if found!=d.satellite_found:return "Satellitenentdeckung widersprüchlich."

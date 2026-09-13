@@ -10,9 +10,12 @@ const Terrain = preload("res://scripts/world/world_terrain.gd")
 const Landmarks = preload("res://scripts/world/world_landmarks.gd")
 const Catalog = preload("res://scripts/core/catalog.gd")
 const OrbitProjection = preload("res://scripts/world/world_orbit_projection.gd")
+const GroundProjection = preload("res://scripts/world/world_ground_projection.gd")
+const Armor = preload("res://scripts/world/world_armor.gd")
 const ControlScript = preload("res://scripts/world/world_control.gd")
 
 var _orbit: RefCounted
+var _ground: RefCounted
 var _camera: Camera3D
 var _map: Node3D
 var _environment: Environment
@@ -83,26 +86,30 @@ func present(state: Dictionary) -> void:
 		root.position = next
 		root.set_meta("moving",movement.length() > 0.005)
 		var task := str(data.get("assignment","idle"))
+		Armor.show(root.get_meta("armor_parts",[]),str(data.get("equipment",{}).get("armor",""))=="armor")
+		(root.get_node("Model") as Node3D).rotation.z=PI/2 if task=="downed" else 0.0
+		(root.get_node("Model") as Node3D).position.y=0.3 if task=="downed" else 0.0
 		var targets: Array = data.get("target",coords)
 		var moving_recently := Time.get_ticks_msec()-int(_last_motion.get(id,-1000)) < 130
 		var walking := Vector2(coords[0],coords[1]).distance_to(Vector2(targets[0],targets[1])) > 0.05 or moving_recently
-		if not walking and task in ["work","salvage"]:
-			var station_id := "workbench" if task == "work" else "satellite"
+		if not walking and task in ["work","salvage","gather"]:
+			var station_id := "workbench" if task == "work" else str(state.get("ground",{}).get("activity",{}).get("site_id","")) if task=="gather" else "satellite"
 			if _objects.has(station_id):
 				var toward := (_objects[station_id] as Node3D).position - root.position
 				(root.get_node("Model") as Node3D).rotation.y = atan2(toward.x,toward.z)
 		var animation: AnimationPlayer = root.get_meta("animation_player",null)
 		if animation != null:
-			var wanted := "Walk" if walking else "Work" if task in ["work","salvage"] else "Idle"
+			var wanted := "Walk" if walking and task!="downed" else "Work" if task in ["work","salvage","gather"] else "Idle"
 			if animation.has_animation(wanted) and animation.current_animation != wanted:
 				animation.play(wanted,0.15)
-			animation.speed_scale = 0.0 if bool(state.get("paused",false)) else 1.0
+			animation.speed_scale = 0.0 if bool(state.get("paused",false)) or task=="downed" else 1.0
 		var title := root.get_node("Title") as Label3D
-		title.text = str(data.get("name",id)) + (" · ARBEIT" if task == "work" else " · BERGUNG" if task == "salvage" else "")
+		title.text = str(data.get("name",id)) + (" · ARBEIT" if task == "work" else " · BERGUNG" if task in ["salvage","gather"] else " · BERGUNG IN %ds" % int(ceil(float(data.get("respawn_remaining",0)))) if task=="downed" else " · %d LP" % int(data.health) if float(data.get("health",100))<100 else "")
 	var was_flying:=_flying
 	_flying = str(state.get("ship",{}).get("mode","landed")) == "flying" or (bool(state.get("travel",{}).get("active",false)) and str(state.get("travel",{}).get("phase","")) == "flying")
 	_orbit.present(_map,_objects,state)
-	if _flying and not was_flying and _region in ["rust","space"]:
+	_ground.present(_map,_objects,_units,state)
+	if _flying and not was_flying and _region in ["rust","space","bunker_surface","distribution","tradepost"]:
 		_flight_camera_follow=true
 	for id in _units:
 		(_units[id] as Node3D).visible = crew.has(id) and not _flying and str(crew.get(id,{}).get("assignment","idle")) != "aboard"
@@ -147,10 +154,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_dragging = event.pressed
 			get_viewport().set_input_as_handled()
 		elif event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_zoom = clampf(_zoom*0.9,19,420 if _region=="rust" else 300 if _region=="space" else 180)
+			_zoom = clampf(_zoom*0.9,19,_max_zoom())
 			get_viewport().set_input_as_handled()
 		elif event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_zoom = clampf(_zoom/0.9,19,420 if _region=="rust" else 300 if _region=="space" else 180)
+			_zoom = clampf(_zoom/0.9,19,_max_zoom())
 			get_viewport().set_input_as_handled()
 		elif event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 			var at: Variant = _ground_at(event.position)
@@ -187,7 +194,7 @@ func focus_object(id: String) -> void:
 		_flight_camera_follow=id=="shuttle"
 
 func focus_home() -> void:
-	_flight_camera_follow=_region in ["rust","space"]
+	_flight_camera_follow=_region in ["rust","space","bunker_surface","distribution","tradepost"]
 	match _region:
 		"rust":
 			var coords: Array = _snapshot.get("ship",{}).get("position",[-210,180])
@@ -200,9 +207,19 @@ func focus_home() -> void:
 			var coords: Array = _snapshot.get("ship",{}).get("position",[-85,0])
 			_focus = Vector3(coords[0]+35,0,coords[1]-8)
 			_zoom = 145.0
+		"bunker_surface","distribution","tradepost":
+			var coords: Array = _snapshot.get("ship",{}).get("position",[0,0])
+			_focus=Vector3(coords[0],0,coords[1])
+			_zoom=82.0 if _region=="distribution" else 65.0
+		"bunker_depths":
+			_focus=Vector3(0,0,22)
+			_zoom=64.0
 		_:
 			_focus = Vector3(2,0,-1)
 			_zoom = 48.0
+
+func _max_zoom() -> float:
+	return minf(650,Catalog.bounds(_region)*2.0) if _region in ["rust","distribution","bunker_surface","tradepost"] else 300.0 if _region=="space" else 180.0
 
 func set_selection(kind: String, id: String) -> void:
 	_selected_kind = kind
@@ -255,10 +272,11 @@ func _build_map() -> void:
 	if _region=="space": points={"shuttle":[-85,0],"pirate":[55,-25]}
 	_objects = Landmarks.build(_map,_region,points)
 	_orbit=OrbitProjection.new()
+	_ground=GroundProjection.new()
 	_destination = Geo.ring(_map,0.65,Color("f6d497"))
 	_destination_age = 10.0
-	_environment.background_color = Color("091624") if _region in ["station","space"] else Color("839ba6")
-	_environment.fog_enabled = _region not in ["station","space"]
+	_environment.background_color = Color("091624") if _region in ["station","space","bunker_depths"] else Color("839ba6")
+	_environment.fog_enabled = _region not in ["station","space","bunker_depths"]
 	focus_home()
 
 func _create_unit(id: String, data: Dictionary) -> void:
@@ -276,6 +294,7 @@ func _create_unit(id: String, data: Dictionary) -> void:
 		player.play("Idle")
 		player.advance(0)
 		root.set_meta("animation_player",player)
+	root.set_meta("armor_parts",Armor.attach(model))
 	var color := Color("91dfd6") if id == "ida" else Color("eac890")
 	Geo.collider(root,"unit",id,Vector3(1.2,2.2,1.2))
 	var disk := Geo.cylinder(root,Vector3(0,0.035,0),0.47,0.04,Color("334f58"),16)

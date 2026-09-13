@@ -5,6 +5,11 @@ const Catalog = preload("res://scripts/core/catalog.gd")
 const Validator = preload("res://scripts/core/save_validator.gd")
 const LegacyValidator = preload("res://scripts/core/legacy_validator_v1.gd")
 const Stage = preload("res://scripts/core/stage_state.gd")
+const LegacyV2=preload("res://scripts/core/legacy_validator_v2.gd")
+const GroundState=preload("res://scripts/core/ground_state.gd")
+const GroundOps=preload("res://scripts/core/ground_operations.gd")
+const GroundCatalog=preload("res://scripts/core/ground_catalog.gd")
+const Nav=preload("res://scripts/core/ground_navigation.gd")
 const Orbit = preload("res://scripts/core/orbit_operations.gd")
 signal state_changed
 signal notice(message: String)
@@ -13,6 +18,8 @@ var _guest_id: int = 0
 var _receipts: Dictionary = {}
 var _state: Dictionary = {}
 var _orbit: RefCounted = Orbit.new()
+var _ground: RefCounted=GroundOps.new()
+var _routes: Dictionary={}
 
 func _init(seed_value: int = -1) -> void:
 	_state = {
@@ -27,9 +34,12 @@ func _init(seed_value: int = -1) -> void:
 	_state.inventory.scrap = 8
 	_state.inventory.parts = 3
 	Stage.extend(_state,seed_value)
+	GroundState.extend(_state)
 	_state.crew.ida.position=[0.0,0.0];_state.crew.ida.target=[0.0,0.0]
 	_state.crew.jaro.position=[1.0,1.0];_state.crew.jaro.target=[1.0,1.0]
 	_orbit.bind(_state,_log)
+	_ground.bind(_state,_log,_cancel_unit_tasks)
+	_routes.clear()
 
 func _empty_items() -> Dictionary:
 	return {"scrap":0,"parts":0,"toolkit":0,"cutter":0,"blackbox":0}
@@ -92,6 +102,12 @@ func _dispatch(command: Dictionary, sender: int) -> String:
 	if kind == "toggle_pause":
 		_state.paused = not _state.paused
 		return ""
+	if kind in ["gather","cancel_gather","attack","use_elevator","rent_ship","return_rental"]:
+		var previous_region: String=_state.region
+		var result: String=_ground.dispatch(command,sender)
+		if _state.region!=previous_region:_routes.clear()
+		return result
+	if kind=="launch" and _ground.busy():return "Crew ist gebunden oder verwundet."
 	if kind in ["launch","ship_move","radar_scan","land","fire_turret","flee","equip"]:
 		return _orbit.dispatch(command,sender)
 	if _state.travel.active:
@@ -102,6 +118,8 @@ func _dispatch(command: Dictionary, sender: int) -> String:
 			if not error.is_empty(): return error
 			if not Validator.position_valid(command.get("position"), Catalog.bounds(_state.region)):
 				return "Ziel liegt außerhalb der Karte."
+			if Nav.path(_state.region,Vector2(_state.crew[command.unit_id].position[0],_state.crew[command.unit_id].position[1]),Vector2(command.position[0],command.position[1])).is_empty():return "Ziel blockiert oder nicht erreichbar."
+			_state.crew[command.unit_id].attack_target=""
 			_state.crew[command.unit_id].target = command.position.duplicate()
 		"accept_contract":
 			if _state.region != "base" or _state.contract.status != "available": return "Kein neuer Auftrag verfügbar."
@@ -168,6 +186,7 @@ func _start_work(command: Dictionary, sender: int) -> String:
 		if _state.inventory[item] < recipe.materials[item]: return "Material im Basislager fehlt."
 	for item: String in recipe.materials:
 		_state.inventory[item] -= recipe.materials[item]
+	unit.attack_target=""
 	unit.assignment = "work"
 	unit.target = Catalog.interaction_point("base", "workbench")
 	_state.work = {"active":true,"unit_id":command.unit_id,"recipe_id":recipe_id,"remaining":recipe.duration,"total":recipe.duration,"phase":"walking","reserved":recipe.materials.duplicate(true)}
@@ -177,12 +196,15 @@ func _start_work(command: Dictionary, sender: int) -> String:
 func _start_travel(command: Dictionary) -> String:
 	if _state.encounter.active:return "Raumkontakt erst lösen oder fliehen."
 	var destination: Variant = command.get("destination")
-	if not destination is String or not destination in ["base","rust","station"] or destination == _state.region:
+	if not destination is String or not destination in GroundCatalog.DESTINATIONS or destination == _state.region:
 		return "Ungültiges Reiseziel."
+	if _state.region=="bunker_depths":return "Zuerst mit dem Aufzug zur Oberfläche zurück."
+	if _ground.busy():return "Gewinnung beenden oder Notversorgung abwarten."
 	if _state.work.active or _state.salvage.active: return "Erst laufende Arbeit beenden oder abbrechen."
 	if _state.ship.condition < 20.0: return "Shuttle muss repariert werden."
 	for unit_id: String in _state.crew:
 		var unit: Dictionary = _state.crew[unit_id]
+		unit.attack_target=""
 		unit.assignment = "boarding"
 		unit.target = _state.ship.position.duplicate()
 	var roll: int = _orbit.roll_station_contact() if destination=="station" else 99
@@ -201,6 +223,7 @@ func _start_salvage(command: Dictionary, sender: int) -> String:
 	var error: String = _unit_error(command.get("unit_id"), sender)
 	if not error.is_empty(): return error
 	var unit: Dictionary = _state.crew[command.unit_id]
+	unit.attack_target=""
 	unit.assignment = "salvage"
 	unit.target = Catalog.interaction_point("rust", "satellite")
 	_state.salvage = {"active":true,"unit_id":command.unit_id,"remaining":8.0,"total":8.0,"phase":"walking"}
@@ -213,7 +236,7 @@ func _cargo_count() -> int:
 	return count
 
 func _trade(command: Dictionary) -> String:
-	if _state.region != "station": return "Handel ist an der Station möglich."
+	if not _state.region in ["station","distribution","tradepost"] or _state.ship.mode!="landed": return "Handel ist an einem gelandeten Markt möglich."
 	var side: Variant = command.get("side")
 	var item: Variant = command.get("item")
 	var amount: Variant = command.get("amount")
@@ -250,6 +273,9 @@ func advance(delta: float) -> void:
 
 func _tick(delta: float) -> void:
 	_state.time += delta
+	_ground.tick(delta)
+	if _state.ship.condition<=0 and _state.ship.mode=="flying" and _state.region!="space":
+		_state.ship.condition=50.0;_arrive("base");_log("Notbergung nach Flaktreffer: Crew und Schiff zurück an der Basis.");return
 	if not _state.travel.active and _state.ship.mode=="flying":
 		var destination: String=_orbit.tick(delta)
 		if not destination.is_empty():_arrive(destination)
@@ -259,7 +285,8 @@ func _tick(delta: float) -> void:
 			var unit: Dictionary = _state.crew[unit_id]
 			var point: Vector2 = Vector2(unit.position[0], unit.position[1])
 			var target: Vector2 = Vector2(unit.target[0], unit.target[1])
-			point = point.move_toward(target, Catalog.WALK_SPEED * delta)
+			if unit.health<=0:continue
+			point = _move_on_route(unit_id,point,target,delta)
 			unit.position = [point.x, point.y]
 	if _state.travel.active:
 		_tick_travel(delta)
@@ -318,6 +345,7 @@ func _tick_travel(delta: float) -> void:
 	_arrive(destination)
 
 func _arrive(destination: String) -> void:
+	_routes.clear()
 	_state.region = destination
 	# N1 has no fuel attrition: repeated flights must not strand the first crew.
 	var landing: Array = Catalog.landmarks(_state.region).shuttle
@@ -325,6 +353,7 @@ func _arrive(destination: String) -> void:
 	var offset: float = -3.7
 	for unit_id: String in _state.crew:
 		var unit: Dictionary = _state.crew[unit_id]
+		unit.attack_target=""
 		unit.position = [landing[0] + offset, landing[1] + 3.8]
 		_release(unit_id)
 		offset += 7.4
@@ -333,7 +362,7 @@ func _arrive(destination: String) -> void:
 		for item: String in _state.cargo:
 			_state.inventory[item] += _state.cargo[item]
 			_state.cargo[item] = 0
-	_log("Gelandet: " + {"base":"Heimatbasis","rust":"Rostwelt","station":"Handelsstation"}[_state.region] + ".")
+	_log("Gelandet: " + {"base":"Heimatbasis","rust":"Rostwelt","station":"Handelsstation","bunker_surface":"Bunkeroberfläche","distribution":"Verteilzentrum","tradepost":"Handelsposten"}.get(_state.region,_state.region) + ".")
 
 func set_guest(peer_id: int) -> void:
 	if peer_id <= 1: return
@@ -348,7 +377,7 @@ func clear_guest() -> void:
 	_changed()
 
 func save_game(path: String) -> Dictionary:
-	var payload: Dictionary = {"schema_version":2,"state":snapshot(),"receipts":_receipts.duplicate(true)}
+	var payload: Dictionary = {"schema_version":3,"state":snapshot(),"receipts":_receipts.duplicate(true)}
 	var reason: String = Validator.validate(payload)
 	if not reason.is_empty(): return _result(false, "Speichern abgelehnt: " + reason)
 	var temporary: String = path + ".tmp"
@@ -375,6 +404,10 @@ func load_game(path: String) -> Dictionary:
 		var legacy_error: String=LegacyValidator.validate(payload)
 		if not legacy_error.is_empty():return _result(false,"Alter Spielstand abgelehnt: "+legacy_error)
 		payload=Stage.migrate(payload)
+	if payload is Dictionary and payload.get("schema_version")==2:
+		var legacy_error: String=LegacyV2.validate(payload)
+		if not legacy_error.is_empty():return _result(false,"Orbit-Spielstand abgelehnt: "+legacy_error)
+		payload=GroundState.migrate(payload)
 	var reason: String = Validator.validate(payload)
 	if not reason.is_empty(): return _result(false, "Spielstand abgelehnt: " + reason)
 	var previous_revision: int = int(_state.revision)
@@ -385,6 +418,8 @@ func load_game(path: String) -> Dictionary:
 	_state.crew.ida.owner = 1
 	_state.crew.jaro.owner = _guest_id if _guest_id > 1 else 1
 	_orbit.bind(_state,_log)
+	_ground.bind(_state,_log,_cancel_unit_tasks)
+	_routes.clear()
 	_changed()
 	return _result(true, "Spiel geladen.")
 
@@ -420,3 +455,21 @@ func _transfer(command: Dictionary) -> String:
 	destination[item] += quantity
 	_log("%d × %s %s." % [quantity,Catalog.item_name(item),"eingeladen" if direction == "load" else "ausgeladen"])
 	return ""
+
+func _cancel_unit_tasks(id: String) -> void:
+	if _state.work.active and _state.work.unit_id==id:
+		for item: String in _state.work.reserved:_state.inventory[item]+=_state.work.reserved[item]
+		_state.work=_empty_work()
+	if _state.salvage.active and _state.salvage.unit_id==id:_state.salvage=_empty_salvage()
+
+func _move_on_route(id: String,point: Vector2,target: Vector2,delta: float) -> Vector2:
+	if point.distance_to(target)<0.02:return target
+	var key: String=str(_state.region)+str(target)
+	if not _routes.has(id) or _routes[id].key!=key:
+		_routes[id]={"key":key,"points":Nav.path(_state.region,point,target)}
+	var path: Array=_routes[id].points
+	if path.is_empty():return point
+	var next: Vector2=path[0]
+	point=point.move_toward(next,Catalog.WALK_SPEED*delta)
+	if point.distance_to(next)<0.02:path.pop_front()
+	return point

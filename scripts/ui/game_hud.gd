@@ -6,13 +6,14 @@ signal action_requested(action: String, payload: Dictionary)
 
 const Icons=preload("res://scripts/ui/hud_icons.gd")
 const Catalog=preload("res://scripts/core/catalog.gd")
+const GroundContext=preload("res://scripts/ui/ground_context.gd")
 
 const INK := Color("101d27")
 const PAPER := Color("eee8da")
 const MUTED := Color("a3b3b8")
 const AMBER := Color("efab6f")
 const CYAN := Color("86c5c2")
-const REGIONS := {"base": "HEIMAT / ROSTGRENZE", "rust": "ROSTGRENZE / SUCHGEBIET", "station": "ORBIT / HANDELSSTATION", "space":"ORBIT / RAUMKONTAKT"}
+const REGIONS := {"base": "HEIMAT / ROSTGRENZE", "rust": "ROSTGRENZE / SUCHGEBIET", "station": "ORBIT / HANDELSSTATION", "space":"ORBIT / RAUMKONTAKT","bunker_surface":"WACHTPOSTEN / OBERFLÄCHE","bunker_depths":"BUNKER / UNTERGRUND","distribution":"KNOTENWERK / VERTEILZENTRUM","tradepost":"STAUBMARKT / HANDELSPOSTEN"}
 
 var selected_unit := "ida"
 var selected_units: Array[String]=["ida"]
@@ -155,7 +156,7 @@ func _build_top() -> void:
 	_control_toggle=_icon_button("crew","Der gewählten Figur folgen [V]",func():action_requested.emit("toggle_control",{}),row)
 	_menu=PopupMenu.new()
 	add_child(_menu)
-	for entry: Array in [["Speichern · F5",1],["Laden · F9",2],["Crewakte",7],["Koop-Verbindung",3],["Logbuch",4],["Bedienung",5],["Speichern und beenden",6]]: _menu.add_item(entry[0],entry[1])
+	for entry: Array in [["Speichern · F5",1],["Laden · F9",2],["Crewakte",7],["Koop-Verbindung",3],["Logbuch",4],["Bedienung",5],["Zum Hauptmenü",8],["Speichern und beenden",6]]: _menu.add_item(entry[0],entry[1])
 	_menu.id_pressed.connect(_menu_action)
 	_icon_button("menu","Menü · Speichern, Laden, Koop und Hilfe",func():_menu.popup(Rect2i(Vector2i(get_viewport().get_mouse_position()),Vector2i(240,0))),row)
 	_resources=Label.new();_resources.hide();row.add_child(_resources)
@@ -254,30 +255,15 @@ func _build_travel() -> void:
 	_travel_panel.hide()
 
 func _build_network() -> void:
-	_network_window = Window.new()
-	_network_window.title = "Koop · dieselbe Crew, zwei Commander"
-	_network_window.unresizable = true
-	_network_window.transient = true
-	_network_window.close_requested.connect(_network_window.hide)
+	_network_window = preload("res://scripts/ui/network_dialog.gd").new()
 	add_child(_network_window)
-	_network_window.hide()
-	var margin := MarginContainer.new()
-	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for side: String in ["left","right","top","bottom"]:
-		margin.add_theme_constant_override("margin_"+side,20)
-	_network_window.add_child(margin)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation",12)
-	margin.add_child(column)
-	column.add_child(_label("Host führt Ida. Gast führt Jaro.",16))
-	column.add_child(_label("Reise, Handel und gemeinsame Pause beim Host.",12,MUTED))
-	_address = LineEdit.new()
-	_address.text="127.0.0.1"
-	_address.placeholder_text="IP-Adresse des Hosts"
-	column.add_child(_address)
-	_button("Sitzung öffnen",func(): action_requested.emit("host",{}); _network_window.hide(),column)
-	_button("Beitreten",func(): action_requested.emit("join",{"address":_address.text.strip_edges()}); _network_window.hide(),column)
-	_button("Verbindung schließen",func(): action_requested.emit("disconnect",{}); _network_window.hide(),column)
+	_network_window.action_requested.connect(func(action:String,payload:Dictionary):action_requested.emit(action,payload))
+
+func set_invitation(invitation:String) -> void:
+	_network_window.present(_network.text,invitation)
+
+func open_network(internet:bool=true) -> void:
+	_network_window.open(internet)
 
 func choose_unit(id: String, focus: bool) -> void:
 	selected_unit=id
@@ -350,7 +336,7 @@ func present(state: Dictionary) -> void:
 	for id: String in _crew_buttons:
 		var unit: Dictionary=state.get("crew",{}).get(id,{})
 		var assignment: String=unit.get("assignment","idle")
-		var work_label: String={"idle":"Bereit", "work":"Werkstatt", "salvage":"Bergung", "boarding":"Zum Shuttle", "moving":"Unterwegs", "aboard":"Pilotin" if id=="ida" else "Geschützturm"}.get(assignment,assignment)
+		var work_label: String={"idle":"Bereit", "work":"Werkstatt", "salvage":"Bergung", "boarding":"Zum Shuttle", "moving":"Unterwegs", "aboard":"Pilotin" if id=="ida" else "Geschützturm","gather":"Gewinnung","downed":"Rückkehr %d s" % int(unit.get("respawn_remaining",0))}.get(assignment,assignment)
 		var button: Button=_crew_buttons[id]
 		var owns: bool=_owns(id)
 		var owner_label: String="DU" if owns else "HOST" if _guest else "GAST"
@@ -377,12 +363,13 @@ func _rebuild_actions() -> void:
 	_action_buttons.clear()
 	_context_actions.columns=3 if selection_id in ["market","workbench"] else 1 if selection_id=="storage" else 2
 	_worker.visible=selection_id in ["workbench","satellite"]
+	if GroundContext.build(self,selection_id): return
 	match selection_id:
 		"contracts":
 			_add_command("accept_contract","Auftrag annehmen","accept_contract")
 			_add_command("claim_contract","Bergung abgeben","claim_contract")
 		"workbench":
-			for id: String in ["toolkit","repair","helmet","cutter"]:
+			for id: String in ["toolkit","repair","helmet","armor","cutter"]:
 				if Catalog.recipes().has(id): _add_command(id,str(Catalog.recipes()[id].label),"assign_work",{"recipe_id":id},true)
 			_add_command("upgrade_workbench","Werkbank auf Stufe 2 ausbauen","upgrade_workbench",{},true)
 			_add_command("cancel_work","Abbrechen","cancel_work")
@@ -395,6 +382,9 @@ func _rebuild_actions() -> void:
 			_add_command("rust","Zur Absturzstelle","travel",{"destination":"rust"})
 			_add_command("base","Heimfliegen","travel",{"destination":"base"})
 			_add_command("station","Zur Handelsstation","travel",{"destination":"station"})
+			for destination:String in ["bunker_surface","distribution","tradepost"]:
+				_add_command(destination,REGIONS[destination],"travel",{"destination":destination})
+			if _state.get("rental",{}).get("active",false):_add_command("return_rental","Mietschiff zurückgeben","return_rental")
 		"market":
 			for item: String in ["scrap","parts"]:
 				var label: String="Metall" if item=="scrap" else "Bauteil"
@@ -402,18 +392,25 @@ func _rebuild_actions() -> void:
 				_add_command("sell_"+item,label+" verkaufen (−1)","trade",{"side":"sell","item":item,"amount":1})
 			_add_command("sell_toolkit","Werkzeugkit verkaufen","trade",{"side":"sell","item":"toolkit","amount":1})
 			_add_command("sell_cutter","Schneider verkaufen","trade",{"side":"sell","item":"cutter","amount":1})
+			for item:String in ["armor","helmet"]:
+				_add_command("buy_"+item,Catalog.item_name(item)+" kaufen","trade",{"side":"buy","item":item,"amount":1})
+			for item:String in ["ore","alloy"]:
+				_add_command("sell_"+item,Catalog.item_name(item)+" verkaufen","trade",{"side":"sell","item":item,"amount":1})
+			if _state.get("region","")=="station":_add_command("rent_ship","Geier mieten · 900 Credits / 20 Spielminuten","rent_ship",{"ship_id":"vulture"})
 		"storage":
 			_hint.text="Güter aus dem Shuttle werden zu Hause ins Lager übernommen."
-			for item: String in ["scrap","parts","toolkit","cutter"]:
+			for item: String in ["scrap","parts","toolkit","cutter","helmet","armor","ore","alloy"]:
 				var row:=HBoxContainer.new()
 				_context_actions.add_child(row)
 				_add_command("load_"+item,_item_name(item),"transfer",{"item":item,"amount":1,"direction":"load"},false,row)
 				_add_command("unload_"+item,"Ausladen","transfer",{"item":item,"amount":1,"direction":"unload"},false,row)
 		"ida","jaro":
 			_add_command("equip_helmet","Instandgesetzten Helm aus dem Lager ausrüsten","equip",{"item":"helmet"},true)
+			for item:String in ["armor","toolkit","cutter"]:
+				_add_command("equip_"+item,Catalog.item_name(item)+" aus dem Lager ausrüsten","equip",{"item":item},true)
 
 func _add_command(key: String,label: String,type: String,data: Dictionary={},with_unit: bool=false,parent: Node=null) -> void:
-	var captions: Dictionary={"accept_contract":"Annehmen","claim_contract":"Abgeben","toolkit":"Werkzeugkit","repair":"Reparieren","helmet":"Helm richten","cutter":"Schneider","upgrade_workbench":"Werkbank II","equip_helmet":"Helm anlegen","cancel_work":"Abbrechen","salvage":"Bergen","cancel_salvage":"Abbrechen","rust":"Suchgebiet","base":"Heimat","station":"Station"}
+	var captions: Dictionary={"accept_contract":"Annehmen","claim_contract":"Abgeben","toolkit":"Werkzeugkit","repair":"Reparieren","helmet":"Helm richten","armor":"Rüstung","cutter":"Schneider","upgrade_workbench":"Werkbank II","equip_helmet":"Helm anlegen","equip_armor":"Rüstung anlegen","equip_toolkit":"Werkzeugkit","equip_cutter":"Schneider","gather":"Gewinnen","cancel_gather":"Abbrechen","attack":"Angriff","stop_attack":"Stopp","use_elevator":"Aufzug","bunker_surface":"Wachtposten","distribution":"Verteilzentrum","tradepost":"Staubmarkt","rent_ship":"Geier mieten","return_rental":"Mietschiff zurück","cancel_work":"Abbrechen","salvage":"Bergen","cancel_salvage":"Abbrechen","rust":"Suchgebiet","base":"Heimat","station":"Station"}
 	var button:=_button(captions.get(key,label),func():
 		var payload: Dictionary=data.duplicate(true)
 		if with_unit: payload["unit_id"]=selected_unit
@@ -450,9 +447,10 @@ func _update_context() -> void:
 	if not _worker.disabled: _worker.select(0 if selected_unit=="ida" else 1)
 	for index: int in range(2):
 		_worker.set_item_disabled(index,not _owns("ida" if index==0 else "jaro"))
-	var height: float={"workbench":365,"market":265,"storage":330,"shuttle":290,"satellite":305,"contracts":250,"ida":340,"jaro":340}.get(selection_id,205)
+	var height: float={"workbench":410,"market":455,"storage":575,"shuttle":480,"satellite":305,"contracts":250,"ida":520,"jaro":520}.get(selection_id,310)
 	_context_panel.offset_top=-height-50
 	_context_panel.offset_bottom=-50
+	if GroundContext.present(self,selection_id): return
 	match selection_id:
 		"contracts":
 			_context_title.text="Ein Signal im Staub"
@@ -484,22 +482,26 @@ func _update_context() -> void:
 			_hint.text=blocked
 			if salvage.active: _show_progress(salvage,"Bergung")
 		"shuttle":
-			_context_title.text="Entersäbel"
+			_context_title.text=str(_state.ship.get("name","Entersäbel"))
 			_context_text.text="[b]Zustand %d %% · Fracht %d / %d[/b]\nAn Bord: %s\nIda: Pilotin · Jaro: Geschützturm\nZur Station kann ein Piratenkontakt auftreten." % [int(_state.ship.condition),_cargo_used(),int(_state.ship.capacity),_items(cargo)]
 			var blocked: String="Der Host entscheidet über die gemeinsame Reise." if _guest else "Laufende Arbeit zuerst beenden oder abbrechen." if work.active or salvage.active else ""
-			for key: String in ["base","rust","station"]:
-				_disable(key,_state.region==key or _state.region=="space" or _state.travel.active or not blocked.is_empty() or (key=="rust" and contract.status=="available"))
+			for key: String in ["base","rust","station","bunker_surface","distribution","tradepost"]:
+				_disable(key,_state.region==key or _state.region in ["space","bunker_depths"] or _state.travel.active or not blocked.is_empty() or (key=="rust" and contract.status=="available"))
+			_disable("return_rental",_guest or _state.region not in ["base","station"])
+			if _state.get("rental",{}).get("active",false):_context_text.text+="\nMiete: %d s verbleiben" % int(_state.rental.remaining)
 			_hint.text=blocked if not blocked.is_empty() else "Für die Absturzstelle zuerst den Auftrag annehmen." if contract.status=="available" else "Reiseziel wählen."
 		"market":
-			_context_title.text="Stationsmarkt"
+			_context_title.text="Markt / "+REGIONS.get(_state.region,_state.region)
 			_context_text.text="[b]%d Credits · Fracht %d / %d[/b]\nAn Bord: %s" % [int(_state.credits),_cargo_used(),int(_state.ship.capacity),_items(cargo)]
 			_hint.text="Handel übernimmt der Host." if _guest else "Einkäufe kommen ins Shuttle. Zu Hause wird automatisch ausgeladen."
+			_disable("rent_ship",_guest or int(_state.credits)<900 or bool(_state.get("rental",{}).get("active",false)))
+			if _state.region=="station":_context_text.text+="\nGeier: 900 Cr für 20 Spielminuten. Mehr Fracht und Wrackertrag."
 
 		"storage":
 			_context_title.text="Basislager"
 			_context_text.text="[b]Im Lager[/b]  "+_items(inventory)+"\n\n[b]Im Shuttle[/b]  "+_items(cargo)
 			_hint.text="Je Klick ein Gut. Ausladen macht eine Verladung rückgängig."
-			for item: String in ["scrap","parts","toolkit","cutter"]:
+			for item: String in ["scrap","parts","toolkit","cutter","helmet","armor","ore","alloy"]:
 				_disable("load_"+item,_guest or int(inventory[item])<=0 or _cargo_used()>=int(_state.ship.capacity) or _state.travel.active)
 				_disable("unload_"+item,_guest or int(cargo[item])<=0 or _state.travel.active)
 		"bed_ida","bed_jaro":
@@ -516,9 +518,13 @@ func _update_context() -> void:
 			var skills: Dictionary=actor.get("skills",{})
 			var gear: Dictionary=actor.get("equipment",{})
 			var assignment: String=str(actor.get("assignment","idle"))
-			var status_label: String={"idle":"Bereit","work":"In der Werkstatt","salvage":"Bergung","boarding":"Auf dem Weg zum Schiff","aboard":"An Bord"}.get(assignment,assignment)
+			var status_label: String={"idle":"Bereit","work":"In der Werkstatt","salvage":"Bergung","boarding":"Auf dem Weg zum Schiff","aboard":"An Bord","gather":"Materialgewinnung","downed":"Wiederherstellung"}.get(assignment,assignment)
 			_context_text.text="[b]CREWAKTE / "+str(actor.get("name",selected_unit))+"[/b]\n"+("Pilotin & Technikerin" if selected_unit=="ida" else "Turmschütze & Bergungshelfer")+"\n\nTechnik %d   ·   Pilot %d   ·   Geschütz %d\n\nHelm: %s\nWerkzeug: %s\nStatus: %s" % [int(skills.get("tech",actor.get("skill",0))),int(skills.get("pilot",0)),int(skills.get("gunnery",0)),_item_name(str(gear.get("helmet","Basishelm"))),_item_name(str(gear.get("tool","Grundwerkzeug"))),status_label]
-			_hint.text="Rechtsklick: Laufziel. Traits, Beziehungen und Laufbahn folgen später."
+			var effects:Dictionary=Catalog.skill_effects(actor)
+			_context_text.text+="\nRüstung: %s\nGesundheit: %d / 100\n\n[b]WIRKUNG[/b]\nBodentreffer: %d · Turmtreffer: %d\nFlugtempo: +%d %% · Schutz: %d %%\nAbbau- / Bergezeit: ×%.2f" % [_item_name(str(gear.get("armor",""))),int(actor.get("health",100)),int(effects.get("ground_damage",10)),int(effects.get("turret_damage",7)),roundi((float(effects.get("flight_multiplier",1))-1)*100),roundi(float(effects.get("armor_reduction",0))*100),1.0/maxf(float(effects.get("gather_multiplier",1)),0.01)]
+			_hint.text="Technik schaltet Rezepte frei. Erfahrung, Traits und Beziehungen folgen."
+			if float(actor.get("respawn_remaining",0))>0:_hint.text="Wiederherstellung: %.1f s. Pause hält auch diesen Timer an." % float(actor.respawn_remaining)
+			for item:String in ["armor","toolkit","cutter"]:_disable("equip_"+item,not _owns(selected_unit) or _state.region!="base" or int(inventory.get(item,0))<=0 or actor.get("assignment","idle")!="idle")
 			_disable("equip_helmet",not _owns(selected_unit) or _state.region!="base" or int(inventory.get("helmet",0))<=0 or actor.get("assignment","idle")!="idle")
 
 func set_recipe_details(recipes: Dictionary,prices: Dictionary) -> void:
@@ -526,12 +532,12 @@ func set_recipe_details(recipes: Dictionary,prices: Dictionary) -> void:
 	_prices=prices
 	if _state.is_empty(): return
 	if selection_id=="workbench":
-		for id: String in ["toolkit","repair","helmet","cutter","upgrade_workbench"]:
+		for id: String in ["toolkit","repair","helmet","armor","cutter","upgrade_workbench"]:
 			if not recipes.has(id) or not _action_buttons.has(id): continue
 			var recipe: Dictionary=recipes[id]
 			var reason: String=_recipe_blocked(id,recipe)
 			var button: Button=_action_buttons[id]
-			var caption: String={"toolkit":"Werkzeugkit","repair":"Reparieren","helmet":"Helm richten","cutter":"Schneider","upgrade_workbench":"Werkbank II"}[id]
+			var caption: String={"toolkit":"Werkzeugkit","repair":"Reparieren","helmet":"Helm richten","armor":"Rüstung","cutter":"Schneider","upgrade_workbench":"Werkbank II"}[id]
 			var short_reason: String="Belegt" if _state.work.active else "Stufe "+str(recipe.get("tier",1)) if int(_state.get("base",{}).get("workbench_tier",1))<int(recipe.get("tier",1)) else "Bauplan fehlt" if not id in _state.blueprints and id!="upgrade_workbench" else "Technik "+str(recipe.min_skill) if int(_state.crew[selected_unit].skill)<int(recipe.min_skill) else "Gesperrt"
 			button.text=caption+"\n"+(str(int(recipe.duration))+" s" if reason.is_empty() else short_reason)
 			button.add_theme_font_size_override("font_size",12)
@@ -545,6 +551,7 @@ func set_recipe_details(recipes: Dictionary,prices: Dictionary) -> void:
 		for key: String in _action_buttons:
 			var side: String=key.get_slice("_",0)
 			var item: String=key.trim_prefix(side+"_")
+			if not prices.has(item):continue
 			var amount: int=int(prices[item][side])
 			_action_buttons[key].text=_item_name(item)+"\n"+("−" if side=="buy" else "+")+str(amount)+" Cr"
 			var blocked: bool=_guest or _state.travel.active
@@ -560,7 +567,7 @@ func _items(items: Dictionary) -> String:
 	return " · ".join(parts) if not parts.is_empty() else "leer"
 
 func _item_name(id: String) -> String:
-	return {"scrap":"Metall","parts":"Bauteile","toolkit":"Werkzeugkit","cutter":"Schneider","blackbox":"Blackbox","helmet":"Instandgesetzter Helm","basic_helmet":"Basishelm","basic_tool":"Grundwerkzeug","":"nicht ausgerüstet"}.get(id,id)
+	return {"scrap":"Metall","parts":"Bauteile","toolkit":"Werkzeugkit","cutter":"Schneider","blackbox":"Blackbox","armor":"Schutzrüstung","ore":"Erz","alloy":"Legierung","helmet":"Instandgesetzter Helm","basic_helmet":"Basishelm","basic_tool":"Grundwerkzeug","":"nicht ausgerüstet"}.get(id,id)
 
 func _disable(key: String, value: bool) -> void:
 	if _action_buttons.has(key): _action_buttons[key].disabled=value
@@ -605,18 +612,20 @@ func _build_objective() -> void:
 
 func _update_objective() -> void:
 	for id: String in _quick_actions:
-		_quick_actions[id].visible=id=="shuttle" or (_state.region=="base" and id in ["contracts","workbench","storage"]) or (_state.region=="station" and id=="market")
+		_quick_actions[id].visible=(id=="shuttle" and _state.region!="bunker_depths") or (_state.region=="base" and id in ["contracts","workbench","storage"]) or (_state.region in ["station","distribution","tradepost"] and id=="market")
 	var status: String=_state.contract.status
 	_objective_id="contracts"
 	var text: String="Erster Auftrag · 260 Credits + Bauplan"
 	var action: String="Auftragskonsole zeigen"
-	if _state.region=="station":
-		text="Handelsstation · Güter liegen im Shuttle";action="Markt öffnen";_objective_id="market"
+	if _state.region in ["station","distribution","tradepost"]:
+		text={"station":"Handelsstation · Güter liegen im Shuttle","distribution":"Verteilzentrum · Handel, Wachen und Funde","tradepost":"Staubmarkt · Handel und Erkundung"}[_state.region];action="Markt öffnen";_objective_id="market"
 	elif _state.region=="rust":
 		var found: bool=bool(_state.get("discovery",{}).get("satellite_found",false))
 		text="Blackbox geborgen · Zurück nach Hause" if status=="recovered" else "Satellit gefunden · Landen und bergen" if found else "Suchflug · Radarimpuls · Kontakt anfliegen"
 		action="Shuttle zeigen" if status=="recovered" else "Absturzstelle zeigen"
 		_objective_id="shuttle" if status=="recovered" or not found else "satellite"
+	elif _state.region in ["bunker_surface","bunker_depths"]:
+		text="Bunker · Crew sichern und Aufzug erreichen";action="Aufzug zeigen";_objective_id="bunker_entry" if _state.region=="bunker_surface" else "elevator"
 	elif _state.region=="space":
 		text="Piratenkontakt · Angriff oder Rückzug";action="Shuttle zeigen";_objective_id="shuttle"
 	elif status=="active":
@@ -629,8 +638,8 @@ func _update_objective() -> void:
 	var name: String=str(_state.crew[selected_unit].name)
 	_activity.text="Kamera folgt "+name+" · Rechtsklick: Laufziel · WASD: Kamera" if _direct_mode else str(selected_units.size())+" gewählt · RMT Laufziel · WASD Kamera"
 	if str(_state.ship.get("mode","landed"))=="flying": _activity.text="RMT Flugziel · WASD Kamera · Leertaste Pause"
-	for job: Dictionary in [_state.work,_state.salvage]:
-		if job.active:
+	for job: Dictionary in [_state.work,_state.salvage,_state.get("ground",{}).get("activity",{})]:
+		if job.get("active",false):
 			_activity.text=str(_state.crew[job.unit_id].name)+" · "+(_recipe_name(job.recipe_id) if job.has("recipe_id") else "Bergung")+" · "+("pausiert" if _state.paused else "auf dem Weg" if job.get("phase","")=="walking" else "in Arbeit")
 	_controls.text="Linksklick: wählen  ·  Rechtsklick: Laufziel  ·  WASD: Kamera  ·  V: Ansicht  ·  Leertaste: Pause"
 
@@ -671,7 +680,7 @@ func _menu_action(id: int) -> void:
 	match id:
 		1: action_requested.emit("save",{})
 		2: action_requested.emit("load",{})
-		3: _network_window.popup_centered(Vector2i(460,290))
+		3: open_network()
 		4:
 			var dialog:=AcceptDialog.new()
 			dialog.title="Logbuch"
@@ -683,6 +692,7 @@ func _menu_action(id: int) -> void:
 		5: _show_help()
 		6: action_requested.emit("quit",{})
 		7: choose_unit(selected_unit,true)
+		8: action_requested.emit("main_menu",{})
 
 func _metric(parent: Node,icon: String,hint: String) -> Label:
 	var row:=HBoxContainer.new()
@@ -713,9 +723,10 @@ func _icon_button(icon: String,hint: String,callback: Callable,parent: Node,dime
 	return button
 
 func _action_icon(key: String) -> String:
+	if key.begins_with("equip_"): return key.trim_prefix("equip_")
 	if key.begins_with("buy_") or key.begins_with("load_"): return "load"
 	if key.begins_with("sell_") or key.begins_with("unload_"): return "unload"
-	return {"accept_contract":"contracts","claim_contract":"check","cancel_work":"close","cancel_salvage":"close","salvage":"satellite","rust":"satellite","station":"market"}.get(key,key)
+	return {"accept_contract":"contracts","claim_contract":"check","cancel_work":"close","cancel_salvage":"close","salvage":"satellite","rust":"satellite","station":"market","gather":"mining","cancel_gather":"close","use_elevator":"elevator","bunker_surface":"base","distribution":"storage","tradepost":"market","rent_ship":"shuttle","return_rental":"unload","attack":"target","stop_attack":"pause"}.get(key,key)
 
 func _build_quick_actions() -> void:
 	var column:=_panel(Control.PRESET_TOP_LEFT,Rect2(12,68,46,205))

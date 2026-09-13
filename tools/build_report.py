@@ -1,4 +1,4 @@
-"""Build the dated N2 game plan as standalone HTML with available real captures.
+"""Build the dated N3 game plan as standalone HTML with available real captures.
 
 The tracked template contains no local ship images or models. A fresh clone can
 generate the text report; captures from the documented window probes enrich it.
@@ -12,13 +12,18 @@ import struct
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "output"
 SHOTS = [
-    ("rooms-orbit/base.png", "Die neue Heimat: vier getrennte Räume, Mittelgang, zwei freie Andockflächen und das eigene Shuttle."),
-    ("rooms-orbit/base-landscape.png", "Weiter herausgezoomt: ein Außenposten in einem großzügigen Rostwelt-Gebiet. Die Startkamera bleibt näher am Gebäude."),
-    ("rooms-orbit/station.png", "Meridian-Freihafen: größeres Stationsdock mit Handel und Platz für weitere Ladenbereiche."),
-    ("rooms-orbit/rust-radar.png", "Suchflug über die große Missionskarte: zunächst nur unbekannte Radarkontakte."),
-    ("rooms-orbit/rust-discovered.png", "Satellit in der Nähe identifiziert; neben dem Fund landen und die Crew zur Bergung schicken."),
-    ("rooms-orbit/space-contact.png", "Separat geladener Raumkontakt: die Entersäbel und ein schwacher Freibeuter auf einer festen Flugebene."),
-    ("product-crew-sheet.png", "Erste Crewakte mit Fähigkeiten, Aufgabe und tatsächlicher Ausrüstung. Traits und Laufbahn sind weitere Entwicklung."),
+    ('n3-main-menu.png', 'Das wiederverwendete Menümotiv mit der sitzenden Frau; Karriere und Koop im neuen Menü.'),
+    ('rooms-orbit/base.png', 'Die Heimat aus vier Räumen. Die beiden freien Andockplätze sind bisher vorbereitet, noch nicht bebaubar.'),
+    ('ground-world/armor.png', 'Ida mit sichtbarem Schutzsatz aus Brust- und Schulterteilen; Jaro trägt die einfache Ausgangsausrüstung.'),
+    ('n3-armor-profile.png', 'Die Crewakte nennt aktuelle Fähigkeiten, Gesundheit und echte Ausrüstung. Erfahrungszuwachs folgt später.'),
+    ('ground-world/rust-mining.png', 'Im großen Suchgebiet: Erz entdecken, landen, abbauen und mit begrenztem Frachtraum heimbringen.'),
+    ('ground-world/rust-wreck.png', 'Ein zusätzliches Schiffwrack liefert endliche Schiffslegierung. Die Crew arbeitet am Fundort.'),
+    ('ground-world/geier.png', 'Geier: das in Blender vereinfachte Mietschiff mit zwei Bergungsarmen und größerem Frachtraum.'),
+    ('ground-world/bunker-surface.png', 'Bunkeroberfläche mit Flak, einfachem Wächter, Lastenaufzug und durchsichtiger Vorderwand.'),
+    ('ground-world/bunker-depths.png', 'Das Untergeschoss wird separat geladen. Die erste Fassung hat Zentralgang, Lager und Sicherheitsraum.'),
+    ('ground-world/distribution.png', 'Das Verteilzentrum: mehrere Hallen und ein Ladehof als erste spielbare Struktur für Handel und Kampf.'),
+    ('ground-world/tradepost.png', 'Der kleine Handelsposten auf einer eigenen Karte. Ein weiterer Materialfund liegt abseits im Gelände.'),
+    ('rooms-orbit/space-contact.png', 'Der vorhandene zufällige Raumkontakt: Freibeuter und Entersäbel auf einer festen Flugebene.'),
 ]
 
 

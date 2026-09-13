@@ -91,10 +91,12 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 	elif name == "white_astronaut":
 		pack = "crew"
 	var path := "res://assets/curated/%s/%s.glb" % [pack,name]
-	if name == "craft_cargoA" and FileAccess.file_exists("res://assets/local/entersaebel.glb"):
+	if name == "craft_cargoA" and ResourceLoader.exists("res://assets/local/entersaebel.glb"):
 		path = "res://assets/local/entersaebel.glb"
 	if name == "freibeuter":
-		path = "res://assets/local/freibeuter/freibeuter.glb" if FileAccess.file_exists("res://assets/local/freibeuter/freibeuter.glb") else "res://assets/curated/space/craft_cargoA.glb"
+		path = "res://assets/local/freibeuter/freibeuter.glb" if ResourceLoader.exists("res://assets/local/freibeuter/freibeuter.glb") else "res://assets/curated/space/craft_cargoA.glb"
+	if name == "geier":
+		path = "res://assets/local/geier/geier.glb" if ResourceLoader.exists("res://assets/local/geier/geier.glb") else "res://assets/curated/space/craft_cargoA.glb"
 	var packed := load(path) as PackedScene
 	if packed == null:
 		push_error("Required curated asset missing: " + name)
@@ -103,7 +105,7 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 	pivot.add_child(instance)
 	var bounds := _bounds(instance, Transform3D.IDENTITY)
 	var ratio := Vector3(dimensions.x / maxf(bounds.size.x, 0.001), dimensions.y / maxf(bounds.size.y, 0.001), dimensions.z / maxf(bounds.size.z, 0.001))
-	if name in ["craft_cargoA","freibeuter"]:
+	if name in ["craft_cargoA","freibeuter","geier"]:
 		ratio = Vector3.ONE * dimensions.z / maxf(bounds.size.z,0.001)
 	if name == "white_astronaut":
 		ratio = Vector3.ONE * dimensions.y / maxf(bounds.size.y,0.001)
@@ -127,6 +129,13 @@ static func fade_asset(node: Node, opacity: float) -> void:
 	if node is MeshInstance3D:
 		var instance := node as MeshInstance3D
 		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# Procedural boxes use material_override, which wins over surface overrides.
+		# Fade that material too; otherwise an apparently faded wall stays opaque.
+		if instance.material_override is StandardMaterial3D:
+			var override_faded:=instance.material_override.duplicate() as StandardMaterial3D
+			override_faded.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+			override_faded.albedo_color.a=opacity
+			instance.material_override=override_faded
 		for surface in range(instance.mesh.get_surface_count()):
 			var source := instance.get_active_material(surface) as StandardMaterial3D
 			if source != null:

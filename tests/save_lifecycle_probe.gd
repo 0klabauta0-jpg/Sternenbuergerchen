@@ -34,7 +34,7 @@ func _run() -> void:
 			_check(game.simulation.snapshot().contract.status=="active","First session has real progress")
 		"restore":
 			_check(game.simulation.snapshot().contract.status=="active","Normal startup restores contract")
-			_check(game.simulation.snapshot().paused and game.simulation.snapshot().schema_version==2,"Normal startup restores pause and current migrated schema")
+			_check(game.simulation.snapshot().paused and game.simulation.snapshot().schema_version==3,"Normal startup restores pause and current migrated schema")
 			game.send_command({"type":"assign_work","unit_id":"ida","recipe_id":"toolkit"})
 			_check(game.simulation.snapshot().work.active,"Can continue restored session")
 		"guards":

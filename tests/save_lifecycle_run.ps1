@@ -21,17 +21,17 @@ foreach($phaseName in @('initial','restore','guards','recovered')){
         Write-Output $match.Value
         if($phaseName -eq 'initial'){
             # Convert the genuine first-session save into its historical v1 shape.
-            # No success state or economy value is created; only schema2 additions are removed.
+            # No success state or economy value is created; only later schema additions are removed.
             $path=Join-Path $runRoot 'lifecycle-roundtrip.json'
-            Copy-Item -LiteralPath $path -Destination (Join-Path $runRoot 'initial-schema2.json')
+            Copy-Item -LiteralPath $path -Destination (Join-Path $runRoot 'initial-schema3.json')
             $legacy=Get-Content -LiteralPath $path -Raw | ConvertFrom-Json
             $legacy.schema_version=1;$legacy.state.schema_version=1
-            foreach($key in @('base','random_seed','discovery','encounter')){$legacy.state.PSObject.Properties.Remove($key)}
-            foreach($key in @('mode','position','target','roles')){$legacy.state.ship.PSObject.Properties.Remove($key)}
+            foreach($key in @('base','random_seed','discovery','encounter','ground','resources','rental')){$legacy.state.PSObject.Properties.Remove($key)}
+            foreach($key in @('mode','position','target','roles','model','name')){$legacy.state.ship.PSObject.Properties.Remove($key)}
             foreach($key in @('kind','encounter_decided','encounter_roll')){$legacy.state.travel.PSObject.Properties.Remove($key)}
-            $legacy.state.inventory.PSObject.Properties.Remove('helmet');$legacy.state.cargo.PSObject.Properties.Remove('helmet')
-            $legacy.state.blueprints=@($legacy.state.blueprints | Where-Object {$_ -notin @('helmet','upgrade_workbench')})
-            foreach($crew in @('ida','jaro')){$legacy.state.crew.$crew.PSObject.Properties.Remove('skills');$legacy.state.crew.$crew.PSObject.Properties.Remove('equipment')}
+            foreach($item in @('helmet','armor','ore','alloy')){$legacy.state.inventory.PSObject.Properties.Remove($item);$legacy.state.cargo.PSObject.Properties.Remove($item)}
+            $legacy.state.blueprints=@($legacy.state.blueprints | Where-Object {$_ -notin @('helmet','upgrade_workbench','armor')})
+            foreach($crew in @('ida','jaro')){foreach($field in @('skills','equipment','health','respawn_remaining','attack_target','attack_cooldown')){$legacy.state.crew.$crew.PSObject.Properties.Remove($field)}}
             $legacy | ConvertTo-Json -Depth 100 | Set-Content -Encoding utf8 -LiteralPath $path
             Copy-Item -LiteralPath $path -Destination (Join-Path $runRoot 'legacy-input-v1.json')
         }

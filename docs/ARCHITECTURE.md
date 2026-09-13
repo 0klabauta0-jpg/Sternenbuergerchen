@@ -1,14 +1,20 @@
 # Architektur und Schnittstellen
 
-## Aktueller Vertrag: Räume und Orbit, Schema v2
+## Aktuelle Verträge: Schema v3, Boden und Internet
 
-Verbindlicher aktueller Snapshot- und Commandvertrag: [contracts/N2_ORBIT.md](contracts/N2_ORBIT.md). `SimulationRoot` bleibt die einzige autoritative Mutationsstelle. `orbit_operations.gd` führt ihre Flug-, Radar- und Kampfoperationen aus; `stage_state.gd` ergänzt Zustand und migriert validierte v1-Saves. Die eingefrorenen `legacy_validator_v1.gd` und `legacy_catalog_v1.gd` dienen ausschließlich dem alten Speicherformat.
+[contracts/N3_GROUND.md](contracts/N3_GROUND.md) definiert aktuelle Regionen, IDs, Commands, Ressourcen, Rüstung, Miete und Kampf. [N3_SKILLS_MENU.md](N3_SKILLS_MENU.md) erklärt die tatsächlichen Charakterwirkungen; [INTERNET_COOP.md](INTERNET_COOP.md) den Internet-Gateway. Die v2-Ergänzungen aus [N2_ORBIT.md](contracts/N2_ORBIT.md) bleiben Grundlage, soweit v3 sie nicht ausdrücklich erweitert. Gesamtprüfung: [N3_ACCEPTANCE.md](N3_ACCEPTANCE.md).
 
-Der Katalog besitzt Raumpositionen und Kartengrenzen. `world_rooms.gd`, `world_space.gd` und `world_orbit_projection.gd` bauen ausschließlich die bestätigte Region auf und stellen deren Snapshot dar. `expedition_hud.gd` ergänzt kontextbezogene Befehle über denselben Session-Gateway. Der Host würfelt die Begegnung einmalig; Clients würfeln weder Begegnungen noch Schaden. Rechte für Pilot und Turmschütze folgen dem Crewbesitz. Schema v2 umfasst `space`, Entdeckung, Schiffszustand, Profile, Ausrüstung und Werkbankstufe.
+`SimulationRoot` ist die einzige autoritative Mutationsstelle. `ground_operations.gd` führt Bodenkampf, Gewinnung, Aufzug, Genesung und Mietzeit aus; `ground_state.gd` ergänzt v3 und migriert validierte v2-Daten. `orbit_operations.gd` führt Flug/Radar/Raumkampf aus. Der aktuelle Validator prüft v3 einschließlich Gesundheit, Bindungen, Ressourcen und Mietschiff. Eingefrorene `legacy_validator_v1/v2.gd` und zugehörige Kataloge prüfen Altformate vor der Kette v1→v2→v3. `stage_state.gd` verwendet dabei bewusst den eingefrorenen v2-Katalog. Karriere, Arbeitsreservierungen und Anfragebelege bleiben erhalten.
+
+`Catalog` besitzt Karten-/Raumpositionen und gemeinsame Hindernisrechtecke aus `ground_catalog.gd`. `ground_navigation.gd` berechnet Laufwege mit 0,6 m Abstand und prüft gerade Schusslinien gegen diese Rechtecke. Der Renderer stellt dieselben Rechtecke dar und baut nur die bestätigte aktive Region: base, rust, station, space, bunker_surface, bunker_depths, distribution oder tradepost. Transparente Frontwände sind ausschließlich Darstellung. Sonstige Landschaftsdekoration und gegenseitige Figuren-/Schiffskollision gehören noch nicht zur Autoritätsnavigation.
+
+UI und Welt senden ausschließlich Befehle über `session_gateway.gd` und lesen Snapshots. Der Gateway verwendet wahlweise ENet/LAN oder WebSocket über einen temporären eigenen Cloudflare-Tunnel. Internetauthentifizierung prüft Einladung, Protokoll und Snapshot-Schema vor Peerfreigabe; danach stammen Absenderrechte ausschließlich aus der Verbindung. DNS-/TLS-Ersatzweg behält die Zertifikatsprüfung bei. Expliziter Disconnect und direkte Session-Freigabe räumen Authentifizierung, Peer und eigene Helfer auf. Die Simulation bleibt unabhängig vom Transport.
+
+Host würfelt Raumkontakte einmalig und speichert den Wurf; Clients würfeln weder Begegnungen noch Schaden. Besitz bestimmt Arbeiter und Bodenschützen. Ida fliegt, Jaro bedient den Turm. Rüstung, Werkzeuge und drei Fähigkeiten haben die im Katalog abgeleiteten Wirkungen; es gibt noch keine XP-, Trait- oder PvP-Regeln. Pause hält auch Kampf, Genesung und Mietzeit an; Netzwerk/Oberfläche laufen weiter.
 
 ## Basis-API und historischer v1-Vertrag
 
-Die folgende Basis-API bleibt erhalten. Der dargestellte v1-Snapshot und ursprüngliche Rezept-/Regionenkatalog dokumentieren das Altformat; Erweiterungen und aktuell gültige Felder stehen im v2-Vertrag oben.
+Die folgende Basis-API bleibt erhalten. Der dargestellte v1-Snapshot und ursprüngliche Rezept-/Regionenkatalog dokumentieren das Altformat; Erweiterungen und aktuell gültige Felder stehen in den aktuellen Verträgen oben.
 
 `scripts/core/simulation_root.gd` extends Node; class_name RestartSimulation. Einzige autoritative Mutationsstelle. Keine Autoloads. API:
 - `snapshot() -> Dictionary` tiefe, JSON-kompatible Kopie.
@@ -38,9 +44,9 @@ Commands: `move {unit_id,position:[x,z]}`, `accept_contract`, `assign_work {unit
 
 `scripts/world/world_view.gd` extends Node3D; class_name RestartWorld. API `present(snapshot:Dictionary)`, `focus_unit(unit_id:String)`, `focus_home()`; Signale `object_selected(kind:String,id:String)` und `ground_clicked(position:Vector2)`. Baut sichtbare Karten/Kamera, NPC-Modelle, Kenney-Objekte; Snapshot bestimmt sichtbare Positionen. Klick trifft IDs, Boden-Rechtsklick liefert Wegziel. Kamera: WASD/Pfeile, Mausrad, mittlere Maus/Drag, Home. Welt besitzt keine Gameplay-Daten. Typen kind=`unit` oder `object`; id=crew/landmark IDs. Aktive Auswahl als optionale Methode `set_selection(kind,id)`.
 
-`scripts/ui/game_hud.gd` extends CanvasLayer: zeigt Snapshot und sendet Commands; `scripts/game.gd` verbindet Welt, HUD, Simulation und später Netzwerk. `scripts/network/session_gateway.gd` vermittelt dasselbe Commandformat, setzt Absender aus der Verbindung und überträgt Snapshots.
+`scripts/ui/game_hud.gd` extends CanvasLayer: zeigt Snapshot und sendet Commands; `scripts/game.gd` verbindet Welt, HUD, Simulation und Netzwerk. `scripts/network/session_gateway.gd` vermittelt dasselbe Commandformat, setzt Absender aus der Verbindung und überträgt Snapshots.
 
-Ruling: Primär datenbasierter offener Boden ohne begehbare Felsblockaden; Felsen begrenzen Wege sichtbar. Grenzen werden vom Kern geprüft. Keine scheinbare Deckungs-/Kampfmechanik vor N2. Startwerte bleiben Balancevorschläge im Katalog.
+Historisches N1-Ruling: offener Boden mit nur visuellen Felsen, noch ohne Hindernisnavigation oder Kampf. N3 ersetzt diese Grenze für die gemeinsam katalogisierten Hindernisse und führt einfachen Kampf ein. Startwerte bleiben Balancevorschläge im Katalog.
 
 Point-and-Click-Ergänzung: `RestartWorld.units_selected(ids:Array[String])`, `set_selected_units(ids)` und `set_control_mode(follow:bool,unit_id)` trennen Gruppenauswahl und Kamerafolge. `ground_clicked` gilt in beiden Ansichten. `scripts/game.gd` leitet pro gewählter eigener Figur einen normalen `move`-Command weiter; Gruppen erhalten versetzte Ziele. WASD beeinflusst ausschließlich die lokale Kamera. Es gibt keinen parallelen Richtungssteuerungs-RPC oder gespeicherten Tastenstatus.
 

@@ -77,11 +77,11 @@ func present(state: Dictionary, guest: bool) -> void:
 	_guest = guest
 	if not is_instance_valid(_panel) or state.is_empty(): return
 	var region: String = str(state.region)
-	_panel.visible = region in ["rust","space"] and not bool(state.travel.active)
+	_panel.visible = region in ["rust","space","bunker_surface","distribution","tradepost"] and not bool(state.travel.active)
 	if not _panel.visible: return
 	var airborne: bool = str(state.ship.get("mode","landed")) == "flying"
 	var discovery: Dictionary = state.get("discovery",{})
-	var contacts: Array = discovery.get("signals",[])
+	var contacts: Array = discovery.get("signals",[]) if region=="rust" else []
 	var layout: String = region+str(airborne)+str(contacts.size())
 	if layout != _last_layout:
 		_last_layout = layout
@@ -97,7 +97,7 @@ func present(state: Dictionary, guest: bool) -> void:
 			_action("stop_fire","Feuer einstellen","pause",func():_send("fire_turret",{"target_id":""}))
 			_action("flee","Rückzug","shuttle",func():_send("flee"))
 		elif airborne:
-			_action("radar_scan","Radarimpuls","target",func():_send("radar_scan"))
+			if region=="rust":_action("radar_scan","Radarimpuls","target",func():_send("radar_scan"))
 			_action("land","Hier landen","load",func():_send("land"))
 			for contact: Dictionary in contacts:
 				var id: String = str(contact.id)
@@ -108,12 +108,12 @@ func present(state: Dictionary, guest: bool) -> void:
 				button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				_contact_buttons[id] = button
 		else:
-			_action("launch","Suchflug starten","shuttle",func():_send("launch"))
+			_action("launch","Suchflug starten" if region=="rust" else "Abheben","shuttle",func():_send("launch"))
 	if region == "space":
 		var encounter: Dictionary = state.get("encounter",{})
 		var enemy: Dictionary = encounter.get("enemy",{})
 		_heading.text = "RAUMKONTAKT / FREIBEUTER"
-		_detail.text = "Entersäbel %d %%   ·   Gegner %d / %d\nIda: Pilotin   ·   Jaro: Geschützturm\nRechtsklick: Ausweichziel auf der Ebene." % [int(state.ship.condition),int(enemy.get("hull",0)),int(enemy.get("max_hull",1))]
+		_detail.text = "%s %d %%   ·   Gegner %d / %d\nIda: Pilotin   ·   Jaro: Geschützturm\nRechtsklick: Ausweichziel auf der Ebene." % [str(state.ship.get("name","Entersäbel")),int(state.ship.condition),int(enemy.get("hull",0)),int(enemy.get("max_hull",1))]
 		var gunner: Dictionary = state.crew.get("jaro",{})
 		var owns_gunner: bool = _guest or int(gunner.get("owner",1)) == 1
 		_buttons.fire_turret.disabled = not owns_gunner or str(encounter.get("turret_target","")) == "pirate"
@@ -124,12 +124,14 @@ func present(state: Dictionary, guest: bool) -> void:
 			_detail.text += "\nRückzug: %.1f s" % float(encounter.escape_remaining)
 		elif str(encounter.get("turret_target","")) == "pirate": _detail.text += "\nTurm verfolgt das Ziel."
 	else:
-		_heading.text = "SUCHGEBIET / ROSTGRENZE"
+		_heading.text = "SUCHGEBIET / ROSTGRENZE" if region=="rust" else "GEBIETSFLUG / "+str(state.ship.get("name","Entersäbel")).to_upper()
 		var found: bool = bool(discovery.get("satellite_found",false))
 		_detail.text = "Satellit identifiziert. In der Nähe landen und eine Person zur Bergung schicken." if found else "Der Satellit liegt irgendwo in diesem Gebiet. Suchflug starten, Radarimpuls senden und unbekannte Kontakte anfliegen."
+		if region!="rust":_detail.text="Entfernt landen und mit der Crew erkunden. Jede Region wird einzeln geladen."
+		if region=="bunker_surface":_detail.text+="\nAchtung: Die Flak bedroht fliegende Schiffe im Umkreis des Bunkers."
 		if airborne:
 			_detail.text += "\nRechtsklick: Flugziel. Kein Höhenflug."
-			_buttons.radar_scan.disabled = guest
+			if _buttons.has("radar_scan"):_buttons.radar_scan.disabled = guest
 			_buttons.land.disabled = guest
 			for contact: Dictionary in contacts:
 				if not _contact_buttons.has(str(contact.id)): continue

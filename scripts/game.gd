@@ -16,6 +16,8 @@ var expedition: CanvasLayer
 var save_path: String = SAVE_PATH
 var load_on_start: bool = true
 var simulation_seed: int = -1
+var startup_network_mode := ""
+var startup_network_address := ""
 var _auto_save_allowed := true
 var _counter := 0
 var _ui_elapsed := 0.0
@@ -56,16 +58,27 @@ func _ready() -> void:
 	expedition.action_requested.connect(_on_action)
 	simulation.notice.connect(hud.notify)
 	session.connection_changed.connect(func(message: String): hud.notify(message))
+	if session.has_signal("invitation_ready"):
+		session.invitation_ready.connect(func(_invitation:String):hud.notify("Einladung bereit. Im Koop-Fenster kopieren und deinem Freund schicken."))
 	session.command_result.connect(func(result: Dictionary):
 		if not result.get("ok",false): hud.notify(str(result.get("reason","Befehl abgelehnt"))))
 	get_tree().auto_accept_quit=false
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--capture="): _capture_path=argument.trim_prefix("--capture="); _capture_time=3.0
 		if argument=="--capture-quit": _capture_quit=true
-		if argument.begins_with("--join="): session.join_host(argument.trim_prefix("--join="))
-		if argument=="--host": session.start_host()
+		if startup_network_mode.is_empty() and argument.begins_with("--join="): session.join_host(argument.trim_prefix("--join="))
+		if startup_network_mode.is_empty() and argument=="--host": session.start_host()
 	_refresh()
 	if not startup_message.is_empty(): hud.notify(startup_message)
+	if not startup_network_mode.is_empty(): _startup_connection.call_deferred()
+
+func _startup_connection() -> void:
+	match startup_network_mode:
+		"internet_host": _on_action("internet_host",{});hud.open_network(true)
+		"internet_join": _on_action("internet_join",{"address":startup_network_address});hud.open_network(true)
+		"lan_host": _on_action("host",{});hud.open_network(false)
+		"lan_join": _on_action("join",{"address":startup_network_address});hud.open_network(false)
+	startup_network_address = ""
 
 func send_command(command: Dictionary) -> Dictionary:
 	_counter+=1
@@ -144,6 +157,11 @@ func _on_action(action: String,payload: Dictionary) -> void:
 			if _direct_mode: world.focus_unit(hud.selected_unit)
 			hud.notify("Einzelansicht: Rechtsklick setzt das Laufziel. Kamera folgt "+hud.selected_unit.capitalize()+"." if _direct_mode else "Crewansicht: Rahmen ziehen und Rechtsklick für den Gruppenauftrag.")
 		"focus_object": world.focus_object(str(payload.get("object_id","shuttle")))
+		"rally_elevator":
+			var snapshot:Dictionary=session.current_snapshot()
+			var at:Array=Catalog.landmarks(str(snapshot.region)).get(str(payload.get("object_id","elevator")),[])
+			if at.size()==2:
+				for id:String in _owned_units(["ida","jaro"]):send_command({"type":"move","unit_id":id,"position":at})
 		"inspect_object":
 			var id: String=str(payload.get("object_id","contracts"))
 			_on_object_selected("object",id)
@@ -155,7 +173,19 @@ func _on_action(action: String,payload: Dictionary) -> void:
 		"join":
 			var error: Error=session.join_host(str(payload.get("address","127.0.0.1")))
 			if error!=OK: hud.notify("Beitritt fehlgeschlagen: "+error_string(error))
+		"internet_host":
+			var error: Error=session.start_internet_host()
+			if error!=OK: hud.notify(session.status_text())
+		"internet_join":
+			var error: Error=session.join_internet(str(payload.get("address","")))
+			if error!=OK: hud.notify(session.status_text())
 		"disconnect": session.disconnect_session()
+		"main_menu":
+			if not session.is_guest() and _auto_save_allowed:
+				var saved:Dictionary=simulation.save_game(save_path)
+				if not saved.get("ok",false):hud.notify(str(saved.reason));return
+			session.disconnect_session()
+			get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 		"quit": _quit()
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -183,6 +213,7 @@ func _process(delta: float) -> void:
 func _refresh() -> void:
 	if not is_instance_valid(hud): return
 	hud.set_connection(session.status_text(),session.is_guest())
+	if session.has_method("internet_invitation"):hud.set_invitation(session.internet_invitation())
 	hud.present(session.current_snapshot())
 	hud.set_recipe_details(Catalog.recipes(),Catalog.prices())
 	if is_instance_valid(expedition): expedition.present(session.current_snapshot(),session.is_guest())
