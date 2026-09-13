@@ -21,13 +21,26 @@ func command(kind: String, data: Dictionary = {}, sender: int = 1) -> Dictionary
 	payload.request_id = "test-%d" % serial
 	return sim.submit(payload, sender)
 
+func prepare_salvage() -> void:
+	# N2 deliberately requires a real ship search before the previous salvage tests.
+	var state: Dictionary=sim.snapshot()
+	if state.region!="rust" or state.travel.active or state.salvage.active:return
+	var ship: Vector2=Vector2(state.ship.position[0],state.ship.position[1])
+	if state.discovery.satellite_found and ship.distance_to(Vector2(145,-125))<40:return
+	command("launch")
+	sim.advance(10)
+	command("radar_scan")
+	command("ship_move",{"position":[145,-125]})
+	sim.advance(20)
+	command("land")
+
 func run() -> void:
 	if not ResourceLoader.exists("res://scripts/core/simulation_root.gd"):
 		check(false, "authoritative simulation exists")
 		quit(1)
 		return
 	var script: Script = load("res://scripts/core/simulation_root.gd")
-	sim = script.new()
+	sim = script.new(1)
 	sim.auto_tick = false
 	root.add_child(sim)
 	var initial: Dictionary = sim.snapshot()
@@ -55,6 +68,7 @@ func run() -> void:
 	check(sim.snapshot().region == "base", "travel never teleports instantly")
 	sim.advance(30.0)
 	check(sim.snapshot().region == "rust", "travel arrives")
+	prepare_salvage()
 	check(command("salvage", {"unit_id":"jaro"}).ok, "salvage assigned")
 	sim.advance(1.0)
 	check(sim.snapshot().cargo.blackbox == 0, "distant crew cannot salvage instantly")
@@ -95,7 +109,7 @@ func run() -> void:
 	check(sim.snapshot().paused and sim.snapshot().crew.jaro.owner == 1, "disconnect pauses and releases guest seat")
 	# A second independent session exercises in-progress reservations and finite resources.
 	sim.free()
-	sim = script.new()
+	sim = script.new(1)
 	sim.auto_tick = false
 	root.add_child(sim)
 	check(not command("assign_work", {"unit_id":"jaro","recipe_id":"toolkit"}).ok, "skill requirement is enforced")
@@ -119,15 +133,18 @@ func run() -> void:
 	command("accept_contract")
 	command("travel", {"destination":"rust"})
 	check(sim.save_game(save_path).ok and sim.load_game(save_path).ok, "boarding roundtrip")
-	sim.advance(3.0)
+	sim.advance(5.8)
 	check(sim.snapshot().travel.phase == "flying", "walking crew boards and starts flight")
 	check(sim.save_game(save_path).ok and sim.load_game(save_path).ok, "flying roundtrip")
 	sim.advance(10.0)
+	prepare_salvage()
 	command("salvage", {"unit_id":"jaro"})
 	sim.advance(40.0)
+	prepare_salvage()
 	check(command("salvage", {"unit_id":"jaro"}).ok, "remaining salvage can be worked again")
 	sim.advance(10.0)
 	check(sim.snapshot().wreck_remaining == 0 and sim.snapshot().cargo.scrap == 8 and sim.snapshot().cargo.blackbox == 1, "wreck yields finite scrap and one blackbox")
+	prepare_salvage()
 	check(not command("salvage", {"unit_id":"jaro"}).ok, "empty wreck cannot repeat yield")
 	command("travel", {"destination":"station"})
 	sim.advance(40.0)
@@ -138,6 +155,8 @@ func run() -> void:
 	command("travel", {"destination":"base"})
 	sim.advance(40.0)
 	command("claim_contract")
+	command("upgrade_workbench", {"unit_id":"ida"})
+	sim.advance(20.0)
 	check(command("assign_work", {"unit_id":"ida","recipe_id":"cutter"}).ok, "reward blueprint and market materials enable cutter")
 	sim.advance(20.0)
 	check(sim.snapshot().inventory.cutter == 1, "cutter crafted from real inputs")
@@ -170,7 +189,7 @@ func run() -> void:
 	check(not command("trade", {"side":"buy","item":"parts","amount":1.5}).ok, "fractional trade denied")
 		# Loading crafted stock must make station selling reachable through real commands.
 	sim.free()
-	sim = script.new()
+	sim = script.new(1)
 	sim.auto_tick = false
 	root.add_child(sim)
 	command("assign_work", {"unit_id":"ida","recipe_id":"toolkit"})
@@ -205,8 +224,10 @@ func run() -> void:
 		command("accept_contract")
 		command("travel", {"destination":"rust"})
 		sim.advance(20.0)
+		prepare_salvage()
 		command("salvage", {"unit_id":"jaro"})
 		sim.advance(40.0)
+		prepare_salvage()
 		command("salvage", {"unit_id":"jaro"})
 		sim.advance(10.0)
 		command("travel", {"destination":"base"})
@@ -220,7 +241,7 @@ func run() -> void:
 		check(command("transfer", {"item":"blackbox","amount":1,"direction":"unload"}).ok and command("claim_contract").ok, "unloaded blackbox can be claimed once")
 		# Loading an older paused snapshot must still broadcast a new revision.
 	sim.free()
-	sim = script.new()
+	sim = script.new(1)
 	sim.auto_tick = false
 	root.add_child(sim)
 	command("toggle_pause")
@@ -233,33 +254,34 @@ func run() -> void:
 	check(sim.snapshot().crew.ida.target == saved_target and sim.snapshot().paused, "load restores paused target while preserving publication progress")
 		# Product workers must stand at authoritative approach points outside object meshes.
 	sim.free()
-	sim = script.new()
+	sim = script.new(1)
 	sim.auto_tick = false
 	root.add_child(sim)
 	command("assign_work", {"unit_id":"ida","recipe_id":"toolkit"})
 	var work_target: Array = sim.snapshot().crew.ida.target
-	check(is_equal_approx(float(work_target[0]),3.0) and is_equal_approx(float(work_target[1]),0.3), "workbench target uses external interaction point")
+	check(is_equal_approx(float(work_target[0]),10.0) and is_equal_approx(float(work_target[1]),4.3), "workbench target uses external interaction point")
 	sim.advance(3.0)
 	var worker_position: Array = sim.snapshot().crew.ida.position
-	check(is_equal_approx(float(worker_position[0]),3.0) and is_equal_approx(float(worker_position[1]),0.3) and sim.snapshot().work.phase == "working", "worker performs work at external workbench point")
+	check(is_equal_approx(float(worker_position[0]),10.0) and is_equal_approx(float(worker_position[1]),4.3) and sim.snapshot().work.phase == "working", "worker performs work at external workbench point")
 	check(sim.save_game(save_path).ok and sim.load_game(save_path).ok, "external workbench target survives validated load")
 	sim.advance(20.0)
 	command("accept_contract")
 	command("travel", {"destination":"rust"})
 	sim.advance(20.0)
+	prepare_salvage()
 	command("salvage", {"unit_id":"jaro"})
 	var salvage_target: Array = sim.snapshot().crew.jaro.target
-	check(is_equal_approx(float(salvage_target[0]),22.0) and is_equal_approx(float(salvage_target[1]),-11.2), "satellite target stands outside central wreck mesh")
+	check(is_equal_approx(float(salvage_target[0]),145.0) and is_equal_approx(float(salvage_target[1]),-121.2), "satellite target stands outside central wreck mesh")
 	check(sim.save_game(save_path).ok and sim.load_game(save_path).ok, "external satellite target survives validated load")
-	sim.advance(14.0)
+	sim.advance(3.0)
 	worker_position = sim.snapshot().crew.jaro.position
-	check(is_equal_approx(float(worker_position[0]),22.0) and is_equal_approx(float(worker_position[1]),-11.2) and sim.snapshot().salvage.phase == "working", "salvage progresses at external satellite point")
+	check(is_equal_approx(float(worker_position[0]),145.0) and is_equal_approx(float(worker_position[1]),-121.2) and sim.snapshot().salvage.phase == "working", "salvage progresses at external satellite point")
 	var landing_ship: Array = [-45.0,32.0]
 	# Arrival itself was traversed above; fresh arrival keeps both people outside the hull.
 	command("cancel_salvage")
 	command("travel", {"destination":"base"})
 	sim.advance(40.0)
-	landing_ship = [13.0,8.0]
+	landing_ship = [25.0,22.0]
 	for unit_id: String in ["ida","jaro"]:
 		var arrival: Array = sim.snapshot().crew[unit_id].position
 		check(is_equal_approx(absf(float(arrival[0])-float(landing_ship[0])),3.7) and is_equal_approx(float(arrival[1])-float(landing_ship[1]),3.8), "arrival places crew beside hull: " + unit_id)

@@ -29,12 +29,19 @@ try {
         $errorsText = Get-Content -LiteralPath (Join-Path $runRoot ($roleName + '-error.log')) -Raw
         if ($errorsText -match '(SCRIPT ERROR|ERROR:)') { throw "$roleName has engine errors." }
         if ($Visual) {
-            foreach ($captureStage in @('paused', 'reconnected')) {
+            foreach ($captureStage in @('paused', 'contact', 'reconnected')) {
                 $capturePath = Join-Path $runRoot ($roleName + '-' + $captureStage + '.png')
                 if (-not (Test-Path -LiteralPath $capturePath) -or (Get-Item -LiteralPath $capturePath).Length -eq 0) { throw "Missing $roleName $captureStage viewport capture." }
             }
         }
         Write-Output ("{0}: checks={1} failed={2} snapshots={3}" -f $roleName, $resultData.checks.Count, $resultData.failed, $resultData.received_snapshots)
+    }
+    if($Visual){
+        foreach($captureStage in @('paused','contact','reconnected')){
+            $hostShot=Get-Content -LiteralPath (Join-Path $runRoot ('host-'+$captureStage+'-capture.json')) -Raw | ConvertFrom-Json
+            $guestShot=Get-Content -LiteralPath (Join-Path $runRoot ('guest-'+$captureStage+'-capture.json')) -Raw | ConvertFrom-Json
+            if(($hostShot.snapshot | ConvertTo-Json -Depth 100 -Compress) -ne ($guestShot.snapshot | ConvertTo-Json -Depth 100 -Compress)){throw "Full host/guest snapshots differ at $captureStage"}
+        }
     }
     Write-Output "NETWORK_TWO_PROCESS_PASS evidence=$runRoot"
 } catch {

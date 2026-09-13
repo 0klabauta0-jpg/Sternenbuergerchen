@@ -1,4 +1,14 @@
-# N0/N1-Schnittstellen
+# Architektur und Schnittstellen
+
+## Aktueller Vertrag: Räume und Orbit, Schema v2
+
+Verbindlicher aktueller Snapshot- und Commandvertrag: [contracts/N2_ORBIT.md](contracts/N2_ORBIT.md). `SimulationRoot` bleibt die einzige autoritative Mutationsstelle. `orbit_operations.gd` führt ihre Flug-, Radar- und Kampfoperationen aus; `stage_state.gd` ergänzt Zustand und migriert validierte v1-Saves. Die eingefrorenen `legacy_validator_v1.gd` und `legacy_catalog_v1.gd` dienen ausschließlich dem alten Speicherformat.
+
+Der Katalog besitzt Raumpositionen und Kartengrenzen. `world_rooms.gd`, `world_space.gd` und `world_orbit_projection.gd` bauen ausschließlich die bestätigte Region auf und stellen deren Snapshot dar. `expedition_hud.gd` ergänzt kontextbezogene Befehle über denselben Session-Gateway. Der Host würfelt die Begegnung einmalig; Clients würfeln weder Begegnungen noch Schaden. Rechte für Pilot und Turmschütze folgen dem Crewbesitz. Schema v2 umfasst `space`, Entdeckung, Schiffszustand, Profile, Ausrüstung und Werkbankstufe.
+
+## Basis-API und historischer v1-Vertrag
+
+Die folgende Basis-API bleibt erhalten. Der dargestellte v1-Snapshot und ursprüngliche Rezept-/Regionenkatalog dokumentieren das Altformat; Erweiterungen und aktuell gültige Felder stehen im v2-Vertrag oben.
 
 `scripts/core/simulation_root.gd` extends Node; class_name RestartSimulation. Einzige autoritative Mutationsstelle. Keine Autoloads. API:
 - `snapshot() -> Dictionary` tiefe, JSON-kompatible Kopie.

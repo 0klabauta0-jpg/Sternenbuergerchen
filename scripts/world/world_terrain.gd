@@ -1,66 +1,54 @@
 extends RefCounted
-## Authored composition plus deterministic geological dressing on an open plane.
+## Broad open Mars valleys, layered mesas and batched small rocks.
 const Geo = preload("res://scripts/world/world_geometry.gd")
+const Catalog = preload("res://scripts/core/catalog.gd")
+const Space = preload("res://scripts/world/world_space.gd")
 
 static func build(parent: Node3D, region: String) -> void:
-	if region == "station":
-		_station(parent)
+	if region in ["station","space"]:
+		Space.build(parent,region)
 		return
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 812 if region == "base" else 901
-	_ground(parent, rng)
+	var half := Catalog.bounds(region)
+	_ground(parent,rng,half)
+	var clear_radius := 49.0 if region == "base" else 25.0
+	var points: Array = Catalog.landmarks(region).values()
+	# Geography is authored independently of hidden contact positions.
+	# Keep wide valleys between the mesa groups; low stones are visual only.
+	var mesa_count := 34 if region == "base" else 66
+	for i in range(mesa_count):
+		var point := Vector2(rng.randf_range(-half*0.92,half*0.92),rng.randf_range(-half*0.92,half*0.92))
+		if region == "base" and point.length() < clear_radius: continue
+		var blocked := false
+		for landmark: Array in points:
+			if point.distance_to(Vector2(landmark[0],landmark[1])) < 31: blocked=true
+		if blocked: continue
+		var radius := rng.randf_range(8,20) if region == "base" else rng.randf_range(11,29)
+		var height := radius*rng.randf_range(0.65,1.5)
+		_mesa(parent,point,radius,height,rng)
+	# Surrounding escarpments reinforce scale from every camera bearing.
+	for i in range(18):
+		var angle := TAU*i/18.0
+		var point := Vector2(cos(angle),sin(angle))*half*0.99
+		_mesa(parent,point,rng.randf_range(22,42),rng.randf_range(26,48),rng,true)
 	if region == "base":
-		# Keep the complete crew/workshop/shuttle route open. Rocks form the horizon.
-		for data in [Vector4(-10,14,8,6),Vector4(-7,-20,10,8),Vector4(19,-10,8,10)]:
+		for data in [Vector4(-45,-28,14,13),Vector4(-53,22,13,11),Vector4(46,-42,17,18),Vector4(16,-62,21,24)]:
 			_mesa(parent,Vector2(data.x,data.y),data.z,data.w,rng)
-		for data in [Vector4(-30,-24,15,15), Vector4(-13,-32,11,19), Vector4(6,-37,15,13), Vector4(26,-31,12,17), Vector4(45,-19,15,21), Vector4(-40,5,15,12), Vector4(-28,24,12,9), Vector4(35,30,14,10), Vector4(52,9,10,9)]:
-			_mesa(parent, Vector2(data.x,data.y), data.z, data.w, rng)
-		for data in [Vector4(-62,-65,27,24), Vector4(-20,-76,24,33), Vector4(25,-73,23,27), Vector4(65,-55,23,30), Vector4(-66,30,19,22)]:
-			_mesa(parent, Vector2(data.x,data.y), data.z, data.w, rng, true)
-		_trail(parent,Vector2(12,14),Vector2(5,30))
-	else:
-		for data in [Vector4(12,-33,9,8),Vector4(47,-18,9,11),Vector4(20,8,9,5),Vector4(-64,21,10,8),Vector4(-40,8,9,7)]:
-			_mesa(parent,Vector2(data.x,data.y),data.z,data.w,rng)
-		for data in [Vector4(-75,-25,19,19), Vector4(-28,-57,23,26), Vector4(19,-62,17,22), Vector4(66,-35,24,27), Vector4(75,20,22,23), Vector4(20,65,20,13), Vector4(-63,63,19,18), Vector4(-90,20,19,25)]:
-			_mesa(parent, Vector2(data.x,data.y), data.z, data.w, rng)
-		for data in [Vector4(-115,-95,35,36), Vector4(-43,-108,28,41), Vector4(43,-105,40,33), Vector4(115,-76,28,42)]:
-			_mesa(parent, Vector2(data.x,data.y), data.z, data.w, rng, true)
-		# The old impact scar is a shallow visual stain, not a blocking crater.
-		var scar := Geo.cylinder(parent, Vector3(24,0.012,-15), 11.0, 0.025, Color("79513f"), 11)
-		scar.scale.z = 0.62
-		_trail(parent,Vector2(-40,28),Vector2(12,-8))
-	for i in range(95):
-		var point := Vector2(rng.randf_range(-95,95), rng.randf_range(-95,95))
-		if (region == "base" and point.length() < 25) or (region == "rust" and _near_route(point)):
-			continue
-		var size := rng.randf_range(0.3,1.35)
-		var rock := Geo.cylinder(parent, Vector3(point.x,size*0.3,point.y), size, size*0.6, Color("bd8861"), 5)
-		rock.rotation.y = rng.randf_range(0,TAU)
-		rock.scale.z = rng.randf_range(0.6,1.1)
-		# A compact dark foot keeps every small rock firmly grounded.
-		Geo.cylinder(parent, Vector3(point.x,0.016,point.y), size*1.08,0.025,Color("93644c"),6)
+	_scatter(parent,rng,half,region)
 
-static func _near_route(point: Vector2) -> bool:
-	return point.distance_to(Geometry2D.get_closest_point_to_segment(point, Vector2(-45,32), Vector2(22,-15))) < 12
-
-static func _trail(parent: Node3D, from: Vector2, to: Vector2) -> void:
-	var direction := (to-from).normalized()
-	var normal := Vector2(-direction.y,direction.x)
-	var length := from.distance_to(to)
-	for i in range(int(length/3.0)):
-		for side in [-0.7,0.7]:
-			var at: Vector2 = from+direction*(i*3.0)+normal*side
-			var rut := Geo.box(parent,Vector3(at.x,0.025,at.y),Vector3(0.14,0.018,2.7),Color("a57050"))
-			rut.rotation.y = atan2(direction.x,direction.y)
-
-static func _ground(parent: Node3D, rng: RandomNumberGenerator) -> void:
+static func _ground(parent: Node3D, rng: RandomNumberGenerator, half: float) -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var sand := Color("98694f")
-	for z in range(-160,160,8):
-		for x in range(-160,160,8):
-			var tint := sand.lightened(rng.randf_range(-0.012,0.012))
-			for v in [Vector3(x,0,z),Vector3(x+8,0,z),Vector3(x,0,z+8),Vector3(x+8,0,z),Vector3(x+8,0,z+8),Vector3(x,0,z+8)]:
+	var step := 12
+	for z in range(-int(half),int(half),step):
+		for x in range(-int(half),int(half),step):
+			var end_x := minf(x+step,half)
+			var end_z := minf(z+step,half)
+			var valley := sin(x*0.020+sin(z*0.009)*2.2)
+			var tint := sand.lerp(Color("b9825a"),maxf(0,valley)*0.18).lightened(rng.randf_range(-0.015,0.015))
+			for v in [Vector3(x,0,z),Vector3(end_x,0,z),Vector3(x,0,end_z),Vector3(end_x,0,z),Vector3(end_x,0,end_z),Vector3(x,0,end_z)]:
 				st.set_color(tint)
 				st.set_normal(Vector3.UP)
 				st.add_vertex(v)
@@ -72,7 +60,30 @@ static func _ground(parent: Node3D, rng: RandomNumberGenerator) -> void:
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	node.material_override = mat
 	parent.add_child(node)
-	Geo.collider(parent,"ground","ground",Vector3(320,0.2,320),Vector3(0,-0.2,0))
+	Geo.collider(parent,"ground","ground",Vector3(half*2,0.2,half*2),Vector3(0,-0.2,0))
+
+static func _scatter(parent: Node3D, rng: RandomNumberGenerator, half: float, region: String) -> void:
+	var transforms: Array[Transform3D] = []
+	for i in range(650 if region == "base" else 1800):
+		var point := Vector2(rng.randf_range(-half,half),rng.randf_range(-half,half))
+		if region == "base" and point.length() < 43: continue
+		var scale := rng.randf_range(0.25,1.7)
+		var basis := Basis(Vector3.UP,rng.randf_range(0,TAU)).scaled(Vector3(scale,scale*rng.randf_range(0.3,0.7),scale*0.7))
+		transforms.append(Transform3D(basis,Vector3(point.x,scale*0.18,point.y)))
+	var mesh := CylinderMesh.new()
+	mesh.top_radius=0.5
+	mesh.bottom_radius=1.0
+	mesh.height=1.0
+	mesh.radial_segments=5
+	var batch := MultiMesh.new()
+	batch.transform_format=MultiMesh.TRANSFORM_3D
+	batch.mesh=mesh
+	batch.instance_count=transforms.size()
+	for i in range(transforms.size()): batch.set_instance_transform(i,transforms[i])
+	var node := MultiMeshInstance3D.new()
+	node.multimesh=batch
+	node.material_override=Geo.material(Color("b8845f"))
+	parent.add_child(node)
 
 static func _mesa(parent: Node3D, point: Vector2, radius: float, height: float, rng: RandomNumberGenerator, distant: bool = false) -> void:
 	var count := 9
@@ -115,27 +126,3 @@ static func _mesa(parent: Node3D, point: Vector2, radius: float, height: float, 
 
 static func _vertex(angle: float, jitter: float, radius: float, y: float, point: Vector2) -> Vector3:
 	return Vector3(point.x+cos(angle)*radius*jitter,y,point.y+sin(angle)*radius*jitter*0.72)
-
-static func _station(parent: Node3D) -> void:
-	Geo.box(parent,Vector3(0,-0.8,0),Vector3(36,1.6,35),Color("344d59"),0.5)
-	Geo.box(parent,Vector3(0,-0.03,0),Vector3(33,0.12,32),Color("637983"),0.4)
-	Geo.collider(parent,"ground","ground",Vector3(36,0.2,35),Vector3(0,-0.2,0))
-	for x in [-16.0,16.0]:
-		Geo.box(parent,Vector3(x,0.05,0),Vector3(0.16,0.12,32),Color("72b9ba"))
-	for z in [-15.5,15.5]:
-		Geo.box(parent,Vector3(0,0.1,z),Vector3(32,0.2,0.22),Color("82bab9"))
-	for x in [-14.0,14.0]:
-		for z in [-12.0,-5.0,2.0,9.0]:
-			Geo.box(parent,Vector3(x,1.0,z),Vector3(0.2,2.0,0.2),Color("314451"))
-	# Remote structures and a planet sell the orbit without a menu backdrop.
-	for x in [-70.0,55.0]:
-		Geo.box(parent,Vector3(x,-12,-55),Vector3(8,13,30),Color("344858"))
-		Geo.box(parent,Vector3(x,-5,-55),Vector3(30,0.5,20),Color("437582"))
-	var planet := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = 57
-	sphere.height = 114
-	planet.mesh = sphere
-	planet.material_override = Geo.material(Color("bc8e69"))
-	parent.add_child(planet)
-	planet.position = Vector3(-110,-40,-130)

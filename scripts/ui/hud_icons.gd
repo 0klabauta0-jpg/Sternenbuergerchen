@@ -25,6 +25,8 @@ const SHAPES := {
 	"lock":"<rect x='4' y='10' width='16' height='12' rx='1'/><path d='M8 10V6a4 4 0 0 1 8 0v4M12 14v4'/>",
 	"log":"<path d='M4 3h16v18H4zM8 7h8m-8 5h8m-8 5h5'/>",
 	"check":"<path d='m3 12 6 6L21 5'/>",
+	"helmet":"<path d='M3 13v-2a9 9 0 0 1 18 0v8l-5 3H8l-5-3zM4 10h16v6H4M9 19h6'/>",
+	"upgrade_workbench":"<path d='M2 12h20M5 12v10m14-10v10M8 7l4-5 4 5M12 2v8'/>",
 }
 
 static func texture(id: String) -> Texture2D:

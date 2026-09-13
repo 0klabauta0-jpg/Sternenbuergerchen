@@ -1,28 +1,39 @@
-# N1a — Point-and-Click-Koop
+# N2 — echte Produktprozesse, Suche und Raumkontakt
 
-Stand nach Nutzerkorrektur: Figuren werden ausgewählt und über Rechtsklick beziehungsweise den autoritativen `move`-Befehl zu einem Ziel geschickt. Die zusätzliche Richtungssteuerungsprobe wurde entfernt; frühere Messungen dazu sind kein Lieferstand.
+Die aktuelle Abnahme benutzt `tests/network_run.ps1 -Visual -Port 28073`: zwei echte Godot4.6.2-Produktprozesse mit `scenes/game.tscn`, ENet-Verbindung und vollständig isolierten Savepfaden. `game.simulation_seed=3` legt ausschließlich den Startwert des produktiven Zufallsgenerators fest; keine Mission, Geometrie, Gesundheit oder Auszahlung wird für Erfolg injiziert. Autoritative Zeit läuft beschleunigt; Netzwerk und Snapshot-Takt bleiben echte Echtzeit.
 
-`tests/network_probe.gd` enthält weiterhin den bisherigen Missions-/Save-/Reconnect-Nachweis mit zwei echten ENet-Prozessen. Er prüft Crewbesitz, verweigerte fremde Befehle, gemeinsame Pause, bestätigtes Wegziel, Werkbankarbeit, Reise, Bergung, einmalige Auszahlung und Disconnect/Reconnect. Die Revisionsbarriere nach Laden eines älteren pausierten Saves sowie die Fließkommatoleranz beim wiederhergestellten Ziel bleiben erhalten.
+## Geprüfter Spielerweg
 
-`tests/network_run.ps1 -Visual` lädt die echte `scenes/game.tscn` in zwei Produktfenstern. Beide Prozesse verwenden isolierte Speicherpfade und erzeugen pro Rolle Viewport-Captures für `paused` und `reconnected` samt vollständigen Snapshot-JSONs. Die Prüfung umfasst bei Erfolg weiterhin 27 Host- und 21 Gastchecks (48 insgesamt), inklusive vier Captures.
+Host Ida und Gast Jaro bekommen ihre vorhandenen Plätze. Fremde und gefälschte Befehle werden abgelehnt. Werkbankarbeit, gemeinsame Pause und Wiederherstellung eines älteren pausierten Saves mit streng neuerer Revision werden über ENet geprüft. Danach: reale Reise zur Rostkarte, Boarding für Suchflug, anonyme Radarsignale, Host-Anflug, Näheidentifikation, Landung, Gast-Fußbergung und Rückkehr mit genau einer Blackbox/Auszahlung.
 
-Aktueller Status: Abschließender Fensterlauf nach dem Icon-HUD-/Point-and-Click-Umbau bestanden:
+Die anschließende Stationsreise löst über den gespeicherten regulären35%-Wurf einen separaten Raumkontakt aus. Host bleibt Pilot, Gast bedient Jaros Turm; fremde Pilot-/Turmsteuerung wird verweigert. Gemeinsame Kampfpause, Save/Reload mit Gastbesitz, tatsächlicher Turmsieg und Fortsetzung zur Station werden beobachtet. Nach Rückkehr: Disconnect pausiert und gibt Jaro zurück; Reconnect nutzt dieselben zwei Personen und behält die Auszahlung genau einmal.
+
+## Ergebnis
 
 ```text
-host: checks=27 failed=0 snapshots=55
-guest: checks=21 failed=0 snapshots=35
+host: checks=46 failed=0 snapshots=57
+guest: checks=29 failed=0 snapshots=47
 NETWORK_TWO_PROCESS_PASS
 ```
 
-Evidenzordner: `C:\Users\bjoer\AppData\Local\Temp\sternenbuergerchen-network-f0b634130bdd4dec9271c07c9d0f6b82`.
+**75 Checks bestanden.** Evidenz:
+`C:\Users\bjoer\AppData\Local\Temp\sternenbuergerchen-network-e7849408add542848e41c5f26f8daa3a`
 
-Alle vier echten 1440×900-Viewportbilder wurden geöffnet und visuell geprüft: `host-paused.png`, `guest-paused.png`, `host-reconnected.png`, `guest-reconnected.png`. Sie zeigen das aktuelle kompakte Icon-HUD, Point-and-Click-Hinweise, korrekt beschrifteten Crewbesitz und die echte Produktwelt. Die Werkstatt nennt in beiden Prozessen korrekt Ida als tatsächlich arbeitende Person. Der Gast kann die Hostarbeit nicht abbrechen.
+Beide Enginefehlerlogs sind leer. Sechs tatsächliche Viewport-Captures samt Snapshot-JSONs wurden geschrieben. Die vollständigen Host-/Gast-Snapshots sind in allen drei stabilen Phasen identisch; diese Gleichheit ist zusätzlich im Runner verankert:
 
-| Phase | Vollständige Host-/Gast-Snapshots | Revision | Credits | Auftrag | Pause |
-|---|---|---:|---:|---|---|
-| paused | identisch | 285 | 180 | active | ja |
-| reconnected | identisch | 909 | 440 | claimed | ja |
+| Phase | Region | Revision beider Prozesse | Credits | Snapshot |
+|---|---|---:|---:|---|
+| paused | base |83|180|identisch|
+| contact | space |330|440|identisch|
+| reconnected | base |395|440|identisch|
 
-Geld/Blueprint werden genau einmal gebucht; Crewbesitz und zwei vorhandene Crewmitglieder bleiben beim Reconnect konsistent. Der ältere pausierte Save wird mit höherer Revision an den verbundenen Gast übertragen. Beide Enginefehlerlogs sind leer. Die vom Runner gestarteten Prozesse sind beendet.
+Der erste Lauf deckte beim Gast einen echten Rendererfehler auf: vor dem ersten Reconnect-Snapshot enthielt die Welt alte Crew-Nodes, aber ein leeres Crew-Dictionary. Der Weltverantwortliche hat diesen Lebenszyklusfehler behoben. Der gezielte Wiederlauf ist der oben dokumentierte grüne Stand; frühere doppelt gezählte Radarchecks wurden durch eine einmalige Phasenbarriere entfernt.
 
-Diese Abnahme belegt die echten ENet-Befehle und ihre Wirkung in zwei Produktfenstern. Tatsächliche Mausbedienung wird separat im GUI-Produktlauf geprüft. Internet/NAT, Paketverlust, PvP und die vollständige Kampagne sind nicht Gegenstand dieser begrenzten Netzprobe. Die abschließende Abnahme eröffnet keinen weiteren Testscope.
+## Save-Lebenszyklus einschließlich v1-Migration
+
+`tests/save_lifecycle_run.ps1` startet vier weitere echte Produktprozesse (initial,restore,guards,recovered), jeweils mit eindeutigem temporären Speicherpfad. Der erste echte Save wird verlustfrei in seine historische v1-Form serialisiert (nur additive Schema2-Felder entfernt), damit der folgende normale Produktstart tatsächlich die Migration ausführt. Fortschritt, Pause und fortgesetzte Arbeit bleiben erhalten. Beschädigte Saves bleiben geschützt; explizites Speichern stellt Autosave wieder her; ein fehlgeschlagenes Beenden-Save hält das Produkt offen.
+
+**10 Checks /4 Produktstarts bestanden.** Evidenz:
+`C:\Users\bjoer\AppData\Local\Temp\sternenbuergerchen-lifecycle-n2-88e447a169a946eeaf80bc2f8ee1ed37`
+
+Die normalen Nutzerkarrieren wurden weder gelesen noch geändert. Alle vom Runner gestarteten Prozesse sind beendet. Tatsächliche Mausbedienung, visuelle Endgestaltung und Internet/NAT bleiben getrennte Abnahmen; dieser Nachweis betrifft reale autoritative Befehle und ihre geteilte Produktwirkung über zwei lokale ENet-Prozesse.

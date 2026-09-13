@@ -1,5 +1,13 @@
 # Sternenbürgerchen — Neustart
 
+## Bestätigte Erweiterung vom 13.09.2026
+
+Unterkünfte, Lager, Werkstatt sowie Küche/Aufenthalt mit Auftragscomputer erhalten getrennte Räume und einen gemeinsamen Gang. Etwas weiterer Kamerablick, größere Rostlandschaft und freie Andockflächen bereiten späteren Slot-Ausbau vor. Die Werkbank beginnt auf Stufe 1 mit einfacher Herstellung und Reparatur; bessere Maschinen ermöglichen höherwertige Rezepte.
+
+Alle Orte sind **einzeln geladene Karten**. Große lokale Einsatzgebiete ersetzen keinen nahtlosen Planeten. Die größere Handelsstation wird angeflogen; mit Zufallschance unterbricht eine eigene Weltraumkarte die Reise. Raumbewegung bleibt auf einer Ebene. Die lokal vereinfachte Buccaneer heißt Freibeuter; die Entersäbel erhält einen von der zweiten Person bedienten Geschützturm. Radar zeigt zunächst unbekannte Kontakte, die erst in der Nähe identifiziert werden. Alte Crewideen und Charakterbögen bleiben im Gesamtplan erhalten.
+
+Arbeitsbranch dieser Erweiterung: `codex/rostgrenze-raeume-orbit`. Aktuelle Abnahme steht in `docs/ROOMS_ORBIT_ACCEPTANCE.md`; die folgenden Absätze bewahren die ursprüngliche Neustartentscheidung.
+
 Autorisiert durch „Dann leg los“ am 12.09.2026 nach Review 3 des Neustartplans. Neue Projektbasis: `C:\dev\SternenBuergerchen-Neustart`, eigener Branch `codex/neustart-n0-n1`, neue Historie im bestehenden GitHub-Repository; kein Umbau der alten Runtime.
 
 Commander führt zunächst zwei befreundete NPCs aus einer sichtbaren kleinen Rostwelt-Basis. Zwei Betten, Lager, Werkbank und eigenes kleines Shuttle sind der Einstieg. Anklickbare Arbeitsplätze öffnen passende Menüs; geeignete Arbeiter führen die Aufträge dort aus. Satellitenbergung, Geld/Blueprint, Markt, Herstellung, Reparatur und Rückkehr schließen den ersten Spielkreis.

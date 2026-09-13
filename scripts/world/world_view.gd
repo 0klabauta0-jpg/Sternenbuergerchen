@@ -9,8 +9,10 @@ const Geo = preload("res://scripts/world/world_geometry.gd")
 const Terrain = preload("res://scripts/world/world_terrain.gd")
 const Landmarks = preload("res://scripts/world/world_landmarks.gd")
 const Catalog = preload("res://scripts/core/catalog.gd")
+const OrbitProjection = preload("res://scripts/world/world_orbit_projection.gd")
 const ControlScript = preload("res://scripts/world/world_control.gd")
 
+var _orbit: RefCounted
 var _camera: Camera3D
 var _map: Node3D
 var _environment: Environment
@@ -19,13 +21,14 @@ var _objects: Dictionary = {}
 var _snapshot: Dictionary = {}
 var _region := ""
 var _focus := Vector3(4,0,0)
-var _zoom := 37.0
+var _zoom := 48.0
 var _selected_kind := ""
 var _selected_id := ""
 var _dragging := false
 var _destination: MeshInstance3D
 var _destination_age := 10.0
 var _flying := false
+var _flight_camera_follow := false
 var _control: Node
 var _selected_units: Array[String] = []
 var _last_motion: Dictionary = {}
@@ -38,7 +41,7 @@ func _ready() -> void:
 	_camera = Camera3D.new()
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	_camera.size = _zoom
-	_camera.far = 600
+	_camera.far = 1800
 	_camera.near = 0.1
 	_camera.current = true
 	add_child(_camera)
@@ -52,6 +55,10 @@ func _ready() -> void:
 	_update_camera()
 
 func present(state: Dictionary) -> void:
+	# A joining/reconnecting client has no confirmed snapshot yet. Keep the last
+	# rendered map until the host sends a complete state.
+	if state.is_empty() or not state.has("region") or not state.get("crew") is Dictionary:
+		return
 	_snapshot = state
 	if not is_node_ready():
 		return
@@ -92,9 +99,14 @@ func present(state: Dictionary) -> void:
 			animation.speed_scale = 0.0 if bool(state.get("paused",false)) else 1.0
 		var title := root.get_node("Title") as Label3D
 		title.text = str(data.get("name",id)) + (" · ARBEIT" if task == "work" else " · BERGUNG" if task == "salvage" else "")
-	_flying = bool(state.get("travel",{}).get("active",false)) and str(state.get("travel",{}).get("phase","")) == "flying"
+	var was_flying:=_flying
+	_flying = str(state.get("ship",{}).get("mode","landed")) == "flying" or (bool(state.get("travel",{}).get("active",false)) and str(state.get("travel",{}).get("phase","")) == "flying")
+	_orbit.present(_map,_objects,state)
+	if _flying and not was_flying and _region in ["rust","space"]:
+		_flight_camera_follow=true
 	for id in _units:
-		(_units[id] as Node3D).visible = not _flying
+		(_units[id] as Node3D).visible = crew.has(id) and not _flying and str(crew.get(id,{}).get("assignment","idle")) != "aboard"
+		Geo.set_pickable(_units[id],(_units[id] as Node3D).visible)
 	_apply_selection()
 
 func _process(delta: float) -> void:
@@ -111,19 +123,23 @@ func _process(delta: float) -> void:
 		_focus += (right*horizontal+forward*vertical)*delta*_zoom*0.55
 		if absf(horizontal)+absf(vertical)>0:
 			_follow_delay = 1.0
-		_focus.x = clampf(_focus.x,-115,115)
-		_focus.z = clampf(_focus.z,-115,115)
+			_flight_camera_follow=false
+		_focus.x = clampf(_focus.x,-Catalog.bounds(_region),Catalog.bounds(_region))
+		_focus.z = clampf(_focus.z,-Catalog.bounds(_region),Catalog.bounds(_region))
 	if _follow_mode and _units.has(_follow_unit) and _follow_delay <= 0 and not _dragging:
 		_focus = _focus.lerp((_units[_follow_unit] as Node3D).position,1.0-exp(-delta*4.0))
+	elif _flying and _flight_camera_follow and _objects.has("shuttle") and not _dragging:
+		var target: Vector3=(_objects.shuttle as Node3D).position
+		if _region=="space": target+=Vector3(minf(32,_zoom*0.22),0,-minf(8,_zoom*0.055))
+		_focus=_focus.lerp(target,1.0-exp(-delta*4.0))
 	_update_camera()
+	if is_instance_valid(_map):
+		for title: Label3D in _map.find_children("*","Label3D",true,false):
+			title.pixel_size=0.030*clampf(_zoom/48.0,0.7,8.0)
 	_destination_age += delta
 	if is_instance_valid(_destination):
 		_destination.visible = _destination_age < 3.0
 		_destination.scale = Vector3.ONE * (1.0 + sin(_destination_age*5.0)*0.1)
-	if _objects.has("shuttle"):
-		var craft := (_objects.shuttle as Node3D).get_node_or_null("Craft") as Node3D
-		if craft != null:
-			craft.position.y = lerpf(craft.position.y,5.0 if _flying else 0.35,minf(delta*2.0,1.0))
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -131,10 +147,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_dragging = event.pressed
 			get_viewport().set_input_as_handled()
 		elif event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_zoom = clampf(_zoom*0.9,19,105)
+			_zoom = clampf(_zoom*0.9,19,420 if _region=="rust" else 300 if _region=="space" else 180)
 			get_viewport().set_input_as_handled()
 		elif event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_zoom = clampf(_zoom/0.9,19,105)
+			_zoom = clampf(_zoom/0.9,19,420 if _region=="rust" else 300 if _region=="space" else 180)
 			get_viewport().set_input_as_handled()
 		elif event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 			var at: Variant = _ground_at(event.position)
@@ -149,6 +165,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		var forward := Vector3(_camera.global_basis.z.x,0,_camera.global_basis.z.z).normalized()
 		_focus -= right*event.relative.x*factor + forward*event.relative.y*factor*1.4
 		_follow_delay = 1.0
+		_flight_camera_follow=false
 		get_viewport().set_input_as_handled()
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_HOME:
 		focus_home()
@@ -164,21 +181,28 @@ func focus_unit(id: String) -> void:
 		_focus = (_units[id] as Node3D).position
 
 func focus_object(id: String) -> void:
-	if _objects.has(id):
+	if _objects.has(id) and (_objects[id] as Node3D).visible:
 		_focus = (_objects[id] as Node3D).position
 		_zoom = minf(_zoom,43.0)
+		_flight_camera_follow=id=="shuttle"
 
 func focus_home() -> void:
+	_flight_camera_follow=_region in ["rust","space"]
 	match _region:
 		"rust":
-			_focus = Vector3(-40,0,29)
-			_zoom = 58.0
+			var coords: Array = _snapshot.get("ship",{}).get("position",[-210,180])
+			_focus = Vector3(coords[0],0,coords[1])
+			_zoom = 76.0
 		"station":
-			_focus = Vector3(1,0,1)
-			_zoom = 37.0
+			_focus = Vector3(0,0,0)
+			_zoom = 70.0
+		"space":
+			var coords: Array = _snapshot.get("ship",{}).get("position",[-85,0])
+			_focus = Vector3(coords[0]+35,0,coords[1]-8)
+			_zoom = 145.0
 		_:
-			_focus = Vector3(4,0,0)
-			_zoom = 37.0
+			_focus = Vector3(2,0,-1)
+			_zoom = 48.0
 
 func set_selection(kind: String, id: String) -> void:
 	_selected_kind = kind
@@ -227,11 +251,14 @@ func _build_map() -> void:
 	_map.name = "Region_"+_region
 	add_child(_map)
 	Terrain.build(_map,_region)
-	_objects = Landmarks.build(_map,_region,Catalog.landmarks(_region))
+	var points: Dictionary = Catalog.landmarks(_region)
+	if _region=="space": points={"shuttle":[-85,0],"pirate":[55,-25]}
+	_objects = Landmarks.build(_map,_region,points)
+	_orbit=OrbitProjection.new()
 	_destination = Geo.ring(_map,0.65,Color("f6d497"))
 	_destination_age = 10.0
-	_environment.background_color = Color("142331") if _region == "station" else Color("839ba6")
-	_environment.fog_enabled = _region != "station"
+	_environment.background_color = Color("091624") if _region in ["station","space"] else Color("839ba6")
+	_environment.fog_enabled = _region not in ["station","space"]
 	focus_home()
 
 func _create_unit(id: String, data: Dictionary) -> void:
@@ -264,12 +291,12 @@ func _update_camera() -> void:
 	_camera.size = _zoom
 	# Slight left framing compensates for the wider inspection panel on the right.
 	var target := _focus + Vector3(2.1,0,-1.7)
-	_camera.position = target + Vector3(30,39,44)
+	_camera.position = target + Vector3(30,39,44).normalized()*maxf(66,_zoom*1.15)
 	_camera.look_at(target,Vector3.UP)
 
 func _pick(screen: Vector2) -> void:
 	var origin := _camera.project_ray_origin(screen)
-	var query := PhysicsRayQueryParameters3D.create(origin,origin+_camera.project_ray_normal(screen)*600)
+	var query := PhysicsRayQueryParameters3D.create(origin,origin+_camera.project_ray_normal(screen)*1800)
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	if hit.is_empty():
 		return

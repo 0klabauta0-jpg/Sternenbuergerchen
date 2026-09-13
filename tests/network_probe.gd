@@ -23,6 +23,7 @@ var _capture_pending: bool = false
 var _captured: Dictionary = {}
 var _saved_target: Array = []
 var _restored_revision: int = -1
+var _radar_checked: bool = false
 func _initialize() -> void:
 	for argument: String in OS.get_cmdline_user_args():
 		if argument.begins_with("--role="): role = argument.trim_prefix("--role=")
@@ -39,18 +40,19 @@ func _start() -> void:
 		game = game_scene.instantiate()
 		game.name = "Game"
 		game.load_on_start = false
+		game.simulation_seed = 3
 		game.save_path = output_dir.path_join(role + "-isolated-campaign.json")
 		root.add_child(game)
 		simulation = game.simulation
 		session = game.session
-		DisplayServer.window_set_title("Sternenbürgerchen · N1a " + role.to_upper())
+		DisplayServer.window_set_title("Sternenbürgerchen · N2 ENet " + role.to_upper())
 		game.hud.choose_unit("jaro" if role == "guest" else "ida", false)
 	else:
 		game = Node.new()
 		game.name = "Game"
 		root.add_child(game)
 		var core_script: Script = load("res://scripts/core/simulation_root.gd")
-		simulation = core_script.new()
+		simulation = core_script.new(3)
 		simulation.name = "Simulation"
 		game.add_child(simulation)
 		session = SessionScript.new()
@@ -123,8 +125,26 @@ func _host_step() -> void:
 			phase = "outbound"
 		"outbound":
 			if str(state.region) != "rust" or bool(state.travel.active): return
-			_write("host_stage", {"stage":"salvage"})
-			phase = "salvage"
+			_check(not state.discovery.satellite_found,"new mission starts with unknown satellite")
+			_check(_command("launch").ok,"host begins actual search-flight boarding")
+			phase="launch"
+		"launch":
+			if state.ship.mode!="flying":return
+			_check(_command("radar_scan").ok,"host scans from airborne shuttle")
+			var radar: Dictionary=simulation.snapshot()
+			_check(radar.discovery.signals.size()==3 and not JSON.stringify(radar.discovery.signals).contains("satellite"),"radar exposes anonymous contacts only")
+			_write("host_stage",{"stage":"radar_ready","revision":int(radar.revision)})
+			phase="radar_wait"
+		"radar_wait":
+			if guest_stage!="radar_checked":return
+			_check(_command("ship_move",{"position":[145,-125]}).ok,"host pilots pointclick approach to radar contact")
+			phase="search"
+		"search":
+			if not state.discovery.satellite_found:return
+			_check(_command("land").ok,"nearby contact identified and actual ship landed")
+			_check(simulation.snapshot().crew.jaro.assignment=="idle","guest exits landed ship for foot work")
+			_write("host_stage",{"stage":"salvage","revision":int(simulation.snapshot().revision)})
+			phase="salvage"
 		"salvage":
 			if str(state.contract.status) != "recovered": return
 			_check(int(state.cargo.blackbox) == 1 and int(state.wreck_remaining) < 8, "guest work produces real finite salvage")
@@ -139,7 +159,40 @@ func _host_step() -> void:
 			_check(not _command("claim_contract").ok and int(session.current_snapshot().credits) == credits, "second payout request refused")
 			_check(credits == initial_credits + int(state.contract.reward), "reward paid exactly once")
 			_write("host_stage", {"stage":"reward","credits":credits})
-			phase = "disconnect"
+			phase = "reward_wait"
+		"reward_wait":
+			if guest_stage!="reward_checked":return
+			_check(_command("travel",{"destination":"station"}).ok,"host accepts station route with saved random decision")
+			_check(simulation.snapshot().travel.encounter_roll<35,"seeded real station roll produces pirate contact")
+			phase="station_route"
+		"station_route":
+			if state.region!="space":return
+			_check(state.encounter.active and state.ship.roles.pilot=="ida" and state.ship.roles.gunner=="jaro","independent contact map has explicit pilot and turret roles")
+			_check(not _command("fire_turret",{"target_id":"pirate"}).ok,"host cannot commandeer guest turret")
+			_check(_command("toggle_pause").ok,"host pauses contact for joint role check")
+			_write("host_stage",{"stage":"contact","revision":int(simulation.snapshot().revision)})
+			phase="contact_wait"
+		"contact_wait":
+			if guest_stage!="contact_checked":return
+			if not _ensure_capture("contact"):return
+			_check(state.encounter.turret_target=="pirate","guest turret order confirmed by authoritative host")
+			_check(simulation.save_game(output_dir.path_join("host-contact.json")).ok,"shared paused combat snapshot saved")
+			_check(simulation.load_game(output_dir.path_join("host-contact.json")).ok,"shared combat snapshot restored preserving guest")
+			_check(_command("toggle_pause").ok,"shared contact resumes")
+			phase="combat"
+		"combat":
+			if state.region!="station":return
+			_check(state.encounter.status=="won" and state.encounter.enemy.hull==0,"guest turret defeats weak pirate and reaches original station destination")
+			_write("host_stage",{"stage":"won","credits":int(state.credits),"revision":int(state.revision)})
+			phase="won_wait"
+		"won_wait":
+			if guest_stage!="won_checked":return
+			_check(_command("travel",{"destination":"base"}).ok,"host returns from station after encounter")
+			phase="return_for_disconnect"
+		"return_for_disconnect":
+			if state.region!="base" or state.travel.active:return
+			_write("host_stage",{"stage":"disconnect_now","credits":int(state.credits)})
+			phase="disconnect"
 		"disconnect":
 			if guest_stage != "disconnected" or int(state.crew.jaro.owner) != 1: return
 			_check(bool(state.paused) and state.crew.size() == 2, "disconnect pauses and returns guest seat")
@@ -194,14 +247,50 @@ func _guest_step() -> void:
 			_write("guest_stage", {"stage":"restored_checked"})
 			phase = "salvage_wait"
 		"salvage_wait":
-			if host_stage != "salvage" or str(state.region) != "rust": return
+			if not _radar_checked and host_stage=="radar_ready" and state.region=="rust" and int(state.revision)>=int(host.revision):
+				_check(state.ship.mode=="flying" and state.discovery.signals.size()==3 and not state.discovery.satellite_found,"guest receives same anonymous airborne radar")
+				_send_named("pilot_forbidden","ship_move",{"position":[0,0],"sender_id":1})
+				_send_named("radar_forbidden","radar_scan")
+				_send_named("land_forbidden","land")
+				phase="radar_check"
+				return
+			if host_stage != "salvage" or str(state.region) != "rust" or int(state.revision)<int(host.revision): return
+			_check(state.discovery.satellite_found and state.ship.mode=="landed","guest sees proximity discovery and landed ship")
 			_check(not bool(state.paused) and int(state.inventory.toolkit) == 1, "guest sees completed crafting and shared travel")
 			_send_named("salvage", "salvage", {"unit_id":"jaro"})
 			phase = "reward"
+		"radar_check":
+			if not receipts.has("pilot_forbidden") or not receipts.has("radar_forbidden") or not receipts.has("land_forbidden"):return
+			_check(not receipts.pilot_forbidden.ok and not receipts.radar_forbidden.ok and not receipts.land_forbidden.ok,"guest cannot spoof pilot radar or landing authority")
+			_radar_checked=true
+			_write("guest_stage",{"stage":"radar_checked"})
+			phase="salvage_wait"
 		"reward":
 			if host_stage != "reward" or str(state.contract.status) != "claimed": return
 			_check(receipts.has("salvage") and receipts["salvage"].ok, "guest salvage accepted remotely")
 			_check(int(state.credits) == int(host.credits) and state.blueprints.count("cutter") == 1, "guest sees identical one-time reward")
+			_write("guest_stage",{"stage":"reward_checked"})
+			phase="contact_wait"
+		"contact_wait":
+			if host_stage!="contact" or state.region!="space" or int(state.revision)<int(host.revision):return
+			_check(state.encounter.active and state.paused,"guest receives same paused pirate contact")
+			_send_named("pilot_space_forbidden","ship_move",{"position":[-150,0]})
+			_send_named("turret","fire_turret",{"target_id":"pirate"})
+			phase="contact_check"
+		"contact_check":
+			if not receipts.has("pilot_space_forbidden") or not receipts.has("turret") or state.encounter.turret_target!="pirate":return
+			if not _ensure_capture("contact"):return
+			_check(not receipts.pilot_space_forbidden.ok and receipts.turret.ok,"guest turret works while pilot remains host-only")
+			_write("guest_stage",{"stage":"contact_checked"})
+			phase="won_wait"
+		"won_wait":
+			if host_stage!="won" or state.region!="station" or int(state.revision)<int(host.revision):return
+			_check(state.encounter.status=="won" and state.encounter.enemy.hull==0,"guest sees actual turret victory and continued station route")
+			_check(int(state.credits)==int(host.credits),"combat introduces no duplicate contract reward")
+			_write("guest_stage",{"stage":"won_checked"})
+			phase="disconnect_wait"
+		"disconnect_wait":
+			if host_stage!="disconnect_now" or state.region!="base":return
 			session.disconnect_session()
 			_write("guest_stage", {"stage":"disconnected"})
 			phase = "reconnect_wait"
@@ -251,7 +340,7 @@ func _ensure_capture(label: String) -> bool:
 	return false
 
 func _capture_viewport(label: String) -> void:
-	game.hud.select_object("object", "workbench" if label == "paused" else "contracts")
+	game.hud.select_object("object", "shuttle" if label=="contact" else ("workbench" if label == "paused" else "contracts"))
 	game.world.focus_home()
 	game._refresh()
 	await process_frame

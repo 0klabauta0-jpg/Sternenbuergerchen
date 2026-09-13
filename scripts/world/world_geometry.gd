@@ -93,6 +93,8 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 	var path := "res://assets/curated/%s/%s.glb" % [pack,name]
 	if name == "craft_cargoA" and FileAccess.file_exists("res://assets/local/entersaebel.glb"):
 		path = "res://assets/local/entersaebel.glb"
+	if name == "freibeuter":
+		path = "res://assets/local/freibeuter/freibeuter.glb"
 	var packed := load(path) as PackedScene
 	if packed == null:
 		push_error("Required curated asset missing: " + name)
@@ -101,6 +103,8 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 	pivot.add_child(instance)
 	var bounds := _bounds(instance, Transform3D.IDENTITY)
 	var ratio := Vector3(dimensions.x / maxf(bounds.size.x, 0.001), dimensions.y / maxf(bounds.size.y, 0.001), dimensions.z / maxf(bounds.size.z, 0.001))
+	if name in ["craft_cargoA","freibeuter"]:
+		ratio = Vector3.ONE * dimensions.z / maxf(bounds.size.z,0.001)
 	if name == "white_astronaut":
 		ratio = Vector3.ONE * dimensions.y / maxf(bounds.size.y,0.001)
 	instance.scale = ratio
@@ -145,3 +149,8 @@ static func _bounds(node: Node3D, transform: Transform3D) -> AABB:
 				result = result.merge(child_bounds) if valid else child_bounds
 				valid = true
 	return result
+
+static func set_pickable(node: Node, enabled: bool) -> void:
+	if node is CollisionObject3D:
+		(node as CollisionObject3D).collision_layer=1 if enabled else 0
+	for child in node.get_children(): set_pickable(child,enabled)

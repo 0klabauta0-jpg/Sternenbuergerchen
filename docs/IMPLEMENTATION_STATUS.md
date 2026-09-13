@@ -1,4 +1,18 @@
-# Umsetzungsstand
+# Umsetzungsstand · 13.09.2026
+
+Die Stufe **Räume, Suche und erster Raumkontakt** ist implementiert und technisch geprüft. Vier getrennte Basisräume, sichtbare Ausbauflächen, größere einzeln geladene Karten, ein Stationsdock, Radarentdeckung, planarer Schiffskampf gegen einen zufälligen Freibeuter, Jaros Geschützturm, Werkbankstufen und die erste Crewakte erweitern den bisherigen Spielkreis.
+
+Aktuelle Abnahme: **67 neue Kernprüfungen, 100 Kernregressionen, 63 Produktfensterprüfungen, 13 Steuerungsprüfungen, 43 Weltprüfungen, 75 Prüfungen mit zwei echten ENet-Prozessen und 10 Speicher-Lebenszyklusprüfungen bestanden.** Alte v1-Spielstände werden validiert in v2 übernommen. Details, Grenzen und Belege: [ROOMS_ORBIT_ACCEPTANCE.md](ROOMS_ORBIT_ACCEPTANCE.md), [N2_ORBIT.md](contracts/N2_ORBIT.md) und [network_report.md](../tests/network_report.md).
+
+Es wird immer nur die aktive Karte aufgebaut: Basis 320×320 m, Satellitengebiet 640×640 m, Station 160×160 m, Raumkontakt 480×480 m. Die Reise zur Station hat aktuell 35 % Begegnungschance; der Wurf erfolgt einmalig im Kern und wird gespeichert. Flugziele liegen auf einer Ebene. Niederlage führt Crew und beschädigtes Schiff zur Basis zurück.
+
+**Noch offen:** Hindernisnavigation und Deckung, tatsächlich baubare Raummodule, Bunkerkampf, das vollständige Verwundungs-/Evakuierungs-/Respawnsystem, Rekrutierung, Persönlichkeit und fortlaufende Charakterentwicklung, Forschung, Raumberufe, weitere Planeten/Schiffe und PvP. Wände und Felsen sind derzeit visuell. Die Crewakte zeigt bereits echte Fähigkeiten, Aufgabe und Ausrüstung; die Ausbauflächen sind vorbereitete Standorte. Loopback-Koop mit zwei Prozessen ist geprüft, Internetvermittlung und Matchmaking noch nicht. Menschliche Verständlichkeits- und Spielspaßtests stehen aus.
+
+Der Gesamtplan mit echten Spielbildern ist privat veröffentlicht: [Sternenbürgerchen-Spielplan](https://sternenbuergerchen-neustart.klabauta.chatgpt.site). Lokal erzeugt `tools/build_report.py` die eigenständigen HTML-Dateien unter `output/`.
+
+## Historischer Stand N0/N1 · 12.09.2026
+
+Die folgenden Ergebnisse beschreiben die vorige Stufe. Für aktuelle Funktionen und Grenzen gelten die Angaben oben und die N2-Abnahme.
 
 12.09.2026 — Erste spielbare Neustartstufe N0/N1 umgesetzt; N1a als lokaler Zwei-Prozess-Nachweis bestanden. Eigenes Godot-4.6.2-Projekt, Start über `Spielen.cmd`.
 

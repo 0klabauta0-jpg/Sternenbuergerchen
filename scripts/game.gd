@@ -5,14 +5,17 @@ const WorldScript = preload("res://scripts/world/world_view.gd")
 const HudScript = preload("res://scripts/ui/game_hud.gd")
 const SessionScript = preload("res://scripts/network/session_gateway.gd")
 const Catalog = preload("res://scripts/core/catalog.gd")
+const ExpeditionScript = preload("res://scripts/ui/expedition_hud.gd")
 const SAVE_PATH := "user://campaign.json"
 
 var simulation: Node
 var world: Node3D
 var hud: CanvasLayer
 var session: Node
+var expedition: CanvasLayer
 var save_path: String = SAVE_PATH
 var load_on_start: bool = true
+var simulation_seed: int = -1
 var _auto_save_allowed := true
 var _counter := 0
 var _ui_elapsed := 0.0
@@ -23,7 +26,7 @@ var _direct_mode := false
 
 func _ready() -> void:
 	DisplayServer.window_set_title("Sternenbürgerchen · Rostgrenze · Neustart")
-	simulation = SimulationScript.new()
+	simulation = SimulationScript.new(simulation_seed)
 	simulation.name="Simulation"
 	add_child(simulation)
 	var startup_message := ""
@@ -46,6 +49,11 @@ func _ready() -> void:
 	world.units_selected.connect(_on_units_selected)
 	hud.command_requested.connect(send_command)
 	hud.action_requested.connect(_on_action)
+	expedition=ExpeditionScript.new()
+	expedition.name="ExpeditionHUD"
+	add_child(expedition)
+	expedition.command_requested.connect(send_command)
+	expedition.action_requested.connect(_on_action)
 	simulation.notice.connect(hud.notify)
 	session.connection_changed.connect(func(message: String): hud.notify(message))
 	session.command_result.connect(func(result: Dictionary):
@@ -70,11 +78,19 @@ func send_command(command: Dictionary) -> Dictionary:
 	return result
 
 func _on_object_selected(kind: String,id: String) -> void:
+	if is_instance_valid(expedition) and expedition.inspect_target(id):
+		hud.dismiss_context()
+		if world.has_method("set_selection"): world.set_selection(kind,id)
+		return
 	hud.select_object(kind,id)
 	if world.has_method("set_selection"): world.set_selection(kind,id)
 	_refresh()
 
 func _on_ground_clicked(position: Vector2) -> void:
+	var state: Dictionary=session.current_snapshot()
+	if str(state.get("ship",{}).get("mode","landed"))=="flying":
+		send_command({"type":"ship_move","position":[position.x,position.y]})
+		return
 	var selection: Array[String]=[]
 	if _direct_mode: selection.append(str(hud.selected_unit))
 	else: selection.assign(hud.selected_units)
@@ -169,6 +185,7 @@ func _refresh() -> void:
 	hud.set_connection(session.status_text(),session.is_guest())
 	hud.present(session.current_snapshot())
 	hud.set_recipe_details(Catalog.recipes(),Catalog.prices())
+	if is_instance_valid(expedition): expedition.present(session.current_snapshot(),session.is_guest())
 
 func _capture() -> void:
 	await RenderingServer.frame_post_draw
