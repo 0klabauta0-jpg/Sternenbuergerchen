@@ -37,4 +37,6 @@ Sieben tatsächliche Spielansichten liegen im privaten Gesamtplan; lokale Belege
 
 ## Veröffentlichung
 
+Zusätzliche Lieferprüfung des Laufzeitcommits `d2d0c5b3bf9e77b1f59fc51325ecd6b06be0e93b`: Ein frisches Git-Archiv ohne `assets/local` wurde in Godot 4.6.2 importiert und mit isoliertem APPDATA gestartet. Import, kurzer Start und `tests/asset_delivery_test.gd` jeweils Exit 0, keine Fehler oder Warnungen. Sowohl Shuttle als auch Freibeuter besitzen ein gültiges Kenney-Ersatzmesh; der Pirat ist zusätzlich rötlich eingefärbt. Die gleiche Assetprüfung mit den lokalen Blender-Schiffen besteht ebenfalls. Evidenz: `C:/Users/bjoer/AppData/Local/Temp/sternenbuergerchen-delivery-fixed-97fa7723358b45358063f76b78feddae/result.json`. Der Reportgenerator wurde im ursprünglichen frischen Archiv auch ohne Bildbelege erfolgreich ausgeführt und kennzeichnet fehlende lokale Bilder.
+
 Der mobile Gesamtplan ist als eigenständige private ChatGPT-Site veröffentlicht: https://sternenbuergerchen-neustart.klabauta.chatgpt.site. Er enthält Texte und tatsächliche Spielbilder, keine Spielquellen oder herunterladbaren Schiffsmodelle. Die lokale HTML wird aus `docs/reports/ROSTGRENZE_SPIELPLAN_TEMPLATE.html` und vorhandenen Bildern mit `tools/build_report.py` erzeugt. Lokale Blender-Modelle bleiben Git-ignoriert; im Clone stehen Kenney-Ersatzmodelle bereit.
