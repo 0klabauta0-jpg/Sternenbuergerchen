@@ -1,3 +1,20 @@
+# Privater Windows-Testbuild N5 · 13.09.2026
+
+N5 wurde mit Godot4.6.2, Schema5 und Dateiversion0.5.0.0 exportiert. Das Paket enthält EXE/Engine/eingebetteten PCK, drei lokale Schiffsvorlagen, cloudflared2026.9.1, Anleitung und Lizenztexte einschließlich der zusätzlich verwendeten Factory-/Space-Module.
+
+- ZIP `output/Sternenbuergerchen-Windows-N5.zip`: 59836709 Bytes, SHA-256 `633c815224b9f2c6295d19855e7df217bd814d467d69f886912035d501f5b966`.
+- EXE SHA-256 `856ce3f52de388c43eea41589229942ed7e64242f3da4a64b811758f4f4d964e`.
+- Frisch entpackt:14 Manifestdateien bytegenau/SHA-geprüft,15 Dateien einschließlich BUILD.json, keine project.godot und keine Karriere/Einladung.
+- Reguläre EXE: Menü und Game über den vorhandenen Host-Einstieg in isolierter APPDATA gestartet, Exit0, echte Bilder angesehen, Enginefehlerlogs leer.
+- Genau dieser exportierte PCK:25/25 Prüfungen mit tatsächlichem Menübutton, neuem Schema, neun Zielen, regionalen Preisen, Reparaturaufsatz und den lokalen Modellen. Zusätzliche Modellprüfung9/9.
+- Entersäbel9714 Dreiecke/14 Meshes, Freibeuter13945, Geier17998. N5-Blend und Reimport überprüft; horizontales Profil7,5×11m.
+
+Belege: `output/windows-n5-delivery/`. Exportlog: `output/windows-n5-export.log`. Quellprojekt:761 Kernprüfungen,159 neue/aktuelle Fensterprüfungen,12 Speicherstarts-Prüfungen,62 ENet und70 öffentliche WSS-Prüfungen über DNS-Ersatzweg. Kein zusätzlicher Internetlauf der exportierten EXE, kein Nachweis zweier Haushalte oder weiterer Hardware. Windows x86_64/OpenGL3.3, privater nicht signierter Entwicklungsbuild. ZIP und Modelle bleiben lokal; der Handybericht enthält nur Texte und Aufnahmen.
+
+`output/windows/` ist nun N5; die N4-/N3-ZIPs und ihre folgenden Beschreibungen bleiben historisch.
+
+---
+
 # Privater Windows-Testbuild N4 · 13.09.2026
 
 N4-Release mit Godot4.6.2 und Dateiversion0.4.0.0 wurde aus dem eingefrorenen Arbeitsstand exportiert. Das lokale Paket enthält Engine und eingebetteten PCK, die drei tatsächlichen lokalen Schiffsmodelle, portables offizielles cloudflared2026.9.1, Lizenztexte, deutsche N4-Anleitung und ein SHA-256-Manifest. Keine Installation von Godot ist beim Freund nötig. Kein Upload zu Git oder Site.

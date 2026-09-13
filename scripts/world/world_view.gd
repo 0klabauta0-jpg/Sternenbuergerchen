@@ -9,6 +9,7 @@ signal context_clicked(kind: String, id: String, screen: Vector2)
 const Geo = preload("res://scripts/world/world_geometry.gd")
 const Terrain = preload("res://scripts/world/world_terrain.gd")
 const Landmarks = preload("res://scripts/world/world_landmarks.gd")
+const Regions=preload("res://scripts/core/regions.gd")
 const Catalog = preload("res://scripts/core/catalog.gd")
 const OrbitProjection = preload("res://scripts/world/world_orbit_projection.gd")
 const GroundProjection = preload("res://scripts/world/world_ground_projection.gd")
@@ -111,7 +112,7 @@ func present(state: Dictionary) -> void:
 	_flying = str(state.get("ship",{}).get("mode","landed")) == "flying" or (bool(state.get("travel",{}).get("active",false)) and str(state.get("travel",{}).get("phase","")) == "flying")
 	_orbit.present(_map,_objects,state)
 	_ground.present(_map,_objects,_units,state)
-	if _flying and not was_flying and _region in ["base","rust","station","orbit","space","bunker_surface","distribution","tradepost"]:
+	if _flying and not was_flying and _region in (Regions.DESTINATIONS+["orbit","space"]):
 		_flight_camera_follow=true
 	for id in _units:
 		(_units[id] as Node3D).visible = crew.has(id) and not _flying and str(crew.get(id,{}).get("assignment","idle")) != "aboard"
@@ -147,7 +148,9 @@ func _process(delta: float) -> void:
 	_update_camera()
 	if is_instance_valid(_map):
 		for title: Label3D in _map.find_children("*","Label3D",true,false):
-			title.pixel_size=0.030*clampf(_zoom/48.0,0.7,8.0)
+			title.pixel_size=0.030*clampf(_zoom/48.0,0.7,4.0)
+			if str(title.get_parent().name).begins_with("bed_"):continue
+			title.visible=_zoom<180 or str(title.get_parent().name)==_selected_id
 	_destination_age += delta
 	if is_instance_valid(_destination):
 		_destination.visible = _destination_age < 3.0
@@ -205,8 +208,8 @@ func focus_object(id: String) -> void:
 		_flight_camera_follow=id=="shuttle"
 
 func focus_home() -> void:
-	_flight_camera_follow=_region in ["base","rust","station","orbit","space","bunker_surface","distribution","tradepost"]
-	match _region:
+	_flight_camera_follow=_region in (Regions.DESTINATIONS+["orbit","space"])
+	match Regions.archetype(_region):
 		"base":
 			var ship: Dictionary=_snapshot.get("ship",{})
 			var coords: Array=ship.get("position",[2,0])
@@ -228,14 +231,14 @@ func focus_home() -> void:
 			_focus=Vector3(coords[0],0,coords[1])
 			_zoom=82.0 if _region=="distribution" else 65.0
 		"bunker_depths":
-			_focus=Vector3(0,0,22)
-			_zoom=64.0
+			_focus=Vector3(0,0,22*Regions.depth_scale(_region))
+			_zoom=96.0
 		_:
 			_focus = Vector3(2,0,-1)
 			_zoom = 48.0
 
 func _max_zoom() -> float:
-	return minf(950,Catalog.bounds(_region)*2.0) if _region in ["base","rust","distribution","bunker_surface","tradepost"] else 400.0 if _region in ["space","orbit"] else 180.0
+	return minf(950,Catalog.bounds(_region)*2.0) if Regions.archetype(_region) in ["base","rust","distribution","bunker_surface","tradepost"] else 1000.0 if _region in ["space","orbit"] else 420.0 if Regions.underground(_region) else 180.0
 
 func mark_destination(at: Vector2, flight: bool) -> void:
 	if not is_instance_valid(_destination): return
@@ -299,8 +302,8 @@ func _build_map() -> void:
 	_destination = Geo.ring(_map,0.65,Color("f6d497"))
 	_destination_label = Geo.label(_map,"",Vector3.ZERO,Color("f6d497"),18)
 	_destination_age = 10.0
-	_environment.background_color = Color("091624") if _region in ["station","space","orbit","bunker_depths"] else Color("839ba6")
-	_environment.fog_enabled = _region not in ["station","space","orbit","bunker_depths"]
+	_environment.background_color = Color("091624") if Regions.archetype(_region) in ["station","space","orbit","bunker_depths"] else Color("839ba6")
+	_environment.fog_enabled = Regions.archetype(_region) not in ["station","space","orbit","bunker_depths"]
 	focus_home()
 
 func _create_unit(id: String, data: Dictionary) -> void:

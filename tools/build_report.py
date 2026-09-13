@@ -1,4 +1,4 @@
-"""Build the dated N4 game plan as standalone HTML with available real captures.
+"""Build the dated N5 game plan as standalone HTML with available real captures.
 
 The tracked template contains no local ship images or models. A fresh clone can
 generate the text report; captures from the documented window probes enrich it.
@@ -12,22 +12,22 @@ import struct
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "output"
 SHOTS = [
-    ('n3-main-menu.png', 'Das erhaltene Hauptmenümotiv mit der sitzenden Frau; dieses Motiv bleibt gegenüber N3 unverändert.'),
-    ('n4-base.png', 'Aktuelle Heimat mit vier getrennten Räumen, sechs Betten und durchsichtigen Frontwänden. Ausbauplätze sind vorbereitet, noch nicht bebaubar.'),
-    ('n4-workshop.png', 'Die Werkstatt zeigt passende Arbeit, Zutaten und die tatsächlich eingesetzte Person. Im vollständigen Spielweg entsteht ein Rucksack aus Startmaterial.'),
-    ('n4-crew-dossier.png', 'Das echte Dossier: sichtbare Figur, fünf Slots und getrennte Bestände. Dieser Rucksack wurde in der Mausprobe regulär hergestellt und ausgerüstet.'),
-    ('n4-world/crew-equipment.png', 'Darstellungsprobe der riggebundenen Rüstung, des Rucksacks und Handwerkzeugs; Gegenstände für diese Bildprobe gezielt bereitgestellt, nicht als erspielter Fortschritt ausgegeben.'),
-    ('n4-world/entersaebel.png', 'Die überarbeitete Entersäbel: vereinfachte Kontur und Fahrwerk. Originaldatei erhalten; Umbau lokal in Blender.'),
-    ('n4-manual-seats.png', 'Manuell gewählte Plätze haben Vorrang: Hier pilotiert Jaro, während Ida den freien Turm übernimmt. Beide bleiben bis zum Start an Bord.'),
-    ('n4-travel-chart.png', 'Die echte Reisekarte mit benannten Orten, Gebietsgrößen und vorläufigem Begegnungsrisiko.'),
-    ('n4-world/orbit.png', 'Der Orbit ist eine eigene geladene Raumkarte. Von hier wird der Zielanflug angefordert.'),
-    ('n4-rust-arrival.png', 'Ankunft im Suchgebiet: Das Schiff schwebt am Rand. Lokaler Flug, Landung und Aussteigen bleiben eigene Befehle.'),
-    ('n4-satellite.png', 'Die erste Blackbox wurde im vollständigen Produktweg geborgen. Weitere Verwertung benötigt passende Ausrüstung.'),
-    ('n4-world/bunker_surface.png', 'Bunkeroberfläche mit geschlossener Hülle, erkennbarer Eingangsöffnung, Flak und Lastenaufzug.'),
-    ('n4-world/distribution.png', 'Verteilzentrum auf einer vergrößerten Einzelkarte: Hallen, Ladehof und getrennte Funktionsbereiche.'),
-    ('n4-world/tradepost.png', 'Eigener kleiner Handelsposten mit Modulen und Versorgung; die große Umgebung enthält einen weiteren Fund.'),
-    ('n4-market.png', 'Ankunft, Landung, Aussteigen und regulärer Einkauf von Multi-Tool und Salvage-Aufsatz im Freihafen Meridian.'),
-    ('n4-world/space-contact.png', 'Separat geladener Piratenkontakt, über eine tatsächliche Reise ausgelöst. Der Turm verwendet den besetzten Schützenplatz.'),
+    ('n5-world/base-details.png', 'Aktuelle N5-Basis mit getrennten Räumen, Satellitenschüssel und Kenney-Versorgungsmodulen.'),
+    ('n5-world/terraced-canyon.png', 'Breite Felsstufen und eine gewundene Schlucht in der Heimatkarte. Der Bodenweg ist begehbar; die Terrassen sind Hindernisse.'),
+    ('n5-world/travel-chart.png', 'Die echte native Reisekarte: neun Ziele, Bunkerstufen, Ortsgrößen, Risiken und die drei Handelsstrecken.'),
+    ('n5-world/entersaebel.png', 'Die neue lokale Blender-Entersäbel mit achteckigem Turm und vereinfachter Silhouette.'),
+    ('n5-world/bunker_surface.png', 'Karst: leichte Bunkeroberfläche, echte Reiseankunft.'),
+    ('n5-world/bunker_medium.png', 'Kluft: mittlere Bunkerbesatzung und Versorgung.'),
+    ('n5-world/bunker_hard.png', 'Bastion: schwere Oberfläche mit verstärkter Besatzung.'),
+    ('n5-world/bunker_hard_depths-fixture.png', 'Die größere unterirdische Bastion mit unterteilten Hallen. Diese Aufnahme ist eine Darstellungsprobe; der separate Kerntest prüft den echten Aufzug.'),
+    ('n5-world/distribution_friendly.png', 'Freihafen: freundliches Verteilzentrum und regulärer Handel.'),
+    ('n5-world/distribution.png', 'Knotenwerk: besetztes Verteilzentrum; Handel erst nach Sicherung.'),
+    ('n5-world/tradepost.png', 'Staubmarkt auf seiner eigenen großen Karte.'),
+    ('n5-world/market-prices.png', 'Die tatsächliche Marktoberfläche in Meridian mit regionalen Preisen.'),
+    ('n5-world/orbit.png', 'Vergrößerte eigene Orbitkarte, weiterhin Flug auf einer Ebene.'),
+    ('n5-world/space-contact.png', 'Tatsächlich ausgelöster Piratenkontakt auf einer eigenen Raumkarte.'),
+    ('n4-crew-dossier.png', 'Das bestehende Dossier mit der weißen Helmfigur, Ausrüstungsslots und persönlichem Rucksack.'),
+    ('n3-main-menu.png', 'Das erhaltene Hauptmenümotiv mit der sitzenden Frau.'),
 ]
 
 

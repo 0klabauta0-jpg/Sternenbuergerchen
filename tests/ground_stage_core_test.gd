@@ -38,7 +38,7 @@ func move_both(point: Array) -> void:
 	sim.advance(45)
 func run() -> void:
 	fresh()
-	check(sim.snapshot().schema_version==4,"schema4 retains ground stage")
+	check(sim.snapshot().schema_version==5,"schema5 retains ground stage")
 	var saved: Dictionary=sim.save_game("user://n3-initial.json")
 	check(saved.ok,"initial save: "+saved.reason)
 	check(cmd("assign_work",{"unit_id":"ida","recipe_id":"armor"}).ok,"armor recipe is available")
@@ -73,7 +73,7 @@ func run() -> void:
 	move_both([0,12])
 	check(cmd("use_elevator").ok and sim.snapshot().region=="bunker_depths","surface lobby lift enters separate underground")
 	check(not cmd("travel",{"destination":"base"}).ok,"no shuttle teleport out of underground")
-	check(not cmd("move",{"unit_id":"ida","position":[30,40]}).ok,"underground void is not walkable")
+	check(not cmd("move",{"unit_id":"ida","position":[100,110]}).ok,"underground void is not walkable")
 	check(not Nav.clear("bunker_depths",Vector2(-20,10),Vector2(20,10)),"walls block direct shooting line")
 	for id in ["ida","jaro"]:cmd("attack",{"unit_id":id,"target_id":"depth_guard"})
 	sim.advance(25)
@@ -82,7 +82,7 @@ func run() -> void:
 	sim.advance(20)
 	check(sim.snapshot().inventory.alloy==2 and sim.snapshot().resources.bunker_cache.remaining==6,"underground find finite and added to carried basis stock")
 	roundtrip("underground progress")
-	move_both([0,36]);check(cmd("use_elevator").ok and sim.snapshot().region=="bunker_surface","lift returns to parked ship map")
+	move_both(Catalog.landmarks("bunker_depths").elevator);check(cmd("use_elevator").ok and sim.snapshot().region=="bunker_surface","lift returns to parked ship map")
 	check(sim.snapshot().ground.enemies.bunker_surface.aa_turret.defeated,"enemy state persists across maps")
 	trip("base")
 	# Actual unarmored injury, timed recovery, pause and save.
@@ -154,7 +154,7 @@ func run() -> void:
 	check(cmd("return_rental").ok,"explicit safe rental handover")
 	check(not sim.snapshot().rental.active and sim.snapshot().ship.model=="cutlass" and sim.snapshot().inventory.alloy==18 and sim.snapshot().cargo.alloy==0,"safe rental handover preserves excess cargo")
 	# Newly independent maps, market and ownership commands.
-	trip("distribution");check(cmd("trade",{"side":"buy","item":"scrap","amount":1}).ok,"distribution has real market")
+	trip("distribution");check(not cmd("trade",{"side":"buy","item":"scrap","amount":1}).ok,"hostile distribution blocks market until secured")
 	trip("tradepost");sim.set_guest(7)
 	check(cmd("gather",{"unit_id":"jaro","site_id":"tradepost_cache"}).ok,"host can order guest worker")
 	check(cmd("cancel_gather",{},7).ok,"guest cancels shared gathering")
@@ -180,14 +180,14 @@ func run() -> void:
 	_test_corruption()
 	var report:=FileAccess.open("res://output/ground-stage-core.json",FileAccess.WRITE)
 	if report!=null:
-		report.store_string(JSON.stringify({"checks":checks,"failures":failures,"engine":Engine.get_version_info().string,"scope":"Authoritative schema4 with N3 ground mechanics; real commands and simulation time, separate test saves, no normal campaign"},"  "));report.close()
+		report.store_string(JSON.stringify({"checks":checks,"failures":failures,"engine":Engine.get_version_info().string,"scope":"Authoritative schema5 with N3 ground mechanics; real commands and simulation time, separate test saves, no normal campaign"},"  "));report.close()
 	print("GROUND_STAGE ",checks," checks; ",failures," failures")
 	sim.free();quit(1 if failures else 0)
 
 func _test_corruption() -> void:
 	fresh()
 	for mutation in ["armor","health","stock","rental","enemy","activity","underground_void","wrong_flight_region"]:
-		var broken: Dictionary={"schema_version":4,"state":sim.snapshot(),"receipts":{}}
+		var broken: Dictionary={"schema_version":5,"state":sim.snapshot(),"receipts":{}}
 		match mutation:
 			"armor":broken.state.crew.ida.equipment.armor="godmode"
 			"health":broken.state.crew.ida.health=-1
@@ -197,11 +197,11 @@ func _test_corruption() -> void:
 			"activity":broken.state.ground.activity.active=true
 			"underground_void":
 				broken.state.region="bunker_depths"
-				broken.state.crew.ida.position=[30,40];broken.state.crew.ida.target=[30,40]
+				broken.state.crew.ida.position=[100,110];broken.state.crew.ida.target=[100,110]
 			"wrong_flight_region":
 				broken.state.ship.mode="flying"
 				for unit: Dictionary in broken.state.crew.values():unit.assignment="aboard";unit.position=broken.state.ship.position.duplicate();unit.target=unit.position.duplicate()
-		check(not Validator.validate(broken).is_empty(),"invalid schema4 "+mutation+" rejected")
+		check(not Validator.validate(broken).is_empty(),"invalid schema5 "+mutation+" rejected")
 
 func _equivalent(a: Variant,b: Variant) -> bool:
 	if a is Dictionary and b is Dictionary:

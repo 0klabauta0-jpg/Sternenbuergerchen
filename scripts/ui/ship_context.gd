@@ -8,6 +8,8 @@ static func build(hud: Node) -> void:
 	hud._add_command("enter_orbit","In den Orbit","enter_orbit")
 	hud._button("Reisekarte öffnen",func():hud.action_requested.emit("travel_chart",{}),hud._context_actions,46)
 	hud._add_command("land","Hier landen","land")
+	hud._worker.visible=true
+	hud._add_command("field_repair","Feldreparatur","field_repair",{},true)
 	if hud._state.get("rental",{}).get("active",false):hud._add_command("return_rental","Mietschiff zurückgeben","return_rental")
 
 static func present(hud: Node) -> void:
@@ -26,10 +28,12 @@ static func present(hud: Node) -> void:
 	for unit: Dictionary in s.crew.values():
 		if str(unit.get("assignment",""))!="aboard":all_aboard=false
 	var busy: bool=bool(s.travel.active)
+	hud._disable("field_repair",str(ship.mode)!="landed" or float(ship.condition)>=70.0)
 	hud._disable("launch",busy or str(ship.mode)!="landed" or not all_aboard or str(seats.get("pilot","")).is_empty())
 	hud._disable("enter_orbit",busy or str(ship.mode)!="flying" or str(s.region) in ["orbit","space"])
 	hud._disable("land",busy or str(ship.mode)!="flying" or str(s.region) in ["orbit","space"])
 	hud._disable("return_rental",str(s.region) not in ["base","station"] or str(ship.mode)!="landed")
 	hud._hint.text="Rechtsklick: einsteigen, Plätze nach Fähigkeiten. Umschalt+Rechtsklick oder Plätze: Rollen selbst zuweisen. Abheben erst mit Crew an Bord."
+	hud._context_text.text+="\n\nFeldreparatur: Multi-Tool + Reparatur-Aufsatz, 1 Bauteil im Rucksack, Nähe 6 m am Zugang. Bis 70 %; danach Werkstatt."
 	if str(ship.mode)=="flying":hud._hint.text="Rechtsklick auf die Welt: lokales Flugziel. Neue Orte wählst du auf der Reisekarte im Orbit."
 	if s.get("rental",{}).get("active",false):hud._context_text.text+="\n\nMiete: %d s verbleiben" % int(s.rental.remaining)

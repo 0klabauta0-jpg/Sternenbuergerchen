@@ -1,4 +1,5 @@
 extends RefCounted
+const Regions=preload("res://scripts/core/regions.gd")
 ## Spatially indexed static obstacles and bounded grid A*. Routes live in SimulationRoot.
 const Catalog=preload("res://scripts/core/catalog.gd")
 const CLEARANCE: float=0.6
@@ -27,10 +28,11 @@ static func _index(region: String) -> Dictionary:
 static func _inside(region: String,p: Vector2) -> bool:
 	var bound: float=Catalog.bounds(region)
 	if absf(p.x)>bound or absf(p.y)>bound:return false
-	if region=="bunker_depths" and not (Rect2(-7.3,-47.3,14.6,94.6).has_point(p) or Rect2(-39.3,-23.3,78.6,46.6).has_point(p)):return false
+	var depth_point: Vector2=p/Regions.depth_scale(region)
+	if Regions.underground(region) and not (Rect2(-7.3,-47.3,14.6,94.6).has_point(depth_point) or Rect2(-39.3,-23.3,78.6,46.6).has_point(depth_point)):return false
 	return true
 static func _ship_rect(region: String,ship: Dictionary) -> Rect2:
-	if ship.is_empty() or ship.get("mode")!="landed" or region in ["space","orbit","bunker_depths"]:return Rect2()
+	if ship.is_empty() or ship.get("mode")!="landed" or (region in ["space","orbit"] or Regions.underground(region)):return Rect2()
 	return _rect({"center":ship.position,"size":Catalog.ship_profile(ship.model).size})
 static func walkable(region: String,point: Vector2,ship: Dictionary={}) -> bool:
 	if not _inside(region,point):return false
@@ -58,7 +60,7 @@ static func clear(region: String,a: Vector2,b: Vector2,ship: Dictionary={},ignor
 		if index.names[id]!=ignore and _intersects(a,b,index.rects[id]):return false
 	var hull: Rect2=_ship_rect(region,ship)
 	if hull.has_area() and _intersects(a,b,hull):return false
-	if region=="bunker_depths":
+	if Regions.underground(region):
 		for step in range(1,17):
 			if not _inside(region,a.lerp(b,float(step)/16.0)):return false
 	return true

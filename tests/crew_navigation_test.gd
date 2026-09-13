@@ -11,7 +11,7 @@ func run() -> void:
 	var longest_ms:=0
 	for region: String in ["base","rust","station","bunker_surface","bunker_depths","distribution","tradepost"]:
 		var ship: Dictionary={"model":"cutlass","mode":"landed","position":Catalog.landmarks(region).get("shuttle",[-65,70])}
-		var access: Array=Catalog.ship_access(ship) if region!="bunker_depths" else [0,36]
+		var access: Array=Catalog.ship_access(ship) if region!="bunker_depths" else Catalog.landmarks(region).elevator
 		var from:=Vector2(access[0],access[1])
 		for id: String in Catalog.landmarks(region):
 			if id in ["shuttle","aa_turret","kitchen","expansion_a","expansion_b"]:continue

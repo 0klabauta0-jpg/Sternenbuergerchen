@@ -1,4 +1,5 @@
 extends RefCounted
+const Regions=preload("res://scripts/core/regions.gd")
 const Catalog=preload("res://scripts/core/catalog.gd")
 const Stage=preload("res://scripts/core/stage_state.gd")
 var s: Dictionary
@@ -9,7 +10,7 @@ func dispatch(c: Dictionary,sender: int) -> String:
 	if s.travel.active:return "Crew befindet sich auf Reise."
 	match kind:
 		"ship_move":
-			if not s.region in ["base","station","orbit","rust","space","bunker_surface","distribution","tradepost"] or s.ship.mode!="flying":return "Das Shuttle ist nicht im freien Flug."
+			if not s.region in (Regions.DESTINATIONS+["orbit","space"]) or s.ship.mode!="flying":return "Das Shuttle ist nicht im freien Flug."
 			if not _point(c.get("position"),Catalog.bounds(s.region)):return "Flugziel liegt außerhalb der Karte."
 			s.ship.target=c.position.duplicate()
 		"radar_scan":

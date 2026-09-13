@@ -1,9 +1,11 @@
 extends RefCounted
 class_name RestartCatalog
+const Regions=preload("res://scripts/core/regions.gd")
+const TradeRoutes=preload("res://scripts/core/trade_routes.gd")
 const Layout=preload("res://scripts/core/world_layout.gd")
 const Gear=preload("res://scripts/core/equipment_catalog.gd")
 const Ground=preload("res://scripts/core/ground_catalog.gd")
-const ITEMS: Array[String] = ["scrap","parts","toolkit","cutter","blackbox","helmet","armor","ore","alloy","backpack","multitool","mining_attachment","salvage_attachment","medgun","med_charge"]
+const ITEMS: Array[String] = ["scrap","parts","toolkit","cutter","blackbox","helmet","armor","ore","alloy","backpack","multitool","mining_attachment","salvage_attachment","medgun","med_charge","repair_attachment"]
 const WALK_SPEED: float = 6.0
 static func item_name(id: String) -> String:
 	return {"scrap":"Metall","parts":"Bauteile","toolkit":"Werkzeugkit","cutter":"Schneider","blackbox":"Blackbox","helmet":"Schutzhelm","armor":"Schutzrüstung","ore":"Erz","alloy":"Schiffslegierung"}.get(id,Gear.names().get(id,id))
@@ -17,9 +19,9 @@ static func recipes() -> Dictionary:
 		"upgrade_workbench":{"label":"Werkbank Stufe 2","materials":{"scrap":3,"parts":1},"duration":12.0,"min_skill":3,"tier":1,"output":{}}
 	}
 	result.merge(Gear.recipes());return result
-static func prices() -> Dictionary:
+static func prices(region: String="") -> Dictionary:
 	var result: Dictionary={"scrap":{"buy":12,"sell":6},"parts":{"buy":35,"sell":18},"toolkit":{"buy":90,"sell":50},"cutter":{"buy":150,"sell":85},"helmet":{"buy":60,"sell":30},"armor":{"buy":220,"sell":110},"ore":{"buy":55,"sell":35},"alloy":{"buy":160,"sell":120}}
-	result.merge(Gear.prices());return result
+	result.merge(Gear.prices());result.merge(TradeRoutes.overrides(region),true);return result
 static func profiles() -> Dictionary:
 	return {"ida":{"name":"Ida","skills":{"pilot":3,"gunnery":1,"tech":3},"equipment":{"helmet":"basic_helmet","tool":""}},"jaro":{"name":"Jaro","skills":{"pilot":1,"gunnery":3,"tech":1},"equipment":{"helmet":"basic_helmet","tool":""}}}
 static func rooms() -> Dictionary:return Layout.rooms()
@@ -29,11 +31,13 @@ static func interaction_point(region: String,object_id: String) -> Array:
 	var points: Dictionary=landmarks(region)
 	if not points.has(object_id):return []
 	var point: Array=points[object_id].duplicate()
+	var resource_id: String=object_id
+	object_id=Regions.object_base(object_id)
 	if object_id=="workbench":point[1]+=1.3
 	elif object_id=="storage":point[1]+=2.0
 	elif object_id=="satellite":point[1]+=4.8
 	elif object_id in ["mining_site","derelict","distribution_wreck"]:point[1]+=8.5
-	elif Ground.sites().has(object_id):point[1]+=3.2
+	elif Ground.sites().has(resource_id):point[1]+=3.2
 	elif object_id=="contracts":point[1]+=1.8
 	elif object_id=="market":point[1]+=2.7
 	elif object_id.begins_with("bed_"):point[1]+=2.1
@@ -52,13 +56,13 @@ static func ship_access(ship: Dictionary) -> Array:
 	return [ship.position[0]+offset[0],ship.position[1]+offset[1]]
 static func navigation_obstacles(region: String,ship: Dictionary={}) -> Dictionary:
 	var result: Dictionary=obstacles(region).duplicate(true)
-	if not ship.is_empty() and ship.get("mode")=="landed" and not region in ["orbit","space","bunker_depths"]:
+	if not ship.is_empty() and ship.get("mode")=="landed" and not region in ["orbit","space"] and not Regions.underground(region):
 		result["_ship"]={"center":ship.position.duplicate(),"size":ship_profile(ship.model).size.duplicate()}
 	return result
 static func arrival_point(region: String) -> Array:return [-bounds(region)+25.0,bounds(region)-25.0]
-static func travel_risk(destination: String) -> int:return {"base":0,"rust":20,"bunker_surface":25,"tradepost":20,"distribution":25,"station":35}.get(destination,0)
+static func travel_risk(destination: String) -> int:return Regions.risk(destination)
 static func destination_info() -> Dictionary:
 	var result: Dictionary={}
-	for id: String in ["base","rust","station","bunker_surface","distribution","tradepost"]:
-		result[id]={"label":{"base":"Heimatbasis","rust":"Suchgebiet","station":"Handelsstation","bunker_surface":"Bunker","distribution":"Verteilzentrum","tradepost":"Handelsposten"}[id],"risk":travel_risk(id)}
+	for id: String in Regions.DESTINATIONS:
+		result[id]={"label":Regions.LABELS[id],"risk":travel_risk(id)}
 	return result

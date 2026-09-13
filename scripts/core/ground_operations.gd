@@ -1,4 +1,5 @@
 extends RefCounted
+const Regions=preload("res://scripts/core/regions.gd")
 const Catalog=preload("res://scripts/core/catalog.gd")
 const GroundCatalog=preload("res://scripts/core/ground_catalog.gd")
 const State=preload("res://scripts/core/ground_state.gd")
@@ -66,12 +67,12 @@ func _gather(c: Dictionary,sender: int) -> String:
 			if contact.id==signal_id and contact.identified:identified=true
 		if not identified:return "Fundstelle zuerst per Radar identifizieren."
 	if s.resources[id].remaining<=0:return "Fundstelle ist erschöpft."
-	if s.region!="bunker_depths" and cargo_count()>=s.ship.capacity:return "Frachtraum ist voll."
+	if not Regions.underground(s.region) and cargo_count()>=s.ship.capacity:return "Frachtraum ist voll."
 	var point: Array=Catalog.interaction_point(s.region,id)
 	var unit: Dictionary=s.crew[c.unit_id]
 	if Nav.path(s.region,_v(unit.position),_v(point),s.ship).is_empty():return "Fundstelle ist nicht erreichbar."
 	if id=="mining_site" and not (unit.equipment.tool=="multitool" and unit.equipment.attachment=="mining_attachment"):return "Mining braucht Multi-Tool und Mining-Aufsatz."
-	if id in ["derelict","distribution_wreck"] and not (unit.equipment.tool=="cutter" or (unit.equipment.tool=="multitool" and unit.equipment.attachment=="salvage_attachment")):return "Salvage braucht Schneidwerkzeug oder Multi-Tool mit Salvage-Aufsatz."
+	if Regions.object_base(id) in ["derelict","distribution_wreck"] and not (unit.equipment.tool=="cutter" or (unit.equipment.tool=="multitool" and unit.equipment.attachment=="salvage_attachment")):return "Salvage braucht Schneidwerkzeug oder Multi-Tool mit Salvage-Aufsatz."
 	var duration: float=site.duration/Catalog.skill_effects(unit).gather_multiplier
 	unit.assignment="gather";unit.attack_target="";unit.target=point
 	s.ground.activity={"active":true,"unit_id":c.unit_id,"site_id":id,"remaining":duration,"total":duration,"phase":"walking"}
@@ -92,18 +93,18 @@ func _attack(c: Dictionary,sender: int) -> String:
 	unit.target=[approach.x,approach.y]
 	return ""
 func _elevator(sender: int) -> String:
-	if not s.region in ["bunker_surface","bunker_depths"] or s.ship.mode!="landed":return "Kein nutzbarer Aufzug hier."
+	if not Regions.bunker(s.region) or s.ship.mode!="landed":return "Kein nutzbarer Aufzug hier."
 	if busy() or s.work.active or s.salvage.active:return "Crew ist gebunden oder verwundet."
-	var entry: String="bunker_entry" if s.region=="bunker_surface" else "elevator"
+	var entry: String="bunker_entry" if not Regions.underground(s.region) else "elevator"
 	var point: Vector2=_v(Catalog.landmarks(s.region)[entry])
 	for unit: Dictionary in s.crew.values():
 		if unit.assignment!="idle" or _v(unit.position).distance_to(point)>8.0:return "Beide Crewmitglieder zum Aufzug bringen (8 m)."
-	s.region="bunker_depths" if s.region=="bunker_surface" else "bunker_surface"
-	var destination: Array=Catalog.landmarks(s.region)["elevator" if s.region=="bunker_depths" else "bunker_entry"]
+	s.region=Regions.elevator_target(s.region)
+	var destination: Array=Catalog.landmarks(s.region)["elevator" if Regions.underground(s.region) else "bunker_entry"]
 	var offset: float=-1.5
 	for unit: Dictionary in s.crew.values():
 		unit.position=[destination[0]+offset,destination[1]];unit.target=unit.position.duplicate();unit.attack_target="";offset+=3.0
-	log_event.call("Aufzug: "+("Untergrund" if s.region=="bunker_depths" else "Oberfläche")+" erreicht.")
+	log_event.call("Aufzug: "+("Untergrund" if Regions.underground(s.region) else "Oberfläche")+" erreicht.")
 	return ""
 func cargo_count() -> int:
 	var result: int=0
@@ -146,10 +147,10 @@ func _tick_activity(delta: float) -> void:
 	activity.phase="working";activity.remaining=maxf(0,activity.remaining-delta)
 	if activity.remaining>0:return
 	var site: Dictionary=Catalog.resource_sites()[activity.site_id]
-	var multiplier: int=3 if s.rental.active and not s.rental.expired and activity.site_id in ["derelict","distribution_wreck"] else 1
-	var room: int=10000000 if s.region=="bunker_depths" else int(s.ship.capacity)-cargo_count()
+	var multiplier: int=3 if s.rental.active and not s.rental.expired and Regions.object_base(activity.site_id) in ["derelict","distribution_wreck"] else 1
+	var room: int=10000000 if Regions.underground(s.region) else int(s.ship.capacity)-cargo_count()
 	var amount: int=mini(room,mini(int(s.resources[activity.site_id].remaining),int(site["yield"])*multiplier))
-	var destination: Dictionary=s.inventory if s.region=="bunker_depths" else s.cargo
+	var destination: Dictionary=s.inventory if Regions.underground(s.region) else s.cargo
 	destination[site.item]+=amount;s.resources[activity.site_id].remaining-=amount
 	log_event.call("Fund geborgen: %d × %s."%[amount,Catalog.item_name(site.item)])
 	stop_activity()

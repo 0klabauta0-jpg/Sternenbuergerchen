@@ -1,5 +1,14 @@
 # Sternenbürgerchen — Neustart
 
+## Aktuelle Erweiterung N5 · 13.09.2026
+
+N5 liefert neun Reiseziele und vierzehn getrennte Karten: größere Orbit-/Kontaktkarten, drei Bunker mit eigenem Untergrund, freundliches Freihafen und besetztes Knotenwerk. Ein echter Handelsring verbindet Meridian, Freihafen und Staubmarkt. Kenney-Details, terrassierte Felsen/Schluchten, die Entersäbel mit9714 Dreiecken und der kleine Reparaturaufsatz ergänzen den bisherigen Spielkreis.
+
+Schema5 erhält streng geprüfte alte Karrieren über eingefrorene N4-Abhängigkeiten. `regions.gd` vereinheitlicht Welt-/Reise-/Aufzugs-IDs; regionale Preise stammen aus `trade_routes.gd`. Der Host bleibt einzige Autorität; beide Commander führen alle Personen.
+
+Verbindliche Umsetzung, Zahlen, Nachweise und Grenzen: [N5_ACCEPTANCE.md](N5_ACCEPTANCE.md). Aufgabe: [N5_ROUTES_WORLD.md](tasks/N5_ROUTES_WORLD.md). Die nächsten begehbaren Schiffsinnenräume bleiben im anschließenden Ausbau. Alle folgenden N4-/N3-Abschnitte sind historische Stände.
+
+
 ## Aktuelle Erweiterung N4 · 13.09.2026
 
 N4 verbindet gemeinsame Crewführung, echte Einsteigewege, ausdrückliche Reisephasen und persönliche Ausrüstung. Figuren laufen durch Türen und um gemeinsam definierte Möbel-, Fels-, Wand- und Schiffsumrisse. Die Basis behält vier Räume; zwei belegte und vier vorbereitete Betten sind sichtbar, ohne bereits Rekrutierung zu liefern. Die Außenkarten sind mindestens960×960m groß; das Verteilzentrum misst1280×1280m. Alle Karten werden weiterhin einzeln geladen.

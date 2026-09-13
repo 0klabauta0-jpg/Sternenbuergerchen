@@ -1,5 +1,6 @@
 extends RefCounted
 ## Selectable station models and set dressing, keyed by the shared catalog IDs.
+const Regions=preload("res://scripts/core/regions.gd")
 const Geo = preload("res://scripts/world/world_geometry.gd")
 const Ship = preload("res://scripts/world/world_ship.gd")
 const Rooms = preload("res://scripts/world/world_rooms.gd")
@@ -21,7 +22,7 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 		root.position = Vector3(at[0],0,at[1])
 		var collision := Vector3(1.8,2,1.8)
 		var label_height := 2.3
-		match id:
+		match Regions.object_base(str(id)):
 			"bed_ida", "bed_jaro", "bed_3", "bed_4", "bed_5", "bed_6":
 				Geo.asset(root,"bed-single",Vector3(0,0.05,-0.2),Vector3(1.45,0.85,2.6),PI)
 				collision = Vector3(1.5,0.9,2.6)
@@ -107,6 +108,7 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 	return nodes
 
 static func site_title(id: String) -> String:
+	id=Regions.object_base(id)
 	return {"mining_site":"ERZVORKOMMEN","derelict":"VERLASSENES SCHIFFSWRACK","bunker_entry":"LASTENAUFZUG · ABWÄRTS","elevator":"LASTENAUFZUG · AUFWÄRTS","aa_turret":"FLAKGESCHÜTZ","surface_cache":"MATERIALKISTEN","bunker_cache":"LEGIERUNGSLAGER","bunker_terminal":"SICHERHEITSTERMINAL","distribution_cache":"FRACHTDEPOT","distribution_wreck":"BERGEDOCK / WRACK","tradepost_cache":"VERLASSENES DEPOT"}.get(id,TITLES.get(id,id))
 
 static func _lift(root: Node3D) -> void:

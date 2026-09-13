@@ -3,13 +3,18 @@ extends Window
 signal command_requested(command: Dictionary)
 const Catalog=preload("res://scripts/core/catalog.gd")
 const Icons=preload("res://scripts/ui/hud_icons.gd")
-const DESTINATIONS := {
-	"base":{"title":"Rostgrenze","subtitle":"Heimatbasis","icon":"base","at":Vector2(62,52)},
-	"rust":{"title":"Signal im Staub","subtitle":"Satellit · Erz · Wrack","icon":"satellite","at":Vector2(286,52)},
-	"bunker_surface":{"title":"Wachtposten","subtitle":"Flak · Bunker · Aufzug","icon":"armor","at":Vector2(62,195)},
-	"distribution":{"title":"Knotenwerk","subtitle":"Verteilzentrum","icon":"storage","at":Vector2(286,195)},
-	"tradepost":{"title":"Staubmarkt","subtitle":"Handel · Erkundung","icon":"market","at":Vector2(62,338)},
-	"station":{"title":"Meridian","subtitle":"Orbitaler Freihafen","icon":"shuttle","at":Vector2(286,338)}
+const Regions=preload("res://scripts/core/regions.gd")
+const Routes=preload("res://scripts/core/trade_routes.gd")
+const DESTINATIONS={
+ "base":{"title":"Rostgrenze","subtitle":"Heimatbasis","icon":"base","at":Vector2(8,35)},
+ "rust":{"title":"Signal im Staub","subtitle":"Satellit · Erz · Wrack","icon":"satellite","at":Vector2(208,35)},
+ "station":{"title":"Meridian","subtitle":"Orbitaler Freihafen","icon":"shuttle","at":Vector2(408,35)},
+ "bunker_surface":{"title":"Karst · LEICHT","subtitle":"Flak + Wache · 1 unten","icon":"armor","at":Vector2(8,160)},
+ "bunker_medium":{"title":"Kluft · MITTEL","subtitle":"3 oben · 2 unten","icon":"armor","at":Vector2(208,160)},
+ "bunker_hard":{"title":"Bastion · SCHWER","subtitle":"5 oben · 4 unten","icon":"armor","at":Vector2(408,160)},
+ "distribution_friendly":{"title":"Freihafen","subtitle":"Umschlag · freundlich","icon":"market","at":Vector2(8,285)},
+ "distribution":{"title":"Knotenwerk","subtitle":"Umschlag · feindlich","icon":"target","at":Vector2(208,285)},
+ "tradepost":{"title":"Staubmarkt","subtitle":"Handel · Erkundung","icon":"market","at":Vector2(408,285)}
 }
 var _state: Dictionary={}
 var _selected := "rust"
@@ -22,7 +27,7 @@ var _map: Control
 class RouteDiagram extends Control:
 	func _draw() -> void:
 		var ink := Color("263c46")
-		for x in range(24,530,40): draw_line(Vector2(x,0),Vector2(x,474),Color(0.3,0.5,0.55,0.09))
+		for x in range(24,610,40): draw_line(Vector2(x,0),Vector2(x,474),Color(0.3,0.5,0.55,0.09))
 		for y in range(0,474,40): draw_line(Vector2(0,y),Vector2(530,y),Color(0.3,0.5,0.55,0.09))
 		draw_arc(Vector2(265,240),175,0,TAU,72,ink,2.0,true)
 		draw_line(Vector2(265,90),Vector2(265,390),Color("526b72"),1.5,true)
@@ -32,8 +37,8 @@ class RouteDiagram extends Control:
 
 func _ready() -> void:
 	title="Reisekarte · Rostwelt und Orbit"
-	size=Vector2i(920,620)
-	min_size=Vector2i(850,590)
+	size=Vector2i(1040,680)
+	min_size=Vector2i(1040,680)
 	transient=true
 	unresizable=true
 	close_requested.connect(hide)
@@ -50,7 +55,7 @@ func _ready() -> void:
 	row.add_theme_constant_override("separation",23)
 	column.add_child(row)
 	_map=RouteDiagram.new()
-	_map.custom_minimum_size=Vector2(520,465)
+	_map.custom_minimum_size=Vector2(610,400)
 	row.add_child(_map)
 	for id: String in DESTINATIONS:
 		var data: Dictionary=DESTINATIONS[id]
@@ -61,7 +66,7 @@ func _ready() -> void:
 		button.add_theme_constant_override("icon_max_width",22)
 		button.add_theme_font_size_override("font_size",14)
 		button.position=data.at
-		button.size=Vector2(192,79)
+		button.size=Vector2(192,88)
 		button.pressed.connect(func():_selected=id;_refresh())
 		_map.add_child(button)
 		_buttons[id]=button
@@ -72,7 +77,7 @@ func _ready() -> void:
 	_title=_label("",23,Color("efab6f"));info.add_child(_title)
 	_detail=_label("",15)
 	_detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	_detail.custom_minimum_size=Vector2(284,295)
+	_detail.custom_minimum_size=Vector2(284,285)
 	info.add_child(_detail)
 	_route=Button.new()
 	_route.text="Anflug beginnen"
@@ -84,6 +89,13 @@ func _ready() -> void:
 	back.custom_minimum_size.y=38
 	back.pressed.connect(hide)
 	info.add_child(back)
+	var summary:="HANDELSRING · Bruttomarge pro Stück\n"
+	for leg: Dictionary in Routes.routes():
+		summary+="%s → %s: %s %d → %d (+%d Cr)   " % [DESTINATIONS[leg.from].title,DESTINATIONS[leg.to].title,Catalog.item_name(leg.item),leg.buy,leg.sell,leg.margin]
+	summary+="\nStartkapital und Fracht nötig; Schäden mindern den Gewinn."
+	var routes_label:=_label(summary,14,Color("afd3c0"))
+	routes_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(routes_label)
 	hide()
 
 func _label(text: String, pixels: int, color: Color=Color("e0e8e5")) -> Label:
@@ -98,7 +110,7 @@ func present(state: Dictionary) -> void:
 
 func open_chart(state: Dictionary) -> void:
 	present(state)
-	popup_centered(Vector2i(920,620))
+	popup_centered(Vector2i(1040,680))
 
 func _refresh() -> void:
 	if _state.is_empty():return
@@ -107,6 +119,9 @@ func _refresh() -> void:
 	var width:=int(Catalog.bounds(_selected)*2)
 	_detail.text=str(data.subtitle)+"\n\nGebiet: %d × %d m\n\n" % [width,width]
 	_detail.text+="Risiko unterwegs: %d %%\n\n" % int(Catalog.travel_risk(_selected))
+	for route: Dictionary in Routes.routes():
+		if route.to==_selected:_detail.text+="Verkauf: %s für %d Cr. Einkauf in %s: %d Cr.\n\n" % [Catalog.item_name(route.item),route.sell,DESTINATIONS[route.from].title,route.buy]
+	if Regions.bunker(_selected):_detail.text+="Untergrund: %d × %d m, per Aufzug separat geladen.\n\n" % [int(Catalog.bounds(Regions.elevator_target(_selected))*2),int(Catalog.bounds(Regions.elevator_target(_selected))*2)]
 	_detail.text+="Ankunft: schwebend am Rand des Zielgebiets. Danach selbst anfliegen, landen und aussteigen."
 	var ready: bool=str(_state.get("region",""))=="orbit" and not bool(_state.get("travel",{}).get("active",false))
 	_route.disabled=not ready

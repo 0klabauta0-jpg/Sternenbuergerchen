@@ -1,5 +1,12 @@
 # Architektur und Schnittstellen
 
+## Aktueller Vertrag: Schema5
+
+[N5_ACCEPTANCE.md](N5_ACCEPTANCE.md) beschreibt Regionen, Bunkerpaare, regionale Wirtschaft, Feldreparatur und die geprüfte Migration. `regions.gd` ist der gemeinsame Katalog für alle14 Karten, `trade_routes.gd` besitzt die festen Preise. `world_expansion_state.gd` ergänzt streng validierte N4-Saves; `legacy_n4/` bleibt unverändert. `SimulationRoot` erstellt und speichert Schema5. Aktive Arbeit, Fracht und Crewplätze werden erhalten; neue Geometrie kann geloggte räumliche Anpassungen benötigen.
+
+Die folgende N4-Beschreibung bewahrt die Grundlagen von Crew-/Reise-/Ausrüstungsbefehlen. Ihre Versionsnummer, Liste von neun Regionen und direkte v4-Zielmigration sind durch den Absatz oben ersetzt. Die gemeinsame Kontroll- und Netzwerkarchitektur gilt weiter.
+
+
 ## Aktueller Vertrag: Schema4
 
 [contracts/N4_CREW_TRAVEL.md](contracts/N4_CREW_TRAVEL.md) definiert Crew-/Sitzbindung, explizite Reise, gemeinsame Kooprechte, Ausrüstung, persönliche Container und Migration. Boden-/Wirtschaftsregeln aus [N3_GROUND.md](contracts/N3_GROUND.md) und Orbitgrundlagen aus [N2_ORBIT.md](contracts/N2_ORBIT.md) gelten nur, soweit N4 sie nicht ersetzt. Ältere Host-/Gast-Rollentrennung, automatisches Boarding und alte Reiseankünfte sind keine aktuellen Regeln. Prüfstand: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).

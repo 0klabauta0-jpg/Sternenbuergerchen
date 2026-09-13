@@ -1,4 +1,5 @@
 extends RefCounted
+const Regions=preload("res://scripts/core/regions.gd")
 const Catalog=preload("res://scripts/core/catalog.gd")
 const GroundCatalog=preload("res://scripts/core/ground_catalog.gd")
 const Numbers=preload("res://scripts/core/legacy_validator_v2.gd")
@@ -9,8 +10,8 @@ static func validate(s: Dictionary) -> String:
 	if not rental.get("active") is bool or not rental.get("expired") is bool or not Numbers.number(rental.get("remaining"),0,1200):return "Mietstatus ungültig."
 	if rental.expired!=(rental.active and rental.remaining==0) or (not rental.active and rental.remaining!=0):return "Mietzeit widersprüchlich."
 	if s.ship.get("model")!=("vulture" if rental.active else "cutlass") or s.ship.get("name")!=("Geier" if rental.active else "Entersäbel") or s.ship.capacity!=(40 if rental.active else 12):return "Mietschiff widersprüchlich."
-	if s.ship.mode=="flying" and not s.region in ["base","station","orbit","rust","space","bunker_surface","distribution","tradepost"]:return "Flug auf dieser Karte ungültig."
-	if s.ship.mode=="landed" and not Nav.landing_clear("bunker_surface" if s.region=="bunker_depths" else s.region,s.ship):return "Gelandeter Rumpf in Weltgeometrie."
+	if s.ship.mode=="flying" and not s.region in (Regions.DESTINATIONS+["orbit","space"]):return "Flug auf dieser Karte ungültig."
+	if s.ship.mode=="landed" and not Nav.landing_clear(Regions.surface(s.region),s.ship):return "Gelandeter Rumpf in Weltgeometrie."
 	if not s.get("resources") is Dictionary or s.resources.size()!=Catalog.resource_sites().size():return "Fundstellen fehlen."
 	for id: String in Catalog.resource_sites():
 		if not s.resources.get(id) is Dictionary or not Numbers.whole(s.resources[id].get("remaining"),0,Catalog.resource_sites()[id].stock):return "Fundbestand ungültig."

@@ -34,7 +34,7 @@ func _run() -> void:
 			_check(game.simulation.snapshot().contract.status=="active","First session has real progress")
 		"restore":
 			_check(game.simulation.snapshot().contract.status=="active","Normal startup restores contract")
-			_check(game.simulation.snapshot().paused and game.simulation.snapshot().schema_version==4,"Normal startup restores pause and current migrated schema")
+			_check(game.simulation.snapshot().paused and game.simulation.snapshot().schema_version==5,"Normal startup restores pause and current migrated schema")
 			var migrated: Dictionary = game.simulation.snapshot()
 			_check(migrated.ship.seats.size()==4 and migrated.crew.ida.seat=="" and migrated.crew.jaro.seat=="", "Legacy grounded crew gains empty seats without duplication")
 			_check(migrated.crew.ida.backpack.capacity==0 and migrated.crew.ida.backpack.items.has("med_charge") and migrated.inventory.has("multitool"), "Legacy startup adds real N4 containers and item schema")

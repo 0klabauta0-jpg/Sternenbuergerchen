@@ -3,7 +3,7 @@ extends SceneTree
 const Geo = preload("res://scripts/world/world_geometry.gd")
 const CURATED_SHIP := "res://assets/curated/space/craft_cargoA.glb"
 const LOCAL_SHIPS := {
-	"craft_cargoA":["res://assets/local/entersaebel_n4/entersaebel.glb","res://assets/local/entersaebel.glb"],
+	"craft_cargoA":["res://assets/local/entersaebel_n5/entersaebel.glb","res://assets/local/entersaebel_n4/entersaebel.glb","res://assets/local/entersaebel.glb"],
 	"freibeuter":["res://assets/local/freibeuter/freibeuter.glb"],
 	"geier":["res://assets/local/geier/geier.glb"]
 }
@@ -15,7 +15,7 @@ func _initialize() -> void:
 	root.add_child(stage)
 	var require_curated := "--require-curated" in OS.get_cmdline_user_args()
 	for id: String in LOCAL_SHIPS:
-		# The N4 derivative takes precedence over the earlier local Cutlass.
+		# The N5 derivative takes precedence over the earlier local Cutlass.
 		var expected:=CURATED_SHIP
 		for candidate: String in LOCAL_SHIPS[id]:
 			if ResourceLoader.exists(candidate):expected=candidate;break

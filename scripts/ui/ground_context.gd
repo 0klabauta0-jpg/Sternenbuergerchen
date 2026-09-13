@@ -1,5 +1,6 @@
 extends RefCounted
 ## Context UI for shared crew resource sites, lifts and ground attacks.
+const Regions=preload("res://scripts/core/regions.gd")
 const Catalog = preload("res://scripts/core/catalog.gd")
 
 static func build(hud:Node,id:String)->bool:
@@ -36,7 +37,7 @@ static func present(hud:Node,id:String)->bool:
 		var tool_blocked:String=""
 		if id=="mining_site" and not (tool=="multitool" and attachment=="mining_attachment"):
 			tool_blocked="Mining erfordert ein angelegtes Multi-Tool mit Mining-Aufsatz."
-		elif id in ["derelict","distribution_wreck"] and not (tool=="cutter" or (tool=="multitool" and attachment=="salvage_attachment")):
+		elif Regions.object_base(id) in ["derelict","distribution_wreck"] and not (tool=="cutter" or (tool=="multitool" and attachment=="salvage_attachment")):
 			tool_blocked="Wrackbergung erfordert einen Schneider oder ein Multi-Tool mit Berge-Aufsatz."
 		hud._disable("gather",remaining<=0 or active or not tool_blocked.is_empty() or not hud._owns(hud.selected_unit) or actor.get("assignment","idle")!="idle" or str(s.ship.get("mode","landed"))=="flying")
 		hud._disable("cancel_gather",not active or not hud._owns(str(activity.get("unit_id",""))))
@@ -47,7 +48,7 @@ static func present(hud:Node,id:String)->bool:
 		return true
 	if id in ["bunker_entry","elevator"]:
 		hud._context_title.text="Bunkeraufzug"
-		hud._context_text.text="[b]%s[/b]\n\nVersammelt die Crew am Aufzug. Beide Commander dürfen den Wechsel auslösen; das Ziel ist eine eigene Karte." % ("Zur unterirdischen Anlage" if s.region=="bunker_surface" else "Zur Oberfläche")
+		hud._context_text.text="[b]%s[/b]\n\nVersammelt die Crew am Aufzug. Beide Commander dürfen den Wechsel auslösen; das Ziel ist eine eigene Karte." % ("Zur unterirdischen Anlage" if not Regions.underground(s.region) else "Zur Oberfläche")
 		hud._disable("use_elevator",bool(s.get("travel",{}).get("active",false)))
 		hud._hint.text="Im Koop könnt ihr beide die gesamte Crew zum Aufzug führen."
 		return true

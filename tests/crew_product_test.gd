@@ -18,7 +18,7 @@ func _run() -> void:
 	await process_frame
 	await physics_frame
 	await process_frame
-	_check(game.simulation.snapshot().schema_version==4,"Fresh product uses schema 4")
+	_check(game.simulation.snapshot().schema_version==5,"Fresh product uses schema 5")
 	await _capture("n4-base")
 	await _object("workbench")
 	await _action("backpack")

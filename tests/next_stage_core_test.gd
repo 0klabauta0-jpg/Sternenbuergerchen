@@ -19,8 +19,8 @@ func cmd(kind: String,data: Dictionary = {},sender: int = 1) -> Dictionary:
 	return sim.submit(c,sender)
 func run() -> void:
 	sim=Core.new(1);sim.auto_tick=false;root.add_child(sim)
-	check(sim.snapshot().schema_version==4,"schema4 retains orbit extensions")
-	if sim.snapshot().schema_version!=4:
+	check(sim.snapshot().schema_version==5,"schema5 retains orbit extensions")
+	if sim.snapshot().schema_version!=5:
 		sim.free();quit(1);return
 	check(sim.snapshot().base.workbench_tier==1,"simple starting workbench")
 	check(sim.snapshot().crew.ida.skills.pilot>sim.snapshot().crew.jaro.skills.pilot,"different actual crew profiles")

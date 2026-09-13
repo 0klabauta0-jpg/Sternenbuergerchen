@@ -12,6 +12,7 @@ static func present(unit: Node3D, equipment: Dictionary) -> void:
 	var color:=Color("80948f")
 	if tool=="medgun":color=Color("d695ad")
 	elif str(equipment.get("attachment",""))=="mining_attachment":color=Color("72c9cc")
+	elif str(equipment.get("attachment",""))=="repair_attachment":color=Color("97cc82")
 	elif str(equipment.get("attachment",""))=="salvage_attachment":color=Color("d8ad70")
 	var tip:=parts.tip as MeshInstance3D
 	var material:=tip.material_override as StandardMaterial3D

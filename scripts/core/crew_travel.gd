@@ -1,4 +1,5 @@
 extends RefCounted
+const Regions=preload("res://scripts/core/regions.gd")
 const Catalog=preload("res://scripts/core/catalog.gd")
 const Nav=preload("res://scripts/core/ground_navigation.gd")
 const SEATS=["pilot","gunner","passenger_1","passenger_2"]
@@ -18,7 +19,7 @@ func dispatch(c: Dictionary) -> String:
 	if c.type in ["board","cancel_board","disembark"]:
 		if not c.get("unit_id") is String or not s.crew.has(c.unit_id):return "Person nicht gefunden."
 		var unit: Dictionary=s.crew[c.unit_id]
-		if s.ship.mode!="landed" or s.region=="bunker_depths":return "Einstieg und Ausstieg brauchen ein gelandetes Schiff."
+		if s.ship.mode!="landed" or Regions.underground(s.region):return "Einstieg und Ausstieg brauchen ein gelandetes Schiff."
 		if c.type=="board":
 			if unit.assignment!="idle" or unit.health<=0:return "Person ist bereits gebunden."
 			var role: Variant=c.get("role")

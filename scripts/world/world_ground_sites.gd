@@ -1,18 +1,26 @@
 extends RefCounted
 ## Authored modular locations. Blocking footprints come from the core catalog.
 const Geo = preload("res://scripts/world/world_geometry.gd")
+const Regions=preload("res://scripts/core/regions.gd")
 const Catalog = preload("res://scripts/core/catalog.gd")
 const Layout = preload("res://scripts/core/world_layout.gd")
 
 static func build(parent: Node3D, region: String) -> void:
-	match region:
+	match Regions.archetype(region):
 		"bunker_surface": _surface(parent)
-		"bunker_depths": _depths(parent)
+		"bunker_depths":
+			var interior:=Node3D.new();parent.add_child(interior);interior.scale=Vector3(Regions.depth_scale(region),1,Regions.depth_scale(region))
+			_depths(interior);_build_floors(interior)
+			for child: Node in interior.get_children():
+				if child is Label3D:
+					var at: Vector3=child.position*interior.scale
+					child.reparent(parent,false);child.position=at
 		"distribution": _distribution(parent)
 		"tradepost": _tradepost(parent)
 	_build_obstacles(parent,region)
 	_build_furniture(parent,region)
 	_build_floors(parent)
+	if Regions.bunker(region) or Regions.archetype(region)=="distribution":Geo.label(parent,Regions.LABELS[region],Vector3(0,12,-45 if not Regions.underground(region) else -40*Regions.depth_scale(region)),Color("a2d3bd") if region=="distribution_friendly" else Color("e5b785"),30)
 
 static func _floor(parent: Node3D, center: Vector2, size: Vector2, color: Color) -> void:
 	var layers: Array=parent.get_meta("floor_layers",[])
@@ -63,6 +71,10 @@ static func _wall(parent: Node3D, center: Vector2, size: Vector2, height: float,
 	for i in range(maxi(1,int(length/8))):
 		var at:=-length/2+4+i*8
 		Geo.box(root,Vector3(0,height*0.5,at) if along_z else Vector3(at,height*0.5,0),Vector3(size.x+0.15,height,0.32) if along_z else Vector3(0.32,height,size.y+0.15),Color("899b93"))
+	if not transparent:
+		for i in range(maxi(1,int(length/7))):
+			var at:=-length/2+3.5+i*7
+			Geo.asset(root,"factory:structure-wall",Vector3(0,0.2,at) if along_z else Vector3(at,0.2,0),Vector3(size.x,height-0.4,6.6) if along_z else Vector3(6.6,height-0.4,size.y))
 	return root
 
 static func _build_obstacles(parent: Node3D, region: String) -> void:
@@ -73,8 +85,8 @@ static func _build_obstacles(parent: Node3D, region: String) -> void:
 		var center:=Vector2(spec.center[0],spec.center[1])
 		var size:=Vector2(spec.size[0],spec.size[1])
 		var root: Node3D
-		if region in ["bunker_surface","bunker_depths"]:
-			root=_wall(parent,center,size,5.5 if region=="bunker_depths" else 6.0,bool(spec.get("front",false)))
+		if Regions.bunker(region):
+			root=_wall(parent,center,size,5.5 if Regions.underground(region) else 6.0,bool(spec.get("front",false)))
 		elif minf(size.x,size.y)<=1.1:
 			root=_wall(parent,center,size,5.4 if region=="tradepost" else 6.0 if str(id).begins_with("market") else 8.0,bool(spec.get("front",false)))
 		elif region=="rust":
@@ -85,13 +97,13 @@ static func _build_obstacles(parent: Node3D, region: String) -> void:
 		else:
 			root=Node3D.new(); parent.add_child(root)
 			root.position=Vector3(center.x,0,center.y)
-			var height:=12.0 if str(id).ends_with("_a") else 11.0 if str(id).ends_with("_c") else 9.0 if region=="distribution" else 4.0
+			var height:=12.0 if str(id).ends_with("_a") else 11.0 if str(id).ends_with("_c") else 9.0 if Regions.archetype(region)=="distribution" else 4.0
 			Geo.box(root,Vector3(0,height/2,0),Vector3(size.x,height,size.y),Color("5c7577"))
 			Geo.box(root,Vector3(0,height+0.12,0),Vector3(size.x,0.25,size.y),Color("a3b0a6"))
 			for x in range(int(-size.x/2)+1,int(size.x/2),3):
 				Geo.box(root,Vector3(x,height/2,size.y/2+0.02),Vector3(0.13,height-0.4,0.10),Color("8b9f98"))
 			Geo.box(root,Vector3(0,1.2,size.y/2+0.08),Vector3(size.x*0.7,0.65,0.12),Color("c7a168"))
-			if region=="distribution":
+			if Regions.archetype(region)=="distribution":
 				for x in [-size.x*0.25,size.x*0.25]:
 					Geo.box(root,Vector3(x,2.9,size.y/2+0.09),Vector3(size.x*0.32,5.0,0.13),Color("344e59"))
 					Geo.box(root,Vector3(x,5.48,size.y/2+0.16),Vector3(size.x*0.33,0.22,0.18),Color("b8cdba"))
@@ -132,7 +144,7 @@ static func _surface(parent: Node3D) -> void:
 		Geo.box(parent,Vector3(x,6.1,-7),Vector3(1.4,0.5,39),Color("82948c"))
 	Geo.box(parent,Vector3(0,6.2,-22),Vector3(48,0.5,12),Color("8f9b8e"))
 	Geo.box(parent,Vector3(0,6.4,10),Vector3(42,1.1,1.5),Color("a2afa2"))
-	Geo.label(parent,"KARST / AUSSENANLAGE 09",Vector3(0,8,-28),Color("dce2c6"),31)
+	Geo.label(parent,"ROSTWELT / SICHERHEITSANLAGE",Vector3(0,8,-28),Color("dce2c6"),25)
 	Geo.label(parent,"01   LASTENAUFZUG",Vector3(0,0.4,20),Color("dbc590"),24)
 	for x in [-5.0,5.0]: _lamp(parent,Vector3(x,4,12.05))
 
@@ -168,7 +180,7 @@ static func _distribution(parent: Node3D) -> void:
 	_canopy(parent,Vector2(57,31),Vector2(36,29),9,Color("b1b496"))
 	_canopy(parent,Vector2(50,-44),Vector2(36,24),8,Color("849c96"))
 	_canopy(parent,Vector2(-27,24),Vector2(26,18),6,Color("c2bca4"))
-	Geo.label(parent,"MERIDIAN / DISTRIBUTION 04",Vector3(-25,14,-80),Color("e2dec4"),39)
+	Geo.label(parent,"LOGISTIK / UMSCHLAG 04",Vector3(-25,14,-80),Color("e2dec4"),32)
 	Geo.label(parent,"01  HANDEL",Vector3(-28,0.25,37),Color("e0d1ad"),25)
 	Geo.label(parent,"02  UMSCHLAG",Vector3(-22,0.25,-45),Color("c6ded0"),26)
 	Geo.label(parent,"03  SICHERHEIT",Vector3(49,0.25,-27),Color("a5d4ce"),25)
@@ -192,7 +204,7 @@ static func _tradepost(parent: Node3D) -> void:
 	Geo.box(parent,Vector3(-3,5.25,8.5),Vector3(6.35,0.4,0.55),Color("c6b693"))
 	Geo.box(parent,Vector3(-3,4.9,8.8),Vector3(4.8,0.15,0.2),Color("8bc7b7"))
 	Geo.label(parent,"SCHLEUSE / 01",Vector3(-3,6.0,9),Color("e1c79e"),20)
-	Geo.label(parent,"SAUM / HANDELSPOSTEN",Vector3(0,7,-21),Color("ddd8b8"),30)
+	Geo.label(parent,"STAUBMARKT / HANDELSPOSTEN",Vector3(0,7,-21),Color("ddd8b8"),30)
 
 static func _canopy(parent: Node3D, center: Vector2, size: Vector2, height: float, color: Color) -> void:
 	# Elevated crossbeams leave all unblocked ground navigable. Cutaway roof bands

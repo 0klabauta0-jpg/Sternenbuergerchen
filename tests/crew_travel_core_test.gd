@@ -16,7 +16,7 @@ func cmd(kind: String,data: Dictionary={},sender: int=1) -> Dictionary:
 	return sim.submit(c,sender)
 func run() -> void:
 	sim=Core.new(1);sim.auto_tick=false;root.add_child(sim)
-	check(sim.snapshot().schema_version==4,"schema4")
+	check(sim.snapshot().schema_version==5,"schema5")
 	sim.set_guest(7)
 	check(cmd("move",{"unit_id":"ida","position":[0,1]},7).ok,"guest commands all crew")
 	check(not cmd("travel",{"destination":"rust"}).ok,"surface travel cannot skip orbit")
@@ -84,8 +84,8 @@ func run() -> void:
 	check(cmd("use_medgun",{"unit_id":"ida","target_id":"jaro"},7).ok,"guest revives crew")
 	check(patient.health==35 and patient.assignment=="idle" and patient.respawn_remaining==0,"revive cancels respawn timer")
 	check(valid(),"equipment and treatment state saves")
-	check(sim.save_game("user://n4-core-check.json").ok,"atomic schema4 save")
-	check(sim.load_game("user://n4-core-check.json").ok,"schema4 JSON roundtrip")
+	check(sim.save_game("user://n4-core-check.json").ok,"atomic schema5 save")
+	check(sim.load_game("user://n4-core-check.json").ok,"schema5 JSON roundtrip")
 	var stock: int=int(sim.snapshot().inventory.med_charge)
 	var parts: int=int(sim.snapshot().inventory.parts)
 	check(cmd("assign_work",{"unit_id":"ida","recipe_id":"med_charge"},7).ok,"guest reserves charge recipe")
@@ -97,6 +97,6 @@ func run() -> void:
 	sim.free();quit(1 if failures else 0)
 
 func valid() -> bool:
-	var error: String=Validator.validate({"schema_version":4,"state":sim.snapshot(),"receipts":{}})
+	var error: String=Validator.validate({"schema_version":5,"state":sim.snapshot(),"receipts":{}})
 	if not error.is_empty():printerr(error)
 	return error.is_empty()

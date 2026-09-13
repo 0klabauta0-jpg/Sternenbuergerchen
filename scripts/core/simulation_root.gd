@@ -1,5 +1,6 @@
 extends Node
 class_name RestartSimulation
+const Regions=preload("res://scripts/core/regions.gd")
 
 const Catalog = preload("res://scripts/core/catalog.gd")
 const Validator = preload("res://scripts/core/save_validator.gd")
@@ -11,7 +12,9 @@ const GroundOps=preload("res://scripts/core/ground_operations.gd")
 const GroundCatalog=preload("res://scripts/core/ground_catalog.gd")
 const Nav=preload("res://scripts/core/ground_navigation.gd")
 const Orbit = preload("res://scripts/core/orbit_operations.gd")
-const CrewState=preload("res://scripts/core/crew_state.gd")
+const CrewState=preload("res://scripts/core/legacy_n4/crew_state.gd")
+const LegacyV4=preload("res://scripts/core/legacy_n4/save_validator.gd")
+const Expansion=preload("res://scripts/core/world_expansion_state.gd")
 const CrewTravel=preload("res://scripts/core/crew_travel.gd")
 const Equipment=preload("res://scripts/core/equipment_operations.gd")
 const LegacyV3=preload("res://scripts/core/legacy_validator_v3.gd")
@@ -42,6 +45,8 @@ func _init(seed_value: int = -1) -> void:
 	Stage.extend(_state,seed_value)
 	GroundState.extend(_state)
 	CrewState.extend(_state)
+	Expansion.extend(_state)
+	_state.ground.enemies.bunker_depths=Catalog.ground_enemies("bunker_depths")
 	_state.crew.ida.position=[0.0,0.0];_state.crew.ida.target=[0.0,0.0]
 	_state.crew.jaro.position=[1.0,1.0];_state.crew.jaro.target=[1.0,1.0]
 	_crew_travel.bind(_state,_log)
@@ -110,7 +115,7 @@ func _dispatch(command: Dictionary, sender: int) -> String:
 		_state.paused = not _state.paused
 		return ""
 	if kind in ["board","board_crew","cancel_board","disembark","launch","enter_orbit","travel"]:return _crew_travel.dispatch(command)
-	if kind in ["equip","equip_item","unequip_item","backpack_transfer","use_medgun"]:return _equipment.dispatch(command)
+	if kind in ["equip","equip_item","unequip_item","backpack_transfer","use_medgun","field_repair"]:return _equipment.dispatch(command)
 	if kind in ["gather","cancel_gather","attack","use_elevator","rent_ship","return_rental"]:
 		var previous_region: String=_state.region
 		var result: String=_ground.dispatch(command,sender)
@@ -223,14 +228,17 @@ func _cargo_count() -> int:
 	return count
 
 func _trade(command: Dictionary) -> String:
-	if not _state.region in ["station","distribution","tradepost"] or _state.ship.mode!="landed": return "Handel ist an einem gelandeten Markt möglich."
+	if not _state.region in Regions.MARKETS or _state.ship.mode!="landed": return "Handel ist an einem gelandeten Markt möglich."
+	if _state.region=="distribution":
+		for enemy: Dictionary in _state.ground.enemies.distribution.values():
+			if not enemy.defeated:return "Knotenwerk ist besetzt. Erst die Depotwachen ausschalten."
 	var side: Variant = command.get("side")
 	var item: Variant = command.get("item")
 	var amount: Variant = command.get("amount")
-	if not side is String or not side in ["buy","sell"] or not item is String or not Catalog.prices().has(item): return "Ungültiges Handelsangebot."
+	if not side is String or not side in ["buy","sell"] or not item is String or not Catalog.prices(_state.region).has(item): return "Ungültiges Handelsangebot."
 	if not Validator.whole(amount, 1, 10000): return "Menge muss eine positive ganze Zahl sein."
 	var quantity: int = int(amount)
-	var cost: int = int(Catalog.prices()[item][side]) * quantity
+	var cost: int = int(Catalog.prices(_state.region)[item][side]) * quantity
 	if side == "buy":
 		if _state.credits < cost: return "Nicht genug Credits."
 		if _cargo_count() + quantity > _state.ship.capacity: return "Frachtraum ist voll."
@@ -338,7 +346,7 @@ func clear_guest() -> void:
 	_changed()
 
 func save_game(path: String) -> Dictionary:
-	var payload: Dictionary = {"schema_version":4,"state":snapshot(),"receipts":_receipts.duplicate(true)}
+	var payload: Dictionary = {"schema_version":5,"state":snapshot(),"receipts":_receipts.duplicate(true)}
 	var reason: String = Validator.validate(payload)
 	if not reason.is_empty(): return _result(false, "Speichern abgelehnt: " + reason)
 	var temporary: String = path + ".tmp"
@@ -373,6 +381,10 @@ func load_game(path: String) -> Dictionary:
 		var legacy_error: String=LegacyV3.validate(payload)
 		if not legacy_error.is_empty():return _result(false,"Boden-Spielstand abgelehnt: "+legacy_error)
 		payload=CrewState.migrate(payload)
+	if payload is Dictionary and payload.get("schema_version")==4:
+		var legacy_error: String=LegacyV4.validate(payload)
+		if not legacy_error.is_empty():return _result(false,"N4-Spielstand abgelehnt: "+legacy_error)
+		payload=Expansion.migrate(payload)
 	var reason: String = Validator.validate(payload)
 	if not reason.is_empty(): return _result(false, "Spielstand abgelehnt: " + reason)
 	var previous_revision: int = int(_state.revision)

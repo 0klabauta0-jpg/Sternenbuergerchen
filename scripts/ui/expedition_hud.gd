@@ -2,6 +2,7 @@ extends CanvasLayer
 ## Local flight, orbital chart and contacts have distinct actions.
 signal command_requested(command: Dictionary)
 signal action_requested(action: String, payload: Dictionary)
+const Regions=preload("res://scripts/core/regions.gd")
 const Icons=preload("res://scripts/ui/hud_icons.gd")
 var _panel: PanelContainer
 var _heading: Label
@@ -121,7 +122,7 @@ func present(state: Dictionary,guest: bool) -> void:
 			for contact: Dictionary in contacts:
 				var id: String=str(contact.id)
 				if _contact_buttons.has(id):_contact_buttons[id].text=str(contact.get("label","Unbekanntes Signal"))+" →"
-		if region=="bunker_surface":_detail.text+="\nFlak voraus: außerhalb ihrer Reichweite landen."
+		if Regions.archetype(region)=="bunker_surface":_detail.text+="\nFlak voraus: außerhalb ihrer Reichweite landen."
 
 func inspect_target(id: String) -> bool:
 	return id=="pirate" or id.begins_with("signal_")

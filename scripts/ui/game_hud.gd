@@ -5,6 +5,7 @@ signal command_requested(command: Dictionary)
 signal action_requested(action: String, payload: Dictionary)
 
 const Icons=preload("res://scripts/ui/hud_icons.gd")
+const Regions=preload("res://scripts/core/regions.gd")
 const Catalog=preload("res://scripts/core/catalog.gd")
 const GroundContext=preload("res://scripts/ui/ground_context.gd")
 const ShipContext=preload("res://scripts/ui/ship_context.gd")
@@ -14,7 +15,7 @@ const PAPER := Color("eee8da")
 const MUTED := Color("a3b3b8")
 const AMBER := Color("efab6f")
 const CYAN := Color("86c5c2")
-const REGIONS := {"orbit":"ROSTWELT / ORBIT","base": "HEIMAT / ROSTGRENZE", "rust": "ROSTGRENZE / SUCHGEBIET", "station": "ORBIT / HANDELSSTATION", "space":"ORBIT / RAUMKONTAKT","bunker_surface":"WACHTPOSTEN / OBERFLÄCHE","bunker_depths":"BUNKER / UNTERGRUND","distribution":"KNOTENWERK / VERTEILZENTRUM","tradepost":"STAUBMARKT / HANDELSPOSTEN"}
+const REGIONS = Regions.LABELS
 
 var selected_unit := "ida"
 var selected_units: Array[String]=["ida"]
@@ -429,7 +430,7 @@ func _rebuild_actions() -> void:
 				_add_command("equip_"+item,Catalog.item_name(item)+" aus dem Lager ausrüsten","equip",{"item":item},true)
 
 func _add_command(key: String,label: String,type: String,data: Dictionary={},with_unit: bool=false,parent: Node=null) -> void:
-	var captions: Dictionary={"accept_contract":"Annehmen","claim_contract":"Abgeben","toolkit":"Werkzeugkit","repair":"Reparieren","helmet":"Helm richten","armor":"Rüstung","cutter":"Schneider","upgrade_workbench":"Werkbank II","equip_helmet":"Helm anlegen","equip_armor":"Rüstung anlegen","equip_toolkit":"Werkzeugkit","equip_cutter":"Schneider","gather":"Gewinnen","cancel_gather":"Abbrechen","attack":"Angriff","stop_attack":"Stopp","use_elevator":"Aufzug","bunker_surface":"Wachtposten","distribution":"Verteilzentrum","tradepost":"Staubmarkt","rent_ship":"Geier mieten","return_rental":"Mietschiff zurück","cancel_work":"Abbrechen","salvage":"Bergen","cancel_salvage":"Abbrechen","rust":"Suchgebiet","base":"Heimat","station":"Station"}
+	var captions: Dictionary={"field_repair":"Feldreparatur","accept_contract":"Annehmen","claim_contract":"Abgeben","toolkit":"Werkzeugkit","repair":"Reparieren","helmet":"Helm richten","armor":"Rüstung","cutter":"Schneider","upgrade_workbench":"Werkbank II","equip_helmet":"Helm anlegen","equip_armor":"Rüstung anlegen","equip_toolkit":"Werkzeugkit","equip_cutter":"Schneider","gather":"Gewinnen","cancel_gather":"Abbrechen","attack":"Angriff","stop_attack":"Stopp","use_elevator":"Aufzug","bunker_surface":"Wachtposten","distribution":"Verteilzentrum","tradepost":"Staubmarkt","rent_ship":"Geier mieten","return_rental":"Mietschiff zurück","cancel_work":"Abbrechen","salvage":"Bergen","cancel_salvage":"Abbrechen","rust":"Suchgebiet","base":"Heimat","station":"Station"}
 	var button:=_button(captions.get(key,label),func():
 		var payload: Dictionary=data.duplicate(true)
 		if with_unit: payload["unit_id"]=selected_unit
@@ -515,8 +516,9 @@ func _update_context() -> void:
 		"market":
 			_context_title.text="Markt / "+REGIONS.get(_state.region,_state.region)
 			_context_text.text="[b]%d Credits · Fracht %d / %d[/b]\nAn Bord: %s" % [int(_state.credits),_cargo_used(),int(_state.ship.capacity),_items(cargo)]
-			_hint.text="Einkäufe kommen in die Schiffsfracht. Am Heimatdock über das Lager oder Dossier ausladen."
+			_hint.text="Einkäufe → Schiffsfracht. Handelsring: Meridian (Bauteile) → Freihafen (Metall) → Staubmarkt (Legierung) → Meridian. Preise gelten je Stück; Risiken auf der Reisekarte."
 			_disable("rent_ship",int(_state.credits)<900 or bool(_state.get("rental",{}).get("active",false)))
+			if _state.region=="distribution":_context_text.text+="\nBesetztes Depot: Handel erst nach Ausschalten beider Wachen."
 			if _state.region=="station":_context_text.text+="\nGeier: 900 Cr für 20 Spielminuten. Mehr Fracht und Wrackertrag."
 
 		"storage":
@@ -629,22 +631,22 @@ func _build_objective() -> void:
 
 func _update_objective() -> void:
 	for id: String in _quick_actions:
-		_quick_actions[id].visible=(id=="shuttle" and _state.region!="bunker_depths") or (_state.region=="base" and id in ["contracts","workbench","storage"]) or (_state.region in ["station","distribution","tradepost"] and id=="market")
+		_quick_actions[id].visible=(id=="shuttle" and not Regions.underground(_state.region)) or (_state.region=="base" and id in ["contracts","workbench","storage"]) or (_state.region in Regions.MARKETS and id=="market")
 	var status: String=_state.contract.status
 	_objective_id="contracts"
 	var text: String="Erster Auftrag · 260 Credits + Bauplan"
 	var action: String="Auftragskonsole zeigen"
 	if _state.region=="orbit":
 		text="Im Orbit · Ort auf der Reisekarte wählen";action="Reisekarte öffnen";_objective_id="travel_chart"
-	elif _state.region in ["station","distribution","tradepost"]:
-		text={"station":"Handelsstation · Güter liegen im Shuttle","distribution":"Verteilzentrum · Handel, Wachen und Funde","tradepost":"Staubmarkt · Handel und Erkundung"}[_state.region];action="Markt öffnen";_objective_id="market"
+	elif _state.region in Regions.MARKETS:
+		text=Regions.LABELS[_state.region]+" · Handel und Fracht";action="Markt öffnen";_objective_id="market"
 	elif _state.region=="rust":
 		var found: bool=bool(_state.get("discovery",{}).get("satellite_found",false))
 		text="Blackbox geborgen · Zurück nach Hause" if status=="recovered" else "Satellit gefunden · Landen und bergen" if found else "Suchflug · Radarimpuls · Kontakt anfliegen"
 		action="Shuttle zeigen" if status=="recovered" else "Absturzstelle zeigen"
 		_objective_id="shuttle" if status=="recovered" or not found else "satellite"
-	elif _state.region in ["bunker_surface","bunker_depths"]:
-		text="Bunker · Crew sichern und Aufzug erreichen";action="Aufzug zeigen";_objective_id="bunker_entry" if _state.region=="bunker_surface" else "elevator"
+	elif Regions.bunker(_state.region):
+		text="Bunker · Crew sichern und Aufzug erreichen";action="Aufzug zeigen";_objective_id="bunker_entry" if not Regions.underground(_state.region) else "elevator"
 	elif _state.region=="space":
 		text="Piratenkontakt · Angriff oder Rückzug";action="Shuttle zeigen";_objective_id="shuttle"
 	elif status=="active":

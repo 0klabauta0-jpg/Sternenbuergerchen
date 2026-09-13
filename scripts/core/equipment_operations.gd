@@ -1,4 +1,5 @@
 extends RefCounted
+const Regions=preload("res://scripts/core/regions.gd")
 const Catalog=preload("res://scripts/core/catalog.gd")
 const Gear=preload("res://scripts/core/equipment_catalog.gd")
 const Numbers=preload("res://scripts/core/legacy_validator_v2.gd")
@@ -17,6 +18,7 @@ func dispatch(c: Dictionary) -> String:
 		"unequip_item":return _unequip(unit,c)
 		"backpack_transfer":return _transfer(unit,c)
 		"use_medgun":return _heal(unit,c)
+		"field_repair":return _field_repair(unit)
 		"equip":
 			if not c.get("item") is String:return "Gegenstand fehlt."
 			return _equip(unit,{"slot":Gear.slot_for(c.item),"item":c.item,"source":"inventory"})
@@ -28,7 +30,7 @@ func container_error(unit: Dictionary,name: Variant) -> String:
 		return ""
 	if name=="inventory":
 		if s.region!="base" or _v(unit.position).distance_to(_v(Catalog.landmarks("base").storage))>8.0 or unit.assignment=="aboard":return "Basislager aufsuchen (8 m)."
-	elif unit.assignment!="aboard" and (s.region in ["orbit","space","bunker_depths"] or s.ship.mode!="landed" or _v(unit.position).distance_to(_v(Catalog.ship_access(s.ship)))>8.0):return "Frachtzugang aufsuchen (8 m) oder einsteigen."
+	elif unit.assignment!="aboard" and ((s.region in ["orbit","space"] or Regions.underground(s.region)) or s.ship.mode!="landed" or _v(unit.position).distance_to(_v(Catalog.ship_access(s.ship)))>8.0):return "Frachtzugang aufsuchen (8 m) oder einsteigen."
 	return ""
 func _container(unit: Dictionary,name: String) -> Dictionary:return unit.backpack.items if name=="backpack" else s[name]
 func _capacity(unit: Dictionary,name: String) -> int:return int(unit.backpack.capacity) if name=="backpack" else (int(s.ship.capacity) if name=="cargo" else 10000000)
@@ -95,5 +97,16 @@ func _heal(unit: Dictionary,c: Dictionary) -> String:
 	target.health=minf(100,target.health+35.0)
 	if target.assignment=="downed":target.assignment="idle";target.respawn_remaining=0.0;target.target=target.position.duplicate()
 	log_event.call(unit.name+" behandelt "+target.name+" mit der Medgun.")
+	return ""
+func _field_repair(unit: Dictionary) -> String:
+	if unit.assignment!="idle" or unit.equipment.tool!="multitool" or unit.equipment.attachment!="repair_attachment":return "Freie Person mit Multi-Tool und Reparatur-Aufsatz auswählen."
+	if s.ship.mode!="landed" or Regions.underground(s.region):return "Reparatur braucht ein gelandetes, zugängliches Schiff."
+	var access:=_v(Catalog.ship_access(s.ship))
+	if _v(unit.position).distance_to(access)>6.0 or not Nav.clear(s.region,_v(unit.position),access,s.ship):return "Zum Schiffszugang gehen (6 m)."
+	if s.ship.condition>=70.0:return "Feldreparatur reicht bis 70 %. Für mehr die Basiswerkstatt benutzen."
+	if unit.backpack.items.parts<1:return "Ein Bauteil im eigenen Rucksack wird benötigt."
+	unit.backpack.items.parts-=1
+	s.ship.condition=minf(70.0,s.ship.condition+10.0+unit.skills.tech)
+	log_event.call(unit.name+" repariert kleine Rumpfschäden; ein Bauteil verbraucht.")
 	return ""
 func _v(point: Array) -> Vector2:return Vector2(point[0],point[1])

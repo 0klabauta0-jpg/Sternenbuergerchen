@@ -95,6 +95,10 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 		path = "res://assets/local/entersaebel.glb"
 	if name == "craft_cargoA" and ResourceLoader.exists("res://assets/local/entersaebel_n4/entersaebel.glb"):
 		path = "res://assets/local/entersaebel_n4/entersaebel.glb"
+	if name == "craft_cargoA" and ResourceLoader.exists("res://assets/local/entersaebel_n5/entersaebel.glb"):
+		path = "res://assets/local/entersaebel_n5/entersaebel.glb"
+	if name.begins_with("factory:"):path="res://assets/curated/factory/"+name.trim_prefix("factory:")+".glb"
+	if name.begins_with("space-props:"):path="res://assets/curated/space-props/"+name.trim_prefix("space-props:")+".glb"
 	if name == "freibeuter":
 		path = "res://assets/local/freibeuter/freibeuter.glb" if ResourceLoader.exists("res://assets/local/freibeuter/freibeuter.glb") else "res://assets/curated/space/craft_cargoA.glb"
 	if name == "geier":

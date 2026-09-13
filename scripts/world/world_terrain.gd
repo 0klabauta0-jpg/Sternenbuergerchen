@@ -1,6 +1,7 @@
 extends RefCounted
 ## Broad open Mars valleys, layered mesas and batched small rocks.
 const Geo = preload("res://scripts/world/world_geometry.gd")
+const Regions=preload("res://scripts/core/regions.gd")
 const Catalog = preload("res://scripts/core/catalog.gd")
 const Layout = preload("res://scripts/core/world_layout.gd")
 const Space = preload("res://scripts/world/world_space.gd")
@@ -9,8 +10,8 @@ static func build(parent: Node3D, region: String) -> void:
 	if region in ["station","space","orbit"]:
 		Space.build(parent,region)
 		return
-	if region == "bunker_depths":
-		Geo.collider(parent,"ground","ground",Vector3(128,0.2,128),Vector3(0,-0.2,0))
+	if Regions.underground(region):
+		Geo.collider(parent,"ground","ground",Vector3(Catalog.bounds(region)*2,0.2,Catalog.bounds(region)*2),Vector3(0,-0.2,0))
 		return
 	var rng := RandomNumberGenerator.new()
 	rng.seed = {"base":812,"rust":901,"bunker_surface":972,"distribution":1048,"tradepost":1135}.get(region,901)
@@ -65,8 +66,8 @@ static func _mesa(parent: Node3D, point: Vector2, radius: float, height: float, 
 	for i in range(count):
 		angles.append(TAU * i / count + rng.randf_range(-0.09,0.09))
 		jitter.append(rng.randf_range(0.83,1.12))
-	var scales := [1.0,1.04,0.86,0.9,0.77,0.79,0.61,0.60]
-	var heights := [0.0,0.10,0.27,0.32,0.53,0.58,0.95,1.0]
+	var scales := [1.0,1.0,0.80,0.80,0.57,0.57,0.34,0.34]
+	var heights := [0.0,0.28,0.28,0.58,0.58,0.84,0.84,1.0]
 	var colors := [Color("885643"),Color("ae7355"),Color("ce9366"),Color("a66b50"),Color("c28a61"),Color("a56d55"),Color("daa979")]
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -84,7 +85,7 @@ static func _mesa(parent: Node3D, point: Vector2, radius: float, height: float, 
 				st.set_color(color.lightened(0.035 * sin(angles[i]*2)))
 				st.add_vertex(vertex)
 	for i in range(count):
-		for vertex in [Vector3(point.x,height,point.y),_vertex(angles[i],jitter[i],radius*0.6,height,point),_vertex(angles[(i+1)%count],jitter[(i+1)%count],radius*0.6,height,point)]:
+		for vertex in [Vector3(point.x,height,point.y),_vertex(angles[i],jitter[i],radius*0.34,height,point),_vertex(angles[(i+1)%count],jitter[(i+1)%count],radius*0.34,height,point)]:
 			st.set_color(Color("d3a273") if not distant else Color("a49b83"))
 			st.add_vertex(vertex)
 	st.generate_normals()

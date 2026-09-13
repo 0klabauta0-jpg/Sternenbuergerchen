@@ -1,5 +1,14 @@
 # Umsetzungsstand · 13.09.2026
 
+## Aktuelle Erweiterung N5 · 13.09.2026
+
+N5 liefert neun Reiseziele und vierzehn getrennte Karten: größere Orbit-/Kontaktkarten, drei Bunker mit eigenem Untergrund, freundliches Freihafen und besetztes Knotenwerk. Ein echter Handelsring verbindet Meridian, Freihafen und Staubmarkt. Kenney-Details, terrassierte Felsen/Schluchten, die Entersäbel mit9714 Dreiecken und der kleine Reparaturaufsatz ergänzen den bisherigen Spielkreis.
+
+Schema5 erhält streng geprüfte alte Karrieren über eingefrorene N4-Abhängigkeiten. `regions.gd` vereinheitlicht Welt-/Reise-/Aufzugs-IDs; regionale Preise stammen aus `trade_routes.gd`. Der Host bleibt einzige Autorität; beide Commander führen alle Personen.
+
+Verbindliche Umsetzung, Zahlen, Nachweise und Grenzen: [N5_ACCEPTANCE.md](N5_ACCEPTANCE.md). Aufgabe: [N5_ROUTES_WORLD.md](tasks/N5_ROUTES_WORLD.md). Die nächsten begehbaren Schiffsinnenräume bleiben im anschließenden Ausbau. Alle folgenden N4-/N3-Abschnitte sind historische Stände.
+
+
 ## Aktueller Stand N4 · Crew, Wege, Reise und Ausrüstung
 
 N4 ist implementiert; der vollständige aktuelle Produktfensterdurchlauf besteht mit76/76 Prüfungen. Abschließende Steuerungs-/Fenster- und Paketprüfung werden getrennt geführt; die private Windows-N4-Auslieferung ist [separat geprüft](WINDOWS_DELIVERY.md). Verbindlich sind [N4_CREW_TRAVEL.md](contracts/N4_CREW_TRAVEL.md) und die [N4-Aufgabe](tasks/N4_CREW_TRAVEL_EQUIPMENT.md). N3 und frühere Ergebnisse stehen weiter unten ausdrücklich als Historie.

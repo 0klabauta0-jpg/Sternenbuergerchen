@@ -68,7 +68,7 @@ func run() -> void:
 		root.add_child(game)
 		sim = game.simulation
 		session = game.session
-		DisplayServer.window_set_title("Sternenbürgerchen · N4 Koop · " + role)
+		DisplayServer.window_set_title("Sternenbürgerchen · N5 Koop · " + role)
 	else:
 		sim = Simulation.new(3)
 		sim.name = "Simulation"
@@ -174,12 +174,12 @@ func host_run() -> void:
 	check(await wait_until(func() -> bool: return sim.snapshot().crew.ida.assignment == "aboard" and sim.snapshot().crew.jaro.assignment == "aboard"), "both crew physically reach seats")
 	write("flight-ready", true)
 	check(await wait_until(func() -> bool: return exists("flight-done"), 35.0), "guest drives real launch orbit travel landing and trade")
-	check(sim.snapshot().region == "tradepost" and sim.snapshot().ship.mode == "landed", "guest flight reaches and lands on chosen map")
-	check(sim.snapshot().credits == 168 and sim.snapshot().cargo.med_charge == 1, "guest trade charges actual shared account once")
+	check(sim.snapshot().region == "distribution_friendly" and sim.snapshot().ship.mode == "landed", "guest flight reaches and lands on chosen map")
+	check(sim.snapshot().credits == 135 and sim.snapshot().cargo.repair_attachment == 1, "guest trade charges actual shared account once")
 	session.dispatch({"type":"toggle_pause", "request_id":"internet-v4-pause"})
 	write("host-final", sim.snapshot())
 	await capture("final")
-	check(await wait_until(func() -> bool: return exists("v4-seen")), "guest confirms v4 equipment and region")
+	check(await wait_until(func() -> bool: return exists("v5-seen")), "guest confirms v5 equipment and region")
 	# Give guest time to finish before the host closes its tunnel.
 	await create_timer(0.4).timeout
 
@@ -252,15 +252,15 @@ func guest_run() -> void:
 	check((await command("launch")).ok, "guest launches shared shuttle")
 	check((await command("enter_orbit")).ok, "guest starts explicit orbit transition")
 	check(await wait_until(func() -> bool: return session.current_snapshot().region == "orbit"), "guest sees actual orbit arrival")
-	check((await command("travel", {"destination":"tradepost"})).ok, "guest selects intermap destination")
-	check(await wait_until(func() -> bool: return session.current_snapshot().region == "tradepost"), "flight reaches tradepost")
+	check((await command("travel", {"destination":"distribution_friendly"})).ok, "guest selects intermap destination")
+	check(await wait_until(func() -> bool: return session.current_snapshot().region == "distribution_friendly"), "flight reaches distribution_friendly")
 	check((await command("land")).ok, "guest lands shared shuttle")
-	check((await command("trade", {"side":"buy", "item":"med_charge", "amount":1})).ok, "guest performs shared-account trade")
+	check((await command("trade", {"side":"buy", "item":"repair_attachment", "amount":1})).ok, "guest performs shared-account trade")
 	write("flight-done", true)
 	check(await wait_until(func() -> bool: return exists("host-final") and int(session.current_snapshot().get("revision", -1)) == int(read("host-final").revision), 65.0), "host final snapshot recorded and received")
-	check(session.current_snapshot().get("schema_version") == 4, "v4 snapshot crosses gateway")
+	check(session.current_snapshot().get("schema_version") == 5, "v5 snapshot crosses gateway")
 	check(session.current_snapshot().crew.ida.equipment.get("armor") == "armor", "actual crafted and equipped armor replicated")
-	check(session.current_snapshot().region == "tradepost", "new region replicated")
+	check(session.current_snapshot().region == "distribution_friendly", "new region replicated")
 	write("guest-final", session.current_snapshot())
 	await capture("final")
-	write("v4-seen", true)
+	write("v5-seen", true)

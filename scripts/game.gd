@@ -260,7 +260,7 @@ func _refresh() -> void:
 	if session.has_method("internet_invitation"):hud.set_invitation(session.internet_invitation())
 	hud.present(session.current_snapshot())
 	if is_instance_valid(travel_chart) and travel_chart.visible:travel_chart.present(session.current_snapshot())
-	hud.set_recipe_details(Catalog.recipes(),Catalog.prices())
+	hud.set_recipe_details(Catalog.recipes(),Catalog.prices(str(session.current_snapshot().get("region",""))))
 	if is_instance_valid(expedition): expedition.present(session.current_snapshot(),session.is_guest())
 
 func _capture() -> void:

@@ -1,5 +1,6 @@
 extends RefCounted
 ## Fixed X/Z space staging; no motion, damage or encounter decisions here.
+const Catalog=preload("res://scripts/core/catalog.gd")
 const Geo = preload("res://scripts/world/world_geometry.gd")
 
 static func build(parent: Node3D, region: String) -> void:
@@ -17,10 +18,11 @@ static func build(parent: Node3D, region: String) -> void:
 			Geo.box(parent,Vector3(x,-1.8,19),Vector3(21,0.3,16),Color("396473"),0.5)
 	else:
 		# Faint navigation lattice gives planar point-and-click a stable reference.
-		for axis in range(-240,241,40):
-			Geo.box(parent,Vector3(axis,-0.25,0),Vector3(0.06,0.025,480),Color("172c3b"))
-			Geo.box(parent,Vector3(0,-0.25,axis),Vector3(480,0.025,0.06),Color("172c3b"))
-		Geo.collider(parent,"ground","ground",Vector3(480,0.2,480),Vector3(0,-0.4,0))
+		var half:=int(Catalog.bounds(region))
+		for axis in range(-half,half+1,80):
+			Geo.box(parent,Vector3(axis,-0.25,0),Vector3(0.06,0.025,half*2),Color("172c3b"))
+			Geo.box(parent,Vector3(0,-0.25,axis),Vector3(half*2,0.025,0.06),Color("172c3b"))
+		Geo.collider(parent,"ground","ground",Vector3(half*2,0.2,half*2),Vector3(0,-0.4,0))
 	_planet(parent,region)
 	if region=="orbit":
 		Geo.label(parent,"ROSTWELT / ORBIT",Vector3(0,0,-18),Color("80a2b2"),24)

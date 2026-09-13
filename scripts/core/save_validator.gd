@@ -1,4 +1,5 @@
 extends RefCounted
+const Regions=preload("res://scripts/core/regions.gd")
 
 const Catalog = preload("res://scripts/core/catalog.gd")
 
@@ -18,13 +19,13 @@ static func _items(value: Variant) -> bool:
 	return true
 
 static func validate(payload: Variant) -> String:
-	if not payload is Dictionary or payload.get("schema_version") != 4: return "Unbekanntes Speicherformat."
+	if not payload is Dictionary or payload.get("schema_version") != 5: return "Unbekanntes Speicherformat."
 	var value: Variant = payload.get("state")
 	if not value is Dictionary: return "Zustand fehlt."
 	var s: Dictionary = value
-	if s.get("schema_version") != 4 or not whole(s.get("revision"),0,1000000000000): return "Version oder Revision ungültig."
+	if s.get("schema_version") != 5 or not whole(s.get("revision"),0,1000000000000): return "Version oder Revision ungültig."
 	if not number(s.get("time"),0.0,1000000000000.0) or not s.get("paused") is bool: return "Zeit ungültig."
-	if not s.get("region") in ["base","rust","station","space","orbit","bunker_surface","bunker_depths","distribution","tradepost"]: return "Region ungültig."
+	if not s.get("region") in Regions.ALL: return "Region ungültig."
 	if not whole(s.get("credits"),0,1000000000) or not _items(s.get("inventory")) or not _items(s.get("cargo")): return "Bestand ungültig."
 	if not s.get("ship") is Dictionary or not number(s.ship.get("condition"),0,100) or not whole(s.ship.get("capacity"),1,1000): return "Shuttle ungültig."
 	var cargo_count: int = 0
@@ -73,7 +74,7 @@ static func validate(payload: Variant) -> String:
 	var stage_error: String=_stage_valid(s)
 	if not stage_error.is_empty():return stage_error
 	if travel.active:
-		if work.active or salvage.active or travel.from!=s.region or travel.phase!="flying" or travel.total!=5 or not travel.to in ["orbit","base","rust","station","bunker_surface","distribution","tradepost"]:return "Reise ungültig."
+		if work.active or salvage.active or travel.from!=s.region or travel.phase!="flying" or travel.total!=5 or not travel.to in (Regions.DESTINATIONS+["orbit"]):return "Reise ungültig."
 		if travel.kind=="orbit" and (travel.to!="orbit" or not Catalog.destination_info().has(travel.from)):return "Orbitaufstieg ungültig."
 		if travel.kind=="intermap" and travel.from!="orbit":return "Ortsreise braucht Orbit."
 	elif travel.phase != "idle" or travel.from != "" or travel.to != "" or travel.remaining != 0 or travel.total != 0: return "Inaktive Reise inkonsistent."
@@ -102,7 +103,7 @@ static func _materials_equal(first: Dictionary, second: Dictionary) -> bool:
 static func _stage_valid(s: Dictionary) -> String:
 	if not whole(s.get("random_seed"),1,2147483646):return "Zufallszustand ungültig."
 	if not s.get("base") is Dictionary or not whole(s.base.get("workbench_tier"),1,2):return "Werkbankstufe ungültig."
-	if not s.ship.get("mode") in ["landed","flying"] or not position_valid(s.ship.get("position"),Catalog.bounds("bunker_surface") if s.region=="bunker_depths" else Catalog.bounds(s.region)) or not position_valid(s.ship.get("target"),Catalog.bounds("bunker_surface") if s.region=="bunker_depths" else Catalog.bounds(s.region)):return "Flugzustand ungültig."
+	if not s.ship.get("mode") in ["landed","flying"] or not position_valid(s.ship.get("position"),Catalog.bounds("bunker_surface") if Regions.underground(s.region) else Catalog.bounds(s.region)) or not position_valid(s.ship.get("target"),Catalog.bounds("bunker_surface") if Regions.underground(s.region) else Catalog.bounds(s.region)):return "Flugzustand ungültig."
 	var crew_error: String=preload("res://scripts/core/crew_validator.gd").validate(s)
 	if not crew_error.is_empty():return crew_error
 	if not s.travel.get("kind") in ["intermap","orbit","legacy"] or not s.travel.get("encounter_decided") is bool or not whole(s.travel.get("encounter_roll"),-1,99):return "Reisewurf ungültig."
@@ -135,12 +136,12 @@ static func _stage_valid(s: Dictionary) -> String:
 	if s.salvage.active and (not d.satellite_found or s.ship.mode!="landed"):return "Bergung ohne Landung/Entdeckung."
 	if not s.get("encounter") is Dictionary:return "Raumkontakt fehlt."
 	var e: Dictionary=s.encounter
-	if not e.get("active") is bool or not e.get("status") in ["none","active","won","escaped","rescued"] or not e.get("pending_destination") in ["","base","rust","station","bunker_surface","distribution","tradepost"] or not e.get("enemy") is Dictionary or not e.get("turret_target") in ["","pirate"]:return "Raumkontakt ungültig."
+	if not e.get("active") is bool or not e.get("status") in ["none","active","won","escaped","rescued"] or not e.get("pending_destination") in (Regions.DESTINATIONS+[""]) or not e.get("enemy") is Dictionary or not e.get("turret_target") in ["","pirate"]:return "Raumkontakt ungültig."
 	for timer: String in ["fire_cooldown","enemy_cooldown","escape_remaining"]:
 		if not number(e.get(timer),0,20):return "Kampfzeit ungültig."
 	if e.active!=(e.status=="active") or e.active!=(s.region=="space"):return "Raumkontaktstatus widersprüchlich."
 	if e.active and (s.ship.mode!="flying" or s.travel.active or e.pending_destination.is_empty()):return "Raumflug inkonsistent."
 	if e.status!="none":
-		if e.enemy.get("id")!="pirate" or e.enemy.get("name")!="Freibeuter" or e.enemy.get("model")!="buccaneer" or not position_valid(e.enemy.get("position"),240) or not position_valid(e.enemy.get("target"),240) or not number(e.enemy.get("hull"),0,40) or e.enemy.get("max_hull")!=40:return "Gegner ungültig."
+		if e.enemy.get("id")!="pirate" or e.enemy.get("name")!="Freibeuter" or e.enemy.get("model")!="buccaneer" or not position_valid(e.enemy.get("position"),Catalog.bounds("space")) or not position_valid(e.enemy.get("target"),Catalog.bounds("space")) or not number(e.enemy.get("hull"),0,40) or e.enemy.get("max_hull")!=40:return "Gegner ungültig."
 	elif not e.enemy.is_empty():return "Gegner ohne Kontakt."
 	return ""

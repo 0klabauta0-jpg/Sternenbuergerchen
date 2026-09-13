@@ -1,0 +1,52 @@
+[
+  {
+    "asset": "assets/curated/factory/machine.glb",
+    "source": "C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\kenney_factory-kit_3.0\\Models\\GLB format\\machine.glb",
+    "sha256": "a39e3042bcb7789274428357383317d70e1c31906e5301c99e7d9e90ac584863"
+  },
+  {
+    "asset": "assets/curated/factory/machine-fortified.glb",
+    "source": "C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\kenney_factory-kit_3.0\\Models\\GLB format\\machine-fortified.glb",
+    "sha256": "0907f6616f49bbdaa20241ac4b568b780f30352f204851c53568b8e7df59b528"
+  },
+  {
+    "asset": "assets/curated/factory/pipe-large-long.glb",
+    "source": "C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\kenney_factory-kit_3.0\\Models\\GLB format\\pipe-large-long.glb",
+    "sha256": "8e6650cc662695c28fffb1ffa10f190255f7d9c6c1d4a2a48d375e9bbb89b04f"
+  },
+  {
+    "asset": "assets/curated/factory/robot-arm-a.glb",
+    "source": "C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\kenney_factory-kit_3.0\\Models\\GLB format\\robot-arm-a.glb",
+    "sha256": "ad3f766791adadd1cfb5ccc27d2b2ac8787848282f2a15b3c407f350dc281b68"
+  },
+  {
+    "asset": "assets/curated/factory/structure-wall.glb",
+    "source": "C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\kenney_factory-kit_3.0\\Models\\GLB format\\structure-wall.glb",
+    "sha256": "3bdcb31d693b4e97a9fa198e9de1a47bfd14e829520da08ceaacadbdb258582c"
+  },
+  {
+    "asset": "assets/curated/factory/screen-wide.glb",
+    "source": "C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\kenney_factory-kit_3.0\\Models\\GLB format\\screen-wide.glb",
+    "sha256": "220211ee38d51a521475caec06bb27aa231f5b1d43fd74cb93393cca47edfda3"
+  },
+  {
+    "asset": "assets/curated/factory/box-large.glb",
+    "source": "C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\kenney_factory-kit_3.0\\Models\\GLB format\\box-large.glb",
+    "sha256": "f5c7a7b4d7ec48c2695dc5241d62a38dbb54b487e6be0f089548582c91bacdfd"
+  },
+  {
+    "asset": "assets/curated/space-props/satelliteDish_detailed.glb",
+    "source": "C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\3D assets\\Space Kit\\Models\\GLTF format\\satelliteDish_detailed.glb",
+    "sha256": "143dd36b2c427e3201110967a18fd836bc7aa8002dbf3e44efa42c75fbb44ae5"
+  },
+  {
+    "asset": "assets/curated/space-props/satelliteDish_large.glb",
+    "source": "C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\3D assets\\Space Kit\\Models\\GLTF format\\satelliteDish_large.glb",
+    "sha256": "8fe696a37081a0a6f1c56ab867f447f33a498ef9f1daabb5aabc62b1ce09277e"
+  },
+  {
+    "asset": "assets/curated/space-props/structure_detailed.glb",
+    "source": "C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\3D assets\\Space Kit\\Models\\GLTF format\\structure_detailed.glb",
+    "sha256": "e0bbdfca04b9e645f0b7feec5a7a5096dc6701b744b42103fe437db06b345a4b"
+  }
+]
