@@ -94,7 +94,7 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 	if name == "craft_cargoA" and FileAccess.file_exists("res://assets/local/entersaebel.glb"):
 		path = "res://assets/local/entersaebel.glb"
 	if name == "freibeuter":
-		path = "res://assets/local/freibeuter/freibeuter.glb"
+		path = "res://assets/local/freibeuter/freibeuter.glb" if FileAccess.file_exists("res://assets/local/freibeuter/freibeuter.glb") else "res://assets/curated/space/craft_cargoA.glb"
 	var packed := load(path) as PackedScene
 	if packed == null:
 		push_error("Required curated asset missing: " + name)
@@ -111,6 +111,8 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 	instance.position = -Vector3(bounds.position.x + bounds.size.x * 0.5, bounds.position.y, bounds.position.z + bounds.size.z * 0.5) * ratio
 	if name == "floor":
 		_tint(instance,material(Color("899da5"),0.15))
+	elif name == "freibeuter" and path.begins_with("res://assets/curated/"):
+		_tint(instance,material(Color("ad6658"),0.25))
 	return pivot
 
 static func _tint(node: Node, mat: Material) -> void:
