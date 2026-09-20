@@ -26,7 +26,7 @@ static func landmarks(region: String) -> Dictionary:
 	return scaled
 static func _landmarks(region: String) -> Dictionary:
 	match region:
-		"base":return {"workbench":[10.0,3.0],"storage":[-10.0,3.0],"contracts":[10.0,-14.0],"shuttle":[25.0,22.0],"bed_ida":[-14.5,-16.2],"bed_jaro":[-12.7,-16.2],"bed_3":[-10.9,-16.2],"bed_4":[-9.1,-16.2],"bed_5":[-7.3,-16.2],"bed_6":[-5.5,-16.2],"kitchen":[5.0,-12.0],"expansion_a":[27.0,-12.0],"expansion_b":[27.0,3.0]}
+		"base":return {"workbench":[10.0,3.0],"storage":[-10.0,3.0],"contracts":[10.0,-14.0],"office":[5.0,-16.0],"shuttle":[25.0,22.0],"bed_ida":[-14.5,-16.2],"bed_jaro":[-12.7,-16.2],"bed_3":[-10.9,-16.2],"bed_4":[-9.1,-16.2],"bed_5":[-7.3,-16.2],"bed_6":[-5.5,-16.2],"kitchen":[5.0,-12.0],"expansion_a":[27.0,-12.0],"expansion_b":[27.0,3.0]}
 		"rust":return {"shuttle":[-210.0,180.0],"satellite":[145.0,-125.0],"mining_site":[-300.0,-210.0],"derelict":[310.0,250.0]}
 		"station":return {"shuttle":[0.0,28.0],"market":[-12.0,-8.0]}
 		"orbit":return {"shuttle":[0.0,0.0]}
@@ -98,7 +98,7 @@ static func obstacles(region: String) -> Dictionary:
 		match Regions.object_base(str(id)):
 			"workbench":size=[2.5,1.3];offset=[0,-0.25]
 			"storage":size=[3.4,1.8];offset=[0,-0.25]
-			"contracts":size=[1.2,1.2];offset=[0,-0.45]
+			"contracts","office":size=[1.2,1.2];offset=[0,-0.45]
 			"kitchen":size=[2.6,1.3];offset=[0,-0.3]
 			"market":size=[8.0,2.6];offset=[0,-0.4]
 			"satellite":size=[11.5,7.0];offset=[0,0]

@@ -39,7 +39,9 @@ var _control_toggle: Button
 var _controls: Label
 var _progress: ProgressBar
 var _progress_text: Label
-var _travel_panel: PanelContainer
+var _travel_panel: Control
+var _cargo_panel: VBoxContainer
+var _cargo_footer: VBoxContainer
 var _travel_title: Label
 var _travel_progress: ProgressBar
 var _crew_buttons: Dictionary = {}
@@ -74,7 +76,7 @@ func _ready() -> void:
 	var theme := Theme.new()
 	theme.default_font_size = 14
 	var font:=SystemFont.new()
-	font.font_names=PackedStringArray(["Bahnschrift","Segoe UI"])
+	font.font_names=PackedStringArray(["Segoe UI","Noto Sans"])
 	theme.default_font=font
 	theme.set_stylebox("panel","TooltipPanel",_style(Color("101b21"),1,CYAN))
 	theme.set_color("font_color","TooltipLabel",PAPER)
@@ -150,7 +152,7 @@ func _build_top() -> void:
 	var row:=HBoxContainer.new()
 	row.add_theme_constant_override("separation",18)
 	top.add_child(row)
-	var brand:=_label("STERNENBÜRGERCHEN",14,PAPER)
+	var brand:=_label("Sternenbürgerchen",14,PAPER)
 	row.add_child(brand)
 	_location=_label("ROSTGRENZE",12,MUTED)
 	_location.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -162,13 +164,13 @@ func _build_top() -> void:
 	_control_toggle=_icon_button("crew","Der gewählten Figur folgen [V]",func():action_requested.emit("toggle_control",{}),row)
 	_menu=PopupMenu.new()
 	add_child(_menu)
-	for entry: Array in [["Speichern · F5",1],["Laden · F9",2],["Crewakte",7],["Koop-Verbindung",3],["Logbuch",4],["Bedienung",5],["Zum Hauptmenü",8],["Speichern und beenden",6]]: _menu.add_item(entry[0],entry[1])
+	for entry: Array in [["Speichern · F5",1],["Laden · F9",2],["Koop-Verbindung",3],["Logbuch",4],["Handbuch / Bedienung",5],["Zum Hauptmenü",8],["Speichern und beenden",6]]: _menu.add_item(entry[0],entry[1])
 	_menu.id_pressed.connect(_menu_action)
-	_icon_button("menu","Menü · Speichern, Laden, Koop und Hilfe",func():_menu.popup(Rect2i(Vector2i(get_viewport().get_mouse_position()),Vector2i(240,0))),row)
+	_button("System",func():_menu.popup(Rect2i(Vector2i(get_viewport().get_mouse_position()),Vector2i(260,0))),row,30)
 	_resources=Label.new();_resources.hide();row.add_child(_resources)
 
 func _build_crew() -> void:
-	var column:=_panel(Control.PRESET_BOTTOM_LEFT,Rect2(12,-160,332,110))
+	var column:=_panel(Control.PRESET_BOTTOM_RIGHT,Rect2(-352,-164,340,114))
 	var header:=HBoxContainer.new()
 	column.add_child(header)
 	_crew_caption=_label("CREW / 01 GEWÄHLT",11,AMBER)
@@ -196,7 +198,7 @@ func _build_crew() -> void:
 	_network=Label.new();_network.hide();column.add_child(_network)
 
 func _build_context() -> void:
-	var column:=_panel(Control.PRESET_BOTTOM_RIGHT,Rect2(-410,-350,398,300))
+	var column:=_panel(Control.PRESET_TOP_LEFT,Rect2(70,68,394,400))
 	_context_panel=column.get_parent()
 	var heading:=HBoxContainer.new()
 	column.add_child(heading)
@@ -233,6 +235,7 @@ func _build_context() -> void:
 	column.add_child(_action_scroll)
 	_context_actions.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	_action_scroll.add_child(_context_actions)
+	_cargo_footer=VBoxContainer.new();column.add_child(_cargo_footer)
 	_hint=_label("",12,MUTED)
 	_hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_hint)
@@ -253,21 +256,11 @@ func _build_footer() -> void:
 	_log=Label.new();_log.hide();column.add_child(_log)
 
 func _build_travel() -> void:
-	_travel_panel = PanelContainer.new()
-	_travel_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	_travel_panel.position = Vector2(-260,-76)
-	_travel_panel.size = Vector2(520,152)
-	_travel_panel.add_theme_stylebox_override("panel",_style(INK))
+	_travel_panel=preload("res://scripts/ui/travel_animation.gd").new()
 	_root.add_child(_travel_panel)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation",14)
-	_travel_panel.add_child(column)
-	column.add_child(_label("ENTERSÄBEL / REISE", 12, AMBER))
-	_travel_title = _label("Anflug",22)
-	column.add_child(_travel_title)
-	_travel_progress = ProgressBar.new()
-	_travel_progress.custom_minimum_size.y=14
-	column.add_child(_travel_progress)
+	_travel_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_travel_panel.offset_left=-330;_travel_panel.offset_top=-165
+	_travel_panel.offset_right=330;_travel_panel.offset_bottom=165
 	_travel_panel.hide()
 
 func _build_network() -> void:
@@ -283,6 +276,7 @@ func open_network(internet:bool=true) -> void:
 
 func _build_dossier() -> void:
 	_dossier = load("res://scripts/ui/crew_dossier.gd").new()
+	_dossier.theme=_root.theme
 	add_child(_dossier)
 	_dossier.action_requested.connect(func(action: String, payload: Dictionary):action_requested.emit(action,payload))
 
@@ -371,18 +365,13 @@ func present(state: Dictionary) -> void:
 		var button: Button=_crew_buttons[id]
 		var owns: bool=_owns(id)
 		var owner_label: String="CREW" if owns else ""
-		button.text=("● " if id in selected_units else "○ ")+str(unit.get("name",id))+"  "+owner_label+"\n"+work_label
+		button.text=("● " if id in selected_units else "○ ")+str(unit.get("name",id))+"\n"+work_label+" · "+str(int(unit.get("health",0)))+" HP"
 		button.add_theme_stylebox_override("normal",_style(Color("304d53") if id in selected_units else Color("243640"),5,CYAN if id in selected_units else Color("33464e")))
 	var entries: Array=state.get("log",[])
 	var recent: PackedStringArray=[]
 	for i: int in range(maxi(0,entries.size()-3),entries.size()): recent.append(str(entries[i]))
 	_log.text="\n".join(recent)
-	var travel: Dictionary=state.get("travel",{})
-	_travel_panel.visible=travel.get("active",false)
-	if _travel_panel.visible:
-		var destination: String=travel.get("to","base")
-		_travel_title.text=("Crew steigt ein" if travel.get("phase","")=="boarding" else "Unterwegs nach "+REGIONS.get(destination,destination))
-		_travel_progress.value=_fraction(travel)
+	_travel_panel.present(state)
 	_update_objective()
 	_update_context()
 
@@ -392,6 +381,9 @@ func _rebuild_actions() -> void:
 		_context_actions.remove_child(child)
 		child.queue_free()
 	_action_buttons.clear()
+	_cargo_panel=null
+	for child: Node in _cargo_footer.get_children():
+		_cargo_footer.remove_child(child);child.queue_free()
 	_context_actions.columns=1 if selection_id=="storage" else 2
 	_worker.visible=selection_id in ["workbench","satellite"]
 	if GroundContext.build(self,selection_id): return
@@ -417,12 +409,16 @@ func _rebuild_actions() -> void:
 				_add_command("sell_"+item,Catalog.item_name(item)+" verkaufen","trade",{"side":"sell","item":item,"amount":1})
 			if _state.get("region","")=="station":_add_command("rent_ship","Geier mieten · 900 Credits / 20 Spielminuten","rent_ship",{"ship_id":"vulture"})
 		"storage":
-			_hint.text="Güter aus dem Shuttle werden zu Hause ins Lager übernommen."
-			for item: String in Catalog.ITEMS:
-				var row:=HBoxContainer.new()
-				_context_actions.add_child(row)
-				_add_command("load_"+item,_item_name(item),"transfer",{"item":item,"amount":1,"direction":"load"},false,row)
-				_add_command("unload_"+item,"Ausladen","transfer",{"item":item,"amount":1,"direction":"unload"},false,row)
+			_cargo_panel=preload("res://scripts/ui/cargo_panel.gd").new()
+			_cargo_panel.footer=_cargo_footer
+			_context_actions.add_child(_cargo_panel)
+			_cargo_panel.command_requested.connect(func(command: Dictionary):command_requested.emit(command))
+			_cargo_panel.feedback.connect(notify)
+		"office":
+			for id: String in _state.get("crew",{}):
+				_button(str(_state.crew[id].name)+" · Akte & Ausrüstung",func():open_dossier(id),_context_actions,48)
+			_button("Crew auswählen",func():select_units(["ida","jaro"]),_context_actions,40)
+
 		"ida","jaro":
 			_button("Dossier & Ausrüstung",func():open_dossier(selected_unit),_context_actions,48)
 			_add_command("equip_helmet","Instandgesetzten Helm aus dem Lager ausrüsten","equip",{"item":"helmet"},true)
@@ -430,7 +426,7 @@ func _rebuild_actions() -> void:
 				_add_command("equip_"+item,Catalog.item_name(item)+" aus dem Lager ausrüsten","equip",{"item":item},true)
 
 func _add_command(key: String,label: String,type: String,data: Dictionary={},with_unit: bool=false,parent: Node=null) -> void:
-	var captions: Dictionary={"field_repair":"Feldreparatur","accept_contract":"Annehmen","claim_contract":"Abgeben","toolkit":"Werkzeugkit","repair":"Reparieren","helmet":"Helm richten","armor":"Rüstung","cutter":"Schneider","upgrade_workbench":"Werkbank II","equip_helmet":"Helm anlegen","equip_armor":"Rüstung anlegen","equip_toolkit":"Werkzeugkit","equip_cutter":"Schneider","gather":"Gewinnen","cancel_gather":"Abbrechen","attack":"Angriff","stop_attack":"Stopp","use_elevator":"Aufzug","bunker_surface":"Wachtposten","distribution":"Verteilzentrum","tradepost":"Staubmarkt","rent_ship":"Geier mieten","return_rental":"Mietschiff zurück","cancel_work":"Abbrechen","salvage":"Bergen","cancel_salvage":"Abbrechen","rust":"Suchgebiet","base":"Heimat","station":"Station"}
+	var captions: Dictionary={"field_repair":"Feldreparatur","accept_contract":"Annehmen","claim_contract":"Abgeben · +260 Cr","toolkit":"Werkzeugkit","repair":"Reparieren","helmet":"Helm richten","armor":"Rüstung","cutter":"Schneider","upgrade_workbench":"Werkbank II","equip_helmet":"Helm anlegen","equip_armor":"Rüstung anlegen","equip_toolkit":"Werkzeugkit","equip_cutter":"Schneider","gather":"Gewinnen","cancel_gather":"Abbrechen","attack":"Angriff","stop_attack":"Stopp","use_elevator":"Aufzug","bunker_surface":"Wachtposten","distribution":"Verteilzentrum","tradepost":"Staubmarkt","rent_ship":"Geier mieten","return_rental":"Mietschiff zurück","cancel_work":"Abbrechen","salvage":"Bergen","cancel_salvage":"Abbrechen","rust":"Suchgebiet","base":"Heimat","station":"Station"}
 	var button:=_button(captions.get(key,label),func():
 		var payload: Dictionary=data.duplicate(true)
 		if with_unit: payload["unit_id"]=selected_unit
@@ -469,8 +465,9 @@ func _update_context() -> void:
 		_worker.set_item_disabled(index,not _owns("ida" if index==0 else "jaro"))
 	var height: float={"workbench":500,"market":530,"storage":530,"shuttle":500,"satellite":305,"contracts":250,"ida":520,"jaro":520}.get(selection_id,310)
 	_action_scroll.custom_minimum_size.y=minf(210,maxf(48,_context_actions.get_combined_minimum_size().y))
-	_context_panel.offset_top=-height-50
-	_context_panel.offset_bottom=-50
+	_context_panel.offset_top=68
+	_context_panel.offset_bottom=minf(68+height,float(get_viewport().get_visible_rect().size.y)-50)
+	if selection_id=="storage":_action_scroll.custom_minimum_size.y=250
 	if selection_id.begins_with("bed_"):
 		_context_title.text="Unterkunft / Schlafplatz"
 		_context_text.text="Zwei belegte Betten und vier zusätzliche Plätze an den Wänden."
@@ -522,12 +519,17 @@ func _update_context() -> void:
 			if _state.region=="station":_context_text.text+="\nGeier: 900 Cr für 20 Spielminuten. Mehr Fracht und Wrackertrag."
 
 		"storage":
-			_context_title.text="Basislager"
-			_context_text.text="[b]Im Lager[/b]  "+_items(inventory)+"\n\n[b]Im Shuttle[/b]  "+_items(cargo)
-			_hint.text="Je Klick ein Gut. Ausladen macht eine Verladung rückgängig."
-			for item: String in Catalog.ITEMS:
-				_disable("load_"+item,int(inventory[item])<=0 or _cargo_used()>=int(_state.ship.capacity) or _state.travel.active)
-				_disable("unload_"+item,int(cargo[item])<=0 or _state.travel.active)
+			_context_title.text="Lager & Schiffsfracht"
+			_context_text.text="[b]Entladen wird hier im Basislager.[/b]"
+			if is_instance_valid(_cargo_panel):_cargo_panel.present(_state)
+			_hint.text="Schiff am Heimatdock landen. Eine Person bleibt an Bord oder am Zugang."
+		"office":
+			_context_title.text="Büro · Crewverwaltung"
+			_context_text.text="[b]Zwei Crewmitglieder · gemeinsames Kommando[/b]\nAkte öffnen: Fähigkeiten, Gesundheit, Ausrüstung und Rucksack."
+			for person: Dictionary in _state.crew.values():
+				_context_text.text+="\n\n%s · %d / 100 Gesundheit\nPilotieren %d · Geschütz %d · Technik %d" % [person.name,int(person.health),int(person.skills.pilot),int(person.skills.gunnery),int(person.skills.tech)]
+			_hint.text="Plätze werden beim Einsteigen nach Fähigkeiten verteilt; manuelle Zuweisung am Schiff. Bewerber und Ausbildung folgen später."
+
 		"bed_ida","bed_jaro":
 			_context_title.text="Ein Platz für "+("Ida" if selection_id=="bed_ida" else "Jaro")
 			_context_text.text="Fest reserviertes Bett.\n\nVier weitere Schlafplätze stehen bereit. Neue Crew folgt mit Rekrutierung."
@@ -607,7 +609,7 @@ func notify(message: String) -> void:
 func _process(delta: float) -> void:
 	if _toast_seconds>0:
 		_toast_seconds-=delta
-		if _toast_seconds<=0: _toast.text="F5: Speichern · F9: Laden · Menü: Logbuch und Hilfe"
+		if _toast_seconds<=0: _toast.text=""
 
 func _show_help() -> void:
 	var dialog:=AcceptDialog.new()
@@ -631,7 +633,7 @@ func _build_objective() -> void:
 
 func _update_objective() -> void:
 	for id: String in _quick_actions:
-		_quick_actions[id].visible=(id=="shuttle" and not Regions.underground(_state.region)) or (_state.region=="base" and id in ["contracts","workbench","storage"]) or (_state.region in Regions.MARKETS and id=="market")
+		_quick_actions[id].visible=(id=="shuttle" and not Regions.underground(_state.region)) or (_state.region=="base" and id in ["contracts","workbench","storage","office"]) or (_state.region in Regions.MARKETS and id=="market")
 	var status: String=_state.contract.status
 	_objective_id="contracts"
 	var text: String="Erster Auftrag · 260 Credits + Bauplan"
@@ -651,7 +653,9 @@ func _update_objective() -> void:
 		text="Piratenkontakt · Angriff oder Rückzug";action="Shuttle zeigen";_objective_id="shuttle"
 	elif status=="active":
 		text="Auftrag angenommen · Zur Absturzstelle";action="Shuttle öffnen";_objective_id="shuttle"
-	elif status=="recovered": text="Zurück daheim · Bergung abgeben";action="Auftrag abgeben"
+	elif status=="recovered":
+		_objective_id="storage";action="Lager & Abgabe öffnen"
+		text="Blackbox im Schiff · Am Heimatdock landen und im Lager ausladen" if int(_state.cargo.blackbox)>0 else "Blackbox im Lager · Jetzt 260 Cr + Bauplan abholen" if int(_state.inventory.blackbox)>0 else "Blackbox im Rucksack · Ins Basislager übertragen"
 	elif status=="claimed": text="Bauplan erhalten · Schneider herstellen";action="Werkbank öffnen";_objective_id="workbench"
 	_objective.text=text
 	_objective_button.tooltip_text=action
@@ -750,10 +754,10 @@ func _action_icon(key: String) -> String:
 	return {"accept_contract":"contracts","claim_contract":"check","cancel_work":"close","cancel_salvage":"close","salvage":"satellite","rust":"satellite","station":"market","gather":"mining","cancel_gather":"close","use_elevator":"elevator","bunker_surface":"base","distribution":"storage","tradepost":"market","rent_ship":"shuttle","return_rental":"unload","attack":"target","stop_attack":"pause"}.get(key,key)
 
 func _build_quick_actions() -> void:
-	var column:=_panel(Control.PRESET_TOP_LEFT,Rect2(12,68,46,205))
-	for id: String in ["contracts","workbench","storage","shuttle","market"]:
-		var label: String={"contracts":"Auftragskonsole","workbench":"Werkbank","storage":"Lager","shuttle":"Entersäbel · Shuttle","market":"Stationsmarkt"}[id]
-		_quick_actions[id]=_icon_button(id,label,func():action_requested.emit("inspect_object",{"object_id":id}),column,30)
+	var column:=_panel(Control.PRESET_TOP_LEFT,Rect2(12,68,46,245))
+	for id: String in ["contracts","workbench","storage","office","shuttle","market"]:
+		var label: String={"contracts":"Auftragskonsole","workbench":"Werkbank","storage":"Lager","shuttle":"Entersäbel · Shuttle","market":"Stationsmarkt","office":"Büro · Crew verwalten"}[id]
+		_quick_actions[id]=_icon_button("crew" if id=="office" else id,label,func():action_requested.emit("inspect_object",{"object_id":id}),column,30)
 
 func _seat_label(seat: String) -> String:
-	return {"pilot":"Pilot", "gunner":"Turmschütze", "passenger_1":"Passagier", "passenger_2":"Passagier"}.get(seat,"An Bord")
+	return {"pilot":"Pilot", "gunner":"Turm", "passenger_1":"Passagier", "passenger_2":"Passagier"}.get(seat,"An Bord")

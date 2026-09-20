@@ -28,6 +28,16 @@ static func validate(payload: Variant) -> String:
 	if not s.get("region") in Regions.ALL: return "Region ungültig."
 	if not whole(s.get("credits"),0,1000000000) or not _items(s.get("inventory")) or not _items(s.get("cargo")): return "Bestand ungültig."
 	if not s.get("ship") is Dictionary or not number(s.ship.get("condition"),0,100) or not whole(s.ship.get("capacity"),1,1000): return "Shuttle ungültig."
+	if s.ship.has("order"):
+		var order: Variant=s.ship.order
+		if not order is Dictionary:return "Flugauftrag ungültig."
+		if not order.is_empty():
+			if not s.get("travel") is Dictionary:return "Reisedaten fehlen."
+			if order.size()!=4 or not order.get("kind") in ["patrol","search"] or order.get("region")!=s.region or s.ship.get("mode")!="flying" or s.get("travel",{}).get("active",true):return "Flugauftrag passt nicht zur Region."
+			if not order.get("points") is Array or order.points.size()<2 or order.points.size()>10 or not whole(order.get("index"),0,order.points.size()-1):return "Flugpunkte ungültig."
+			for point: Variant in order.points:
+				if not position_valid(point,Catalog.bounds(s.region)):return "Flugpunkt außerhalb der Karte."
+			if order.points[int(order.index)]!=s.ship.get("target"):return "Flugziel widerspricht Auftrag."
 	var cargo_count: int = 0
 	for item: String in s.cargo: cargo_count += int(s.cargo[item])
 	if cargo_count > s.ship.capacity: return "Frachtraum überfüllt."

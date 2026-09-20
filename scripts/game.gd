@@ -27,6 +27,7 @@ var _capture_path := ""
 var _capture_time := -1.0
 var _capture_quit := false
 var _direct_mode := false
+var _pending_flight_order := ""
 
 func _ready() -> void:
 	DisplayServer.window_set_title("Sternenbürgerchen · Rostgrenze · Neustart")
@@ -57,6 +58,7 @@ func _ready() -> void:
 	expedition=ExpeditionScript.new()
 	expedition.name="ExpeditionHUD"
 	add_child(expedition)
+	expedition._panel.theme=hud._root.theme
 	expedition.command_requested.connect(send_command)
 	expedition.action_requested.connect(_on_action)
 	boarding_menu=preload("res://scripts/ui/boarding_menu.gd").new()
@@ -64,6 +66,7 @@ func _ready() -> void:
 	boarding_menu.command_requested.connect(send_command)
 	boarding_menu.action_requested.connect(_on_action)
 	travel_chart=preload("res://scripts/ui/travel_chart.gd").new()
+	travel_chart.theme=hud._root.theme
 	add_child(travel_chart)
 	travel_chart.command_requested.connect(send_command)
 	simulation.notice.connect(hud.notify)
@@ -112,6 +115,10 @@ func _on_object_selected(kind: String,id: String) -> void:
 	_refresh()
 
 func _on_ground_clicked(position: Vector2) -> void:
+	if not _pending_flight_order.is_empty():
+		var mode:=_pending_flight_order;_pending_flight_order=""
+		send_command({"type":"ship_order","mode":mode,"position":[position.x,position.y]})
+		return
 	var state: Dictionary=session.current_snapshot()
 	if str(state.get("ship",{}).get("mode","landed"))=="flying":
 		var flight_result := send_command({"type":"ship_move","position":[position.x,position.y]})
@@ -161,6 +168,9 @@ func _on_units_selected(ids: Array[String]) -> void:
 
 func _on_action(action: String,payload: Dictionary) -> void:
 	match action:
+		"flight_order":
+			_pending_flight_order=str(payload.get("mode",""))
+			hud.notify("Rechtsklick: zweiter Patrouillenpunkt. Escape bricht ab." if _pending_flight_order=="patrol" else "Rechtsklick: Mittelpunkt des 180-m-Suchrasters. Escape bricht ab.")
 		"boarding_menu":
 			boarding_menu.open_for(session.current_snapshot(),_owned_units(hud.selected_units),get_viewport().get_mouse_position())
 		"board_selected":_board_selected(payload.get("ids",hud.selected_units))
@@ -241,7 +251,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_1: hud.choose_unit("ida",false)
 		KEY_2: hud.choose_unit("jaro",false)
 		KEY_V: _on_action("toggle_control",{}); get_viewport().set_input_as_handled()
-		KEY_ESCAPE: hud.dismiss_context()
+		KEY_ESCAPE: _pending_flight_order="";hud.dismiss_context()
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(session) or not is_instance_valid(world) or not is_instance_valid(hud): return

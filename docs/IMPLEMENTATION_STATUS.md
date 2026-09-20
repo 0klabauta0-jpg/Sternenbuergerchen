@@ -1,5 +1,9 @@
 # Umsetzungsstand · 13.09.2026
 
+## Aktueller Stand N6 · 21.09.2026
+
+[N6_ACCEPTANCE.md](N6_ACCEPTANCE.md) ist der aktuelle Umfang und Prüfstand: animierte Reise/Systemkarte, Frachtkarten mit Lagerabgabe, Büroterminal, neu angeordnete Bedienung und autoritative Hindernisumwege/Patrouille/Suche. ship.order ist ein streng geprüfter optionaler Zusatz zu Schema5; fehlende alte Felder werden ergänzt. Alte blockierte Flugpositionen werden beim Laden sichtbar korrigiert. Die folgenden N5/N4-Abschnitte bewahren Grundlagen und damalige Ausbaustände. Schiffsinnenräume bleiben geplant und sind nicht Teil von N6.
+
 ## Aktuelle Erweiterung N5 · 13.09.2026
 
 N5 liefert neun Reiseziele und vierzehn getrennte Karten: größere Orbit-/Kontaktkarten, drei Bunker mit eigenem Untergrund, freundliches Freihafen und besetztes Knotenwerk. Ein echter Handelsring verbindet Meridian, Freihafen und Staubmarkt. Kenney-Details, terrassierte Felsen/Schluchten, die Entersäbel mit9714 Dreiecken und der kleine Reparaturaufsatz ergänzen den bisherigen Spielkreis.

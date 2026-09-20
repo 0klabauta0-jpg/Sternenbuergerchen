@@ -1,5 +1,9 @@
 # Architektur und Schnittstellen
 
+## Aktueller Zusatz: Schema5 mit optionalem Flugauftrag
+
+[N6_ACCEPTANCE.md](N6_ACCEPTANCE.md) ist der aktuelle Umfang und Prüfstand: animierte Reise/Systemkarte, Frachtkarten mit Lagerabgabe, Büroterminal, neu angeordnete Bedienung und autoritative Hindernisumwege/Patrouille/Suche. ship.order ist ein streng geprüfter optionaler Zusatz zu Schema5; fehlende alte Felder werden ergänzt. Alte blockierte Flugpositionen werden beim Laden sichtbar korrigiert. Die folgenden N5/N4-Abschnitte bewahren Grundlagen und damalige Ausbaustände. Schiffsinnenräume bleiben geplant und sind nicht Teil von N6.
+
 ## Aktueller Vertrag: Schema5
 
 [N5_ACCEPTANCE.md](N5_ACCEPTANCE.md) beschreibt Regionen, Bunkerpaare, regionale Wirtschaft, Feldreparatur und die geprüfte Migration. `regions.gd` ist der gemeinsame Katalog für alle14 Karten, `trade_routes.gd` besitzt die festen Preise. `world_expansion_state.gd` ergänzt streng validierte N4-Saves; `legacy_n4/` bleibt unverändert. `SimulationRoot` erstellt und speichert Schema5. Aktive Arbeit, Fracht und Crewplätze werden erhalten; neue Geometrie kann geloggte räumliche Anpassungen benötigen.

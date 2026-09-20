@@ -182,9 +182,13 @@ func _name(item: String) -> String:
 
 func _refresh() -> void:
 	var crew: Dictionary = _crew()
+	if crew.is_empty():return
 	_heading.text = str(crew.get("name", _unit_id)) + " / CREW-DOSSIER"
 	var skills: Dictionary = crew.get("skills", {})
-	_profile.text = "Gesundheit %s / 100     Pilot %s · Geschütz %s · Technik %s" % [crew.get("health", "–"), skills.get("pilot", "–"), skills.get("gunnery", "–"), skills.get("tech", "–")]
+	_profile.text = "Gesundheit %s / 100\nPilotieren %s   ·   Geschütz %s   ·   Technik %s" % [crew.get("health", "–"), skills.get("pilot", "–"), skills.get("gunnery", "–"), skills.get("tech", "–")]
+	var effect: Dictionary=Catalog.skill_effects(crew)
+	_profile.tooltip_text="Pilotieren: Fluggeschwindigkeit. Geschütz: Boden- und Turmschaden. Technik: Rezepte und Arbeitsdauer."
+	_profile.text+="\nFlugtempo × %.2f · Turmschaden %s" % [float(effect.flight_multiplier),str(effect.turret_damage)]
 	var equipment: Dictionary = crew.get("equipment", {})
 	_doll.present(equipment)
 	for slot: String in _slots:
@@ -212,7 +216,8 @@ func _refresh() -> void:
 				_rows[key] = row
 			var button: Button = _rows[key]
 			button.show()
-			button.text = _name(item) + "\n× " + str(quantity)
+			button.text = _name(item) + "\n" + str(quantity) + " Stück"
+			button.icon = Icons.texture(item if Icons.SHAPES.has(item) else "storage")
 			button.source = {"from":container, "item":item, "available":quantity, "unit_id":_unit_id}
 			button.tooltip_text = "Ziehen: " + _name(item)
 	var target_id: String = str(_heal_target.get_item_metadata(_heal_target.selected)) if _heal_target.selected >= 0 else ""

@@ -17,7 +17,7 @@ var _guest:=false
 
 func _ready() -> void:
 	_panel=PanelContainer.new()
-	_panel.position=Vector2(80,78)
+
 	_panel.custom_minimum_size=Vector2(300,0)
 	var style:=StyleBoxFlat.new()
 	style.bg_color=Color(0.035,0.065,0.09,0.96)
@@ -26,6 +26,8 @@ func _ready() -> void:
 	style.set_content_margin_all(13)
 	_panel.add_theme_stylebox_override("panel",style)
 	add_child(_panel)
+	_panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_panel.offset_left=-318;_panel.offset_right=-12;_panel.offset_top=158;_panel.offset_bottom=158
 	var column:=VBoxContainer.new()
 	column.add_theme_constant_override("separation",10)
 	_panel.add_child(column)

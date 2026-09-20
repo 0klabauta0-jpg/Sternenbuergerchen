@@ -121,7 +121,7 @@ func _dispatch(command: Dictionary, sender: int) -> String:
 		var result: String=_ground.dispatch(command,sender)
 		if _state.region!=previous_region:_routes.clear()
 		return result
-	if kind in ["ship_move","radar_scan","land","fire_turret","flee"]:
+	if kind in ["ship_move","ship_order","radar_scan","land","fire_turret","flee"]:
 		return _orbit.dispatch(command,sender)
 	if _state.travel.active:
 		return "Crew befindet sich auf Reise."
@@ -406,6 +406,7 @@ func _normalize_loaded_numbers() -> void:
 	for key: String in ["schema_version","revision","credits","wreck_remaining"]:
 		_state[key] = int(_state[key])
 	_state.ship.capacity = int(_state.ship.capacity)
+	if not _state.ship.get("order",{}).is_empty():_state.ship.order.index=int(_state.ship.order.index)
 	_state.contract.reward = int(_state.contract.reward)
 	_state.random_seed=int(_state.random_seed)
 	_state.base.workbench_tier=int(_state.base.workbench_tier)

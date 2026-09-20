@@ -71,7 +71,10 @@ func _run() -> void:
 	await _fly_to(Vector2(25,22))
 	await _land_and_exit()
 	await _object("storage")
-	await _action("unload_blackbox")
+	var cargo_ui: Node=game.hud._cargo_panel
+	game.hud._action_scroll.ensure_control_visible(cargo_ui._rows["cargo:blackbox"])
+	await process_frame
+	await _click(cargo_ui._rows["cargo:blackbox"].get_global_rect().get_center())
 	_check(game.simulation.snapshot().inventory.blackbox==1,"Dock unload transfers actual blackbox into base inventory")
 	await _object("contracts")
 	await _action("claim_contract")

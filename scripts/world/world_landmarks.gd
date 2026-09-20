@@ -5,7 +5,7 @@ const Geo = preload("res://scripts/world/world_geometry.gd")
 const Ship = preload("res://scripts/world/world_ship.gd")
 const Rooms = preload("res://scripts/world/world_rooms.gd")
 const GroundSites = preload("res://scripts/world/world_ground_sites.gd")
-const TITLES := {"workbench":"WERKBANK", "storage":"LAGER", "contracts":"AUFTRÄGE", "shuttle":"ENTERSÄBEL · SHUTTLE", "market":"HANDEL", "satellite":"SATELLITENWRACK", "bed_ida":"IDA", "bed_jaro":"JARO", "kitchen":"KÜCHE / AUFENTHALT", "expansion_a":"MODULFLÄCHE A", "expansion_b":"MODULFLÄCHE B", "pirate":"FREIBEUTER"}
+const TITLES := {"workbench":"WERKBANK", "office":"BÜRO · CREW", "storage":"LAGER · HIER ENTLADEN", "contracts":"AUFTRÄGE", "shuttle":"ENTERSÄBEL · SHUTTLE", "market":"HANDEL", "satellite":"SATELLITENWRACK", "bed_ida":"IDA", "bed_jaro":"JARO", "kitchen":"KÜCHE / AUFENTHALT", "expansion_a":"MODULFLÄCHE A", "expansion_b":"MODULFLÄCHE B", "pirate":"FREIBEUTER"}
 
 static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dictionary:
 	var nodes := {}
@@ -36,7 +36,7 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 				Geo.asset(root,"crate-small",Vector3(1.0,0.05,-0.2),Vector3(1.0,0.75,1.0))
 				Geo.asset(root,"crate-small",Vector3(-0.6,0.95,-0.3),Vector3(0.9,0.6,0.9),0.15)
 				collision = Vector3(3,1.8,1.8)
-			"contracts":
+			"contracts", "office":
 				Geo.asset(root,"computer",Vector3(0,0.05,-0.45),Vector3(1.2,1.9,1.2))
 				_beacon(root,Vector3(0,1.8,-0.4),Color("77d9d2"))
 			"shuttle":

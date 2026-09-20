@@ -38,7 +38,7 @@ static func interaction_point(region: String,object_id: String) -> Array:
 	elif object_id=="satellite":point[1]+=4.8
 	elif object_id in ["mining_site","derelict","distribution_wreck"]:point[1]+=8.5
 	elif Ground.sites().has(resource_id):point[1]+=3.2
-	elif object_id=="contracts":point[1]+=1.8
+	elif object_id in ["contracts","office"]:point[1]+=1.8
 	elif object_id=="market":point[1]+=2.7
 	elif object_id.begins_with("bed_"):point[1]+=2.1
 	return point

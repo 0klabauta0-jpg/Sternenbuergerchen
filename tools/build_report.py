@@ -1,4 +1,4 @@
-"""Build the dated N5 game plan as standalone HTML with available real captures.
+"""Build the dated N6 game plan as standalone HTML with available real captures.
 
 The tracked template contains no local ship images or models. A fresh clone can
 generate the text report; captures from the documented window probes enrich it.
@@ -12,9 +12,13 @@ import struct
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "output"
 SHOTS = [
+    ('n6-system-chart.png', 'N6: die echte Systemkarte mit Asche, Rostwelt, Karstmond und Meridian-Gürtel. Alle Ziele behalten ihre getrennten Karten.'),
+    ('n6-ascent.png', 'N6: tatsächlicher Aufstieg in den Orbit, aus der laufenden Reisezeit animiert und pausierbar.'),
+    ('n6-planet-approach.png', 'N6: Anflug auf den gewählten Ort, ohne Ladebalken.'),
+    ('n6-cargo-unloaded.png', 'N6: Blackbox per echtem Drag-and-drop im Basislager ausgeladen; die feste Abgabe zahlt 260 Credits und einen Bauplan.'),
+    ('n6-flight-orders.png', 'N6: Patrouille, Suchraster und Halt am ausgewählten Schiff. Die Bedienprüfung erteilt die Patrouille mit echtem Rechtsklick.'),
     ('n5-world/base-details.png', 'Aktuelle N5-Basis mit getrennten Räumen, Satellitenschüssel und Kenney-Versorgungsmodulen.'),
     ('n5-world/terraced-canyon.png', 'Breite Felsstufen und eine gewundene Schlucht in der Heimatkarte. Der Bodenweg ist begehbar; die Terrassen sind Hindernisse.'),
-    ('n5-world/travel-chart.png', 'Die echte native Reisekarte: neun Ziele, Bunkerstufen, Ortsgrößen, Risiken und die drei Handelsstrecken.'),
     ('n5-world/entersaebel.png', 'Die neue lokale Blender-Entersäbel mit achteckigem Turm und vereinfachter Silhouette.'),
     ('n5-world/bunker_surface.png', 'Karst: leichte Bunkeroberfläche, echte Reiseankunft.'),
     ('n5-world/bunker_medium.png', 'Kluft: mittlere Bunkerbesatzung und Versorgung.'),
@@ -26,7 +30,7 @@ SHOTS = [
     ('n5-world/market-prices.png', 'Die tatsächliche Marktoberfläche in Meridian mit regionalen Preisen.'),
     ('n5-world/orbit.png', 'Vergrößerte eigene Orbitkarte, weiterhin Flug auf einer Ebene.'),
     ('n5-world/space-contact.png', 'Tatsächlich ausgelöster Piratenkontakt auf einer eigenen Raumkarte.'),
-    ('n4-crew-dossier.png', 'Das bestehende Dossier mit der weißen Helmfigur, Ausrüstungsslots und persönlichem Rucksack.'),
+    ('n6-dossier.png', 'Das bestehende Dossier mit der weißen Helmfigur, Ausrüstungsslots und persönlichem Rucksack.'),
     ('n3-main-menu.png', 'Das erhaltene Hauptmenümotiv mit der sitzenden Frau.'),
 ]
 

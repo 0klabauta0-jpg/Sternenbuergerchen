@@ -2,6 +2,12 @@ extends RefCounted
 ## Original 24px line icons; rendered as vectors, no font glyph dependencies.
 static var _cache: Dictionary={}
 const SHAPES := {
+	"scrap":"<path d='m2 16 8-4 12 4-8 5zM2 10l8-4 12 4-8 5zM2 10v6m12-1v6m8-11v6'/>",
+	"parts":"<path d='m8 2 5 3v6l-5 3-5-3V5zM8 6v4m-2-2h4M16 11l5 3v6l-5 3-5-3v-6z'/><circle cx='16' cy='17' r='2'/>",
+	"blackbox":"<rect x='3' y='5' width='18' height='15' rx='2'/><path d='M8 5V2h8v3M7 10h10M7 14h4m3 0h3M7 18h10'/>",
+	"ore":"<path d='m3 15 5-10 8-3 6 12-7 8H6zM8 5l7 17m1-20-4 10 10 2M3 15l9-3'/>",
+	"alloy":"<path d='m3 9 9-5 9 5v10l-9 3-9-3zM3 9l9 4 9-4M12 13v9M7 7l10 4'/>",
+	"repair_attachment":"<path d='M5 22v-9l-3-3V4l4 3 4-3v6l-3 3v9M15 4h7v9h-7zM18 13v9'/>",
 	"orbit":"<circle cx='12' cy='12' r='5'/><ellipse cx='12' cy='12' rx='11' ry='4' transform='rotate(-35 12 12)'/><circle cx='3' cy='17' r='2'/>",
 	"multitool":"<path d='M3 8h13l5 4-5 3H9l-1 7H4l1-10H3zM16 8V4h5'/>",
 	"medgun":"<path d='M3 8h14v8H9l-1 6H4l1-10H3zM17 10h5M10 5v8M6 9h8'/>",
@@ -28,7 +34,6 @@ const SHAPES := {
 	"menu":"<path d='M3 5h18M3 12h18M3 19h18'/>",
 	"close":"<path d='m5 5 14 14M19 5 5 19'/>",
 	"toolkit":"<path d='M3 8h18v13H3zM8 8V4h8v4M3 14h18M10 12v4h4v-4'/>",
-	"repair_attachment":"<path d='M14 3a6 6 0 0 0-7 7L2 16l6 6 6-7a6 6 0 0 0 7-7l-5 3-3-3z'/>",
 	"field_repair":"<path d='M4 12h16M12 4v16M3 3h18v18H3z'/>",
 	"repair":"<path d='M14 3a6 6 0 0 0-7 7L2 16l6 6 6-7a6 6 0 0 0 7-7l-5 3-3-3z'/>",
 	"cutter":"<path d='m3 18 10-10 3 3L6 21zM13 8l3-6 6 6-6 3M17 5l4-4'/>",

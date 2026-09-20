@@ -8,6 +8,10 @@ static func build(hud: Node) -> void:
 	hud._add_command("enter_orbit","In den Orbit","enter_orbit")
 	hud._button("Reisekarte öffnen",func():hud.action_requested.emit("travel_chart",{}),hud._context_actions,46)
 	hud._add_command("land","Hier landen","land")
+	hud._button("Patrouille setzen",func():hud.action_requested.emit("flight_order",{"mode":"patrol"}),hud._context_actions,40)
+	hud._button("Suchgebiet setzen",func():hud.action_requested.emit("flight_order",{"mode":"search"}),hud._context_actions,40)
+	hud._add_command("ship_stop","Position halten","ship_order",{"mode":"stop"})
+	hud._button("Fracht ansehen",func():hud.select_object("object","storage"),hud._context_actions,40)
 	hud._worker.visible=true
 	hud._add_command("field_repair","Feldreparatur","field_repair",{},true)
 	if hud._state.get("rental",{}).get("active",false):hud._add_command("return_rental","Mietschiff zurückgeben","return_rental")
@@ -37,3 +41,6 @@ static func present(hud: Node) -> void:
 	hud._context_text.text+="\n\nFeldreparatur: Multi-Tool + Reparatur-Aufsatz, 1 Bauteil im Rucksack, Nähe 6 m am Zugang. Bis 70 %; danach Werkstatt."
 	if str(ship.mode)=="flying":hud._hint.text="Rechtsklick auf die Welt: lokales Flugziel. Neue Orte wählst du auf der Reisekarte im Orbit."
 	if s.get("rental",{}).get("active",false):hud._context_text.text+="\n\nMiete: %d s verbleiben" % int(s.rental.remaining)
+
+	var order: Dictionary=ship.get("order",{})
+	if not order.is_empty():hud._context_text.text+="\nFlugauftrag: "+("Patrouille" if order.kind=="patrol" else "Suchraster")+" · Punkt %d / %d" % [int(order.index)+1,order.points.size()]

@@ -43,7 +43,8 @@ func run() -> void:
 	v3=Ground.migrate(v2);v3.state.region="rust";v3.state.ship.mode="flying";v3.state.ship.position=[0.0,0.0];v3.state.ship.target=[10.0,0.0]
 	for unit: Dictionary in v3.state.crew.values():unit.assignment="aboard";unit.position=[0.0,0.0];unit.target=[0.0,0.0]
 	check(V3.validate(v3).is_empty(),"legacy flying fixture valid")
-	sim=load_fixture(v3,"v3 flight");check(sim.snapshot().ship.seats.pilot=="ida" and sim.snapshot().ship.seats.gunner=="jaro","legacy roles preserved as actual seats");sim.advance(1);check(sim.snapshot().ship.position[0]>0,"legacy flight remains movable");sim.free()
+	sim=load_fixture(v3,"v3 flight");check(sim.snapshot().ship.seats.pilot=="ida" and sim.snapshot().ship.seats.gunner=="jaro","legacy roles preserved as actual seats");var flight=preload("res://scripts/core/flight_navigation.gd");var at: Array=sim.snapshot().ship.position
+	check(flight.clear("rust","cutlass",Vector2(at[0],at[1]),Vector2(at[0],at[1])),"legacy flight relocated outside new hull obstacles");sim.free()
 	v3=Ground.migrate(v2);v3.state.crew.ida.position=[10.0,3.0];v3.state.crew.ida.target=[10.0,3.0]
 	check(V3.validate(v3).is_empty(),"old free point now furniture fixture valid")
 	sim=load_fixture(v3,"v3 new obstacle");check(sim.snapshot().crew.ida.position!=[10.0,3.0],"blocked old position relocated");check(sim.snapshot().inventory==v3.state.inventory.merged({"backpack":0,"multitool":0,"mining_attachment":0,"salvage_attachment":0,"medgun":0,"med_charge":0,"repair_attachment":0}),"no old inventory lost");sim.free()

@@ -1,3 +1,17 @@
+# Privater Windows-Testbuild N6 · 21.09.2026
+
+Godot4.6.2, Schema5 mit optionalem Flugauftrag, Dateiversion0.6.0.0. Neues Paket output/Sternenbuergerchen-Windows-N6.zip: 61370338 Bytes.
+
+ZIP SHA256: fac2adf58000a8d2751159b445aa91c4f2f6a9170324a2fb16c995b8027b8d0c
+
+EXE SHA256: 2a21605b9da8f9a1dfb86df183ecc4f918c9d104275d158fca75f751134b0ba7
+
+Frisch entpackt:14 Manifestdateien bytegenau geprüft, normale EXE startet Menü und Spiel mit isolierter APPDATA und Exit0. 29/29 Prüfungen im exakt eingebetteten PCK bestanden; neue UI-/Flugmodule vorhanden. Fehlerlogs leer, Screenshots gespeichert. ZIP/Modelle bleiben lokal, cloudflared2026.9.1 und Lizenztexte enthalten. output/windows ist jetzt N6. Kein separater neuer Internetlauf der exportierten EXE; Quellprojekt-Nachweise in [N6_ACCEPTANCE.md](N6_ACCEPTANCE.md). Alte ZIPs unverändert.
+
+Evidenz: C:\Users\bjoer\AppData\Local\Temp\sternen-windows-n6-n6s3u0ub
+
+---
+
 # Privater Windows-Testbuild N5 · 13.09.2026
 
 N5 wurde mit Godot4.6.2, Schema5 und Dateiversion0.5.0.0 exportiert. Das Paket enthält EXE/Engine/eingebetteten PCK, drei lokale Schiffsvorlagen, cloudflared2026.9.1, Anleitung und Lizenztexte einschließlich der zusätzlich verwendeten Factory-/Space-Module.

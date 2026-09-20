@@ -55,6 +55,7 @@ func dispatch(c: Dictionary) -> String:
 		if not c.get("destination") is String or not Catalog.destination_info().has(c.destination):return "Ungültiges Reiseziel."
 		destination=c.destination
 	else:return "Unbekannter Reisebefehl."
+	s.ship.order={}
 	s.random_seed=(int(s.random_seed)*48271)%2147483647
 	s.ship.target=s.ship.position.duplicate()
 	s.travel={"active":true,"from":s.region,"to":destination,"remaining":5.0,"total":5.0,"phase":"flying","kind":"orbit" if destination=="orbit" else "intermap","encounter_decided":true,"encounter_roll":int(s.random_seed)%100}
@@ -64,6 +65,7 @@ func tick_boarding() -> void:
 		if unit.assignment=="boarding" and _v(unit.position).distance_to(_v(unit.target))<0.02:unit.assignment="aboard"
 		if unit.assignment=="aboard":unit.position=s.ship.position.duplicate();unit.target=unit.position.duplicate()
 func arrive(destination: String) -> void:
+	s.ship.order={}
 	s.region=destination;s.ship.mode="flying"
 	s.ship.position=[0.0,0.0] if destination=="orbit" else Catalog.arrival_point(destination)
 	s.ship.target=s.ship.position.duplicate();s.travel=empty_travel();tick_boarding()
