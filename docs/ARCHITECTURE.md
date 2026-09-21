@@ -1,5 +1,9 @@
 # Aktuell: N7 · Teams, Ebenen, Forschung und Grafik
 
+## Lokaler N8-Zusatz: physische Fracht
+
+[N8_FREIGHT.md](N8_FREIGHT.md) ersetzt im lokalen N8-Arbeitsstand die unten historisch beschriebene unmittelbare Handels-/Frachtumbuchung. `cargo_hauling.gd` führt echte Trageaufträge und geteilte Kisten innerhalb der Autorität von SimulationRoot aus. `freight_world` ist in TeamCampaign gemeinsam; `hauling.jobs` bindet die eigene Crew. Der Renderer zeigt ausschließlich Projektionen. Kämpfende PvP-Figuren werden anhand der autoritativen Kampfaufträge von automatischer Vergabe ausgeschlossen. Dies ist noch keine vollständige N8-Produktfreigabe.
+
 [N7_ACCEPTANCE.md](N7_ACCEPTANCE.md) beschreibt den aktuellen geprüften Umfang und die Grenzen. Zwei Teams mit bis zu acht Menschen je Team; Koop innerhalb des Teams und Boden-PvP gegeneinander. Die folgenden N6/N5-Abschnitte sind historische Stände.
 
 # Architektur und Schnittstellen

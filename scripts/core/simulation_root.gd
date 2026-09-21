@@ -3,6 +3,7 @@ class_name RestartSimulation
 const Haul=preload("res://scripts/core/cargo_hauling.gd")
 const Market=preload("res://scripts/core/market_stock.gd")
 var external_market_clock:=false
+var haul_excluded:Array[String]=[] # Derived from campaign PvP orders, never persisted.
 const Sites=preload("res://scripts/core/site_state.gd")
 const Infrastructure=preload("res://scripts/core/base_infrastructure.gd")
 const Regions=preload("res://scripts/core/regions.gd")
@@ -332,7 +333,7 @@ func _tick(delta: float) -> void:
 	_state.time += delta
 	if not external_market_clock:Market.advance(_state.market_stock,delta)
 	_tick_ground_levels(delta)
-	Haul.tick(_state,delta,_log)
+	Haul.tick(_state,delta,_log,haul_excluded)
 	if _state.ship.condition<=0 and _state.ship.mode=="flying" and _state.region!="space":
 		_state.ship.condition=50.0;_arrive("base");_log("Notbergung nach Flaktreffer: Crew und Schiff zurück an der Basis.");return
 	if not _state.travel.active and _state.ship.mode=="flying":

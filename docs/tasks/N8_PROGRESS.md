@@ -36,9 +36,9 @@ Plan: N8_IMPLEMENTATION_PLAN.md. Basis: 61f77cd. Keine finale Abnahme, kein N8-P
 - Nach Einführung der Waren erneut 16 echte lokale Netzwerkprozesse bestanden: ENet `sternen-team16-e1a7ecfa141647c892924b5eaddf4be4`, WebSocket `sternen-team16-c86c9d1dc4514bf99b1d6bc474a353c0` (Temp-Evidenz). Das ist kein Test zwischen zwei entfernten Internetanschlüssen.
 - Spieländerungen weiterhin lokal im N8-Arbeitsstand; kein neues Windows-Paket veröffentlicht. Privater Handybericht unter https://sternenbuergerchen-neustart.klabauta.chatgpt.site/n8.html am 21.09.2026 erfolgreich veröffentlicht. Enthält echte Aufnahmen, direkte Referenzvergleiche und ausdrücklich offene Arbeiten.
 
-## Neu beauftragt: automatische, überfallbare NPC-Verladung
-- Noch nicht implementiert: `trade` und `transfer` buchen aktuell unmittelbar um.
-- Ziel: ein Verladeauftrag steuert verfügbare gesunde NPCs automatisch über reale Wege zwischen Quelle und Ziel. Sichtbare Tragelasten gehören jeweils genau einem Behälter/Träger/Bodenobjekt.
-- Kauf reserviert gemeinsamen Händlerbestand; Verkauf bezahlt erst bei tatsächlicher Lieferung. Gefallene Träger lassen echte Beute zurück, die auch andere Teams aufnehmen und abtransportieren können.
-- Erforderliche Integration: Crew-Bindung, Navigation, Schaden/Respawn, Teamprojektion, konkurrierendes Aufheben, Boarding/Reise, Pause sowie strenge Save-Prüfung einschließlich Blackbox-Konsistenz. Keine reine Trageanimation über unverändertem Soforttransfer.
-- Ablauf und Grenzen im neuen Handybericht beschrieben. Schiffsenterung, Laderoboter und große begehbare Frachträume sind damit noch nicht zugesagt oder geliefert.
+## Umgesetzt: automatische, überfallbare NPC-Verladung
+- Handel und Basislager/Schiffstransfers buchen nicht mehr unmittelbar ans Ziel. NPCs tragen reale Kisten, mit Pause, Abbruch, Verwundung, gegnerischer Aufnahme und korrekter einmaliger Warenvergabe.
+- Kauf reserviert gemeinsamen Händlerbestand; Verkauf bezahlt erst bei tatsächlicher Lieferung. Geteilte Frachtwelt, aktive Träger und offene Aufträge sind speicherbar. Start/Reise warten auf Abschluss oder Abbruch.
+- Nachweise und genaue Grenzen: [N8_FREIGHT.md](../N8_FREIGHT.md). Neue Kern-, Überfall-, Konkurrenz-, native Maus- und Zwei-Prozess-Netzwerkproben bestanden; 16-Prozess-ENet und WebSockets ebenfalls grün.
+- Frischer gezielter Review fand eine Übernahme kämpfender PvP-NPCs durch automatische Verladung. Rot-Grün-Test hinzugefügt und behoben: der Kern erhält die tatsächlich durch PvP gebundenen Figuren als abgeleitete Ausschlussliste. Bestehende Angriffe bleiben bestehen.
+- Grenzen: Mining-/Bergungs-Ausgabepfade sind noch keine Feldlogistikkette; die persönliche Missions-Blackbox ist noch nicht zwischen Karrieren übertragbar. Normale Handelswaren sind stehlbar. Kein Schiffsenterungssystem, keine Laderoboter oder großen begehbaren Frachträume.

@@ -21,6 +21,7 @@ Bestehende gültige Saves ohne neue Felder erhalten einen leeren Frachtzustand n
 - `haul_flow_test`: Kauf ohne Teleport, automatische Crew, Pause, Lieferung, Speichern, Verkauf erst bei Anlieferung.
 - `haul_raid_test`: echter Bodenangriff auf Träger, Fallkiste, Übernahme durch Gegenteam, identische Anfragebelege und Save vor/nach Überfall.
 - `haul_guards_test`: Abbruch vor und während Transport, Startblockade, konkurrierende Aufnahme und atomare Ablehnung beschädigter Aufträge.
+- `haul_combat_priority_test`: aktive PvP-Befehle bleiben bestehen; die automatische Verladung nimmt eine andere freie Figur. Bestätigter Reviewer-Befund mit Rot-Grün-Regression behoben.
 - `haul_window_test`: reales Godot-Fenster, Marktknopf, sichtbare Tragelast, Abbruch, Raycast auf Fallkiste und echter Rechtsklick über InputEvent.
 - `haul_network_run.py`: zwei echte Produktprozesse, ENet sowie authentifizierte WebSockets; Gastkauf, sichtbarer Träger, Ablegen, Übernahme zum gegnerischen Schiff, beide Projektionen und gemeinsamer Save. Evidenz: Temp `sternen-haul-network-x7hgpbuk` / `sternen-haul-network-pkhltf5k`.
 - 16-Prozess-Regressionsläufe: ENet `sternen-team16-069fbb9eacf44c1792569da73c3a25b8`, WebSocket `sternen-team16-67418c8241d84ffb9ecfe24a6455b1fa`.

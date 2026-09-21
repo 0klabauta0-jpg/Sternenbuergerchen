@@ -161,6 +161,9 @@ func advance(delta:float) -> void:
 	while remaining>0.00001:
 		var step:=minf(remaining,0.05)
 		for team in 2:
+			_cores[team].haul_excluded.clear()
+			for order:Dictionary in _combat.orders.values():
+				if int(order.team)==team:_cores[team].haul_excluded.append(str(order.unit))
 			_cores[team].advance(step)
 			var state:Dictionary=_cores[team]._state
 			if not _pending_planets[team].is_empty() and not state.travel.active and state.region in preload("res://scripts/core/regions.gd").DESTINATIONS:

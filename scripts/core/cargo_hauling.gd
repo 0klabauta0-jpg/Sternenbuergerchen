@@ -82,7 +82,7 @@ static func interrupt(s:Dictionary,id:String) -> void:
 static func cancel(s:Dictionary) -> void:
  for id:String in s.crew:interrupt(s,id)
  s.hauling.jobs.clear()
-static func tick(s:Dictionary,delta:float,logger:Callable) -> void:
+static func tick(s:Dictionary,delta:float,logger:Callable,excluded:Array[String]=[]) -> void:
  for j:Dictionary in s.hauling.jobs.duplicate():
   var box:Dictionary=s.freight_world.crates.get(j.crate,{})
   if int(j.held)==0 and (int(j.left)==0 or box.is_empty() or int(box.get("amount",0))==0):
@@ -90,6 +90,7 @@ static func tick(s:Dictionary,delta:float,logger:Callable) -> void:
   if j.region!=s.region or s.ship.mode!="landed" or s.travel.active:continue
   if str(j.unit).is_empty():
    for id:String in s.crew:
+    if id in excluded:continue
     var unit:Dictionary=s.crew[id]
     if not str(j.preferred).is_empty() and j.preferred!=id:continue
     if unit.health<=0 or not unit.assignment in ["idle","aboard"] or unit.get("level_region",s.region)!=s.region or not str(unit.attack_target).is_empty():continue
