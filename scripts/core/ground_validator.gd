@@ -25,6 +25,7 @@ static func validate(s: Dictionary) -> String:
 		for id: String in expected:
 			if not enemies.get(id) is Dictionary:return "Feind fehlt."
 			var enemy: Dictionary=enemies[id]
+			if enemy.has("last_tick") and not Numbers.number(enemy.last_tick,0,1000000000000):return "Feindtakt ungültig."
 			for field: String in ["id","name","kind","max_health"]:
 				if enemy.get(field)!=expected[id][field]:return "Feindtyp ungültig."
 			if not Numbers.position_valid(enemy.get("position"),Catalog.bounds(region)) or not Numbers.position_valid(enemy.get("target"),Catalog.bounds(region)):return "Feindposition ungültig."
@@ -37,18 +38,19 @@ static func validate(s: Dictionary) -> String:
 		if not s.crew.has(activity.unit_id) or not Catalog.resource_sites().has(activity.site_id):return "Gewinnungsbindung ungültig."
 		var site: Dictionary=Catalog.resource_sites()[activity.site_id]
 		var worker: Dictionary=s.crew[activity.unit_id]
-		if site.region!=s.region or worker.assignment!="gather" or s.travel.active or s.ship.mode!="landed" or s.resources[activity.site_id].remaining<=0 or activity.phase=="idle":return "Gewinnung widersprüchlich."
-		if not is_equal_approx(activity.total,site.duration/Catalog.skill_effects(worker).gather_multiplier) or not _same(worker.target,Catalog.interaction_point(s.region,activity.site_id)):return "Gewinnungsziel/-zeit ungültig."
+		if site.region!=worker.get("level_region",s.region) or worker.assignment!="gather" or s.travel.active or s.ship.mode!="landed" or s.resources[activity.site_id].remaining<=0 or activity.phase=="idle":return "Gewinnung widersprüchlich."
+		if not is_equal_approx(activity.total,site.duration/Catalog.skill_effects(worker).gather_multiplier) or not _same(worker.target,Catalog.interaction_point(worker.get("level_region",s.region),activity.site_id)):return "Gewinnungsziel/-zeit ungültig."
 	elif activity.unit_id!="" or activity.site_id!="" or activity.total!=0 or activity.remaining!=0 or activity.phase!="idle":return "Inaktive Gewinnung inkonsistent."
 	for id: String in s.crew:
 		var unit: Dictionary=s.crew[id]
+		var level:String=unit.get("level_region",s.region)
 		if s.ship.mode=="landed" and unit.assignment!="aboard":
-			if not Nav.walkable(s.region,Vector2(unit.position[0],unit.position[1]),s.ship) or not Nav.walkable(s.region,Vector2(unit.target[0],unit.target[1]),s.ship):return "Person innerhalb eines Hindernisses."
+			if not Nav.walkable(level,Vector2(unit.position[0],unit.position[1]),s.ship) or not Nav.walkable(level,Vector2(unit.target[0],unit.target[1]),s.ship):return "Person innerhalb eines Hindernisses."
 		if not unit.equipment.get("armor") in ["","armor"] or not Numbers.number(unit.get("health"),0,100) or not Numbers.number(unit.get("respawn_remaining"),0,20) or not Numbers.number(unit.get("attack_cooldown"),0,1) or not unit.get("attack_target") is String:return "Gesundheit/Ausrüstung ungültig."
 		if (unit.health==0)!=(unit.assignment=="downed") or (unit.health>0 and unit.respawn_remaining!=0) or (unit.health==0 and unit.respawn_remaining<=0):return "Verwundung widersprüchlich."
 		if unit.assignment=="downed" and (s.travel.active or s.ship.mode!="landed" or not _same(unit.position,unit.target)):return "Verwundete Person im Flug."
 		if unit.assignment=="gather" and (not activity.active or activity.unit_id!=id):return "Verwaiste Gewinnungsbindung."
-		if not unit.attack_target.is_empty() and (unit.assignment!="idle" or not s.ground.enemies[s.region].has(unit.attack_target)):return "Angriffsziel ungültig."
+		if not unit.attack_target.is_empty() and (unit.assignment!="idle" or not s.ground.enemies[level].has(unit.attack_target)):return "Angriffsziel ungültig."
 	return ""
 static func _same(a: Array,b: Array) -> bool:
 	return is_equal_approx(float(a[0]),float(b[0])) and is_equal_approx(float(a[1]),float(b[1]))

@@ -24,7 +24,7 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 		var label_height := 2.3
 		match Regions.object_base(str(id)):
 			"bed_ida", "bed_jaro", "bed_3", "bed_4", "bed_5", "bed_6":
-				Geo.asset(root,"bed-single",Vector3(0,0.05,-0.2),Vector3(1.45,0.85,2.6),PI)
+				Geo.asset(root,"hab:bed",Vector3(0,0.05,-0.2),Vector3(1.45,0.85,2.6),PI)
 				collision = Vector3(1.5,0.9,2.6)
 				label_height = 1.3
 			"workbench":

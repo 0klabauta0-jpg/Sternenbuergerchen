@@ -33,7 +33,20 @@ static func _path(parent: Node3D, points: Array, width: float) -> void:
 		var a: Vector2=points[i];var b: Vector2=points[i+1];var na:=edges[i];var nb:=edges[i+1]
 		for p: Vector2 in [a-na,a+na,b-nb,b-nb,a+na,b+nb]:
 			surface.set_normal(Vector3.UP);surface.add_vertex(Vector3(p.x,0.04,p.y))
-	var mesh:=MeshInstance3D.new();mesh.mesh=surface.commit();var material:=Geo.material(Color("b29a76"));material.cull_mode=BaseMaterial3D.CULL_DISABLED;mesh.material_override=material;parent.add_child(mesh)
+	for i in range(points.size()-1):
+		var a:Vector2=points[i];var b:Vector2=points[i+1]
+		var direction:Vector2=(b-a).normalized();var normal:=direction.orthogonal()
+		for side in [-1.0,1.0]:
+			var center:Vector2=(a+b)*0.5+normal*(width*0.5-0.07)*side
+			var strip:=Geo.box(parent,Vector3(center.x,0.065,center.y),Vector3(0.10,0.025,a.distance_to(b)),Color("b9b5a0"))
+			strip.rotation.y=atan2(direction.x,direction.y)
+		for n in maxi(1,int(a.distance_to(b)/2.5)):
+			var point:Vector2=a+direction*(n*2.5+0.7)
+			for side in [-1.0,1.0]:
+				var at:Vector2=point+normal*(width*0.5-0.22)*side
+				var light:=Geo.box(parent,Vector3(at.x,0.085,at.y),Vector3(0.16,0.035,0.16),Color("70c9c4"))
+				light.material_override=Geo.material(Color("70c9c4"),0,0.8)
+	var mesh:=MeshInstance3D.new();mesh.mesh=surface.commit();var material:=Geo.material(Color("48545a"));material.cull_mode=BaseMaterial3D.CULL_DISABLED;mesh.material_override=material;parent.add_child(mesh)
 
 static func _room(parent: Node3D, center: Vector2, size: Vector2, door: Vector2, title: String, east: bool) -> void:
 	Geo.box(parent,Vector3(center.x,0.015,center.y),Vector3(size.x,0.07,size.y),Color("819496") if not east else Color("879a98"))

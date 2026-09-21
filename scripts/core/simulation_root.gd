@@ -22,6 +22,7 @@ signal state_changed
 signal notice(message: String)
 var auto_tick: bool = true
 var _guest_id: int = 0
+var _guest_members: Dictionary = {}
 var _receipts: Dictionary = {}
 var _state: Dictionary = {}
 var _orbit: RefCounted = Orbit.new()
@@ -46,6 +47,7 @@ func _init(seed_value: int = -1) -> void:
 	GroundState.extend(_state)
 	CrewState.extend(_state)
 	Expansion.extend(_state)
+	_state.blueprints.append("research_materials")
 	_state.ground.enemies.bunker_depths=Catalog.ground_enemies("bunker_depths")
 	_state.crew.ida.position=[0.0,0.0];_state.crew.ida.target=[0.0,0.0]
 	_state.crew.jaro.position=[1.0,1.0];_state.crew.jaro.target=[1.0,1.0]
@@ -95,12 +97,12 @@ func submit(command: Dictionary, sender_id: int = 1) -> Dictionary:
 	if _receipts.has(receipt_key):
 		return _receipts[receipt_key].duplicate(true)
 	var reason: String = ""
-	if sender_id != 1 and (sender_id != _guest_id or _guest_id == 0):
+	if sender_id != 1 and not _guest_members.has(sender_id):
 		reason = "Absender ist nicht Teil der Sitzung."
 	elif not command.get("type") is String:
 		reason = "Befehlstyp fehlt."
 	else:
-		reason = _dispatch(command, sender_id)
+		reason = _dispatch_on_level(command, sender_id)
 	var result: Dictionary = _result(reason.is_empty(), reason if not reason.is_empty() else "Bestätigt.", request)
 	_receipts[receipt_key] = result
 	if result.ok:
@@ -108,6 +110,30 @@ func submit(command: Dictionary, sender_id: int = 1) -> Dictionary:
 	else:
 		notice.emit(reason)
 	return result.duplicate(true)
+
+func _dispatch_on_level(command:Dictionary,sender:int) -> String:
+	var id:String=str(command.get("unit_id",""))
+	var original:String=_state.region
+	var level:String=str(_state.crew.get(id,{}).get("level_region",original))
+	if command.has("view_region") and command.view_region!=level:return "Person befindet sich auf einer anderen Ebene."
+	var contextual:bool=command.type in ["move","attack","gather","equip","equip_item","unequip_item","backpack_transfer","use_medgun","field_repair"]
+	if contextual:_state.region=level
+	var reason:String=_dispatch(command,sender)
+	if contextual:_state.region=original
+	return reason
+
+func _tick_ground_levels(delta:float) -> void:
+	if not Regions.bunker(_state.region):_ground.tick(delta);return
+	var original:String=_state.region
+	var crew:Dictionary=_state.crew
+	var first:=true
+	for region:String in [Regions.surface(original),Regions.elevator_target(Regions.surface(original))]:
+		var subset:Dictionary={}
+		for id:String in crew:
+			if crew[id].get("level_region",original)==region:subset[id]=crew[id]
+		_state.region=region;_state.crew=subset
+		_ground.tick(delta,first);first=false
+	_state.region=original;_state.crew=crew
 
 func _dispatch(command: Dictionary, sender: int) -> String:
 	var kind: String = command.type
@@ -184,6 +210,7 @@ func _start_work(command: Dictionary, sender: int) -> String:
 	if not recipe_id is String or not Catalog.recipes().has(recipe_id): return "Unbekanntes Rezept."
 	if not _state.blueprints.has(recipe_id): return "Bauplan fehlt."
 	var recipe: Dictionary = Catalog.recipes()[recipe_id]
+	if recipe.has("unlocks") and str(recipe.unlocks[0]) in _state.blueprints:return "Forschung bereits abgeschlossen."
 	if _state.base.workbench_tier < recipe.tier:return "Werkbankstufe reicht nicht. Erst die Werkbank ausbauen."
 	if recipe_id=="upgrade_workbench" and _state.base.workbench_tier>=2:return "Werkbank ist bereits auf Stufe 2."
 	var unit: Dictionary = _state.crew[command.unit_id]
@@ -268,7 +295,7 @@ func advance(delta: float) -> void:
 
 func _tick(delta: float) -> void:
 	_state.time += delta
-	_ground.tick(delta)
+	_tick_ground_levels(delta)
 	if _state.ship.condition<=0 and _state.ship.mode=="flying" and _state.region!="space":
 		_state.ship.condition=50.0;_arrive("base");_log("Notbergung nach Flaktreffer: Crew und Schiff zurück an der Basis.");return
 	if not _state.travel.active and _state.ship.mode=="flying":
@@ -295,6 +322,8 @@ func _tick(delta: float) -> void:
 			if _state.work.remaining <= 0.0:
 				var recipe: Dictionary = Catalog.recipes()[_state.work.recipe_id]
 				for item: String in recipe.output: _state.inventory[item] += recipe.output[item]
+				for unlock:String in recipe.get("unlocks",[]):
+					if not unlock in _state.blueprints:_state.blueprints.append(unlock)
 				if _state.work.recipe_id == "repair": _state.ship.condition = minf(100.0, _state.ship.condition + 28.0)
 				if _state.work.recipe_id == "upgrade_workbench":_state.base.workbench_tier=2
 				_log(recipe.label + " fertig.")
@@ -334,15 +363,18 @@ func _salvage_tool(unit: Dictionary) -> bool:
 	return unit.equipment.tool=="cutter" or (unit.equipment.tool=="multitool" and unit.equipment.attachment=="salvage_attachment")
 
 func set_guest(peer_id: int) -> void:
-	if peer_id <= 1: return
-	_guest_id = peer_id
-	_state.crew.jaro.owner = peer_id
+	if peer_id<=1 or _guest_members.size()>=15:return
+	_guest_members[peer_id]=true
+	_guest_id=int(_guest_members.keys()[0])
+	_state.crew.jaro.owner=_guest_id
 	_changed()
 
-func clear_guest() -> void:
-	_guest_id = 0
-	_state.crew.jaro.owner = 1
-	_state.paused = true
+func clear_guest(peer_id: int=0) -> void:
+	if peer_id==0:_guest_members.clear()
+	else:_guest_members.erase(peer_id)
+	_guest_id=int(_guest_members.keys()[0]) if not _guest_members.is_empty() else 0
+	_state.crew.jaro.owner=_guest_id if _guest_id>1 else 1
+	_state.paused=true
 	_changed()
 
 func save_game(path: String) -> Dictionary:
@@ -387,9 +419,21 @@ func load_game(path: String) -> Dictionary:
 		payload=Expansion.migrate(payload)
 	var reason: String = Validator.validate(payload)
 	if not reason.is_empty(): return _result(false, "Spielstand abgelehnt: " + reason)
+	return restore_payload(payload)
+
+func export_payload() -> Dictionary:
+	return {"schema_version":5,"state":snapshot(),"receipts":_receipts.duplicate(true)}
+
+func restore_payload(payload: Dictionary) -> Dictionary:
+	var reason:String=Validator.validate(payload)
+	if not reason.is_empty():return _result(false,"Spielstand abgelehnt: "+reason)
 	var previous_revision: int = int(_state.revision)
 	_state = payload.state.duplicate(true)
+	if Regions.underground(_state.region):
+		for unit:Dictionary in _state.crew.values():unit.level_region=unit.get("level_region",_state.region)
+		_state.region=Regions.surface(_state.region)
 	_normalize_loaded_numbers()
+	if not "research_materials" in _state.blueprints:_state.blueprints.append("research_materials")
 	_state.revision = maxi(previous_revision, int(_state.revision))
 	_receipts = payload.receipts.duplicate(true)
 	_state.crew.ida.owner = 1
@@ -455,9 +499,10 @@ func _cancel_unit_tasks(id: String) -> void:
 
 func _move_on_route(id: String,point: Vector2,target: Vector2,delta: float) -> Vector2:
 	if point.distance_to(target)<0.02:return target
-	var key: String=str(_state.region)+str(target)+str(_state.ship.position)+str(_state.ship.mode)+str(_state.ship.model)
+	var region:String=_state.crew[id].get("level_region",_state.region)
+	var key: String=region+str(target)+str(_state.ship.position)+str(_state.ship.mode)+str(_state.ship.model)
 	if not _routes.has(id) or _routes[id].key!=key:
-		_routes[id]={"key":key,"points":Nav.path(_state.region,point,target,_state.ship)}
+		_routes[id]={"key":key,"points":Nav.path(region,point,target,_state.ship)}
 	var path: Array=_routes[id].points
 	if path.is_empty():return point
 	var next: Vector2=path[0]

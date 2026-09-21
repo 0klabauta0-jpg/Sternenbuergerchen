@@ -28,6 +28,9 @@ func present(map: Node3D, objects: Dictionary, units: Dictionary, state: Diction
 			Geo.set_pickable(root,known)
 			(root.get_node("Title") as Label3D).text=Landmarks.site_title(str(id))+" · %d" % int(state.resources[id].remaining)
 	var enemies: Dictionary=state.get("ground",{}).get("enemies",{}).get(region,{})
+	for id in objects.keys():
+		if str(id).begins_with("team") and not enemies.has(id):
+			(objects[id] as Node).queue_free();objects.erase(id)
 	for id in enemies:
 		var data: Dictionary=enemies[id]
 		if not objects.has(id):

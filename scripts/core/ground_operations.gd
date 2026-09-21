@@ -21,7 +21,7 @@ func dispatch(c: Dictionary,sender: int) -> String:
 			if not s.ground.activity.active:return "Keine Gewinnung aktiv."
 			stop_activity()
 		"attack":return _attack(c,sender)
-		"use_elevator":return _elevator(sender)
+		"use_elevator":return _elevator(c,sender)
 		"rent_ship":
 			if c.get("ship_id")!="vulture":return "Dieses Schiff wird nicht vermietet."
 			if s.region!="station" or s.ship.mode!="landed":return "Geier am Stationsdock mieten."
@@ -92,19 +92,31 @@ func _attack(c: Dictionary,sender: int) -> String:
 	unit.attack_target=target;var approach: Vector2=Nav.safe_near(s.region,_v(enemy.position),s.ship)
 	unit.target=[approach.x,approach.y]
 	return ""
-func _elevator(sender: int) -> String:
+func _elevator(c:Dictionary,_sender: int) -> String:
 	if not Regions.bunker(s.region) or s.ship.mode!="landed":return "Kein nutzbarer Aufzug hier."
-	if busy() or s.work.active or s.salvage.active:return "Crew ist gebunden oder verwundet."
-	var entry: String="bunker_entry" if not Regions.underground(s.region) else "elevator"
-	var point: Vector2=_v(Catalog.landmarks(s.region)[entry])
-	for unit: Dictionary in s.crew.values():
-		if unit.assignment!="idle" or _v(unit.position).distance_to(point)>8.0:return "Beide Crewmitglieder zum Aufzug bringen (8 m)."
-	s.region=Regions.elevator_target(s.region)
-	var destination: Array=Catalog.landmarks(s.region)["elevator" if Regions.underground(s.region) else "bunker_entry"]
-	var offset: float=-1.5
-	for unit: Dictionary in s.crew.values():
-		unit.position=[destination[0]+offset,destination[1]];unit.target=unit.position.duplicate();unit.attack_target="";offset+=3.0
-	log_event.call("Aufzug: "+("Untergrund" if Regions.underground(s.region) else "Oberfläche")+" erreicht.")
+	var ids:Variant=c.get("unit_ids",s.crew.keys())
+	if not ids is Array or ids.is_empty() or ids.size()>s.crew.size():return "Personen für den Aufzug auswählen."
+	var from:="";var seen:Dictionary={}
+	for id:Variant in ids:
+		if not id is String or not s.crew.has(id) or seen.has(id):return "Aufzugsauswahl ungültig."
+		seen[id]=true
+		var unit:Dictionary=s.crew[id]
+		var region:String=unit.get("level_region",s.region)
+		if from.is_empty():from=region
+		if from!=region:return "Ausgewählte Personen sind auf verschiedenen Ebenen."
+		var entry:String="elevator" if Regions.underground(region) else "bunker_entry"
+		var point:Vector2=_v(Catalog.landmarks(region)[entry])
+		if unit.assignment!="idle" or unit.health<=0 or _v(unit.position).distance_to(point)>8:return "Ausgewählte Personen zum Aufzug bringen (8 m)."
+	var target:String=Regions.elevator_target(from)
+	var destination:Array=Catalog.landmarks(target)["elevator" if Regions.underground(target) else "bunker_entry"]
+	var offset:float=-1.5
+	for unit:Dictionary in s.crew.values():unit.level_region=unit.get("level_region",s.region)
+	for id:String in ids:
+		var unit:Dictionary=s.crew[id]
+		unit.level_region=target
+		var safe:Vector2=Nav.safe_near(target,Vector2(destination[0]+offset,destination[1]),s.ship)
+		unit.position=[safe.x,safe.y];unit.target=unit.position.duplicate();unit.attack_target="";offset+=3
+	log_event.call("Aufzug: ausgewählte Crew erreicht "+("Untergeschoss." if Regions.underground(target) else "Oberfläche."))
 	return ""
 func cargo_count() -> int:
 	var result: int=0
@@ -121,8 +133,8 @@ func return_rental() -> void:
 	s.rental={"active":false,"remaining":0.0,"expired":false}
 	s.ship.model="cutlass";s.ship.name="Entersäbel";s.ship.capacity=12
 	log_event.call("Geier zurückgegeben. Fracht im Basislager, Entersäbel bereit.")
-func tick(delta: float) -> void:
-	if s.rental.active:
+func tick(delta: float, rental_tick:bool=true) -> void:
+	if rental_tick and s.rental.active:
 		s.rental.remaining=maxf(0,s.rental.remaining-delta)
 		if s.rental.remaining<=0:s.rental.expired=true
 
@@ -141,7 +153,7 @@ func tick(delta: float) -> void:
 	_tick_combat(delta)
 func _tick_activity(delta: float) -> void:
 	var activity: Dictionary=s.ground.activity
-	if not activity.active:return
+	if not activity.active or not s.crew.has(activity.unit_id):return
 	var unit: Dictionary=s.crew[activity.unit_id]
 	if _v(unit.position).distance_to(_v(unit.target))>0.03:return
 	activity.phase="working";activity.remaining=maxf(0,activity.remaining-delta)
@@ -171,7 +183,8 @@ func _tick_combat(delta: float) -> void:
 				log_event.call(enemy.name+" ausgeschaltet. Bergungsprämie erhalten.")
 	for enemy: Dictionary in enemies.values():
 		if enemy.defeated:continue
-		enemy.cooldown=maxf(0,enemy.cooldown-delta)
+		if float(enemy.get("last_tick",-1))<float(s.time):
+			enemy.cooldown=maxf(0,enemy.cooldown-delta);enemy.last_tick=s.time
 		if enemy.cooldown>0:continue
 		if s.ship.mode=="flying":
 			if enemy.kind=="aa" and _v(enemy.position).distance_to(_v(s.ship.position))<=100.0:

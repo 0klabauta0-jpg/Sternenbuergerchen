@@ -19,6 +19,7 @@ func dispatch(c: Dictionary) -> String:
 	if c.type in ["board","cancel_board","disembark"]:
 		if not c.get("unit_id") is String or not s.crew.has(c.unit_id):return "Person nicht gefunden."
 		var unit: Dictionary=s.crew[c.unit_id]
+		if unit.get("level_region",s.region)!=s.region:return "Person muss zuerst zur Oberfläche zurückkehren."
 		if s.ship.mode!="landed" or Regions.underground(s.region):return "Einstieg und Ausstieg brauchen ein gelandetes Schiff."
 		if c.type=="board":
 			if unit.assignment!="idle" or unit.health<=0:return "Person ist bereits gebunden."
@@ -67,6 +68,7 @@ func tick_boarding() -> void:
 func arrive(destination: String) -> void:
 	s.ship.order={}
 	s.region=destination;s.ship.mode="flying"
+	for unit:Dictionary in s.crew.values():unit.erase("level_region")
 	s.ship.position=[0.0,0.0] if destination=="orbit" else Catalog.arrival_point(destination)
 	s.ship.target=s.ship.position.duplicate();s.travel=empty_travel();tick_boarding()
 	logger.call("Ankunft im Flug: "+destination+". Landen und ausdrücklich aussteigen.")

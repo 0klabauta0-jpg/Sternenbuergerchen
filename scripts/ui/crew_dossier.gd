@@ -22,112 +22,62 @@ var _headers: Dictionary = {}
 var _heal: Button
 var _heal_target: OptionButton
 var _refresh_pending: bool = false
+var _crew_select: Dictionary={}
+var _health: ProgressBar
 
 func _ready() -> void:
-	title = "Crew-Dossier"
-	size = Vector2i(1120, 720)
-	min_size = Vector2i(940, 620)
-	visible = false
+	title="Crew-Dossier"
+	size=Vector2i(1240,780);min_size=size
+	visible=false
 	close_requested.connect(close)
-	window_input.connect(func(event: InputEvent) -> void:
-		if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE: close())
-	var backdrop := PanelContainer.new()
+	window_input.connect(func(event:InputEvent):
+		if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:close())
+	var backdrop:=PanelContainer.new()
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("101d27")
-	style.content_margin_left = 20
-	style.content_margin_right = 20
-	style.content_margin_top = 16
-	style.content_margin_bottom = 16
-	backdrop.add_theme_stylebox_override("panel", style)
+	backdrop.add_theme_stylebox_override("panel",_panel_style(Color("091e29"),16))
 	add_child(backdrop)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 12)
-	backdrop.add_child(column)
-	var bar := HBoxContainer.new()
-	column.add_child(bar)
-	_heading = Label.new()
-	_heading.add_theme_font_size_override("font_size", 25)
-	_heading.add_theme_color_override("font_color", Color("efab6f"))
-	_heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bar.add_child(_heading)
-	var dismiss := Button.new()
-	dismiss.text = "Schließen ×"
-	dismiss.pressed.connect(close)
-	bar.add_child(dismiss)
-	_profile = Label.new()
-	column.add_child(_profile)
-	var body := HBoxContainer.new()
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", 16)
-	column.add_child(body)
-	var paper := VBoxContainer.new()
-	paper.custom_minimum_size.x = 310
-	body.add_child(paper)
-	_doll = Doll.new()
-	_doll.custom_minimum_size = Vector2(280, 280)
-	_doll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	paper.add_child(_doll)
-	var slot_grid := GridContainer.new()
-	slot_grid.columns = 2
-	paper.add_child(slot_grid)
-	for slot: String in SLOT_NAMES:
-		var button: Button = _make_target({"to":"equipment", "slot":slot})
-		button.custom_minimum_size = Vector2(151, 57)
-		button.add_theme_font_size_override("font_size", 13)
-		slot_grid.add_child(button)
-		_slots[slot] = button
-	var stores := HBoxContainer.new()
-	stores.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	stores.add_theme_constant_override("separation", 10)
-	body.add_child(stores)
-	for container: String in CONTAINER_NAMES:
-		var panel := VBoxContainer.new()
-		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		panel.custom_minimum_size.x = 190
-		stores.add_child(panel)
-		var header := Label.new()
-		header.add_theme_color_override("font_color", Color("86c5c2"))
-		panel.add_child(header)
-		_headers[container] = header
-		var drop: Button = _make_target({"to":container})
-		drop.text = "Hier ablegen ↓"
-		drop.tooltip_text = "Basislager: Figur muss in 8 m Nähe sein." if container == "inventory" else "Fracht: Am Zugang in 8 m Nähe oder an Bord. Direktes Lager-Umladen nur am Heimatdock." if container == "cargo" else "Persönlicher Rucksack. Jeder Gegenstand belegt einen Platz."
-		drop.custom_minimum_size.y = 44
-		panel.add_child(drop)
-		var scroll := ScrollContainer.new()
-		scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		panel.add_child(scroll)
-		var list := VBoxContainer.new()
-		list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		scroll.add_child(list)
-		_lists[container] = list
-	var controls := HBoxContainer.new()
-	column.add_child(controls)
-	var amount_label := Label.new()
-	amount_label.text = "Menge beim Ziehen"
-	controls.add_child(amount_label)
-	_amount = SpinBox.new()
-	_amount.min_value = 1
-	_amount.max_value = 99
-	_amount.value = 1
-	controls.add_child(_amount)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	controls.add_child(spacer)
-	_heal_target = OptionButton.new()
-	controls.add_child(_heal_target)
-	_heal = Button.new()
-	_heal.text = "Medgun anwenden · 1 Ladung"
-	_heal.pressed.connect(_request_heal)
-	controls.add_child(_heal)
-	_feedback = Label.new()
-	_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_feedback.custom_minimum_size.y = 44
-	_feedback.text = "Gegenstand auf einen passenden Platz ziehen. Bestände ändern sich erst nach Bestätigung."
-	column.add_child(_feedback)
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",14);backdrop.add_child(column)
+	var bar:=HBoxContainer.new();column.add_child(bar)
+	_heading=Label.new();_heading.add_theme_font_size_override("font_size",28);_heading.add_theme_color_override("font_color",Color("ffb461"));_heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.add_child(_heading)
+	var dismiss:=Button.new();dismiss.text="×";dismiss.custom_minimum_size=Vector2(44,42);dismiss.pressed.connect(close);bar.add_child(dismiss)
+	var body:=HBoxContainer.new();body.size_flags_vertical=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",14);column.add_child(body)
+	var crew_panel:=VBoxContainer.new();crew_panel.custom_minimum_size.x=140;crew_panel.add_theme_constant_override("separation",12);body.add_child(crew_panel)
+	var crew_title:=Label.new();crew_title.text="CREW";crew_panel.add_child(crew_title)
+	for id in ["ida","jaro"]:
+		var button:=Button.new();button.text=id.capitalize();button.custom_minimum_size=Vector2(140,85)
+		button.icon=load("res://assets/ui/crew_portrait.png");button.expand_icon=true;button.add_theme_constant_override("icon_max_width",44)
+		button.pressed.connect(func():_unit_id=id;_refresh());crew_panel.add_child(button);_crew_select[id]=button
+	var frame:=PanelContainer.new();frame.custom_minimum_size.x=450;frame.add_theme_stylebox_override("panel",_panel_style(Color("102c37"),12));body.add_child(frame)
+	var paper:=VBoxContainer.new();paper.add_theme_constant_override("separation",10);frame.add_child(paper)
+	_health=ProgressBar.new();_health.custom_minimum_size.y=16;_health.show_percentage=false
+	var fill:=StyleBoxFlat.new();fill.bg_color=Color("57ccc5");fill.set_corner_radius_all(6);_health.add_theme_stylebox_override("fill",fill);paper.add_child(_health)
+	_profile=Label.new();_profile.add_theme_font_size_override("font_size",15);paper.add_child(_profile)
+	_doll=Doll.new();paper.add_child(_doll);_doll.custom_minimum_size=Vector2(400,315);_doll.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	var slot_grid:=GridContainer.new();slot_grid.columns=5;slot_grid.add_theme_constant_override("h_separation",5);paper.add_child(slot_grid)
+	for slot:String in SLOT_NAMES:
+		var button:=_make_target({"to":"equipment","slot":slot});slot_grid.add_child(button)
+		button.custom_minimum_size=Vector2(80,96);button.add_theme_font_size_override("font_size",11);button.alignment=HORIZONTAL_ALIGNMENT_CENTER;button.icon_alignment=HORIZONTAL_ALIGNMENT_CENTER;button.vertical_icon_alignment=VERTICAL_ALIGNMENT_TOP;button.add_theme_constant_override("icon_max_width",32);_slots[slot]=button
+	var stores:=VBoxContainer.new();stores.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stores.add_theme_constant_override("separation",12);body.add_child(stores)
+	for container:String in CONTAINER_NAMES:
+		var panel:=VBoxContainer.new();panel.size_flags_vertical=Control.SIZE_EXPAND_FILL;stores.add_child(panel)
+		var header:=Label.new();header.add_theme_font_size_override("font_size",16);header.add_theme_color_override("font_color",Color("efe5d5"));panel.add_child(header);_headers[container]=header
+		var drop:=_make_target({"to":container});drop.text="↓ Hier ablegen";panel.add_child(drop);drop.custom_minimum_size=Vector2(0,28)
+		drop.tooltip_text="Lager nur in Reichweite; Fracht am Schiffszugang oder an Bord. Bestätigte Transfers beachten Nähe und Kapazität."
+		var scroll:=ScrollContainer.new();scroll.custom_minimum_size.y=100;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;panel.add_child(scroll)
+		var list:=GridContainer.new();list.columns=4;list.add_theme_constant_override("h_separation",6);list.add_theme_constant_override("v_separation",6);scroll.add_child(list);_lists[container]=list
+	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",12);column.add_child(controls)
+	var label:=Label.new();label.text="Transfermenge";controls.add_child(label)
+	_amount=SpinBox.new();_amount.min_value=1;_amount.max_value=99;_amount.value=1;controls.add_child(_amount)
+	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.add_child(spacer)
+	_heal_target=OptionButton.new();controls.add_child(_heal_target)
+	_heal=Button.new();_heal.text="Medgun anwenden · 1 Ladung";_heal.pressed.connect(_request_heal);controls.add_child(_heal)
+	_feedback=Label.new();_feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_feedback.custom_minimum_size.y=38;_feedback.text="Gegenstände auf Ausrüstung oder Container ziehen.";column.add_child(_feedback)
 	_refresh()
+
+func _panel_style(color:Color,padding:int) -> StyleBoxFlat:
+	var style:=StyleBoxFlat.new();style.bg_color=color;style.border_color=Color("355665");style.set_border_width_all(1);style.set_corner_radius_all(12)
+	style.content_margin_left=padding;style.content_margin_right=padding;style.content_margin_top=padding;style.content_margin_bottom=padding
+	return style
 
 func present(state: Dictionary, unit_id: String = "") -> void:
 	_state = state.duplicate(true)
@@ -184,6 +134,11 @@ func _refresh() -> void:
 	var crew: Dictionary = _crew()
 	if crew.is_empty():return
 	_heading.text = str(crew.get("name", _unit_id)) + " / CREW-DOSSIER"
+	_health.value=float(crew.get("health",0))
+	for id:String in _crew_select:
+		var style:=_panel_style(Color("493c2c") if id==_unit_id else Color("142e3a"),8)
+		style.border_color=Color("ffb35f") if id==_unit_id else Color("355665")
+		_crew_select[id].add_theme_stylebox_override("normal",style)
 	var skills: Dictionary = crew.get("skills", {})
 	_profile.text = "Gesundheit %s / 100\nPilotieren %s   ·   Geschütz %s   ·   Technik %s" % [crew.get("health", "–"), skills.get("pilot", "–"), skills.get("gunnery", "–"), skills.get("tech", "–")]
 	var effect: Dictionary=Catalog.skill_effects(crew)
@@ -213,6 +168,12 @@ func _refresh() -> void:
 			if not _rows.has(key):
 				var row: Button = _make_target({"to":container})
 				_lists[container].add_child(row)
+				row.custom_minimum_size=Vector2(116,80)
+				row.alignment=HORIZONTAL_ALIGNMENT_CENTER
+				row.icon_alignment=HORIZONTAL_ALIGNMENT_CENTER
+				row.vertical_icon_alignment=VERTICAL_ALIGNMENT_TOP
+				row.add_theme_font_size_override("font_size",12)
+				row.add_theme_constant_override("icon_max_width",30)
 				_rows[key] = row
 			var button: Button = _rows[key]
 			button.show()

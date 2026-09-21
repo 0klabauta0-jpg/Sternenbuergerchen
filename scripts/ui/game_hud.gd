@@ -26,6 +26,7 @@ var _state: Dictionary = {}
 var _root: Control
 var _resources: Label
 var _location: Label
+var _level_button:Button
 var _network: Label
 var _context_title: Label
 var _context_text: RichTextLabel
@@ -107,6 +108,7 @@ func _ready() -> void:
 	_blueprints=preload("res://scripts/ui/blueprint_tree.gd").new()
 	_blueprints.theme=_root.theme
 	add_child(_blueprints)
+	_blueprints.command_requested.connect(func(command:Dictionary):command_requested.emit(command))
 	var preferences:=ConfigFile.new()
 	preferences.load("user://display_preferences.cfg")
 	_guidance_mode=int(preferences.get_value("display","guidance",1))
@@ -174,7 +176,10 @@ func _build_top() -> void:
 	add_child(_menu)
 	for entry: Array in [["Speichern · F5",1],["Laden · F9",2],["Koop-Verbindung",3],["Logbuch",4],["Handbuch / Bedienung",5],["Zum Hauptmenü",8],["Speichern und beenden",6]]: _menu.add_item(entry[0],entry[1])
 	_menu.add_item("Anzeigehilfen: sanft / ruhig / aus",9)
+	_menu.add_item("Team-Lobby",10)
 	_menu.id_pressed.connect(_menu_action)
+	_level_button=_button("Ebene wechseln",func():action_requested.emit("switch_level",{}),row,30)
+	_level_button.hide()
 	_button("Baupläne",func():_blueprints.open_tree(_state),row,30)
 	_button("System",func():_menu.popup(Rect2i(Vector2i(get_viewport().get_mouse_position()),Vector2i(260,0))),row,30)
 	_resources=Label.new();_resources.hide();row.add_child(_resources)
@@ -359,6 +364,9 @@ func present(state: Dictionary) -> void:
 		selection_id=""
 		_rebuild_actions()
 	_location.text=REGIONS.get(region,region.to_upper())
+	if state.has("campaign"):_location.text=str(state.campaign.planets[state.campaign.planet])+" · "+_location.text
+	_level_button.visible=preload("res://scripts/core/regions.gd").bunker(region)
+	_level_button.text="↑ Oberfläche" if preload("res://scripts/core/regions.gd").underground(region) else "↓ Untergeschoss"
 	var cargo: Dictionary=state.get("cargo",{})
 	var cargo_used: int=0
 	for value: Variant in cargo.values(): cargo_used += int(value)
@@ -373,6 +381,7 @@ func present(state: Dictionary) -> void:
 		var unit: Dictionary=state.get("crew",{}).get(id,{})
 		var assignment: String=unit.get("assignment","idle")
 		var work_label: String={"idle":"Bereit", "work":"Werkstatt", "salvage":"Bergung", "boarding":"Zum Shuttle", "moving":"Unterwegs", "aboard":_seat_label(str(unit.get("seat",""))),"gather":"Gewinnung","downed":"Rückkehr %d s" % int(unit.get("respawn_remaining",0))}.get(assignment,assignment)
+		if unit.has("level_region"):work_label+=" · UG" if preload("res://scripts/core/regions.gd").underground(unit.level_region) else " · EG"
 		var button: Button=_crew_buttons[id]
 		var owns: bool=_owns(id)
 		var owner_label: String="CREW" if owns else ""
@@ -717,6 +726,7 @@ func _menu_action(id: int) -> void:
 		1: action_requested.emit("save",{})
 		2: action_requested.emit("load",{})
 		3: open_network()
+		10: action_requested.emit("team_lobby",{})
 		4:
 			var dialog:=AcceptDialog.new()
 			dialog.title="Logbuch"

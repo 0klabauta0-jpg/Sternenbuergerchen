@@ -53,7 +53,10 @@ static func validate(payload: Variant) -> String:
 		if not s.crew.get(unit_id) is Dictionary: return "Person fehlt."
 		var unit: Dictionary = s.crew[unit_id]
 		if unit.get("id") != unit_id or not unit.get("name") is String or not whole(unit.get("skill"),0,10) or not whole(unit.get("owner"),1,2147483647): return "Personendaten ungültig."
-		if not position_valid(unit.get("position"),Catalog.bounds(s.region)) or not position_valid(unit.get("target"),Catalog.bounds(s.region)): return "Personenposition ungültig."
+		var level:Variant=unit.get("level_region",s.region)
+		if not level is String or (level!=s.region and (not Regions.bunker(s.region) or level!=Regions.elevator_target(s.region))):return "Personenebene ungültig."
+		if unit.get("assignment") in ["aboard","boarding"] and level!=s.region:return "Schiff auf anderer Ebene."
+		if not position_valid(unit.get("position"),Catalog.bounds(level)) or not position_valid(unit.get("target"),Catalog.bounds(level)): return "Personenposition ungültig."
 		if not unit.get("assignment") in ["idle","work","salvage","boarding","aboard","gather","downed"]: return "Zuweisung ungültig."
 	if not s.get("contract") is Dictionary or not s.contract.get("status") in ["available","active","recovered","claimed"] or s.contract.get("reward") != 260: return "Auftrag ungültig."
 	var blackboxes: int = int(s.inventory.blackbox) + int(s.cargo.blackbox)

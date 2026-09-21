@@ -71,7 +71,7 @@ func run() -> void:
 	cmd("cancel_gather")
 	check(sim.snapshot().resources.surface_cache.remaining==4,"cancel consumes no resource")
 	move_both([0,12])
-	check(cmd("use_elevator").ok and sim.snapshot().region=="bunker_depths","surface lobby lift enters separate underground")
+	check(cmd("use_elevator").ok and sim.snapshot().region=="bunker_surface" and sim.snapshot().crew.ida.level_region=="bunker_depths","lift changes crew level within persistent site")
 	check(not cmd("travel",{"destination":"base"}).ok,"no shuttle teleport out of underground")
 	check(not cmd("move",{"unit_id":"ida","position":[100,110]}).ok,"underground void is not walkable")
 	check(not Nav.clear("bunker_depths",Vector2(-20,10),Vector2(20,10)),"walls block direct shooting line")

@@ -9,3 +9,6 @@ assets/local/
 *.blend1
 __pycache__/
 *.pyc
+
+# Local visual captures may contain the user-provided ship models.
+assets/original/previews/

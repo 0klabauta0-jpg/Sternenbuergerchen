@@ -97,6 +97,7 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 		path = "res://assets/local/entersaebel_n4/entersaebel.glb"
 	if name == "craft_cargoA" and ResourceLoader.exists("res://assets/local/entersaebel_n5/entersaebel.glb"):
 		path = "res://assets/local/entersaebel_n5/entersaebel.glb"
+	if name.begins_with("hab:"):path="res://assets/original/habitat/"+name.trim_prefix("hab:")+".glb"
 	if name.begins_with("factory:"):path="res://assets/curated/factory/"+name.trim_prefix("factory:")+".glb"
 	if name.begins_with("space-props:"):path="res://assets/curated/space-props/"+name.trim_prefix("space-props:")+".glb"
 	if name == "freibeuter":
@@ -120,7 +121,7 @@ static func asset(parent: Node3D, name: String, at: Vector3, dimensions: Vector3
 	instance.scale = ratio
 	instance.position = -Vector3(bounds.position.x + bounds.size.x * 0.5, bounds.position.y, bounds.position.z + bounds.size.z * 0.5) * ratio
 	if name == "floor":
-		_tint(instance,material(Color("899da5"),0.15))
+		_tint(instance,material(Color("6f7068"),0.15))
 	elif name == "freibeuter" and path.begins_with("res://assets/curated/"):
 		_tint(instance,material(Color("ad6658"),0.25))
 	return pivot

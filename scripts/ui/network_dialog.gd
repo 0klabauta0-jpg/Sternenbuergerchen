@@ -10,7 +10,7 @@ var _copy: Button
 var _invitation := ""
 
 func _ready() -> void:
-	title = "Koop · zwei Commander, eine Crew"
+	title = "Mehrspieler · Koop und Team gegen Team"
 	unresizable = true
 	transient = true
 	size = Vector2i(560,440)

@@ -98,15 +98,24 @@ static func _build_obstacles(parent: Node3D, region: String) -> void:
 			root=Node3D.new(); parent.add_child(root)
 			root.position=Vector3(center.x,0,center.y)
 			var height:=12.0 if str(id).ends_with("_a") else 11.0 if str(id).ends_with("_c") else 9.0 if Regions.archetype(region)=="distribution" else 4.0
-			Geo.box(root,Vector3(0,height/2,0),Vector3(size.x,height,size.y),Color("5c7577"))
-			Geo.box(root,Vector3(0,height+0.12,0),Vector3(size.x,0.25,size.y),Color("a3b0a6"))
+			Geo.box(root,Vector3(0,height/2,0),Vector3(size.x,height,size.y),Color("b7b1a0"))
+			Geo.box(root,Vector3(0,height+0.12,0),Vector3(size.x,0.25,size.y),Color("7c7e79"))
 			for x in range(int(-size.x/2)+1,int(size.x/2),3):
 				Geo.box(root,Vector3(x,height/2,size.y/2+0.02),Vector3(0.13,height-0.4,0.10),Color("8b9f98"))
-			Geo.box(root,Vector3(0,1.2,size.y/2+0.08),Vector3(size.x*0.7,0.65,0.12),Color("c7a168"))
+			Geo.box(root,Vector3(0,1.2,size.y/2+0.08),Vector3(size.x*0.7,0.65,0.12),Color("df8d3d"))
 			if Regions.archetype(region)=="distribution":
 				for x in [-size.x*0.25,size.x*0.25]:
 					Geo.box(root,Vector3(x,2.9,size.y/2+0.09),Vector3(size.x*0.32,5.0,0.13),Color("344e59"))
 					Geo.box(root,Vector3(x,5.48,size.y/2+0.16),Vector3(size.x*0.33,0.22,0.18),Color("b8cdba"))
+				# Roof plant and recessed bay details remain inside the solid warehouse footprint.
+				for x in [-size.x*0.3,size.x*0.3]:
+					Geo.box(root,Vector3(x,height+0.5,-size.y*0.2),Vector3(size.x*0.21,0.8,size.y*0.3),Color("555d60"))
+					for n in 7:
+						Geo.box(root,Vector3(x,height+0.92,-size.y*0.34+n*size.y*0.04),Vector3(size.x*0.2,0.035,0.09),Color("8c9796"))
+					Geo.asset(root,"hab:shelf",Vector3(x,0.15,size.y*0.39),Vector3(size.x*0.27,4.2,1.5))
+					Geo.box(root,Vector3(x,5.8,size.y*0.48),Vector3(size.x*0.31,0.6,0.5),Color("e39440"))
+					for side in [-1.0,1.0]:
+						Geo.box(root,Vector3(x+size.x*0.15*side,2.7,size.y*0.48),Vector3(0.38,5.4,0.5),Color("d4cab3"))
 				Geo.label(root,"LOGISTIK / "+str(id).right(1).to_upper(),Vector3(0,height-1.1,size.y/2+0.2),Color("d3dec5"),23)
 		root.name="Blocker_"+str(id)
 		root.set_meta("footprint",spec.duplicate(true))
@@ -170,10 +179,10 @@ static func _depths(parent: Node3D) -> void:
 	for x in [-29.0,-19.0,19.0,29.0]: _lamp(parent,Vector3(x,5,-23.4))
 
 static func _distribution(parent: Node3D) -> void:
-	_floor(parent,Vector2(5,-5),Vector2(220,180),Color("827d6b"))
+	_floor(parent,Vector2(5,-5),Vector2(220,180),Color("656560"))
 	# Broad vehicle lanes divide small functional volumes, not one monumental box.
-	_floor(parent,Vector2(-26,4),Vector2(25,140),Color("667c7a"))
-	_floor(parent,Vector2(50,-17),Vector2(125,16),Color("627875"))
+	_floor(parent,Vector2(-26,4),Vector2(25,140),Color("414c53"))
+	_floor(parent,Vector2(50,-17),Vector2(125,16),Color("414c53"))
 	_floor(parent,Vector2(-83,83),Vector2(20,75),Color("aa9475"))
 	_canopy(parent,Vector2(-56,-35),Vector2(39,30),11,Color("a9b4a3"))
 	_canopy(parent,Vector2(14,0),Vector2(37,45),12,Color("8ca8a2"))
@@ -188,6 +197,16 @@ static func _distribution(parent: Node3D) -> void:
 	# Long low road seams make the full landscape useful to read from a shuttle.
 	_floor(parent,Vector2(-110,190),Vector2(20,105),Color("a38b6d"))
 	_floor(parent,Vector2(180,-16),Vector2(125,14),Color("a38b6d"))
+
+	# Painted parking bays, central lane dashes and inset guidance lights do not block paths.
+	for z in range(-55,66,10):
+		Geo.box(parent,Vector3(-26,0.075,z),Vector3(0.25,0.025,4.5),Color("d8c6a0"))
+		for x in [-37.5,-14.5]:
+			var light:=Geo.box(parent,Vector3(x,0.09,z),Vector3(0.22,0.06,0.8),Color("6fc9c8"))
+			light.material_override=Geo.material(Color("6fc9c8"),0,0.5)
+	for x in range(-76,100,12):
+		for z in [65.0,78.0]:Geo.box(parent,Vector3(x,0.08,z),Vector3(10,0.025,0.18),Color("ceab67"))
+		Geo.box(parent,Vector3(x-5,0.08,71.5),Vector3(0.18,0.025,13),Color("ceab67"))
 
 static func _tradepost(parent: Node3D) -> void:
 	_floor(parent,Vector2(0,0),Vector2(55,45),Color("8a8877"))

@@ -34,7 +34,7 @@ func run() -> void:
 	game.hud._blueprints.open_tree(original)
 	await create_timer(0.3).timeout
 	check(game.hud._blueprints.visible,"blueprints visible")
-	check("Forschung · noch nicht spielbar" in game.hud._blueprints._body.text,"research status honest")
+	check(game.hud._blueprints._buttons.has("research_materials") and game.hud._blueprints._start.disabled,"research tree shows locked bench prerequisite")
 	check(game.simulation.snapshot()==original,"read-only UI preserves entire snapshot")
 	await RenderingServer.frame_post_draw
 	game.hud._blueprints.get_texture().get_image().save_png("res://output/n7-blueprints-initial.png")
@@ -43,5 +43,16 @@ func run() -> void:
 	await create_timer(0.3).timeout
 	await RenderingServer.frame_post_draw
 	game.travel_chart.get_texture().get_image().save_png("res://output/n7-chart-initial.png")
+	game.travel_chart.hide()
+	game.set_process(false)
+	var team_view:Dictionary=original.duplicate(true)
+	team_view.campaign={"team":0,"home":"rust","planet":"rust","started":false,"lobby_open":true,"members":{1:0,7:0,8:1},"homes":["rust","ice"],"planets":preload("res://scripts/core/team_campaign.gd").PLANETS,"max_per_team":8,"ai":[false,false]}
+	game.travel_chart.open_chart(team_view)
+	await create_timer(0.3).timeout;await RenderingServer.frame_post_draw
+	game.travel_chart.get_texture().get_image().save_png("res://output/n7-chart-teams.png")
+	game.travel_chart.hide()
+	game.team_lobby.present(team_view,true);game.team_lobby.popup_centered()
+	await create_timer(0.3).timeout;await RenderingServer.frame_post_draw
+	game.team_lobby.get_texture().get_image().save_png("res://output/n7-lobby.png")
 	print("REFERENCE_UX 9 checks; failed=",failures)
 	quit(1 if failures else 0)

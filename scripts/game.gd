@@ -8,6 +8,9 @@ const Catalog = preload("res://scripts/core/catalog.gd")
 const ExpeditionScript = preload("res://scripts/ui/expedition_hud.gd")
 const SAVE_PATH := "user://campaign.json"
 
+var _view_region := ""
+var team_mode := false
+var team_lobby: Window
 var simulation: Node
 var world: Node3D
 var hud: CanvasLayer
@@ -31,7 +34,8 @@ var _pending_flight_order := ""
 
 func _ready() -> void:
 	DisplayServer.window_set_title("Sternenbürgerchen · Rostgrenze · Neustart")
-	simulation = SimulationScript.new(simulation_seed)
+	simulation = preload("res://scripts/core/team_campaign.gd").new(simulation_seed) if team_mode else SimulationScript.new(simulation_seed)
+	if team_mode and save_path == SAVE_PATH: save_path="user://team_campaign.json"
 	simulation.name="Simulation"
 	add_child(simulation)
 	var startup_message := ""
@@ -69,6 +73,10 @@ func _ready() -> void:
 	travel_chart.theme=hud._root.theme
 	add_child(travel_chart)
 	travel_chart.command_requested.connect(send_command)
+	team_lobby=preload("res://scripts/ui/team_lobby.gd").new()
+	team_lobby.theme=hud._root.theme
+	add_child(team_lobby)
+	team_lobby.command_requested.connect(send_command)
 	simulation.notice.connect(hud.notify)
 	session.connection_changed.connect(func(message: String): hud.notify(message))
 	if session.has_signal("invitation_ready"):
@@ -85,6 +93,7 @@ func _ready() -> void:
 	_refresh()
 	if not startup_message.is_empty(): hud.notify(startup_message)
 	if not startup_network_mode.is_empty(): _startup_connection.call_deferred()
+	if team_mode: team_lobby.popup_centered.call_deferred()
 
 func _startup_connection() -> void:
 	match startup_network_mode:
@@ -98,6 +107,8 @@ func send_command(command: Dictionary) -> Dictionary:
 	_counter+=1
 	var payload: Dictionary=command.duplicate(true)
 	payload["request_id"]="ui-%s-%s-%s" % [OS.get_process_id(),Time.get_ticks_usec(),_counter]
+	if payload.get("type")=="use_elevator":payload.unit_ids=hud.selected_units.duplicate()
+	if payload.get("type") in ["move","attack","gather"]:payload.view_region=_presentation_snapshot().get("region","")
 	var result: Dictionary=session.dispatch(payload)
 	hud.present_command_result(result)
 	if result.get("pending",false): hud.notify("Befehl wird beim Host geprüft …")
@@ -168,6 +179,19 @@ func _on_units_selected(ids: Array[String]) -> void:
 
 func _on_action(action: String,payload: Dictionary) -> void:
 	match action:
+		"switch_level":
+			var state:Dictionary=session.current_snapshot()
+			var regions=preload("res://scripts/core/regions.gd")
+			if regions.bunker(str(state.get("region",""))):
+				var explored:=false
+				for unit:Dictionary in state.crew.values():
+					if unit.has("level_region"):explored=true
+				if explored:_view_region=regions.elevator_target(str(_presentation_snapshot().region))
+				else:hud.notify("Untergeschoss zuerst mit dem Aufzug betreten.")
+			_refresh()
+		"team_lobby":
+			team_lobby.present(session.current_snapshot(),not session.is_guest())
+			team_lobby.popup_centered()
 		"flight_order":
 			_pending_flight_order=str(payload.get("mode",""))
 			hud.notify("Rechtsklick: zweiter Patrouillenpunkt. Escape bricht ab." if _pending_flight_order=="patrol" else "Rechtsklick: Mittelpunkt des 180-m-Suchrasters. Escape bricht ab.")
@@ -196,6 +220,9 @@ func _on_action(action: String,payload: Dictionary) -> void:
 			_refresh()
 		"focus_unit":
 			var unit_id: String=str(payload.get("unit_id","ida"))
+			var state:Dictionary=session.current_snapshot()
+			_view_region=str(state.crew.get(unit_id,{}).get("level_region",state.region))
+			world.present(_presentation_snapshot())
 			world.focus_unit(unit_id)
 			world.set_selection("unit",unit_id)
 		"selection_changed":
@@ -213,10 +240,10 @@ func _on_action(action: String,payload: Dictionary) -> void:
 		"guidance": world.guidance_mode=int(payload.mode)
 		"focus_object": world.focus_object(str(payload.get("object_id","shuttle")))
 		"rally_elevator":
-			var snapshot:Dictionary=session.current_snapshot()
+			var snapshot:Dictionary=_presentation_snapshot()
 			var at:Array=Catalog.landmarks(str(snapshot.region)).get(str(payload.get("object_id","elevator")),[])
 			if at.size()==2:
-				for id:String in _owned_units(["ida","jaro"]):send_command({"type":"move","unit_id":id,"position":at})
+				for id:String in _owned_units(hud.selected_units):send_command({"type":"move","unit_id":id,"position":at})
 		"inspect_object":
 			var id: String=str(payload.get("object_id","contracts"))
 			_on_object_selected("object",id)
@@ -256,7 +283,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(session) or not is_instance_valid(world) or not is_instance_valid(hud): return
-	world.present(session.current_snapshot())
+	world.present(_presentation_snapshot())
 	_ui_elapsed+=delta
 	if _ui_elapsed>=0.12:
 		_ui_elapsed=0.0
@@ -265,11 +292,24 @@ func _process(delta: float) -> void:
 		_capture_time-=delta
 		if _capture_time<=0: _capture()
 
+func _presentation_snapshot() -> Dictionary:
+	var state:Dictionary=session.current_snapshot()
+	if state.is_empty():return state
+	var regions=preload("res://scripts/core/regions.gd")
+	var canonical:String=state.region
+	if not regions.bunker(canonical):_view_region="";return state
+	if _view_region!=canonical and _view_region!=regions.elevator_target(canonical):_view_region=canonical
+	for unit:Dictionary in state.crew.values():unit.level_region=unit.get("level_region",canonical)
+	state.region=_view_region
+	return state
+
 func _refresh() -> void:
 	if not is_instance_valid(hud): return
 	hud.set_connection(session.status_text(),session.is_guest())
 	if session.has_method("internet_invitation"):hud.set_invitation(session.internet_invitation())
-	hud.present(session.current_snapshot())
+	hud.present(_presentation_snapshot())
+	if is_instance_valid(team_lobby):
+		team_lobby.present(session.current_snapshot(),not session.is_guest())
 	if is_instance_valid(travel_chart) and travel_chart.visible:travel_chart.present(session.current_snapshot())
 	hud.set_recipe_details(Catalog.recipes(),Catalog.prices(str(session.current_snapshot().get("region",""))))
 	if is_instance_valid(expedition): expedition.present(session.current_snapshot(),session.is_guest())

@@ -25,6 +25,8 @@ var _retry_count: int = 0
 var _fallback_used: bool = false
 var _generation: int = 0
 var _guest_id: int = 0
+var _guests: Dictionary = {}
+var _command_windows: Dictionary = {}
 var _guest_mode: bool = false
 var _connected: bool = false
 var _latest_snapshot: Dictionary = {}
@@ -47,7 +49,7 @@ func start_host(port: int = 27991) -> Error:
 	disconnect_session()
 	var enet := ENetMultiplayerPeer.new()
 	_peer = enet
-	var error: Error = enet.create_server(port, 1)
+	var error: Error = enet.create_server(port, 15)
 	if error != OK:
 		_peer = null
 		_set_message("Host konnte nicht starten · Fehler %d" % error)
@@ -56,7 +58,7 @@ func start_host(port: int = 27991) -> Error:
 	_transport = "lan"
 	_connected = true
 	_simulation.set("auto_tick", true)
-	_set_message("Host · Port %d · Gastplatz frei" % port)
+	_set_message("Host · Port %d · bis zu 15 Gastplätze" % port)
 	_last_revision = -1
 	return OK
 
@@ -168,11 +170,11 @@ func _begin_auth(host: bool) -> void:
 
 func _on_auth_rejected() -> void:
 	if _guest_mode:
-		_set_message("Einladung abgewiesen: Schlüssel, Spielversion oder Gastplatz prüfen.")
+		_set_message("Einladung abgewiesen: Schlüssel, Spielversion oder freie Teamplätze prüfen.")
 
 func _on_tunnel_ready(url: String) -> void:
 	_invitation = url + "#" + _secret
-	_set_message("Internet bereit · Einladung kopieren · Gastplatz frei")
+	_set_message("Internet bereit · Einladung kopieren · bis zu 15 Gastplätze")
 	invitation_ready.emit(_invitation)
 
 func _on_tunnel_failed(reason: String) -> void:
@@ -263,6 +265,8 @@ func disconnect_session() -> void:
 	if _simulation != null and not _guest_mode and _guest_id != 0:
 		_simulation.clear_guest()
 	_guest_id = 0
+	_guests.clear()
+	_command_windows.clear()
 	_connected = false
 	if _peer != null:
 		_peer.close()
@@ -315,24 +319,25 @@ func _publish_snapshot(force: bool = false) -> void:
 	_latest_snapshot = state
 	_last_revision = revision
 	snapshot_received.emit(state.duplicate(true))
-	if _peer != null and multiplayer.is_server() and _guest_id != 0:
-		_receive_snapshot.rpc_id(_guest_id, state)
+	if _peer != null and multiplayer.is_server():
+		for peer_id:int in _guests:
+			var projection:Dictionary=_simulation.snapshot_for(peer_id) if _simulation.has_method("snapshot_for") else state
+			_receive_snapshot.rpc_id(peer_id,projection)
 
 @rpc("any_peer", "call_remote", "reliable")
 func _receive_command(command: Dictionary) -> void:
 	if _peer == null or not multiplayer.is_server() or _guest_mode:
 		return
 	var sender: int = multiplayer.get_remote_sender_id()
-	if sender != _guest_id or sender == 0:
+	if not _guests.has(sender) or sender == 0:
 		return
 	# Payload ownership fields never select the sender: the authenticated connection does.
 	if _transport == "internet":
 		var now: int = Time.get_ticks_msec()
-		if now - _command_window >= 1000:
-			_command_window = now
-			_command_count = 0
-		_command_count += 1
-		if _command_count > 30 or var_to_bytes(command).size() > 4096:
+		var window:Dictionary=_command_windows.get(sender,{"start":now,"count":0})
+		if now-int(window.start)>=1000:window={"start":now,"count":0}
+		window.count+=1;_command_windows[sender]=window
+		if int(window.count)>30 or var_to_bytes(command).size()>4096:
 			_receive_result.rpc_id(sender, {"ok": false, "reason": "Zu viele oder zu große Befehle.", "request_id": str(command.get("request_id", "")).left(96)})
 			return
 	var result: Dictionary = _simulation.submit(command, sender)
@@ -352,21 +357,23 @@ func _receive_result(result: Dictionary) -> void:
 		command_result.emit(result.duplicate(true))
 
 func _on_peer_connected(peer_id: int) -> void:
-	if _guest_mode or _peer == null or not multiplayer.is_server():
-		return
-	if _guest_id != 0:
-		_peer.disconnect_peer(peer_id)
-		return
-	_guest_id = peer_id
+	if _guest_mode or _peer==null or not multiplayer.is_server():return
+	if _guests.size()>=15:
+		_peer.disconnect_peer(peer_id);return
+	_guests[peer_id]=true
+	_guest_id=int(_guests.keys()[0])
 	_simulation.set_guest(peer_id)
-	_last_revision = -1
-	_set_message("Koop · beide Spieler führen die gesamte Crew")
+	if _simulation.has_method("accepts_peer") and not _simulation.accepts_peer(peer_id):
+		_guests.erase(peer_id);_peer.disconnect_peer(peer_id);return
+	_last_revision=-1
+	_set_message("%d Commander verbunden" % (_guests.size()+1))
 
 func _on_peer_disconnected(peer_id: int) -> void:
-	if not _guest_mode and peer_id == _guest_id and _simulation != null:
-		_guest_id = 0
-		_simulation.clear_guest()
-		_set_message("Gast getrennt · pausiert · Host führt beide")
+	if not _guest_mode and _guests.has(peer_id) and _simulation!=null:
+		_guests.erase(peer_id);_command_windows.erase(peer_id)
+		_guest_id=int(_guests.keys()[0]) if not _guests.is_empty() else 0
+		_simulation.clear_guest(peer_id)
+		_set_message("Commander getrennt · Sitzung pausiert")
 
 func _on_connected_to_server() -> void:
 	_connected = true

@@ -1,13 +1,13 @@
 extends RefCounted
 ## Authentication finishes before SceneMultiplayer exposes a peer or accepts RPCs.
 signal rejected
-const PROTOCOL: String = "sternenbuergerchen-coop-1"
+const PROTOCOL: String = "sternenbuergerchen-teams-2"
 var _api: SceneMultiplayer
 var _secret: String
 var _schema: int
 var _host: bool
 var _nonces: Dictionary = {}
-var _reserved: int = 0
+var _reserved: Dictionary = {}
 
 func setup(api: SceneMultiplayer, secret: String, schema: int, host: bool) -> void:
 	_api = api
@@ -28,11 +28,12 @@ func stop() -> void:
 	_api.peer_disconnected.disconnect(forget)
 	_secret = ""
 	_nonces.clear()
+	_reserved.clear()
 
 func begin(id: int) -> void:
 	if not _host:
 		return
-	if _reserved != 0 or _nonces.size() >= 4:
+	if _reserved.size()+_nonces.size() >= 15:
 		_api.disconnect_peer(id)
 		return
 	var nonce: String = Crypto.new().generate_random_bytes(32).hex_encode()
@@ -49,10 +50,10 @@ func receive(id: int, data: PackedByteArray) -> void:
 		return
 	if _host:
 		var nonce: String = _nonces.get(id, "")
-		if nonce.is_empty() or _reserved != 0 or not _equal(packet.get("proof"), _proof(nonce, "guest")):
+		if nonce.is_empty() or _reserved.size() >= 15 or _reserved.has(id) or not _equal(packet.get("proof"), _proof(nonce, "guest")):
 			_reject(id)
 			return
-		_reserved = id
+		_reserved[id] = true
 		_nonces.erase(id)
 		_api.complete_auth(id)
 	else:
@@ -93,5 +94,4 @@ func _auth_failed(id: int) -> void:
 
 func forget(id: int) -> void:
 	_nonces.erase(id)
-	if id == _reserved:
-		_reserved = 0
+	_reserved.erase(id)

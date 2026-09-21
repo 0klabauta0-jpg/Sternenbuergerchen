@@ -91,6 +91,7 @@ func _heal(unit: Dictionary,c: Dictionary) -> String:
 	var target: Dictionary=s.crew[id]
 	if target.assignment in ["aboard","boarding"]:return "Zielperson muss aussteigen."
 	if target.health>=100:return "Zielperson ist gesund."
+	if unit.get("level_region",s.region)!=target.get("level_region",s.region):return "Zielperson befindet sich auf einer anderen Ebene."
 	if _v(unit.position).distance_to(_v(target.position))>6 or not Nav.clear(s.region,_v(unit.position),_v(target.position),s.ship):return "Zielperson muss innerhalb6m und erreichbar sein."
 	if unit.backpack.items.med_charge<1:return "Keine Med-Ladung im eigenen Rucksack."
 	unit.backpack.items.med_charge-=1

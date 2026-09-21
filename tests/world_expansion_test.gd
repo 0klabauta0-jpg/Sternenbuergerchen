@@ -71,7 +71,7 @@ func run() -> void:
 		sim.advance(60)
 		check(send("use_elevator").ok,"actual lift down "+surface)
 		var depth:=Regions.elevator_target(surface)
-		check(sim.snapshot().region==depth,"correct isolated depth "+depth)
+		check(sim.snapshot().region==surface and sim.snapshot().crew.ida.level_region==depth and sim.snapshot().crew.jaro.level_region==depth,"correct crew level "+depth)
 		check(sim.snapshot().ship.position==ship_at,"ship stays on its surface")
 		valid("underground "+depth)
 		check(not send("board",{"unit_id":"ida"}).ok,"no remote boarding from underground")

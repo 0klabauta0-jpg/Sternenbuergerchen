@@ -10,8 +10,8 @@ static func build(hud:Node,id:String)->bool:
 		hud._add_command("cancel_gather","Arbeit abbrechen","cancel_gather")
 		return true
 	if id in ["bunker_entry","elevator"]:
-		hud._button("Crew zum Aufzug",func():hud.action_requested.emit("rally_elevator",{"object_id":id}),hud._context_actions,48)
-		hud._add_command("use_elevator","Aufzug benutzen","use_elevator")
+		hud._button("Auswahl zum Aufzug",func():hud.action_requested.emit("rally_elevator",{"object_id":id}),hud._context_actions,48)
+		hud._add_command("use_elevator","Auswahl transportieren","use_elevator")
 		return true
 	var enemies:Dictionary=hud._state.get("ground",{}).get("enemies",{}).get(str(hud._state.get("region","")),{})
 	if enemies.has(id):

@@ -18,7 +18,9 @@ static func recipes() -> Dictionary:
 		"cutter":{"label":"Schneidwerkzeug","materials":{"scrap":3,"parts":2},"duration":10.0,"min_skill":3,"tier":2,"output":{"cutter":1}},
 		"upgrade_workbench":{"label":"Werkbank Stufe 2","materials":{"scrap":3,"parts":1},"duration":12.0,"min_skill":3,"tier":1,"output":{}}
 	}
-	result.merge(Gear.recipes());return result
+	result.merge(Gear.recipes())
+	result.merge(preload("res://scripts/core/research_catalog.gd").recipes())
+	return result
 static func prices(region: String="") -> Dictionary:
 	var result: Dictionary={"scrap":{"buy":12,"sell":6},"parts":{"buy":35,"sell":18},"toolkit":{"buy":90,"sell":50},"cutter":{"buy":150,"sell":85},"helmet":{"buy":60,"sell":30},"armor":{"buy":220,"sell":110},"ore":{"buy":55,"sell":35},"alloy":{"buy":160,"sell":120}}
 	result.merge(Gear.prices());result.merge(TradeRoutes.overrides(region),true);return result

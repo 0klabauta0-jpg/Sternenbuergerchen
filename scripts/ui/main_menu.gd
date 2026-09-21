@@ -9,6 +9,7 @@ var _address: LineEdit
 var _notice: Label
 var _continue: Button
 var _starting := false
+var _team_mode: CheckButton
 
 func _ready() -> void:
 	DisplayServer.window_set_title("Sternenbürgerchen · Rostgrenze")
@@ -52,11 +53,15 @@ func _ready() -> void:
 	_card.add_child(_home)
 	_continue = _button(_home,"Karriere fortsetzen" if FileAccess.file_exists(SAVE_PATH) else "Neue Karriere","play",func():_launch("", "", true))
 	if FileAccess.file_exists(SAVE_PATH): _button(_home,"Neu beginnen","crew",_confirm_new)
-	_button(_home,"Mit einem Freund spielen","network",func():_home.hide();_network.show();_notice.text="Internet: Einladungslink austauschen.\nIm selben Netzwerk funktioniert weiterhin LAN.")
+	_button(_home,"Mehrspieler · Koop / Team gegen Team","network",func():_home.hide();_network.show();_notice.text="Internet: Einladungslink austauschen.\nIm selben Netzwerk funktioniert weiterhin LAN.")
 	_button(_home,"Beenden","close",func():get_tree().quit())
 	_network = VBoxContainer.new()
 	_network.add_theme_constant_override("separation",9)
 	_card.add_child(_network)
+	_team_mode=CheckButton.new()
+	_team_mode.text="Team-Partie · 2 Teams mit je bis zu 8 Spielern"
+	_team_mode.tooltip_text="Gemeinsame Crew je Team, eigene Karriere je Gegner. Ohne Haken: gemeinsame Koop-Karriere."
+	_network.add_child(_team_mode)
 	_button(_network,"Internet-Sitzung öffnen","network",func():_launch("internet_host"))
 	_address = LineEdit.new()
 	_address.secret = true
@@ -130,6 +135,7 @@ func _launch(mode: String = "", address: String = "", restore: bool = true) -> v
 	if _starting: return
 	_starting = true
 	var game:Node = load("res://scenes/game.tscn").instantiate()
+	game.team_mode = is_instance_valid(_team_mode) and _team_mode.button_pressed and mode.ends_with("host")
 	game.load_on_start = restore
 	game.startup_network_mode = mode
 	game.startup_network_address = address

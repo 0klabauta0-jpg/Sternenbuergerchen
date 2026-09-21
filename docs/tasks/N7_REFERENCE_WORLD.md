@@ -1,3 +1,7 @@
+# Umsetzungsstand 21.09.2026
+
+Der Arbeitsplan unten ist die ursprüngliche Zielbeschreibung. Der aktuelle Umfang steht in [N7_ACCEPTANCE.md](../N7_ACCEPTANCE.md): Teammodus 2 × 8, vier Weltbestände, Bunkerebenen, Forschung und erste Grafiküberarbeitung sind umgesetzt. Referenzgrafik, eigenständige Planetenlayouts, strategische KI und Schiffs-PvP bleiben offen. Frühere Formulierungen „noch nicht implementiert“ unten dokumentieren den Ausgangspunkt.
+
 # N7 – Referenzstil, Startwelten und Ebenen
 
 ## Verbindlicher Auftrag vom 21.09.2026
@@ -59,3 +63,9 @@ Ziel ist ein grafischer Baum mit auswählbaren Knoten und nachvollziehbaren Kant
 5. Forschungsmechanik ausbauen; Bauplanansicht in den vollständigen grafischen Baum überführen.
 
 Keine N7-Veröffentlichung und keine Erledigt-Markierung für die Gesamtanforderung vor diesen Nachweisen. Alte erfolgreiche N6-Prüfungen bleiben historische Evidenz.
+
+## Bestätigte Erweiterung: Team-Koop und PvP gleichzeitig
+
+Nutzerkorrektur: Mehr Spieler pro Team haben Vorrang; zwei Teams reichen. Erste Umsetzung: zwei Teams mit bis zu acht menschlichen Commandern je Team, maximal 16 einschließlich Host. Auch ungleich große Teams sind erlaubt. Alle Mitglieder eines Teams befehligen dessen Crew und Schiffe gemeinsam; keine Befehle an gegnerische Einheiten. Vier Planeten bleiben als wählbare Heimatorte erhalten. Dies ersetzt die frühere offene Frage nach getrennten Starts: Teammitglieder teilen eine Heimatbasis, gegnerische Teams starten getrennt.
+
+Host verwaltet Teamzuordnung, Startplätze und Gegnerstatus. Einladung authentifiziert eine Verbindung, verleiht aber keine freie Wahl gegnerischer Besitzrechte. Reconnect, volle Teams und ungültige Teamwechsel sind explizite Zustände. Solo, reiner Koop und Team-gegen-Team verwenden dieselben Regeln mit unterschiedlicher Sitzbelegung.

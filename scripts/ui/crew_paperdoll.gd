@@ -35,10 +35,14 @@ func _ready() -> void:
 			player.get_animation("Idle").loop_mode = Animation.LOOP_LINEAR
 			player.play("Idle")
 			player.advance(0)
+	var pedestal:=MeshInstance3D.new()
+	var disc:=CylinderMesh.new();disc.top_radius=0.64;disc.bottom_radius=0.69;disc.height=0.12;disc.radial_segments=12
+	pedestal.mesh=disc;pedestal.position.y=-0.065
+	var mat:=StandardMaterial3D.new();mat.albedo_color=Color("384c56");pedestal.material_override=mat;stage.add_child(pedestal)
 	var camera := Camera3D.new()
 	stage.add_child(camera)
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.size = 2.75
+	camera.size = 2.35
 	camera.position = Vector3(2.3, 1.5, 5.5)
 	camera.look_at(Vector3(0, 1.02, 0))
 	var light := DirectionalLight3D.new()

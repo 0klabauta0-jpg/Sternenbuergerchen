@@ -1,0 +1,44 @@
+[
+  {
+    "name": "shelf",
+    "vertices": 912,
+    "triangles": 1672,
+    "materials": 4
+  },
+  {
+    "name": "workwall",
+    "vertices": 720,
+    "triangles": 1320,
+    "materials": 4
+  },
+  {
+    "name": "cabinet",
+    "vertices": 144,
+    "triangles": 264,
+    "materials": 3
+  },
+  {
+    "name": "bed",
+    "vertices": 144,
+    "triangles": 264,
+    "materials": 4
+  },
+  {
+    "name": "table",
+    "vertices": 300,
+    "triangles": 548,
+    "materials": 5
+  },
+  {
+    "name": "planter",
+    "vertices": 444,
+    "triangles": 812,
+    "materials": 2
+  },
+  {
+    "name": "cargo",
+    "vertices": 480,
+    "triangles": 880,
+    "materials": 3
+  }
+]

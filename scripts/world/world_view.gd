@@ -28,6 +28,8 @@ var _units: Dictionary = {}
 var _objects: Dictionary = {}
 var _snapshot: Dictionary = {}
 var _region := ""
+var _planet := "rust"
+var _camera_views:Dictionary={}
 var _focus := Vector3(4,0,0)
 var _zoom := 76.0
 var _selected_kind := ""
@@ -78,9 +80,14 @@ func present(state: Dictionary) -> void:
 	if not is_node_ready():
 		return
 	var region := str(state.get("region","base"))
-	if region != _region:
+	var planet:String=state.get("campaign",{}).get("planet","rust")
+	if region != _region or planet!=_planet:
+		if Regions.bunker(_region):_camera_views[_planet+":"+_region]={"focus":_focus,"zoom":_zoom}
+		_planet=planet
 		_region = region
 		_build_map()
+		var view:Dictionary=_camera_views.get(_planet+":"+_region,{})
+		if Regions.bunker(_region) and not view.is_empty():_focus=view.focus;_zoom=view.zoom
 	var crew: Dictionary = state.get("crew",{})
 	for id in crew:
 		if not _units.has(id):
@@ -124,7 +131,7 @@ func present(state: Dictionary) -> void:
 	if _flying and not was_flying and _region in (Regions.DESTINATIONS+["orbit","space"]):
 		_flight_camera_follow=true
 	for id in _units:
-		(_units[id] as Node3D).visible = crew.has(id) and not _flying and str(crew.get(id,{}).get("assignment","idle")) != "aboard"
+		(_units[id] as Node3D).visible = crew.has(id) and crew[id].get("level_region",_region)==_region and not _flying and str(crew.get(id,{}).get("assignment","idle")) != "aboard"
 		Geo.set_pickable(_units[id],(_units[id] as Node3D).visible)
 	_apply_selection()
 
@@ -149,7 +156,7 @@ func _process(delta: float) -> void:
 			_flight_camera_follow=false
 		_focus.x = clampf(_focus.x,-Catalog.bounds(_region),Catalog.bounds(_region))
 		_focus.z = clampf(_focus.z,-Catalog.bounds(_region),Catalog.bounds(_region))
-	if _follow_mode and _units.has(_follow_unit) and _follow_delay <= 0 and not _dragging:
+	if _follow_mode and _units.has(_follow_unit) and _units[_follow_unit].visible and _follow_delay <= 0 and not _dragging:
 		_focus = _focus.lerp((_units[_follow_unit] as Node3D).position,1.0-exp(-delta*4.0))
 	elif _flying and _flight_camera_follow and _objects.has("shuttle") and not _dragging:
 		var target: Vector3=(_objects.shuttle as Node3D).position
@@ -289,6 +296,7 @@ func _apply_selection() -> void:
 	for id in _objects:
 		var root: Node3D = _objects[id]
 		(root.get_node("Selection") as MeshInstance3D).visible = _selected_kind == "object" and _selected_id == id
+		if root.has_node("Title") and _region=="base":(root.get_node("Title") as Label3D).visible=_selected_id==id or id in ["storage","shuttle"]
 	for id in _units:
 		var root: Node3D = _units[id]
 		(root.get_node("Selection") as MeshInstance3D).visible = id in _selected_units
@@ -303,7 +311,7 @@ func _build_map() -> void:
 	_map = Node3D.new()
 	_map.name = "Region_"+_region
 	add_child(_map)
-	Terrain.build(_map,_region)
+	Terrain.build(_map,_region,_planet)
 	var points: Dictionary = Catalog.landmarks(_region)
 	if _region=="space": points={"shuttle":[-85,0],"pirate":[55,-25]}
 	_objects = Landmarks.build(_map,_region,points)

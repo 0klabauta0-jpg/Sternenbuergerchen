@@ -1,3 +1,7 @@
+# Aktuell: N7 · Teams, Ebenen, Forschung und Grafik
+
+[N7_ACCEPTANCE.md](N7_ACCEPTANCE.md) beschreibt den aktuellen geprüften Umfang und die Grenzen. Zwei Teams mit bis zu acht Menschen je Team; Koop innerhalb des Teams und Boden-PvP gegeneinander. Die folgenden N6/N5-Abschnitte sind historische Stände.
+
 # Umsetzungsstand · 13.09.2026
 
 ## Aktueller Stand N6 · 21.09.2026

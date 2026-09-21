@@ -41,13 +41,16 @@ static func furniture(region: String) -> Array:
 	region=Regions.archetype(region)
 	var result: Array=[]
 	if region=="base":
-		result.append(_item("lounge_table","table",[11,-8.5],[3.5,1.6],0.9))
+		result.append(_item("lounge_table","hab:table",[11,-8.5],[3.5,1.6],1.6))
 		for x in [9.8,12.2]:
 			for z in [-9.8,-7.2]:result.append(_item("chair_%s_%s"%[x,z],"chair",[x,z],[0.8,0.8],0.7))
 		for x in [-14.0,-10.0,-6.0]:result.append(_item("crate_%s"%x,"crate-small",[x,7],[1.1,1.2],0.8))
-		for x in [-14.2,-5.6]:result.append(_item("locker_%s"%x,"locker",[x,-10.1 if x< -10 else -7.3],[1.2,0.7],2.0))
+		for x in [-14.2,-5.6]:result.append(_item("locker_%s"%x,"hab:cabinet",[x,-10.1 if x< -10 else -7.3],[1.2,0.7],2.0))
 		for x in [-12.0,-7.0,-2.0]:result.append(_item("solar_%s"%x,"solar",[x,-24],[4.5,5.5],2.8))
 		for x in [-30.0,-23.0]:result.append(_item("outside_crate_%s"%x,"crate-wide",[x,18],[3.8,3.6],2.4))
+		for x in [-13.0,-7.0]:result.append(_item("supply_shelf_%s"%x,"hab:shelf",[x,-1.8],[4.0,1.1],2.9))
+		result.append(_item("workwall","hab:workwall",[10,-1.8],[7.5,1.1],3.0))
+		result.append(_item("lounge_planter","hab:planter",[12.6,-16.8],[1.8,0.7],1.1))
 		result.append(_item("base_mast","mast",[-19,-18],[0.35,0.35],8))
 	elif region=="station":
 		for x in [-24.0,24.0]:
@@ -77,6 +80,13 @@ static func furniture(region: String) -> Array:
 		for x in [-33.0,33.0]:
 			for z in [-4.0,4.0]:result.append(_item("depth_supply_%s_%s"%[x,z],"factory:box-large",[x*depth_factor,z*depth_factor],[4,4],2.4))
 	elif region=="distribution":
+		for cluster in [[-77,5],[12,59],[73,-72]]:
+			for row in 3:
+				for col in 3:
+					var x:float=cluster[0]+col*8;var z:float=cluster[1]+row*5
+					result.append(_item("cargo_%s_%s"%[x,z],"hab:cargo",[x,z],[6.5,3],3.0))
+		for x in [32.0,43.0,54.0,65.0]:result.append(_item("depot_shelf_%s"%x,"hab:shelf",[x,-52],[7,2],5))
+		for x in [-67.0,-56.0]:result.append(_item("depot_tank_%s"%x,"tank",[x,-72],[7,7],9))
 		result.append(_item("depot_dish","space-props:satelliteDish_large",[-97,-75],[14,14],15))
 		for x in [-90.0,-75.0,84.0]:
 			result.append(_item("depot_machinery_%s"%x,"factory:machine-fortified",[x,-56],[7,6],5))
@@ -155,9 +165,9 @@ static func _structure_template(region: String) -> Dictionary:
 			for z in [-36.0,36.0]:_rect(result,"depth_hall_%s_%s"%[x,z],Vector2(x,z),Vector2(1,24),"wall",x>0)
 		for z in [-48.0,48.0]:_rect(result,"depth_end_%s"%z,Vector2(0,z),Vector2(16,1),"wall",z>0)
 	elif region=="distribution":
-		_rect(result,"depot_stack_a",Vector2(10,0),Vector2(16,24),"warehouse",false)
-		_rect(result,"depot_stack_b",Vector2(60,25),Vector2(18,12),"warehouse",false)
-		_rect(result,"depot_stack_c",Vector2(-55,-35),Vector2(24,16),"warehouse",false)
+		_rect(result,"depot_stack_a",Vector2(10,0),Vector2(32,38),"warehouse",false)
+		_rect(result,"depot_stack_b",Vector2(60,25),Vector2(30,22),"warehouse",false)
+		_rect(result,"depot_stack_c",Vector2(-55,-35),Vector2(36,26),"warehouse",false)
 		_rect(result,"security_back",Vector2(50,-56),Vector2(36,1),"wall",false)
 		_rect(result,"security_side",Vector2(68,-44),Vector2(1,24),"wall",true)
 		_rect(result,"market_back",Vector2(-27,15),Vector2(26,1),"wall",false)
@@ -211,6 +221,13 @@ static func rocks(region: String) -> Array:
 		for i in ridge.size():
 			var p: Array=ridge[i]
 			result.append({"id":"home_ridge_%d"%i,"center":[p[0],p[1]],"size":[p[2]*2.4,p[2]*1.8],"height":p[3],"radius":p[2],"seed":1400+i,"category":"rock","kind":"mesa"})
+	if region=="base":
+		for cluster:Vector2 in [Vector2(-25,5),Vector2(-10,24),Vector2(42,20),Vector2(18,-32),Vector2(-39,28)]:
+			for j in 7:
+				var angle:=j*2.39
+				var at:Vector2=cluster+Vector2.from_angle(angle)*(1.0+j*0.44)
+				var radius:=0.5+float(j%3)*0.18
+				result.append({"id":"scree_%s_%d"%[str(cluster),j],"center":[at.x,at.y],"size":[radius*2.4,radius*1.8],"height":radius*0.8,"radius":radius,"seed":2100+j,"category":"rock","kind":"mesa"})
 	_rock_cache[region]=result
 	return result
 
