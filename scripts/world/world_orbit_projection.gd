@@ -1,4 +1,6 @@
 extends RefCounted
+const Regions=preload("res://scripts/core/regions.gd")
+const Heights=preload("res://scripts/core/terrain_layout.gd")
 ## Snapshot-only contact, ship and confirmed-shot projection.
 const Geo = preload("res://scripts/world/world_geometry.gd")
 const Ship = preload("res://scripts/world/world_ship.gd")
@@ -14,6 +16,14 @@ func present(map: Node3D, objects: Dictionary, state: Dictionary) -> void:
 		beams.clear()
 		previous={}
 	var region := str(state.get("region","base"))
+	if region=="base":
+		var infrastructure:Dictionary=state.base.get("infrastructure",{"solar":3,"solar_tier":1,"sender_tier":1})
+		for i in 6:
+			var module:=map.find_child("Furniture_solar_slot_%d"%i,true,false) as Node3D
+			if module!=null:module.visible=i<int(infrastructure.solar)
+		for kind:String in ["small","large"]:
+			var reactor:=map.find_child("Furniture_reactor_"+kind,true,false) as Node3D
+			if reactor!=null:reactor.visible=int(infrastructure.get("fusion_"+kind,0))>0
 	var ship: Dictionary = state.get("ship",{})
 	var airborne := str(ship.get("mode","landed"))=="flying"
 	if objects.has("shuttle"):
@@ -23,7 +33,11 @@ func present(map: Node3D, objects: Dictionary, state: Dictionary) -> void:
 		(root.get_node("Title") as Label3D).text=str(ship.get("name","Entersäbel")).to_upper()+ (" · MIETSCHIFF" if model=="vulture" else " · SHUTTLE")
 		if ship.has("position"):
 			var coords: Array=ship.position
-			root.position=Vector3(coords[0],0,coords[1])
+			var at:=Vector2(coords[0],coords[1])
+			var profile:Dictionary=preload("res://scripts/core/catalog.gd").ship_profile(model)
+			var radius:=Vector2(profile.size[0],profile.size[1]).length()*0.5
+			var altitude:=Heights.flight_floor(region,at,radius) if airborne else Heights.height_at(region,at)
+			root.position=Vector3(at.x,altitude,at.y)
 		(root.get_node("Title") as Label3D).position.y=8.4 if airborne else 4.5
 		Geo.set_pickable(root,true)
 	if objects.has("satellite"):
@@ -32,7 +46,7 @@ func present(map: Node3D, objects: Dictionary, state: Dictionary) -> void:
 		Geo.set_pickable(objects.satellite,known)
 	if objects.has("workbench"):
 		(objects.workbench.get_node("Title") as Label3D).text="WERKBANK · STUFE %d" % int(state.get("base",{}).get("workbench_tier",1))
-	if region=="rust": _signals(map,state)
+	if Regions.archetype(region)=="rust": _signals(map,state)
 	if region=="space" and objects.has("pirate"):
 		var encounter: Dictionary=state.get("encounter",{})
 		var enemy: Dictionary=encounter.get("enemy",{})
@@ -82,7 +96,7 @@ func _signals(map: Node3D, state: Dictionary) -> void:
 			Geo.collider(root,"object",id,Vector3(10,0.15,10))
 			markers[id]=root
 		var marker: Node3D=markers[id]
-		marker.position=Vector3(signal_data.position[0],0,signal_data.position[1])
+		marker.position=Vector3(signal_data.position[0],Heights.height_at(str(state.region),Vector2(signal_data.position[0],signal_data.position[1])),signal_data.position[1])
 		(marker.get_node("Title") as Label3D).text=str(signal_data.get("label","Unbekanntes Signal"))
 		marker.visible=not (bool(signal_data.get("identified",false)) and str(signal_data.get("kind",""))=="satellite")
 		Geo.set_pickable(marker,marker.visible)

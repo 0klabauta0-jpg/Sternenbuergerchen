@@ -1,4 +1,5 @@
 extends RefCounted
+const Terrain=preload("res://scripts/core/terrain_layout.gd")
 const Regions=preload("res://scripts/core/regions.gd")
 ## Spatially indexed static obstacles and bounded grid A*. Routes live in SimulationRoot.
 const Catalog=preload("res://scripts/core/catalog.gd")
@@ -44,6 +45,7 @@ static func walkable(region: String,point: Vector2,ship: Dictionary={}) -> bool:
 	return not hull.has_area() or not hull.has_point(point)
 static func clear(region: String,a: Vector2,b: Vector2,ship: Dictionary={},ignore: String="") -> bool:
 	if not _inside(region,a) or not _inside(region,b):return false
+	if not Terrain.traversable(region,a,b):return false
 	var index: Dictionary=_index(region)
 	var ids: Array=[]
 	if a.distance_squared_to(b)>1024.0:
@@ -64,10 +66,22 @@ static func clear(region: String,a: Vector2,b: Vector2,ship: Dictionary={},ignor
 		for step in range(1,17):
 			if not _inside(region,a.lerp(b,float(step)/16.0)):return false
 	return true
-static func path(region: String,from: Vector2,to: Vector2,ship: Dictionary={}) -> Array:
+static func path(region: String,from: Vector2,to: Vector2,ship: Dictionary={},use_ramps:bool=true) -> Array:
 	searches+=1
 	if not walkable(region,to,ship):return []
 	if clear(region,from,to,ship):return [to]
+	if use_ramps and not Terrain.traversable(region,from,to):
+		for patch:Dictionary in Terrain.patches(region):
+			var ramp:Rect2=patch.ramp
+			var top:=Vector2(ramp.get_center().x,ramp.position.y-1.0)
+			var bottom:=Vector2(ramp.get_center().x,ramp.end.y+1.0)
+			var entry:=bottom if Terrain.height_at(region,from)<Terrain.height_at(region,to) else top
+			var leave:=top if entry==bottom else bottom
+			if not Terrain.traversable(region,from,entry) or not Terrain.traversable(region,leave,to):continue
+			var first:=path(region,from,entry,ship,false)
+			var middle:=path(region,entry,leave,ship,false)
+			var last:=path(region,leave,to,ship,false)
+			if not first.is_empty() and not middle.is_empty() and not last.is_empty():return first+middle+last
 	var start: Variant=_grid_near(region,from,ship)
 	var goal: Variant=_grid_near(region,to,ship)
 	if start==null or goal==null:return []
@@ -81,7 +95,7 @@ static func path(region: String,from: Vector2,to: Vector2,ship: Dictionary={}) -
 		if point==goal:found=true;break
 		closed[point]=true
 		for offset: Vector2i in [Vector2i(-1,0),Vector2i(1,0),Vector2i(0,-1),Vector2i(0,1),Vector2i(-1,-1),Vector2i(-1,1),Vector2i(1,-1),Vector2i(1,1)]:
-			var next: Vector2i=point+offset
+			var next: Vector2i=point+offset*(4 if Regions.archetype(region)=="rust" else 1)
 			if closed.has(next) or not clear(region,Vector2(point),Vector2(next),ship):continue
 			var cost: float=costs[point]+Vector2(offset).length()
 			if cost>=float(costs.get(next,INF)):continue
@@ -99,11 +113,12 @@ static func path(region: String,from: Vector2,to: Vector2,ship: Dictionary={}) -
 		result.append(grid[far]);anchor=grid[far];index=far+1
 	return result
 static func _grid_near(region: String,p: Vector2,ship: Dictionary) -> Variant:
-	var centre:=Vector2i(roundi(p.x),roundi(p.y))
+	var spacing:=4 if Regions.archetype(region)=="rust" else 1
+	var centre:=Vector2i(roundi(p.x/spacing)*spacing,roundi(p.y/spacing)*spacing)
 	for radius in range(0,5):
 		for x in range(-radius,radius+1):
 			for y in range(-radius,radius+1):
-				var node:=centre+Vector2i(x,y)
+				var node:=centre+Vector2i(x,y)*spacing
 				if walkable(region,Vector2(node),ship) and clear(region,p,Vector2(node),ship):return node
 	return null
 static func safe_near(region: String,p: Vector2,ship: Dictionary={},distance: int=50) -> Vector2:
@@ -116,6 +131,7 @@ static func safe_near(region: String,p: Vector2,ship: Dictionary={},distance: in
 static func landing_clear(region: String,ship: Dictionary) -> bool:
 	var hull: Rect2=_ship_rect(region,ship)
 	if not hull.has_area():return false
+	if not Terrain.level_landing(region,hull):return false
 	if not _inside(region,hull.position) or not _inside(region,hull.end):return false
 	for rect: Rect2 in _index(region).rects:
 		if hull.intersects(rect):return false

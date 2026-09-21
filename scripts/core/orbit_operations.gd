@@ -33,9 +33,9 @@ func dispatch(c: Dictionary,sender: int) -> String:
 		"ship_order":
 			return _order(c)
 		"radar_scan":
-			if s.region!="rust" or s.ship.mode!="flying":return "Radar im Suchflug benutzen."
+			if Regions.archetype(s.region)!="rust" or s.ship.mode!="flying":return "Radar im Suchflug benutzen."
 			if not s.discovery.radar_scanned:
-				s.discovery.radar_scanned=true;s.discovery.signals=Catalog.radar_contacts()
+				s.discovery.radar_scanned=true;s.discovery.signals=Catalog.radar_contacts(s.region)
 				log_event.call("Radar: drei unbekannte Kontakte. Zur Identifikation nahe heranfliegen.")
 		"land":
 			if not Catalog.destination_info().has(s.region) or s.ship.mode!="flying":return "Landung ist hier nicht möglich."
@@ -92,7 +92,7 @@ func tick(delta: float) -> String:
 				if position.distance_to(next)<0.01:_path.pop_front()
 
 	s.ship.position=[position.x,position.y];board_crew()
-	if s.region=="rust" and s.discovery.radar_scanned:
+	if Regions.archetype(s.region)=="rust" and s.discovery.radar_scanned:
 		for contact: Dictionary in s.discovery.signals:
 			if not contact.identified and position.distance_to(_v(contact.position))<=30.0:
 				contact.identified=true
@@ -163,6 +163,6 @@ func _order(c: Dictionary) -> String:
 		previous=_v(point)
 	s.ship.order={"kind":mode,"region":str(s.region),"points":points,"index":0}
 	s.ship.target=points[0].duplicate();_path_key=""
-	if mode=="search" and s.region=="rust":dispatch({"type":"radar_scan"},1)
+	if mode=="search" and Regions.archetype(s.region)=="rust":dispatch({"type":"radar_scan"},1)
 	log_event.call("Patrouille aktiv. Rechtsklick ersetzt den Auftrag." if mode=="patrol" else "Suchraster aktiv: 180 × 180 m, Radar und Identifikation beim Vorbeiflug.")
 	return ""

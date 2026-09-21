@@ -74,7 +74,7 @@ func present(state: Dictionary,guest: bool) -> void:
 	var airborne: bool=str(state.ship.get("mode","landed"))=="flying"
 	_panel.visible=(airborne or region in ["space","orbit"]) and not bool(state.travel.active)
 	if not _panel.visible:return
-	var contacts: Array=state.get("discovery",{}).get("signals",[]) if region=="rust" else []
+	var contacts: Array=state.get("discovery",{}).get("signals",[]) if preload("res://scripts/core/regions.gd").archetype(region)=="rust" else []
 	var layout:=region+str(airborne)+str(contacts.size())
 	if layout!=_last_layout:
 		_last_layout=layout
@@ -92,7 +92,7 @@ func present(state: Dictionary,guest: bool) -> void:
 			_action("land","Hier landen","load",func():_send("land"))
 			_action("enter_orbit","In den Orbit","orbit",func():_send("enter_orbit"))
 			_action("travel_chart","Reiseübersicht","contracts",func():action_requested.emit("travel_chart",{}))
-			if region=="rust":
+			if preload("res://scripts/core/regions.gd").archetype(region)=="rust":
 				_action("radar_scan","Radarimpuls","target",func():_send("radar_scan"))
 				for contact: Dictionary in contacts:
 					var id: String=str(contact.id)
@@ -119,7 +119,7 @@ func present(state: Dictionary,guest: bool) -> void:
 	else:
 		_heading.text="LOKALER FLUG / "+str(state.ship.get("name","Entersäbel")).to_upper()
 		_detail.text="Pilot: %s\nRechtsklick: hierhin fliegen.\nLandung und Aussteigen sind getrennte Befehle." % pilot
-		if region=="rust":
+		if preload("res://scripts/core/regions.gd").archetype(region)=="rust":
 			_detail.text+="\nRadar zeigt unbekannte Signale; Nähe identifiziert den Fund."
 			for contact: Dictionary in contacts:
 				var id: String=str(contact.id)

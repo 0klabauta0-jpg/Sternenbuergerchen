@@ -117,6 +117,8 @@ func send_command(command: Dictionary) -> Dictionary:
 	return result
 
 func _on_object_selected(kind: String,id: String) -> void:
+	if kind=="freight":
+		send_command({"type":"pickup_freight","crate_id":id,"unit_id":hud.selected_unit});return
 	if is_instance_valid(expedition) and expedition.inspect_target(id):
 		hud.dismiss_context()
 		if world.has_method("set_selection"): world.set_selection(kind,id)

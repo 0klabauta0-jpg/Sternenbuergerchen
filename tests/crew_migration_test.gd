@@ -47,7 +47,7 @@ func run() -> void:
 	check(flight.clear("rust","cutlass",Vector2(at[0],at[1]),Vector2(at[0],at[1])),"legacy flight relocated outside new hull obstacles");sim.free()
 	v3=Ground.migrate(v2);v3.state.crew.ida.position=[10.0,3.0];v3.state.crew.ida.target=[10.0,3.0]
 	check(V3.validate(v3).is_empty(),"old free point now furniture fixture valid")
-	sim=load_fixture(v3,"v3 new obstacle");check(sim.snapshot().crew.ida.position!=[10.0,3.0],"blocked old position relocated");check(sim.snapshot().inventory==v3.state.inventory.merged({"backpack":0,"multitool":0,"mining_attachment":0,"salvage_attachment":0,"medgun":0,"med_charge":0,"repair_attachment":0}),"no old inventory lost");sim.free()
+	sim=load_fixture(v3,"v3 new obstacle");check(sim.snapshot().crew.ida.position!=[10.0,3.0],"blocked old position relocated");check(sim.snapshot().inventory==v3.state.inventory.merged({"backpack":0,"multitool":0,"mining_attachment":0,"salvage_attachment":0,"medgun":0,"med_charge":0,"repair_attachment":0,"food":0,"medical_supplies":0}),"no old inventory lost; new trade goods begin empty");sim.free()
 	# The old paid v1 career retains unlocks, discovery and rejection receipts.
 	var paid:=base_v1();paid.state.credits=440;paid.state.contract.status="claimed";paid.state.blueprints.append("cutter")
 	check(V1.validate(paid).is_empty(),"independent paid v1 valid")

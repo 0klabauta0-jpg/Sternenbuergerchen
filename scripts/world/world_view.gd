@@ -1,7 +1,9 @@
 extends Node3D
 class_name RestartWorld
+const Heights=preload("res://scripts/core/terrain_layout.gd")
 ## Snapshot projection only. Commands are emitted for the authoritative core.
 signal object_selected(kind: String, id: String)
+var _freight=preload("res://scripts/world/world_freight_projection.gd").new()
 signal ground_clicked(position: Vector2)
 signal units_selected(ids: Array[String])
 signal context_clicked(kind: String, id: String, screen: Vector2)
@@ -80,7 +82,7 @@ func present(state: Dictionary) -> void:
 	if not is_node_ready():
 		return
 	var region := str(state.get("region","base"))
-	var planet:String=state.get("campaign",{}).get("planet","rust")
+	var planet:String=state.get("campaign",{}).get("planet",["rust","ice","basalt","mineral"][Regions.variant(region)])
 	if region != _region or planet!=_planet:
 		if Regions.bunker(_region):_camera_views[_planet+":"+_region]={"focus":_focus,"zoom":_zoom}
 		_planet=planet
@@ -95,7 +97,7 @@ func present(state: Dictionary) -> void:
 		var root: Node3D = _units[id]
 		var data: Dictionary = crew[id]
 		var coords: Array = data.get("position",[0,0])
-		var next := Vector3(float(coords[0]),0.08,float(coords[1]))
+		var next := Vector3(float(coords[0]),0.08+Heights.height_at(_region,Vector2(coords[0],coords[1])),float(coords[1]))
 		var movement := next - root.position
 		if movement.length() > 0.005:
 			_last_motion[id] = Time.get_ticks_msec()
@@ -123,11 +125,12 @@ func present(state: Dictionary) -> void:
 				animation.play(wanted,0.15)
 			animation.speed_scale = 0.0 if bool(state.get("paused",false)) or task=="downed" else 1.0
 		var title := root.get_node("Title") as Label3D
-		title.text = str(data.get("name",id)) + (" · ARBEIT" if task == "work" else " · BERGUNG" if task in ["salvage","gather"] else " · BERGUNG IN %ds" % int(ceil(float(data.get("respawn_remaining",0)))) if task=="downed" else " · %d LP" % int(data.health) if float(data.get("health",100))<100 else "")
+		title.text = str(data.get("name",id)) + (" · VERLADEN" if task=="hauling" else " · ARBEIT" if task == "work" else " · BERGUNG" if task in ["salvage","gather"] else " · BERGUNG IN %ds" % int(ceil(float(data.get("respawn_remaining",0)))) if task=="downed" else " · %d LP" % int(data.health) if float(data.get("health",100))<100 else "")
 	var was_flying:=_flying
 	_flying = str(state.get("ship",{}).get("mode","landed")) == "flying" or (bool(state.get("travel",{}).get("active",false)) and str(state.get("travel",{}).get("phase","")) == "flying")
 	_orbit.present(_map,_objects,state)
 	_ground.present(_map,_objects,_units,state)
+	_freight.present(_map,_units,_objects,state)
 	if _flying and not was_flying and _region in (Regions.DESTINATIONS+["orbit","space"]):
 		_flight_camera_follow=true
 	for id in _units:
@@ -189,6 +192,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			var hit := _hit_at(event.position)
 			if not hit.is_empty():
 				var collider: Object = hit.collider
+				if collider.get_meta("kind","")=="freight":
+					object_selected.emit("freight",str(collider.get_meta("id")))
+					get_viewport().set_input_as_handled();return
 				if collider.has_meta("id") and str(collider.get_meta("id"))=="shuttle":
 					context_clicked.emit("object","shuttle",event.position)
 					get_viewport().set_input_as_handled()
@@ -259,9 +265,9 @@ func _max_zoom() -> float:
 
 func mark_destination(at: Vector2, flight: bool) -> void:
 	if not is_instance_valid(_destination): return
-	_destination.position = Vector3(at.x,0.09,at.y)
+	_destination.position = Vector3(at.x,0.09+Heights.height_at(_region,at),at.y)
 	_destination_age = 0.0
-	_destination_label.position = Vector3(at.x,2.0,at.y)
+	_destination_label.position = Vector3(at.x,2.0+Heights.height_at(_region,at),at.y)
 	_destination_label.text = "FLUGZIEL AUF DIESER KARTE" if flight else "LAUFZIEL"
 
 func set_selection(kind: String, id: String) -> void:
@@ -314,9 +320,12 @@ func _build_map() -> void:
 	Terrain.build(_map,_region,_planet)
 	var points: Dictionary = Catalog.landmarks(_region)
 	if _region=="space": points={"shuttle":[-85,0],"pirate":[55,-25]}
-	_objects = Landmarks.build(_map,_region,points)
+	var settlement:=Node3D.new();_map.add_child(settlement)
+	_objects = Landmarks.build(settlement,_region,points)
+	preload("res://scripts/world/world_elevation.gd").lift(settlement,_region)
 	_orbit=OrbitProjection.new()
 	_ground=GroundProjection.new()
+	_freight=preload("res://scripts/world/world_freight_projection.gd").new()
 	_destination = Geo.ring(_map,0.65,Color("f6d497"))
 	_destination_label = Geo.label(_map,"",Vector3.ZERO,Color("f6d497"),18)
 	_destination_age = 10.0
@@ -372,7 +381,7 @@ func _hit_at(screen: Vector2) -> Dictionary:
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
 func _ground_at(screen: Vector2) -> Variant:
-	return Plane(Vector3.UP,0).intersects_ray(_camera.project_ray_origin(screen),_camera.project_ray_normal(screen))
+	return Heights.ray_hit(_region,_camera.project_ray_origin(screen),_camera.project_ray_normal(screen))
 
 func _lighting() -> void:
 	var world_env := WorldEnvironment.new()
@@ -409,4 +418,4 @@ func _update_guidance(delta: float) -> void:
 	var at: Array=Catalog.landmarks(_region).get(str(hint.id),[])
 	if at.size()!=2:_guide.hide();return
 	_guide.text=str(hint.text)+"\n▼"
-	_guide.position=Vector3(at[0],5.4+(sin(_guide_time*2.0)*0.3 if guidance_mode==1 else 0.0),at[1])
+	_guide.position=Vector3(at[0],Heights.height_at(_region,Vector2(at[0],at[1]))+5.4+(sin(_guide_time*2.0)*0.3 if guidance_mode==1 else 0.0),at[1])

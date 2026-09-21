@@ -15,7 +15,9 @@ func check(value: bool,label: String) -> void:
 func cmd(kind: String,data: Dictionary={},sender: int=1) -> Dictionary:
 	serial+=1
 	var c:=data.duplicate(true);c.type=kind;c.request_id="n3-%s"%serial
-	return sim.submit(c,sender)
+	var result:Dictionary=sim.submit(c,sender)
+	if result.ok and kind in ["trade","transfer"]:check(Journey.finish_hauling(sim),"physical shipment finishes")
+	return result
 func fresh() -> void:
 	if is_instance_valid(sim):sim.free()
 	sim=Core.new(1);sim.auto_tick=false;root.add_child(sim)

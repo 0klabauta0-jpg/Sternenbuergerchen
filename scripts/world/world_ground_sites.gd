@@ -126,6 +126,13 @@ static func _build_furniture(parent: Node3D, region: String) -> void:
 		root.position=Vector3(spec.center[0],0,spec.center[1])
 		root.set_meta("footprint",spec.duplicate(true))
 		var size:=Vector3(spec.size[0],spec.height,spec.size[1])
+		if str(spec.id).begins_with("solar_slot_") or str(spec.id).begins_with("reactor_"):
+			# Reserved foundations remain visible when the plant has not been bought.
+			var foundation:=Node3D.new();foundation.name="Foundation_"+str(spec.id);parent.add_child(foundation);foundation.position=root.position
+			Geo.box(foundation,Vector3(0,0.22,0),Vector3(size.x,0.44,size.z),Color("536066"))
+			for x:float in [-size.x*0.45,size.x*0.45]:
+				for z:float in [-size.z*0.45,size.z*0.45]:
+					Geo.box(foundation,Vector3(x,0.66,z),Vector3(0.25,0.9,0.25),Color("db9949"))
 		match str(spec.asset):
 			"table":
 				Geo.box(root,Vector3(0,size.y-0.08,0),Vector3(size.x,0.16,size.z),Color("afad94"))
@@ -143,7 +150,12 @@ static func _build_furniture(parent: Node3D, region: String) -> void:
 				for i in range(1,4): Geo.box(root,Vector3(-size.x/2+size.x*i/4,size.y,0),Vector3(0.025,0.012,size.z),Color("669594"))
 			"tank": Geo.cylinder(root,Vector3(0,size.y/2,0),size.x/2,size.y,Color("637677"),10)
 			"mast": _mast(root,Vector3.ZERO,size.y)
-			_: Geo.asset(root,str(spec.asset),Vector3.ZERO,size,float(spec.yaw))
+			_:
+				Geo.asset(root,str(spec.asset),Vector3.ZERO,size,float(spec.yaw))
+				if str(spec.asset)=="hab:cargo":
+					for side:float in [-1.0,1.0]:
+						Geo.box(root,Vector3(side*size.x*0.40,size.y*0.52,size.z*0.51),Vector3(0.25,size.y*0.80,0.08),Color("db9046"))
+					Geo.box(root,Vector3(0,size.y*0.63,size.z*0.52),Vector3(size.x*0.25,0.38,0.07),Color("d7cfb4"))
 
 static func _surface(parent: Node3D) -> void:
 	_floor(parent,Vector2(0,-7),Vector2(48,44),Color("77837d"))
@@ -195,8 +207,8 @@ static func _distribution(parent: Node3D) -> void:
 	Geo.label(parent,"03  SICHERHEIT",Vector3(49,0.25,-27),Color("a5d4ce"),25)
 	Geo.label(parent,"04  BERGEDOCK",Vector3(88,0.25,41),Color("dfbd89"),26)
 	# Long low road seams make the full landscape useful to read from a shuttle.
-	_floor(parent,Vector2(-110,190),Vector2(20,105),Color("a38b6d"))
-	_floor(parent,Vector2(180,-16),Vector2(125,14),Color("a38b6d"))
+	# Segment the approach through the authored southern ramp; no flat bridge through a cliff.
+	preload("res://scripts/world/world_rooms.gd")._path(parent,[Vector2(-170,160),Vector2(-185,210),Vector2(-130,226),Vector2(-60,226),Vector2(0,226),Vector2(0,210),Vector2(0,200),Vector2(0,190),Vector2(0,180),Vector2(0,160),Vector2(0,120),Vector2(-26,80)],12.0)
 
 	# Painted parking bays, central lane dashes and inset guidance lights do not block paths.
 	for z in range(-55,66,10):

@@ -12,6 +12,7 @@ var _rows: Dictionary={}
 var _headers: Dictionary={}
 var _amount: SpinBox
 var _claim: Button
+var _cancel:Button
 var _status: Label
 func _ready() -> void:
 	var top:=HBoxContainer.new();add_child(top)
@@ -23,6 +24,7 @@ func _ready() -> void:
 		var header:=_slot(container);header.text="Basislager" if container=="inventory" else "Schiffsfracht";header.icon=Icons.texture("storage" if container=="inventory" else "shuttle");column.add_child(header);_headers[container]=header
 		var list:=VBoxContainer.new();column.add_child(list);_lists[container]=list
 	_status=Label.new();_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_status.add_theme_font_size_override("font_size",13);footer.add_child(_status)
+	_cancel=Button.new();_cancel.text="Verladung abbrechen · Kisten bleiben liegen";_cancel.pressed.connect(func():command_requested.emit({"type":"cancel_hauling"}));footer.add_child(_cancel)
 	_claim=Button.new();_claim.text="Blackbox abgeben · +260 Cr + Bauplan";_claim.custom_minimum_size.y=40;_claim.pressed.connect(func():command_requested.emit({"type":"claim_contract"}));footer.add_child(_claim)
 func _slot(container: String) -> Button:
 	var button:=Slot.new();button.target={"to":container};button.accept=_reject;button.amount=func():return int(_amount.value)
@@ -50,9 +52,11 @@ func present(state: Dictionary) -> void:
 			button.tooltip_text="Ziehen auf "+("Schiffsfracht" if container=="inventory" else "Basislager")+" oder klicken. 1 Stück = 1 Frachtplatz."
 	_claim.visible=state.contract.status=="recovered"
 	_claim.disabled=int(state.inventory.blackbox)<1 or state.region!="base" or state.paused
-	_status.text="Ware auf den anderen Behälter ziehen. Klick verlädt die gewählte Menge."
+	_status.text="Ware auf den anderen Behälter ziehen. Klick beauftragt NPCs mit der gewählten Menge."
 	if state.contract.status=="recovered":_status.text="Blackbox im Lager. Jetzt Belohnung abholen." if int(state.inventory.blackbox)>0 else "Blackbox aus dem Schiff ins Basislager ziehen. Danach hier abgeben."
 	if state.contract.status=="claimed":_status.text="Auftrag bezahlt: 260 Credits + Schneider-Bauplan."
+	_cancel.visible=not state.get("hauling",{"jobs":[]}).jobs.is_empty()
+	if _cancel.visible:_status.text=preload("res://scripts/core/cargo_hauling.gd").summary(state)
 	var unavailable:=_access_error()
 	if not unavailable.is_empty():_status.text=unavailable+"\n"+_status.text
 func _access_error() -> String:
@@ -60,10 +64,7 @@ func _access_error() -> String:
 	if _state.get("region","")!="base":return "Ausladen im Basislager: zur Rostgrenze zurückkehren."
 	var ship: Dictionary=_state.ship;var dock: Array=Catalog.landmarks("base").shuttle
 	if ship.mode!="landed" or Vector2(ship.position[0],ship.position[1]).distance_to(Vector2(dock[0],dock[1]))>20:return "Am markierten Heimatdock landen, dann hier ausladen."
-	var at: Array=Catalog.ship_access(ship)
-	for crew: Dictionary in _state.crew.values():
-		if crew.health>0 and (crew.assignment=="aboard" or Vector2(crew.position[0],crew.position[1]).distance_to(Vector2(at[0],at[1]))<=8):return ""
-	return "Eine Person zum Schiffszugang schicken oder an Bord lassen."
+	return ""
 func _reject(data: Dictionary,target: Dictionary) -> String:
 	if not data.get("from","") in ["inventory","cargo"] or not target.get("to","") in ["inventory","cargo"] or data.get("from")==target.get("to"):return "Auf den anderen Behälter ziehen."
 	if not Catalog.ITEMS.has(data.get("item","")):return "Unbekannte Ware."

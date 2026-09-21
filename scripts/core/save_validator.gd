@@ -23,6 +23,12 @@ static func validate(payload: Variant) -> String:
 	var value: Variant = payload.get("state")
 	if not value is Dictionary: return "Zustand fehlt."
 	var s: Dictionary = value
+	var market_error:String=preload("res://scripts/core/market_stock.gd").validate(s.get("market_stock"))
+	if not market_error.is_empty():return market_error
+	var site_error:String=preload("res://scripts/core/site_state.gd").validate(s)
+	if not site_error.is_empty():return site_error
+	var power_error:String=preload("res://scripts/core/base_infrastructure.gd").validate(s)
+	if not power_error.is_empty():return power_error
 	if s.get("schema_version") != 5 or not whole(s.get("revision"),0,1000000000000): return "Version oder Revision ungültig."
 	if not number(s.get("time"),0.0,1000000000000.0) or not s.get("paused") is bool: return "Zeit ungültig."
 	if not s.get("region") in Regions.ALL: return "Region ungültig."
@@ -57,13 +63,8 @@ static func validate(payload: Variant) -> String:
 		if not level is String or (level!=s.region and (not Regions.bunker(s.region) or level!=Regions.elevator_target(s.region))):return "Personenebene ungültig."
 		if unit.get("assignment") in ["aboard","boarding"] and level!=s.region:return "Schiff auf anderer Ebene."
 		if not position_valid(unit.get("position"),Catalog.bounds(level)) or not position_valid(unit.get("target"),Catalog.bounds(level)): return "Personenposition ungültig."
-		if not unit.get("assignment") in ["idle","work","salvage","boarding","aboard","gather","downed"]: return "Zuweisung ungültig."
+		if not unit.get("assignment") in ["idle","work","salvage","boarding","aboard","gather","downed","hauling"]: return "Zuweisung ungültig."
 	if not s.get("contract") is Dictionary or not s.contract.get("status") in ["available","active","recovered","claimed"] or s.contract.get("reward") != 260: return "Auftrag ungültig."
-	var blackboxes: int = int(s.inventory.blackbox) + int(s.cargo.blackbox)
-	for unit: Dictionary in s.crew.values():
-		if not unit.get("backpack") is Dictionary or not _items(unit.backpack.get("items")):return "Rucksackbestand ungültig."
-		blackboxes+=int(unit.backpack.items.blackbox)
-	if blackboxes != (1 if s.contract.status == "recovered" else 0): return "Blackbox und Auftrag widersprechen sich."
 	if unique.has("cutter") != (s.contract.status == "claimed"): return "Bauplan und Auszahlung widersprechen sich."
 	for key: String in ["work","salvage","travel"]:
 		if not s.get(key) is Dictionary: return "Vorgang fehlt."
@@ -81,8 +82,8 @@ static func validate(payload: Variant) -> String:
 		if not _same_position(s.crew[work.unit_id].target,Catalog.interaction_point("base", "workbench")): return "Werkbankziel ungültig."
 	elif work.unit_id != "" or work.recipe_id != "" or not work.reserved.is_empty() or work.phase != "idle" or work.remaining != 0 or work.total != 0: return "Inaktive Arbeit inkonsistent."
 	if salvage.active:
-		if s.region != "rust" or s.contract.status == "available" or s.wreck_remaining <= 0 or not s.crew.has(salvage.unit_id) or s.crew[salvage.unit_id].assignment != "salvage" or salvage.total != 8 or not salvage.phase in ["walking","working"]: return "Bergung ungültig."
-		if not _same_position(s.crew[salvage.unit_id].target,Catalog.interaction_point("rust", "satellite")): return "Bergungsziel ungültig."
+		if Regions.archetype(s.region) != "rust" or s.contract.status == "available" or s.wreck_remaining <= 0 or not s.crew.has(salvage.unit_id) or s.crew[salvage.unit_id].assignment != "salvage" or salvage.total != 8 or not salvage.phase in ["walking","working"]: return "Bergung ungültig."
+		if not _same_position(s.crew[salvage.unit_id].target,Catalog.interaction_point(s.region, "satellite")): return "Bergungsziel ungültig."
 	elif salvage.unit_id != "" or salvage.phase != "idle" or salvage.remaining != 0 or salvage.total != 0: return "Inaktive Bergung inkonsistent."
 	var stage_error: String=_stage_valid(s)
 	if not stage_error.is_empty():return stage_error
@@ -102,7 +103,16 @@ static func validate(payload: Variant) -> String:
 	for key: Variant in payload.receipts:
 		var receipt: Variant = payload.receipts[key]
 		if not key is String or not receipt is Dictionary or not receipt.get("ok") is bool or not receipt.get("reason") is String or not receipt.get("request_id") is String or receipt.request_id.is_empty(): return "Anfragebeleg ungültig."
-	return preload("res://scripts/core/ground_validator.gd").validate(s)
+	var ground_error:String=preload("res://scripts/core/ground_validator.gd").validate(s)
+	if not ground_error.is_empty():return ground_error
+	var haul_error:String=preload("res://scripts/core/cargo_hauling.gd").validate(s)
+	if not haul_error.is_empty():return haul_error
+	var blackboxes: int = int(s.inventory.blackbox) + int(s.cargo.blackbox)+preload("res://scripts/core/cargo_hauling.gd").blackboxes(s)
+	for unit: Dictionary in s.crew.values():
+		if not unit.get("backpack") is Dictionary or not _items(unit.backpack.get("items")):return "Rucksackbestand ungültig."
+		blackboxes+=int(unit.backpack.items.blackbox)
+	if blackboxes != (1 if s.contract.status == "recovered" else 0): return "Blackbox und Auftrag widersprechen sich."
+	return ""
 
 static func _same_position(first: Array, second: Array) -> bool:
 	return is_equal_approx(float(first[0]),float(second[0])) and is_equal_approx(float(first[1]),float(second[1]))
@@ -141,7 +151,7 @@ static func _stage_valid(s: Dictionary) -> String:
 		seen[contact.id]=true
 		if not position_valid(contact.get("position"),480) or not contact.get("identified") is bool or not contact.get("label") is String:return "Kontaktdaten ungültig."
 		var index: int=int(str(contact.id).right(2))-1
-		if not _same_position(contact.position,Catalog.radar_contacts()[index].position):return "Kontaktposition ungültig."
+		if not _same_position(contact.position,Catalog.radar_contacts(s.get("discovery_site","rust"))[index].position):return "Kontaktposition ungültig."
 		var kind: String="unknown" if not contact.identified else ("satellite" if contact.id=="signal_01" else ("mining_site" if contact.id=="signal_02" else "derelict"))
 		if contact.get("kind")!=kind:return "Kontaktidentität ungültig."
 		if kind=="satellite":found=true

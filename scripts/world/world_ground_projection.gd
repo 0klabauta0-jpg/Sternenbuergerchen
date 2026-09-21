@@ -1,4 +1,6 @@
 extends RefCounted
+const Regions=preload("res://scripts/core/regions.gd")
+const Heights=preload("res://scripts/core/terrain_layout.gd")
 ## Finite resources, enemies and injury visuals only reflect confirmed snapshots.
 const Geo = preload("res://scripts/world/world_geometry.gd")
 const Landmarks = preload("res://scripts/world/world_landmarks.gd")
@@ -20,10 +22,10 @@ func present(map: Node3D, objects: Dictionary, units: Dictionary, state: Diction
 		if state.get("resources",{}).has(id):
 			var root: Node3D=objects[id]
 			var known:=true
-			if region=="rust" and id in ["mining_site","derelict"]:
+			if Regions.archetype(region)=="rust" and Regions.object_base(str(id)) in ["mining_site","derelict"]:
 				known=false
 				for contact: Dictionary in state.get("discovery",{}).get("signals",[]):
-					if str(contact.get("kind",""))==id and bool(contact.get("identified",false)): known=true
+					if str(contact.get("kind",""))==Regions.object_base(str(id)) and bool(contact.get("identified",false)): known=true
 			root.visible=known
 			Geo.set_pickable(root,known)
 			(root.get_node("Title") as Label3D).text=Landmarks.site_title(str(id))+" · %d" % int(state.resources[id].remaining)
@@ -41,7 +43,7 @@ func present(map: Node3D, objects: Dictionary, units: Dictionary, state: Diction
 			objects[id]=root
 		var root: Node3D=objects[id]
 		if not root.has_node("EnemyModel"): _enemy_model(root,str(data.kind))
-		root.position=Vector3(data.position[0],0.08,data.position[1])
+		root.position=Vector3(data.position[0],0.08+Heights.height_at(region,Vector2(data.position[0],data.position[1])),data.position[1])
 		var model:=root.get_node("EnemyModel") as Node3D
 		var down:=bool(data.defeated)
 		model.rotation.z=PI/2 if down and str(data.kind)!="aa" else 0.0

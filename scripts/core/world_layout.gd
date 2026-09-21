@@ -1,5 +1,6 @@
 extends RefCounted
 ## Shared deterministic layout data. No nodes, state mutation or gameplay rules.
+const Heights=preload("res://scripts/core/terrain_layout.gd")
 const Regions=preload("res://scripts/core/regions.gd")
 static var _obstacle_cache: Dictionary={}
 static var _rock_cache: Dictionary={}
@@ -19,6 +20,9 @@ static func rooms(region: String="base") -> Dictionary:
 
 static func landmarks(region: String) -> Dictionary:
 	var result:=_landmarks(Regions.archetype(region))
+	if Regions.archetype(region)=="rust" and Regions.variant(region)>0:
+		var layouts:Array=[{}, {"satellite":[-145,-160],"mining_site":[270,-220],"derelict":[180,250]}, {"satellite":[250,180],"mining_site":[-230,220],"derelict":[-260,-200]}, {"satellite":[-250,100],"mining_site":[230,240],"derelict":[-70,-280]}]
+		result.merge(layouts[Regions.variant(region)],true)
 	var scaled: Dictionary={}
 	for id: String in result:
 		var at: Array=result[id];var factor:=Regions.depth_scale(region)
@@ -38,15 +42,18 @@ static func _landmarks(region: String) -> Dictionary:
 
 static func furniture(region: String) -> Array:
 	var depth_factor:=Regions.depth_scale(region)
+	var variant:=Regions.variant(region)
 	region=Regions.archetype(region)
 	var result: Array=[]
 	if region=="base":
+		result.append(_item("reactor_small","factory:machine-fortified",[44,3],[6,6],4))
+		result.append(_item("reactor_large","factory:machine-fortified",[42,-22],[10,10],7))
 		result.append(_item("lounge_table","hab:table",[11,-8.5],[3.5,1.6],1.6))
 		for x in [9.8,12.2]:
 			for z in [-9.8,-7.2]:result.append(_item("chair_%s_%s"%[x,z],"chair",[x,z],[0.8,0.8],0.7))
 		for x in [-14.0,-10.0,-6.0]:result.append(_item("crate_%s"%x,"crate-small",[x,7],[1.1,1.2],0.8))
 		for x in [-14.2,-5.6]:result.append(_item("locker_%s"%x,"hab:cabinet",[x,-10.1 if x< -10 else -7.3],[1.2,0.7],2.0))
-		for x in [-12.0,-7.0,-2.0]:result.append(_item("solar_%s"%x,"solar",[x,-24],[4.5,5.5],2.8))
+		for i in 6:result.append(_item("solar_slot_%d"%i,"solar",[-12.0+(i%3)*5,-24.0-(i/3)*8],[4.5,5.5],2.8))
 		for x in [-30.0,-23.0]:result.append(_item("outside_crate_%s"%x,"crate-wide",[x,18],[3.8,3.6],2.4))
 		for x in [-13.0,-7.0]:result.append(_item("supply_shelf_%s"%x,"hab:shelf",[x,-1.8],[4.0,1.1],2.9))
 		result.append(_item("workwall","hab:workwall",[10,-1.8],[7.5,1.1],3.0))
@@ -93,6 +100,13 @@ static func furniture(region: String) -> Array:
 			result.append(_item("depot_robot_%s"%x,"factory:robot-arm-a",[x,-38],[5,5],7))
 	elif region=="tradepost":
 		result.append(_item("trade_dish","space-props:satelliteDish_detailed",[29,-24],[8,8],9))
+	if variant>0 and not region in ["base","station","bunker_depths"]:
+		var yards:Array=[[],[[-70,15],[-56,15],[-70,31]],[[56,16],[68,16],[68,30]],[[0,-85],[15,-85],[-15,-85]]]
+		for i in yards[variant].size():
+			var at:Array=yards[variant][i]
+			result.append(_item("variant_supply_%d"%i,"hab:cargo",at,[8,4],3.0))
+		var camp:Array=[[0,0],[-64,48],[56,48],[35,-85]][variant]
+		result.append(_item("variant_workshop","hab:workwall",camp,[6,1.5],3.0))
 	return result
 
 static func _item(id: String, asset: String, center: Array, size: Array, height: float) -> Dictionary:
@@ -187,9 +201,10 @@ static func _rect(result: Dictionary,id: String,center: Vector2,size: Vector2,ki
 static func rocks(region: String) -> Array:
 	if _rock_cache.has(region):return _rock_cache[region]
 	var result: Array=[]
+	var authored_region:=region
 	region=Regions.archetype(region)
 	if region not in ["base","rust","bunker_surface","distribution","tradepost"]:return result
-	var rng:=RandomNumberGenerator.new();rng.seed={"base":812,"rust":901,"bunker_surface":972,"distribution":1048,"tradepost":1135}.get(region,901)
+	var rng:=RandomNumberGenerator.new();rng.seed={"base":812,"rust":901,"bunker_surface":972,"distribution":1048,"tradepost":1135}.get(region,901)+Regions.variant(authored_region)*907
 	var half:=bounds(region)
 	var structures:=_structures(region)
 	for i in range(80+160):
@@ -197,7 +212,7 @@ static func rocks(region: String) -> Array:
 		var radius:=rng.randf_range(11,27) if i<80 else rng.randf_range(0.7,1.8)
 		if _clear_area(region,point,radius):continue
 		var blocked:=false
-		for at: Array in landmarks(region).values():
+		for at: Array in landmarks(authored_region).values():
 			if point.distance_to(Vector2(at[0],at[1]))<radius+17:blocked=true
 		for spec: Dictionary in structures.values():
 			var size:=Vector2(spec.size[0],spec.size[1]);var rect:=Rect2(Vector2(spec.center[0],spec.center[1])-size/2,size)
@@ -210,7 +225,7 @@ static func rocks(region: String) -> Array:
 		for side in [-1.0,1.0]:
 			var point:=center+Vector2(side*62+sin(step*1.1)*28,step*47)
 			var radius:=38.0;var blocked:=false
-			for at: Array in landmarks(region).values():
+			for at: Array in landmarks(authored_region).values():
 				if point.distance_to(Vector2(at[0],at[1]))<radius+30:blocked=true
 			if _clear_area(region,point,radius) or absf(point.x)>half-55 or absf(point.y)>half-55:blocked=true
 			if blocked:continue
@@ -228,7 +243,12 @@ static func rocks(region: String) -> Array:
 				var at:Vector2=cluster+Vector2.from_angle(angle)*(1.0+j*0.44)
 				var radius:=0.5+float(j%3)*0.18
 				result.append({"id":"scree_%s_%d"%[str(cluster),j],"center":[at.x,at.y],"size":[radius*2.4,radius*1.8],"height":radius*0.8,"radius":radius,"seed":2100+j,"category":"rock","kind":"mesa"})
-	_rock_cache[region]=result
+	result=result.filter(func(rock:Dictionary):
+		var area:=Rect2(Vector2(rock.center[0],rock.center[1])-Vector2(rock.size[0],rock.size[1])*0.5,Vector2(rock.size[0],rock.size[1]))
+		for patch:Dictionary in Heights.patches(authored_region):
+			if area.intersects((patch.ramp as Rect2).grow(5.0)):return false
+		return true)
+	_rock_cache[authored_region]=result
 	return result
 
 static func _clear_area(region: String,point: Vector2,radius: float) -> bool:

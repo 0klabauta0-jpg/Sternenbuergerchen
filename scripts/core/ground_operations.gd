@@ -60,8 +60,8 @@ func _gather(c: Dictionary,sender: int) -> String:
 	if not id is String or not Catalog.resource_sites().has(id):return "Fundstelle unbekannt."
 	var site: Dictionary=Catalog.resource_sites()[id]
 	if site.region!=s.region:return "Fundstelle liegt auf einer anderen Karte."
-	if id in ["mining_site","derelict"]:
-		var signal_id: String="signal_02" if id=="mining_site" else "signal_03"
+	if Regions.object_base(id) in ["mining_site","derelict"]:
+		var signal_id: String="signal_02" if Regions.object_base(id)=="mining_site" else "signal_03"
 		var identified: bool=false
 		for contact: Dictionary in s.discovery.signals:
 			if contact.id==signal_id and contact.identified:identified=true
@@ -71,7 +71,7 @@ func _gather(c: Dictionary,sender: int) -> String:
 	var point: Array=Catalog.interaction_point(s.region,id)
 	var unit: Dictionary=s.crew[c.unit_id]
 	if Nav.path(s.region,_v(unit.position),_v(point),s.ship).is_empty():return "Fundstelle ist nicht erreichbar."
-	if id=="mining_site" and not (unit.equipment.tool=="multitool" and unit.equipment.attachment=="mining_attachment"):return "Mining braucht Multi-Tool und Mining-Aufsatz."
+	if Regions.object_base(id)=="mining_site" and not (unit.equipment.tool=="multitool" and unit.equipment.attachment=="mining_attachment"):return "Mining braucht Multi-Tool und Mining-Aufsatz."
 	if Regions.object_base(id) in ["derelict","distribution_wreck"] and not (unit.equipment.tool=="cutter" or (unit.equipment.tool=="multitool" and unit.equipment.attachment=="salvage_attachment")):return "Salvage braucht Schneidwerkzeug oder Multi-Tool mit Salvage-Aufsatz."
 	var duration: float=site.duration/Catalog.skill_effects(unit).gather_multiplier
 	unit.assignment="gather";unit.attack_target="";unit.target=point

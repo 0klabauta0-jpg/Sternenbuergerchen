@@ -7,8 +7,16 @@ static func command(sim: Node,kind: String,data: Dictionary={}) -> Dictionary:
 	serial+=1;var c:=data.duplicate(true);c.type=kind;c.request_id="journey-%d"%serial
 	var result: Dictionary=sim.submit(c)
 	if not result.ok:printerr("JOURNEY ",kind," ",result.reason)
+	if result.ok and kind in ["trade","transfer"]:finish_hauling(sim)
 	return result
+static func finish_hauling(sim:Node) -> bool:
+	for step in 1200:
+		if sim.snapshot().get("hauling",{"jobs":[]}).jobs.is_empty():return true
+		if sim.snapshot().paused:return false
+		sim.advance(0.5)
+	return false
 static func board(sim: Node) -> bool:
+	if not finish_hauling(sim):return false
 	var ids: Array[String]=[]
 	for unit: Dictionary in sim.snapshot().crew.values():
 		if unit.assignment=="idle":ids.append(unit.id)

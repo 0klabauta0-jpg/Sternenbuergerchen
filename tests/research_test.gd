@@ -9,6 +9,7 @@ func run() -> void:
 	var sim:Node=load("res://scripts/core/simulation_root.gd").new(3);sim.auto_tick=false;root.add_child(sim)
 	# Focused research fixture after an earned bench upgrade; transactions are real commands.
 	sim._state.base.workbench_tier=2
+	check(sim.submit({"type":"toggle_sender","request_id":"research-power"}).ok,"free starter power for research")
 	var before:int=sim.snapshot().inventory.parts
 	var command:Dictionary={"type":"assign_work","unit_id":"ida","recipe_id":"research_materials","request_id":"research"}
 	var result:Dictionary=sim.submit(command)

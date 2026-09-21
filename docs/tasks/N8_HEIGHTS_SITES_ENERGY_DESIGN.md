@@ -1,6 +1,6 @@
 # N8 – Begehbare Höhenwelten, bewohnte Orte und Energie
 
-Status: konkreter Entwurf zur Durchsicht, noch keine Implementierung. Basis: N7, Commit 1895361. Datum: 21.09.2026.
+Status: vom Nutzer bestätigt; Umsetzung läuft, noch keine finale N8-Abnahme. Basis: N7, Commit 1895361. Datum: 21.09.2026.
 
 ## Ziel und Ausgangslage
 Die Karten sollen die räumliche Staffelung und wohnliche Wirkung der vom Nutzer gelieferten Vorlagen erreichen. Aktuell erzeugt WorldTerrain den begehbaren Boden auf y=0; die Mesas sind aufgesetzte Hindernisse. Gebäude, Straßen und Interaktionspunkte nehmen dieselbe Ebene an. Solarzellen und Sendestation sind bisher reine Requisiten. Regionen verwenden feste Archetypen; TeamCampaign speichert Bestände pro Planet, noch nicht pro eigenständigem Einsatzort.
@@ -60,6 +60,7 @@ Autoritativer BaseInfrastructure-Zustand: gebaute Module, Stufe, priorisierte Ve
 
 Vorgeschlagener kleiner Anfang: 24 Leistungseinheiten Solarversorgung. Grundversorgung 6, Sendestation I 4, Werkbank I während Arbeit 6: ausreichende Reserve, keine Start-Sackgasse. Werkbank II benötigt 12, Forschung zusätzlich 6. Verbesserte Sendestation 8 und zusätzliche Unterkunft 2 erzeugen zusammen nachvollziehbaren Ausbaubedarf.
 
+- Nachtrag des Nutzers: Anlagen sind auch mit Lieferung kaufbar. Solar I → II → III, danach kleiner und großer Fusionsreaktor. Baupläne können gefunden, erforscht oder gekauft werden. Herstellung benötigt Materialien; ein Anlagenkauf bezahlt Lieferung und Montage.
 - Solar I ist am Start vorhanden. Weitere Module brauchen Metall, Bauteile und Bauzeit mit Techniker. Solar II setzt gefundenen Bauplan und Energieforschung voraus, erhöht Leistung pro Slot.
 - Sendestation I bietet die lokalen Einstiegsaufträge. Ausbau erschließt neue Auftragsklassen/weitere Angebote; die Systemkarte und der Heimflug werden bei Strommangel nicht gesperrt.
 - Forschungsast: Grundlagen Energie → effiziente Solarzellen → Netzsteuerung; Kommunikationsast: Relaistechnik → Sendestation II. Voraussetzungen und Fundhinweise sind im bestehenden Baum sichtbar.

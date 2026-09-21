@@ -2,6 +2,8 @@ extends RefCounted
 ## Original 24px line icons; rendered as vectors, no font glyph dependencies.
 static var _cache: Dictionary={}
 const SHAPES := {
+	"food":"<path d='M4 7h16v14H4zM8 7V4h8v3M12 10v8m0-4c-4 0-4-3-4-3 4 0 4 3 4 3m0 2c4 0 4-3 4-3-4 0-4 3-4 3'/>",
+	"medical_supplies":"<rect x='2' y='7' width='20' height='14' rx='2'/><path d='M8 7V3h8v4M12 10v8M8 14h8'/>",
 	"scrap":"<path d='m2 16 8-4 12 4-8 5zM2 10l8-4 12 4-8 5zM2 10v6m12-1v6m8-11v6'/>",
 	"parts":"<path d='m8 2 5 3v6l-5 3-5-3V5zM8 6v4m-2-2h4M16 11l5 3v6l-5 3-5-3v-6z'/><circle cx='16' cy='17' r='2'/>",
 	"blackbox":"<rect x='3' y='5' width='18' height='15' rx='2'/><path d='M8 5V2h8v3M7 10h10M7 14h4m3 0h3M7 18h10'/>",

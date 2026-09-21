@@ -29,7 +29,9 @@ func command(kind: String, data: Dictionary = {}, sender: int = 1) -> Dictionary
 	var payload: Dictionary = data.duplicate(true)
 	payload.type = kind
 	payload.request_id = "test-%d" % serial
-	return sim.submit(payload, sender)
+	var result:Dictionary=sim.submit(payload,sender)
+	if result.ok and kind in ["trade","transfer"]:check(Journey.finish_hauling(sim),"physical delivery completes")
+	return result
 
 func prepare_salvage() -> void:
 	var state: Dictionary=sim.snapshot()
@@ -159,8 +161,12 @@ func run() -> void:
 	command("travel", {"destination":"base"})
 	sim.advance(40.0)
 	command("claim_contract")
-	command("upgrade_workbench", {"unit_id":"ida"})
-	sim.advance(20.0)
+	check(command("upgrade_workbench", {"unit_id":"ida"}).ok, "workbench upgrade accepted")
+	# Include the real ramp approach, but bound the wait to catch stuck workers.
+	for second in 60:
+		if not sim.snapshot().work.active:break
+		sim.advance(1.0)
+	check(not sim.snapshot().work.active, "workbench upgrade finishes after ramp approach")
 	check(command("assign_work", {"unit_id":"ida","recipe_id":"cutter"}).ok, "reward blueprint and market materials enable cutter")
 	sim.advance(20.0)
 	check(sim.snapshot().inventory.cutter == 1, "cutter crafted from real inputs")

@@ -6,6 +6,8 @@ const Catalog = preload("res://scripts/core/catalog.gd")
 const Layout = preload("res://scripts/core/world_layout.gd")
 const Space = preload("res://scripts/world/world_space.gd")
 
+const Heights=preload("res://scripts/core/terrain_layout.gd")
+
 static var _planet := "rust"
 
 static func _stone_color(color:Color) -> Color:
@@ -27,10 +29,12 @@ static func build(parent: Node3D, region: String,planet:String="rust") -> void:
 	rng.seed = {"base":812,"rust":901,"bunker_surface":972,"distribution":1048,"tradepost":1135}.get(region,901)
 	var half := Catalog.bounds(region)
 	_ground(parent,rng,half)
+	preload("res://scripts/world/world_elevation.gd").build(parent,region,_stone_color(Color("9a5435")))
 	for spec: Dictionary in Layout.rocks(region):
 		if str(spec.kind)!="mesa":continue
 		var rock_rng:=RandomNumberGenerator.new();rock_rng.seed=int(spec.seed)
-		_mesa(parent,Vector2(spec.center[0],spec.center[1]),float(spec.radius),float(spec.height),rock_rng)
+		var shelf:=Node3D.new();parent.add_child(shelf);shelf.position.y=Heights.height_at(region,Vector2(spec.center[0],spec.center[1]))
+		_mesa(shelf,Vector2(spec.center[0],spec.center[1]),float(spec.radius),float(spec.height),rock_rng)
 	_scatter(parent,region)
 	if region=="base":_home_scree(parent)
 
@@ -65,7 +69,7 @@ static func _scatter(parent: Node3D, region: String) -> void:
 	for spec: Dictionary in Layout.rocks(region):
 		if str(spec.kind)!="stone":continue
 		var dimensions:=Vector3(spec.size[0],spec.height,spec.size[1])
-		transforms.append(Transform3D(Basis.IDENTITY.scaled(dimensions),Vector3(spec.center[0],spec.height/2,spec.center[1])))
+		transforms.append(Transform3D(Basis.IDENTITY.scaled(dimensions),Vector3(spec.center[0],spec.height/2+Heights.height_at(region,Vector2(spec.center[0],spec.center[1])),spec.center[1])))
 	var mesh:=CylinderMesh.new();mesh.top_radius=0.30;mesh.bottom_radius=0.5;mesh.height=1.0;mesh.radial_segments=6
 	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.mesh=mesh;batch.instance_count=transforms.size()
 	for i in range(transforms.size()):batch.set_instance_transform(i,transforms[i])
@@ -133,6 +137,7 @@ static func _home_scree(parent: Node3D) -> void:
 			var a:=Vector2.from_angle(j*TAU/5)*r+at
 			var b:=Vector2.from_angle((j+1)*TAU/5)*r+at
 			for v in [Vector3(a.x,0.008,a.y),Vector3(b.x,0.008,b.y),Vector3(at.x,height,at.y)]:
+				v.y+=Heights.height_at("base",Vector2(v.x,v.z))
 				st.set_color(shade);st.add_vertex(v)
 	st.generate_normals()
 	var node:=MeshInstance3D.new();node.mesh=st.commit()

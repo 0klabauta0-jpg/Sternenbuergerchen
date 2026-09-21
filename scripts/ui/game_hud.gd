@@ -380,7 +380,7 @@ func present(state: Dictionary) -> void:
 	for id: String in _crew_buttons:
 		var unit: Dictionary=state.get("crew",{}).get(id,{})
 		var assignment: String=unit.get("assignment","idle")
-		var work_label: String={"idle":"Bereit", "work":"Werkstatt", "salvage":"Bergung", "boarding":"Zum Shuttle", "moving":"Unterwegs", "aboard":_seat_label(str(unit.get("seat",""))),"gather":"Gewinnung","downed":"Rückkehr %d s" % int(unit.get("respawn_remaining",0))}.get(assignment,assignment)
+		var work_label: String={"hauling":"Verladen", "idle":"Bereit", "work":"Werkstatt", "salvage":"Bergung", "boarding":"Zum Shuttle", "moving":"Unterwegs", "aboard":_seat_label(str(unit.get("seat",""))),"gather":"Gewinnung","downed":"Rückkehr %d s" % int(unit.get("respawn_remaining",0))}.get(assignment,assignment)
 		if unit.has("level_region"):work_label+=" · UG" if preload("res://scripts/core/regions.gd").underground(unit.level_region) else " · EG"
 		var button: Button=_crew_buttons[id]
 		var owns: bool=_owns(id)
@@ -424,6 +424,7 @@ func _rebuild_actions() -> void:
 		"shuttle":
 			ShipContext.build(self)
 		"market":
+			_add_command("cancel_hauling","Verladung abbrechen · Kisten bleiben liegen","cancel_hauling",{},false,_cargo_footer)
 			for item: String in Catalog.prices():
 				_add_command("buy_"+item,Catalog.item_name(item)+" kaufen","trade",{"side":"buy","item":item,"amount":1})
 				_add_command("sell_"+item,Catalog.item_name(item)+" verkaufen","trade",{"side":"sell","item":item,"amount":1})
@@ -533,7 +534,12 @@ func _update_context() -> void:
 		"market":
 			_context_title.text="Markt / "+REGIONS.get(_state.region,_state.region)
 			_context_text.text="[b]%d Credits · Fracht %d / %d[/b]\nAn Bord: %s" % [int(_state.credits),_cargo_used(),int(_state.ship.capacity),_items(cargo)]
-			_hint.text="Einkäufe → Schiffsfracht. Handelsring: Meridian (Bauteile) → Freihafen (Metall) → Staubmarkt (Legierung) → Meridian. Preise gelten je Stück; Risiken auf der Reisekarte."
+			_context_text.text+="\n"+preload("res://scripts/core/cargo_hauling.gd").summary(_state)
+			_disable("cancel_hauling",_state.get("hauling",{"jobs":[]}).jobs.is_empty())
+			var shipment:Dictionary=_state.market_stock[_state.region]
+			var seconds:=int(ceil(shipment.remaining))
+			_context_text.text+="\nGemeinsamer Händlerbestand · Nachschub in %d:%02d"%[seconds/60,seconds%60]
+			_hint.text="NPCs tragen Einkäufe zum Schiff; Verkäufe werden erst bei Lieferung bezahlt. Freie Crew steigt automatisch aus. Kisten anklicken: ausgewählte Person holt sie ab."
 			_disable("rent_ship",int(_state.credits)<900 or bool(_state.get("rental",{}).get("active",false)))
 			if _state.region=="distribution":_context_text.text+="\nBesetztes Depot: Handel erst nach Ausschalten beider Wachen."
 			if _state.region=="station":_context_text.text+="\nGeier: 900 Cr für 20 Spielminuten. Mehr Fracht und Wrackertrag."
@@ -542,7 +548,7 @@ func _update_context() -> void:
 			_context_title.text="Lager & Schiffsfracht"
 			_context_text.text="[b]Entladen wird hier im Basislager.[/b]"
 			if is_instance_valid(_cargo_panel):_cargo_panel.present(_state)
-			_hint.text="Schiff am Heimatdock landen. Eine Person bleibt an Bord oder am Zugang."
+			_hint.text="Schiff am Heimatdock landen. Freie NPCs tragen automatisch. Abbruch lässt Fracht vor Ort."
 		"office":
 			_context_title.text="Büro · Crewverwaltung"
 			_context_text.text="[b]Zwei Crewmitglieder · gemeinsames Kommando[/b]\nAkte öffnen: Fähigkeiten, Gesundheit, Ausrüstung und Rucksack."
@@ -593,12 +599,13 @@ func set_recipe_details(recipes: Dictionary,prices: Dictionary) -> void:
 			var item: String=key.trim_prefix(side+"_")
 			if not prices.has(item):continue
 			var amount: int=int(prices[item][side])
-			_action_buttons[key].text=_item_name(item)+"\n"+("−" if side=="buy" else "+")+str(amount)+" Cr"
+			var stock:int=int(_state.market_stock[_state.region].items[item])
+			_action_buttons[key].text=_item_name(item)+"\n"+("−" if side=="buy" else "+")+str(amount)+" Cr"+(" · %d da"%stock if side=="buy" else "")
 			var blocked: bool=_state.travel.active
-			if side=="buy": blocked=blocked or int(_state.credits)<amount or _cargo_used()>=int(_state.ship.capacity)
+			if side=="buy": blocked=blocked or stock<=0 or int(_state.credits)<amount or _cargo_used()+preload("res://scripts/core/cargo_hauling.gd").inbound(_state)>=int(_state.ship.capacity)
 			else: blocked=blocked or int(_state.cargo[item])<=0
 			_action_buttons[key].disabled=blocked
-			_action_buttons[key].tooltip_text="Kein Bestand an Bord." if side=="sell" and int(_state.cargo[item])<=0 else "Nicht genug Credits oder Frachtraum." if blocked else "Eine Einheit handeln"
+			_action_buttons[key].tooltip_text="Ausverkauft. Zeit bis Nachschub steht oben beim Händler." if side=="buy" and stock<=0 else "Kein Bestand an Bord." if side=="sell" and int(_state.cargo[item])<=0 else "Nicht genug Credits oder Frachtraum." if blocked else "Eine Einheit handeln"
 
 func _items(items: Dictionary) -> String:
 	var parts: PackedStringArray=[]
@@ -662,7 +669,7 @@ func _update_objective() -> void:
 		text="Im Orbit · Ort auf der Reisekarte wählen";action="Reisekarte öffnen";_objective_id="travel_chart"
 	elif _state.region in Regions.MARKETS:
 		text=Regions.LABELS[_state.region]+" · Handel und Fracht";action="Markt öffnen";_objective_id="market"
-	elif _state.region=="rust":
+	elif preload("res://scripts/core/regions.gd").archetype(_state.region)=="rust":
 		var found: bool=bool(_state.get("discovery",{}).get("satellite_found",false))
 		text="Blackbox geborgen · Zurück nach Hause" if status=="recovered" else "Satellit gefunden · Landen und bergen" if found else "Suchflug · Radarimpuls · Kontakt anfliegen"
 		action="Shuttle zeigen" if status=="recovered" else "Absturzstelle zeigen"

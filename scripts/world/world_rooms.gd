@@ -21,7 +21,7 @@ static func base(parent: Node3D) -> void:
 	Geo.label(parent,"ROSTGRENZE / 07",Vector3(0,3.9,-18),Color("d5e1d1"),28)
 	# Furnishings are projected from WorldLayout by GroundSites, once per map.
 	# The approach follows a gentle bend and shares no extra collision geometry.
-	_path(parent,[Vector2(0,11),Vector2(3,15),Vector2(11,18),Vector2(20,23),Vector2(25,29)],3.0)
+	_path(parent,[Vector2(0,11),Vector2(0,15),Vector2(0,21),Vector2(0,27),Vector2(0,33),Vector2(0,40),Vector2(14,40),Vector2(25,29)],3.0)
 
 static func _path(parent: Node3D, points: Array, width: float) -> void:
 	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES)

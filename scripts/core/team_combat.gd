@@ -49,6 +49,11 @@ func project(state:Dictionary,cores:Array[Node],planets:Array[String],team:int) 
 		if unit.assignment=="aboard":continue
 		var key:="team%d:%s"%[1-team,id]
 		state.ground.enemies[unit.get("level_region",state.region)][key]={"id":key,"kind":"guard","name":"Team %d · %s"%[2-team,unit.name],"health":unit.health,"max_health":100,"position":unit.position.duplicate(),"target":unit.target.duplicate(),"defeated":unit.health<=0,"cooldown":unit.attack_cooldown,"team":1-team}
+	for j:Dictionary in cores[1-team]._state.get("hauling",{"jobs":[]}).jobs:
+		if int(j.held)>0 and not str(j.unit).is_empty():
+			var unit:Dictionary=cores[1-team]._state.crew[j.unit]
+			var key:String="team%d:%s"%[1-team,j.unit]
+			state.ground.enemies[unit.get("level_region",state.region)][key].carrying=j.item
 	for id:String in state.crew:
 		var key:=str(team)+":"+id
 		if orders.has(key):state.crew[id].attack_target="team%d:%s"%[1-team,orders[key].target]

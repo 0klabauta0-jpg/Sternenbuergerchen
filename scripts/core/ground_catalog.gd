@@ -11,7 +11,8 @@ static func landmarks(region: String) -> Dictionary:
 	return {}
 static func sites() -> Dictionary:
 	var result:=_sites()
-	for region: String in ["bunker_medium","bunker_medium_depths","bunker_hard","bunker_hard_depths","distribution_friendly"]:
+	for region: String in Regions.ALL:
+		if region==Regions.archetype(region):continue
 		for id: String in _sites():
 			var site: Dictionary=_sites()[id]
 			if site.region!=Regions.archetype(region):continue
@@ -29,7 +30,7 @@ static func _sites() -> Dictionary:
 		"distribution_wreck":{"region":"distribution","item":"scrap","stock":24,"duration":8.0,"yield":4},
 		"tradepost_cache":{"region":"tradepost","item":"parts","stock":6,"duration":5.0,"yield":2}}
 static func enemies(region: String) -> Dictionary:
-	if region=="distribution_friendly":return {}
+	if Regions.family(region)=="distribution_friendly":return {}
 	var result:=_enemies(Regions.archetype(region))
 	var level:=Regions.difficulty(region)
 	if Regions.bunker(region):

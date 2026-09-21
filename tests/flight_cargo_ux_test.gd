@@ -41,12 +41,13 @@ func run() -> void:
 	check(cmd("land").ok,"land at dock")
 	var stock: int=sim.snapshot().inventory.scrap
 	var transfer: Dictionary={"type":"transfer","item":"scrap","amount":3,"direction":"load","request_id":"n6-idempotent"}
-	check(sim.submit(transfer).ok,"actual cargo stack loaded")
+	check(sim.submit(transfer).ok and sim.snapshot().cargo.scrap==0,"actual cargo stack scheduled")
+	check(Journey.finish_hauling(sim),"real load path completes")
 	check(sim.submit(transfer).ok and sim.snapshot().cargo.scrap==3,"repeated receipt never duplicates cargo")
-	check(cmd("transfer",{"item":"scrap","amount":3,"direction":"unload"}).ok and sim.snapshot().inventory.scrap==stock,"unload conserves stack")
+	check(cmd("transfer",{"item":"scrap","amount":3,"direction":"unload"}).ok and Journey.finish_hauling(sim) and sim.snapshot().inventory.scrap==stock,"unload conserves stack")
 	check(not cmd("transfer",{"item":"scrap","amount":13,"direction":"load"}).ok,"invalid amount rejected")
 	check(not cmd("claim_contract").ok,"no early mission payment")
-	check(cmd("launch").ok and cmd("enter_orbit").ok,"depart again");sim.advance(5.1)
+	check(Journey.board(sim) and cmd("launch").ok and cmd("enter_orbit").ok,"depart again");sim.advance(5.1)
 	check(cmd("travel",{"destination":"rust"}).ok,"travel rust");sim.advance(5.1)
 	if sim.snapshot().encounter.active:cmd("flee");sim.advance(7.1)
 	check(cmd("ship_order",{"mode":"search","position":[145,-125]}).ok,"search raster accepted")

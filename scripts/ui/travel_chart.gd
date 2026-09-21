@@ -18,6 +18,8 @@ const DESTINATIONS={
 }
 var _state: Dictionary={}
 var _selected := "rust"
+var _variants:OptionButton
+var _variant_family:=""
 var _buttons: Dictionary={}
 var _title: Label
 var _detail: Label
@@ -81,8 +83,8 @@ class RouteDiagram extends Control:
 
 func _ready() -> void:
 	title="Systemkarte · Asche"
-	size=Vector2i(1100,710)
-	min_size=Vector2i(1100,710)
+	size=Vector2i(1100,780)
+	min_size=Vector2i(1100,780)
 	transient=true
 	unresizable=true
 	close_requested.connect(hide)
@@ -122,6 +124,8 @@ func _ready() -> void:
 	row.add_child(info)
 	_preview=TextureRect.new();_preview.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;_preview.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;_preview.custom_minimum_size=Vector2(284,132);info.add_child(_preview)
 	_title=_label("",26,Color("efab6f"));info.add_child(_title)
+	_variants=OptionButton.new();info.add_child(_variants)
+	_variants.item_selected.connect(func(_index:int):_refresh())
 	_detail=_label("",14)
 	_detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	_detail.custom_minimum_size=Vector2(280,150)
@@ -129,7 +133,7 @@ func _ready() -> void:
 	_route=Button.new()
 	_route.text="Anflug beginnen"
 	_route.custom_minimum_size.y=46
-	_route.pressed.connect(func():command_requested.emit({"type":"travel","destination":_selected}))
+	_route.pressed.connect(func():command_requested.emit({"type":"travel_site" if _state.has("campaign") and _variants.visible else "travel","destination":str(_variants.get_item_metadata(_variants.selected)) if _variants.visible else _selected}))
 	info.add_child(_route)
 	var back:=Button.new()
 	back.text="Zurück zum Schiff"
@@ -176,6 +180,13 @@ func _refresh() -> void:
 	for planet:String in _planet_buttons:
 		_planet_buttons[planet].disabled=_state.get("region","")!="orbit" or _state.get("travel",{}).get("active",false)
 	_map.selected=_selected;_map.show_starts=_state.has("campaign");_map.queue_redraw()
+	if _variant_family!=_selected:
+		_variant_family=_selected;_variants.clear()
+		_variants.visible=_selected not in ["base","station"]
+		if _variants.visible:
+			for i in 4:
+				var id:String=_selected+("_v%d"%(i+1) if i>0 else "")
+				_variants.add_item(Regions.LABELS[id]+" · "+["Rostwelt","Frostmark","Schlacke","Grünschiefer"][i]);_variants.set_item_metadata(i,id)
 	var data: Dictionary=DESTINATIONS[_selected]
 	var preview_id:String="distribution_friendly" if _selected=="distribution" else "bunker_surface" if Regions.bunker(_selected) else _selected
 	var preview_path:String="res://assets/original/previews/%s.jpg"%preview_id
@@ -186,7 +197,9 @@ func _refresh() -> void:
 	var cargo:=0
 	for amount:Variant in _state.cargo.values():cargo+=int(amount)
 	_ship_info.text="%s  ·  Crew %d / %d an Bord  ·  Fracht %d / %d"%[_state.ship.name,aboard,_state.crew.size(),cargo,_state.ship.capacity]
-	_title.text=str(data.title)
+	var destination:String=str(_variants.get_item_metadata(_variants.selected)) if _variants.visible else _selected
+	_title.text=Regions.LABELS.get(destination,str(data.title))
+	_title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var width:=int(Catalog.bounds(_selected)*2)
 	_detail.text=str(data.subtitle)+"\n\nGebiet: %d × %d m\n" % [width,width]
 	_detail.text+="Risiko unterwegs: %d %%\n" % int(Catalog.travel_risk(_selected))
@@ -195,7 +208,9 @@ func _refresh() -> void:
 	if Regions.bunker(_selected):_detail.text+="Untergeschoss %d × %d m · Aufzug.\n" % [int(Catalog.bounds(Regions.elevator_target(_selected))*2),int(Catalog.bounds(Regions.elevator_target(_selected))*2)]
 	_detail.text+="\nAnkunft am Kartenrand · selbst landen."
 	var ready: bool=str(_state.get("region",""))=="orbit" and not bool(_state.get("travel",{}).get("active",false))
-	_route.disabled=not ready
+	var access_error:String=preload("res://scripts/core/base_infrastructure.gd").site_access(_state,destination)
+	if not access_error.is_empty():_detail.text+="\n"+access_error
+	_route.disabled=not ready or not access_error.is_empty()
 	var action_style:=StyleBoxFlat.new();action_style.bg_color=Color("ed9d48");action_style.set_corner_radius_all(8);_route.add_theme_stylebox_override("normal",action_style);_route.add_theme_color_override("font_color",Color("17232b"))
 	if not ready:_detail.text+="\nZuerst in den Orbit aufsteigen."
 	for id: String in _buttons:

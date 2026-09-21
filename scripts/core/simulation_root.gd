@@ -1,5 +1,10 @@
 extends Node
 class_name RestartSimulation
+const Haul=preload("res://scripts/core/cargo_hauling.gd")
+const Market=preload("res://scripts/core/market_stock.gd")
+var external_market_clock:=false
+const Sites=preload("res://scripts/core/site_state.gd")
+const Infrastructure=preload("res://scripts/core/base_infrastructure.gd")
 const Regions=preload("res://scripts/core/regions.gd")
 
 const Catalog = preload("res://scripts/core/catalog.gd")
@@ -48,6 +53,10 @@ func _init(seed_value: int = -1) -> void:
 	CrewState.extend(_state)
 	Expansion.extend(_state)
 	_state.blueprints.append("research_materials")
+	Infrastructure.extend(_state)
+	Sites.extend(_state)
+	Market.extend(_state)
+	Haul.extend(_state)
 	_state.ground.enemies.bunker_depths=Catalog.ground_enemies("bunker_depths")
 	_state.crew.ida.position=[0.0,0.0];_state.crew.ida.target=[0.0,0.0]
 	_state.crew.jaro.position=[1.0,1.0];_state.crew.jaro.target=[1.0,1.0]
@@ -70,7 +79,9 @@ func _empty_travel() -> Dictionary:
 	return {"active":false,"from":"","to":"","remaining":0.0,"total":0.0,"phase":"idle","kind":"intermap","encounter_decided":false,"encounter_roll":-1}
 
 func snapshot() -> Dictionary:
-	return _state.duplicate(true)
+	var view:Dictionary=_state.duplicate(true)
+	view.wreck_remaining=Sites.wreck(_state)
+	return view
 
 func _physics_process(delta: float) -> void:
 	if auto_tick:
@@ -137,9 +148,22 @@ func _tick_ground_levels(delta:float) -> void:
 
 func _dispatch(command: Dictionary, sender: int) -> String:
 	var kind: String = command.type
+	if kind=="pickup_freight":return Haul.pickup(_state,command)
+	if kind=="cancel_hauling":Haul.cancel(_state);return ""
+	if not _state.hauling.jobs.is_empty() and kind in ["launch","enter_orbit","travel","rent_ship","return_rental"]:return "Zuerst Verladung abschließen oder abbrechen. Ware bleibt beim Abbruch vor Ort."
+	if kind=="buy_power":
+		if not command.get("offer") is String:return "Energieangebot fehlt."
+		return Infrastructure.buy(_state,command.offer)
+	if kind=="toggle_sender":
+		if _state.region!="base":return "Sendersteuerung nur in der Basis."
+		_state.base.infrastructure.sender_enabled=not _state.base.infrastructure.sender_enabled
+		return ""
 	if kind == "toggle_pause":
 		_state.paused = not _state.paused
 		return ""
+	if kind=="travel" and command.get("destination") is String:
+		var access_error:String=Infrastructure.site_access(_state,command.destination)
+		if not access_error.is_empty():return access_error
 	if kind in ["board","board_crew","cancel_board","disembark","launch","enter_orbit","travel"]:return _crew_travel.dispatch(command)
 	if kind in ["equip","equip_item","unequip_item","backpack_transfer","use_medgun","field_repair"]:return _equipment.dispatch(command)
 	if kind in ["gather","cancel_gather","attack","use_elevator","rent_ship","return_rental"]:
@@ -189,6 +213,7 @@ func _dispatch(command: Dictionary, sender: int) -> String:
 			_state.contract.status = "claimed"
 			_state.credits += _state.contract.reward
 			_state.blueprints.append("cutter")
+			Infrastructure.extend(_state)
 			_log("Auftrag bezahlt: 260 Credits und Bauplan Schneidwerkzeug.")
 		"trade": return _trade(command)
 		"transfer": return _transfer(command)
@@ -210,6 +235,8 @@ func _start_work(command: Dictionary, sender: int) -> String:
 	if not recipe_id is String or not Catalog.recipes().has(recipe_id): return "Unbekanntes Rezept."
 	if not _state.blueprints.has(recipe_id): return "Bauplan fehlt."
 	var recipe: Dictionary = Catalog.recipes()[recipe_id]
+	var infrastructure_error:=Infrastructure.available(_state,recipe_id)
+	if not infrastructure_error.is_empty():return infrastructure_error
 	if recipe.has("unlocks") and str(recipe.unlocks[0]) in _state.blueprints:return "Forschung bereits abgeschlossen."
 	if _state.base.workbench_tier < recipe.tier:return "Werkbankstufe reicht nicht. Erst die Werkbank ausbauen."
 	if recipe_id=="upgrade_workbench" and _state.base.workbench_tier>=2:return "Werkbank ist bereits auf Stufe 2."
@@ -229,22 +256,22 @@ func _start_work(command: Dictionary, sender: int) -> String:
 	return ""
 
 func _start_salvage(command: Dictionary, sender: int) -> String:
-	if _state.region != "rust": return "Bergung ist nur am Satelliten möglich."
+	if Regions.archetype(_state.region) != "rust": return "Bergung ist nur am Satelliten möglich."
 	if not _state.discovery.satellite_found:return "Satellit zuerst mit dem Shuttle und Radar finden."
 	if _state.ship.mode!="landed":return "Vor der Bergung landen."
 	if _state.contract.status == "available": return "Zuerst den Bergungsauftrag annehmen."
 	if _state.salvage.active: return "Am Satelliten wird bereits gearbeitet."
-	if _state.wreck_remaining <= 0: return "Wrack ist vollständig geborgen."
+	if Sites.wreck(_state) <= 0: return "Wrack ist vollständig geborgen."
 	if _cargo_count() >= _state.ship.capacity: return "Frachtraum ist voll."
 	var error: String = _unit_error(command.get("unit_id"), sender)
 	if not error.is_empty(): return error
 	var unit: Dictionary = _state.crew[command.unit_id]
 	if _state.contract.status!="active" and not _salvage_tool(unit):return "Bergung braucht Schneidwerkzeug oder Multi-Tool mit Salvage-Aufsatz."
-	var destination: Array=Catalog.interaction_point("rust","satellite")
+	var destination: Array=Catalog.interaction_point(_state.region,"satellite")
 	if Nav.path(_state.region,Vector2(unit.position[0],unit.position[1]),Vector2(destination[0],destination[1]),_state.ship).is_empty():return "Satellit nicht erreichbar."
 	unit.attack_target=""
 	unit.assignment = "salvage"
-	unit.target = Catalog.interaction_point("rust", "satellite")
+	unit.target = Catalog.interaction_point(_state.region, "satellite")
 	_state.salvage = {"active":true,"unit_id":command.unit_id,"remaining":8.0,"total":8.0,"phase":"walking"}
 	_log(unit.name + " geht zum Satellitenwrack.")
 	return ""
@@ -256,8 +283,8 @@ func _cargo_count() -> int:
 
 func _trade(command: Dictionary) -> String:
 	if not _state.region in Regions.MARKETS or _state.ship.mode!="landed": return "Handel ist an einem gelandeten Markt möglich."
-	if _state.region=="distribution":
-		for enemy: Dictionary in _state.ground.enemies.distribution.values():
+	if Regions.family(_state.region)=="distribution":
+		for enemy: Dictionary in _state.ground.enemies[_state.region].values():
 			if not enemy.defeated:return "Knotenwerk ist besetzt. Erst die Depotwachen ausschalten."
 	var side: Variant = command.get("side")
 	var item: Variant = command.get("item")
@@ -266,16 +293,24 @@ func _trade(command: Dictionary) -> String:
 	if not Validator.whole(amount, 1, 10000): return "Menge muss eine positive ganze Zahl sein."
 	var quantity: int = int(amount)
 	var cost: int = int(Catalog.prices(_state.region)[item][side]) * quantity
+	var stock:Dictionary=_state.market_stock[_state.region].items
+	var from:Array=Catalog.interaction_point(_state.region,"market") if side=="buy" else Catalog.ship_access(_state.ship)
+	var destination:String="cargo" if side=="buy" else "market"
+	var haul_error:String=Haul.can_order(_state,from,Haul.destination(_state,destination))
+	if not haul_error.is_empty():return haul_error
 	if side == "buy":
+		if int(stock[item])<quantity:return "Händlerbestand erschöpft. Nächsten Nachschub abwarten."
 		if _state.credits < cost: return "Nicht genug Credits."
-		if _cargo_count() + quantity > _state.ship.capacity: return "Frachtraum ist voll."
+		if _cargo_count() + Haul.inbound(_state) + quantity > _state.ship.capacity: return "Frachtraum ist voll."
 		_state.credits -= cost
-		_state.cargo[item] += quantity
+		Haul.order(_state,item,quantity,from,destination)
+		stock[item]-=quantity
 	else:
 		if _state.cargo[item] < quantity: return "Ware fehlt im Frachtraum."
+		if int(stock[item])+quantity>Market.LIMIT:return "Händlerlager voll."
 		_state.cargo[item] -= quantity
-		_state.credits += cost
-	_log("Handel abgeschlossen: %d × %s." % [quantity, Catalog.item_name(item)])
+		Haul.order(_state,item,quantity,from,destination,int(Catalog.prices(_state.region)[item].sell))
+	_log("Verladung beauftragt: %d × %s." % [quantity, Catalog.item_name(item)])
 	return ""
 
 func _release(unit_id: String) -> void:
@@ -295,7 +330,9 @@ func advance(delta: float) -> void:
 
 func _tick(delta: float) -> void:
 	_state.time += delta
+	if not external_market_clock:Market.advance(_state.market_stock,delta)
 	_tick_ground_levels(delta)
+	Haul.tick(_state,delta,_log)
 	if _state.ship.condition<=0 and _state.ship.mode=="flying" and _state.region!="space":
 		_state.ship.condition=50.0;_arrive("base");_log("Notbergung nach Flaktreffer: Crew und Schiff zurück an der Basis.");return
 	if not _state.travel.active and _state.ship.mode=="flying":
@@ -316,7 +353,7 @@ func _tick(delta: float) -> void:
 		return
 	if _state.work.active:
 		var unit: Dictionary = _state.crew[_state.work.unit_id]
-		if _arrived(unit):
+		if _arrived(unit) and Infrastructure.budget(_state,_state.work.recipe_id).powered:
 			_state.work.phase = "working"
 			_state.work.remaining = maxf(0.0, _state.work.remaining - delta)
 			if _state.work.remaining <= 0.0:
@@ -326,6 +363,7 @@ func _tick(delta: float) -> void:
 					if not unlock in _state.blueprints:_state.blueprints.append(unlock)
 				if _state.work.recipe_id == "repair": _state.ship.condition = minf(100.0, _state.ship.condition + 28.0)
 				if _state.work.recipe_id == "upgrade_workbench":_state.base.workbench_tier=2
+				Infrastructure.complete(_state,_state.work.recipe_id)
 				_log(recipe.label + " fertig.")
 				_release(_state.work.unit_id)
 				_state.work = _empty_work()
@@ -336,13 +374,15 @@ func _tick(delta: float) -> void:
 			_state.salvage.remaining = maxf(0.0, _state.salvage.remaining - delta)
 			if _state.salvage.remaining <= 0.0:
 				var room: int = int(_state.ship.capacity) - _cargo_count()
-				if _state.contract.status == "active" and room > 0:
+				if _state.contract.status == "active" and room > 0 and not _state.world_claims[_state.region]:
+					_state.world_claims[_state.region]=true
 					_state.cargo.blackbox = 1
 					_state.contract.status = "recovered"
 					room -= 1
-				var recovered: int = mini(mini(4, int(_state.wreck_remaining)), room)
+				var recovered: int = mini(mini(4, Sites.wreck(_state)), room)
 				_state.cargo.scrap += recovered
-				_state.wreck_remaining -= recovered
+				_state.wreck_remaining = Sites.wreck(_state)-recovered
+				if _state.has("world_wrecks"):_state.world_wrecks[_state.discovery_site]=_state.wreck_remaining
 				_log("Bergung beendet. Fracht im Shuttle; Rückkehr zur Basis möglich.")
 				_release(_state.salvage.unit_id)
 				_state.salvage = _empty_salvage()
@@ -359,6 +399,7 @@ func _tick_travel(delta: float) -> void:
 	_arrive(destination)
 func _arrive(destination: String) -> void:
 	_routes.clear();_crew_travel.arrive(destination)
+	Sites.enter(_state,destination)
 func _salvage_tool(unit: Dictionary) -> bool:
 	return unit.equipment.tool=="cutter" or (unit.equipment.tool=="multitool" and unit.equipment.attachment=="salvage_attachment")
 
@@ -379,6 +420,8 @@ func clear_guest(peer_id: int=0) -> void:
 
 func save_game(path: String) -> Dictionary:
 	var payload: Dictionary = {"schema_version":5,"state":snapshot(),"receipts":_receipts.duplicate(true)}
+	if payload is Dictionary and payload.get("state") is Dictionary and not payload.state.has("site_revision"):
+		Sites.extend(payload.state)
 	var reason: String = Validator.validate(payload)
 	if not reason.is_empty(): return _result(false, "Speichern abgelehnt: " + reason)
 	var temporary: String = path + ".tmp"
@@ -401,6 +444,7 @@ func load_game(path: String) -> Dictionary:
 	if file == null or file.get_length() > 16000000: return _result(false, "Spielstand nicht lesbar oder zu groß.")
 	var payload: Variant = JSON.parse_string(file.get_as_text())
 	file.close()
+	var older:bool=payload is Dictionary and Validator.whole(payload.get("schema_version"),1,4)
 	if payload is Dictionary and payload.get("schema_version")==1:
 		var legacy_error: String=LegacyValidator.validate(payload)
 		if not legacy_error.is_empty():return _result(false,"Alter Spielstand abgelehnt: "+legacy_error)
@@ -417,6 +461,8 @@ func load_game(path: String) -> Dictionary:
 		var legacy_error: String=LegacyV4.validate(payload)
 		if not legacy_error.is_empty():return _result(false,"N4-Spielstand abgelehnt: "+legacy_error)
 		payload=Expansion.migrate(payload)
+	var migration_error:String=preload("res://scripts/core/n8_migration.gd").prepare(payload,older)
+	if not migration_error.is_empty():return _result(false,migration_error)
 	var reason: String = Validator.validate(payload)
 	if not reason.is_empty(): return _result(false, "Spielstand abgelehnt: " + reason)
 	return restore_payload(payload)
@@ -425,6 +471,9 @@ func export_payload() -> Dictionary:
 	return {"schema_version":5,"state":snapshot(),"receipts":_receipts.duplicate(true)}
 
 func restore_payload(payload: Dictionary) -> Dictionary:
+	payload=payload.duplicate(true)
+	var migration_error:String=preload("res://scripts/core/n8_migration.gd").prepare(payload)
+	if not migration_error.is_empty():return _result(false,migration_error)
 	var reason:String=Validator.validate(payload)
 	if not reason.is_empty():return _result(false,"Spielstand abgelehnt: "+reason)
 	var previous_revision: int = int(_state.revision)
@@ -432,8 +481,10 @@ func restore_payload(payload: Dictionary) -> Dictionary:
 	if Regions.underground(_state.region):
 		for unit:Dictionary in _state.crew.values():unit.level_region=unit.get("level_region",_state.region)
 		_state.region=Regions.surface(_state.region)
+	Haul.extend(_state)
 	_normalize_loaded_numbers()
 	if not "research_materials" in _state.blueprints:_state.blueprints.append("research_materials")
+	Infrastructure.extend(_state)
 	_state.revision = maxi(previous_revision, int(_state.revision))
 	_receipts = payload.receipts.duplicate(true)
 	_state.crew.ida.owner = 1
@@ -468,12 +519,6 @@ func _transfer(command: Dictionary) -> String:
 	if _state.region != "base": return "Fracht wird am Basislager verladen."
 	var dock: Array=Catalog.landmarks("base").shuttle
 	if _state.ship.mode!="landed" or Vector2(_state.ship.position[0],_state.ship.position[1]).distance_to(Vector2(dock[0],dock[1]))>20.0:return "Frachtlogistik braucht das gelandete Schiff am Heimatdock."
-	var access: Array=Catalog.ship_access(_state.ship)
-	var available: bool=false
-	for unit: Dictionary in _state.crew.values():
-		if unit.health>0 and (unit.assignment=="aboard" or Vector2(unit.position[0],unit.position[1]).distance_to(Vector2(access[0],access[1]))<=8):available=true
-	if not available:return "Eine Figur zum Schiffszugang bringen."
-
 	var direction: Variant = command.get("direction")
 	var item: Variant = command.get("item")
 	var amount: Variant = command.get("amount")
@@ -484,13 +529,18 @@ func _transfer(command: Dictionary) -> String:
 	var source: Dictionary = _state.inventory if direction == "load" else _state.cargo
 	var destination: Dictionary = _state.cargo if direction == "load" else _state.inventory
 	if source[item] < quantity: return "Ware fehlt im Lager oder Frachtraum."
-	if direction == "load" and _cargo_count() + quantity > _state.ship.capacity: return "Frachtraum ist voll."
+	if direction == "load" and _cargo_count() + Haul.inbound(_state) + quantity > _state.ship.capacity: return "Frachtraum ist voll."
+	var from:Array=Catalog.interaction_point("base","storage") if direction=="load" else Catalog.ship_access(_state.ship)
+	var target:String="cargo" if direction=="load" else "inventory"
+	var haul_error:String=Haul.can_order(_state,from,Haul.destination(_state,target))
+	if not haul_error.is_empty():return haul_error
 	source[item] -= quantity
-	destination[item] += quantity
-	_log("%d × %s %s." % [quantity,Catalog.item_name(item),"eingeladen" if direction == "load" else "ausgeladen"])
+	Haul.order(_state,item,quantity,from,target)
+	_log("%d × %s %s." % [quantity,Catalog.item_name(item),"zum Einladen bereitgestellt" if direction == "load" else "zum Ausladen bereitgestellt"])
 	return ""
 
 func _cancel_unit_tasks(id: String) -> void:
+	Haul.interrupt(_state,id)
 	if _state.crew[id].assignment=="boarding":_crew_travel.dispatch({"type":"cancel_board","unit_id":id})
 	if _state.work.active and _state.work.unit_id==id:
 		for item: String in _state.work.reserved:_state.inventory[item]+=_state.work.reserved[item]

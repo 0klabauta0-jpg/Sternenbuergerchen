@@ -26,7 +26,7 @@ func valid(label: String) -> void:
 	check(error.is_empty(),label+": "+error)
 func run() -> void:
 	fresh();valid("fresh schema5")
-	check(Catalog.destination_info().size()==9 and Regions.ALL.size()==14,"nine destinations, fourteen separate maps")
+	check(Catalog.destination_info().size()==30 and Regions.ALL.size()==44,"thirty destinations, forty-four region layers")
 	check(Catalog.bounds("space")==600 and Catalog.bounds("orbit")==600,"space 1200m")
 	for region: String in Regions.ALL:
 		if region in ["space","orbit"]:continue

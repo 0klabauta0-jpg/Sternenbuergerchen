@@ -5,10 +5,10 @@ const TradeRoutes=preload("res://scripts/core/trade_routes.gd")
 const Layout=preload("res://scripts/core/world_layout.gd")
 const Gear=preload("res://scripts/core/equipment_catalog.gd")
 const Ground=preload("res://scripts/core/ground_catalog.gd")
-const ITEMS: Array[String] = ["scrap","parts","toolkit","cutter","blackbox","helmet","armor","ore","alloy","backpack","multitool","mining_attachment","salvage_attachment","medgun","med_charge","repair_attachment"]
+const ITEMS: Array[String] = ["scrap","parts","toolkit","cutter","blackbox","helmet","armor","ore","alloy","backpack","multitool","mining_attachment","salvage_attachment","medgun","med_charge","repair_attachment","food","medical_supplies"]
 const WALK_SPEED: float = 6.0
 static func item_name(id: String) -> String:
-	return {"scrap":"Metall","parts":"Bauteile","toolkit":"Werkzeugkit","cutter":"Schneider","blackbox":"Blackbox","helmet":"Schutzhelm","armor":"Schutzrüstung","ore":"Erz","alloy":"Schiffslegierung"}.get(id,Gear.names().get(id,id))
+	return {"food":"Nahrung","medical_supplies":"Medizinische Güter","scrap":"Metall","parts":"Bauteile","toolkit":"Werkzeugkit","cutter":"Schneider","blackbox":"Blackbox","helmet":"Schutzhelm","armor":"Schutzrüstung","ore":"Erz","alloy":"Schiffslegierung"}.get(id,Gear.names().get(id,id))
 static func recipes() -> Dictionary:
 	var result: Dictionary={
 		"armor":{"label":"Schutzrüstung","materials":{"scrap":3,"parts":2},"duration":10.0,"min_skill":2,"tier":1,"output":{"armor":1}},
@@ -19,10 +19,11 @@ static func recipes() -> Dictionary:
 		"upgrade_workbench":{"label":"Werkbank Stufe 2","materials":{"scrap":3,"parts":1},"duration":12.0,"min_skill":3,"tier":1,"output":{}}
 	}
 	result.merge(Gear.recipes())
+	result.merge(preload("res://scripts/core/base_infrastructure.gd").recipes())
 	result.merge(preload("res://scripts/core/research_catalog.gd").recipes())
 	return result
 static func prices(region: String="") -> Dictionary:
-	var result: Dictionary={"scrap":{"buy":12,"sell":6},"parts":{"buy":35,"sell":18},"toolkit":{"buy":90,"sell":50},"cutter":{"buy":150,"sell":85},"helmet":{"buy":60,"sell":30},"armor":{"buy":220,"sell":110},"ore":{"buy":55,"sell":35},"alloy":{"buy":160,"sell":120}}
+	var result: Dictionary={"food":{"buy":18,"sell":12},"medical_supplies":{"buy":70,"sell":48},"scrap":{"buy":12,"sell":6},"parts":{"buy":35,"sell":18},"toolkit":{"buy":90,"sell":50},"cutter":{"buy":150,"sell":85},"helmet":{"buy":60,"sell":30},"armor":{"buy":220,"sell":110},"ore":{"buy":55,"sell":35},"alloy":{"buy":160,"sell":120}}
 	result.merge(Gear.prices());result.merge(TradeRoutes.overrides(region),true);return result
 static func profiles() -> Dictionary:
 	return {"ida":{"name":"Ida","skills":{"pilot":3,"gunnery":1,"tech":3},"equipment":{"helmet":"basic_helmet","tool":""}},"jaro":{"name":"Jaro","skills":{"pilot":1,"gunnery":3,"tech":1},"equipment":{"helmet":"basic_helmet","tool":""}}}
@@ -44,8 +45,9 @@ static func interaction_point(region: String,object_id: String) -> Array:
 	elif object_id=="market":point[1]+=2.7
 	elif object_id.begins_with("bed_"):point[1]+=2.1
 	return point
-static func radar_contacts() -> Array:
-	return [{"id":"signal_01","position":[145.0,-125.0],"identified":false,"label":"Unbekanntes Signal","kind":"unknown"},{"id":"signal_02","position":[-300.0,-210.0],"identified":false,"label":"Unbekanntes Signal","kind":"unknown"},{"id":"signal_03","position":[310.0,250.0],"identified":false,"label":"Unbekanntes Signal","kind":"unknown"}]
+static func radar_contacts(region:String="rust") -> Array:
+	var points:Dictionary=landmarks(region)
+	return [{"id":"signal_01","position":points.get("satellite",[145.0,-125.0]),"identified":false,"label":"Unbekanntes Signal","kind":"unknown"},{"id":"signal_02","position":points.get(Regions.object_id(region,"mining_site"),[-300.0,-210.0]),"identified":false,"label":"Unbekanntes Signal","kind":"unknown"},{"id":"signal_03","position":points.get(Regions.object_id(region,"derelict"),[310.0,250.0]),"identified":false,"label":"Unbekanntes Signal","kind":"unknown"}]
 
 static func obstacles(region: String) -> Dictionary:return Layout.obstacles(region)
 static func ground_enemies(region: String) -> Dictionary:return Ground.enemies(region)

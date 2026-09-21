@@ -16,7 +16,9 @@ func cmd(kind: String,data: Dictionary = {},sender: int = 1) -> Dictionary:
 	serial += 1
 	var c: Dictionary = data.duplicate(true)
 	c.type=kind;c.request_id="n2-%d"%serial
-	return sim.submit(c,sender)
+	var result:Dictionary=sim.submit(c,sender)
+	if result.ok and kind in ["trade","transfer"]:check(Journey.finish_hauling(sim),"physical shipment finishes")
+	return result
 func run() -> void:
 	sim=Core.new(1);sim.auto_tick=false;root.add_child(sim)
 	check(sim.snapshot().schema_version==5,"schema5 retains orbit extensions")
@@ -62,7 +64,8 @@ func run() -> void:
 	check(sim.save_game("user://n2-active-upgrade.json").ok and sim.load_game("user://n2-active-upgrade.json").ok,"upgrade reservation survives reload")
 	sim.advance(30)
 	check(sim.snapshot().base.workbench_tier==2,"upgrade completes tier2")
-	check(cmd("assign_work",{"unit_id":"ida","recipe_id":"cutter"}).ok,"tier2 reward recipe works")
+	var craft:Dictionary=cmd("assign_work",{"unit_id":"ida","recipe_id":"cutter"})
+	check(craft.ok,"tier2 reward recipe works: "+craft.reason)
 	sim.advance(20)
 	check(sim.snapshot().inventory.cutter==1,"tier2 output produced")
 	# Fixed initial seed makes the production random sequence reproducible, not forced outcomes.

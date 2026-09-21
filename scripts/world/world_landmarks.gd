@@ -63,7 +63,8 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 				collision=Vector3(12,0.15,12)
 				label_height=0.6
 			"satellite":
-				_wreck(root)
+				if Regions.variant(region)>0:_ship_wreck(root)
+				else:_wreck(root)
 				collision = Vector3(10,3.4,7)
 				label_height = 4.3
 			"market":
@@ -97,7 +98,7 @@ static func build(parent: Node3D, region: String, landmarks: Dictionary) -> Dict
 				Geo.asset(root,"computer-wide",Vector3(0,0.05,-0.5),Vector3(3.2,2.0,1.5))
 				collision=Vector3(3.5,2.3,2.0)
 		Geo.collider(root,"object",str(id),collision)
-		var title := Geo.label(root,site_title(str(id)),Vector3(0,label_height,0),Color("dce8df"),20 if str(id).begins_with("bed") else 23)
+		var title := Geo.label(root,"SCHIFFSWRACK · BLACKBOX" if id=="satellite" and Regions.variant(region)>0 else site_title(str(id)),Vector3(0,label_height,0),Color("dce8df"),20 if str(id).begins_with("bed") else 23)
 		if str(id).begins_with("bed"):
 			title.visible = false
 		title.name = "Title"
