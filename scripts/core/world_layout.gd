@@ -205,6 +205,12 @@ static func rocks(region: String) -> Array:
 			if _clear_area(region,point,radius) or absf(point.x)>half-55 or absf(point.y)>half-55:blocked=true
 			if blocked:continue
 			result.append({"id":"canyon_%d_%d"%[step,int(side)],"center":[point.x,point.y],"size":[radius*2.4,radius*1.8],"height":14.0+step*1.5,"radius":radius,"seed":430+step,"category":"rock","kind":"mesa"})
+	# Authored home skyline: shared footprints keep the visible cliffs solid.
+	if region=="base":
+		var ridge: Array=[[-42,-43,10,14],[-26,-49,12,17],[-6,-52,14,19],[17,-50,12,16],[36,-47,10,13],[-49,-22,9,11],[-52,10,10,12],[51,31,9,10]]
+		for i in ridge.size():
+			var p: Array=ridge[i]
+			result.append({"id":"home_ridge_%d"%i,"center":[p[0],p[1]],"size":[p[2]*2.4,p[2]*1.8],"height":p[3],"radius":p[2],"seed":1400+i,"category":"rock","kind":"mesa"})
 	_rock_cache[region]=result
 	return result
 

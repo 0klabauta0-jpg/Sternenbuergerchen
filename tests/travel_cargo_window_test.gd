@@ -16,7 +16,7 @@ func _run() -> void:
 	await process_frame
 	_check(game.simulation.snapshot().schema_version==5,"Fresh product uses schema 5")
 	await _capture("n6-base")
-	_check(game.hud._menu.get_item_count()==7,"System menu separates crew gameplay from session functions")
+	_check(game.hud._menu.get_item_index(7)==-1 and game.hud._menu.get_item_index(9)>=0,"System menu separates crew gameplay from session functions")
 	await _object("workbench")
 	await _action("backpack")
 	_check(game.simulation.snapshot().work.active,"Scrollable workshop starts backpack recipe")

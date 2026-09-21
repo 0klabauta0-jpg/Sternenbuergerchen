@@ -16,6 +16,9 @@ const GroundProjection = preload("res://scripts/world/world_ground_projection.gd
 const Armor = preload("res://scripts/world/world_armor.gd")
 const ControlScript = preload("res://scripts/world/world_control.gd")
 
+var guidance_mode := 1
+var _guide: Label3D
+var _guide_time := 0.0
 var _orbit: RefCounted
 var _ground: RefCounted
 var _camera: Camera3D
@@ -26,7 +29,7 @@ var _objects: Dictionary = {}
 var _snapshot: Dictionary = {}
 var _region := ""
 var _focus := Vector3(4,0,0)
-var _zoom := 48.0
+var _zoom := 76.0
 var _selected_kind := ""
 var _selected_id := ""
 var _dragging := false
@@ -56,6 +59,12 @@ func _ready() -> void:
 	_control.clicked.connect(_pick)
 	_control.box_finished.connect(_box_select)
 	_lighting()
+	_guide=Geo.label(self,"",Vector3.ZERO,Color("ffc06a"),28)
+	_guide.no_depth_test=true
+	_guide.hide()
+	var preferences:=ConfigFile.new()
+	preferences.load("user://display_preferences.cfg")
+	guidance_mode=int(preferences.get_value("display","guidance",1))
 	if not _snapshot.is_empty():
 		present(_snapshot)
 	_update_camera()
@@ -120,6 +129,7 @@ func present(state: Dictionary) -> void:
 	_apply_selection()
 
 func _process(delta: float) -> void:
+	_update_guidance(delta)
 	if _camera == null:
 		return
 	var ui_focus := get_viewport().gui_get_focus_owner()
@@ -214,7 +224,7 @@ func focus_home() -> void:
 			var ship: Dictionary=_snapshot.get("ship",{})
 			var coords: Array=ship.get("position",[2,0])
 			_focus=Vector3(coords[0],0,coords[1]) if ship.get("mode","")=="flying" else Vector3(2,0,-1)
-			_zoom=78.0 if ship.get("mode","")=="flying" else 48.0
+			_zoom=78.0 if ship.get("mode","")=="flying" else 76.0
 		"rust":
 			var coords: Array = _snapshot.get("ship",{}).get("position",[-210,180])
 			_focus = Vector3(coords[0],0,coords[1])
@@ -381,3 +391,14 @@ func _lighting() -> void:
 	sun.shadow_bias = 0.15
 	sun.shadow_normal_bias = 2.0
 	add_child(sun)
+
+func _update_guidance(delta: float) -> void:
+	if not is_instance_valid(_guide):return
+	_guide_time+=delta
+	var hint: Dictionary=preload("res://scripts/ui/onboarding_hint.gd").target(_snapshot)
+	_guide.visible=guidance_mode>0 and not hint.is_empty()
+	if not _guide.visible:return
+	var at: Array=Catalog.landmarks(_region).get(str(hint.id),[])
+	if at.size()!=2:_guide.hide();return
+	_guide.text=str(hint.text)+"\n▼"
+	_guide.position=Vector3(at[0],5.4+(sin(_guide_time*2.0)*0.3 if guidance_mode==1 else 0.0),at[1])

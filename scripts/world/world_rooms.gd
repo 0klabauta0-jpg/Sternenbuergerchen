@@ -54,10 +54,19 @@ static func _wall(parent: Node3D, at: Vector2, length: float, along_z: bool, tra
 		var offset := -length/2+segment*(i+0.5)
 		var pos := Vector3(at.x,0.10,at.y)+Vector3(0,0,offset) if along_z else Vector3(at.x+offset,0.10,at.y)
 		var wall := Geo.asset(parent,"wall",pos,Vector3(segment,3.05,0.42),PI/2 if along_z else 0.0)
-		if transparent: Geo.fade_asset(wall,0.14)
+		if transparent: Geo.fade_asset(wall,0.20)
+		var trim_size:=Vector3(0.48,0.28,segment-0.08) if along_z else Vector3(segment-0.08,0.28,0.48)
+		var stripe:=Geo.box(parent,pos+Vector3(0,0.8,0),trim_size,Color("dc883b"))
+		if transparent:Geo.fade_asset(stripe,0.20)
+		if not transparent:
+			var panel_size:=Vector3(0.46,1.65,segment-0.16) if along_z else Vector3(segment-0.16,1.65,0.46)
+			Geo.box(parent,pos+Vector3(0,1.86,0),panel_size,Color("c7c1ae"))
+			var lamp_size:=Vector3(0.49,0.55,0.12) if along_z else Vector3(0.12,0.55,0.49)
+			var lamp:=Geo.box(parent,pos+Vector3(0,2.45,0),lamp_size,Color("ffce80"))
+			lamp.material_override=Geo.material(Color("ffce80"),0,1.2)
 	var dimensions := Vector3(0.25,0.17,length) if along_z else Vector3(length,0.17,0.25)
-	Geo.box(parent,Vector3(at.x,0.18,at.y),dimensions,Color("577578"))
-	Geo.box(parent,Vector3(at.x,3.16,at.y),dimensions,Color("527078"))
+	Geo.box(parent,Vector3(at.x,0.18,at.y),dimensions,Color("4a4c4a"))
+	Geo.box(parent,Vector3(at.x,3.16,at.y),dimensions,Color("c6bdab"))
 
 static func station(parent: Node3D) -> void:
 	for spec: Dictionary in Layout.rooms("station").values():

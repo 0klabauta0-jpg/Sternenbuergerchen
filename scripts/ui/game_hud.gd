@@ -67,6 +67,8 @@ var _quick_actions: Dictionary={}
 var _crew_caption: Label
 var _dossier: Window
 var _dossier_unit := "ida"
+var _blueprints: Window
+var _guidance_mode := 1
 
 func _ready() -> void:
 	_root = Control.new()
@@ -102,6 +104,12 @@ func _ready() -> void:
 	_build_travel()
 	_build_network()
 	_build_dossier()
+	_blueprints=preload("res://scripts/ui/blueprint_tree.gd").new()
+	_blueprints.theme=_root.theme
+	add_child(_blueprints)
+	var preferences:=ConfigFile.new()
+	preferences.load("user://display_preferences.cfg")
+	_guidance_mode=int(preferences.get_value("display","guidance",1))
 	set_process(true)
 
 func _style(color: Color, radius: int = 8, border: Color = Color("33464e")) -> StyleBoxFlat:
@@ -109,7 +117,7 @@ func _style(color: Color, radius: int = 8, border: Color = Color("33464e")) -> S
 	box.bg_color = color
 	box.border_color = border
 	box.set_border_width_all(1)
-	box.set_corner_radius_all(1)
+	box.set_corner_radius_all(radius)
 	box.content_margin_left = 10
 	box.content_margin_right = 10
 	box.content_margin_top = 7
@@ -165,7 +173,9 @@ func _build_top() -> void:
 	_menu=PopupMenu.new()
 	add_child(_menu)
 	for entry: Array in [["Speichern · F5",1],["Laden · F9",2],["Koop-Verbindung",3],["Logbuch",4],["Handbuch / Bedienung",5],["Zum Hauptmenü",8],["Speichern und beenden",6]]: _menu.add_item(entry[0],entry[1])
+	_menu.add_item("Anzeigehilfen: sanft / ruhig / aus",9)
 	_menu.id_pressed.connect(_menu_action)
+	_button("Baupläne",func():_blueprints.open_tree(_state),row,30)
 	_button("System",func():_menu.popup(Rect2i(Vector2i(get_viewport().get_mouse_position()),Vector2i(260,0))),row,30)
 	_resources=Label.new();_resources.hide();row.add_child(_resources)
 
@@ -339,6 +349,7 @@ func set_connection(text: String, guest: bool) -> void:
 
 func present(state: Dictionary) -> void:
 	_state=state
+	if is_instance_valid(_blueprints) and _blueprints.visible:_blueprints.present(state)
 	if state.is_empty(): return
 	if is_instance_valid(_dossier) and _dossier.visible: _dossier.present(state,_dossier_unit)
 	var region: String=state.get("region","base")
@@ -718,6 +729,14 @@ func _menu_action(id: int) -> void:
 		6: action_requested.emit("quit",{})
 		7: open_dossier(selected_unit)
 		8: action_requested.emit("main_menu",{})
+		9:
+			_guidance_mode=(_guidance_mode+1)%3
+			var preferences:=ConfigFile.new()
+			preferences.load("user://display_preferences.cfg")
+			preferences.set_value("display","guidance",_guidance_mode)
+			preferences.save("user://display_preferences.cfg")
+			action_requested.emit("guidance",{"mode":_guidance_mode})
+			notify("Anzeigehilfen: "+["aus","sanft pulsierend","ruhig"][ _guidance_mode])
 
 func _metric(parent: Node,icon: String,hint: String) -> Label:
 	var row:=HBoxContainer.new()

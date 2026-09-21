@@ -210,6 +210,7 @@ func _on_action(action: String,payload: Dictionary) -> void:
 			world.set_control_mode(_direct_mode,hud.selected_unit)
 			if _direct_mode: world.focus_unit(hud.selected_unit)
 			hud.notify("Einzelansicht: Rechtsklick setzt das Laufziel. Kamera folgt "+hud.selected_unit.capitalize()+"." if _direct_mode else "Crewansicht: Rahmen ziehen und Rechtsklick für den Gruppenauftrag.")
+		"guidance": world.guidance_mode=int(payload.mode)
 		"focus_object": world.focus_object(str(payload.get("object_id","shuttle")))
 		"rally_elevator":
 			var snapshot:Dictionary=session.current_snapshot()

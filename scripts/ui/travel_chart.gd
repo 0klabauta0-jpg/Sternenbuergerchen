@@ -6,15 +6,15 @@ const Icons=preload("res://scripts/ui/hud_icons.gd")
 const Regions=preload("res://scripts/core/regions.gd")
 const Routes=preload("res://scripts/core/trade_routes.gd")
 const DESTINATIONS={
- "base":{"title":"Rostgrenze","subtitle":"Heimatbasis","icon":"base","at":Vector2(45,145)},
- "rust":{"title":"Signal im Staub","subtitle":"Satellit · Erz · Wrack","icon":"satellite","at":Vector2(45,193)},
- "station":{"title":"Meridian","subtitle":"Orbitaler Freihafen","icon":"shuttle","at":Vector2(455,125)},
- "bunker_surface":{"title":"Karst · LEICHT","subtitle":"Flak + Wache · 1 unten","icon":"armor","at":Vector2(250,267)},
- "bunker_medium":{"title":"Kluft · MITTEL","subtitle":"3 oben · 2 unten","icon":"armor","at":Vector2(250,315)},
- "bunker_hard":{"title":"Bastion · SCHWER","subtitle":"5 oben · 4 unten","icon":"armor","at":Vector2(250,363)},
- "distribution_friendly":{"title":"Freihafen","subtitle":"Umschlag · freundlich","icon":"market","at":Vector2(455,173)},
- "distribution":{"title":"Knotenwerk","subtitle":"Umschlag · feindlich","icon":"target","at":Vector2(455,221)},
- "tradepost":{"title":"Staubmarkt","subtitle":"Handel · Erkundung","icon":"market","at":Vector2(45,241)}
+ "base":{"title":"Rostgrenze","subtitle":"Heimatbasis","icon":"base","at":Vector2(8,270)},
+ "rust":{"title":"Signal im Staub","subtitle":"Satellit · Erz · Wrack","icon":"satellite","at":Vector2(8,318)},
+ "station":{"title":"Meridian","subtitle":"Orbitaler Freihafen","icon":"shuttle","at":Vector2(458,267)},
+ "bunker_surface":{"title":"Karst · LEICHT","subtitle":"Flak + Wache · 1 unten","icon":"armor","at":Vector2(458,24)},
+ "bunker_medium":{"title":"Kluft · MITTEL","subtitle":"3 oben · 2 unten","icon":"armor","at":Vector2(458,72)},
+ "bunker_hard":{"title":"Bastion · SCHWER","subtitle":"5 oben · 4 unten","icon":"armor","at":Vector2(458,120)},
+ "distribution_friendly":{"title":"Freihafen","subtitle":"Umschlag · freundlich","icon":"market","at":Vector2(458,315)},
+ "distribution":{"title":"Knotenwerk","subtitle":"Umschlag · feindlich","icon":"target","at":Vector2(458,363)},
+ "tradepost":{"title":"Staubmarkt","subtitle":"Handel · Erkundung","icon":"market","at":Vector2(8,366)}
 }
 var _state: Dictionary={}
 var _selected := "rust"
@@ -27,29 +27,64 @@ var _map: Control
 class RouteDiagram extends Control:
 	var selected: String="rust"
 	const GROUPS={"base":0,"rust":0,"tradepost":0,"bunker_surface":1,"bunker_medium":1,"bunker_hard":1,"station":2,"distribution_friendly":2,"distribution":2}
-	const CENTERS=[Vector2(128,99),Vector2(332,220),Vector2(538,78)]
+	const CENTERS=[Vector2(212,300),Vector2(402,92),Vector2(481,258)]
 	func _draw() -> void:
-		draw_rect(Rect2(Vector2.ZERO,size),Color("09131e"))
-		for i in 125:draw_circle(Vector2(fposmod(i*137.29,640),fposmod(i*73.63,430)),1.0 if i%3 else 1.6,Color(0.6,0.77,0.85,0.2+float(i%4)*0.1))
-		var star:=Vector2(68,364)
-		for r in [160.0,290.0,420.0,535.0]:
-			draw_arc(star,r,-PI*0.7,PI*0.1,90,Color(0.36,0.48,0.56,0.24),1,true)
-		for r in range(60,24,-4):draw_circle(star,r,Color(0.93,0.37,0.13,0.035))
-		draw_circle(star,24,Color("f3974d"));draw_circle(star-Vector2(7,5),14,Color("ffda8d"))
-		draw_arc(star,32,-2.8,0.3,36,Color("ffb66d"),3,true)
-		draw_line(star+Vector2(20,-14),star+Vector2(51,-35),Color("d66c4b"),3,true)
-		draw_string(ThemeDB.fallback_font,Vector2(30,410),"ASCHE · Flackerstern",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("edb38c"))
-		var names: Array=["ROSTWELT","KARSTMOND","MERIDIAN-GÜRTEL"]
-		var colors: Array=[Color("bd7951"),Color("858f96"),Color("4d9299")]
-		for i in 3:
-			var at: Vector2=CENTERS[i]
-			draw_circle(at,27 if i<2 else 32,colors[i]);draw_circle(at+Vector2(11,4),21,colors[i].darkened(0.45))
-			draw_arc(at,34,0,TAU,60,colors[i].lightened(0.15),1,true)
-			draw_string(ThemeDB.fallback_font,at+Vector2(-70,-43),names[i],HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("c0d1d9"))
-			if i==2:draw_arc(at,40,-0.4,PI+0.4,60,Color("7aa5a7"),3,true)
-		var selected_at: Vector2=CENTERS[int(GROUPS.get(selected,0))]
-		draw_arc(selected_at,39,0,TAU,60,Color("f0b176"),2,true)
-		draw_dashed_line(star,selected_at,Color(0.8,0.65,0.43,0.6),1,5,true)
+		draw_rect(Rect2(Vector2.ZERO,size),Color("07161f"))
+		var rng:=RandomNumberGenerator.new();rng.seed=717
+		for i in 430:
+			var at:=Vector2(rng.randf_range(0,640),rng.randf_range(0,430))
+			draw_circle(at,rng.randf_range(0.3,1.25),Color(0.7,0.83,0.91,rng.randf_range(0.15,0.8)))
+		var star:=Vector2(292,201)
+		for r in [85.0,145.0,207.0,280.0]:
+			var orbit:=PackedVector2Array()
+			for i in 121:orbit.append(star+Vector2(cos(i*TAU/120)*r,sin(i*TAU/120)*r*0.61))
+			draw_polyline(orbit,Color(0.47,0.61,0.65,0.22),1,true)
+		for i in 220:
+			var a:=rng.randf_range(-0.7,1.4)
+			var at:=star+Vector2(cos(a)*rng.randf_range(219,265),sin(a)*rng.randf_range(150,188))
+			var poly:=PackedVector2Array()
+			var radius:=rng.randf_range(1.5,5)
+			for j in 5:poly.append(at+Vector2.from_angle(j*TAU/5)*radius*rng.randf_range(0.7,1.2))
+			draw_colored_polygon(poly,Color("35636b").lightened(rng.randf_range(-0.25,0.18)))
+		for r in range(85,30,-3):draw_circle(star,r,Color(1,0.43,0.09,0.016))
+		_planet(star,32,Color("f7972e"),182,true)
+		_planet(CENTERS[0],53,Color("b75e34"),921,false)
+		_planet(CENTERS[1],37,Color("938673"),925,false)
+		draw_string(ThemeDB.fallback_font,star+Vector2(-23,53),"ASCHE",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("ffe1b1"))
+		draw_string(ThemeDB.fallback_font,CENTERS[0]+Vector2(-46,75),"ROSTWELT",HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("ead9bd"))
+		draw_string(ThemeDB.fallback_font,CENTERS[1]+Vector2(-45,-52),"KARSTMOND",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("ead9bd"))
+		draw_string(ThemeDB.fallback_font,Vector2(391,236),"MERIDIAN-GÜRTEL",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("a9d4d2"))
+		for id: String in DESTINATIONS:
+			var button_at: Vector2=DESTINATIONS[id].at
+			var center: Vector2=CENTERS[int(GROUPS[id])]
+			var anchor:=button_at+Vector2(177 if button_at.x<100 else 0,21)
+			var edge:=center+(anchor-center).normalized()*(56 if GROUPS[id]==0 else 40 if GROUPS[id]==1 else 9)
+			var color:=Color("ffb158") if id==selected else Color("71929b")
+			draw_line(edge,anchor,color,1,true);draw_circle(edge,4,color)
+		var destination: Vector2=CENTERS[int(GROUPS.get(selected,0))]
+		if GROUPS.get(selected,0)!=0:draw_dashed_line(CENTERS[0]+Vector2(55,-8),destination,Color("ffb158"),2,9,true)
+
+	func _planet(at: Vector2,radius: float,color: Color,seed_value: int,star: bool) -> void:
+		var rng:=RandomNumberGenerator.new();rng.seed=seed_value
+		draw_circle(at,radius+1,color.lightened(0.25))
+		draw_circle(at,radius,color.darkened(0.4))
+		# Faceted surface with directional shading; fixed seed avoids visual flicker.
+		for y in range(-int(radius),int(radius),3):
+			for x in range(-int(radius),int(radius),3):
+				var p:=Vector2(x,y)
+				if p.length()>radius-2:continue
+				var z:=sqrt(maxf(0,1-p.length_squared()/(radius*radius)))
+				var light:=clampf(z*0.45-float(x)/radius*0.45-float(y)/radius*0.18,0.08,1)
+				var shade:=color.darkened(0.72-light*0.7).lightened(rng.randf_range(-0.06,0.06))
+				if star:shade=color.lightened(rng.randf_range(-0.28,0.22))
+				draw_circle(at+p,2.2,shade)
+		if not star:
+			for i in 24:
+				var p:=Vector2(rng.randf_range(-radius*0.8,radius*0.8),rng.randf_range(-radius*0.8,radius*0.8))
+				var r:=rng.randf_range(1.5,radius*0.12)
+				if p.length()+r>radius*0.88:continue
+				draw_circle(at+p,r,color.darkened(0.38))
+				draw_arc(at+p,r,0.8,3.5,12,color.lightened(0.12),1,true)
 
 func _ready() -> void:
 	title="Systemkarte · Asche"
@@ -150,5 +185,6 @@ func _refresh() -> void:
 		style.bg_color=Color("355a5c") if id==_selected else Color("1b303a")
 		style.border_color=Color("efab6f") if id==_selected else Color("46606a")
 		style.set_border_width_all(2 if id==_selected else 1)
+		style.set_corner_radius_all(8)
 		_buttons[id].add_theme_stylebox_override("normal",style)
 	if bool(_state.get("travel",{}).get("active",false)):hide()
