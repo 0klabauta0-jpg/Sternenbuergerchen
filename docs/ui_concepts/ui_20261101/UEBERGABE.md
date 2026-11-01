@@ -7,6 +7,7 @@ Stand: 01.11.2026. Auftrag: bestehende Funktionen ansehen, visuelle Alternativen
 - Review: [UI-Workbench](../../reports/STERNENBUERGERCHEN_UI_2026-11-01.html).
 - Exakte Bildgenerator-Eingaben: [prompts.json](prompts.json).
 - Exakte Eingaben der kompakten Revision: [prompts_revision2.json](prompts_revision2.json).
+- Exakter Bearbeitungsauftrag A3: [prompts_revision3.json](prompts_revision3.json).
 - Sichtbare Bildauslegung und Prüfergebnisse: [PRUEFUNG.md](PRUEFUNG.md).
 - Task und Prüfumfang: [TASK_UI_KONZEPT_20261101](../../tasks/TASK_UI_KONZEPT_20261101.md).
 - Arbeitsbasis: `integration/core-foundation`, Commit `3cae5a216`.
@@ -17,7 +18,7 @@ Stand: 01.11.2026. Auftrag: bestehende Funktionen ansehen, visuelle Alternativen
 
 ## 1. Gewählte Richtung und erhaltene Alternativen
 
-**Nutzerentscheidung vom 01.11.2026: A für die Mission weiterentwickeln, C als Staging-Grundlage weiterführen.** A gefällt grundsätzlich, benötigt aber deutlich kompaktere Buttons und mehr Platz für spätere Planung/Aktionen. Daraus entsteht A2. Die Auswahl ist eine Konzeptentscheidung, keine Runtime-Freigabe. B und das ursprüngliche A bleiben als Vorgeschichte erhalten.
+**Nutzerentscheidung vom 01.11.2026: A für die Mission weiterentwickeln, C als Staging-Grundlage weiterführen. Aktueller Auftrag ist A3:** quadratische kompakte Buttons in einem unten links bündig beginnenden Randband; Teamkarten und Log darüber. A2 dokumentiert den vorherigen Versuch mit horizontalen Buttons. Die Auswahl bleibt eine Konzeptentscheidung, keine Runtime-Freigabe. B, ursprüngliches A und A2 bleiben als Vorgeschichte erhalten.
 
 | Richtung | Schwerpunkt | Gewinn | Zielkonflikt |
 |---|---|---|---|
@@ -29,7 +30,7 @@ A und B wurden mit derselben Beispielmission, ALPHA 4/4 und einem geplanten Bewe
 
 C zeigt eine Staging-Richtung. Heimatbasis und FOB bleiben getrennte Zustände: Heimatbasis stellt Personal und Flugmittel bereit; FOB organisiert Fireteams, Loadout, Respawn und Boarding. Der Entwurf soll sie gestalterisch verbinden, nicht fachlich zusammenlegen.
 
-### A2 – kompaktere Überarbeitung von A
+### A2 – historischer Versuch mit horizontalen Buttons
 
 Neuer Bildkandidat: [mockup_a2_kommandodeck_kompakt.png](../../reports/assets/ui-2026-11-01/mockup_a2_kommandodeck_kompakt.png). Das ursprüngliche A wird nicht überschrieben. Die linke Teamübersicht und die obere rechte Transport-/Dropdown-/Planungsfläche sind ausdrücklich positiv bewertet und bleiben als Aufbau erhalten. Der Spieltitel oben links entfällt.
 
@@ -38,6 +39,18 @@ Ziel bei 1920×1080: Aktionsbuttons 40–44px hoch, 18–22px-Icon neben lesbare
 Planung und spätere Aktionen benötigen freien Raum. Deshalb Reserven im Layout lassen, ohne dafür neue oder nur vorgestellte aktive Controls zu erfinden. Bestehende Plan-/Command-Verträge bleiben maßgeblich. A2 darf GO nicht in einen Pause-/Fortsetzen-Knopf umdeuten.
 
 Bewegen, Verteidigen, Nehmen und Ausrüstung wurden als Grundlage positiv bewertet. Flankieren und Dropship wurden als unklar bewertet; neue separate Motivvarianten sollen deren Bedeutung vereinfachen. Vorhandene Kandidaten und Entscheidungen erhalten, neue Varianten anhand der Manifest-Einträge zuordnen. Keine automatische Übernahme in aktive Assets.
+
+### A3 – aktueller Auftrag: quadratisches Randband
+
+Bildkandidat: [mockup_a3_randband_quadratisch.png](../../reports/assets/ui-2026-11-01/mockup_a3_randband_quadratisch.png), als neue Revision aus A2. Der Nutzer will das Befehlsband **direkt an der absoluten unteren Bildkante, beginnend an der linken unteren Ecke**, kompakt nach rechts laufend. Es darf weder unterhalb noch links daneben einen dekorativen Außenabstand geben. Teamkarten werden nach oben versetzt, das Band beginnt darunter; das Log liegt ebenfalls oberhalb des Bands.
+
+Quadratische kompakte Buttons sind wieder ausdrücklich gewünscht. Unser Gestaltungsziel bei 1920×1080: 56–64px-Quadrate, 24–28px-Icons und lesbare, separat unter den Quadraten angeordnete Labels. Diese Maße sind eine Assistentenentscheidung, keine wörtliche Nutzerforderung. Eine Aktionsreihe plus schmale Team-/Kontextzeile hält die Bandhöhe begrenzt; Schrift wird nicht verkleinert, um Flächenmängel zu kaschieren.
+
+Reihenfolge: **Bewegen → Nehmen → Verteidigen → Flankieren → Plan ausführen**. Das letzte Quadrat direkt rechts der Flanke ist die gewählte Entwurfsanordnung; es bleibt dieselbe GO-Planausführung. Haltung und Feuerregeln schließen rechts als kompakte bestehende Gruppen an. Freiraum bleibt frei, statt erfundene aktive Funktionen darzustellen.
+
+Dropship oben rechts und der Missions-/Zielkasten im oberen rechten Mittelbereich bleiben erhalten. Dropship/LZ wird maßvoll kleiner. Die linke Teamübersicht behält ihren Inhalt, aber ausdrücklich nicht ihre alte vertikale Position. Zwischen Karten, Log und Band bleibt Abstand; keine Überdeckung. „Normal“ aus A2 bleibt als illustrativer Haltungszustand erhalten. Kein neuer Spieltitel oben links und kein neuer Iconpass: Die sechs aktuellen Galerie-Motive bleiben unverändert.
+
+Für die Umsetzung gilt die echte Viewportkante als Bezug. A2 ist 1672×941px groß; dessen letzte Bildzeile ist kein festes y-Ziel für ein 1920×1080-Layout. Tatsächliche A3-Abweichungen erst nach Sichtprüfung unter [PRUEFUNG.md](PRUEFUNG.md) bewerten.
 
 ## 2. Was vom früheren UI-Konzept erhalten bleibt
 
@@ -177,7 +190,7 @@ HUD-Updates weiter über vorhandene Dirty-/Readmodel-Pfade ausführen, insbesond
 
 Erste Vergleichsfläche: **1920×1080 bei unveränderter Betriebssystem-/Spielskalierung**. Der bestehende `DropLightLayoutContract` verwendet diese Größe, 8px-Basisabstand und 48×48 beziehungsweise 40×40-Aktionsflächen (`scripts/meta/drop_light_layout_contract.gd:4–8`). Neue Werte sind Entwurfsziele, keine universellen UX-Gesetze.
 
-Für A2 hat das konkrete Nutzerfeedback Vorrang vor den größeren Kacheln des ersten Bilds: Buttons 40–44px hoch, Icons 18–22px und Dock insgesamt 112–128px. Das bestehende Runtime-Layout bleibt bis zu einem eigenen Implementierungsauftrag unverändert. Den ausgewählten Teamkontext knapp in einer Kopfzeile zeigen; Details bleiben erreichbar, belegen aber keinen großen permanenten Erklärungsblock.
+**Aktuell gilt A3:** quadratische Buttons als Gestaltungsziel 56–64px, Icons 24–28px bei 1920×1080; Labels separat darunter. Das kompakte Band liegt bündig unten links und enthält eine Aktionsreihe plus schmale Team-/Kontextzeile. Teamkarten und Log liegen mit Abstand darüber; Dropship/LZ bleibt oben rechts etwas kleiner. Die horizontalen 40–44px-A2-Buttons sind historische Geometrie. Das Runtime-Layout bleibt bis zu einem eigenen Implementierungsauftrag unverändert.
 
 - Haupttexte als Entwurf 16–18px, Nebenwerte 14–16px; sehr kleine Diagnosezahlen aus dem normalen Handlungspfad nehmen.
 - Panelkanten, Auswahl, Fokus, Hover und Zielmarkierung getrennt gestalten. Farbe immer durch Form, Text oder Zustand ergänzen.
@@ -201,7 +214,7 @@ Pro Paket passende vorhandene Verifier anhand des aktuellen Tasks wählen, echte
 
 ## 10. Prüfstand und offene Entscheidungen
 
-Die Sichtprüfung und Metadaten stehen in [PRUEFUNG.md](PRUEFUNG.md), Dateihashes und Herkunft im [Manifest](manifest.json). Alle acht Icon-PNGs einschließlich der zwei V2-Kandidaten besitzen echtes Alpha; die vier Komplettscreens sind illustrative Rasterbilder. Kleine Zielgrößen und der echte Godot-Klickweg bleiben offen. Der Browserzugriff des Agenten auf die lokale HTML-Datei wurde durch die Browserrichtlinie gesperrt. Syntax, Export und A↔A2-Umschaltung sind offline geprüft. Der echte Nutzerexport wurde in Downloads gefunden und bestätigt einen erfolgten Export; die übrigen Browserinteraktionen sind dadurch nicht geprüft.
+Die Sichtprüfung und Metadaten stehen in [PRUEFUNG.md](PRUEFUNG.md), Dateihashes und Herkunft im [Manifest](manifest.json). Alle acht Icon-PNGs einschließlich der zwei V2-Kandidaten besitzen echtes Alpha. Fünf Screenentwürfe und ein erhaltener A3-Zwischenstand sind illustrative Rasterbilder. A3 zeigt die gewünschten Positionen, ist aber kein maßgenaues Layout: Kacheln nativ mit identischer Breite/Höhe bauen und die Bandhöhe kontrollieren. Kleine Zielgrößen und der echte Godot-Klickweg bleiben offen. Der Browserzugriff des Agenten auf die lokale HTML-Datei wurde durch die Browserrichtlinie gesperrt. Syntax, Export und A3/A2/A-Umschaltung sind offline geprüft. Der echte Nutzerexport bestätigt einen erfolgten Export; die übrigen Browserinteraktionen sind dadurch nicht geprüft.
 
 ### Sichtbare Abweichungen, die der nächste Chat nicht übernehmen soll
 
@@ -212,7 +225,7 @@ Die Sichtprüfung und Metadaten stehen in [PRUEFUNG.md](PRUEFUNG.md), Dateihashe
 - Generierte Logos, Charaktergesichter und Schiffskonstruktionen sind keine beauftragten neuen Marken-, NPC- oder Fahrzeugassets. Die bestehenden Kenney-Figuren und tatsächlich zugewiesenen Craft-Bilder bleiben maßgeblich.
 - Der Bildgenerator hat FoW und bekannte Kontakte nicht als nachgewiesenen Runtime-Zustand abgebildet. Keine sichtbare Figur aus dem Bild als Freigabe für unbekannte Gegnerdaten verstehen.
 
-Die Missionsrichtung A ist entschieden; A2 setzt die gewünschte Verdichtung als neuen Bildvorschlag um. C bleibt zur Weiterentwicklung gewählt. Offen bleiben endgültige Dichte, Erkennung der neuen Flanken-/Dropship-Motive bei Zielgröße, Lesbarkeit im hellen und dunklen Gelände, konkrete Anpassung der existierenden Controls und spätere Nutzungstests. Der Export enthält **null von fünf gesetzten Sichtprüfungs-Häkchen**. Seine 48px-/Dunkel-Einstellung ist ein Review-Anzeigestand, kein Nachweis der 24-/32px-Prüfung. Die Icons ersetzen keinen vollständigen Zustands-/Rollenatlas.
+Die Missionsrichtung A ist entschieden; der aktuelle Revisionsauftrag A3 ersetzt A2s horizontale Geometrie durch ein bündiges quadratisches Randband. C bleibt zur Weiterentwicklung gewählt. Offen bleiben tatsächliche A3-Zieltreue laut nachfolgender Bildprüfung, endgültige Dichte, Iconerkennung bei Zielgröße, Lesbarkeit im Gelände, Anpassung der existierenden Controls und spätere Nutzungstests. Der ursprüngliche Export enthält **null von fünf gesetzten Sichtprüfungs-Häkchen**. Seine 48px-/Dunkel-Einstellung ist kein Nachweis der 24-/32px-Prüfung. Die Icons ersetzen keinen vollständigen Zustands-/Rollenatlas.
 
 ## 11. Kopierbarer Start für den nächsten Chat
 
@@ -225,12 +238,16 @@ docs/ui_concepts/ui_20261101/UEBERGABE.md
 Öffne docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html und lies
 docs/ui_concepts/ui_20261101/FEEDBACK_20261101.md samt Review-Export.
 Basis dieses Konzeptpakets: integration/core-foundation, 3cae5a216.
-A ist für die Mission gewählt, C für Staging weiterzuführen. A2 verdichtet
-A: Buttons 40–44px, Icon 18–22px, Dock 112–128px bei 1920×1080.
-Linke Teams und oberen rechten Plan-/Transportbereich erhalten;
-keinen Spieltitel oben links. Raum gewinnen, ohne Texte zu verkleinern
-oder neue aktive Funktionen zu erfinden. Noch keine Runtime-Freigabe.
-Flankieren/Dropship haben neue V2-Motive zur Prüfung; Originale erhalten.
+A ist für die Mission gewählt, C für Staging weiterzuführen. Aktuell A3:
+Band ab linker unterer Ecke bündig am absoluten unteren Bildrand.
+Kompakte quadratische Buttons, Ziel 56–64px / Icon 24–28px bei 1920×1080;
+Labels lesbar separat darunter. Bewegen, Nehmen, Verteidigen, Flankieren,
+dann Plan ausführen direkt rechts als Quadrat; Haltung/Feuerregeln rechts.
+Teamkarten und Log nach oben über das Band; keine alte Position fixieren.
+Dropship oben rechts und Missionsziel oberer rechter Mittelbereich bleiben;
+Dropship/LZ maßvoll kleiner. Haltung Normal behalten, keinen Spieltitel.
+A2s horizontale Geometrie ist Vorgeschichte. Keine neuen aktiven Funktionen,
+keine kleineren Schriften, keine neue Iconrunde. Noch keine Runtime-Freigabe.
 Bildtexte/Zahlen sind Illustrationen. Keine Review-Checkbox war gesetzt.
 Prüfe den heutigen Branch, Diff und die wirklichen Funktionsverträge.
 Nutze vorhandene UI-Komponenten, Snapshots und Commandpfade.

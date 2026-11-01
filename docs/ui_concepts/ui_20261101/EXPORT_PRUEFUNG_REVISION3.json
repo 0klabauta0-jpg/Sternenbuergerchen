@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "scope": "Actual export and three revision-switch functions offline in Node VM with synthetic UI controls; not a browser test",
+  "checks": [
+    "A3/A2/A1 image and zoom paths agree",
+    "title and caption set for each revision",
+    "active revision and mapping exported",
+    "A3 vs A2 comparison metadata",
+    "four retained icon verdicts and two open v2 icons unchanged",
+    "review gates stay unchecked",
+    "no runtime integration claim"
+  ],
+  "browser_agent_qa": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL"
+}

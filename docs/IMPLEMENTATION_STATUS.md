@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### UI-Konzept 2026-11-01 – Revision A3: quadratisches Randband
+- Status: angeforderte Fortsetzung desselben noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`; Revisionsbasis `c976edcea`. Keine Runtime-Aenderung.
+- Aenderung: Band beginnt buendig links unten und endet an der unteren Bildkante; kompakte quadratische Tasten mit Planausfuehrung direkt nach Flankieren; Teamkarten und separates Protokoll darueber. Dropship/LZ oben rechts kleiner, Zielkasten beibehalten. Kein neuer Iconpass.
+- Der erste A3-Versuch bettete das Protokoll noch ins Band ein; ein gezielter Korrekturaufruf setzte es darueber. Beide Generatororiginale und Prompts sind erhalten. Die Review zeigt final A3 standardmaessig und bietet A2/A als Vergleich.
+- Pruefung: zwei Bildsichtungen, Quellen-/Hash-/PNG- und Verweispruefung, JS-Syntax sowie drei Umschaltzustaende und Export offline geprueft. Native Quadrat-/Bandmasse, Fokus und Laufzeit offen; Rasterkacheln sind nur annaehernd quadratisch, Welt ist durch Bildbearbeitung weicher geworden.
+- Einstieg unveraendert `docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html`, Begruendung in `UEBERGABE.md`, `FEEDBACK_20261101.md`, `PRUEFUNG.md`; neue Eingaben `prompts_revision3*.json`. A3 bleibt ein neuer unbewerteter Vorschlag.
+
 ### UI-Konzept 2026-11-01 – Nutzerfeedback und kompakte Revision A2
 - Status: Fortsetzung des noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`, Revisionsbasis `2286e5b07`; keine Runtime-Aenderung.
 - Nutzerexport aus Downloads gefunden und unveraendert archiviert: Mission A, Staging C weiterfuehren; vier Iconmotive geeignet, Flankieren/Dropship unklar. Alle fuenf Pruefcheckboxen bleiben ungesetzt.

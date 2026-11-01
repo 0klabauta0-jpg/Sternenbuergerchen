@@ -2,9 +2,9 @@
 
 ## Ergebnis und Umfang
 
-Die Erstrunde enthält drei Layoutbilder und sechs separate Icons. Nach dem tatsächlichen Nutzerexport sind zusätzlich ein kompakter A2-Entwurf und zwei alternative Icons erzeugt, im Projekt gesichert und visuell gesichtet: insgesamt zwölf PNG-Kandidaten. Die exakten Eingaben stehen in `prompts.json` und `prompts_revision2.json`; verwendet wurde das eingebaute `image_gen.imagegen`. Die Originaldateien aus dem Generator bleiben unverändert. Dateien, Größen, Alpha und SHA256 sind in `manifest.json` und `ASSET_PRUEFUNG.json` erfasst.
+Die Erstrunde enthält drei Layoutbilder und sechs separate Icons. Danach kamen A2, zwei Iconalternativen und A3 einschließlich eines erhaltenen Korrektur-Zwischenstands hinzu: insgesamt vierzehn PNGs (fünf Screenentwürfe, ein A3-Zwischenstand, acht Icons). Exakte Eingaben stehen in `prompts.json`, `prompts_revision2.json`, `prompts_revision3.json` und `prompts_revision3_korrektur.json`; verwendet wurde das eingebaute `image_gen.imagegen`. Die Originaldateien aus dem Generator bleiben unverändert. Dateien, Größen, Alpha und SHA256 sind in `manifest.json` und `ASSET_PRUEFUNG.json` erfasst.
 
-Der Nutzer hat **A für die Mission und C als Staging-Grundlage** gewählt. A2 reagiert auf seinen Wunsch nach kompakteren Buttons; die neue Ausarbeitung ist noch nicht bewertet. B bleibt eine helle Alternative. Alle Screens sind Anschauungsbilder; dieses Paket verändert keine Godot-Runtime, Szenen, Bedienung oder Spielregeln.
+Der Nutzer hat **A für die Mission und C als Staging-Grundlage** gewählt. Aktuell zeigt A3 den gewünschten Aufbau mit kompakten quadratischen Kacheln im unteren Randband; A2 mit horizontalen Buttons bleibt als vorheriger Versuch erhalten. Die aktuelle A3-Ausarbeitung ist noch nicht bewertet. B bleibt eine helle Alternative. Alle Screens sind Anschauungsbilder; dieses Paket verändert keine Godot-Runtime, Szenen, Bedienung oder Spielregeln.
 
 ## Sichtprüfung der Layouts
 
@@ -42,7 +42,7 @@ Die Erkennbarkeit bei tatsächlichen 24/32px ist **noch nicht visuell abgenommen
 
 ## Offene Entscheidungen für die nächste Runde
 
-A ist als Missionsrichtung gewählt; offen sind die konkrete A2-Ausarbeitung, Staging-C-Dichte, Iconvereinfachung bei kleinen Größen sowie native Schrift-/Panelgrößen. Die Workbench exportiert Bewertungen und Notizen, speichert sie aber nicht automatisch über Sitzungen hinweg. Der wiedergefundene Erstrundenexport wird als dokumentierter Ausgangsstand angezeigt.
+A ist als Missionsrichtung gewählt; offen sind die konkrete A3-Ausarbeitung, Staging-C-Dichte, Iconvereinfachung bei kleinen Größen sowie native Schrift-/Panelgrößen. Die Workbench exportiert Bewertungen und Notizen, speichert sie aber nicht automatisch über Sitzungen hinweg. Der wiedergefundene Erstrundenexport wird als dokumentierter Ausgangsstand angezeigt.
 
 ## Revision A2: Sichtprüfung nach dem Nutzerfeedback
 
@@ -56,3 +56,15 @@ A ist als Missionsrichtung gewählt; offen sind die konkrete A2-Ausarbeitung, St
 - `icon_dropship_v2.png`: schräge Transportansicht mit Rampe, Personenzeichen und Abwärtspfeil; Transport/Ausstieg werden deutlicher. Kann auch als Absetzen verstanden werden; mit Beschriftung prüfen. Zwei Personenzeichen sind keine Kapazitätsregel.
 - Beide neuen Icons sind 1254×1254px-RGBA-PNGs mit Alpha 0–255. Die vier positiv bewerteten Originale bleiben erhalten; neue Varianten haben die Bewertung „offen“.
 - Eine zweite Sichtprüfung bestätigt die sichtbare Verdichtung und den Erhalt der gewünschten Bereiche. Syntax und Export-/A↔A2-Umschaltfunktionen wurden offline mit synthetischen Controls geprüft; siehe `EXPORT_PRUEFUNG_REVISION2.json`. Reale Browser- und Godot-Prüfung bleiben getrennt.
+
+## Revision A3: Randband und kompakte quadratische Tasten
+
+- Aktueller Kandidat: `mockup_a3_randband_quadratisch.png`, 1672×941px RGB. A2 bleibt umschaltbar; sämtliche bisherigen Icons sind unverändert.
+- Der erste A3-Aufruf setzte das Protokoll noch in das Band. Er bleibt als `mockup_a3_randband_versuch1.png` erhalten. Ein gezielter zweiter Bildgenerator-Aufruf verschob das Protokoll darüber und reduzierte den Innenabstand. Beide Eingaben und Generatororiginale sind dokumentiert.
+- Die finale Sichtprüfung bestätigt ein von der linken unteren Ecke durchgehendes dunkles Band bis an die Unterkante. Die letzte Bildzeile ist vollständig dunkler Bandhintergrund; es bleibt kein dekorativer Geländeabstand darunter.
+- Fünf kompakte Kacheln stehen links in einer Reihe: Bewegen, Nehmen, Verteidigen, Flankieren, Plan ausführen. Die letzte folgt direkt nach Flankieren und ist durch gefülltes Cyan plus Play-Symbol vom Befehlswechsel unterschieden. Beschriftungen liegen unter den Kacheln.
+- Teamkarten sind nach oben versetzt. Das Protokoll steht als eigenes Panel rechts darüber, mit sichtbarem Abstand zum Band. Missionsziel bleibt oben rechts der Mitte; Dropship-/Landezone-Panel ist gegenüber A2 sichtbar kleiner. Kein Spieltitel oben links.
+- Die Rasterkacheln sind annähernd quadratisch, nicht maßgenau: Die Farbkontur der ausgewählten Kachel ergibt ungefähr 65×56px; das ist keine native Control-Geometrie. Für die spätere Umsetzung Breite und Höhe ausdrücklich gleich setzen. Das Ziel 56–64px bei 1920×1080 ist eine Entwurfsvorgabe. Siehe `A3_GEOMETRIE_PRUEFUNG.json`.
+- Das Band ist im Raster höher als die angefragten etwa 90–96px. Für eine exakt kompakte native Fassung Innenabstände, Kontext und Beschriftungszeile kontrollieren; den Bildmaßstab nicht blind übernehmen. Schrift und lange deutsche Labels dürfen dabei nicht unlesbar werden.
+- Landschaft wirkt nach den Bildbearbeitungen weicher als A2. Dies ist ein Mockup-Artefakt und kein Auftrag, im Spiel einen Unschärfefilter oder weichere Weltgrafik einzuführen. „Normal“ bleibt nur der illustrative Haltungszustand.
+- Unabhängige zweite Bildsichtung bestätigt die gewünschten räumlichen Änderungen ohne schwere Layoutinkonsistenz. JavaScript-Syntax und die Umschaltung A3/A2/A einschließlich übereinstimmender Bild-/Zoomziele, Metadaten und unveränderter Iconurteile sind offline geprüft: `EXPORT_PRUEFUNG_REVISION3.json`. Kein automatisierter Browser- oder Godot-Nachweis.

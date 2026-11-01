@@ -1,12 +1,12 @@
 {
   "status": "PASS",
-  "scope": "revision2 local links and integrity; no browser automation",
-  "revision": "a2_compact",
-  "png_artifacts": 12,
+  "scope": "revision3 local references and source integrity; no browser automation",
+  "revision": "a3_edge_square",
+  "png_artifacts": 14,
   "png_references": 2,
+  "originals_and_first_attempt_preserved": true,
+  "all_prompt_hashes": "PASS",
   "review_export_integrity": "PASS",
-  "prompt_file_hashes": "PASS",
-  "all_originals_preserved": true,
   "missing_references": [],
   "html_ids_unique": true,
   "external_dependencies": []

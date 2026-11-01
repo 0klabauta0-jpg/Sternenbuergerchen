@@ -1,0 +1,16 @@
+{
+  "schema": "sternenbuergerchen.ui_prompts.revision3_correction.v1",
+  "date": "2026-11-01",
+  "tool": "built-in image_gen.imagegen",
+  "reason": "First generated A3 embedded the protocol in a tall strip despite requested separate log; targeted correction, original attempt retained",
+  "items": [
+    {
+      "id": "mockup_a3_randband_quadratisch_final",
+      "file": "mockup_a3_randband_quadratisch.png",
+      "references": [
+        "C:/Users/bjoer/.codex/worktrees/ui-entwuerfe-20261101/SternenBuergerchen/docs/reports/assets/ui-2026-11-01/mockup_a3_randband_versuch1.png"
+      ],
+      "prompt": "Use-case: precise-object-edit / ui-mockup. Correct ONLY TWO layout issues in this supplied A3 game interface image. This image is the EDIT TARGET, not just style reference. Preserve all terrain, camera, characters, buildings, colors, upper mission 'Relais sichern', upper-right compact Dropship/LZ card, left ALPHA/BRAVO cards, currentNormal stance, five SQUARE command buttons and their order. Keep NO title at upper left. REQUIRED FIX1: MOVE THE EVENT LOG/PROTOCOL OUT OF THE BOTTOM COMMAND STRIP. It is currently embedded at the far right of the strip. Lift it to a SMALL SEPARATE FLOATING DARK CARD on the RIGHT ABOVE THE STRIP, about x1410..1660 and y708..815 in this1672x941frame. Its two lines stay '10:24 ALPHA bereit für Befehl.' and '10:24 BRAVO hält Position.'. Leave a small visible terrain gap between its bottom edge and the top of the command strip. NO EVENT LOG, timestamps, protocol or message feed remains INSIDE the bottom strip. Do not duplicate it. REQUIRED FIX2: MAKE THE BOTTOM EDGE STRIP LOWER IN HEIGHT. Current strip begins near y805; revised strip must begin near y838 and end EXACTLY at y941, around103px total height, flush to both bottom edge and left x0, with no outer bottom/left gap. Reduce its internal padding and shrink each of the five square button bodies to about52-55px square; keep all FIVE in one left-to-right row: Bewegen, Nehmen, Verteidigen, Flankieren, Plan ausführen. Labels remain legible BELOW each square, outside square body, not clipped; execute remains a cyan square immediately after Flankieren, never a long rectangle. To the right of those five, keep slimALPHA4/4/FTLMara/Bereit context and the compact stance and fire-rule dropdowns, current-order 'Auftrag: Bewegen' and 'Ziel gewählt'. The area formerly occupied by the embedded log is quiet dark strip / breathing room, no new controls. The bottom strip should feel compact through padding/layout, not tiny unreadable text. Existing team cards already sit above the new strip; keep them there. NO new content, no changed objective, no extra logo/caption that forces an outside bottom margin. Do not reframe or crop the image. The two key corrections must be unmistakable: separate LOG ABOVE strip; SHALLOWER edge-attached strip with all five small squares."
+    }
+  ]
+}

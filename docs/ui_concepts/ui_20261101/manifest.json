@@ -276,10 +276,38 @@
         1084
       ],
       "fully_transparent_percent": 67.35
+    },
+    {
+      "id": "mockup_a3_randband_versuch1",
+      "kind": "mockup",
+      "status": "prior_attempt_protocol_inside_band_retained",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a3_randband_versuch1.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-f21edc73-fb04-4cd5-865f-59f5dca89a04.png",
+      "sha256": "dc8c9716bcf80074958d1559e475dff746ea6d414fc92fac80edce6f2ba611ea",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2562963,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a3_edge_square"
+    },
+    {
+      "id": "mockup_a3_randband_quadratisch",
+      "kind": "mockup",
+      "status": "revision3_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a3_randband_quadratisch.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-c743de91-08ae-4df0-8dc2-7a20f5f8be9a.png",
+      "sha256": "b12a784f26f4ca698180a1fd81f42d95719b0f1cc8d1212ec99a9d0c02c20ff6",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2513517,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a3_edge_square"
     }
   ],
-  "current_revision": "a2_compact",
-  "revision_base_sha": "2286e5b07",
+  "current_revision": "a3_edge_square",
+  "revision_base_sha": "c976edcea",
   "revision2_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision2.json",
   "revision2_prompt_file_sha256": "c7ef1a7c96569d7d3dee3b6125e16d1fc5f66e378e6a214b88cb72eb2246cbeb",
   "review_selection": {
@@ -307,8 +335,8 @@
     "scope": "original concept directions only; revision2 assets remain unreviewed"
   },
   "review_assets": {
-    "mission_proposal": "mockup_a2_kommandodeck_kompakt.png",
-    "prior_mission": "mockup_a_kommandodeck.png",
+    "mission_proposal": "mockup_a3_randband_quadratisch.png",
+    "prior_mission": "mockup_a2_kommandodeck_kompakt.png",
     "staging": "mockup_c_einsatztafel.png",
     "icons": [
       "icon_move.png",
@@ -317,8 +345,35 @@
       "icon_take.png",
       "icon_dropship_v2.png",
       "icon_loadout.png"
+    ],
+    "mission_history": [
+      "mockup_a3_randband_versuch1.png",
+      "mockup_a2_kommandodeck_kompakt.png",
+      "mockup_a_kommandodeck.png"
     ]
   },
   "browser_agent_qa": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL",
-  "user_export_evidence": "Original real JSON recovered in Downloads; proves one user export, not all browser interactions"
+  "user_export_evidence": "Original real JSON recovered in Downloads; proves one user export, not all browser interactions",
+  "revision3_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision3.json",
+  "revision3_prompt_file_sha256": "5629dc813578391cb4599d5f3d2156a56c61ad6bcac16bab591c89c723a88f80",
+  "revision3_correction_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision3_korrektur.json",
+  "revision3_correction_prompt_file_sha256": "9bc202819a74154d8c3305d2640508291f9cea7a554c196b9f7929d25df1e6e9",
+  "revision3_feedback": {
+    "source": "current user chat message",
+    "requests": [
+      "bottom-left and bottom edge flush band",
+      "compact square command buttons",
+      "team cards above strip",
+      "execute immediately after flank as chosen layout",
+      "protocol above strip",
+      "compact upper-right dropship and LZ",
+      "keep objective upper-right-center"
+    ],
+    "scope": "visual concept revision; no runtime implementation"
+  },
+  "revision3_iteration": {
+    "first_attempt": "mockup_a3_randband_versuch1.png",
+    "finding": "protocol embedded in strip despite requested position",
+    "targeted_correction": "protocol moved above strip and padding reduced"
+  }
 }

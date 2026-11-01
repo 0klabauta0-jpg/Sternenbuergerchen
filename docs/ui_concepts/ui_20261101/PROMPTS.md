@@ -35,6 +35,18 @@ Der wiedergefundene Review-Export wählt A für die Mission und C als Staging-Gr
 
 Die zwei neuen Icons sind Alternativen zu den als unklar bewerteten Originalen. Für neue Varianten liegt noch keine Nutzerbewertung vor. Vier positiv bewertete Originalmotive bleiben bestehen. Alle bisherigen PNGs und Eingaben bleiben erhalten.
 
+## Revision A3: quadratisches Randband
+
+Der nächste Revisionsauftrag setzt das Band an die tatsächliche untere Viewportkante, beginnend links bei x=0. Kompakte Quadrate ersetzen die horizontalen A2-Buttons. Teamkarten und Protokoll wandern über das Band. Dropship/Landezone bleiben oben rechts und werden etwas kleiner; die Auftragskarte oben rechts der Mitte bleibt erhalten.
+
+Exakter Bearbeitungsauftrag: [prompts_revision3.json](prompts_revision3.json). Eingabebild ist A2; neue Datei `mockup_a3_randband_quadratisch.png`. Bestehende Icons, A/A2 und die anderen Screens bleiben erhalten.
+
+Der erste A3-Aufruf setzte das Protokoll entgegen der Vorgabe in das Randband. Dieser Zwischenstand bleibt als `mockup_a3_randband_versuch1.png` erhalten. Ein gezielter zweiter Aufruf versetzt das Protokoll über das Band und reduziert die Bandhöhe durch weniger Innenabstand; Eingabe und exakte Korrektur stehen in [prompts_revision3_korrektur.json](prompts_revision3_korrektur.json). Das ist eine sichtbare Ausgabekorrektur, keine Änderung des Nutzerauftrags.
+
+Die fünf quadratischen Tasten stehen in der Folge Bewegen → Nehmen → Verteidigen → Flankieren → Plan ausführen. Die Ausführen-Taste gehört räumlich dazu, ist aber ein separater bestätigter Auslöseschritt mit eigener Akzentfläche. Lesbare Beschriftungen sitzen unter den Quadraten. Zielgrößen 56–64px bei 1920×1080 und 24–28px für Icons sind unsere Entwurfsentscheidung, keine wörtliche Maßvorgabe des Nutzers. Status, Haltung und Feuerregel bleiben eigene kompakte Gruppen.
+
+Der freigelegte Landschaftsbereich ist Bildinterpretation. Keine einzelne Pixelgeometrie oder kleine Schrift aus dem Generator soll ungeprüft zum Godot-Control werden. Die tatsächliche Sichtprüfung folgt in [PRUEFUNG.md](PRUEFUNG.md).
+
 ## Für die spätere Umsetzung
 
 Texte, Flächen, Fokus und Zustände nativ in Godot aufbauen. Die generierten Komplettscreens bleiben Anschauungsmaterial. Kleine HUD-Icons zunächst mit Beschriftung einsetzen und bei Bedarf aus dieser Motivvorlage vereinfachen. Vorhandene Kenney-Symbole für Checkmark, Schließen und einfache Pfeile weiterhin verwenden.
