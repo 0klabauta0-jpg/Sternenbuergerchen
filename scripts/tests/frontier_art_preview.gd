@@ -14,10 +14,12 @@ const PAD = preload("res://scripts/terrain/frontier_outpost_pad.gd")
 const CLOSED_BUILDING = preload("res://scripts/terrain/frontier_closed_buildings.gd")
 const WORKLIFE = preload("res://scripts/terrain/frontier_worklife.gd")
 const ACCESS = preload("res://scripts/terrain/frontier_access_anchors.gd")
+const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const ART_ROOT := "res://Assets/curated/frontier_illustrated_20261101/"
 const MODEL_SCALE := 0.35
 const SHIP_SCALE := 0.22 # Deliberately compact fiction scale, not SC canonical metres.
-const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/"
+const CAPTURE_ROOT: String = "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/"
+const CAPTURE_REPORT: String = "res://output/grafik_20261101/main_adoption_after_capture.json"
 
 var _view
 var _data
@@ -174,18 +176,21 @@ func _combined_bounds(node: Node3D) -> AABB:
 	return result
 
 func _add_ship(model: String, plane: Vector2, yaw: float) -> void:
-	var path := ART_ROOT+"ships_pass04_r02/"+model+".glb"
+	var entry: Dictionary = SHIP_VISUALS.get_ship(model)
+	var path: String = String(entry.get("model_path",""))
 	if not ResourceLoader.exists(path):
 		push_error("Missing frontier ship candidate: "+path)
 		return
 	var visual: Node3D = load(path).instantiate()
 	visual.name = model
-	visual.scale = Vector3.ONE*SHIP_SCALE
+	visual.scale = Vector3.ONE*float(entry.get("scale",SHIP_SCALE))
 	visual.position = Vector3(plane.x,PAD.DECK_HEIGHT,plane.y)
-	visual.rotation_degrees.y = yaw
+	visual.rotation_degrees.y = yaw+float(entry.get("root_rotation_y_degrees",0.0))
+	visual.set_meta("ship_asset_id",String(entry.get("asset_id",model)))
+	visual.set_meta("ship_revision",String(entry.get("revision","")))
 	_stage.add_child(visual)
-	var bounds := _combined_bounds(visual)
-	_model_facts.append({"id":model,"path":path,"source_sha256":FileAccess.get_sha256(path),"bounds_world":str(bounds),"bounds_min":[bounds.position.x,bounds.position.y,bounds.position.z],"bounds_size":[bounds.size.x,bounds.size.y,bounds.size.z],"scale":SHIP_SCALE,"yaw_degrees":yaw,"canonical_star_citizen_dimensions":false,"status":"new simplified static reference reconstruction"})
+	var bounds: AABB = _combined_bounds(visual)
+	_model_facts.append({"id":model,"path":path,"source_sha256":FileAccess.get_sha256(path),"revision":String(entry.get("revision","")),"catalog_id":String(SHIP_VISUALS.get_catalog_snapshot().get("catalog_id","")),"bounds_world":str(bounds),"bounds_min":[bounds.position.x,bounds.position.y,bounds.position.z],"bounds_size":[bounds.size.x,bounds.size.y,bounds.size.z],"scale":float(entry.get("scale",SHIP_SCALE)),"yaw_degrees":visual.rotation_degrees.y,"canonical_star_citizen_dimensions":false,"status":"user-directed adopted Ref03 visual; not a claim of exact concept reconstruction"})
 
 func _add_citizen(role: String, plane: Vector2) -> void:
 	var path := ART_ROOT+"citizens_pass02/"+role+".glb"
@@ -418,8 +423,14 @@ func _walk_demo() -> void:
 	_sim.enqueue_command({"type":"move_to_position","unit_id":actor.unit_id,"target_position":_registry.grid_to_world(target_grid),"requeue_until_target":true,"local_avoidance_enabled":false})
 
 func _capture_all() -> void:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://output/grafik_20261101"))
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CAPTURE_ROOT))
+	var capture_root: String = _capture_argument("--capture-output=",CAPTURE_ROOT).trim_suffix("/")+"/"
+	var capture_report: String = _capture_argument("--capture-report=",CAPTURE_REPORT)
+	if capture_root.contains("engine_pass07_paths/") or capture_report.contains("pass07_paths_after_capture.json"):
+		push_error("Main adoption capture must not overwrite historical P07 evidence")
+		get_tree().quit(1)
+		return
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(capture_report.get_base_dir()))
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(capture_root))
 	_view.call("_request_viewport_redraw",true,60000)
 	for i in range(30): await get_tree().process_frame
 	var captures: Array = []
@@ -433,7 +444,7 @@ func _capture_all() -> void:
 		for i in range(12): await get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
-		var path: String = CAPTURE_ROOT+String(id)+".png"
+		var path: String = capture_root+String(id)+".png"
 		var error := image.save_png(path)
 		var camera: Camera3D = _view.get_node("ViewportContainer/SubViewport/WorldRoot/Camera3D")
 		captures.append({"id":id,"path":path,"error":error,"camera_size":_view.get_camera_size(),"camera_transform":str(camera.global_transform),"camera_projection":camera.projection,"viewport_size":str(get_viewport().get_visible_rect().size),"profile_enabled":id!="baseline","building_shells_visible":_buildings_closed})
@@ -442,22 +453,31 @@ func _capture_all() -> void:
 	_walk_demo()
 	await get_tree().create_timer(1.5).timeout
 	await RenderingServer.frame_post_draw
-	var walk_error := get_viewport().get_texture().get_image().save_png(CAPTURE_ROOT+"walk_pose.png")
-	captures.append({"id":"walk_pose","path":CAPTURE_ROOT+"walk_pose.png","error":walk_error,"camera_size":_view.get_camera_size(),"profile_enabled":true})
+	var walk_error := get_viewport().get_texture().get_image().save_png(capture_root+"walk_pose.png")
+	captures.append({"id":"walk_pose","path":capture_root+"walk_pose.png","error":walk_error,"camera_size":_view.get_camera_size(),"profile_enabled":true})
 	var renderer: String = RenderingServer.get_current_rendering_method()+" / "+RenderingServer.get_current_rendering_driver_name()
 	var sources := {}
 	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://scripts/terrain/frontier_outpost_pad.gd","res://scripts/terrain/frontier_closed_buildings.gd","res://scripts/terrain/frontier_worklife.gd","res://shaders/terrain/frontier_contact_paint.gdshader","res://shaders/terrain/frontier_ground.gdshader","res://shaders/terrain/frontier_building_wear.gdshader","res://scripts/terrain/frontier_access_anchors.gd"]:
 		sources[source] = FileAccess.get_sha256(source)
 	for source in ["res://scripts/terrain/terrain_map_3d_view.gd","res://scripts/editor/map_editor.gd","res://scripts/tests/mission_test_setup.gd","res://data/terrain_surface_visual_theme_catalog.json","res://data/terrain_tile_catalog.json","res://data/terrain_3d_asset_mapping.json","res://maps/frontier_workyard_24x20.json","res://data/mission_scenarios/frontier_workyard_24x20.json"]:
 		sources[source] = FileAccess.get_sha256(source)
+	for source: String in ["res://scripts/terrain/frontier_ship_visuals.gd","res://data/frontier_ship_visual_catalog.json"]:
+		sources[source] = FileAccess.get_sha256(source)
 	var snapshot: Dictionary = _view.get_render_snapshot()
-	var report := {"report_ready":false,"pass":"07_paths","report_revision":"env07","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"worklife_sources":_worklife.source_facts,"use_groups":_worklife.use_groups,"contact_gravel_count":_worklife.gravel_count,"pads":_pad_facts,"captures":captures,"structure_and_citizen_scale":MODEL_SCALE,"stylized_ship_scale":SHIP_SCALE,"canonical_star_citizen_dimensions":false,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Twelve fixed cameras, resolution, global light and crew placement preserved from pass06. Paths align to actual shared doorway/pad anchors; planar lane normals and pad rails corrected. Real-map integration controls are separate from these synthetic fixture comparisons. All primary GLBs and geology unchanged; ships remain separate Astra work."}
+	var report := {"report_ready":false,"pass":"main_adoption","report_revision":"env08","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"ship_catalog":SHIP_VISUALS.get_catalog_snapshot(),"worklife_sources":_worklife.source_facts,"use_groups":_worklife.use_groups,"contact_gravel_count":_worklife.gravel_count,"pads":_pad_facts,"captures":captures,"structure_and_citizen_scale":MODEL_SCALE,"stylized_ship_scale":SHIP_SCALE,"canonical_star_citizen_dimensions":false,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"P07 environment, cameras, global light and crew placement retained. Both ship resources replaced byte-for-byte by Astra refinement_03 through the shared visual catalog. This synthetic fixture is separate from normal mission/menu runtime evidence."}
 	report["access_layout"] = _stage.get_node("FrontierWorkingGround").get_access_snapshot()
-	var report_file := FileAccess.open("res://output/grafik_20261101/pass07_paths_after_capture.json",FileAccess.WRITE)
+	var report_file: FileAccess = FileAccess.open(capture_report,FileAccess.WRITE)
 	if report_file == null:
 		push_error("Cannot write frontier engine capture report")
 		get_tree().quit(1)
 		return
 	report_file.store_string(JSON.stringify(report,"  "))
+	report_file.close()
 	print("FRONTIER_ENGINE_CAPTURE ",JSON.stringify(report))
 	get_tree().quit()
+
+func _capture_argument(prefix: String, fallback: String) -> String:
+	for argument: String in OS.get_cmdline_user_args():
+		if argument.begins_with(prefix):
+			return argument.trim_prefix(prefix)
+	return fallback

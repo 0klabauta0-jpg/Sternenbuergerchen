@@ -1,0 +1,127 @@
+{
+	"captures": [],
+	"checks": [
+		{
+			"label": "Project normal entry is MainMenu",
+			"passed": true
+		},
+		{
+			"label": "Normal main menu scene loads",
+			"passed": true
+		},
+		{
+			"label": "MainMenu displays a background texture",
+			"passed": true
+		},
+		{
+			"label": "MainMenu background comes from the existing catalog",
+			"passed": true
+		},
+		{
+			"label": "Normal MainMenu catalog selects the Frontier start image",
+			"passed": true
+		},
+		{
+			"label": "Real Singleplayer button is actionable",
+			"passed": true
+		},
+		{
+			"label": "Normal Singleplayer opens visible Homebase",
+			"passed": true
+		},
+		{
+			"label": "Original normal grid_sweep mission remains selected",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase bootstrap provides a playable team",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase has a craft and pilot",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase payload is ready without fixture mutation",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase launch command is accepted",
+			"passed": true
+		},
+		{
+			"label": "Normal mission owns TacticalController, Primary3DView and SimulationRoot",
+			"passed": false
+		},
+		{
+			"label": "Existing player roster bytes remain unchanged",
+			"passed": false
+		}
+	],
+	"elapsed_msec": 16631,
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"facts": {
+		"forced_arrival": false,
+		"forced_unloading": false,
+		"player_roster_created_by_normal_start": false,
+		"player_roster_existed_before": true,
+		"private_simulation_state_writes": false,
+		"profile_reset": false,
+		"sources_sha256": {
+			"res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+			"res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+			"res://project.godot": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+			"res://scenes/meta/meta_layer_test.tscn": "e8e0f22fa3292ded594daebe72498dbf062ca76213335753283a1b7b74d29051",
+			"res://scenes/tests/mission_reactivity_test.tscn": "e3d5e05923b8042cdaad829eff049447bb6560351a0129c916a8a00dd168a8ce",
+			"res://scenes/ui/main_menu.tscn": "148ac78102575a8691cab391dcc38e3257f0d52869e1cdf4e74f7f0dd3ad5b4b",
+			"res://scripts/meta/meta_layer_flow.gd": "137d3e9aee900e733853afc9dfa954a1991f5e1470a34a0dddc9464c4ebf31ce",
+			"res://scripts/terrain/terrain_map_3d_view.gd": "c01f81415c5c15e0217237d7ff993aed9b85c5d30ed23ff64c0d02bc854b0ea6",
+			"res://scripts/tests/mission_test_setup.gd": "e7564b350e4fda6775423bdf7836ed633f0a7103e89b4ed64b013784400b1222",
+			"res://scripts/ui/main_menu_screen.gd": "77211508aab83e7bc7ef66ffcf65bed33de11bc13b43c1b1eb173ed6d7c3694c"
+		},
+		"synthetic_fixture": false,
+		"time_acceleration": false
+	},
+	"failed": 2,
+	"passed": 12,
+	"renderer": {
+		"display": "headless",
+		"driver": "d3d12",
+		"method": "forward_plus"
+	},
+	"schema": "sternenbuergerchen.frontier_main_startup.v1",
+	"scope": "Actual normal scene/UI-command route with real timer-driven transport/deployment. Bounded smoke, no complete campaign/combat/performance/art acceptance.",
+	"stages": [
+		{
+			"details": {
+				"background_path": "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png",
+				"background_sha256": "",
+				"scene": "res://scenes/ui/main_menu.tscn"
+			},
+			"elapsed_msec": 2933,
+			"id": "main_menu"
+		},
+		{
+			"details": {
+				"craft_id": "dropship_1",
+				"craft_location": "homebase",
+				"payload_seeded": true,
+				"selected_mission_id": "grid_sweep",
+				"selected_mission_map_path": "res://maps/Ground_Mission01_32x32.json",
+				"visible_homebase_post_show_guard_after_actionable": true
+			},
+			"elapsed_msec": 15074,
+			"id": "homebase"
+		}
+	]
+}

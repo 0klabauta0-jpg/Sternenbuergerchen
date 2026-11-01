@@ -1,0 +1,194 @@
+{
+  "input": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\buccaneer\\buccaneer_master.blend",
+  "input_sha256": "681c810e29a5d92203a5641dec3eff818315b0af4e0dda1bf7f9f6a3a705967d",
+  "collection": "LOW",
+  "source_mesh_count": 88,
+  "evaluated_mesh_count": 88,
+  "target_length": 11.0,
+  "target": [
+    0.0,
+    0.0,
+    1.649999976158142
+  ],
+  "engine": "BLENDER_EEVEE",
+  "samples": 48,
+  "blender_version": "5.2.3 LTS",
+  "color_management": "Khronos PBR Neutral; exposure 0; gamma 1",
+  "camera_policy": "Fixed world target and ortho scale derived only from target-length, never fitted to model bounds. Azimuth 0 looks from Blender -Y; positive rotates toward +X.",
+  "bounds_min": [
+    -5.878890514373779,
+    -5.5,
+    0.0
+  ],
+  "bounds_max": [
+    5.878890514373779,
+    5.499998569488525,
+    4.119763374328613
+  ],
+  "lights": [
+    {
+      "name": "Key",
+      "position_factor": [
+        -0.65,
+        -0.9,
+        1.5
+      ],
+      "watts_factor_L_squared": 12.0,
+      "size_factor_L": 1.0,
+      "color": [
+        1,
+        0.94,
+        0.84
+      ]
+    },
+    {
+      "name": "Fill",
+      "position_factor": [
+        1.0,
+        -0.1,
+        0.8
+      ],
+      "watts_factor_L_squared": 5.0,
+      "size_factor_L": 1.1,
+      "color": [
+        0.82,
+        0.9,
+        1
+      ]
+    },
+    {
+      "name": "Rim",
+      "position_factor": [
+        0.3,
+        1.0,
+        1.1
+      ],
+      "watts_factor_L_squared": 8.0,
+      "size_factor_L": 0.8,
+      "color": [
+        1,
+        0.98,
+        0.9
+      ]
+    }
+  ],
+  "floor": true,
+  "transparent": false,
+  "shots": [
+    {
+      "view": "front",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_front.png",
+      "azimuth": -52.0,
+      "elevation": 35.0,
+      "location": [
+        -28.402027130126953,
+        -22.19009780883789,
+        26.88736343383789
+      ],
+      "rotation_euler": [
+        0.9599313139915466,
+        -4.312393286909355e-08,
+        -0.9075713157653809
+      ],
+      "ortho_scale": 18.149999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "4c8469771af8447cd0c758eba5cd0fa2bc26606602a36704f5b0366b5831ecd0"
+    },
+    {
+      "view": "rear",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_rear.png",
+      "azimuth": -128.0,
+      "elevation": 35.0,
+      "location": [
+        -28.402027130126953,
+        22.19009780883789,
+        26.88736343383789
+      ],
+      "rotation_euler": [
+        0.9599311947822571,
+        -1.74014886056284e-07,
+        -2.2340214252471924
+      ],
+      "ortho_scale": 18.149999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "cbc76633c27870ba23cba78ef7c6315ab24cafabadc6a2d960efd90d27637397"
+    },
+    {
+      "view": "side",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_side.png",
+      "azimuth": -90.0,
+      "elevation": 4.0,
+      "location": [
+        -438.9281921386719,
+        -2.687659936186776e-14,
+        32.34284591674805
+      ],
+      "rotation_euler": [
+        1.5009833574295044,
+        -5.748816178652305e-08,
+        -1.5707963705062866
+      ],
+      "ortho_scale": 18.149999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "2f22f6b66032a3d5ba1f2a9a24eb5345b93c2a33dd7fd009b6d205721335abac"
+    },
+    {
+      "view": "top",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_top.png",
+      "azimuth": 0.0,
+      "elevation": 90.0,
+      "location": [
+        0.0,
+        -2.6942231286269285e-15,
+        45.650001525878906
+      ],
+      "rotation_euler": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "ortho_scale": 18.149999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "6a7c31cc85452d6f4b8b891164a9c2915cf66fc5d26d3212b4fac8bbeb7d2eb2"
+    },
+    {
+      "view": "game",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_game.png",
+      "azimuth": -38.0,
+      "elevation": 48.0,
+      "location": [
+        -18.126150131225586,
+        -23.20041275024414,
+        34.34837341308594
+      ],
+      "rotation_euler": [
+        0.7330383658409119,
+        -3.4227085166094184e-08,
+        -0.6632252335548401
+      ],
+      "ortho_scale": 49.5,
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "2f163ad36be54623b4d99e41670aed568e3b34b314b3ba55c196d625a22fe0e7"
+    }
+  ]
+}

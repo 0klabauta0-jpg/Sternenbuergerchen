@@ -1,0 +1,53 @@
+{
+  "sources": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png",
+      "bytes": 1972494,
+      "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17",
+      "package_copy": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/08_cutlass_vorne_wimmel.png",
+        "bytes": 1972494,
+        "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17"
+      },
+      "kind": "existing_generated_2D_target",
+      "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/09_cutlass_hinten_wimmel.png",
+      "bytes": 2017632,
+      "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9",
+      "package_copy": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/09_cutlass_hinten_wimmel.png",
+        "bytes": 2017632,
+        "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9"
+      },
+      "kind": "existing_generated_2D_target",
+      "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+      "bytes": 1942254,
+      "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d",
+      "package_copy": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/13_buccaneer_vorne_wimmel_vereinfacht.png",
+        "bytes": 1942254,
+        "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d"
+      },
+      "kind": "existing_generated_2D_target",
+      "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+      "bytes": 2079946,
+      "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d",
+      "package_copy": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/11_buccaneer_hinten_wimmel.png",
+        "bytes": 2079946,
+        "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d"
+      },
+      "kind": "existing_generated_2D_target",
+      "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+    }
+  ],
+  "raw_obj_usage": "Neither local DRAKE OBJ is used in the new geometry. Original independently authored mesh reconstruction from the supplied images."
+}

@@ -1,4 +1,5 @@
 {
+	"terrain_visual_theme_id": "frontier_illustrated_v1",
 	"enemy_team_configs": {
 		"default": {
 			"advance_style": "hold",

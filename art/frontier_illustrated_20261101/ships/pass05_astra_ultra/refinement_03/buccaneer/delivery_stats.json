@@ -1,0 +1,38 @@
+{
+  "source": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\buccaneer\\buccaneer_master.blend",
+  "glb": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\frontier_illustrated_20261101\\ships_pass05_astra_ultra\\refinement_03\\buccaneer_01.glb",
+  "triangles": 19672,
+  "source_meshes": 88,
+  "export_meshes": 1,
+  "materials": [
+    "M_Petrol",
+    "M_PetrolShade",
+    "M_Ivory",
+    "M_Graphite",
+    "M_Ochre",
+    "M_Glass",
+    "M_Steel",
+    "M_WarmCore"
+  ],
+  "bbox_blender": {
+    "min": [
+      -5.878890514373779,
+      -5.5,
+      0.0
+    ],
+    "max": [
+      5.878890514373779,
+      5.499998569488525,
+      4.119763374328613
+    ],
+    "size": [
+      11.757781028747559,
+      10.999998569488525,
+      4.119763374328613
+    ]
+  },
+  "sha256": {
+    "blend": "681c810e29a5d92203a5641dec3eff818315b0af4e0dda1bf7f9f6a3a705967d",
+    "glb": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3"
+  }
+}

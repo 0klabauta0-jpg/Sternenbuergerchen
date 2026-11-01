@@ -1,0 +1,22 @@
+{
+  "input": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\buccaneer\\exports\\buccaneer_source_parts.glb",
+  "output": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\frontier_illustrated_20261101\\ships_pass05_astra_ultra\\refinement_03\\buccaneer_01.glb",
+  "input_sha256": "dccb55412572ce6585795e4c74249f7fe01fb55725913d9df832efadc657d5b8",
+  "output_sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+  "source_mesh_nodes": 88,
+  "meshes": 1,
+  "primitives": 8,
+  "triangles": 19672,
+  "image_sha256_unchanged": [
+    "37bb83a6a0e7937e106e69b97fe650fb7076003682902d45145684090682504a",
+    "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+    "eaba1c4a9a5eee1422fcc6a5b7a69981f99d4596c6ae1da1db3df2b45c35942d",
+    "e87f53cbb056fa3015838bcdf2fa200089cbcd4a60b9e083db5b69e8587e797f",
+    "7691e954733b36b4dc94c5e876bc00102dea219f2d3350bedd4ee0563151899f",
+    "69e35a2d2e2a3a63a4f3c810992f45a47297d6ef07da9923a45f9ae54c4e0dd9",
+    "f329246c4715b687748c4c734bf7d036524d07554f05e9a8c71aa222e93db465",
+    "1b8ede1a83d65f5fdeee5db51f901fc2faa06b232b0789fcf58443c950661d58",
+    "837f5f5c24677f66f563c79b1474a428fb1290652cd99ba1f959fe61a44f5251"
+  ],
+  "bytes": 1454988
+}

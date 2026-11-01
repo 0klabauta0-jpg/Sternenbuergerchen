@@ -1,0 +1,148 @@
+{
+  "input": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\frontier_illustrated_20261101\\ships_pass05_astra_ultra\\refinement_03\\buccaneer_01.glb",
+  "input_sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+  "collection": "GLB_ALL_MESHES",
+  "source_mesh_count": 1,
+  "evaluated_mesh_count": 1,
+  "target_length": 11.0,
+  "target": [
+    0.0,
+    0.0,
+    1.649999976158142
+  ],
+  "engine": "BLENDER_EEVEE",
+  "samples": 48,
+  "blender_version": "5.2.3 LTS",
+  "color_management": "Khronos PBR Neutral; exposure 0; gamma 1",
+  "camera_policy": "Fixed world target and ortho scale derived only from target-length, never fitted to model bounds. Azimuth 0 looks from Blender -Y; positive rotates toward +X.",
+  "bounds_min": [
+    -5.878890514373779,
+    -5.5,
+    0.0
+  ],
+  "bounds_max": [
+    5.878890514373779,
+    5.499998569488525,
+    4.119763374328613
+  ],
+  "lights": [
+    {
+      "name": "Key",
+      "position_factor": [
+        -0.65,
+        -0.9,
+        1.5
+      ],
+      "watts_factor_L_squared": 12.0,
+      "size_factor_L": 1.0,
+      "color": [
+        1,
+        0.94,
+        0.84
+      ]
+    },
+    {
+      "name": "Fill",
+      "position_factor": [
+        1.0,
+        -0.1,
+        0.8
+      ],
+      "watts_factor_L_squared": 5.0,
+      "size_factor_L": 1.1,
+      "color": [
+        0.82,
+        0.9,
+        1
+      ]
+    },
+    {
+      "name": "Rim",
+      "position_factor": [
+        0.3,
+        1.0,
+        1.1
+      ],
+      "watts_factor_L_squared": 8.0,
+      "size_factor_L": 0.8,
+      "color": [
+        1,
+        0.98,
+        0.9
+      ]
+    }
+  ],
+  "floor": true,
+  "transparent": false,
+  "shots": [
+    {
+      "view": "front",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\roundtrip\\material_front.png",
+      "azimuth": -52.0,
+      "elevation": 35.0,
+      "location": [
+        -28.402027130126953,
+        -22.19009780883789,
+        26.88736343383789
+      ],
+      "rotation_euler": [
+        0.9599313139915466,
+        -4.312393286909355e-08,
+        -0.9075713157653809
+      ],
+      "ortho_scale": 18.149999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "f847368c40caaaac14882e910cd8450ad652aa6ce0993481a127cb89eaf5792e"
+    },
+    {
+      "view": "rear",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\roundtrip\\material_rear.png",
+      "azimuth": -128.0,
+      "elevation": 35.0,
+      "location": [
+        -28.402027130126953,
+        22.19009780883789,
+        26.88736343383789
+      ],
+      "rotation_euler": [
+        0.9599311947822571,
+        -1.74014886056284e-07,
+        -2.2340214252471924
+      ],
+      "ortho_scale": 18.149999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "22f71f6922bd5c947c54aa7e5e53777fd8ef3f57649b134e36127fbafa9b6896"
+    },
+    {
+      "view": "game",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\roundtrip\\material_game.png",
+      "azimuth": -38.0,
+      "elevation": 48.0,
+      "location": [
+        -18.126150131225586,
+        -23.20041275024414,
+        34.34837341308594
+      ],
+      "rotation_euler": [
+        0.7330383658409119,
+        -3.4227085166094184e-08,
+        -0.6632252335548401
+      ],
+      "ortho_scale": 49.5,
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "9d9f9ac9f321e0921432b222b89db60aad40d3ff8bd9e0543c9d2b7951731c10"
+    }
+  ]
+}

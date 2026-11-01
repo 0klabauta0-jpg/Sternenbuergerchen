@@ -1,0 +1,9 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: one shared versioned ship visual catalog exists
+FAIL: preview uses the final Ref03 resource cutlass_01.glb
+FAIL: preview uses the final Ref03 resource buccaneer_01.glb
+FAIL: normal dropship renderer instantiates the adopted Cutlass
+FAIL: adopted +Z ship nose follows physical +X flight direction
+FRONTIER_MAIN_SHIP_ADOPTION {"failed":5,"passed":0}

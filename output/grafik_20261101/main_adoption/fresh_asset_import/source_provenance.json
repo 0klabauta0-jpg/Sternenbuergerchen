@@ -1,0 +1,23 @@
+{
+  "claim": "Fresh isolated import of byte-identical active assets; does not claim a warning-free full editor/plugin shutdown.",
+  "files": [
+    {
+      "source": "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+      "isolated_copy": "output/grafik_20261101/main_adoption/fresh_asset_import/cutlass_01.glb",
+      "source_sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "copy_sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf"
+    },
+    {
+      "source": "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb",
+      "isolated_copy": "output/grafik_20261101/main_adoption/fresh_asset_import/buccaneer_01.glb",
+      "source_sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+      "copy_sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3"
+    },
+    {
+      "source": "Assets/curated/main_menu/frontier_outpost_main_20261101.png",
+      "isolated_copy": "output/grafik_20261101/main_adoption/fresh_asset_import/frontier_outpost_main_20261101.png",
+      "source_sha256": "35c52473d92cbec346577a7be269553f8270d586f69f241067952a3be49bcea6",
+      "copy_sha256": "35c52473d92cbec346577a7be269553f8270d586f69f241067952a3be49bcea6"
+    }
+  ]
+}

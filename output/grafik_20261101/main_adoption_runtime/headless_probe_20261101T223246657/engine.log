@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Project normal entry is MainMenu
+PASS: Normal main menu scene loads
+PASS: MainMenu displays a background texture
+PASS: MainMenu background comes from the existing catalog
+PASS: Normal MainMenu catalog selects the Frontier start image
+FRONTIER_STARTUP_STAGE main_menu
+PASS: Real Singleplayer button is actionable
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3743)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3546)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:182)
+       [3] _frames (res://scripts/tests/frontier_main_startup_verifier.gd:61)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3743)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3546)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:182)
+       [3] _frames (res://scripts/tests/frontier_main_startup_verifier.gd:61)
+PASS: Normal Singleplayer opens visible Homebase
+PASS: Original normal grid_sweep mission remains selected
+PASS: Normal Homebase bootstrap provides a playable team
+PASS: Normal Homebase has a craft and pilot
+PASS: Normal Homebase payload is ready without fixture mutation
+FRONTIER_STARTUP_STAGE homebase
+PASS: Normal Homebase launch command is accepted
+FAIL: Normal mission owns TacticalController, Primary3DView and SimulationRoot
+FAIL: Existing player roster bytes remain unchanged
+FRONTIER_MAIN_STARTUP {"evidence_output":"res://output/grafik_20261101/main_adoption_runtime/headless_probe.json","failed":2,"passed":12,"stages":2}

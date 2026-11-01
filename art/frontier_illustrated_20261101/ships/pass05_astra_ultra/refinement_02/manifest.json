@@ -1,0 +1,893 @@
+{
+  "schema": "sternenbuergerchen.ship_refinement.v2",
+  "status": "reviewed_intermediate_candidates_not_user_approved_not_integrated",
+  "scope": "Cutlass forewings, canopy and manned turret; Buccaneer smaller complete pods and revised canopy.",
+  "predecessor_manifests": [
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/manifest.json",
+      "bytes": 116799,
+      "sha256": "91446e916554d57674c555a7e27df6deac5f8123a923feb1e920f6e00727c81f"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_01/manifest.json",
+      "bytes": 37735,
+      "sha256": "2a6c7105518d56968bb25f84a7c1f2b15cb3ee1be64f2f0d7b7656b37eaa0462"
+    }
+  ],
+  "preserved_unique_artifacts": 156,
+  "documentation_exceptions": [
+    {
+      "path": "docs/tasks/ART_2026_11_01_astra_ship_revision.md",
+      "historical_sha256": "17700998694af78e4682ef156d6a4ca769319fa3658641872eba34568c28dc88",
+      "reason": "Explicitly allowed continuation of own task documentation."
+    }
+  ],
+  "assets": {
+    "cutlass": {
+      "source": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/source/final/cutlass_01.blend",
+        "bytes": 4312604,
+        "sha256": "be3c808f384872f0e9a112535a02c3a6cb3e135aa4f06c1fdbe78e96626fc5a6"
+      },
+      "export": {
+        "path": "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_02/cutlass_01.glb",
+        "bytes": 1190624,
+        "sha256": "d0a1d31e7a0077021a308013fe0c842e5d742058299f393f072b43f82d01bdc0"
+      },
+      "audit": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/independent_qa.json",
+        "bytes": 339313,
+        "sha256": "bb2dad333c91696430e211f58b648bf3664a9929733feac03873a15619300ba2"
+      },
+      "source_parts": 144,
+      "triangles": 16224,
+      "glb_summary": {
+        "nodes": 1,
+        "meshes": 1,
+        "materials": 8,
+        "images": 5,
+        "accessors": 32,
+        "bytes": 1190624
+      },
+      "bbox_blender": {
+        "min": [
+          -6.2151079177856445,
+          -8.0,
+          0.0
+        ],
+        "max": [
+          6.2151079177856445,
+          8.0,
+          5.7466325759887695
+        ],
+        "size": [
+          12.430215835571289,
+          16.0,
+          5.7466325759887695
+        ],
+        "center": [
+          0.0,
+          0.0,
+          2.8733162879943848
+        ]
+      },
+      "bbox_gltf_godot": {
+        "min": [
+          -6.2151079177856445,
+          0.0,
+          -8.0
+        ],
+        "max": [
+          6.2151079177856445,
+          5.7466325759887695,
+          8.0
+        ],
+        "size": [
+          12.430215835571289,
+          5.7466325759887695,
+          16.0
+        ],
+        "center": [
+          0.0,
+          2.8733162879943848,
+          0.0
+        ]
+      },
+      "contact_components": 1,
+      "qa": {
+        "pass": true,
+        "errors": 0,
+        "warnings": 0,
+        "direct_glb_comparison": {
+          "pass": true,
+          "matched_corners": 48672,
+          "max_position_error_m": 0.0,
+          "max_normal_vector_error": 8.316548320593148e-05,
+          "max_uv_coordinate_error": 1.1920928955078125e-07,
+          "materials_and_full_texture_pixels_pass": true
+        },
+        "roundtrip_comparison": {
+          "pass": true,
+          "matched_corners": 48672,
+          "max_position_error_m": 0.0,
+          "max_normal_vector_error": 0.001105122496122052,
+          "max_uv_coordinate_error": 1.1920928955078125e-07,
+          "materials_and_full_texture_pixels_pass": true
+        }
+      },
+      "comparison": {
+        "conditions": {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/matched_conditions.json",
+          "bytes": 16212,
+          "sha256": "be0c1aba42fefb639a824938e1ff2c71a82bb5a97fc2c19f70424cfa649b7e1d"
+        },
+        "bindings": {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/package_binding.json",
+          "bytes": 5521,
+          "sha256": "a01c91206ab23ac964df275a1436216799c78405e6350fc1f911e081a0fae29f"
+        },
+        "equal_condition_pairs": 8,
+        "hash_bindings": 23
+      }
+    },
+    "buccaneer": {
+      "source": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/buccaneer_master.blend",
+        "bytes": 4487205,
+        "sha256": "06cd6c3b105b0b7450639618e2c06ddf3355a094064bbdceb5640d0a14b7450c"
+      },
+      "export": {
+        "path": "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_02/buccaneer_01.glb",
+        "bytes": 1452472,
+        "sha256": "27634374c9abb51e77b39fb21b4c8d810e2302c3cb000924c81d25d39d7850f6"
+      },
+      "audit": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit.json",
+        "bytes": 286807,
+        "sha256": "32e3ff4b226b773c1911488af68d9b968a9c26205b238f125af3155d903fce14"
+      },
+      "source_parts": 88,
+      "triangles": 19632,
+      "glb_summary": {
+        "nodes": 1,
+        "meshes": 1,
+        "materials": 8,
+        "images": 9,
+        "accessors": 32,
+        "bytes": 1452472
+      },
+      "bbox_blender": {
+        "min": [
+          -5.878890514373779,
+          -5.5,
+          0.0
+        ],
+        "max": [
+          5.878890514373779,
+          5.499998569488525,
+          4.119763374328613
+        ],
+        "size": [
+          11.757781028747559,
+          10.999998569488525,
+          4.119763374328613
+        ],
+        "center": [
+          0.0,
+          -7.152557373046875e-07,
+          2.0598816871643066
+        ]
+      },
+      "bbox_gltf_godot": {
+        "min": [
+          -5.878890514373779,
+          0.0,
+          -5.499998569488525
+        ],
+        "max": [
+          5.878890514373779,
+          4.119763374328613,
+          5.5
+        ],
+        "size": [
+          11.757781028747559,
+          4.119763374328613,
+          10.999998569488525
+        ],
+        "center": [
+          0.0,
+          2.0598816871643066,
+          7.152557373046875e-07
+        ]
+      },
+      "contact_components": 1,
+      "qa": {
+        "pass": true,
+        "errors": 0,
+        "warnings": 0,
+        "direct_glb_comparison": {
+          "pass": true,
+          "matched_corners": 58896,
+          "max_position_error_m": 0.0,
+          "max_normal_vector_error": 8.210608508900996e-05,
+          "max_uv_coordinate_error": 1.7881393432617188e-07,
+          "materials_and_full_texture_pixels_pass": true
+        },
+        "roundtrip_comparison": {
+          "pass": true,
+          "matched_corners": 58896,
+          "max_position_error_m": 0.0,
+          "max_normal_vector_error": 0.0014497404938796298,
+          "max_uv_coordinate_error": 1.7881393432617188e-07,
+          "materials_and_full_texture_pixels_pass": true
+        }
+      },
+      "comparison": {
+        "conditions": {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/matched_conditions.json",
+          "bytes": 16110,
+          "sha256": "5f59e757820fb501a6b6e521b762aaae02d0ba0da030140300c6ce7e76b3471c"
+        },
+        "bindings": {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/package_binding.json",
+          "bytes": 10563,
+          "sha256": "2bf35b534e1826144faaccc96861f59e9fb424d06ed8b73228adb38d3ccc59fa"
+        },
+        "equal_condition_pairs": 8,
+        "hash_bindings": 23
+      }
+    }
+  },
+  "files": [
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit.json",
+      "bytes": 286807,
+      "sha256": "32e3ff4b226b773c1911488af68d9b968a9c26205b238f125af3155d903fce14"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit_embedded_images/image_0_sRGB.png",
+      "bytes": 57923,
+      "sha256": "37bb83a6a0e7937e106e69b97fe650fb7076003682902d45145684090682504a"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit_embedded_images/image_1_Non-Color.png",
+      "bytes": 90122,
+      "sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit_embedded_images/image_2_sRGB.png",
+      "bytes": 23761,
+      "sha256": "eaba1c4a9a5eee1422fcc6a5b7a69981f99d4596c6ae1da1db3df2b45c35942d"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit_embedded_images/image_3_sRGB.png",
+      "bytes": 28300,
+      "sha256": "e87f53cbb056fa3015838bcdf2fa200089cbcd4a60b9e083db5b69e8587e797f"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit_embedded_images/image_4_sRGB.png",
+      "bytes": 35658,
+      "sha256": "7691e954733b36b4dc94c5e876bc00102dea219f2d3350bedd4ee0563151899f"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit_embedded_images/image_5_sRGB.png",
+      "bytes": 41760,
+      "sha256": "69e35a2d2e2a3a63a4f3c810992f45a47297d6ef07da9923a45f9ae54c4e0dd9"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit_embedded_images/image_6_sRGB.png",
+      "bytes": 71832,
+      "sha256": "f329246c4715b687748c4c734bf7d036524d07554f05e9a8c71aa222e93db465"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit_embedded_images/image_7_sRGB.png",
+      "bytes": 9829,
+      "sha256": "1b8ede1a83d65f5fdeee5db51f901fc2faa06b232b0789fcf58443c950661d58"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/audit_embedded_images/image_8_sRGB.png",
+      "bytes": 53225,
+      "sha256": "837f5f5c24677f66f563c79b1474a428fb1290652cd99ba1f959fe61a44f5251"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/buccaneer_master.blend",
+      "bytes": 4487205,
+      "sha256": "06cd6c3b105b0b7450639618e2c06ddf3355a094064bbdceb5640d0a14b7450c"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/build_buccaneer.py",
+      "bytes": 23008,
+      "sha256": "9869a0908f5a131232bd8ea8962cf8af1bb931a1a817466d11cea804f24d4111"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/delivery_stats.json",
+      "bytes": 1134,
+      "sha256": "de0cddc88e94c82f12511b4eb330083b1cfdb46ecfc4822d12b3b85133e97def"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/evaluated_proportions.json",
+      "bytes": 94287,
+      "sha256": "a8a78bef08a2b326699c6e53e0939477d2b010c625f006ddeae872b36b4df33d"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/exports/buccaneer_01.glb",
+      "bytes": 1526552,
+      "sha256": "b388e8335d76f9b42935ab6c3c0225874dd9acd1f7e2368a122a7c23758c6058"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/exports/buccaneer_source_parts.glb",
+      "bytes": 1526552,
+      "sha256": "7b6a816336929b7b54acf192cac08149f85d7dce9ec4b6e194bd9dc0d8a22f69"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/exports/consolidation.json",
+      "bytes": 1409,
+      "sha256": "d1cda5ef70daf578a8cb0a51a9f3b142ed0fd157e0a9779f959bf79045811d79"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/finalize_buccaneer.py",
+      "bytes": 4735,
+      "sha256": "5fde64cc97b2bfb03c502a7e8822816fa28d02fc1d88099e48ecabaf9fbe7d11"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/inspect_root_contact.py",
+      "bytes": 1317,
+      "sha256": "6fc97c49b60586279d0aea614dc83c5d9b68d5deda09acb122863c5a64737420"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/measure_proportions.py",
+      "bytes": 3008,
+      "sha256": "2f16e88ca8cda322a0091fb5b76eeb98df48336e6fb414f60ef1eb8e069bbbf8"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/buccaneer/README.md",
+      "bytes": 4387,
+      "sha256": "ae754e332fe56101fb8ea65c735b9729f802d13097456dffa21b7ffbf88d781f"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/build/build_cutlass.py",
+      "bytes": 26204,
+      "sha256": "a3d9a646387c483805c8191eb3c71e3271c51e6233ddbda2f4c3c4e0d6c60462"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/build/make_paint.py",
+      "bytes": 1295,
+      "sha256": "c3814b56d1af88f4de320e41501daf0691ea22ab7e06e3bc3ad606a457a4ec52"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/build/measure_proportions.py",
+      "bytes": 3931,
+      "sha256": "479406c18de2ab8b11917e29b448338d2ba0854af8cf31de0830e9944375e8d9"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/build/review_cutlass.py",
+      "bytes": 3589,
+      "sha256": "3b6f7c0b2d188d48c8e0c51298847e1916af18a0967463887e92d0030272fd8c"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/README.md",
+      "bytes": 6229,
+      "sha256": "06ac72d28a2b0dc85f4e655556aad1da4333583622a88f79725f3613641ccf97"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/assembly.png",
+      "bytes": 1937986,
+      "sha256": "ec380360cccb9867a5328b258d58ce86c1aae992ca846c796efdf39f7c2d940d"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/cameras.json",
+      "bytes": 1948,
+      "sha256": "8c8b5279f62d63dcaae65f46279405fb96e54cf7aa23c05e17cdf657cb129085"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/evaluated_proportions.json",
+      "bytes": 10634,
+      "sha256": "31c88be5bafb09fbce47dc7c80d2d834e4e2152509b640276ecb71103718d4e8"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/front.png",
+      "bytes": 1871165,
+      "sha256": "2114ad933e9751d66f7f2281db6b3021e7d7ac26196c28e186c239b6e888ebdc"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/game.png",
+      "bytes": 1663657,
+      "sha256": "f4f2b922f7bbe1bfc5a75dabbe1a81d51c55daa926fc105194c79d36244eae84"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/independent_qa.json",
+      "bytes": 339313,
+      "sha256": "bb2dad333c91696430e211f58b648bf3664a9929733feac03873a15619300ba2"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/independent_qa_embedded_images/image_0_sRGB.png",
+      "bytes": 70712,
+      "sha256": "4b0194c6c76ce57441e0122db36c333f0901495c13c38e1ce6def83f7ee92582"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/independent_qa_embedded_images/image_1_Non-Color.png",
+      "bytes": 88584,
+      "sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/independent_qa_embedded_images/image_2_sRGB.png",
+      "bytes": 41971,
+      "sha256": "c1380278055af046d62e45ac43927a749639a4cff0a58ed3d1b74df52116c9fd"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/independent_qa_embedded_images/image_3_sRGB.png",
+      "bytes": 47427,
+      "sha256": "063b5821b172e3440c8ecbdb19321b30ed0f53633ab9e7bf7d612dabc86f2ba6"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/independent_qa_embedded_images/image_4_sRGB.png",
+      "bytes": 56681,
+      "sha256": "3df4398a2ad47f40bae1d7ed369dbf5777f8234d9ad64279c3536267bd8ddf18"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/rear.png",
+      "bytes": 1874954,
+      "sha256": "129353f7dd3aff11f602442b299833971172e0784c2a0ca96824a4d27243a625"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/side.png",
+      "bytes": 1759859,
+      "sha256": "f06d1d92c1dac101df5ea333b59784bcb4cd5a2f817aa45372582ad2c0e50b95"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/top.png",
+      "bytes": 1778940,
+      "sha256": "1a348676f12be33fd74575c62c56d7e47b1a8f7a81c8da1f0b15edf67b4f9847"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/review/final/wire.png",
+      "bytes": 1921346,
+      "sha256": "8370a6f9be876744eaca4e51400abc8eddef6e41c9faca9ca2933cf3db95260a"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/source/final/cutlass_01.blend",
+      "bytes": 4312604,
+      "sha256": "be3c808f384872f0e9a112535a02c3a6cb3e135aa4f06c1fdbe78e96626fc5a6"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/source/final/generator_snapshot.py",
+      "bytes": 26204,
+      "sha256": "a3d9a646387c483805c8191eb3c71e3271c51e6233ddbda2f4c3c4e0d6c60462"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/source/final/proportion_metrics.json",
+      "bytes": 1111,
+      "sha256": "19c4b98b4f1702839727e1092e907b550c2e6cbfa927a2b55c163af9d8a6bbe1"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/textures/Ivory_basecolor.png",
+      "bytes": 70712,
+      "sha256": "4b0194c6c76ce57441e0122db36c333f0901495c13c38e1ce6def83f7ee92582"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/textures/Ochre_basecolor.png",
+      "bytes": 56681,
+      "sha256": "3df4398a2ad47f40bae1d7ed369dbf5777f8234d9ad64279c3536267bd8ddf18"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/textures/paint_roughness.png",
+      "bytes": 44984,
+      "sha256": "22737d5e34a629e18a30d4049cb5cb39f972cd837856aa61c7e77e3d3d68a4b9"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/textures/Petrol_basecolor.png",
+      "bytes": 41971,
+      "sha256": "c1380278055af046d62e45ac43927a749639a4cff0a58ed3d1b74df52116c9fd"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/cutlass/textures/PetrolLight_basecolor.png",
+      "bytes": 47427,
+      "sha256": "063b5821b172e3440c8ecbdb19321b30ed0f53633ab9e7bf7d612dabc86f2ba6"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/README.md",
+      "bytes": 4893,
+      "sha256": "b953af59aae55bb85d23292f4fe53cc70a555ef9efbe03c73c2173d98cd31820"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/matched_conditions.json",
+      "bytes": 16110,
+      "sha256": "5f59e757820fb501a6b6e521b762aaae02d0ba0da030140300c6ce7e76b3471c"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/new/material_front.png",
+      "bytes": 996237,
+      "sha256": "1bba8017d7b131c579175b0cf6fa9457ab05691e55d35d1393c9b582a514028e"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/new/material_game.png",
+      "bytes": 225286,
+      "sha256": "64c2485afee6ebffd649cdb4762e924ccac8b59951d8a991b68b4abcf818784b"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/new/material_rear.png",
+      "bytes": 1010032,
+      "sha256": "ab3a7cccff6420733e4f841d131b916ed115ae8eee68d6e8e3fbe05d49b70691"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/new/material_side.png",
+      "bytes": 762924,
+      "sha256": "7ec1362f21eb7bc9106d802d5bf9dd12751e0a987c9a41455324435d2f59aacb"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/new/material_top.png",
+      "bytes": 990071,
+      "sha256": "496bd79f6f9f2d99626f98792356ac4542749a657234c3259756268f46ca9efb"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/new/render_manifest.json",
+      "bytes": 5587,
+      "sha256": "aee51d3d963158f2aa248082c61506d8a69f6540edb3adeaa5c7c8da3bb5e578"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/package_binding.json",
+      "bytes": 10563,
+      "sha256": "2bf35b534e1826144faaccc96861f59e9fb424d06ed8b73228adb38d3ccc59fa"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/previous/material_front.png",
+      "bytes": 1012129,
+      "sha256": "84d48cdc096d8e5af3122b8091abe0e5f2357d0504bc22fab694b1e60a9060d5"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/previous/material_game.png",
+      "bytes": 226329,
+      "sha256": "703e0abcbc6d1b2b3e87525d07aee64c791a0ff5508e5d406e5e34af18c73dd2"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/previous/material_rear.png",
+      "bytes": 1019505,
+      "sha256": "c0335ad5523f7c1ba632388ed707d6b22b5175a976e1e6aac8b393f6c1995c44"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/previous/material_side.png",
+      "bytes": 768678,
+      "sha256": "9eb5c195e9825b5a9eb61d95b2b2c227e1c9b4d5418039e649cbea80606ee13b"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/previous/material_top.png",
+      "bytes": 993845,
+      "sha256": "c882f6536513107b6ec3e57d05d0ce77f8509b1d32203599bdc11ab6f9e6003b"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/previous/render_manifest.json",
+      "bytes": 5587,
+      "sha256": "3ee41ad8b8d84cf627d635c7badd549f0d177a66cabfb83761b125ded932f254"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/roundtrip/material_front.png",
+      "bytes": 996319,
+      "sha256": "23ced45e95c901601eeb5b31693251e73563e9ecb9f2e55b01f3abdf09b19417"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/roundtrip/material_game.png",
+      "bytes": 225046,
+      "sha256": "bcf7e06ec5fcabd371d99b108eb8d308cd0c9db75c5fe3433c32474d415333a1"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/roundtrip/material_rear.png",
+      "bytes": 1009612,
+      "sha256": "654d06959692542dfa7b1192b597a35c1014e3f9890434c6883f1f28d45bfb3e"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/roundtrip/render_manifest.json",
+      "bytes": 4129,
+      "sha256": "5b7e5eb6c6df0213fdbc9d397dee4e7a85c9304623ca16dd881141ca450ea918"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/sheets/manifest.json",
+      "bytes": 4475,
+      "sha256": "55df95e06224a465edc77c0d8aad31fe2ce207a2145237b7eca84838e011c006"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/sheets/Vorher_und_Neu.png",
+      "bytes": 3063811,
+      "sha256": "089782dff50a613a85f9a1b3aca1cbd2803dc232a87d9a5765e6169eb3a3581d"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/sheets/Ziel_und_Neu.png",
+      "bytes": 4605030,
+      "sha256": "17c8a4381bb0380e4e293d7b631ca148195f7be133bb621da14a071ade1e4c02"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/source_diagnostics/random_front.png",
+      "bytes": 984446,
+      "sha256": "51bc2697fe6386eb51976ee6bdea34a8f2cb6a423a6ee60ffc008f7ed076d0f8"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/source_diagnostics/random_rear.png",
+      "bytes": 1006023,
+      "sha256": "10ab14826e6119de3f7f750fe4cdfc654442d151389b890c6967fee2bec50106"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/source_diagnostics/render_manifest.json",
+      "bytes": 4929,
+      "sha256": "ad60e90bd5e47acfb5daff294744565d349eab3d457f0356e8be1d3a0b2cda93"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/source_diagnostics/wire_front.png",
+      "bytes": 1047127,
+      "sha256": "f7cd8af2a721e1f6b959d5d4c0df1be07d27b64f8cc736f6be9090175fef064d"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/source_diagnostics/wire_rear.png",
+      "bytes": 1068660,
+      "sha256": "91d593f490d182bf56182d04b4cb78f185a70697a84da01b6b03f4344c185b5c"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/buccaneer/VISUAL_REVIEW.md",
+      "bytes": 2058,
+      "sha256": "3e4c3fc0e285aa42367b3ab6f30e9ac4c3bad0b9447747ad576a4b778df3f7b3"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/compose_refinement_sheets.py",
+      "bytes": 3648,
+      "sha256": "d7a1cfbabfca441ce16971ee58707260224a705752226267e8e6ac9c69f97b60"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/compose_refinement_sheets.py",
+      "bytes": 3695,
+      "sha256": "4fd66ac8b54a7f98164bd6a023ec4d3e849b2a5c0ccceb712564903f9efbd4f1"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/matched_conditions.json",
+      "bytes": 16212,
+      "sha256": "be0c1aba42fefb639a824938e1ff2c71a82bb5a97fc2c19f70424cfa649b7e1d"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/new/material_front.png",
+      "bytes": 1008741,
+      "sha256": "de523bd71501372d84c37d6a262441bd3479b5e237aa9d9b2d7a937fd3b6a114"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/new/material_game.png",
+      "bytes": 225748,
+      "sha256": "4c5c6ba4b5a3ee719b4acc88383d4d04ff6a7dbc2f7f03bbc92132cee17e0339"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/new/material_rear.png",
+      "bytes": 1024018,
+      "sha256": "308e61984c098a29590dad7018fd12dc0d5a91a2b18fb9f03e1ad34a199086b5"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/new/material_side.png",
+      "bytes": 761394,
+      "sha256": "046fea932fd84b5cb086e336e1ab3dd84ede0c9ec3f0ffdce4db1ead84514718"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/new/material_top.png",
+      "bytes": 999485,
+      "sha256": "e43abe510415393ffc779d2c64d167b7440c8980e08e0e57c6129249162baef7"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/new/render_manifest.json",
+      "bytes": 5570,
+      "sha256": "8260c0b54ec9307ccf3aba99949479b25038ea78dfd1cfe7db4a0e9f0cfe8ec0"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/package_binding.json",
+      "bytes": 5521,
+      "sha256": "a01c91206ab23ac964df275a1436216799c78405e6350fc1f911e081a0fae29f"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/previous/material_front.png",
+      "bytes": 1003421,
+      "sha256": "14a9d06e0f9a76dff7b843c3741d72938296ec48d0e61e5dbeba4105f49953c9"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/previous/material_game.png",
+      "bytes": 225637,
+      "sha256": "af067a24bcfdd29801f27b12e2063ec9056e322b7dabe7bab7f4121e6cba1bc6"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/previous/material_rear.png",
+      "bytes": 1017637,
+      "sha256": "5d5aa47a542615ca7810ed0f5ba93d76daa245a0f4ea849ae019116e23752c05"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/previous/material_side.png",
+      "bytes": 753107,
+      "sha256": "eaefe06972eb0f740f1fe6ae37f356e9d60be3622ad71a0876fb59171016599e"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/previous/material_top.png",
+      "bytes": 1003971,
+      "sha256": "603f0589d5394816263b4700e7206232bc5deb742c731e8645208f51e617d6e5"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/previous/render_manifest.json",
+      "bytes": 5569,
+      "sha256": "afe11b977c6df008a85eb8a72cf2bd4a7822c28da6358201b84cb0b2bdad4d27"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/render_package.py",
+      "bytes": 4156,
+      "sha256": "6bfc112ac31766a0cdd6440e505bebe982cdcb25c469be50c066f885449fa0fc"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/roundtrip/material_front.png",
+      "bytes": 1008596,
+      "sha256": "f3ab5a4c716dd7c0c9e6b14a03cf9044b5ca3fd9f46a4bff9458210c8807b62b"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/roundtrip/material_game.png",
+      "bytes": 225564,
+      "sha256": "f27d37f33beef1663cb6c4271be70733191fca350e810343eb8773c13f26eb5e"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/roundtrip/material_rear.png",
+      "bytes": 1023853,
+      "sha256": "a3150fa0bafb2506392f2993519405c04ef7560e7a69f5d5ac54a4cb6fa419d9"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/roundtrip/render_manifest.json",
+      "bytes": 4108,
+      "sha256": "6a80bde11c57032c59c66dab516ea0bcd97c7610239fc7692ab686cb533c9173"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/sheets/manifest.json",
+      "bytes": 4441,
+      "sha256": "466953f2e4dde1edf6ea9faddf7b475e13f8f93335e20a999cc6a79b722c62db"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/sheets/Vorher_und_Neu.png",
+      "bytes": 2540781,
+      "sha256": "e47c99aeceb29640a38aaa74d6fb48fb87110af22ba8c3de7abc6faf4e20dce4"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/sheets/Ziel_und_Neu.png",
+      "bytes": 4606408,
+      "sha256": "cc6164f631905ad93e840c5f8339cf5d65384ca1e38638775088083a7b0db3ac"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/source_diagnostics/random_front.png",
+      "bytes": 1003033,
+      "sha256": "63eab8d8557f14b550b04dddda62219c2f5fdbbbbc60ac87e9d59f26c7325c1e"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/source_diagnostics/random_rear.png",
+      "bytes": 1024108,
+      "sha256": "8fbad85564e59762c38dd976a1358948f5d120a66435ae0b05b0c89f3cce6a13"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/source_diagnostics/render_manifest.json",
+      "bytes": 4914,
+      "sha256": "fccf9b9337611f676508181614af4235ca056096abf69f01a6663625918dfa05"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/source_diagnostics/wire_front.png",
+      "bytes": 1074523,
+      "sha256": "df97e3e08bdc639e610b4b0e69b61a2453ff818cd3312fd28b2032f6630249c1"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/source_diagnostics/wire_rear.png",
+      "bytes": 1087860,
+      "sha256": "1c5b51079152e39c80d2a076e6034536d0140e38ea370b882861379e9c9e49d9"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/verify_refinement_conditions.py",
+      "bytes": 3776,
+      "sha256": "da8da97b52b36f02d05b517518ee7a345198aa97406441ab704a7b96df3f2a54"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/cutlass/VISUAL_REVIEW.md",
+      "bytes": 1976,
+      "sha256": "408fadf5f08d54051520e810954adb23a34238fdcc068cafb78be226e68067fe"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/review/verify_refinement_conditions.py",
+      "bytes": 3776,
+      "sha256": "da8da97b52b36f02d05b517518ee7a345198aa97406441ab704a7b96df3f2a54"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_02/write_manifest.py",
+      "bytes": 4485,
+      "sha256": "987b444b274f2df116be00198d0dfbd96cefd2f9e418fe05d6be11c3182d7c6f"
+    }
+  ],
+  "task": {
+    "path": "docs/tasks/ART_2026_11_01_astra_ship_revision.md",
+    "bytes": 7925,
+    "sha256": "3b4e7b51959b057258646bd6f46fbee7d0be66ffcd2f6cc75c03a8355ac726f6"
+  },
+  "dependencies": [
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_01/write_manifest.py",
+      "bytes": 7581,
+      "sha256": "f7dcfc02ace7bc0830264fcb131eb36f653ea358083b403af3da976a7b9fd68d"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/verify_ship.py",
+      "bytes": 33373,
+      "sha256": "9ecc94bc5db1e005e3338f4f5c09c4d34cacd58a738d7a6f4ac908c43158526b"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/consolidate_glb.py",
+      "bytes": 8468,
+      "sha256": "c1de14c481f5361bc985c53f6cc39616ebe21da9cf57abf42e3736486202c28b"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/render_matched.py",
+      "bytes": 11882,
+      "sha256": "95873c664fed9512285f9b571848a8e56320db0620bc58376a5d3b866425dd76"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/tool_manifest.json",
+      "bytes": 4362,
+      "sha256": "8a7e04e2a8b2d25a4660a5a163e64c407eb0690b7f182f079ccc49aa12057084"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/reference_sources.json",
+      "bytes": 2838,
+      "sha256": "ec41cba123601ba118cccb45ed9f4e0445cbd86a73bb166334103a491e58d233"
+    }
+  ],
+  "provenance": {
+    "geometry": "Project-authored procedural modifications; no imported external 3D meshes.",
+    "references": {
+      "sources": [
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png",
+          "bytes": 1972494,
+          "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17",
+          "package_copy": {
+            "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/08_cutlass_vorne_wimmel.png",
+            "bytes": 1972494,
+            "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17"
+          },
+          "kind": "existing_generated_2D_target",
+          "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+        },
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/09_cutlass_hinten_wimmel.png",
+          "bytes": 2017632,
+          "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9",
+          "package_copy": {
+            "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/09_cutlass_hinten_wimmel.png",
+            "bytes": 2017632,
+            "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9"
+          },
+          "kind": "existing_generated_2D_target",
+          "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+        },
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+          "bytes": 1942254,
+          "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d",
+          "package_copy": {
+            "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/13_buccaneer_vorne_wimmel_vereinfacht.png",
+            "bytes": 1942254,
+            "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d"
+          },
+          "kind": "existing_generated_2D_target",
+          "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+        },
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+          "bytes": 2079946,
+          "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d",
+          "package_copy": {
+            "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/11_buccaneer_hinten_wimmel.png",
+            "bytes": 2079946,
+            "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d"
+          },
+          "kind": "existing_generated_2D_target",
+          "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+        }
+      ],
+      "raw_obj_usage": "Neither local DRAKE OBJ is used in the new geometry. Original independently authored mesh reconstruction from the supplied images."
+    },
+    "rights": "No new rights to underlying spacecraft designs asserted."
+  },
+  "integration": {
+    "native_godot": "pending main chat",
+    "git": "task/grafikreferenzen-20261101; no checkout, commit or push",
+    "dimensions": "stylized inferred 16m Cutlass and11m Buccaneer",
+    "orientation": "Blender -Y forward Z up maps to GLB/Godot +Z forward Y up; centered ground pivot"
+  }
+}

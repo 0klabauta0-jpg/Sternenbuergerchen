@@ -1,0 +1,188 @@
+{
+  "source": {
+    "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\buccaneer\\buccaneer_master.blend",
+    "sha256": "681c810e29a5d92203a5641dec3eff818315b0af4e0dda1bf7f9f6a3a705967d"
+  },
+  "glb": {
+    "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\frontier_illustrated_20261101\\ships_pass05_astra_ultra\\refinement_03\\buccaneer_01.glb",
+    "sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3"
+  },
+  "numeric_audit": {
+    "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\buccaneer\\audit.json",
+    "sha256": "c4e7f573c9d0c1c7966622cf87845740b7e29d0afa056bf4eecf3f4b3779e6fc"
+  },
+  "render_commands": [
+    [
+      "C:/Users/bjoer/AppData/Local/Programs/Blender Foundation/Blender 5.2/blender.exe",
+      "-b",
+      "--factory-startup",
+      "--python-exit-code",
+      "1",
+      "-P",
+      "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\render_matched.py",
+      "--",
+      "--target-length",
+      "11",
+      "--front-az",
+      "-52",
+      "--front-el",
+      "35",
+      "--rear-az",
+      "-128",
+      "--rear-el",
+      "35",
+      "--engine",
+      "EEVEE",
+      "--samples",
+      "48",
+      "--ortho-factor",
+      "1.65",
+      "--input",
+      "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\buccaneer\\buccaneer_master.blend",
+      "--output-dir",
+      "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new",
+      "--modes",
+      "material",
+      "--views",
+      "front,rear,side,top,game"
+    ],
+    [
+      "C:/Users/bjoer/AppData/Local/Programs/Blender Foundation/Blender 5.2/blender.exe",
+      "-b",
+      "--factory-startup",
+      "--python-exit-code",
+      "1",
+      "-P",
+      "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\render_matched.py",
+      "--",
+      "--target-length",
+      "11",
+      "--front-az",
+      "-52",
+      "--front-el",
+      "35",
+      "--rear-az",
+      "-128",
+      "--rear-el",
+      "35",
+      "--engine",
+      "EEVEE",
+      "--samples",
+      "48",
+      "--ortho-factor",
+      "1.65",
+      "--input",
+      "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\buccaneer\\buccaneer_master.blend",
+      "--output-dir",
+      "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\source_diagnostics",
+      "--modes",
+      "random,wire",
+      "--views",
+      "front,rear"
+    ],
+    [
+      "C:/Users/bjoer/AppData/Local/Programs/Blender Foundation/Blender 5.2/blender.exe",
+      "-b",
+      "--factory-startup",
+      "--python-exit-code",
+      "1",
+      "-P",
+      "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\render_matched.py",
+      "--",
+      "--target-length",
+      "11",
+      "--front-az",
+      "-52",
+      "--front-el",
+      "35",
+      "--rear-az",
+      "-128",
+      "--rear-el",
+      "35",
+      "--engine",
+      "EEVEE",
+      "--samples",
+      "48",
+      "--ortho-factor",
+      "1.65",
+      "--input",
+      "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\frontier_illustrated_20261101\\ships_pass05_astra_ultra\\refinement_03\\buccaneer_01.glb",
+      "--output-dir",
+      "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\roundtrip",
+      "--modes",
+      "material",
+      "--views",
+      "front,rear,game"
+    ]
+  ],
+  "helpers": {
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\render_matched.py": "95873c664fed9512285f9b571848a8e56320db0620bc58376a5d3b866425dd76",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\verify_refinement_conditions.py": "da8da97b52b36f02d05b517518ee7a345198aa97406441ab704a7b96df3f2a54",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\compose_refinement_sheets.py": "ff671b37cf121aca83ea82cb3bc93929c0080079e796a61c48db684e8d598775"
+  },
+  "matched_conditions_sha256": "afbf66320d58d98488c83eab1cba5c0a97dd653596620662636f3ad5e7be6688",
+  "sheets_manifest_sha256": "51be903a0a4f5846324af9cf097b6a24efc76d4a8440d493f222e58a9ea9d844",
+  "visually_opened_images": [
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_front.png",
+      "sha256": "4c8469771af8447cd0c758eba5cd0fa2bc26606602a36704f5b0366b5831ecd0"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_rear.png",
+      "sha256": "cbc76633c27870ba23cba78ef7c6315ab24cafabadc6a2d960efd90d27637397"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_side.png",
+      "sha256": "2f22f6b66032a3d5ba1f2a9a24eb5345b93c2a33dd7fd009b6d205721335abac"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_top.png",
+      "sha256": "6a7c31cc85452d6f4b8b891164a9c2915cf66fc5d26d3212b4fac8bbeb7d2eb2"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_game.png",
+      "sha256": "2f163ad36be54623b4d99e41670aed568e3b34b314b3ba55c196d625a22fe0e7"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\source_diagnostics\\random_front.png",
+      "sha256": "1b177797515cb08f44a2076b64acc891908514e483a11558ee3d3cef7425f370"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\source_diagnostics\\random_rear.png",
+      "sha256": "ab3f29b80655bac46db45ea3230e01bd983bcdeffd06bb1f2ed858c69b286d95"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\source_diagnostics\\wire_front.png",
+      "sha256": "0bb127e4cc6b8c8ad0c45a23ab216a89d82f3703d6788f0f1890d30b9faf9799"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\source_diagnostics\\wire_rear.png",
+      "sha256": "3ab10120b31efad157494f91e974000dbea08c2d58356cbda525d2eff9df41ad"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\roundtrip\\material_front.png",
+      "sha256": "f847368c40caaaac14882e910cd8450ad652aa6ce0993481a127cb89eaf5792e"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\roundtrip\\material_rear.png",
+      "sha256": "22f71f6922bd5c947c54aa7e5e53777fd8ef3f57649b134e36127fbafa9b6896"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\roundtrip\\material_game.png",
+      "sha256": "9d9f9ac9f321e0921432b222b89db60aad40d3ff8bd9e0543c9d2b7951731c10"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\sheets\\Ziel_und_Neu.png",
+      "sha256": "df4f5df2d26f5e78d1733aa648db03422d9d7eacaa38e48da834c3876a3068f9"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\sheets\\Vorher_und_Neu.png",
+      "sha256": "1e73f2ff944ae3aa59779858b6a2259cd595563521ea236679122e52e7f57574"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\sheets\\Vorher_und_Neu_Seite.png",
+      "sha256": "3aa75a672401f4d619f3c4063ebcc2b5d670e18c30f89974770a0632fe5166b0"
+    }
+  ],
+  "note": "All12 final source/GLB renders and3sheets were actually opened. Side comparison uses complete equal-size frames without any crop. Independent visual review: continuous lower cockpit tub and upper-half side glazing are clearly visible. No newly visible detached assemblies or open holes found in these views. Blender diagnostic evidence only; not Godot integration or user aesthetic acceptance."
+}

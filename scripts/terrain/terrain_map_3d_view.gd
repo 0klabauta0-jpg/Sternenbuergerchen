@@ -10,6 +10,7 @@ const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_even
 const CONTACT_DENSITY_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/contact_density_overlay.gd")
 const TERRAIN_TRUTH_AUDIT_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_truth_audit.gd")
 const FRONTIER_ART_PROFILE_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_art_profile.gd")
+const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const HEX_GROUND_BATCH_SCRIPT: GDScript = preload("res://scripts/terrain/hex_ground_batch.gd")
 
@@ -10701,7 +10702,10 @@ func _add_label3d(parent: Node3D, text: String, position: Vector3, node_name: St
 func _add_dropship_proxy(world_position: Vector2, visual_payload: Dictionary = {}, visual_id: String = "primary") -> Node3D:
 	var payload: Dictionary = visual_payload if not visual_payload.is_empty() else _drop_payload
 	_dropship_rotation_y = _get_dropship_rotation_y_for_payload(payload, world_position)
-	var model_scene := _get_asset_model_scene("fahrzeug_speeder_b_se")
+	var frontier_entry: Dictionary = _get_frontier_dropship_visual_entry()
+	var model_scene: PackedScene = _get_asset_model_scene_by_path(String(frontier_entry.get("model_path",""))) if not frontier_entry.is_empty() else null
+	if model_scene == null:
+		model_scene = _get_asset_model_scene("fahrzeug_speeder_b_se")
 	if model_scene == null:
 		model_scene = _get_asset_model_scene_by_name(DROPSHIP_MODEL_NAME)
 	if model_scene != null:
@@ -10709,15 +10713,19 @@ func _add_dropship_proxy(world_position: Vector2, visual_payload: Dictionary = {
 		if model_instance != null:
 			_normalize_asset_model_instance(model_instance)
 			var craft_root := Node3D.new()
-			var extra_y_offset: float = _get_asset_y_offset("fahrzeug_speeder_b_se")
+			var extra_y_offset: float = 0.0 if not frontier_entry.is_empty() else _get_asset_y_offset("fahrzeug_speeder_b_se")
 			craft_root.name = "DropshipModel_%s" % _sanitize_node_name(visual_id)
 			craft_root.position = _world_to_air_layer_3d_position_for_payload(payload, world_position, extra_y_offset)
 			craft_root.set_meta("flight_altitude_layer", String(payload.get("air_layer", AIR_LAYER_ID)))
 			craft_root.set_meta("terrain_height_independent", true)
 			craft_root.set_meta("dropship_visual_mode", "model")
 			craft_root.set_meta("dropship_extra_y_offset", extra_y_offset)
+			craft_root.set_meta("ship_asset_id",String(frontier_entry.get("asset_id","legacy_speeder_b")))
+			craft_root.set_meta("ship_revision",String(frontier_entry.get("revision","legacy_mapping")))
+			craft_root.set_meta("ship_model_path",String(frontier_entry.get("model_path",_get_model_path_for_type("fahrzeug_speeder_b_se"))))
+			craft_root.set_meta("ship_source_sha256",String(frontier_entry.get("sha256","")))
 			craft_root.rotation_degrees.y = _dropship_rotation_y
-			craft_root.scale = Vector3.ONE * (_get_asset_model_scale("fahrzeug_speeder_b_se") if _has_model_mapping_for_type("fahrzeug_speeder_b_se") else DROPSHIP_MODEL_SCALE)
+			craft_root.scale = Vector3.ONE * (float(frontier_entry.get("scale",0.22)) if not frontier_entry.is_empty() else (_get_asset_model_scale("fahrzeug_speeder_b_se") if _has_model_mapping_for_type("fahrzeug_speeder_b_se") else DROPSHIP_MODEL_SCALE))
 			craft_root.add_child(model_instance)
 			_drop_root.add_child(craft_root)
 			_dropship_model_visible = true
@@ -10789,12 +10797,28 @@ func _get_dropship_rotation_y_for_payload(payload: Dictionary, world_position: V
 		return _get_dropship_model_yaw(world_position, target_position, -_camera_yaw_degrees)
 	if typeof(payload.get("lz_position", null)) == TYPE_VECTOR2:
 		return _get_dropship_model_yaw(world_position, Vector2(payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
-	return wrapf(-_camera_yaw_degrees + DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES, 0.0, 360.0)
+	var frontier_entry: Dictionary = _get_frontier_dropship_visual_entry()
+	var offset_degrees: float = float(frontier_entry.get("root_rotation_y_degrees",0.0)) if not frontier_entry.is_empty() else DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES
+	return wrapf(-_camera_yaw_degrees + offset_degrees, 0.0, 360.0)
 
 
 func _get_dropship_model_yaw(from_world_position: Vector2, to_world_position: Vector2, fallback_yaw: float = 0.0) -> float:
+	var frontier_entry: Dictionary = _get_frontier_dropship_visual_entry()
+	if not frontier_entry.is_empty():
+		# Ref03 geometry faces +Z. Use the actual rendered plane rather than the
+		# old Kenney forward convention; unit/world yaw helpers stay unchanged.
+		var delta: Vector3 = _world_to_3d_position(to_world_position,0.0)-_world_to_3d_position(from_world_position,0.0)
+		var yaw_degrees: float = fallback_yaw if Vector2(delta.x,delta.z).length_squared()<=0.0001 else rad_to_deg(atan2(delta.x,delta.z))
+		return wrapf(yaw_degrees+float(frontier_entry.get("root_rotation_y_degrees",0.0)),0.0,360.0)
 	var direction_yaw: float = _get_world_direction_yaw(from_world_position, to_world_position, fallback_yaw)
 	return wrapf(direction_yaw + DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES, 0.0, 360.0)
+
+
+func _get_frontier_dropship_visual_entry() -> Dictionary:
+	var entry: Dictionary = FRONTIER_SHIP_VISUALS_SCRIPT.get_for_role("dropship")
+	if entry.is_empty() or _get_asset_model_scene_by_path(String(entry.get("model_path","")))==null:
+		return {}
+	return entry
 
 
 func _maybe_emit_unit_step_sfx(

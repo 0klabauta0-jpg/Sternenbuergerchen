@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "hex_foundation",
+      "script": "res://scripts/tests/frontier_hex_foundation_verifier.gd",
+      "success_marker": "FRONTIER_HEX_FOUNDATION_ALL_PASS",
+      "timeout": 60
+    },
+    {
+      "name": "hex_movement",
+      "script": "res://scripts/tests/frontier_hex_movement_verifier.gd",
+      "success_marker": "FRONTIER_HEX_MOVEMENT",
+      "timeout": 60,
+      "args": [
+        "--evidence-output=res://output/grafik_20261101/main_adoption/hex_movement.json"
+      ]
+    },
+    {
+      "name": "hex_render",
+      "script": "res://scripts/tests/frontier_hex_render_verifier.gd",
+      "success_marker": "FRONTIER_HEX_RENDER",
+      "timeout": 60
+    },
+    {
+      "name": "hex_visibility",
+      "script": "res://scripts/tests/frontier_hex_visibility_verifier.gd",
+      "success_marker": "76 passed, 0 failed",
+      "timeout": 60
+    },
+    {
+      "name": "art_profile",
+      "script": "res://scripts/tests/frontier_art_profile_verifier.gd",
+      "success_marker": "FRONTIER_ART_RESULT",
+      "timeout": 60
+    },
+    {
+      "name": "art_integration",
+      "script": "res://scripts/tests/frontier_art_integration_verifier.gd",
+      "success_marker": "FRONTIER_ART_INTEGRATION",
+      "timeout": 60
+    },
+    {
+      "name": "combat_authority",
+      "script": "res://scripts/tests/task_162_combat_authority_contract_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "multiplayer_authority",
+      "script": "res://scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "multiplayer_snapshot",
+      "script": "res://scripts/tests/task_168_multiplayer_snapshot_contract_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "legacy_fow_visual",
+      "script": "res://scripts/tests/task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "legacy_heights",
+      "script": "res://scripts/tests/task_184_gameplay_hill_semantics_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "legacy_avoidance",
+      "script": "res://scripts/tests/task_475_fireteam_pathfinding_avoidance_stability_pass.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "legacy_corridor",
+      "script": "res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "authority_boundary",
+      "script": "res://scripts/tests/task_284_gameplay_truth_architecture_boundary_audit.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "art_pass02",
+      "script": "res://scripts/tests/frontier_pass02_verifier.gd",
+      "success_marker": "FRONTIER_PASS02",
+      "timeout": 60
+    },
+    {
+      "name": "art_pass03_geology",
+      "script": "res://scripts/tests/frontier_pass03_geology_verifier.gd",
+      "success_marker": "FRONTIER_PASS03_GEOLOGY",
+      "timeout": 60
+    },
+    {
+      "name": "current_ref03_ship_adoption",
+      "script": "res://scripts/tests/frontier_main_ship_adoption_verifier.gd",
+      "success_marker": "FRONTIER_MAIN_SHIP_ADOPTION",
+      "timeout": 60
+    },
+    {
+      "name": "art_pass05_environment",
+      "script": "res://scripts/tests/frontier_pass05_environment_verifier.gd",
+      "success_marker": "FRONTIER_PASS05_ENVIRONMENT",
+      "timeout": 60
+    },
+    {
+      "name": "current_environment_adoption",
+      "script": "res://scripts/tests/frontier_main_environment_verifier.gd",
+      "success_marker": "FRONTIER_MAIN_ENVIRONMENT",
+      "timeout": 60
+    },
+    {
+      "name": "art_pass06_building_wear",
+      "script": "res://output/grafik_20261101/main_adoption/art_pass06_building_wear_probe.gd",
+      "success_marker": "BUILDING_PASS06_QA",
+      "timeout": 60
+    },
+    {
+      "name": "art_pass06_geology_relief",
+      "script": "res://art/frontier_illustrated_20261101/environment/pass06/geology/qa/frontier_pass06_geology_verifier.gd",
+      "success_marker": "FRONTIER_PASS06_GEOLOGY",
+      "timeout": 60
+    },
+    {
+      "name": "art_pass07_paths",
+      "script": "res://scripts/tests/frontier_pass07_paths_verifier.gd",
+      "success_marker": "FRONTIER_PASS07_PATHS",
+      "timeout": 60
+    },
+    {
+      "name": "art_pass07_pad_rails",
+      "script": "res://output/grafik_20261101/main_adoption/art_pass07_pad_rails_probe.gd",
+      "success_marker": "FRONTIER_PASS07_PAD_RAILS",
+      "timeout": 60
+    },
+    {
+      "name": "regular_runtime_slice",
+      "script": "res://output/grafik_20261101/main_adoption/regular_runtime_slice_probe.gd",
+      "args": [],
+      "success_marker": "FRONTIER_RUNTIME_SLICE_RESULT",
+      "timeout": 120
+    },
+    {
+      "name": "regular_theme_override",
+      "script": "res://art/frontier_illustrated_20261101/environment/pass07/runtime/theme_override_probe.gd",
+      "args": [],
+      "success_marker": "FRONTIER_THEME_OVERRIDE_RESULT",
+      "timeout": 120
+    },
+    {
+      "name": "regular_theme_413",
+      "script": "res://scripts/tests/task_413_terrain_theme_packs_ground_mission_variant.gd",
+      "args": [],
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 120
+    },
+    {
+      "name": "regular_editor_save_mp_287",
+      "script": "res://scripts/tests/task_287_editor_save_multiplayer_contract_regression_review.gd",
+      "args": [],
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 120
+    },
+    {
+      "name": "default_graphics",
+      "script": "res://scripts/tests/frontier_start_graphics_verifier.gd",
+      "success_marker": "FRONTIER_START_GRAPHICS_ALL_PASS",
+      "timeout": 90
+    },
+    {
+      "name": "netfox_autoload_1182",
+      "script": "res://scripts/tests/task_1182_clean_checkout_netfox_autoload_contract.gd",
+      "success_marker": "TASK_1182 PASS",
+      "timeout": 60
+    }
+  ]
+}

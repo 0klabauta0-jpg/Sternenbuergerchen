@@ -1,0 +1,194 @@
+{
+  "input": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_02\\cutlass\\source\\final\\cutlass_01.blend",
+  "input_sha256": "be3c808f384872f0e9a112535a02c3a6cb3e135aa4f06c1fdbe78e96626fc5a6",
+  "collection": "LOW",
+  "source_mesh_count": 144,
+  "evaluated_mesh_count": 144,
+  "target_length": 16.0,
+  "target": [
+    0.0,
+    0.0,
+    2.4000000953674316
+  ],
+  "engine": "BLENDER_EEVEE",
+  "samples": 48,
+  "blender_version": "5.2.3 LTS",
+  "color_management": "Khronos PBR Neutral; exposure 0; gamma 1",
+  "camera_policy": "Fixed world target and ortho scale derived only from target-length, never fitted to model bounds. Azimuth 0 looks from Blender -Y; positive rotates toward +X.",
+  "bounds_min": [
+    -6.2151079177856445,
+    -8.0,
+    0.0
+  ],
+  "bounds_max": [
+    6.2151079177856445,
+    8.0,
+    5.7466325759887695
+  ],
+  "lights": [
+    {
+      "name": "Key",
+      "position_factor": [
+        -0.65,
+        -0.9,
+        1.5
+      ],
+      "watts_factor_L_squared": 12.0,
+      "size_factor_L": 1.0,
+      "color": [
+        1,
+        0.94,
+        0.84
+      ]
+    },
+    {
+      "name": "Fill",
+      "position_factor": [
+        1.0,
+        -0.1,
+        0.8
+      ],
+      "watts_factor_L_squared": 5.0,
+      "size_factor_L": 1.1,
+      "color": [
+        0.82,
+        0.9,
+        1
+      ]
+    },
+    {
+      "name": "Rim",
+      "position_factor": [
+        0.3,
+        1.0,
+        1.1
+      ],
+      "watts_factor_L_squared": 8.0,
+      "size_factor_L": 0.8,
+      "color": [
+        1,
+        0.98,
+        0.9
+      ]
+    }
+  ],
+  "floor": true,
+  "transparent": false,
+  "shots": [
+    {
+      "view": "front",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_02\\review\\cutlass\\new\\material_front.png",
+      "azimuth": -52.0,
+      "elevation": 35.0,
+      "location": [
+        -41.31203842163086,
+        -32.27650451660156,
+        39.10889434814453
+      ],
+      "rotation_euler": [
+        0.9599311947822571,
+        7.7628762085169e-08,
+        -0.9075713753700256
+      ],
+      "ortho_scale": 26.399999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "de523bd71501372d84c37d6a262441bd3479b5e237aa9d9b2d7a937fd3b6a114"
+    },
+    {
+      "view": "rear",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_02\\review\\cutlass\\new\\material_rear.png",
+      "azimuth": -128.0,
+      "elevation": 35.0,
+      "location": [
+        -41.31203842163086,
+        32.27650451660156,
+        39.10889434814453
+      ],
+      "rotation_euler": [
+        0.9599310159683228,
+        -5.4428106466275494e-08,
+        -2.2340214252471924
+      ],
+      "ortho_scale": 26.399999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "308e61984c098a29590dad7018fd12dc0d5a91a2b18fb9f03e1ad34a199086b5"
+    },
+    {
+      "view": "side",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_02\\review\\cutlass\\new\\material_side.png",
+      "azimuth": -90.0,
+      "elevation": 4.0,
+      "location": [
+        -638.4410400390625,
+        -3.909323358737213e-14,
+        47.04414367675781
+      ],
+      "rotation_euler": [
+        1.5009833574295044,
+        -5.748816178652305e-08,
+        -1.5707963705062866
+      ],
+      "ortho_scale": 26.399999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "046fea932fd84b5cb086e336e1ab3dd84ede0c9ec3f0ffdce4db1ead84514718"
+    },
+    {
+      "view": "top",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_02\\review\\cutlass\\new\\material_top.png",
+      "azimuth": 0.0,
+      "elevation": 90.0,
+      "location": [
+        0.0,
+        -3.918869928272537e-15,
+        66.4000015258789
+      ],
+      "rotation_euler": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "ortho_scale": 26.399999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "e43abe510415393ffc779d2c64d167b7440c8980e08e0e57c6129249162baef7"
+    },
+    {
+      "view": "game",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_02\\review\\cutlass\\new\\material_game.png",
+      "azimuth": -38.0,
+      "elevation": 48.0,
+      "location": [
+        -26.36530876159668,
+        -33.746055603027344,
+        49.96126937866211
+      ],
+      "rotation_euler": [
+        0.7330384254455566,
+        -1.6110604406094353e-08,
+        -0.6632252335548401
+      ],
+      "ortho_scale": 72.0,
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "4c5c6ba4b5a3ee719b4acc88383d4d04ff6a7dbc2f7f03bbc92132cee17e0339"
+    }
+  ]
+}

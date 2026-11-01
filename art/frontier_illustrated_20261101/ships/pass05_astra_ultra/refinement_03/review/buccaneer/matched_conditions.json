@@ -1,0 +1,379 @@
+{
+  "schema": "sternenbuergerchen.refinement_matched_conditions.v1",
+  "pass": true,
+  "errors": [],
+  "checks": [
+    {
+      "left": "previous",
+      "right": "new",
+      "view": "front",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "previous",
+      "right": "new",
+      "view": "rear",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "previous",
+      "right": "new",
+      "view": "side",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "previous",
+      "right": "new",
+      "view": "top",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "previous",
+      "right": "new",
+      "view": "game",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "new",
+      "right": "roundtrip",
+      "view": "front",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "new",
+      "right": "roundtrip",
+      "view": "rear",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "new",
+      "right": "roundtrip",
+      "view": "game",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    }
+  ],
+  "hash_bindings": [
+    {
+      "type": "render_input",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_02\\buccaneer\\buccaneer_master.blend",
+      "expected": "06cd6c3b105b0b7450639618e2c06ddf3355a094064bbdceb5640d0a14b7450c",
+      "actual": "06cd6c3b105b0b7450639618e2c06ddf3355a094064bbdceb5640d0a14b7450c",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\previous\\material_front.png",
+      "expected": "1bba8017d7b131c579175b0cf6fa9457ab05691e55d35d1393c9b582a514028e",
+      "actual": "1bba8017d7b131c579175b0cf6fa9457ab05691e55d35d1393c9b582a514028e",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\previous\\material_rear.png",
+      "expected": "ab3a7cccff6420733e4f841d131b916ed115ae8eee68d6e8e3fbe05d49b70691",
+      "actual": "ab3a7cccff6420733e4f841d131b916ed115ae8eee68d6e8e3fbe05d49b70691",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\previous\\material_side.png",
+      "expected": "7ec1362f21eb7bc9106d802d5bf9dd12751e0a987c9a41455324435d2f59aacb",
+      "actual": "7ec1362f21eb7bc9106d802d5bf9dd12751e0a987c9a41455324435d2f59aacb",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\previous\\material_top.png",
+      "expected": "496bd79f6f9f2d99626f98792356ac4542749a657234c3259756268f46ca9efb",
+      "actual": "496bd79f6f9f2d99626f98792356ac4542749a657234c3259756268f46ca9efb",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\previous\\material_game.png",
+      "expected": "64c2485afee6ebffd649cdb4762e924ccac8b59951d8a991b68b4abcf818784b",
+      "actual": "64c2485afee6ebffd649cdb4762e924ccac8b59951d8a991b68b4abcf818784b",
+      "pass": true
+    },
+    {
+      "type": "render_input",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\buccaneer\\buccaneer_master.blend",
+      "expected": "681c810e29a5d92203a5641dec3eff818315b0af4e0dda1bf7f9f6a3a705967d",
+      "actual": "681c810e29a5d92203a5641dec3eff818315b0af4e0dda1bf7f9f6a3a705967d",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_front.png",
+      "expected": "4c8469771af8447cd0c758eba5cd0fa2bc26606602a36704f5b0366b5831ecd0",
+      "actual": "4c8469771af8447cd0c758eba5cd0fa2bc26606602a36704f5b0366b5831ecd0",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_rear.png",
+      "expected": "cbc76633c27870ba23cba78ef7c6315ab24cafabadc6a2d960efd90d27637397",
+      "actual": "cbc76633c27870ba23cba78ef7c6315ab24cafabadc6a2d960efd90d27637397",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_side.png",
+      "expected": "2f22f6b66032a3d5ba1f2a9a24eb5345b93c2a33dd7fd009b6d205721335abac",
+      "actual": "2f22f6b66032a3d5ba1f2a9a24eb5345b93c2a33dd7fd009b6d205721335abac",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_top.png",
+      "expected": "6a7c31cc85452d6f4b8b891164a9c2915cf66fc5d26d3212b4fac8bbeb7d2eb2",
+      "actual": "6a7c31cc85452d6f4b8b891164a9c2915cf66fc5d26d3212b4fac8bbeb7d2eb2",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\new\\material_game.png",
+      "expected": "2f163ad36be54623b4d99e41670aed568e3b34b314b3ba55c196d625a22fe0e7",
+      "actual": "2f163ad36be54623b4d99e41670aed568e3b34b314b3ba55c196d625a22fe0e7",
+      "pass": true
+    },
+    {
+      "type": "render_input",
+      "set": "roundtrip",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\frontier_illustrated_20261101\\ships_pass05_astra_ultra\\refinement_03\\buccaneer_01.glb",
+      "expected": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+      "actual": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "roundtrip",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\roundtrip\\material_front.png",
+      "expected": "f847368c40caaaac14882e910cd8450ad652aa6ce0993481a127cb89eaf5792e",
+      "actual": "f847368c40caaaac14882e910cd8450ad652aa6ce0993481a127cb89eaf5792e",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "roundtrip",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\roundtrip\\material_rear.png",
+      "expected": "22f71f6922bd5c947c54aa7e5e53777fd8ef3f57649b134e36127fbafa9b6896",
+      "actual": "22f71f6922bd5c947c54aa7e5e53777fd8ef3f57649b134e36127fbafa9b6896",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "roundtrip",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\roundtrip\\material_game.png",
+      "expected": "9d9f9ac9f321e0921432b222b89db60aad40d3ff8bd9e0543c9d2b7951731c10",
+      "actual": "9d9f9ac9f321e0921432b222b89db60aad40d3ff8bd9e0543c9d2b7951731c10",
+      "pass": true
+    },
+    {
+      "type": "render_input",
+      "set": "source_diagnostics",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\buccaneer\\buccaneer_master.blend",
+      "expected": "681c810e29a5d92203a5641dec3eff818315b0af4e0dda1bf7f9f6a3a705967d",
+      "actual": "681c810e29a5d92203a5641dec3eff818315b0af4e0dda1bf7f9f6a3a705967d",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "source_diagnostics",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\source_diagnostics\\random_front.png",
+      "expected": "1b177797515cb08f44a2076b64acc891908514e483a11558ee3d3cef7425f370",
+      "actual": "1b177797515cb08f44a2076b64acc891908514e483a11558ee3d3cef7425f370",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "source_diagnostics",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\source_diagnostics\\random_rear.png",
+      "expected": "ab3f29b80655bac46db45ea3230e01bd983bcdeffd06bb1f2ed858c69b286d95",
+      "actual": "ab3f29b80655bac46db45ea3230e01bd983bcdeffd06bb1f2ed858c69b286d95",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "source_diagnostics",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\source_diagnostics\\wire_front.png",
+      "expected": "0bb127e4cc6b8c8ad0c45a23ab216a89d82f3703d6788f0f1890d30b9faf9799",
+      "actual": "0bb127e4cc6b8c8ad0c45a23ab216a89d82f3703d6788f0f1890d30b9faf9799",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "source_diagnostics",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\buccaneer\\source_diagnostics\\wire_rear.png",
+      "expected": "3ab10120b31efad157494f91e974000dbea08c2d58356cbda525d2eff9df41ad",
+      "actual": "3ab10120b31efad157494f91e974000dbea08c2d58356cbda525d2eff9df41ad",
+      "pass": true
+    },
+    {
+      "type": "numeric_audit_input",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\buccaneer\\buccaneer_master.blend",
+      "expected": "681c810e29a5d92203a5641dec3eff818315b0af4e0dda1bf7f9f6a3a705967d",
+      "actual": "681c810e29a5d92203a5641dec3eff818315b0af4e0dda1bf7f9f6a3a705967d",
+      "pass": true
+    },
+    {
+      "type": "numeric_audit_input",
+      "set": "roundtrip",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\frontier_illustrated_20261101\\ships_pass05_astra_ultra\\refinement_03\\buccaneer_01.glb",
+      "expected": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+      "actual": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+      "pass": true
+    }
+  ],
+  "numeric_audit": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_03/buccaneer/audit.json",
+  "note": "Blender diagnostic comparison of frozen previous candidate and refinement; not native Godot or user acceptance."
+}
