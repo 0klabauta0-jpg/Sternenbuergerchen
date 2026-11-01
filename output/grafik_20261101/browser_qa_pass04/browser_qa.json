@@ -2,9 +2,9 @@
   "schema": "sternenbuergerchen.graphics_pass04_browser_qa.v1",
   "revision": "r02",
   "html": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\docs\\reports\\STERNENBUERGERCHEN_GRAFIK_2026-11-01.html",
-  "html_sha256_start": "7d238dae1177e12b802c8807bd3453915ef2ecc313e57b37dc62b34dadcb7945",
+  "html_sha256_start": "7ae0d52d3b258b2ae17b617d743a734de8ede0bd871b6843166ae559a7cbc5e6",
   "script_sha256": "0cea9512732bd57fbeaa40a8c32bd6138938b23c5583235c8bd039726e1d2d4c",
-  "started_at": "2026-11-01T16:28:17.653Z",
+  "started_at": "2026-11-01T16:48:38.445Z",
   "checks": [
     {
       "name": "pass02_archive_byte_identical",
@@ -762,39 +762,39 @@
   "screenshots": [
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\00c_desktop_rejected_r01_vs_r02.png",
-      "sha256": "72026f100aabde2afca6495462b38d75df89e9137dc5ac0d777626a436965592"
+      "sha256": "1021e046a91e69789e854468c7f920e1e409588ddbaaa5bf41e356cb19a5d57d"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\00a_desktop_closed_habitat.png",
-      "sha256": "969803ed5faafbaa29d1cfe584019b247c5fc18045e0004518edd974cdc54ae6"
+      "sha256": "d2745746e6367de10b38000de1f600a0422514dc7520ba3a7f6f1834dfef658d"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\00b_desktop_ships_rear.png",
-      "sha256": "a3fa06e1da8b25376e96fd3afe78397286ae174161af3f183d581249dcb70fd5"
+      "sha256": "bec3c00cd6be87c787f2ab8e9a27f1747b463681fca11f5a78626fc266f00688"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\01_desktop_hero_after.png",
-      "sha256": "034593940622f1162591e07b8b63f5ea920d51a52143c8dfebdeb205da1bc16e"
+      "sha256": "1b618fc2ab76dc1fd7508f9fc65784cf7029cb4071c2b91b0daba4fca995aa55"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\02_desktop_pair_overview.png",
-      "sha256": "d53938b9673ad5e6517adb31e0ff70a0655cd56554ee812393c4a22a206ee899"
+      "sha256": "eb2abef9db91ccaaa1adf169995b8d37d7796071307cab6046338b553fe32053"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\02_desktop_pair_workshop.png",
-      "sha256": "40b03484b26f7d793ca15e2a28c39cb8f5f962231a03c6ede6ae5095bf4635dd"
+      "sha256": "886b7c60c1ca9b02fd3317638b5a2b2a8a8d322c2ef2398861f5bbf91462dbec"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\02_desktop_pair_crew.png",
-      "sha256": "a268ee78e6d0b5c0f09e353975b16cefcc3e27c777b41ef154b91bf66104bf26"
+      "sha256": "66486294ff304448cc7b76e741c8068092c3a0c4905ed33e2d894168484b1c7a"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\02_desktop_pair_hex_grid.png",
-      "sha256": "1a0c024a908cf03f1344887060245f0e7cbd13fbd59dd7a3fbe979739b830333"
+      "sha256": "1589b9087ac41c8de985befcc780a1efe5072ff7617c40cfd8c6eed5f117cfee"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\02_desktop_pair_landscape.png",
-      "sha256": "36ad80aeff471c0c7d589d6749f5d240e8c5bbe325f1337e947a59ef1ad86c86"
+      "sha256": "2ff367593bb638b6ec4087b35ddab65f913e46ad85f226f0f9f58fe80b2aa3b2"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\02_desktop_pair_cutaway.png",
@@ -802,11 +802,11 @@
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\03_desktop_wipe_overview.png",
-      "sha256": "ef503f2e067105697fdd5b51a6325a96a4e4341e6fec84c63396db9475b3eb89"
+      "sha256": "7f2e8685cb25b289eceada0ab8fdb74e299a11709fc1896ee12da825599a5a5c"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\04_desktop_landscape_pair.png",
-      "sha256": "a218875f00964f477eaced3172d97c72c752ba75d543dbfb7eb08cb476dfb4d6"
+      "sha256": "a907fb1c80c81959a0291faecbaadde7c975b5b858f3c93df3d857a999c23236"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\04b_desktop_provenance.png",
@@ -814,11 +814,11 @@
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\04c_desktop_cutaway.png",
-      "sha256": "beff01b92f62843a05a34f731ce071b6ae6e99e872d08b63381f593b05cb981a"
+      "sha256": "392f90b4963234c99720c9cd98bcac8dfd714596c8da4fca9b33110ed010aece"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\05_desktop_after_lightbox.png",
-      "sha256": "b61bf3ede34122e2d5a5e60a1e3d6a22a0c9ab7af96c318b018e8df39ea81328"
+      "sha256": "eb4e28998e117eccd6a5e6d15931b8cf592eb90a920c6ffab3092a57f55afed5"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\06_desktop_primary_references.png",
@@ -826,19 +826,19 @@
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\07_mobile_hero_after.png",
-      "sha256": "042ff9aab5561ab9c646ebafdfab187bcf7ceccb5265ba7e0c870e5bcdfabf2e"
+      "sha256": "490a6c0c75ae0e1be5fe7086cb2767a01fe9d59931f8607d15b98207e43d6e88"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\08_mobile_crew_pair.png",
-      "sha256": "33ba338f4a1879b2f788013611b332c7b8745f81982326118f23535eb329502d"
+      "sha256": "d7954214fd0f89b6b3aa943e40fdb93062de09e8d659ec1a331a38be7e197f52"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\09_mobile_wipe.png",
-      "sha256": "4e5ab90609d768903c122bb9be79e0f660a456f3591550aa129649c57fcea72b"
+      "sha256": "2d37d1da62d82829056c6c530ecd0a71e75f035e39163bb5feb6923be4eea581"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\10_mobile_lightbox.png",
-      "sha256": "96e9f0a20f551508e1c040f3233c9d8ff3f4a9589da95375967beb8bf71da3ea"
+      "sha256": "5946546f89e2bea67049362b743190cafd622954d194d1e2f54f92a53ef6f72c"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\11_mobile_reference.png",
@@ -846,7 +846,7 @@
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\12_mobile_terrain_pair.png",
-      "sha256": "6cf74f2ac2687b9d9f6a3e92afdcae1c104b632d0799dfe0db6e337674888409"
+      "sha256": "ab7aa8741a95b5b224d77a70260872cd8ab7291b768b349901572a54922b561d"
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\13_mobile_provenance.png",
@@ -854,17 +854,17 @@
     },
     {
       "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\13b_mobile_closed_hall.png",
-      "sha256": "13609279665293c7c5dc24bdf307bd976af916ec819130d9e212b5ef3e515b1a"
+      "sha256": "8ce3426acc58a2fa68ad43d75ac5694725ad16a66da7951f6fead5e9693a8505"
     }
   ],
   "downloads": [
     {
-      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\downloads\\grafik_20261101_pass04_r02_2026-11-01T16-28-52-557Z_01.json",
-      "sha256": "8fbabbcd3aef45cafa45ebe23f72833568e70c8c04a43eab97bb6f2a8b0b20ff"
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\downloads\\grafik_20261101_pass04_r02_2026-11-01T16-49-24-662Z_01.json",
+      "sha256": "0c05ac6e477db87f3eb5b62651b6d8e776b847fd3d2aa9fb072e4531a18bab64"
     },
     {
-      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\downloads\\grafik_20261101_pass04_r02_2026-11-01T16-28-52-838Z_02.json",
-      "sha256": "f8b51ea7676ac0bf8fcdb6703dc77845c9636281bdca6c55ef7cc398f4a28584"
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass04\\downloads\\grafik_20261101_pass04_r02_2026-11-01T16-49-25-161Z_02.json",
+      "sha256": "a2e30e05e6f2686cc0cff65cd68fc2f3bc6e0c725a45859176f007fd76115b0f"
     }
   ],
   "console_errors": [],
@@ -872,24 +872,35 @@
   "external_requests": [],
   "visual_inspection": {
     "pass": true,
-    "reviewed_at": "2026-11-01T16:30:49.097505+00:00",
-    "html_sha256": "7d238dae1177e12b802c8807bd3453915ef2ecc313e57b37dc62b34dadcb7945",
+    "reviewed_at": "2026-11-01T16:50:28.292084+00:00",
+    "html_sha256": "7ae0d52d3b258b2ae17b617d743a734de8ede0bd871b6843166ae559a7cbc5e6",
+    "source_fix_commit": "794261191f4165d997f729fb105a5ef0c028774c",
     "screenshot_layouts_reviewed": 24,
-    "method": "All24 final screenshot layouts inspected in three contact sheets; desktop/mobile hero and mobile lightbox opened separately. Native closed_outpost and landscape were opened, along with detailed landscape pair, closed hall and direct R01/R02 ship comparison.",
-    "findings": "No broken images, horizontal overflow or clipped primary controls. Six historical pairs, four ship front/rear comparisons, three current closed/open states and historical archives remain distinct. The R02 criticism and separate Astra continuation are prominent. Exact-source hashes, working notes and real unique JSON downloads passed. Desktop hero evidence was corrected to begin at scrollY0, then the complete suite repeated against the unchanged HTML.",
-    "limits": "Offline report/UI evidence only; no artistic user acceptance of ships, no campaign/editor migration or general gameplay/performance acceptance. R02 remains a criticized technical intermediate state; separate Astra models are not integrated.",
+    "method": "Identical180-check browser script repeated after refreshed17 captures and the source fix. All24 final screenshot layouts inspected in three fresh contact sheets. New native closed_hall and closed_outpost opened separately to inspect window/door separation and ramp joins.",
+    "findings": "Hall windows now sit beside the roll door; the captured ramp approach appears joined without a visible gap. Exact centimetre geometry is bounded by the separate native verifier, not inferred from pixels. Report layout, six pairs, R01/R02/2D comparisons, three building states, lightbox, notes and two real JSON downloads remain correct. No broken images or horizontal overflow. No HTML, generator, QA script, model or runtime edits in this report refresh.",
+    "limits": "Offline report/UI and captured-view evidence only. R02 ships remain criticized technical intermediates; no artistic user approval, campaign/editor migration or general gameplay/performance acceptance.",
     "contact_sheets": [
       {
         "path": "output/grafik_20261101/browser_qa_pass04/visual_contact_01.jpg",
-        "sha256": "6fe87d0ed4a7e4c2e9a9efce22887bea2665ccb1cf4379791f0630c3d2c143d2"
+        "sha256": "929cdb8db55e966c78b4cb60605adabfdc35b2c4eb4edf951f38c690f1e37122"
       },
       {
         "path": "output/grafik_20261101/browser_qa_pass04/visual_contact_02.jpg",
-        "sha256": "ab802d8b704938a523fe8ee2e151b31d8375ffe5fad7ea5876aa202525680f46"
+        "sha256": "64958152a1e3b7fb0df77e6e870d4cfd2461a1265982be68c25659d1e7d54a25"
       },
       {
         "path": "output/grafik_20261101/browser_qa_pass04/visual_contact_03.jpg",
-        "sha256": "e8571cea53f869427d00134341d8297d4c2719200d6ce76a8a930443248a7f6a"
+        "sha256": "9da9f629b391505eb6297364fb3cfc16812378c870419673f673a6800c2cea59"
+      }
+    ],
+    "native_images_opened": [
+      {
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/closed_hall.png",
+        "sha256": "67ed88ef55227f197eba0198e952e0d79c4c60c7cd407be6b57ca897ee7a2af3"
+      },
+      {
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/closed_outpost.png",
+        "sha256": "46eb623067dd6dc561b1a77654c40cd47c1bce3abb5eaedaf7ebacc181df03a3"
       }
     ]
   },
@@ -918,7 +929,7 @@
         },
         "after_id": "pass04_after_overview",
         "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/overview.png",
-        "after_sha256": "644beb31c5d75743c1ed4718a21fcfe0518f8742d9dd95781646f5cfe5c5d1fd",
+        "after_sha256": "6c3a1d41e61cfa8ed8aa1c49109f01d90647d137c1d3e6c1b52f9d597a93f4a1",
         "after_camera": {
           "building_shells_visible": false,
           "camera_projection": 1,
@@ -953,7 +964,7 @@
         },
         "after_id": "pass04_after_workshop",
         "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/workshop.png",
-        "after_sha256": "778d168d22d3edd70171f241e46005fbe52f319d18b276876c25be93b9e09b79",
+        "after_sha256": "74ef744460820ff1033e946dd956ec6c1ec4e8ccd805fa606a8b002025f3938f",
         "after_camera": {
           "building_shells_visible": false,
           "camera_projection": 1,
@@ -988,7 +999,7 @@
         },
         "after_id": "pass04_after_crew",
         "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/crew.png",
-        "after_sha256": "eb8951f099332b0f922241a7268ff0f99d43140331669975fd7a5e527ac3fced",
+        "after_sha256": "7ebda2daea4a806acd2f3c7ef8a62f8f198136bd2451231145646949e566769d",
         "after_camera": {
           "building_shells_visible": false,
           "camera_projection": 1,
@@ -1023,7 +1034,7 @@
         },
         "after_id": "pass04_after_hex_grid",
         "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/hex_grid.png",
-        "after_sha256": "8fd2f969a7e47cd2dbeb79bd8e3e9b7cc440cdd37c2f6dbe2ed7796e93513181",
+        "after_sha256": "0447659e23c32c1ff467bbdd8bf2317b40fe4e0f7145862004df84dacb19b2fe",
         "after_camera": {
           "building_shells_visible": false,
           "camera_projection": 1,
@@ -1058,7 +1069,7 @@
         },
         "after_id": "pass04_after_landscape",
         "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/landscape.png",
-        "after_sha256": "e7f1a02e89a9e08a9b3bfbd1d7e8ddd4cb6b8af02251e1a3efb2d3a3b187c809",
+        "after_sha256": "3614e8a86307d4dd9af390a2efee5cc897d103a81dd8a1b90a79ced6c0b2a2ef",
         "after_camera": {
           "building_shells_visible": false,
           "camera_projection": 1,
@@ -4022,8 +4033,8 @@
         "res://scripts/terrain/frontier_art_dressing.gd": "235aaf318f42687c8f914408019bbfacb685eb63b23cf5578d7640750569f36a",
         "res://scripts/terrain/frontier_art_geology.gd": "a987305579549a196d02b5e2172f1104bf7ea8a889c0a535adb478576288a4ec",
         "res://scripts/terrain/frontier_art_profile.gd": "9ea54d24eb732ea804e750d2543e15fd85c4f1ba3b4f1d19c78c591629f26c0f",
-        "res://scripts/terrain/frontier_closed_buildings.gd": "974f8f0a775368fcb319a8fe156265c55b716c97b1280937268d2c55426841b9",
-        "res://scripts/terrain/frontier_outpost_pad.gd": "ca022fc56341d05e987bb47355a33f9f47ad9faada58e166efed24566bf2717a",
+        "res://scripts/terrain/frontier_closed_buildings.gd": "967129250a0be1e9529f48e67d14de88b1d582b72983f6dd90b8e969cf68842d",
+        "res://scripts/terrain/frontier_outpost_pad.gd": "0f2ac2200330f473c1fcd2fa3c57ef779a530f55c0d9c62991ba5713b24805b2",
         "res://scripts/tests/frontier_art_preview.gd": "25803f45e736015427e9001cf009eedc15cf72deb8c8f23a5da30d4f1be50971",
         "res://shaders/terrain/frontier_ground.gdshader": "406b093c14c4dceaf4142f5a210711221c2b7dbb5fbfb2e5e8062bd5c0116842"
       },
@@ -4032,10 +4043,10 @@
       "synthetic_fixture": true,
       "tile_count": 396,
       "unit_spacing_enabled": false,
-      "engine_report": "output/grafik_20261101/pass04_check_runs/20261101T160417Z-pid125408/metadata/report.json",
+      "engine_report": "output/grafik_20261101/pass04_check_runs/20261101T164440Z-pid41380/metadata/report.json",
       "ship_user_status": "criticized_not_accepted",
       "ship_followup_chat": "01a197d8-ebd0-7100-8d12-21ff6bc52c0d",
-      "visual_review": "Native views inspected: closed shells, deck contact and clearance, complete model imports. User still rejects ship target fidelity; Astra Ultra revision commissioned separately.",
+      "visual_review": "Updated native closed hall and outpost images opened after independent review corrections: windows outside shutter frame, mirrored ramp starts overlap inset decks. User still criticizes ship target fidelity; Astra Ultra revision commissioned separately.",
       "closed_shell_scope": "Own authored Godot exterior geometry over hidden cutaway GLBs; visual-only C toggle, no door/interior simulation."
     },
     "building_views": [
@@ -5427,13 +5438,10 @@
       "height": 900
     }
   ],
-  "html_sha256_end": "7d238dae1177e12b802c8807bd3453915ef2ecc313e57b37dc62b34dadcb7945",
-  "completed_at": "2026-11-01T16:28:57.368Z",
+  "html_sha256_end": "7ae0d52d3b258b2ae17b617d743a734de8ede0bd871b6843166ae559a7cbc5e6",
+  "completed_at": "2026-11-01T16:49:29.939Z",
   "pass": true,
   "status": "pass",
-  "final_artifact_validation_at": "2026-11-01T16:30:49.111914+00:00",
-  "diagnostic_history": [
-    "diagnostic_first_run_missing_self_report.json",
-    "diagnostic_second_run_before_hero_fix.json"
-  ]
+  "final_artifact_validation_at": "2026-11-01T16:50:28.307802+00:00",
+  "supersedes_html_sha256": "7d238dae1177e12b802c8807bd3453915ef2ecc313e57b37dc62b34dadcb7945"
 }
