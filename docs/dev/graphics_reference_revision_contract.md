@@ -50,6 +50,10 @@ Strukturen, Fahrzeuge und Menschen. Er ergaenzt den
 - Pro Asset den erreichten Stand angeben: Referenz, 2D-Ziel, nativer Ist-Stand,
   separater Modellkandidat oder tatsaechlich integrierte Variante. Nutzerurteil,
   aktive Integration und geprueftes Spielverhalten einzeln belegen.
+- Bei Zwischenstaenden konkrete naechste Grafikschritte nennen: zugeordnete
+  Zielreferenz, sichtbarer Abstand, vorgeschlagene Aenderung und Bildvergleich
+  danach. Offene Vorschlaege nicht als implementiert ausgeben. Vorlaeufige
+  Grundlagen nicht als unveraenderliche Endentscheidung festschreiben.
 
 ## HTML-Vergleich
 

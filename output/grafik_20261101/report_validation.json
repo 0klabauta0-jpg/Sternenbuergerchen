@@ -1,0 +1,4 @@
+{
+  "local_checks": "14/14 strenge Godot-Prüfläufe bestanden: Hex-Grundlage 41/41, Bewegung 25/25, Render/Picking 33/33, Sicht 76/76 sowie Grafikprofil, Integration und bestehende Authority-/Multiplayer-/Legacy-Prüfungen. Zwölf Bewegungsversuche in sechs Richtungen, jeweils mit/ohne Avoidance, dauern gleichmäßig 108 Ticks. Originale Kenney-Exporte und drei Strukturen mit Asset-QA; sechs echte Vulkan-Ansichten. Browser: 58/58 Funktionsprüfungen plus 3/3 mobile Notizprüfungen bestanden; exakte HTML-Hashes und Abschlusslauf stehen in browser_qa.",
+  "git_status": "Implementierung auf task/grafikreferenzen-20261101, Code-Commit 3e58cc1887883be9db221eb42fea19aa362aa890, erfolgreich nach origin gepusht. HTML/Belege werden anschließend als eigenes Übergabepaket gesichert. Keine Integration nach main."
+}

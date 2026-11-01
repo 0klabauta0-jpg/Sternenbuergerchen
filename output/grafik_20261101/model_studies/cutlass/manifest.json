@@ -1,0 +1,139 @@
+{
+  "schema": "sternenbuergerchen.ship_material_study.v1",
+  "ship": "cutlass",
+  "tool": "Blender 5.2.3 LTS",
+  "source_path": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+  "source_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60",
+  "source_material_information": "None present in OBJ. Neutral baseline is a new clay material, not original game appearance.",
+  "geometry_change": "None beyond common centering and nominal length normalization before both baseline and candidate. Identical normalized vertices and topology.",
+  "raw_import_dimensions": [
+    2614.555908203125,
+    3571.7490234375,
+    1023.56591796875
+  ],
+  "uniform_scale_applied": 0.01049905831444249,
+  "nominal_length_m": 37.5,
+  "source_front": "positive Y in Blender after OBJ import (-Z forward, Y up)",
+  "geometry_sha256_before": "fae17444b529117285b9ffcc606d47601bb73a93a3cbaba1d3d478c554f1fdf2",
+  "geometry_sha256_after": "fae17444b529117285b9ffcc606d47601bb73a93a3cbaba1d3d478c554f1fdf2",
+  "geometry_unchanged": true,
+  "objects": [
+    {
+      "name": "Study_cutlass",
+      "vertices": 149983,
+      "faces": 265435,
+      "triangles": 265435,
+      "dimensions_m": [
+        27.450374603271484,
+        37.5,
+        10.746477127075195
+      ],
+      "uv_layers": 1,
+      "materials": 6,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "material_face_counts": {
+    "M_SlateTeal": 40366,
+    "M_WarmIvory": 82706,
+    "M_Ochre": 9885,
+    "M_DarkGlaze": 2556,
+    "M_EngineHardware": 125667,
+    "M_WarmEngine": 4255
+  },
+  "baseline_renders": {
+    "front": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_front.png",
+    "rear": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_rear.png",
+    "distance": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_distance.png"
+  },
+  "candidate_renders": {
+    "front": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_front.png",
+    "rear": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_rear.png",
+    "distance": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_distance.png"
+  },
+  "qa_raw_file": "qa_check_raw.json",
+  "qa_pass": false,
+  "qa_errors": [
+    "Study_cutlass: 301 closed parts with normals pointing inward",
+    "Study_cutlass: 16 edges with inconsistent face winding",
+    "Study_cutlass: degenerate faces=621 zero-len edges=257"
+  ],
+  "qa_warnings": [
+    "Study_cutlass: non-manifold edges=5 wire=0",
+    "Study_cutlass: duplicate verts=494 loose verts=0",
+    "265435 tris > max_tris 100000: z-fighting/floating checks skipped",
+    "asset lowest point z=-5.3732 (not resting on ground plane z=0)"
+  ],
+  "qa_scope": "Full topology scan. Expensive intertriangle z-fighting/floating checks skipped above 100000 tris. UV scan disabled because source has no UV layers, recorded explicitly in raw stats.",
+  "status": "Isolated high-poly material reference study; not runtime ready; no integration, collision or navigation.",
+  "glb": {
+    "bytes": 7752068,
+    "meshes": 1,
+    "materials": 6,
+    "triangles": 265435,
+    "images": 0,
+    "animations": 0,
+    "skins": 0,
+    "extensions_used": []
+  },
+  "render_conditions": {
+    "engine": "Cycles",
+    "device": "OptiX GPU",
+    "samples": 32,
+    "view_transform": "Khronos PBR Neutral",
+    "resolution": [
+      1280,
+      900
+    ],
+    "world": "Pale blue constant sky",
+    "camera": "Orthographic, matched source/candidate per view",
+    "distance_ortho_scale": 129.375
+  },
+  "elapsed_seconds": 27.32,
+  "files": {
+    "neutral_source.blend": {
+      "bytes": 8820514,
+      "sha256": "8a8ca954bdd6ec46e4079e8f3dd731a4a44df3233c8284acdd649b9249220471"
+    },
+    "material_candidate.blend": {
+      "bytes": 8847903,
+      "sha256": "32a84867dba06603119f7d787d0ab2389d23bc2ddb74027f9b108be35974aadf"
+    },
+    "material_candidate.glb": {
+      "bytes": 7752068,
+      "sha256": "e774995969526cab52df0199f3056f607cc96c68526f1268625de842d3d5f1d8"
+    },
+    "qa_check_raw.json": {
+      "bytes": 1172,
+      "sha256": "fa60d04fb3aa770a2777dfda761b8acd923e3c6f7e9319664c1573807a88a29a"
+    }
+  },
+  "godot_import_check": {
+    "geometry_unchanged": true,
+    "engine_triangle_count_matches": true,
+    "engine_materials_present": true,
+    "native_capture_files_written": true
+  },
+  "godot_visual_review": "All four native engine captures opened. Front axis, silhouette, pivot and scale are consistent. Black backface areas and jagged shading expose inherited source normal/topology defects; visual/runtime gate is not passed.",
+  "blender_visual_review": "Front, rear, game-distance comparisons and true barycentric wire views opened. Ivory masses, slate shell, dark glazing and small ochre accents are visible. Original fine greebles remain. Geometric paint masks still have rough boundaries; authored semantic panel assignment is needed.",
+  "game_distance_limit": "Illustrative orthographic distance check only; no production tactical camera or gameplay scene acceptance.",
+  "latest_direction_gap": "Source geometry was not simplified. Wimmelbild/fewer-details target remains pending in 3D.",
+  "qa_wire_render": "Cycles barycentric shader, 0.5 pixel wires; temporary QA material only, saved candidate geometry unmodified.",
+  "qa_uv_maps": 0,
+  "renders_sha256": {
+    "cutlass_candidate_distance.png": "bb36c8fa97afea134a252ca9cf8c3dd965b9e776c649f9f0945d27e996ac5782",
+    "cutlass_candidate_front.png": "d0434c43023f17f07af2a450e1e38b529cfe8fcfc8487845fb1055f91fbc0215",
+    "cutlass_candidate_rear.png": "bd0690dbb41f6d1781103590e4d4a52c6e7dbdcf8c51eaecd4aa1c5be5f464a7",
+    "cutlass_godot_front.png": "3bcc7627923adf9b522bed94861ba9e11a8d343da4534792d465e9593f3b7516",
+    "cutlass_godot_rear.png": "c40550771b43478c1d2efc25572cf390e319914c79254fb0f56a7c13f46f33fc",
+    "cutlass_qa_solid.png": "cc43577c0fa1e2cc1f0cbf0a1fd9b47aed675b56af517e49b5e22cab1872d11c",
+    "cutlass_qa_wire.png": "9ee245a04a53872ea8a3ef43c7aafdfe91a47ff9ffb4f9989eb330490d15201e",
+    "cutlass_source_distance.png": "d5bea88a42e9233c14295ec886ab4761b281afd05c289e22e9eb935e503c76b1",
+    "cutlass_source_front.png": "f15bdee9374b373b9623baae494fc40f1d0bf7d5453e4fd750ddb7b27f64ac2e",
+    "cutlass_source_rear.png": "73af551ca202fb0259f7cd824fe44011c58f85fd86e70ffc1d40f1232c512437"
+  }
+}

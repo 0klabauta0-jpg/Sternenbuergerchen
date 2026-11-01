@@ -1,0 +1,5 @@
+# Temporary contact sheets and external high-poly source studies stay local.
+/grafik_20261101/sources/
+/grafik_20261101/model_studies/**/*.blend
+/grafik_20261101/model_studies/**/*.glb
+**/__pycache__/

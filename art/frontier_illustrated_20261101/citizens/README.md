@@ -1,4 +1,4 @@
-# Citizens: finale Auswahl sind die normalen Kenney-Astronauten
+# Citizens: vorlaeufige Basis sind die normalen Kenney-Astronauten
 
 Der Nutzer hat die Eigenbaufiguren und anschliessend auch die umgebauten
 Kenney-Ableitungen verworfen. Der finale Satz nutzt deshalb die vollstaendige
@@ -7,6 +7,12 @@ UVs und Skin-Gewichten aus Kenneys **Animated Characters Bundle 4.0 (CC0)**.
 Nur ein einheitlicher Meterfaktor normalisiert die Figur auf 1,78 m und setzt
 den tiefsten Punkt auf den Boden. Es gibt keine eigenen Koepfe, Panzerplatten,
 Manschetten oder angepassten Koerperproportionen im finalen Export.
+
+Die letzte Nutzerpraezisierung setzt diesen Satz als **vorlaeufige Grundlage**.
+Spaeter sollen darauf insbesondere Ruestung, Helme/Ausruestung und etwas
+Aussehen weiterentwickelt werden. Die folgenden QA-Daten dokumentieren den
+jetzigen unveraenderten Export, keine dauerhafte Sperre fuer Modellrevisionen.
+Die verworfenen frueheren Umbauten sind damit nicht nachtraeglich freigegeben.
 
 ## Aktuelle Dateien
 

@@ -15,15 +15,22 @@ ein gekennzeichneter Kompatibilitaetspfad.
 
 **Spec:** docs/tasks/HEX_2026_11_01_foundation.md
 
-- [ ] HexGrid, MapData/Registry und Load/Save-Vertrag einfuehren; Roundtrip,
+- [x] HexGrid, MapData/Registry und Load/Save-Vertrag einfuehren; Roundtrip,
   negative Koordinaten und Legacy-Fakten pruefen.
-- [ ] A*/HPA auf sechs Hexnachbarn und passende Kosten umstellen; Hindernisse,
+- [x] A*/HPA auf sechs Hexnachbarn und passende Kosten umstellen; Hindernisse,
   Hoehen/Rampen und Legacy-Regressionen pruefen.
-- [ ] SimulationRoot im Hexmodus mit physischem Streckenmass bewegen lassen;
+- [x] SimulationRoot im Hexmodus mit physischem Streckenmass bewegen lassen;
   sechs gleich lange Richtungen messen. Legacy-Verhalten separat erhalten.
-- [ ] TerrainMap3DView: Hexoberflaechen, Koordinatentransform, Auswahl und Picking;
+- [x] TerrainMap3DView: Hexoberflaechen, Koordinatentransform, Auswahl und Picking;
   gebatchte Materialien/Geometrie und Profilwechsel mitpruefen.
-- [ ] Freigegebene Grafikfamilie als nativen Basis-Ausschnitt auf Hex platzieren;
+- [x] Freigegebene Grafikfamilie als nativen Basis-Ausschnitt auf Hex platzieren;
   Gebaeude-/Wegbelegung, Citizen-Bewegung und Ansichten oeffnen.
-- [ ] Relevante bestehende Verifier, frische Import-/Bildbelege und HTML.
+- [x] Relevante bestehende Verifier, frische Import-/Bildbelege und HTML.
   Stand und verbleibende Altinhaltsmigration in getrennten Commit-Paketen sichern.
+
+## Ergebnis dieses Pakets
+Erster nativer Hex-Basis-Ausschnitt und gemeinsam versionierte Grundlage.
+14/14 strenge Godot-Laeufe PASS; genaue Belege und Grenzen in
+`output/grafik_20261101/final_verification_manifest.json`. Dieser Plan umfasst
+keine abgeschlossene globale Altinhalts-, Editor- oder sechsseitige
+Mauer-Migration. Die verbleibenden Teile sind separat weiterzufuehren.

@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### ART / HEX 2026-11-01 - Erster nativer Hex-Basis-Ausschnitt
+- Arbeitsbasis: `integration/core-foundation` auf `3cae5a216`; isolierter Branch `task/grafikreferenzen-20261101`. Implementierung `3e58cc1887883be9db221eb42fea19aa362aa890` ist nach origin gepusht, keine Main-Integration.
+- Nutzerkorrektur umgesetzt: vier normale originale Kenney-Astronauten mit Originalformen/-texturen und Idle/Walk; selbst gebaute Figuren verworfen. Drei neue eigene Habitat-/Werkstatt-/Versorgungsmodelle, matte Rostwelt-Palette, Licht/Schatten und Hex-Gelaende in `scenes/tests/frontier_art_preview.tscn`.
+- Letzte Praezisierung: Kenney ist die vorlaeufige Figurenbasis; spaeter Ruestung, Ausruestung und Aussehen weiterentwickeln. Die HTML enthaelt sechs konkrete naechste Grafikschritte mit Zielreferenz, sichtbarer Differenz, vorgeschlagener Aenderung und anschliessendem Bildvergleich. Diese Vorschlaege sind noch nicht implementiert.
+- Hex-Vertrag `hex_axial_v1`: Map/Registry, sechs Nachbarn, A*/HPA, physische Bewegung, LOS/FoW, 3D-Flaechen, Auswahl und Picking. `SimulationRoot` bleibt autoritaer. Grafikprofil und Rueckwechsel veraendern keine Kartenfakten.
+- Evidence: 14/14 strenge Godot-4.6.2-Prueflaeufe PASS (`output/grafik_20261101/check_runs/20261101T130304Z-pid107088/metadata/report.json`); zwoelf Bewegungsversuche jeweils 108 Ticks. Asset-QA und frischer Citizen-GLB-Roundtrip PASS. Sechs native Vulkan-Ansichten. Unabhaengiger Abschlussreview: keine verbleibenden Findings der gemeldeten Kamera-/Hintergrund-/Yaw-/Metadaten-/Hex-FoW-Punkte.
+- Uebergabe: `docs/reports/STERNENBUERGERCHEN_GRAFIK_2026-11-01.html`, Launcher `output/grafik_20261101/START_HEX_BASIS.ps1`; Offline-HTML mit lokalen Notizen, Bildentscheidungen und JSON-Export. Browserbelege und genaue HTML-Hashes unter `output/grafik_20261101/browser_qa/`.
+- Umfang: erster synthetischer Basis-Ausschnitt mit 396 Hexfeldern. Altinhalte, Editor, sechsseitige Mauerdefinitionen und vollstaendige Kampagnenmigration noch offen. Keine Menschenmengen-/Spaetspiel-Abnahme. Schiffe bleiben vereinfachte 2D-Ziele; alte rohe 3D-Materialstudien sind keine freigegebenen Runtime-Assets. Editorimport Exit 0 mit bestehender MCP-Plugin-Shutdown-Warnung; native Vorschau und strenge Prueflaeufe ohne Runtime-/Skriptfehler.
+
 ### TASK_1201 - FOW Stability (P06, VERIFIED_NO_CODE)
 - Status: `VERIFIED_NO_CODE`; keine Runtime-, Test- oder Phaseninstrumentierungsaenderung. Basis/Mess-SHA `f657ad68860d9ccb9be7ebb1f85ec1a2bae29060`; Produktionsdiff gegen P05 `d319e3c...f657ad6` fuer `scripts data scenes project.godot` leer.
 - Umgebung: Godot 4.6.2 official, Ryzen 7 7800X3D, 64 GB, Windows 10 19045. 3-cold/5-warm: FoW p99 `[1653,1638,1679,1913,1909,1810,1863,1978]` usec, 8/8 PASS <=2000; Dynamic p99 2 usec in 8/8. Proxy p99 `[2921,3083,3089,3117,3117,3110,3153,3010]` usec.

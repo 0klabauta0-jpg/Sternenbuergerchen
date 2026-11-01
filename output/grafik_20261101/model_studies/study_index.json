@@ -1,0 +1,63 @@
+{
+  "schema": "sternenbuergerchen.ship_material_study_index.v1",
+  "status": "Material studies only. Source geometry retained. No runtime or art acceptance.",
+  "latest_user_direction": "More Wimmelbild, slightly fewer details. Detailed source meshes remain visibly too busy; simplification is pending.",
+  "ships": {
+    "cutlass": {
+      "manifest": "output/grafik_20261101/model_studies/cutlass/manifest.json",
+      "manifest_sha256": "dc105c6b7924f2fb25c38f7018eaa5cd53a6edd7ca91d8af474d9c9b4241f343",
+      "triangles": 265435,
+      "materials": 6,
+      "qa_pass": false,
+      "technical_import_checks": {
+        "geometry_unchanged": true,
+        "engine_triangle_count_matches": true,
+        "engine_materials_present": true,
+        "native_capture_files_written": true
+      },
+      "blender_source": {
+        "front": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_front.png",
+        "rear": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_rear.png",
+        "distance": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_distance.png"
+      },
+      "blender_candidate": {
+        "front": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_front.png",
+        "rear": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_rear.png",
+        "distance": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_distance.png"
+      },
+      "godot_captures": {
+        "front": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_godot_front.png",
+        "rear": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_godot_rear.png"
+      },
+      "wire": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_qa_wire.png"
+    },
+    "buccaneer": {
+      "manifest": "output/grafik_20261101/model_studies/buccaneer/manifest.json",
+      "manifest_sha256": "e5af869064d30d528116bf5bf6de2c213edf9ad250dd7b02aef41eb159f686e2",
+      "triangles": 132384,
+      "materials": 6,
+      "qa_pass": false,
+      "technical_import_checks": {
+        "geometry_unchanged": true,
+        "engine_triangle_count_matches": true,
+        "engine_materials_present": true,
+        "native_capture_files_written": true
+      },
+      "blender_source": {
+        "front": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_front.png",
+        "rear": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_rear.png",
+        "distance": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_distance.png"
+      },
+      "blender_candidate": {
+        "front": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_front.png",
+        "rear": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_rear.png",
+        "distance": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_distance.png"
+      },
+      "godot_captures": {
+        "front": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_godot_front.png",
+        "rear": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_godot_rear.png"
+      },
+      "wire": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_qa_wire.png"
+    }
+  }
+}

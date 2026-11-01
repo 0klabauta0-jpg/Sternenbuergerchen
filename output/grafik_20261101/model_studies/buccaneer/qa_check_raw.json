@@ -1,0 +1,44 @@
+{
+  "ok": true,
+  "pass": false,
+  "errors": [
+    "Study_buccaneer: 421 closed parts with normals pointing inward",
+    "Study_buccaneer: 1430 edges with inconsistent face winding",
+    "Study_buccaneer: degenerate faces=6 zero-len edges=0"
+  ],
+  "warnings": [
+    "Study_buccaneer: non-manifold edges=748 wire=0",
+    "Study_buccaneer: duplicate verts=321 loose verts=0",
+    "132384 tris > max_tris 100000: z-fighting/floating checks skipped",
+    "asset lowest point z=-1.9528 (not resting on ground plane z=0)"
+  ],
+  "ground_z": -1.9528,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [],
+  "enclosed": [],
+  "objects": {
+    "Study_buccaneer": {
+      "verts": 77966,
+      "faces": 132384,
+      "tris": 132384,
+      "ngons": 0,
+      "boundary_edges": 18395,
+      "nonmanifold_edges": 748,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 6,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 1430,
+      "duplicate_verts": 321,
+      "islands": 2564,
+      "inside_out_islands": 421,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 6
+    }
+  }
+}

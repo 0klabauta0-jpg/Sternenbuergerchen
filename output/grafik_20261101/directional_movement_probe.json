@@ -1,0 +1,204 @@
+{
+	"all_checks_pass": true,
+	"checks": [
+		{
+			"description": "Fixture registers 64 flat ground tiles",
+			"pass": true
+		},
+		{
+			"description": "Automatic physics tick is disabled; fixture advances explicit fixed deltas only",
+			"pass": true
+		},
+		{
+			"description": "Unit spacing and local avoidance are explicitly disabled in fixture",
+			"pass": true
+		},
+		{
+			"description": "Movement integrator resolves the actual fixture TerrainRegistry",
+			"pass": true
+		},
+		{
+			"description": "grid_positive_diagonal: actual A* returns two diagonal steps with correct endpoints",
+			"pass": true
+		},
+		{
+			"description": "grid_positive_diagonal: actual terrain integrator reaches target and consumes path",
+			"pass": true
+		},
+		{
+			"description": "grid_mixed_diagonal: actual A* returns two diagonal steps with correct endpoints",
+			"pass": true
+		},
+		{
+			"description": "grid_mixed_diagonal: actual terrain integrator reaches target and consumes path",
+			"pass": true
+		},
+		{
+			"description": "Actual pathfinder gives both two-diagonal routes equal cost",
+			"pass": true
+		},
+		{
+			"description": "Routes have the same ground-plane length under existing square-cell 3D transform",
+			"pass": true
+		},
+		{
+			"description": "Private integrator probe enqueues no commands or effects",
+			"pass": true
+		},
+		{
+			"description": "No automatic SimulationRoot ticks or gameplay loop were run",
+			"pass": true
+		},
+		{
+			"description": "All synthetic fixture Nodes are freed",
+			"pass": true
+		},
+		{
+			"description": "Measured production source files remain byte-identical during probe",
+			"pass": true
+		}
+	],
+	"created_at_utc": "2026-11-01T12:14:01Z",
+	"diagnostic_only": true,
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"failed_checks": 0,
+	"fixture": {
+		"automatic_physics": false,
+		"blockers": 0,
+		"fixed_delta_seconds": 0.0166666666666667,
+		"height_level": 0,
+		"integrator": "SimulationRoot._apply_move_command_with_terrain",
+		"invocation": "direct private method on isolated fixture Nodes with actual pathfinder world waypoints",
+		"iso_half_height": 32.0,
+		"iso_half_width": 64.0,
+		"local_avoidance": false,
+		"map_size": [
+			8,
+			8
+		],
+		"node_class": "Node2D (no UI, combat, registry membership or unit speed modifier)",
+		"production_renderer_instantiated": false,
+		"requeue_until_target": false,
+		"surface": "ground",
+		"tiles": 64,
+		"unit_spacing": false,
+		"visible_3d_cell_size": 1.0,
+		"visible_3d_length_definition": "sqrt(grid_delta.x^2 + grid_delta.y^2) * cell_size, matching TerrainMap3DView._grid_to_3d_position; no rendered capture"
+	},
+	"limits": [
+		"Synthetic empty map and explicit path injection; not a normal command/RPC/end-to-end gameplay path.",
+		"Simulated seconds are tick count times fixed delta, not wallclock performance or FPS.",
+		"No combat, terrain height, cover, blockers, unit crowding, avoidance or multiplayer load.",
+		"No navigation fix, no hex implementation, no production state mutation."
+	],
+	"observed": {
+		"directional_time_difference_seconds": 1.61666666666667,
+		"equal_path_cost": true,
+		"equal_visible_3d_length": true,
+		"interpretation": "Measured fixture result only. Passing probe validates the measurement, not directional fairness or release readiness.",
+		"mixed_over_positive_time_ratio": 2.01041666666667
+	},
+	"passed_checks": 14,
+	"schema": "sternenbuergerchen.synthetic_directional_movement_probe.v1",
+	"source_sha256": {
+		"res://scripts/core/simulation_root.gd": "b5d033c211db1ba0d1d2452bff28d5bc30224323f98f0929a3bdcdd5bc1b2dca",
+		"res://scripts/terrain/terrain_map_data.gd": "e45f982b96bb904c2b3e1d48abef57388fac305ec9af7ab79e7bf299f13043f1",
+		"res://scripts/terrain/terrain_pathfinder.gd": "99616ca54c43c7552e7e533795d9fa1900d9e5dc6e719e83544bd5903b74035f",
+		"res://scripts/terrain/terrain_registry.gd": "6013cec3fb8a2b6c22deff712bc4be7ea746e17b484c78881e74af4b23704ec6"
+	},
+	"synthetic_fixture": true,
+	"trials": [
+		{
+			"actual_distance_moved_projected_world": 128.0,
+			"from_grid": [
+				3,
+				3
+			],
+			"from_projected_world": [
+				0.0,
+				192.0
+			],
+			"grid_path": [
+				[
+					3,
+					3
+				],
+				[
+					4,
+					4
+				],
+				[
+					5,
+					5
+				]
+			],
+			"id": "grid_positive_diagonal",
+			"nominal_move_speed_projected_world_per_second": 80.0,
+			"path_cost": 2.82842712474,
+			"projected_path_length": 128.0,
+			"simulated_seconds": 1.6,
+			"target_error_projected_world": 0.0,
+			"ticks": 96,
+			"to_grid": [
+				5,
+				5
+			],
+			"to_projected_world": [
+				0.0,
+				320.0
+			],
+			"visible_3d_ground_length": 2.82842707633972
+		},
+		{
+			"actual_distance_moved_projected_world": 256.0,
+			"from_grid": [
+				3,
+				3
+			],
+			"from_projected_world": [
+				0.0,
+				192.0
+			],
+			"grid_path": [
+				[
+					3,
+					3
+				],
+				[
+					4,
+					2
+				],
+				[
+					5,
+					1
+				]
+			],
+			"id": "grid_mixed_diagonal",
+			"nominal_move_speed_projected_world_per_second": 80.0,
+			"path_cost": 2.82842712474,
+			"projected_path_length": 256.0,
+			"simulated_seconds": 3.21666666666667,
+			"target_error_projected_world": 0.0,
+			"ticks": 193,
+			"to_grid": [
+				5,
+				1
+			],
+			"to_projected_world": [
+				256.0,
+				192.0
+			],
+			"visible_3d_ground_length": 2.82842707633972
+		}
+	]
+}

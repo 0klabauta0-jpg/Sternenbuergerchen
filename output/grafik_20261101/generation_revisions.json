@@ -1,0 +1,34 @@
+{
+  "additional_targets": [
+    {
+      "id": "buccaneer_rear_v3",
+      "file": "12_buccaneer_hinten_wimmel_konsistent.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/10_buccaneer_vorne_wimmel.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Image1 is the EDIT TARGET: simplified Wimmelbild-style Drake Buccaneer REAR/ABOVE view. Image2 is the same ship FRONT/ABOVE view and serves only as equipment-consistency reference. Change only ONE small thing in image1: restore the small simple dark paired fixed gun barrels under the outer wing edges, matching their location and length on image2; especially the clearly visible near wing at lower-right in the REAR view must have its small two-barrel assembly pointing toward the NOSE (away from the camera, toward upper-right), not toward the rear/exhaust. Also retain the symmetrical opposite assembly where it would be visible. These are only a few clean understated shapes, with no bolts, no cables, no firing. Keep EVERY other part of image1 unchanged: exact camera, full silhouette, both engines and simplified aft petals, center cannon, painted matte style, reduced detail, slate/ivory/ochre colors, sky/clouds and framing. Do not add any other equipment. No text, logos, labels, UI. Keep the entire image as the same clean hand-painted 2D game modeling reference.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-3482611d-f770-443b-a31c-33096828e072.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/12_buccaneer_hinten_wimmel_konsistent.png",
+      "status": "rejected_pair_direction_trial_preserved"
+    },
+    {
+      "id": "buccaneer_front_v3",
+      "file": "13_buccaneer_vorne_wimmel_vereinfacht.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/10_buccaneer_vorne_wimmel.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Edit only this one small detail on the supplied simplified painted Buccaneer front/above illustration. REMOVE the small paired gun barrels sticking out UNDER the far-right outer wing tip, and REMOVE the corresponding small gun barrels under the near-left outer wing tip. Cleanly paint matching sky or wing surface in the tiny removed areas. Keep the large CENTRAL DORSAL CANNON completely unchanged. The user's instruction is 'a little fewer details', so the little under-wing weapons are intentionally omitted from this simplified game-art interpretation. Change nothing else: exact same ship silhouette, cockpit, engine pods, outer wing panels, central cannon, all colors, shadows, sky and clouds, camera, framing, image dimensions, painted Wimmelbild illustration style. No new detail, no new guns, no text, no logo, no UI. This should look like exactly the original image with just those tiny under-wing barrels removed.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-61af0d60-f605-4973-81af-d490a7d0b621.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+      "status": "current_2d_target_proposal"
+    }
+  ],
+  "latest_ship_targets": [
+    "cutlass_front_v2",
+    "cutlass_rear_v2",
+    "buccaneer_front_v3",
+    "buccaneer_rear_v2"
+  ],
+  "final_consistency_note": "Small underwing gun barrels intentionally omitted from both simplified Buccaneer 2D views; main dorsal cannon retained. Rejected rear barrel-direction trial12 retained only for provenance."
+}

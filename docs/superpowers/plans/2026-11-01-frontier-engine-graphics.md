@@ -30,7 +30,8 @@ im bisherigen Format.
   relevante bestehende 3D-/Navigationsverifier ausfuehren.
 - [x] Native Ansichten oeffnen und sichtbare Fehler korrigieren; sechs echte
   Ansichten fuer die HTML-Uebergabe aufnehmen.
-- [ ] Abschliessende HTML-Uebergabe, Metadaten und Git-Push.
+- [x] Abschliessende Offline-HTML, Metadaten, Browserbelege und Git-Uebergabe;
+  exakte Code-/Pruefbelege unter `output/grafik_20261101/`.
 
 ## Pruefschwerpunkte
 Mensch/Tuer-Massstab; Figurenfuesse und Handkontakte; ueberdeckte begehbare

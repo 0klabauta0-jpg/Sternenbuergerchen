@@ -1,0 +1,72 @@
+{
+  "html_sha256_start": "51b80b63dc3176cc28d4dab70076bba05df2021dc7a0a5efc2634629accf67fb",
+  "checks": [
+    {
+      "name": "desktop_six_roadmap_cards",
+      "pass": true
+    },
+    {
+      "name": "kenney_provisional_and_future_armor",
+      "pass": true
+    },
+    {
+      "name": "roadmap_card_1_goal_gap_proposal_comparison",
+      "pass": true,
+      "heading": "Gelände: zusammenhängende Landschaft statt flacher Platten"
+    },
+    {
+      "name": "roadmap_card_2_goal_gap_proposal_comparison",
+      "pass": true,
+      "heading": "Basis: die drei Gebäude näher an die Silhouetten bringen"
+    },
+    {
+      "name": "roadmap_card_3_goal_gap_proposal_comparison",
+      "pass": true,
+      "heading": "Umgebung: ausgewählte Wimmelbild-Gruppen ergänzen"
+    },
+    {
+      "name": "roadmap_card_4_goal_gap_proposal_comparison",
+      "pass": true,
+      "heading": "Licht und Materialien: mehr gemalte Farbigkeit"
+    },
+    {
+      "name": "roadmap_card_5_goal_gap_proposal_comparison",
+      "pass": true,
+      "heading": "Citizens: Kenney als vorläufige Basis weiterentwickeln"
+    },
+    {
+      "name": "roadmap_card_6_goal_gap_proposal_comparison",
+      "pass": true,
+      "heading": "Cutlass und Buccaneer: vereinfachte echte Spielmodelle"
+    },
+    {
+      "name": "desktop_roadmap_horizontal_overflow_zero",
+      "pass": true,
+      "dimensions": {
+        "width": 1440,
+        "scroll": 1440,
+        "body": 1440
+      }
+    },
+    {
+      "name": "mobile_six_roadmap_cards",
+      "pass": true
+    },
+    {
+      "name": "mobile_roadmap_horizontal_overflow_zero",
+      "pass": true,
+      "dimensions": {
+        "width": 390,
+        "scroll": 390,
+        "body": 390
+      }
+    }
+  ],
+  "errors": [],
+  "screenshots": [
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa\\08_desktop_roadmap.png",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa\\09_mobile_roadmap.png"
+  ],
+  "html_sha256_end": "51b80b63dc3176cc28d4dab70076bba05df2021dc7a0a5efc2634629accf67fb",
+  "pass": true
+}

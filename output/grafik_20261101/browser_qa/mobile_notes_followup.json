@@ -1,0 +1,18 @@
+{
+  "checks": [
+    {
+      "name": "mobile_note_click_and_edit",
+      "pass": true
+    },
+    {
+      "name": "mobile_note_reopen_persisted",
+      "pass": true
+    },
+    {
+      "name": "mobile_decision_reopen_persisted",
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "pass": true
+}

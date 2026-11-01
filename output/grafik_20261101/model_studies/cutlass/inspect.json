@@ -1,0 +1,23 @@
+{
+  "source": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+  "raw_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60",
+  "import_dims": [
+    2614.555908203125,
+    3571.7490234375,
+    1023.56591796875
+  ],
+  "scale_applied": 0.01049905831444249,
+  "objects": [
+    {
+      "name": "Study_cutlass",
+      "vertices": 149983,
+      "faces": 265435,
+      "triangles": 265435,
+      "dimensions": [
+        27.450374603271484,
+        37.5,
+        10.746477127075195
+      ]
+    }
+  ]
+}

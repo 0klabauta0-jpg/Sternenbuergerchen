@@ -1,0 +1,23 @@
+{
+  "source": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+  "raw_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191",
+  "import_dims": [
+    1590.6651611328125,
+    1458.348388671875,
+    373.4947509765625
+  ],
+  "scale_applied": 0.010457034464612065,
+  "objects": [
+    {
+      "name": "Study_buccaneer",
+      "vertices": 77966,
+      "faces": 132384,
+      "triangles": 132384,
+      "dimensions": [
+        16.63364028930664,
+        15.25,
+        3.905646324157715
+      ]
+    }
+  ]
+}
