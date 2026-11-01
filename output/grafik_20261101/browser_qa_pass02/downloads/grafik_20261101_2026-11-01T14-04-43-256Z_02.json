@@ -1,0 +1,1853 @@
+{
+  "schema": "sternenbuergerchen.html_workbench.v1",
+  "report_id": "grafik_20261101",
+  "title": "SternenBürgerchen · Grafik + Hex · 01.11.2026",
+  "exported_at": "2026-11-01T14:04:43.256Z",
+  "controls": {
+    "comparison": {
+      "wipe": 63,
+      "decision": "closer",
+      "note": "QA Pass02: gebaute Wege vorhanden; Cutaway fehlt."
+    },
+    "reference_search": "",
+    "references": {
+      "ref_rostgrenze": {
+        "decision": "revise",
+        "note": "QA Pass02: Klippen noch zu regelmäßig — äöü."
+      },
+      "ref_freihafen": {
+        "decision": "open",
+        "note": ""
+      },
+      "ref_tactical": {
+        "decision": "open",
+        "note": ""
+      }
+    },
+    "catalog": {
+      "search": ""
+    },
+    "review": {
+      "wimmelbild": true,
+      "detail_level": false,
+      "ship_pairs": false,
+      "world_coherence": false,
+      "native_gap_understood": false,
+      "global_notes": "QA Pass02: vollständige Vorlagen, ehrlicher Bildvergleich."
+    },
+    "asset_decisions": {
+      "terrain": "open",
+      "people": "open",
+      "outpost": "open",
+      "cutlass_front": "open",
+      "cutlass_rear": "open",
+      "buccaneer_front": "open",
+      "buccaneer_rear": "open",
+      "cutlass_front_v1": "open",
+      "cutlass_rear_v1": "open",
+      "buccaneer_front_v1": "open",
+      "buccaneer_rear_v1": "open",
+      "buccaneer_front_v2_previous": "open",
+      "pass02_after_landscape": "open",
+      "pass02_after_crew": "revise",
+      "ref_rostgrenze": "open",
+      "ref_freihafen": "open",
+      "ref_tactical": "open",
+      "history_shadowfall": "open"
+    },
+    "ship_decisions": {}
+  },
+  "notes": {
+    "review": {
+      "decision": ""
+    },
+    "assets": {
+      "terrain": "",
+      "people": "",
+      "outpost": "",
+      "cutlass_front": "",
+      "cutlass_rear": "",
+      "buccaneer_front": "",
+      "buccaneer_rear": "",
+      "cutlass_front_v1": "",
+      "cutlass_rear_v1": "",
+      "buccaneer_front_v1": "",
+      "buccaneer_rear_v1": "",
+      "buccaneer_front_v2_previous": "",
+      "pass02_after_landscape": "",
+      "pass02_after_crew": "QA Pass02: Ausrüstung im tatsächlichen Nachherbild prüfen.",
+      "ref_rostgrenze": "",
+      "ref_freihafen": "",
+      "ref_tactical": "",
+      "history_shadowfall": ""
+    },
+    "ships": {},
+    "global": "QA Pass02: vollständige Vorlagen, ehrlicher Bildvergleich."
+  },
+  "active_choices": {
+    "group": "all",
+    "view": "front",
+    "distance": "near",
+    "engine_view": "baseline",
+    "pass02": {
+      "view": "crew",
+      "mode": "wipe",
+      "wipe": 63
+    }
+  },
+  "computed": {
+    "current_targets": 7,
+    "current_user_references": 3,
+    "historical_references": 8,
+    "pass02_after_ready": true,
+    "pass02_comparison_pairs": 4,
+    "previous_targets": 5,
+    "generation_outputs": 13,
+    "native_material_studies": 2,
+    "ship_study_geometry_unchanged": true,
+    "ship_study_mesh_qa_pass": false,
+    "engine_preview": true,
+    "hex_topology": "hex_axial_v1",
+    "hex_fixture_cells": 396,
+    "stock_citizen_base_preserved": true,
+    "citizen_equipment_candidates": 4,
+    "new_structure_models": 3,
+    "legacy_campaign_migrated": false
+  },
+  "metadata": {
+    "template": "docs/reports/_html_workbench_template.html",
+    "working_notes_only": true,
+    "storage_available": true,
+    "native_engine_capture": {
+      "active_campaign_integration": false,
+      "actors": 4,
+      "captures": [
+        {
+          "camera_size": 12,
+          "error": 0,
+          "id": "overview",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/overview.png",
+          "profile_enabled": true
+        },
+        {
+          "camera_size": 12,
+          "error": 0,
+          "id": "hex_grid",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/hex_grid.png",
+          "profile_enabled": true
+        },
+        {
+          "camera_size": 2.5,
+          "error": 0,
+          "id": "crew",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/crew.png",
+          "profile_enabled": true
+        },
+        {
+          "camera_size": 4.2,
+          "error": 0,
+          "id": "workshop",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/workshop.png",
+          "profile_enabled": true
+        },
+        {
+          "camera_size": 12,
+          "error": 0,
+          "id": "baseline",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/baseline.png",
+          "profile_enabled": false
+        },
+        {
+          "camera_size": 2.5,
+          "id": "walk_pose",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/walk_pose.png",
+          "profile_enabled": true
+        }
+      ],
+      "engine": {
+        "build": "official",
+        "hash": "71f334935c000924d403448e698df4441130df18",
+        "hex": 263682,
+        "major": 4,
+        "minor": 6,
+        "patch": 2,
+        "status": "stable",
+        "string": "4.6.2-stable (official)",
+        "timestamp": 0
+      },
+      "grid_topology": "hex_axial_v1",
+      "launch_arguments": [
+        "res://scenes/tests/frontier_art_preview.tscn"
+      ],
+      "light": {
+        "adjustment_brightness": 1,
+        "adjustment_contrast": 1.02999997138977,
+        "adjustment_enabled": true,
+        "adjustment_saturation": 1.03999996185303,
+        "ambient_light_color": "b6c7ceff",
+        "ambient_light_energy": 0.280000001192093,
+        "background_color": "a7cad4ff",
+        "energy": 0.850000023841858,
+        "rotation_degrees": "(-52.0, -32.0, 0.0)",
+        "shadow_blur": 1.79999995231628,
+        "shadow_enabled": true,
+        "shadow_opacity": 0.620000004768372,
+        "tonemap_enabled": true,
+        "tonemap_mode": "aces"
+      },
+      "local_avoidance_enabled": false,
+      "models": [
+        {
+          "bounds_world": "[P: (7.131001, 0.0, 5.019625), S: (2.337999, 1.5225, 2.36075)]",
+          "id": "habitat_01",
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures/habitat_01.glb",
+          "scale": 0.35,
+          "source_sha256": "e4c7f3e429063ddf32c348afb647ec678199409f28b9fab7acd757867c6c9c53"
+        },
+        {
+          "bounds_world": "[P: (11.968, 0.0, 5.20425), S: (2.464001, 1.477875, 1.9915)]",
+          "id": "workshop_01",
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures/workshop_01.glb",
+          "scale": 0.35,
+          "source_sha256": "de0809aa18a803e3022b3442bf9f0db0f3065545a14dd8a0194765e47cebfd64"
+        },
+        {
+          "bounds_world": "[P: (15.25125, 0.0, 7.64), S: (1.697499, 0.9485, 1.12)]",
+          "id": "service_unit_01",
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures/service_unit_01.glb",
+          "scale": 0.35,
+          "source_sha256": "8a3d145c88e31b2a7a700887b915a463b9f9d8def88c7007bd29bc016434aa0e"
+        },
+        {
+          "animations": [
+            "idle",
+            "walk"
+          ],
+          "id": "operator",
+          "path": "res://Assets/curated/frontier_illustrated_20261101/citizens/operator.glb",
+          "scale": 0.35,
+          "source_sha256": "812416a625ba324735e8a0d2e9393dad82066e4905eec8aaf02b97f229b254a5"
+        },
+        {
+          "animations": [
+            "idle",
+            "walk"
+          ],
+          "id": "pilot",
+          "path": "res://Assets/curated/frontier_illustrated_20261101/citizens/pilot.glb",
+          "scale": 0.35,
+          "source_sha256": "b4a7669b0f2c659098beb37e9639af35b3b8c69c0f11ee4df832503c15087194"
+        },
+        {
+          "animations": [
+            "idle",
+            "walk"
+          ],
+          "id": "mechanic",
+          "path": "res://Assets/curated/frontier_illustrated_20261101/citizens/mechanic.glb",
+          "scale": 0.35,
+          "source_sha256": "11e2295e07de100839cb8e853721b60d3d4205f05485a46d7bf339c778cbf025"
+        },
+        {
+          "animations": [
+            "idle",
+            "walk"
+          ],
+          "id": "medic",
+          "path": "res://Assets/curated/frontier_illustrated_20261101/citizens/medic.glb",
+          "scale": 0.35,
+          "source_sha256": "9f0eea0c570c1af5e5ced3a628cbb1a659d9636f0095faa6a9c773dd9fa5e42f"
+        }
+      ],
+      "movement_authority": "SimulationRoot",
+      "renderer": "forward_plus / vulkan",
+      "runtime_scale_from_metres": 0.35,
+      "synthetic_fixture": true,
+      "tile_count": 396,
+      "unit_spacing_enabled": false
+    },
+    "pass02_comparison": {
+      "references": {
+        "schema": "sternenbuergerchen.graphics_references.v1",
+        "date": "2026-11-01",
+        "task": "docs/tasks/ART_2026_11_01_pass02.md",
+        "current_user_references": [
+          {
+            "id": "ref_rostgrenze",
+            "title": "Rostgrenze · Außenposten-Cutaway",
+            "group": "buildings",
+            "description": "Rote Schichtklippen, helle orange eingefasste Module, sichtbar gruppierte Arbeitsräume und ein gebauter Weg zwischen Eingang und Landepad.",
+            "assignments": [
+              "terrain: große unregelmäßige Schichtklippen und gestaffelte Felsgruppen",
+              "structures: creme-orange Rahmen, Sockel, Eingänge und lesbare Funktionsgruppen",
+              "connections: gemeinsame Wege, Pad und einzelne Anschlussgruppen"
+            ],
+            "limits": "Raumaufteilung ist eine Formreferenz. Bettenzahlen, Erweiterungsmarken und Beschriftungen beauftragen keine Innenraum-, Basis- oder Wirtschaftssimulation.",
+            "source_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-03f6c8c2-a842-4970-8104-e3c33497f729.png",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+            "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8",
+            "bytes": 2808290,
+            "dimensions": [
+              1672,
+              941
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false,
+            "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+            "status": "current_user_reference",
+            "native_engine_capture": false,
+            "earlier_generation_provenance": "not supplied; no prompt/tool attribution inferred",
+            "approval_scope": "visual target assignment for ART_2026_11_01_pass02; no automatic model or gameplay acceptance"
+          },
+          {
+            "id": "ref_freihafen",
+            "title": "Freihafen · Distribution Center",
+            "group": "buildings",
+            "description": "Zusammengehörige creme-orange Hallen, breite Torrahmen, Arbeitsbuchten, geordnete Containergruppen und verbundene graue Plattformen vor roten Klippen.",
+            "assignments": [
+              "terrain: weite rostrote Landschaft mit kühlen grauen Bauflächen",
+              "structures: kräftige Rahmen, große ruhige Dachformen und verständliche Arbeitsausstattung",
+              "composition: Hauptgebäude, Nebenmodul und Pad über gebaute Flächen verbinden"
+            ],
+            "limits": "Der Grafikpass übernimmt Formhierarchie und Funktionsgruppen. Eine komplette Lagerhalle, Warenwirtschaft, Fahrzeuge oder Logistiksimulation sind damit nicht implementiert oder zusätzlich beauftragt.",
+            "source_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-1f877621-9b3e-4afa-919a-7c8e41fbe0cc.png",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+            "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530",
+            "bytes": 2998364,
+            "dimensions": [
+              1672,
+              941
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false,
+            "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+            "status": "current_user_reference",
+            "native_engine_capture": false,
+            "earlier_generation_provenance": "not supplied; no prompt/tool attribution inferred",
+            "approval_scope": "visual target assignment for ART_2026_11_01_pass02; no automatic model or gameplay acceptance"
+          },
+          {
+            "id": "ref_tactical",
+            "title": "Rostwelt · Taktische Gesamtansicht",
+            "group": "terrain",
+            "description": "Weite isometrische Spiellandschaft mit geschichteter Klippenkante, einzelnen Felstürmen, offenen Bewegungsräumen und einer verbundenen Gruppe heller Cutaway-Module.",
+            "assignments": [
+              "terrain: natürlich gestaffelte Randklippen, ruhige offene Flächen und wenige große Felsgruppen",
+              "composition: Gebäudemassen, Radar/Pad und Wegschleifen im Spielabstand lesbar halten",
+              "people: kleine Gruppen und klare Auswahl vor ruhigem Boden beurteilen"
+            ],
+            "limits": "Die sichtbaren Quadratfelder sind Bildinhalt. Der ausdrücklich beauftragte Spielvertrag bleibt hex_axial_v1; das Bild löst keine Rückmigration zu Quadratfeldern aus.",
+            "source_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-720890b3-d6c0-4574-8cc3-053eeede46f7.png",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+            "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e",
+            "bytes": 2468912,
+            "dimensions": [
+              1672,
+              941
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false,
+            "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+            "status": "current_user_reference",
+            "native_engine_capture": false,
+            "earlier_generation_provenance": "not supplied; no prompt/tool attribution inferred",
+            "approval_scope": "visual target assignment for ART_2026_11_01_pass02; no automatic model or gameplay acceptance"
+          }
+        ],
+        "historical_context": [
+          {
+            "id": "history_menu",
+            "title": "Crew · Schiffsinnenraum",
+            "description": "Früherer Hauptmenühintergrund, TASK_199.",
+            "status": "historical_context_only",
+            "active_model_reference": false,
+            "origin": "older local image; original generation prompt/tool not available",
+            "project_copy": "Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg",
+            "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_16_45.jpeg",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_16_45.jpeg",
+            "sha256": "8702c2e3989b8e537656bf3824c734e2474ba797f7744b574aad8390299a5563",
+            "bytes": 717441,
+            "dimensions": [
+              1376,
+              768
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false,
+            "project_copy_byte_identical": true,
+            "catalog_evidence": "docs/assets/background_image_catalog.md; docs/tasks/TASK_199_main_menu_shell_background_image.md; docs/tasks/TASK_245_background_image_catalog_and_screen_usage.md"
+          },
+          {
+            "id": "history_explosion",
+            "title": "Roter Außenposten · Explosion",
+            "description": "Früherer Debrief-/Ergebnishintergrund, TASK_245.",
+            "status": "historical_context_only",
+            "active_model_reference": false,
+            "origin": "older local image; original generation prompt/tool not available",
+            "project_copy": "Assets/used/backgrounds/ai_generated/bg_desert_explosion_base.jpg",
+            "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_21_53.jpeg",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_21_53.jpeg",
+            "sha256": "c203999a3a3a2cff13a13e1489da6b05547d81083e07290b7d9d51011044c9af",
+            "bytes": 788232,
+            "dimensions": [
+              1376,
+              768
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false,
+            "project_copy_byte_identical": true,
+            "catalog_evidence": "docs/assets/background_image_catalog.md; docs/tasks/TASK_199_main_menu_shell_background_image.md; docs/tasks/TASK_245_background_image_catalog_and_screen_usage.md"
+          },
+          {
+            "id": "history_hangar",
+            "title": "Blaue Hangarhalle",
+            "description": "Früherer Lobby-/Setuphintergrund, TASK_245.",
+            "status": "historical_context_only",
+            "active_model_reference": false,
+            "origin": "older local image; original generation prompt/tool not available",
+            "project_copy": "Assets/used/backgrounds/ai_generated/bg_hangar_shiphall.png",
+            "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_34_01.png",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_34_01.png",
+            "sha256": "837b6362f56c82036b3fbc09a526a71921fe0bd1f462d57eb4318f0e7f48958b",
+            "bytes": 1589094,
+            "dimensions": [
+              1344,
+              768
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false,
+            "project_copy_byte_identical": true,
+            "catalog_evidence": "docs/assets/background_image_catalog.md; docs/tasks/TASK_199_main_menu_shell_background_image.md; docs/tasks/TASK_245_background_image_catalog_and_screen_usage.md"
+          },
+          {
+            "id": "history_night",
+            "title": "Nächtlicher Außenposten",
+            "description": "Ältere lokale Bildquelle; kein belegter Katalogeintrag oder Modellfreigabestatus.",
+            "status": "historical_context_only",
+            "active_model_reference": false,
+            "origin": "older local image; original generation prompt/tool not available",
+            "project_copy": null,
+            "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_36_53.jpeg",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_36_53.jpeg",
+            "sha256": "21c95ddc1cf633837b644e61a032825b66bf9af8f4fe2ea55292d569e2559a47",
+            "bytes": 666505,
+            "dimensions": [
+              1376,
+              768
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false
+          },
+          {
+            "id": "history_space_simple",
+            "title": "Asteroidenflug · Flächige Fassung",
+            "description": "Ältere lokale Bildquelle; kein belegter Katalogeintrag oder Modellfreigabestatus.",
+            "status": "historical_context_only",
+            "active_model_reference": false,
+            "origin": "older local image; original generation prompt/tool not available",
+            "project_copy": null,
+            "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_38_25.png",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_38_25.png",
+            "sha256": "44d80f2d39b9f5d0de8660e5d8221fc8fc63909b09501295a47c2afa0db999a3",
+            "bytes": 1124014,
+            "dimensions": [
+              1376,
+              768
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false
+          },
+          {
+            "id": "history_space",
+            "title": "Asteroidenflug · Detailfassung",
+            "description": "Früherer Lade-/Lobbyhintergrund, TASK_245.",
+            "status": "historical_context_only",
+            "active_model_reference": false,
+            "origin": "older local image; original generation prompt/tool not available",
+            "project_copy": "Assets/used/backgrounds/ai_generated/bg_asteroid_flight.png",
+            "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_41_57.png",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_41_57.png",
+            "sha256": "89c2d6b8c65f5d73c04ae72242cb7f4f59b78c13b953e083d5065e3e42997c0c",
+            "bytes": 1702838,
+            "dimensions": [
+              1376,
+              768
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false,
+            "project_copy_byte_identical": true,
+            "catalog_evidence": "docs/assets/background_image_catalog.md; docs/tasks/TASK_199_main_menu_shell_background_image.md; docs/tasks/TASK_245_background_image_catalog_and_screen_usage.md"
+          },
+          {
+            "id": "history_desert",
+            "title": "Sandiger Raumhafen",
+            "description": "Früherer Missionsauswahl-/Setuphintergrund, TASK_245.",
+            "status": "historical_context_only",
+            "active_model_reference": false,
+            "origin": "older local image; original generation prompt/tool not available",
+            "project_copy": "Assets/used/backgrounds/ai_generated/bg_desert_outpost.png",
+            "source_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_45_03.png",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_45_03.png",
+            "sha256": "1a2bf25c7a1800db1b3cdca088d8ad10e04f197d5a78b65f714c78c4bdffcb3b",
+            "bytes": 1526978,
+            "dimensions": [
+              1376,
+              768
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false,
+            "project_copy_byte_identical": true,
+            "catalog_evidence": "docs/assets/background_image_catalog.md; docs/tasks/TASK_199_main_menu_shell_background_image.md; docs/tasks/TASK_245_background_image_catalog_and_screen_usage.md"
+          },
+          {
+            "id": "history_shadowfall",
+            "title": "Shadowfall · Alpha / Bravo / Charlie / Delta",
+            "description": "Ältere lokale taktische Karte auf grauem Boden mit Kompass. Eigenständiges Bild, ausdrücklich nicht identisch mit der neu gelieferten roten Gesamtkarte.",
+            "status": "historical_context_only",
+            "active_model_reference": false,
+            "origin": "older local image; original generation prompt/tool not available",
+            "project_copy": null,
+            "source_path": "C:/Users/bjoer/Pictures/Shadowfall_Map_2.png",
+            "package_path": "docs/reports/assets/grafik-2026-11-01/references/historical/Shadowfall_Map_2.png",
+            "sha256": "12f2510f4efd0033b65e8de2c24b875f4c5758ccd2f3da89e11ada885a15ff46",
+            "bytes": 7198974,
+            "dimensions": [
+              3072,
+              2048
+            ],
+            "copy_byte_identical": true,
+            "artwork_modified": false
+          }
+        ],
+        "current_reference_count": 3,
+        "historical_count": 8,
+        "runtime_topology": "hex_axial_v1",
+        "notes": [
+          "All packaged originals are byte-identical; report WebP derivatives are display packaging only.",
+          "Historical images document earlier UI/context, not current model approval.",
+          "The three current attachments complement generated 01/02/03 and ship targets; they are not three new generated outputs."
+        ]
+      },
+      "before_metadata": {
+        "active_campaign_integration": false,
+        "actors": 4,
+        "captures": [
+          {
+            "camera_size": 12,
+            "error": 0,
+            "id": "overview",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/overview.png",
+            "profile_enabled": true
+          },
+          {
+            "camera_size": 12,
+            "error": 0,
+            "id": "hex_grid",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/hex_grid.png",
+            "profile_enabled": true
+          },
+          {
+            "camera_size": 2.5,
+            "error": 0,
+            "id": "crew",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/crew.png",
+            "profile_enabled": true
+          },
+          {
+            "camera_size": 4.2,
+            "error": 0,
+            "id": "workshop",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/workshop.png",
+            "profile_enabled": true
+          },
+          {
+            "camera_size": 12,
+            "error": 0,
+            "id": "baseline",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/baseline.png",
+            "profile_enabled": false
+          },
+          {
+            "camera_size": 2.5,
+            "id": "walk_pose",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/walk_pose.png",
+            "profile_enabled": true
+          }
+        ],
+        "engine": {
+          "build": "official",
+          "hash": "71f334935c000924d403448e698df4441130df18",
+          "hex": 263682,
+          "major": 4,
+          "minor": 6,
+          "patch": 2,
+          "status": "stable",
+          "string": "4.6.2-stable (official)",
+          "timestamp": 0
+        },
+        "grid_topology": "hex_axial_v1",
+        "launch_arguments": [
+          "res://scenes/tests/frontier_art_preview.tscn"
+        ],
+        "light": {
+          "adjustment_brightness": 1,
+          "adjustment_contrast": 1.02999997138977,
+          "adjustment_enabled": true,
+          "adjustment_saturation": 1.03999996185303,
+          "ambient_light_color": "b6c7ceff",
+          "ambient_light_energy": 0.280000001192093,
+          "background_color": "a7cad4ff",
+          "energy": 0.850000023841858,
+          "rotation_degrees": "(-52.0, -32.0, 0.0)",
+          "shadow_blur": 1.79999995231628,
+          "shadow_enabled": true,
+          "shadow_opacity": 0.620000004768372,
+          "tonemap_enabled": true,
+          "tonemap_mode": "aces"
+        },
+        "local_avoidance_enabled": false,
+        "models": [
+          {
+            "bounds_world": "[P: (7.131001, 0.0, 5.019625), S: (2.337999, 1.5225, 2.36075)]",
+            "id": "habitat_01",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/structures/habitat_01.glb",
+            "scale": 0.35,
+            "source_sha256": "e4c7f3e429063ddf32c348afb647ec678199409f28b9fab7acd757867c6c9c53"
+          },
+          {
+            "bounds_world": "[P: (11.968, 0.0, 5.20425), S: (2.464001, 1.477875, 1.9915)]",
+            "id": "workshop_01",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/structures/workshop_01.glb",
+            "scale": 0.35,
+            "source_sha256": "de0809aa18a803e3022b3442bf9f0db0f3065545a14dd8a0194765e47cebfd64"
+          },
+          {
+            "bounds_world": "[P: (15.25125, 0.0, 7.64), S: (1.697499, 0.9485, 1.12)]",
+            "id": "service_unit_01",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/structures/service_unit_01.glb",
+            "scale": 0.35,
+            "source_sha256": "8a3d145c88e31b2a7a700887b915a463b9f9d8def88c7007bd29bc016434aa0e"
+          },
+          {
+            "animations": [
+              "idle",
+              "walk"
+            ],
+            "id": "operator",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/citizens/operator.glb",
+            "scale": 0.35,
+            "source_sha256": "812416a625ba324735e8a0d2e9393dad82066e4905eec8aaf02b97f229b254a5"
+          },
+          {
+            "animations": [
+              "idle",
+              "walk"
+            ],
+            "id": "pilot",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/citizens/pilot.glb",
+            "scale": 0.35,
+            "source_sha256": "b4a7669b0f2c659098beb37e9639af35b3b8c69c0f11ee4df832503c15087194"
+          },
+          {
+            "animations": [
+              "idle",
+              "walk"
+            ],
+            "id": "mechanic",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/citizens/mechanic.glb",
+            "scale": 0.35,
+            "source_sha256": "11e2295e07de100839cb8e853721b60d3d4205f05485a46d7bf339c778cbf025"
+          },
+          {
+            "animations": [
+              "idle",
+              "walk"
+            ],
+            "id": "medic",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/citizens/medic.glb",
+            "scale": 0.35,
+            "source_sha256": "9f0eea0c570c1af5e5ced3a628cbb1a659d9636f0095faa6a9c773dd9fa5e42f"
+          }
+        ],
+        "movement_authority": "SimulationRoot",
+        "renderer": "forward_plus / vulkan",
+        "runtime_scale_from_metres": 0.35,
+        "synthetic_fixture": true,
+        "tile_count": 396,
+        "unit_spacing_enabled": false
+      },
+      "after_metadata": {
+        "active_campaign_integration": false,
+        "actors": 4,
+        "captures": [
+          {
+            "camera_projection": 1,
+            "camera_size": 12,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+            "error": 0,
+            "id": "overview",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/overview.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          {
+            "camera_projection": 1,
+            "camera_size": 12,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+            "error": 0,
+            "id": "hex_grid",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/hex_grid.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          {
+            "camera_projection": 1,
+            "camera_size": 2.5,
+            "camera_transform": "[X: (1.0, 0.0, 0.0), Y: (0.0, 0.978148, -0.207912), Z: (0.0, 0.207912, 0.978148), O: (12.15, 4.04241, 27.00666)]",
+            "error": 0,
+            "id": "crew",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/crew.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          {
+            "camera_projection": 1,
+            "camera_size": 4.2,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+            "error": 0,
+            "id": "workshop",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/workshop.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          {
+            "camera_projection": 1,
+            "camera_size": 23,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+            "error": 0,
+            "id": "landscape",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/landscape.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          {
+            "camera_projection": 1,
+            "camera_size": 12,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+            "error": 0,
+            "id": "baseline",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/baseline.png",
+            "profile_enabled": false,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          {
+            "camera_size": 2.5,
+            "id": "walk_pose",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/walk_pose.png",
+            "profile_enabled": true
+          }
+        ],
+        "comparison_note": "Same fixed cameras and output resolution as pass01; lighting and displayed assets deliberately revised in pass02. Flat fixture surface is continuous; Hex cells remain authoritative and selectable.",
+        "engine": {
+          "build": "official",
+          "hash": "71f334935c000924d403448e698df4441130df18",
+          "hex": 263682,
+          "major": 4,
+          "minor": 6,
+          "patch": 2,
+          "status": "stable",
+          "string": "4.6.2-stable (official)",
+          "timestamp": 0
+        },
+        "flat_hex_cap_count": 0,
+        "grid_topology": "hex_axial_v1",
+        "launch_arguments": [
+          "res://scenes/tests/frontier_art_preview.tscn"
+        ],
+        "light": {
+          "adjustment_brightness": 1,
+          "adjustment_contrast": 1.04999995231628,
+          "adjustment_enabled": true,
+          "adjustment_saturation": 0.939999997615814,
+          "ambient_light_color": "b6bfcdff",
+          "ambient_light_energy": 0.340000003576279,
+          "background_color": "aa6e58ff",
+          "energy": 0.949999988079071,
+          "rotation_degrees": "(-52.0, -32.0, 0.0)",
+          "shadow_blur": 1.79999995231628,
+          "shadow_enabled": true,
+          "shadow_opacity": 0.720000028610229,
+          "tonemap_enabled": true,
+          "tonemap_mode": "aces"
+        },
+        "local_avoidance_enabled": false,
+        "missing_asset_mapping_count": 0,
+        "models": [
+          {
+            "bounds_world": "[P: (7.131001, 0.0, 5.019625), S: (2.337999, 1.5225, 2.36075)]",
+            "id": "habitat_01",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/structures/habitat_01.glb",
+            "scale": 0.35,
+            "source_sha256": "1da24faad755ea8b5c8e33a9420b8633f1f8c56053b155bdda0e9ef0e8c20e52"
+          },
+          {
+            "bounds_world": "[P: (11.968, 0.0, 5.19935), S: (2.464001, 1.477875, 2.0013)]",
+            "id": "workshop_01",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/structures/workshop_01.glb",
+            "scale": 0.35,
+            "source_sha256": "28e5d97863f5c97e8a54d3f28a44867f9a38b372d31f4d80e7b668946d24a7ec"
+          },
+          {
+            "bounds_world": "[P: (15.25125, 0.0, 7.64), S: (1.697499, 0.9485, 1.12)]",
+            "id": "service_unit_01",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/structures/service_unit_01.glb",
+            "scale": 0.35,
+            "source_sha256": "81a2d1fb532db4082d586bb9834ba0559b3d5cd5fda3b7814f27c74a39518ea3"
+          },
+          {
+            "animations": [
+              "idle",
+              "walk"
+            ],
+            "id": "operator",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb",
+            "scale": 0.35,
+            "source_sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c"
+          },
+          {
+            "animations": [
+              "idle",
+              "walk"
+            ],
+            "id": "pilot",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/pilot.glb",
+            "scale": 0.35,
+            "source_sha256": "4548eb634e41a4a94965d616b45a51339e3da150bd0d1d708016e1f625c4ac00"
+          },
+          {
+            "animations": [
+              "idle",
+              "walk"
+            ],
+            "id": "mechanic",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/mechanic.glb",
+            "scale": 0.35,
+            "source_sha256": "03ec6f35421d2cebfaa03f7fa911db71f4c6120ac8858dd369f7bbcd9b878496"
+          },
+          {
+            "animations": [
+              "idle",
+              "walk"
+            ],
+            "id": "medic",
+            "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/medic.glb",
+            "scale": 0.35,
+            "source_sha256": "e7c0c690f0ae9a85a93d18ecf7d765c9c16756f74e847bd926379f3cfd1e4f79"
+          }
+        ],
+        "movement_authority": "SimulationRoot",
+        "pass": "02",
+        "renderer": "forward_plus / vulkan",
+        "report_ready": true,
+        "runtime_scale_from_metres": 0.35,
+        "runtime_sources_sha256": {
+          "res://scripts/terrain/frontier_art_dressing.gd": "36c8e8e5578403b93c0550a7c6a170aa6914788c5f8fae00ec095e3252ff05b9",
+          "res://scripts/terrain/frontier_art_geology.gd": "76d3eef42b997eadfd44376ea386112257f9c9e0338fcac015de5eae17d9424a",
+          "res://scripts/terrain/frontier_art_profile.gd": "9ea54d24eb732ea804e750d2543e15fd85c4f1ba3b4f1d19c78c591629f26c0f",
+          "res://scripts/tests/frontier_art_preview.gd": "ecb166355bee486541935549edd99deb19297fff9419810f4eb4bc560eb4aedc",
+          "res://shaders/terrain/frontier_ground.gdshader": "49684ed28039202051e6412a5fecc64b13f84dd2abdecd18fbd5f0ced5930853"
+        },
+        "synthetic_fixture": true,
+        "tile_count": 396,
+        "unit_spacing_enabled": false,
+        "validation_report": "output/grafik_20261101/pass02_check_runs/20261101T135343Z-pid108400/metadata/report.json"
+      },
+      "after_ready": true,
+      "pairs": [
+        {
+          "id": "overview",
+          "title": "Übersicht",
+          "before_id": "pass02_before_overview",
+          "before_path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/overview.png",
+          "before_sha256": "15a562b49cb326416d70d0caca4f0f2cc128c9622790568fbd331d11b2ba9905",
+          "before_camera": {
+            "camera_size": 12,
+            "error": 0,
+            "id": "overview",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/overview.png",
+            "profile_enabled": true
+          },
+          "after_id": "pass02_after_overview",
+          "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/overview.png",
+          "after_sha256": "2692c612bbd1c4e39b3d2ac73657117d2a906ce58f58311ae04d67a6ab8c25d3",
+          "after_camera": {
+            "camera_projection": 1,
+            "camera_size": 12,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+            "error": 0,
+            "id": "overview",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/overview.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_size_match": true
+        },
+        {
+          "id": "workshop",
+          "title": "Werkstatt",
+          "before_id": "pass02_before_workshop",
+          "before_path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/workshop.png",
+          "before_sha256": "713e7e6c80dd9689c2673dda36870b99ee6c5e00a1d770066e6facf1bf85de7c",
+          "before_camera": {
+            "camera_size": 4.2,
+            "error": 0,
+            "id": "workshop",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/workshop.png",
+            "profile_enabled": true
+          },
+          "after_id": "pass02_after_workshop",
+          "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/workshop.png",
+          "after_sha256": "7045ddccf3c80a12a40593b89855a9d33208d8a76e659e08f64a6c69745d9728",
+          "after_camera": {
+            "camera_projection": 1,
+            "camera_size": 4.2,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+            "error": 0,
+            "id": "workshop",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/workshop.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_size_match": true
+        },
+        {
+          "id": "crew",
+          "title": "Crew",
+          "before_id": "pass02_before_crew",
+          "before_path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/crew.png",
+          "before_sha256": "d6051f45e1360d744885c45d60eb723d8d3dc901a881fcbd45c457cd296b8965",
+          "before_camera": {
+            "camera_size": 2.5,
+            "error": 0,
+            "id": "crew",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/crew.png",
+            "profile_enabled": true
+          },
+          "after_id": "pass02_after_crew",
+          "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/crew.png",
+          "after_sha256": "0df080533c336d8e659f891747e93aef2087d026fa521732f223997d0cd7123e",
+          "after_camera": {
+            "camera_projection": 1,
+            "camera_size": 2.5,
+            "camera_transform": "[X: (1.0, 0.0, 0.0), Y: (0.0, 0.978148, -0.207912), Z: (0.0, 0.207912, 0.978148), O: (12.15, 4.04241, 27.00666)]",
+            "error": 0,
+            "id": "crew",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/crew.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_size_match": true
+        },
+        {
+          "id": "hex_grid",
+          "title": "Hexraster",
+          "before_id": "pass02_before_hex_grid",
+          "before_path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/hex_grid.png",
+          "before_sha256": "66cf97cd6bafadc4ae36414a805f393b56e2549b7d40878f932271685ac30e51",
+          "before_camera": {
+            "camera_size": 12,
+            "error": 0,
+            "id": "hex_grid",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass/hex_grid.png",
+            "profile_enabled": true
+          },
+          "after_id": "pass02_after_hex_grid",
+          "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/hex_grid.png",
+          "after_sha256": "e0944980fdded24a391cacd86c46f8544409ac8875de98eae8ff2de25c3df9e7",
+          "after_camera": {
+            "camera_projection": 1,
+            "camera_size": 12,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+            "error": 0,
+            "id": "hex_grid",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/hex_grid.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_size_match": true
+        }
+      ],
+      "after_extras": [
+        {
+          "id": "pass02_after_landscape",
+          "view": "landscape",
+          "title": "Gelände · weite Ansicht",
+          "description": "Neue weite Ansicht der geschichteten Randklippen, Felsgruppen und verbundenen Basis. Nur Nachher; kein gleiches Vorherbild vorhanden. Die Klippen bleiben regelmäßiger als in den gemalten Hauptvorlagen."
+        },
+        {
+          "id": "pass02_after_walk_pose",
+          "view": "walk_pose",
+          "title": "Ausrüstung · Gehpose",
+          "description": "Native Walk-Momentaufnahme der modular ausgerüsteten Kenney-Kandidaten. Eine Pose ergänzt den getrennten Animations-/Roundtrip-Nachweis; sie ersetzt keinen vollständigen Bewegungstest."
+        },
+        {
+          "id": "pass02_after_baseline",
+          "view": "baseline",
+          "title": "Pass 02 · Farbprofil aus",
+          "description": "Derselbe Pass-02-Ausschnitt mit ausgeschaltetem Frontier-Farbprofil. Das ist ein Profilvergleich und kein zusätzlicher Vorherstand."
+        }
+      ],
+      "citizen_candidates": [
+        {
+          "role": "operator",
+          "triangles": 2804,
+          "meshes": 2,
+          "materials": 4,
+          "skins": 1,
+          "stock_body_triangles": 1604,
+          "stock_files_unchanged": true,
+          "path": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\operator.glb",
+          "sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c"
+        },
+        {
+          "role": "pilot",
+          "triangles": 3344,
+          "meshes": 2,
+          "materials": 4,
+          "skins": 1,
+          "stock_body_triangles": 1604,
+          "stock_files_unchanged": true,
+          "path": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\pilot.glb",
+          "sha256": "4548eb634e41a4a94965d616b45a51339e3da150bd0d1d708016e1f625c4ac00"
+        },
+        {
+          "role": "mechanic",
+          "triangles": 2912,
+          "meshes": 2,
+          "materials": 4,
+          "skins": 1,
+          "stock_body_triangles": 1604,
+          "stock_files_unchanged": true,
+          "path": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\mechanic.glb",
+          "sha256": "03ec6f35421d2cebfaa03f7fa911db71f4c6120ac8858dd369f7bbcd9b878496"
+        },
+        {
+          "role": "medic",
+          "triangles": 3020,
+          "meshes": 2,
+          "materials": 4,
+          "skins": 1,
+          "stock_body_triangles": 1604,
+          "stock_files_unchanged": true,
+          "path": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\medic.glb",
+          "sha256": "e7c0c690f0ae9a85a93d18ecf7d765c9c16756f74e847bd926379f3cfd1e4f79"
+        }
+      ],
+      "renderer_match": true,
+      "light_unchanged": false,
+      "scope": "synthetic graphics fixture; no campaign/editor migration or release acceptance"
+    },
+    "reference_manifest": "output/grafik_20261101/reference_manifest.json",
+    "stock_citizen_manifest": "art/frontier_illustrated_20261101/citizens/qa/stock_manifest.json",
+    "asset_assignments": [
+      {
+        "id": "terrain",
+        "title": "Rostwelt · Landschaft",
+        "group": "terrain",
+        "status": "2D-Ziel · aktuelle Fassung",
+        "kind": "target",
+        "version": "current",
+        "approved_2d": true,
+        "path": "docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png",
+        "sha256": "e72d18f790117bf3add45f91433582c543c41c9a28f14d586eb26a66a06bc3ea",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png"
+      },
+      {
+        "id": "people",
+        "title": "Menschen · Vier Rollen",
+        "group": "people",
+        "status": "2D-Ziel · aktuelle Fassung",
+        "kind": "target",
+        "version": "current",
+        "approved_2d": true,
+        "path": "docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+        "sha256": "994454732fc6b6b8713dd6eca6494c95d87f3984c3dbcb410230c0f3d8aff811",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png"
+      },
+      {
+        "id": "outpost",
+        "title": "Außenposten · Zusammengehöriges Kit",
+        "group": "buildings",
+        "status": "2D-Ziel · aktuelle Fassung",
+        "kind": "target",
+        "version": "current",
+        "approved_2d": true,
+        "path": "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+        "sha256": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png"
+      },
+      {
+        "id": "cutlass_front_v1",
+        "title": "Cutlass · Vorn, erste Fassung",
+        "group": "cutlass",
+        "status": "2D-Ziel · erhaltene Vorfassung",
+        "kind": "target",
+        "version": "archive",
+        "approved_2d": false,
+        "path": "docs/reports/assets/grafik-2026-11-01/04_cutlass_vorne.png",
+        "sha256": "91821edff5c1c2353a14272c39be13e9718f393c3b9458f78a67fbbb13b7c615",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/04_cutlass_vorne.png"
+      },
+      {
+        "id": "cutlass_rear_v1",
+        "title": "Cutlass · Heck, erste Fassung",
+        "group": "cutlass",
+        "status": "2D-Ziel · erhaltene Vorfassung",
+        "kind": "target",
+        "version": "archive",
+        "approved_2d": false,
+        "path": "docs/reports/assets/grafik-2026-11-01/05_cutlass_hinten.png",
+        "sha256": "458db594763b2a4d9f40cd51d573ca4fe531d56133a33150c12fec9f75034266",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/05_cutlass_hinten.png"
+      },
+      {
+        "id": "buccaneer_front_v1",
+        "title": "Buccaneer · Vorn, erste Fassung",
+        "group": "buccaneer",
+        "status": "2D-Ziel · erhaltene Vorfassung",
+        "kind": "target",
+        "version": "archive",
+        "approved_2d": false,
+        "path": "docs/reports/assets/grafik-2026-11-01/06_buccaneer_vorne.png",
+        "sha256": "f21e8c31cd20b5e8e94d20b6371379a18871d2688f501a0f1e9a37d5be1ee176",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/06_buccaneer_vorne.png"
+      },
+      {
+        "id": "buccaneer_rear_v1",
+        "title": "Buccaneer · Heck, erste Fassung",
+        "group": "buccaneer",
+        "status": "2D-Ziel · erhaltene Vorfassung",
+        "kind": "target",
+        "version": "archive",
+        "approved_2d": false,
+        "path": "docs/reports/assets/grafik-2026-11-01/07_buccaneer_hinten.png",
+        "sha256": "bd0118b46c05c602cb9c375b826ff4c04a582355fb848abf4d2fde146ca4c56e",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/07_buccaneer_hinten.png"
+      },
+      {
+        "id": "cutlass_front",
+        "title": "Cutlass · Vorn / oben",
+        "group": "cutlass",
+        "status": "2D-Ziel · aktuelle Fassung",
+        "kind": "target",
+        "version": "current",
+        "approved_2d": false,
+        "path": "docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png",
+        "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png"
+      },
+      {
+        "id": "cutlass_rear",
+        "title": "Cutlass · Heck / oben",
+        "group": "cutlass",
+        "status": "2D-Ziel · aktuelle Fassung",
+        "kind": "target",
+        "version": "current",
+        "approved_2d": false,
+        "path": "docs/reports/assets/grafik-2026-11-01/09_cutlass_hinten_wimmel.png",
+        "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/09_cutlass_hinten_wimmel.png"
+      },
+      {
+        "id": "buccaneer_front_v2_previous",
+        "title": "Buccaneer · Frühere V2-Vorderansicht",
+        "group": "buccaneer",
+        "status": "2D-Ziel · erhaltene Vorfassung",
+        "kind": "target",
+        "version": "archive",
+        "approved_2d": false,
+        "path": "docs/reports/assets/grafik-2026-11-01/10_buccaneer_vorne_wimmel.png",
+        "sha256": "214ce60690a687717aab040447cb031a0da0a3d5e06f48af8ddb5e47b10905e9",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/10_buccaneer_vorne_wimmel.png"
+      },
+      {
+        "id": "buccaneer_rear",
+        "title": "Buccaneer · Heck / oben",
+        "group": "buccaneer",
+        "status": "2D-Ziel · aktuelle Fassung",
+        "kind": "target",
+        "version": "current",
+        "approved_2d": false,
+        "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+        "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png"
+      },
+      {
+        "id": "buccaneer_front",
+        "title": "Buccaneer · Vorn / oben",
+        "group": "buccaneer",
+        "status": "2D-Ziel · aktuelle Fassung",
+        "kind": "target",
+        "version": "current",
+        "approved_2d": false,
+        "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+        "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png"
+      },
+      {
+        "id": "engine_overview",
+        "title": "Godot · Hex-Basis · Übersicht",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · separater Hex-Basisausschnitt",
+        "kind": "engine",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass/overview.png",
+        "sha256": "15a562b49cb326416d70d0caca4f0f2cc128c9622790568fbd331d11b2ba9905",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass/overview.png",
+        "source_model": "art/frontier_illustrated_20261101/structures/manifest.json\nart/frontier_illustrated_20261101/citizens/qa/stock_manifest.json"
+      },
+      {
+        "id": "engine_hex_grid",
+        "title": "Godot · Hex-Basis · Hexraster",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · separater Hex-Basisausschnitt",
+        "kind": "engine",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass/hex_grid.png",
+        "sha256": "66cf97cd6bafadc4ae36414a805f393b56e2549b7d40878f932271685ac30e51",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass/hex_grid.png",
+        "source_model": "art/frontier_illustrated_20261101/structures/manifest.json\nart/frontier_illustrated_20261101/citizens/qa/stock_manifest.json"
+      },
+      {
+        "id": "engine_crew",
+        "title": "Godot · Hex-Basis · Kenney-Citizens",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · separater Hex-Basisausschnitt",
+        "kind": "engine",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass/crew.png",
+        "sha256": "d6051f45e1360d744885c45d60eb723d8d3dc901a881fcbd45c457cd296b8965",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass/crew.png",
+        "source_model": "art/frontier_illustrated_20261101/structures/manifest.json\nart/frontier_illustrated_20261101/citizens/qa/stock_manifest.json"
+      },
+      {
+        "id": "engine_workshop",
+        "title": "Godot · Hex-Basis · Werkstatt",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · separater Hex-Basisausschnitt",
+        "kind": "engine",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass/workshop.png",
+        "sha256": "713e7e6c80dd9689c2673dda36870b99ee6c5e00a1d770066e6facf1bf85de7c",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass/workshop.png",
+        "source_model": "art/frontier_illustrated_20261101/structures/manifest.json\nart/frontier_illustrated_20261101/citizens/qa/stock_manifest.json"
+      },
+      {
+        "id": "engine_walk_pose",
+        "title": "Godot · Hex-Basis · Gehpose",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · separater Hex-Basisausschnitt",
+        "kind": "engine",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass/walk_pose.png",
+        "sha256": "22f897b229d2cfd9b3edfd64ee0804ea32eddcf6d75da6d730a1922182440e96",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass/walk_pose.png",
+        "source_model": "art/frontier_illustrated_20261101/structures/manifest.json\nart/frontier_illustrated_20261101/citizens/qa/stock_manifest.json"
+      },
+      {
+        "id": "engine_baseline",
+        "title": "Godot · Hex-Basis · Profil aus",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · separater Hex-Basisausschnitt",
+        "kind": "engine",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass/baseline.png",
+        "sha256": "3d96a5c5d778f75b671089a77e6ac6c93ec6a1803e506e417df579d391841d0e",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass/baseline.png",
+        "source_model": "art/frontier_illustrated_20261101/structures/manifest.json\nart/frontier_illustrated_20261101/citizens/qa/stock_manifest.json"
+      },
+      {
+        "id": "cutlass_source_front",
+        "title": "Cutlass · Neutrale Quelle · Vorn / oben",
+        "group": "cutlass",
+        "status": "Native Quelle · neues Clay-Shading",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_front.png",
+        "sha256": "f15bdee9374b373b9623baae494fc40f1d0bf7d5453e4fd750ddb7b27f64ac2e",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_front.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+        "source_model_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60"
+      },
+      {
+        "id": "cutlass_source_rear",
+        "title": "Cutlass · Neutrale Quelle · Heck / oben",
+        "group": "cutlass",
+        "status": "Native Quelle · neues Clay-Shading",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_rear.png",
+        "sha256": "73af551ca202fb0259f7cd824fe44011c58f85fd86e70ffc1d40f1232c512437",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_rear.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+        "source_model_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60"
+      },
+      {
+        "id": "cutlass_source_distance",
+        "title": "Cutlass · Neutrale Quelle · Abstandsprobe",
+        "group": "cutlass",
+        "status": "Native Quelle · neues Clay-Shading",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_distance.png",
+        "sha256": "d5bea88a42e9233c14295ec886ab4761b281afd05c289e22e9eb935e503c76b1",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_source_distance.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+        "source_model_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60"
+      },
+      {
+        "id": "cutlass_candidate_front",
+        "title": "Cutlass · Materialprobe · Vorn / oben",
+        "group": "cutlass",
+        "status": "Separater 3D-Kandidat · Materialprobe",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_front.png",
+        "sha256": "d0434c43023f17f07af2a450e1e38b529cfe8fcfc8487845fb1055f91fbc0215",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_front.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+        "source_model_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60"
+      },
+      {
+        "id": "cutlass_candidate_rear",
+        "title": "Cutlass · Materialprobe · Heck / oben",
+        "group": "cutlass",
+        "status": "Separater 3D-Kandidat · Materialprobe",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_rear.png",
+        "sha256": "bd0690dbb41f6d1781103590e4d4a52c6e7dbdcf8c51eaecd4aa1c5be5f464a7",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_rear.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+        "source_model_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60"
+      },
+      {
+        "id": "cutlass_candidate_distance",
+        "title": "Cutlass · Materialprobe · Abstandsprobe",
+        "group": "cutlass",
+        "status": "Separater 3D-Kandidat · Materialprobe",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_distance.png",
+        "sha256": "bb36c8fa97afea134a252ca9cf8c3dd965b9e776c649f9f0945d27e996ac5782",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_candidate_distance.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+        "source_model_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60"
+      },
+      {
+        "id": "cutlass_godot_front",
+        "title": "Cutlass · Godot · Vorn / oben",
+        "group": "cutlass",
+        "status": "Nativer Godot-Import · visuell nicht bestanden",
+        "kind": "godot",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_godot_front.png",
+        "sha256": "3bcc7627923adf9b522bed94861ba9e11a8d343da4534792d465e9593f3b7516",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_godot_front.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+        "source_model_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60"
+      },
+      {
+        "id": "cutlass_godot_rear",
+        "title": "Cutlass · Godot · Heck / oben",
+        "group": "cutlass",
+        "status": "Nativer Godot-Import · visuell nicht bestanden",
+        "kind": "godot",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_godot_rear.png",
+        "sha256": "c40550771b43478c1d2efc25572cf390e319914c79254fb0f56a7c13f46f33fc",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_godot_rear.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+        "source_model_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60"
+      },
+      {
+        "id": "cutlass_qa_solid",
+        "title": "Cutlass · QA · Vollflächen",
+        "group": "cutlass",
+        "status": "Geometrieprüfung · nicht bestanden",
+        "kind": "qa",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_qa_solid.png",
+        "sha256": "cc43577c0fa1e2cc1f0cbf0a1fd9b47aed675b56af517e49b5e22cab1872d11c",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_qa_solid.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+        "source_model_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60"
+      },
+      {
+        "id": "cutlass_qa_wire",
+        "title": "Cutlass · QA · Dreieckskanten",
+        "group": "cutlass",
+        "status": "Geometrieprüfung · nicht bestanden",
+        "kind": "qa",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_qa_wire.png",
+        "sha256": "9ee245a04a53872ea8a3ef43c7aafdfe91a47ff9ffb4f9989eb330490d15201e",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/cutlass_qa_wire.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+        "source_model_sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60"
+      },
+      {
+        "id": "buccaneer_source_front",
+        "title": "Buccaneer · Neutrale Quelle · Vorn / oben",
+        "group": "buccaneer",
+        "status": "Native Quelle · neues Clay-Shading",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_front.png",
+        "sha256": "c386870c65734f98df9eadef660c34da7b70151fc3ecae4455fd1f0c890fa222",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_front.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+        "source_model_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191"
+      },
+      {
+        "id": "buccaneer_source_rear",
+        "title": "Buccaneer · Neutrale Quelle · Heck / oben",
+        "group": "buccaneer",
+        "status": "Native Quelle · neues Clay-Shading",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_rear.png",
+        "sha256": "79f793a957a9dbd6a8ba2df7fd0e722f3b60e98e97edf6c2926ce5aadc6ea69b",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_rear.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+        "source_model_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191"
+      },
+      {
+        "id": "buccaneer_source_distance",
+        "title": "Buccaneer · Neutrale Quelle · Abstandsprobe",
+        "group": "buccaneer",
+        "status": "Native Quelle · neues Clay-Shading",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_distance.png",
+        "sha256": "74a0830fe8fea524cce478f45380c990df46edf157cd834703a1d26d8ae2e2df",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_distance.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+        "source_model_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191"
+      },
+      {
+        "id": "buccaneer_candidate_front",
+        "title": "Buccaneer · Materialprobe · Vorn / oben",
+        "group": "buccaneer",
+        "status": "Separater 3D-Kandidat · Materialprobe",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_front.png",
+        "sha256": "ecd505bf56844048e7c486fb238e7a5902a5eee53828fc9a7271c236e0c3d305",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_front.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+        "source_model_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191"
+      },
+      {
+        "id": "buccaneer_candidate_rear",
+        "title": "Buccaneer · Materialprobe · Heck / oben",
+        "group": "buccaneer",
+        "status": "Separater 3D-Kandidat · Materialprobe",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_rear.png",
+        "sha256": "7f868c2b75519ab150dc444cd8fd266b449bd5e6a61b0d8ce75bb6515daf7e39",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_rear.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+        "source_model_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191"
+      },
+      {
+        "id": "buccaneer_candidate_distance",
+        "title": "Buccaneer · Materialprobe · Abstandsprobe",
+        "group": "buccaneer",
+        "status": "Separater 3D-Kandidat · Materialprobe",
+        "kind": "native",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_distance.png",
+        "sha256": "6672d51c0288b5ff17a9d7aea7f908aca06fe0a1cc83e22024131b336a3f655f",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_distance.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+        "source_model_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191"
+      },
+      {
+        "id": "buccaneer_godot_front",
+        "title": "Buccaneer · Godot · Vorn / oben",
+        "group": "buccaneer",
+        "status": "Nativer Godot-Import · visuell nicht bestanden",
+        "kind": "godot",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_godot_front.png",
+        "sha256": "24a2e3d79641d768e2ef06d07f31f6b0b5e2a9811aac6321f020408b1798eefa",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_godot_front.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+        "source_model_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191"
+      },
+      {
+        "id": "buccaneer_godot_rear",
+        "title": "Buccaneer · Godot · Heck / oben",
+        "group": "buccaneer",
+        "status": "Nativer Godot-Import · visuell nicht bestanden",
+        "kind": "godot",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_godot_rear.png",
+        "sha256": "6ccaa2c4ccd50ea43c88f3cef51efcbaab7ee106e193554ca5dbc4a184ced4e4",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_godot_rear.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+        "source_model_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191"
+      },
+      {
+        "id": "buccaneer_qa_solid",
+        "title": "Buccaneer · QA · Vollflächen",
+        "group": "buccaneer",
+        "status": "Geometrieprüfung · nicht bestanden",
+        "kind": "qa",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_qa_solid.png",
+        "sha256": "de800604ae45499e45d4ed730a008f52234335d0849aa144f2a350612a867aae",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_qa_solid.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+        "source_model_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191"
+      },
+      {
+        "id": "buccaneer_qa_wire",
+        "title": "Buccaneer · QA · Dreieckskanten",
+        "group": "buccaneer",
+        "status": "Geometrieprüfung · nicht bestanden",
+        "kind": "qa",
+        "path": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_qa_wire.png",
+        "sha256": "0395e4400794a8979c18eb8805970cf47a28effa65cc5398caf528eb7db133a4",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_qa_wire.png",
+        "source_model": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+        "source_model_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191"
+      },
+      {
+        "id": "ref_terrain",
+        "title": "Star Citizen · Boden und Klippen",
+        "group": "terrain",
+        "status": "Externe / projektfremde Stilreferenz",
+        "kind": "reference",
+        "path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-03-08_16-00-35-254.jpg",
+        "sha256": "8ec584cf16240c539e9fbd8dd1e261e43ee22590edc95d8def9e6e9f58c1ba94",
+        "original_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-03-08_16-00-35-254.jpg"
+      },
+      {
+        "id": "ref_arches",
+        "title": "Star Citizen · Raum und Atmosphäre",
+        "group": "terrain",
+        "status": "Externe / projektfremde Stilreferenz",
+        "kind": "reference",
+        "path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2025-09-15_21-57-40-AD5.jpg",
+        "sha256": "f9e33c8b96721e66df24ddd33a72e91ffabc8c2c86a1d6cdca255b6de98cd13b",
+        "original_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2025-09-15_21-57-40-AD5.jpg"
+      },
+      {
+        "id": "ref_industry",
+        "title": "Star Citizen · Zweckmäßige Industrie",
+        "group": "buildings",
+        "status": "Externe / projektfremde Stilreferenz",
+        "kind": "reference",
+        "path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-01-19_20-55-35-867.jpg",
+        "sha256": "b787fce017d0077de742d93c039447be0487862714baadd77bc4119638e9736d",
+        "original_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-01-19_20-55-35-867.jpg"
+      },
+      {
+        "id": "ref_crew",
+        "title": "Star Citizen · Ausrüstung und Rollen",
+        "group": "people",
+        "status": "Externe / projektfremde Stilreferenz",
+        "kind": "reference",
+        "path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-02-15_20-07-35-C11.jpg",
+        "sha256": "df8e5d8ce77652bbd55e939df06c9a7859c76349769f0146bf28fa5f60e27292",
+        "original_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2026-02-15_20-07-35-C11.jpg"
+      },
+      {
+        "id": "ref_armor",
+        "title": "Star Citizen · Helle Rüstung",
+        "group": "people",
+        "status": "Externe / projektfremde Stilreferenz",
+        "kind": "reference",
+        "path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/Squadron_42_-_Star_Citizen_Screenshot_2025.01.10_-_20.41.59.11.png",
+        "sha256": "cc4cd52fe0a2b52118b35d1aaa65e0b52a26c9246a9bf1dbf0996af5d9674194",
+        "original_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/Squadron_42_-_Star_Citizen_Screenshot_2025.01.10_-_20.41.59.11.png"
+      },
+      {
+        "id": "ref_sky",
+        "title": "Star Citizen · Himmel und Tageslicht",
+        "group": "references",
+        "status": "Externe / projektfremde Stilreferenz",
+        "kind": "reference",
+        "path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2025-11-04_21-28-50-B29.jpg",
+        "sha256": "dbe590177d0bedd110b14ff66a04c19a74406761ebcc4e8cc9a8f7e3a55bd7af",
+        "original_path": "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2025-11-04_21-28-50-B29.jpg"
+      },
+      {
+        "id": "ref_insel",
+        "title": "InselKrieg · Illustrierte Miniaturwelt",
+        "group": "references",
+        "status": "Externe / projektfremde Stilreferenz",
+        "kind": "reference",
+        "path": "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png",
+        "sha256": "c4150be1a2ee0befa056833b2f088e0431f2d926fce98475865bb19d49ef316e",
+        "original_path": "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+      },
+      {
+        "id": "ref_rostgrenze",
+        "title": "Rostgrenze · Außenposten-Cutaway",
+        "group": "buildings",
+        "status": "Aktuelle Nutzerreferenz · Grafikpass 02",
+        "kind": "primary_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+        "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+        "source_original_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-03f6c8c2-a842-4970-8104-e3c33497f729.png",
+        "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+        "active_model_reference": true,
+        "assignments": [
+          "terrain: große unregelmäßige Schichtklippen und gestaffelte Felsgruppen",
+          "structures: creme-orange Rahmen, Sockel, Eingänge und lesbare Funktionsgruppen",
+          "connections: gemeinsame Wege, Pad und einzelne Anschlussgruppen"
+        ]
+      },
+      {
+        "id": "ref_freihafen",
+        "title": "Freihafen · Distribution Center",
+        "group": "buildings",
+        "status": "Aktuelle Nutzerreferenz · Grafikpass 02",
+        "kind": "primary_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+        "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+        "source_original_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-1f877621-9b3e-4afa-919a-7c8e41fbe0cc.png",
+        "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+        "active_model_reference": true,
+        "assignments": [
+          "terrain: weite rostrote Landschaft mit kühlen grauen Bauflächen",
+          "structures: kräftige Rahmen, große ruhige Dachformen und verständliche Arbeitsausstattung",
+          "composition: Hauptgebäude, Nebenmodul und Pad über gebaute Flächen verbinden"
+        ]
+      },
+      {
+        "id": "ref_tactical",
+        "title": "Rostwelt · Taktische Gesamtansicht",
+        "group": "terrain",
+        "status": "Aktuelle Nutzerreferenz · Grafikpass 02",
+        "kind": "primary_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+        "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+        "source_original_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-720890b3-d6c0-4574-8cc3-053eeede46f7.png",
+        "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+        "active_model_reference": true,
+        "assignments": [
+          "terrain: natürlich gestaffelte Randklippen, ruhige offene Flächen und wenige große Felsgruppen",
+          "composition: Gebäudemassen, Radar/Pad und Wegschleifen im Spielabstand lesbar halten",
+          "people: kleine Gruppen und klare Auswahl vor ruhigem Boden beurteilen"
+        ]
+      },
+      {
+        "id": "history_menu",
+        "title": "Crew · Schiffsinnenraum",
+        "group": "references",
+        "status": "Historischer Kontext · keine aktive Modellfreigabe",
+        "kind": "historical_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_16_45.jpeg",
+        "sha256": "8702c2e3989b8e537656bf3824c734e2474ba797f7744b574aad8390299a5563",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_16_45.jpeg",
+        "source_original_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_16_45.jpeg",
+        "origin": "older local image; original generation prompt/tool not available",
+        "active_model_reference": false
+      },
+      {
+        "id": "history_explosion",
+        "title": "Roter Außenposten · Explosion",
+        "group": "references",
+        "status": "Historischer Kontext · keine aktive Modellfreigabe",
+        "kind": "historical_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_21_53.jpeg",
+        "sha256": "c203999a3a3a2cff13a13e1489da6b05547d81083e07290b7d9d51011044c9af",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_21_53.jpeg",
+        "source_original_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_21_53.jpeg",
+        "origin": "older local image; original generation prompt/tool not available",
+        "active_model_reference": false
+      },
+      {
+        "id": "history_hangar",
+        "title": "Blaue Hangarhalle",
+        "group": "references",
+        "status": "Historischer Kontext · keine aktive Modellfreigabe",
+        "kind": "historical_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_34_01.png",
+        "sha256": "837b6362f56c82036b3fbc09a526a71921fe0bd1f462d57eb4318f0e7f48958b",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_34_01.png",
+        "source_original_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_34_01.png",
+        "origin": "older local image; original generation prompt/tool not available",
+        "active_model_reference": false
+      },
+      {
+        "id": "history_night",
+        "title": "Nächtlicher Außenposten",
+        "group": "references",
+        "status": "Historischer Kontext · keine aktive Modellfreigabe",
+        "kind": "historical_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_36_53.jpeg",
+        "sha256": "21c95ddc1cf633837b644e61a032825b66bf9af8f4fe2ea55292d569e2559a47",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_36_53.jpeg",
+        "source_original_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_36_53.jpeg",
+        "origin": "older local image; original generation prompt/tool not available",
+        "active_model_reference": false
+      },
+      {
+        "id": "history_space_simple",
+        "title": "Asteroidenflug · Flächige Fassung",
+        "group": "references",
+        "status": "Historischer Kontext · keine aktive Modellfreigabe",
+        "kind": "historical_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_38_25.png",
+        "sha256": "44d80f2d39b9f5d0de8660e5d8221fc8fc63909b09501295a47c2afa0db999a3",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_38_25.png",
+        "source_original_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_38_25.png",
+        "origin": "older local image; original generation prompt/tool not available",
+        "active_model_reference": false
+      },
+      {
+        "id": "history_space",
+        "title": "Asteroidenflug · Detailfassung",
+        "group": "references",
+        "status": "Historischer Kontext · keine aktive Modellfreigabe",
+        "kind": "historical_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_41_57.png",
+        "sha256": "89c2d6b8c65f5d73c04ae72242cb7f4f59b78c13b953e083d5065e3e42997c0c",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_41_57.png",
+        "source_original_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_41_57.png",
+        "origin": "older local image; original generation prompt/tool not available",
+        "active_model_reference": false
+      },
+      {
+        "id": "history_desert",
+        "title": "Sandiger Raumhafen",
+        "group": "references",
+        "status": "Historischer Kontext · keine aktive Modellfreigabe",
+        "kind": "historical_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_45_03.png",
+        "sha256": "1a2bf25c7a1800db1b3cdca088d8ad10e04f197d5a78b65f714c78c4bdffcb3b",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/historical/Use AI Image Apr 18, 2026, 23_45_03.png",
+        "source_original_path": "C:/Users/bjoer/Pictures/Sternenbürger/Use AI Image Apr 18, 2026, 23_45_03.png",
+        "origin": "older local image; original generation prompt/tool not available",
+        "active_model_reference": false
+      },
+      {
+        "id": "history_shadowfall",
+        "title": "Shadowfall · Alpha / Bravo / Charlie / Delta",
+        "group": "references",
+        "status": "Historischer Kontext · keine aktive Modellfreigabe",
+        "kind": "historical_reference",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/historical/Shadowfall_Map_2.png",
+        "sha256": "12f2510f4efd0033b65e8de2c24b875f4c5758ccd2f3da89e11ada885a15ff46",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/historical/Shadowfall_Map_2.png",
+        "source_original_path": "C:/Users/bjoer/Pictures/Shadowfall_Map_2.png",
+        "origin": "older local image; original generation prompt/tool not available",
+        "active_model_reference": false
+      },
+      {
+        "id": "pass02_before_overview",
+        "title": "Vorher · Pass 01 · Übersicht",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · unverändert gesicherter Vorherstand",
+        "kind": "pass02_before",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/overview.png",
+        "sha256": "15a562b49cb326416d70d0caca4f0f2cc128c9622790568fbd331d11b2ba9905",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/before/overview.png",
+        "source_model": "output/grafik_20261101/pass02_before_capture.json"
+      },
+      {
+        "id": "pass02_after_overview",
+        "title": "Nachher · Grafikpass 02 · Übersicht",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · gesicherter Grafikpass 02",
+        "kind": "pass02_after",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/overview.png",
+        "sha256": "2692c612bbd1c4e39b3d2ac73657117d2a906ce58f58311ae04d67a6ab8c25d3",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/after/overview.png",
+        "source_model": "output/grafik_20261101/pass02_after_capture.json"
+      },
+      {
+        "id": "pass02_before_workshop",
+        "title": "Vorher · Pass 01 · Werkstatt",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · unverändert gesicherter Vorherstand",
+        "kind": "pass02_before",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/workshop.png",
+        "sha256": "713e7e6c80dd9689c2673dda36870b99ee6c5e00a1d770066e6facf1bf85de7c",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/before/workshop.png",
+        "source_model": "output/grafik_20261101/pass02_before_capture.json"
+      },
+      {
+        "id": "pass02_after_workshop",
+        "title": "Nachher · Grafikpass 02 · Werkstatt",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · gesicherter Grafikpass 02",
+        "kind": "pass02_after",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/workshop.png",
+        "sha256": "7045ddccf3c80a12a40593b89855a9d33208d8a76e659e08f64a6c69745d9728",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/after/workshop.png",
+        "source_model": "output/grafik_20261101/pass02_after_capture.json"
+      },
+      {
+        "id": "pass02_before_crew",
+        "title": "Vorher · Pass 01 · Crew",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · unverändert gesicherter Vorherstand",
+        "kind": "pass02_before",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/crew.png",
+        "sha256": "d6051f45e1360d744885c45d60eb723d8d3dc901a881fcbd45c457cd296b8965",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/before/crew.png",
+        "source_model": "output/grafik_20261101/pass02_before_capture.json"
+      },
+      {
+        "id": "pass02_after_crew",
+        "title": "Nachher · Grafikpass 02 · Crew",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · gesicherter Grafikpass 02",
+        "kind": "pass02_after",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/crew.png",
+        "sha256": "0df080533c336d8e659f891747e93aef2087d026fa521732f223997d0cd7123e",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/after/crew.png",
+        "source_model": "output/grafik_20261101/pass02_after_capture.json"
+      },
+      {
+        "id": "pass02_before_hex_grid",
+        "title": "Vorher · Pass 01 · Hexraster",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · unverändert gesicherter Vorherstand",
+        "kind": "pass02_before",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/hex_grid.png",
+        "sha256": "66cf97cd6bafadc4ae36414a805f393b56e2549b7d40878f932271685ac30e51",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/before/hex_grid.png",
+        "source_model": "output/grafik_20261101/pass02_before_capture.json"
+      },
+      {
+        "id": "pass02_after_hex_grid",
+        "title": "Nachher · Grafikpass 02 · Hexraster",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · gesicherter Grafikpass 02",
+        "kind": "pass02_after",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/hex_grid.png",
+        "sha256": "e0944980fdded24a391cacd86c46f8544409ac8875de98eae8ff2de25c3df9e7",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/after/hex_grid.png",
+        "source_model": "output/grafik_20261101/pass02_after_capture.json"
+      },
+      {
+        "id": "pass02_after_landscape",
+        "title": "Gelände · weite Ansicht",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · zusätzliche Pass-02-Ansicht",
+        "kind": "pass02_extra",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/landscape.png",
+        "sha256": "d3ef19634ba45ff8c82f83e484842f05a9ec4db7a761b130b1f28e53cf2442a9",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/after/landscape.png",
+        "source_model": "output/grafik_20261101/pass02_after_capture.json"
+      },
+      {
+        "id": "pass02_after_walk_pose",
+        "title": "Ausrüstung · Gehpose",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · zusätzliche Pass-02-Ansicht",
+        "kind": "pass02_extra",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/walk_pose.png",
+        "sha256": "ad566c80fa99ab552f6367f0721c608a8e86cc3feaa2d626e13a4b622defe5a7",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/after/walk_pose.png",
+        "source_model": "output/grafik_20261101/pass02_after_capture.json"
+      },
+      {
+        "id": "pass02_after_baseline",
+        "title": "Pass 02 · Farbprofil aus",
+        "group": "engine",
+        "status": "Native Godot-Aufnahme · zusätzliche Pass-02-Ansicht",
+        "kind": "pass02_extra",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/baseline.png",
+        "sha256": "485a8ef9ae503d110fb12e59c210a8c65563d75846cbbeb96a4f2bd2834d325c",
+        "original_path": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/engine_pass02/after/baseline.png",
+        "source_model": "output/grafik_20261101/pass02_after_capture.json"
+      }
+    ]
+  }
+}

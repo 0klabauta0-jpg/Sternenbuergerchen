@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### ART 2026-11-01 Pass02 - Nativer Grafikpass und Vorher/Nachher
+- Bewusste Fortsetzung des noch nicht integrierten Grafikbranches `task/grafikreferenzen-20261101`, Ausgang `93bdf43ff`. Implementierung `4e21697fce43aa2cf89da3f8d527bd48d09b4d58` committed und gepusht; keine Main-Integration.
+- Tatsaechlich umgesetzt: 14 deterministische geschichtete Klippenformen, Fels-/Pflanzengruppen, gebaute markierte Verbindungen, Padmarkierung, kontinuierliche Bodenfarbe, ueberarbeitetes Licht. Drei creme-orange Gebaeude ueberarbeitet, Werkbank/Regal lesbarer. Vier neue modulare Ausruestungskandidaten auf originalen Kenney-Koerpern mit originalen Idle/Walk-Clips; alte Stock-GLBs bleiben erhalten.
+- Hindernis-/LOS-Fakten werden im synthetischen Fixture vor Registry-Aufbau gesetzt. Externe schwache Visual-Owner vermeiden doppelte Ersatzgeometrie; flache Bodenvisuals ersetzen keine Hex-Fakten, Hoehen oder Picking.
+- Source-/Pose-/frische GLB-Roundtrip-QA bestanden. 15/15 strenge Engine-Laeufe PASS, neuer Pass02-Verifier 27/27; keine fehlenden Assets im finalen nativen Snapshot. Beleg: `output/grafik_20261101/pass02_verification_manifest.json`.
+- Sieben echte Forward+/Vulkan-Ansichten; vier feste Vorher-/Nachher-Kameras mit 1600x900 und bytegleich erhaltenen Vorher-PNGs. Licht/Material-/Modellstand bewusst veraendert. Zusaetzliche weite Gelaendeansicht nur als Nachher. HTML-Workbench mit Wischvergleich und genauer Herkunft unter dem bisherigen Reportpfad.
+- Fehlende Vorlagen nachgetragen: Rostgrenze-Cutaway, Freihafen und taktische Karte; acht aeltere Bilder als historischen Kontext katalogisiert. Quadratraster/Bildbeschriftungen sind keine neue Topologie- oder Gameplay-Anweisung.
+- Grenzen: Szene und Klippen noch weniger organisch/dicht als die Konzepte; Cutaway-Raumensemble, grosse Freihafen-Halle und Schiffsmodelluebernahme offen. Weiter synthetischer Ausschnitt, keine komplette Kampagnen-/Editor-Migration oder Release-/Performance-Abnahme. Aktuelle Browserbelege unter `output/grafik_20261101/browser_qa_pass02/`.
+
 ### ART / HEX 2026-11-01 - Erster nativer Hex-Basis-Ausschnitt
 - Arbeitsbasis: `integration/core-foundation` auf `3cae5a216`; isolierter Branch `task/grafikreferenzen-20261101`. Implementierung `3e58cc1887883be9db221eb42fea19aa362aa890` ist nach origin gepusht, keine Main-Integration.
 - Nutzerkorrektur umgesetzt: vier normale originale Kenney-Astronauten mit Originalformen/-texturen und Idle/Walk; selbst gebaute Figuren verworfen. Drei neue eigene Habitat-/Werkstatt-/Versorgungsmodelle, matte Rostwelt-Palette, Licht/Schatten und Hex-Gelaende in `scenes/tests/frontier_art_preview.tscn`.

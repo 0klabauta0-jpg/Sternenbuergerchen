@@ -1,45 +1,57 @@
-"""Visible, reference-linked next art steps; proposals, not completed changes."""
+"""Pass-02 art targets, their starting gaps and explicit native review criteria."""
 from html import escape
 
 STEPS = [
     {
         "title": "Gelände: zusammenhängende Landschaft statt flacher Platten",
-        "reference": "Rostwelt-Landschaft (01) und Außenposten (03)",
+        "reference": "Rostgrenze-Cutaway + taktische Rostwelt-Gesamtkarte; ergänzend Landschaft 01",
+        "reference_ids": ["ref_rostgrenze", "ref_tactical", "terrain"],
+        "status": "pass02_in_progress_capture_pending",
         "gap": "Der native Boden ist noch großflächig leer. Wege und Höhenkanten zeichnen die Hexgrenzen sehr deutlich nach; die Vorlagen zeigen geschichtete Felsen, natürliche Übergänge und räumliche Tiefe.",
-        "change": "Zuerst breite Sand-/Farbzonen und weich auslaufende Wegspuren über Zellgrenzen legen. Danach zusammenhängende Plateau- und Klippenformen, wenige große Felsgruppen und eine hellere, kühlere Ferne aufbauen. Das Hexraster bleibt für Logik und Auswahl erhalten; die Oberfläche darf natürlicher wirken.",
+        "change": "Den roten Schichtstein der vollständigen Vorlagen in breite unregelmäßige Klippen, gestaffelte Felstürme und wenige große Steingruppen übersetzen. Offene rostrote Bodenflächen ruhig variieren und natürliche Übergänge statt wiederholter Randplatten bilden. Das Hexraster bleibt für Logik und Auswahl erhalten; die im Kartenbild sichtbaren Quadratfelder werden nicht übernommen.",
         "check": "Gleiche Übersichtskamera mit Raster an/aus vergleichen: Weg und Plateau müssen ohne Raster lesbar sein; sichtbare Hindernisse müssen zu belegten Zellen passen.",
     },
     {
         "title": "Basis: die drei Gebäude näher an die Silhouetten bringen",
-        "reference": "Außenposten (03), besonders Dach, Eingang und offene Werkstatt",
+        "reference": "Rostgrenze-Cutaway + Freihafen / Distribution Center; ergänzend Außenposten 03",
+        "reference_ids": ["ref_rostgrenze", "ref_freihafen", "outpost"],
+        "status": "pass02_in_progress_capture_pending",
         "gap": "Creme/Petrol und die Gebäudetypen sind erkennbar. Dächer, Rahmen und Sockel wirken noch geradliniger und flächiger als im Zielbild; die Werkstatt ist deutlich leerer.",
-        "change": "Die breiten Dachschrägen, abgerundeten Ecken, Türrahmen und Sockel gezielt nacharbeiten. Wenige große Funktionsdetails ergänzen: Werkbank, Kran, seitliche Leitungsgruppe und klarer Tankanschluss. Farbflächen und Proportionen haben Vorrang vor zusätzlichen Schrauben oder Paneelfugen.",
-        "check": "Je Gebäude Front-, Rück- und Spielansicht neben 03 prüfen: Silhouette und Funktion sollen schon klein erkennbar sein; Menschen/Türen und Handkontakte müssen stimmen.",
+        "change": "Creme-orange Außenrahmen, breite Sockel, verständliche Eingänge und eine offene, ausgestattete Werkstatt zusammenführen. Die großen Dach- und Raumgruppen aus den Hauptbildern über wenige kräftige Bauteile aufnehmen. Werkbank, Kran und Tankanschluss als Funktionsgruppen setzen; keine Bettenzahlen oder Raumtexte als neue Simulation interpretieren.",
+        "check": "Front-, Rück- und feste Werkstattkamera gegen Rostgrenze/Freihafen und 03 prüfen. Silhouette, Türmaß und große Funktionsgruppen müssen schon im Spielabstand lesbar sein; native Import- und Kontaktprüfung separat belegen.",
     },
     {
-        "title": "Umgebung: ausgewählte Wimmelbild-Gruppen ergänzen",
-        "reference": "Fels-/Pflanzengruppen und Arbeitsbereiche in 01 und 03",
+        "title": "Verbindungen: eine gebaute Basis statt einzelner Objekte",
+        "reference": "Wege, Pad und Raumgruppen der Rostgrenze; Plattformen und Arbeitsbuchten im Freihafen; Gesamtkarte",
+        "reference_ids": ["ref_rostgrenze", "ref_freihafen", "ref_tactical"],
+        "status": "pass02_in_progress_capture_pending",
         "gap": "Zwischen den Gebäuden fehlen noch die kleinen zusammenhängenden Szenen der Vorlagen. Das lässt die Basis trotz passender Grundfarben unbelebt wirken.",
-        "change": "Eine kleine wiederverwendbare Familie aus Felsen, trockenem Busch, Agave, Kisten und Werkzeugwagen bauen. In Gruppen an Gebäudeecken, Klippen und Arbeitsplätzen setzen; Wege und wichtige Silhouetten frei lassen. Klare große Formen, wenig Oberflächendetail.",
-        "check": "In Spielgröße prüfen, ob jede Gruppe als Ganzes lesbar bleibt. Begehbare Flächen und Sichtlinien prüfen; reine Dekoration erhält keine verdeckte Gameplay-Wirkung.",
+        "change": "Gebäude, Arbeitsflächen und Landepad durch klare gebaute Verbindungen zusammenfassen. Wenige Container-/Werkzeuggruppen an sinnvolle Arbeitsorte stellen, trockene Vegetation und Felsgruppen am Rand bündeln. Die Raumkomposition aus der Gesamtkarte führen lassen; weder eine vollständige Warenwirtschaft noch eine komplette Innenraumsimulation ergänzen.",
+        "check": "Dieselbe Übersicht vor/nach dem Pass und mit/ohne Hexraster zeigen. Wege müssen ohne Raster lesbar bleiben. Keine blickdichten Hindernisse auf unverändert begehbaren Feldern; Dekoration erzeugt keine versteckte Gameplay-Wirkung.",
     },
     {
         "title": "Licht und Materialien: mehr gemalte Farbigkeit",
-        "reference": "Warme Sonnenflächen, kühle Schatten und Luftperspektive in 01/03",
+        "reference": "Warme rote Felsen und creme-orange Module in Rostgrenze/Freihafen; weite Staffelung der Gesamtkarte",
+        "reference_ids": ["ref_rostgrenze", "ref_freihafen", "ref_tactical"],
+        "status": "pass02_in_progress_capture_pending",
         "gap": "Matte Flächen und echte Schatten sind vorhanden. Der Ausschnitt wirkt noch stärker wie sauberes flaches 3D als wie die farbig abgestufte Illustration.",
-        "change": "Nach den großen Formen Licht und Materialfarben gemeinsam abstimmen: warmes Creme statt grauer Fassaden, gedämpftes Petrol, kühlere Schatten und dezente Kontaktverdunklung. Große ruhige Farbvariationen verwenden; Glanz und winzige Schmutzdetails sparsam halten.",
-        "check": "Gleiche Kameras mit einem festen Beleuchtungszustand vergleichen. Türen, Gesichter und Dachkanten müssen in Sonne und Schatten lesbar bleiben; Schwarzflächen und ausgebrannte Kanten vermeiden.",
+        "change": "Nach den großen Formen warme Rostflächen, helle creme-orange Architektur, kühle graue Bauflächen und dezente Kontaktverdunklung abstimmen. Das frühere Petrol ist ergänzend, keine unveränderliche Endpalette. Glanz und kleinteiligen Schmutz sparsam halten; große Schatten lesbar staffeln.",
+        "check": "Feste Kameras vergleichen und Änderungen der Lichtparameter ausdrücklich dokumentieren. Türen, Gesichter und Dachkanten müssen in Sonne und Schatten lesbar bleiben; Schwarzflächen und ausgebrannte Kanten vermeiden.",
     },
     {
         "title": "Citizens: Kenney als vorläufige Basis weiterentwickeln",
-        "reference": "Normale Kenney-Astronauten + Personenstudie (02) + lokale Star-Citizen-Rüstungsbilder",
+        "reference": "Originale Kenney-Astronauten als Grundfigur; kleine Figuren in Rostgrenze/Gesamtkarte; Personenstudie 02 und lokale Rüstungsbilder",
+        "reference_ids": ["ref_rostgrenze", "ref_tactical", "people", "ref_armor"],
+        "status": "pass02_in_progress_capture_pending",
         "gap": "Die ursprünglichen Kenney-Figuren gefallen besser als der verworfene Eigenbau. Sie sind vorläufig gesetzt; eigene Rüstung, Ausrüstung und mehr Variation im Aussehen fehlen noch.",
-        "change": "Auf der vorhandenen Grundfigur modulare Brust-, Schulter- und Knieschützer, Helme/Visiere, Stiefel, Gürtel und Rucksäcke ausprobieren. Zuerst Arbeitsanzug, Pilot und gepanzerte Variante in wenigen großen Farbflächen. Danach Haare, Gesichter und einzelne Silhouetten behutsam variieren; den freundlichen Kenney-Charakter als Ausgangspunkt erhalten.",
+        "change": "Auf der vorhandenen Grundfigur wenige große Rüstungs-/Ausrüstungsteile als separate Kandidaten erproben, etwa Brustschutz, Schulterteile und Rucksack. Die ursprünglichen Körper und Skins als unveränderten Vergleich erhalten; keine erneute fremde Körperform erzwingen. Die Grundfigur bleibt Ausgangspunkt für spätere gezielte Variation.",
         "check": "Original und Umbau nebeneinander in gleicher Kamera zeigen. Vorder-/Rückansicht, Idle und Walk sowie angewinkelte Arme auf Durchdringungen prüfen; die Figuren müssen auch im Spielabstand unterscheidbar bleiben.",
     },
     {
         "title": "Cutlass und Buccaneer: vereinfachte echte Spielmodelle",
         "reference": "Aktuelle Bildpaare: Cutlass 08/09, Buccaneer 13/11; lokale/RSI-Formreferenzen",
+        "reference_ids": ["cutlass_front", "cutlass_rear", "buccaneer_front", "buccaneer_rear"],
+        "status": "future_model_revision_not_part_of_pass02",
         "gap": "Die vereinfachten 2D-Ansichten sind vorhanden. Die alten hochauflösenden Materialproben behalten zu viel Geometrie und haben bekannte Flächenfehler; sie erfüllen das Ziel noch nicht.",
         "change": "Neue einfache Spielgeometrie nach den aktuellen Ansichten aufbauen: bei der Cutlass Frachtrumpf, Kanzel, Rampe und getrennte Hecktriebwerke; bei der Buccaneer schmale Kanzel, große Triebwerkspods und kurze Flügel. Kleine Paneele, Waffenanbauten und technische Fugen stark reduzieren. Keine reine Umfärbung der fehlerhaften Rohmodelle.",
         "check": "Vorne/hinten und in Spielgröße gegen dasselbe Bildpaar vergleichen. Silhouette zuerst, dann Farbflächen; Normalen, Rückseiten, Maßstab, Pivot und nativen Godot-Import gesondert prüfen.",
@@ -47,27 +59,28 @@ STEPS = [
 ]
 
 
-def render_next_art_steps():
+def render_next_art_steps(after_ready=False):
     cards = []
     for i, item in enumerate(STEPS, 1):
         cards.append(
             '<article class="next-art-card">'
-            f'<div class="eyebrow">Schritt {i:02d} · noch offen</div>'
+            f'<div class="eyebrow">Schritt {i:02d} · {"separate Modellarbeit offen" if i == 6 else "native Gegenprobe vorhanden · Urteil offen" if after_ready else "Pass 02 in Arbeit · Aufnahme ausstehend"}</div>'
             f'<h3>{escape(item["title"])}</h3>'
             f'<p class="next-reference">Ziel: {escape(item["reference"])}</p>'
-            f'<p><strong>Sichtbarer Abstand.</strong> {escape(item["gap"])}</p>'
-            f'<p><strong>Was ich ändern würde.</strong> {escape(item["change"])}</p>'
+            f'<p><strong>Ausgangsbefund vor Pass 02.</strong> {escape(item["gap"])}</p>'
+            f'<p><strong>Ziel des Grafikschritts.</strong> {escape(item["change"])}</p>'
             f'<p><strong>Vergleich danach.</strong> {escape(item["check"])}</p>'
             '</article>'
         )
     return (
         '<section id="naechste-grafikschritte" class="section next-art-section" aria-labelledby="next-art-heading">'
         '<div class="section-head"><div><div class="eyebrow">Nächste Grafikschritte / konkret am Bild</div>'
-        '<h2 id="next-art-heading">So würde ich näher an die Vorlagen kommen.</h2></div>'
-        '<p>Vorgeschlagene Reihenfolge für den nächsten Durchgang. Diese Änderungen sind noch offen; '
-        'die Godot-Bilder oben zeigen den tatsächlich erreichten Stand.</p></div>'
+        '<h2 id="next-art-heading">Woran der Grafikpass gemessen wird.</h2></div>'
+        '<p>Die vollständigen Hauptvorlagen bestimmen die Ziele. Ausgangsbefund, Arbeitsziel und Bildprüfung '
+        'bleiben getrennt; der native Vergleich oben zeigt den tatsächlich aufgenommenen Stand.</p></div>'
         '<p class="next-art-intro">Zuerst Gelände, Gebäudekörper und Bildkomposition angleichen; '
-        'danach Ausstattung, Licht und Figurenvarianten. Die normalen Kenney-Astronauten sind '
+        'danach Ausstattung, Licht und Figurenvarianten. Rostgrenze, Freihafen und Gesamtkarte ergänzen '
+        'die bisherigen 01/02/03-Vorlagen. Die normalen Kenney-Astronauten sind '
         '<strong>vorläufige Grundlage</strong>: Rüstung und Aussehen sollen später gezielt weiterentwickelt werden. '
         'Die vereinfachten Schiffe behalten wenige gut lesbare Formen.</p>'
         '<div class="next-art-grid">' + ''.join(cards) + '</div>'
