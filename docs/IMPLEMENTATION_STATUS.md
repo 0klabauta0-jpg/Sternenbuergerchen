@@ -1,5 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### ART 2026-11-01 Pass04/R02 - Umgebung und geschlossene Aussenansichten
+- Weiterhin unintegrierter Grafikbranch task/grafikreferenzen-20261101 auf104609cc6; native Implementierung039840e52e04c6cf22a900a184e7a81a1b291435 committed und gepusht. Keine Main-Integration.
+- Drei echte Kenney-basierte Strukturkandidaten (14 Quellmodule): Basis/Halle mit differenzierteren Material-/Gebrauchsfeldern und neue tragende Doppeltankversorgung. Alter Spielzeuglader entfernt; Quellen/Lizenzen unveraendert belegt.
+- Zusaetzliche eigene Godot-Aussenhuellen zeigen die Gebaeude geschlossen mit Dachschraegen, Fenstern, Tueren/Tor, Luefter und sparsamen Nieten. C schaltet rein visuell zwischen geschlossen und Schnitt; keine zweite Tor-/Innenraum-/Gameplay-Wahrheit.
+- Zwei flache gefaste Aussenposten-Pads nachThedus-Bildreferenz, seitliche Rampen, gebrochene Landemarkierungen/Inset-Leuchten; vereinigte matte Wege ohne koplanare Kreuzungsflaechen. Boden und Wege mit Sediment-/Pigmentfeldern; angefaste Kleinfelsen und feinere gebrochene Schichten (55Meshes/21744Vertices) innerhalb unveraenderter14Navhuellen.
+- 17/17 strenge Godot-Laeufe PASS nach frischem4.6.2Import, Pass04-Verifier18/18. 17echte Vulkan-Aufnahmen, sechs Pass03/Pass04-Paare mit identischen Kameras/Projektion/Licht und1600x900PNG; drei aktuelle Closed/Open-Kamerapaare. Keine fehlenden Assets; originale Citizen-Koerper/Ausruestung unveraendert.
+- Schiffe: R01 ausdruecklich abgelehnt; zwei weitere Form-/Look-Iterationen jeSchiff technisch Source-/Fresh-GLB-geprueft und als R02-Zwischenstand nativ gezeigt (16696/17324Tris). Nutzer kritisiert auchR02 als zuweitvom2D-Ziel entfernt. KEINE gestalterische Schiffsabnahme: separate Astra-Ultra-Blender-Revision im ausdruecklich angeforderten Chat01a197d8-ebd0-7100-8d12-21ff6bc52c0d, eigene Outputs pass05_astra_ultra, nicht automatisch integriert.
+- Aktuelle Offline-HTML frisch mit180/180Browserchecks bestanden:86Bilder/172Decodes,24Screenshots,2echteJSONexports,Desktop/Mobil/ClosedOpen/6Paare/Schiffsrevisionen. SHA2567d238dae1177e12b802c8807bd3453915ef2ecc313e57b37dc62b34dadcb7945. Pass03-HTML bleibt bytegleich erhalten; P4-Beleg in output/grafik_20261101/pass04_verification_manifest.json.
+- Umfang bleibt synthetische Hex-Grafikprobe; keine Flug-/Betankungs-/Innenraum-/Wirtschaftsmechanik, Kampagnen-/Editor-Migration oder allgemeine Release-/Performance-Abnahme. Die HTML bewahrt die kritisierten Zwischenstaende und bietet getrennte technische/gestalterische Urteile.
+
+
 ### ART 2026-11-01 Pass03 - Kenney-Cutaway, Freihafen und gebrochene Felsen
 - Fortsetzung des noch nicht integrierten Grafikbranches `task/grafikreferenzen-20261101`, Ausgang `7a37f5d9a`. Code `723163544f4174c85b77e34e8b55cf7b09711454` committed/gepusht, keine Main-Integration.
 - Zwei neue grafische Strukturkandidaten verwenden zehn echte Kenney-GLB-Quellen aus Space Station1.0/Factory3.0: Waende, Betten, Konsolen, Container, ausgeschnittener offener Hallenrahmen, Lift und Tank. Eigene Montage/Farb-/Groessenanpassung und Quellobjekte im `art/frontier_illustrated_20261101/structures/pass03/manifest.json` nachvollziehbar; Originaldateien und Lizenzhashes unveraendert.

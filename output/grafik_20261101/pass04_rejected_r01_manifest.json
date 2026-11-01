@@ -1,0 +1,60 @@
+{
+  "schema": "sternenbuergerchen.graphics_rejected_revision.v1",
+  "pass": "04",
+  "revision": "r01",
+  "status": "explicitly_rejected_by_user",
+  "views": [
+    {
+      "id": "rejected_r01_cutlass_front",
+      "ship": "cutlass",
+      "view": "front",
+      "source_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/cutlass_front.png",
+      "archive_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/rejected_r01/cutlass_front.png",
+      "sha256": "d56e3abce297962023db286ec791cb4056988f2bd4b45d1698fa072087514785",
+      "copy_byte_identical": true,
+      "status": "user_rejected_r01",
+      "current_model_approval": false
+    },
+    {
+      "id": "rejected_r01_cutlass_rear",
+      "ship": "cutlass",
+      "view": "rear",
+      "source_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/cutlass_rear.png",
+      "archive_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/rejected_r01/cutlass_rear.png",
+      "sha256": "ff628c3a9a616ecac577f768f836b3df395b749314321b48a510733f379c2e8c",
+      "copy_byte_identical": true,
+      "status": "user_rejected_r01",
+      "current_model_approval": false
+    },
+    {
+      "id": "rejected_r01_buccaneer_front",
+      "ship": "buccaneer",
+      "view": "front",
+      "source_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/buccaneer_front.png",
+      "archive_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/rejected_r01/buccaneer_front.png",
+      "sha256": "3585c1fa4b3ed04405df91826814130a8f39d689fc4a54db8098551dfd2a1b21",
+      "copy_byte_identical": true,
+      "status": "user_rejected_r01",
+      "current_model_approval": false
+    },
+    {
+      "id": "rejected_r01_buccaneer_rear",
+      "ship": "buccaneer",
+      "view": "rear",
+      "source_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/buccaneer_rear.png",
+      "archive_path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/rejected_r01/buccaneer_rear.png",
+      "sha256": "ff0bc01b46c7c2449ef6e720ae5d4c1a98c8b229b7b0786cc90bc650aad5d796",
+      "copy_byte_identical": true,
+      "status": "user_rejected_r01",
+      "current_model_approval": false
+    }
+  ],
+  "source_manifest": "art/frontier_illustrated_20261101/ships/pass04/manifest.json",
+  "capture_metadata_archive": "output/grafik_20261101/pass04_rejected_r01_capture.json",
+  "capture_metadata_sha256": "94f68b079ebed1b535e4b52761324b7cb982ea755a9d5af2bc0892448252ba3b",
+  "notes": [
+    "The user explicitly rejected both R01 ships; technical/source checks are historical evidence, not visual acceptance.",
+    "Archived raw capture metadata retains its original paths. This manifest relocates the four ship PNGs to rejected_r01.",
+    "R02 report decisions and notes use a new namespace; these rejected views must never activate as the current R02 model."
+  ]
+}

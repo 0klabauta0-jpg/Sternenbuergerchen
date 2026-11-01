@@ -1,92 +1,93 @@
-"""Pass-02 art targets, their starting gaps and explicit native review criteria."""
+"""Current Pass-04 targets, user criticism and separate native review criteria."""
 from html import escape
 
-STEPS = [{'title': 'Geologie: gebrochene Umrisse statt gleichförmiger Schichtstapel',
-  'reference': 'Rostgrenze-Cutaway, Freihafen und taktische Gesamtkarte',
-  'reference_ids': ['ref_rostgrenze', 'ref_freihafen', 'ref_tactical'],
-  'status': 'pass03_native_candidate_captured_visual_acceptance_open',
-  'gap': 'Pass 02 zeigt deutliche Schichtklippen, aber viele Felskörper bleiben regelmäßig und '
-         'wiederholen ähnliche horizontale Stufen.',
-  'change': 'Unterschiedliche Lagenstärken, versetzte Felskonturen, gebrochene Flanken und ruhige '
-            'Schuttanschlüsse zu zusammengehörigen Körpern formen. Wenige große Massen führen die '
-            'Komposition; keine bloße zufällige Kleinteilverteilung.',
-  'check': 'Feste Übersicht und Geländeansicht vor/nach dem Pass vergleichen. Große Umrisse und Lagen '
-           'müssen natürlich variieren; sichtbare Felsen dürfen nicht auf weiterhin begehbaren Feldern '
-           'stehen.'},
- {'title': 'Rostgrenze: lesbare Cutaway-Raumgruppen',
-  'reference': 'Rostgrenze-Cutaway, besonders Unterkunft, Lager, Werkstatt und Aufenthalt',
-  'reference_ids': ['ref_rostgrenze', 'outpost'],
-  'status': 'pass03_native_candidate_captured_visual_acceptance_open',
-  'gap': 'Die erste Gebäudefamilie zeigt einzelne äußere Hüllen. Sichtbare verbundene Funktionsräume der '
-         'Rostgrenze fehlen im Pass-02-Ausgangsstand.',
-  'change': 'Originale Kenney-Space-Station-Wände, Betten, Displays, Computer und Container tatsächlich '
-            'importieren und mit eigener editierbarer Schnittbasis, Außenkante, Eingang und '
-            'Funktionsgruppen verbinden. Anpassungen, Quellhashes und Lizenzen im Modellmanifest '
-            'belegen. Möbel und Arbeitsausstattung gruppieren; keine Bettenzahl oder Bildbeschriftung '
-            'als Gameplay-Regel übernehmen.',
-  'check': 'Nahansicht, feste Übersicht und Spielabstand gegen dieselbe Rostgrenze-Vorlage prüfen. '
-           'Raumgruppen müssen ohne Text erkennbar sein; der Cutaway ist eine Darstellung, kein '
-           'begehbarer simulierter Innenraum.'},
- {'title': 'Freihafen: Hallenensemble und Vorplatz verbinden',
-  'reference': 'Freihafen / Distribution Center: große Hallenrahmen, Nebenmodul, Container und '
-               'Plattformen',
-  'reference_ids': ['ref_freihafen', 'ref_tactical'],
-  'status': 'pass03_native_candidate_captured_visual_acceptance_open',
-  'gap': 'Pass 02 hat eine kleine offene Werkstatt und wenige verbundene Einzelformen. Die größere '
-         'Hallenhierarchie und der zusammengehörige Arbeitsvorplatz fehlen.',
-  'change': 'Originale Kenney-Factory-Torrahmen, Kran- und Tankgeometrie mit eigener creme-oranger '
-            'Hallenkonstruktion verbinden. Ruhige Dachgruppen und geordnete Arbeitsbuchten mit Vorplatz '
-            'und Wegen zu einer Komposition zusammenfassen. Originalquellen, Übernahme und Anpassung '
-            'nachvollziehbar belegen; keine Warenwirtschaft oder Fahrzeugmechanik aus dem Bild ableiten.',
-  'check': 'Feste Werkstatt-, Übersichts- und Geländeansicht vergleichen. Hauptbau und Nebenformen '
-           'müssen in kleiner Ansicht unterscheidbar bleiben; keine Warenwirtschaft oder '
-           'Fahrzeugmechanik aus dem Bild ableiten.'},
- {'title': 'Komposition: neue Modelle mit Gelände und Wegen abstimmen',
-  'reference': 'Taktische Gesamtkarte, Rostgrenze-Wege und Freihafen-Vorplatz',
-  'reference_ids': ['ref_tactical', 'ref_rostgrenze', 'ref_freihafen'],
-  'status': 'pass03_native_candidate_captured_visual_acceptance_open',
-  'gap': 'Der vorhandene Pass-02-Ausschnitt ist noch weit offener und regelmäßiger als die vollständigen '
-         'Konzepte. Neue größere Modelle können Figuren, Wege oder Blickbeziehungen verdecken.',
-  'change': 'Modellmassen, Felsrand, offene Bewegungsräume und Arbeitsflächen gemeinsam setzen. '
-            'Farbflächen und gezielte Requisitengruppen führen die Lesbarkeit; Hex bleibt der gemeinsame '
-            'Logik-/Auswahlvertrag.',
-  'check': 'Alle fünf unveränderten Kameras und Raster an/aus beurteilen. Renderer, Kamera, Licht und '
-           'Modellhashes dokumentieren; Footprints, Picking und tatsächliche Crewbewegung getrennt '
-           'prüfen.'},
- {'title': 'Citizens: vorhandene Kenney-Ausrüstung erhalten und maßstäblich zeigen',
-  'reference': 'Beibehaltene Pass-02-Ausrüstung auf Kenney; kleine Figuren in Rostgrenze und Gesamtkarte',
-  'reference_ids': ['people', 'ref_rostgrenze', 'ref_tactical'],
-  'status': 'retained_from_pass02_no_new_character_revision',
-  'gap': 'Die vier Figuren sind vorhandene Ausrüstungskandidaten. Größere Hallen und Cutaway-Wände '
-         'können ihre Silhouetten oder den menschlichen Maßstab verdecken.',
-  'change': 'Die bestehenden Körper, Skins, Rüstungsteile und Idle-/Walk-Clips beibehalten. Aufstellung, '
-            'Türen und Arbeitsflächen so abstimmen, dass die Figuren im Spielabstand verständlich '
-            'bleiben. Keine neue Figurenvariante als Teil dieses Passes behaupten.',
-  'check': 'Feste Crewkamera, Übersicht und Walk-Aufnahme prüfen. Vorher-/Nachher-Modellhashes '
-           'abgleichen und beibehaltene Ausrüstung von einer neuen Figurenfreigabe unterscheiden.'},
- {'title': 'Cutlass und Buccaneer bleiben separate Modellarbeit',
-  'reference': 'Aktuelle Bildpaare Cutlass 08/09 und Buccaneer 13/11',
+STEPS = [{'title': 'Kritisierte R02-Schiffe im Astra-Chat neu überarbeiten',
+  'reference': 'Cutlass08/09, Buccaneer13/11; eigene neue Blender-/GLB-Quellen',
   'reference_ids': ['cutlass_front', 'cutlass_rear', 'buccaneer_front', 'buccaneer_rear'],
-  'status': 'future_model_revision_not_part_of_pass03',
-  'gap': 'Die älteren hochauflösenden Schiffsmaterialproben behalten bekannte Flächenfehler und sind '
-         'keine einsatzbereiten vereinfachten Spielmodelle.',
-  'change': 'Vereinfachte echte Spielgeometrie in einem eigenen Arbeitspaket nach denselben Bildpaaren '
-            'aufbauen. Der Pass-03-Gelände-/Strukturumbau übernimmt keine alten Materialproben als '
-            'aktive Schiffsmodelle.',
-  'check': 'Später Vorder-/Rückansicht und Spielabstand sowie Geometrie, Normalen und nativen Import '
-           'gesondert prüfen.'}]
+  'status': 'r02_criticized_not_accepted_astra_revision_delegated',
+  'gap': 'Nach R01 trifft auch R02 das 2D-Bildziel für den Nutzer noch nicht. Source-/Importchecks und '
+         'freigegebene Captures sind technische Nachweise, keine gestalterische Annahme.',
+  'change': 'Beide Schiffe im ausdrücklich beauftragten separaten Astra-Ultra-Blender-Chat nach '
+            'Cutlass08/09 und Buccaneer13/11 überarbeiten. Eigener Ausgabebereich pass05_astra_ultra; '
+            'keine automatische Runtime-Übernahme. R01 abgelehnt archivieren, R02 als kritisierten '
+            'technischen Zwischenstand direkt vergleichbar halten.',
+  'check': 'R02 nativ neben dem 2D-Ziel und neben R01 zeigen; Status weiter kritisiert klar ausweisen. '
+           'Astra-Ergebnisse erst nach eigener Mehransichten-/Source-/Roundtripprüfung und gesonderter '
+           'nativer Integration als neuen Stand zeigen.'},
+ {'title': 'Gebäude geschlossen und im Cutaway zeigen',
+  'reference': 'Rostgrenze-Cutaway, Freihafen und lokale SC-Industriequellen',
+  'reference_ids': ['ref_rostgrenze', 'ref_freihafen', 'ref_industry'],
+  'status': 'pass04_r02_in_progress_capture_pending',
+  'gap': 'Der Nutzer empfindet die bisherigen sauberen, gleichförmigen Flächen und Ausstattungsgruppen '
+         'als steril.',
+  'change': 'Die Kenney-basierten Raum-/Hallensets um eigene in Godot erzeugte Außenhüllen ergänzen und '
+            'zwischen geschlossenem Zustand und Schnittdarstellung umschalten. Mehr Schrägen, Fasen und '
+            'wenige gezielte Nieten an großen Bauteilen erproben. Keine Kenney-Dach-GLBs vortäuschen; '
+            'Quellhash des eigenen Schalenbuilders und tatsächliche native Sichtzustände belegen.',
+  'check': 'Basis, Halle und Außenposten geschlossen/offen bei passender Kamera öffnen. Beide Bilder '
+           'sind aktuelle Nachherzustände, keine historischen Vorherbilder. Sichtwechsel verändert '
+           'keine Kartenfakten; Quellen und native Meshdarstellung getrennt prüfen.'},
+ {'title': 'Versorgung: tragender Aufbau statt kritisiertem Tank/Wagen',
+  'reference': 'Funktionale SC-Außenposten, Freihafen-Anschlüsse und Kenney-Factory-Grundteile',
+  'reference_ids': ['ref_freihafen', 'ref_industry'],
+  'status': 'pass04_r02_in_progress_capture_pending',
+  'gap': 'Tank und Wagen des Vorherstands gefallen dem Nutzer nicht; Aufbau und Verbindung wirken noch '
+         'nicht überzeugend.',
+  'change': 'Eine verständliche Fuel-/Versorgungsbaugruppe mit getragenen Tanks, Rahmen und klaren '
+            'Anschlüssen aufbauen. Echte Kenney-Grundbauteile nachweisbar verwenden; Versorgung als '
+            'grafischen Funktionsbereich in die Basis einbinden.',
+  'check': 'Neue Utility-Nahansicht, Gesamtbild und technische Montage-/Kontaktprüfung zeigen. Keine '
+           'schwebenden Baugruppen; die grafischen Anschlüsse behaupten keine Betankungs- oder '
+           'Fahrzeugmechanik.'},
+ {'title': 'Wege und Pads an SC-Außenposten annähern',
+  'reference': 'HDMS-Thedus · tatsächlich geöffnete Community-Ingame-Padvorlage; ergänzend '
+               'Rostgrenze/Freihafen',
+  'reference_ids': ['ref_thedus', 'ref_rostgrenze', 'ref_freihafen'],
+  'status': 'pass04_r02_in_progress_capture_pending',
+  'gap': 'Die bisherigen dünnen Verbindungen und die kleine Padform treffen die gewünschte '
+         'Außenpostenwirkung noch nicht.',
+  'change': 'Sehr flache rechteckige Metalldecks mit kleinen Fasen, gebrochenen Eck-/Landelinien, '
+            'niedrigen Randlichtern und seitlichen Zugangsrampen nach Thedus aufbauen. Breite matte '
+            'Servicewege verbinden Basis und Pads. Ein größeres Cutlass- und ein kleineres '
+            'Buccaneer-Pad am bewusst stilisierten Fahrzeugmaßstab ausrichten; bisherige H-/Ringform '
+            'ersetzen.',
+  'check': 'Sechs feste Vorher-/Nachherkameras, Raster an/aus und neue weite Außenpostenansicht prüfen. '
+           'Modell-/Padbelegung muss vor Registry-Aufbau gesetzt sein; Crew und Picking bleiben '
+           'getrennte echte Funktionsprüfungen.'},
+ {'title': 'Boden, Felsen und Wege weiter an die 2D-Ziele annähern',
+  'reference': 'Taktische Gesamtkarte, Rostgrenze und Freihafen',
+  'reference_ids': ['ref_tactical', 'ref_rostgrenze', 'ref_freihafen'],
+  'status': 'pass04_r02_in_progress_capture_pending',
+  'gap': 'Der Nutzer wünscht weiterhin eine hübschere, stärker zusammenhängende Landschaft nach den '
+         'Bildvorlagen; die vorherigen großen Facetten und Flächen reichen ihm nicht.',
+  'change': 'Ruhige weiche Sediment-/Pigmentfelder, gebrochene Felslippen und besser eingebundene '
+            'Wegkanten weiterentwickeln. Die Umgebung mit geschlossenen Gebäuden, neuen Schiffen und '
+            'Pads als eine Komposition beurteilen; das autoritative Hexraster bleibt erhalten.',
+  'check': 'Sechs feste Paaransichten und neue weite/geschlossene Ansichten nativ öffnen. Vorherbilder '
+           'erhalten, verbleibende Abstände konkret benennen; keine R01-Captures oder alten '
+           'Modellurteile als R02-Freigabe weiterführen.'},
+ {'title': 'Kenney-Citizens und Ausrüstung aus Pass02 erhalten',
+  'reference': 'Bestehende modulare Kenney-Figuren und originale Idle-/Walk-Clips',
+  'reference_ids': ['people', 'ref_tactical'],
+  'status': 'retained_from_pass02_no_new_character_revision',
+  'gap': 'Der neue Pass betrifft Schiffe, Sets und Außenpostenflächen. Bestehende Figuren sollen dabei '
+         'weder verändert noch von großen Baugruppen verdeckt werden.',
+  'change': 'Die vorhandenen Körper, Skins und Ausrüstung beibehalten. Aufstellung und Blickbeziehungen '
+            'im neuen Layout erhalten; keine zusätzliche Menschenrevision behaupten.',
+  'check': 'Vorher-/Nachher-Modellhashes, feste Crewkamera und Walk-Ansicht prüfen. Beibehaltene '
+           'Figuren und neue Umgebung in den Metadaten getrennt führen.'}]
 
 
 def render_next_art_steps(after_ready=False):
     cards = []
     for i, item in enumerate(STEPS, 1):
-        status_label = "aus Pass 02 beibehalten" if i == 5 else "separate Modellarbeit offen" if i == 6 else "native Gegenprobe vorhanden · Urteil offen" if after_ready else "Pass 03 in Arbeit · Aufnahme ausstehend"
+        status_label = "R02 weiter kritisiert · Astra-Revision beauftragt" if item["status"].startswith("r02_criticized") else "aus Pass 02 beibehalten" if item["status"].startswith("retained") else "native Gegenprobe vorhanden · Urteil offen" if after_ready else "Pass 04 / R02 in Arbeit · Aufnahme ausstehend"
         cards.append(
             '<article class="next-art-card">'
             f'<div class="eyebrow">Schritt {i:02d} · {status_label}</div>'
             f'<h3>{escape(item["title"])}</h3>'
             f'<p class="next-reference">Ziel: {escape(item["reference"])}</p>'
-            f'<p><strong>Ausgangsbefund aus Pass 02.</strong> {escape(item["gap"])}</p>'
+            f'<p><strong>Beauftragter Ausgangsbefund.</strong> {escape(item["gap"])}</p>'
             f'<p><strong>Ziel des Grafikschritts.</strong> {escape(item["change"])}</p>'
             f'<p><strong>Vergleich danach.</strong> {escape(item["check"])}</p>'
             '</article>'
@@ -94,11 +95,11 @@ def render_next_art_steps(after_ready=False):
     return (
         '<section id="naechste-grafikschritte" class="section next-art-section" aria-labelledby="next-art-heading">'
         '<div class="section-head"><div><div class="eyebrow">Nächste Grafikschritte / konkret am Bild</div>'
-        '<h2 id="next-art-heading">Woran Pass 03 gemessen wird.</h2></div>'
+        '<h2 id="next-art-heading">Bildfortschritt prüfen, Schiffe weiter überarbeiten.</h2></div>'
         '<p>Die vollständigen Hauptvorlagen bestimmen die Ziele. Ausgangsbefund, Arbeitsziel und Bildprüfung '
         'bleiben getrennt; der native Vergleich oben zeigt den tatsächlich aufgenommenen Stand.</p></div>'
-        '<p class="next-art-intro">Organischere Felsen, die grafische Rostgrenze-Raumgruppe und das kleine Freihafen-Hallenensemble sind die Ziele dieses Passes. '
-        'Die Kenney-Ausrüstung aus Pass 02 bleibt bestehen. Der neue Bericht verwendet eigene leere Notizen; frühere Modellurteile sind keine neue Freigabe.</p>'
+        '<p class="next-art-intro">R01 wurde abgelehnt; auch R02 bleibt für den Nutzer bei den Schiffen zu weit vom Ziel entfernt. Die nächste Schiffsrevision läuft im separaten Astra-Ultra-Blender-Chat. Geschlossene Gebäude mit Schrägen/Fasen/Nieten und die nähere 2D-Landschaft werden hier weiter beurteilt. '
+        'Die vorhandenen Kenney-Citizens bleiben bestehen. Neue leere Notizen und ein eigener Exportbereich trennen diesen Auftrag vom eingefrorenen Pass 03.</p>'
         '<div class="next-art-grid">' + ''.join(cards) + '</div>'
         '<p class="section-footnote">Nach jedem Schritt dieselben Kameras in Nah- und Spielansicht aufnehmen '
         'und direkt gegen die zugeordnete Vorlage stellen. Proportionen, Farbflächen und Silhouetten '

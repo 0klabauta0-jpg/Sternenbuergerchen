@@ -9,44 +9,65 @@ Differenzen und lokale Notizen/Entscheidungen mit JSON-Export.
 In diesem Checkout `output/grafik_20261101/START_HEX_BASIS.ps1` ausfuehren.
 Godot 4.6.2 muss als `godot_console.exe` oder `godot.exe` im PATH liegen.
 Der Launcher importiert und startet `scenes/tests/frontier_art_preview.tscn`
-mit Vulkan/Forward+. `-Capture` erstellt acht Pass03-Ansichten.
+mit Vulkan/Forward+. `-Capture` erstellt 17 aktuelle Pass04/R02-Ansichten.
 
-Tasten: 1 Gesamtansicht, 2 Halle, 3 Crew, 4 Gelaende, 5 Cutaway-Basis,
-G Hexraster, Leertaste Bewegung,
+Tasten: 1 Gesamtansicht, 2 Halle, 3 Crew, 4 Gelaende, 5 Basis,
+6 Aussenposten, 7 Cutlass, 8 Buccaneer, 9 Versorgung,
+C geschlossene Aussenhuelle / Schnittansicht, G Hexraster, Leertaste Bewegung,
 Mausrad Zoom, Linksklick Feldauswahl, Escape schliessen.
 
 ## Tatsaechlicher Stand
 
-Pass03 des synthetischen nativen Ausschnitts mit 396 Hexfeldern: gebrochene
-Felskoerper, zusammenhaengende Bodenfarbe, neue Cutaway-Basis und Freihafen-Halle
-auf zehn echten Kenney-Space-Station-/Factory-Quellmodulen. Eigene Montage und
-Anpassungen, Ladevorplatz/Container/Lader/Funkmast. Figuren, Originalkoerper und
-Ausruestungskandidaten aus Pass02 unveraendert; keine Nutzerabnahme behauptet.
+Pass04/R02 des synthetischen nativen Ausschnitts mit396Hexfeldern:
+Kenney-basierte Cutaway-Basis/Halle mit Gebrauchsfeldern, neue tragende
+Doppeltankanlage statt altem Serviceaufbau/Lader, zwei flache gefaste Pads
+und vereinigte matte Servicewege. Zusaetzliche eigene Godot-Aussenhuellen
+zeigen beide Gebaeude geschlossen mit Dachschraegen, Fenster-/Torreihen,
+Luefter und wenigen Nieten. C schaltet nur die Darstellung um.
 
-Fuenf Vorher-/Nachher-Paare haben dieselben Kamera-Transforms, Projektion,
-1600x900, Renderer und Beleuchtung. Pass02 bleibt bytegleich unter
-`engine_pass03/before`, Nachher unter `engine_pass03/after`. Die neue
-Cutaway-Nahansicht hat kein vorgetaeuschtes Vorher-Gegenstueck.
-Die drei ergaenzten Nutzerreferenzen und acht historische Kontextbilder sind
-mit Herkunft/Hashes katalogisiert; Quadratfelder im Kartenbild aendern Hex nicht.
+Nach ausdruecklicher Nutzerablehnung der R01-Schiffe folgen zwei weitere
+Form-/Look-Iterationen je Schiff: Cutlass und Buccaneer mit neu geformten
+Rumpf-/Kanzel-/Motor-/Fluegelgruppen, breiten Fasen und sparsamen Anschluessen.
+Die Schiffsmasse sind bewusst stilisiert, keine kanonischen SC-Masse.
+Auch R02 bleibt laut Nutzer zu weit vom2D-Ziel entfernt. Diese Schiffe sind
+ausdruecklich kritisierte technische Zwischenstaende. Die weitere Blender-
+Modellarbeit ist an den angeforderten Astra-Ultra-Nebenchat
+01a197d8-ebd0-7100-8d12-21ff6bc52c0d ausgelagert (pass05_astra_ultra).
+Originale Kenney-Citizens und Ausruestung aus Pass02 bleiben unveraendert.
 
-Hex besitzt einen versionierten Daten-/Registry-/Pfad-/Bewegungs-/Sichtvertrag;
-Darstellung und Auswahl verwenden dieselben Zellen. SimulationRoot bleibt
-autoritaer. Bestehende Kampagnen, der Editor und sechsseitige Mauer-Inhalte
-sind noch nicht vollstaendig migriert. Die Vorschau prueft keine Menschenmengen
-oder Spaetspiel-Performance. Cutlass/Buccaneer sind vereinfachte 2D-Ziele;
-die alten Rohgeometrie-Materialstudien sind nicht als Runtime-Modelle geeignet.
+Sechs Vorher-/Nachher-Paare verwenden identische Kameras, Licht und1600x900.
+Pass03 bleibt bytegleich unter engine_pass04/before. Neue Schiff-/Utility-/
+Aussenposten-/geschlossene Ansichten haben keine vorgetaeuschten Vorherbilder.
+Die vom Nutzer abgelehnten R01-Schiffbilder bleiben getrennt erhalten.
+
+Die Felsen erhalten mehr gebrochene Lippen und die kleinen Steine ungleiche
+angefaste Koerper;55Gesteinsgruppen-Meshes mit21744Vertices bleiben in den
+urspruenglichen14Navhuellen. Boden/Wege erhalten weiche Sediment-/Pigmentfelder.
+Hex/Registries/SimulationRoot behalten die autoritative Karten-/Bewegungswahrheit.
+Keine Flug-/Betankungs-/Innenraum-/Tor-/Wirtschaftsmechanik, keine Kampagnen-
+oder Editor-Migration, keine allgemeine Nutzer-Art-/Performance-/Release-Abnahme.
 
 ## Belege und Reproduktion
 
-- `pass03_verification_manifest.json`: aktueller Code-SHA, 16/16 strenge
-  Engine-Laeufe, fuenf unveraendert gerahmte Bildpaare und acht Aufnahmen.
-- `engine_checks_pass03.json`, `pass03_check_runs/`, `pass03_*_capture.json`:
-  aktuelle Verifier, Kamera-/Licht-/Modell-/Quellenhashes.
-- `browser_qa_pass03/`: frischer Browsernachweis und echte JSON-Exporte.
-- `art/frontier_illustrated_20261101/structures/pass03/manifest.json`:
-  zehn Kenney-Quellen/Lizenzen und genaue Uebernahme/Aenderungen; Roh-QA
-  inklusive begruendet akzeptierter Kontakt-/Montagewarnungen.
+- pass04_verification_manifest.json: aktueller Code-SHA,17strenge Engine-Laeufe,
+  sechs gleiche Kamerapaare,17nativeAnsichten und exakter Browserbeleg.
+- engine_checks_pass04.json, pass04_check_runs/, pass04_*_capture.json:
+  Verifier, Kamera-/Licht-/Modell-/Quellenhashes.
+- browser_qa_pass04/: Desktop/Mobil, funktionale Bild-/Sichtzustandsvergleiche,
+  lokale Notizen/Entscheidungen, echte JSON-Exporte ohne externe Abhaengigkeiten.
+- art/frontier_illustrated_20261101/structures/pass04/manifest.json:
+ 14echte Kenney-Quellen/Lizenzen, Source-/Fresh-GLB-QA und akzeptierte Warnungen.
+- art/frontier_illustrated_20261101/ships/pass04_r02/{cutlass,buccaneer}/manifest.json:
+  neue Quellen, beide Arbeitsiterationen und frische GLB-Roundtrips.
+- pass04_rejected_r01_manifest.json: Nutzerablehnung und unveraenderte R01-PNGs.
+- pass04_reference_manifest.json: Thedus-Ingamebild als visuelle Padreferenz.
+
+Die folgenden Belege dokumentieren den erhaltenen Pass03:
+
+- pass03_verification_manifest.json:16/16strengeLaeufe,fuenfBildpaare,achtAufnahmen.
+- browser_qa_pass03/:136/136Browserchecks am unveraenderten historischen HTML.
+- art/frontier_illustrated_20261101/structures/pass03/manifest.json:
+  zehn echte Kenney-Quellen und damalige Montage-/Kontaktwarnungen.
 
 Die folgenden Belege dokumentieren den erhaltenen Pass02:
 
@@ -76,3 +97,11 @@ Die folgenden Belege dokumentieren den erhaltenen Pass01:
 Bilddateien bleiben als Original-PNGs unter `docs/reports/assets/`; die HTML
 enthaelt kompakte WebP-Anzeigekopien. Externe rohe Schiffsmodelle und verworfene
 Figurenstudien bleiben lokal erhalten und werden nicht als aktive Assets verteilt.
+
+## Erhaltene Arbeitsproben
+
+pass04_*_review.log, pass04_geometry_check.log, pass04_fresh_import.log und
+pass04_check_runs/20261101T153427Z-pid20432/ sind fruehere Arbeitsstaende,
+keine Belege fuer die finale R02-Revision. Die aktuelle strenge Serie steht
+im pass04_verification_manifest.json. probe_geology_pass03.gd bewahrt eine
+isolierte aeltere Geometrie-/Lookprobe ausserhalb der aktiven Tests.
