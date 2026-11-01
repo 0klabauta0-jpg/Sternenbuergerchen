@@ -13,10 +13,11 @@ const DRESSING = preload("res://scripts/terrain/frontier_art_dressing.gd")
 const PAD = preload("res://scripts/terrain/frontier_outpost_pad.gd")
 const CLOSED_BUILDING = preload("res://scripts/terrain/frontier_closed_buildings.gd")
 const WORKLIFE = preload("res://scripts/terrain/frontier_worklife.gd")
+const ACCESS = preload("res://scripts/terrain/frontier_access_anchors.gd")
 const ART_ROOT := "res://Assets/curated/frontier_illustrated_20261101/"
 const MODEL_SCALE := 0.35
 const SHIP_SCALE := 0.22 # Deliberately compact fiction scale, not SC canonical metres.
-const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/"
+const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/"
 
 var _view
 var _data
@@ -37,6 +38,7 @@ var _closed_shells: Array[Node3D] = []
 var _cutaway_buildings: Array[Node3D] = []
 var _buildings_closed := true
 var _worklife: Node3D
+var _access_anchors: Dictionary = {}
 
 func _ready() -> void:
 	_capture_mode = OS.get_cmdline_user_args().has("--capture-frontier-art")
@@ -67,7 +69,7 @@ func _ready() -> void:
 	var dressing = DRESSING.new()
 	dressing.name = "FrontierWorkingGround"
 	_stage.add_child(dressing)
-	_reserve_footprints(dressing.build(_profile))
+	_reserve_footprints(dressing.build(_profile,_access_anchors))
 	_worklife = WORKLIFE.new()
 	_worklife.name = "FrontierUseGroups"
 	_stage.add_child(_worklife)
@@ -152,6 +154,7 @@ func _add_structure(model: String, plane: Vector2, family: String = "structures"
 		shell.name = "ClosedExterior_"+model
 		_stage.add_child(shell)
 		shell.build(bounds,model=="freihafen_hall_01")
+		_access_anchors["hall" if model=="freihafen_hall_01" else "habitat"] = shell.get_meta("access_anchor")
 		_closed_shells.append(shell)
 		_cutaway_buildings.append(visual)
 	# This fixture reserves the visible footprint in authoritative terrain facts.
@@ -220,6 +223,9 @@ func _animation_name(player: AnimationPlayer, suffix: String) -> String:
 
 func _set_buildings_closed(closed: bool) -> void:
 	_buildings_closed = closed
+	if is_instance_valid(_stage):
+		var dressing:=_stage.get_node_or_null("FrontierWorkingGround")
+		if dressing!=null:dressing.set_buildings_closed(closed)
 	for shell in _closed_shells:
 		shell.visible = closed
 	for building in _cutaway_buildings:
@@ -263,6 +269,7 @@ func _add_landing_pad(plane: Vector2, size: Vector2, designation: String) -> voi
 	pad.name = "OutpostLandingPad_"+designation
 	_stage.add_child(pad)
 	var reservation: Rect2 = pad.build(plane,size,designation,-1.0 if designation=="02" else 1.0)
+	_access_anchors["pad"+designation]=ACCESS.pad(plane,size,-1.0 if designation=="02" else 1.0)
 	_reserve_footprints([reservation])
 	_pad_facts.append({"id":designation,"center":[plane.x,plane.y],"size":[size.x,size.y],"deck_height":PAD.DECK_HEIGHT,"reservation":str(reservation),"visual_only":true})
 
@@ -439,11 +446,14 @@ func _capture_all() -> void:
 	captures.append({"id":"walk_pose","path":CAPTURE_ROOT+"walk_pose.png","error":walk_error,"camera_size":_view.get_camera_size(),"profile_enabled":true})
 	var renderer: String = RenderingServer.get_current_rendering_method()+" / "+RenderingServer.get_current_rendering_driver_name()
 	var sources := {}
-	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://scripts/terrain/frontier_outpost_pad.gd","res://scripts/terrain/frontier_closed_buildings.gd","res://scripts/terrain/frontier_worklife.gd","res://shaders/terrain/frontier_contact_paint.gdshader","res://shaders/terrain/frontier_ground.gdshader","res://shaders/terrain/frontier_building_wear.gdshader"]:
+	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://scripts/terrain/frontier_outpost_pad.gd","res://scripts/terrain/frontier_closed_buildings.gd","res://scripts/terrain/frontier_worklife.gd","res://shaders/terrain/frontier_contact_paint.gdshader","res://shaders/terrain/frontier_ground.gdshader","res://shaders/terrain/frontier_building_wear.gdshader","res://scripts/terrain/frontier_access_anchors.gd"]:
+		sources[source] = FileAccess.get_sha256(source)
+	for source in ["res://scripts/terrain/terrain_map_3d_view.gd","res://scripts/editor/map_editor.gd","res://scripts/tests/mission_test_setup.gd","res://data/terrain_surface_visual_theme_catalog.json","res://data/terrain_tile_catalog.json","res://data/terrain_3d_asset_mapping.json","res://maps/frontier_workyard_24x20.json","res://data/mission_scenarios/frontier_workyard_24x20.json"]:
 		sources[source] = FileAccess.get_sha256(source)
 	var snapshot: Dictionary = _view.get_render_snapshot()
-	var report := {"report_ready":false,"pass":"06_environment","report_revision":"env06","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"worklife_sources":_worklife.source_facts,"use_groups":_worklife.use_groups,"contact_gravel_count":_worklife.gravel_count,"pads":_pad_facts,"captures":captures,"structure_and_citizen_scale":MODEL_SCALE,"stylized_ship_scale":SHIP_SCALE,"canonical_star_citizen_dimensions":false,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Twelve fixed environment cameras, resolution, renderer, global light and crew placement preserved from pass05. Geology erosion and bounded blocked-area foot relief revised; painterly soil, rock, paving and building wear revised. All primary GLBs unchanged, ships stay under separate Astra revision. Hex height/navigation/picking facts remain authoritative and unchanged."}
-	var report_file := FileAccess.open("res://output/grafik_20261101/pass06_environment_after_capture.json",FileAccess.WRITE)
+	var report := {"report_ready":false,"pass":"07_paths","report_revision":"env07","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"worklife_sources":_worklife.source_facts,"use_groups":_worklife.use_groups,"contact_gravel_count":_worklife.gravel_count,"pads":_pad_facts,"captures":captures,"structure_and_citizen_scale":MODEL_SCALE,"stylized_ship_scale":SHIP_SCALE,"canonical_star_citizen_dimensions":false,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Twelve fixed cameras, resolution, global light and crew placement preserved from pass06. Paths align to actual shared doorway/pad anchors; planar lane normals and pad rails corrected. Real-map integration controls are separate from these synthetic fixture comparisons. All primary GLBs and geology unchanged; ships remain separate Astra work."}
+	report["access_layout"] = _stage.get_node("FrontierWorkingGround").get_access_snapshot()
+	var report_file := FileAccess.open("res://output/grafik_20261101/pass07_paths_after_capture.json",FileAccess.WRITE)
 	if report_file == null:
 		push_error("Cannot write frontier engine capture report")
 		get_tree().quit(1)

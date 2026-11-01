@@ -7,7 +7,7 @@ const GROUND_SHADER = preload("res://shaders/terrain/frontier_ground.gdshader")
 const SURFACE_COLORS := {
 	"ground": Color("a65c40"),
 	"sand": Color("cf8a57"),
-	"road": Color("a65c40"),
+	"road": Color("858973"),
 	"rock": Color("af573b"),
 	"water": Color("638f9a"),
 }
@@ -16,14 +16,20 @@ var _materials: Dictionary = {}
 func surface_color(surface_type: String) -> Color:
 	return SURFACE_COLORS.get(surface_type, SURFACE_COLORS["ground"])
 
-func material_for(color: Color, rock: bool = false) -> ShaderMaterial:
-	var key := "%s:%s" % [color.to_html(), str(rock)]
+func surface_material_for(surface_type: String) -> ShaderMaterial:
+	return material_for(surface_color(surface_type),false,surface_type=="road")
+
+func material_for(color: Color, rock: bool = false, paved: bool = false) -> ShaderMaterial:
+	var key := "%s:%s:%s" % [color.to_html(), str(rock),str(paved)]
 	if _materials.has(key):
 		return _materials[key]
 	var material := ShaderMaterial.new()
 	material.shader = GROUND_SHADER
 	material.set_shader_parameter("base_color", color)
 	material.set_shader_parameter("rock_strata", rock)
+	material.set_shader_parameter("paved_surface", paved)
+	# Location-specific wear belongs to authored dressing, never generic maps.
+	material.set_shader_parameter("authored_paving_wear", false)
 	_materials[key] = material
 	return material
 

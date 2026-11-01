@@ -1,0 +1,37 @@
+{
+	"display_name": "Frontier: Versorgungshof (Grafik-/Authoring-Slice)",
+	"enemy_groups": [
+		{
+			"display_name": "Entfernte Testwache",
+			"enemy_ids": [
+				"enemy_delta",
+				"enemy_echo"
+			],
+			"group_id": "distant_workyard_patrol",
+			"spawn_marker_id": "spawn_bravo",
+			"team_id": "team_bravo"
+		}
+	],
+	"map_file_path": "res://maps/frontier_workyard_24x20.json",
+	"mission_slot_count_override": 4,
+	"notes": [
+		"P07: small regular Hex map, not the frontier_art_preview fixture.",
+		"Original utility_fuel_01 at 0.35; stored occupied cells have no new LOS/cover semantics.",
+		"Existing Editor Live Test PackedScene activation is unchanged; no authored LZ or Meta deployment acceptance.",
+		"No base building, interior, fuel, resource or ship gameplay."
+	],
+	"objective": {
+		"capture_radius": 64.0,
+		"marker_id": "objective_point"
+	},
+	"patrol_bindings": [],
+	"scenario_id": "frontier_workyard_24x20",
+	"time_limit_seconds": 900.0,
+	"version": 1,
+	"wave_config": {
+		"first_wave_delay_seconds": 600.0,
+		"units_per_wave": 2,
+		"wave_count": 1,
+		"wave_delay_seconds": 60.0
+	}
+}

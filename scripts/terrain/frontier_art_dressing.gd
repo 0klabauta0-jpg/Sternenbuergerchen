@@ -4,13 +4,29 @@ var _materials: Dictionary = {}
 var _footprints: Array[Rect2] = []
 var _path_layers: Dictionary = {}
 const GROUND_SHADER = preload("res://shaders/terrain/frontier_ground.gdshader")
+const ACCESS = preload("res://scripts/terrain/frontier_access_anchors.gd")
+var _access: Dictionary = {}
+var _paths: Array = []
+var _entrance_ramps: Array = []
+var _apron_rect := Rect2()
+var _cutaway_thresholds: Array[Node3D] = []
 
-func build(profile) -> Array[Rect2]:
+func build(profile,access_anchors: Dictionary = {}) -> Array[Rect2]:
+	_access = ACCESS.defaults().merged(access_anchors,true)
+	_paths.clear()
+	_entrance_ramps.clear()
+	var hall: Dictionary = _access["hall"]
+	var hall_bounds: AABB = hall["bounds"]
+	_apron_rect = Rect2(Vector2(hall_bounds.get_center().x-2.175,hall_bounds.end.z-0.01625),Vector2(4.35,1.25))
+	var first: Vector2 = _access["pad01"]["ground"]
+	var last: Vector2 = _access["pad02"]["ground"]
+	var hab: Vector2 = _access["habitat"]["ground"]
+	var hall_entry := Vector2(hall["step_front"].x,_apron_rect.end.y)
 	# A wide service spine with short building connections; clear turning space.
-	_path([Vector2(9.96,10.9),Vector2(10.5,10.9),Vector2(11.2,10.45),Vector2(15.0,10.45),Vector2(15.9,11.8),Vector2(16.14,11.8)],1.04,true)
-	_path([Vector2(8.3,7.42),Vector2(8.3,8.0),Vector2(9.8,8.7),Vector2(10.55,10.7)],0.68)
-	_path([Vector2(13.2,10.45),Vector2(13.2,8.48)],0.84)
-	_path([Vector2(15.0,10.45),Vector2(16.1,9.15),Vector2(16.1,8.73)],0.64)
+	_path([first,first+Vector2(0.76,0.0),Vector2(11.3,10.9),Vector2(14.6,10.9),last-Vector2(0.89,0.0),last],1.04,true,"service_spine")
+	_path([hab,hab+Vector2(0.0,0.76),Vector2(8.6,9.65),Vector2(9.6,10.3),Vector2(10.3,10.9),Vector2(10.92,10.9)],0.68,false,"habitat")
+	_path([hall_entry,hall_entry+Vector2(0.0,0.75),Vector2(hall_entry.x,10.15),Vector2(hall_entry.x,10.9)],0.84,false,"hall")
+	_path([Vector2(16.1,8.73),Vector2(16.1,9.45),Vector2(16.1,10.25),Vector2(15.3,10.9),Vector2(14.3,10.9)],0.64,false,"utility")
 	for center in [Vector2(4.6,5.0),Vector2(5.8,6.5),Vector2(6.5,14.5),Vector2(18.7,6.7),Vector2(21.8,9.0),Vector2(11.0,2.3),Vector2(19.4,2.6)]:
 		_rock_group(center,profile)
 	for center in [Vector2(6.5,7.2),Vector2(9.5,7.3),Vector2(10.7,7.5),Vector2(15.4,7.0),Vector2(18.0,7.6),Vector2(9.8,13.5),Vector2(17.0,13.8),Vector2(5.0,6.0),Vector2(20.7,8.7),Vector2(14.0,3.5)]:
@@ -20,16 +36,29 @@ func build(profile) -> Array[Rect2]:
 	for p in [Vector2(10.5,11.45),Vector2(11.6,9.85),Vector2(15.1,11.2),Vector2(13.8,8.6)]:
 		_bollard(p)
 	_finish_paths()
+	_add_path_guides()
 	_loading_yard()
+	_add_entrance_ramp("HabitatEntry",_access["habitat"],0.68)
+	_add_entrance_ramp("HallEntry",_access["hall"],float(_access["hall"]["step_width"]))
 	_radio_mast(Vector2(10.7,3.25))
 	return _footprints.duplicate()
 
+func get_access_snapshot() -> Dictionary:
+	return {"anchors":_access.duplicate(true),"paths":_paths.duplicate(true),"apron":_apron_rect,"entrance_ramps":_entrance_ramps.duplicate(true),"paving_height":ACCESS.PAVING_HEIGHT}
+
+func set_buildings_closed(closed: bool) -> void:
+	# The closed shell already owns its tread. In cutaway mode a neutral tread
+	# bridges the same entrance span; never render both coplanar top faces.
+	for threshold in _cutaway_thresholds:threshold.visible=not closed
+
 func _loading_yard() -> void:
 	# Flat authored apron: decoration does not introduce a second floor height.
-	var apron := _box(self,"LoadingApron",Vector3(4.35,0.012,1.20),Vector3(13.7,0.0,7.98),"858b7c")
+	var apron_center := _apron_rect.get_center()
+	var apron := _box(self,"LoadingApron",Vector3(_apron_rect.size.x,0.014,_apron_rect.size.y),Vector3(apron_center.x,0.007,apron_center.y),"858b7c")
 	apron.material_override = _paving_material("858b7c")
-	for x in [12.0,12.7,13.4,14.1,14.8,15.5]:
-		_box(self,"ApronBayStripe",Vector3(0.026,0.004,0.32),Vector3(x,0.009,8.32),"e0d2a0").material_override = _marking_material("e0d2a0")
+	for offset in [-0.74,0.74,1.45]:
+		var x: float = _access["hall"]["step_front"].x+offset
+		_box(self,"ApronBayStripe",Vector3(0.026,0.003,0.32),Vector3(x,0.0165,_apron_rect.end.y-0.22),"e0d2a0").material_override = _marking_material("e0d2a0")
 	for center in [Vector2(15.8,5.0),Vector2(16.7,5.6),Vector2(15.8,6.25)]:
 		_container(center,2 if center.y<5.5 else 1)
 
@@ -95,6 +124,10 @@ func _paving_material(color: String) -> ShaderMaterial:
 	material.shader = GROUND_SHADER
 	material.set_shader_parameter("base_color",Color(color))
 	material.set_shader_parameter("paved_surface",true)
+	material.set_shader_parameter("authored_paving_wear",true)
+	if _paths.size()==4:
+		for spec in [["wear_service_span",_paths[0]["points"][2],_paths[0]["points"][3]],["wear_hall_span",_paths[2]["points"][0],_paths[2]["points"].back()],["wear_utility_span",_paths[3]["points"][1],_paths[3]["points"][2]]]:
+			material.set_shader_parameter(spec[0],Vector4(spec[1].x,spec[1].y,spec[2].x,spec[2].y))
 	return material
 
 func _marking_material(color: String) -> ShaderMaterial:
@@ -117,27 +150,48 @@ func _box(parent: Node3D,label: String,size: Vector3,position: Vector3,color: St
 	parent.add_child(instance)
 	return instance
 
-func _path(points: Array,width: float,service_lane: bool = false) -> void:
+func _path(points: Array,width: float,service_lane: bool = false,id: String = "path") -> void:
 	var curve := Curve2D.new()
 	curve.bake_interval = 0.10
 	for index in range(points.size()):
 		var tangent: Vector2 = (points[mini(index+1,points.size()-1)]-points[maxi(index-1,0)])*0.12
+		if index<=1:tangent=(points[1]-points[0])*0.24
+		elif index>=points.size()-2:tangent=(points.back()-points[points.size()-2])*0.24
 		curve.add_point(points[index],-tangent,tangent)
 	var samples := curve.get_baked_points()
+	_paths.append({"id":id,"points":points.duplicate(),"samples":samples,"width":width,"service_lane":service_lane})
 	# Warm dusty shoulders merge with the red soil; the deck stays matte and low.
 	_ribbon(samples,width+0.14,0.007,"b47b53")
 	_ribbon(samples,width,0.010,"686f63")
-	_ribbon(samples,width-0.10,0.012,"747c6c")
+	_ribbon(samples,width-0.10,ACCESS.PAVING_HEIGHT,"747c6c")
+
+func _add_path_guides() -> void:
+	for path in _paths:
+		_add_lane_guides(path)
+
+func _guide_clear(point: Vector2,path: Dictionary) -> bool:
+	if _apron_rect.grow(0.05).has_point(point):return false
+	for other in _paths:
+		if other["id"]==path["id"]:continue
+		for sample in other["samples"]:
+			if point.distance_squared_to(sample)<pow(float(other["width"])*0.5+0.05,2.0):return false
+	return true
+
+func _add_lane_guides(path: Dictionary) -> void:
+	var samples: PackedVector2Array=path["samples"]
+	var width: float=path["width"]
 	for index in range(3,samples.size()-3,7):
 		var a: Vector2 = samples[index]
 		var direction: Vector2 = (samples[index+1]-samples[index-1]).normalized()
 		var normal := Vector2(-direction.y,direction.x)
 		for side in [-1.0,1.0]:
-			var marker := _box(self,"PathEdgeGuide",Vector3(0.024,0.003,0.24),Vector3(a.x+normal.x*(width*0.5-0.06)*side,0.017,a.y+normal.y*(width*0.5-0.06)*side),"cbc6a5")
+			var p: Vector2=a+normal*(width*0.5-0.06)*side
+			if not _guide_clear(p,path):continue
+			var marker := _box(self,"PathEdgeGuide",Vector3(0.024,0.003,0.24),Vector3(p.x,0.0165,p.y),"cbc6a5")
 			marker.rotation.y = atan2(direction.x,direction.y)
 			marker.material_override = _marking_material("cbc6a5")
-		if service_lane and index%2==1:
-			var center_mark := _box(self,"ServiceLaneGuide",Vector3(0.022,0.003,0.20),Vector3(a.x,0.018,a.y),"d4af67")
+		if path["service_lane"] and index%2==1 and _guide_clear(a,path):
+			var center_mark := _box(self,"ServiceLaneGuide",Vector3(0.022,0.003,0.20),Vector3(a.x,0.0165,a.y),"d4af67")
 			center_mark.rotation.y = atan2(direction.x,direction.y)
 			center_mark.material_override = _marking_material("d4af67")
 
@@ -172,17 +226,51 @@ func _finish_paths() -> void:
 		var layer: Dictionary = _path_layers[color]
 		var surface := SurfaceTool.new()
 		surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+		surface.set_normal(Vector3.UP)
 		for polygon in layer["polygons"]:
 			var indices := Geometry2D.triangulate_polygon(polygon)
-			for index in indices:
-				var point: Vector2 = polygon[index]
-				surface.add_vertex(Vector3(point.x,float(layer["height"]),point.y))
-		surface.generate_normals()
+			for offset in range(0,indices.size(),3):
+				var a: Vector2=polygon[indices[offset]]
+				var b: Vector2=polygon[indices[offset+1]]
+				var c: Vector2=polygon[indices[offset+2]]
+				if absf((b-a).cross(c-a))<0.00000001:continue
+				if (b-a).cross(c-a)<0.0:
+					var swap:=b
+					b=c
+					c=swap
+				for point in [a,b,c]:surface.add_vertex(Vector3(point.x,float(layer["height"]),point.y))
 		var instance := MeshInstance3D.new()
 		instance.name = "JoinedServicePaths"
+		instance.set_meta("path_layer",color)
 		instance.mesh = surface.commit()
 		instance.material_override = _paving_material(color)
 		add_child(instance)
+
+func _add_entrance_ramp(label: String,anchor: Dictionary,width: float) -> void:
+	var front: Vector2=anchor["step_front"]
+	var foot: Vector2=anchor["ground"]
+	var side := Vector2.RIGHT
+	var high := Vector3(front.x,ACCESS.STEP_TOP,front.y)
+	var low := Vector3(foot.x,ACCESS.PAVING_HEIGHT,foot.y)
+	var near_width: float=anchor["step_width"]
+	var a:=high+Vector3(side.x,0.0,side.y)*near_width*0.5
+	var b:=low+Vector3(side.x,0.0,side.y)*width*0.5
+	var c:=low-Vector3(side.x,0.0,side.y)*width*0.5
+	var d:=high-Vector3(side.x,0.0,side.y)*near_width*0.5
+	var surface:=SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for v in [a,b,c,a,c,d]:surface.add_vertex(v)
+	surface.generate_normals()
+	var ramp:=MeshInstance3D.new()
+	ramp.name=label+"AccessApron"
+	ramp.mesh=surface.commit()
+	ramp.material_override=_paving_material("858b7c" if label=="HallEntry" else "989c85")
+	add_child(ramp)
+	var bridge_center:=Vector3(front.x,0.0345,front.y-0.135)
+	var bridge:=_box(self,label+"CutawayThreshold",Vector3(near_width,0.045,0.27),bridge_center,"989c85")
+	bridge.hide()
+	_cutaway_thresholds.append(bridge)
+	_entrance_ramps.append({"id":label,"high":high,"low":low,"width":width})
 
 func _rock_group(center: Vector2,profile) -> void:
 	var root := Node3D.new()

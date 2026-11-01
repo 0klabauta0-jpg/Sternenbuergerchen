@@ -1,0 +1,107 @@
+{
+  "diagnostic_only": true,
+  "roi_xyxy": [
+    430,
+    650,
+    1015,
+    683
+  ],
+  "measure": "Darkness count is limited to the visually identified central lower road edge; not a generic acceptance metric.",
+  "variants": [
+    {
+      "id": "baseline",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_ssao",
+      "dark_pixels_max_channel_under_90": 3377,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_global_shadows",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_ssao_no_global_shadows",
+      "dark_pixels_max_channel_under_90": 3377,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_paving_cast",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_paving_or_ground_cast",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_ground_cast",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_dressing_cast",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_dressing_or_ground_cast",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_marking_cast",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "hide_layer_7",
+      "dark_pixels_max_channel_under_90": 1610,
+      "pixels_changed_over_12": 4057
+    },
+    {
+      "id": "hide_layer_10",
+      "dark_pixels_max_channel_under_90": 2952,
+      "pixels_changed_over_12": 2821
+    },
+    {
+      "id": "hide_layer_12",
+      "dark_pixels_max_channel_under_90": 6823,
+      "pixels_changed_over_12": 6471
+    },
+    {
+      "id": "no_cast_layer_7",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_cast_layer_10",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "no_cast_layer_12",
+      "dark_pixels_max_channel_under_90": 3388,
+      "pixels_changed_over_12": 0
+    },
+    {
+      "id": "up_only",
+      "dark_pixels_max_channel_under_90": 0,
+      "pixels_changed_over_12": 4243
+    },
+    {
+      "id": "flat_generated",
+      "dark_pixels_max_channel_under_90": 0,
+      "pixels_changed_over_12": 4243
+    },
+    {
+      "id": "up_and_winding",
+      "dark_pixels_max_channel_under_90": 0,
+      "pixels_changed_over_12": 4243
+    }
+  ]
+}

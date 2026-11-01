@@ -65,7 +65,16 @@ func run() -> void:
 	check(max_ticks-min_ticks <= 1,"all six equal visible routes take equal simulation time within one tick")
 	fixture.free()
 	var result := {"synthetic_fixture":true,"passed":passed,"failed":failed,"samples":samples,"tick_spread":max_ticks-min_ticks,"engine":Engine.get_version_info()}
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://output/grafik_20261101"))
-	FileAccess.open("res://output/grafik_20261101/hex_movement_verification.json",FileAccess.WRITE).store_string(JSON.stringify(result,"  "))
+	var evidence_path := "res://output/grafik_20261101/hex_movement_verification.json"
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--evidence-output="):evidence_path=arg.trim_prefix("--evidence-output=")
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(evidence_path.get_base_dir()))
+	var evidence_file := FileAccess.open(evidence_path,FileAccess.WRITE)
+	if evidence_file==null:
+		push_error("Cannot open Hex movement evidence %s: %s"%[evidence_path,FileAccess.get_open_error()])
+		quit(1)
+		return
+	evidence_file.store_string(JSON.stringify(result,"  "))
+	evidence_file.close()
 	print("FRONTIER_HEX_MOVEMENT ",JSON.stringify(result))
 	quit(1 if failed else 0)

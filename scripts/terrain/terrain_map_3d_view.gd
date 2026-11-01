@@ -1205,6 +1205,7 @@ var _dynamic_unit_source_signatures: Dictionary = {}
 var _fire_sector_los_cache: Dictionary = {}
 var _fire_sector_los_cache_signature: String = ""
 var _frontier_art_enabled: bool = false
+var _frontier_art_override: int = -1 # -1 follows the map/CLI; 0/1 are explicit visual overrides.
 var _external_terrain_object_visuals: Dictionary = {}
 var _flat_ground_visual_owner: WeakRef
 var _frontier_art_profile = FRONTIER_ART_PROFILE_SCRIPT.new()
@@ -1215,8 +1216,7 @@ var _hex_grid_visible: bool = true
 
 func _ready() -> void:
 	layer = -100
-	if OS.get_cmdline_user_args().has("--frontier-art-v1"):
-		_frontier_art_enabled = true
+	_update_frontier_art_profile()
 	_ensure_nodes()
 	_resize_subviewport()
 	_update_camera_transform()
@@ -1264,10 +1264,32 @@ func _process(delta: float) -> void:
 
 
 func set_frontier_art_enabled(enabled: bool) -> void:
+	# Store intent even when the effective value already matches. A later map
+	# change must not silently discard an explicit preview choice.
+	_frontier_art_override = 1 if enabled else 0
+	_refresh_frontier_art_override()
+
+
+func clear_frontier_art_override() -> void:
+	_frontier_art_override = -1
+	_refresh_frontier_art_override()
+
+
+func _update_frontier_art_profile() -> bool:
+	var enabled: bool = _frontier_art_override == 1 if _frontier_art_override >= 0 else (
+		OS.get_cmdline_user_args().has("--frontier-art-v1")
+		or _active_terrain_visual_theme_id == FRONTIER_ART_PROFILE_SCRIPT.PROFILE_ID
+	)
 	if _frontier_art_enabled == enabled:
-		return
+		return false
 	_frontier_art_enabled = enabled
 	_ground_batch_source_cache.clear()
+	return true
+
+
+func _refresh_frontier_art_override() -> void:
+	if not _update_frontier_art_profile():
+		return
 	if _terrain_map_data != null:
 		render_map()
 	else:
@@ -2425,6 +2447,7 @@ func get_render_snapshot() -> Dictionary:
 	var render_monitor_snapshot: Dictionary = _build_render_monitor_snapshot()
 	return {
 		"frontier_art_enabled": _frontier_art_enabled,
+		"frontier_art_override": _frontier_art_override,
 		"grid_topology": _active_grid_topology,
 		"frontier_art_profile_id": FRONTIER_ART_PROFILE_SCRIPT.PROFILE_ID if _frontier_art_enabled else "",
 		"read_only": true,
@@ -3537,6 +3560,7 @@ func _screen_to_viewport_position(screen_position: Vector2) -> Vector2:
 func _read_map_transform() -> void:
 	if _terrain_map_data == null:
 		_active_terrain_visual_theme_id = ""
+		_update_frontier_art_profile()
 		return
 	_grid_size = _terrain_map_data.call("get_grid_size")
 	var next_topology: String = String(_terrain_map_data.call("get_grid_topology")) if _terrain_map_data.has_method("get_grid_topology") else "square8"
@@ -3545,6 +3569,9 @@ func _read_map_transform() -> void:
 	_active_grid_topology = next_topology
 	_grid_origin_world = _terrain_map_data.call("get_grid_origin")
 	_active_terrain_visual_theme_id = _read_terrain_visual_theme_id(_terrain_map_data)
+	# This resolver only changes visual selection/cache state. render_map calls
+	# us, so invoking the public setter here would recursively rebuild the map.
+	_update_frontier_art_profile()
 	var tile_size: Dictionary = Dictionary(_terrain_map_data.call("get_tile_size"))
 	_half_tile_width = maxf(float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH)), 0.001)
 	_half_tile_height = maxf(float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT)), 0.001)
@@ -3676,7 +3703,7 @@ func _add_tile_visual(tile_data) -> void:
 	var cell_size: float = _get_3d_cell_size()
 	if _uses_hex_grid():
 		var hex_color: Color = _frontier_art_profile.surface_color(String(tile_data.surface_type)) if _frontier_art_enabled else _get_tile_color(tile_data)
-		var hex_material: Material = _frontier_art_profile.material_for(hex_color) if _frontier_art_enabled else _make_material(hex_color)
+		var hex_material: Material = _frontier_art_profile.surface_material_for(String(tile_data.surface_type)) if _frontier_art_enabled else _make_material(hex_color)
 		var owns_flat_ground: bool = height_level==0 and _flat_ground_visual_owner!=null and is_instance_valid(_flat_ground_visual_owner.get_ref())
 		if not owns_flat_ground:
 			_hex_ground_batch.queue_tile(_grid_to_3d_position(Vector2(tile_data.grid_position), top_y), hex_color, cell_size, hex_material)
@@ -3797,7 +3824,10 @@ func _queue_ground_model_batch(tile_data, top_y: float, visual_type_id: String =
 	var material_override_color: Color = _get_ground_surface_model_override_color(normalized_visual_type_id, tile_data)
 	var material_override_unshaded: bool = material_override_color != Color.TRANSPARENT and normalized_visual_type_id == "ground_flat" and not _frontier_art_enabled
 	var source_key: String = _build_ground_batch_source_key(normalized_visual_type_id, material_override_color, material_override_unshaded)
-	var source: Dictionary = _get_ground_batch_source(normalized_visual_type_id, material_override_color, material_override_unshaded, source_key)
+	var paved_surface: bool = _frontier_art_enabled and String(tile_data.surface_type)=="road"
+	if paved_surface:
+		source_key += ":paved"
+	var source: Dictionary = _get_ground_batch_source(normalized_visual_type_id, material_override_color, material_override_unshaded, source_key,paved_surface)
 	if source.is_empty():
 		return false
 	var mapped_entry: Dictionary = _get_model_entry_for_type(normalized_visual_type_id)
@@ -3885,7 +3915,7 @@ func _ground_model_supports_multimesh(visual_type_id: String) -> bool:
 	return GROUND_MULTIMESH_MODEL_KEYS.has(visual_type_id.strip_edges().to_lower())
 
 
-func _get_ground_batch_source(visual_type_id: String, material_override_color: Color, material_override_unshaded: bool, source_key: String) -> Dictionary:
+func _get_ground_batch_source(visual_type_id: String, material_override_color: Color, material_override_unshaded: bool, source_key: String, paved_surface: bool = false) -> Dictionary:
 	if _ground_batch_source_cache.has(source_key):
 		return Dictionary(_ground_batch_source_cache.get(source_key, {}))
 	var model_scene := _get_asset_model_scene(visual_type_id)
@@ -3901,7 +3931,7 @@ func _get_ground_batch_source(visual_type_id: String, material_override_color: C
 	if material_override_color != Color.TRANSPARENT:
 		material_override = _make_unshaded_material(material_override_color) if material_override_unshaded else _make_material(material_override_color)
 		if _frontier_art_enabled:
-			material_override = _frontier_art_profile.material_for(material_override_color)
+			material_override = _frontier_art_profile.material_for(material_override_color,false,paved_surface)
 		_apply_material_override_recursive(model_instance, material_override)
 	elif _is_space_station_model_entry(_get_model_entry_for_type(visual_type_id)):
 		material_override = _make_space_station_colormap_material()
@@ -4133,7 +4163,7 @@ func _apply_ground_surface_material_override(model_instance: Node3D, visual_type
 		return Color.TRANSPARENT
 	var material: Material = _make_unshaded_material(override_color) if visual_type_id.strip_edges().to_lower() == "ground_flat" else _make_material(override_color)
 	if _frontier_art_enabled:
-		material = _frontier_art_profile.material_for(override_color)
+		material = _frontier_art_profile.material_for(override_color,false,tile_data!=null and String(tile_data.surface_type)=="road")
 	_apply_material_override_recursive(model_instance, material)
 	return override_color
 

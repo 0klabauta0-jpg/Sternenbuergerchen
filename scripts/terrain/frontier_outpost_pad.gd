@@ -69,9 +69,13 @@ func _ramp(edge: float, length: float, width: float, side: float) -> void:
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for v in ([a,b,c,a,c,d] if side>0.0 else [a,c,b,a,d,c]): surface.add_vertex(v)
 	_mesh("AccessRamp",surface,"929889")
+	# Both rails follow the actual ramp endpoints, including its deck overlap.
+	var span := b-a
+	var rail_center := (a+b)*0.5
+	var rail_angle := atan2(span.y,absf(span.x))*side
 	for z in [-width*0.45,width*0.45]:
-		var strip := _box("RampEdge",Vector3(length,0.014,0.035),Vector3(edge+length*0.5*side,DECK_HEIGHT*0.5+0.01,z),"c7b879")
-		strip.rotation.z = -atan2(DECK_HEIGHT-0.014,length)*side
+		var strip := _box("RampEdge",Vector3(span.length(),0.014,0.035),Vector3(rail_center.x,rail_center.y,z),"c7b879")
+		strip.rotation.z = rail_angle
 
 func _mesh(label: String,surface: SurfaceTool,color: String) -> void:
 	surface.generate_normals()

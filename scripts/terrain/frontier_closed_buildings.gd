@@ -2,6 +2,7 @@ extends Node3D
 ## Display-only exterior family: parent visibility keeps the closed/cutaway switch.
 ## Geometry remains within original XZ bounds+0.22m and original height+0.20m.
 const WEAR_SHADER = preload("res://shaders/terrain/frontier_building_wear.gdshader")
+const ACCESS = preload("res://scripts/terrain/frontier_access_anchors.gd")
 var _materials: Dictionary = {}
 var _wear_height := 1.0
 var _wear_seed := 3.2
@@ -23,6 +24,7 @@ func build(bounds: AABB, hall: bool) -> void:
 	set_meta("permitted_margin_xz",0.22)
 	set_meta("maximum_height",height+0.20)
 	set_meta("material_revision","pass06_selective_painterly_wear")
+	set_meta("access_anchor",ACCESS.building(bounds,hall))
 
 func _build_habitat(size: Vector2,height: float) -> void:
 	var wall_top := height*0.89
@@ -70,8 +72,8 @@ func _build_hall(size: Vector2,height: float) -> void:
 
 func _add_front(size: Vector2,height: float,hall: bool) -> void:
 	var front := size.y*0.5
-	var door_x: float = -size.x*0.10 if hall else 0.0
-	var opening_width: float = size.x*(0.54 if hall else 0.25)
+	var door_x: float = ACCESS.door_offset(size.x,hall)
+	var opening_width: float = ACCESS.door_width(size.x,hall)
 	var opening_height: float = height*(0.65 if hall else 0.69)
 	var door_y := opening_height*0.5+0.07
 	var frame_z := front+0.045

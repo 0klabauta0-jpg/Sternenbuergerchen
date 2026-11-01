@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "runtime_slice",
+      "script": "res://scripts/tests/frontier_runtime_map_slice_verifier.gd",
+      "args": [],
+      "success_marker": "FRONTIER_RUNTIME_SLICE_RESULT",
+      "timeout": 120
+    },
+    {
+      "name": "cli_override",
+      "script": "res://scripts/tests/frontier_runtime_map_slice_verifier.gd",
+      "args": [
+        "--frontier-art-v1",
+        "--cli-profile-check"
+      ],
+      "success_marker": "FRONTIER_RUNTIME_SLICE_RESULT",
+      "timeout": 120
+    },
+    {
+      "name": "theme_override",
+      "script": "res://art/frontier_illustrated_20261101/environment/pass07/runtime/theme_override_probe.gd",
+      "args": [],
+      "success_marker": "FRONTIER_THEME_OVERRIDE_RESULT",
+      "timeout": 120
+    },
+    {
+      "name": "editor_live_158",
+      "script": "res://scripts/tests/task_158_verifier.gd",
+      "args": [],
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 120
+    },
+    {
+      "name": "legacy_view_159",
+      "script": "res://scripts/tests/task_159_verifier.gd",
+      "args": [],
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 120
+    },
+    {
+      "name": "theme_413",
+      "script": "res://scripts/tests/task_413_terrain_theme_packs_ground_mission_variant.gd",
+      "args": [],
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 120
+    },
+    {
+      "name": "editor_save_mp_287",
+      "script": "res://scripts/tests/task_287_editor_save_multiplayer_contract_regression_review.gd",
+      "args": [],
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 120
+    },
+    {
+      "name": "art_profile",
+      "script": "res://scripts/tests/frontier_art_profile_verifier.gd",
+      "args": [],
+      "success_marker": "FRONTIER_ART_RESULT",
+      "timeout": 120
+    },
+    {
+      "name": "hex_foundation",
+      "script": "res://scripts/tests/frontier_hex_foundation_verifier.gd",
+      "args": [],
+      "success_marker": "FRONTIER_HEX_FOUNDATION_ALL_PASS",
+      "timeout": 120
+    },
+    {
+      "name": "hex_render",
+      "script": "res://scripts/tests/frontier_hex_render_verifier.gd",
+      "args": [],
+      "success_marker": "FRONTIER_HEX_RENDER",
+      "timeout": 120
+    },
+    {
+      "name": "hex_movement",
+      "script": "res://scripts/tests/frontier_hex_movement_verifier.gd",
+      "args": [
+        "--evidence-output=res://output/grafik_20261101/pass07_runtime/hex_movement_private.json"
+      ],
+      "success_marker": "FRONTIER_HEX_MOVEMENT",
+      "timeout": 120
+    },
+    {
+      "name": "hex_visibility",
+      "script": "res://scripts/tests/frontier_hex_visibility_verifier.gd",
+      "args": [],
+      "success_marker": " passed, 0 failed ===",
+      "timeout": 120
+    }
+  ]
+}

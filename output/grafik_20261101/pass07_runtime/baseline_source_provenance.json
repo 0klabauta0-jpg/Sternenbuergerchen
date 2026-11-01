@@ -1,0 +1,16 @@
+{
+  "base_commit": "501201b0c56ebf3dee7b96541381f1c6de74ee64",
+  "baseline_project": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\pass07_runtime\\baseline_head",
+  "project_only_adjustment": "different application name for isolated fresh user data; no gameplay or script change",
+  "shared_read_only_resources": [
+    "Assets",
+    "addons",
+    ".godot",
+    "docs"
+  ],
+  "scripts_maps_data_shaders": "git archive HEAD, no shared-source checkout/reset",
+  "extracted_project_retained": false,
+  "source_archive": "output/grafik_20261101/pass07_runtime/baseline_head_sources.zip",
+  "source_archive_sha256": "86ca9fa31f833d9d5c14926db40fa812dc262e2296fc8b35f9759d242266bd38",
+  "cleanup": "Verified child of own pass07_runtime directory; removed four junctions themselves before deleting only extracted source files."
+}

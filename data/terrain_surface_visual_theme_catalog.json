@@ -21,6 +21,18 @@
 		"water": "nature_ground_dirt_river_tile"
 	},
 	"themes": {
+		"frontier_illustrated_v1": {
+			"description": "Illustrated Frontier visual profile on explicitly authored maps; topology and gameplay fields remain MapData facts.",
+			"visual_only": true,
+			"surface_model_by_surface": {
+				"ground": "ground_flat",
+				"sand": "ground_flat",
+				"rock": "ground_flat",
+				"road": "ground_flat",
+				"water": "nature_ground_dirt_river_tile"
+			},
+			"tile_type_overrides": {}
+		},
 		"space_default_v1": {
 			"description": "Compatibility pack: all gameplay surfaces keep the Space Kit ground base.",
 			"visual_only": true,

@@ -1,0 +1,80 @@
+{
+	"before_source_sha256": "0f2ac2200330f473c1fcd2fa3c57ef779a530f55c0d9c62991ba5713b24805b2",
+	"captures": [
+		{
+			"camera_size": 1.45000004768372,
+			"camera_transform": "[X: (0.790125, 0.0, -0.612946), Y: (-0.247117, 0.915128, -0.31855), Z: (0.560924, 0.403164, 0.723065), O: (4.05, 1.05, 1.65)]",
+			"error": 0,
+			"id": "east_join_before",
+			"path": "res://output/grafik_20261101/pass07_pad_rails_east_join_before.png"
+		},
+		{
+			"camera_size": 1.45000004768372,
+			"camera_transform": "[X: (0.790125, 0.0, -0.612946), Y: (-0.247117, 0.915128, -0.31855), Z: (0.560924, 0.403164, 0.723065), O: (4.05, 1.05, 1.65)]",
+			"error": 0,
+			"id": "east_join_after",
+			"path": "res://output/grafik_20261101/pass07_pad_rails_east_join_after.png"
+		},
+		{
+			"camera_size": 6.40000009536743,
+			"camera_transform": "[X: (0.761352, 0.0, -0.648339), Y: (-0.311233, 0.877243, -0.365484), Z: (0.568751, 0.480047, 0.667891), O: (6.0, 4.7, 6.4)]",
+			"error": 0,
+			"id": "east_game_before",
+			"path": "res://output/grafik_20261101/pass07_pad_rails_east_game_before.png"
+		},
+		{
+			"camera_size": 6.40000009536743,
+			"camera_transform": "[X: (0.761352, 0.0, -0.648339), Y: (-0.311233, 0.877243, -0.365484), Z: (0.568751, 0.480047, 0.667891), O: (6.0, 4.7, 6.4)]",
+			"error": 0,
+			"id": "east_game_after",
+			"path": "res://output/grafik_20261101/pass07_pad_rails_east_game_after.png"
+		},
+		{
+			"camera_size": 1.45000004768372,
+			"camera_transform": "[X: (0.790125, 0.0, 0.612946), Y: (0.247117, 0.915128, -0.31855), Z: (-0.560924, 0.403164, 0.723066), O: (-3.65, 1.05, 1.65)]",
+			"error": 0,
+			"id": "west_join_before",
+			"path": "res://output/grafik_20261101/pass07_pad_rails_west_join_before.png"
+		},
+		{
+			"camera_size": 1.45000004768372,
+			"camera_transform": "[X: (0.790125, 0.0, 0.612946), Y: (0.247117, 0.915128, -0.31855), Z: (-0.560924, 0.403164, 0.723066), O: (-3.65, 1.05, 1.65)]",
+			"error": 0,
+			"id": "west_join_after",
+			"path": "res://output/grafik_20261101/pass07_pad_rails_west_join_after.png"
+		},
+		{
+			"camera_size": 6.40000009536743,
+			"camera_transform": "[X: (0.761352, 0.0, 0.648339), Y: (0.311233, 0.877243, -0.365484), Z: (-0.568751, 0.480047, 0.667891), O: (-6.0, 4.7, 6.4)]",
+			"error": 0,
+			"id": "west_game_before",
+			"path": "res://output/grafik_20261101/pass07_pad_rails_west_game_before.png"
+		},
+		{
+			"camera_size": 6.40000009536743,
+			"camera_transform": "[X: (0.761352, 0.0, 0.648339), Y: (0.311233, 0.877243, -0.365484), Z: (-0.568751, 0.480047, 0.667891), O: (-6.0, 4.7, 6.4)]",
+			"error": 0,
+			"id": "west_game_after",
+			"path": "res://output/grafik_20261101/pass07_pad_rails_west_game_after.png"
+		}
+	],
+	"diagnostic_only": true,
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"renderer": {
+		"adapter": "NVIDIA GeForce RTX 4070 Ti SUPER",
+		"driver": "vulkan",
+		"method": "forward_plus"
+	},
+	"scope": "Isolated pad rail endpoint correction; same camera/light/material between each pair; no preview/runtime/campaign acceptance.",
+	"source_sha256": "1301ddd9ddf8b17490615ab5bb50419d0e05b58f958586dae658e81209679772"
+}

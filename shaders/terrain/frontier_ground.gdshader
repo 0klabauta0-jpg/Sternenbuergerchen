@@ -4,6 +4,10 @@ render_mode diffuse_burley, specular_disabled;
 uniform vec4 base_color : source_color = vec4(0.76, 0.49, 0.30, 1.0);
 uniform bool rock_strata = false;
 uniform bool paved_surface = false;
+uniform bool authored_paving_wear = false;
+uniform vec4 wear_service_span = vec4(11.2,10.45,15.0,10.45);
+uniform vec4 wear_hall_span = vec4(13.2,8.48,13.2,10.45);
+uniform vec4 wear_utility_span = vec4(15.15,10.25,16.1,9.15);
 uniform bool marking_surface = false;
 uniform vec4 sediment_color : source_color = vec4(0.73, 0.51, 0.33, 1.0);
 varying vec3 ground_world_position;
@@ -96,8 +100,10 @@ void fragment() {
 		value *= mix(0.94, 1.04, stroke);
 	}
 	if (paved_surface) {
-		float wheels=max(wheel_mark(ground_world_position.xz,vec2(12.5,7.0),vec2(13.1,10.3)),wheel_mark(ground_world_position.xz,vec2(13.1,7.0),vec2(13.7,10.3)));
-		value*=1.0-wheels*0.18;
+		if (authored_paving_wear) {
+			float wheels=max(wheel_mark(ground_world_position.xz,wear_hall_span.xy+vec2(-0.28,0.0),wear_hall_span.zw+vec2(-0.28,0.0)),wheel_mark(ground_world_position.xz,wear_hall_span.xy+vec2(0.28,0.0),wear_hall_span.zw+vec2(0.28,0.0)));
+			value*=1.0-wheels*0.18;
+		}
 		// Scuffed aggregate and dusty, broad paint loss. No regular tile lattice.
 		float scuff = smoothstep(0.46, 0.72, broad_patch(ground_world_position.xz * 3.7));
 		float worn = smoothstep(0.42, 0.75, sediment) * scuff;
@@ -106,9 +112,9 @@ void fragment() {
 		// Local deposits on quiet straight approach spans soften selected road
 		// shoulders without a second coplanar overlay or a universal orange border.
 		vec2 p=ground_world_position.xz;
-		float shoulder=dusty_shoulder(p,vec2(11.2,10.45),vec2(15.0,10.45),1.04);
-		shoulder=max(shoulder,dusty_shoulder(p,vec2(13.2,8.48),vec2(13.2,10.45),0.84));
-		shoulder=max(shoulder,dusty_shoulder(p,vec2(15.15,10.25),vec2(16.1,9.15),0.64));
+		float shoulder=authored_paving_wear?dusty_shoulder(p,wear_service_span.xy,wear_service_span.zw,1.04):0.0;
+		shoulder=max(shoulder,authored_paving_wear?dusty_shoulder(p,wear_hall_span.xy,wear_hall_span.zw,0.84):0.0);
+		shoulder=max(shoulder,authored_paving_wear?dusty_shoulder(p,wear_utility_span.xy,wear_utility_span.zw,0.64):0.0);
 		float broken_deposit=shoulder*smoothstep(0.40,0.80,broad_patch(p*7.0+vec2(patch,region)));
 		pigment=mix(pigment,sediment_color.rgb,broken_deposit*0.30);
 	}

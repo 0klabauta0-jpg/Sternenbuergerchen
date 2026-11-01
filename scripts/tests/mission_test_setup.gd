@@ -900,7 +900,8 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 		"configure_iso_grid",
 		terrain_map_data.call("get_grid_origin"),
 		float(tile_size.get("half_width", 64.0)),
-		float(tile_size.get("half_height", 32.0))
+		float(tile_size.get("half_height", 32.0)),
+		String(terrain_map_data.call("get_grid_topology"))
 	)
 
 	for tile_data in terrain_map_data.call("get_tiles"):

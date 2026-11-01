@@ -1,0 +1,8 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: saved Frontier theme activates profile without a start flag
+FAIL: explicit override can return to saved-map selection
+FAIL: real editor registry keeps loaded Hex topology
+FAIL: regular mission setup registry keeps loaded Hex topology
+FRONTIER_RUNTIME_SLICE_RESULT {"checks":[{"label":"saved Frontier theme activates profile without a start flag","passed":false},{"label":"legacy map clears map-selected profile","passed":true},{"label":"explicit false while already false survives later Frontier map","passed":true},{"label":"explicit true survives later legacy map","passed":true},{"label":"explicit override can return to saved-map selection","passed":false},{"label":"real editor registry keeps loaded Hex topology","passed":false},{"label":"regular mission setup registry keeps loaded Hex topology","passed":false}],"failed":4,"passed":3}

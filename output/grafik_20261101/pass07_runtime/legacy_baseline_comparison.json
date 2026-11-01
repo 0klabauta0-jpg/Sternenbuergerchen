@@ -1,0 +1,89 @@
+{
+  "base_commit": "501201b0c56ebf3dee7b96541381f1c6de74ee64",
+  "assertion_sets_identical": true,
+  "production_tests_modified": false,
+  "overall_legacy_gates_pass": false,
+  "scope": "Exact executed failure-label comparison only; existing failing assertions can mask untested differences. Neither test is relabeled green. Baseline application name changed solely for isolated fresh user data.",
+  "tests": [
+    {
+      "task": 158,
+      "baseline": {
+        "passed": 29,
+        "failed": 13,
+        "labels": [
+          "FAIL: Waiting dropship is mirrored into the 2.5D primary view without auto LZ",
+          "FAIL: Waiting dropship uses the calibrated Kenney speeder GLB in the 3D primary view",
+          "FAIL: Player/controller LZ path sets the mission LZ",
+          "FAIL: LZ becomes visible only after player path placement",
+          "FAIL: Calling dropship starts the inbound live sequence",
+          "FAIL: Dropship deploys and switches to outbound after reaching LZ",
+          "FAIL: Selected fireteam deploys through dropship state",
+          "FAIL: Objective reports live friendly capture progress",
+          "FAIL: GO executes the created Attack Area",
+          "FAIL: Tactical controller tracks active Attack Area execution",
+          "FAIL: Live contact system exposes scenario enemy contacts",
+          "FAIL: Contact overlay visual bridge shows live contacts",
+          "FAIL: Friendly and enemy live visuals are visible"
+        ],
+        "log_sha256": "7af87e17d0dfbd287080dab66a6367754ceb77d3ca38206bbf1df4ebfcca0aac",
+        "log": "output/grafik_20261101/pass07_runtime/baseline_158.log"
+      },
+      "candidate": {
+        "passed": 29,
+        "failed": 13,
+        "labels": [
+          "FAIL: Waiting dropship is mirrored into the 2.5D primary view without auto LZ",
+          "FAIL: Waiting dropship uses the calibrated Kenney speeder GLB in the 3D primary view",
+          "FAIL: Player/controller LZ path sets the mission LZ",
+          "FAIL: LZ becomes visible only after player path placement",
+          "FAIL: Calling dropship starts the inbound live sequence",
+          "FAIL: Dropship deploys and switches to outbound after reaching LZ",
+          "FAIL: Selected fireteam deploys through dropship state",
+          "FAIL: Objective reports live friendly capture progress",
+          "FAIL: GO executes the created Attack Area",
+          "FAIL: Tactical controller tracks active Attack Area execution",
+          "FAIL: Live contact system exposes scenario enemy contacts",
+          "FAIL: Contact overlay visual bridge shows live contacts",
+          "FAIL: Friendly and enemy live visuals are visible"
+        ],
+        "log_sha256": "c8c1746b75251b1d140c200e9a776e11c9cb4ad094b2c6a7ce10b20e824686a5",
+        "log": "output/grafik_20261101/pass07_runtime/strict_runs/20261101T201928Z-pid135184/logs/engine-check-editor_live_158.log"
+      },
+      "new_failure_labels": [],
+      "all_original_tests_pass": false
+    },
+    {
+      "task": 159,
+      "baseline": {
+        "passed": 86,
+        "failed": 6,
+        "labels": [
+          "[FAIL] Editor Primary3DView renders visible field borders",
+          "[FAIL] Visual parity 3D map renders field borders for every tile",
+          "[FAIL] Visual parity ground tile uses the Kenney terrain GLB",
+          "[FAIL] Visual parity ground tile keeps the Kenney terrain material",
+          "[FAIL] Live 2.5D unit proxy faces its movement target",
+          "[FAIL] Live 2.5D dropship faces its approach target"
+        ],
+        "log_sha256": "15556134d4a81ee17ae77492bf784fa2f069442ee1a71e34f8a49f8c2c07dacc",
+        "log": "output/grafik_20261101/pass07_runtime/baseline_159.log"
+      },
+      "candidate": {
+        "passed": 86,
+        "failed": 6,
+        "labels": [
+          "[FAIL] Editor Primary3DView renders visible field borders",
+          "[FAIL] Visual parity 3D map renders field borders for every tile",
+          "[FAIL] Visual parity ground tile uses the Kenney terrain GLB",
+          "[FAIL] Visual parity ground tile keeps the Kenney terrain material",
+          "[FAIL] Live 2.5D unit proxy faces its movement target",
+          "[FAIL] Live 2.5D dropship faces its approach target"
+        ],
+        "log_sha256": "8c1366a7764f89db21ee8b9424faa6a57753bc3ed7d95688d8d64b4b2b4efce4",
+        "log": "output/grafik_20261101/pass07_runtime/strict_runs/20261101T201928Z-pid135184/logs/engine-check-legacy_view_159.log"
+      },
+      "new_failure_labels": [],
+      "all_original_tests_pass": false
+    }
+  ]
+}
