@@ -1,5 +1,15 @@
 # IMPLEMENTATION_STATUS
 
+### Native UI R2 2026-11-02 – Verdichtung und Funktionsprüfung
+- Nutzerauftrag: weiterer Pass näher an den bestätigten Bild-KI-Vorlagen, ausdrücklich mit Logik-/Funktionsprüfung. Branch `task/ui-umsetzung-r2-20261101`, bewusst auf dem noch nicht integrierten R1 `80593f416` und Konzeptstand `135466b5c`; Integrationsbasis `3cae5a216`.
+- Mission: 160px-Randband, begrenzte Teamgruppe, flacherer Mitgliederstreifen, verständliche Haltung und bestätigte Feuerregel im nativen Dropdown. Alte Callbacks/Gates bleiben Owner; Diagnose in Details, korrekte Aktionsmarkierungen, Popup schließt beim Metawechsel.
+- Heimatbasis/FOB: kompaktes Briefing und volle Arbeitsbereiche, erreichbare Details/Scrollflächen, flexible Poolkarten und kompakter Respawn. Zuweisungs-/Loadout-/Lead-/Transit-/Read-only-Pfade bleiben erhalten. FOB-Kontext folgt dem vorhandenen State-Refresh auch bei reinem Fokuswechsel ohne Resize.
+- Debrief: gegliederte native Ergebnis-/Personen-/FTL-/Ereignis-/Entwicklungskarten aus vorhandenen Resultaten, ehrliche Leerzustände, feste Rückwege. Slotänderungen werden signalgetrieben statt per Frame nachgeführt. Settings: beschriftete Audioentwürfe und Cancel; Bibliothek erhält Fokus/Controls. Lobby: Setup scrollt, Verbindung/Sitzung bleibt fest und gegatet, Badges und verschobene Kontexthilfe erhalten.
+- Bestätigter Savefehler korrigiert: Basiswurfgrenze 0.22 wurde fälschlich auf effektive Traitwerte angewandt. Validator akzeptiert nun den bestehenden endlichen 0..1-Profilvertrag; Generatorwerte, Traits und Balance unverändert. Echte problematische Roster roundtrippen durch den Store.
+- Nachweis: 27 gezielte Checks / 1.731 Assertions ohne Fehler,17 reale Windows-/GL-Captures (davon 6 physisch/logisch 1280×720),10 Offline-HTML-/Exportprüfungen. Akzeptierte letzte Einzelruns und fixierte Quellen-/Artefakthashes: `docs/qa/ui_native_r2_20261101/VERIFIKATION.json`.
+- Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_NATIVE_R2_2026-11-02.html` mit getrenntem R2/R1/Konzeptvergleich und vollständigem lokalem JSON-Feedback; Task und Designvertrag dokumentieren Gründe und Owners.
+- Grenzen: keine menschlich vollständig durchgespielte Runde/Release-/EXE-/Langzeitabnahme. Die bestehende fehlende Lobby-Payload-Netzwerkanbindung bleibt ausdrücklich offen; NativeUI-R2 ist keine bestätigte reale Mehrspielerpartie. Hauptcheckout und alte Nachweise bleiben erhalten.
+
 ### Native UI R1 2026-11-01 – bestaetigte Entwuerfe im Spiel
 - Nutzerfreigabe: Gestaltung positiv bewertet und native Umsetzung beauftragt. Neuer Branch `task/ui-umsetzung-r1-20261101`, bewusst auf noch nicht integriertem Konzeptstand `135466b5c` auf Basis `integration/core-foundation` aufgebaut.
 - Gemeinsames gecachtes natives Theme fuer Fenster, Karten, Buttons, Dropdowns, Inputs, Tabs, Scrollbars und Fokus; MetaUISkin delegiert. Hauptmenue/Creator, Settings/Escape/Hilfe, Lobby, Heimatbasis/FOB, Personenbogen, Debrief und Editor angebunden. Separate rechte Teamlibrary, begrenzte scrollbare Settings-/Creatorfenster mit festen Aktionen.

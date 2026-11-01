@@ -3911,6 +3911,13 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 	var overlay := get_node_or_null("../TacticalUI/CharacterOverlay") as Control
 	if overlay != null:
 		overlay.visible = is_visible and _character_overlay_open
+	if not is_visible:
+		var details := get_node_or_null("../TacticalUI/A5TeamDetailsPopup") as PopupPanel
+		if details != null:
+			details.hide()
+		var rule_selector := get_node_or_null("%s/A5FireRuleSelector" % FIRETEAM_PANEL_PATH) as OptionButton
+		if rule_selector != null:
+			rule_selector.get_popup().hide()
 
 
 func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool = true) -> void:
@@ -4638,7 +4645,7 @@ func _refresh_selected_fireteam_cards() -> void:
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit != null and unit.has_method("get_unit_id") else ""
 		var in_drop_transit: bool = not unit_id.is_empty() and hud_embarked_unit_state.has(unit_id) and not _deployed_unit_ids.has(unit_id)
-		card.custom_minimum_size = Vector2(196.0, 132.0)
+		card.custom_minimum_size = Vector2(196.0, 88.0)
 		card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		card.call(
 			"setup_from_profile",
@@ -4653,10 +4660,10 @@ func _refresh_selected_fireteam_cards() -> void:
 				"selected": _is_selected_member_card_unit(unit, selected_cards_fireteam_id),
 				"disabled": in_drop_transit,
 				"fixed_size": true,
-				"fixed_card_size": Vector2(196.0, 132.0),
+				"fixed_card_size": Vector2(196.0, 88.0),
 				"compact_wrap_text": true,
-				"compact_data_a_max_lines": 2,
-				"compact_data_b_max_lines": 4,
+				"compact_data_a_max_lines": 1,
+				"compact_data_b_max_lines": 2,
 				"compact_text_min_width": 108.0,
 				"compact_name_font_size": 15,
 				"compact_data_font_size": 12,
@@ -13662,7 +13669,7 @@ func _build_fire_rule_button_snapshot() -> Dictionary:
 		var rule: String = String(spec.get("rule", "")).strip_edges().to_lower()
 		if rule.is_empty():
 			continue
-		var button_snapshot: Dictionary = _build_button_snapshot(NodePath(String(spec.get("path", ""))))
+		var button_snapshot: Dictionary = _build_hierarchy_button_snapshot("fire_rule_" + rule, NodePath(String(spec.get("path", ""))))
 		button_snapshot["rule"] = rule
 		var button := get_node_or_null(NodePath(String(spec.get("path", "")))) as Button
 		button_snapshot["active"] = button != null and button.button_pressed
@@ -14016,6 +14023,20 @@ func _build_full_command_button_snapshot() -> Dictionary:
 func _build_hierarchy_button_snapshot(action_id: String, button_path: NodePath) -> Dictionary:
 	var snapshot: Dictionary = _build_button_snapshot(button_path)
 	snapshot["action_id"] = action_id
+	if action_id.begins_with("fire_rule_"):
+		var selector := get_node_or_null("%s/A5FireRuleSelector" % FIRETEAM_PANEL_PATH) as OptionButton
+		if selector != null:
+			# Availability belongs to the presented option; original nodes retain
+			# their command gate and callback. Raw node visibility stays explicit.
+			snapshot["source_node_visible"] = snapshot.get("visible", false)
+			snapshot["presentation_path"] = String(selector.get_path())
+			snapshot["visible"] = selector.visible
+			snapshot["is_visible_in_tree"] = selector.is_visible_in_tree()
+			snapshot["global_rect"] = selector.get_global_rect()
+			for index in range(selector.item_count):
+				if String(selector.get_item_metadata(index)) == action_id.trim_prefix("fire_rule_"):
+					snapshot["presentation_label"] = selector.get_item_text(index)
+					break
 	return snapshot
 
 
@@ -14957,6 +14978,10 @@ func _apply_native_a5_hud_layout() -> void:
 	NATIVE_A5_HUD_LAYOUT_SCRIPT.configure(self, {
 		"target_armed": _is_target_placement_armed,
 		"fire_rule": _get_selected_fire_rule_consensus(),
+		"fire_rule_enabled": not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty(),
+		"delete_active": _has_deletable_order_focus(),
+		"sort_active": not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty(),
+		"feedback": _last_command_text,
 	})
 	var source := get_node_or_null(command_feedback_label_path) as Label
 	var order_text := "Auftrag: Keine Befehle geplant"
@@ -14979,6 +15004,7 @@ func _apply_native_a5_hud_layout() -> void:
 			order_text = "Auftrag: %d Wegpunkte · %d Gebiete" % [waypoint_count, area_count]
 	if _selected_fireteam_ids.is_empty():
 		order_text = "Auftrag: Fireteam auswählen"
+	var team_header := _build_native_team_header()
 	NATIVE_A5_HUD_LAYOUT_SCRIPT.refresh(self, {
 		"visible": _tactical_ui_visible,
 		"target": _format_world_position(_selected_tile_world_position) if _has_selected_tile else target_text,
@@ -14986,8 +15012,52 @@ func _apply_native_a5_hud_layout() -> void:
 		"order": order_text,
 		"detail": detail_text,
 		"feedback": _last_command_text,
-		"team": "Fireteam %s" % _get_fireteam_name() if not _selected_fireteam_ids.is_empty() else "Kein Fireteam ausgewählt",
+		"team": team_header.title,
+		"team_summary": team_header.summary,
+		"fire_rule": _get_selected_fire_rule_consensus(),
+		"fire_rule_enabled": not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty(),
 	})
+
+
+func _build_native_team_header() -> Dictionary:
+	if _selected_fireteam_ids.is_empty():
+		return {"title": "Kein Fireteam ausgewählt", "summary": "Fireteam links oder auf der Karte auswählen"}
+	var member_ids: Dictionary = {}
+	for fireteam_id in _selected_fireteam_ids:
+		for unit in _get_fireteam_units(String(fireteam_id), true):
+			if unit != null and unit.has_method("get_unit_id"):
+				member_ids[String(unit.call("get_unit_id"))] = true
+	if _selected_fireteam_ids.size() > 1:
+		return {"title": "Alle Fireteams" if _is_all_fireteams_selected() else "%d Fireteams" % _selected_fireteam_ids.size(), "summary": "%d Teams · %d Operatoren" % [_selected_fireteam_ids.size(), member_ids.size()]}
+	var fireteam_id := String(_selected_fireteam_ids[0])
+	var lead = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	var lead_name := String(lead.call("get_display_name")) if lead != null and lead.has_method("get_display_name") else "nicht zugewiesen"
+	return {"title": _get_fireteam_display_label(fireteam_id), "summary": "%d Operatoren · FTL %s" % [member_ids.size(), lead_name]}
+
+
+func _on_native_fire_rule_selected(index: int) -> void:
+	var selector := get_node_or_null("%s/A5FireRuleSelector" % FIRETEAM_PANEL_PATH) as OptionButton
+	if selector != null and not selector.disabled and index >= 0 and index < selector.item_count:
+		var rule := String(selector.get_item_metadata(index))
+		for spec_variant in _get_fire_rule_button_specs():
+			var spec := Dictionary(spec_variant)
+			if String(spec.get("rule", "")) != rule:
+				continue
+			var original := get_node_or_null(String(spec.get("path", ""))) as Button
+			if original != null and not original.disabled:
+				original.pressed.emit()
+			break
+	# OptionButton may select provisionally. Always read the confirmed owner back,
+	# including while its existing network request is pending or rejected.
+	_apply_native_a5_hud_layout()
+
+
+func _open_native_team_details() -> void:
+	var popup := get_node_or_null("../TacticalUI/A5TeamDetailsPopup") as PopupPanel
+	if popup != null:
+		var viewport_size := Vector2i(get_viewport().get_visible_rect().size)
+		popup.popup_centered(Vector2i(mini(740, viewport_size.x - 32), mini(420, viewport_size.y - 32)))
+		_apply_native_a5_hud_layout()
 
 
 func _deferred_enforce_drop_light_fixed_hud_layout() -> void:

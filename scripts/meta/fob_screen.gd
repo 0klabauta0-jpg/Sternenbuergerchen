@@ -79,11 +79,14 @@ var _dropship_transport_craft_id: String = ""
 var _mission_launch_ready_craft_id: String = ""
 var _unified_transit_entries: Array = []
 var _pending_transport_remove: Dictionary = {}
+var _r2_layout_refresh_pending: bool = false
 
 
 func _ready() -> void:
 	TACTICAL_UI_THEME_SCRIPT.apply_screen(self)
 	set_meta("native_ui_screen_family", "fob")
+	if not get_viewport().size_changed.is_connected(_enforce_drop_light_fixed_layout):
+		get_viewport().size_changed.connect(_enforce_drop_light_fixed_layout)
 	META_UI_SKIN_SCRIPT.apply_fob(self)
 	_apply_drop_light_fixed_layout()
 	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
@@ -163,8 +166,7 @@ func _ready() -> void:
 
 
 func _apply_drop_light_fixed_layout() -> void:
-	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
-	custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
+	custom_minimum_size = Vector2.ZERO
 	set_meta("drop_light_fixed_fullhd_layout", true)
 	set_meta("drop_light_screen", DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SCREEN_FOB"))
 
@@ -230,15 +232,107 @@ func _apply_drop_light_fixed_layout() -> void:
 
 
 func _enforce_drop_light_fixed_layout() -> void:
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_fob_layout")
-	_apply_fixed_window_contract("Panel", layout.get("viewport"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/MissionPanel", layout.get("topbar"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/AvailablePanel", layout.get("unassigned_pool"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/FireteamPanel", layout.get("fireteams"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/StagingPanel", layout.get("loadout"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/DropshipPanel", layout.get("flightdeck"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/DropLightBottomRow/BoardingStatusPanel", layout.get("boarding_status"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/DropLightBottomRow/ActionsPanel", layout.get("actions"))
+	var layout := get_native_r2_layout_snapshot()
+	_ensure_r2_staging_scroll()
+	for label_path in [
+		"Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHelpLabel",
+		"Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamSummaryLabel",
+		"Panel/Margin/VBox/DropLightBottomRow/BoardingStatusPanel/Margin/VBox/BodyLabel",
+	]:
+		var label := get_node_or_null(label_path) as Label
+		if label != null:
+			label.max_lines_visible = 3
+			label.tooltip_text = label.text
+	var ship_scroll := get_node_or_null("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipQueueScroll") as ScrollContainer
+	if ship_scroll != null:
+		ship_scroll.custom_minimum_size = Vector2.ZERO
+	for entry in [
+		["Panel", "viewport"],
+		["Panel/Margin/VBox/MissionPanel", "topbar"],
+		["Panel/Margin/VBox/ContentRow/AvailablePanel", "unassigned_pool"],
+		["Panel/Margin/VBox/ContentRow/FireteamPanel", "fireteams"],
+		["Panel/Margin/VBox/ContentRow/StagingPanel", "loadout"],
+		["Panel/Margin/VBox/ContentRow/DropshipPanel", "flightdeck"],
+		["Panel/Margin/VBox/DropLightBottomRow/BoardingStatusPanel", "boarding_status"],
+		["Panel/Margin/VBox/DropLightBottomRow/ActionsPanel", "actions"],
+	]:
+		_apply_fixed_window_contract(entry[0], layout[entry[1]])
+	var popup_size := Vector2i(mini(920, int(layout.viewport.size.x) - 32), mini(840, int(layout.viewport.size.y) - 64))
+	_apply_fixed_window_contract("CharacterOverlay/OverlayPanel", Rect2i((Vector2i(layout.viewport.size) - popup_size) / 2, popup_size))
+	_apply_r2_team_context()
+
+
+func get_native_r2_layout_snapshot() -> Dictionary:
+	var viewport_size := Vector2i(get_viewport_rect().size)
+	var usable_width := viewport_size.x - 64
+	var roster_width := int(round(float(usable_width) * 0.18 / 8.0)) * 8
+	var team_width := int(round(float(usable_width) * 0.36 / 8.0)) * 8
+	var team_left := roster_width + 32
+	var transport_left := roster_width + team_width + 48
+	var transport_width := usable_width - roster_width - team_width
+	var flightdeck_height := maxi(240, viewport_size.y - 368)
+	return {
+		"viewport": Rect2i(Vector2i.ZERO, viewport_size),
+		"topbar": Rect2i(0, 0, viewport_size.x, 72),
+		"unassigned_pool": Rect2i(16, 88, roster_width, viewport_size.y - 104),
+		"fireteams": Rect2i(team_left, 88, team_width, 192),
+		"loadout": Rect2i(team_left, 296, team_width, viewport_size.y - 312),
+		"flightdeck": Rect2i(transport_left, 88, transport_width, flightdeck_height),
+		"boarding_status": Rect2i(transport_left, 96 + flightdeck_height, transport_width, 104),
+		"actions": Rect2i(transport_left, 208 + flightdeck_height, transport_width, 128),
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _ensure_r2_staging_scroll() -> void:
+	var panel := get_node_or_null("Panel/Margin/VBox/ContentRow/StagingPanel") as PanelContainer
+	if panel == null:
+		return
+	var old_margin := panel.get_node_or_null("StagingMargin") as MarginContainer
+	if old_margin == null:
+		return
+	# Preserve the complete existing staging path while bounding all sections
+	# at 720p. Respawn and per-member loadout remain reachable by native scroll.
+	var content := old_margin.get_node("StagingVBox") as VBoxContainer
+	old_margin.remove_child(content)
+	panel.remove_child(old_margin)
+	old_margin.queue_free()
+	var scroll := ScrollContainer.new()
+	scroll.name = "StagingMargin"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.add_child(scroll)
+	scroll.add_child(content)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var members := content.get_node("LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll") as ScrollContainer
+	members.custom_minimum_size.y = 192.0
+
+
+func _apply_r2_team_context() -> void:
+	var host := get_node_or_null("Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox") as VBoxContainer
+	if host == null:
+		return
+	var label := host.get_node_or_null("R2TeamContext") as Label
+	if label == null:
+		label = Label.new()
+		label.name = "R2TeamContext"
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.max_lines_visible = 2
+		label.add_theme_font_size_override("font_size", 12)
+		host.add_child(label)
+		host.move_child(label, mini(3, host.get_child_count() - 1))
+	var location := "Teamübersicht"
+	if _focused_fireteam_id == _loadout_staged_fireteam_id:
+		location = "Im Loadout · Ausrüstung unten bearbeiten"
+	elif _focused_fireteam_id == _respawn_staged_fireteam_id:
+		location = "Am Respawnanker"
+	elif _dropship_staged_fireteam_ids.has(_focused_fireteam_id):
+		location = "Am Transport · Boarding rechts"
+	var context_text := "%s · %s" % [_get_fireteam_label(_focused_fireteam_id), location]
+	if label.text != context_text:
+		label.text = context_text
+	label.set_meta("ui_sets_gameplay_truth", false)
 
 
 func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
@@ -262,6 +356,20 @@ func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
 	control.set_deferred("size", fixed_size)
 	control.set_meta("drop_light_rect", rect)
 	control.set_meta("drop_light_fixed_fullhd_layout", true)
+	if not control.minimum_size_changed.is_connected(_queue_r2_layout_refresh):
+		control.minimum_size_changed.connect(_queue_r2_layout_refresh)
+
+
+func _queue_r2_layout_refresh() -> void:
+	if _r2_layout_refresh_pending:
+		return
+	_r2_layout_refresh_pending = true
+	call_deferred("_refresh_r2_layout_after_minimum_change")
+
+
+func _refresh_r2_layout_after_minimum_change() -> void:
+	_r2_layout_refresh_pending = false
+	_enforce_drop_light_fixed_layout()
 
 
 func _apply_drop_light_topbar_compaction() -> void:
@@ -1211,6 +1319,7 @@ func _update_fireteam_toolbar() -> void:
 	assign_button.disabled = _focused_unit_id.is_empty() or _focused_fireteam_id.is_empty()
 	clear_button.disabled = _focused_unit_id.is_empty() or _get_selected_fireteam_id_for_unit(_focused_unit_id).is_empty()
 	summary_label.text = _build_fireteam_panel_summary_text()
+	_apply_r2_team_context()
 
 
 func _update_staging_panel() -> void:
@@ -1260,6 +1369,15 @@ func _update_staging_panel() -> void:
 	clear_loadout_button.disabled = not has_loadout_fireteam
 
 	_render_staging_fireteam_card(respawn_fireteam_list, respawn_fireteam_id, "", "respawn_staging", respawn_member_ids, respawn_lead_unit_id)
+	# Empty staging must not reserve an invisible 54px card slot. A real staged
+	# team still uses the existing card, member rows and outer native scrolling.
+	respawn_fireteam_list.custom_minimum_size.y = 0.0
+	respawn_fireteam_list.visible = respawn_fireteam_list.get_child_count() > 0
+	var respawn_panel := respawn_fireteam_list.get_parent().get_parent().get_parent() as Control
+	respawn_panel.custom_minimum_size.y = 96.0
+	var respawn_margin := respawn_panel.get_node("RespawnMargin") as MarginContainer
+	respawn_margin.add_theme_constant_override("margin_top", 2)
+	respawn_margin.add_theme_constant_override("margin_bottom", 2)
 	_render_staging_fireteam_card(loadout_fireteam_list, loadout_fireteam_id, "", "loadout_staging")
 	_render_loadout_member_rows(loadout_member_list, loadout_fireteam_id, member_ids, lead_unit_id, has_loadout_fireteam)
 
@@ -2730,9 +2848,8 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 	row_margin.add_theme_constant_override("margin_bottom", 4)
 	row_panel.add_child(row_margin)
 
-	var content_row := HBoxContainer.new()
+	var content_row := VBoxContainer.new()
 	content_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	content_row.add_theme_constant_override("separation", 6)
 	row_margin.add_child(content_row)
 
@@ -2748,12 +2865,15 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 			"disabled": false,
 			"drag_enabled": false,
 			"compact_mode": true,
-			"fixed_size": true,
-			"fixed_card_size": Vector2(132.0, 42.0),
+			"fixed_size": false,
+			"show_badges": false,
+			"compact_name_font_size": 12,
+			"compact_data_font_size": 11,
 			"is_lead": member_unit_id == lead_unit_id,
 			"show_lead_indicator": member_unit_id == lead_unit_id,
 		}
 	)
+	member_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	member_card.mouse_filter = Control.MOUSE_FILTER_STOP
 	if member_card.has_signal("card_pressed") and not member_card.card_pressed.is_connected(_on_operator_card_pressed):
 		member_card.card_pressed.connect(_on_operator_card_pressed)
@@ -2784,6 +2904,7 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 	name_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	name_row.add_theme_constant_override("separation", 4)
 	identity_vbox.add_child(name_row)
+	name_row.visible = false
 
 	var name_label := Label.new()
 	name_label.name = "NameLabel"
@@ -2810,19 +2931,26 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 	status_label.clip_text = true
 	status_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	status_label.add_theme_font_size_override("font_size", 8)
+	status_label.add_theme_font_size_override("font_size", 11)
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status_label.add_theme_color_override("font_color", Color(0.72, 0.78, 0.83, 1.0))
 	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	identity_vbox.add_child(status_label)
 
-	var selectors_row := HBoxContainer.new()
+	var selectors_row := GridContainer.new()
+	selectors_row.columns = 2
 	selectors_row.name = "LoadoutDropdowns"
 	selectors_row.custom_minimum_size = Vector2(152.0, 0.0)
-	selectors_row.size_flags_horizontal = Control.SIZE_SHRINK_END
+	selectors_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	selectors_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	selectors_row.add_theme_constant_override("separation", 3)
+	selectors_row.add_theme_constant_override("h_separation", 8)
+	selectors_row.add_theme_constant_override("v_separation", 4)
 	content_row.add_child(selectors_row)
 
+	var slot_label_armor := Label.new()
+	slot_label_armor.text = "Rüstung"
+	slot_label_armor.add_theme_font_size_override("font_size", 12)
+	selectors_row.add_child(slot_label_armor)
 	var armor_select := _build_compact_loadout_select("ArmorSelect", 46.0, "loadout.armor")
 	_apply_help_id(armor_select, "loadout.armor")
 	_populate_compact_armor_option_button(armor_select, String(member_loadout.get("armor", "medium")))
@@ -2831,20 +2959,32 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 	selectors_row.add_child(armor_select)
 
 	var weapon_1_id: String = String(member_loadout.get("weapon_1", member_loadout.get("weapon", DEFAULT_MEMBER_WEAPON)))
+	var slot_label_1 := Label.new()
+	slot_label_1.text = "Waffe 1"
+	slot_label_1.add_theme_font_size_override("font_size", 12)
+	selectors_row.add_child(slot_label_1)
 	var weapon_1_select := _build_compact_loadout_select("Weapon1Select", 50.0, "loadout.weapon_slot")
 	_populate_compact_weapon_option_button(weapon_1_select, weapon_1_id)
 	if not weapon_1_select.item_selected.is_connected(_on_member_weapon_1_selected.bind(fireteam_id, member_unit_id)):
 		weapon_1_select.item_selected.connect(_on_member_weapon_1_selected.bind(fireteam_id, member_unit_id))
 	selectors_row.add_child(weapon_1_select)
-	selectors_row.add_child(_build_compact_weapon_preview("Weapon1Preview", weapon_1_id))
+	var preview_1 := _build_compact_weapon_preview("Weapon1Preview", weapon_1_id)
+	preview_1.visible = false
+	selectors_row.add_child(preview_1)
 
 	var weapon_2_id: String = String(member_loadout.get("weapon_2", DEFAULT_MEMBER_WEAPON))
+	var slot_label_2 := Label.new()
+	slot_label_2.text = "Waffe 2"
+	slot_label_2.add_theme_font_size_override("font_size", 12)
+	selectors_row.add_child(slot_label_2)
 	var weapon_2_select := _build_compact_loadout_select("Weapon2Select", 50.0, "loadout.weapon_slot")
 	_populate_compact_weapon_option_button(weapon_2_select, weapon_2_id)
 	if not weapon_2_select.item_selected.is_connected(_on_member_weapon_2_selected.bind(fireteam_id, member_unit_id)):
 		weapon_2_select.item_selected.connect(_on_member_weapon_2_selected.bind(fireteam_id, member_unit_id))
 	selectors_row.add_child(weapon_2_select)
-	selectors_row.add_child(_build_compact_weapon_preview("Weapon2Preview", weapon_2_id))
+	var preview_2 := _build_compact_weapon_preview("Weapon2Preview", weapon_2_id)
+	preview_2.visible = false
+	selectors_row.add_child(preview_2)
 
 	return row_panel
 
@@ -2853,8 +2993,8 @@ func _build_compact_loadout_select(control_name: String, min_width: float, help_
 	var option_button := OptionButton.new()
 	option_button.name = control_name
 	option_button.custom_minimum_size = Vector2(min_width, 24.0)
-	option_button.size_flags_horizontal = Control.SIZE_SHRINK_END
-	option_button.add_theme_font_size_override("font_size", 8)
+	option_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	option_button.add_theme_font_size_override("font_size", 12)
 	option_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	option_button.set_meta("compact_loadout_dropdown", true)
 	_apply_help_id(option_button, help_id)
@@ -3664,7 +3804,7 @@ func _render_dropship_fireteam_cards(container: VBoxContainer) -> void:
 	var visible_craft_states: Array = _get_visible_transport_craft_states()
 	if visible_craft_states.is_empty():
 		var empty_label := Label.new()
-		empty_label.text = "No Homebase craft visible in FOB yet."
+		empty_label.text = "Noch kein Transport an der FOB.\nFlugmittel in der Heimatbasis zuweisen und zur FOB schicken.\nAnkommende Schiffe erscheinen hier mit Transitstatus."
 		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		container.add_child(empty_label)
 		return

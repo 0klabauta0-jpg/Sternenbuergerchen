@@ -7,6 +7,7 @@ const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/perso
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
+const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const BACKGROUND_ID: String = "debrief_desert_explosion_base"
 const DEBRIEF_SUMMARY_CHIP_COUNT_MIN := 5
 const DEBRIEF_TEAM_STATUS_MAX_CHARS := 180
@@ -27,6 +28,10 @@ signal return_to_fob_requested()
 signal return_to_homebase_requested()
 
 var _mission_result: Dictionary = {}
+var _native_review_slots: Dictionary = {}
+var _native_review_people: VBoxContainer
+var _native_review_heading: Label
+var _native_review_pending := false
 
 
 func _ready() -> void:
@@ -43,6 +48,8 @@ func _ready() -> void:
 	_apply_readability_style()
 	_render_result()
 	_apply_contextual_help_ids()
+	if not resized.is_connected(_queue_native_review_layout):
+		resized.connect(_queue_native_review_layout)
 
 
 func set_mission_result(mission_result: Dictionary) -> void:
@@ -463,6 +470,7 @@ func _render_result() -> void:
 		character_events_label.text = "Character updates: pending"
 		personnel_events_label.text = "Personnel updates: pending"
 		_apply_readability_style()
+		_refresh_native_review_cards()
 		return
 
 	var winner_team_id: String = String(_mission_result.get("winning_team_id", ""))
@@ -498,7 +506,8 @@ func _render_result() -> void:
 		var health_points: int = int(member_state.get("health_points", -1))
 		team_state_counts[vital_state] = int(team_state_counts.get(vital_state, 0)) + 1
 		if team_state_tokens.size() < 4:
-			team_state_tokens.append("%s %s %dHP" % [display_name, vital_state.to_upper(), health_points])
+			var health_text := "%dHP" % health_points if health_points >= 0 else "HP unbekannt"
+			team_state_tokens.append("%s %s %s" % [display_name, vital_state.to_upper(), health_text])
 
 	if team_state_tokens.is_empty():
 		team_state_label.text = "Team: unavailable"
@@ -555,6 +564,248 @@ func _render_result() -> void:
 	else:
 		personnel_events_label.text = "Personnel updates:\n%s" % "\n".join(personnel_event_lines)
 	_apply_readability_style()
+	_refresh_native_review_cards()
+
+
+func _refresh_native_review_cards() -> void:
+	_ensure_native_review_cards()
+	_native_review_heading.text = "Ergebnis ausstehend" if _mission_result.is_empty() else "Einsatz abgeschlossen"
+	for child in _native_review_people.get_children():
+		_native_review_people.remove_child(child)
+		child.queue_free()
+	var states: Array = _mission_result.get("team_states", [])
+	for entry in states:
+		if typeof(entry) != TYPE_DICTIONARY:
+			continue
+		var member: Dictionary = entry
+		var card := PanelContainer.new()
+		card.name = "PersonCard_%d" % _native_review_people.get_child_count()
+		card.set_meta("debrief_member_id", String(member.get("unit_id", "")))
+		card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		TACTICAL_UI_THEME_SCRIPT.style_card(card)
+		_native_review_people.add_child(card)
+		var contents := VBoxContainer.new()
+		contents.name = "Contents"
+		contents.add_theme_constant_override("separation", 4)
+		card.add_child(contents)
+		var identity_row := HBoxContainer.new()
+		identity_row.name = "IdentityRow"
+		identity_row.add_theme_constant_override("separation", 10)
+		contents.add_child(identity_row)
+		var portrait_id := String(member.get("portrait_id", "")).strip_edges()
+		var portrait_path := String(member.get("portrait_path", "")).strip_edges()
+		if not portrait_id.is_empty() or not portrait_path.is_empty():
+			var texture := PORTRAIT_IDENTITY_CATALOG_SCRIPT.load_texture(portrait_id, portrait_path) as Texture2D
+			if texture != null:
+				var portrait := TextureRect.new()
+				portrait.custom_minimum_size = Vector2(48, 48)
+				portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+				portrait.texture = texture
+				identity_row.add_child(portrait)
+		var identity := Label.new()
+		identity.name = "IdentityLabel"
+		identity.text = String(member.get("display_name", member.get("unit_id", "Person unbekannt")))
+		if identity.text.strip_edges().is_empty():
+			identity.text = "Person unbekannt"
+		identity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		identity.clip_text = true
+		identity.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		TACTICAL_UI_THEME_SCRIPT.style_label(identity, false, 16)
+		identity_row.add_child(identity)
+		var status := Label.new()
+		status.name = "StatusLabel"
+		var vital := String(member.get("vital_state", "unknown"))
+		var status_names := {"fit": "Einsatzfähig", "wounded": "Verletzt", "down": "Ausgefallen", "dead": "Verstorben"}
+		var fireteam := String(member.get("fireteam_id", "")).to_upper()
+		status.text = "%s%s" % [status_names.get(vital, "Status unbekannt"), " · " + fireteam if not fireteam.is_empty() else ""]
+		TACTICAL_UI_THEME_SCRIPT.style_label(status, true, 12)
+		contents.add_child(status)
+		var health := Label.new()
+		health.name = "HealthLabel"
+		var hp := int(member.get("health_points", -1))
+		health.text = "%d HP" % hp if hp >= 0 else "Gesundheit unbekannt"
+		TACTICAL_UI_THEME_SCRIPT.style_label(health, false, 13)
+		contents.add_child(health)
+	if _native_review_people.get_child_count() == 0:
+		var empty := Label.new()
+		empty.text = "Keine Personendaten im Einsatzbericht."
+		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		TACTICAL_UI_THEME_SCRIPT.style_label(empty, true, 14)
+		_native_review_people.add_child(empty)
+	for source_name in _native_review_slots:
+		var source := get_node_or_null("Panel/Margin/VBox/" + source_name) as Control
+		var slot := _native_review_slots[source_name] as Control
+		slot.visible = source != null and source.visible
+	var layout := get_node("Panel/Margin/VBox/NativeReviewLayout")
+	layout.get_node("BodyRow/DetailsGrid/AARCard/Contents/EmptyLabel").visible = _extract_debrief_aar_payload().is_empty()
+	layout.get_node("BodyRow/DetailsGrid/ProgressCard/Contents/EmptyLabel").visible = not (get_node("Panel/Margin/VBox/SkillProgressPreviewLabel") as Label).visible and not (get_node("Panel/Margin/VBox/SkillAwardSummaryLabel") as Label).visible
+	_queue_native_review_layout()
+
+
+func _ensure_native_review_cards() -> void:
+	var old_vbox := get_node("Panel/Margin/VBox") as VBoxContainer
+	if old_vbox.has_node("NativeReviewLayout"):
+		return
+	# Public Label/Button NodePaths and connected instances stay intact. Native
+	# containers size the card slots; only these bounded legacy leaves are placed
+	# into them on render/resize. The person list has its own real scroll ancestry.
+	for child in old_vbox.get_children():
+		if child is Control:
+			child.set_as_top_level(true)
+			child.set_anchors_preset(Control.PRESET_TOP_LEFT)
+			child.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			child.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+			child.custom_minimum_size = Vector2.ZERO
+			child.z_index = 10
+	old_vbox.add_theme_constant_override("separation", 0)
+	var layout := VBoxContainer.new()
+	layout.name = "NativeReviewLayout"
+	layout.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layout.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	layout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	layout.add_theme_constant_override("separation", 10)
+	old_vbox.add_child(layout)
+	var result := _make_review_card(layout, "ResultCard", "")
+	_add_review_slot(result, "TitleLabel", 22)
+	_native_review_heading = Label.new()
+	_native_review_heading.name = "OutcomeHeading"
+	TACTICAL_UI_THEME_SCRIPT.style_label(_native_review_heading, false, 26)
+	_native_review_heading.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT)
+	result.add_child(_native_review_heading)
+	_add_review_slot(result, "ResultLabel", 20)
+	_add_review_slot(result, "SummaryStrip", 28)
+	var body := HBoxContainer.new()
+	body.name = "BodyRow"
+	body.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", 12)
+	layout.add_child(body)
+	var people := _make_review_card(body, "PeopleCard", "Personenfolgen")
+	var people_card := people.get_parent() as Control
+	people_card.custom_minimum_size.x = 320
+	people_card.size_flags_stretch_ratio = 0.85
+	_add_review_slot(people, "TeamStateLabel", 48)
+	var scroll := ScrollContainer.new()
+	scroll.name = "PeopleScroll"
+	scroll.custom_minimum_size = Vector2(0, 96)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	people.add_child(scroll)
+	_native_review_people = VBoxContainer.new()
+	_native_review_people.name = "DebriefPeopleList"
+	_native_review_people.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_native_review_people.add_theme_constant_override("separation", 8)
+	scroll.add_child(_native_review_people)
+	var details := GridContainer.new()
+	details.name = "DetailsGrid"
+	details.columns = 2
+	details.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	details.size_flags_stretch_ratio = 1.85
+	details.add_theme_constant_override("h_separation", 10)
+	details.add_theme_constant_override("v_separation", 10)
+	body.add_child(details)
+	var feedback := _make_review_card(details, "FeedbackCard", "FTL-Rückmeldung")
+	_add_review_slot(feedback, "FTLFeedbackLabel", 64)
+	var aar := _make_review_card(details, "AARCard", "Gefechtsauswertung")
+	_add_review_slot(aar, "AARSummaryLabel", 20)
+	_add_review_slot(aar, "AARChipStrip", 26)
+	_add_review_slot(aar, "AARRowsLabel", 32)
+	_add_review_slot(aar, "AARLimitLabel", 28)
+	_add_review_empty(aar, "Keine Gefechtsauswertung im Bericht.")
+	var events := _make_review_card(details, "EventsCard", "Gemeldete Ereignisse")
+	_add_review_slot(events, "CharacterEventsLabel", 52)
+	_add_review_slot(events, "PersonnelEventsLabel", 52)
+	var progress := _make_review_card(details, "ProgressCard", "Entwicklung · Vorschau / bestätigte Folgen")
+	_add_review_slot(progress, "SkillProgressPreviewLabel", 44)
+	_add_review_slot(progress, "SkillAwardSummaryLabel", 44)
+	_add_review_empty(progress, "Keine Entwicklungsdaten oder bestätigten Auszeichnungen im Bericht.")
+	var returns := _make_review_card(layout, "ReturnCard", "Rückweg · vorhandene Ziele")
+	_add_review_slot(returns, "AirAssetEventsLabel", 22)
+	_add_review_slot(returns, "ButtonRow", 40)
+	set_meta("native_debrief_card_layout", "r2_snapshot_cards")
+
+
+func _make_review_card(parent: Node, card_name: String, heading: String) -> VBoxContainer:
+	var card := PanelContainer.new()
+	card.name = card_name
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.size_flags_vertical = Control.SIZE_EXPAND_FILL if parent is GridContainer or parent is HBoxContainer else Control.SIZE_FILL
+	TACTICAL_UI_THEME_SCRIPT.style_card(card)
+	parent.add_child(card)
+	var contents := VBoxContainer.new()
+	contents.name = "Contents"
+	contents.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	contents.add_theme_constant_override("separation", 6)
+	card.add_child(contents)
+	if not heading.is_empty():
+		var title := Label.new()
+		title.text = heading
+		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		TACTICAL_UI_THEME_SCRIPT.style_label(title, false, 16)
+		contents.add_child(title)
+	return contents
+
+
+func _add_review_slot(parent: VBoxContainer, source_name: String, height: int) -> void:
+	var slot := Control.new()
+	slot.name = source_name + "Slot"
+	slot.custom_minimum_size = Vector2(0, height)
+	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(slot)
+	# Native containers can finish sorting after the first deferred render.
+	# Follow actual slot geometry changes, without polling or frame rebuilds.
+	slot.item_rect_changed.connect(_queue_native_review_layout)
+	_native_review_slots[source_name] = slot
+
+
+func _add_review_empty(parent: VBoxContainer, text: String) -> void:
+	var empty := Label.new()
+	empty.name = "EmptyLabel"
+	empty.text = text
+	empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	TACTICAL_UI_THEME_SCRIPT.style_label(empty, true, 13)
+	parent.add_child(empty)
+
+
+func _queue_native_review_layout() -> void:
+	if _native_review_pending or not is_inside_tree() or _native_review_slots.is_empty():
+		return
+	_native_review_pending = true
+	call_deferred("_apply_native_review_geometry")
+
+
+func _apply_native_review_geometry() -> void:
+	_native_review_pending = false
+	set_meta("native_debrief_layout_passes", int(get_meta("native_debrief_layout_passes", 0)) + 1)
+	for source_name in _native_review_slots:
+		var source := get_node_or_null("Panel/Margin/VBox/" + source_name) as Control
+		var slot := _native_review_slots[source_name] as Control
+		if source == null or not source.visible or not slot.visible:
+			continue
+		if not source.is_set_as_top_level():
+			source.set_as_top_level(true)
+			source.set_anchors_preset(Control.PRESET_TOP_LEFT)
+			source.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			source.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		var rect := slot.get_global_rect()
+		if source is Label:
+			var label := source as Label
+			label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			label.clip_text = true
+			label.max_lines_visible = maxi(1, int(rect.size.y / float(label.get_theme_font_size("font_size") + 4)))
+			label.tooltip_text = label.text
+			label.mouse_filter = Control.MOUSE_FILTER_STOP
+		# These legacy leaves are top-level Controls: use canvas-local absolute
+		# position, then settle after any already queued legacy container sort.
+		source.position = rect.position
+		source.size = rect.size
+		source.set_deferred("position", rect.position)
+		source.set_deferred("size", rect.size)
+		source.set_meta("native_debrief_card_slot", source_name)
 
 
 func _ensure_character_events_label() -> Label:

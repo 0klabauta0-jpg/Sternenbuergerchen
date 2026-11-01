@@ -93,10 +93,11 @@ func _check_mission(window_size: Vector2i) -> void:
 	_check(mission_control != null and event_log != null and not mission_control.get_global_rect().intersects(event_log.get_global_rect()), prefix + "mission controls and protocol remain separate")
 	for button_name in FIRE_RULES:
 		var button := grid.get_node_or_null(NodePath(button_name)) as Button
-		_check(button != null and button.is_visible_in_tree(), prefix + button_name + " stays reachable")
+		var selector := team.get_node_or_null("A5FireRuleSelector") as OptionButton
+		_check(button != null and selector != null and selector.is_visible_in_tree() and selector.item_count == 4, prefix + button_name + " stays reachable through the four-rule selector")
 		if button != null:
 			_check(team.get_global_rect().encloses(button.get_global_rect()), prefix + button_name + " belongs to selected-team parameters")
-			_check(button.z_index > team.z_index, prefix + button_name + " draws above the later team-panel background")
+			_check(selector != null and selector.z_index > team.z_index, prefix + "rule selector draws above the later team-panel background")
 			_check(not button.get_signal_connection_list("pressed").is_empty(), prefix + button_name + " retains its callback")
 	var identity := team.get_node_or_null("A5TeamIdentity") as Control
 	var character_overlay := scene.get_node_or_null("TacticalUI/CharacterOverlay") as Control
@@ -110,9 +111,14 @@ func _check_mission(window_size: Vector2i) -> void:
 	var stance := scene.get_node_or_null(TEAM_PATH + "/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/TacticalStancePanel") as Control
 	_check(identity != null and stance != null and identity.get_global_rect().end.y <= stance.get_global_rect().position.y, prefix + "team heading and stance have separate readable lines")
 	var status_readout := scene.get_node_or_null(TEAM_PATH + "/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel") as Label
-	_check(status_readout != null and status_readout.is_visible_in_tree() and band_rect.encloses(status_readout.get_global_rect()), prefix + "existing tactical decision/status feedback remains visibly bounded")
-	if status_readout != null and stance != null:
-		_check(not status_readout.get_global_rect().intersects(stance.get_global_rect()), prefix + "tactical decision/status feedback does not overlap team parameters")
+	var details := team.get_node_or_null("A5DetailsButton") as Button
+	_check(status_readout != null and details != null and details.is_visible_in_tree(), prefix + "existing tactical feedback remains reachable through explicit details")
+	if details != null and status_readout != null:
+		details.pressed.emit()
+		var popup := scene.get_node("TacticalUI/A5TeamDetailsPopup") as PopupPanel
+		var text := popup.get_node("Margin/Box/Scroll/Text") as Label
+		_check(popup.visible and text.text.contains(status_readout.text) and not paused, prefix + "details show the original status while real time continues")
+		popup.hide()
 	if target != null:
 		var target_label := target.get_node("Contents/Target") as Label
 		var order_label := target.get_node("Contents/Order") as Label

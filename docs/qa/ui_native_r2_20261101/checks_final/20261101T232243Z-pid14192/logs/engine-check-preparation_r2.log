@@ -1,0 +1,153 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+GEOMETRY Homebase (1920, 1080) topbar actual=[P: (0.0, 0.0), S: (1920.0, 56.0)] expected=[P: (0.0, 0.0), S: (1920.0, 56.0)]
+PASS: (1920, 1080) Homebase topbar uses current native owner geometry
+PASS: (1920, 1080) Homebase topbar is bounded
+GEOMETRY Homebase (1920, 1080) mission_brief actual=[P: (16.0, 64.0), S: (1888.0, 136.0)] expected=[P: (16.0, 64.0), S: (1888.0, 136.0)]
+PASS: (1920, 1080) Homebase mission_brief uses current native owner geometry
+PASS: (1920, 1080) Homebase mission_brief is bounded
+GEOMETRY Homebase (1920, 1080) roster actual=[P: (16.0, 216.0), S: (464.0, 848.0)] expected=[P: (16.0, 216.0), S: (464.0, 848.0)]
+PASS: (1920, 1080) Homebase roster uses current native owner geometry
+PASS: (1920, 1080) Homebase roster is bounded
+GEOMETRY Homebase (1920, 1080) fireteams actual=[P: (496.0, 216.0), S: (520.0, 848.0)] expected=[P: (496.0, 216.0), S: (520.0, 848.0)]
+PASS: (1920, 1080) Homebase fireteams uses current native owner geometry
+PASS: (1920, 1080) Homebase fireteams is bounded
+GEOMETRY Homebase (1920, 1080) flightdeck actual=[P: (1032.0, 216.0), S: (872.0, 848.0)] expected=[P: (1032.0, 216.0), S: (872.0, 848.0)]
+PASS: (1920, 1080) Homebase flightdeck uses current native owner geometry
+PASS: (1920, 1080) Homebase flightdeck is bounded
+PASS: (1920, 1080) Homebase briefing leaves height for preparation
+PASS: (1920, 1080) Homebase RosterPanel is a full-height work area
+PASS: (1920, 1080) Homebase HomebaseFireteamPanel is a full-height work area
+PASS: (1920, 1080) Homebase AircraftPanel is a full-height work area
+PASS: (1920, 1080) complete briefing has a bounded native scroll
+PASS: (1920, 1080) compact Homebase roster card fits without clipping its right frame
+PASS: (1920, 1080) briefing details button is initially reachable
+PASS: (1920, 1080) briefing toggle opens focused details view
+PASS: (1920, 1080) full briefing frame stays inside viewport
+PASS: (1920, 1080) focused briefing temporarily uses preparation area
+PASS: (1920, 1080) full briefing can reach its final content
+PASS: (1920, 1080) briefing navigation does not mutate selected team
+PASS: (1920, 1080) return restores roster work area
+PASS: (1920, 1080) Homebase active fireteam drop target stays reachable
+PASS: (1920, 1080) Homebase fireteam accepts actual operator drag contract
+PASS: (1920, 1080) existing Homebase callback assigns focused operator
+PASS: (1920, 1080) Homebase character popup and close stay inside viewport
+PASS: (1920, 1080) Homebase character sheet remains read-only
+PASS: (1920, 1080) closing character detail preserves team assignment
+GEOMETRY FOB (1920, 1080) topbar actual=[P: (0.0, 0.0), S: (1920.0, 72.0)] expected=[P: (0.0, 0.0), S: (1920.0, 72.0)]
+PASS: (1920, 1080) FOB topbar uses current native owner geometry
+PASS: (1920, 1080) FOB topbar is bounded
+GEOMETRY FOB (1920, 1080) unassigned_pool actual=[P: (16.0, 88.0), S: (336.0, 976.0)] expected=[P: (16.0, 88.0), S: (336.0, 976.0)]
+PASS: (1920, 1080) FOB unassigned_pool uses current native owner geometry
+PASS: (1920, 1080) FOB unassigned_pool is bounded
+GEOMETRY FOB (1920, 1080) fireteams actual=[P: (368.0, 88.0), S: (672.0, 192.0)] expected=[P: (368.0, 88.0), S: (672.0, 192.0)]
+PASS: (1920, 1080) FOB fireteams uses current native owner geometry
+PASS: (1920, 1080) FOB fireteams is bounded
+GEOMETRY FOB (1920, 1080) loadout actual=[P: (368.0, 296.0), S: (672.0, 768.0)] expected=[P: (368.0, 296.0), S: (672.0, 768.0)]
+PASS: (1920, 1080) FOB loadout uses current native owner geometry
+PASS: (1920, 1080) FOB loadout is bounded
+GEOMETRY FOB (1920, 1080) flightdeck actual=[P: (1056.0, 88.0), S: (848.0, 712.0)] expected=[P: (1056.0, 88.0), S: (848.0, 712.0)]
+PASS: (1920, 1080) FOB flightdeck uses current native owner geometry
+PASS: (1920, 1080) FOB flightdeck is bounded
+GEOMETRY FOB (1920, 1080) boarding_status actual=[P: (1056.0, 808.0), S: (848.0, 104.0)] expected=[P: (1056.0, 808.0), S: (848.0, 104.0)]
+PASS: (1920, 1080) FOB boarding_status uses current native owner geometry
+PASS: (1920, 1080) FOB boarding_status is bounded
+GEOMETRY FOB (1920, 1080) actions actual=[P: (1056.0, 920.0), S: (848.0, 128.0)] expected=[P: (1056.0, 920.0), S: (848.0, 128.0)]
+PASS: (1920, 1080) FOB actions uses current native owner geometry
+PASS: (1920, 1080) FOB actions is bounded
+PASS: (1920, 1080) real FOB loadout state produces all three member rows
+PASS: (1920, 1080) team context explains location of staged team
+PASS: (1920, 1080) full FOB staging remains in bounded native scroll
+PASS: (1920, 1080) loadout retains populated native dropdowns
+PASS: (1920, 1080) empty respawn panel stays compact
+PASS: (1920, 1080) first armor choice is reachable before scrolling
+PASS: (1920, 1080) armor callback updates existing member loadout owner
+PASS: (1920, 1080) weapon callback updates existing member loadout owner
+PASS: (1920, 1080) existing leader callback retains selected member identity
+PASS: (1920, 1080) first loadout dropdown can be scrolled into real input bounds
+PASS: (1920, 1080) FOB character close remains inside viewport
+PASS: (1920, 1080) FOB character overlay keeps input boundary and read-only sheet
+PASS: (1920, 1080) FOB detail closes through existing callback
+PASS: (1920, 1080) supplied transit operator keeps drag disabled
+PASS: (1920, 1080) transit card cannot create assignment drag data
+PASS: (1920, 1080) FOB BoardButton stays inside viewport
+PASS: (1920, 1080) FOB SendButton stays inside viewport
+GEOMETRY Homebase (1280, 720) topbar actual=[P: (0.0, 0.0), S: (1280.0, 56.0)] expected=[P: (0.0, 0.0), S: (1280.0, 56.0)]
+PASS: (1280, 720) Homebase topbar uses current native owner geometry
+PASS: (1280, 720) Homebase topbar is bounded
+GEOMETRY Homebase (1280, 720) mission_brief actual=[P: (16.0, 64.0), S: (1248.0, 136.0)] expected=[P: (16.0, 64.0), S: (1248.0, 136.0)]
+PASS: (1280, 720) Homebase mission_brief uses current native owner geometry
+PASS: (1280, 720) Homebase mission_brief is bounded
+GEOMETRY Homebase (1280, 720) roster actual=[P: (16.0, 216.0), S: (304.0, 488.0)] expected=[P: (16.0, 216.0), S: (304.0, 488.0)]
+PASS: (1280, 720) Homebase roster uses current native owner geometry
+PASS: (1280, 720) Homebase roster is bounded
+GEOMETRY Homebase (1280, 720) fireteams actual=[P: (336.0, 216.0), S: (344.0, 488.0)] expected=[P: (336.0, 216.0), S: (344.0, 488.0)]
+PASS: (1280, 720) Homebase fireteams uses current native owner geometry
+PASS: (1280, 720) Homebase fireteams is bounded
+GEOMETRY Homebase (1280, 720) flightdeck actual=[P: (696.0, 216.0), S: (568.0, 488.0)] expected=[P: (696.0, 216.0), S: (568.0, 488.0)]
+PASS: (1280, 720) Homebase flightdeck uses current native owner geometry
+PASS: (1280, 720) Homebase flightdeck is bounded
+PASS: (1280, 720) Homebase briefing leaves height for preparation
+PASS: (1280, 720) Homebase RosterPanel is a full-height work area
+PASS: (1280, 720) Homebase HomebaseFireteamPanel is a full-height work area
+PASS: (1280, 720) Homebase AircraftPanel is a full-height work area
+PASS: (1280, 720) complete briefing has a bounded native scroll
+PASS: (1280, 720) compact Homebase roster card fits without clipping its right frame
+PASS: (1280, 720) briefing details button is initially reachable
+PASS: (1280, 720) briefing toggle opens focused details view
+PASS: (1280, 720) full briefing frame stays inside viewport
+PASS: (1280, 720) focused briefing temporarily uses preparation area
+PASS: (1280, 720) full briefing can reach its final content
+PASS: (1280, 720) briefing navigation does not mutate selected team
+PASS: (1280, 720) return restores roster work area
+PASS: (1280, 720) Homebase active fireteam drop target stays reachable
+PASS: (1280, 720) Homebase fireteam accepts actual operator drag contract
+PASS: (1280, 720) existing Homebase callback assigns focused operator
+PASS: (1280, 720) Homebase character popup and close stay inside viewport
+PASS: (1280, 720) Homebase character sheet remains read-only
+PASS: (1280, 720) closing character detail preserves team assignment
+GEOMETRY FOB (1280, 720) topbar actual=[P: (0.0, 0.0), S: (1280.0, 72.0)] expected=[P: (0.0, 0.0), S: (1280.0, 72.0)]
+PASS: (1280, 720) FOB topbar uses current native owner geometry
+PASS: (1280, 720) FOB topbar is bounded
+GEOMETRY FOB (1280, 720) unassigned_pool actual=[P: (16.0, 88.0), S: (216.0, 616.0)] expected=[P: (16.0, 88.0), S: (216.0, 616.0)]
+PASS: (1280, 720) FOB unassigned_pool uses current native owner geometry
+PASS: (1280, 720) FOB unassigned_pool is bounded
+GEOMETRY FOB (1280, 720) fireteams actual=[P: (248.0, 88.0), S: (440.0, 192.0)] expected=[P: (248.0, 88.0), S: (440.0, 192.0)]
+PASS: (1280, 720) FOB fireteams uses current native owner geometry
+PASS: (1280, 720) FOB fireteams is bounded
+GEOMETRY FOB (1280, 720) loadout actual=[P: (248.0, 296.0), S: (440.0, 408.0)] expected=[P: (248.0, 296.0), S: (440.0, 408.0)]
+PASS: (1280, 720) FOB loadout uses current native owner geometry
+PASS: (1280, 720) FOB loadout is bounded
+GEOMETRY FOB (1280, 720) flightdeck actual=[P: (704.0, 88.0), S: (560.0, 352.0)] expected=[P: (704.0, 88.0), S: (560.0, 352.0)]
+PASS: (1280, 720) FOB flightdeck uses current native owner geometry
+PASS: (1280, 720) FOB flightdeck is bounded
+GEOMETRY FOB (1280, 720) boarding_status actual=[P: (704.0, 448.0), S: (560.0, 104.0)] expected=[P: (704.0, 448.0), S: (560.0, 104.0)]
+PASS: (1280, 720) FOB boarding_status uses current native owner geometry
+PASS: (1280, 720) FOB boarding_status is bounded
+GEOMETRY FOB (1280, 720) actions actual=[P: (704.0, 560.0), S: (560.0, 128.0)] expected=[P: (704.0, 560.0), S: (560.0, 128.0)]
+PASS: (1280, 720) FOB actions uses current native owner geometry
+PASS: (1280, 720) FOB actions is bounded
+PASS: (1280, 720) real FOB loadout state produces all three member rows
+PASS: (1280, 720) team context explains location of staged team
+PASS: (1280, 720) full FOB staging remains in bounded native scroll
+PASS: (1280, 720) loadout retains populated native dropdowns
+PASS: (1280, 720) empty respawn panel stays compact
+PASS: (1280, 720) first armor choice is reachable before scrolling
+PASS: (1280, 720) armor callback updates existing member loadout owner
+PASS: (1280, 720) weapon callback updates existing member loadout owner
+PASS: (1280, 720) existing leader callback retains selected member identity
+PASS: (1280, 720) first loadout dropdown can be scrolled into real input bounds
+PASS: (1280, 720) FOB character close remains inside viewport
+PASS: (1280, 720) FOB character overlay keeps input boundary and read-only sheet
+PASS: (1280, 720) FOB detail closes through existing callback
+PASS: (1280, 720) supplied transit operator keeps drag disabled
+PASS: (1280, 720) transit card cannot create assignment drag data
+PASS: (1280, 720) FOB BoardButton stays inside viewport
+PASS: (1280, 720) FOB SendButton stays inside viewport
+RESULTS: 120 passed, 0 failed
+PASS: native R2 preparation layout and callbacks

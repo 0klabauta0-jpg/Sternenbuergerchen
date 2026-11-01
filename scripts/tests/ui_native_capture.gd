@@ -4,6 +4,9 @@ extends SceneTree
 const OUTPUT_DIR := "res://docs/qa/ui_native_r1_20261101/captures"
 var _view := "main_menu"
 var _window_size := Vector2i(1920, 1080)
+var _logical_size := Vector2i(1920, 1080)
+var _output_dir := OUTPUT_DIR
+var _fixture_scope := "ui_native_r1_capture"
 
 func _init() -> void:
 	for arg in OS.get_cmdline_user_args():
@@ -12,6 +15,13 @@ func _init() -> void:
 		if arg.begins_with("--size="):
 			var pieces := arg.trim_prefix("--size=").split("x")
 			_window_size = Vector2i(int(pieces[0]), int(pieces[1]))
+		if arg.begins_with("--logical-size="):
+			var pieces := arg.trim_prefix("--logical-size=").split("x")
+			_logical_size = Vector2i(int(pieces[0]), int(pieces[1]))
+		if arg.begins_with("--output="):
+			_output_dir = arg.trim_prefix("--output=")
+		if arg.begins_with("--fixture-scope="):
+			_fixture_scope = arg.trim_prefix("--fixture-scope=")
 	call_deferred("_run")
 
 func _run() -> void:
@@ -20,7 +30,7 @@ func _run() -> void:
 		quit(1)
 		return
 	root.size = _window_size
-	root.content_scale_size = Vector2i(1920, 1080)
+	root.content_scale_size = _logical_size
 	root.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
 	var scene: Node
 	match _view:
@@ -46,9 +56,9 @@ func _run() -> void:
 			return
 	if _view in ["main_menu", "settings", "teameditor", "escape"]:
 		# Keep capture-generated rosters/settings in a separate test slot.
-		scene.set("_start_roster_profile_id", "ui_native_r1_capture")
-		scene.set("_start_roster_save_path", "user://ui_native_r1_capture_roster.cfg")
-		scene.set("_settings_config_path", "user://ui_native_r1_capture_settings.cfg")
+		scene.set("_start_roster_profile_id", _fixture_scope)
+		scene.set("_start_roster_save_path", "user://%s_roster.cfg" % _fixture_scope)
+		scene.set("_settings_config_path", "user://%s_settings.cfg" % _fixture_scope)
 	root.add_child(scene)
 	current_scene = scene
 	if scene is Control:
@@ -77,6 +87,13 @@ func _run() -> void:
 		"debrief":
 			scene.call("set_mission_result", _debrief_fixture())
 	root.size = _window_size
+	# Re-establish a neutral pointer after opening/repositioning native panels.
+	# This also clears a tooltip armed by the underlying menu during startup.
+	Input.warp_mouse(Vector2(2, 2))
+	var neutral_motion := InputEventMouseMotion.new()
+	neutral_motion.position = Vector2(2, 2)
+	neutral_motion.global_position = Vector2(2, 2)
+	root.push_input(neutral_motion, true)
 	for _frame in range(12):
 		await process_frame
 	await RenderingServer.frame_post_draw
@@ -95,9 +112,9 @@ func _run() -> void:
 		push_error("Capture is an empty uniform viewport; hidden fixture is not visual evidence.")
 		quit(1)
 		return
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUTPUT_DIR))
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_output_dir))
 	var basename := "%s_%dx%d" % [_view, _window_size.x, _window_size.y]
-	var image_path := OUTPUT_DIR.path_join(basename + ".png")
+	var image_path := _output_dir.path_join(basename + ".png")
 	var error := capture.save_png(image_path)
 	var evidence := {
 		"view": _view,
@@ -109,11 +126,13 @@ func _run() -> void:
 		"renderer": RenderingServer.get_current_rendering_method(),
 		"image_size": [capture.get_width(), capture.get_height()],
 		"requested_window_size": [_window_size.x, _window_size.y],
+		"logical_size": [_logical_size.x, _logical_size.y],
+		"scaled_capture": _logical_size != _window_size,
 		"viewport_size": [root.get_visible_rect().size.x, root.get_visible_rect().size.y],
 		"save_error": error,
 		"note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
 	}
-	var file := FileAccess.open(OUTPUT_DIR.path_join(basename + ".json"), FileAccess.WRITE)
+	var file := FileAccess.open(_output_dir.path_join(basename + ".json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify(evidence, "\t") + "\n")
 	file.close()
 	print("CAPTURE: " + JSON.stringify(evidence))

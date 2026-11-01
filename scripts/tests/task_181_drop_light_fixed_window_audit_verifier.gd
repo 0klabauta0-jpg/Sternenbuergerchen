@@ -37,7 +37,9 @@ func _test_fob_windows_are_actual_fixed_rects() -> void:
 	root.add_child(screen)
 	await _wait_frames(4)
 
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_fob_layout")
+	# Preparation screens now own responsive R2 rectangles; mission keeps its
+	# shared HUD contract. Retain strict actual geometry and function checks.
+	var layout: Dictionary = screen.call("get_native_r2_layout_snapshot")
 	_assert_fixed_windows(
 		screen,
 		layout,
@@ -54,7 +56,9 @@ func _test_fob_windows_are_actual_fixed_rects() -> void:
 	)
 	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/AvailablePanel", "Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableScroll", "FOB NPC pool scroll stays inside the fixed #09 window")
 	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/FireteamPanel", "Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll", "FOB Fireteam scroll stays inside the fixed #10 window")
-	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/StagingPanel", "Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll", "FOB Loadout scroll stays inside the fixed #13 window")
+	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/StagingPanel", "Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin", "FOB full staging scroll stays inside the bounded #13 window")
+	var loadout_scroll := screen.get_node_or_null("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll") as ScrollContainer
+	_assert(loadout_scroll != null and loadout_scroll.vertical_scroll_mode == ScrollContainer.SCROLL_MODE_AUTO, "FOB per-member loadout retains native vertical scrolling")
 	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/DropshipPanel", "Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipQueueScroll", "FOB Flightdeck ship list stays inside the fixed #14 window")
 	_assert_fob_bottom_actions_do_not_expose_fake_active_buttons(screen)
 
@@ -70,7 +74,7 @@ func _test_homebase_windows_are_actual_fixed_rects() -> void:
 	screen.call("setup_roster", UNIT_ROSTER_PRESETS_SCRIPT.call("get_homebase_roster"))
 	await _wait_frames(4)
 
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout")
+	var layout: Dictionary = screen.call("get_native_r2_layout_snapshot")
 	_assert_fixed_windows(
 		screen,
 		layout,

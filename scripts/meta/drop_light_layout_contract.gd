@@ -79,20 +79,20 @@ static func get_homebase_layout() -> Dictionary:
 
 
 static func get_mission_hud_layout(viewport_size: Vector2i = TARGET_VIEWPORT) -> Dictionary:
-	var band_top := viewport_size.y - 176
+	var band_top := viewport_size.y - 160
 	var mini_height := mini(304, maxi(176, band_top - 352))
 	return {
 		"viewport": Rect2i(Vector2i.ZERO, viewport_size),
 		"mission_identity": Rect2i(viewport_size.x - 736, 24, 352, 72),
 		"top_nav": Rect2i(16, 16, 384, 56),
 		"fireteam_mini": Rect2i(32, 112, 240, mini_height),
-		"event_log": Rect2i(viewport_size.x - 368, band_top - 320, 352, 160),
-		"bottom_dock": Rect2i(0, band_top, viewport_size.x, 176),
-		"command_matrix": Rect2i(0, band_top, 360, 176),
-		"target_order": Rect2i(368, band_top, 248, 176),
-		"selected_fireteam": Rect2i(624, band_top, viewport_size.x - 632, 176),
-		"selected_members": Rect2i(368, band_top - 152, viewport_size.x - 384, 144),
-		"mission_control": Rect2i(viewport_size.x - 368, 104, 352, mini(240, band_top - 440)),
+		"event_log": Rect2i(viewport_size.x - 368, band_top - 280, 352, 160),
+		"bottom_dock": Rect2i(0, band_top, viewport_size.x, 160),
+		"command_matrix": Rect2i(0, band_top, 360, 160),
+		"target_order": Rect2i(368, band_top, 248, 160),
+		"selected_fireteam": Rect2i(624, band_top, mini(512, viewport_size.x - 632), 160),
+		"selected_members": Rect2i(368, band_top - 112, viewport_size.x - 384, 104),
+		"mission_control": Rect2i(viewport_size.x - 368, 104, 352, mini(240, band_top - 400)),
 	}
 
 

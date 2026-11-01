@@ -15,6 +15,8 @@ const RULE_LABELS := {"FireRuleHoldButton": "FH", "FireRuleReturnButton": "AF", 
 const LABELS := {"MoveButton": "Bewegen", "TakeButton": "Nehmen", "HoldButton": "Halten", "FlankButton": "Flanke", "GoCommandMatrixButton": "Plan\nausführen", "TargetButton": "Ziel", "ClearTargetButton": "Leeren", "DeleteOrderButton": "Löschen", "SortCommandMatrixButton": "Ordnen"}
 const ICON_IDS := {"MoveButton": "move", "TakeButton": "take", "HoldButton": "defend", "FlankButton": "flank"}
 const CHARACTER_OVERLAY_Z := 64
+const FIRE_CODES: PackedStringArray = ["hold", "return", "free", "suppress"]
+const FIRE_NAMES: PackedStringArray = ["Feuer halten", "Antwortfeuer", "Feuer frei", "Unterdrücken"]
 
 
 static func configure(controller: Node, state: Dictionary = {}) -> void:
@@ -42,11 +44,24 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 	_layout_target_labels(target, Rect2(layout.target_order))
 	var team_panel := controller.get_node_or_null(BASE + "FireteamPanel") as PanelContainer
 	if team_panel != null:
+		_ensure_team_controls(controller, team_panel, layer)
 		_ensure_label(team_panel, "A5TeamIdentity", 16)
 		(team_panel.get_node("A5TeamIdentity") as Label).max_lines_visible = 1
-		_place(team_panel.get_node("A5TeamIdentity") as Control, Rect2(team.position + Vector2i(8, 6), Vector2i(team.size.x - 88, 24)))
-		_ensure_label(team_panel, "A5FireRuleHeading", 12).text = "FEUERREGEL"
-		_place(team_panel.get_node("A5FireRuleHeading") as Control, Rect2(team.position + Vector2i(8, 100), Vector2i(272, 18)))
+		_place(team_panel.get_node("A5TeamIdentity") as Control, Rect2(team.position + Vector2i(8, 6), Vector2i(team.size.x - 176, 24)))
+		var summary := _ensure_label(team_panel, "A5TeamSummary", 12)
+		summary.max_lines_visible = 1
+		_place(summary, Rect2(team.position + Vector2i(8, 32), Vector2i(team.size.x - 16, 18)))
+		var fire_heading := _ensure_label(team_panel, "A5FireRuleHeading", 12)
+		fire_heading.text = "Feuerregel"
+		fire_heading.autowrap_mode = TextServer.AUTOWRAP_OFF
+		fire_heading.max_lines_visible = 1
+		fire_heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		fire_heading.clip_text = true
+		fire_heading.visible = true
+		_place(fire_heading, Rect2(team.position + Vector2i(8, 108), Vector2i(team.size.x - 16, 20)))
+		fire_heading.z_index = 12
+		_place(team_panel.get_node("A5FireRuleSelector") as Control, Rect2(team.position + Vector2i(8, 130), Vector2i(team.size.x - 16, 28)))
+		_place(team_panel.get_node("A5DetailsButton") as Control, Rect2(team.position + Vector2i(team.size.x - 160, 6), Vector2i(76, 26)))
 		THEME.style_card(team_panel)
 	var band_panel := controller.get_node_or_null("../TacticalUI/BottomDock") as PanelContainer
 	if band_panel != null:
@@ -82,12 +97,11 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 			var column := FIRST.find(name) if row == 0 else SECOND.find(name)
 			_present_primary_action(button, state)
 			button.visible = true
-			_place(button, Rect2(Vector2(band.position + Vector2i(8 + column * 70, 16 + row * 72)), Vector2(64, 64)))
+			_place(button, Rect2(Vector2(band.position + Vector2i(8 + column * 70, 8 + row * 72)), Vector2(64, 64)))
 			button.set_meta("native_a5_primary_action", true)
 		elif RULES.has(name):
 			var index := RULES.find(name)
 			_present_fire_rule(button, state)
-			button.visible = true
 			_place(button, Rect2(Vector2(team.position + Vector2i(8 + index * 70, 122)), Vector2(64, 36)))
 		elif bool(button.get_meta("drop_light_command_placeholder", false)):
 			var active_context := not button.disabled and not button.text.strip_edges().is_empty() and not button.get_signal_connection_list("pressed").is_empty()
@@ -99,20 +113,20 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 		var button := context_buttons[index]
 		_present_context_button(button)
 		_place(button, Rect2(368 + index * 128, band.position.y - 44, 120, 36))
-	_place_context_tool(controller, "DoorBreachButton", Rect2(Vector2(layout.target_order.position + Vector2i(8, 132)), Vector2(112, 32)), true)
-	_place_context_tool(controller, "WaypointEraseButton", Rect2(Vector2(layout.target_order.position + Vector2i(128, 132)), Vector2(112, 32)), false)
+	_place_context_tool(controller, "DoorBreachButton", Rect2(Vector2(layout.target_order.position + Vector2i(8, 124)), Vector2(112, 32)), true)
+	_place_context_tool(controller, "WaypointEraseButton", Rect2(Vector2(layout.target_order.position + Vector2i(128, 124)), Vector2(112, 32)), false)
 	var all_button := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton") as Button
 	if all_button != null:
 		_place(all_button, Rect2(Vector2(team.position + Vector2i(team.size.x - 76, 6)), Vector2(64, 26)))
 	var stance_panel := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
 	if stance_panel != null:
 		stance_panel.clip_contents = false
-		_place(stance_panel, Rect2(Vector2(team.position + Vector2i(8, 34)), Vector2(280, 62)))
+		_place(stance_panel, Rect2(Vector2(team.position + Vector2i(8, 50)), Vector2(team.size.x - 16, 58)))
 		_refresh_stance_buttons(stance_panel)
 	var info_scroll := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll") as ScrollContainer
 	if info_scroll != null:
 		info_scroll.clip_contents = true
-		_place(info_scroll, Rect2(Vector2(team.position + Vector2i(304, 34)), Vector2(maxi(120, team.size.x - 320), 132)))
+		_place(info_scroll, Rect2(Vector2(team.position + Vector2i(8, 30)), Vector2(team.size.x - 16, 128)))
 		# Legacy status strings remain readable in the existing scroll and tooltip,
 		# but their old 640px/large-label minimum may not spill over the header.
 		for label_name in ["CommandFeedbackLabel", "HotkeyLegendLabel"]:
@@ -149,6 +163,7 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 	if strategic != null:
 		_place(strategic, Rect2(layout.mission_control))
 	_keep_transport_and_control_separate(controller)
+	_refresh_fire_rule_selector(controller, state)
 	grid.set_meta("native_a5_geometry_signature", geometry_signature)
 
 
@@ -159,7 +174,7 @@ static func _geometry_signature(controller: Node, grid: GridContainer, viewport_
 			context.append("%s:%s" % [child.name, child.text])
 	var craft := controller.get_node_or_null("../TacticalUI/MissionDropshipPanel") as Control
 	var transport := str(craft.get_global_rect()) if craft != null and craft.visible else "hidden"
-	return "%s|%d|%s|%s" % [viewport_size, grid.get_child_count(), "|".join(context), transport]
+	return "r2_heading1|%s|%d|%s|%s" % [viewport_size, grid.get_child_count(), "|".join(context), transport]
 
 
 static func _is_active_context_button(button: Button) -> bool:
@@ -182,12 +197,13 @@ static func _refresh_presentation(controller: Node, grid: GridContainer, state: 
 		elif _is_active_context_button(button):
 			_present_context_button(button)
 	var layout: Dictionary = LAYOUT.get_mission_hud_layout(Vector2i(controller.get_viewport().get_visible_rect().size))
-	_place_context_tool(controller, "DoorBreachButton", Rect2(Vector2(layout.target_order.position + Vector2i(8, 132)), Vector2(112, 32)), true)
-	_place_context_tool(controller, "WaypointEraseButton", Rect2(Vector2(layout.target_order.position + Vector2i(128, 132)), Vector2(112, 32)), false)
+	_place_context_tool(controller, "DoorBreachButton", Rect2(Vector2(layout.target_order.position + Vector2i(8, 124)), Vector2(112, 32)), true)
+	_place_context_tool(controller, "WaypointEraseButton", Rect2(Vector2(layout.target_order.position + Vector2i(128, 124)), Vector2(112, 32)), false)
 	var stance := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
 	if stance != null:
 		_refresh_stance_buttons(stance)
 	_layout_team_readouts(controller, Rect2(layout.selected_fireteam))
+	_refresh_fire_rule_selector(controller, state)
 
 
 static func _hide_internal_slot_badge(button: Button) -> void:
@@ -220,6 +236,10 @@ static func _present_primary_action(button: Button, state: Dictionary) -> void:
 		button.visible = true
 	var name := String(button.name)
 	var selected := bool(state.get("target_armed", false)) if name == "TargetButton" else button.button_pressed
+	if name == "DeleteOrderButton":
+		selected = bool(state.get("delete_active", false))
+	elif name == "SortCommandMatrixButton":
+		selected = bool(state.get("sort_active", false))
 	if _button_style_dirty(button, selected, 12):
 		THEME.style_action_tile(button, selected, name == "GoCommandMatrixButton")
 		if name == "GoCommandMatrixButton":
@@ -243,8 +263,10 @@ static func _present_primary_action(button: Button, state: Dictionary) -> void:
 
 
 static func _present_fire_rule(button: Button, state: Dictionary) -> void:
-	if not button.visible:
-		button.visible = true
+	# Original nodes retain callback, gate, metadata and confirmed toggle state.
+	# The compact selector is their player-facing presentation.
+	if button.visible:
+		button.visible = false
 	var selected := String(button.get_meta("fire_rule", "")) == String(state.get("fire_rule", ""))
 	if _button_style_dirty(button, selected, 13):
 		THEME.style_command_button(button, "selected" if selected else "neutral")
@@ -266,13 +288,21 @@ static func _present_context_button(button: Button) -> void:
 
 
 static func _refresh_stance_buttons(stance: Control) -> void:
+	var summary := stance.get_node_or_null("MarginContainer/VBoxContainer/SummaryLabel") as Label
+	if summary != null:
+		summary.visible = false
+		stance.tooltip_text = summary.tooltip_text
+	var labels := {"Cautious": "Vorsichtig", "Normal": "Normal", "Aggressive": "Offensiv"}
 	for name in ["Cautious", "Normal", "Aggressive"]:
 		var button := stance.get_node_or_null("MarginContainer/VBoxContainer/HBoxContainer/%sButton" % name) as Button
 		if button != null:
-			if button.get_theme_font_size("font_size") != 12:
-				button.add_theme_font_size_override("font_size", 12)
-			if button.custom_minimum_size != Vector2(76, 26):
-				button.custom_minimum_size = Vector2(76, 26)
+			if button.text != labels[name]:
+				button.text = labels[name]
+			button.set_meta("mission_selected_fireteam_stance_player_label", button.text)
+			if button.get_theme_font_size("font_size") != 13:
+				button.add_theme_font_size_override("font_size", 13)
+			if button.custom_minimum_size != Vector2(104, 28):
+				button.custom_minimum_size = Vector2(104, 28)
 
 
 static func refresh(controller: Node, view_model: Dictionary) -> void:
@@ -283,11 +313,131 @@ static func refresh(controller: Node, view_model: Dictionary) -> void:
 	_set_text(panel.get_node("Contents/Target") as Label, "Ziel gewählt" if bool(view_model.get("target_selected", false)) else "Ziel auswählen")
 	_set_text(panel.get_node("Contents/Order") as Label, String(view_model.get("order", "Kein Plan ausgewählt")))
 	var feedback := String(view_model.get("feedback", ""))
-	_set_text(panel.get_node("Contents/Feedback") as Label, feedback)
+	var display_feedback := "Befehl auswählen" if feedback == "AWAITING INPUT" else feedback
+	if feedback.begins_with("FIRE ") and feedback.contains(" REQUEST"):
+		display_feedback = "Feuerregel wird geprüft"
+	_set_text(panel.get_node("Contents/Feedback") as Label, display_feedback)
 	panel.tooltip_text = "Ziel: %s\n%s\n%s\n\n%s" % [view_model.get("target", "—"), view_model.get("order", ""), feedback, view_model.get("detail", "")]
 	var title := controller.get_node_or_null(BASE + "FireteamPanel/A5TeamIdentity") as Label
 	if title != null:
 		_set_text(title, String(view_model.get("team", "Kein Fireteam ausgewählt")))
+	var summary := controller.get_node_or_null(BASE + "FireteamPanel/A5TeamSummary") as Label
+	if summary != null:
+		_set_text(summary, String(view_model.get("team_summary", "")))
+	_refresh_fire_rule_selector(controller, view_model)
+	_refresh_details_text(controller)
+
+
+static func _ensure_team_controls(controller: Node, team: PanelContainer, layer: CanvasLayer) -> void:
+	if team.get_node_or_null("A5FireRuleSelector") == null:
+		var selector := OptionButton.new()
+		selector.name = "A5FireRuleSelector"
+		selector.fit_to_longest_item = false
+		selector.clip_text = true
+		selector.focus_mode = Control.FOCUS_ALL
+		selector.theme = THEME.get_theme()
+		for index in range(FIRE_CODES.size()):
+			selector.add_item(FIRE_NAMES[index], index)
+			selector.set_item_metadata(index, FIRE_CODES[index])
+		selector.item_selected.connect(Callable(controller, "_on_native_fire_rule_selected"))
+		selector.set_meta("ui_sets_gameplay_truth", false)
+		team.add_child(selector)
+		THEME.style_command_button(selector)
+		selector.add_theme_font_size_override("font_size", 14)
+	if team.get_node_or_null("A5DetailsButton") == null:
+		var button := Button.new()
+		button.name = "A5DetailsButton"
+		button.text = "Details"
+		button.tooltip_text = "Teamzustand, Befehlsdetails und Tastenkürzel anzeigen"
+		button.pressed.connect(Callable(controller, "_open_native_team_details"))
+		team.add_child(button)
+		THEME.style_command_button(button)
+		button.add_theme_font_size_override("font_size", 12)
+	if layer.get_node_or_null("A5TeamDetailsPopup") == null:
+		var popup := PopupPanel.new()
+		popup.name = "A5TeamDetailsPopup"
+		popup.theme = THEME.get_theme()
+		popup.min_size = Vector2i(360, 240)
+		popup.exclusive = true
+		popup.set_meta("ui_sets_gameplay_truth", false)
+		layer.add_child(popup)
+		var margin := MarginContainer.new()
+		margin.name = "Margin"
+		for side in ["left", "top", "right", "bottom"]:
+			margin.add_theme_constant_override("margin_" + side, 12)
+		popup.add_child(margin)
+		margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+		var box := VBoxContainer.new()
+		box.name = "Box"
+		box.add_theme_constant_override("separation", 10)
+		margin.add_child(box)
+		var header := HBoxContainer.new()
+		box.add_child(header)
+		var heading := Label.new()
+		heading.text = "Team- und Befehlsdetails"
+		heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		header.add_child(heading)
+		var close := Button.new()
+		close.name = "Close"
+		close.text = "Schließen"
+		close.pressed.connect(Callable(popup, "hide"))
+		header.add_child(close)
+		var scroll := ScrollContainer.new()
+		scroll.name = "Scroll"
+		scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		box.add_child(scroll)
+		var text := Label.new()
+		text.name = "Text"
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		THEME.style_label(text, false, 14)
+		scroll.add_child(text)
+
+
+static func _refresh_fire_rule_selector(controller: Node, state: Dictionary) -> void:
+	var selector := controller.get_node_or_null(BASE + "FireteamPanel/A5FireRuleSelector") as OptionButton
+	if selector == null:
+		return
+	var menu := selector.get_popup()
+	var any_enabled := false
+	for index in range(RULES.size()):
+		var original := controller.get_node_or_null(GRID + "/" + RULES[index]) as Button
+		var disabled := original == null or original.disabled
+		if selector.is_item_disabled(index) != disabled:
+			selector.set_item_disabled(index, disabled)
+		any_enabled = any_enabled or not disabled
+		if original != null and menu.get_item_tooltip(index) != original.tooltip_text:
+			menu.set_item_tooltip(index, original.tooltip_text)
+	selector.disabled = not bool(state.get("fire_rule_enabled", false)) or not any_enabled
+	var consensus := String(state.get("fire_rule", ""))
+	var index := FIRE_CODES.find(consensus)
+	if selector.selected != index:
+		selector.select(index)
+	if index < 0:
+		var placeholder := "Gemischte Feuerregeln" if consensus == "mixed" else "Fireteam auswählen"
+		if selector.text != placeholder:
+			selector.text = placeholder
+	else:
+		selector.set_meta("help_id", "mission.rule.fire_rule_" + consensus)
+	selector.tooltip_text = "Bestätigte Feuerregel: %s\n%s" % [FIRE_NAMES[index] if index >= 0 else selector.text, menu.get_item_tooltip(index) if index >= 0 else "Wähle eine gemeinsame Regel für die ausgewählten Fireteams."]
+	var heading := controller.get_node_or_null(BASE + "FireteamPanel/A5FireRuleHeading") as Label
+	if heading != null:
+		var feedback := String(state.get("feedback", ""))
+		_set_text(heading, "Feuerregel · Änderung angefragt" if feedback.begins_with("FIRE ") and feedback.contains(" REQUEST") else "Feuerregel")
+
+
+static func _refresh_details_text(controller: Node) -> void:
+	var popup := controller.get_node_or_null("../TacticalUI/A5TeamDetailsPopup") as PopupPanel
+	if popup == null or not popup.visible:
+		return
+	var parts: PackedStringArray = []
+	for path in [BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel", INFO + "/CommandFeedbackLabel", INFO + "/HotkeyLegendLabel"]:
+		var source := controller.get_node_or_null(path) as Label
+		if source != null and not source.text.strip_edges().is_empty():
+			parts.append(source.text)
+	_set_text(popup.get_node("Margin/Box/Scroll/Text") as Label, "\n\n".join(parts))
 
 
 static func _ensure_target_panel(layer: CanvasLayer) -> PanelContainer:
@@ -315,7 +465,7 @@ static func _layout_target_labels(panel: PanelContainer, rect: Rect2) -> void:
 	var contents := panel.get_node("Contents") as Control
 	contents.clip_contents = false
 	contents.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var slots := {"Heading": Rect2(8, 8, 232, 18), "Target": Rect2(8, 32, 232, 34), "Order": Rect2(8, 68, 232, 38), "Feedback": Rect2(8, 108, 232, 20)}
+	var slots := {"Heading": Rect2(8, 8, 232, 18), "Target": Rect2(8, 32, 232, 26), "Order": Rect2(8, 62, 232, 30), "Feedback": Rect2(8, 96, 232, 20)}
 	for name in slots:
 		var label := contents.get_node(NodePath(name)) as Label
 		var slot: Rect2 = slots[name]
@@ -334,30 +484,16 @@ static func _style_execute_tile(button: Button) -> void:
 		button.add_theme_stylebox_override(state, THEME.build_flat_stylebox(base.bg_color, base.border_color, base.corner_radius_top_left, base.border_width_left, Vector4(2, 4, 2, 4)))
 
 
-static func _layout_team_readouts(controller: Node, rect: Rect2) -> void:
-	# Preserve the real decision/status readouts in their original nodes. They
-	# get bounded lines beside the parameters instead of occupying the header.
-	var width := maxf(120.0, rect.size.x - 320.0)
-	var readouts := {
-		BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel": Rect2(304, 34, width, 56),
-		INFO + "/CommandFeedbackLabel": Rect2(304, 96, width, 48),
-		INFO + "/HotkeyLegendLabel": Rect2(304, 148, width, 18),
-	}
-	for path in readouts:
+static func _layout_team_readouts(controller: Node, _rect: Rect2) -> void:
+	# The source nodes remain owned and updated by their existing presenters.
+	# Their complete text is available in the explicit details popup.
+	for path in [BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel", INFO + "/CommandFeedbackLabel", INFO + "/HotkeyLegendLabel"]:
 		var label := controller.get_node_or_null(NodePath(path)) as Label
 		if label == null:
 			continue
-		var slot: Rect2 = readouts[path]
-		label.visible = true
-		label.clip_text = true
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.max_lines_visible = 1 if label.name == "HotkeyLegendLabel" else 3
-		label.tooltip_text = label.text if label.tooltip_text.is_empty() else label.tooltip_text
-		var font_size := 13 if label.name == "FireteamStatusLabel" else 12
-		var color: Color = THEME.COLOR_TEXT_MUTED if label.name == "HotkeyLegendLabel" else THEME.COLOR_TEXT
-		if label.get_theme_font_size("font_size") != font_size or label.get_theme_color("font_color") != color:
-			THEME.style_label(label, label.name == "HotkeyLegendLabel", font_size)
-		_place(label, Rect2(rect.position + slot.position, slot.size))
+		label.visible = false
+		if not label.has_meta("native_a5_layout"):
+			label.set_meta("native_a5_layout", true)
 
 
 static func _ensure_label(parent: Node, name: String, font_size: int) -> Label:

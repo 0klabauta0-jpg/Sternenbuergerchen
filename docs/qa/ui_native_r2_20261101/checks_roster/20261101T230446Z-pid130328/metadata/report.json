@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster.json",
+  "godot": "godot_console",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.041,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-01T23:04:46.045982+00:00",
+  "finished_at": "2026-11-01T23:05:00.337698+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328\\logs\\engine-check-roster_save.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\ui_r2_roster_save_workflow_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.472,
+      "name": "roster_save",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328\\logs\\check-roster_save.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328\\logs\\engine-check-roster_save.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328\\logs\\engine-check-task232.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_232_start_roster_generation_contract.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 5.449,
+      "name": "task232",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328\\logs\\check-task232.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328\\logs\\engine-check-task232.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328\\logs\\engine-check-task234.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_234_persistent_player_roster_save_and_reset.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 7.314,
+      "name": "task234",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328\\logs\\check-task234.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_roster\\20261101T230446Z-pid130328\\logs\\engine-check-task234.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 3,
+    "passed": 3,
+    "failed": 0
+  }
+}

@@ -1,0 +1,631 @@
+[
+  {
+    "view": "main_menu",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 4.476,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/main_menu_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "main_menu",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "57d88f60856219b5b295eea9e614311ca119a4208e845d9e07dfc423884ff18d"
+  },
+  {
+    "view": "characters",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.605,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/characters_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "characters",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "9e01429b90d2d3dbd04ff151bb23fc133f3545b84da8b6ca263bd61ea7c02d79"
+  },
+  {
+    "view": "settings",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 4.251,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/settings_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "settings",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "087ca159640b66314aac8dc7bd612417a6bfde98ebe15ba34336431a9e4055df"
+  },
+  {
+    "view": "debrief",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.12,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/debrief_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "debrief",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "958074dad192d1b53182047fa1ad510399578fbc5b0b9b8fad7dfe8c2a903581"
+  },
+  {
+    "view": "editor",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 5.951,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/editor_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "editor",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "2007bab87ec7599800072ee7cba45e805723b39a6b624a917a284efa5194dc7b"
+  },
+  {
+    "view": "escape",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 4.385,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/escape_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "escape",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "e15d6b448d6d85b8b0d8b93c406170184ecf1050562c84714282ddd4ac4f05ba"
+  },
+  {
+    "view": "settings",
+    "size": "1280x720",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 4.321,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/settings_1280x720.png",
+      "image_size": [
+        1280,
+        720
+      ],
+      "logical_size": [
+        1280,
+        720
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1280,
+        720
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "settings",
+      "viewport_size": [
+        1280.0,
+        720.0
+      ]
+    },
+    "image_sha256": "09de22104bf37910d8f69875c0cd5b478ef8d612e00e5c7e157d3085ba2ba888"
+  },
+  {
+    "view": "debrief",
+    "size": "1280x720",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.199,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/debrief_1280x720.png",
+      "image_size": [
+        1280,
+        720
+      ],
+      "logical_size": [
+        1280,
+        720
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1280,
+        720
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "debrief",
+      "viewport_size": [
+        1280.0,
+        720.0
+      ]
+    },
+    "image_sha256": "ff7514424e1dfb88c7fd6bfd68ceb253c6b55e79ba64c6706b56363f823c65fd"
+  },
+  {
+    "view": "mission",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 7.102,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/mission_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "mission",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "92dbf2391ca51c941492e38c76a58f43ecc2dea8fcacad2735c83d4bbd30e4d9"
+  },
+  {
+    "view": "homebase",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 10.958,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/homebase_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "homebase",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "a0e56fbfe5fd0490f67f44aa7a8b0f04d04e4f35ebdefb724d1114c20b0d2dd4"
+  },
+  {
+    "view": "teameditor",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 4.716,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/teameditor_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "teameditor",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "bac89d4b512f1388cfebac6f7e380d517d539288b133396267c1f387e6168b29"
+  },
+  {
+    "view": "mission",
+    "size": "1280x720",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 7.173,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/mission_1280x720.png",
+      "image_size": [
+        1280,
+        720
+      ],
+      "logical_size": [
+        1280,
+        720
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1280,
+        720
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "mission",
+      "viewport_size": [
+        1280.0,
+        720.0
+      ]
+    },
+    "image_sha256": "c8e703612e8f26d421ffab88b5c33ffbcda88c068ef284b7d983cc5073902a09"
+  },
+  {
+    "view": "homebase",
+    "size": "1280x720",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 11.464,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/homebase_1280x720.png",
+      "image_size": [
+        1280,
+        720
+      ],
+      "logical_size": [
+        1280,
+        720
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1280,
+        720
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "homebase",
+      "viewport_size": [
+        1280.0,
+        720.0
+      ]
+    },
+    "image_sha256": "fdb2d4886c22570a01d503c190ab8531ed56aa3f4a08f5fb46b305f69f6aba9e"
+  },
+  {
+    "view": "lobby",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 6.494,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/lobby_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "lobby",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "119d515fd99150f815e9dcecace2aec531170323771e19d23b1eeda6e9f70ecb"
+  },
+  {
+    "view": "lobby",
+    "size": "1280x720",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 6.315,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/lobby_1280x720.png",
+      "image_size": [
+        1280,
+        720
+      ],
+      "logical_size": [
+        1280,
+        720
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1280,
+        720
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "lobby",
+      "viewport_size": [
+        1280.0,
+        720.0
+      ]
+    },
+    "image_sha256": "3870f3a37530914ae43aa12d0eb5447906a1b1420b5999b01134d48f67e2d2a5"
+  },
+  {
+    "view": "fob",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.896,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/fob_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "fob",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "7f4ed29cd03775a6bded6457b1c0d49fabc41f04d38382f7d4450ba80e59c359"
+  },
+  {
+    "view": "fob",
+    "size": "1280x720",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.927,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "image": "res://docs/qa/ui_native_r2_20261101/captures/fob_1280x720.png",
+      "image_size": [
+        1280,
+        720
+      ],
+      "logical_size": [
+        1280,
+        720
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1280,
+        720
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "view": "fob",
+      "viewport_size": [
+        1280.0,
+        720.0
+      ]
+    },
+    "image_sha256": "16abc747b8b722618218476f51f19ce7f092f5cb2c5a5ec38320e9fa75ff9ce6"
+  }
+]

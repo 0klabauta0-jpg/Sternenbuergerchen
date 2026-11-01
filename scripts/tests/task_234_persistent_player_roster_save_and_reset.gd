@@ -94,6 +94,9 @@ func _test_reset_archives_existing_save() -> void:
 
 func _test_main_menu_uses_persistent_store_and_confirmation() -> void:
 	var main_menu := MAIN_MENU_SCENE.instantiate()
+	main_menu.set("_start_roster_profile_id", "task_234_menu")
+	main_menu.set("_start_roster_save_path", MENU_PATH)
+	main_menu.set("_settings_config_path", "user://ui_native_r2_verifier/task234/settings.cfg")
 	root.add_child(main_menu)
 	await _wait_frames(3)
 	main_menu.call("set_start_roster_store_path_for_tests", MENU_PATH, "task_234_menu", true)
@@ -107,6 +110,9 @@ func _test_main_menu_uses_persistent_store_and_confirmation() -> void:
 	await _wait_frames(2)
 
 	var second_menu := MAIN_MENU_SCENE.instantiate()
+	second_menu.set("_start_roster_profile_id", "task_234_menu")
+	second_menu.set("_start_roster_save_path", MENU_PATH)
+	second_menu.set("_settings_config_path", "user://ui_native_r2_verifier/task234/settings.cfg")
 	root.add_child(second_menu)
 	await _wait_frames(3)
 	second_menu.call("set_start_roster_store_path_for_tests", MENU_PATH, "task_234_menu", false)

@@ -25,6 +25,14 @@ Jeder Eintrag ist als `MetaUnitProfile` nutzbar und enthaelt:
 - Traits aus dem bestehenden Trait-System
 - maximal drei ableitbare Rank-Badges aus TASK_207
 
+### Effektive Werte und Persistenz (UI-R2)
+`MIN_SKILL_VALUE = 0.22` begrenzt den zufälligen Basiswurf. Gespeicherte
+`skill_values` stammen anschließend aus dem bestehenden Skill-/Trait-/Profile-Math-Pfad
+und sind endliche Werte im Bereich 0 bis 1. Traits dürfen effektive Werte unter
+die Basiswurfgrenze senken. Der Roster-Validator prüft diesen effektiven Bereich;
+er verändert weder Traits noch generierte Werte. Fehlende Pflichtwerte, negative,
+über 1 liegende und nicht endliche Werte werden weiter abgelehnt.
+
 ## Rollenmix
 Der Generator muss diese Startkategorien abdecken:
 - `leader`

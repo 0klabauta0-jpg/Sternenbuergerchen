@@ -119,7 +119,11 @@ func _ready() -> void:
 	_ensure_mission_host()
 	_ensure_audio_event_bus()
 	_ensure_lobby_setup_controls()
+	_ensure_native_lobby_sections()
 	_enforce_lobby_panel_geometry()
+	var viewport := get_viewport()
+	if viewport != null and not viewport.size_changed.is_connected(_enforce_lobby_panel_geometry):
+		viewport.size_changed.connect(_enforce_lobby_panel_geometry)
 	_configure_default_inputs()
 	_connect_ui_signals()
 	_apply_contextual_help_ids()
@@ -971,6 +975,55 @@ func _ensure_lobby_setup_controls() -> void:
 		_network_hint_label = setup_panel.find_child("NetworkHintLabel", true, false) as Label
 
 
+func _ensure_native_lobby_sections() -> void:
+	var vbox := get_node("Panel/Margin/VBox") as VBoxContainer
+	if vbox.has_node("LobbyBodyScroll"):
+		return
+	# Keep the actual connection/session controls and their public NodePaths.
+	# The old whole-window scroll becomes a native fixed shell; only setup and
+	# diagnostic content move into the independently clipped body scroll.
+	var old_margin := get_node("Panel/Margin") as ScrollContainer
+	var panel := get_node("Panel") as Control
+	panel.remove_child(old_margin)
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	panel.add_child(margin)
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "top", "right", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 16)
+	vbox.reparent(margin, false)
+	old_margin.free()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 8)
+	(get_node("Panel/Margin/VBox/TitleLabel") as Label).add_theme_font_size_override("font_size", 24)
+	var body := ScrollContainer.new()
+	body.name = "LobbyBodyScroll"
+	body.custom_minimum_size = Vector2(0, 96)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	body.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	vbox.add_child(body)
+	vbox.move_child(body, _team_badge_row.get_index() + 1)
+	var content := VBoxContainer.new()
+	content.name = "Content"
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 12)
+	body.add_child(content)
+	for node_name in ["TeamReadabilityLabel", "LobbySetupPanel", "RosterModeRow", "PeerLabel", "AssignmentLabel", "SettingsLabel", "MapConsentPanel", "HintLabel"]:
+		var control := vbox.get_node_or_null(NodePath(node_name)) as Control
+		if control != null:
+			control.reparent(content)
+	var host_join := vbox.get_node("HostJoinGrid") as GridContainer
+	host_join.add_theme_constant_override("v_separation", 8)
+	var session_row := vbox.get_node("SessionRow") as HBoxContainer
+	session_row.add_theme_constant_override("separation", 8)
+	for button in [_host_button, _join_button, _ready_button, _start_button, _disconnect_button, _back_button]:
+		TACTICAL_UI_THEME_SCRIPT.style_command_button(button, "accent" if button == _start_button else "neutral")
+	set_meta("native_lobby_sections", "fixed_actions_scrollable_setup")
+
+
 func _enforce_lobby_panel_geometry() -> void:
 	var panel := get_node_or_null("Panel") as Control
 	if panel == null:
@@ -1120,7 +1173,7 @@ func _apply_contextual_help_ids() -> void:
 	_apply_help_id(_start_button, "multiplayer.start")
 	_apply_help_id(_disconnect_button, "multiplayer.disconnect")
 	_apply_help_id(_back_button, "multiplayer.disconnect")
-	_apply_help_id(get_node_or_null("Panel/Margin/VBox/RosterModeRow/RosterModeLabel"), "multiplayer.roster_ownership")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/LobbyBodyScroll/Content/RosterModeRow/RosterModeLabel"), "multiplayer.roster_ownership")
 	_apply_help_id(_roster_mode_option, "multiplayer.roster_ownership")
 	_apply_help_id(_roster_mode_summary_label, "multiplayer.roster_ownership")
 	_apply_help_id(_assignment_label, "multiplayer.roster_ownership")
@@ -1641,6 +1694,7 @@ func _build_team_readability_text(snapshot: Dictionary) -> String:
 
 func _refresh_team_badges(snapshot: Dictionary) -> void:
 	for child in _team_badge_row.get_children():
+		_team_badge_row.remove_child(child)
 		child.queue_free()
 	var badge_entries: Array = _build_team_badge_data(snapshot)
 	_team_badge_row.visible = not badge_entries.is_empty()
@@ -1649,10 +1703,12 @@ func _refresh_team_badges(snapshot: Dictionary) -> void:
 		var label := Label.new()
 		label.text = String(entry.get("badge_text", ""))
 		label.tooltip_text = String(entry.get("tooltip", ""))
-		label.custom_minimum_size = Vector2(192.0, 30.0)
-		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.custom_minimum_size = Vector2(0.0, 30.0)
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		label.clip_text = true
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.clip_text = false
 		label.add_theme_font_size_override("font_size", 11)
 		label.add_theme_color_override("font_color", Color(0.95, 0.98, 1.0, 1.0))
 		label.add_theme_stylebox_override("normal", _make_team_badge_style(String(entry.get("team_color_hex", ""))))

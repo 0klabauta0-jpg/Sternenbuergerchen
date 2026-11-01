@@ -65,6 +65,7 @@ var _draft_comic_bubble_settings: Dictionary = {}
 var _draft_gameplay_settings: Dictionary = {}
 var _display_section_label: Label = null
 var _audio_section_label: Label = null
+var _audio_value_labels: Dictionary = {}
 var _input_section_label: Label = null
 var _gameplay_section_label: Label = null
 var _resolution_option: OptionButton = null
@@ -878,6 +879,8 @@ func _ensure_settings_screen_nodes() -> void:
 	_master_volume_slider.custom_minimum_size = Vector2(360.0, 30.0)
 	_music_volume_slider = _ensure_settings_slider("MusicVolumeSlider")
 	_sfx_volume_slider = _ensure_settings_slider("SfxVolumeSlider")
+	for channel in ["Master", "Music", "Sfx"]:
+		_audio_value_labels[channel] = _ensure_settings_label(channel + "VolumeCaption", "", 13)
 
 	_input_section_label = _ensure_settings_label("InputSectionLabel", "Eingabe", 18)
 	_input_actions_label = _ensure_settings_label("InputActionsLabel", _build_input_actions_text(), 13)
@@ -1642,6 +1645,9 @@ func _refresh_team_name_controls() -> void:
 func _refresh_team_library() -> void:
 	if _team_library_list == null:
 		return
+	var focused_row := get_viewport().gui_get_focus_owner() as Button
+	var restore_focus := focused_row != null and focused_row.get_parent() == _team_library_list
+	var focused_path := String(focused_row.get_meta("roster_entry_path", "")) if restore_focus else ""
 	var library: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("list_roster_entries", _start_roster_profile_id, _start_roster_save_path))
 	_team_library_entries = Array(library.get("entries", [])).duplicate(true)
 	var active_path: String = String(library.get("active_path", _start_roster_save_path))
@@ -1675,6 +1681,24 @@ func _refresh_team_library() -> void:
 		if not row.gui_input.is_connected(row_input_callable):
 			row.gui_input.connect(row_input_callable)
 		_team_library_list.add_child(row)
+		if restore_focus and String(entry.get("path", "")) == focused_path:
+			row.call_deferred("grab_focus")
+	_refresh_team_library_status()
+
+
+func _select_team_library_row(entry_path: String) -> void:
+	_selected_roster_entry_path = entry_path.strip_edges()
+	# Selection changes presentation only. Keep the actual buttons, keyboard
+	# focus and double-click target alive instead of rebuilding the whole list.
+	if _team_library_list != null:
+		for child in _team_library_list.get_children():
+			var row := child as Button
+			if row == null:
+				continue
+			var selected := String(row.get_meta("roster_entry_path", "")) == _selected_roster_entry_path
+			row.set_pressed_no_signal(selected)
+			TACTICAL_UI_THEME_SCRIPT.style_command_button(row, "selected" if selected else "neutral")
+			row.add_theme_font_size_override("font_size", 14)
 	_refresh_team_library_status()
 
 
@@ -3227,8 +3251,11 @@ func _order_settings_nodes(action_row: HBoxContainer) -> void:
 		_fullscreen_check,
 		_vsync_check,
 		_audio_section_label,
+		_audio_value_labels.get("Master"),
 		_master_volume_slider,
+		_audio_value_labels.get("Music"),
 		_music_volume_slider,
+		_audio_value_labels.get("Sfx"),
 		_sfx_volume_slider,
 		_input_section_label,
 		_input_actions_label,
@@ -3329,6 +3356,7 @@ func _refresh_settings_controls(gameplay_settings: Dictionary, comic_settings: D
 		_music_volume_slider.set_value_no_signal(float(gameplay.get("music_volume", 80.0)))
 	if _sfx_volume_slider != null:
 		_sfx_volume_slider.set_value_no_signal(float(gameplay.get("sfx_volume", 80.0)))
+	_refresh_audio_value_labels(gameplay)
 	_fullscreen_check.set_pressed_no_signal(String(gameplay.get("window_mode", "windowed")) == "fullscreen")
 	_configure_bubble_mode_option(comic)
 	if _fog_of_war_option != null:
@@ -3360,6 +3388,15 @@ func _refresh_settings_controls(gameplay_settings: Dictionary, comic_settings: D
 	_refresh_thought_hold_label(comic)
 	if _input_actions_label != null:
 		_input_actions_label.text = _build_input_actions_text()
+
+
+func _refresh_audio_value_labels(settings: Dictionary) -> void:
+	var channels := {"Master": ["Gesamtlautstärke", "master_volume"], "Music": ["Musik", "music_volume"], "Sfx": ["Effekte", "sfx_volume"]}
+	for channel in channels:
+		var label := _audio_value_labels.get(channel) as Label
+		if label != null:
+			var definition: Array = channels[channel]
+			label.text = "%s · %d %%" % [definition[0], roundi(float(settings.get(definition[1], 80.0)))]
 
 
 func _build_input_actions_text() -> String:
@@ -3766,8 +3803,7 @@ func _on_team_name_suggest_pressed() -> void:
 
 
 func _on_team_library_row_pressed(entry_path: String) -> void:
-	_selected_roster_entry_path = entry_path.strip_edges()
-	_refresh_team_library()
+	_select_team_library_row(entry_path)
 	_play_ui_sfx("switch", "team_library_select")
 
 
@@ -3775,11 +3811,9 @@ func _on_team_library_row_gui_input(event: InputEvent, entry_path: String) -> vo
 	var mouse_event := event as InputEventMouseButton
 	if mouse_event == null or not mouse_event.pressed or mouse_event.button_index != MOUSE_BUTTON_LEFT:
 		return
-	_selected_roster_entry_path = entry_path.strip_edges()
+	_select_team_library_row(entry_path)
 	if mouse_event.double_click:
 		open_team_editor(entry_path)
-	else:
-		_refresh_team_library()
 
 
 func _on_team_library_activate_pressed() -> void:
@@ -3913,6 +3947,7 @@ func _parse_resolution_preset(resolution_preset: String) -> Vector2i:
 
 func _on_master_volume_changed(value: float) -> void:
 	_draft_gameplay_settings["master_volume"] = clampf(value, 0.0, 100.0)
+	_refresh_audio_value_labels(_draft_gameplay_settings)
 	_status_label.text = "Settings changed"
 
 
@@ -3959,11 +3994,13 @@ func _on_vsync_toggled(enabled: bool) -> void:
 
 func _on_music_volume_changed(value: float) -> void:
 	_draft_gameplay_settings["music_volume"] = clampf(value, 0.0, 100.0)
+	_refresh_audio_value_labels(_draft_gameplay_settings)
 	_status_label.text = "Settings changed"
 
 
 func _on_sfx_volume_changed(value: float) -> void:
 	_draft_gameplay_settings["sfx_volume"] = clampf(value, 0.0, 100.0)
+	_refresh_audio_value_labels(_draft_gameplay_settings)
 	_status_label.text = "Settings changed"
 
 

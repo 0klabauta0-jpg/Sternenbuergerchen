@@ -1,4 +1,4 @@
-# Native UI Design Contract · R1
+# Native UI Design Contract · R1 / R2
 
 Gültig für den vom Nutzer am 01.11.2026 beauftragten Umsetzungsschritt auf Basis der bestätigten UI-Konzepte. Die Bilder bestimmen Formsprache und Gruppierung; bestehende Runtime-/Datenverträge bestimmen Inhalt und erlaubte Aktionen.
 
@@ -33,3 +33,15 @@ Gültig für den vom Nutzer am 01.11.2026 beauftragten Umsetzungsschritt auf Bas
 
 ## Nachweis
 Native Strukturchecks prüfen Controls, Quadrate, Positionen, Erreichbarkeit und Zustandsgrenzen. Echte nicht-headless Viewport-Captures prüfen das gerenderte Ergebnis. Kein simuliertes Capture-/Ersatzboard gilt als Bildbeleg. Menschliche Verständlichkeitsprüfung bleibt offen.
+
+## Verdichtung R2
+- Mission: Randband höchstens 160px hoch, Teamparameter als begrenzte Gruppe bis 560px; Mitgliederstreifen höchstens 112px. 64px-Aktionstasten bleiben lesbar und quadratisch. Lange Diagnose erhält einen erreichbaren Detailpfad.
+- Haltung verwendet verständliche volle Wörter. Ein nativer Feuerregel-Selektor delegiert an dieselben vorhandenen Buttons/Callbacks und übernimmt deren Sperren. Die Anzeige folgt dem bestätigten Konsens; Pending-, Gemischt- und Leerzustand dürfen keine erfolgreiche Änderung vortäuschen.
+- Löschziel-/Ordnungsmarkierungen lesen den bestehenden Controllerzustand, nicht `button_pressed` eines gewöhnlichen Aktionsbuttons.
+- Heimatbasis/FOB priorisieren drei Arbeitsbereiche. Briefingdetails sind explizit erreichbar. Eine Person oder ein Team kann seinen Arbeitsort wechseln; eine zweite bearbeitbare Zuordnungsinstanz entsteht dadurch nicht.
+- Nachbesprechung gliedert vorhandene Resultate in Karten. Fehlende Gesundheit, Entwicklung oder Ereignisse bleiben als fehlend erkennbar; keine erfundenen Auszeichnungen, Zeitstempel oder Kennzahlen.
+- Settings zeigen Audiokanal und aktuellen Entwurfswert. Abbrechen speichert diesen Entwurf nicht. Bibliotheksauswahl behält Controls und Tastaturfokus; ein bloßer Auswahlwechsel baut nicht die ganze Liste neu.
+- Lobby hält Verbindungs-/Sitzungsaktionen außerhalb des scrollbaren Setupkörpers. Host-, Client-, Bereitschafts- und Kartenannahmegates bleiben unverändert. Verschobene Setuptexte behalten Kontexthilfe; die vorhandene Payload-Netzwerklücke wird dadurch nicht als behoben ausgegeben.
+- Die FOB-Teamkontextzeile aktualisiert sich am bestehenden Zustandsrefresh, auch bei reinem Fokuswechsel ohne Größenänderung. Mindestgrößensignale sind keine State-Änderungsquelle.
+- R2-Captures bei 1280×720 verwenden ausdrücklich auch diese logische Viewportgröße. R1-Bildskalierung wird nicht rückwirkend als kleiner Reflow ausgegeben.
+- Die Roster-Prüfung folgt dem bestehenden effektiven 0..1-Wertevertrag nach Traits, siehe `character_roster_generation_contract.md`. UI-Save-Fixtures dürfen gültige problematische Werte nicht neutralisieren.

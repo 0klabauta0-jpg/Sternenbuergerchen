@@ -122,6 +122,7 @@ var _roster_card_pool = HOMEBASE_CARD_POOL_SCRIPT.new()
 var _staged_card_pool = HOMEBASE_CARD_POOL_SCRIPT.new()
 var _team_feedback_text: String = ""
 var _character_sheet_open: bool = false
+var _r2_briefing_details_open: bool = false
 var _aircraft_feedback_text: String = ""
 var _mission_catalog: Array = []
 var _selected_mission_id: String = "fob_transfer"
@@ -148,6 +149,8 @@ var _post_mission_skill_delta_by_unit_id: Dictionary = {}
 func _ready() -> void:
 	TACTICAL_UI_THEME_SCRIPT.apply_screen(self)
 	set_meta("native_ui_screen_family", "homebase")
+	if not get_viewport().size_changed.is_connected(_enforce_drop_light_fixed_layout):
+		get_viewport().size_changed.connect(_enforce_drop_light_fixed_layout)
 	set_process(true)
 	META_UI_SKIN_SCRIPT.apply_homebase(self)
 	_apply_drop_light_fixed_layout()
@@ -1935,8 +1938,7 @@ func _apply_help_id(node: Node, help_id: String) -> void:
 
 
 func _apply_drop_light_fixed_layout() -> void:
-	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
-	custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
+	custom_minimum_size = Vector2.ZERO
 	set_meta("drop_light_fixed_fullhd_layout", true)
 	set_meta("drop_light_screen", DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SCREEN_HOMEBASE"))
 	_character_sheet_open = false
@@ -1949,16 +1951,128 @@ func _apply_drop_light_fixed_layout() -> void:
 
 
 func _enforce_drop_light_fixed_layout() -> void:
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout")
-	_apply_fixed_window_contract("DropLightTopbar", layout.get("topbar"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/MissionPanel", layout.get("mission_brief"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/RosterPanel", layout.get("roster"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel", layout.get("fireteams"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/AircraftPanel", layout.get("flightdeck"))
+	var layout := get_native_r2_layout_snapshot()
+	_apply_fixed_window_contract("Panel", layout.viewport)
+	_apply_fixed_window_contract("DropLightTopbar", layout.topbar)
+	_ensure_r2_briefing_scroll()
+	_ensure_r2_briefing_toggle()
+	_apply_r2_briefing_visibility()
+	_apply_fixed_window_contract("Panel/Margin/VBox/MissionPanel", layout.mission_brief)
+	for entry in [
+		["Panel/Margin/VBox/ContentRow/RosterPanel", "roster"],
+		["Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel", "fireteams"],
+		["Panel/Margin/VBox/ContentRow/AircraftPanel", "flightdeck"],
+	]:
+		var panel := get_node_or_null(entry[0]) as Control
+		if panel != null:
+			panel.visible = not _r2_briefing_details_open
+		_apply_fixed_window_contract(entry[0], layout[entry[1]])
 	_retire_homebase_loadout_panel()
 	_disable_legacy_homebase_window("Panel/Margin/VBox/ContentRow/TeamPanel", "homebase_legacy_transfer_window_disabled")
 	_disable_legacy_homebase_window("Panel/Margin/VBox/ContentRow/InfoPanel", "homebase_legacy_character_sheet_window_disabled")
 	_apply_character_popup_rect()
+
+
+func get_native_r2_layout_snapshot() -> Dictionary:
+	var viewport_size := Vector2i(get_viewport_rect().size)
+	var usable_width := viewport_size.x - 64
+	var roster_width := int(round(float(usable_width) * 0.25 / 8.0)) * 8
+	var team_width := int(round(float(usable_width) * 0.28 / 8.0)) * 8
+	var work_top := 216
+	var work_height := maxi(200, viewport_size.y - work_top - 16)
+	return {
+		"viewport": Rect2i(Vector2i.ZERO, viewport_size),
+		"topbar": Rect2i(0, 0, viewport_size.x, 56),
+		"mission_brief": Rect2i(16, 64, viewport_size.x - 32, viewport_size.y - 80 if _r2_briefing_details_open else 136),
+		"roster": Rect2i(16, work_top, roster_width, work_height),
+		"fireteams": Rect2i(32 + roster_width, work_top, team_width, work_height),
+		"flightdeck": Rect2i(48 + roster_width + team_width, work_top, usable_width - roster_width - team_width, work_height),
+		"character_popup": Rect2i(viewport_size.x - mini(808, viewport_size.x - 32) - 16, 32, mini(808, viewport_size.x - 32), mini(840, viewport_size.y - 64)),
+		"briefing_details_open": _r2_briefing_details_open,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _ensure_r2_briefing_scroll() -> void:
+	var panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as PanelContainer
+	if panel == null:
+		return
+	var old_margin := panel.get_node_or_null("MissionMargin") as MarginContainer
+	if old_margin == null:
+		return
+	# Keep every existing briefing NodePath and callback. Only its presentation
+	# wrapper changes so long recommendations cannot enlarge the bounded frame.
+	var content := old_margin.get_node("MissionVBox") as VBoxContainer
+	old_margin.remove_child(content)
+	panel.remove_child(old_margin)
+	old_margin.queue_free()
+	var scroll := ScrollContainer.new()
+	scroll.name = "MissionMargin"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.add_child(scroll)
+	scroll.add_child(content)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 4)
+
+
+func _ensure_r2_briefing_toggle() -> void:
+	var header := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow") as HBoxContainer
+	if header == null:
+		return
+	var button := header.get_node_or_null("R2BriefingDetailsButton") as Button
+	if button == null:
+		button = Button.new()
+		button.name = "R2BriefingDetailsButton"
+		button.custom_minimum_size = Vector2(144, 30)
+		button.pressed.connect(_on_r2_briefing_details_pressed)
+		header.add_child(button)
+	button.text = "Zur Vorbereitung" if _r2_briefing_details_open else "Briefingdetails"
+	button.tooltip_text = "Vollständiges Briefing, Empfehlungen und Bereitschaft anzeigen."
+	META_UI_SKIN_SCRIPT.style_secondary_button(button)
+
+
+func _on_r2_briefing_details_pressed() -> void:
+	_r2_briefing_details_open = not _r2_briefing_details_open
+	var scroll := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin") as ScrollContainer
+	if scroll != null:
+		scroll.scroll_vertical = 0
+	_enforce_drop_light_fixed_layout()
+
+
+func _apply_r2_briefing_visibility() -> void:
+	var vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
+	if vbox == null:
+		return
+	# Visibility of existing feedback stays with its existing source updater.
+	# The scroll wrapper provides density without hiding readiness/return data.
+	var summary := vbox.get_node_or_null("R2PreparationStatus") as Label
+	if summary == null:
+		summary = Label.new()
+		summary.name = "R2PreparationStatus"
+		summary.clip_text = true
+		summary.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		summary.add_theme_font_size_override("font_size", 12)
+		vbox.add_child(summary)
+		vbox.move_child(summary, 3)
+	summary.text = String(_pre_mission_readiness_snapshot.get("summary_text", ""))
+	summary.tooltip_text = summary.text
+	for label_name in ["MissionHeaderLabel", "MissionSummaryLabel"]:
+		var label := vbox.get_node_or_null(label_name) as Label
+		if label != null:
+			label.clip_text = true
+			label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			label.max_lines_visible = -1 if _r2_briefing_details_open else 1
+			label.tooltip_text = label.text
+	var info_row := vbox.get_node_or_null("MissionInfoRow")
+	if info_row != null:
+		for child in info_row.get_children():
+			if child is Label:
+				(child as Label).clip_text = true
+				(child as Label).text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+				(child as Label).tooltip_text = (child as Label).text
 
 
 func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
@@ -1969,6 +2083,10 @@ func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
 		return
 	var rect: Rect2i = rect_variant
 	control.set_as_top_level(true)
+	control.anchor_left = 0.0
+	control.anchor_top = 0.0
+	control.anchor_right = 0.0
+	control.anchor_bottom = 0.0
 	control.position = Vector2(float(rect.position.x), float(rect.position.y))
 	control.size = Vector2(float(rect.size.x), float(rect.size.y))
 	control.custom_minimum_size = Vector2(float(rect.size.x), float(rect.size.y))
@@ -2490,17 +2608,8 @@ func _apply_character_popup_rect() -> void:
 	var popup := get_node_or_null("CharacterSheetPopup") as Control
 	if popup == null:
 		return
-	popup.set_as_top_level(true)
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout")
-	var rect_variant: Variant = layout.get("character_popup")
-	if typeof(rect_variant) != TYPE_RECT2I:
-		return
-	var rect: Rect2i = rect_variant
-	popup.position = Vector2(float(rect.position.x), float(rect.position.y))
-	popup.size = Vector2(float(rect.size.x), float(rect.size.y))
-	popup.custom_minimum_size = Vector2(float(rect.size.x), float(rect.size.y))
-	popup.set_deferred("position", popup.position)
-	popup.set_deferred("size", popup.size)
+	var rect: Rect2i = get_native_r2_layout_snapshot().character_popup
+	_apply_fixed_window_contract("CharacterSheetPopup", rect)
 	popup.set_meta("homebase_character_popup_rect", rect)
 
 
@@ -2905,6 +3014,9 @@ func _configure_roster_pool_card(card, spec: Dictionary) -> void:
 	var unit_id: String = String(spec.get("unit_id", "")).strip_edges()
 	var profile = spec.get("profile", null)
 	var is_in_transit: bool = bool(spec.get("is_in_transit", false))
+	# The pooled card may have the old 316px minimum from a previous setup.
+	# Let the existing compact layout fill the actual roster viewport instead.
+	card.custom_minimum_size = Vector2(0.0, HOMEBASE_OPERATOR_CARD_SIZE.y)
 	card.setup_from_profile(
 		profile,
 		{
@@ -2917,8 +3029,7 @@ func _configure_roster_pool_card(card, spec: Dictionary) -> void:
 			"compact_mode": true,
 			"show_progress": is_in_transit,
 			"progress_value": float(spec.get("progress_value", 0.0)),
-			"fixed_size": true,
-			"fixed_card_size": HOMEBASE_OPERATOR_CARD_SIZE,
+			"fixed_size": false,
 		}
 	)
 	if not card.card_pressed.is_connected(_on_compact_card_pressed):
@@ -3685,6 +3796,10 @@ func _update_mission_info() -> void:
 	_update_pre_mission_readiness_panel()
 	_update_next_sortie_readiness_summary()
 	_apply_post_debrief_density_findings()
+	var preparation_status := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/R2PreparationStatus") as Label
+	if preparation_status != null:
+		preparation_status.text = String(_pre_mission_readiness_snapshot.get("summary_text", ""))
+		preparation_status.tooltip_text = preparation_status.text
 
 
 func _update_personnel_notifications() -> void:
