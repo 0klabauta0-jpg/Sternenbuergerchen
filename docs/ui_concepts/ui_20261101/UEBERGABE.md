@@ -16,10 +16,11 @@ Stand: 01.11.2026. Auftrag: bestehende Funktionen ansehen, visuelle Alternativen
 - Lokale Konzeptkopie: `C:/Users/bjoer/.codex/worktrees/ui-entwuerfe-20261101/SternenBuergerchen`.
 - Der Grafikpass im separaten Worktree `grafikreferenzen-20261101` ist Stilquelle, kein Bestandteil dieser Integration.
 - Nutzerfeedback und Revisionsauftrag: [FEEDBACK_20261101.md](FEEDBACK_20261101.md); unveränderter [Review-Export](review_export_20261101_154755.json).
+- Neuester Umfang, elf Bildtafeln und quellbasierte Begründungen: [MENUES_UND_KARTEN.md](MENUES_UND_KARTEN.md).
 
 ## 1. Gewählte Richtung und erhaltene Alternativen
 
-**Nutzerentscheidung vom 01.11.2026: A für die Mission weiterentwickeln, C als Staging-Grundlage weiterführen. Aktueller Auftrag ist A4:** engere quadratische Buttons mit Text **im Button**; Blöcke von links nach rechts **Aktionen → Ziel/Auftrag → Alpha mit Haltung/Feuerregel darunter**. Das Randband aus A3 bleibt, dessen Außenbeschriftung ist überholt. Die Auswahl bleibt eine Konzeptentscheidung, keine Runtime-Freigabe. Vorherige Bilder bleiben als Vorgeschichte erhalten.
+**Aktueller Nutzerauftrag A5: zwei echte Reihen kleinerer Missionsbuttons und Bild-KI-Vorschläge für alle vorhandenen Menüs, Details und kleinen Charakterkarten.** A bleibt die gewählte Missionsrichtung; C bleibt Staging-Grundlage. Innenbeschriftung und **Aktionen → Ziel/Auftrag → Alpha mit Haltung/Feuerregel darunter** bleiben. A4s leere zweite-Reihen-Reserve ist überholt. Der [Menüguide](MENUES_UND_KARTEN.md) enthält elf Bildtafeln einschließlich getrenntem lesendem Charakterbogen und bearbeitbarem Teameditor. Alles bleibt Konzept, ohne Runtime-Freigabe.
 
 | Richtung | Schwerpunkt | Gewinn | Zielkonflikt |
 |---|---|---|---|
@@ -55,7 +56,7 @@ Dropship oben rechts und der Missions-/Zielkasten im oberen rechten Mittelbereic
 
 Für die Umsetzung gilt die echte Viewportkante als Bezug. A2 ist 1672×941px groß; dessen letzte Bildzeile ist kein festes y-Ziel für ein 1920×1080-Layout. Tatsächliche A3-Abweichungen erst nach Sichtprüfung unter [PRUEFUNG.md](PRUEFUNG.md) bewerten.
 
-### A4 – aktueller Auftrag: Text innen, Zielblock in der Mitte
+### A4 – historischer Einreihenentwurf mit Innenbeschriftung
 
 Neuer Kandidat: [mockup_a4_band_bloecke_kompakt.png](../../reports/assets/ui-2026-11-01/mockup_a4_band_bloecke_kompakt.png), abgeleitet aus A3. Die fünf Aktionsbuttons unten links werden etwas kompakter und enger. **Kurze lesbare Beschriftungen liegen innerhalb des jeweiligen Quadrats**, unter dem Icon; „Plan ausführen“ kann im Button zweizeilig stehen. Zielentwurf des Assistenten: Bildkörper um 60px, Abstand 4–6px; keine wörtliche Nutzermaßvorgabe und kein Anlass für kleinere Schrift.
 
@@ -63,13 +64,21 @@ Der Nutzer möchte Haltung und Feuerregel unter dem Alpha-/Bereit-Header und die
 
 Unter der ersten Aktionsreihe bleibt freie Layoutreserve für eine spätere zweite Reihe. Dafür keine zusätzlichen aktiven oder angedeuteten Buttons zeichnen und das Band nicht höher machen. Welt, Teamkarten, Log, obere rechte Bereiche und die sechs aktuellen Galerie-Icons bleiben wie in A3; Randverankerung und Haltung „Normal“ bleiben erhalten. Tatsächliche Zieltreue getrennt im Bildprüfbericht beurteilen.
 
+### A5 – aktuell: zwei Reihen und vollständiges Menüpaket
+
+Neuer Missionskandidat: [mockup_a5_mission_zweireihig.png](../../reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png). Reihe 1: **Bewegen / Nehmen / Verteidigen / Flankieren / Plan ausführen**. Reihe 2: **Ziel / Leeren / Löschen / Ordnen**, fünfter Platz leer ohne Ghost-Button. Der aktuelle Action-Katalog belegt diese Funktionen; die zweite Reihe ist kein zukünftiger Befehlsentwurf.
+
+Unser Maßziel für die 1672px breite Bildvorlage sind etwa 50–52px-Buttonkörper mit etwa 4px Abstand, zwei Reihen innerhalb der bisherigen etwa 127px-Bandhöhe. Innenbeschriftung lesbar halten; Blockfolge, Randanker, Teamkarten/Log darüber und obere rechte Bereiche erhalten. Tatsächliche Zieltreue im Bildprüfbericht beurteilen.
+
+Zehn weitere Tafeln behandeln Hauptmenü, Basis, FOB/Loadout, Charakterkarten/Bogen, Details, Debrief, Lobby, Settings/Hilfe/Escape, Editor und einen eigenen editierbaren Teameditor. Der [Menüguide](MENUES_UND_KARTEN.md) erklärt die jeweilige Gestaltung und die tatsächlich vorhandenen Felder. Absicht und sichtbare Interpretation ersetzen keine unbekannten internen Generatorgedanken. Frühere Bilder und sechs aktuelle Galerie-Icons bleiben erhalten.
+
 ## 2. Was vom früheren UI-Konzept erhalten bleibt
 
 Quelle: [Better UI README](../better_ui/README.md), [getrennte Screens](../better_ui/separated_screens.html), [Mischvorschläge](../better_ui/index.html).
 
 - „Tactical Dock“: Karte führt; `#16 COMMAND MATRIX` bündelt den Bedienweg, `#17 SELECTED FIRETEAM` zeigt Kontext, `#18 MISSION CONTROL` Transport und LZ.
 - „Operator Cards“: Transfer, Deck, Boarding und Recovery direkt an der betroffenen Personen-/Schiffkarte nachvollziehen.
-- „Dense Loadout Drawer“: stabile Slotgrößen und kleine, erkennbare Waffenbilder. Keine erfundenen Waffen hinzufügen.
+- „Dense Loadout Drawer“: stabile Slotgrößen und kleine, erkennbare Waffenbilder. Der aktuelle `LoadoutContract` enthält SMG, Rifle, Sniper, Railgun, Rocket launcher, Medictool und kontextabhängig None; die alte Beschränkung auf SMG/Medictool ist überholt. Keine zusätzlichen Waffen erfinden.
 - „Hangar Ops Board“: Flightdeck als UI-Bühne, nicht als zusätzlicher begehbarer Spielraum.
 - Die früheren Homebase-/FOB-Iterationen enthalten bewusst gesetzte Kenney-Pads, Schiffbilder und Boarding-Stapel. Sie bleiben als Vorgeschichte erhalten.
 - Feste Panelgrößen pro Ansicht, stabile Buttonhöhen und begrenzte variable Inhaltsbereiche bleiben sinnvoll. Das ist kein Auftrag, lange wichtige Texte unzugänglich abzuschneiden.
@@ -201,7 +210,7 @@ HUD-Updates weiter über vorhandene Dirty-/Readmodel-Pfade ausführen, insbesond
 
 Erste Vergleichsfläche: **1920×1080 bei unveränderter Betriebssystem-/Spielskalierung**. Der bestehende `DropLightLayoutContract` verwendet diese Größe, 8px-Basisabstand und 48×48 beziehungsweise 40×40-Aktionsflächen (`scripts/meta/drop_light_layout_contract.gd:4–8`). Neue Werte sind Entwurfsziele, keine universellen UX-Gesetze.
 
-**Aktuell gilt A4:** fünf engere Quadrate mit Icon und lesbarem Kurzlabel **im Button** (Assistentenziel um 60px, Abstand 4–6px). Danach Ziel/Auftrag als Mittelblock, dann Alpha-Header mit Haltung/Feuerregel darunter. Unter der Aktionsreihe freie Reserve lassen, ohne Bandhöhe oder andere Bildteile zu verändern. Bündiger unterer/linker Rand bleibt. A2s horizontale Geometrie und A3s Außenlabels sind historisch. Das Runtime-Layout bleibt bis zu einem eigenen Implementierungsauftrag unverändert.
+**Aktuell gilt A5:** zwei echte Reihen mit Innenbeschriftung und neun vorhandenen Actions; im 1672px-Bild als Assistentenziel etwa 50–52px-Buttonkörper/4px Abstand in der bisherigen etwa 127px-Bandhöhe. Danach Ziel/Auftrag, dann Alpha mit Haltung/Feuerregel darunter. Bündigkeit und übrige Bildbereiche erhalten. A2s horizontale Geometrie, A3s Außenlabels und A4s nur freie zweite-Reihen-Reserve sind historisch. Runtime bleibt bis zu einem eigenen Umsetzungsauftrag unverändert.
 
 - Haupttexte als Entwurf 16–18px, Nebenwerte 14–16px; sehr kleine Diagnosezahlen aus dem normalen Handlungspfad nehmen.
 - Panelkanten, Auswahl, Fokus, Hover und Zielmarkierung getrennt gestalten. Farbe immer durch Form, Text oder Zustand ergänzen.
@@ -225,18 +234,18 @@ Pro Paket passende vorhandene Verifier anhand des aktuellen Tasks wählen, echte
 
 ## 10. Prüfstand und offene Entscheidungen
 
-Die Sichtprüfung und Metadaten stehen in [PRUEFUNG.md](PRUEFUNG.md), Dateihashes und Herkunft im [Manifest](manifest.json). Alle acht Icon-PNGs einschließlich der zwei V2-Kandidaten besitzen echtes Alpha. Sechs Screenentwürfe und je ein erhaltener A3-/A4-Zwischenstand sind illustrative Rasterbilder. A4 zeigt die aktuelle Innenbeschriftung und Blockfolge, ist aber kein maßgenaues Layout: Kacheln nativ mit identischer Breite/Höhe bauen, Text einpassen und Bandhöhe sowie eine mögliche zweite Reihe kontrollieren. Kleine Zielgrößen und der echte Godot-Klickweg bleiben offen. Der Browserzugriff des Agenten auf die lokale HTML-Datei wurde durch die Browserrichtlinie gesperrt. Syntax, Export und A4/A3/A2/A-Umschaltung sind offline geprüft. Der echte Nutzerexport bestätigt einen erfolgten Export; die übrigen Browserinteraktionen sind dadurch nicht geprüft.
+Die aktuelle Sichtprüfung steht in [BILDPRUEFUNG_REVISION5.md](BILDPRUEFUNG_REVISION5.md), der Gesamtprüfstand in [PRUEFUNG.md](PRUEFUNG.md), Dateihashes und Herkunft im [Manifest](manifest.json). Das Paket umfasst 17 Screen-/Kartentafeln, sieben erhaltene Zwischenversuche und acht Icons mit echtem Alpha; dazu zwei Referenzbilder. A5 zeigt zwei belegte Reihen und die aktuelle Blockfolge, ist aber kein maßgenaues Layout: Kacheln nativ mit identischer Breite/Höhe bauen, Text einpassen und Bandhöhe prüfen. Kleine Zielgrößen und der echte Godot-Klickweg bleiben offen. Der Browserzugriff auf die lokale HTML-Datei wurde durch die Browserrichtlinie gesperrt. Fünf Missionsstände, zehn Menüwechsel und Export wurden offline mit synthetischen Controls geprüft: neun Checks bestanden; [Nachweis](EXPORT_PRUEFUNG_REVISION5.json). Der echte Nutzerexport bestätigt einen erfolgten Export; die übrigen Browserinteraktionen sind dadurch nicht geprüft.
 
 ### Sichtbare Abweichungen, die der nächste Chat nicht übernehmen soll
 
 - Das ursprüngliche A zeigt „Vorsichtig“, A2 und B „Normal“; das ist keine neue Regel oder geplante Verhaltensänderung.
 - Der A-Hilfetext sagt „Einheit bewegt sich“. In der echten UI „Fireteam bewegt sich“ verwenden, damit keine individuelle NPC-Steuerung suggeriert wird.
-- C zeichnet „Aufklärung“, „Technik“, „Sturmgewehr“ und „Pistole“. Diese Beispieltexte sind keine Bestätigung verfügbarer Rollen oder Waffen. Aktuellen Katalog und seine `future_task`-/`status_only`-Grenzen lesen; bestehende SMG-/Medictool- beziehungsweise tatsächlich verfügbare Slots verwenden.
+- C zeichnet „Aufklärung“, „Technik“, „Sturmgewehr“ und „Pistole“. Der erneute Quellabgleich bestätigt Scout Sniper/Combat Engineer als Startprofile und `rifle` als Sturmgewehr. Eine separat auswählbare Pistole ist nicht im aktuellen Loadout-Katalog. Rollen-/Fittexte bestätigen keine neuen Recon-/Engineer-Aktionen; `future_task`-/`status_only`-Grenzen weiter beachten.
 - C markiert Boarding bereits im Fortschrittsstreifen und zeigt zugleich „Boarding starten“. Vor dem Start muss der Streifen bei Vorbereitung stehen; während Boarding sind Zustandsanzeige und nächste erlaubte Aktion aus dem Runtime-Vertrag abzuleiten.
 - Generierte Logos, Charaktergesichter und Schiffskonstruktionen sind keine beauftragten neuen Marken-, NPC- oder Fahrzeugassets. Die bestehenden Kenney-Figuren und tatsächlich zugewiesenen Craft-Bilder bleiben maßgeblich.
 - Der Bildgenerator hat FoW und bekannte Kontakte nicht als nachgewiesenen Runtime-Zustand abgebildet. Keine sichtbare Figur aus dem Bild als Freigabe für unbekannte Gegnerdaten verstehen.
 
-Die Missionsrichtung A ist entschieden; aktuell ersetzt A4 die Außenlabels und Blockanordnung aus A3 durch Innenbeschriftung und Aktionen → Ziel/Auftrag → Team/Haltung/Feuerregel. C bleibt zur Weiterentwicklung gewählt. Offen bleiben tatsächliche A4-Zieltreue laut Bildprüfung, endgültige Dichte, Iconerkennung bei Zielgröße, Lesbarkeit im Gelände, Anpassung der existierenden Controls und spätere Nutzungstests. Der ursprüngliche Export enthält **null von fünf gesetzten Sichtprüfungs-Häkchen**. Seine 48px-/Dunkel-Einstellung ist kein Nachweis der 24-/32px-Prüfung. Die Icons ersetzen keinen vollständigen Zustands-/Rollenatlas.
+Die Missionsrichtung A ist entschieden; A5 zeigt zwei echte Befehlsreihen, das erweiterte Paket elf neue Menü-/Kartentafeln. C bleibt Staging-Grundlage. Offen bleiben tatsächliche Bildtreue laut Prüfung, endgültige Dichte, Iconerkennung, Lesbarkeit, native Anpassung und Nutzungstests. Der ursprüngliche Export enthält **null von fünf gesetzten Sichtprüfungs-Häkchen**. Seine 48px-/Dunkel-Einstellung ist kein Nachweis der 24-/32px-Prüfung. Die Icons ersetzen keinen vollständigen Zustands-/Rollenatlas.
 
 ## 11. Kopierbarer Start für den nächsten Chat
 
@@ -249,17 +258,20 @@ docs/ui_concepts/ui_20261101/UEBERGABE.md
 Öffne docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html und lies
 docs/ui_concepts/ui_20261101/FEEDBACK_20261101.md samt Review-Export.
 Basis dieses Konzeptpakets: integration/core-foundation, 3cae5a216.
-A ist für die Mission gewählt, C für Staging weiterzuführen. Aktuell A4:
+A ist für die Mission gewählt, C für Staging weiterzuführen. Aktuell A5:
 Band ab linker unterer Ecke bündig am absoluten unteren Bildrand.
-Fünf engere Quadrate, Ziel um 60px und Abstand 4–6px: Icon oben,
-kurzes lesbares Label IM Button; Plan ausführen nötigenfalls zweizeilig.
-Bewegen, Nehmen, Verteidigen, Flankieren, dann Plan ausführen.
+Zwei echte Reihen: Bewegen/Nehmen/Verteidigen/Flankieren/Plan ausführen;
+darunter Ziel/Leeren/Löschen/Ordnen, fünfter Platz leer ohne Platzhalter.
+Kleinere Quadrate mit lesbarem Label IM Button. Ziel in der Bildvorlage:
+etwa 50–52px / 4px Abstand innerhalb bisheriger etwa 127px-Bandhöhe.
 Blöcke von links: Aktionen → Ziel/Auftrag → Alpha mit Haltung/Feuerregel
-UNTER dem Header. Teamgruppe kompakt nach links rücken.
-Unter erster Aktionsreihe freie Reserve für später, keine neuen Buttons
-und keine höhere Leiste. Welt, Karten, Log und obere rechte Bereiche
-wie A3 erhalten; Normal bleibt. A3s Außenlabels sind überholt.
-Keine kleineren Schriften, keine neue Iconrunde, keine Runtime-Freigabe.
+UNTER dem Header. Welt/Karten/Log/oben rechts erhalten, Normal bleibt.
+Lies zusätzlich docs/ui_concepts/ui_20261101/MENUES_UND_KARTEN.md:
+elf neue Tafeln für alle bestehenden Menüs/Details/Charakterkarten.
+Lies docs/ui_concepts/ui_20261101/BILDPRUEFUNG_REVISION5.md für
+Restabweichungen wie Medictool-Glyph, FTL-Sterne und Editor-Deckung.
+Kompaktkarte, lesenden Charakterbogen und editierbaren Creator trennen.
+Keine Zukunftsfunktionen, neue Iconrunde oder Runtime-Freigabe ableiten.
 Bildtexte/Zahlen sind Illustrationen. Keine Review-Checkbox war gesetzt.
 Prüfe den heutigen Branch, Diff und die wirklichen Funktionsverträge.
 Nutze vorhandene UI-Komponenten, Snapshots und Commandpfade.

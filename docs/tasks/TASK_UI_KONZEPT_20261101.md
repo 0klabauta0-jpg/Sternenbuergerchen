@@ -1,7 +1,7 @@
 # UI-Konzept und Bildgenerator-Icons · 01.11.2026
 
 ## Ziel / Problem
-Vorhandene Oberflächen und Funktionen sichten, visuelle Alternativen im aktuellen SternenBürgerchen-Stil erstellen und eine nachvollziehbare Übergabe für die spätere Godot-Umsetzung liefern.
+Vorhandene Oberflächen und Funktionen sichten, visuelle Alternativen im aktuellen SternenBürgerchen-Stil erstellen und eine nachvollziehbare Übergabe für die spätere Godot-Umsetzung liefern. Der neueste Nutzerauftrag erweitert dies ausdrücklich auf alle vorhandenen Menüs, Detailtafeln und kleinen Charakterkarten sowie zwei echte Reihen kompakter Missionsbuttons.
 
 ## Grundlage / Ursache
 Der Nutzer beauftragt ausdrücklich Entwürfe, Icons mit dem Bildgenerator und die Erklärung der Gestaltungsentscheidungen. Bestehende UI-Vorschläge und der laufende Grafikpass dienen als Quellen. Wiederverwendete Befehlssymbole und sehr kleine Theme-Schriften sind konkrete Ansatzpunkte aus dem Code; ihre Wirkung ist noch nicht mit Spielern geprüft.
@@ -9,6 +9,7 @@ Der Nutzer beauftragt ausdrücklich Entwürfe, Icons mit dem Bildgenerator und d
 ## Umfang und Nicht-Ziele
 - Funktionsinventar, Alternativen, generierte Rasterentwürfe und sechs separate Icon-Kandidaten.
 - Lokale interaktive Review-Workbench und schriftliche Übergabe einschließlich exakter Prompts, Herkunft und Prüfgrenzen.
+- Erweiterung A5: elf Bildtafeln für Mission, Hauptmenü, Heimatbasis, FOB/Loadout, Charakterkarten/lesenden Bogen, Detailkarten, Debrief, Lobby, Settings/Hilfe/Escape, Editor und einen getrennten bearbeitbaren Teameditor. Gestaltungsgründe und Quellumfang in `docs/ui_concepts/ui_20261101/MENUES_UND_KARTEN.md`.
 - Keine Änderung an Runtime, Input, Regeln, Szenen oder aktiven Assets; keine Integration des parallelen Grafikpasses.
 
 ## Relevante Quellen
@@ -73,7 +74,9 @@ Die neueste Rückmeldung präzisiert denselben Konzeptauftrag: Das Befehlsband l
 - Gestaltungsziel und tatsächliches Bildergebnis werden getrennt dokumentiert. Für andere Ausgabegrößen gilt die Randverankerung relativ zur echten Bildhöhe, keine feste A2-Pixelkoordinate.
 - Kein Runtime-/Input-/Gameplay- oder Assetintegrationsauftrag; GO bleibt Planausführung, Echtzeit bleibt ohne Pause.
 
-## Aktuelle Revision A4 · Innenbeschriftung und drei kompakte Blöcke
+## Historische Revision A4 · Innenbeschriftung und drei kompakte Blöcke
+
+Innenbeschriftung und die Drei-Block-Anordnung bleiben für A5 erhalten. Die nur freie Reserve für eine zweite Reihe wird durch zwei tatsächlich belegte Reihen ersetzt.
 
 Neuester Nutzerwunsch: Buttons unten links noch kompakter und enger; **Text innerhalb der Buttons**, damit später eine zweite Reihe Platz hat. Unter dem Alpha-/Bereit-Header stehen Haltung und Feuerregel; die Gruppe rückt nach links. „Ziel gewählt / Auftrag: Bewegen“ liegt zwischen Aktionsblock und Alpha-/Haltungsblock. Die bereits mitgeteilte Auslegung lautet von links nach rechts **Aktionen → Ziel/Auftrag → Alpha + Haltung + Feuerregel**; sie ist eine konkrete Layoutausarbeitung, keine zusätzliche Gameplay-Funktion.
 
@@ -90,3 +93,27 @@ Neuester Nutzerwunsch: Buttons unten links noch kompakter und enger; **Text inne
 - Drei Blöcke sind eindeutig in der Reihenfolge Aktionen → Ziel/Auftrag → Team/Haltung/Feuerregel erkennbar. Haltung und Feuerregel liegen unter dem Alpha-Header.
 - Platzreserve ist leer, Bandhöhe und übrige Bildbereiche bleiben gegenüber A3 erhalten. Tatsächliche Abweichungen werden im Bildprüfbericht benannt.
 - Unverändert Konzeptrevision ohne Runtime-, Input-, Gameplay- oder aktive Assetänderungen.
+
+## Aktuelle Erweiterung A5 · alle Menüs und zwei echte Befehlsreihen
+
+Der Nutzer verlangt weitere Bild-KI-Vorschläge für sämtliche bestehenden Menüs, Details und kompakte Charakterkarten im etablierten Stil, mit verständlicher Erklärung in der vollständigen HTML-Review. Die Bildbegründung dokumentiert unsere Absicht und später die sichtbare Auslegung; sie behauptet keine internen Gedanken des Generators.
+
+- A5: Reihe 1 Bewegen/Nehmen/Verteidigen/Flankieren/Plan ausführen; Reihe 2 Ziel/Leeren/Löschen/Ordnen, fünfte Position leer ohne Ghost-Control. Dies sind vorhandene Actions laut `mission_command_hierarchy_contract.gd:81–113`, keine neuen Gameplay-Funktionen.
+- Assistentenziel für die 1672px breite Bildvorlage: Buttonkörper etwa 50–52px, Abstand etwa 4px, zwei Reihen in der bisherigen etwa 127px-Bandhöhe. Lesbare Innenbeschriftung, Bündigkeit und Aktionen → Ziel/Auftrag → Team/Haltung/Feuerregel bleiben.
+- Neun weitere Menü-/Kartentafeln plus separater Teameditor ergeben zusammen mit A5 elf neue Bilder; genaue Dateizuordnung im Menüguide. Vorherige Bildfassungen bleiben erhalten.
+- Lesender Charakterbogen in Basis/FOB und kompakte Personenauswahl bleiben vom editierbaren Creator mit Budgets/Locks getrennt. Keine individuelle NPC-Bewegungssteuerung in der Mission.
+- Erneuter Audit korrigiert alte Kataloggrenzen: sechs kanonische Waffen plus kontextabhängig None; Rifle/Engineer/Scout sind belegt. Rollen-Fits bestätigen keine zukünftigen Actions; Settings-Eingaben sind Übersicht ohne Rebinding.
+
+### Akzeptanz A5 und Menüpaket
+
+- Alle elf Tafeln sind in der HTML-Review zugeordnet; pro Tafel sind Zweck, Aufbau, relevante Zustände, Quellen und Grenzen nachvollziehbar erklärt.
+- Zweite A5-Reihe enthält echte bestehende Aktionen; kein Zukunfts-/Statusfeld wird als aktiver Befehl gezeichnet. Tatsächliche Größen-/Layoutabweichungen werden getrennt von den Maßzielen bewertet.
+- Kompaktkarte, lesender Detailbogen und bearbeitbarer Creator sind sichtbar verschieden. Leere/gesperrte/Transit-/Fehlerzustände und autoritative Grenzen bleiben dokumentiert.
+- Exakte Prompts, Herkunft und tatsächliche Bildprüfung werden ergänzt; keine Runtime-Freigabe und kein Ersatz nativer Controls durch Komplettscreen-Raster.
+
+### Dateien und lokale Prüfung der Erweiterung
+
+- Bestehende Review-HTML und Status/Übergabe/Feedback fortgeschrieben; neue `MENUES_UND_KARTEN.md`, `BILDPRUEFUNG_REVISION5.md`, `prompts_revision5*.json`, `EXPORT_PRUEFUNG_REVISION5.json`; Manifest/Asset-/Paketprüfung aktualisiert.
+- Elf neue Vorschläge plus fünf gezielte Korrekturen; erste Versuche separat erhalten. Keine Szenen, Runtime-Skripte oder Spielregeln ändern.
+- Prüfen: tatsächliche Bildsichtung, lokale Links, PNG-/Quellenhashes, JavaScript-Syntax, fünf Missionsstände und zehn Menü-/Exportzustände offline. Bestehende Browserblockade nicht umgehen; Browser-/Godot-Prüfung offen halten.
+- Restabweichungen ausdrücklich dokumentieren, insbesondere Kontur der leeren Rasterzelle, generierte Zuordnungs-/Kapazitätsbeispiele, Medictool-Glyph, FTL-Stern und numerischer Deckungswert. Bilder sind keine Nutzerabnahme.

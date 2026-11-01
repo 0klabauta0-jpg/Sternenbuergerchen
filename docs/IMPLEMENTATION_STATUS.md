@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### UI-Konzept 2026-11-01 – A5 und Menü-/Kartenfamilie
+- Status: angeforderte Fortsetzung des bestehenden, noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`; Revisionsbasis `478bceac3`. Keine Runtime-Aenderung.
+- Elf neue Bild-KI-Tafeln: Mission A5 mit zwei belegten Reihen bestehender Aktionen; Hauptmenue, Heimatbasis, FOB/Loadout, Charakterbogen/kompakte Karten, Detailkarten, Debrief, Lobby, Settings/Hilfe/Escape, Karteneditor und Teameditor. Fuenf gezielte Korrekturen; alle ersten Versuche erhalten. Gesamtpaket 32 PNG-Artefakte plus zwei Referenzen.
+- Bestehende Review-Workbench erweitert: fuenf Missionsstaende, zehn Menue-/Kartenansichten, Erklaerung von Absicht und sichtbarem Ergebnis, eigene Bewertungen/Notizen samt JSON-Export. Neue Tafeln bleiben unbewertet; Erstrundenexport und acht Icons unveraendert.
+- Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html`, `MENUES_UND_KARTEN.md` und `BILDPRUEFUNG_REVISION5.md` im Konzeptpaket. Exakte Eingaben in `prompts_revision5*.json`, Herkunft/Hashes im Manifest.
+- Pruefgrenze: Bilder gesichtet und mit aktuellen Funktionsquellen abgeglichen; lokale Integritaet und UI-/Exportlogik offline. Verbleibende Text-/Zustands-/Glyph-Abweichungen dokumentiert. Keine Browser-, Godot-, nativen Groessen- oder Performanceabnahme.
+
 ### UI-Konzept 2026-11-01 – Revision A4: Innenlabels und kompakte Blockfolge
 - Status: angeforderte Fortsetzung des bestehenden, noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`; Revisionsbasis `040e5f4e2`. Keine Runtime-Aenderung.
 - Aenderung: enger gruppierte Aktionstasten mit Innenbeschriftung; Ziel/Auftrag steht zwischen Aktionen und ALPHA. Haltung/Feuerregel unter dem ALPHA-Header links ausgerichtet. Freie Reserve unter der ersten Reihe; keine neuen aktiven Befehle.

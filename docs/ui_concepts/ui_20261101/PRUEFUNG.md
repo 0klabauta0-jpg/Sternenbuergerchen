@@ -2,9 +2,9 @@
 
 ## Ergebnis und Umfang
 
-Die Erstrunde enthält drei Layoutbilder und sechs separate Icons. Danach kamen A2, zwei Iconalternativen, A3 und A4 hinzu: insgesamt sechzehn PNGs (sechs Screenentwürfe, je ein erhaltener A3-/A4-Zwischenstand, acht Icons). Exakte Eingaben stehen in `prompts.json` und den Dateien `prompts_revision2/3/4*.json`; verwendet wurde das eingebaute `image_gen.imagegen`. Die Originaldateien aus dem Generator bleiben unverändert. Dateien, Größen, Alpha und SHA256 sind in `manifest.json` und `ASSET_PRUEFUNG.json` erfasst.
+Aktuell enthält das Paket 32 PNG-Artefakte: 17 Screen-/Kartentafeln, sieben erhaltene Zwischenversuche und acht Icons. Hinzu kommen zwei Referenzbilder. A5 und zehn weitere Menü-/Kartentafeln erweitern die bisherigen sechzehn Artefakte; fünf neue erste Versuche bleiben nach gezielten Bildkorrekturen erhalten. Exakte Eingaben stehen in `prompts.json` und `prompts_revision2/3/4/5*.json`; verwendet wurde das eingebaute `image_gen.imagegen`. Die Originaldateien bleiben unverändert. Größen, Alpha und SHA256 sind in `manifest.json` und `ASSET_PRUEFUNG.json` erfasst.
 
-Der Nutzer hat **A für die Mission und C als Staging-Grundlage** gewählt. Aktuell zeigt A4 die engere Aktionsgruppe mit Innenlabels sowie Aktionen → Ziel/Auftrag → Team mit Haltung/Feuerregel darunter. A3 und A2 bleiben als vorherige Versuche erhalten. Die aktuelle A4-Ausarbeitung ist noch nicht bewertet. B bleibt eine helle Alternative. Alle Screens sind Anschauungsbilder; dieses Paket verändert keine Godot-Runtime, Szenen, Bedienung oder Spielregeln.
+Der Nutzer hat **A für die Mission und C als Staging-Grundlage** gewählt. Aktuell zeigt A5 zwei tatsächlich belegte Reihen vorhandener Aktionen mit Innenlabels sowie Aktionen → Ziel/Auftrag → Team mit Haltung/Feuerregel darunter. A4/A3/A2/A bleiben vergleichbar. A5 und die zehn neuen Tafeln sind noch nicht bewertet. Die vollständige Sichtprüfung samt verbleibenden Bildfehlern steht in [BILDPRUEFUNG_REVISION5.md](BILDPRUEFUNG_REVISION5.md), die Begründung und Quellen im [Menüguide](MENUES_UND_KARTEN.md). Alle Screens sind Anschauungsbilder; dieses Paket verändert keine Godot-Runtime, Szenen, Bedienung oder Spielregeln.
 
 ## Sichtprüfung der Layouts
 
@@ -12,7 +12,7 @@ Der Nutzer hat **A für die Mission und C als Staging-Grundlage** gewählt. Aktu
 |---|---|---|
 | A / Kommandodeck | Karte bleibt dominant; die vier beschrifteten Befehle und Planausführung bilden einen zusammenhängenden Bereich; dunkle Flächen trennen Information vom warmen Gelände | Unteres Dock ist dicht; Portraits sind illustrativ; „Einheit bewegt sich“ später als Fireteam formulieren |
 | B / Feldtablet | Ruhige cremefarbene Leseflächen; eindeutiger rechter Befehlskontext und gut sichtbarer nächster Schritt | Rechte Spalte ist groß; A/B unterscheiden tatsächlich Kamera, Figuren und Haltung. Kein kontrollierter Vergleich der Kartenfläche |
-| C / Einsatztafel | Zuordnung Personal → Fireteam → Loadout → Dropship ist sichtbar; Hangar bringt die neue Materialwelt ins UI | Zusätzliche Rollen-/Waffenwörter sind generiert; die Boarding-Phase widerspricht dem gleichzeitig gezeichneten Startbutton. Zustände und Texte aus bestehenden Contracts einsetzen |
+| C / Einsatztafel | Zuordnung Personal → Fireteam → Loadout → Dropship ist sichtbar; Hangar bringt die neue Materialwelt ins UI | Boarding-Phase widerspricht gleichzeitigem Startbutton. Rollen-/Waffentexte sind Beispiele; Rifle, Engineer und Scout/Sniper sind im aktuellen Bestand belegt, eine separat wählbare Pistole nicht bestätigt. Zustände und Texte aus bestehenden Contracts einsetzen |
 
 Alle Layouts: 1672×941px, RGB-PNG, annähernd 16:9. Die angefragte Desktopfläche war eine Gestaltungsvorgabe, keine Zusage eines exakt 1920×1080 gelieferten Rasters. Die spätere Godot-UI muss Text und Controls nativ rendern und bei echten Zielauflösungen geprüft werden. Illustration und Portraits bestätigen weder Sichtbarkeit eines Gegners noch eine verfügbare Rolle oder Schiffs-/Waffenklasse.
 
@@ -42,7 +42,13 @@ Die Erkennbarkeit bei tatsächlichen 24/32px ist **noch nicht visuell abgenommen
 
 ## Offene Entscheidungen für die nächste Runde
 
-A ist als Missionsrichtung gewählt; offen sind die konkrete A4-Ausarbeitung, Staging-C-Dichte, Iconvereinfachung bei kleinen Größen sowie native Schrift-/Panelgrößen. Die Workbench exportiert Bewertungen und Notizen, speichert sie aber nicht automatisch über Sitzungen hinweg. Der wiedergefundene Erstrundenexport wird als dokumentierter Ausgangsstand angezeigt.
+A ist als Missionsrichtung gewählt; offen sind A5 und die zehn neuen Menü-/Kartentafeln, Iconvereinfachung bei kleinen Größen sowie native Schrift-/Panelgrößen. Die Workbench exportiert Bewertungen und Notizen, speichert sie aber nicht automatisch über Sitzungen hinweg. Der wiedergefundene Erstrundenexport wird als dokumentierter Ausgangsstand angezeigt. Alle zehn neuen Tafeln starten mit offenem Urteil; einzelne Bewertungen und Notizen werden auch aus ausgeblendeten Tafeln exportiert.
+
+## Revision A5 und vollständiges Menüpaket
+
+Die [tatsächliche Bildprüfung](BILDPRUEFUNG_REVISION5.md) dokumentiert alle elf Tafeln, fünf Korrekturen und verbleibende Abweichungen. Hauptmenü, Heimatbasis, FOB/Loadout, Charakterbogen/kompakte Karten, Detailkarten, Nachbesprechung, Lobby, Einstellungen/Hilfe/Escape, Karteneditor und Teameditor sind in der Workbench einzeln bewertbar. A5 bleibt im Missionsvergleich.
+
+Fünf Missionsstände und zehn Menüselektionen einschließlich Export wurden offline mit synthetischen Controls geprüft: neun Checks bestanden; siehe [EXPORT_PRUEFUNG_REVISION5.json](EXPORT_PRUEFUNG_REVISION5.json). Lokale Verweise, PNG-/Generatororiginale, alle Prompt-Hashes und unveränderte Erstrundenbewertungen sind bestätigt; siehe [PAKET_PRUEFUNG.json](PAKET_PRUEFUNG.json). Diese eng begrenzte Prüfung ersetzt keine Browser-/Fokus- oder native Godot-Abnahme.
 
 ## Revision A2: Sichtprüfung nach dem Nutzerfeedback
 

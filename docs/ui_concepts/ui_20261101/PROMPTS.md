@@ -57,6 +57,16 @@ Aktionsquadrate sollen enger stehen und Icon sowie Beschriftung im Button tragen
 
 Die drei Blöcke folgen nun **Aktionen → Ziel/Auftrag → Team**. „Ziel gewählt / Auftrag: Bewegen“ steht als schmaler Mittelblock. Haltung und Feuerregel werden unter den ALPHA-/FTL-/Bereit-Header gestapelt und mit ihm links ausgerichtet. Das bündige Band, Teamkarten, separates Protokoll und die oberen rechten Felder bleiben erhalten. A3s Außenbeschriftung und alte Blockfolge sind damit überholt; die Vorgeschichte bleibt unverändert abrufbar.
 
+## Revision A5: zwei Reihen und weitere Menüs/Karten
+
+[prompts_revision5.json](prompts_revision5.json) enthält elf vollständig dokumentierte Aufrufe: A5 bearbeitet A4, die zehn Menü-/Kartentafeln nutzen A4 und C als Stil-/Weltreferenzen. Der aktuelle Auftrag erweitert denselben Konzepttask um Hauptmenü, Heimatbasis, FOB, Personen-/Detailkarten, Debrief, Lobby, Einstellungen/Hilfe/Escape sowie Karten- und Teameditor.
+
+A5 ordnet neun bestehende Aktionen in zwei sichtbare Reihen. Kompakte Quadrate mit Innenlabels, die Blockfolge und das bündige Band bleiben Ziele; exakte Maße sind im Raster nicht garantiert. Der zusätzliche leere Rasterplatz genehmigt keinen neuen Befehl.
+
+[prompts_revision5_korrektur.json](prompts_revision5_korrektur.json) enthält fünf gezielte Bearbeitungen nach tatsächlicher Sichtprüfung. Die ersten Ausgaben bleiben als `_versuch1` erhalten. Korrigiert werden widersprüchliche Respawn-/Rückkehrtexte, Rollenbezeichnungen, Skalenhinweis und Lobby-Bereitschaft; ein zusätzlicher A5-Pass verdichtet die Tasten weiter. Exakte Quadrate, die Entfernung der leeren Umrandung und einzelne Glyph-/Sternfehler wurden nicht vollständig umgesetzt. Die verbleibenden Abweichungen stehen in [BILDPRUEFUNG_REVISION5.md](BILDPRUEFUNG_REVISION5.md).
+
+Die inhaltliche Erklärung stammt aus unserem Briefing und der anschließenden Bildinterpretation, nicht aus unbekannten internen Gedanken der Bilder-KI. [MENUES_UND_KARTEN.md](MENUES_UND_KARTEN.md) ordnet Zweck, Zustände und Quellen jeder Tafel zu.
+
 ## Für die spätere Umsetzung
 
 Texte, Flächen, Fokus und Zustände nativ in Godot aufbauen. Die generierten Komplettscreens bleiben Anschauungsmaterial. Kleine HUD-Icons zunächst mit Beschriftung einsetzen und bei Bedarf aus dieser Motivvorlage vereinfachen. Vorhandene Kenney-Symbole für Checkmark, Schließen und einfache Pfeile weiterhin verwenden.
