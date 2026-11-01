@@ -9,6 +9,9 @@ const FOG_OF_WAR_MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fo
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const CONTACT_DENSITY_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/contact_density_overlay.gd")
 const TERRAIN_TRUTH_AUDIT_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_truth_audit.gd")
+const FRONTIER_ART_PROFILE_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_art_profile.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
+const HEX_GROUND_BATCH_SCRIPT: GDScript = preload("res://scripts/terrain/hex_ground_batch.gd")
 
 const VIEWPORT_CONTAINER_NAME: String = "ViewportContainer"
 const VIEWPORT_NAME: String = "SubViewport"
@@ -1201,10 +1204,17 @@ var _dynamic_order_skip_count: int = 0
 var _dynamic_unit_source_signatures: Dictionary = {}
 var _fire_sector_los_cache: Dictionary = {}
 var _fire_sector_los_cache_signature: String = ""
+var _frontier_art_enabled: bool = false
+var _frontier_art_profile = FRONTIER_ART_PROFILE_SCRIPT.new()
+var _active_grid_topology: String = "square8"
+var _hex_ground_batch = HEX_GROUND_BATCH_SCRIPT.new()
+var _hex_grid_visible: bool = true
 
 
 func _ready() -> void:
 	layer = -100
+	if OS.get_cmdline_user_args().has("--frontier-art-v1"):
+		_frontier_art_enabled = true
 	_ensure_nodes()
 	_resize_subviewport()
 	_update_camera_transform()
@@ -1249,6 +1259,30 @@ func _process(delta: float) -> void:
 			"creates_movement": false,
 			"sets_multiplayer_truth": false,
 		}
+
+
+func set_frontier_art_enabled(enabled: bool) -> void:
+	if _frontier_art_enabled == enabled:
+		return
+	_frontier_art_enabled = enabled
+	_ground_batch_source_cache.clear()
+	if _terrain_map_data != null:
+		render_map()
+	else:
+		_ensure_nodes()
+	_request_viewport_redraw(true)
+
+
+func set_hex_grid_visible(enabled: bool) -> void:
+	if _hex_grid_visible == enabled:
+		return
+	_hex_grid_visible = enabled
+	if _terrain_map_data != null:
+		render_map()
+
+
+func _uses_hex_grid() -> bool:
+	return _active_grid_topology == "hex_axial_v1"
 
 
 func configure_from_map(terrain_map_data) -> void:
@@ -1302,6 +1336,7 @@ func render_map(terrain_map_data = null) -> void:
 	_ground_multimesh_instance_count = 0
 	_ground_multimesh_tile_count = 0
 	_ground_batch_requests.clear()
+	_hex_ground_batch.clear()
 	_tile_texture_count = 0
 	_height_edge_texture_count = 0
 	_height_edge_model_count = 0
@@ -1393,6 +1428,10 @@ func render_map(terrain_map_data = null) -> void:
 	for tile_data in render_tiles:
 		_add_tile_visual(tile_data)
 	_flush_ground_model_batches()
+	if _uses_hex_grid():
+		var hex_counts: Dictionary = _hex_ground_batch.flush(_map_root)
+		_ground_multimesh_instance_count += int(hex_counts["batch_count"])
+		_ground_multimesh_tile_count += int(hex_counts["tile_count"])
 	_flush_surface_tint_batches()
 	_flush_static_prop_model_batches()
 	_add_tile_grid_lines(render_tiles)
@@ -2124,7 +2163,7 @@ func _pick_tile_at_screen_position(viewport_position: Vector2):
 		if tile_data == null:
 			continue
 		var screen_quad: Array[Vector2] = _get_tile_top_screen_quad(tile_data)
-		if screen_quad.size() != 4 or not _screen_point_is_inside_convex_quad(viewport_position, screen_quad):
+		if screen_quad.size() < 3 or not _screen_point_is_inside_convex_quad(viewport_position, screen_quad):
 			continue
 		var surface_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_SELECTION_SURFACE_Y_OFFSET
 		var tile_center_3d: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), surface_y)
@@ -2145,6 +2184,10 @@ func _get_tile_top_screen_quad(tile_data) -> Array[Vector2]:
 	var half_size: float = cell_size * 0.5
 	var top_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_GRID_LINE_SURFACE_Y_OFFSET
 	var center: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y)
+	if _uses_hex_grid():
+		for corner in HEX_GRID_SCRIPT.corners(Vector2.ZERO, cell_size / sqrt(3.0)):
+			result.append(_camera.unproject_position(center + Vector3(corner.x, 0.0, corner.y)))
+		return result
 	for corner in [
 		center + Vector3(-half_size, 0.0, -half_size),
 		center + Vector3(half_size, 0.0, -half_size),
@@ -2156,7 +2199,7 @@ func _get_tile_top_screen_quad(tile_data) -> Array[Vector2]:
 
 
 func _screen_point_is_inside_convex_quad(point: Vector2, quad: Array[Vector2]) -> bool:
-	if quad.size() != 4:
+	if quad.size() < 3:
 		return false
 	var saw_positive: bool = false
 	var saw_negative: bool = false
@@ -2359,6 +2402,9 @@ func get_render_snapshot() -> Dictionary:
 	var render_budget_totals: Dictionary = _build_render_budget_totals(render_budget_by_category)
 	var render_monitor_snapshot: Dictionary = _build_render_monitor_snapshot()
 	return {
+		"frontier_art_enabled": _frontier_art_enabled,
+		"grid_topology": _active_grid_topology,
+		"frontier_art_profile_id": FRONTIER_ART_PROFILE_SCRIPT.PROFILE_ID if _frontier_art_enabled else "",
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_navigation": false,
@@ -3113,8 +3159,8 @@ func _build_editor_light_snapshot() -> Dictionary:
 		"ambient_light_color": environment.ambient_light_color.to_html(true) if environment != null else EDITOR_AMBIENT_LIGHT_COLOR.to_html(true),
 		"ambient_light_energy": float(environment.ambient_light_energy) if environment != null else EDITOR_AMBIENT_LIGHT_ENERGY,
 		"background_color": environment.background_color.to_html(true) if environment != null else EDITOR_EMPTY_BACKGROUND_COLOR.to_html(true),
-		"tonemap_enabled": environment != null and environment.tonemap_mode == Environment.TONE_MAPPER_FILMIC,
-		"tonemap_mode": "filmic" if environment != null and environment.tonemap_mode == Environment.TONE_MAPPER_FILMIC else "other",
+		"tonemap_enabled": environment != null and environment.tonemap_mode != Environment.TONE_MAPPER_LINEAR,
+		"tonemap_mode": "filmic" if environment != null and environment.tonemap_mode == Environment.TONE_MAPPER_FILMIC else ("aces" if environment != null and environment.tonemap_mode == Environment.TONE_MAPPER_ACES else "other"),
 		"adjustment_enabled": bool(environment.adjustment_enabled) if environment != null else true,
 		"adjustment_brightness": float(environment.adjustment_brightness) if environment != null else EDITOR_ADJUSTMENT_BRIGHTNESS,
 		"adjustment_contrast": float(environment.adjustment_contrast) if environment != null else EDITOR_ADJUSTMENT_CONTRAST,
@@ -3384,10 +3430,14 @@ func _ensure_nodes() -> void:
 	environment.ambient_light_color = EDITOR_AMBIENT_LIGHT_COLOR
 	environment.ambient_light_energy = EDITOR_AMBIENT_LIGHT_ENERGY
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	environment.tonemap_exposure = 1.0
+	environment.ssao_enabled = false
 	environment.adjustment_enabled = true
 	environment.adjustment_brightness = EDITOR_ADJUSTMENT_BRIGHTNESS
 	environment.adjustment_contrast = EDITOR_ADJUSTMENT_CONTRAST
 	environment.adjustment_saturation = EDITOR_ADJUSTMENT_SATURATION
+	if _frontier_art_enabled:
+		_frontier_art_profile.apply_environment(environment)
 
 
 func _apply_editor_light_settings() -> void:
@@ -3397,10 +3447,16 @@ func _apply_editor_light_settings() -> void:
 	if light == null:
 		return
 	light.light_energy = EDITOR_LIGHT_ENERGY
+	light.light_color = Color.WHITE
+	light.shadow_normal_bias = 2.0
+	light.shadow_bias = 0.1
+	light.directional_shadow_max_distance = 100.0
 	light.rotation_degrees = EDITOR_LIGHT_ROTATION_DEGREES
 	light.shadow_enabled = _editor_light_shadows_enabled
 	light.shadow_opacity = EDITOR_LIGHT_SHADOW_OPACITY
 	light.shadow_blur = EDITOR_LIGHT_SHADOW_BLUR
+	if _frontier_art_enabled:
+		_frontier_art_profile.apply_light(light)
 
 
 func _ensure_node3d(parent: Node, node_name: String) -> Node3D:
@@ -3461,6 +3517,10 @@ func _read_map_transform() -> void:
 		_active_terrain_visual_theme_id = ""
 		return
 	_grid_size = _terrain_map_data.call("get_grid_size")
+	var next_topology: String = String(_terrain_map_data.call("get_grid_topology")) if _terrain_map_data.has_method("get_grid_topology") else "square8"
+	if next_topology != _active_grid_topology:
+		_ground_batch_source_cache.clear()
+	_active_grid_topology = next_topology
 	_grid_origin_world = _terrain_map_data.call("get_grid_origin")
 	_active_terrain_visual_theme_id = _read_terrain_visual_theme_id(_terrain_map_data)
 	var tile_size: Dictionary = Dictionary(_terrain_map_data.call("get_tile_size"))
@@ -3592,7 +3652,11 @@ func _add_tile_visual(tile_data) -> void:
 	var tile_thickness: float = _get_3d_ground_thickness()
 	var tile_fill: float = _get_3d_ground_fill()
 	var cell_size: float = _get_3d_cell_size()
-	if _uses_strict_3d_asset_mapping():
+	if _uses_hex_grid():
+		var hex_color: Color = _frontier_art_profile.surface_color(String(tile_data.surface_type)) if _frontier_art_enabled else _get_tile_color(tile_data)
+		var hex_material: Material = _frontier_art_profile.material_for(hex_color) if _frontier_art_enabled else _make_material(hex_color)
+		_hex_ground_batch.queue_tile(_grid_to_3d_position(Vector2(tile_data.grid_position), top_y), hex_color, cell_size, hex_material)
+	elif _uses_strict_3d_asset_mapping():
 		var ground_visual_type_id: String = _resolve_ground_surface_model_key(tile_data)
 		if not _queue_ground_model_batch(tile_data, top_y, ground_visual_type_id) and not _add_ground_model_visual(tile_data, top_y, ground_visual_type_id):
 			_add_missing_asset_marker(tile_data, top_y, ground_visual_type_id)
@@ -3667,7 +3731,7 @@ func _add_ground_model_visual(tile_data, top_y: float, visual_type_id: String = 
 		return false
 	_normalize_asset_model_instance(model_instance)
 	var material_override_color: Color = _apply_ground_surface_material_override(model_instance, normalized_visual_type_id, tile_data)
-	var material_override_unshaded: bool = material_override_color != Color.TRANSPARENT and normalized_visual_type_id == "ground_flat"
+	var material_override_unshaded: bool = material_override_color != Color.TRANSPARENT and normalized_visual_type_id == "ground_flat" and not _frontier_art_enabled
 	var mapped_entry: Dictionary = _get_model_entry_for_type(normalized_visual_type_id)
 	if _is_space_station_model_entry(mapped_entry):
 		_space_station_model_count += 1
@@ -3704,7 +3768,7 @@ func _queue_ground_model_batch(tile_data, top_y: float, visual_type_id: String =
 	if not _ground_model_supports_multimesh(normalized_visual_type_id):
 		return false
 	var material_override_color: Color = _get_ground_surface_model_override_color(normalized_visual_type_id, tile_data)
-	var material_override_unshaded: bool = material_override_color != Color.TRANSPARENT and normalized_visual_type_id == "ground_flat"
+	var material_override_unshaded: bool = material_override_color != Color.TRANSPARENT and normalized_visual_type_id == "ground_flat" and not _frontier_art_enabled
 	var source_key: String = _build_ground_batch_source_key(normalized_visual_type_id, material_override_color, material_override_unshaded)
 	var source: Dictionary = _get_ground_batch_source(normalized_visual_type_id, material_override_color, material_override_unshaded, source_key)
 	if source.is_empty():
@@ -3809,6 +3873,8 @@ func _get_ground_batch_source(visual_type_id: String, material_override_color: C
 	var material_override: Material = null
 	if material_override_color != Color.TRANSPARENT:
 		material_override = _make_unshaded_material(material_override_color) if material_override_unshaded else _make_material(material_override_color)
+		if _frontier_art_enabled:
+			material_override = _frontier_art_profile.material_for(material_override_color)
 		_apply_material_override_recursive(model_instance, material_override)
 	elif _is_space_station_model_entry(_get_model_entry_for_type(visual_type_id)):
 		material_override = _make_space_station_colormap_material()
@@ -4038,13 +4104,18 @@ func _apply_ground_surface_material_override(model_instance: Node3D, visual_type
 	var override_color: Color = _get_ground_surface_model_override_color(visual_type_id, tile_data)
 	if override_color == Color.TRANSPARENT:
 		return Color.TRANSPARENT
-	var material: StandardMaterial3D = _make_unshaded_material(override_color) if visual_type_id.strip_edges().to_lower() == "ground_flat" else _make_material(override_color)
+	var material: Material = _make_unshaded_material(override_color) if visual_type_id.strip_edges().to_lower() == "ground_flat" else _make_material(override_color)
+	if _frontier_art_enabled:
+		material = _frontier_art_profile.material_for(override_color)
 	_apply_material_override_recursive(model_instance, material)
 	return override_color
 
 
 func _get_ground_surface_model_override_color(visual_type_id: String, tile_data) -> Color:
 	var normalized: String = visual_type_id.strip_edges().to_lower()
+	if _frontier_art_enabled and (normalized == "ground_flat" or normalized.begins_with("nature_ground")):
+		var surface_type := String(tile_data.surface_type) if tile_data != null else "ground"
+		return _frontier_art_profile.surface_color(surface_type)
 	if normalized == "ground_flat":
 		return _get_space_kit_terrain_top_color()
 	if normalized != "nature_ground_dirt":
@@ -4119,6 +4190,8 @@ func _add_missing_asset_marker(tile_data, top_y: float, visual_type_id: String) 
 
 
 func _add_surface_tint_visual(tile_data, top_y: float) -> void:
+	if _frontier_art_enabled or _uses_hex_grid():
+		return # The opaque ground material already expresses the authoritative surface type.
 	if tile_data == null or _map_root == null or not _uses_strict_3d_asset_mapping():
 		return
 	if _tile_should_use_station_floor_surface(tile_data):
@@ -4237,6 +4310,9 @@ func _flush_surface_tint_batches() -> void:
 func _add_tile_grid_lines(tiles: Array) -> void:
 	if _map_root == null or tiles.is_empty():
 		return
+	if _uses_hex_grid():
+		_add_hex_grid_lines(tiles)
+		return
 	var shadow_material := _make_editor_grid_material(false)
 	var highlight_material := _make_editor_grid_material(true)
 	var shadow_mesh := ImmediateMesh.new()
@@ -4291,6 +4367,29 @@ func _add_tile_grid_lines(tiles: Array) -> void:
 	_tile_grid_line_count = line_count
 
 
+func _add_hex_grid_lines(tiles: Array) -> void:
+	if not _hex_grid_visible:
+		return
+	var material := _make_unshaded_material(Color(0.34, 0.24, 0.16, 0.38), true)
+	var mesh := ImmediateMesh.new()
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
+	var edges: Dictionary = {}
+	var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, _get_3d_cell_size() / sqrt(3.0))
+	for tile in tiles:
+		var top: float = float(tile.height_level) * _get_3d_height_step() + 0.008
+		var center := _grid_to_3d_position(Vector2(tile.grid_position), top)
+		for index in range(6):
+			var a := center + Vector3(corners[index].x, 0.0, corners[index].y)
+			var b := center + Vector3(corners[(index + 1) % 6].x, 0.0, corners[(index + 1) % 6].y)
+			_add_unique_grid_line_quad(mesh, edges, a, b, 0.010)
+	mesh.surface_end()
+	var lines := MeshInstance3D.new()
+	lines.name = "TileGridLines3D"
+	lines.mesh = mesh
+	_map_root.add_child(lines)
+	_tile_grid_line_count = edges.size()
+
+
 func _add_unique_grid_line_quad(mesh: ImmediateMesh, rendered_edges: Dictionary, start_point: Vector3, end_point: Vector3, line_width: float) -> bool:
 	var edge_key: String = _get_grid_edge_key(start_point, end_point)
 	if rendered_edges.has(edge_key):
@@ -4331,6 +4430,8 @@ func _get_grid_point_key(point: Vector3) -> String:
 
 
 func _add_height_edge_visuals(tile_data) -> void:
+	if _uses_hex_grid():
+		return # Hex columns already connect their top surface to the common base.
 	if _uses_strict_3d_asset_mapping():
 		_add_height_edge_model_visuals(tile_data)
 	else:
@@ -5182,6 +5283,10 @@ func _merge_transformed_aabb(bounds: Dictionary, source_transform: Transform3D, 
 
 func _apply_map_asset_material_override(model_instance: Node3D, visual_type_id: String) -> void:
 	var normalized: String = visual_type_id.strip_edges().to_lower()
+	if _frontier_art_enabled:
+		if normalized.begins_with("rock_") or normalized.begins_with("cliff_") or normalized.begins_with("slope_"):
+			_apply_material_override_recursive(model_instance, _frontier_art_profile.material_for(Color("b87551"), true))
+			return
 	var override_color: Color = Color.TRANSPARENT
 	if normalized.begins_with("rock_") or normalized.begins_with("cliff_"):
 		override_color = Color(0.46, 0.45, 0.42, 1.0)
@@ -5465,6 +5570,8 @@ func _rebuild_selection_visuals() -> void:
 		var selection := MeshInstance3D.new()
 		selection.name = "Selection_%d_%d" % [grid_position.x, grid_position.y]
 		selection.mesh = mesh
+		if _uses_hex_grid():
+			selection.mesh = _hex_ground_batch.mesh_for(0.018, cell_size * 0.98 / sqrt(3.0))
 		selection.material_override = _make_editor_selection_material(false)
 		var selection_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_SELECTION_SURFACE_Y_OFFSET
 		selection.position = _grid_to_3d_position(Vector2(grid_position), selection_y)
@@ -5482,6 +5589,16 @@ func _add_selection_border(grid_position: Vector2i, y_position: float) -> void:
 	var half_size: float = cell_size * 0.5
 	var line_width: float = maxf(cell_size * TILE_SELECTION_BORDER_WIDTH_FACTOR, 0.026)
 	var center: Vector3 = _grid_to_3d_position(Vector2(grid_position), y_position)
+	if _uses_hex_grid():
+		var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, cell_size / sqrt(3.0))
+		for index in range(6):
+			_add_grid_line_quad(mesh, center + Vector3(corners[index].x, 0.0, corners[index].y), center + Vector3(corners[(index+1)%6].x, 0.0, corners[(index+1)%6].y), line_width)
+		mesh.surface_end()
+		var hex_border := MeshInstance3D.new()
+		hex_border.name = "SelectionBorder_%d_%d" % [grid_position.x, grid_position.y]
+		hex_border.mesh = mesh
+		_selection_root.add_child(hex_border)
+		return
 	var nw := center + Vector3(-half_size, 0.0, -half_size)
 	var ne := center + Vector3(half_size, 0.0, -half_size)
 	var se := center + Vector3(half_size, 0.0, half_size)
@@ -5927,6 +6044,8 @@ func _create_fow_overlay_multimesh() -> void:
 	multi_mesh.transform_format = MultiMesh.TRANSFORM_3D
 	multi_mesh.use_colors = true
 	multi_mesh.mesh = _make_box_mesh(Vector3(cell_size * 0.99, FOW_OVERLAY_HEIGHT, cell_size * 0.99))
+	if _uses_hex_grid():
+		multi_mesh.mesh = _hex_ground_batch.mesh_for(FOW_OVERLAY_HEIGHT, cell_size / sqrt(3.0))
 	multi_mesh.instance_count = _fow_overlay_slot_by_tile_id.size()
 	var instance := MultiMeshInstance3D.new()
 	instance.name = "FoWUnknownBlackoutOverlay"
@@ -6035,6 +6154,8 @@ func _add_fow_overlay_multimesh(node_name: String, transforms: Array, color: Col
 	var multi_mesh := MultiMesh.new()
 	multi_mesh.transform_format = MultiMesh.TRANSFORM_3D
 	multi_mesh.mesh = _make_box_mesh(Vector3(cell_size * 0.99, FOW_OVERLAY_HEIGHT, cell_size * 0.99))
+	if _uses_hex_grid():
+		multi_mesh.mesh = _hex_ground_batch.mesh_for(FOW_OVERLAY_HEIGHT, cell_size / sqrt(3.0))
 	multi_mesh.instance_count = transforms.size()
 	for index in range(transforms.size()):
 		var instance_transform: Transform3D = transforms[index]
@@ -8085,6 +8206,8 @@ func _resolve_unit_motion_or_target_direction(proxy: Node3D, unit: Node, current
 func _get_world_direction_from_proxy_yaw(unit_world_position: Vector2, yaw_degrees: float) -> Vector2:
 	var yaw_radians: float = deg_to_rad(yaw_degrees)
 	var grid_direction := Vector2(-cos(yaw_radians), sin(yaw_radians))
+	if _uses_hex_grid():
+		grid_direction = HEX_GRID_SCRIPT.plane_to_axial(grid_direction)
 	var world_tip: Vector2 = _grid_float_to_world(_world_to_grid_float(unit_world_position) + grid_direction)
 	if unit_world_position.distance_squared_to(world_tip) <= 0.001:
 		return Vector2.ZERO
@@ -11533,6 +11656,8 @@ func _get_vector2_from_variant(value: Variant, fallback: Vector2) -> Vector2:
 
 func _get_world_direction_yaw(from_world_position: Vector2, to_world_position: Vector2, fallback_yaw: float = 0.0) -> float:
 	var delta_grid: Vector2 = _world_to_grid_float(to_world_position) - _world_to_grid_float(from_world_position)
+	if _uses_hex_grid():
+		delta_grid = HEX_GRID_SCRIPT.axial_to_plane(delta_grid)
 	if delta_grid.length_squared() <= 0.0001:
 		return fallback_yaw
 	return wrapf(rad_to_deg(atan2(delta_grid.x, -delta_grid.y)), 0.0, 360.0)
@@ -11540,6 +11665,8 @@ func _get_world_direction_yaw(from_world_position: Vector2, to_world_position: V
 
 func _get_unit_world_direction_yaw(from_world_position: Vector2, to_world_position: Vector2, fallback_yaw: float = 0.0) -> float:
 	var delta_grid: Vector2 = _world_to_grid_float(to_world_position) - _world_to_grid_float(from_world_position)
+	if _uses_hex_grid():
+		delta_grid = HEX_GRID_SCRIPT.axial_to_plane(delta_grid)
 	if delta_grid.length_squared() <= 0.0001:
 		return fallback_yaw
 	return wrapf(rad_to_deg(atan2(delta_grid.y, -delta_grid.x)), 0.0, 360.0)
@@ -12777,6 +12904,8 @@ func _add_tile_marker(parent: Node3D, grid_position: Vector2i, color: Color, nod
 	var marker := MeshInstance3D.new()
 	marker.name = node_name
 	marker.mesh = _make_box_mesh(Vector3(cell_size * marker_fill, maxf(height, 0.01), cell_size * marker_fill))
+	if _uses_hex_grid():
+		marker.mesh = _hex_ground_batch.mesh_for(maxf(height, 0.01), cell_size * marker_fill / sqrt(3.0))
 	marker.material_override = _make_material(color, true)
 	var top_y: float = float(tile_data.height_level) * _get_3d_height_step()
 	marker.position = _grid_to_3d_position(Vector2(grid_position), top_y + 0.014 + (height * 0.5))
@@ -12994,6 +13123,13 @@ func _add_tile_fill_batch(parent: Node3D, grid_positions: Array, color: Color, n
 			continue
 		var top_y: float = float(tile_data.height_level) * _get_3d_height_step()
 		var center: Vector3 = _grid_to_3d_position(Vector2(grid_position), top_y + surface_offset)
+		if _uses_hex_grid():
+			var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, cell_size * clampf(fill, 0.1, 1.0) / sqrt(3.0))
+			for index in range(6):
+				mesh.surface_add_vertex(center)
+				mesh.surface_add_vertex(center + Vector3(corners[index].x, 0.0, corners[index].y))
+				mesh.surface_add_vertex(center + Vector3(corners[(index+1)%6].x, 0.0, corners[(index+1)%6].y))
+			continue
 		var north_west: Vector3 = center + Vector3(-half_extent, 0.0, -half_extent)
 		var north_east: Vector3 = center + Vector3(half_extent, 0.0, -half_extent)
 		var south_east: Vector3 = center + Vector3(half_extent, 0.0, half_extent)
@@ -13051,6 +13187,8 @@ func _tile_uses_wall_segment_los(tile_data) -> bool:
 
 
 func _build_grid_line(start_grid: Vector2i, end_grid: Vector2i) -> Array:
+	if _uses_hex_grid():
+		return HEX_GRID_SCRIPT.line(start_grid, end_grid)
 	var cells: Array = []
 	var x0: int = start_grid.x
 	var y0: int = start_grid.y
@@ -13612,6 +13750,8 @@ func _get_3d_ground_thickness() -> float:
 
 
 func _get_3d_ground_fill() -> float:
+	if _frontier_art_enabled:
+		return 1.0
 	return clampf(_get_3d_grid_number("ground_fill_no_grid", 0.995), 0.1, 1.0)
 
 
@@ -14335,15 +14475,19 @@ func _world_to_grid_float(world_position: Vector2) -> Vector2:
 	var delta: Vector2 = world_position - _grid_origin_world
 	var grid_x: float = ((delta.y / _half_tile_height) + (delta.x / _half_tile_width)) * 0.5
 	var grid_y: float = ((delta.y / _half_tile_height) - (delta.x / _half_tile_width)) * 0.5
-	return Vector2(grid_x, grid_y)
+	return HEX_GRID_SCRIPT.plane_to_axial(Vector2(grid_x, grid_y)) if _uses_hex_grid() else Vector2(grid_x, grid_y)
 
 
 func _world_to_grid_position(world_position: Vector2) -> Vector2i:
 	var grid_position: Vector2 = _world_to_grid_float(world_position)
+	if _uses_hex_grid():
+		return HEX_GRID_SCRIPT.round_axial(grid_position)
 	return Vector2i(roundi(grid_position.x), roundi(grid_position.y))
 
 
 func _grid_float_to_world(grid_position: Vector2) -> Vector2:
+	if _uses_hex_grid():
+		grid_position = HEX_GRID_SCRIPT.axial_to_plane(grid_position)
 	return Vector2(
 		_grid_origin_world.x + ((grid_position.x - grid_position.y) * _half_tile_width),
 		_grid_origin_world.y + ((grid_position.x + grid_position.y) * _half_tile_height)
@@ -14373,11 +14517,15 @@ func _get_grid_surface_y(grid_position: Vector2i) -> float:
 
 func _grid_to_3d_position(grid_position: Vector2, y_offset: float) -> Vector3:
 	var cell_size: float = _get_3d_cell_size()
+	if _uses_hex_grid():
+		grid_position = HEX_GRID_SCRIPT.axial_to_plane(grid_position)
 	return Vector3(grid_position.x * cell_size, y_offset, grid_position.y * cell_size)
 
 
 func _position_3d_to_world(position_3d: Vector3) -> Vector2:
 	var cell_size: float = _get_3d_cell_size()
+	if _uses_hex_grid():
+		return _grid_float_to_world(HEX_GRID_SCRIPT.plane_to_axial(Vector2(position_3d.x / cell_size, position_3d.z / cell_size)))
 	return _grid_float_to_world(Vector2(position_3d.x / cell_size, position_3d.z / cell_size))
 
 

@@ -33,6 +33,7 @@ Du arbeitest als vorsichtiger Senior-Entwickler im bestehenden Godot-4.6.2-Proje
 - Kleine, kontrollierte Aenderungen bevorzugen
 - Review-Vorschlaege erst auf Sinnhaftigkeit gegen den aktuellen Code pruefen
 - Bei manuellen Playtest-Erkenntnissen das gewuenschte Verhalten als Contract oder Akzeptanzkriterium festhalten
+- Grafikreferenzen, Zielbilder und Modellvergleiche nach [graphics_reference_revision_contract.md](dev/graphics_reference_revision_contract.md) zuordnen, dokumentieren und pruefen.
 
 ## Architekturregeln
 - UI ist Anzeige, nicht Gameplay-Wahrheit

@@ -1,0 +1,266 @@
+{
+  "schema": "sternenbuergerchen.frontier_structures.v1",
+  "blender": "5.2.3 LTS",
+  "assets": {
+    "habitat_01": {
+      "asset": "habitat_01",
+      "front_axis_blender": "-Y",
+      "front_axis_godot": "+Z",
+      "units": "metres",
+      "dimensions_blender_xyz": [
+        6.679999828338623,
+        6.744999885559082,
+        4.349999904632568
+      ],
+      "pivot": "full bounds XY centre, ground Z=0",
+      "part_count": 108,
+      "palette": [
+        "Cream",
+        "PaleTrim",
+        "SlateTeal",
+        "DarkFrame",
+        "Hardware",
+        "Ochre",
+        "Glass",
+        "Deck"
+      ],
+      "source_blend": "art/frontier_illustrated_20261101/structures/source/habitat_01.blend",
+      "source_blend_sha256": "829bf5cea5519ee9f5b5bb9ff0c0ea1e3f197b70aa1e730c5631573e1a1077e8",
+      "export_glb": "Assets/curated/frontier_illustrated_20261101/structures/habitat_01.glb",
+      "glb": {
+        "bytes": 661580,
+        "sha256": "e4c7f3e429063ddf32c348afb647ec678199409f28b9fab7acd757867c6c9c53",
+        "meshes": 1,
+        "materials": 7,
+        "triangles": 12320,
+        "animations": 0,
+        "skins": 0,
+        "nodes": 1
+      },
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [
+        "hidden back-to-back faces: Habitat_AirlockSeal<->Habitat_AirlockDoor (6 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing.001<->Habitat_FrontWindow_SideFrame.002 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing<->Habitat_FrontWindow_SideFrame.001 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing<->Habitat_FrontWindow_SideFrame (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing.001<->Habitat_FrontWindow_SideFrame.003 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing.001<->Habitat_FrontWindow_Sill.003 (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing<->Habitat_FrontWindow_Sill.001 (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing.001<->Habitat_FrontWindow_Sill.002 (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing<->Habitat_FrontWindow_Sill (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideHeader.001<->Habitat_SideWindowSill.005 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideHeader.001<->Habitat_SideWindowSill.007 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideHeader<->Habitat_SideWindowSill.001 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideHeader<->Habitat_SideWindowSill.003 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideLower.001<->Habitat_SideWindowSill.004 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideLower.001<->Habitat_SideWindowSill.006 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideLower<->Habitat_SideWindowSill (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideLower<->Habitat_SideWindowSill.002 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_DoorLintel<->Habitat_AirlockSeal (2 pairs) - delete to save tris",
+        "2 parts fully enclosed, not touching (eyes/internals?): ['Habitat_DoorHandle', 'Habitat_DoorHandle.001']"
+      ],
+      "warning_acceptance": {
+        "hidden back-to-back faces": "Accepted internal mounting/contact caps at separately editable closed parts. No visible coplanar overlap; not a watertight boolean union.",
+        "fully enclosed handles": "Heuristic on nested airlock ring; both ochre handle bars visibly protrude and were inspected in front/side view."
+      },
+      "qa_scope": "all new geometry, including z-fight/contact checks; UV excluded for constant-color untextured palette",
+      "door_height_m": 2.1,
+      "references": [
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+        "docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png"
+      ],
+      "status": "original first-pass static visual; no collision/navigation; Godot integration by parent task",
+      "evaluated_source_totals": {
+        "verts": 6372,
+        "faces": 6376,
+        "tris": 12320,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "inside_out_islands": 0
+      },
+      "views_opened": [
+        "front",
+        "rear",
+        "wire"
+      ],
+      "view_renderer": "Blender Workbench, same geometry/material assignments; native Godot acceptance belongs to parent preview task",
+      "qa_image_sha256": {
+        "front": "9e1123a25d2c427da9bdb0b5a3da7ebfbc9df948237a3a5b9fb623ef635606de",
+        "rear": "5ed33e4cba14b7a9bc7e6ded1e422b52c4f915c96ed9fcd83be45c83914ef3ca",
+        "wire": "4e3bfb12cc3bff2f6506ada7f0e66e789d3867978453424cd1137248d00f1eaa"
+      },
+      "source_reference_sha256": {
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+        "docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png": "e72d18f790117bf3add45f91433582c543c41c9a28f14d586eb26a66a06bc3ea"
+      },
+      "technical_file_checks_pass": true
+    },
+    "workshop_01": {
+      "asset": "workshop_01",
+      "front_axis_blender": "-Y",
+      "front_axis_godot": "+Z",
+      "units": "metres",
+      "dimensions_blender_xyz": [
+        7.039999961853027,
+        5.690000057220459,
+        4.222499847412109
+      ],
+      "pivot": "full bounds XY centre, ground Z=0",
+      "part_count": 70,
+      "palette": [
+        "Cream",
+        "PaleTrim",
+        "SlateTeal",
+        "DarkFrame",
+        "Hardware",
+        "Ochre",
+        "Glass",
+        "Deck"
+      ],
+      "source_blend": "art/frontier_illustrated_20261101/structures/source/workshop_01.blend",
+      "source_blend_sha256": "b7df545680d44b5dbc838d7e5f13a6fc8c54bacaf9fb8d203846cad09ae0efcd",
+      "export_glb": "Assets/curated/frontier_illustrated_20261101/structures/workshop_01.glb",
+      "glb": {
+        "bytes": 415540,
+        "sha256": "de0809aa18a803e3022b3442bf9f0db0f3065545a14dd8a0194765e47cebfd64",
+        "meshes": 1,
+        "materials": 8,
+        "triangles": 7616,
+        "animations": 0,
+        "skins": 0,
+        "nodes": 1
+      },
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [
+        "hidden back-to-back faces: Workshop_GroundPlinth<->Workshop_PortalFrame.001 (6 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_GroundPlinth<->Workshop_PortalFrame (6 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_EntryBumper<->Workshop_SafetyBand (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_ToolCabinet<->Workshop_CabinetDoor (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_ToolCabinet<->Workshop_CabinetDoor.001 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_EntryBumper.001<->Workshop_SafetyBand.001 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_CabinetDoor<->Workshop_CabinetHandle (1 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_CabinetDoor.001<->Workshop_CabinetHandle (1 pairs) - delete to save tris"
+      ],
+      "warning_acceptance": {
+        "hidden back-to-back faces": "Accepted internal mounting/contact caps at separately editable closed parts. No visible coplanar overlap; not a watertight boolean union.",
+        "fully enclosed handles": "Heuristic on nested airlock ring; both ochre handle bars visibly protrude and were inspected in front/side view."
+      },
+      "qa_scope": "all new geometry, including z-fight/contact checks; UV excluded for constant-color untextured palette",
+      "door_height_m": null,
+      "references": [
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+        "docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png"
+      ],
+      "status": "original first-pass static visual; no collision/navigation; Godot integration by parent task",
+      "evaluated_source_totals": {
+        "verts": 3948,
+        "faces": 3886,
+        "tris": 7616,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "inside_out_islands": 0
+      },
+      "views_opened": [
+        "front",
+        "rear",
+        "wire"
+      ],
+      "view_renderer": "Blender Workbench, same geometry/material assignments; native Godot acceptance belongs to parent preview task",
+      "qa_image_sha256": {
+        "front": "68c1dbb47b300c02141091a0afadbed0bf52c0b573206137fd481b08da8b3524",
+        "rear": "2c9f68ce09eae1ff48d9d35c56058553342bfce24a5a0e05d467a39ec52e69e8",
+        "wire": "144f7f8682ce3fa77f79ca63e0c727a0c7234a3069f8681c7b21d22030948704"
+      },
+      "source_reference_sha256": {
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+        "docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png": "e72d18f790117bf3add45f91433582c543c41c9a28f14d586eb26a66a06bc3ea"
+      },
+      "technical_file_checks_pass": true
+    },
+    "service_unit_01": {
+      "asset": "service_unit_01",
+      "front_axis_blender": "-Y",
+      "front_axis_godot": "+Z",
+      "units": "metres",
+      "dimensions_blender_xyz": [
+        4.849999904632568,
+        3.200000047683716,
+        2.7100000381469727
+      ],
+      "pivot": "full bounds XY centre, ground Z=0",
+      "part_count": 77,
+      "palette": [
+        "Cream",
+        "PaleTrim",
+        "SlateTeal",
+        "DarkFrame",
+        "Hardware",
+        "Ochre",
+        "Glass",
+        "Deck"
+      ],
+      "source_blend": "art/frontier_illustrated_20261101/structures/source/service_unit_01.blend",
+      "source_blend_sha256": "39b1b1cac37b914e7413949aa9dffeaef0224283522e8f36ecf998f5dbad4932",
+      "export_glb": "Assets/curated/frontier_illustrated_20261101/structures/service_unit_01.glb",
+      "glb": {
+        "bytes": 306216,
+        "sha256": "8a3d145c88e31b2a7a700887b915a463b9f9d8def88c7007bd29bc016434aa0e",
+        "meshes": 1,
+        "materials": 6,
+        "triangles": 5832,
+        "animations": 0,
+        "skins": 0,
+        "nodes": 1
+      },
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [],
+      "warning_acceptance": {
+        "hidden back-to-back faces": "Accepted internal mounting/contact caps at separately editable closed parts. No visible coplanar overlap; not a watertight boolean union.",
+        "fully enclosed handles": "Heuristic on nested airlock ring; both ochre handle bars visibly protrude and were inspected in front/side view."
+      },
+      "qa_scope": "all new geometry, including z-fight/contact checks; UV excluded for constant-color untextured palette",
+      "door_height_m": null,
+      "references": [
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+        "docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png"
+      ],
+      "status": "original first-pass static visual; no collision/navigation; Godot integration by parent task",
+      "evaluated_source_totals": {
+        "verts": 3068,
+        "faces": 3347,
+        "tris": 5832,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "inside_out_islands": 0
+      },
+      "views_opened": [
+        "front",
+        "rear",
+        "wire"
+      ],
+      "view_renderer": "Blender Workbench, same geometry/material assignments; native Godot acceptance belongs to parent preview task",
+      "qa_image_sha256": {
+        "front": "cd944bd42687ff499f8d994d194570dc48b8a55c214224fa2207a58dec5263ea",
+        "rear": "668fa1379a38811c6ed1a31cc255e365f726054ef4f5e41f53054640e2e9ef2a",
+        "wire": "82167690d13c9c215050b68d556e304b0c405b491f464aebec19d2929278acb8"
+      },
+      "source_reference_sha256": {
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+        "docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png": "e72d18f790117bf3add45f91433582c543c41c9a28f14d586eb26a66a06bc3ea"
+      },
+      "technical_file_checks_pass": true
+    }
+  }
+}
