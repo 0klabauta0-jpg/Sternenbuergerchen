@@ -12,6 +12,7 @@ Simulation, Darstellung und UI strikt trennen.
 - Dirty-Flags statt per-frame Komplett-Refresh
 - Out-of-View-Simulation vereinfacht, aber konsistent
 - Navigation ueber A*-Pfadsuche auf dem Iso-Grid (walkable, Hoehenunterschied, Surface-Kosten); Geradlinien-Fallback ohne TerrainRegistry
+- Neue Hex-Inhalte verwenden den versionierten Vertrag `hex_axial_v1` aus `docs/dev/hex_grid_v1_contract.md`: MapData besitzt die Topologie, Registry/A*/HPA lesen dieselben sechs Nachbarn und SimulationRoot verwendet das physische Bewegungsmass. Bestehende Karten ohne Topologiefeld bleiben ausdruecklich `square8`; der native neue Basis-Ausschnitt ist der erste Hex-Verbraucher, keine abgeschlossene Altinhaltsmigration.
 - Datenbasiertes Combat statt Physik-Ballistik
 
 ## Wahrheitsquellen und Grenzen

@@ -2,6 +2,7 @@ class_name TerrainPathfinder
 extends RefCounted
 
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 
 const CARDINAL_DIRECTIONS: Array = [
 	Vector2i.RIGHT,
@@ -47,7 +48,8 @@ func find_path_with_options(from_grid: Vector2i, to_grid: Vector2i, registry, op
 	var in_open_set: Dictionary = {from_grid: true}
 	var came_from: Dictionary = {}
 	var g_score: Dictionary = {from_grid: 0.0}
-	var f_score: Dictionary = {from_grid: _estimate_cost(from_grid, to_grid)}
+	var f_score: Dictionary = {from_grid: _estimate_cost(from_grid, to_grid, registry, options)}
+	var neighbor_directions: Array = get_neighbor_directions(registry)
 
 	while not open_set.is_empty():
 		var current: Vector2i = _pop_lowest_f_score(open_set, f_score)
@@ -55,7 +57,7 @@ func find_path_with_options(from_grid: Vector2i, to_grid: Vector2i, registry, op
 		if current == to_grid:
 			return _reconstruct_path(came_from, current)
 
-		for direction in NEIGHBOR_DIRECTIONS:
+		for direction in neighbor_directions:
 			var neighbor: Vector2i = current + direction
 			if not _is_neighbor_walkable(current, neighbor, registry):
 				continue
@@ -66,7 +68,7 @@ func find_path_with_options(from_grid: Vector2i, to_grid: Vector2i, registry, op
 
 			came_from[neighbor] = current
 			g_score[neighbor] = tentative_g_score
-			f_score[neighbor] = tentative_g_score + _estimate_cost(neighbor, to_grid)
+			f_score[neighbor] = tentative_g_score + _estimate_cost(neighbor, to_grid, registry, options)
 			if not in_open_set.has(neighbor):
 				in_open_set[neighbor] = true
 				open_set.append(neighbor)
@@ -74,8 +76,14 @@ func find_path_with_options(from_grid: Vector2i, to_grid: Vector2i, registry, op
 	return result
 
 
-func get_neighbor_directions() -> Array:
+func get_neighbor_directions(registry = null) -> Array:
+	if _is_hex_registry(registry):
+		return HEX_GRID_SCRIPT.neighbor_directions()
 	return NEIGHBOR_DIRECTIONS.duplicate()
+
+
+func _is_hex_registry(registry) -> bool:
+	return registry != null and registry.has_method("get_grid_topology") and String(registry.call("get_grid_topology")) == HEX_GRID_SCRIPT.TOPOLOGY_ID
 
 
 func can_traverse_step(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -> bool:
@@ -123,7 +131,7 @@ func get_exposure_score(grid_position: Vector2i, registry, options: Dictionary =
 	var exposure: float = 0.0
 	for hazard_variant in hazard_grids:
 		var hazard_grid: Vector2i = Vector2i(hazard_variant)
-		var grid_distance: float = _grid_distance_score(grid_position, hazard_grid)
+		var grid_distance: float = _grid_distance_score(grid_position, hazard_grid, registry)
 		if grid_distance > max_distance:
 			continue
 		_increment_diagnostic_counter(options, "los_check_count")
@@ -159,7 +167,10 @@ func _reconstruct_path(came_from: Dictionary, current: Vector2i) -> Array:
 	return path
 
 
-func _estimate_cost(from_grid: Vector2i, to_grid: Vector2i) -> float:
+func _estimate_cost(from_grid: Vector2i, to_grid: Vector2i, registry = null, options: Dictionary = {}) -> float:
+	if _is_hex_registry(registry):
+		var minimum_cost: float = MIN_COVER_AWARE_STEP_COST if bool(options.get("cover_aware_enabled", false)) else MIN_SURFACE_PATH_COST
+		return float(HEX_GRID_SCRIPT.distance(from_grid, to_grid)) * minimum_cost
 	var delta: Vector2i = to_grid - from_grid
 	var distance_x: float = absf(float(delta.x))
 	var distance_y: float = absf(float(delta.y))
@@ -169,6 +180,8 @@ func _estimate_cost(from_grid: Vector2i, to_grid: Vector2i) -> float:
 
 
 func _is_neighbor_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -> bool:
+	if _is_hex_registry(registry):
+		return HEX_GRID_SCRIPT.are_neighbors(current_grid, neighbor_grid) and _is_grid_step_walkable(current_grid, neighbor_grid, registry)
 	var delta: Vector2i = neighbor_grid - current_grid
 	if abs(delta.x) > 1 or abs(delta.y) > 1 or delta == Vector2i.ZERO:
 		return false
@@ -233,12 +246,12 @@ func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, o
 		var exposure_score: float = get_exposure_score(neighbor_grid, registry, options)
 		var cover_score: float = _get_cover_score(neighbor_grid, registry, options)
 		base_cost = maxf(base_cost + (exposure_weight * exposure_score) - (cover_weight * cover_score), MIN_COVER_AWARE_STEP_COST)
-	base_cost += _get_corridor_penalty(neighbor_grid, options)
-	base_cost += _get_lane_penalty(neighbor_grid, options)
+	base_cost += _get_corridor_penalty(neighbor_grid, options, registry)
+	base_cost += _get_lane_penalty(neighbor_grid, options, registry)
 	base_cost += _get_blocker_clearance_penalty(neighbor_grid, registry, options)
 
 	var delta: Vector2i = neighbor_grid - current_grid
-	if abs(delta.x) == 1 and abs(delta.y) == 1:
+	if not _is_hex_registry(registry) and abs(delta.x) == 1 and abs(delta.y) == 1:
 		return base_cost * DIAGONAL_COST_MULTIPLIER
 	return base_cost
 
@@ -255,7 +268,7 @@ func _get_cover_score(grid_position: Vector2i, registry, options: Dictionary = {
 	return clampf(float(tile_data.cover_value) / 100.0, 0.0, 1.0)
 
 
-func _get_corridor_penalty(grid_position: Vector2i, options: Dictionary) -> float:
+func _get_corridor_penalty(grid_position: Vector2i, options: Dictionary, registry = null) -> float:
 	if not bool(options.get("corridor_enabled", false)):
 		return 0.0
 	var corridor_weight: float = maxf(float(options.get("corridor_weight", 0.0)), 0.0)
@@ -264,14 +277,14 @@ func _get_corridor_penalty(grid_position: Vector2i, options: Dictionary) -> floa
 	var from_grid: Vector2i = Vector2i(options.get("corridor_from_grid", grid_position))
 	var to_grid: Vector2i = Vector2i(options.get("corridor_to_grid", grid_position))
 	var half_width: float = maxf(float(options.get("corridor_half_width_grid", 0.0)), 0.0)
-	var distance: float = absf(_signed_grid_line_distance(grid_position, from_grid, to_grid))
+	var distance: float = absf(_signed_grid_line_distance(grid_position, from_grid, to_grid, registry))
 	if distance <= half_width:
 		return 0.0
 	_increment_diagnostic_counter(options, "corridor_penalty_count")
 	return (distance - half_width) * corridor_weight
 
 
-func _get_lane_penalty(grid_position: Vector2i, options: Dictionary) -> float:
+func _get_lane_penalty(grid_position: Vector2i, options: Dictionary, registry = null) -> float:
 	if not bool(options.get("lane_enabled", false)):
 		return 0.0
 	var lane_weight: float = maxf(float(options.get("lane_weight", 0.0)), 0.0)
@@ -279,7 +292,7 @@ func _get_lane_penalty(grid_position: Vector2i, options: Dictionary) -> float:
 		return 0.0
 	var from_grid: Vector2i = Vector2i(options.get("corridor_from_grid", grid_position))
 	var to_grid: Vector2i = Vector2i(options.get("corridor_to_grid", grid_position))
-	var signed_distance: float = _signed_grid_line_distance(grid_position, from_grid, to_grid)
+	var signed_distance: float = _signed_grid_line_distance(grid_position, from_grid, to_grid, registry)
 	var desired_offset: float = float(options.get("lane_offset_grid", 0.0))
 	_increment_diagnostic_counter(options, "lane_penalty_count")
 	return absf(signed_distance - desired_offset) * lane_weight * LANE_PENALTY_SCALE
@@ -295,6 +308,8 @@ func _get_blocker_clearance_penalty(grid_position: Vector2i, registry, options: 
 	for offset_x in range(-radius, radius + 1):
 		for offset_y in range(-radius, radius + 1):
 			if offset_x == 0 and offset_y == 0:
+				continue
+			if _is_hex_registry(registry) and HEX_GRID_SCRIPT.distance(Vector2i.ZERO, Vector2i(offset_x, offset_y)) > radius:
 				continue
 			var probe_grid: Vector2i = grid_position + Vector2i(offset_x, offset_y)
 			var tile_data = registry.call("get_tile_at_grid", probe_grid)
@@ -316,10 +331,14 @@ func _get_blocker_clearance_penalty(grid_position: Vector2i, registry, options: 
 	return normalized_score * blocker_weight * BLOCKER_CLEARANCE_PENALTY_SCALE
 
 
-func _signed_grid_line_distance(grid_position: Vector2i, from_grid: Vector2i, to_grid: Vector2i) -> float:
+func _signed_grid_line_distance(grid_position: Vector2i, from_grid: Vector2i, to_grid: Vector2i, registry = null) -> float:
 	var from_value: Vector2 = Vector2(from_grid)
 	var to_value: Vector2 = Vector2(to_grid)
 	var point_value: Vector2 = Vector2(grid_position)
+	if _is_hex_registry(registry):
+		from_value = HEX_GRID_SCRIPT.axial_to_plane(from_value)
+		to_value = HEX_GRID_SCRIPT.axial_to_plane(to_value)
+		point_value = HEX_GRID_SCRIPT.axial_to_plane(point_value)
 	var line: Vector2 = to_value - from_value
 	var length: float = line.length()
 	if length <= 0.001:
@@ -328,7 +347,9 @@ func _signed_grid_line_distance(grid_position: Vector2i, from_grid: Vector2i, to
 	return line.cross(delta) / length
 
 
-func _grid_distance_score(a: Vector2i, b: Vector2i) -> float:
+func _grid_distance_score(a: Vector2i, b: Vector2i, registry = null) -> float:
+	if _is_hex_registry(registry):
+		return float(HEX_GRID_SCRIPT.distance(a, b))
 	var delta: Vector2i = a - b
 	return maxf(absf(float(delta.x)), absf(float(delta.y)))
 
@@ -340,16 +361,20 @@ func _has_grid_line_of_sight(source_grid: Vector2i, target_grid: Vector2i, regis
 	var target_tile = registry.call("get_tile_at_grid", target_grid)
 	var source_height: int = int(source_tile.height_level) if source_tile != null else 0
 	var target_height: int = int(target_tile.height_level) if target_tile != null else 0
-	var delta: Vector2i = target_grid - source_grid
-	var step_count: int = maxi(abs(delta.x), abs(delta.y))
+	var stepped_grids: Array = []
+	if _is_hex_registry(registry):
+		stepped_grids = HEX_GRID_SCRIPT.line(source_grid, target_grid)
+	else:
+		var delta: Vector2i = target_grid - source_grid
+		var step_count_legacy: int = maxi(abs(delta.x), abs(delta.y))
+		for step_index in range(step_count_legacy + 1):
+			var t: float = float(step_index) / float(maxi(step_count_legacy, 1))
+			stepped_grids.append(Vector2i(roundi(lerpf(float(source_grid.x), float(target_grid.x), t)), roundi(lerpf(float(source_grid.y), float(target_grid.y), t))))
+	var step_count: int = stepped_grids.size() - 1
 	if step_count <= 0:
 		return true
 	for step_index in range(1, step_count):
-		var t: float = float(step_index) / float(step_count)
-		var stepped_grid := Vector2i(
-			roundi(lerpf(float(source_grid.x), float(target_grid.x), t)),
-			roundi(lerpf(float(source_grid.y), float(target_grid.y), t))
-		)
+		var stepped_grid: Vector2i = Vector2i(stepped_grids[step_index])
 		var tile_data = registry.call("get_tile_at_grid", stepped_grid)
 		if tile_data == null:
 			continue

@@ -1912,6 +1912,7 @@ func _apply_move_command_with_terrain(
 
 	var current_position: Vector2 = unit_node.global_position
 	var previous_position: Vector2 = current_position
+	var hex_metric: bool = _uses_hex_movement_metric(terrain_registry)
 	var step_distance: float = MOVE_SPEED_PER_SECOND * move_speed_factor * _extract_surface_speed_factor(unit_node) * delta
 	while step_distance > 0.0 and not path_world_points.is_empty():
 		var next_waypoint: Vector2 = _coerce_vector2(path_world_points[0], target_position)
@@ -1921,13 +1922,18 @@ func _apply_move_command_with_terrain(
 			continue
 
 		var distance_to_waypoint: float = direction_to_waypoint.length()
+		if hex_metric:
+			distance_to_waypoint = float(terrain_registry.call("get_movement_distance", current_position, next_waypoint))
 		if distance_to_waypoint <= step_distance:
 			current_position = next_waypoint
 			step_distance -= distance_to_waypoint
 			path_world_points.pop_front()
 			continue
 
-		current_position += direction_to_waypoint.normalized() * step_distance
+		if hex_metric:
+			current_position = current_position.lerp(next_waypoint, step_distance / distance_to_waypoint)
+		else:
+			current_position += direction_to_waypoint.normalized() * step_distance
 		step_distance = 0.0
 
 	_store_unit_facing_from_positions(unit_node, previous_position, current_position)
@@ -1939,6 +1945,10 @@ func _apply_move_command_with_terrain(
 
 	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
 		enqueue_command(cmd)
+
+
+func _uses_hex_movement_metric(terrain_registry) -> bool:
+	return terrain_registry != null and terrain_registry.has_method("get_grid_topology") and String(terrain_registry.call("get_grid_topology")) == "hex_axial_v1"
 
 
 func _apply_move_command_with_terrain_avoidance(
@@ -1974,15 +1984,25 @@ func _apply_move_command_with_terrain_avoidance(
 
 	var step_distance: float = MOVE_SPEED_PER_SECOND * move_speed_factor * _extract_surface_speed_factor(unit_node) * delta
 	var distance_to_waypoint: float = direction_to_waypoint.length()
+	var hex_metric: bool = _uses_hex_movement_metric(terrain_registry)
+	if hex_metric:
+		distance_to_waypoint = float(terrain_registry.call("get_movement_distance", current_position, next_waypoint))
 	var desired_step_distance: float = minf(step_distance, distance_to_waypoint)
 	var desired_velocity: Vector2 = direction_to_waypoint.normalized() * (desired_step_distance / maxf(delta, 0.0001))
-	var safe_velocity: Vector2 = _resolve_local_avoidance_velocity(cmd, unit_node, current_position, desired_velocity, step_distance / maxf(delta, 0.0001), delta, terrain_registry)
+	if hex_metric:
+		desired_velocity = direction_to_waypoint * (desired_step_distance / distance_to_waypoint) / maxf(delta, 0.0001)
+	var avoidance_speed: float = desired_velocity.length() if hex_metric else step_distance / maxf(delta, 0.0001)
+	var safe_velocity: Vector2 = _resolve_local_avoidance_velocity(cmd, unit_node, current_position, desired_velocity, avoidance_speed, delta, terrain_registry)
 	if safe_velocity.length_squared() <= 0.0001 \
 		and bool(cmd.get("local_avoidance_deadlock", false)) \
 		and _is_local_avoidance_position_walkable(next_waypoint, terrain_registry):
 		safe_velocity = desired_velocity
 	var displacement: Vector2 = safe_velocity * delta
-	if displacement.length() > desired_step_distance:
+	if hex_metric:
+		var physical_displacement: float = float(terrain_registry.call("get_movement_distance", current_position, current_position + displacement))
+		if physical_displacement > desired_step_distance:
+			displacement *= desired_step_distance / physical_displacement
+	elif displacement.length() > desired_step_distance:
 		displacement = displacement.normalized() * desired_step_distance
 	current_position += displacement
 	if current_position.distance_to(next_waypoint) <= 0.5:

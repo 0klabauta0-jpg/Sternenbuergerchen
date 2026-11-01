@@ -2,6 +2,7 @@ class_name TerrainRegistry
 extends Node
 
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 
 var _tiles: Dictionary = {}
 var _tile_id_lookup: Dictionary = {}
@@ -13,12 +14,55 @@ var _runtime_tile_overrides: Dictionary = {}
 var _grid_origin_world: Vector2 = Vector2.ZERO
 var _half_tile_width: float = 64.0
 var _half_tile_height: float = 32.0
+var _grid_topology: String = "square8"
 
 
-func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half_tile_height: float) -> void:
+func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half_tile_height: float, grid_topology: String = "square8") -> void:
+	if grid_topology != "square8" and grid_topology != HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		push_warning("TerrainRegistry rejects unsupported grid_topology '%s'." % grid_topology)
+		return
+	var topology_changed: bool = _grid_topology != grid_topology
+	_grid_topology = grid_topology
 	_grid_origin_world = grid_origin_world
 	_half_tile_width = maxf(half_tile_width, 0.001)
 	_half_tile_height = maxf(half_tile_height, 0.001)
+	if topology_changed:
+		_bump_revision()
+
+
+func get_grid_topology() -> String:
+	return _grid_topology
+
+
+func are_grid_neighbors(a: Vector2i, b: Vector2i) -> bool:
+	if _grid_topology == HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		return HEX_GRID_SCRIPT.are_neighbors(a, b)
+	var delta: Vector2i = b - a
+	return delta != Vector2i.ZERO and absi(delta.x) <= 1 and absi(delta.y) <= 1
+
+
+func get_grid_line(from_grid: Vector2i, to_grid: Vector2i) -> Array[Vector2i]:
+	if _grid_topology == HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		return HEX_GRID_SCRIPT.line(from_grid, to_grid)
+	var result: Array[Vector2i] = []
+	var delta: Vector2i = to_grid - from_grid
+	var steps: int = maxi(absi(delta.x), absi(delta.y))
+	if steps == 0:
+		result.append(from_grid)
+		return result
+	for index in range(steps + 1):
+		var point: Vector2i = Vector2i(Vector2(from_grid).lerp(Vector2(to_grid), float(index) / float(steps)).round())
+		if result.is_empty() or result[-1] != point:
+			result.append(point)
+	return result
+
+
+func get_movement_distance(from_world: Vector2, to_world: Vector2) -> float:
+	if _grid_topology != HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		return from_world.distance_to(to_world)
+	var from_plane: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(world_to_grid_float(from_world))
+	var to_plane: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(world_to_grid_float(to_world))
+	return from_plane.distance_to(to_plane) * Vector2(_half_tile_width, _half_tile_height).length()
 
 
 func clear_tiles() -> void:
@@ -328,6 +372,8 @@ func get_walkable_cover_tiles_in_radius(world_center: Vector2, radius: float) ->
 
 func world_to_grid(world_pos: Vector2) -> Vector2i:
 	var grid_position: Vector2 = world_to_grid_float(world_pos)
+	if _grid_topology == HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		return HEX_GRID_SCRIPT.round_axial(grid_position)
 	return Vector2i(roundi(grid_position.x), roundi(grid_position.y))
 
 
@@ -335,10 +381,18 @@ func world_to_grid_float(world_pos: Vector2) -> Vector2:
 	var delta: Vector2 = world_pos - _grid_origin_world
 	var grid_x: float = ((delta.y / _half_tile_height) + (delta.x / _half_tile_width)) * 0.5
 	var grid_y: float = ((delta.y / _half_tile_height) - (delta.x / _half_tile_width)) * 0.5
+	if _grid_topology == HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		return HEX_GRID_SCRIPT.plane_to_axial(Vector2(grid_x, grid_y))
 	return Vector2(grid_x, grid_y)
 
 
 func grid_to_world(grid_pos: Vector2i) -> Vector2:
+	if _grid_topology == HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		var plane: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(Vector2(grid_pos))
+		return Vector2(
+			_grid_origin_world.x + ((plane.x - plane.y) * _half_tile_width),
+			_grid_origin_world.y + ((plane.x + plane.y) * _half_tile_height)
+		)
 	return Vector2(
 		_grid_origin_world.x + (float(grid_pos.x - grid_pos.y) * _half_tile_width),
 		_grid_origin_world.y + (float(grid_pos.x + grid_pos.y) * _half_tile_height)

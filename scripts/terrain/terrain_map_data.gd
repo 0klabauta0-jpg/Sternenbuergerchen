@@ -5,9 +5,11 @@ const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrai
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 
 var _map_name: String = ""
 var _terrain_visual_theme_id: String = ""
+var _grid_topology: String = "square8"
 var _mission_slot_count: int = 3
 var _grid_size: Vector2i = Vector2i.ZERO
 var _tile_half_width: float = 64.0
@@ -44,6 +46,12 @@ static func load_from_file(path: String) -> TerrainMapData:
 		return terrain_map_data
 
 	var root_dict: Dictionary = parsed_json
+	var topology: String = String(root_dict.get("grid_topology", "square8")).strip_edges()
+	if topology != "square8" and topology != HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		terrain_map_data._load_issue_message = "Unsupported grid_topology '%s' in %s" % [topology, path]
+		push_warning(terrain_map_data._load_issue_message)
+		return terrain_map_data
+	terrain_map_data._grid_topology = topology
 	terrain_map_data._map_name = String(root_dict.get("map_name", path.get_file().get_basename()))
 	terrain_map_data._terrain_visual_theme_id = _normalize_optional_id(String(root_dict.get("terrain_visual_theme_id", root_dict.get("surface_visual_theme_id", ""))))
 	terrain_map_data._mission_slot_count = maxi(int(root_dict.get("mission_slot_count", 3)), 1)
@@ -123,9 +131,15 @@ static func create_empty(
 	grid_origin: Vector2,
 	half_tile_width: float = 64.0,
 	half_tile_height: float = 32.0,
-	mission_slot_count: int = 3
+	mission_slot_count: int = 3,
+	grid_topology: String = "square8"
 ) -> TerrainMapData:
 	var terrain_map_data := TerrainMapData.new()
+	if grid_topology != "square8" and grid_topology != HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		terrain_map_data._load_issue_message = "Unsupported grid_topology '%s'" % grid_topology
+		push_warning(terrain_map_data._load_issue_message)
+		return terrain_map_data
+	terrain_map_data._grid_topology = grid_topology
 	terrain_map_data._map_name = map_name
 	terrain_map_data._mission_slot_count = maxi(mission_slot_count, 1)
 	terrain_map_data._grid_size = grid_size
@@ -172,6 +186,7 @@ func save_to_file(path: String) -> Error:
 
 	var json_root: Dictionary = {
 		"map_name": _map_name,
+		"grid_topology": _grid_topology,
 		"mission_slot_count": _mission_slot_count,
 		"grid_size": {
 			"x": _grid_size.x,
@@ -275,6 +290,10 @@ func set_mission_slot_count(mission_slot_count: int) -> void:
 
 func get_grid_size() -> Vector2i:
 	return _grid_size
+
+
+func get_grid_topology() -> String:
+	return _grid_topology
 
 
 func get_tile_size() -> Dictionary:
@@ -472,6 +491,12 @@ func set_marker_color(marker_id: String, marker_color: Color) -> void:
 
 
 func _grid_to_world(grid_position: Vector2i) -> Vector2:
+	if _grid_topology == HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		var plane: Vector2 = HEX_GRID_SCRIPT.axial_to_plane(Vector2(grid_position))
+		return Vector2(
+			_grid_origin.x + ((plane.x - plane.y) * _tile_half_width),
+			_grid_origin.y + ((plane.x + plane.y) * _tile_half_height)
+		)
 	return Vector2(
 		_grid_origin.x + (float(grid_position.x - grid_position.y) * _tile_half_width),
 		_grid_origin.y + (float(grid_position.x + grid_position.y) * _tile_half_height)
