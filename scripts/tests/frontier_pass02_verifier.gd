@@ -45,6 +45,7 @@ func _check_geology() -> void:
 	check(bool(first_data["finite"]),"all geology transforms, vertices and generated normals are finite")
 	check(int(first_data["cap_vertices"])>0 and bool(first_data["caps_up"]),"SurfaceTool-generated geology cap normals point upward")
 	check(int(first_data["wall_normals"])>0 and bool(first_data["walls_out"]),"SurfaceTool-generated vertical wall normals point outward")
+	check(int(first_data["relief_meshes"])==14 and bool(first_data["relief_up"]),"tagged foot-relief meshes have upward sloped terrain normals")
 	check(first_data["digest"]==second_data["digest"],"two fresh geology builds have identical mesh geometry and transforms")
 	check(not first_footprints.is_empty() and first_footprints==second_footprints,"geology footprints are nonempty and deterministic")
 	var finite_footprints := true
@@ -63,9 +64,13 @@ func _geometry_data(geology: Node3D) -> Dictionary:
 	var cap_vertices := 0
 	var walls_out := true
 	var wall_normals := 0
+	var relief_meshes := 0
+	var relief_up := true
 	for mesh_variant in geology.find_children("*","MeshInstance3D",true,false):
 		var instance := mesh_variant as MeshInstance3D
 		mesh_count += 1
+		var is_relief: bool = instance.get_meta("frontier_geology_kind","rock")=="talus_relief"
+		if is_relief: relief_meshes += 1
 		var local_transform: Transform3D = geology.global_transform.affine_inverse()*instance.global_transform
 		finite = finite and local_transform.origin.is_finite() and local_transform.basis.is_finite()
 		for surface_index in range(instance.mesh.get_surface_count()):
@@ -81,7 +86,9 @@ func _geometry_data(geology: Node3D) -> Dictionary:
 					continue
 				var normal := normals[index]
 				finite = finite and normal.is_finite()
-				if surface_index==instance.mesh.get_surface_count()-1:
+				if is_relief:
+					relief_up = relief_up and normal.y>0.45
+				elif surface_index==instance.mesh.get_surface_count()-1:
 					cap_vertices += 1
 					caps_up = caps_up and normal.y>0.95
 				elif absf(normal.y)<0.8:
@@ -92,7 +99,7 @@ func _geometry_data(geology: Node3D) -> Dictionary:
 	var hasher := HashingContext.new()
 	hasher.start(HashingContext.HASH_SHA256)
 	hasher.update(var_to_bytes(entries))
-	return {"mesh_count":mesh_count,"vertex_count":vertex_count,"finite":finite,"caps_up":caps_up,"cap_vertices":cap_vertices,"walls_out":walls_out,"wall_normals":wall_normals,"digest":hasher.finish().hex_encode()}
+	return {"mesh_count":mesh_count,"vertex_count":vertex_count,"finite":finite,"caps_up":caps_up,"cap_vertices":cap_vertices,"walls_out":walls_out,"wall_normals":wall_normals,"relief_meshes":relief_meshes,"relief_up":relief_up,"digest":hasher.finish().hex_encode()}
 
 func _check_external_visual_owner() -> void:
 	var data = MAP.create_empty("pass02_owner",Vector2i(5,5),Vector2.ZERO,64.0,32.0,3,"hex_axial_v1")

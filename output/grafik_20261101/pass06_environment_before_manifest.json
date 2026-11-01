@@ -1,0 +1,233 @@
+{
+  "schema": "sternenbuergerchen.graphics_pass06_baseline.v1",
+  "source_revision": "env05",
+  "next_revision": "env06",
+  "source_code_commit": "5499c976028b8200b8a61bb92d5a6879f8ad57a9",
+  "html_archive": "docs/reports/STERNENBUERGERCHEN_GRAFIK_PASS05_2026-11-01.html",
+  "html_archive_sha256": "ab79aeec33e86fcf2c4cbe1751937dba6e1b6b8f81b84f2e355d2a51981a28aa",
+  "capture_metadata": "output/grafik_20261101/pass06_environment_before_capture.json",
+  "capture_metadata_sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610",
+  "captures": [
+    {
+      "id": "baseline",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/baseline.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/baseline.png",
+      "sha256": "57add73c13e67edd18f6dcd030f5ad05cfe79313b2da17af61a3686b967abc65",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "buccaneer_front",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/buccaneer_front.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/buccaneer_front.png",
+      "sha256": "db186cf0c79100a21d149eae711b1a47a990a1c85979ddb49b92abe8817264f4",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "buccaneer_rear",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/buccaneer_rear.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/buccaneer_rear.png",
+      "sha256": "2b3fec567474d290ec65faf76a0954b20a11a81635a0bdc232f77f7847522314",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "closed_habitat",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_habitat.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_habitat.png",
+      "sha256": "bd61fb85432ec22d8eb4119b87d2f3cfe8e7b29f66fd3604e97a07507f0964cd",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "closed_hall",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_hall.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_hall.png",
+      "sha256": "ae411ef8cbd550196c39fd894850ff9cc4cf794477624ac65be2f087bdc05712",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "closed_outpost",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_outpost.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_outpost.png",
+      "sha256": "4de4b4f369896fb4466ef97f33ade16f3488be2c6f61c84882406ea5599803cd",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "crew",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/crew.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/crew.png",
+      "sha256": "c6572de7164b3d5141be22cbd148ee73f92e19307a86dea4be5d886b96547151",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "cutaway",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/cutaway.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/cutaway.png",
+      "sha256": "d8b590e50f0fd45e0523c1fbce6dd310ae5b0d891c057b62348060fe8bf839ac",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "cutlass_front",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/cutlass_front.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/cutlass_front.png",
+      "sha256": "8dfaef644739d8335c1d22a4390e99fffb26396c8058f53dfb30404d8596408d",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "cutlass_rear",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/cutlass_rear.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/cutlass_rear.png",
+      "sha256": "d4591f60779cb6e16cce5496d5ae45b31bff33c116a935aea0544d25a23daa87",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "geology_detail",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/geology_detail.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/geology_detail.png",
+      "sha256": "26d6722362c49554aa6b666670f29f1064e78050d9ec87d3394b179a771265e5",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "ground_detail",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/ground_detail.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/ground_detail.png",
+      "sha256": "c5183707cf47a495506140ec5c706005d376d69c48b383e36e80cd1c367272fa",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "hex_grid",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/hex_grid.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/hex_grid.png",
+      "sha256": "90445757369cdcea8d53c2883796bed6c5378868fc2ba139a3f81b30563133e2",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "landscape",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/landscape.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/landscape.png",
+      "sha256": "90b41a35153a6ef53dbc9a8096e7ac00adda35d5342ecd046f525dd4db986cae",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "lived_outpost",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/lived_outpost.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/lived_outpost.png",
+      "sha256": "91976f10b91c83398a4f2f1d1b964ea8e02b06284a1332c145d5fe6c93f6221d",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "outpost",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/outpost.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/outpost.png",
+      "sha256": "eff1e088dce26ed01e3ed2d73cabb52a1796c1a2ba1c81e90897caa3cb27eda2",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "overview",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/overview.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/overview.png",
+      "sha256": "dbed07bbebcc3e9f544aa8037ecde74ad295d6af636b5c5e959ff2c78880c293",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "utility",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/utility.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/utility.png",
+      "sha256": "7975affc76fbe0c17c8135748d301692666899841eb22a36da56a0c6cac3ab93",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "walk_pose",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/walk_pose.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/walk_pose.png",
+      "sha256": "3ec694b335107149a756267e503906a39ba92c94e6458688396036490fa97871",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    },
+    {
+      "id": "workshop",
+      "source": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/workshop.png",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/workshop.png",
+      "sha256": "0a18924f063d7821e72feb9dc61d2a5999b5cef0189f478958ca8567b1afef14",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "byte_identical": true
+    }
+  ],
+  "notes": "Metadata is copied byte-for-byte and retains its original Pass05 capture paths. The before rows above identify the immutable Pass06 package copies."
+}

@@ -1,0 +1,167 @@
+[
+  {
+    "building": "habitat",
+    "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_habitat_front.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "before",
+    "size": 4.0,
+    "view": "front"
+  },
+  {
+    "building": "habitat",
+    "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_habitat_rear.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "before",
+    "size": 4.0,
+    "view": "rear"
+  },
+  {
+    "building": "hall",
+    "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_hall_front.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "before",
+    "size": 4.90000009536743,
+    "view": "front"
+  },
+  {
+    "building": "hall",
+    "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_hall_rear.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "before",
+    "size": 4.90000009536743,
+    "view": "rear"
+  },
+  {
+    "building": "ensemble",
+    "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_ensemble_game.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "before",
+    "size": 9.5,
+    "view": "game"
+  },
+  {
+    "building": "habitat",
+    "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_habitat_front.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "wear_disabled",
+    "size": 4.0,
+    "view": "front"
+  },
+  {
+    "building": "habitat",
+    "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_habitat_rear.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "wear_disabled",
+    "size": 4.0,
+    "view": "rear"
+  },
+  {
+    "building": "hall",
+    "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_hall_front.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "wear_disabled",
+    "size": 4.90000009536743,
+    "view": "front"
+  },
+  {
+    "building": "hall",
+    "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_hall_rear.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "wear_disabled",
+    "size": 4.90000009536743,
+    "view": "rear"
+  },
+  {
+    "building": "ensemble",
+    "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_ensemble_game.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "wear_disabled",
+    "size": 9.5,
+    "view": "game"
+  },
+  {
+    "building": "habitat",
+    "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_habitat_front.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "after",
+    "size": 4.0,
+    "view": "front"
+  },
+  {
+    "building": "habitat",
+    "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_habitat_rear.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "after",
+    "size": 4.0,
+    "view": "rear"
+  },
+  {
+    "building": "hall",
+    "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_hall_front.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "after",
+    "size": 4.90000009536743,
+    "view": "front"
+  },
+  {
+    "building": "hall",
+    "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_hall_rear.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "after",
+    "size": 4.90000009536743,
+    "view": "rear"
+  },
+  {
+    "building": "ensemble",
+    "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+    "light": "unchanged FrontierArtProfile",
+    "path": "res://art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_ensemble_game.png",
+    "renderer": "forward_plus/vulkan",
+    "resolution": "(1280, 900)",
+    "revision": "after",
+    "size": 9.5,
+    "view": "game"
+  }
+]

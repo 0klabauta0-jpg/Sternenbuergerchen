@@ -1,12 +1,17 @@
 extends Node3D
 ## Display-only exterior family: parent visibility keeps the closed/cutaway switch.
 ## Geometry remains within original XZ bounds+0.22m and original height+0.20m.
+const WEAR_SHADER = preload("res://shaders/terrain/frontier_building_wear.gdshader")
 var _materials: Dictionary = {}
+var _wear_height := 1.0
+var _wear_seed := 3.2
 
 func build(bounds: AABB, hall: bool) -> void:
 	position = Vector3(bounds.get_center().x,0.0,bounds.get_center().z)
 	var size := Vector2(bounds.size.x,bounds.size.z)
 	var height := bounds.end.y
+	_wear_height = height
+	_wear_seed = 17.7 if hall else 3.2
 	if hall: _build_hall(size,height)
 	else: _build_habitat(size,height)
 	_chamfered("DustSkirt",size+Vector2.ONE*0.035,0.0,0.127,0.10,"65695b")
@@ -17,6 +22,7 @@ func build(bounds: AABB, hall: bool) -> void:
 	set_meta("original_world_bounds",bounds)
 	set_meta("permitted_margin_xz",0.22)
 	set_meta("maximum_height",height+0.20)
+	set_meta("material_revision","pass06_selective_painterly_wear")
 
 func _build_habitat(size: Vector2,height: float) -> void:
 	var wall_top := height*0.89
@@ -208,7 +214,7 @@ func _mesh(label: String,surface: SurfaceTool,color: String) -> MeshInstance3D:
 	var instance := MeshInstance3D.new()
 	instance.name = label
 	instance.mesh = surface.commit()
-	instance.material_override = _material(color)
+	_route_material(instance,label,color)
 	add_child(instance)
 	return instance
 
@@ -219,7 +225,7 @@ func _box(label: String,size: Vector3,center: Vector3,color: String) -> MeshInst
 	mesh.size = size
 	instance.mesh = mesh
 	instance.position = center
-	instance.material_override = _material(color)
+	_route_material(instance,label,color)
 	add_child(instance)
 	return instance
 
@@ -232,6 +238,38 @@ func _emissive(color: String,energy: float) -> StandardMaterial3D:
 		material.emission_energy_multiplier = energy
 		_materials[key] = material
 	return _materials[key]
+
+func _route_material(instance: MeshInstance3D,label: String,color: String) -> void:
+	instance.set_meta("surface_role_label",label)
+	# Glass, light surfaces, narrow graphic marks and deep voids keep the P05 route.
+	var clean_labels := ["FrontWindow","DoorGlass","WarmOccupiedWindow","MonitorClerestory","BayStatusStrip","EntranceWarmFrame","CanopyWarmUnderside","ShutterJoint","DoorSplit","ShutterSafetyStripe","ServiceAccessMarker","RecessedServiceChannel","HabitatLifeSupportInset","HallExhaustLouver"]
+	if label in clean_labels:
+		instance.material_override = _material(color)
+		instance.set_meta("material_route","standard_or_emissive_preserved")
+		return
+	var role := "paint"
+	if label in ["DustSkirt","InsetFoundationBand","FoundationRepairPanel","EntranceStep"]:
+		role = "base"
+	elif "Roof" in label or "LifeSupportBase" in label or "MonitorCap" in label or "HVAC" in label:
+		role = "roof"
+	elif "Portal" in label or "Buttress" in label or "Rib" in label or "Frame" in label or "Brow" in label or "Sill" in label:
+		role = "structure"
+	var key := "wear:"+color+":"+role
+	if not _materials.has(key):
+		var material := ShaderMaterial.new()
+		material.shader = WEAR_SHADER
+		material.set_shader_parameter("base_color",Color(color))
+		material.set_shader_parameter("building_origin",global_position)
+		material.set_shader_parameter("building_height",_wear_height)
+		material.set_shader_parameter("pattern_seed",_wear_seed)
+		var strengths := {"paint":Vector4(0.60,0.40,0.70,0.28),"roof":Vector4(0.38,0.90,0.15,0.30),"structure":Vector4(0.46,0.40,0.32,0.58),"base":Vector4(0.95,0.12,0.30,0.28)}
+		material.set_shader_parameter("role_strength",strengths[role])
+		_materials[key] = material
+	instance.material_override = _materials[key]
+	var bounds := instance.get_aabb()
+	instance.set_instance_shader_parameter("wear_part_min",bounds.position)
+	instance.set_instance_shader_parameter("wear_part_max",bounds.end)
+	instance.set_meta("material_route","painterly_wear:"+role)
 
 func _material(color: String) -> StandardMaterial3D:
 	if not _materials.has(color):

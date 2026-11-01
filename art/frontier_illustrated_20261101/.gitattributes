@@ -3,3 +3,4 @@
 structures/pass04/references/*.html -whitespace
 structures/pass04/source_assets/** -whitespace
 environment/pass05/**/*.log -whitespace
+environment/pass06/**/*.log -whitespace

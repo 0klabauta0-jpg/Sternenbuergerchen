@@ -29,7 +29,7 @@ func _loading_yard() -> void:
 	var apron := _box(self,"LoadingApron",Vector3(4.35,0.012,1.20),Vector3(13.7,0.0,7.98),"858b7c")
 	apron.material_override = _paving_material("858b7c")
 	for x in [12.0,12.7,13.4,14.1,14.8,15.5]:
-		_box(self,"ApronBayStripe",Vector3(0.026,0.004,0.32),Vector3(x,0.009,8.32),"e0d2a0")
+		_box(self,"ApronBayStripe",Vector3(0.026,0.004,0.32),Vector3(x,0.009,8.32),"e0d2a0").material_override = _marking_material("e0d2a0")
 	for center in [Vector2(15.8,5.0),Vector2(16.7,5.6),Vector2(15.8,6.25)]:
 		_container(center,2 if center.y<5.5 else 1)
 
@@ -97,9 +97,18 @@ func _paving_material(color: String) -> ShaderMaterial:
 	material.set_shader_parameter("paved_surface",true)
 	return material
 
+func _marking_material(color: String) -> ShaderMaterial:
+	var key := "worn_marking:"+color
+	if _materials.has(key): return _materials[key]
+	var material := _paving_material(color)
+	material.set_shader_parameter("marking_surface",true)
+	_materials[key] = material
+	return material
+
 func _box(parent: Node3D,label: String,size: Vector3,position: Vector3,color: String) -> MeshInstance3D:
 	var instance := MeshInstance3D.new()
 	instance.name = label
+	instance.set_meta("art_part",label)
 	var mesh := BoxMesh.new()
 	mesh.size = size
 	instance.mesh = mesh
@@ -126,9 +135,11 @@ func _path(points: Array,width: float,service_lane: bool = false) -> void:
 		for side in [-1.0,1.0]:
 			var marker := _box(self,"PathEdgeGuide",Vector3(0.024,0.003,0.24),Vector3(a.x+normal.x*(width*0.5-0.06)*side,0.017,a.y+normal.y*(width*0.5-0.06)*side),"cbc6a5")
 			marker.rotation.y = atan2(direction.x,direction.y)
+			marker.material_override = _marking_material("cbc6a5")
 		if service_lane and index%2==1:
 			var center_mark := _box(self,"ServiceLaneGuide",Vector3(0.022,0.003,0.20),Vector3(a.x,0.018,a.y),"d4af67")
 			center_mark.rotation.y = atan2(direction.x,direction.y)
+			center_mark.material_override = _marking_material("d4af67")
 
 func _ribbon(points: PackedVector2Array,width: float,height: float,color: String) -> void:
 	var left := PackedVector2Array()

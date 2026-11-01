@@ -16,7 +16,7 @@ const WORKLIFE = preload("res://scripts/terrain/frontier_worklife.gd")
 const ART_ROOT := "res://Assets/curated/frontier_illustrated_20261101/"
 const MODEL_SCALE := 0.35
 const SHIP_SCALE := 0.22 # Deliberately compact fiction scale, not SC canonical metres.
-const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/"
+const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/"
 
 var _view
 var _data
@@ -435,15 +435,15 @@ func _capture_all() -> void:
 	_walk_demo()
 	await get_tree().create_timer(1.5).timeout
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(CAPTURE_ROOT+"walk_pose.png")
-	captures.append({"id":"walk_pose","path":CAPTURE_ROOT+"walk_pose.png","camera_size":_view.get_camera_size(),"profile_enabled":true})
+	var walk_error := get_viewport().get_texture().get_image().save_png(CAPTURE_ROOT+"walk_pose.png")
+	captures.append({"id":"walk_pose","path":CAPTURE_ROOT+"walk_pose.png","error":walk_error,"camera_size":_view.get_camera_size(),"profile_enabled":true})
 	var renderer: String = RenderingServer.get_current_rendering_method()+" / "+RenderingServer.get_current_rendering_driver_name()
 	var sources := {}
-	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://scripts/terrain/frontier_outpost_pad.gd","res://scripts/terrain/frontier_closed_buildings.gd","res://scripts/terrain/frontier_worklife.gd","res://shaders/terrain/frontier_contact_paint.gdshader","res://shaders/terrain/frontier_ground.gdshader"]:
+	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://scripts/terrain/frontier_outpost_pad.gd","res://scripts/terrain/frontier_closed_buildings.gd","res://scripts/terrain/frontier_worklife.gd","res://shaders/terrain/frontier_contact_paint.gdshader","res://shaders/terrain/frontier_ground.gdshader","res://shaders/terrain/frontier_building_wear.gdshader"]:
 		sources[source] = FileAccess.get_sha256(source)
 	var snapshot: Dictionary = _view.get_render_snapshot()
-	var report := {"report_ready":false,"pass":"05_environment","report_revision":"env05","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"worklife_sources":_worklife.source_facts,"use_groups":_worklife.use_groups,"contact_gravel_count":_worklife.gravel_count,"pads":_pad_facts,"captures":captures,"structure_and_citizen_scale":MODEL_SCALE,"stylized_ship_scale":SHIP_SCALE,"canonical_star_citizen_dimensions":false,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Nine fixed environment cameras, resolution, renderer and global light preserved from pass04. Buildings/geology/contacts/use groups revised; four original citizen starts and facing authored around use areas. Ship GLBs and citizen geometry unchanged; ships remain criticized interim assets under separate Astra revision. Hex facts remain authoritative."}
-	var report_file := FileAccess.open("res://output/grafik_20261101/pass05_environment_after_capture.json",FileAccess.WRITE)
+	var report := {"report_ready":false,"pass":"06_environment","report_revision":"env06","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"worklife_sources":_worklife.source_facts,"use_groups":_worklife.use_groups,"contact_gravel_count":_worklife.gravel_count,"pads":_pad_facts,"captures":captures,"structure_and_citizen_scale":MODEL_SCALE,"stylized_ship_scale":SHIP_SCALE,"canonical_star_citizen_dimensions":false,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Twelve fixed environment cameras, resolution, renderer, global light and crew placement preserved from pass05. Geology erosion and bounded blocked-area foot relief revised; painterly soil, rock, paving and building wear revised. All primary GLBs unchanged, ships stay under separate Astra revision. Hex height/navigation/picking facts remain authoritative and unchanged."}
+	var report_file := FileAccess.open("res://output/grafik_20261101/pass06_environment_after_capture.json",FileAccess.WRITE)
 	if report_file == null:
 		push_error("Cannot write frontier engine capture report")
 		get_tree().quit(1)

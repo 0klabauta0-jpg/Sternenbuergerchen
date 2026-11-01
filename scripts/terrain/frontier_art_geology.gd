@@ -1,7 +1,8 @@
 extends Node3D
-## Pass05 authored fractured geology. One-time visual build; fixture owns facts.
+## Pass06 eroded rocks and locked-footprint relief. Build once; no terrain facts.
 var _footprints: Array[Rect2] = []
 var _materials: Array[Material] = []
+var _sediment_material: Material
 
 func build(profile, _center: Vector2) -> Array[Rect2]:
 	_footprints.clear()
@@ -10,6 +11,7 @@ func build(profile, _center: Vector2) -> Array[Rect2]:
 		child.free()
 	for color in ["aa583d","ae5c3e","b46141","bb6846","c1724d"]:
 		_materials.append(profile.material_for(Color(color),true))
+	_sediment_material = profile.material_for(profile.surface_color("ground"))
 	var groups := [
 		[Vector2(-0.7,1.0),Vector3(6.8,4.6,4.5)],
 		[Vector2(5.1,-3.1),Vector3(6.5,3.8,4.5)],
@@ -43,6 +45,7 @@ func _add_mesa(label: String, plane: Vector2, size: Vector3, seed_value: int) ->
 	var width := envelope.size.x
 	var depth := envelope.size.y
 	var center := envelope.get_center()
+	_add_foot_relief(group,envelope.grow(0.17),size.y,seed_value)
 	if size.x<3.0:
 		_add_block(group,"FracturedSpire",center,Vector3(width*0.72,size.y,depth*0.70),seed_value,4)
 		_add_block(group,"SpireShoulder",center+Vector2(width*0.22,depth*0.17),Vector3(width*0.39,size.y*0.30,depth*0.48),seed_value+13,1)
@@ -94,6 +97,13 @@ func _pass02_envelope(size: Vector3,seed_value: int) -> Rect2:
 
 func _add_block(group: Node3D,label: String,center: Vector2,size: Vector3,seed_value: int,tiers: int) -> void:
 	var outline := _block_outline(seed_value,12 if tiers==1 else 18)
+	var channel_limit := 2 if tiers==2 or label=="FracturedSpire" else 3 if label=="OffsetCrown" else 5
+	var eroded := _eroded_outline(outline,seed_value,tiers,channel_limit)
+	outline = eroded["points"]
+	var grooves: PackedFloat32Array = eroded["grooves"]
+	var starts: PackedFloat32Array = eroded["starts"]
+	var ends: PackedFloat32Array = eroded["ends"]
+	var drifts: PackedVector2Array = eroded["drifts"]
 	var levels: Array[float] = [0.0,0.43,1.0]
 	if tiers>=5:
 		var profiles := [[0.0,0.11,0.20,0.27,0.51,0.60,0.80,1.0],[0.0,0.18,0.32,0.39,0.69,0.75,0.90,1.0],[0.0,0.10,0.26,0.31,0.56,0.67,0.74,0.93,1.0]]
@@ -115,10 +125,10 @@ func _add_block(group: Node3D,label: String,center: Vector2,size: Vector3,seed_v
 		var ring := PackedVector3Array()
 		for vertex in range(outline.size()):
 			var distance := mini(posmod(vertex-cut_face,outline.size()),posmod(cut_face-vertex,outline.size()))
-			var fracture_weight := maxf(0.0,1.0-float(distance)/3.3)
-			var other_face := posmod(cut_face+5+seed_value%3,outline.size())
+			var fracture_weight := maxf(0.0,1.0-float(distance)*18.0/float(outline.size())/3.3)
+			var other_face := posmod(cut_face+roundi(float(5+seed_value%3)*float(outline.size())/18.0),outline.size())
 			var other_distance := mini(posmod(vertex-other_face,outline.size()),posmod(other_face-vertex,outline.size()))
-			var secondary_weight := maxf(0.0,1.0-float(other_distance)/2.5)
+			var secondary_weight := maxf(0.0,1.0-float(other_distance)*18.0/float(outline.size())/2.5)
 			# Only a local broken face alternately retreats and overhangs. The broad
 			# adjacent wall stays quiet; no periodic lip goes around the whole body.
 			var retreat := fracture_depths[mini(level,fracture_depths.size()-1)]*fracture_weight if tiers>1 else 0.0
@@ -128,7 +138,12 @@ func _add_block(group: Node3D,label: String,center: Vector2,size: Vector3,seed_v
 				# One broken crown bevel, with unequal chips, replaces the machined
 				# right-angle prism edge. It is not another repeated strata ring.
 				taper += 0.035+_noise(seed_value,vertex+221)*0.075
-			var point := outline[vertex]*(1.0-taper-retreat)+lean*height
+			# Narrow incised gullies are actual moving vertices, with distinct
+			# shoulders and bed-dependent depth. They drain into the foot relief.
+			var groove_depth := grooves[vertex]*(0.035+_noise(seed_value,vertex+291)*0.050)
+			var activity := smoothstep(starts[vertex],starts[vertex]+0.17,height)*(1.0-smoothstep(ends[vertex]-0.14,ends[vertex],height))
+			retreat += groove_depth*activity
+			var point := outline[vertex]*(1.0-taper-retreat)+lean*height+drifts[vertex]*sin(PI*height)
 			var fracture_height := height
 			if level>0 and level<levels.size()-1:
 				fracture_height += (_noise(seed_value+11,vertex)-0.5)*0.065*sin(PI*height)
@@ -167,10 +182,92 @@ func _add_block(group: Node3D,label: String,center: Vector2,size: Vector3,seed_v
 	surface_materials.append(4)
 	var instance := MeshInstance3D.new()
 	instance.name = label
+	instance.set_meta("frontier_geology_kind","eroded_rock")
+	instance.set_meta("erosion_channel_count",eroded["channel_count"])
 	instance.position = Vector3(center.x,0.0,center.y)
 	instance.mesh = mesh
 	for surface in range(mesh.get_surface_count()):
 		instance.set_surface_override_material(surface,_materials[surface_materials[surface]])
+	group.add_child(instance)
+
+func _eroded_outline(coarse: PackedVector2Array,seed_value: int,tiers: int,limit: int) -> Dictionary:
+	var points := PackedVector2Array()
+	var grooves := PackedFloat32Array()
+	var starts := PackedFloat32Array()
+	var ends := PackedFloat32Array()
+	var drifts := PackedVector2Array()
+	var channels := 0
+	for index in range(coarse.size()):
+		points.append(coarse[index])
+		grooves.append(0.0)
+		starts.append(-0.2)
+		ends.append(1.2)
+		drifts.append(Vector2.ZERO)
+		if tiers<2: continue
+		var next := (index+1)%coarse.size()
+		var facing := (coarse[index]+coarse[next]).normalized().dot(Vector2(0.35,0.94))
+		var selected := _noise(seed_value,index+251)>(0.50 if facing>0.0 else 0.89)
+		if tiers==2: selected = selected and index%2==0
+		if not selected or channels>=limit: continue
+		var midpoint := 0.42+_noise(seed_value,index+263)*0.16
+		var start := -0.12 if channels%3==0 else 0.16+_noise(seed_value,index+281)*0.28
+		var end := 1.12 if channels%3==1 else 0.62+_noise(seed_value,index+283)*0.32
+		var drift := (coarse[next]-coarse[index])*(_noise(seed_value,index+287)-0.5)*0.075
+		for offset in [-0.13,0.0,0.13]:
+			points.append(coarse[index].lerp(coarse[next],midpoint+offset))
+			grooves.append(1.0 if offset==0.0 else 0.05)
+			starts.append(start)
+			ends.append(end)
+			drifts.append(drift)
+		channels += 1
+	return {"points":points,"grooves":grooves,"starts":starts,"ends":ends,"drifts":drifts,"channel_count":channels}
+
+func _add_foot_relief(group: Node3D,envelope: Rect2,wall_height: float,seed_value: int) -> void:
+	# This continuous terrain fan is wholly inside the already locked envelope.
+	# Its outer edge ends below the flat visual ground; no collision or tile height.
+	var center := envelope.get_center()
+	var half := envelope.size*0.5
+	var sectors := 24
+	var contour := PackedVector2Array()
+	for index in range(sectors):
+		var angle := TAU*float(index)/float(sectors)
+		var x := cos(angle)
+		var z := sin(angle)
+		var reach := 0.89+_noise(seed_value,index+311)*0.09
+		contour.append(Vector2(signf(x)*pow(absf(x),0.66)*half.x,signf(z)*pow(absf(z),0.66)*half.y)*reach)
+	var radii: Array[float] = [0.23,0.45,0.67,0.86,1.0]
+	var heights: Array[float] = [1.0,0.90,0.73,0.42,0.0]
+	var maximum_height := minf(clampf(wall_height*0.16,0.24,0.72),minf(envelope.size.x,envelope.size.y)*0.16)
+	var rings: Array[PackedVector3Array] = []
+	for band in range(radii.size()):
+		var ring := PackedVector3Array()
+		for index in range(sectors):
+			var point := contour[index]*radii[band]
+			var direction := contour[index].normalized()
+			var lobe := 0.52+0.32*maxf(direction.dot(Vector2(0.25,0.97)),0.0)+_noise(seed_value,index+347)*0.14
+			var height := 0.085+maximum_height*heights[band]*lobe
+			if band<radii.size()-1:
+				height += (_noise(seed_value+band*17,index+371)-0.5)*0.045*heights[band]
+			ring.append(Vector3(center.x+point.x,height,center.y+point.y))
+		rings.append(ring)
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	surface.set_smooth_group(-1)
+	var peak := Vector3(center.x,0.085+maximum_height*0.80,center.y)
+	for index in range(sectors):
+		var next := (index+1)%sectors
+		_triangle(surface,peak,rings[0][next],rings[0][index])
+	for band in range(rings.size()-1):
+		for index in range(sectors):
+			var next := (index+1)%sectors
+			_quad(surface,rings[band][index],rings[band][next],rings[band+1][next],rings[band+1][index])
+	surface.generate_normals()
+	var instance := MeshInstance3D.new()
+	instance.name = "LockedTalusRelief"
+	instance.set_meta("frontier_geology_kind","talus_relief")
+	instance.set_meta("relief_outer_local_y",0.085)
+	instance.mesh = surface.commit()
+	instance.material_override = _sediment_material
 	group.add_child(instance)
 
 func _block_outline(seed_value: int,count: int) -> PackedVector2Array:

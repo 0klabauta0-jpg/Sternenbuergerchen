@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass06\\geology\\qa\\check_runs\\20261101T191233Z-pid126024",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass06\\geology\\qa\\checks.json",
+  "godot": "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.049,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass06\\geology\\qa\\check_runs\\20261101T191233Z-pid126024\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-01T19:12:33.439058+00:00",
+  "finished_at": "2026-11-01T19:12:34.811277+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass06\\geology\\qa\\check_runs\\20261101T191233Z-pid126024\\logs\\engine-check-geology_contract.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\scripts\\tests\\frontier_pass03_geology_verifier.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 0.66,
+      "name": "geology_contract",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass06\\geology\\qa\\check_runs\\20261101T191233Z-pid126024\\logs\\check-geology_contract.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass06\\geology\\qa\\check_runs\\20261101T191233Z-pid126024\\logs\\engine-check-geology_contract.log",
+      "passed": false,
+      "reasons": [
+        "exit 1"
+      ]
+    },
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Microsoft/WinGet/Links/godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass06\\geology\\qa\\check_runs\\20261101T191233Z-pid126024\\logs\\engine-check-pass06_relief.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass06\\geology\\qa\\frontier_pass06_geology_verifier.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 0.649,
+      "name": "pass06_relief",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass06\\geology\\qa\\check_runs\\20261101T191233Z-pid126024\\logs\\check-pass06_relief.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass06\\geology\\qa\\check_runs\\20261101T191233Z-pid126024\\logs\\engine-check-pass06_relief.log",
+      "passed": false,
+      "reasons": [
+        "exit 1"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 2,
+    "passed": 0,
+    "failed": 2
+  }
+}

@@ -30,7 +30,8 @@ void vertex(){contact_world=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;}
 void fragment(){
 	vec2 p=contact_world.xz;
 	float broad=noise2(p*2.7);
-	float warp=(broad-0.5)*0.24;
+	float flow=noise2(vec2(p.x*0.65+p.y*0.38,p.y*3.8-p.x*0.7));
+	float warp=(broad-0.5)*0.28+(flow-0.5)*0.13;
 	float dust=bank(p,vec2(8.3,6.2),vec2(1.23,1.25),warp);
 	dust=max(dust,bank(p,vec2(13.2,6.2),vec2(1.86,1.24),warp));
 	dust=max(dust,bank(p,vec2(16.1,8.2),vec2(0.84,0.58),warp));
@@ -44,7 +45,9 @@ void fragment(){
 	worn*=mix(0.4,1.0,noise2(p*8.0));
 	float gravel_patch=1.0-smoothstep(1.0,2.5,length((p-vec2(17.2,6.3))*vec2(0.8,1.0))+warp);
 	dust=max(dust,gravel_patch*0.45);
-	ALBEDO=mix(dust_color.rgb,compact_color.rgb,smoothstep(0.12,0.55,worn));
-	ALPHA=clamp(max(dust*0.64,worn*0.50)*(0.70+0.30*broad),0.0,0.70);
+	// Broken, brush-like deposits rather than one clean outline around each prop.
+	float pigment=mix(0.91,1.16,flow);
+	ALBEDO=mix(dust_color.rgb*pigment,compact_color.rgb,smoothstep(0.12,0.55,worn));
+	ALPHA=clamp(max(dust*0.70,worn*0.50)*(0.46+0.32*broad+0.22*flow),0.0,0.70);
 	ROUGHNESS=1.0;
 }

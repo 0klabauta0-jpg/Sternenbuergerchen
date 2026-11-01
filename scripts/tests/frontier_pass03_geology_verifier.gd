@@ -58,11 +58,13 @@ func run() -> void:
 	check(bool(data["finite"]),"all mesh transforms, vertices and normals are finite")
 	check(bool(data["caps_up"]),"generated upper cap normals point up")
 	check(bool(data["walls_out"]),"generated wall normals point out from their individual block")
+	check(int(data["relief_meshes"])==14 and bool(data["relief_up"]),"fourteen tagged foot-relief meshes have upward terrain normals")
+	check(bool(data["known_kinds"]),"every geology mesh has an explicit recognized geometry kind")
 	check(int(data["degenerate_triangles"])==0,"new rock triangles have nonzero area")
 	check(int(data["outside_footprint_vertices"])==0,"returned conservative footprints contain every new rock and debris vertex")
 	check(int(data["terraced_groups"])>=10,"large plateaus include attached masses with unequal top heights")
-	# Pass04 adds chipped strata within the identical placement envelopes.
-	check(int(data["vertices"])<=30000,"chipped strata stay within the 30k authored-scene vertex budget")
+	# Pass06 includes incised wall channels and real locked-footprint ground relief.
+	check(int(data["vertices"])<=60000,"eroded rock and fourteen relief fans stay within the 60k scene vertex budget")
 	check(data["digest"]==other["digest"] and footprints==other_footprints,"fresh builds deterministically reproduce geometry and footprints")
 	first.free()
 	second.free()
@@ -79,12 +81,19 @@ func geometry(geology: Node3D,footprints: Array) -> Dictionary:
 	var outside := 0
 	var degenerate := 0
 	var terraced_groups := 0
+	var relief_meshes := 0
+	var relief_up := true
+	var known_kinds := true
 	for group_index in range(geology.get_child_count()):
 		var group: Node3D = geology.get_child(group_index)
 		var heights: Dictionary = {}
 		for mesh_variant in group.find_children("*","MeshInstance3D",true,false):
 			var instance := mesh_variant as MeshInstance3D
 			meshes_count += 1
+			var kind: String = instance.get_meta("frontier_geology_kind","rock")
+			var is_relief := kind=="talus_relief"
+			known_kinds = known_kinds and kind in ["rock","eroded_rock","talus_relief"]
+			if is_relief: relief_meshes += 1
 			var transform: Transform3D = geology.global_transform.affine_inverse()*instance.global_transform
 			finite = finite and transform.origin.is_finite() and transform.basis.is_finite()
 			var top := instance.mesh.get_aabb().end.y+instance.position.y
@@ -105,7 +114,9 @@ func geometry(geology: Node3D,footprints: Array) -> Dictionary:
 						continue
 					var normal := normals[index]
 					finite = finite and normal.is_finite()
-					if surface==instance.mesh.get_surface_count()-1:
+					if is_relief:
+						relief_up = relief_up and normal.y>0.45
+					elif surface==instance.mesh.get_surface_count()-1:
 						caps_up = caps_up and normal.y>0.95
 					elif absf(normal.y)<0.8:
 						var radial := Vector3(points[index].x,0.0,points[index].z).normalized()
@@ -115,7 +126,7 @@ func geometry(geology: Node3D,footprints: Array) -> Dictionary:
 						degenerate += 1
 		if heights.size()>1:
 			terraced_groups += 1
-	return {"meshes":meshes_count,"vertices":vertices_count,"finite":finite,"caps_up":caps_up,"walls_out":walls_out,"outside_footprint_vertices":outside,"degenerate_triangles":degenerate,"terraced_groups":terraced_groups,"digest":digest(entries)}
+	return {"meshes":meshes_count,"vertices":vertices_count,"finite":finite,"caps_up":caps_up,"walls_out":walls_out,"relief_meshes":relief_meshes,"relief_up":relief_up,"known_kinds":known_kinds,"outside_footprint_vertices":outside,"degenerate_triangles":degenerate,"terraced_groups":terraced_groups,"digest":digest(entries)}
 
 func digest(value: Variant) -> String:
 	var hasher := HashingContext.new()
