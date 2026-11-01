@@ -12,7 +12,7 @@ const BACKDROP = preload("res://scripts/terrain/frontier_art_geology.gd")
 const DRESSING = preload("res://scripts/terrain/frontier_art_dressing.gd")
 const ART_ROOT := "res://Assets/curated/frontier_illustrated_20261101/"
 const MODEL_SCALE := 0.35
-const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/"
+const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/"
 
 var _view
 var _data
@@ -44,8 +44,8 @@ func _ready() -> void:
 	_add_continuous_backdrop_ground()
 	_data = MAP.create_empty("frontier_hex_base_preview",Vector2i(22,18),Vector2.ZERO,64.0,32.0,3,"hex_axial_v1")
 	_make_terrain()
-	_add_structure("habitat_01",Vector2(8.3,6.2))
-	_add_structure("workshop_01",Vector2(13.2,6.2))
+	_add_structure("habitat_cutaway_01",Vector2(8.3,6.2),"structures_pass03")
+	_add_structure("freihafen_hall_01",Vector2(13.2,6.2),"structures_pass03")
 	_add_structure("service_unit_01",Vector2(16.1,8.2))
 	_add_landing_pad(Vector2(5.9,9.1))
 	_add_solar_array(Vector2(9.1,3.8))
@@ -116,8 +116,8 @@ func _add_continuous_backdrop_ground() -> void:
 	_stage.add_child(ground)
 	_view.set_flat_ground_visual_owner(ground)
 
-func _add_structure(model: String, plane: Vector2) -> void:
-	var path := ART_ROOT+"structures/"+model+".glb"
+func _add_structure(model: String, plane: Vector2, family: String = "structures") -> void:
+	var path := ART_ROOT+family+"/"+model+".glb"
 	if not ResourceLoader.exists(path):
 		push_error("Missing approved frontier structure: "+path)
 		return
@@ -294,7 +294,7 @@ func _build_ui() -> void:
 	panel.add_theme_stylebox_override("panel",style)
 	layer.add_child(panel)
 	_status = Label.new()
-	_status.text = "STERNENBÜRGERCHEN  /  HEX-BASIS\nGrafik- und Bewegungsprobe · kein Kampagnenstand\n1 Übersicht   2 Werkstatt   3 Citizens   4 Gelände\nG Hexraster   Leertaste Gehen   Mausrad Zoom"
+	_status.text = "STERNENBÜRGERCHEN  /  HEX-BASIS\nGrafik- und Bewegungsprobe · kein Kampagnenstand\n1 Übersicht   2 Halle   3 Citizens   4 Gelände   5 Basis\nG Hexraster   Leertaste Gehen   Mausrad Zoom"
 	_status.add_theme_font_size_override("font_size",15)
 	panel.add_child(_status)
 
@@ -319,6 +319,10 @@ func _camera_view(id: String, reset_zoom: bool = true) -> void:
 		focus = Vector2(12.0,5.6)
 		size = 23.0
 		pitch = 46.0
+	elif id=="cutaway":
+		focus = Vector2(8.3,6.2)
+		size = 3.6
+		pitch = 50.0
 	size *= _preview_zoom_factor
 	_view.set("_focus_grid_position",HEX.plane_to_axial(focus))
 	_view.set("_camera_size",size)
@@ -343,6 +347,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_2: _camera_view("workshop")
 			KEY_3: _camera_view("crew")
 			KEY_4: _camera_view("landscape")
+			KEY_5: _camera_view("cutaway")
 			KEY_G:
 				_view.set_hex_grid_visible(not bool(_view.get("_hex_grid_visible")))
 				_camera_view(_current_view_id,false)
@@ -368,7 +373,7 @@ func _capture_all() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CAPTURE_ROOT))
 	for i in range(30): await get_tree().process_frame
 	var captures: Array = []
-	for id in ["overview","hex_grid","crew","workshop","landscape","baseline"]:
+	for id in ["overview","hex_grid","crew","workshop","landscape","cutaway","baseline"]:
 		_view.set_frontier_art_enabled(id!="baseline")
 		_view.set_hex_grid_visible(id=="hex_grid")
 		_camera_view("overview" if id in ["hex_grid","baseline"] else id)
@@ -391,8 +396,8 @@ func _capture_all() -> void:
 	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://shaders/terrain/frontier_ground.gdshader"]:
 		sources[source] = FileAccess.get_sha256(source)
 	var snapshot: Dictionary = _view.get_render_snapshot()
-	var report := {"report_ready":false,"pass":"02","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"captures":captures,"runtime_scale_from_metres":MODEL_SCALE,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Same fixed cameras and output resolution as pass01; lighting and displayed assets deliberately revised in pass02. Flat fixture surface is continuous; Hex cells remain authoritative and selectable."}
-	var report_file := FileAccess.open("res://output/grafik_20261101/pass02_after_capture.json",FileAccess.WRITE)
+	var report := {"report_ready":false,"pass":"03","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"captures":captures,"runtime_scale_from_metres":MODEL_SCALE,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Five fixed cameras, output resolution, renderer and lighting preserved from pass02. Geology, architecture and yard dressing revised in pass03; cutaway is an additional close view. Hex cells remain authoritative and selectable."}
+	var report_file := FileAccess.open("res://output/grafik_20261101/pass03_after_capture.json",FileAccess.WRITE)
 	if report_file == null:
 		push_error("Cannot write frontier engine capture report")
 		get_tree().quit(1)

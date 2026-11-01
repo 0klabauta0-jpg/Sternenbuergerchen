@@ -1,0 +1,1692 @@
+[
+  {
+    "pack": "space_station",
+    "asset": "wall",
+    "path": "Assets\\curated\\kenney\\space_station\\models\\wall.glb",
+    "sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+    "bounds_blender": {
+      "min": [
+        -0.5,
+        -0.15000000596046448,
+        0.0
+      ],
+      "max": [
+        0.5,
+        0.15000000596046448,
+        1.0
+      ]
+    },
+    "dimensions": [
+      1.0,
+      0.30000001192092896,
+      1.0
+    ],
+    "objects": [
+      {
+        "name": "wall",
+        "verts": 68,
+        "triangles": 44,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\space_station\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": true,
+      "errors": [],
+      "warnings": [
+        "wall: duplicate verts=34 loose verts=0"
+      ],
+      "ground_z": 0.0,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [],
+      "enclosed": [],
+      "objects": {
+        "wall": {
+          "verts": 68,
+          "faces": 44,
+          "tris": 44,
+          "ngons": 0,
+          "boundary_edges": 68,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 34,
+          "islands": 12,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "space_station",
+    "asset": "wall-window",
+    "path": "Assets\\curated\\kenney\\space_station\\models\\wall-window.glb",
+    "sha256": "55053731040bad9e0a02cd5cbef4d6ce4516f40019d41488eb36a5bdebcda6f3",
+    "bounds_blender": {
+      "min": [
+        -0.5,
+        -0.15000000596046448,
+        0.0
+      ],
+      "max": [
+        0.5,
+        0.15000000596046448,
+        1.0
+      ]
+    },
+    "dimensions": [
+      1.0,
+      0.30000001192092896,
+      1.0
+    ],
+    "objects": [
+      {
+        "name": "wall-window",
+        "verts": 140,
+        "triangles": 104,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\space_station\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": true,
+      "errors": [],
+      "warnings": [
+        "wall-window: duplicate verts=70 loose verts=0",
+        "hidden back-to-back faces: wall-window (6 pairs) - delete to save tris"
+      ],
+      "ground_z": 0.0,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [
+        {
+          "where": "wall-window",
+          "tri_pairs": 6
+        }
+      ],
+      "enclosed": [],
+      "objects": {
+        "wall-window": {
+          "verts": 140,
+          "faces": 104,
+          "tris": 104,
+          "ngons": 0,
+          "boundary_edges": 140,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 70,
+          "islands": 21,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "space_station",
+    "asset": "wall-door",
+    "path": "Assets\\curated\\kenney\\space_station\\models\\wall-door.glb",
+    "sha256": "e1692da0f0a0ebd2dfd36787dbe9a47748141d82bbbb12b0381919d52e271603",
+    "bounds_blender": {
+      "min": [
+        -0.5,
+        -0.15000000596046448,
+        0.0
+      ],
+      "max": [
+        0.5,
+        0.15000000596046448,
+        1.0
+      ]
+    },
+    "dimensions": [
+      1.0,
+      0.30000001192092896,
+      1.0
+    ],
+    "objects": [
+      {
+        "name": "wall-door",
+        "verts": 144,
+        "triangles": 98,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\space_station\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": true,
+      "errors": [],
+      "warnings": [
+        "wall-door: duplicate verts=72 loose verts=0"
+      ],
+      "ground_z": 0.0,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [],
+      "enclosed": [],
+      "objects": {
+        "wall-door": {
+          "verts": 144,
+          "faces": 98,
+          "tris": 98,
+          "ngons": 0,
+          "boundary_edges": 148,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 72,
+          "islands": 21,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "space_station",
+    "asset": "bed-single",
+    "path": "Assets\\curated\\kenney\\space_station\\models\\bed-single.glb",
+    "sha256": "5eca54cb1f72da773380ded3a326e1c116e9353aebdf202b9353ed7ddc1cc6db",
+    "bounds_blender": {
+      "min": [
+        -0.25,
+        -0.5,
+        0.0
+      ],
+      "max": [
+        0.25,
+        0.5,
+        0.3500000238418579
+      ]
+    },
+    "dimensions": [
+      0.5,
+      1.0,
+      0.3500000238418579
+    ],
+    "objects": [
+      {
+        "name": "bed-single",
+        "verts": 72,
+        "triangles": 56,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\space_station\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": true,
+      "errors": [],
+      "warnings": [
+        "bed-single: duplicate verts=34 loose verts=0",
+        "hidden back-to-back faces: bed-single (3 pairs) - delete to save tris"
+      ],
+      "ground_z": 0.0,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [
+        {
+          "where": "bed-single",
+          "tri_pairs": 3
+        }
+      ],
+      "enclosed": [],
+      "objects": {
+        "bed-single": {
+          "verts": 72,
+          "faces": 56,
+          "tris": 56,
+          "ngons": 0,
+          "boundary_edges": 72,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 34,
+          "islands": 10,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "space_station",
+    "asset": "table-display",
+    "path": "Assets\\curated\\kenney\\space_station\\models\\table-display.glb",
+    "sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3",
+    "bounds_blender": {
+      "min": [
+        -0.6207106709480286,
+        -0.4448888599872589,
+        -0.30000001192092896
+      ],
+      "max": [
+        0.6207106709480286,
+        0.37071067094802856,
+        0.30000001192092896
+      ]
+    },
+    "dimensions": [
+      1.2414213418960571,
+      0.8155995309352875,
+      0.6000000238418579
+    ],
+    "objects": [
+      {
+        "name": "table-display",
+        "verts": 234,
+        "triangles": 176,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "name": "ship",
+        "verts": 100,
+        "triangles": 64,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            1.4438228216156449e-15
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.15000000596046448
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\space_station\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": false,
+      "errors": [
+        "table-display: degenerate faces=1 zero-len edges=0"
+      ],
+      "warnings": [
+        "table-display: duplicate verts=101 loose verts=0",
+        "ship: duplicate verts=50 loose verts=0",
+        "asset lowest point z=-0.3 (not resting on ground plane z=0)"
+      ],
+      "ground_z": -0.3,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [],
+      "enclosed": [],
+      "objects": {
+        "table-display": {
+          "verts": 234,
+          "faces": 176,
+          "tris": 176,
+          "ngons": 0,
+          "boundary_edges": 238,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 1,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 101,
+          "islands": 32,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        },
+        "ship": {
+          "verts": 100,
+          "faces": 64,
+          "tris": 64,
+          "ngons": 0,
+          "boundary_edges": 100,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 50,
+          "islands": 18,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "space_station",
+    "asset": "computer",
+    "path": "Assets\\curated\\kenney\\space_station\\models\\computer.glb",
+    "sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7",
+    "bounds_blender": {
+      "min": [
+        -0.20000000298023224,
+        -0.26314112544059753,
+        0.0
+      ],
+      "max": [
+        0.20000000298023224,
+        0.17499999701976776,
+        0.6608729362487793
+      ]
+    },
+    "dimensions": [
+      0.4000000059604645,
+      0.4381411224603653,
+      0.6608729362487793
+    ],
+    "objects": [
+      {
+        "name": "computer",
+        "verts": 172,
+        "triangles": 140,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\space_station\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": false,
+      "errors": [
+        "computer: degenerate faces=1 zero-len edges=0"
+      ],
+      "warnings": [
+        "computer: duplicate verts=82 loose verts=0",
+        "hidden back-to-back faces: computer (9 pairs) - delete to save tris"
+      ],
+      "ground_z": 0.0,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [
+        {
+          "where": "computer",
+          "tri_pairs": 9
+        }
+      ],
+      "enclosed": [],
+      "objects": {
+        "computer": {
+          "verts": 172,
+          "faces": 140,
+          "tris": 140,
+          "ngons": 0,
+          "boundary_edges": 172,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 1,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 82,
+          "islands": 21,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "space_station",
+    "asset": "computer-wide",
+    "path": "Assets\\curated\\kenney\\space_station\\models\\computer-wide.glb",
+    "sha256": "62420ce928f288f91ce85e2245e80e6c9efbee9b6e91b7ea9b83d0289fa647c4",
+    "bounds_blender": {
+      "min": [
+        -0.40000003576278687,
+        -0.2965650260448456,
+        0.0
+      ],
+      "max": [
+        0.4000000059604645,
+        0.23661395907402039,
+        0.49684643745422363
+      ]
+    },
+    "dimensions": [
+      0.8000000417232513,
+      0.533178985118866,
+      0.49684643745422363
+    ],
+    "objects": [
+      {
+        "name": "computer-wide",
+        "verts": 230,
+        "triangles": 174,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\space_station\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": true,
+      "errors": [],
+      "warnings": [
+        "computer-wide: duplicate verts=111 loose verts=0"
+      ],
+      "ground_z": 0.0,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [],
+      "enclosed": [],
+      "objects": {
+        "computer-wide": {
+          "verts": 230,
+          "faces": 174,
+          "tris": 174,
+          "ngons": 0,
+          "boundary_edges": 230,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 111,
+          "islands": 32,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "space_station",
+    "asset": "container-wide",
+    "path": "Assets\\curated\\kenney\\space_station\\models\\container-wide.glb",
+    "sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0",
+    "bounds_blender": {
+      "min": [
+        -0.30000001192092896,
+        -0.30000001192092896,
+        0.0
+      ],
+      "max": [
+        0.30000001192092896,
+        0.30000001192092896,
+        0.699999988079071
+      ]
+    },
+    "dimensions": [
+      0.6000000238418579,
+      0.6000000238418579,
+      0.699999988079071
+    ],
+    "objects": [
+      {
+        "name": "container-wide",
+        "verts": 128,
+        "triangles": 116,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\space_station\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": true,
+      "errors": [],
+      "warnings": [
+        "container-wide: duplicate verts=64 loose verts=0"
+      ],
+      "ground_z": 0.0,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [],
+      "enclosed": [],
+      "objects": {
+        "container-wide": {
+          "verts": 128,
+          "faces": 116,
+          "tris": 116,
+          "ngons": 0,
+          "boundary_edges": 128,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 64,
+          "islands": 11,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "factory",
+    "asset": "door",
+    "path": "Assets\\curated\\kenney\\factory\\models\\door.glb",
+    "sha256": "1995868d11013b5f00598cf2280ece883581162aabe2921f3fde0341d0628ddd",
+    "bounds_blender": {
+      "min": [
+        -0.39779144525527954,
+        -0.09806923568248749,
+        0.0
+      ],
+      "max": [
+        0.4265891909599304,
+        0.3107829689979553,
+        1.600000023841858
+      ]
+    },
+    "dimensions": [
+      0.82438063621521,
+      0.4088522046804428,
+      1.600000023841858
+    ],
+    "objects": [
+      {
+        "name": "door.001",
+        "verts": 184,
+        "triangles": 156,
+        "matrix": [
+          [
+            0.9640028476715088,
+            0.2658918797969818,
+            0.0,
+            0.4000000059604645
+          ],
+          [
+            -0.2658918797969818,
+            0.9640028476715088,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\factory\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": true,
+      "errors": [],
+      "warnings": [
+        "door.001: duplicate verts=92 loose verts=0",
+        "hidden back-to-back faces: door.001 (12 pairs) - delete to save tris"
+      ],
+      "ground_z": 0.0,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [
+        {
+          "where": "door.001",
+          "tri_pairs": 12
+        }
+      ],
+      "enclosed": [],
+      "objects": {
+        "door.001": {
+          "verts": 184,
+          "faces": 156,
+          "tris": 156,
+          "ngons": 0,
+          "boundary_edges": 184,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 92,
+          "islands": 24,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "factory",
+    "asset": "door-wide-closed",
+    "path": "Assets\\curated\\kenney\\factory\\models\\door-wide-closed.glb",
+    "sha256": "987837d7b45bca466c5f2268fa0193e014374cc0d2ef0784f6c37092856b71d0",
+    "bounds_blender": {
+      "min": [
+        -0.8999999761581421,
+        -0.4000000059604645,
+        4.51194631754889e-17
+      ],
+      "max": [
+        0.8999999761581421,
+        -0.4000000059604645,
+        1.600000023841858
+      ]
+    },
+    "dimensions": [
+      1.7999999523162842,
+      0.0,
+      1.600000023841858
+    ],
+    "objects": [
+      {
+        "name": "door-wide-closed",
+        "verts": 28,
+        "triangles": 22,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\factory\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": true,
+      "errors": [],
+      "warnings": [
+        "door-wide-closed: duplicate verts=8 loose verts=0"
+      ],
+      "ground_z": 0.0,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [],
+      "enclosed": [],
+      "objects": {
+        "door-wide-closed": {
+          "verts": 28,
+          "faces": 22,
+          "tris": 22,
+          "ngons": 0,
+          "boundary_edges": 28,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 8,
+          "islands": 4,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "factory",
+    "asset": "detail-tank",
+    "path": "Assets\\curated\\kenney\\factory\\models\\detail-tank.glb",
+    "sha256": "b1edc2953c590c16f1d8280dfeb9073af6c710ac3d587f3dba144f69363d799b",
+    "bounds_blender": {
+      "min": [
+        -0.4240000247955322,
+        -0.257647842168808,
+        0.0
+      ],
+      "max": [
+        0.4240000545978546,
+        0.257647842168808,
+        0.41529566049575806
+      ]
+    },
+    "dimensions": [
+      0.8480000793933868,
+      0.515295684337616,
+      0.41529566049575806
+    ],
+    "objects": [
+      {
+        "name": "detail-tank",
+        "verts": 286,
+        "triangles": 236,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\factory\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": false,
+      "errors": [
+        "detail-tank: degenerate faces=2 zero-len edges=0"
+      ],
+      "warnings": [
+        "detail-tank: duplicate verts=131 loose verts=0"
+      ],
+      "ground_z": 0.0,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [],
+      "enclosed": [],
+      "objects": {
+        "detail-tank": {
+          "verts": 286,
+          "faces": 236,
+          "tris": 236,
+          "ngons": 0,
+          "boundary_edges": 270,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 2,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 131,
+          "islands": 39,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "factory",
+    "asset": "crane",
+    "path": "Assets\\curated\\kenney\\factory\\models\\crane.glb",
+    "sha256": "ceaf20fb976ce0415d2b3d40e723b6ad377845818fa4fa68b55434108b1a6880",
+    "bounds_blender": {
+      "min": [
+        -0.9630127549171448,
+        -0.6901248693466187,
+        -8.121503305413553e-16
+      ],
+      "max": [
+        0.9630127549171448,
+        2.9901251792907715,
+        3.553319215774536
+      ]
+    },
+    "dimensions": [
+      1.9260255098342896,
+      3.68025004863739,
+      3.553319215774537
+    ],
+    "objects": [
+      {
+        "name": "crane",
+        "verts": 448,
+        "triangles": 412,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "name": "arm",
+        "verts": 192,
+        "triangles": 148,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            6.078493828068354e-13
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            2.995932224091752e-13
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            3.003319263458252
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\factory\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": false,
+      "errors": [
+        "crane: 16 edges with inconsistent face winding",
+        "z-fighting: crane (8 overlapping coplanar tri pairs)"
+      ],
+      "warnings": [
+        "crane: non-manifold edges=6 wire=0",
+        "crane: duplicate verts=202 loose verts=0",
+        "arm: duplicate verts=96 loose verts=0",
+        "hidden back-to-back faces: crane (114 pairs) - delete to save tris",
+        "hidden back-to-back faces: arm (28 pairs) - delete to save tris"
+      ],
+      "ground_z": -0.0,
+      "zfighting": [
+        {
+          "where": "crane",
+          "tri_pairs": 8
+        }
+      ],
+      "floating": [],
+      "back_to_back": [
+        {
+          "where": "crane",
+          "tri_pairs": 114
+        },
+        {
+          "where": "arm",
+          "tri_pairs": 28
+        }
+      ],
+      "enclosed": [],
+      "objects": {
+        "crane": {
+          "verts": 448,
+          "faces": 412,
+          "tris": 412,
+          "ngons": 0,
+          "boundary_edges": 412,
+          "nonmanifold_edges": 6,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 16,
+          "duplicate_verts": 202,
+          "islands": 46,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        },
+        "arm": {
+          "verts": 192,
+          "faces": 148,
+          "tris": 148,
+          "ngons": 0,
+          "boundary_edges": 192,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 96,
+          "islands": 25,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  },
+  {
+    "pack": "factory",
+    "asset": "crane-lift",
+    "path": "Assets\\curated\\kenney\\factory\\models\\crane-lift.glb",
+    "sha256": "060197cd67598ed4359ecbcb0af980d4505992213c1ab6cc9f56812dff7bbf07",
+    "bounds_blender": {
+      "min": [
+        -0.3583333194255829,
+        -0.3583333194255829,
+        -2.249999761581421
+      ],
+      "max": [
+        0.3583333194255829,
+        0.3583333194255829,
+        0.25
+      ]
+    },
+    "dimensions": [
+      0.7166666388511658,
+      0.7166666388511658,
+      2.499999761581421
+    ],
+    "objects": [
+      {
+        "name": "crane-lift",
+        "verts": 64,
+        "triangles": 120,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "name": "chain",
+        "verts": 24,
+        "triangles": 12,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            -1.4438228216156449e-15
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            1.3761436185806054e-15
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -0.25
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      },
+      {
+        "name": "magnet",
+        "verts": 196,
+        "triangles": 172,
+        "matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            4.331468570726053e-15
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            -1.3535838912942001e-14
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            -1.3499999046325684
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "name": "colormap",
+        "images": [
+          {
+            "name": "colormap",
+            "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\kenney\\factory\\models\\Textures\\colormap.png",
+            "size": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    ],
+    "raw_qa": {
+      "ok": true,
+      "pass": false,
+      "errors": [
+        "crane-lift: 1 closed parts with normals pointing inward"
+      ],
+      "warnings": [
+        "crane-lift: duplicate verts=32 loose verts=0",
+        "chain: duplicate verts=12 loose verts=0",
+        "magnet: duplicate verts=90 loose verts=0",
+        "hidden back-to-back faces: crane-lift (60 pairs) - delete to save tris",
+        "hidden back-to-back faces: magnet (23 pairs) - delete to save tris",
+        "hidden back-to-back faces: chain<->magnet (4 pairs) - delete to save tris",
+        "asset lowest point z=-2.25 (not resting on ground plane z=0)"
+      ],
+      "ground_z": -2.25,
+      "zfighting": [],
+      "floating": [],
+      "back_to_back": [
+        {
+          "where": "crane-lift",
+          "tri_pairs": 60
+        },
+        {
+          "where": "magnet",
+          "tri_pairs": 23
+        },
+        {
+          "where": "chain<->magnet",
+          "tri_pairs": 4
+        }
+      ],
+      "enclosed": [],
+      "objects": {
+        "crane-lift": {
+          "verts": 64,
+          "faces": 120,
+          "tris": 120,
+          "ngons": 0,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 32,
+          "islands": 2,
+          "inside_out_islands": 1,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        },
+        "chain": {
+          "verts": 24,
+          "faces": 12,
+          "tris": 12,
+          "ngons": 0,
+          "boundary_edges": 24,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 12,
+          "islands": 6,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        },
+        "magnet": {
+          "verts": 196,
+          "faces": 172,
+          "tris": 172,
+          "ngons": 0,
+          "boundary_edges": 188,
+          "nonmanifold_edges": 0,
+          "wire_edges": 0,
+          "loose_verts": 0,
+          "degenerate_faces": 0,
+          "zero_length_edges": 0,
+          "inconsistent_normals_edges": 0,
+          "duplicate_verts": 90,
+          "islands": 19,
+          "inside_out_islands": 0,
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "materials": 1
+        }
+      }
+    }
+  }
+]

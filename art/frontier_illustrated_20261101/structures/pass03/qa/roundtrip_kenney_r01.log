@@ -1,0 +1,24 @@
+00:00.422  blend            | Read blend: "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\source\habitat_cutaway_01.blend"
+15:50:31 | INFO: Data are loaded, start creating Blender stuff
+15:50:31 | INFO: Blender create Mesh node habitat_cutaway_01_Mesh
+15:50:31 | INFO: glTF import finished in 0.02s
+00:02.125  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\habitat_cutaway_01_roundtrip_front.png'
+00:02.219  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\habitat_cutaway_01_roundtrip_game.png'
+00:02.235  blend            | Read blend: "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\source\freihafen_hall_01.blend"
+FRESH_ROUNDTRIP {"asset": "habitat_cutaway_01", "pass": true, "glb_sha256": "b731373a25957861e15e8f440f764117ba2c061691fb2dd6532e494593ec184b", "import_method": "fresh Blender5.2.3 factory-empty; merge_vertices=True requested; attribute seams preserved; no source repair", "mesh_count": 1, "triangles": 4935, "triangles_by_material": {"M_Frontier03_Cream": 1068, "M_Frontier03_PaleTrim": 114, "M_Frontier03_Frame": 1795, "M_Frontier03_Orange": 1034, "M_Frontier03_Deck": 176, "M_Frontier03_Soft": 460, "M_Frontier03_Glass": 112, "M_Frontier03_Warm": 176}, "material_assignment_matches_source": true, "bounds_blender_m": {"min": [-3.450000047683716, -3.549999952316284, 0.0], "max": [3.450000047683716, 3.549999952316284, 3.005000114440918]}, "dimensions_blender_m": [6.900000095367432, 7.099999904632568, 3.005000114440918], "ground_z": 0.0, "maximum_bidirectional_nearest_vertex_error_m": 0.0, "raw_qa": "art\\frontier_illustrated_20261101\\structures\\pass03\\qa\\habitat_cutaway_01_roundtrip_raw.json", "raw_warnings": ["habitat_cutaway_01: duplicate verts=5068 loose verts=0", "hidden back-to-back faces: habitat_cutaway_01 (151 pairs) - delete to save tris"], "raw_errors": [], "images": ["art\\frontier_illustrated_20261101\\structures\\pass03\\qa\\habitat_cutaway_01_roundtrip_front.png", "art\\frontier_illustrated_20261101\\structures\\pass03\\qa\\habitat_cutaway_01_roundtrip_game.png"]}
+15:50:33 | INFO: Data are loaded, start creating Blender stuff
+15:50:33 | INFO: Blender create Mesh node freihafen_hall_01_Mesh
+15:50:33 | INFO: glTF import finished in 0.03s
+Traceback (most recent call last):
+  File "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\generator\verify_roundtrip.py", line 51, in <module>
+    rows=[verify(a) for a in ASSETS]
+          ~~~~~~^^^
+  File "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\generator\verify_roundtrip.py", line 31, in verify
+    error=max(point_error(original,actual),point_error(actual,original));assert error<.00003
+                                                                                ^^^^^^^^^^^^
+AssertionError
+
+Error: script failed, file: 'art/frontier_illustrated_20261101/structures/pass03/generator/verify_roundtrip.py', exiting.
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

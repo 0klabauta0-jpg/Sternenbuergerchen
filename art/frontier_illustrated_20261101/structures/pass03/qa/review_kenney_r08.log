@@ -1,0 +1,19 @@
+00:00.438  blend            | Read blend: "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\source\habitat_cutaway_01.blend"
+00:01.938  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\habitat_cutaway_01_front.png'
+00:02.063  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\habitat_cutaway_01_rear.png'
+00:02.172  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\habitat_cutaway_01_top.png'
+00:02.250  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\habitat_cutaway_01_game.png'
+00:02.344  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\habitat_cutaway_01_random.png'
+00:02.547  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\habitat_cutaway_01_wire.png'
+00:02.563  blend            | Read blend: "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\source\freihafen_hall_01.blend"
+00:02.782  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\freihafen_hall_01_front.png'
+00:02.891  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\freihafen_hall_01_rear.png'
+00:02.985  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\freihafen_hall_01_top.png'
+00:03.078  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\freihafen_hall_01_game.png'
+00:03.188  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\freihafen_hall_01_random.png'
+00:03.375  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\freihafen_hall_01_wire.png'
+REVIEW_READY habitat_cutaway_01
+REVIEW_READY freihafen_hall_01
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

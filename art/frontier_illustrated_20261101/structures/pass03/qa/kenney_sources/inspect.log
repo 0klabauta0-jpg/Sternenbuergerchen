@@ -1,0 +1,73 @@
+15:32:06 | INFO: Data are loaded, start creating Blender stuff
+15:32:06 | INFO: Blender create Mesh node wall
+15:32:07 | INFO: glTF import finished in 0.07s
+00:02.594  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_wall_front.png'
+00:02.719  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_wall_top.png'
+15:32:09 | INFO: Data are loaded, start creating Blender stuff
+15:32:09 | INFO: Blender create Mesh node wall-window
+15:32:09 | INFO: glTF import finished in 0.00s
+00:02.859  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_wall-window_front.png'
+00:02.953  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_wall-window_top.png'
+15:32:09 | INFO: Data are loaded, start creating Blender stuff
+15:32:09 | INFO: Blender create Mesh node wall-door
+15:32:09 | INFO: glTF import finished in 0.00s
+00:03.109  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_wall-door_front.png'
+00:03.203  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_wall-door_top.png'
+15:32:09 | INFO: Data are loaded, start creating Blender stuff
+15:32:09 | INFO: Blender create Mesh node bed-single
+15:32:09 | INFO: glTF import finished in 0.00s
+00:03.359  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_bed-single_front.png'
+00:03.453  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_bed-single_top.png'
+15:32:09 | INFO: Data are loaded, start creating Blender stuff
+15:32:09 | INFO: Blender create Mesh node table-display
+15:32:09 | INFO: Blender create Mesh node ship
+15:32:09 | INFO: glTF import finished in 0.01s
+00:03.625  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_table-display_front.png'
+00:03.719  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_table-display_top.png'
+15:32:10 | INFO: Data are loaded, start creating Blender stuff
+15:32:10 | INFO: Blender create Mesh node computer
+15:32:10 | INFO: glTF import finished in 0.00s
+00:03.859  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_computer_front.png'
+00:03.953  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_computer_top.png'
+15:32:10 | INFO: Data are loaded, start creating Blender stuff
+15:32:10 | INFO: Blender create Mesh node computer-wide
+15:32:10 | INFO: glTF import finished in 0.00s
+00:04.109  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_computer-wide_front.png'
+00:04.203  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_computer-wide_top.png'
+15:32:10 | INFO: Data are loaded, start creating Blender stuff
+15:32:10 | INFO: Blender create Mesh node container-wide
+15:32:10 | INFO: glTF import finished in 0.00s
+00:04.359  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_container-wide_front.png'
+00:04.453  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\space_station_container-wide_top.png'
+15:32:10 | INFO: Data are loaded, start creating Blender stuff
+15:32:10 | INFO: Blender create Mesh node door
+15:32:10 | INFO: glTF import finished in 0.00s
+00:04.594  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\factory_door_front.png'
+00:04.703  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\factory_door_top.png'
+15:32:11 | INFO: Data are loaded, start creating Blender stuff
+15:32:11 | INFO: Blender create Mesh node door-wide-closed
+15:32:11 | INFO: glTF import finished in 0.00s
+00:04.844  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\factory_door-wide-closed_front.png'
+00:04.953  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\factory_door-wide-closed_top.png'
+15:32:11 | INFO: Data are loaded, start creating Blender stuff
+15:32:11 | INFO: Blender create Mesh node detail-tank
+15:32:11 | INFO: glTF import finished in 0.00s
+00:05.125  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\factory_detail-tank_front.png'
+00:05.234  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\factory_detail-tank_top.png'
+15:32:11 | INFO: Data are loaded, start creating Blender stuff
+15:32:11 | INFO: Blender create Mesh node crane
+15:32:11 | INFO: Blender create Mesh node arm
+15:32:11 | INFO: glTF import finished in 0.00s
+00:05.406  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\factory_crane_front.png'
+00:05.516  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\factory_crane_top.png'
+15:32:11 | INFO: Data are loaded, start creating Blender stuff
+15:32:11 | INFO: Blender create Mesh node crane-lift
+15:32:11 | INFO: Blender create Mesh node chain
+15:32:11 | INFO: Blender create Mesh node magnet
+15:32:11 | INFO: glTF import finished in 0.00s
+00:05.672  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\factory_crane-lift_front.png'
+00:05.781  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\pass03\qa\kenney_sources\factory_crane-lift_top.png'
+MODULE_INSPECTION [{"pack": "space_station", "asset": "wall", "dimensions": [1.0, 0.30000001192092896, 1.0], "objects": [{"name": "wall", "verts": 68, "triangles": 44, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "space_station", "asset": "wall-window", "dimensions": [1.0, 0.30000001192092896, 1.0], "objects": [{"name": "wall-window", "verts": 140, "triangles": 104, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "space_station", "asset": "wall-door", "dimensions": [1.0, 0.30000001192092896, 1.0], "objects": [{"name": "wall-door", "verts": 144, "triangles": 98, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "space_station", "asset": "bed-single", "dimensions": [0.5, 1.0, 0.3500000238418579], "objects": [{"name": "bed-single", "verts": 72, "triangles": 56, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "space_station", "asset": "table-display", "dimensions": [1.2414213418960571, 0.8155995309352875, 0.6000000238418579], "objects": [{"name": "table-display", "verts": 234, "triangles": 176, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}, {"name": "ship", "verts": 100, "triangles": 64, "matrix": [[1.0, 0.0, 0.0, 1.4438228216156449e-15], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.15000000596046448], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "space_station", "asset": "computer", "dimensions": [0.4000000059604645, 0.4381411224603653, 0.6608729362487793], "objects": [{"name": "computer", "verts": 172, "triangles": 140, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "space_station", "asset": "computer-wide", "dimensions": [0.8000000417232513, 0.533178985118866, 0.49684643745422363], "objects": [{"name": "computer-wide", "verts": 230, "triangles": 174, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "space_station", "asset": "container-wide", "dimensions": [0.6000000238418579, 0.6000000238418579, 0.699999988079071], "objects": [{"name": "container-wide", "verts": 128, "triangles": 116, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "factory", "asset": "door", "dimensions": [0.82438063621521, 0.4088522046804428, 1.600000023841858], "objects": [{"name": "door.001", "verts": 184, "triangles": 156, "matrix": [[0.9640028476715088, 0.2658918797969818, 0.0, 0.4000000059604645], [-0.2658918797969818, 0.9640028476715088, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "factory", "asset": "door-wide-closed", "dimensions": [1.7999999523162842, 0.0, 1.600000023841858], "objects": [{"name": "door-wide-closed", "verts": 28, "triangles": 22, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "factory", "asset": "detail-tank", "dimensions": [0.8480000793933868, 0.515295684337616, 0.41529566049575806], "objects": [{"name": "detail-tank", "verts": 286, "triangles": 236, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "factory", "asset": "crane", "dimensions": [1.9260255098342896, 3.68025004863739, 3.553319215774537], "objects": [{"name": "crane", "verts": 448, "triangles": 412, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}, {"name": "arm", "verts": 192, "triangles": 148, "matrix": [[1.0, 0.0, 0.0, 6.078493828068354e-13], [0.0, 1.0, 0.0, 2.995932224091752e-13], [0.0, 0.0, 1.0, 3.003319263458252], [0.0, 0.0, 0.0, 1.0]]}]}, {"pack": "factory", "asset": "crane-lift", "dimensions": [0.7166666388511658, 0.7166666388511658, 2.499999761581421], "objects": [{"name": "crane-lift", "verts": 64, "triangles": 120, "matrix": [[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]}, {"name": "chain", "verts": 24, "triangles": 12, "matrix": [[1.0, 0.0, 0.0, -1.4438228216156449e-15], [0.0, 1.0, 0.0, 1.3761436185806054e-15], [0.0, 0.0, 1.0, -0.25], [0.0, 0.0, 0.0, 1.0]]}, {"name": "magnet", "verts": 196, "triangles": 172, "matrix": [[1.0, 0.0, 0.0, 4.331468570726053e-15], [0.0, 1.0, 0.0, -1.3535838912942001e-14], [0.0, 0.0, 1.0, -1.3499999046325684], [0.0, 0.0, 0.0, 1.0]]}]}]
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

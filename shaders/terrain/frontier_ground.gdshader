@@ -6,7 +6,15 @@ uniform bool rock_strata = false;
 varying vec3 ground_world_position;
 
 float patch_hash(vec2 p) {
-	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+	// Integer lattice hashing keeps shared corners identical after GPU inlining.
+	// A sine hash can disagree between equivalent corner expressions and expose
+	// the noise lattice as large hard-edged polygons on otherwise flat ground.
+	uvec2 q = uvec2(ivec2(p));
+	uint h = (q.x * 1597334677u) ^ (q.y * 3812015801u);
+	h = (h ^ (h >> 16u)) * 2246822519u;
+	h = (h ^ (h >> 13u)) * 3266489917u;
+	h = h ^ (h >> 16u);
+	return float(h & 16777215u) / 16777215.0;
 }
 
 float broad_patch(vec2 p) {
@@ -30,8 +38,10 @@ void fragment() {
 	vec3 pigment = mix(base_color.rgb * vec3(0.95, 0.94, 0.95), base_color.rgb * vec3(1.10, 1.08, 1.0), region);
 	value *= mix(0.97, 1.03, grit);
 	if (rock_strata) {
-		float layer = sin(ground_world_position.y * 10.0 + patch * 1.5);
-		value *= mix(0.88, 1.05, smoothstep(-0.15, 0.2, layer));
+		// Broken broad pigment beds support the mesh, without regular ring stripes.
+		float layer = broad_patch(vec2(ground_world_position.y * 2.1 + region * 0.7,
+			ground_world_position.x * 0.17 + ground_world_position.z * 0.13));
+		value *= mix(0.95, 1.035, layer);
 	}
 	ALBEDO = pigment * value;
 	ROUGHNESS = 0.96;
