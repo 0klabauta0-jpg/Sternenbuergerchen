@@ -61,7 +61,8 @@ func run() -> void:
 	check(int(data["degenerate_triangles"])==0,"new rock triangles have nonzero area")
 	check(int(data["outside_footprint_vertices"])==0,"returned conservative footprints contain every new rock and debris vertex")
 	check(int(data["terraced_groups"])>=10,"large plateaus include attached masses with unequal top heights")
-	check(int(data["vertices"])<=18000,"geometry stays within the small authored-scene vertex budget")
+	# Pass04 adds chipped strata within the identical placement envelopes.
+	check(int(data["vertices"])<=30000,"chipped strata stay within the 30k authored-scene vertex budget")
 	check(data["digest"]==other["digest"] and footprints==other_footprints,"fresh builds deterministically reproduce geometry and footprints")
 	first.free()
 	second.free()

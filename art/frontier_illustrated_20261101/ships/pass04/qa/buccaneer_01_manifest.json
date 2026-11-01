@@ -1,0 +1,162 @@
+{
+  "asset": "buccaneer_01",
+  "status": "new simplified illustration-led model candidate; not a stock SC model or accepted final art",
+  "construction": "new original low-poly mesh reconstruction; no old OBJ/material-study/Kenney ship geometry imported",
+  "source": "art/frontier_illustrated_20261101/ships/pass04/source/buccaneer_01.blend",
+  "source_sha256": "87fcabf3f78990b86647e44192265f957bac92d63437df10a197b8c40eeb8ce3",
+  "export": {
+    "path": "Assets/curated/frontier_illustrated_20261101/ships_pass04/buccaneer_01.glb",
+    "sha256": "746c959a8f16e320db89c4194e44d939b3ebe90b29d5f05225187c3a18b3eded",
+    "bytes": 197680,
+    "meshes": 1,
+    "materials": 7,
+    "triangles": 3800,
+    "nodes": 1,
+    "skins": 0,
+    "animations": 0
+  },
+  "triangles": 3800,
+  "vertices": 2004,
+  "editable_parts": 62,
+  "dimensions_blender_m": [
+    12.065033912658691,
+    11.0,
+    4.015793323516846
+  ],
+  "bounds_blender_m": {
+    "min": [
+      -6.032516956329346,
+      -5.499999523162842,
+      0.0
+    ],
+    "max": [
+      6.032516956329346,
+      5.5,
+      4.015793323516846
+    ]
+  },
+  "normalization_length_m": 11.0,
+  "normalization_uniform_factor": 1.0140892670605064,
+  "scale_status": "explicitly stylized display normalization, NOT canonical Star Citizen measurements",
+  "pivot": "full BBox XY center / groundZ0 on static feet",
+  "front_blender": "-Y",
+  "front_godot": "+Z",
+  "runtime_scale_suggested": 0.22,
+  "palette": {
+    "Ivory": "e4dccb",
+    "Petrol": "4c6870",
+    "Frame": "2d3e43",
+    "Steel": "8b9693",
+    "Ochre": "d99b45",
+    "Glass": "2d4a59",
+    "WarmCore": "a66a36",
+    "GlassWarm": "674f3c"
+  },
+  "no_emission": true,
+  "reference_images": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+      "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+      "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d"
+    }
+  ],
+  "qa_pass": true,
+  "qa_errors": [],
+  "qa_warnings": [],
+  "qa_scope": "entire static assembly, no expensive-check skips; UV excluded for solid-color materials",
+  "identity": {
+    "identity": [
+      "very narrow central fuselage and pointed glazed nose",
+      "two large parallel cylindrical pods, dark front inlets and smaller petalled rear nozzles",
+      "short swept outer wings",
+      "central dorsal cannon",
+      "open negative space between fuselage and pods at front"
+    ],
+    "limits": [
+      "tripod original simplified static undercarriage, not a canonical animated landing system",
+      "intake/exhaust internals reduced to broad concentric shapes and six rear petals per pod",
+      "no textures or flight/weapon mechanics"
+    ]
+  },
+  "groups": {
+    "Buccaneer_canopy": [
+      "Buccaneer_Canopy"
+    ],
+    "Buccaneer_dorsal_gun_and_keels": [
+      "Buccaneer_CannonMount",
+      "Buccaneer_CannonReceiver",
+      "Buccaneer_DorsalBarrel",
+      "Buccaneer_DorsalMuzzle",
+      "Buccaneer_AftKeel_-1",
+      "Buccaneer_SpineIvory_-1",
+      "Buccaneer_AftKeel_1",
+      "Buccaneer_SpineIvory_1"
+    ],
+    "Buccaneer_narrow_fuselage": [
+      "Buccaneer_SlimSpine"
+    ],
+    "Buccaneer_pod_pylons": [
+      "Buccaneer_InnerPylon_L",
+      "Buccaneer_InnerFairing_L",
+      "Buccaneer_InnerPylon_R",
+      "Buccaneer_InnerFairing_R"
+    ],
+    "Buccaneer_short_outer_wings": [
+      "Buccaneer_OuterWing_L",
+      "Buccaneer_WingIvory_L",
+      "Buccaneer_WingOchre_L",
+      "Buccaneer_OuterWing_R",
+      "Buccaneer_WingIvory_R",
+      "Buccaneer_WingOchre_R"
+    ],
+    "Buccaneer_static_landing_gear": [
+      "Buccaneer_NoseGear_Foot",
+      "Buccaneer_NoseGear_Strut",
+      "Buccaneer_NoseGear_Knee",
+      "Buccaneer_NoseGear_Brace",
+      "Buccaneer_PodGear_0_Foot",
+      "Buccaneer_PodGear_0_Strut",
+      "Buccaneer_PodGear_0_Knee",
+      "Buccaneer_PodGear_0_Brace",
+      "Buccaneer_PodGear_1_Foot",
+      "Buccaneer_PodGear_1_Strut",
+      "Buccaneer_PodGear_1_Knee",
+      "Buccaneer_PodGear_1_Brace"
+    ],
+    "Buccaneer_twin_engine_pods": [
+      "Buccaneer_EnginePod_L",
+      "Buccaneer_FrontIntake_L",
+      "Buccaneer_IntakeLip_L",
+      "Buccaneer_IntakeDepth_L",
+      "Buccaneer_IntakeInnerRing_L",
+      "Buccaneer_RearNozzle_L",
+      "Buccaneer_RearLip_L",
+      "Buccaneer_RecessWarm_L",
+      "Buccaneer_RecessDark_L",
+      "Buccaneer_ExhaustPetal_L0",
+      "Buccaneer_ExhaustPetal_L1",
+      "Buccaneer_ExhaustPetal_L2",
+      "Buccaneer_ExhaustPetal_L3",
+      "Buccaneer_ExhaustPetal_L4",
+      "Buccaneer_ExhaustPetal_L5",
+      "Buccaneer_EnginePod_R",
+      "Buccaneer_FrontIntake_R",
+      "Buccaneer_IntakeLip_R",
+      "Buccaneer_IntakeDepth_R",
+      "Buccaneer_IntakeInnerRing_R",
+      "Buccaneer_RearNozzle_R",
+      "Buccaneer_RearLip_R",
+      "Buccaneer_RecessWarm_R",
+      "Buccaneer_RecessDark_R",
+      "Buccaneer_ExhaustPetal_R0",
+      "Buccaneer_ExhaustPetal_R1",
+      "Buccaneer_ExhaustPetal_R2",
+      "Buccaneer_ExhaustPetal_R3",
+      "Buccaneer_ExhaustPetal_R4",
+      "Buccaneer_ExhaustPetal_R5"
+    ]
+  }
+}

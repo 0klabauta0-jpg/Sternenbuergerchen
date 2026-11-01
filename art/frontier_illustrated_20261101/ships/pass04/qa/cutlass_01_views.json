@@ -1,0 +1,54 @@
+[
+  {
+    "view": "front",
+    "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_front.png",
+    "direction_blender": [
+      0.5221105217933655,
+      -0.668271005153656,
+      0.5299192667007446
+    ],
+    "orthographic_height_source_m": 14.632020257016583,
+    "runtime_scale_assumption": null,
+    "camera_size_world": null,
+    "engine": "Blender5.2.3 Workbench; not native Godot"
+  },
+  {
+    "view": "rear",
+    "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_rear.png",
+    "direction_blender": [
+      -0.5221105217933655,
+      0.668271005153656,
+      0.5299192667007446
+    ],
+    "orthographic_height_source_m": 14.632021026767996,
+    "runtime_scale_assumption": null,
+    "camera_size_world": null,
+    "engine": "Blender5.2.3 Workbench; not native Godot"
+  },
+  {
+    "view": "top",
+    "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_top.png",
+    "direction_blender": [
+      0.0,
+      -0.0010000000474974513,
+      1.0
+    ],
+    "orthographic_height_source_m": 18.082750986872707,
+    "runtime_scale_assumption": null,
+    "camera_size_world": null,
+    "engine": "Blender5.2.3 Workbench; not native Godot"
+  },
+  {
+    "view": "game",
+    "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_game.png",
+    "direction_blender": [
+      0.2614452838897705,
+      -0.5872157216072083,
+      0.7660444378852844
+    ],
+    "orthographic_height_source_m": 54.54545454545455,
+    "runtime_scale_assumption": 0.22,
+    "camera_size_world": 12,
+    "engine": "Blender5.2.3 Workbench; not native Godot"
+  }
+]

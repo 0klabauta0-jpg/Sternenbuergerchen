@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    "habitat_cutaway_01: duplicate verts=5186 loose verts=0",
+    "hidden back-to-back faces: habitat_cutaway_01 (151 pairs) - delete to save tris"
+  ],
+  "ground_z": 0.0,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [
+    {
+      "where": "habitat_cutaway_01",
+      "tri_pairs": 151
+    }
+  ],
+  "enclosed": [],
+  "objects": {
+    "habitat_cutaway_01": {
+      "verts": 10391,
+      "faces": 5077,
+      "tris": 5077,
+      "ngons": 0,
+      "boundary_edges": 10395,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 5186,
+      "islands": 2660,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 12
+    }
+  }
+}

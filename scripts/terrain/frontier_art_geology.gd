@@ -1,5 +1,5 @@
 extends Node3D
-## Pass03 authored geology. One-time visual build; fixture still owns terrain facts.
+## Authored fractured geology. One-time visual build; fixture owns terrain facts.
 var _footprints: Array[Rect2] = []
 var _materials: Array[Material] = []
 
@@ -44,7 +44,7 @@ func _add_mesa(label: String, plane: Vector2, size: Vector3, seed_value: int) ->
 	var depth := envelope.size.y
 	var center := envelope.get_center()
 	if size.x<3.0:
-		_add_block(group,"FracturedSpire",center,Vector3(width*0.72,size.y,depth*0.70),seed_value,2)
+		_add_block(group,"FracturedSpire",center,Vector3(width*0.72,size.y,depth*0.70),seed_value,4)
 		_add_block(group,"SpireShoulder",center+Vector2(width*0.22,depth*0.17),Vector3(width*0.39,size.y*0.30,depth*0.48),seed_value+13,1)
 		return
 	var handed := -1.0 if _noise(seed_value,2)<0.5 else 1.0
@@ -52,10 +52,10 @@ func _add_mesa(label: String, plane: Vector2, size: Vector3, seed_value: int) ->
 	var crown_width := width*(0.79+_noise(seed_value,3)*0.06)
 	var crown_depth := depth*(0.72+_noise(seed_value,4)*0.08)
 	if form==0:
-		_add_block(group,"BrokenWall",center+Vector2(width*0.015,-depth*0.11),Vector3(width*0.88,size.y,depth*0.67),seed_value,3)
+		_add_block(group,"BrokenWall",center+Vector2(width*0.015,-depth*0.11),Vector3(width*0.88,size.y,depth*0.67),seed_value,6)
 		_add_block(group,"BroadTerrace",center+Vector2(0.0,depth*0.20),Vector3(width*0.80,size.y*(0.38+_noise(seed_value,5)*0.12),depth*0.42),seed_value+29,2)
 	else:
-		_add_block(group,"BrokenWall",center+Vector2(handed*width*0.055,-depth*0.05),Vector3(crown_width,size.y,crown_depth),seed_value,3)
+		_add_block(group,"BrokenWall",center+Vector2(handed*width*0.055,-depth*0.05),Vector3(crown_width,size.y,crown_depth),seed_value,6)
 		# Unequal adjoining shoulders make a wall mass rather than a tapered cylinder.
 		var shoulder_height := 0.70 if form==2 else 0.51
 		_add_block(group,"LowerButtress",center+Vector2(-handed*width*0.245,depth*0.205),Vector3(width*0.46,size.y*(shoulder_height+_noise(seed_value,5)*0.10),depth*0.47),seed_value+29,2)
@@ -108,8 +108,10 @@ func _add_block(group: Node3D,label: String,center: Vector2,size: Vector3,seed_v
 			var distance := mini(posmod(vertex-cut_face,outline.size()),posmod(cut_face-vertex,outline.size()))
 			# Only one fractured face retreats strongly at a terrace. Other long walls
 			# stay almost vertical, so bands do not make complete concentric pancakes.
-			var retreat := (0.13 if distance<=2 else 0.018)*float(tier)
-			var point := outline[vertex]*(1.0-retreat)
+			var retreat := (0.07 if distance<=2 else 0.014)*float(tier)
+			# Broad chipped lips and broken strata, all inside the old Nav envelope.
+			var chipped_lip := (0.045+_noise(seed_value+tier*7,vertex)*0.018) if level%2==1 else 0.0
+			var point := outline[vertex]*(1.0-retreat-chipped_lip)
 			var fracture_height := height
 			if level>0 and level<tiers*2-1:
 				fracture_height += (_noise(seed_value+ceili(float(level)/2.0)*11,vertex)-0.5)*0.055

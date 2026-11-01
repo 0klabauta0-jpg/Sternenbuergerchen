@@ -1,0 +1,13 @@
+TRIANGLE_COUNT 16696
+Info: Saved as "cutlass_01.blend"
+INFO Draco is available, use library at C:\Users\bjoer\AppData\Local\Programs\Blender Foundation\Blender 5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\bjoer\AppData\Local\Programs\Blender Foundation\Blender 5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+16:54:28 | INFO: Starting glTF 2.0 export
+16:54:28 | INFO: Extracting primitive: cutlass_01_Mesh
+16:54:28 | INFO: Primitives created: 9
+16:54:28 | INFO: Finished glTF 2.0 export in 0.026814699172973633 s
+
+CUTLASS_BUILD {"asset": "cutlass_01", "iteration": 2, "source": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/source/iteration02/cutlass_01.blend", "source_sha256": "7d46b2bba751c2262edd100725891129e5347d26aabe597d6fd057591cd05d12", "export": {"path": "Assets/curated/frontier_illustrated_20261101/ships_pass04_r02/cutlass_01.glb", "sha256": "561cbe1297f2f6c72bd14c7c8f4ae33bc53ced7464d44a6a4bdfa49947fcda50", "bytes": 352092, "meshes": 1, "materials": 9, "nodes": 1, "triangles": 16696, "animations": 0, "skins": 0}, "triangles": 16696, "vertices": 8540, "editable_parts": 104, "dimensions_blender_m": [11.66451644897461, 16.0, 5.444308280944824], "bounds_blender_m": {"min": [-5.832258224487305, -7.999999523162842, 0.0], "max": [5.832258224487305, 8.0, 5.444308280944824]}, "normalization_length_m": 16, "runtime_scale": 0.22, "front_blender": "-Y", "front_godot": "+Z", "pivot": "full BBox XY center, groundZ0", "palette": {"Ivory": "e2d5b9", "Petrol": "4f6569", "Slate": "657a7d", "Frame": "293a40", "Steel": "8a9694", "Ochre": "d49b48", "Glass": "274d60", "WarmCore": "ba773d", "Inset": "3a5058"}, "qa_pass": true, "qa_errors": [], "qa_warnings": [], "raw_source_qa": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/source_raw.json"}
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

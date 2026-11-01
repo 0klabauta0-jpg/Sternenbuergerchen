@@ -1,0 +1,196 @@
+{
+  "active_campaign_integration": false,
+  "actors": 4,
+  "captures": [
+    {
+      "camera_projection": 1,
+      "camera_size": 12.0,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+      "error": 0,
+      "id": "overview",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/overview.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "camera_projection": 1,
+      "camera_size": 12.0,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+      "error": 0,
+      "id": "hex_grid",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/hex_grid.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "camera_projection": 1,
+      "camera_size": 2.5,
+      "camera_transform": "[X: (1.0, 0.0, 0.0), Y: (0.0, 0.978148, -0.207912), Z: (0.0, 0.207912, 0.978148), O: (12.15, 4.04241, 27.00666)]",
+      "error": 0,
+      "id": "crew",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/crew.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "camera_projection": 1,
+      "camera_size": 4.2,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+      "error": 0,
+      "id": "workshop",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/workshop.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "camera_projection": 1,
+      "camera_size": 23.0,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+      "error": 0,
+      "id": "landscape",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/landscape.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "camera_projection": 1,
+      "camera_size": 3.6,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+      "error": 0,
+      "id": "cutaway",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/cutaway.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "camera_projection": 1,
+      "camera_size": 12.0,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+      "error": 0,
+      "id": "baseline",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/baseline.png",
+      "profile_enabled": false,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "camera_size": 2.5,
+      "id": "walk_pose",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/walk_pose.png",
+      "profile_enabled": true
+    }
+  ],
+  "comparison_note": "Five fixed cameras, output resolution, renderer and lighting preserved from pass02. Geology, architecture and yard dressing revised in pass03; cutaway is an additional close view. Hex cells remain authoritative and selectable.",
+  "engine": {
+    "build": "official",
+    "hash": "71f334935c000924d403448e698df4441130df18",
+    "hex": 263682,
+    "major": 4,
+    "minor": 6,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.6.2-stable (official)",
+    "timestamp": 0
+  },
+  "flat_hex_cap_count": 0,
+  "grid_topology": "hex_axial_v1",
+  "launch_arguments": [
+    "res://scenes/tests/frontier_art_preview.tscn"
+  ],
+  "light": {
+    "adjustment_brightness": 1.0,
+    "adjustment_contrast": 1.04999995231628,
+    "adjustment_enabled": true,
+    "adjustment_saturation": 0.939999997615814,
+    "ambient_light_color": "b6bfcdff",
+    "ambient_light_energy": 0.340000003576279,
+    "background_color": "aa6e58ff",
+    "energy": 0.949999988079071,
+    "rotation_degrees": "(-52.0, -32.0, 0.0)",
+    "shadow_blur": 1.79999995231628,
+    "shadow_enabled": true,
+    "shadow_opacity": 0.720000028610229,
+    "tonemap_enabled": true,
+    "tonemap_mode": "aces"
+  },
+  "local_avoidance_enabled": false,
+  "missing_asset_mapping_count": 0,
+  "models": [
+    {
+      "bounds_world": "[P: (7.0925, 0.0, 4.9575), S: (2.414999, 1.05175, 2.485)]",
+      "id": "habitat_cutaway_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass03/habitat_cutaway_01.glb",
+      "scale": 0.35,
+      "source_sha256": "b731373a25957861e15e8f440f764117ba2c061691fb2dd6532e494593ec184b"
+    },
+    {
+      "bounds_world": "[P: (11.3625, 0.0, 4.98375), S: (3.674999, 1.47, 2.4325)]",
+      "id": "freihafen_hall_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass03/freihafen_hall_01.glb",
+      "scale": 0.35,
+      "source_sha256": "42db36cabc71e4820a3a06ce6000d54f80c9d1fecfe8a8ab6f41b2359625a3ec"
+    },
+    {
+      "bounds_world": "[P: (15.25125, 0.0, 7.64), S: (1.697499, 0.9485, 1.12)]",
+      "id": "service_unit_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/structures/service_unit_01.glb",
+      "scale": 0.35,
+      "source_sha256": "81a2d1fb532db4082d586bb9834ba0559b3d5cd5fda3b7814f27c74a39518ea3"
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "operator",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb",
+      "scale": 0.35,
+      "source_sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c"
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "pilot",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/pilot.glb",
+      "scale": 0.35,
+      "source_sha256": "4548eb634e41a4a94965d616b45a51339e3da150bd0d1d708016e1f625c4ac00"
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "mechanic",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/mechanic.glb",
+      "scale": 0.35,
+      "source_sha256": "03ec6f35421d2cebfaa03f7fa911db71f4c6120ac8858dd369f7bbcd9b878496"
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "medic",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/medic.glb",
+      "scale": 0.35,
+      "source_sha256": "e7c0c690f0ae9a85a93d18ecf7d765c9c16756f74e847bd926379f3cfd1e4f79"
+    }
+  ],
+  "movement_authority": "SimulationRoot",
+  "pass": "03",
+  "renderer": "forward_plus / vulkan",
+  "report_ready": true,
+  "runtime_scale_from_metres": 0.35,
+  "runtime_sources_sha256": {
+    "res://scripts/terrain/frontier_art_dressing.gd": "260d3d98d67744dd0d15eea5565b38ea1439b3c7a2c687823ba7492c3a4448fa",
+    "res://scripts/terrain/frontier_art_geology.gd": "e89ccf79164f39c5ef5098d26e2415a11bb2a20a8fd6ab4a0509006cb5c21bb9",
+    "res://scripts/terrain/frontier_art_profile.gd": "9ea54d24eb732ea804e750d2543e15fd85c4f1ba3b4f1d19c78c591629f26c0f",
+    "res://scripts/tests/frontier_art_preview.gd": "54c79b919bb4e8736b3b7dacca623c915ee3d135a5ed0a1c2156d020ad1ac0f3",
+    "res://shaders/terrain/frontier_ground.gdshader": "70ade4a781bf29b3d524fc02b01693e76846b66fe5b9787d38c68a426f88d106"
+  },
+  "synthetic_fixture": true,
+  "tile_count": 396,
+  "unit_spacing_enabled": false,
+  "validation_report": "output/grafik_20261101/pass03_check_runs/20261101T145827Z-pid113160/metadata/report.json"
+}

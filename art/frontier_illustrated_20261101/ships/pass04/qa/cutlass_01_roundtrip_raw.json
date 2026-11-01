@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    "cutlass_01: duplicate verts=4152 loose verts=0"
+  ],
+  "ground_z": 0.0,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [],
+  "enclosed": [],
+  "objects": {
+    "cutlass_01": {
+      "verts": 8304,
+      "faces": 4184,
+      "tris": 4184,
+      "ngons": 0,
+      "boundary_edges": 8304,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 4152,
+      "islands": 2068,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 7
+    }
+  }
+}

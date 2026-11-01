@@ -34,14 +34,17 @@ void fragment() {
 	float patch = broad_patch(ground_world_position.xz * 0.40);
 	float region = broad_patch(ground_world_position.xz * 0.13 + vec2(12.1, 4.8));
 	float grit = broad_patch(ground_world_position.xz * 8.0);
+	float sediment = broad_patch(ground_world_position.xz * 1.6 + vec2(region * 3.0, patch));
 	float value = mix(0.87, 1.12, smoothstep(0.10, 0.88, patch));
 	vec3 pigment = mix(base_color.rgb * vec3(0.95, 0.94, 0.95), base_color.rgb * vec3(1.10, 1.08, 1.0), region);
-	value *= mix(0.97, 1.03, grit);
+	value *= mix(0.955, 1.035, grit);
+	// Soft sediment fields break up the flat paint without drawing a square/hex grid.
+	value *= mix(0.94, 1.035, smoothstep(0.20, 0.80, sediment));
 	if (rock_strata) {
 		// Broken broad pigment beds support the mesh, without regular ring stripes.
 		float layer = broad_patch(vec2(ground_world_position.y * 2.1 + region * 0.7,
 			ground_world_position.x * 0.17 + ground_world_position.z * 0.13));
-		value *= mix(0.95, 1.035, layer);
+		value *= mix(0.90, 1.045, layer);
 	}
 	ALBEDO = pigment * value;
 	ROUGHNESS = 0.96;

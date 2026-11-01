@@ -1,0 +1,82 @@
+[
+  {
+    "view": "front",
+    "direction_blender": [
+      -0.533178448677063,
+      -0.6824373602867126,
+      0.5
+    ],
+    "orthographic_width_source_m": 20.58445180892944,
+    "target": [
+      0.5998443365097046,
+      1.3305552005767822,
+      2.4556891918182373
+    ],
+    "engine": "Blender5.2.3 Workbench",
+    "runtime_scale": null
+  },
+  {
+    "view": "rear",
+    "direction_blender": [
+      0.533178448677063,
+      0.6824373602867126,
+      0.5
+    ],
+    "orthographic_width_source_m": 20.58445063967552,
+    "target": [
+      -1.001774787902832,
+      -0.7194246053695679,
+      2.0501742362976074
+    ],
+    "engine": "Blender5.2.3 Workbench",
+    "runtime_scale": null
+  },
+  {
+    "view": "side",
+    "direction_blender": [
+      -0.9659258127212524,
+      -5.914589533937914e-17,
+      0.258819043636322
+    ],
+    "orthographic_width_source_m": 18.240000011618477,
+    "target": [
+      0.7290462255477905,
+      4.0647731225362804e-07,
+      2.720836877822876
+    ],
+    "engine": "Blender5.2.3 Workbench",
+    "runtime_scale": null
+  },
+  {
+    "view": "top",
+    "direction_blender": [
+      0.0,
+      -0.0010000000474974513,
+      1.0
+    ],
+    "orthographic_width_source_m": 25.54036319102905,
+    "target": [
+      0.0,
+      0.0032764459028840065,
+      3.1996551115298644e-06
+    ],
+    "engine": "Blender5.2.3 Workbench",
+    "runtime_scale": null
+  },
+  {
+    "view": "game",
+    "direction_blender": [
+      0.2614452838897705,
+      -0.5872157216072083,
+      0.7660444378852844
+    ],
+    "orthographic_width_source_m": 76.36363636363636,
+    "target": [
+      -0.5510246753692627,
+      1.7655067443847656,
+      1.5414197444915771
+    ],
+    "engine": "Blender5.2.3 Workbench",
+    "runtime_scale": 0.22
+  }
+]

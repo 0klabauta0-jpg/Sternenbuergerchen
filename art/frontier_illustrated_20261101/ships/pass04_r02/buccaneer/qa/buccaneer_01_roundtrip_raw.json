@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    "buccaneer_01: duplicate verts=14088 loose verts=0"
+  ],
+  "ground_z": 0.0,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [],
+  "enclosed": [],
+  "objects": {
+    "buccaneer_01": {
+      "verts": 30197,
+      "faces": 17324,
+      "tris": 17324,
+      "ngons": 0,
+      "boundary_edges": 28188,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 14088,
+      "islands": 7493,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 10
+    }
+  }
+}

@@ -2,20 +2,24 @@ extends Node3D
 ## One-time authored visual groups. The preview applies returned blocking facts.
 var _materials: Dictionary = {}
 var _footprints: Array[Rect2] = []
+var _path_layers: Dictionary = {}
+const GROUND_SHADER = preload("res://shaders/terrain/frontier_ground.gdshader")
 
 func build(profile) -> Array[Rect2]:
-	_path([Vector2(5.9,10.65),Vector2(7.0,10.65),Vector2(8.2,9.95),Vector2(12.3,9.95),Vector2(16.7,9.95),Vector2(17.5,8.9)],0.72)
-	_path([Vector2(8.3,9.95),Vector2(8.3,7.42)],0.66)
-	_path([Vector2(13.2,9.95),Vector2(13.2,7.55)],0.82)
-	_path([Vector2(16.5,9.95),Vector2(16.1,8.73)],0.56)
-	for center in [Vector2(4.6,5.0),Vector2(5.8,6.5),Vector2(6.9,12.6),Vector2(18.7,6.7),Vector2(20.0,10.8),Vector2(11.0,2.3),Vector2(19.4,2.6)]:
+	# A wide service spine with short building connections; clear turning space.
+	_path([Vector2(9.96,10.9),Vector2(10.5,10.9),Vector2(11.2,10.45),Vector2(15.0,10.45),Vector2(15.9,11.8),Vector2(16.14,11.8)],1.04,true)
+	_path([Vector2(8.3,7.42),Vector2(8.3,8.0),Vector2(9.8,8.7),Vector2(10.55,10.7)],0.68)
+	_path([Vector2(13.2,10.45),Vector2(13.2,8.48)],0.84)
+	_path([Vector2(15.0,10.45),Vector2(16.1,9.15),Vector2(16.1,8.73)],0.64)
+	for center in [Vector2(4.6,5.0),Vector2(5.8,6.5),Vector2(6.5,14.5),Vector2(18.7,6.7),Vector2(21.8,9.0),Vector2(11.0,2.3),Vector2(19.4,2.6)]:
 		_rock_group(center,profile)
-	for center in [Vector2(6.5,7.2),Vector2(8.9,7.8),Vector2(10.7,7.5),Vector2(15.4,7.0),Vector2(18.0,7.6),Vector2(8.5,12.2),Vector2(16.1,12.0),Vector2(5.0,6.0),Vector2(19.0,9.4),Vector2(14.0,3.5)]:
+	for center in [Vector2(6.5,7.2),Vector2(9.5,7.3),Vector2(10.7,7.5),Vector2(15.4,7.0),Vector2(18.0,7.6),Vector2(9.8,13.5),Vector2(17.0,13.8),Vector2(5.0,6.0),Vector2(20.7,8.7),Vector2(14.0,3.5)]:
 		_plant_group(center)
 	for spec in [Vector3(9.45,7.9,0.0),Vector3(14.8,7.6,0.3),Vector3(15.6,7.6,-0.2)]:
 		_crate(Vector2(spec.x,spec.y),spec.z)
-	for p in [Vector2(7.3,10.65),Vector2(10.4,10.4),Vector2(15.8,10.4),Vector2(13.8,7.7)]:
+	for p in [Vector2(10.5,11.45),Vector2(11.6,9.85),Vector2(15.1,11.2),Vector2(13.8,8.6)]:
 		_bollard(p)
+	_finish_paths()
 	_loading_yard()
 	_radio_mast(Vector2(10.7,3.25))
 	return _footprints.duplicate()
@@ -27,7 +31,6 @@ func _loading_yard() -> void:
 		_box(self,"ApronBayStripe",Vector3(0.026,0.004,0.32),Vector3(x,0.009,8.32),"e0d2a0")
 	for center in [Vector2(15.8,5.0),Vector2(16.7,5.6),Vector2(15.8,6.25)]:
 		_container(center,2 if center.y<5.5 else 1)
-	_loader(Vector2(16.8,6.95))
 
 func _container(center: Vector2,levels: int) -> void:
 	var group := Node3D.new()
@@ -42,31 +45,6 @@ func _container(center: Vector2,levels: int) -> void:
 			_box(group,"CornerPost",Vector3(0.04,0.41,0.46),Vector3(x,floor_y+0.205,0.0),"53605b")
 		_box(group,"DoorSeam",Vector3(0.02,0.28,0.015),Vector3(0.0,floor_y+0.16,0.23),"53605b")
 	_footprints.append(Rect2(center-Vector2(0.48,0.32),Vector2(0.96,0.64)))
-
-func _loader(center: Vector2) -> void:
-	var group := Node3D.new()
-	group.name = "StaticYardLoaderVisualOnly"
-	group.position = Vector3(center.x,0.0,center.y)
-	add_child(group)
-	_box(group,"LoaderBody",Vector3(0.43,0.20,0.57),Vector3(0.0,0.18,0.0),"c78b3e")
-	_box(group,"CabRoof",Vector3(0.39,0.035,0.34),Vector3(0.0,0.52,-0.10),"d8d0b7")
-	for x in [-0.15,0.15]:
-		for z in [-0.23,0.03]:
-			_box(group,"CabPost",Vector3(0.025,0.27,0.025),Vector3(x,0.37,z),"52615c")
-		_box(group,"Fork",Vector3(0.035,0.03,0.29),Vector3(x,0.045,0.39),"53605b")
-		for z in [-0.18,0.18]:
-			var wheel := MeshInstance3D.new()
-			var mesh := CylinderMesh.new()
-			mesh.radial_segments = 10
-			mesh.top_radius = 0.085
-			mesh.bottom_radius = 0.085
-			mesh.height = 0.055
-			wheel.mesh = mesh
-			wheel.position = Vector3(x*1.48,0.085,z)
-			wheel.rotation.z = PI*0.5
-			wheel.material_override = _material("414d48")
-			group.add_child(wheel)
-	_footprints.append(Rect2(center-Vector2(0.36,0.35),Vector2(0.72,0.95)))
 
 func _radio_mast(center: Vector2) -> void:
 	var group := Node3D.new()
@@ -122,41 +100,74 @@ func _box(parent: Node3D,label: String,size: Vector3,position: Vector3,color: St
 	parent.add_child(instance)
 	return instance
 
-func _path(points: Array,width: float) -> void:
+func _path(points: Array,width: float,service_lane: bool = false) -> void:
 	var curve := Curve2D.new()
-	curve.bake_interval = 0.12
+	curve.bake_interval = 0.10
 	for index in range(points.size()):
-		var tangent: Vector2 = (points[mini(index+1,points.size()-1)]-points[maxi(index-1,0)])*0.18
+		var tangent: Vector2 = (points[mini(index+1,points.size()-1)]-points[maxi(index-1,0)])*0.12
 		curve.add_point(points[index],-tangent,tangent)
 	var samples := curve.get_baked_points()
-	_ribbon(samples,width,0.008,"504f48")
-	_ribbon(samples,width-0.07,0.010,"77776c")
-	# Sparse orange guide strips give structure without a glowing continuous border.
-	for index in range(2,samples.size()-2,8):
+	# Warm dusty shoulders merge with the red soil; the deck stays matte and low.
+	_ribbon(samples,width+0.14,0.007,"b47b53")
+	_ribbon(samples,width,0.010,"686f63")
+	_ribbon(samples,width-0.10,0.012,"818375")
+	for index in range(3,samples.size()-3,7):
 		var a: Vector2 = samples[index]
 		var direction: Vector2 = (samples[index+1]-samples[index-1]).normalized()
 		var normal := Vector2(-direction.y,direction.x)
-		var marker := _box(self,"PathGuide",Vector3(0.018,0.004,0.18),Vector3(a.x+normal.x*(width*0.5-0.045),0.014,a.y+normal.y*(width*0.5-0.045)),"d5a34d")
-		marker.rotation.y = atan2(direction.x,direction.y)
+		for side in [-1.0,1.0]:
+			var marker := _box(self,"PathEdgeGuide",Vector3(0.024,0.003,0.24),Vector3(a.x+normal.x*(width*0.5-0.06)*side,0.017,a.y+normal.y*(width*0.5-0.06)*side),"cbc6a5")
+			marker.rotation.y = atan2(direction.x,direction.y)
+		if service_lane and index%2==1:
+			var center_mark := _box(self,"ServiceLaneGuide",Vector3(0.022,0.003,0.20),Vector3(a.x,0.018,a.y),"d4af67")
+			center_mark.rotation.y = atan2(direction.x,direction.y)
 
 func _ribbon(points: PackedVector2Array,width: float,height: float,color: String) -> void:
-	var surface := SurfaceTool.new()
-	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for index in range(points.size()-1):
-		var a := points[index]
-		var b := points[index+1]
-		var tangent_a := points[index+1]-points[maxi(index-1,0)]
-		var tangent_b := points[mini(index+2,points.size()-1)]-points[index]
-		var normal_a := Vector2(-tangent_a.y,tangent_a.x).normalized()*width*0.5
-		var normal_b := Vector2(-tangent_b.y,tangent_b.x).normalized()*width*0.5
-		var vertices := [Vector3(a.x-normal_a.x,height,a.y-normal_a.y),Vector3(a.x+normal_a.x,height,a.y+normal_a.y),Vector3(b.x+normal_b.x,height,b.y+normal_b.y),Vector3(b.x-normal_b.x,height,b.y-normal_b.y)]
-		for v in [0,2,1,0,3,2]: surface.add_vertex(vertices[v])
-	surface.generate_normals()
-	var instance := MeshInstance3D.new()
-	instance.name = "BuiltPath"
-	instance.mesh = surface.commit()
-	instance.material_override = _material(color)
-	add_child(instance)
+	var left := PackedVector2Array()
+	var right := PackedVector2Array()
+	for index in range(points.size()):
+		var tangent := points[mini(index+1,points.size()-1)]-points[maxi(index-1,0)]
+		var normal := Vector2(-tangent.y,tangent.x).normalized()*width*0.5
+		left.append(points[index]-normal)
+		right.append(points[index]+normal)
+	right.reverse()
+	left.append_array(right)
+	if not _path_layers.has(color):
+		_path_layers[color] = {"height":height,"polygons":[]}
+	var polygons: Array = _path_layers[color]["polygons"]
+	# Union every connected lane before meshing. Crossing coplanar ribbons flicker.
+	var pending := left
+	var index := 0
+	while index<polygons.size():
+		var merged := Geometry2D.merge_polygons(pending,polygons[index])
+		if merged.size()==1:
+			pending = merged[0]
+			polygons.remove_at(index)
+			index = 0
+		else:
+			index += 1
+	polygons.append(pending)
+
+func _finish_paths() -> void:
+	for color in _path_layers:
+		var layer: Dictionary = _path_layers[color]
+		var surface := SurfaceTool.new()
+		surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for polygon in layer["polygons"]:
+			var indices := Geometry2D.triangulate_polygon(polygon)
+			for index in indices:
+				var point: Vector2 = polygon[index]
+				surface.add_vertex(Vector3(point.x,float(layer["height"]),point.y))
+		surface.generate_normals()
+		var instance := MeshInstance3D.new()
+		instance.name = "JoinedServicePaths"
+		instance.mesh = surface.commit()
+		var material := ShaderMaterial.new()
+		material.shader = GROUND_SHADER
+		material.set_shader_parameter("base_color",Color(color))
+		material.set_shader_parameter("rock_strata",false)
+		instance.material_override = material
+		add_child(instance)
 
 func _rock_group(center: Vector2,profile) -> void:
 	var root := Node3D.new()
@@ -168,20 +179,40 @@ func _rock_group(center: Vector2,profile) -> void:
 		var radius := 0.25+float(index)*0.065
 		var scale_value := 0.25 if index>2 else 0.50-float(index)*0.065
 		var rock := MeshInstance3D.new()
-		var mesh := CylinderMesh.new()
-		mesh.radial_segments = 6
-		mesh.rings = 1
-		mesh.bottom_radius = scale_value
-		mesh.top_radius = scale_value*0.62
-		mesh.height = scale_value*0.85
+		var mesh := _boulder_mesh(scale_value,index+int(center.x*31.0))
 		rock.mesh = mesh
-		rock.position = Vector3(cos(phase)*radius,mesh.height*0.5,sin(phase)*radius)
+		rock.position = Vector3(cos(phase)*radius,0.0,sin(phase)*radius)
 		rock.rotation.y = phase
 		rock.scale.z = 0.7+float(index%3)*0.18
 		rock.material_override = profile.material_for(Color("bd6b47").lightened(float(index%3)*0.04),true)
 		root.add_child(rock)
 	_footprints.append(Rect2(center-Vector2.ONE*0.85,Vector2.ONE*1.7))
 	_plant_group(center+Vector2(0.62,0.25))
+
+func _boulder_mesh(radius: float,seed_value: int) -> ArrayMesh:
+	var rings: Array[PackedVector3Array] = []
+	for level in range(4):
+		var ring := PackedVector3Array()
+		var level_radius: float = [0.67,1.0,0.82,0.46][level]
+		var y: float = [0.0,0.20,0.72,0.93][level]*radius
+		for sector in range(7):
+			var angle := TAU*float(sector)/7.0+float(seed_value)*0.51
+			var fracture := 0.88+0.11*sin(float(sector*17+seed_value)*2.7)
+			ring.append(Vector3(cos(angle)*radius*level_radius*fracture,y,sin(angle)*radius*level_radius*fracture))
+		rings.append(ring)
+	var surface := SurfaceTool.new()
+	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	surface.set_smooth_group(-1)
+	for level in range(3):
+		for sector in range(7):
+			var next := (sector+1)%7
+			for v in [rings[level][sector],rings[level][next],rings[level+1][next],rings[level][sector],rings[level+1][next],rings[level+1][sector]]:
+				surface.add_vertex(v)
+	for sector in range(7):
+		for v in [Vector3(0.0,radius*0.93,0.0),rings[3][sector],rings[3][(sector+1)%7]]:
+			surface.add_vertex(v)
+	surface.generate_normals()
+	return surface.commit()
 
 func _plant_group(center: Vector2) -> void:
 	var surface := SurfaceTool.new()

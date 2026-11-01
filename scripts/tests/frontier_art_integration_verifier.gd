@@ -25,7 +25,7 @@ func run() -> void:
 	var simulation = preview.get("_sim")
 	simulation.set_physics_process(false)
 	check(crew.size()==4,"four Kenney-based citizens in the native fixture")
-	check(preview.get("_model_facts").size()==7,"three structures and four citizens loaded")
+	check(preview.get("_model_facts").size()==9,"three structures, two ships and four citizens loaded")
 	check(data.get_grid_topology()=="hex_axial_v1","new base uses Hex map facts")
 	for entry in crew:
 		var visual: Node3D = entry["visual"]

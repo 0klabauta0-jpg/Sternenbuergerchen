@@ -1,0 +1,70 @@
+[
+  {
+    "view": "front",
+    "path": "art\\frontier_illustrated_20261101\\structures\\pass04\\qa\\habitat_cutaway_01_front.png",
+    "camera_direction_blender": [
+      0.3022642433643341,
+      -0.6788966059684753,
+      0.6691306233406067
+    ],
+    "orthographic_width_m": 11.520095977783205,
+    "orthographic_height_m": 8.640071983337405,
+    "target_blender_m": [
+      -0.18420328199863434,
+      0.9137272238731384,
+      1.01027250289917
+    ],
+    "engine": "Blender5.2.3 Workbench; not native Godot"
+  },
+  {
+    "view": "rear",
+    "path": "art\\frontier_illustrated_20261101\\structures\\pass04\\qa\\habitat_cutaway_01_rear.png",
+    "camera_direction_blender": [
+      -0.3205128610134125,
+      0.7198836207389832,
+      0.6156615018844604
+    ],
+    "orthographic_width_m": 11.049256184895833,
+    "orthographic_height_m": 8.286942138671876,
+    "target_blender_m": [
+      0.3958725333213806,
+      -0.3891443908214569,
+      0.66111159324646
+    ],
+    "engine": "Blender5.2.3 Workbench; not native Godot"
+  },
+  {
+    "view": "top",
+    "path": "art\\frontier_illustrated_20261101\\structures\\pass04\\qa\\habitat_cutaway_01_top.png",
+    "camera_direction_blender": [
+      0.0,
+      -0.0010000000474974513,
+      1.0
+    ],
+    "orthographic_width_m": 10.60304799793909,
+    "orthographic_height_m": 7.952285998454317,
+    "target_blender_m": [
+      0.0,
+      0.00012939443695358932,
+      1.26361783259199e-07
+    ],
+    "engine": "Blender5.2.3 Workbench; not native Godot"
+  },
+  {
+    "view": "game",
+    "path": "art\\frontier_illustrated_20261101\\structures\\pass04\\qa\\habitat_cutaway_01_game.png",
+    "camera_direction_blender": [
+      0.2614452838897705,
+      -0.5872157216072083,
+      0.7660444378852844
+    ],
+    "orthographic_width_m": 45.71428571428571,
+    "orthographic_height_m": 34.285714285714285,
+    "target_blender_m": [
+      -0.20176954567432404,
+      0.9531819224357605,
+      0.7995293736457825
+    ],
+    "engine": "Blender5.2.3 Workbench; not native Godot"
+  }
+]

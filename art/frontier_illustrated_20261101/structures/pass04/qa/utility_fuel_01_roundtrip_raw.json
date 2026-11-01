@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    "utility_fuel_01: duplicate verts=3173 loose verts=0",
+    "hidden back-to-back faces: utility_fuel_01 (2 pairs) - delete to save tris"
+  ],
+  "ground_z": 0.0,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [
+    {
+      "where": "utility_fuel_01",
+      "tri_pairs": 2
+    }
+  ],
+  "enclosed": [],
+  "objects": {
+    "utility_fuel_01": {
+      "verts": 6357,
+      "faces": 3100,
+      "tris": 3100,
+      "ngons": 0,
+      "boundary_edges": 6360,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 3173,
+      "islands": 1638,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 6
+    }
+  }
+}

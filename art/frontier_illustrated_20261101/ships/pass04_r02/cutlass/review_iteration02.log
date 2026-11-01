@@ -1,0 +1,15 @@
+00:00.438  blend            | Read blend: "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\source\iteration02\cutlass_01.blend"
+00:02.047  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\qa\iteration02\front.png'
+00:02.204  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\qa\iteration02\rear.png'
+00:02.329  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\qa\iteration02\side.png'
+00:02.469  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\qa\iteration02\top.png'
+00:02.594  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\qa\iteration02\game.png'
+00:02.704  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\qa\iteration02\random.png'
+00:03.079  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\qa\iteration02\wire.png'
+00:03.094  blend            | Read blend: "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04\source\cutlass_01.blend"
+00:03.329  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\qa\iteration02\r01_matched_front.png'
+00:03.438  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\qa\iteration02\r01_matched_rear.png'
+00:03.563  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\ships\pass04_r02\cutlass\qa\iteration02\r01_matched_game.png'
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

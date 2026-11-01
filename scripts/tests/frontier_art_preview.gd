@@ -10,9 +10,12 @@ const HEX = preload("res://scripts/terrain/hex_grid.gd")
 const PROFILE = preload("res://scripts/terrain/frontier_art_profile.gd")
 const BACKDROP = preload("res://scripts/terrain/frontier_art_geology.gd")
 const DRESSING = preload("res://scripts/terrain/frontier_art_dressing.gd")
+const PAD = preload("res://scripts/terrain/frontier_outpost_pad.gd")
+const CLOSED_BUILDING = preload("res://scripts/terrain/frontier_closed_buildings.gd")
 const ART_ROOT := "res://Assets/curated/frontier_illustrated_20261101/"
 const MODEL_SCALE := 0.35
-const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/"
+const SHIP_SCALE := 0.22 # Deliberately compact fiction scale, not SC canonical metres.
+const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass04/after/"
 
 var _view
 var _data
@@ -28,6 +31,10 @@ var _model_facts: Array = []
 var _current_view_id := "overview"
 var _preview_zoom_factor := 1.0
 var _external_visual_owners: Dictionary = {}
+var _pad_facts: Array = []
+var _closed_shells: Array[Node3D] = []
+var _cutaway_buildings: Array[Node3D] = []
+var _buildings_closed := true
 
 func _ready() -> void:
 	_capture_mode = OS.get_cmdline_user_args().has("--capture-frontier-art")
@@ -44,10 +51,13 @@ func _ready() -> void:
 	_add_continuous_backdrop_ground()
 	_data = MAP.create_empty("frontier_hex_base_preview",Vector2i(22,18),Vector2.ZERO,64.0,32.0,3,"hex_axial_v1")
 	_make_terrain()
-	_add_structure("habitat_cutaway_01",Vector2(8.3,6.2),"structures_pass03")
-	_add_structure("freihafen_hall_01",Vector2(13.2,6.2),"structures_pass03")
-	_add_structure("service_unit_01",Vector2(16.1,8.2))
-	_add_landing_pad(Vector2(5.9,9.1))
+	_add_structure("habitat_cutaway_01",Vector2(8.3,6.2),"structures_pass04")
+	_add_structure("freihafen_hall_01",Vector2(13.2,6.2),"structures_pass04")
+	_add_structure("utility_fuel_01",Vector2(16.1,8.2),"structures_pass04")
+	_add_landing_pad(Vector2(6.5,10.9),Vector2(5.0,4.4),"01")
+	_add_landing_pad(Vector2(19.2,11.8),Vector2(4.2,4.1),"02")
+	_add_ship("cutlass_01",Vector2(6.5,10.9),0.0)
+	_add_ship("buccaneer_01",Vector2(19.2,11.8),-25.0)
 	_add_solar_array(Vector2(9.1,3.8))
 	var backdrop = BACKDROP.new()
 	_stage.add_child(backdrop)
@@ -78,7 +88,8 @@ func _ready() -> void:
 	for index in range(4):
 		_add_citizen(["operator","pilot","mechanic","medic"][index],Vector2(10.6+float(index)*1.05,9.4))
 	_build_ui()
-	_camera_view("overview")
+	_set_buildings_closed(true)
+	_camera_view("outpost")
 	if _capture_mode:
 		call_deferred("_capture_all")
 
@@ -128,6 +139,13 @@ func _add_structure(model: String, plane: Vector2, family: String = "structures"
 	_stage.add_child(visual)
 	var bounds: AABB = _combined_bounds(visual)
 	_model_facts.append({"id":model,"path":path,"source_sha256":FileAccess.get_sha256(path),"bounds_world":str(bounds),"scale":MODEL_SCALE})
+	if model in ["habitat_cutaway_01","freihafen_hall_01"]:
+		var shell = CLOSED_BUILDING.new()
+		shell.name = "ClosedExterior_"+model
+		_stage.add_child(shell)
+		shell.build(bounds,model=="freihafen_hall_01")
+		_closed_shells.append(shell)
+		_cutaway_buildings.append(visual)
 	# This fixture reserves the visible footprint in authoritative terrain facts.
 	for tile in _data.get_tiles():
 		var p: Vector2 = HEX.axial_to_plane(Vector2(tile.grid_position))
@@ -143,6 +161,20 @@ func _combined_bounds(node: Node3D) -> AABB:
 		result = current if first else result.merge(current)
 		first = false
 	return result
+
+func _add_ship(model: String, plane: Vector2, yaw: float) -> void:
+	var path := ART_ROOT+"ships_pass04_r02/"+model+".glb"
+	if not ResourceLoader.exists(path):
+		push_error("Missing frontier ship candidate: "+path)
+		return
+	var visual: Node3D = load(path).instantiate()
+	visual.name = model
+	visual.scale = Vector3.ONE*SHIP_SCALE
+	visual.position = Vector3(plane.x,PAD.DECK_HEIGHT,plane.y)
+	visual.rotation_degrees.y = yaw
+	_stage.add_child(visual)
+	var bounds := _combined_bounds(visual)
+	_model_facts.append({"id":model,"path":path,"source_sha256":FileAccess.get_sha256(path),"bounds_world":str(bounds),"bounds_min":[bounds.position.x,bounds.position.y,bounds.position.z],"bounds_size":[bounds.size.x,bounds.size.y,bounds.size.z],"scale":SHIP_SCALE,"yaw_degrees":yaw,"canonical_star_citizen_dimensions":false,"status":"new simplified static reference reconstruction"})
 
 func _add_citizen(role: String, plane: Vector2) -> void:
 	var path := ART_ROOT+"citizens_pass02/"+role+".glb"
@@ -178,6 +210,13 @@ func _animation_name(player: AnimationPlayer, suffix: String) -> String:
 			return name
 	return ""
 
+func _set_buildings_closed(closed: bool) -> void:
+	_buildings_closed = closed
+	for shell in _closed_shells:
+		shell.visible = closed
+	for building in _cutaway_buildings:
+		building.visible = not closed
+
 func _process(_delta: float) -> void:
 	for entry in _crew:
 		var actor: Node2D = entry["actor"]
@@ -211,58 +250,13 @@ func _add_box(parent: Node3D, size: Vector3, position: Vector3, color: Color) ->
 	parent.add_child(instance)
 	return instance
 
-func _add_landing_pad(plane: Vector2) -> void:
-	var root := Node3D.new()
-	root.name = "LandingPlatform"
-	root.position = Vector3(plane.x,0.0,plane.y)
-	_stage.add_child(root)
-	var top := MeshInstance3D.new()
-	var mesh := CylinderMesh.new()
-	mesh.radial_segments = 8
-	mesh.top_radius = 1.45
-	mesh.bottom_radius = 1.45
-	mesh.height = 0.08
-	top.mesh = mesh
-	top.position.y = 0.18
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color("535f60")
-	material.roughness = 0.92
-	top.material_override = material
-	root.add_child(top)
-	# Broad painted landing target and corner beacons, all inside the blocked pad.
-	var ring := SurfaceTool.new()
-	ring.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for segment in range(64):
-		var angle := TAU*float(segment)/64.0
-		var next_angle := TAU*float(segment+1)/64.0
-		var a := Vector3(cos(angle)*1.08,0.223,sin(angle)*1.08)
-		var b := Vector3(cos(angle)*1.115,0.223,sin(angle)*1.115)
-		var c := Vector3(cos(next_angle)*1.115,0.223,sin(next_angle)*1.115)
-		var d := Vector3(cos(next_angle)*1.08,0.223,sin(next_angle)*1.08)
-		for vertex in [a,b,c,a,c,d]: ring.add_vertex(vertex)
-	ring.generate_normals()
-	var paint := MeshInstance3D.new()
-	paint.mesh = ring.commit()
-	var paint_material := StandardMaterial3D.new()
-	paint_material.albedo_color = Color("d6a049")
-	paint_material.roughness = 0.9
-	paint_material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	paint.material_override = paint_material
-	root.add_child(paint)
-	for x in [-0.28,0.28]:
-		_add_box(root,Vector3(0.045,0.004,0.55),Vector3(x,0.225,0.0),Color("d6a049"))
-	_add_box(root,Vector3(0.56,0.004,0.045),Vector3(0.0,0.225,0.0),Color("d6a049"))
-	for x in [-0.96,0.96]:
-		for z in [-0.96,0.96]:
-			_add_box(root,Vector3(0.06,0.23,0.06),Vector3(x,0.34,z),Color("d3ccaa"))
-	for x in [-0.9,0.9]:
-		for z in [-0.9,0.9]:
-			_add_box(root,Vector3(0.12,0.18,0.12),Vector3(x,0.09,z),Color("444f50"))
-	for i in range(3):
-		_add_box(root,Vector3(0.75,0.055,0.28),Vector3(0.0,0.028+0.055*i,1.82-0.28*i),Color("9a9d91"))
-	for tile in _data.get_tiles():
-		if HEX.axial_to_plane(Vector2(tile.grid_position)).distance_to(plane)<1.65:
-			tile.walkable = false
+func _add_landing_pad(plane: Vector2, size: Vector2, designation: String) -> void:
+	var pad = PAD.new()
+	pad.name = "OutpostLandingPad_"+designation
+	_stage.add_child(pad)
+	var reservation: Rect2 = pad.build(plane,size,designation,-1.0 if designation=="02" else 1.0)
+	_reserve_footprints([reservation])
+	_pad_facts.append({"id":designation,"center":[plane.x,plane.y],"size":[size.x,size.y],"deck_height":PAD.DECK_HEIGHT,"reservation":str(reservation),"visual_only":true})
 
 func _add_solar_array(plane: Vector2) -> void:
 	var root := Node3D.new()
@@ -294,7 +288,7 @@ func _build_ui() -> void:
 	panel.add_theme_stylebox_override("panel",style)
 	layer.add_child(panel)
 	_status = Label.new()
-	_status.text = "STERNENBÜRGERCHEN  /  HEX-BASIS\nGrafik- und Bewegungsprobe · kein Kampagnenstand\n1 Übersicht   2 Halle   3 Citizens   4 Gelände   5 Basis\nG Hexraster   Leertaste Gehen   Mausrad Zoom"
+	_status.text = "STERNENBÜRGERCHEN  /  HEX-BASIS\nGrafik- und Bewegungsprobe · kein Kampagnenstand\n1 Übersicht   2 Halle   3 Citizens   4 Gelände   5 Basis\n6 Außenposten   7 Cutlass   8 Buccaneer   9 Versorgung\nC Außenhülle / Schnitt   G Hexraster\nLeertaste Gehen   Mausrad Zoom"
 	_status.add_theme_font_size_override("font_size",15)
 	panel.add_child(_status)
 
@@ -306,6 +300,7 @@ func _camera_view(id: String, reset_zoom: bool = true) -> void:
 	var size := 12.0
 	var pitch := 50.0
 	var yaw := 24.0
+	var target_height := 0.2
 	if id=="crew":
 		focus = Vector2(12.15,9.4)
 		size = 2.5
@@ -323,6 +318,27 @@ func _camera_view(id: String, reset_zoom: bool = true) -> void:
 		focus = Vector2(8.3,6.2)
 		size = 3.6
 		pitch = 50.0
+	elif id=="outpost":
+		focus = Vector2(12.9,9.2)
+		size = 18.0
+		pitch = 50.0
+	elif id in ["cutlass_front","cutlass_rear"]:
+		focus = Vector2(6.5,10.9)
+		size = 4.8
+		pitch = 28.0
+		yaw = 24.0 if id=="cutlass_front" else 204.0
+		target_height = 0.65
+	elif id in ["buccaneer_front","buccaneer_rear"]:
+		focus = Vector2(19.2,11.8)
+		size = 3.8
+		pitch = 44.0 if id=="buccaneer_front" else 28.0
+		yaw = -1.0 if id=="buccaneer_front" else 179.0
+		target_height = 0.55
+	elif id=="utility":
+		focus = Vector2(16.1,8.2)
+		size = 2.5
+		pitch = 28.0
+		target_height = 0.42
 	size *= _preview_zoom_factor
 	_view.set("_focus_grid_position",HEX.plane_to_axial(focus))
 	_view.set("_camera_size",size)
@@ -333,7 +349,7 @@ func _camera_view(id: String, reset_zoom: bool = true) -> void:
 	# camera policy and minimum heights remain unchanged.
 	var camera: Camera3D = _view.get_node("ViewportContainer/SubViewport/WorldRoot/Camera3D")
 	camera.far = 100.0
-	var target := Vector3(focus.x,0.3 if id=="crew" else 0.2,focus.y)
+	var target := Vector3(focus.x,0.3 if id=="crew" else target_height,focus.y)
 	var distance := 18.0
 	var pitch_rad := deg_to_rad(pitch)
 	var yaw_rad := deg_to_rad(yaw)
@@ -348,6 +364,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_3: _camera_view("crew")
 			KEY_4: _camera_view("landscape")
 			KEY_5: _camera_view("cutaway")
+			KEY_6: _camera_view("outpost")
+			KEY_7: _camera_view("cutlass_front")
+			KEY_8: _camera_view("buccaneer_front")
+			KEY_9: _camera_view("utility")
+			KEY_C: _set_buildings_closed(not _buildings_closed)
 			KEY_G:
 				_view.set_hex_grid_visible(not bool(_view.get("_hex_grid_visible")))
 				_camera_view(_current_view_id,false)
@@ -373,17 +394,19 @@ func _capture_all() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CAPTURE_ROOT))
 	for i in range(30): await get_tree().process_frame
 	var captures: Array = []
-	for id in ["overview","hex_grid","crew","workshop","landscape","cutaway","baseline"]:
+	for id in ["overview","hex_grid","crew","workshop","landscape","cutaway","outpost","cutlass_front","cutlass_rear","buccaneer_front","buccaneer_rear","utility","closed_outpost","closed_habitat","closed_hall","baseline"]:
 		_view.set_frontier_art_enabled(id!="baseline")
 		_view.set_hex_grid_visible(id=="hex_grid")
-		_camera_view("overview" if id in ["hex_grid","baseline"] else id)
+		_set_buildings_closed(String(id).begins_with("closed_"))
+		var camera_id: String = {"closed_outpost":"outpost","closed_habitat":"cutaway","closed_hall":"workshop"}.get(id,id)
+		_camera_view("overview" if id in ["hex_grid","baseline"] else camera_id)
 		for i in range(12): await get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
 		var path: String = CAPTURE_ROOT+String(id)+".png"
 		var error := image.save_png(path)
 		var camera: Camera3D = _view.get_node("ViewportContainer/SubViewport/WorldRoot/Camera3D")
-		captures.append({"id":id,"path":path,"error":error,"camera_size":_view.get_camera_size(),"camera_transform":str(camera.global_transform),"camera_projection":camera.projection,"viewport_size":str(get_viewport().get_visible_rect().size),"profile_enabled":id!="baseline"})
+		captures.append({"id":id,"path":path,"error":error,"camera_size":_view.get_camera_size(),"camera_transform":str(camera.global_transform),"camera_projection":camera.projection,"viewport_size":str(get_viewport().get_visible_rect().size),"profile_enabled":id!="baseline","building_shells_visible":_buildings_closed})
 	_view.set_frontier_art_enabled(true)
 	_camera_view("crew")
 	_walk_demo()
@@ -393,11 +416,11 @@ func _capture_all() -> void:
 	captures.append({"id":"walk_pose","path":CAPTURE_ROOT+"walk_pose.png","camera_size":_view.get_camera_size(),"profile_enabled":true})
 	var renderer: String = RenderingServer.get_current_rendering_method()+" / "+RenderingServer.get_current_rendering_driver_name()
 	var sources := {}
-	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://shaders/terrain/frontier_ground.gdshader"]:
+	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://scripts/terrain/frontier_outpost_pad.gd","res://scripts/terrain/frontier_closed_buildings.gd","res://shaders/terrain/frontier_ground.gdshader"]:
 		sources[source] = FileAccess.get_sha256(source)
 	var snapshot: Dictionary = _view.get_render_snapshot()
-	var report := {"report_ready":false,"pass":"03","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"captures":captures,"runtime_scale_from_metres":MODEL_SCALE,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Five fixed cameras, output resolution, renderer and lighting preserved from pass02. Geology, architecture and yard dressing revised in pass03; cutaway is an additional close view. Hex cells remain authoritative and selectable."}
-	var report_file := FileAccess.open("res://output/grafik_20261101/pass03_after_capture.json",FileAccess.WRITE)
+	var report := {"report_ready":false,"pass":"04","report_revision":"r02","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"pads":_pad_facts,"captures":captures,"structure_and_citizen_scale":MODEL_SCALE,"stylized_ship_scale":SHIP_SCALE,"canonical_star_citizen_dimensions":false,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Six fixed cameras, resolution, renderer and lighting preserved from pass03. New ship, utility and outpost close views are after-only. Ship dimensions are stylized, not canonical. Hex cells remain authoritative and selectable."}
+	var report_file := FileAccess.open("res://output/grafik_20261101/pass04_after_capture.json",FileAccess.WRITE)
 	if report_file == null:
 		push_error("Cannot write frontier engine capture report")
 		get_tree().quit(1)
