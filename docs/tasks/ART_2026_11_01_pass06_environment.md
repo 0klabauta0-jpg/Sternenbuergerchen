@@ -75,3 +75,13 @@ bleiben reicher komponiert. Keine allgemeine Performance-/Releasefreigabe.
   begehbare Bodenflaechen weiterhin eben, weniger kleine Senken und reichere
   materialbezogene Gebrauchsspuren als in den2D-Zielen. Originale Cutaways,
   Citizens und Schiffe bleiben unangetastet; kein Main-/Kampagnenumbau.
+
+## HTML-Abschluss
+Schlanke P06-Workbench mit35eingebettetenBildern,12festen Vergleichspaaren,
+Wischregler,3Zielbildern,Quellen/Katalog,Notizen/Entscheidungen undJSONexport.
+P05 ist bytegleich als eigener Archivbericht erreichbar.171/171frische
+Browserchecks samt Sichtpruefung PASS,70Decodes,27geoeffneteScreenshotlayouts,
+2echte unterschiedlicheDownloads,0Console-/Pagefehler/externenRequests.
+ExakterHTML-SHA256:75064afec11b66510846cd4679008fb3247ace2c71ac2a3d558aa1cb42662602.
+Code5929d3dabf8535ba5652065110ae2252d5f38b69 erfolgreich gepusht;
+Bericht/Pruefnachweise als eigenes Uebergabepaket, weiterhin keine Main-Integration.

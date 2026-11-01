@@ -1,0 +1,1257 @@
+{
+  "schema": "sternenbuergerchen.environment_pass06_browser_qa.v1",
+  "revision": "env06",
+  "html": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\docs\\reports\\STERNENBUERGERCHEN_GRAFIK_2026-11-01.html",
+  "html_sha256_start": "75064afec11b66510846cd4679008fb3247ace2c71ac2a3d558aa1cb42662602",
+  "script_sha256": "1e1cc9710c6937bec96982cdfa0cfb1be5f86f2ad22309afbb1a826b0e3343a9",
+  "started_at": "2026-11-01T19:34:21.004Z",
+  "checks": [
+    {
+      "name": "desktop_correct_revision",
+      "pass": true
+    },
+    {
+      "name": "desktop_initial_images_decode",
+      "pass": true
+    },
+    {
+      "name": "new_namespace_has_no_old_notes",
+      "pass": true
+    },
+    {
+      "name": "three_targets_twelve_pairs",
+      "pass": true
+    },
+    {
+      "name": "bounded_image_count",
+      "pass": true
+    },
+    {
+      "name": "three_source_packages",
+      "pass": true
+    },
+    {
+      "name": "archive_p05_byte_identical",
+      "pass": true
+    },
+    {
+      "name": "same_light_renderer",
+      "pass": true
+    },
+    {
+      "name": "native_release_revision",
+      "pass": true
+    },
+    {
+      "name": "technical_seven_fields",
+      "pass": true
+    },
+    {
+      "name": "procedural_shader_scope_visible",
+      "pass": true
+    },
+    {
+      "name": "bounded_relief_scope_visible",
+      "pass": true
+    },
+    {
+      "name": "astra_not_adopted",
+      "pass": true
+    },
+    {
+      "name": "desktop_initial_no_overflow",
+      "pass": true,
+      "dimensions": {
+        "viewport": 1440,
+        "document": 1440,
+        "body": 1440
+      }
+    },
+    {
+      "name": "all_embedded_images_decode",
+      "pass": true
+    },
+    {
+      "name": "all_original_image_hashes",
+      "pass": true
+    },
+    {
+      "name": "all_runtime_hashes",
+      "pass": true
+    },
+    {
+      "name": "source_package_hashes",
+      "pass": true
+    },
+    {
+      "name": "relative_document_links_exist",
+      "pass": true,
+      "missing": []
+    },
+    {
+      "name": "target_switch_ref_rostgrenze",
+      "pass": true
+    },
+    {
+      "name": "ref_rostgrenze_image",
+      "pass": true
+    },
+    {
+      "name": "ref_rostgrenze_id",
+      "pass": true
+    },
+    {
+      "name": "ref_rostgrenze_original_hash",
+      "pass": true
+    },
+    {
+      "name": "ref_rostgrenze_source_provenance",
+      "pass": true
+    },
+    {
+      "name": "target_switch_ref_freihafen",
+      "pass": true
+    },
+    {
+      "name": "ref_freihafen_image",
+      "pass": true
+    },
+    {
+      "name": "ref_freihafen_id",
+      "pass": true
+    },
+    {
+      "name": "ref_freihafen_original_hash",
+      "pass": true
+    },
+    {
+      "name": "ref_freihafen_source_provenance",
+      "pass": true
+    },
+    {
+      "name": "target_switch_ref_tactical",
+      "pass": true
+    },
+    {
+      "name": "ref_tactical_image",
+      "pass": true
+    },
+    {
+      "name": "ref_tactical_id",
+      "pass": true
+    },
+    {
+      "name": "ref_tactical_original_hash",
+      "pass": true
+    },
+    {
+      "name": "ref_tactical_source_provenance",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_closed_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_closed_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_closed_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_closed_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_closed_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_closed_outpost",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_closed_habitat",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_closed_habitat",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_closed_habitat",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_closed_habitat",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_closed_habitat",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_closed_habitat",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_landscape",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_landscape",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_landscape",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_landscape",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_landscape",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_landscape",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_overview",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_overview",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_overview",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_overview",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_overview",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_overview",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_workshop",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_workshop",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_workshop",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_workshop",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_workshop",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_workshop",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_crew",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_crew",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_crew",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_crew",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_crew",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_crew",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_selection_cutaway",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_hashes_cutaway",
+      "pass": true
+    },
+    {
+      "name": "desktop_pair_camera_cutaway",
+      "pass": true
+    },
+    {
+      "name": "desktop_side_mode_cutaway",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_cutaway",
+      "pass": true
+    },
+    {
+      "name": "desktop_wipe_keyboard_cutaway",
+      "pass": true
+    },
+    {
+      "name": "current_hall_image",
+      "pass": true
+    },
+    {
+      "name": "current_hall_id",
+      "pass": true
+    },
+    {
+      "name": "current_hall_original_hash",
+      "pass": true
+    },
+    {
+      "name": "p05_approval_not_inherited",
+      "pass": true
+    },
+    {
+      "name": "lightbox_zoom",
+      "pass": true
+    },
+    {
+      "name": "lightbox_next",
+      "pass": true
+    },
+    {
+      "name": "lightbox_previous",
+      "pass": true
+    },
+    {
+      "name": "typing_does_not_navigate",
+      "pass": true
+    },
+    {
+      "name": "lightbox_escape_focus",
+      "pass": true
+    },
+    {
+      "name": "catalog_group_all",
+      "pass": true
+    },
+    {
+      "name": "catalog_group_targets",
+      "pass": true
+    },
+    {
+      "name": "catalog_group_before",
+      "pass": true
+    },
+    {
+      "name": "catalog_group_after",
+      "pass": true
+    },
+    {
+      "name": "catalog_case_search",
+      "pass": true
+    },
+    {
+      "name": "catalog_empty_search",
+      "pass": true
+    },
+    {
+      "name": "controls_outside_pairs_labelled",
+      "pass": true
+    },
+    {
+      "name": "storage_view_mode_range",
+      "pass": true
+    },
+    {
+      "name": "storage_notes_decision",
+      "pass": true
+    },
+    {
+      "name": "storage_namespace_separate",
+      "pass": true
+    },
+    {
+      "name": "unique_actual_downloads",
+      "pass": true
+    },
+    {
+      "name": "export_schema",
+      "pass": true
+    },
+    {
+      "name": "export_scope_counts",
+      "pass": true
+    },
+    {
+      "name": "export_values",
+      "pass": true
+    },
+    {
+      "name": "export_asset_mapping",
+      "pass": true
+    },
+    {
+      "name": "export_text_fallback",
+      "pass": true
+    },
+    {
+      "name": "copy_fallback_available",
+      "pass": true
+    },
+    {
+      "name": "desktop_end_no_overflow",
+      "pass": true,
+      "dimensions": {
+        "viewport": 1440,
+        "document": 1440,
+        "body": 1440
+      }
+    },
+    {
+      "name": "mobile_correct_revision",
+      "pass": true
+    },
+    {
+      "name": "mobile_initial_images_decode",
+      "pass": true
+    },
+    {
+      "name": "mobile_initial_no_overflow",
+      "pass": true,
+      "dimensions": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      }
+    },
+    {
+      "name": "mobile_pair_selection_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_hashes_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_camera_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "mobile_side_mode_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "mobile_wipe_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "mobile_wipe_keyboard_lived_outpost",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_selection_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_hashes_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_camera_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_side_mode_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_wipe_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_wipe_keyboard_ground_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_selection_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_hashes_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_camera_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_side_mode_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_wipe_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_wipe_keyboard_geology_detail",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_selection_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_hashes_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "mobile_pair_camera_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "mobile_side_mode_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "mobile_wipe_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "mobile_wipe_keyboard_closed_hall",
+      "pass": true
+    },
+    {
+      "name": "mobile_current_hall_image",
+      "pass": true
+    },
+    {
+      "name": "mobile_current_hall_id",
+      "pass": true
+    },
+    {
+      "name": "mobile_current_hall_original_hash",
+      "pass": true
+    },
+    {
+      "name": "mobile_dialog_no_overflow",
+      "pass": true,
+      "dimensions": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      }
+    },
+    {
+      "name": "mobile_notes_persist",
+      "pass": true
+    },
+    {
+      "name": "mobile_export_text",
+      "pass": true
+    },
+    {
+      "name": "mobile_end_no_overflow",
+      "pass": true,
+      "dimensions": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      }
+    },
+    {
+      "name": "html_unchanged",
+      "pass": true
+    },
+    {
+      "name": "page_errors_zero",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "name": "console_errors_zero",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "name": "external_requests_zero",
+      "pass": true,
+      "requests": []
+    }
+  ],
+  "failures": [],
+  "screenshots": [
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_hero.png",
+      "sha256": "b1ee70556b2c8efcc41d59f0e20a39f271400042cddea1d8b56b615765d7b7fd"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_lived_outpost.png",
+      "sha256": "2ba2f288620945a695b8e47914eac25405c95648f09910a1ce90f9a23010be46"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_ground_detail.png",
+      "sha256": "7797f0668e4b406ccfd07019476168bfc82f404630dfe6bb358cd76deea05a18"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_direct_pair_ground_detail.png",
+      "sha256": "b1c99b4665579c8957dcad96a5213594aab4c901b5c0e4e55373a6832154c056"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_geology_detail.png",
+      "sha256": "15b285db71d7cf45b4e151a02667f2b995b505206201e3c6075b619baa91cd5f"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_direct_pair_geology_detail.png",
+      "sha256": "6b0147e031ba4d13d4969cf73a3970b9cec0c04b14c88ae4ea5c19ddc53e0482"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_closed_outpost.png",
+      "sha256": "9033136926f70ed3a8dd85c6d6e3392ff0f0dee0727f50ef30fa1ad296fc35dd"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_closed_habitat.png",
+      "sha256": "fa7fb5b1c73afafa4128052bb7c84a837af8bf07da02a9279fb849c38a629c92"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_closed_hall.png",
+      "sha256": "948f3e1f74e884e9331c307d600ecfe77d2a0c2e469ba022d672290913e9c21d"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_direct_pair_closed_hall.png",
+      "sha256": "30b4d3a2b4c35c6fe57b58159ad6e14b82dc36adbe5d42a06445ec6cc923e46a"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_landscape.png",
+      "sha256": "221e39c734f74b4521fc25971ba266a20491ec676fc502cebbbcbedb3de9e09a"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_direct_pair_landscape.png",
+      "sha256": "97d7dc784bd745a6aff6e6c9e872440a336717bf9a23b4d87a103a784ea8827f"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_overview.png",
+      "sha256": "1d71036b3c71752e679f587c809c4898bc950a4772165658a56be60590fa14bf"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_workshop.png",
+      "sha256": "e0495c8e7dd12377ec15ddb10ed759659608424a2a5fa0bf8c21326ff128b4e4"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_crew.png",
+      "sha256": "c70abcf77291c5944b1aeb57d24fce99a62a2e49a500d43ea7bef9679df0d7ec"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_hex_grid.png",
+      "sha256": "33809d4f189bf07c8c4ad904b732ff2ad984a8a08fd9fdf337f9e836e5502341"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_pair_cutaway.png",
+      "sha256": "1115d20b7d21285c6ec972ab3f30e4e82ffdbc192f3992edc60990505507483c"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_lightbox.png",
+      "sha256": "ffb35b9957efce9c81317b20f60784a3775c340c53557f816ef7e35cf08a6c61"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_wipe.png",
+      "sha256": "f9314cacea2c3d624babbb3c2d326f2d3efddd2fb02df156e9ef2f5f45f3a0d9"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\desktop_sources.png",
+      "sha256": "8b85e8e4b0675e9492b44139ad8f07d0a9b9fbe5d442fa71cad8306b1f62f8e8"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\mobile_hero.png",
+      "sha256": "063a6f1aafe55bc3a81e1ce18aa74c472df3faf7838543986d07dd470e7b0735"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\mobile_pair_lived_outpost.png",
+      "sha256": "10f5bc8228456c5b257aac056b9387a943339aec70265ad3303c47b97c66e38c"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\mobile_pair_ground_detail.png",
+      "sha256": "4bb58fec2bde5b3783811998439c4f6c931b5fec8cdae46749220258207f34ef"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\mobile_pair_geology_detail.png",
+      "sha256": "95a32def3f177bdb4e5837ea4793d533c95ea7ec7a1476dd84b023f3f3895e02"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\mobile_pair_closed_hall.png",
+      "sha256": "0ec109007ebd4bc2a015dc399ce754d89304ef6c28f00ffc40e32844c4172b79"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\mobile_lightbox.png",
+      "sha256": "f6152d7ae03e3854eb09d964ccb05e44e2bb7cd9ac841122788d56e28b10b51e"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\mobile_sources.png",
+      "sha256": "1ddb6bb3e03faf99be79a06fe78ab8694d5fb053909021308b49bb86c0ae623d"
+    }
+  ],
+  "downloads": [
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\downloads\\grafik_20261101_pass06_environment_env06_2026-11-01T19-34-28-462Z_01.json",
+      "sha256": "37037a5a62d7da09620075339fc819ba5223871dab99c16e7b5078d96a5f4bb2"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass06_environment\\downloads\\grafik_20261101_pass06_environment_env06_2026-11-01T19-34-28-597Z_02.json",
+      "sha256": "27d5ec0f3057fa3bfd3cf21824d4301a264a959a8553ccae903608c0de55e2ea"
+    }
+  ],
+  "page_errors": [],
+  "console_errors": [],
+  "external_requests": [],
+  "visual_inspection": {
+    "pass": true,
+    "reviewed_at": "2026-11-01T19:38:55.646729+00:00",
+    "html_sha256": "75064afec11b66510846cd4679008fb3247ace2c71ac2a3d558aa1cb42662602",
+    "native_code_commit": "5929d3dabf8535ba5652065110ae2252d5f38b69",
+    "screenshot_layouts_reviewed": 27,
+    "method": "All27 final desktop/mobile screenshots inspected in four contact sheets. Four direct native before/after comparison screenshots opened individually at full displayed size: landscape, geology_detail, ground_detail and closed_hall. Final native overview/workshop/cutaway/hex_grid/baseline/walk_pose were independently opened before report build.",
+    "findings": "No broken images, clipped primary controls or page overflow in the tested Chromium desktop/mobile viewports. Twelve paired views, side/wipe controls, target selection, image notes, focus/keyboard navigation, storage isolation and two unique actual JSON downloads passed. Source status clearly separates procedural paint, protected-area relief, unchanged primary assets and the P05 archive. Wide/prismatic crowns, flat playable terrain and lower painted usage density remain explicit limits. No artistic user acceptance or Astra adoption inferred.",
+    "limits": "Bounded offline report and captured-view evidence only; no campaign integration or general native gameplay/performance/release acceptance. Material route changes intentionally; same global light is not a claim of identical materials or synchronized animation poses.",
+    "contact_sheets": [
+      {
+        "path": "output/grafik_20261101/browser_qa_pass06_environment/visual_contact_01.jpg",
+        "sha256": "1f414d70d8603738cc8b3a5f59e831e420675f64f19a4d10d3584c408a82ce4b"
+      },
+      {
+        "path": "output/grafik_20261101/browser_qa_pass06_environment/visual_contact_02.jpg",
+        "sha256": "69a17321cbca093de16434ed9dbd80af45045055395cbbe17bf84796f9845fad"
+      },
+      {
+        "path": "output/grafik_20261101/browser_qa_pass06_environment/visual_contact_03.jpg",
+        "sha256": "ab1ac7f4e518e2bb0ba1e8c732a40f56cccf52a162ba2b43b8c7eeed17a52884"
+      },
+      {
+        "path": "output/grafik_20261101/browser_qa_pass06_environment/visual_contact_04.jpg",
+        "sha256": "e9502e2f1a61d6e296e700d04e1351cd75e5f40edf42aeafe6ed0ae9a851b79b"
+      }
+    ]
+  },
+  "browser_version": "151.0.7922.34",
+  "data_summary": {
+    "revision": "env06",
+    "assets": 35,
+    "pairs": 12,
+    "targets": 3,
+    "native_captures": 20,
+    "source_packages": [
+      "buildings",
+      "geology",
+      "ground_paint"
+    ],
+    "code_commit": "5929d3dabf8535ba5652065110ae2252d5f38b69"
+  },
+  "embedded_image_decode": [
+    {
+      "id": "ref_rostgrenze",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "ref_rostgrenze",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "ref_freihafen",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "ref_freihafen",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "ref_tactical",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "ref_tactical",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_lived_outpost",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_lived_outpost",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_ground_detail",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_ground_detail",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_geology_detail",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_geology_detail",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_closed_outpost",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_closed_outpost",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_closed_habitat",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_closed_habitat",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_closed_hall",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_closed_hall",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_landscape",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_landscape",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_overview",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_overview",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_workshop",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_workshop",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_crew",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_crew",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_hex_grid",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_hex_grid",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "before_cutaway",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "before_cutaway",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_overview",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_overview",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_hex_grid",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_hex_grid",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_crew",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_crew",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_workshop",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_workshop",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_landscape",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_landscape",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_cutaway",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_cutaway",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_outpost",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_outpost",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_cutlass_front",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_cutlass_front",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_cutlass_rear",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_cutlass_rear",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_buccaneer_front",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_buccaneer_front",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_buccaneer_rear",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_buccaneer_rear",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_utility",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_utility",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_closed_outpost",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_closed_outpost",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_closed_habitat",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_closed_habitat",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_closed_hall",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_closed_hall",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_lived_outpost",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_lived_outpost",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_ground_detail",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_ground_detail",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_geology_detail",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_geology_detail",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_baseline",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_baseline",
+      "variant": "full",
+      "pass": true
+    },
+    {
+      "id": "after_walk_pose",
+      "variant": "thumb",
+      "pass": true
+    },
+    {
+      "id": "after_walk_pose",
+      "variant": "full",
+      "pass": true
+    }
+  ],
+  "html_sha256_end": "75064afec11b66510846cd4679008fb3247ace2c71ac2a3d558aa1cb42662602",
+  "completed_at": "2026-11-01T19:34:31.337Z",
+  "pass": true,
+  "status": "pass",
+  "final_artifact_validation_at": "2026-11-01T19:38:55.653250+00:00",
+  "scope_summary": {
+    "targets": 3,
+    "comparison_pairs": 12,
+    "before_images_in_report": 12,
+    "native_after_images_in_report": 20,
+    "packaged_images": 35,
+    "archived_p05_native_pngs": 20,
+    "source_packages": 3,
+    "primary_glbs_unchanged": 9,
+    "raw_stock_sources_unchanged": 3
+  }
+}

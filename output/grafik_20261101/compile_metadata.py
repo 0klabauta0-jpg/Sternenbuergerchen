@@ -92,5 +92,30 @@ for row in manifest["scope"]:
  if row["id"] in current_changes: row["actual"]=current_changes[row["id"]]
  row["changed_in_current_pass"]=row["id"] in ("terrain","structures","people")
  if row["id"] in ("people","cutlass","buccaneer"):row["mesh_changed"]=False
+# P06 keeps original GLBs, figure placement and global light; geometry changes
+# are restricted to geology, while closed building exteriors change material.
+manifest.update(report_revision="env06",engine_capture="output/grafik_20261101/pass06_environment_after_capture.json",
+ previous_engine_capture="output/grafik_20261101/pass05_environment_after_capture.json",
+ before_after_verification="output/grafik_20261101/pass06_environment_verification_manifest.json",
+ current_environment_task="docs/tasks/ART_2026_11_01_pass06_environment.md",
+ current_code_commit="5929d3dabf8535ba5652065110ae2252d5f38b69",
+ environment_manifests=["art/frontier_illustrated_20261101/environment/pass06/"+part+"/manifest.json" for part in ("buildings","geology","ground_paint")])
+current_changes={
+ "terrain":"Pass06: echte Sediment-/Talusfaecher innerhalb der unveraenderten14Sperrhuellen, ungleich lange lokale Erosionsrinnen, weichere Pigment-/Staubfelder und selektiver Wegeabrieb; spielbarer Boden weiter eben",
+ "structures":"Pass06: unveraenderte geschlossene Geometrie mit rollenbezogenem Materialabrieb, Dachbleichung und Sockelstaub. Originale Kenney-Cutaway-/Versorgungs-GLBs sowie Arbeitsgruppen unveraendert",
+ "people":"Unveraenderter P05-Stand: vier Original-Kenney-Citizen-/Gear-GLBs mit originalen Idle/Walk und identischen Startpositionen/Blickrichtungen",
+ "cutlass":"Unveraenderter kritisierter R02-Stand; separate Astra-Modellarbeit wird nicht automatisch uebernommen",
+ "buccaneer":"Unveraenderter kritisierter R02-Stand; separate Astra-Modellarbeit wird nicht automatisch uebernommen"}
+for row in manifest["scope"]:
+ if row["id"] in current_changes:row["actual"]=current_changes[row["id"]]
+ row["changed_in_current_pass"]=row["id"] in ("terrain","structures")
+ row["mesh_changed"]=row["id"]=="terrain"
+ row["materials_changed"]=row["id"] in ("terrain","structures")
+manifest["limitations"]=["Synthetischer Hex-Basis-Ausschnitt auf unintegriertem Grafikbranch; keine Main-/Kampagnenmigration.",
+ "Echtes Relief ist auf bestehende gesperrte Geologiehuellen begrenzt; frei begehbarer Boden bleibt eben.",
+ "Felsgrossformen und Kronen bleiben breit/prismatisch, Materialfelder prozedural und ruhiger als die2D-Gebrauchsdichte; keine handgemalte Bake.",
+ "NeunprimaereGLBs, originale Kenney-Cutaways/Citizens und kritisierte R02-Schiffe unveraendert. Separate Astra-Ausgaben nicht adoptiert.",
+ "Gebaeudewear betrifft eigene geschlossene Huellen bei identischer Geometrie; C ist ein grafischer Umschalter, keine Innenraum-/Tor-/Logistiksimulation.",
+ "Keine gestalterische Nutzerfreigabe oder allgemeine Gameplay-/Performance-/Multiplayer-/Release-Abnahme."]
 (PACKAGE/"asset_source_manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 print(json.dumps(dict(targets=len(gen["targets"]),sources=len(source_entries),scope=len(scope),mapping_entries=len(paths),unique_models=len(set(paths)))))

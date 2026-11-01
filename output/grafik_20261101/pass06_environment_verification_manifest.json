@@ -1,0 +1,533 @@
+{
+  "schema": "sternenbuergerchen.graphics_pass06_environment_verification.v1",
+  "report_revision": "env06",
+  "code_commit": "5929d3dabf8535ba5652065110ae2252d5f38b69",
+  "code_commit_pushed": true,
+  "based_on_unintegrated_graphics_branch": "task/grafikreferenzen-20261101",
+  "previous_handoff_commit": "04e934f60",
+  "engine_report": "output/grafik_20261101/pass06_environment_check_runs/20261101T192055Z-pid105384/metadata/report.json",
+  "engine_report_sha256": "6e665945b19670949d7f82841db96f498bb8b2c228cb18113e2d2013435a97de",
+  "engine_checks_passed": 21,
+  "engine_checks_selected": 21,
+  "native_captures": 20,
+  "capture_records": [
+    {
+      "id": "overview",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/overview.png",
+      "sha256": "7aff4279abc4fbd3d4541aa2b3d9ec34d0eec5a14cc06a78a081ded6a71ee634"
+    },
+    {
+      "id": "hex_grid",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/hex_grid.png",
+      "sha256": "70bbe55bd3d6d59f801f10b0e5a5b7b941fd7056e2b7c9191684cd16e0629e52"
+    },
+    {
+      "id": "crew",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/crew.png",
+      "sha256": "60c1442c40ee9389565868f47c7dd43a136955c7da4edb3eb80b03202574d2e8"
+    },
+    {
+      "id": "workshop",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/workshop.png",
+      "sha256": "03a4e7a6500203aa8444274f9efc789579b4cff6e8738c5358c3c087f86433ea"
+    },
+    {
+      "id": "landscape",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/landscape.png",
+      "sha256": "04bebc262c0836a354a2c99f933de766f76100edfbfc5b176bdaa41a3d217659"
+    },
+    {
+      "id": "cutaway",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutaway.png",
+      "sha256": "11bca3e0761c3ed350a265c91908f7dfab4604373247103f176d2e49134f76e9"
+    },
+    {
+      "id": "outpost",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/outpost.png",
+      "sha256": "8bf3d49686cda559dd8dcc0716e34e03b3973fbdea821b7d3aaaa5c7fec558af"
+    },
+    {
+      "id": "cutlass_front",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutlass_front.png",
+      "sha256": "4fe895dcae105afc9a3e318d457de68fdab2b5bbaed3cbc5a51600155dd8da03"
+    },
+    {
+      "id": "cutlass_rear",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutlass_rear.png",
+      "sha256": "227963cf4b81053e9b283d98d4bcbb6a2d74b0aad026208fdc03d42502e409ab"
+    },
+    {
+      "id": "buccaneer_front",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/buccaneer_front.png",
+      "sha256": "61737b8577574f71b1e87bb77e21528e74e512cdb36cfbd1582013b16c42e00a"
+    },
+    {
+      "id": "buccaneer_rear",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/buccaneer_rear.png",
+      "sha256": "ab6645db8f8f062a8524cedd736f5bb6f61ebfe4abbd151b2674cd821323ebd0"
+    },
+    {
+      "id": "utility",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/utility.png",
+      "sha256": "00490bfa62af9808ab5f8d8882f03f749263c64ef9c9c27d9f36c3f93948473b"
+    },
+    {
+      "id": "closed_outpost",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_outpost.png",
+      "sha256": "06b3067b8d8fc454472962f20d8d803798e79deecc3398491e836206ec10b4bf"
+    },
+    {
+      "id": "closed_habitat",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_habitat.png",
+      "sha256": "ec3fb7d1bf6c9023822f0930093460d22fbbedafdd9d517190650e5562b6ec00"
+    },
+    {
+      "id": "closed_hall",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_hall.png",
+      "sha256": "fe4d54b9830ca37f4a4b641f9fec60f9d6a0c718553b41a691e54b993b9c8d65"
+    },
+    {
+      "id": "lived_outpost",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/lived_outpost.png",
+      "sha256": "4579f503d72fe0ec9c85ceb31ed97fe2c0c5a22d92be856149c3269f09a9bf5d"
+    },
+    {
+      "id": "ground_detail",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/ground_detail.png",
+      "sha256": "d625b813a6e9d4dc082679afb0c48f256c6151554086e77c7b17172dccebb566"
+    },
+    {
+      "id": "geology_detail",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/geology_detail.png",
+      "sha256": "b810377f840315c4a39a42ec8c7117505550a81175e72fc7d3e42f248dddce2b"
+    },
+    {
+      "id": "baseline",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/baseline.png",
+      "sha256": "22d7a285ead8986b3264d240f92d7e3fb89d0b6ab23eacdb09f8fa98409f881f"
+    },
+    {
+      "id": "walk_pose",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/walk_pose.png",
+      "sha256": "d8cb7a37d5c131c99d99ba9d8ab0bccb59a71721bef12f18203fa3a5fb2ace41"
+    }
+  ],
+  "pairs": [
+    {
+      "id": "lived_outpost",
+      "title": "Arbeitsbereich",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/lived_outpost.png",
+      "before_sha256": "91976f10b91c83398a4f2f1d1b964ea8e02b06284a1332c145d5fe6c93f6221d",
+      "before_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 10.5,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.40602, 13.9888, 18.36988)]",
+        "error": 0,
+        "id": "lived_outpost",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/lived_outpost.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/lived_outpost.png",
+      "after_sha256": "4579f503d72fe0ec9c85ceb31ed97fe2c0c5a22d92be856149c3269f09a9bf5d",
+      "after_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 10.5,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.40602, 13.9888, 18.36988)]",
+        "error": 0,
+        "id": "lived_outpost",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/lived_outpost.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "ground_detail",
+      "title": "Boden / Kontakte",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/ground_detail.png",
+      "before_sha256": "c5183707cf47a495506140ec5c706005d376d69c48b383e36e80cd1c367272fa",
+      "before_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 4.8,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.344932, 0.529919, -0.77473), Z: (0.215538, 0.848048, 0.484105), O: (19.37968, 15.46487, 17.6139)]",
+        "error": 0,
+        "id": "ground_detail",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/ground_detail.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/ground_detail.png",
+      "after_sha256": "d625b813a6e9d4dc082679afb0c48f256c6151554086e77c7b17172dccebb566",
+      "after_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 4.8,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.344932, 0.529919, -0.77473), Z: (0.215538, 0.848048, 0.484105), O: (19.37968, 15.46487, 17.6139)]",
+        "error": 0,
+        "id": "ground_detail",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/ground_detail.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "geology_detail",
+      "title": "Felsdetail",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/geology_detail.png",
+      "before_sha256": "26d6722362c49554aa6b666670f29f1064e78050d9ec87d3394b179a771265e5",
+      "before_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 8.5,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.250412, 0.788011, -0.562435), Z: (0.320513, 0.615662, 0.719884), O: (25.86923, 11.28191, 15.4579)]",
+        "error": 0,
+        "id": "geology_detail",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/geology_detail.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/geology_detail.png",
+      "after_sha256": "b810377f840315c4a39a42ec8c7117505550a81175e72fc7d3e42f248dddce2b",
+      "after_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 8.5,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.250412, 0.788011, -0.562435), Z: (0.320513, 0.615662, 0.719884), O: (25.86923, 11.28191, 15.4579)]",
+        "error": 0,
+        "id": "geology_detail",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/geology_detail.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "closed_outpost",
+      "title": "Außenposten geschlossen",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_outpost.png",
+      "before_sha256": "4de4b4f369896fb4466ef97f33ade16f3488be2c6f61c84882406ea5599803cd",
+      "before_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 18.0,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (17.60601, 13.9888, 19.76988)]",
+        "error": 0,
+        "id": "closed_outpost",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_outpost.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_outpost.png",
+      "after_sha256": "06b3067b8d8fc454472962f20d8d803798e79deecc3398491e836206ec10b4bf",
+      "after_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 18.0,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (17.60601, 13.9888, 19.76988)]",
+        "error": 0,
+        "id": "closed_outpost",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_outpost.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "closed_habitat",
+      "title": "Basis geschlossen",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_habitat.png",
+      "before_sha256": "bd61fb85432ec22d8eb4119b87d2f3cfe8e7b29f66fd3604e97a07507f0964cd",
+      "before_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 3.6,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+        "error": 0,
+        "id": "closed_habitat",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_habitat.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_habitat.png",
+      "after_sha256": "ec3fb7d1bf6c9023822f0930093460d22fbbedafdd9d517190650e5562b6ec00",
+      "after_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 3.6,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+        "error": 0,
+        "id": "closed_habitat",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_habitat.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "closed_hall",
+      "title": "Halle geschlossen",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_hall.png",
+      "before_sha256": "ae411ef8cbd550196c39fd894850ff9cc4cf794477624ac65be2f087bdc05712",
+      "before_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 4.2,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+        "error": 0,
+        "id": "closed_hall",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_hall.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_hall.png",
+      "after_sha256": "fe4d54b9830ca37f4a4b641f9fec60f9d6a0c718553b41a691e54b993b9c8d65",
+      "after_camera": {
+        "building_shells_visible": true,
+        "camera_projection": 1,
+        "camera_size": 4.2,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+        "error": 0,
+        "id": "closed_hall",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_hall.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "landscape",
+      "title": "Weites Gelände",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/landscape.png",
+      "before_sha256": "90b41a35153a6ef53dbc9a8096e7ac00adda35d5342ecd046f525dd4db986cae",
+      "before_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 23.0,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+        "error": 0,
+        "id": "landscape",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/landscape.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/landscape.png",
+      "after_sha256": "04bebc262c0836a354a2c99f933de766f76100edfbfc5b176bdaa41a3d217659",
+      "after_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 23.0,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+        "error": 0,
+        "id": "landscape",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/landscape.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "overview",
+      "title": "Übersicht / Schnitt",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/overview.png",
+      "before_sha256": "dbed07bbebcc3e9f544aa8037ecde74ad295d6af636b5c5e959ff2c78880c293",
+      "before_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 12.0,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+        "error": 0,
+        "id": "overview",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/overview.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/overview.png",
+      "after_sha256": "7aff4279abc4fbd3d4541aa2b3d9ec34d0eec5a14cc06a78a081ded6a71ee634",
+      "after_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 12.0,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+        "error": 0,
+        "id": "overview",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/overview.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "workshop",
+      "title": "Werkstatt / Schnitt",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/workshop.png",
+      "before_sha256": "0a18924f063d7821e72feb9dc61d2a5999b5cef0189f478958ca8567b1afef14",
+      "before_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 4.2,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+        "error": 0,
+        "id": "workshop",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/workshop.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/workshop.png",
+      "after_sha256": "03a4e7a6500203aa8444274f9efc789579b4cff6e8738c5358c3c087f86433ea",
+      "after_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 4.2,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+        "error": 0,
+        "id": "workshop",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/workshop.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "crew",
+      "title": "Crew",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/crew.png",
+      "before_sha256": "c6572de7164b3d5141be22cbd148ee73f92e19307a86dea4be5d886b96547151",
+      "before_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 2.5,
+        "camera_transform": "[X: (1.0, 0.0, 0.0), Y: (0.0, 0.978148, -0.207912), Z: (0.0, 0.207912, 0.978148), O: (12.15, 4.04241, 27.00666)]",
+        "error": 0,
+        "id": "crew",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/crew.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/crew.png",
+      "after_sha256": "60c1442c40ee9389565868f47c7dd43a136955c7da4edb3eb80b03202574d2e8",
+      "after_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 2.5,
+        "camera_transform": "[X: (1.0, 0.0, 0.0), Y: (0.0, 0.978148, -0.207912), Z: (0.0, 0.207912, 0.978148), O: (12.15, 4.04241, 27.00666)]",
+        "error": 0,
+        "id": "crew",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/crew.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "hex_grid",
+      "title": "Hexraster",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/hex_grid.png",
+      "before_sha256": "90445757369cdcea8d53c2883796bed6c5378868fc2ba139a3f81b30563133e2",
+      "before_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 12.0,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+        "error": 0,
+        "id": "hex_grid",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/hex_grid.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/hex_grid.png",
+      "after_sha256": "70bbe55bd3d6d59f801f10b0e5a5b7b941fd7056e2b7c9191684cd16e0629e52",
+      "after_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 12.0,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+        "error": 0,
+        "id": "hex_grid",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/hex_grid.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    },
+    {
+      "id": "cutaway",
+      "title": "Basis / Schnitt",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/cutaway.png",
+      "before_sha256": "d8b590e50f0fd45e0523c1fbce6dd310ae5b0d891c057b62348060fe8bf839ac",
+      "before_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 3.6,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+        "error": 0,
+        "id": "cutaway",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/cutaway.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutaway.png",
+      "after_sha256": "11bca3e0761c3ed350a265c91908f7dfab4604373247103f176d2e49134f76e9",
+      "after_camera": {
+        "building_shells_visible": false,
+        "camera_projection": 1,
+        "camera_size": 3.6,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+        "error": 0,
+        "id": "cutaway",
+        "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutaway.png",
+        "profile_enabled": true,
+        "viewport_size": "(1920.0, 1080.0)"
+      },
+      "camera_match": true
+    }
+  ],
+  "runtime_sources_sha256": {
+    "res://scripts/terrain/frontier_art_dressing.gd": "86fc88c484dbe82e0f989edea7c0c58a38388ad70bf7e5c5b8410295ff1c74b0",
+    "res://scripts/terrain/frontier_art_geology.gd": "e0c68350e32e041956d41a6b383661db76d01be5aa2ee18596bd22380000ae58",
+    "res://scripts/terrain/frontier_art_profile.gd": "9ea54d24eb732ea804e750d2543e15fd85c4f1ba3b4f1d19c78c591629f26c0f",
+    "res://scripts/terrain/frontier_closed_buildings.gd": "f29315d4b3aa782149a8ad42312658fc53973595f289fab2b257e557c5a07b9e",
+    "res://scripts/terrain/frontier_outpost_pad.gd": "0f2ac2200330f473c1fcd2fa3c57ef779a530f55c0d9c62991ba5713b24805b2",
+    "res://scripts/terrain/frontier_worklife.gd": "15f26e2e951a34a60c111f3c69b36ab7490c0336e36065efa9a01721c9174656",
+    "res://scripts/tests/frontier_art_preview.gd": "2ccde357cd185f6991e615d211ae43956f00852d27d9a523b1f0411f410f9003",
+    "res://shaders/terrain/frontier_building_wear.gdshader": "57463c649ee0f1b900b4d3e40e4f3586e21f222350bdfa9310e9948760d8734b",
+    "res://shaders/terrain/frontier_contact_paint.gdshader": "ff8d87e7082dc6e6f4611db6bd18cdb0514720efd7ca0a07108ffd2807389e2f",
+    "res://shaders/terrain/frontier_ground.gdshader": "240231803877d0bcfe77563f859a623dc8ff38eb97d042942fcccb77357eec4b"
+  },
+  "after_capture_sha256": "c5ed380994bacbb0514eb94a0e984af40a02e22c7e87f40b15b5fb2ff332e60c",
+  "before_capture_sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610",
+  "before_manifest": "output/grafik_20261101/pass06_environment_before_manifest.json",
+  "before_manifest_sha256": "3fdc9953fe281844c8a70dbfe825ee4169e4faad2a0804471c92c5db2620cce6",
+  "archived_pass05_html_sha256": "ab79aeec33e86fcf2c4cbe1751937dba6e1b6b8f81b84f2e355d2a51981a28aa",
+  "source_packages": {
+    "buildings": {
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/manifest.json",
+      "sha256": "9c5c6b9a99cb3697aa74e41f38517a55351f6de5bbf7b81f213fd6ea47865be7"
+    },
+    "geology": {
+      "path": "art/frontier_illustrated_20261101/environment/pass06/geology/manifest.json",
+      "sha256": "bcdb03545193f527f24d7a26e81e42f4ec22657878aeaed0cea715ad70b4b059"
+    },
+    "ground_paint": {
+      "path": "art/frontier_illustrated_20261101/environment/pass06/ground_paint/manifest.json",
+      "sha256": "adfa01715395f6eb889bbedfb630eb05597e92550678456853666b10e741d0a0"
+    }
+  },
+  "primary_glb_hashes_unchanged": true,
+  "raw_stock_sources_unchanged": true,
+  "renderer_match": true,
+  "lighting_match": true,
+  "camera_transforms_match": true,
+  "material_route": "Intentionally revised: ground/rock/building wear is part of P06, not a constant material assumption.",
+  "scope": "Relief limited to protected geology envelopes; finer erosion and material wear. Playable hex centers, paths/pads, height/LOS facts, ships/citizens/Astra and global lighting are not migrated.",
+  "remaining_visual_differences": "Playable ground remains flat and real relief is limited to the existing protected geology envelopes. Cliff masses/crowns remain broad and prismatic. The2Dreferences retain more small depressions, denser usage detail and richer composition. Wear concerns authored closed shells; original GLB cutaways/citizens/ships remain unchanged. Technical checks are not user artistic or general performance/release acceptance.",
+  "ship_user_status": "Retained criticized R02 models; separate Astra work is not automatically adopted.",
+  "browser_report": "output/grafik_20261101/browser_qa_pass06_environment/browser_qa.json",
+  "browser_report_sha256": "a395f70a3a855f6ccec1255874aae30a1ac84a07ccbe26198345a2618ed345dc",
+  "browser_checks_passed": 171,
+  "browser_html_sha256": "75064afec11b66510846cd4679008fb3247ace2c71ac2a3d558aa1cb42662602"
+}
