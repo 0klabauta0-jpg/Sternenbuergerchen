@@ -12,16 +12,16 @@
     "02_menschen_stilstudie.png"
   ],
   "latest_citizen_choice": "Original Kenney astronauts are the provisional base; rejected custom figures stay outside runtime. Future armor, equipment and appearance changes are explicitly requested.",
-  "engine_capture": "output/grafik_20261101/pass04_after_capture.json",
-  "previous_engine_capture": "output/grafik_20261101/pass03_after_capture.json",
+  "engine_capture": "output/grafik_20261101/pass05_environment_after_capture.json",
+  "previous_engine_capture": "output/grafik_20261101/pass04_after_capture.json",
   "additional_user_references": "output/grafik_20261101/reference_manifest.json",
-  "before_after_verification": "output/grafik_20261101/pass04_verification_manifest.json",
+  "before_after_verification": "output/grafik_20261101/pass05_environment_verification_manifest.json",
   "kenney_component_provenance": "art/frontier_illustrated_20261101/structures/pass04/manifest.json",
   "ship_model_provenance": [
     "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/manifest.json",
     "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/manifest.json"
   ],
-  "report_revision": "r02",
+  "report_revision": "env05",
   "ship_user_status": "R02 remains criticized and not visually accepted; separate Astra Ultra Blender revision commissioned",
   "ship_followup_chat": "01a197d8-ebd0-7100-8d12-21ff6bc52c0d",
   "outpost_pad_reference": "output/grafik_20261101/pass04_reference_manifest.json",
@@ -30,44 +30,50 @@
   "scope": [
     {
       "id": "terrain",
-      "actual": "Pass04/R02: feinere gebrochene Felslippen innerhalb gleicher Navhuellen, weichere Sedimentfarbe, vereinigte matte Servicewege mit staubigen Raendern und zwei flache gefaste Aussenposten-Pads",
+      "actual": "Pass05: asymmetrische lokale Felsbrueche/Schultern statt Ringlippen, identische14Navhuellen; Staub-/Sedimentkontakte, gebatchtes Geröll und gezielter Abrieb an Wegen/Vorplatz",
       "runtime_changed": true,
-      "mesh_changed": true
+      "mesh_changed": true,
+      "changed_in_current_pass": true
     },
     {
       "id": "structures",
-      "actual": "Pass04/R02: Kenney-basierte Cutaway-Basis/Halle mit Gebrauchs-/Farbvariation; neue tragende Doppeltankversorgung. Eigene zusaetzliche geschlossene Aussenhuellen mit Schraegkanten, Dach/Fenster/Toren und sparsamen Nieten, per C rein visuell umschaltbar",
+      "actual": "Pass05: eigene differenzierte geschlossene Aussenhuellen fuer Habitat und Industriehalle; Kenney-Cutaway-/Versorgungs-GLBs bleiben unveraendert. Funktionale Arbeitsgruppen mit3unveraenderten Kenney-Props und duplizierter Materialtönung",
       "runtime_changed": true,
-      "mesh_changed": true
+      "mesh_changed": true,
+      "changed_in_current_pass": true
     },
     {
       "id": "people",
-      "actual": "Unveraendert aus Pass02: originale Kenney-Grundfigur mit modularen Ausruestungskandidaten, Original-Idle/Walk",
+      "actual": "Pass05: vier originale Kenney-Citizen-/Gear-GLBs und Idle/Walk unveraendert; Startpositionen und Blickrichtung im synthetischen Fixture an Arbeitsbereiche angepasst",
       "runtime_changed": true,
-      "mesh_changed": true,
-      "changed_in_current_pass": false
+      "mesh_changed": false,
+      "changed_in_current_pass": true
     },
     {
       "id": "cutlass",
-      "actual": "Neue vereinfachte Modellrekonstruktion nach08/09, zwei weitere Form-/Look-Iterationen nach Nutzerablehnung von R01, native statische Einsetzung auf Pad01",
+      "actual": "Unveraenderter kritisierter R02-Zwischenstand aus Pass04; weitere Blender-Modellarbeit separat beiAstraUltra, keine neue Uebernahme in diesem Umgebungspass",
       "runtime_changed": true,
-      "mesh_changed": true
+      "mesh_changed": false,
+      "changed_in_current_pass": false
     },
     {
       "id": "buccaneer",
-      "actual": "Neue vereinfachte Modellrekonstruktion nach13/11, zwei weitere Form-/Look-Iterationen nach Nutzerablehnung von R01, native statische Einsetzung auf Pad02",
+      "actual": "Unveraenderter kritisierter R02-Zwischenstand aus Pass04; weitere Blender-Modellarbeit separat beiAstraUltra, keine neue Uebernahme in diesem Umgebungspass",
       "runtime_changed": true,
-      "mesh_changed": true
+      "mesh_changed": false,
+      "changed_in_current_pass": false
     },
     {
       "id": "rules",
       "actual": "Grafikvertrag und verlinkte Arbeitsregeln",
-      "runtime_changed": false
+      "runtime_changed": false,
+      "changed_in_current_pass": false
     },
     {
       "id": "hex",
       "actual": "Versionierte Hexkoordinaten, A*/HPA, Registry, Bewegungsmass, LOS/FoW, native Auswahl und Picking; Legacy square8 kompatibel",
-      "runtime_changed": true
+      "runtime_changed": true,
+      "changed_in_current_pass": false
     }
   ],
   "source_images_and_models": [
@@ -153,5 +159,11 @@
     "Schiffsmasse/Runtime-Skalierung sind bewusst stilisiert, nicht kanonische Star-Citizen-Abmessungen.",
     "Modelle und Landschaft bleiben vereinfacht: malerische Materialarbeit, reichere Komposition und feinere verwitterte Uebergaenge fehlen weiter.",
     "Keine allgemeine Gameplay-, Grosskarten-Performance-, Multiplayer- oder Release-Abnahme."
+  ],
+  "environment_analysis": "docs/reports/FRONTIER_UMGEBUNG_ANALYSE_2026-11-01.md",
+  "environment_manifests": [
+    "art/frontier_illustrated_20261101/environment/pass05/buildings/manifest.json",
+    "art/frontier_illustrated_20261101/environment/pass05/geology/manifest.json",
+    "art/frontier_illustrated_20261101/environment/pass05/ground_usegroups/manifest.json"
   ]
 }

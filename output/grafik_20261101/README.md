@@ -9,14 +9,36 @@ Differenzen und lokale Notizen/Entscheidungen mit JSON-Export.
 In diesem Checkout `output/grafik_20261101/START_HEX_BASIS.ps1` ausfuehren.
 Godot 4.6.2 muss als `godot_console.exe` oder `godot.exe` im PATH liegen.
 Der Launcher importiert und startet `scenes/tests/frontier_art_preview.tscn`
-mit Vulkan/Forward+. `-Capture` erstellt 17 aktuelle Pass04/R02-Ansichten.
+mit Vulkan/Forward+. `-Capture` erstellt20 aktuellePass05-Umgebungsansichten.
 
 Tasten: 1 Gesamtansicht, 2 Halle, 3 Crew, 4 Gelaende, 5 Basis,
 6 Aussenposten, 7 Cutlass, 8 Buccaneer, 9 Versorgung,
-C geschlossene Aussenhuelle / Schnittansicht, G Hexraster, Leertaste Bewegung,
+0 Arbeitsbereiche, C geschlossene Aussenhuelle / Schnittansicht, G Hexraster, Leertaste Bewegung,
 Mausrad Zoom, Linksklick Feldauswahl, Escape schliessen.
 
 ## Tatsaechlicher Stand
+
+Aktuell Pass05 Umgebung: referenzgefuehrte Formhierarchie, differenzierte
+Gebaeudehuellen, lokale Felsbrueche und bewusst gruppierte Arbeitsbereiche.
+Die vollstaendige Analyse steht unter docs/reports/FRONTIER_UMGEBUNG_ANALYSE_2026-11-01.md.
+Neun feste P4/P5-Kamerapaare und20nativeBilder belegen den wirklichen Stand;
+lived_outpost/ground_detail/geology_detail sind zusaetzliche Nahansichten
+mit eigener Kamera, keine vorgetaeuschten Vorher/Nachher-Paare.
+
+Drei originale Kenney-Props bleiben geometrisch unveraendert, ihre eigenen
+Instanzmaterialien erhalten eine duplizierte warme Toennung. Vier bisherige
+Citizens sind neu angeordnet/gedreht; kein zusaetzliches Civilian-/AI-System.
+Die gekennzeichnetenR02-Schiffe bleiben unveraenderte kritisierte Zwischenstaende,
+weitere Modellarbeit laeuft separat beiAstraUltra/pass05_astra_ultra.
+
+Aktuelle Belege: pass05_environment_verification_manifest.json,
+engine_checks_pass05_environment.json,pass05_environment_check_runs/,
+pass05_environment_*_capture.json und browser_qa_pass05_environment/.
+18/18strengeGodot-Prueflaeufe,21/21eigeneGebaeudegeometrie,12/12Geologie,
+19/19Umgebungs-/Platzierungsfakten. ExakteSource-/Gitblob-/PNG-Hashes
+sowie die verbleibenden2D-Differenzen stehen in den Manifesten.
+
+Die folgende Beschreibung dokumentiert den erhaltenenPass04:
 
 Pass04/R02 des synthetischen nativen Ausschnitts mit396Hexfeldern:
 Kenney-basierte Cutaway-Basis/Halle mit Gebrauchsfeldern, neue tragende
@@ -105,3 +127,14 @@ pass04_check_runs/20261101T153427Z-pid20432/ sind fruehere Arbeitsstaende,
 keine Belege fuer die finale R02-Revision. Die aktuelle strenge Serie steht
 im pass04_verification_manifest.json. probe_geology_pass03.gd bewahrt eine
 isolierte aeltere Geometrie-/Lookprobe ausserhalb der aktiven Tests.
+
+Pass05-Arbeitsproben vor der finalen Materialrunde:
+pass05_environment_setup.log,pass05_environment_geometry.log,
+pass05_environment_review.log und die erste18erSerie
+pass05_environment_check_runs/20261101T175458Z-pid132920/.
+Sie sind historische Arbeitsbelege. Der aktuelle finale18erLauf ist im
+pass05_environment_verification_manifest.json gepinnt.
+
+Pass05-HTML frisch297/297BrowserchecksPASS;111Bilder,222Decodes,
+38Screenshotsund5Sichtnachweise,2echteJSONexports. AktuelleQA/HTML-Hashes
+sind im pass05_environment_verification_manifest.json gebunden.

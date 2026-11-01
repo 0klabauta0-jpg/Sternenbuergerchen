@@ -76,5 +76,21 @@ limitations=["Synthetischer Hex-Basis-Ausschnitt; keine vollstaendige Kampagnen-
 "Schiffsmasse/Runtime-Skalierung sind bewusst stilisiert, nicht kanonische Star-Citizen-Abmessungen.",
 "Modelle und Landschaft bleiben vereinfacht: malerische Materialarbeit, reichere Komposition und feinere verwitterte Uebergaenge fehlen weiter.",
 "Keine allgemeine Gameplay-, Grosskarten-Performance-, Multiplayer- oder Release-Abnahme."])
+# Current environment pass is distinct from the separately owned ship revision.
+manifest.update(report_revision="env05",engine_capture="output/grafik_20261101/pass05_environment_after_capture.json",
+ previous_engine_capture="output/grafik_20261101/pass04_after_capture.json",
+ before_after_verification="output/grafik_20261101/pass05_environment_verification_manifest.json",
+ environment_analysis="docs/reports/FRONTIER_UMGEBUNG_ANALYSE_2026-11-01.md",
+ environment_manifests=["art/frontier_illustrated_20261101/environment/pass05/"+part+"/manifest.json" for part in ("buildings","geology","ground_usegroups")])
+current_changes={
+ "terrain":"Pass05: asymmetrische lokale Felsbrueche/Schultern statt Ringlippen, identische14Navhuellen; Staub-/Sedimentkontakte, gebatchtes Geröll und gezielter Abrieb an Wegen/Vorplatz",
+ "structures":"Pass05: eigene differenzierte geschlossene Aussenhuellen fuer Habitat und Industriehalle; Kenney-Cutaway-/Versorgungs-GLBs bleiben unveraendert. Funktionale Arbeitsgruppen mit3unveraenderten Kenney-Props und duplizierter Materialtönung",
+ "people":"Pass05: vier originale Kenney-Citizen-/Gear-GLBs und Idle/Walk unveraendert; Startpositionen und Blickrichtung im synthetischen Fixture an Arbeitsbereiche angepasst",
+ "cutlass":"Unveraenderter kritisierter R02-Zwischenstand aus Pass04; weitere Blender-Modellarbeit separat beiAstraUltra, keine neue Uebernahme in diesem Umgebungspass",
+ "buccaneer":"Unveraenderter kritisierter R02-Zwischenstand aus Pass04; weitere Blender-Modellarbeit separat beiAstraUltra, keine neue Uebernahme in diesem Umgebungspass"}
+for row in manifest["scope"]:
+ if row["id"] in current_changes: row["actual"]=current_changes[row["id"]]
+ row["changed_in_current_pass"]=row["id"] in ("terrain","structures","people")
+ if row["id"] in ("people","cutlass","buccaneer"):row["mesh_changed"]=False
 (PACKAGE/"asset_source_manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 print(json.dumps(dict(targets=len(gen["targets"]),sources=len(source_entries),scope=len(scope),mapping_entries=len(paths),unique_models=len(set(paths)))))

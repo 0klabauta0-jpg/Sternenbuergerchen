@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### ART 2026-11-01 Pass05 Umgebung - Referenzanalyse und bewohnter wirkende Gruppen
+- Grundlage fbcac03d1, weiter unintegrierter Grafikbranch task/grafikreferenzen-20261101; Code 5499c976028b8200b8a61bb92d5a6879f8ad57a9 committed und gepusht, keine Main-Integration. Schiffe/Astra-Ausgaben bleiben getrennt und unangetastet.
+- Direkter Vergleich Rostgrenze/Freihafen/taktische Karte mit nativen P4-Bildern: fehlende Formhierarchie, Bodenkontakte, ungleiche Komposition, Funktionsgruppen und Materialgewicht verursachen Sterilitaet; mehr gleichmaessige Details alleine haetten dies nicht geloest. Analyse in docs/reports/FRONTIER_UMGEBUNG_ANALYSE_2026-11-01.md.
+- Habitat mit gestaffeltem niedrigem Dach/Servicekanal und gefasstem Eingang; Halle mit hoeherer Lagerbay, niedrigerem seitlichen Buero und schwerem Portal. Eigene Godot-Huellen2588/2508Tris, Geometrie21/21, C-Umschalter und konservative Originalhuelle+.22 erhalten; keine neuen Lichter/Innenraum-/Torzustaende.
+- Felsen: asymmetrische Grundrisse, lokale Frontspalten/Bruchzonen, ungleiche Absaetze und abnehmender Talus statt periodischen Ringlippen.54Meshes/23112Vertices;14Anker/Navhuellen unveraendert(MaxDelta0.95Mikrometer), Geometrievertrag12/12.
+- Boden/Wege: breite Sedimenttoene, Boden-Kontaktshader mit lokalen Staub-/Verdichtungsfeldern unterPflaster, matter Vorplatz mit Gebrauchsstreifen, niedriges Geröll als begrenzter MultiMesh. Drei funktionale Arbeits-/Liefer-/Versorgungsgruppen mit3originalKenneyGLBs/Atlas/Lizenzhashes und getrennt duplizierter warm getoenter Instanzmaterialroute.
+- Vier originale Citizen-/Gear-GLBs/IdleWalk erhalten; Startpositionen/Blickrichtung am Arbeitsplatz statt Praesentationsreihe. NeueAufstellungs-/Kontaktpruefung19/19, gesamte strengeGodotSerie18/18 PASS.20nativeForward+/Vulkan-PNGs;9kamera-/lichtgleicheP4-P5Paare und3neueDetailkameras nurNachher. KeinefehlendenAssets.
+- Unabhaengige nativeSichtpruefung: keinekonkretenneuenBodenstands-/Normalen-/Ueberlappungsblocker. TechnischePruefung ist keinegestalterischeNutzerabnahme. Zielabstand bleibt bei ebenerBodenflaeche, grossenruhigenPlateaus, kompakterGesamtkomposition undgeringeremMaterial-/Erosions-/Gebrauchsreichtum.
+- FrischeOffline-Workbench297/297BrowserchecksPASS,111eingebetteteBilder/222Decodes,38Screenshotsplus5Sichtnachweise,2echteJSONexports. ExakterHTML-SHA256ab79aeec33e86fcf2c4cbe1751937dba6e1b6b8f81b84f2e355d2a51981a28aa;Analyse/9Paare/Detailkarten/Quellen/NotizenDesktopundMobilgeprueft.
+- Kein neuerKI-/Wirtschafts-/Betankungs-/Kampagnenzustand undkeineallgemeinePerformance-/Release-Abnahme. P4HTML undVorherbilder bytegleich erhalten; aktuelleBelege in output/grafik_20261101/pass05_environment_verification_manifest.json.
+
+
 ### ART 2026-11-01 Pass04/R02 - Umgebung und geschlossene Aussenansichten
 - Weiterhin unintegrierter Grafikbranch task/grafikreferenzen-20261101 auf104609cc6; native Implementierung794261191f4165d997f729fb105a5ef0c028774c committed und gepusht. Keine Main-Integration.
 - Drei echte Kenney-basierte Strukturkandidaten (14 Quellmodule): Basis/Halle mit differenzierteren Material-/Gebrauchsfeldern und neue tragende Doppeltankversorgung. Alter Spielzeuglader entfernt; Quellen/Lizenzen unveraendert belegt.

@@ -26,7 +26,7 @@ def capture_is_current(metadata: dict) -> bool:
     return metadata.get("report_ready") is True and metadata.get("report_revision") == REPORT_REVISION
 
 
-def prepare_pass04(root: Path, art: Path, add) -> dict:
+def prepare_pass04(root: Path, art: Path, add, *, verify_current_runtime: bool = True) -> dict:
     references = read(root / "output/grafik_20261101/reference_manifest.json")
     pass04_references = read(root / "output/grafik_20261101/pass04_reference_manifest.json")
     for row in pass04_references["references"]:
@@ -120,9 +120,10 @@ def prepare_pass04(root: Path, art: Path, add) -> dict:
     building_views = []
     r01_ship_cameras = {}
     if ready:
-        for source_path, expected_hash in after.get("runtime_sources_sha256", {}).items():
-            if hashlib.sha256((root / source_path.removeprefix("res://")).read_bytes()).hexdigest() != expected_hash:
-                raise ValueError(f"Capture runtime source differs from current bytes: {source_path}")
+        if verify_current_runtime:
+            for source_path, expected_hash in after.get("runtime_sources_sha256", {}).items():
+                if hashlib.sha256((root / source_path.removeprefix("res://")).read_bytes()).hexdigest() != expected_hash:
+                    raise ValueError(f"Capture runtime source differs from current bytes: {source_path}")
         if not after.get("runtime_sources_sha256"):
             raise ValueError("Released R02 capture must identify runtime source hashes")
         if not {"res://scripts/terrain/frontier_closed_buildings.gd", "res://scripts/tests/frontier_art_preview.gd"}.issubset(after["runtime_sources_sha256"]):
@@ -251,6 +252,7 @@ def prepare_pass04(root: Path, art: Path, add) -> dict:
             "r01_ship_camera_comparison": r01_ship_cameras,
             "ship_user_status": SHIP_USER_STATUS, "ship_followup": SHIP_FOLLOWUP,
             "revision": REPORT_REVISION, "rejected_r01": rejected,
+            "runtime_source_validation": "current_files" if verify_current_runtime else "historical_capture_snapshot",
             "renderer_match": before.get("renderer") == after.get("renderer") if ready else None,
             "light_unchanged": before.get("light") == after.get("light") if ready else None,
             "scope": "synthetic graphics fixture; no campaign/editor migration or release acceptance"}

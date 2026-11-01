@@ -89,3 +89,7 @@ Qualitaet oder allgemeiner Art-/Performance-/Release-Abnahme.
 - OffenerZielabstand: ebenerBoden, grobePlateaus/ruhigeFelsrueckseiten,
   kompakteGebaeudemasse, wenigerMaterialabrieb/GebrauchsdichtealsIllustration.
   BerichtenthaeltAnalysedirektmitBildzuordnungstattallgemeinerDetailaufforderung.
+
+FinaleOffline-HTML:297/297frischeBrowserchecks,111Bilder/222Decodes,
+38automatischeScreenshots+5Sichtnachweise,2echteJSONexports. P4Archiv
+bytegleich, eigenerP5Speicherbereich, keine Nutzer-Artabnahme behauptet.
