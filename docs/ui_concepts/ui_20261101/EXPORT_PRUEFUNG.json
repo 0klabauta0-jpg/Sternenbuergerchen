@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "scope": "JavaScript-Syntax und unveränderte Exportfunktionen offline in Node VM mit synthetischen Controls; keine Browser- oder Downloadprüfung",
+  "checks": [
+    "checked radio wins",
+    "nested controls",
+    "Unicode note",
+    "contenteditable trim",
+    "active choice",
+    "six icons",
+    "icon verdict count",
+    "candidate metadata",
+    "unique safe filenames"
+  ],
+  "browser_status": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL"
+}

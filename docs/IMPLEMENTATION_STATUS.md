@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### UI-Konzept 2026-11-01 – Alternativen und Bildgenerator-Icons
+- Status: Konzeptpaket erstellt; keine Runtime-Integration. Basis `integration/core-foundation` / `3cae5a216`, Branch `task/ui-entwuerfe-20261101`.
+- Stand: Funktionsinventar; drei generierte Layoutkandidaten (A Kommandodeck, B Feldtablet, C Einsatztafel); sechs separate transparente PNG-Icons; lokale Review-Workbench mit JSON-Export; vollständige Gestaltungsbegründung, Prompts, Dateihashes und Next-Chat-Start.
+- Einstieg: `docs/ui_concepts/ui_20261101/UEBERGABE.md`; Vorschau `docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html`; Task `docs/tasks/TASK_UI_KONZEPT_20261101.md`.
+- Prüfung: Neun PNGs gesichtet und unverändert gesichert, sechs Icons mit echtem Alpha; lokale Verweise und JS-Syntax geprüft, Exportfunktionen offline mit synthetischen Controls geprüft. Details in `PRUEFUNG.md` und den JSON-Nachweisen.
+- Grenzen: Browserdienst blockiert `file://`; reale Browser-/Download-/24px-Sichtprüfung offen. A/B haben unterschiedliche generierte Kameras/Haltungen, C enthält illustrative Rollen-/Waffentexte und einen zu korrigierenden Boardingzustand. Keine Godot-, Performance- oder Nutzerabnahme. Nächster Schritt: Variante bewerten und einen kleinen nativen UI-Slice beauftragen.
+
 ### TASK_1201 - FOW Stability (P06, VERIFIED_NO_CODE)
 - Status: `VERIFIED_NO_CODE`; keine Runtime-, Test- oder Phaseninstrumentierungsaenderung. Basis/Mess-SHA `f657ad68860d9ccb9be7ebb1f85ec1a2bae29060`; Produktionsdiff gegen P05 `d319e3c...f657ad6` fuer `scripts data scenes project.godot` leer.
 - Umgebung: Godot 4.6.2 official, Ryzen 7 7800X3D, 64 GB, Windows 10 19045. 3-cold/5-warm: FoW p99 `[1653,1638,1679,1913,1909,1810,1863,1978]` usec, 8/8 PASS <=2000; Dynamic p99 2 usec in 8/8. Proxy p99 `[2921,3083,3089,3117,3117,3110,3153,3010]` usec.

@@ -1,0 +1,217 @@
+{
+  "schema": "sternenbuergerchen.ui_concept_manifest.v1",
+  "date": "2026-11-01",
+  "base_ref": "integration/core-foundation",
+  "base_sha": "3cae5a216",
+  "branch": "task/ui-entwuerfe-20261101",
+  "status": "concept_package_no_runtime_changes",
+  "generator": "built-in image_gen.imagegen",
+  "authorship": "Prompts and design intent authored by Codex; internal generator reasoning not observable",
+  "prompt_file": "docs/ui_concepts/ui_20261101/prompts.json",
+  "prompt_file_sha256": "acdd46bda589a102da135790213f50aee061b717cb7461d7215b21c573b7e0a3",
+  "review": "docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html",
+  "handoff": "docs/ui_concepts/ui_20261101/UEBERGABE.md",
+  "qa": "docs/ui_concepts/ui_20261101/PRUEFUNG.md",
+  "browser_qa": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL",
+  "references": [
+    {
+      "copied_from": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+      "path": "docs/reports/assets/ui-2026-11-01/references/taktische_rostwelt.png",
+      "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e",
+      "status": "current_user_assigned_visual_reference",
+      "role": "visual_style_only_not_runtime_evidence"
+    },
+    {
+      "copied_from": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+      "path": "docs/reports/assets/ui-2026-11-01/references/aussenposten_stilstudie.png",
+      "sha256": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+      "status": "prior_world_style_reference",
+      "role": "visual_style_only_not_runtime_evidence"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "mockup_a_kommandodeck",
+      "kind": "mockup",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a_kommandodeck.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-a1a97bf8-781c-448b-9721-105a0e9e1c9e.png",
+      "sha256": "61a7f597b8440b51e7501fe14edb849f9fb76dde1bbf25add58c2b8a231efbca",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2934875,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB"
+    },
+    {
+      "id": "mockup_b_feldtablet",
+      "kind": "mockup",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_b_feldtablet.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-74460aaf-5443-4a1b-b352-2f1ca46952d9.png",
+      "sha256": "3045df81a7693677b36712856321c5385f8f19d0c11e71fb0b41ee10e10307e0",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2946671,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB"
+    },
+    {
+      "id": "mockup_c_einsatztafel",
+      "kind": "mockup",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_c_einsatztafel.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-b4d1eba2-18c0-46b8-a811-7ff7b5110a39.png",
+      "sha256": "49009116a2cb1d99255e4491eaf559e806a9bc1465fc401fcb2ee71923a07b09",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2100799,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB"
+    },
+    {
+      "id": "icon_move",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_move.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-5e67a35e-2dfd-46cb-9050-6a1a0b752bd9.png",
+      "sha256": "a35eb96198ec52d895bf25a89a080a37887f23895af808a0e6a038a7ec4e3242",
+      "byte_identical_to_generator_original": true,
+      "bytes": 445873,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        104,
+        189,
+        1171,
+        1108
+      ],
+      "fully_transparent_percent": 83.25
+    },
+    {
+      "id": "icon_defend",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_defend.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-d5159042-2433-4f40-8506-8e0a55d5f3c7.png",
+      "sha256": "8c7b8a538858e896ee4374206821fe858dd051c243f444e3d45bdd6898996bc6",
+      "byte_identical_to_generator_original": true,
+      "bytes": 824418,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        219,
+        153,
+        1035,
+        1100
+      ],
+      "fully_transparent_percent": 62.14
+    },
+    {
+      "id": "icon_flank",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_flank.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-229d8ac3-d534-4c61-8739-d930ade03907.png",
+      "sha256": "7aa3a0de3b2c86802bdce6462f539d2e358157e401b8b1f9278a6864e097faf1",
+      "byte_identical_to_generator_original": true,
+      "bytes": 564431,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        219,
+        143,
+        1080,
+        1118
+      ],
+      "fully_transparent_percent": 73.33
+    },
+    {
+      "id": "icon_take",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_take.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-3d96009b-b318-463e-a6ff-53ddc2e43f20.png",
+      "sha256": "bcfc1c2d79437461deb1f687f8e906f19f92558f2844bac04328c136a25c9903",
+      "byte_identical_to_generator_original": true,
+      "bytes": 716494,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        178,
+        84,
+        1059,
+        1206
+      ],
+      "fully_transparent_percent": 69.23
+    },
+    {
+      "id": "icon_dropship",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_dropship.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-64bea0c7-ce48-4028-9e04-b23d8a06ecd8.png",
+      "sha256": "599bc5472a61e18b1cc922a0ebcf4ae7c0f0fa47a57f3e611c211c9f57e16bd9",
+      "byte_identical_to_generator_original": true,
+      "bytes": 958825,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        34,
+        236,
+        1220,
+        1018
+      ],
+      "fully_transparent_percent": 62.36
+    },
+    {
+      "id": "icon_loadout",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_loadout.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-63114808-3599-4827-88a1-ec879e64ceda.png",
+      "sha256": "e4d0d0e38ac4ea6264d353e8fd9807c68bbc61a7a333c645f7656605cdc0763f",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1046538,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        137,
+        137,
+        1117,
+        1092
+      ],
+      "fully_transparent_percent": 52.94
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "scope": "PNG metadata, alpha and byte-identical preservation; no image transformations",
+  "artifacts": [
+    {
+      "file": "mockup_a_kommandodeck.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable"
+    },
+    {
+      "file": "mockup_b_feldtablet.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable"
+    },
+    {
+      "file": "mockup_c_einsatztafel.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable"
+    },
+    {
+      "file": "icon_move.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN"
+    },
+    {
+      "file": "icon_defend.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN"
+    },
+    {
+      "file": "icon_flank.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN"
+    },
+    {
+      "file": "icon_take.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN"
+    },
+    {
+      "file": "icon_dropship.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN"
+    },
+    {
+      "file": "icon_loadout.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN"
+    }
+  ]
+}
