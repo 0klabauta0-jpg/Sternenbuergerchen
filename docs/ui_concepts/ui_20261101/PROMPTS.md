@@ -25,6 +25,16 @@ Gemeinsamer Auftrag: ein einzelnes Motiv, echte Transparenz, keine Schrift oder 
 
 Diese Erläuterungen dokumentieren unsere Vorgaben und die beabsichtigte Bedeutung. Die sichtbare Umsetzung und ihre Grenzen werden in [PRUEFUNG.md](PRUEFUNG.md) bewertet; daraus werden keine unbekannten internen Überlegungen des Bildgenerators abgeleitet.
 
+## Revision A2 nach Nutzerfeedback
+
+Der wiedergefundene Review-Export wählt A für die Mission und C als Staging-Grundlage. Die mündliche Ergänzung verlangt kleinere Buttons, einen flacheren Planbereich, die bisherige linke Truppübersicht und rechte Auswahl-/Transportgruppe sowie keinen Spieltitel oben links. Exakte Eingaben: [prompts_revision2.json](prompts_revision2.json).
+
+- `mockup_a2_kommandodeck_kompakt.png`: A als Bearbeitungsziel, kompakte horizontale Buttons mit kleinem Icon neben Text, reduzierte Zielerklärung und schmale Kopfzeile. Zielgrößen werden als Entwurfsmaß dokumentiert, nicht allein aus dem generierten Raster garantiert.
+- `icon_flank_v2.png`: zwei seitlich um ein Hindernis geführte Pfeile statt eines Rückgängig-ähnlichen U-Pfeils.
+- `icon_dropship_v2.png`: Transporter von schräg seitlich mit Rampe, Passagierzeichen und Abwärtspfeil statt unklarer frontaler Schiffsansicht.
+
+Die zwei neuen Icons sind Alternativen zu den als unklar bewerteten Originalen. Für neue Varianten liegt noch keine Nutzerbewertung vor. Vier positiv bewertete Originalmotive bleiben bestehen. Alle bisherigen PNGs und Eingaben bleiben erhalten.
+
 ## Für die spätere Umsetzung
 
 Texte, Flächen, Fokus und Zustände nativ in Godot aufbauen. Die generierten Komplettscreens bleiben Anschauungsmaterial. Kleine HUD-Icons zunächst mit Beschriftung einsetzen und bei Bedarf aus dieser Motivvorlage vereinfachen. Vorhandene Kenney-Symbole für Checkmark, Schließen und einfache Pfeile weiterhin verwenden.

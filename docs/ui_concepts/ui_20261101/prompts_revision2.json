@@ -1,0 +1,36 @@
+{
+  "schema": "sternenbuergerchen.ui_prompts.revision2.v1",
+  "date": "2026-11-01",
+  "tool": "built-in image_gen.imagegen",
+  "user_feedback": "A chosen; compact commands/dock, retain left roster/right controls, remove top-left game title; original flank/dropship unclear",
+  "source_export": "review_export_20261101_154755.json",
+  "items": [
+    {
+      "id": "mockup_a2_kommandodeck_kompakt",
+      "file": "mockup_a2_kommandodeck_kompakt.png",
+      "references": [
+        "C:/Users/bjoer/.codex/worktrees/ui-entwuerfe-20261101/SternenBuergerchen/docs/reports/assets/ui-2026-11-01/mockup_a_kommandodeck.png"
+      ],
+      "transparent": false,
+      "prompt": "Use-case: precise-object-edit / ui-mockup. EDIT the provided SternenBürgerchen tactical-game screenshot proposal into revision A2 COMPACT. Input image 1 is the edit target. The user likes this DARK variant A, the LEFT ALPHA/BRAVO troop view and the RIGHT dropdown/planning/transport areas. Preserve the exact illustrated rust-canyon world, camera, composition, modular cream/teal buildings, units, colors, visible map and left ALPHA/BRAVO cards. Preserve same image aspect and framing. Change ONLY the oversized bottom HUD and unnecessary top-left game branding; restore matching underlying terrain where HUD is reduced. No world redesign, no new buildings or characters. MAIN CHANGE: bottom commander dock must become visibly shallower, around 100-112 pixels high in this 1672x941 canvas (a design target of about112-128px at1920x1080), starting near bottom y810 instead of original y720. Keep dock at bottom center between left roster and right feed; its TOP EDGE must be dramatically lower, revealing more terrain. Replace the FOUR tall square command tiles by genuinely compact HORIZONTAL buttons, approximately40px high here, with a small18-20px simple icon to the LEFT of a readable label, not a big image above text. Labels exactly 'Bewegen', 'Nehmen', 'Verteidigen', 'Flankieren'. Equal button heights, tight padding, no huge empty interior. Do NOT shrink font into microprint; reduce ornaments, icon sizes and wasted space. Slim selected-team header 'ALPHA 4/4 · FTL Mara · Bereit'. Preserve the separate stance controls 'Vorsichtig · Normal · Aggressiv' with Normal selected, and compact dropdown 'Feuer erwidern'. Group context/target information on the RIGHT of the dock as a short one-line status 'Ziel gewählt' and one moderately sized normal-height primary button 'Plan ausführen' aligned with other controls; eliminate the big explanatory card and giant cyan CTA. A compact selector labeled 'Auftrag: Bewegen' with a down chevron can summarize the current plan while retaining visible four main commands. Keep a discreet quiet empty region inside the dock layout for possible future contextual controls, with NO fake new active actions or placeholder words. About two tidy compact rows with sensible gaps, not a sprawling full-width dashboard. Keep existing upper-right 'Dropship · Bereit' and 'Landezone wählen' card, and left team cards essentially unchanged. TOP LEFT: REMOVE the entire giant 'STERNENBÜRGERCHEN' logo/title bar, its logo and 'EINSATZ · ROSTGRENZE' branding; expose terrain there. The small existing objective card 'Relais sichern' near top-right can stay. Do not invent a replacement logo. Keep palette #151c21 #252d33 slate, white text, cyan interaction, yellow team selection. This is a clean, compact PC real-time COMMANDER interface with indirect fireteam control. No individual soldier actions, no pause/speed controls. Keep small 'UI-ENTWURF · BEISPIELWERTE' caption. All German UI text legible and clean. The key visual win must be MUCH SMALLER BUTTONS AND A SHALLOWER DOCK, not merely a smaller logo."
+    },
+    {
+      "id": "icon_flank_v2",
+      "file": "icon_flank_v2.png",
+      "references": [
+        "C:/Users/bjoer/.codex/worktrees/ui-entwuerfe-20261101/SternenBuergerchen/docs/reports/assets/ui-2026-11-01/icon_flank.png"
+      ],
+      "transparent": true,
+      "prompt": "Use-case: stylized-concept / icon redesign. Image1 is a reference for the existing cream/petrol/cyan enamel icon style ONLY, not a shape to retain. The old single curved arrow looks like Undo; replace its MOTIF decisively. Generate ONE isolated transparent square UI icon for FLANKING / PINCER MANEUVER in a tactical game. Two broad simple cyan route arrows pass UPWARD on opposite sides of ONE small dark petrol rectangular cover obstacle, then angle inward toward its far upper corners. The two arrowheads point diagonally inward from different sides; neither doubles back toward its origin. Large clear negative spaces, symmetry in silhouette, at most5 broad shapes, no circular motion, no U-turn, no undo/reload arrow. Central cover is a plain cream rectangle with petrol border, no screws/details. Arrow style broad cream-edged cyan. Orthographic TOP-DOWN DIAGRAM with no perspective floor, no title, words, letters, numbers, button plate or badge. Authentic transparent alpha background, motif centered within generous approximately15percent equal margins. Same restrained soft enamel/flat illustrated industrial style and upper-left light as original, simplified broad geometry that remains useful at32px. Meaning is surround / approach from both sides, not forward movement. No weapons, no target-crosshair, no glow, no background shadow."
+    },
+    {
+      "id": "icon_dropship_v2",
+      "file": "icon_dropship_v2.png",
+      "references": [
+        "C:/Users/bjoer/.codex/worktrees/ui-entwuerfe-20261101/SternenBuergerchen/docs/reports/assets/ui-2026-11-01/icon_dropship.png"
+      ],
+      "transparent": true,
+      "prompt": "Use-case: stylized-concept / icon redesign. Image1 supplies cream/petrol/cyan illustration style ONLY. The old head-on spaceship silhouette was unclear. Generate ONE isolated transparent square icon conveying TROOP TRANSPORT LANDING, with a clearly different side-three-quarter view. One very simplified chunky CREAM AND PETROL civilian-like science-fiction shuttle with broad cabin, short wings, lowered landing skids and an open rear ramp. Immediately under/beside the ramp, exactly TWO tiny simple cream human passenger silhouettes, clearly disembarking; these are broad head-and-body glyphs, not detailed portraits. One small broad CYAN DOWN ARROW above the shuttle reinforces delivery/landing. Avoid fighter-jet nose, weapons, giant engine circles, busy cockpit paneling or cinematic ship render. The ship, down arrow and two passenger glyphs form one compact grouped motif, large clear negative space, authentic transparent alpha, no text/letter/number/logo/button plate/badge, no floor, no landing-pad background. Centered composition, about15percent equal safe margins. Match restrained cream #edf3e7, petrol #385a60, cyan #63d1d2 enamel shading with upper-left light; mostly flat very simple silhouette readable at48px. This is a candidate transport-navigation icon, not a new in-game spacecraft design or a passenger capacity rule. Keep shapes bold and few, no tiny mechanisms or glowing effects."
+    }
+  ]
+}

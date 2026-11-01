@@ -1,0 +1,81 @@
+{
+  "schema": "sternenbuergerchen.html_workbench.v1",
+  "report_id": "sternenbuergerchen_ui_20261101",
+  "title": "SternenBürgerchen · UI-Entwürfe · 01.11.2026",
+  "exported_at": "2026-11-01T14:47:55.564Z",
+  "controls": {
+    "preview": {
+      "compare_ab": false
+    },
+    "icons": {
+      "move": {
+        "verdict": "continue",
+        "note": ""
+      },
+      "defend": {
+        "verdict": "continue",
+        "note": ""
+      },
+      "flank": {
+        "verdict": "unclear",
+        "note": ""
+      },
+      "take": {
+        "verdict": "continue",
+        "note": ""
+      },
+      "dropship": {
+        "verdict": "unclear",
+        "note": ""
+      },
+      "loadout": {
+        "verdict": "continue",
+        "note": ""
+      }
+    },
+    "review": {
+      "mission_preference": "a",
+      "mission_notes": "",
+      "staging_verdict": "continue",
+      "staging_notes": "",
+      "context": ""
+    },
+    "checks": {
+      "hierarchy": false,
+      "legibility": false,
+      "icon_small": false,
+      "world_style": false,
+      "handoff": false
+    }
+  },
+  "notes": {
+    "review": {
+      "free_note": ""
+    }
+  },
+  "active_choices": {
+    "preview": {
+      "variant": "c"
+    },
+    "icons": {
+      "background": "dark",
+      "size": "48"
+    }
+  },
+  "computed": {
+    "review_checks_checked": 0,
+    "review_checks_total": 5,
+    "icon_verdicts_recorded": 6,
+    "icon_count": 6
+  },
+  "metadata": {
+    "url": "file:///C:/Users/bjoer/.codex/worktrees/ui-entwuerfe-20261101/SternenBuergerchen/docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+    "task": "TASK_UI_KONZEPT_20261101",
+    "status": "concept_review_only",
+    "template_origin": "docs/reports/_html_workbench_template.html",
+    "image_status": "image_generator_candidates",
+    "runtime_integrated": false,
+    "source_manifest": "../ui_concepts/ui_20261101/manifest.json"
+  }
+}

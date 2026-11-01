@@ -5,55 +5,85 @@
       "file": "mockup_a_kommandodeck.png",
       "file_copy": "PASS",
       "real_alpha": "not_required",
-      "small_size_visual_acceptance": "not_applicable"
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "initial"
     },
     {
       "file": "mockup_b_feldtablet.png",
       "file_copy": "PASS",
       "real_alpha": "not_required",
-      "small_size_visual_acceptance": "not_applicable"
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "initial"
     },
     {
       "file": "mockup_c_einsatztafel.png",
       "file_copy": "PASS",
       "real_alpha": "not_required",
-      "small_size_visual_acceptance": "not_applicable"
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "initial"
     },
     {
       "file": "icon_move.png",
       "file_copy": "PASS",
       "real_alpha": "PASS",
-      "small_size_visual_acceptance": "OPEN"
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
     },
     {
       "file": "icon_defend.png",
       "file_copy": "PASS",
       "real_alpha": "PASS",
-      "small_size_visual_acceptance": "OPEN"
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
     },
     {
       "file": "icon_flank.png",
       "file_copy": "PASS",
       "real_alpha": "PASS",
-      "small_size_visual_acceptance": "OPEN"
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
     },
     {
       "file": "icon_take.png",
       "file_copy": "PASS",
       "real_alpha": "PASS",
-      "small_size_visual_acceptance": "OPEN"
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
     },
     {
       "file": "icon_dropship.png",
       "file_copy": "PASS",
       "real_alpha": "PASS",
-      "small_size_visual_acceptance": "OPEN"
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
     },
     {
       "file": "icon_loadout.png",
       "file_copy": "PASS",
       "real_alpha": "PASS",
-      "small_size_visual_acceptance": "OPEN"
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
+    },
+    {
+      "file": "mockup_a2_kommandodeck_kompakt.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a2_compact"
+    },
+    {
+      "file": "icon_flank_v2.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "a2_compact"
+    },
+    {
+      "file": "icon_dropship_v2.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "a2_compact"
     }
   ]
 }

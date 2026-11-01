@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### UI-Konzept 2026-11-01 – Nutzerfeedback und kompakte Revision A2
+- Status: Fortsetzung des noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`, Revisionsbasis `2286e5b07`; keine Runtime-Aenderung.
+- Nutzerexport aus Downloads gefunden und unveraendert archiviert: Mission A, Staging C weiterfuehren; vier Iconmotive geeignet, Flankieren/Dropship unklar. Alle fuenf Pruefcheckboxen bleiben ungesetzt.
+- Aenderung: A2 mit flacherem Dock und horizontalen beschrifteten Buttons, linke Teams/rechter Steuerbereich erhalten, Spieltitel oben links entfernt. Zwei neue separate Iconalternativen. Vorherbilder bleiben verfuegbar; Review zeigt A2 standardmaessig und erfasst die jeweiligen Assetversionen.
+- Pruefung: Sichtvergleich durch zwei Agenten, PNG-/Alpha-/Hashpruefung, lokale Verweise, JS-Syntax sowie Export-/Umschaltfunktionen offline. Echter Nutzerexport bestaetigt einen Download, ersetzt keine automatisierte Browser-/Fokus- oder Godot-Pruefung. Native Pixelziele und kleine Icongroessen bleiben offen.
+- Einstieg: `docs/ui_concepts/ui_20261101/FEEDBACK_20261101.md`, `UEBERGABE.md` und die bestehende Review-HTML. A2 und die neuen Icons sind neue Kandidaten, noch keine Nutzerfreigabe.
+
 ### UI-Konzept 2026-11-01 – Alternativen und Bildgenerator-Icons
 - Status: Konzeptpaket erstellt; keine Runtime-Integration. Basis `integration/core-foundation` / `3cae5a216`, Branch `task/ui-entwuerfe-20261101`.
 - Stand: Funktionsinventar; drei generierte Layoutkandidaten (A Kommandodeck, B Feldtablet, C Einsatztafel); sechs separate transparente PNG-Icons; lokale Review-Workbench mit JSON-Export; vollständige Gestaltungsbegründung, Prompts, Dateihashes und Next-Chat-Start.

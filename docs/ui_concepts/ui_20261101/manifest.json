@@ -212,6 +212,113 @@
         1092
       ],
       "fully_transparent_percent": 52.94
+    },
+    {
+      "id": "mockup_a2_kommandodeck_kompakt",
+      "kind": "mockup",
+      "status": "revision2_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a2_kommandodeck_kompakt.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-f72d2583-e689-4502-a6b8-1dfb11fff49e.png",
+      "sha256": "1bf349ba5b6dc67dd06eff16684f37cde2ef946c77655e1384debb3f17cea8b8",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2791573,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a2_compact"
+    },
+    {
+      "id": "icon_flank_v2",
+      "kind": "icon",
+      "status": "revision2_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_flank_v2.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-41a44300-61dd-49af-af5b-4d6ad0cf9dbf.png",
+      "sha256": "b122fdbdd638b8c154e09696bc8e1770e268f553cdcbf6d66155c6e43fe037a2",
+      "byte_identical_to_generator_original": true,
+      "bytes": 596527,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "revision": "a2_compact",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        61,
+        244,
+        1194,
+        1051
+      ],
+      "fully_transparent_percent": 72.56
+    },
+    {
+      "id": "icon_dropship_v2",
+      "kind": "icon",
+      "status": "revision2_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_dropship_v2.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-e76c889f-c277-487c-b2b3-e19099453d99.png",
+      "sha256": "83f37066358f654c64b942bc22316685cb23c5d8a08fcc19306b612806733fd1",
+      "byte_identical_to_generator_original": true,
+      "bytes": 807865,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "revision": "a2_compact",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        88,
+        156,
+        1166,
+        1084
+      ],
+      "fully_transparent_percent": 67.35
     }
-  ]
+  ],
+  "current_revision": "a2_compact",
+  "revision_base_sha": "2286e5b07",
+  "revision2_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision2.json",
+  "revision2_prompt_file_sha256": "c7ef1a7c96569d7d3dee3b6125e16d1fc5f66e378e6a214b88cb72eb2246cbeb",
+  "review_selection": {
+    "archived_path": "docs/ui_concepts/ui_20261101/review_export_20261101_154755.json",
+    "sha256": "02dcedb8e801704f48288b1ca0f7a8a04791b7d22ee77de44513b4940683c366",
+    "recovered_from": "C:\\Users\\bjoer\\Downloads\\sternenbuergerchen_ui_20261101_2026-11-01T14-47-55-564Z_01.json",
+    "exported_at": "2026-11-01T14:47:55.564Z",
+    "mission_preference": "a",
+    "staging_verdict": "continue",
+    "original_icon_verdicts": {
+      "move": "continue",
+      "defend": "continue",
+      "flank": "unclear",
+      "take": "continue",
+      "dropship": "unclear",
+      "loadout": "continue"
+    },
+    "checks": {
+      "hierarchy": false,
+      "legibility": false,
+      "icon_small": false,
+      "world_style": false,
+      "handoff": false
+    },
+    "scope": "original concept directions only; revision2 assets remain unreviewed"
+  },
+  "review_assets": {
+    "mission_proposal": "mockup_a2_kommandodeck_kompakt.png",
+    "prior_mission": "mockup_a_kommandodeck.png",
+    "staging": "mockup_c_einsatztafel.png",
+    "icons": [
+      "icon_move.png",
+      "icon_defend.png",
+      "icon_flank_v2.png",
+      "icon_take.png",
+      "icon_dropship_v2.png",
+      "icon_loadout.png"
+    ]
+  },
+  "browser_agent_qa": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL",
+  "user_export_evidence": "Original real JSON recovered in Downloads; proves one user export, not all browser interactions"
 }

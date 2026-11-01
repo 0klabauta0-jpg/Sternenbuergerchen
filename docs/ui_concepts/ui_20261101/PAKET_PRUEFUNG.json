@@ -1,12 +1,13 @@
 {
   "status": "PASS",
-  "scope": "File integrity and links only; browser was blocked",
-  "image_artifacts": 9,
-  "real_alpha_icons": 6,
-  "source_references": 2,
-  "exact_prompts": 9,
-  "html_local_references": 16,
-  "missing": [],
-  "external_dependencies": [],
-  "duplicate_html_ids": []
+  "scope": "revision2 local links and integrity; no browser automation",
+  "revision": "a2_compact",
+  "png_artifacts": 12,
+  "png_references": 2,
+  "review_export_integrity": "PASS",
+  "prompt_file_hashes": "PASS",
+  "all_originals_preserved": true,
+  "missing_references": [],
+  "html_ids_unique": true,
+  "external_dependencies": []
 }
