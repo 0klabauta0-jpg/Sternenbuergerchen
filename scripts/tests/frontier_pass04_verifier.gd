@@ -61,6 +61,9 @@ func run() -> void:
 				cap_count += 3
 				for j in range(3): upward = upward and normals[i+j].y>0.95
 		check(cap_count>0 and upward,"pad "+id+" deck has upward normals")
+		var ramp: MeshInstance3D = pad.get_node("AccessRamp")
+		var ramp_vertices: PackedVector3Array = ramp.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		check(not ramp_vertices.is_empty() and absf(ramp_vertices[0].x)<pad.footprint.size.x*0.5-0.04,"pad "+id+" ramp start overlaps the inset deck")
 		var walkable_centers := 0
 		for tile in data.get_tiles():
 			if pad.footprint.has_point(HEX.axial_to_plane(Vector2(tile.grid_position))) and registry.is_walkable(tile.grid_position):
@@ -75,6 +78,15 @@ func run() -> void:
 	for shell in shells:
 		if shell.visible: visible_shells += 1
 	check(visible_shells==2,"closed mode shows both exteriors")
+	for shell in shells:
+		var door: MeshInstance3D = shell.get_node("DoorFrame")
+		var door_box: AABB = door.transform*door.get_aabb()
+		var windows_clear := true
+		for window in shell.find_children("*","MeshInstance3D",false,false):
+			if window.name=="FrontWindowFrame" or (window.mesh is BoxMesh and window.position.y>0.3 and is_equal_approx(window.position.z,door.position.z) and window.mesh.size.x<door.mesh.size.x):
+				var box: AABB = window.transform*window.get_aabb()
+				windows_clear = windows_clear and (box.end.x<door_box.position.x or box.position.x>door_box.end.x)
+		check(windows_clear,"exterior window frames remain outside the door opening")
 	var facts: Array = []
 	for tile in data.get_tiles(): facts.append(tile.to_dict())
 	for id in ["cutlass_front","cutlass_rear","buccaneer_front","buccaneer_rear","utility","outpost"]:

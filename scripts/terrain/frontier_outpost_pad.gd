@@ -61,10 +61,10 @@ func _deck(size: Vector2, height: float, bottom: float, color: String) -> void:
 
 func _ramp(edge: float, length: float, width: float, side: float) -> void:
 	edge *= side
-	var a := Vector3(edge-0.02,DECK_HEIGHT, -width*0.5)
+	var a := Vector3(edge-side*0.05,DECK_HEIGHT, -width*0.5)
 	var b := Vector3(edge+length*side,0.014,-width*0.5)
 	var c := Vector3(edge+length*side,0.014,width*0.5)
-	var d := Vector3(edge-0.02,DECK_HEIGHT,width*0.5)
+	var d := Vector3(edge-side*0.05,DECK_HEIGHT,width*0.5)
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for v in ([a,b,c,a,c,d] if side>0.0 else [a,c,b,a,d,c]): surface.add_vertex(v)

@@ -363,8 +363,8 @@
     "res://scripts/terrain/frontier_art_dressing.gd": "235aaf318f42687c8f914408019bbfacb685eb63b23cf5578d7640750569f36a",
     "res://scripts/terrain/frontier_art_geology.gd": "a987305579549a196d02b5e2172f1104bf7ea8a889c0a535adb478576288a4ec",
     "res://scripts/terrain/frontier_art_profile.gd": "9ea54d24eb732ea804e750d2543e15fd85c4f1ba3b4f1d19c78c591629f26c0f",
-    "res://scripts/terrain/frontier_closed_buildings.gd": "974f8f0a775368fcb319a8fe156265c55b716c97b1280937268d2c55426841b9",
-    "res://scripts/terrain/frontier_outpost_pad.gd": "ca022fc56341d05e987bb47355a33f9f47ad9faada58e166efed24566bf2717a",
+    "res://scripts/terrain/frontier_closed_buildings.gd": "967129250a0be1e9529f48e67d14de88b1d582b72983f6dd90b8e969cf68842d",
+    "res://scripts/terrain/frontier_outpost_pad.gd": "0f2ac2200330f473c1fcd2fa3c57ef779a530f55c0d9c62991ba5713b24805b2",
     "res://scripts/tests/frontier_art_preview.gd": "25803f45e736015427e9001cf009eedc15cf72deb8c8f23a5da30d4f1be50971",
     "res://shaders/terrain/frontier_ground.gdshader": "406b093c14c4dceaf4142f5a210711221c2b7dbb5fbfb2e5e8062bd5c0116842"
   },
@@ -373,9 +373,9 @@
   "synthetic_fixture": true,
   "tile_count": 396,
   "unit_spacing_enabled": false,
-  "engine_report": "output/grafik_20261101/pass04_check_runs/20261101T160417Z-pid125408/metadata/report.json",
+  "engine_report": "output/grafik_20261101/pass04_check_runs/20261101T164440Z-pid41380/metadata/report.json",
   "ship_user_status": "criticized_not_accepted",
   "ship_followup_chat": "01a197d8-ebd0-7100-8d12-21ff6bc52c0d",
-  "visual_review": "Native views inspected: closed shells, deck contact and clearance, complete model imports. User still rejects ship target fidelity; Astra Ultra revision commissioned separately.",
+  "visual_review": "Updated native closed hall and outpost images opened after independent review corrections: windows outside shutter frame, mirrored ramp starts overlap inset decks. User still criticizes ship target fidelity; Astra Ultra revision commissioned separately.",
   "closed_shell_scope": "Own authored Godot exterior geometry over hidden cutaway GLBs; visual-only C toggle, no door/interior simulation."
 }

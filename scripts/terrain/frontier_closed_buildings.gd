@@ -37,10 +37,10 @@ func build(bounds: AABB, hall: bool) -> void:
 			_box("DoorGlass",Vector3(0.055,opening_height*0.42,0.012),Vector3(x,opening_height*0.64,front+0.05),"407c83")
 	# Large dark teal windows and shallow sloping brow/edge strips.
 	for side in [-1.0,1.0]:
-		var x: float = side*width*0.33
-		_box("FrontWindowFrame",Vector3(width*0.19,height*0.25,0.035),Vector3(x,height*0.59,front),"64746b")
-		_box("FrontWindow",Vector3(width*0.16,height*0.19,0.013),Vector3(x,height*0.59,front+0.024),"3c6971")
-		var brow := _box("WindowBrow",Vector3(width*0.22,0.045,0.08),Vector3(x,height*0.75,front+0.018),"c9cbb5")
+		var x: float = side*width*(0.40 if hall else 0.33)
+		_box("FrontWindowFrame",Vector3(width*(0.14 if hall else 0.19),height*0.25,0.035),Vector3(x,height*0.59,front),"64746b")
+		_box("FrontWindow",Vector3(width*(0.11 if hall else 0.16),height*0.19,0.013),Vector3(x,height*0.59,front+0.024),"3c6971")
+		var brow := _box("WindowBrow",Vector3(width*(0.16 if hall else 0.22),0.045,0.08),Vector3(x,height*0.75,front+0.018),"c9cbb5")
 		brow.rotation.x = -0.25
 		_box("CornerArmor",Vector3(0.065,height*0.59,0.055),Vector3(side*(width*0.5-0.065),height*0.53,front-0.018),"c1c4ad")
 		for y in [height*0.30,height*0.72]:
