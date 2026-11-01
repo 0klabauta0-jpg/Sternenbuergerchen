@@ -8,10 +8,11 @@ const SIM = preload("res://scripts/core/simulation_root.gd")
 const ACTOR = preload("res://scripts/tests/frontier_art_preview_actor.gd")
 const HEX = preload("res://scripts/terrain/hex_grid.gd")
 const PROFILE = preload("res://scripts/terrain/frontier_art_profile.gd")
-const BACKDROP = preload("res://scripts/terrain/frontier_art_backdrop.gd")
+const BACKDROP = preload("res://scripts/terrain/frontier_art_geology.gd")
+const DRESSING = preload("res://scripts/terrain/frontier_art_dressing.gd")
 const ART_ROOT := "res://Assets/curated/frontier_illustrated_20261101/"
 const MODEL_SCALE := 0.35
-const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass/"
+const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/"
 
 var _view
 var _data
@@ -26,6 +27,7 @@ var _profile = PROFILE.new()
 var _model_facts: Array = []
 var _current_view_id := "overview"
 var _preview_zoom_factor := 1.0
+var _external_visual_owners: Dictionary = {}
 
 func _ready() -> void:
 	_capture_mode = OS.get_cmdline_user_args().has("--capture-frontier-art")
@@ -49,7 +51,11 @@ func _ready() -> void:
 	_add_solar_array(Vector2(9.1,3.8))
 	var backdrop = BACKDROP.new()
 	_stage.add_child(backdrop)
-	backdrop.build(_profile,Vector2(12.0,5.0))
+	_reserve_footprints(backdrop.build(_profile,Vector2(12.0,5.0)),true,backdrop)
+	var dressing = DRESSING.new()
+	dressing.name = "FrontierWorkingGround"
+	_stage.add_child(dressing)
+	_reserve_footprints(dressing.build(_profile))
 	_registry = REGISTRY.new()
 	_registry.name = "TerrainRegistry"
 	add_child(_registry)
@@ -67,6 +73,7 @@ func _ready() -> void:
 	_sim.local_avoidance_enabled = false
 	_sim.bottleneck_reservation_enabled = false
 	add_child(_sim)
+	_view.set_external_terrain_object_visuals(_external_visual_owners)
 	_view.configure_from_map(_data)
 	for index in range(4):
 		_add_citizen(["operator","pilot","mechanic","medic"][index],Vector2(10.6+float(index)*1.05,9.4))
@@ -80,9 +87,21 @@ func _make_terrain() -> void:
 		var p: Vector2 = HEX.axial_to_plane(Vector2(tile.grid_position))
 		var corridor := absf(p.y-9.6)<0.9 or (p.distance_to(Vector2(6.0,10.4))<2.1)
 		tile.surface_type = "road" if corridor else "ground"
-		if p.y<1.5 and p.x>14.0:
-			tile.height_level = 1
-			tile.walkable = false
+
+func _reserve_footprints(footprints: Array, blocks_sight: bool = false, visual_owner: Node3D = null) -> void:
+	# Authoritative fixture construction happens before registry registration.
+	# The visual builders only return envelopes; they cannot mutate gameplay.
+	for tile in _data.get_tiles():
+		var p: Vector2 = HEX.axial_to_plane(Vector2(tile.grid_position))
+		for footprint in footprints:
+			if footprint.has_point(p):
+				tile.walkable = false
+				if blocks_sight:
+					tile.blocks_los = true
+					tile.object_height = 4
+					if visual_owner != null:
+						_external_visual_owners[tile.grid_position] = visual_owner
+				break
 
 func _add_continuous_backdrop_ground() -> void:
 	var ground := MeshInstance3D.new()
@@ -90,9 +109,12 @@ func _add_continuous_backdrop_ground() -> void:
 	var mesh := PlaneMesh.new()
 	mesh.size = Vector2(120.0,100.0)
 	ground.mesh = mesh
-	ground.position = Vector3(12.0,-0.095,6.0)
+	# This flat fixture uses a continuous painted surface above the individual
+	# cell caps. Hex facts, raised cells, picking and grid overlays remain intact.
+	ground.position = Vector3(12.0,0.0015,6.0)
 	ground.material_override = _profile.material_for(_profile.surface_color("ground"))
 	_stage.add_child(ground)
+	_view.set_flat_ground_visual_owner(ground)
 
 func _add_structure(model: String, plane: Vector2) -> void:
 	var path := ART_ROOT+"structures/"+model+".glb"
@@ -123,7 +145,7 @@ func _combined_bounds(node: Node3D) -> AABB:
 	return result
 
 func _add_citizen(role: String, plane: Vector2) -> void:
-	var path := ART_ROOT+"citizens/"+role+".glb"
+	var path := ART_ROOT+"citizens_pass02/"+role+".glb"
 	if not ResourceLoader.exists(path):
 		push_error("Missing approved frontier citizen: "+path)
 		return
@@ -207,6 +229,32 @@ func _add_landing_pad(plane: Vector2) -> void:
 	material.roughness = 0.92
 	top.material_override = material
 	root.add_child(top)
+	# Broad painted landing target and corner beacons, all inside the blocked pad.
+	var ring := SurfaceTool.new()
+	ring.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for segment in range(64):
+		var angle := TAU*float(segment)/64.0
+		var next_angle := TAU*float(segment+1)/64.0
+		var a := Vector3(cos(angle)*1.08,0.223,sin(angle)*1.08)
+		var b := Vector3(cos(angle)*1.115,0.223,sin(angle)*1.115)
+		var c := Vector3(cos(next_angle)*1.115,0.223,sin(next_angle)*1.115)
+		var d := Vector3(cos(next_angle)*1.08,0.223,sin(next_angle)*1.08)
+		for vertex in [a,b,c,a,c,d]: ring.add_vertex(vertex)
+	ring.generate_normals()
+	var paint := MeshInstance3D.new()
+	paint.mesh = ring.commit()
+	var paint_material := StandardMaterial3D.new()
+	paint_material.albedo_color = Color("d6a049")
+	paint_material.roughness = 0.9
+	paint_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	paint.material_override = paint_material
+	root.add_child(paint)
+	for x in [-0.28,0.28]:
+		_add_box(root,Vector3(0.045,0.004,0.55),Vector3(x,0.225,0.0),Color("d6a049"))
+	_add_box(root,Vector3(0.56,0.004,0.045),Vector3(0.0,0.225,0.0),Color("d6a049"))
+	for x in [-0.96,0.96]:
+		for z in [-0.96,0.96]:
+			_add_box(root,Vector3(0.06,0.23,0.06),Vector3(x,0.34,z),Color("d3ccaa"))
 	for x in [-0.9,0.9]:
 		for z in [-0.9,0.9]:
 			_add_box(root,Vector3(0.12,0.18,0.12),Vector3(x,0.09,z),Color("444f50"))
@@ -226,6 +274,9 @@ func _add_solar_array(plane: Vector2) -> void:
 		_add_box(root,Vector3(0.07,0.4,0.07),Vector3(x,0.2,0.0),Color("505955"))
 		var panel := _add_box(root,Vector3(0.78,0.04,0.95),Vector3(x,0.52,0.0),Color("244d63"))
 		panel.rotation.x = deg_to_rad(-25.0)
+		for z in [-0.40,0.0,0.40]:
+			var crossbar := _add_box(panel,Vector3(0.75,0.008,0.012),Vector3(0.0,0.025,z),Color("9aa7a8"))
+			crossbar.name = "PanelCellRow"
 	for tile in _data.get_tiles():
 		if HEX.axial_to_plane(Vector2(tile.grid_position)).distance_to(plane)<1.7:
 			tile.walkable = false
@@ -243,7 +294,7 @@ func _build_ui() -> void:
 	panel.add_theme_stylebox_override("panel",style)
 	layer.add_child(panel)
 	_status = Label.new()
-	_status.text = "STERNENBÜRGERCHEN  /  HEX-BASIS\nGrafik- und Bewegungsprobe · kein Kampagnenstand\n1 Übersicht   2 Werkstatt   3 Citizens   G Hexraster\nLeertaste Gehen   Linksklick Feld wählen   Mausrad Zoom"
+	_status.text = "STERNENBÜRGERCHEN  /  HEX-BASIS\nGrafik- und Bewegungsprobe · kein Kampagnenstand\n1 Übersicht   2 Werkstatt   3 Citizens   4 Gelände\nG Hexraster   Leertaste Gehen   Mausrad Zoom"
 	_status.add_theme_font_size_override("font_size",15)
 	panel.add_child(_status)
 
@@ -264,6 +315,10 @@ func _camera_view(id: String, reset_zoom: bool = true) -> void:
 		focus = Vector2(13.2,6.8)
 		size = 4.2
 		pitch = 42.0
+	elif id=="landscape":
+		focus = Vector2(12.0,5.6)
+		size = 23.0
+		pitch = 46.0
 	size *= _preview_zoom_factor
 	_view.set("_focus_grid_position",HEX.plane_to_axial(focus))
 	_view.set("_camera_size",size)
@@ -287,6 +342,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_1: _camera_view("overview")
 			KEY_2: _camera_view("workshop")
 			KEY_3: _camera_view("crew")
+			KEY_4: _camera_view("landscape")
 			KEY_G:
 				_view.set_hex_grid_visible(not bool(_view.get("_hex_grid_visible")))
 				_camera_view(_current_view_id,false)
@@ -312,7 +368,7 @@ func _capture_all() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CAPTURE_ROOT))
 	for i in range(30): await get_tree().process_frame
 	var captures: Array = []
-	for id in ["overview","hex_grid","crew","workshop","baseline"]:
+	for id in ["overview","hex_grid","crew","workshop","landscape","baseline"]:
 		_view.set_frontier_art_enabled(id!="baseline")
 		_view.set_hex_grid_visible(id=="hex_grid")
 		_camera_view("overview" if id in ["hex_grid","baseline"] else id)
@@ -321,7 +377,8 @@ func _capture_all() -> void:
 		var image := get_viewport().get_texture().get_image()
 		var path: String = CAPTURE_ROOT+String(id)+".png"
 		var error := image.save_png(path)
-		captures.append({"id":id,"path":path,"error":error,"camera_size":_view.get_camera_size(),"profile_enabled":id!="baseline"})
+		var camera: Camera3D = _view.get_node("ViewportContainer/SubViewport/WorldRoot/Camera3D")
+		captures.append({"id":id,"path":path,"error":error,"camera_size":_view.get_camera_size(),"camera_transform":str(camera.global_transform),"camera_projection":camera.projection,"viewport_size":str(get_viewport().get_visible_rect().size),"profile_enabled":id!="baseline"})
 	_view.set_frontier_art_enabled(true)
 	_camera_view("crew")
 	_walk_demo()
@@ -330,8 +387,12 @@ func _capture_all() -> void:
 	get_viewport().get_texture().get_image().save_png(CAPTURE_ROOT+"walk_pose.png")
 	captures.append({"id":"walk_pose","path":CAPTURE_ROOT+"walk_pose.png","camera_size":_view.get_camera_size(),"profile_enabled":true})
 	var renderer: String = RenderingServer.get_current_rendering_method()+" / "+RenderingServer.get_current_rendering_driver_name()
-	var report := {"engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"captures":captures,"runtime_scale_from_metres":MODEL_SCALE,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot")}
-	var report_file := FileAccess.open("res://output/grafik_20261101/frontier_engine_capture.json",FileAccess.WRITE)
+	var sources := {}
+	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://shaders/terrain/frontier_ground.gdshader"]:
+		sources[source] = FileAccess.get_sha256(source)
+	var snapshot: Dictionary = _view.get_render_snapshot()
+	var report := {"report_ready":false,"pass":"02","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"captures":captures,"runtime_scale_from_metres":MODEL_SCALE,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Same fixed cameras and output resolution as pass01; lighting and displayed assets deliberately revised in pass02. Flat fixture surface is continuous; Hex cells remain authoritative and selectable."}
+	var report_file := FileAccess.open("res://output/grafik_20261101/pass02_after_capture.json",FileAccess.WRITE)
 	if report_file == null:
 		push_error("Cannot write frontier engine capture report")
 		get_tree().quit(1)

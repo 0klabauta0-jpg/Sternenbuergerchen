@@ -14,3 +14,5 @@ qa/*
 !qa/stock_roundtrip.json
 !qa/STOCK_VISUAL_REVIEW.md
 !qa/source_animation_settings.json
+!pass02/
+!pass02/.gitignore

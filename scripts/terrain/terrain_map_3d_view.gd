@@ -1205,6 +1205,8 @@ var _dynamic_unit_source_signatures: Dictionary = {}
 var _fire_sector_los_cache: Dictionary = {}
 var _fire_sector_los_cache_signature: String = ""
 var _frontier_art_enabled: bool = false
+var _external_terrain_object_visuals: Dictionary = {}
+var _flat_ground_visual_owner: WeakRef
 var _frontier_art_profile = FRONTIER_ART_PROFILE_SCRIPT.new()
 var _active_grid_topology: String = "square8"
 var _hex_ground_batch = HEX_GROUND_BATCH_SCRIPT.new()
@@ -1271,6 +1273,26 @@ func set_frontier_art_enabled(enabled: bool) -> void:
 	else:
 		_ensure_nodes()
 	_request_viewport_redraw(true)
+
+
+func set_external_terrain_object_visuals(owners: Dictionary) -> void:
+	# A scene may render a multi-cell rock/building itself. This visual-only map
+	# avoids duplicate fallback boxes while the explicit owner remains alive.
+	_external_terrain_object_visuals.clear()
+	for grid in owners:
+		var owner: Node3D = owners[grid] as Node3D
+		if is_instance_valid(owner):
+			_external_terrain_object_visuals[grid] = weakref(owner)
+	if _terrain_map_data != null:
+		render_map()
+
+
+func set_flat_ground_visual_owner(owner: MeshInstance3D) -> void:
+	# Explicit ownership of the flat visual surface prevents coplanar AO/shadow
+	# artifacts. Raised terrain, tile facts and Hex picking keep their own paths.
+	_flat_ground_visual_owner = weakref(owner) if is_instance_valid(owner) else null
+	if _terrain_map_data != null:
+		render_map()
 
 
 func set_hex_grid_visible(enabled: bool) -> void:
@@ -3655,7 +3677,9 @@ func _add_tile_visual(tile_data) -> void:
 	if _uses_hex_grid():
 		var hex_color: Color = _frontier_art_profile.surface_color(String(tile_data.surface_type)) if _frontier_art_enabled else _get_tile_color(tile_data)
 		var hex_material: Material = _frontier_art_profile.material_for(hex_color) if _frontier_art_enabled else _make_material(hex_color)
-		_hex_ground_batch.queue_tile(_grid_to_3d_position(Vector2(tile_data.grid_position), top_y), hex_color, cell_size, hex_material)
+		var owns_flat_ground: bool = height_level==0 and _flat_ground_visual_owner!=null and is_instance_valid(_flat_ground_visual_owner.get_ref())
+		if not owns_flat_ground:
+			_hex_ground_batch.queue_tile(_grid_to_3d_position(Vector2(tile_data.grid_position), top_y), hex_color, cell_size, hex_material)
 	elif _uses_strict_3d_asset_mapping():
 		var ground_visual_type_id: String = _resolve_ground_surface_model_key(tile_data)
 		if not _queue_ground_model_batch(tile_data, top_y, ground_visual_type_id) and not _add_ground_model_visual(tile_data, top_y, ground_visual_type_id):
@@ -3673,6 +3697,9 @@ func _add_tile_visual(tile_data) -> void:
 	_add_surface_tint_visual(tile_data, top_y)
 	_add_surface_detail_visual(tile_data, top_y)
 	_map_tile_count += 1
+	var external_visual: WeakRef = _external_terrain_object_visuals.get(tile_data.grid_position)
+	if external_visual != null and is_instance_valid(external_visual.get_ref()):
+		return
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""

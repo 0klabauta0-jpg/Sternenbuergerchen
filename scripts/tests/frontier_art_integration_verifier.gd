@@ -24,14 +24,18 @@ func run() -> void:
 	var registry = preview.get("_registry")
 	var simulation = preview.get("_sim")
 	simulation.set_physics_process(false)
-	check(crew.size()==4,"four stock citizens in the native fixture")
+	check(crew.size()==4,"four Kenney-based citizens in the native fixture")
 	check(preview.get("_model_facts").size()==7,"three structures and four citizens loaded")
 	check(data.get_grid_topology()=="hex_axial_v1","new base uses Hex map facts")
 	for entry in crew:
 		var visual: Node3D = entry["visual"]
 		var meshes: Array = visual.find_children("*","MeshInstance3D",true,false)
-		check(meshes.size()==1,"one stock character mesh")
-		check(meshes[0].mesh.get_surface_count()==1,"stock atlas uses one material")
+		check(meshes.size()==2,"original character and modular gear meshes imported")
+		var original_count := 0
+		for mesh in meshes:
+			if mesh.mesh.get_surface_count()==1:
+				original_count += 1
+		check(original_count==1,"original body atlas remains a single-material mesh")
 		check(not String(entry["idle"]).is_empty() and not String(entry["walk"]).is_empty(),"original idle and walk imported")
 		check(registry.is_walkable(registry.world_to_grid(entry["actor"].position)),"citizen starts on walkable Hex")
 	preview.call("_camera_view","crew")

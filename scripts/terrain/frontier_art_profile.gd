@@ -5,10 +5,10 @@ extends RefCounted
 const PROFILE_ID := "frontier_illustrated_v1"
 const GROUND_SHADER = preload("res://shaders/terrain/frontier_ground.gdshader")
 const SURFACE_COLORS := {
-	"ground": Color("c58d62"),
-	"sand": Color("e3bd8c"),
-	"road": Color("bda07c"),
-	"rock": Color("b87551"),
+	"ground": Color("a65c40"),
+	"sand": Color("cf8a57"),
+	"road": Color("a65c40"),
+	"rock": Color("af573b"),
 	"water": Color("638f9a"),
 }
 var _materials: Dictionary = {}
@@ -28,23 +28,23 @@ func material_for(color: Color, rock: bool = false) -> ShaderMaterial:
 	return material
 
 func apply_environment(environment: Environment) -> void:
-	environment.background_color = Color("a7cad4")
-	environment.ambient_light_color = Color("b6c7ce")
-	environment.ambient_light_energy = 0.28
+	environment.background_color = Color("aa6e58")
+	environment.ambient_light_color = Color("b6bfcd")
+	environment.ambient_light_energy = 0.34
 	environment.tonemap_mode = Environment.TONE_MAPPER_ACES
-	environment.tonemap_exposure = 0.9
+	environment.tonemap_exposure = 0.95
 	environment.adjustment_brightness = 1.0
-	environment.adjustment_contrast = 1.03
-	environment.adjustment_saturation = 1.04
+	environment.adjustment_contrast = 1.05
+	environment.adjustment_saturation = 0.94
 	environment.ssao_enabled = true
-	environment.ssao_radius = 0.18
-	environment.ssao_intensity = 1.2
+	environment.ssao_radius = 0.22
+	environment.ssao_intensity = 1.35
 
 func apply_light(light: DirectionalLight3D) -> void:
-	light.light_color = Color("fff8ed")
-	light.light_energy = 0.85
+	light.light_color = Color("fff0d9")
+	light.light_energy = 0.95
 	light.rotation_degrees = Vector3(-52.0, -32.0, 0.0)
-	light.shadow_opacity = 0.62
+	light.shadow_opacity = 0.72
 	light.shadow_blur = 1.8
 	light.shadow_normal_bias = 0.45
 	light.shadow_bias = 0.025

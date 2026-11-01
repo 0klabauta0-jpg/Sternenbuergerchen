@@ -1,0 +1,13 @@
+14:41:50 | INFO: Data are loaded, start creating Blender stuff
+14:41:50 | INFO: Blender create Mesh node habitat_01_ExportMesh
+14:41:51 | INFO: glTF import finished in 0.05s
+14:41:51 | INFO: Data are loaded, start creating Blender stuff
+14:41:51 | INFO: Blender create Mesh node workshop_01_ExportMesh
+14:41:51 | INFO: glTF import finished in 0.03s
+14:41:51 | INFO: Data are loaded, start creating Blender stuff
+14:41:51 | INFO: Blender create Mesh node service_unit_01_ExportMesh
+14:41:51 | INFO: glTF import finished in 0.02s
+FRONTIER_STRUCTURE_ROUNDTRIP {"pass": true, "blender": "5.2.3 LTS", "native_engine_import": false, "assets": {"habitat_01": {"pass": true, "glb_sha256": "1da24faad755ea8b5c8e33a9420b8633f1f8c56053b155bdda0e9ef0e8c20e52", "objects": 1, "triangles": 13184, "dimensions_blender_xyz": [6.679999828338623, 6.744999885559082, 4.349999904632568], "bounds_min": [-3.3399999141693115, -3.372499942779541, 0.0], "bounds_max": [3.3399999141693115, 3.372499942779541, 4.349999904632568], "materials": 8, "geometry_qa_pass": true, "warnings": ["habitat_01: duplicate verts=12984 loose verts=0", "hidden back-to-back faces: habitat_01 (55 pairs) - delete to save tris"], "source_bounds_match_tolerance_m": 0.0001}, "workshop_01": {"pass": true, "glb_sha256": "28e5d97863f5c97e8a54d3f28a44867f9a38b372d31f4d80e7b668946d24a7ec", "objects": 1, "triangles": 9992, "dimensions_blender_xyz": [7.039999961853027, 5.7179999351501465, 4.222499847412109], "bounds_min": [-3.5199999809265137, -2.8589999675750732, 0.0], "bounds_max": [3.5199999809265137, 2.8589999675750732, 4.222499847412109], "materials": 9, "geometry_qa_pass": true, "warnings": ["workshop_01: duplicate verts=9939 loose verts=0", "hidden back-to-back faces: workshop_01 (50 pairs) - delete to save tris"], "source_bounds_match_tolerance_m": 0.0001}, "service_unit_01": {"pass": true, "glb_sha256": "81a2d1fb532db4082d586bb9834ba0559b3d5cd5fda3b7814f27c74a39518ea3", "objects": 1, "triangles": 6760, "dimensions_blender_xyz": [4.849999904632568, 3.200000047683716, 2.7100000381469727], "bounds_min": [-2.424999952316284, -1.600000023841858, 0.0], "bounds_max": [2.424999952316284, 1.600000023841858, 2.7100000381469727], "materials": 7, "geometry_qa_pass": true, "warnings": ["service_unit_01: duplicate verts=6439 loose verts=0"], "source_bounds_match_tolerance_m": 0.0001}}}
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

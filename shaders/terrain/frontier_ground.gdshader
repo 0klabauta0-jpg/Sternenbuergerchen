@@ -23,13 +23,17 @@ void vertex() {
 
 void fragment() {
 	// Continuous world coordinates keep the same broad paint patches across tile seams.
-	float patch = broad_patch(ground_world_position.xz * 0.42);
-	float value = mix(0.94, 1.05, smoothstep(0.18, 0.85, patch));
+	float patch = broad_patch(ground_world_position.xz * 0.40);
+	float region = broad_patch(ground_world_position.xz * 0.13 + vec2(12.1, 4.8));
+	float grit = broad_patch(ground_world_position.xz * 8.0);
+	float value = mix(0.87, 1.12, smoothstep(0.10, 0.88, patch));
+	vec3 pigment = mix(base_color.rgb * vec3(0.95, 0.94, 0.95), base_color.rgb * vec3(1.10, 1.08, 1.0), region);
+	value *= mix(0.97, 1.03, grit);
 	if (rock_strata) {
-		float layer = sin(ground_world_position.y * 8.0 + patch * 0.7);
-		value *= mix(0.84, 1.04, smoothstep(-0.15, 0.2, layer));
+		float layer = sin(ground_world_position.y * 10.0 + patch * 1.5);
+		value *= mix(0.88, 1.05, smoothstep(-0.15, 0.2, layer));
 	}
-	ALBEDO = base_color.rgb * value;
+	ALBEDO = pigment * value;
 	ROUGHNESS = 0.96;
 	METALLIC = 0.0;
 }

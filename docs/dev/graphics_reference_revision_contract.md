@@ -55,6 +55,17 @@ Strukturen, Fahrzeuge und Menschen. Er ergaenzt den
   danach. Offene Vorschlaege nicht als implementiert ausgeben. Vorlaeufige
   Grundlagen nicht als unveraenderliche Endentscheidung festschreiben.
 
+## Externe Grafik im nativen Hex-Ausschnitt
+
+Ein mehrzelliges Klippen-/Gebaeudemodell darf eine explizite, schwach
+referenzierte Visual-Owner-Zuordnung fuer seine Zellen erhalten. Das verhindert
+doppelte Ersatzobjekte, veraendert jedoch keine Karten-, LOS- oder
+Bewegungsfakten. Ohne lebenden Owner greift wieder die normale Darstellung.
+Ein expliziter flacher Ground-Owner darf nur die Kappen der Ebene 0 ersetzen;
+er ersetzt weder Hoehendaten noch Hex-Picking oder Auswahl. Der synthetische
+Fixture-Builder setzt Hindernis-/LOS-Fakten vor der Registry-Registrierung.
+Die Visual-Builder liefern dazu nur Footprint-Huellen zurueck.
+
 ## HTML-Vergleich
 
 Grafikberichte folgen dem vorhandenen Workbench-Format und funktionieren lokal

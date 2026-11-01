@@ -1,4 +1,4 @@
-"""Original frontier structure family, authored for the approved 01/03 images.
+"""Frontier structure family, pass 02: approved 03 + Rostgrenze/Freihafen.
 
 Blender 5.2.3: blender -b --factory-startup -P build_structures.py -- [--preview]
 Geometry is in metres. Front = Blender -Y, glTF/Godot +Z. No engine behavior.
@@ -29,7 +29,7 @@ def reset():
     global MATS,PARTS
     bpy.ops.wm.read_factory_settings(use_empty=True);PARTS=[]
     bpy.context.scene.unit_settings.system='METRIC'
-    MATS={k:material(k,c,r) for k,c,r in [('Cream','ddceb0',.83),('PaleTrim','eee0c4',.8),('SlateTeal','46676b',.82),('DarkFrame','2e4449',.85),('Hardware','778280',.72),('Ochre','d6a23e',.76),('Glass','395b63',.24),('Deck','9f9e8a',.86)]}
+    MATS={k:material(k,c,r) for k,c,r in [('Cream','e0d9c9',.83),('PaleTrim','eee8da',.8),('SlateTeal','567374',.82),('DarkFrame','344447',.85),('Hardware','89918d',.78),('Ochre','df9744',.79),('Glass','395b63',.3),('Deck','aaa99b',.86),('Roof','b7bdb5',.88)]}
 
 def mesh(name,verts,faces,mat,bevel=0):
     me=bpy.data.meshes.new(name+'_Mesh');me.from_pydata(verts,[],faces);me.update()
@@ -233,6 +233,55 @@ def service():
     path_pipe('Service_TankVent',[(1.25,.40,2.2),(1.25,.40,2.62)],.095,'Hardware')
     bar('Service_VentCap',(1.25,.4,2.59),(1.25,.4,2.71),.17,'DarkFrame',16)
 
+
+def assign_material(ob,key):
+    ob.data.materials.clear();ob.data.materials.append(MATS[key])
+
+
+def pass02(asset):
+    """Large readable changes only; additions stay inside the previous bounds."""
+    if asset=='habitat_01':
+        for ob in PARTS:
+            if ob.name.startswith('Habitat_TopPanel'):assign_material(ob,'Roof')
+        # A single continuous low orange band ties the whole kit together.
+        for sx in (-1,1):
+            box('Habitat_OrangeFrontBand',(sx*2.03,-2.329,.77),(2.39,.04,.16),'Ochre',.009)
+            box('Habitat_OrangeSideBand',(sx*3.217,0,.77),(.04,4.26,.16),'Ochre',.009)
+        box('Habitat_OrangeRearBand',(0,2.285,.77),(6.1,.04,.16),'Ochre',.009)
+        for sx in (-1,1):
+            box('Habitat_AirlockOrangeInset',(sx*.866,-2.692,1.58),(.10,.06,1.30),'Ochre',.015)
+        box('Habitat_AirlockEyebrow',(0,-2.69,2.91),(1.31,.065,.095),'Ochre',.01)
+    elif asset=='workshop_01':
+        for ob in PARTS:
+            if ob.name.startswith('Workshop_TopPanel'):assign_material(ob,'Roof')
+            # Move the existing coherent workbench as a group, not loose props.
+            if ob.name.startswith(('Workshop_Bench','Workshop_Drawer','Workshop_Vise')):
+                ob.data.transform(Matrix.Translation(Vector((0,-1.45,0))))
+        for sx in (-1,1):
+            for ya,yb in [(-2.50,-.99),(-.78,.78),(.99,2.50)]:
+                box('Workshop_OrangeWallBand',(sx*3.342,(ya+yb)/2,1.04),(.045,yb-ya,.18),'Ochre',.01)
+        box('Workshop_OrangeRearBand',(0,2.708,1.04),(6.15,.04,.18),'Ochre',.01)
+        box('Workshop_PortalEyebrow',(0,-2.625,3.99),(4.65,.06,.16),'Ochre',.012)
+        # One supported storage rack with three large shelves and grouped cargo.
+        for x in (1.35,2.55):
+            for y in (-2.30,-1.30):
+                box('Workshop_RackUpright',(x,y,1.46),(.12,.12,2.24),'Hardware',.016)
+        for z in (.62,1.26,1.90):
+            box('Workshop_RackShelf',(1.95,-1.80,z),(1.30,1.10,.10),'DarkFrame',.016)
+        for x,z,color in [(1.66,.885,'Ochre'),(2.24,.885,'Cream'),(1.66,1.525,'Cream'),(2.24,1.525,'SlateTeal'),(1.95,2.165,'Ochre')]:
+            box('Workshop_StoredCase',(x,-1.80,z),(.48,.72,.43),color,.035)
+        # A broad front floor cue gives the open bay a useful visual threshold.
+        for x in (-1.95,1.95):
+            box('Workshop_BayFloorMark',(x,-2.20,.354),(.15,.60,.008),'Ochre',.001)
+    else:
+        for ob in PARTS:
+            if ob.name.startswith('Service_CentreBelt'):assign_material(ob,'Ochre')
+            if ob.name.startswith('Service_PumpTop'):assign_material(ob,'Roof')
+        # Broad, connected service outlets; no disconnected decorative nozzles.
+        for x in (-1.96,-1.50):
+            bar('Service_OutputCollar',(x,-1.375,.47),(x,-1.49,.47),.10,'Ochre',12)
+            bar('Service_OutputSocket',(x,-1.465,.47),(x,-1.575,.47),.065,'DarkFrame',12)
+
 def bounds(obs):
     bpy.context.view_layer.update();pts=[o.matrix_world@Vector(c) for o in obs for c in o.bound_box]
     lo=Vector(tuple(min(p[i] for p in pts) for i in range(3)));hi=Vector(tuple(max(p[i] for p in pts) for i in range(3)))
@@ -268,6 +317,12 @@ def preview(asset,size):
     for name,vec in [('front',(1,-1.55,1.05)),('rear',(-1,1.6,1.1))]:
         cam.location=target+Vector(vec).normalized()*max(size)*3;cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler()
         sc.render.filepath=str(ART/'qa'/(asset+'_'+name+'.png'));bpy.ops.render.render(write_still=True)
+    # Deterministic per-part colors expose intersections and detached components.
+    sc.display.shading.color_type='OBJECT'
+    colors=[(.70,.22,.12,1),(.14,.45,.62,1),(.46,.63,.25,1),(.68,.48,.14,1),(.42,.25,.60,1)]
+    for i,ob in enumerate(PARTS):ob.color=colors[i%len(colors)]
+    cam.location=target+Vector((1,-1.55,1.05)).normalized()*max(size)*3;cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler()
+    sc.render.filepath=str(ART/'qa'/(asset+'_random.png'));bpy.ops.render.render(write_still=True)
     # Temporary QA copies: genuine evaluated polygon wires, never exported.
     sc.display.shading.color_type='OBJECT';wires=[]
     for ob in PARTS:
@@ -281,7 +336,7 @@ def main():
     sys.path.insert(0,r'C:/Users/bjoer/.codex/skills/blender-asset-qa/scripts');import qa_check
     records={}
     for asset,fn in [('habitat_01',habitat),('workshop_01',workshop),('service_unit_01',service)]:
-        reset();fn();lo,hi=bounds(PARTS)
+        reset();fn();pass02(asset);lo,hi=bounds(PARTS)
         offset=Vector(((lo.x+hi.x)/2,(lo.y+hi.y)/2,lo.z))
         for ob in PARTS:ob.data.transform(Matrix.Translation(-offset))
         bpy.context.view_layer.update();lo,hi=bounds(PARTS)
@@ -293,6 +348,24 @@ def main():
         bpy.ops.wm.save_as_mainfile(filepath=str(ART/'source'/(asset+'.blend')))
         if '--preview' in sys.argv:preview(asset,hi-lo)
         rec={'asset':asset,'front_axis_blender':'-Y','front_axis_godot':'+Z','units':'metres','dimensions_blender_xyz':list(hi-lo),'pivot':'full bounds XY centre, ground Z=0','part_count':len(PARTS),'palette':list(MATS),'source_blend':str((ART/'source'/(asset+'.blend')).relative_to(ROOT)).replace('\\','/'),'source_blend_sha256':hashlib.sha256((ART/'source'/(asset+'.blend')).read_bytes()).hexdigest(),'export_glb':str((EXPORT/(asset+'.glb')).relative_to(ROOT)).replace('\\','/'),'glb':glb,'qa_pass':qa['pass'],'qa_errors':qa['errors'],'qa_warnings':qa['warnings'],'warning_acceptance':{'hidden back-to-back faces':'Accepted internal mounting/contact caps at separately editable closed parts. No visible coplanar overlap; not a watertight boolean union.','fully enclosed handles':'Heuristic on nested airlock ring; both ochre handle bars visibly protrude and were inspected in front/side view.'},'qa_scope':'all new geometry, including z-fight/contact checks; UV excluded for constant-color untextured palette','door_height_m':2.1 if asset=='habitat_01' else None,'references':['docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png','docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png'],'status':'original first-pass static visual; no collision/navigation; Godot integration by parent task'}
+        rec.update({
+            'revision':'pass02',
+            'status':'pass02 static visual candidate; user visual acceptance pending; no collision/navigation',
+            'references':[
+                'docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png',
+                'docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png',
+                'docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png'],
+            'reference_scope':'03 shape family + current warm pale shells/orange bands and coherent work/storage groups. No room capacity, cutaway gameplay or logistics.',
+            'generator':'art/frontier_illustrated_20261101/structures/generator/build_structures.py',
+            'generator_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            'changes':{
+                'habitat_01':['pale neutral roof panels','warm pale shell palette','continuous orange wall bands','orange chamfered airlock accents'],
+                'workshop_01':['pale neutral roof panels','orange wall/portal bands','existing workbench moved 1.45m toward open front','supported cargo rack inside unchanged width/height'],
+                'service_unit_01':['orange tank belt','pale pump lid','two connected front service couplings']
+            }[asset],
+            'native_import_checked':False,
+            'user_visual_acceptance':False,
+        })
         records[asset]=rec;print('FRONTIER_ASSET '+json.dumps(rec),flush=True)
     (ART/'manifest.json').write_text(json.dumps({'schema':'sternenbuergerchen.frontier_structures.v1','blender':bpy.app.version_string,'assets':records},indent=2),encoding='utf8')
 

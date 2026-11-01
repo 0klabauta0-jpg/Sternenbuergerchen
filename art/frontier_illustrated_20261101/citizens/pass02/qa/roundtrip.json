@@ -1,0 +1,2134 @@
+{
+  "blender": "5.2.3 LTS",
+  "pass": true,
+  "assets": [
+    {
+      "role": "operator",
+      "pass": true,
+      "glb_sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c",
+      "import_method": "fresh Blender5.2.3 factory-empty; merge_vertices=True requested; required UV/hard-normal attribute seam copies remain; no source repair",
+      "rig_count": 1,
+      "skinned_mesh_count": 2,
+      "skin_count": 1,
+      "material_count": 4,
+      "embedded_images": 1,
+      "triangles_by_gltf_mesh": {
+        "characterMedium": 1604,
+        "Gear_Breastplate_Mesh": 1200
+      },
+      "stats_rest": {
+        "vertices": 4051,
+        "triangles": 2804,
+        "bounds_blender_m": {
+          "min": [
+            -0.8553462028503418,
+            -0.2431384027004242,
+            -1.88234423603717e-07
+          ],
+          "max": [
+            0.8555743098258972,
+            0.2695000171661377,
+            1.7799999713897705
+          ]
+        },
+        "dimensions_blender_m": [
+          1.710920512676239,
+          0.5126384198665619,
+          1.7800001596241941
+        ]
+      },
+      "rest_bidirectional_nearest_vertex_error_m": 6.357489041874942e-07,
+      "clips": [
+        {
+          "name": "idle",
+          "imported_action": "idle",
+          "frames": [
+            0.0,
+            32.0
+          ],
+          "duration_seconds": 1.0666666666666667,
+          "sampled_frame_count": 33,
+          "samples": [
+            {
+              "frame": 0,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.45599856802437e-07,
+                "gear": 4.023313522338867e-07
+              }
+            },
+            {
+              "frame": 1,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0494480875422596e-06,
+                "gear": 4.792177037415968e-07
+              }
+            },
+            {
+              "frame": 2,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2980270867046784e-06,
+                "gear": 4.238326027916628e-07
+              }
+            },
+            {
+              "frame": 3,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.207723792314937e-07,
+                "gear": 4.2826258095374214e-07
+              }
+            },
+            {
+              "frame": 4,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.143512463386287e-06,
+                "gear": 4.4053035708202515e-07
+              }
+            },
+            {
+              "frame": 5,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0991564067808213e-06,
+                "gear": 4.693274320288765e-07
+              }
+            },
+            {
+              "frame": 6,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0189605745836161e-06,
+                "gear": 5.535535478884412e-07
+              }
+            },
+            {
+              "frame": 7,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1067310197176994e-06,
+                "gear": 4.837859819417645e-07
+              }
+            },
+            {
+              "frame": 8,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0713303026932408e-06,
+                "gear": 5.101335887047753e-07
+              }
+            },
+            {
+              "frame": 9,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.70407768363657e-07,
+                "gear": 3.816559512870299e-07
+              }
+            },
+            {
+              "frame": 10,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2694005135927e-06,
+                "gear": 4.782901328326261e-07
+              }
+            },
+            {
+              "frame": 11,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.4824221352682798e-06,
+                "gear": 5.170509780327848e-07
+              }
+            },
+            {
+              "frame": 12,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.10550149656774e-06,
+                "gear": 3.943180502119503e-07
+              }
+            },
+            {
+              "frame": 13,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.982943538489053e-07,
+                "gear": 5.331722263690608e-07
+              }
+            },
+            {
+              "frame": 14,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2276965435376042e-06,
+                "gear": 4.023313522338867e-07
+              }
+            },
+            {
+              "frame": 15,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.397188023285707e-07,
+                "gear": 4.3213367462158203e-07
+              }
+            },
+            {
+              "frame": 16,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.097943595596007e-06,
+                "gear": 4.951133405484143e-07
+              }
+            },
+            {
+              "frame": 17,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0203759757132502e-06,
+                "gear": 4.31426570912663e-07
+              }
+            },
+            {
+              "frame": 18,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1534692703207838e-06,
+                "gear": 4.31426570912663e-07
+              }
+            },
+            {
+              "frame": 19,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.205521471092652e-06,
+                "gear": 4.2311162928854174e-07
+              }
+            },
+            {
+              "frame": 20,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.166581114375731e-06,
+                "gear": 3.943180502119503e-07
+              }
+            },
+            {
+              "frame": 21,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.3647380683323718e-06,
+                "gear": 6.462707915488863e-07
+              }
+            },
+            {
+              "frame": 22,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1039940090995515e-06,
+                "gear": 4.782901328326261e-07
+              }
+            },
+            {
+              "frame": 23,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.38654864057753e-07,
+                "gear": 4.174985122062935e-07
+              }
+            },
+            {
+              "frame": 24,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0293672403349774e-06,
+                "gear": 5.092622927804769e-07
+              }
+            },
+            {
+              "frame": 25,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.912353107210947e-07,
+                "gear": 4.805480102731963e-07
+              }
+            },
+            {
+              "frame": 26,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0310914149158634e-06,
+                "gear": 4.027622821922705e-07
+              }
+            },
+            {
+              "frame": 27,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.26861311855464e-06,
+                "gear": 4.308471659442148e-07
+              }
+            },
+            {
+              "frame": 28,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0254771041218191e-06,
+                "gear": 4.3264719806757057e-07
+              }
+            },
+            {
+              "frame": 29,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.980719823943218e-07,
+                "gear": 4.380028997275076e-07
+              }
+            },
+            {
+              "frame": 30,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2354715863693855e-06,
+                "gear": 4.009492329259956e-07
+              }
+            },
+            {
+              "frame": 31,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0346989256504457e-06,
+                "gear": 4.549127083919302e-07
+              }
+            },
+            {
+              "frame": 32,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.45599856802437e-07,
+                "gear": 4.023313522338867e-07
+              }
+            }
+          ]
+        },
+        {
+          "name": "walk",
+          "imported_action": "walk",
+          "frames": [
+            0.0,
+            32.0
+          ],
+          "duration_seconds": 1.0666666666666667,
+          "sampled_frame_count": 33,
+          "samples": [
+            {
+              "frame": 0,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1755873856600374e-06,
+                "gear": 7.89620969499083e-07
+              }
+            },
+            {
+              "frame": 1,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.334658557236253e-07,
+                "gear": 7.630573009009822e-07
+              }
+            },
+            {
+              "frame": 2,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.307571551478759e-06,
+                "gear": 7.416228982037865e-07
+              }
+            },
+            {
+              "frame": 3,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0683207847250742e-06,
+                "gear": 7.110914452823636e-07
+              }
+            },
+            {
+              "frame": 4,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.3670140788235585e-06,
+                "gear": 5.79423385715927e-07
+              }
+            },
+            {
+              "frame": 5,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.111211076931795e-06,
+                "gear": 6.966990326873201e-07
+              }
+            },
+            {
+              "frame": 6,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.760057994550152e-07,
+                "gear": 6.014238351781387e-07
+              }
+            },
+            {
+              "frame": 7,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.678567269271298e-07,
+                "gear": 4.809088522961247e-07
+              }
+            },
+            {
+              "frame": 8,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.775889111551805e-07,
+                "gear": 5.60133059934742e-07
+              }
+            },
+            {
+              "frame": 9,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1002921382896602e-06,
+                "gear": 5.895382173548569e-07
+              }
+            },
+            {
+              "frame": 10,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1186792789885658e-06,
+                "gear": 5.094802872918081e-07
+              }
+            },
+            {
+              "frame": 11,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.17407535071834e-06,
+                "gear": 5.603312160928908e-07
+              }
+            },
+            {
+              "frame": 12,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0413768904982135e-06,
+                "gear": 5.863280421181116e-07
+              }
+            },
+            {
+              "frame": 13,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1024610557797132e-06,
+                "gear": 6.568776029780565e-07
+              }
+            },
+            {
+              "frame": 14,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.107497269003943e-06,
+                "gear": 6.376669716701144e-07
+              }
+            },
+            {
+              "frame": 15,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.117934743888327e-06,
+                "gear": 6.922628017491661e-07
+              }
+            },
+            {
+              "frame": 16,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1536891406649374e-06,
+                "gear": 6.818808060415904e-07
+              }
+            },
+            {
+              "frame": 17,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1267447916907258e-06,
+                "gear": 6.655666879851196e-07
+              }
+            },
+            {
+              "frame": 18,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1021068075933727e-06,
+                "gear": 5.5275074828387e-07
+              }
+            },
+            {
+              "frame": 19,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0257206213282188e-06,
+                "gear": 5.105686682327359e-07
+              }
+            },
+            {
+              "frame": 20,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0811303354785196e-06,
+                "gear": 6.802506504755002e-07
+              }
+            },
+            {
+              "frame": 21,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1281665592832724e-06,
+                "gear": 5.583960387411935e-07
+              }
+            },
+            {
+              "frame": 22,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1318018096062588e-06,
+                "gear": 5.659009048031294e-07
+              }
+            },
+            {
+              "frame": 23,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.292713798458863e-07,
+                "gear": 5.181234428164316e-07
+              }
+            },
+            {
+              "frame": 24,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.320375511379098e-07,
+                "gear": 6.828569780736871e-07
+              }
+            },
+            {
+              "frame": 25,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0604979934214498e-06,
+                "gear": 6.304881594587641e-07
+              }
+            },
+            {
+              "frame": 26,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.587258548686805e-07,
+                "gear": 7.17773616543127e-07
+              }
+            },
+            {
+              "frame": 27,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.119869580179511e-06,
+                "gear": 7.523241833951033e-07
+              }
+            },
+            {
+              "frame": 28,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.279766024708806e-06,
+                "gear": 6.880803766762256e-07
+              }
+            },
+            {
+              "frame": 29,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1309185765639995e-06,
+                "gear": 7.591187340949546e-07
+              }
+            },
+            {
+              "frame": 30,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2171612979727797e-06,
+                "gear": 7.545713174295088e-07
+              }
+            },
+            {
+              "frame": 31,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.965497499957564e-07,
+                "gear": 7.36666152079124e-07
+              }
+            },
+            {
+              "frame": 32,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1755873856600374e-06,
+                "gear": 7.89620969499083e-07
+              }
+            }
+          ]
+        }
+      ],
+      "raw_qa_report": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\operator_roundtrip_raw.json",
+      "errors": [],
+      "warnings": [
+        "characterMedium: duplicate verts=44 loose verts=0",
+        "Gear_Modular: duplicate verts=1601 loose verts=0"
+      ],
+      "image": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\operator_roundtrip_walk.png"
+    },
+    {
+      "role": "pilot",
+      "pass": true,
+      "glb_sha256": "4548eb634e41a4a94965d616b45a51339e3da150bd0d1d708016e1f625c4ac00",
+      "import_method": "fresh Blender5.2.3 factory-empty; merge_vertices=True requested; required UV/hard-normal attribute seam copies remain; no source repair",
+      "rig_count": 1,
+      "skinned_mesh_count": 2,
+      "skin_count": 1,
+      "material_count": 4,
+      "embedded_images": 1,
+      "triangles_by_gltf_mesh": {
+        "characterMedium": 1604,
+        "Gear_Breastplate_Mesh": 1740
+      },
+      "stats_rest": {
+        "vertices": 5488,
+        "triangles": 3344,
+        "bounds_blender_m": {
+          "min": [
+            -0.8553462028503418,
+            -0.2431384027004242,
+            -1.88234423603717e-07
+          ],
+          "max": [
+            0.8555743098258972,
+            0.2695000171661377,
+            1.7799999713897705
+          ]
+        },
+        "dimensions_blender_m": [
+          1.710920512676239,
+          0.5126384198665619,
+          1.7800001596241941
+        ]
+      },
+      "rest_bidirectional_nearest_vertex_error_m": 6.357489041874942e-07,
+      "clips": [
+        {
+          "name": "idle",
+          "imported_action": "idle",
+          "frames": [
+            0.0,
+            32.0
+          ],
+          "duration_seconds": 1.0666666666666667,
+          "sampled_frame_count": 33,
+          "samples": [
+            {
+              "frame": 0,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.45599856802437e-07,
+                "gear": 6.381455932569224e-07
+              }
+            },
+            {
+              "frame": 1,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0494480875422596e-06,
+                "gear": 7.123004479581141e-07
+              }
+            },
+            {
+              "frame": 2,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2980270867046784e-06,
+                "gear": 4.341841304267291e-07
+              }
+            },
+            {
+              "frame": 3,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.207723792314937e-07,
+                "gear": 7.652003546354536e-07
+              }
+            },
+            {
+              "frame": 4,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.143512463386287e-06,
+                "gear": 5.553557116400043e-07
+              }
+            },
+            {
+              "frame": 5,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0991564067808213e-06,
+                "gear": 4.693274320288765e-07
+              }
+            },
+            {
+              "frame": 6,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0189605745836161e-06,
+                "gear": 5.87415797781432e-07
+              }
+            },
+            {
+              "frame": 7,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1067310197176994e-06,
+                "gear": 5.364418029785156e-07
+              }
+            },
+            {
+              "frame": 8,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0713303026932408e-06,
+                "gear": 5.101335887047753e-07
+              }
+            },
+            {
+              "frame": 9,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.70407768363657e-07,
+                "gear": 6.578487159458746e-07
+              }
+            },
+            {
+              "frame": 10,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2694005135927e-06,
+                "gear": 8.596304041930125e-07
+              }
+            },
+            {
+              "frame": 11,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.4824221352682798e-06,
+                "gear": 5.170509780327848e-07
+              }
+            },
+            {
+              "frame": 12,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.10550149656774e-06,
+                "gear": 7.363646545854863e-07
+              }
+            },
+            {
+              "frame": 13,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.982943538489053e-07,
+                "gear": 5.79423385715927e-07
+              }
+            },
+            {
+              "frame": 14,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2276965435376042e-06,
+                "gear": 5.87415797781432e-07
+              }
+            },
+            {
+              "frame": 15,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.397188023285707e-07,
+                "gear": 4.49264462076826e-07
+              }
+            },
+            {
+              "frame": 16,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.097943595596007e-06,
+                "gear": 4.951133405484143e-07
+              }
+            },
+            {
+              "frame": 17,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0203759757132502e-06,
+                "gear": 5.489212639986363e-07
+              }
+            },
+            {
+              "frame": 18,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1534692703207838e-06,
+                "gear": 5.755784400207631e-07
+              }
+            },
+            {
+              "frame": 19,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.205521471092652e-06,
+                "gear": 6.809031560806034e-07
+              }
+            },
+            {
+              "frame": 20,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.166581114375731e-06,
+                "gear": 6.442060112021863e-07
+              }
+            },
+            {
+              "frame": 21,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.3647380683323718e-06,
+                "gear": 6.462707915488863e-07
+              }
+            },
+            {
+              "frame": 22,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1039940090995515e-06,
+                "gear": 8.700287708052201e-07
+              }
+            },
+            {
+              "frame": 23,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.38654864057753e-07,
+                "gear": 6.551429123646813e-07
+              }
+            },
+            {
+              "frame": 24,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0293672403349774e-06,
+                "gear": 5.092622927804769e-07
+              }
+            },
+            {
+              "frame": 25,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.912353107210947e-07,
+                "gear": 5.788482440038933e-07
+              }
+            },
+            {
+              "frame": 26,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0310914149158634e-06,
+                "gear": 5.066394805908203e-07
+              }
+            },
+            {
+              "frame": 27,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.26861311855464e-06,
+                "gear": 4.308471659442148e-07
+              }
+            },
+            {
+              "frame": 28,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0254771041218191e-06,
+                "gear": 5.553557116400043e-07
+              }
+            },
+            {
+              "frame": 29,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.980719823943218e-07,
+                "gear": 6.733610575793136e-07
+              }
+            },
+            {
+              "frame": 30,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2354715863693855e-06,
+                "gear": 4.773025921167573e-07
+              }
+            },
+            {
+              "frame": 31,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0346989256504457e-06,
+                "gear": 6.372751499839069e-07
+              }
+            },
+            {
+              "frame": 32,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.45599856802437e-07,
+                "gear": 6.381455932569224e-07
+              }
+            }
+          ]
+        },
+        {
+          "name": "walk",
+          "imported_action": "walk",
+          "frames": [
+            0.0,
+            32.0
+          ],
+          "duration_seconds": 1.0666666666666667,
+          "sampled_frame_count": 33,
+          "samples": [
+            {
+              "frame": 0,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1755873856600374e-06,
+                "gear": 7.89620969499083e-07
+              }
+            },
+            {
+              "frame": 1,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.334658557236253e-07,
+                "gear": 7.630573009009822e-07
+              }
+            },
+            {
+              "frame": 2,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.307571551478759e-06,
+                "gear": 7.416228982037865e-07
+              }
+            },
+            {
+              "frame": 3,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0683207847250742e-06,
+                "gear": 7.110914452823636e-07
+              }
+            },
+            {
+              "frame": 4,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.3670140788235585e-06,
+                "gear": 5.79423385715927e-07
+              }
+            },
+            {
+              "frame": 5,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.111211076931795e-06,
+                "gear": 6.966990326873201e-07
+              }
+            },
+            {
+              "frame": 6,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.760057994550152e-07,
+                "gear": 6.3430655927732e-07
+              }
+            },
+            {
+              "frame": 7,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.678567269271298e-07,
+                "gear": 4.809088522961247e-07
+              }
+            },
+            {
+              "frame": 8,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.775889111551805e-07,
+                "gear": 5.60133059934742e-07
+              }
+            },
+            {
+              "frame": 9,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1002921382896602e-06,
+                "gear": 5.895382173548569e-07
+              }
+            },
+            {
+              "frame": 10,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1186792789885658e-06,
+                "gear": 5.672235943166015e-07
+              }
+            },
+            {
+              "frame": 11,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.17407535071834e-06,
+                "gear": 5.603312160928908e-07
+              }
+            },
+            {
+              "frame": 12,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0413768904982135e-06,
+                "gear": 5.863280421181116e-07
+              }
+            },
+            {
+              "frame": 13,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1024610557797132e-06,
+                "gear": 6.568776029780565e-07
+              }
+            },
+            {
+              "frame": 14,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.107497269003943e-06,
+                "gear": 6.376669716701144e-07
+              }
+            },
+            {
+              "frame": 15,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.117934743888327e-06,
+                "gear": 6.922628017491661e-07
+              }
+            },
+            {
+              "frame": 16,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1536891406649374e-06,
+                "gear": 6.818808060415904e-07
+              }
+            },
+            {
+              "frame": 17,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1267447916907258e-06,
+                "gear": 7.552698662038893e-07
+              }
+            },
+            {
+              "frame": 18,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1021068075933727e-06,
+                "gear": 6.322027275018627e-07
+              }
+            },
+            {
+              "frame": 19,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0257206213282188e-06,
+                "gear": 5.105686682327359e-07
+              }
+            },
+            {
+              "frame": 20,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0811303354785196e-06,
+                "gear": 6.802506504755002e-07
+              }
+            },
+            {
+              "frame": 21,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1281665592832724e-06,
+                "gear": 5.583960387411935e-07
+              }
+            },
+            {
+              "frame": 22,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1318018096062588e-06,
+                "gear": 6.51915172511508e-07
+              }
+            },
+            {
+              "frame": 23,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.292713798458863e-07,
+                "gear": 5.181234428164316e-07
+              }
+            },
+            {
+              "frame": 24,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.320375511379098e-07,
+                "gear": 6.828569780736871e-07
+              }
+            },
+            {
+              "frame": 25,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0604979934214498e-06,
+                "gear": 6.304881594587641e-07
+              }
+            },
+            {
+              "frame": 26,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.587258548686805e-07,
+                "gear": 7.17773616543127e-07
+              }
+            },
+            {
+              "frame": 27,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.119869580179511e-06,
+                "gear": 7.523241833951033e-07
+              }
+            },
+            {
+              "frame": 28,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.279766024708806e-06,
+                "gear": 6.880803766762256e-07
+              }
+            },
+            {
+              "frame": 29,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1309185765639995e-06,
+                "gear": 7.591187340949546e-07
+              }
+            },
+            {
+              "frame": 30,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2171612979727797e-06,
+                "gear": 7.545713174295088e-07
+              }
+            },
+            {
+              "frame": 31,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.965497499957564e-07,
+                "gear": 7.36666152079124e-07
+              }
+            },
+            {
+              "frame": 32,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1755873856600374e-06,
+                "gear": 7.89620969499083e-07
+              }
+            }
+          ]
+        }
+      ],
+      "raw_qa_report": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\pilot_roundtrip_raw.json",
+      "errors": [],
+      "warnings": [
+        "characterMedium: duplicate verts=44 loose verts=0",
+        "Gear_Modular: duplicate verts=2320 loose verts=0"
+      ],
+      "image": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\pilot_roundtrip_walk.png"
+    },
+    {
+      "role": "mechanic",
+      "pass": true,
+      "glb_sha256": "03ec6f35421d2cebfaa03f7fa911db71f4c6120ac8858dd369f7bbcd9b878496",
+      "import_method": "fresh Blender5.2.3 factory-empty; merge_vertices=True requested; required UV/hard-normal attribute seam copies remain; no source repair",
+      "rig_count": 1,
+      "skinned_mesh_count": 2,
+      "skin_count": 1,
+      "material_count": 4,
+      "embedded_images": 1,
+      "triangles_by_gltf_mesh": {
+        "characterMedium": 1604,
+        "Gear_Breastplate_Mesh": 1308
+      },
+      "stats_rest": {
+        "vertices": 4332,
+        "triangles": 2912,
+        "bounds_blender_m": {
+          "min": [
+            -0.8553462028503418,
+            -0.2431384027004242,
+            -1.88234423603717e-07
+          ],
+          "max": [
+            0.8555743098258972,
+            0.3215000331401825,
+            1.7799999713897705
+          ]
+        },
+        "dimensions_blender_m": [
+          1.710920512676239,
+          0.5646384358406067,
+          1.7800001596241941
+        ]
+      },
+      "rest_bidirectional_nearest_vertex_error_m": 6.357489041874942e-07,
+      "clips": [
+        {
+          "name": "idle",
+          "imported_action": "idle",
+          "frames": [
+            0.0,
+            32.0
+          ],
+          "duration_seconds": 1.0666666666666667,
+          "sampled_frame_count": 33,
+          "samples": [
+            {
+              "frame": 0,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.45599856802437e-07,
+                "gear": 4.023313522338867e-07
+              }
+            },
+            {
+              "frame": 1,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0494480875422596e-06,
+                "gear": 4.792177037415968e-07
+              }
+            },
+            {
+              "frame": 2,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2980270867046784e-06,
+                "gear": 4.238326027916628e-07
+              }
+            },
+            {
+              "frame": 3,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.207723792314937e-07,
+                "gear": 4.2826258095374214e-07
+              }
+            },
+            {
+              "frame": 4,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.143512463386287e-06,
+                "gear": 4.4053035708202515e-07
+              }
+            },
+            {
+              "frame": 5,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0991564067808213e-06,
+                "gear": 4.693274320288765e-07
+              }
+            },
+            {
+              "frame": 6,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0189605745836161e-06,
+                "gear": 5.535535478884412e-07
+              }
+            },
+            {
+              "frame": 7,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1067310197176994e-06,
+                "gear": 4.837859819417645e-07
+              }
+            },
+            {
+              "frame": 8,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0713303026932408e-06,
+                "gear": 5.101335887047753e-07
+              }
+            },
+            {
+              "frame": 9,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.70407768363657e-07,
+                "gear": 3.816559512870299e-07
+              }
+            },
+            {
+              "frame": 10,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2694005135927e-06,
+                "gear": 4.782901328326261e-07
+              }
+            },
+            {
+              "frame": 11,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.4824221352682798e-06,
+                "gear": 5.170509780327848e-07
+              }
+            },
+            {
+              "frame": 12,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.10550149656774e-06,
+                "gear": 3.943180502119503e-07
+              }
+            },
+            {
+              "frame": 13,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.982943538489053e-07,
+                "gear": 5.331722263690608e-07
+              }
+            },
+            {
+              "frame": 14,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2276965435376042e-06,
+                "gear": 4.023313522338867e-07
+              }
+            },
+            {
+              "frame": 15,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.397188023285707e-07,
+                "gear": 4.3213367462158203e-07
+              }
+            },
+            {
+              "frame": 16,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.097943595596007e-06,
+                "gear": 4.951133405484143e-07
+              }
+            },
+            {
+              "frame": 17,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0203759757132502e-06,
+                "gear": 4.31426570912663e-07
+              }
+            },
+            {
+              "frame": 18,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1534692703207838e-06,
+                "gear": 4.31426570912663e-07
+              }
+            },
+            {
+              "frame": 19,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.205521471092652e-06,
+                "gear": 4.2311162928854174e-07
+              }
+            },
+            {
+              "frame": 20,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.166581114375731e-06,
+                "gear": 3.943180502119503e-07
+              }
+            },
+            {
+              "frame": 21,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.3647380683323718e-06,
+                "gear": 6.462707915488863e-07
+              }
+            },
+            {
+              "frame": 22,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1039940090995515e-06,
+                "gear": 4.782901328326261e-07
+              }
+            },
+            {
+              "frame": 23,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.38654864057753e-07,
+                "gear": 4.174985122062935e-07
+              }
+            },
+            {
+              "frame": 24,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0293672403349774e-06,
+                "gear": 5.092622927804769e-07
+              }
+            },
+            {
+              "frame": 25,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.912353107210947e-07,
+                "gear": 4.805480102731963e-07
+              }
+            },
+            {
+              "frame": 26,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0310914149158634e-06,
+                "gear": 4.027622821922705e-07
+              }
+            },
+            {
+              "frame": 27,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.26861311855464e-06,
+                "gear": 4.308471659442148e-07
+              }
+            },
+            {
+              "frame": 28,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0254771041218191e-06,
+                "gear": 4.3264719806757057e-07
+              }
+            },
+            {
+              "frame": 29,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.980719823943218e-07,
+                "gear": 4.380028997275076e-07
+              }
+            },
+            {
+              "frame": 30,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2354715863693855e-06,
+                "gear": 4.009492329259956e-07
+              }
+            },
+            {
+              "frame": 31,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0346989256504457e-06,
+                "gear": 4.549127083919302e-07
+              }
+            },
+            {
+              "frame": 32,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.45599856802437e-07,
+                "gear": 4.023313522338867e-07
+              }
+            }
+          ]
+        },
+        {
+          "name": "walk",
+          "imported_action": "walk",
+          "frames": [
+            0.0,
+            32.0
+          ],
+          "duration_seconds": 1.0666666666666667,
+          "sampled_frame_count": 33,
+          "samples": [
+            {
+              "frame": 0,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1755873856600374e-06,
+                "gear": 7.89620969499083e-07
+              }
+            },
+            {
+              "frame": 1,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.334658557236253e-07,
+                "gear": 7.630573009009822e-07
+              }
+            },
+            {
+              "frame": 2,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.307571551478759e-06,
+                "gear": 7.416228982037865e-07
+              }
+            },
+            {
+              "frame": 3,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0683207847250742e-06,
+                "gear": 7.110914452823636e-07
+              }
+            },
+            {
+              "frame": 4,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.3670140788235585e-06,
+                "gear": 5.79423385715927e-07
+              }
+            },
+            {
+              "frame": 5,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.111211076931795e-06,
+                "gear": 6.966990326873201e-07
+              }
+            },
+            {
+              "frame": 6,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.760057994550152e-07,
+                "gear": 6.014238351781387e-07
+              }
+            },
+            {
+              "frame": 7,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.678567269271298e-07,
+                "gear": 4.809088522961247e-07
+              }
+            },
+            {
+              "frame": 8,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.775889111551805e-07,
+                "gear": 5.60133059934742e-07
+              }
+            },
+            {
+              "frame": 9,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1002921382896602e-06,
+                "gear": 5.895382173548569e-07
+              }
+            },
+            {
+              "frame": 10,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1186792789885658e-06,
+                "gear": 5.094802872918081e-07
+              }
+            },
+            {
+              "frame": 11,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.17407535071834e-06,
+                "gear": 5.603312160928908e-07
+              }
+            },
+            {
+              "frame": 12,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0413768904982135e-06,
+                "gear": 5.863280421181116e-07
+              }
+            },
+            {
+              "frame": 13,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1024610557797132e-06,
+                "gear": 6.568776029780565e-07
+              }
+            },
+            {
+              "frame": 14,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.107497269003943e-06,
+                "gear": 6.376669716701144e-07
+              }
+            },
+            {
+              "frame": 15,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.117934743888327e-06,
+                "gear": 6.922628017491661e-07
+              }
+            },
+            {
+              "frame": 16,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1536891406649374e-06,
+                "gear": 6.818808060415904e-07
+              }
+            },
+            {
+              "frame": 17,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1267447916907258e-06,
+                "gear": 6.655666879851196e-07
+              }
+            },
+            {
+              "frame": 18,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1021068075933727e-06,
+                "gear": 5.5275074828387e-07
+              }
+            },
+            {
+              "frame": 19,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0257206213282188e-06,
+                "gear": 5.105686682327359e-07
+              }
+            },
+            {
+              "frame": 20,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0811303354785196e-06,
+                "gear": 6.802506504755002e-07
+              }
+            },
+            {
+              "frame": 21,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1281665592832724e-06,
+                "gear": 5.583960387411935e-07
+              }
+            },
+            {
+              "frame": 22,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1318018096062588e-06,
+                "gear": 5.659009048031294e-07
+              }
+            },
+            {
+              "frame": 23,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.292713798458863e-07,
+                "gear": 5.181234428164316e-07
+              }
+            },
+            {
+              "frame": 24,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.320375511379098e-07,
+                "gear": 6.828569780736871e-07
+              }
+            },
+            {
+              "frame": 25,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0604979934214498e-06,
+                "gear": 6.304881594587641e-07
+              }
+            },
+            {
+              "frame": 26,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.587258548686805e-07,
+                "gear": 7.17773616543127e-07
+              }
+            },
+            {
+              "frame": 27,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.119869580179511e-06,
+                "gear": 7.523241833951033e-07
+              }
+            },
+            {
+              "frame": 28,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.279766024708806e-06,
+                "gear": 6.880803766762256e-07
+              }
+            },
+            {
+              "frame": 29,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1309185765639995e-06,
+                "gear": 7.591187340949546e-07
+              }
+            },
+            {
+              "frame": 30,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2171612979727797e-06,
+                "gear": 7.545713174295088e-07
+              }
+            },
+            {
+              "frame": 31,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.965497499957564e-07,
+                "gear": 7.36666152079124e-07
+              }
+            },
+            {
+              "frame": 32,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1755873856600374e-06,
+                "gear": 7.89620969499083e-07
+              }
+            }
+          ]
+        }
+      ],
+      "raw_qa_report": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\mechanic_roundtrip_raw.json",
+      "errors": [],
+      "warnings": [
+        "characterMedium: duplicate verts=44 loose verts=0",
+        "Gear_Modular: duplicate verts=1742 loose verts=0"
+      ],
+      "image": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\mechanic_roundtrip_walk.png"
+    },
+    {
+      "role": "medic",
+      "pass": true,
+      "glb_sha256": "e7c0c690f0ae9a85a93d18ecf7d765c9c16756f74e847bd926379f3cfd1e4f79",
+      "import_method": "fresh Blender5.2.3 factory-empty; merge_vertices=True requested; required UV/hard-normal attribute seam copies remain; no source repair",
+      "rig_count": 1,
+      "skinned_mesh_count": 2,
+      "skin_count": 1,
+      "material_count": 4,
+      "embedded_images": 1,
+      "triangles_by_gltf_mesh": {
+        "characterMedium": 1604,
+        "Gear_Breastplate_Mesh": 1416
+      },
+      "stats_rest": {
+        "vertices": 4634,
+        "triangles": 3020,
+        "bounds_blender_m": {
+          "min": [
+            -0.8553462028503418,
+            -0.2431384027004242,
+            -1.88234423603717e-07
+          ],
+          "max": [
+            0.8555743098258972,
+            0.29350003600120544,
+            1.7799999713897705
+          ]
+        },
+        "dimensions_blender_m": [
+          1.710920512676239,
+          0.5366384387016296,
+          1.7800001596241941
+        ]
+      },
+      "rest_bidirectional_nearest_vertex_error_m": 6.357489041874942e-07,
+      "clips": [
+        {
+          "name": "idle",
+          "imported_action": "idle",
+          "frames": [
+            0.0,
+            32.0
+          ],
+          "duration_seconds": 1.0666666666666667,
+          "sampled_frame_count": 33,
+          "samples": [
+            {
+              "frame": 0,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.45599856802437e-07,
+                "gear": 4.023313522338867e-07
+              }
+            },
+            {
+              "frame": 1,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0494480875422596e-06,
+                "gear": 4.792177037415968e-07
+              }
+            },
+            {
+              "frame": 2,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2980270867046784e-06,
+                "gear": 4.238326027916628e-07
+              }
+            },
+            {
+              "frame": 3,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.207723792314937e-07,
+                "gear": 4.2826258095374214e-07
+              }
+            },
+            {
+              "frame": 4,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.143512463386287e-06,
+                "gear": 4.4053035708202515e-07
+              }
+            },
+            {
+              "frame": 5,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0991564067808213e-06,
+                "gear": 4.693274320288765e-07
+              }
+            },
+            {
+              "frame": 6,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0189605745836161e-06,
+                "gear": 5.535535478884412e-07
+              }
+            },
+            {
+              "frame": 7,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1067310197176994e-06,
+                "gear": 4.837859819417645e-07
+              }
+            },
+            {
+              "frame": 8,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0713303026932408e-06,
+                "gear": 5.101335887047753e-07
+              }
+            },
+            {
+              "frame": 9,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.70407768363657e-07,
+                "gear": 3.816559512870299e-07
+              }
+            },
+            {
+              "frame": 10,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2694005135927e-06,
+                "gear": 4.782901328326261e-07
+              }
+            },
+            {
+              "frame": 11,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.4824221352682798e-06,
+                "gear": 5.170509780327848e-07
+              }
+            },
+            {
+              "frame": 12,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.10550149656774e-06,
+                "gear": 3.943180502119503e-07
+              }
+            },
+            {
+              "frame": 13,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.982943538489053e-07,
+                "gear": 5.331722263690608e-07
+              }
+            },
+            {
+              "frame": 14,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2276965435376042e-06,
+                "gear": 4.023313522338867e-07
+              }
+            },
+            {
+              "frame": 15,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.397188023285707e-07,
+                "gear": 4.3213367462158203e-07
+              }
+            },
+            {
+              "frame": 16,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.097943595596007e-06,
+                "gear": 4.951133405484143e-07
+              }
+            },
+            {
+              "frame": 17,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0203759757132502e-06,
+                "gear": 4.31426570912663e-07
+              }
+            },
+            {
+              "frame": 18,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1534692703207838e-06,
+                "gear": 4.31426570912663e-07
+              }
+            },
+            {
+              "frame": 19,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.205521471092652e-06,
+                "gear": 4.2311162928854174e-07
+              }
+            },
+            {
+              "frame": 20,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.166581114375731e-06,
+                "gear": 3.943180502119503e-07
+              }
+            },
+            {
+              "frame": 21,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.3647380683323718e-06,
+                "gear": 6.462707915488863e-07
+              }
+            },
+            {
+              "frame": 22,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1039940090995515e-06,
+                "gear": 4.782901328326261e-07
+              }
+            },
+            {
+              "frame": 23,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.38654864057753e-07,
+                "gear": 4.174985122062935e-07
+              }
+            },
+            {
+              "frame": 24,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0293672403349774e-06,
+                "gear": 5.092622927804769e-07
+              }
+            },
+            {
+              "frame": 25,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.912353107210947e-07,
+                "gear": 4.805480102731963e-07
+              }
+            },
+            {
+              "frame": 26,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0310914149158634e-06,
+                "gear": 4.027622821922705e-07
+              }
+            },
+            {
+              "frame": 27,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.26861311855464e-06,
+                "gear": 4.308471659442148e-07
+              }
+            },
+            {
+              "frame": 28,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0254771041218191e-06,
+                "gear": 4.3264719806757057e-07
+              }
+            },
+            {
+              "frame": 29,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.980719823943218e-07,
+                "gear": 4.380028997275076e-07
+              }
+            },
+            {
+              "frame": 30,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2354715863693855e-06,
+                "gear": 4.009492329259956e-07
+              }
+            },
+            {
+              "frame": 31,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0346989256504457e-06,
+                "gear": 4.549127083919302e-07
+              }
+            },
+            {
+              "frame": 32,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.45599856802437e-07,
+                "gear": 4.023313522338867e-07
+              }
+            }
+          ]
+        },
+        {
+          "name": "walk",
+          "imported_action": "walk",
+          "frames": [
+            0.0,
+            32.0
+          ],
+          "duration_seconds": 1.0666666666666667,
+          "sampled_frame_count": 33,
+          "samples": [
+            {
+              "frame": 0,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1755873856600374e-06,
+                "gear": 7.89620969499083e-07
+              }
+            },
+            {
+              "frame": 1,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.334658557236253e-07,
+                "gear": 7.630573009009822e-07
+              }
+            },
+            {
+              "frame": 2,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.307571551478759e-06,
+                "gear": 7.416228982037865e-07
+              }
+            },
+            {
+              "frame": 3,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0683207847250742e-06,
+                "gear": 7.110914452823636e-07
+              }
+            },
+            {
+              "frame": 4,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.3670140788235585e-06,
+                "gear": 5.79423385715927e-07
+              }
+            },
+            {
+              "frame": 5,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.111211076931795e-06,
+                "gear": 6.966990326873201e-07
+              }
+            },
+            {
+              "frame": 6,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.760057994550152e-07,
+                "gear": 6.014238351781387e-07
+              }
+            },
+            {
+              "frame": 7,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.678567269271298e-07,
+                "gear": 4.809088522961247e-07
+              }
+            },
+            {
+              "frame": 8,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.775889111551805e-07,
+                "gear": 5.60133059934742e-07
+              }
+            },
+            {
+              "frame": 9,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1002921382896602e-06,
+                "gear": 5.895382173548569e-07
+              }
+            },
+            {
+              "frame": 10,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1186792789885658e-06,
+                "gear": 5.094802872918081e-07
+              }
+            },
+            {
+              "frame": 11,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.17407535071834e-06,
+                "gear": 5.603312160928908e-07
+              }
+            },
+            {
+              "frame": 12,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0413768904982135e-06,
+                "gear": 5.863280421181116e-07
+              }
+            },
+            {
+              "frame": 13,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1024610557797132e-06,
+                "gear": 6.568776029780565e-07
+              }
+            },
+            {
+              "frame": 14,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.107497269003943e-06,
+                "gear": 6.376669716701144e-07
+              }
+            },
+            {
+              "frame": 15,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.117934743888327e-06,
+                "gear": 6.922628017491661e-07
+              }
+            },
+            {
+              "frame": 16,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1536891406649374e-06,
+                "gear": 6.818808060415904e-07
+              }
+            },
+            {
+              "frame": 17,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1267447916907258e-06,
+                "gear": 6.655666879851196e-07
+              }
+            },
+            {
+              "frame": 18,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1021068075933727e-06,
+                "gear": 5.5275074828387e-07
+              }
+            },
+            {
+              "frame": 19,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0257206213282188e-06,
+                "gear": 5.105686682327359e-07
+              }
+            },
+            {
+              "frame": 20,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0811303354785196e-06,
+                "gear": 6.802506504755002e-07
+              }
+            },
+            {
+              "frame": 21,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1281665592832724e-06,
+                "gear": 5.583960387411935e-07
+              }
+            },
+            {
+              "frame": 22,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1318018096062588e-06,
+                "gear": 5.659009048031294e-07
+              }
+            },
+            {
+              "frame": 23,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.292713798458863e-07,
+                "gear": 5.181234428164316e-07
+              }
+            },
+            {
+              "frame": 24,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 9.320375511379098e-07,
+                "gear": 6.828569780736871e-07
+              }
+            },
+            {
+              "frame": 25,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.0604979934214498e-06,
+                "gear": 6.304881594587641e-07
+              }
+            },
+            {
+              "frame": 26,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.587258548686805e-07,
+                "gear": 7.17773616543127e-07
+              }
+            },
+            {
+              "frame": 27,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.119869580179511e-06,
+                "gear": 7.523241833951033e-07
+              }
+            },
+            {
+              "frame": 28,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.279766024708806e-06,
+                "gear": 6.880803766762256e-07
+              }
+            },
+            {
+              "frame": 29,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1309185765639995e-06,
+                "gear": 7.591187340949546e-07
+              }
+            },
+            {
+              "frame": 30,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.2171612979727797e-06,
+                "gear": 7.545713174295088e-07
+              }
+            },
+            {
+              "frame": 31,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 8.965497499957564e-07,
+                "gear": 7.36666152079124e-07
+              }
+            },
+            {
+              "frame": 32,
+              "bidirectional_nearest_vertex_error_m": {
+                "body": 1.1755873856600374e-06,
+                "gear": 7.89620969499083e-07
+              }
+            }
+          ]
+        }
+      ],
+      "raw_qa_report": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\medic_roundtrip_raw.json",
+      "errors": [],
+      "warnings": [
+        "characterMedium: duplicate verts=44 loose verts=0",
+        "Gear_Modular: duplicate verts=1893 loose verts=0"
+      ],
+      "image": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\medic_roundtrip_walk.png"
+    }
+  ]
+}

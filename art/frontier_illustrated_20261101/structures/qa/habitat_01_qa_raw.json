@@ -18,6 +18,7 @@
     "hidden back-to-back faces: Habitat_SideHeader<->Habitat_SideWindowSill.003 (2 pairs) - delete to save tris",
     "hidden back-to-back faces: Habitat_SideLower.001<->Habitat_SideWindowSill.004 (2 pairs) - delete to save tris",
     "hidden back-to-back faces: Habitat_SideLower.001<->Habitat_SideWindowSill.006 (2 pairs) - delete to save tris",
+    "hidden back-to-back faces: Habitat_ServicePanel<->Habitat_OrangeRearBand (2 pairs) - delete to save tris",
     "hidden back-to-back faces: Habitat_SideLower<->Habitat_SideWindowSill (2 pairs) - delete to save tris",
     "hidden back-to-back faces: Habitat_SideLower<->Habitat_SideWindowSill.002 (2 pairs) - delete to save tris",
     "hidden back-to-back faces: Habitat_DoorLintel<->Habitat_AirlockSeal (2 pairs) - delete to save tris",
@@ -85,6 +86,10 @@
     },
     {
       "where": "Habitat_SideLower.001<->Habitat_SideWindowSill.006",
+      "tri_pairs": 2
+    },
+    {
+      "where": "Habitat_ServicePanel<->Habitat_OrangeRearBand",
       "tri_pairs": 2
     },
     {
@@ -2479,6 +2484,182 @@
       "verts": 136,
       "faces": 144,
       "tris": 268,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "Habitat_OrangeFrontBand": {
+      "verts": 56,
+      "faces": 54,
+      "tris": 108,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "Habitat_OrangeSideBand": {
+      "verts": 56,
+      "faces": 54,
+      "tris": 108,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "Habitat_OrangeFrontBand.001": {
+      "verts": 56,
+      "faces": 54,
+      "tris": 108,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "Habitat_OrangeSideBand.001": {
+      "verts": 56,
+      "faces": 54,
+      "tris": 108,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "Habitat_OrangeRearBand": {
+      "verts": 56,
+      "faces": 54,
+      "tris": 108,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "Habitat_AirlockOrangeInset": {
+      "verts": 56,
+      "faces": 54,
+      "tris": 108,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "Habitat_AirlockOrangeInset.001": {
+      "verts": 56,
+      "faces": 54,
+      "tris": 108,
+      "ngons": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 0,
+      "islands": 1,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1
+    },
+    "Habitat_AirlockEyebrow": {
+      "verts": 56,
+      "faces": 54,
+      "tris": 108,
       "ngons": 0,
       "boundary_edges": 0,
       "nonmanifold_edges": 0,

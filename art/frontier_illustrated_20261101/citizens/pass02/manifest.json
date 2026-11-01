@@ -1,0 +1,1060 @@
+{
+  "schema": "sternenbuergerchen.citizen_equipment_candidates.v1",
+  "task": "docs/tasks/ART_2026_11_01_pass02.md",
+  "blender": "5.2.3 LTS",
+  "status": "separate native equipment candidates; parent task owns Godot integration/capture; no user approval",
+  "baseline": "Pass01 stock Kenney characterMedium geometry, proportions, texture and weights retained exactly",
+  "generator": "art/frontier_illustrated_20261101/citizens/pass02/generator/build_equipment.py",
+  "generator_sha256": "856fab08ef99be3352b0411bd4a2bc6a8d418200a1eb507d6e3af61561125367",
+  "references": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+      "sha256": "994454732fc6b6b8713dd6eca6494c95d87f3984c3dbcb410230c0f3d8aff811",
+      "status": "current reference image; no model approval inferred"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+      "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8",
+      "status": "current reference image; no model approval inferred"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+      "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530",
+      "status": "current reference image; no model approval inferred"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+      "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e",
+      "status": "current reference image; no model approval inferred"
+    }
+  ],
+  "assets": [
+    {
+      "role": "operator",
+      "status": "separate equipment candidate; no user visual approval inferred",
+      "source_bundle": "Kenney Animated Characters Bundle 4.0",
+      "license": "CC0; new equipment original procedural work",
+      "stock_blend": "art\\frontier_illustrated_20261101\\citizens\\operator_stock.blend",
+      "stock_blend_sha256": "881a7bdb230e09ac1be606e18cac694af1b2600bf86f31e0c3e973eef32f9115",
+      "stock_glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens\\operator.glb",
+      "stock_glb_sha256": "812416a625ba324735e8a0d2e9393dad82066e4905eec8aaf02b97f229b254a5",
+      "body_geometry_uv_weight_signature_before": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+      "body_geometry_uv_weight_signature_after": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+      "body_vertices": 804,
+      "body_triangles": 1604,
+      "source_blend": "art\\frontier_illustrated_20261101\\citizens\\pass02\\source\\operator_equipment.blend",
+      "source_blend_sha256": "b5d45aee8298a756c5c1696436bcb96a4bc0cf9550792755f1866f10ad199b1e",
+      "glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\operator.glb",
+      "glb_sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c",
+      "rig": "original Root; no new bones; rigid equipment groups on existing deform bones",
+      "bone_count_source": 45,
+      "equipment_binding": {
+        "pass": true,
+        "errors": [],
+        "modules": [
+          {
+            "name": "Gear_Breastplate",
+            "bone": "UpperChest",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_ChestIdentifier",
+            "bone": "UpperChest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_LeftShoulder",
+            "bone": "LeftArm",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_LeftKnee",
+            "bone": "LeftLeg",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_RightShoulder",
+            "bone": "RightArm",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_RightKnee",
+            "bone": "RightLeg",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_Backpack",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_BackpackLid",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          }
+        ]
+      },
+      "stats_rest": {
+        "vertices": 1420,
+        "triangles": 2804,
+        "bounds_blender_m": {
+          "min": [
+            -0.8553459644317627,
+            -0.2431384027004242,
+            -2.1517188031339174e-09
+          ],
+          "max": [
+            0.8555741310119629,
+            0.2695000171661377,
+            1.779999852180481
+          ]
+        },
+        "dimensions_blender_m": [
+          1.7109200954437256,
+          0.5126384198665619,
+          1.7799998543321998
+        ]
+      },
+      "mesh_count_glb": 2,
+      "skin_count_glb": 1,
+      "material_count_glb": 4,
+      "embedded_images": 1,
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "coordinates": "metres; rest height 1.78; feet Z0; Blender -Y front / Z up -> Godot +Z front / Y up; existing runtime scale 0.35",
+      "raw_qa_pass": true,
+      "body_uv_qa_pass": true,
+      "errors": [],
+      "warnings": [],
+      "qa_scope": "Full new assembled geometry at rest; original body UV separately. New constant-color gear intentionally has no UVs. No expensive-check skips.",
+      "references": [
+        "docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png"
+      ],
+      "stock_files_unchanged_against_pass01_manifest": true,
+      "export_inspection": {
+        "meshes": [
+          {
+            "mesh": "characterMedium",
+            "triangles": 1604,
+            "gltf_attribute_vertices": 1029,
+            "unique_positions_at_1_micrometre": 804,
+            "coincident_position_groups": 205,
+            "coincident_groups_with_different_normal_uv_skin_or_material_attributes": 205
+          },
+          {
+            "mesh": "Gear_Breastplate_Mesh",
+            "triangles": 1200,
+            "gltf_attribute_vertices": 3203,
+            "unique_positions_at_1_micrometre": 616,
+            "coincident_position_groups": 616,
+            "coincident_groups_with_different_normal_uv_skin_or_material_attributes": 616
+          }
+        ],
+        "animations": [
+          {
+            "name": "idle",
+            "duration_seconds": 1.0666666666666667
+          },
+          {
+            "name": "walk",
+            "duration_seconds": 1.0666666666666667
+          }
+        ],
+        "skins": 1,
+        "materials": 4,
+        "images": 1,
+        "node_names": [
+          "LeftToes",
+          "LeftFoot",
+          "LeftLeg",
+          "LeftUpLeg",
+          "RightToes",
+          "RightFoot",
+          "RightLeg",
+          "RightUpLeg",
+          "LeftHandIndex3",
+          "LeftHandIndex2",
+          "LeftHandIndex1",
+          "LeftHandThumb2",
+          "LeftHandThumb1",
+          "LeftHand",
+          "LeftForeArm",
+          "LeftArm",
+          "LeftShoulder",
+          "Head",
+          "Neck",
+          "RightHandIndex3",
+          "RightHandIndex2",
+          "RightHandIndex1",
+          "RightHandThumb2",
+          "RightHandThumb1",
+          "RightHand",
+          "RightForeArm",
+          "RightArm",
+          "RightShoulder",
+          "UpperChest",
+          "Chest",
+          "Spine",
+          "Hips",
+          "HipsCtrl",
+          "LeftFootRollCtrl",
+          "LeftFootIK",
+          "LeftToeRoll",
+          "LeftHeelRoll",
+          "LeftKneeCtrl",
+          "LeftFootCtrl",
+          "RightFootRollCtrl",
+          "RightFootIK",
+          "RightToeRoll",
+          "RightHeelRoll",
+          "RightKneeCtrl",
+          "RightFootCtrl",
+          "characterMedium",
+          "Gear_Modular",
+          "Root"
+        ],
+        "no_lights_collision_navigation": true
+      },
+      "roundtrip": {
+        "report": "art/frontier_illustrated_20261101/citizens/pass02/qa/roundtrip.json",
+        "raw": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\operator_roundtrip_raw.json",
+        "pass": true,
+        "warnings": [
+          "characterMedium: duplicate verts=44 loose verts=0",
+          "Gear_Modular: duplicate verts=1601 loose verts=0"
+        ],
+        "rest_position_error_m": 6.357489041874942e-07,
+        "sampled_frames_per_clip": 33,
+        "clip_count": 2,
+        "maximum_bidirectional_vertex_error_m": 1.4824221352682798e-06
+      },
+      "warning_acceptance": "Fresh glTF import retains attribute splits at UV and flat/hard-normal seams. Duplicate-vertex warnings and resulting seam boundaries are retained raw, not hidden/repaired. Source geometry is closed and warning-free; rest and all66 clip frames match bidirectionally within0.00004m. Export attribute split evidence is recorded above.",
+      "pose_report": "art/frontier_illustrated_20261101/citizens/pass02/qa/operator_poses.json",
+      "source_qa_report": "art/frontier_illustrated_20261101/citizens/pass02/qa/operator_qa_raw.json",
+      "opened_visuals": [
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/operator_poses.png",
+          "sha256": "a8911c6ed4b617f283299fc1b1511bcd7f1ca4dee9221ed81147243ba4909965"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/operator_stock_idle_front.png",
+          "sha256": "4a7fa32e0c59a3ec0e810c6c5b196de6bd659345da2081b5f8ca6876430e9708"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/operator_random.png",
+          "sha256": "541566e335af37a3b440ef70c5963c7c7cbba7fc9df7bd9134d645ddb8f453e8"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/operator_wire.png",
+          "sha256": "6c0b28730bee9e633baf1a1bf00b88e780b173af772cdd10bdb1e659351c1acf"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/operator_roundtrip_walk.png",
+          "sha256": "530cd470367af68cbbcc54db045454d6bb25480e2564e58ed0b4167407291748"
+        }
+      ]
+    },
+    {
+      "role": "pilot",
+      "status": "separate equipment candidate; no user visual approval inferred",
+      "source_bundle": "Kenney Animated Characters Bundle 4.0",
+      "license": "CC0; new equipment original procedural work",
+      "stock_blend": "art\\frontier_illustrated_20261101\\citizens\\pilot_stock.blend",
+      "stock_blend_sha256": "b5916218f0ae73fb8ad1520b62ef6a3e91c13d6c3b292d415781abe63855a7d4",
+      "stock_glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens\\pilot.glb",
+      "stock_glb_sha256": "b4a7669b0f2c659098beb37e9639af35b3b8c69c0f11ee4df832503c15087194",
+      "body_geometry_uv_weight_signature_before": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+      "body_geometry_uv_weight_signature_after": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+      "body_vertices": 804,
+      "body_triangles": 1604,
+      "source_blend": "art\\frontier_illustrated_20261101\\citizens\\pass02\\source\\pilot_equipment.blend",
+      "source_blend_sha256": "9037eb40b6f2816bc45a9279c84bf048f25fa2093053fb8ba986bf70ca656058",
+      "glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\pilot.glb",
+      "glb_sha256": "4548eb634e41a4a94965d616b45a51339e3da150bd0d1d708016e1f625c4ac00",
+      "rig": "original Root; no new bones; rigid equipment groups on existing deform bones",
+      "bone_count_source": 45,
+      "equipment_binding": {
+        "pass": true,
+        "errors": [],
+        "modules": [
+          {
+            "name": "Gear_Breastplate",
+            "bone": "UpperChest",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_ChestIdentifier",
+            "bone": "UpperChest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_LeftShoulder",
+            "bone": "LeftArm",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_LeftKnee",
+            "bone": "LeftLeg",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_RightShoulder",
+            "bone": "RightArm",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_RightKnee",
+            "bone": "RightLeg",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_Backpack",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_BackpackLid",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_LeftHeadsetCup",
+            "bone": "Head",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_LeftHeadsetCover",
+            "bone": "Head",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_RightHeadsetCup",
+            "bone": "Head",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_RightHeadsetCover",
+            "bone": "Head",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_HeadsetRearBridge",
+            "bone": "Head",
+            "vertices": 56,
+            "triangles": 108
+          }
+        ]
+      },
+      "stats_rest": {
+        "vertices": 1700,
+        "triangles": 3344,
+        "bounds_blender_m": {
+          "min": [
+            -0.8553459644317627,
+            -0.2431384027004242,
+            -2.1517188031339174e-09
+          ],
+          "max": [
+            0.8555741310119629,
+            0.2695000171661377,
+            1.779999852180481
+          ]
+        },
+        "dimensions_blender_m": [
+          1.7109200954437256,
+          0.5126384198665619,
+          1.7799998543321998
+        ]
+      },
+      "mesh_count_glb": 2,
+      "skin_count_glb": 1,
+      "material_count_glb": 4,
+      "embedded_images": 1,
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "coordinates": "metres; rest height 1.78; feet Z0; Blender -Y front / Z up -> Godot +Z front / Y up; existing runtime scale 0.35",
+      "raw_qa_pass": true,
+      "body_uv_qa_pass": true,
+      "errors": [],
+      "warnings": [],
+      "qa_scope": "Full new assembled geometry at rest; original body UV separately. New constant-color gear intentionally has no UVs. No expensive-check skips.",
+      "references": [
+        "docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png"
+      ],
+      "stock_files_unchanged_against_pass01_manifest": true,
+      "export_inspection": {
+        "meshes": [
+          {
+            "mesh": "characterMedium",
+            "triangles": 1604,
+            "gltf_attribute_vertices": 1029,
+            "unique_positions_at_1_micrometre": 804,
+            "coincident_position_groups": 205,
+            "coincident_groups_with_different_normal_uv_skin_or_material_attributes": 205
+          },
+          {
+            "mesh": "Gear_Breastplate_Mesh",
+            "triangles": 1740,
+            "gltf_attribute_vertices": 4640,
+            "unique_positions_at_1_micrometre": 896,
+            "coincident_position_groups": 896,
+            "coincident_groups_with_different_normal_uv_skin_or_material_attributes": 896
+          }
+        ],
+        "animations": [
+          {
+            "name": "idle",
+            "duration_seconds": 1.0666666666666667
+          },
+          {
+            "name": "walk",
+            "duration_seconds": 1.0666666666666667
+          }
+        ],
+        "skins": 1,
+        "materials": 4,
+        "images": 1,
+        "node_names": [
+          "LeftToes",
+          "LeftFoot",
+          "LeftLeg",
+          "LeftUpLeg",
+          "RightToes",
+          "RightFoot",
+          "RightLeg",
+          "RightUpLeg",
+          "LeftHandIndex3",
+          "LeftHandIndex2",
+          "LeftHandIndex1",
+          "LeftHandThumb2",
+          "LeftHandThumb1",
+          "LeftHand",
+          "LeftForeArm",
+          "LeftArm",
+          "LeftShoulder",
+          "Head",
+          "Neck",
+          "RightHandIndex3",
+          "RightHandIndex2",
+          "RightHandIndex1",
+          "RightHandThumb2",
+          "RightHandThumb1",
+          "RightHand",
+          "RightForeArm",
+          "RightArm",
+          "RightShoulder",
+          "UpperChest",
+          "Chest",
+          "Spine",
+          "Hips",
+          "HipsCtrl",
+          "LeftFootRollCtrl",
+          "LeftFootIK",
+          "LeftToeRoll",
+          "LeftHeelRoll",
+          "LeftKneeCtrl",
+          "LeftFootCtrl",
+          "RightFootRollCtrl",
+          "RightFootIK",
+          "RightToeRoll",
+          "RightHeelRoll",
+          "RightKneeCtrl",
+          "RightFootCtrl",
+          "characterMedium",
+          "Gear_Modular",
+          "Root"
+        ],
+        "no_lights_collision_navigation": true
+      },
+      "roundtrip": {
+        "report": "art/frontier_illustrated_20261101/citizens/pass02/qa/roundtrip.json",
+        "raw": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\pilot_roundtrip_raw.json",
+        "pass": true,
+        "warnings": [
+          "characterMedium: duplicate verts=44 loose verts=0",
+          "Gear_Modular: duplicate verts=2320 loose verts=0"
+        ],
+        "rest_position_error_m": 6.357489041874942e-07,
+        "sampled_frames_per_clip": 33,
+        "clip_count": 2,
+        "maximum_bidirectional_vertex_error_m": 1.4824221352682798e-06
+      },
+      "warning_acceptance": "Fresh glTF import retains attribute splits at UV and flat/hard-normal seams. Duplicate-vertex warnings and resulting seam boundaries are retained raw, not hidden/repaired. Source geometry is closed and warning-free; rest and all66 clip frames match bidirectionally within0.00004m. Export attribute split evidence is recorded above.",
+      "pose_report": "art/frontier_illustrated_20261101/citizens/pass02/qa/pilot_poses.json",
+      "source_qa_report": "art/frontier_illustrated_20261101/citizens/pass02/qa/pilot_qa_raw.json",
+      "opened_visuals": [
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/pilot_poses.png",
+          "sha256": "5e49ce968ae1602e570d00e6ccb31be3ae27b71d70f854f7c75e07e346318c11"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/pilot_stock_idle_front.png",
+          "sha256": "8c325be1c8ec38218c49a61d9c81cd03cf8b75a6905e97955459db028aa8f514"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/pilot_random.png",
+          "sha256": "54de54db5a12a7bb827950dc0b880d5bbeab058367365486bc6d1139299b1b59"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/pilot_wire.png",
+          "sha256": "3ad58f2f5511f2506616ba6a23a2a015c49c06f85251d5b52b15ba5f38da7a29"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/pilot_roundtrip_walk.png",
+          "sha256": "6f1baf7142b4d90cce146e164ea43bbdcbc6c4d2b1029e5c8080dc43b894cbd8"
+        }
+      ]
+    },
+    {
+      "role": "mechanic",
+      "status": "separate equipment candidate; no user visual approval inferred",
+      "source_bundle": "Kenney Animated Characters Bundle 4.0",
+      "license": "CC0; new equipment original procedural work",
+      "stock_blend": "art\\frontier_illustrated_20261101\\citizens\\mechanic_stock.blend",
+      "stock_blend_sha256": "a9794b01dd15adf931b352eab10b4bdc6adf74ea991d74840c87e9c186a7addc",
+      "stock_glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens\\mechanic.glb",
+      "stock_glb_sha256": "11e2295e07de100839cb8e853721b60d3d4205f05485a46d7bf339c778cbf025",
+      "body_geometry_uv_weight_signature_before": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+      "body_geometry_uv_weight_signature_after": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+      "body_vertices": 804,
+      "body_triangles": 1604,
+      "source_blend": "art\\frontier_illustrated_20261101\\citizens\\pass02\\source\\mechanic_equipment.blend",
+      "source_blend_sha256": "593fd802367ec9281d0ac8ecff7e2d1609bbf92a93dd39933d067eaa76da1c11",
+      "glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\mechanic.glb",
+      "glb_sha256": "03ec6f35421d2cebfaa03f7fa911db71f4c6120ac8858dd369f7bbcd9b878496",
+      "rig": "original Root; no new bones; rigid equipment groups on existing deform bones",
+      "bone_count_source": 45,
+      "equipment_binding": {
+        "pass": true,
+        "errors": [],
+        "modules": [
+          {
+            "name": "Gear_Breastplate",
+            "bone": "UpperChest",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_ChestIdentifier",
+            "bone": "UpperChest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_LeftShoulder",
+            "bone": "LeftArm",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_LeftKnee",
+            "bone": "LeftLeg",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_RightShoulder",
+            "bone": "RightArm",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_RightKnee",
+            "bone": "RightLeg",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_Backpack",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_BackpackLid",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_ToolCassette",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          }
+        ]
+      },
+      "stats_rest": {
+        "vertices": 1476,
+        "triangles": 2912,
+        "bounds_blender_m": {
+          "min": [
+            -0.8553459644317627,
+            -0.2431384027004242,
+            -2.1517188031339174e-09
+          ],
+          "max": [
+            0.8555741310119629,
+            0.3215000331401825,
+            1.779999852180481
+          ]
+        },
+        "dimensions_blender_m": [
+          1.7109200954437256,
+          0.5646384358406067,
+          1.7799998543321998
+        ]
+      },
+      "mesh_count_glb": 2,
+      "skin_count_glb": 1,
+      "material_count_glb": 4,
+      "embedded_images": 1,
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "coordinates": "metres; rest height 1.78; feet Z0; Blender -Y front / Z up -> Godot +Z front / Y up; existing runtime scale 0.35",
+      "raw_qa_pass": true,
+      "body_uv_qa_pass": true,
+      "errors": [],
+      "warnings": [],
+      "qa_scope": "Full new assembled geometry at rest; original body UV separately. New constant-color gear intentionally has no UVs. No expensive-check skips.",
+      "references": [
+        "docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png"
+      ],
+      "stock_files_unchanged_against_pass01_manifest": true,
+      "export_inspection": {
+        "meshes": [
+          {
+            "mesh": "characterMedium",
+            "triangles": 1604,
+            "gltf_attribute_vertices": 1029,
+            "unique_positions_at_1_micrometre": 804,
+            "coincident_position_groups": 205,
+            "coincident_groups_with_different_normal_uv_skin_or_material_attributes": 205
+          },
+          {
+            "mesh": "Gear_Breastplate_Mesh",
+            "triangles": 1308,
+            "gltf_attribute_vertices": 3484,
+            "unique_positions_at_1_micrometre": 672,
+            "coincident_position_groups": 672,
+            "coincident_groups_with_different_normal_uv_skin_or_material_attributes": 672
+          }
+        ],
+        "animations": [
+          {
+            "name": "idle",
+            "duration_seconds": 1.0666666666666667
+          },
+          {
+            "name": "walk",
+            "duration_seconds": 1.0666666666666667
+          }
+        ],
+        "skins": 1,
+        "materials": 4,
+        "images": 1,
+        "node_names": [
+          "LeftToes",
+          "LeftFoot",
+          "LeftLeg",
+          "LeftUpLeg",
+          "RightToes",
+          "RightFoot",
+          "RightLeg",
+          "RightUpLeg",
+          "LeftHandIndex3",
+          "LeftHandIndex2",
+          "LeftHandIndex1",
+          "LeftHandThumb2",
+          "LeftHandThumb1",
+          "LeftHand",
+          "LeftForeArm",
+          "LeftArm",
+          "LeftShoulder",
+          "Head",
+          "Neck",
+          "RightHandIndex3",
+          "RightHandIndex2",
+          "RightHandIndex1",
+          "RightHandThumb2",
+          "RightHandThumb1",
+          "RightHand",
+          "RightForeArm",
+          "RightArm",
+          "RightShoulder",
+          "UpperChest",
+          "Chest",
+          "Spine",
+          "Hips",
+          "HipsCtrl",
+          "LeftFootRollCtrl",
+          "LeftFootIK",
+          "LeftToeRoll",
+          "LeftHeelRoll",
+          "LeftKneeCtrl",
+          "LeftFootCtrl",
+          "RightFootRollCtrl",
+          "RightFootIK",
+          "RightToeRoll",
+          "RightHeelRoll",
+          "RightKneeCtrl",
+          "RightFootCtrl",
+          "characterMedium",
+          "Gear_Modular",
+          "Root"
+        ],
+        "no_lights_collision_navigation": true
+      },
+      "roundtrip": {
+        "report": "art/frontier_illustrated_20261101/citizens/pass02/qa/roundtrip.json",
+        "raw": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\mechanic_roundtrip_raw.json",
+        "pass": true,
+        "warnings": [
+          "characterMedium: duplicate verts=44 loose verts=0",
+          "Gear_Modular: duplicate verts=1742 loose verts=0"
+        ],
+        "rest_position_error_m": 6.357489041874942e-07,
+        "sampled_frames_per_clip": 33,
+        "clip_count": 2,
+        "maximum_bidirectional_vertex_error_m": 1.4824221352682798e-06
+      },
+      "warning_acceptance": "Fresh glTF import retains attribute splits at UV and flat/hard-normal seams. Duplicate-vertex warnings and resulting seam boundaries are retained raw, not hidden/repaired. Source geometry is closed and warning-free; rest and all66 clip frames match bidirectionally within0.00004m. Export attribute split evidence is recorded above.",
+      "pose_report": "art/frontier_illustrated_20261101/citizens/pass02/qa/mechanic_poses.json",
+      "source_qa_report": "art/frontier_illustrated_20261101/citizens/pass02/qa/mechanic_qa_raw.json",
+      "opened_visuals": [
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/mechanic_poses.png",
+          "sha256": "be4729db09f7c207f12a6a1fe81e509f092d261258fd363fe20beae0feffa8ff"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/mechanic_stock_idle_front.png",
+          "sha256": "740ccc60979c19d5a3fb53ebe763fb2f9f61ab319f11cf4cc6abcf69ac5c5ca0"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/mechanic_random.png",
+          "sha256": "dcc451502713c0486113bec96860e7f154c7d363f574c38f5f0a7fce439c6965"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/mechanic_wire.png",
+          "sha256": "db0c4495a4f81188b00253f52448a9aa5d076ff06341e3361158eccab0354255"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/mechanic_roundtrip_walk.png",
+          "sha256": "b28beaa40b93058fc08682bf59118c23bf0cff24c34f52d88bdb5f7626d2a96b"
+        }
+      ]
+    },
+    {
+      "role": "medic",
+      "status": "separate equipment candidate; no user visual approval inferred",
+      "source_bundle": "Kenney Animated Characters Bundle 4.0",
+      "license": "CC0; new equipment original procedural work",
+      "stock_blend": "art\\frontier_illustrated_20261101\\citizens\\medic_stock.blend",
+      "stock_blend_sha256": "002a0c995e1cee186d4459b4620e56b26ae34aa597386f25822d5f7b85ce46b1",
+      "stock_glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens\\medic.glb",
+      "stock_glb_sha256": "9f0eea0c570c1af5e5ced3a628cbb1a659d9636f0095faa6a9c773dd9fa5e42f",
+      "body_geometry_uv_weight_signature_before": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+      "body_geometry_uv_weight_signature_after": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+      "body_vertices": 804,
+      "body_triangles": 1604,
+      "source_blend": "art\\frontier_illustrated_20261101\\citizens\\pass02\\source\\medic_equipment.blend",
+      "source_blend_sha256": "07ac06e26381873f87a06c664d9bee879ab988a04cfd5da7e3792b879567ed80",
+      "glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\medic.glb",
+      "glb_sha256": "e7c0c690f0ae9a85a93d18ecf7d765c9c16756f74e847bd926379f3cfd1e4f79",
+      "rig": "original Root; no new bones; rigid equipment groups on existing deform bones",
+      "bone_count_source": 45,
+      "equipment_binding": {
+        "pass": true,
+        "errors": [],
+        "modules": [
+          {
+            "name": "Gear_Breastplate",
+            "bone": "UpperChest",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_ChestIdentifier",
+            "bone": "UpperChest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_LeftShoulder",
+            "bone": "LeftArm",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_LeftKnee",
+            "bone": "LeftLeg",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_RightShoulder",
+            "bone": "RightArm",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_RightKnee",
+            "bone": "RightLeg",
+            "vertices": 112,
+            "triangles": 220
+          },
+          {
+            "name": "Gear_Backpack",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_BackpackLid",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_MedicalKitMarkVertical",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          },
+          {
+            "name": "Gear_MedicalKitMarkHorizontal",
+            "bone": "Chest",
+            "vertices": 56,
+            "triangles": 108
+          }
+        ]
+      },
+      "stats_rest": {
+        "vertices": 1532,
+        "triangles": 3020,
+        "bounds_blender_m": {
+          "min": [
+            -0.8553459644317627,
+            -0.2431384027004242,
+            -2.1517188031339174e-09
+          ],
+          "max": [
+            0.8555741310119629,
+            0.29350003600120544,
+            1.779999852180481
+          ]
+        },
+        "dimensions_blender_m": [
+          1.7109200954437256,
+          0.5366384387016296,
+          1.7799998543321998
+        ]
+      },
+      "mesh_count_glb": 2,
+      "skin_count_glb": 1,
+      "material_count_glb": 4,
+      "embedded_images": 1,
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "coordinates": "metres; rest height 1.78; feet Z0; Blender -Y front / Z up -> Godot +Z front / Y up; existing runtime scale 0.35",
+      "raw_qa_pass": true,
+      "body_uv_qa_pass": true,
+      "errors": [],
+      "warnings": [],
+      "qa_scope": "Full new assembled geometry at rest; original body UV separately. New constant-color gear intentionally has no UVs. No expensive-check skips.",
+      "references": [
+        "docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png"
+      ],
+      "stock_files_unchanged_against_pass01_manifest": true,
+      "export_inspection": {
+        "meshes": [
+          {
+            "mesh": "characterMedium",
+            "triangles": 1604,
+            "gltf_attribute_vertices": 1029,
+            "unique_positions_at_1_micrometre": 804,
+            "coincident_position_groups": 205,
+            "coincident_groups_with_different_normal_uv_skin_or_material_attributes": 205
+          },
+          {
+            "mesh": "Gear_Breastplate_Mesh",
+            "triangles": 1416,
+            "gltf_attribute_vertices": 3786,
+            "unique_positions_at_1_micrometre": 728,
+            "coincident_position_groups": 728,
+            "coincident_groups_with_different_normal_uv_skin_or_material_attributes": 728
+          }
+        ],
+        "animations": [
+          {
+            "name": "idle",
+            "duration_seconds": 1.0666666666666667
+          },
+          {
+            "name": "walk",
+            "duration_seconds": 1.0666666666666667
+          }
+        ],
+        "skins": 1,
+        "materials": 4,
+        "images": 1,
+        "node_names": [
+          "LeftToes",
+          "LeftFoot",
+          "LeftLeg",
+          "LeftUpLeg",
+          "RightToes",
+          "RightFoot",
+          "RightLeg",
+          "RightUpLeg",
+          "LeftHandIndex3",
+          "LeftHandIndex2",
+          "LeftHandIndex1",
+          "LeftHandThumb2",
+          "LeftHandThumb1",
+          "LeftHand",
+          "LeftForeArm",
+          "LeftArm",
+          "LeftShoulder",
+          "Head",
+          "Neck",
+          "RightHandIndex3",
+          "RightHandIndex2",
+          "RightHandIndex1",
+          "RightHandThumb2",
+          "RightHandThumb1",
+          "RightHand",
+          "RightForeArm",
+          "RightArm",
+          "RightShoulder",
+          "UpperChest",
+          "Chest",
+          "Spine",
+          "Hips",
+          "HipsCtrl",
+          "LeftFootRollCtrl",
+          "LeftFootIK",
+          "LeftToeRoll",
+          "LeftHeelRoll",
+          "LeftKneeCtrl",
+          "LeftFootCtrl",
+          "RightFootRollCtrl",
+          "RightFootIK",
+          "RightToeRoll",
+          "RightHeelRoll",
+          "RightKneeCtrl",
+          "RightFootCtrl",
+          "characterMedium",
+          "Gear_Modular",
+          "Root"
+        ],
+        "no_lights_collision_navigation": true
+      },
+      "roundtrip": {
+        "report": "art/frontier_illustrated_20261101/citizens/pass02/qa/roundtrip.json",
+        "raw": "art\\frontier_illustrated_20261101\\citizens\\pass02\\qa\\medic_roundtrip_raw.json",
+        "pass": true,
+        "warnings": [
+          "characterMedium: duplicate verts=44 loose verts=0",
+          "Gear_Modular: duplicate verts=1893 loose verts=0"
+        ],
+        "rest_position_error_m": 6.357489041874942e-07,
+        "sampled_frames_per_clip": 33,
+        "clip_count": 2,
+        "maximum_bidirectional_vertex_error_m": 1.4824221352682798e-06
+      },
+      "warning_acceptance": "Fresh glTF import retains attribute splits at UV and flat/hard-normal seams. Duplicate-vertex warnings and resulting seam boundaries are retained raw, not hidden/repaired. Source geometry is closed and warning-free; rest and all66 clip frames match bidirectionally within0.00004m. Export attribute split evidence is recorded above.",
+      "pose_report": "art/frontier_illustrated_20261101/citizens/pass02/qa/medic_poses.json",
+      "source_qa_report": "art/frontier_illustrated_20261101/citizens/pass02/qa/medic_qa_raw.json",
+      "opened_visuals": [
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/medic_poses.png",
+          "sha256": "cf12c2fb1aad657fe300e55a0059e4507dcc0d4362c7294162e7969c9c768f05"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/medic_stock_idle_front.png",
+          "sha256": "58aa6a092cd7ef8e1a290e1cdd0dc31a5ddf5f4fbbd92bb3afa1af1d59e8ddcd"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/medic_random.png",
+          "sha256": "15ded914042808dafa6628f017d9aa37e4a95a9341a2ea24cc89e52b2beca944"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/medic_wire.png",
+          "sha256": "92870c72d0ce24130eca34b450b1378962c36165954f540cf5116672ac6fc1e8"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/citizens/pass02/qa/medic_roundtrip_walk.png",
+          "sha256": "cd85733a34d98c8049b3ee8fe68397d6ef48de23cf482bf576b9999161aef71d"
+        }
+      ]
+    }
+  ],
+  "visual_review": {
+    "opened": true,
+    "finding": "Original friendly heads/faces, body proportions and suit textures remain visible. Broad chamfered breast/shoulder/knee forms and supported packs are distinct in front/rear/side and walk poses. Pilot headset is open; mechanic has stowed cassette; medic has orange pack mark.",
+    "limits": "Workbench texture views assess geometry/attachments, not final Godot lighting. In diagnostic extreme arm/elbow poses pads intentionally overlap at the shoulder; no detached parts or spikes were seen. Gear stays rigid and does not use cloth simulation. Role recognition at actual game distance remains a native preview check. Three environment references guide palette; detailed adult anatomy from the earlier citizen illustration is deliberately not reproduced because the current user chose the Kenney base."
+  },
+  "integration_interface": {
+    "exports": "Assets/curated/frontier_illustrated_20261101/citizens_pass02/{role}.glb",
+    "meshes": [
+      "characterMedium",
+      "Gear_Modular"
+    ],
+    "skeleton": "Root original Kenney hierarchy, one shared skin",
+    "animations": [
+      "idle",
+      "walk"
+    ],
+    "runtime_scale": 0.35,
+    "origin": "feet floorZ0, restheight1.78m",
+    "front_godot": "+Z",
+    "no_gameplay_state": true
+  },
+  "not_claimed": [
+    "user visual acceptance",
+    "native Godot result from this subtask",
+    "population or combat/loadout migration",
+    "full performance acceptance"
+  ]
+}
