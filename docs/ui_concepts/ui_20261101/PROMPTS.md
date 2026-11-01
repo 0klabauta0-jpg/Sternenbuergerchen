@@ -47,6 +47,16 @@ Die fünf quadratischen Tasten stehen in der Folge Bewegen → Nehmen → Vertei
 
 Der freigelegte Landschaftsbereich ist Bildinterpretation. Keine einzelne Pixelgeometrie oder kleine Schrift aus dem Generator soll ungeprüft zum Godot-Control werden. Die tatsächliche Sichtprüfung folgt in [PRUEFUNG.md](PRUEFUNG.md).
 
+## Revision A4: engere Buttons und drei kompakte Blöcke
+
+Exakte Eingabe: [prompts_revision4.json](prompts_revision4.json). A3 ist das Bearbeitungsziel; die neue Datei heißt `mockup_a4_band_bloecke_kompakt.png`.
+
+Der erste A4-Aufruf ordnete Blöcke und Innenlabels richtig, vergrößerte aber die Buttonkörper. Der Zwischenstand bleibt als `mockup_a4_band_versuch1.png` erhalten. [prompts_revision4_korrektur.json](prompts_revision4_korrektur.json) dokumentiert die gezielte Verkleinerung und Linksverschiebung der Folgeblöcke. Der Korrekturaufruf fügt keine Funktion hinzu.
+
+Aktionsquadrate sollen enger stehen und Icon sowie Beschriftung im Button tragen. Damit bleibt unter der ersten Reihe Layoutreserve; es werden keine neuen Befehle oder aktiven Platzhalter ergänzt. Die konkrete Größenidee um 60px und 4–6px Abstand ist eine Assistentenausarbeitung des Nutzerwunschs, keine wörtliche Maßangabe.
+
+Die drei Blöcke folgen nun **Aktionen → Ziel/Auftrag → Team**. „Ziel gewählt / Auftrag: Bewegen“ steht als schmaler Mittelblock. Haltung und Feuerregel werden unter den ALPHA-/FTL-/Bereit-Header gestapelt und mit ihm links ausgerichtet. Das bündige Band, Teamkarten, separates Protokoll und die oberen rechten Felder bleiben erhalten. A3s Außenbeschriftung und alte Blockfolge sind damit überholt; die Vorgeschichte bleibt unverändert abrufbar.
+
 ## Für die spätere Umsetzung
 
 Texte, Flächen, Fokus und Zustände nativ in Godot aufbauen. Die generierten Komplettscreens bleiben Anschauungsmaterial. Kleine HUD-Icons zunächst mit Beschriftung einsetzen und bei Bedarf aus dieser Motivvorlage vereinfachen. Vorhandene Kenney-Symbole für Checkmark, Schließen und einfache Pfeile weiterhin verwenden.

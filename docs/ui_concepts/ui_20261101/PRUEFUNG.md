@@ -2,9 +2,9 @@
 
 ## Ergebnis und Umfang
 
-Die Erstrunde enthält drei Layoutbilder und sechs separate Icons. Danach kamen A2, zwei Iconalternativen und A3 einschließlich eines erhaltenen Korrektur-Zwischenstands hinzu: insgesamt vierzehn PNGs (fünf Screenentwürfe, ein A3-Zwischenstand, acht Icons). Exakte Eingaben stehen in `prompts.json`, `prompts_revision2.json`, `prompts_revision3.json` und `prompts_revision3_korrektur.json`; verwendet wurde das eingebaute `image_gen.imagegen`. Die Originaldateien aus dem Generator bleiben unverändert. Dateien, Größen, Alpha und SHA256 sind in `manifest.json` und `ASSET_PRUEFUNG.json` erfasst.
+Die Erstrunde enthält drei Layoutbilder und sechs separate Icons. Danach kamen A2, zwei Iconalternativen, A3 und A4 hinzu: insgesamt sechzehn PNGs (sechs Screenentwürfe, je ein erhaltener A3-/A4-Zwischenstand, acht Icons). Exakte Eingaben stehen in `prompts.json` und den Dateien `prompts_revision2/3/4*.json`; verwendet wurde das eingebaute `image_gen.imagegen`. Die Originaldateien aus dem Generator bleiben unverändert. Dateien, Größen, Alpha und SHA256 sind in `manifest.json` und `ASSET_PRUEFUNG.json` erfasst.
 
-Der Nutzer hat **A für die Mission und C als Staging-Grundlage** gewählt. Aktuell zeigt A3 den gewünschten Aufbau mit kompakten quadratischen Kacheln im unteren Randband; A2 mit horizontalen Buttons bleibt als vorheriger Versuch erhalten. Die aktuelle A3-Ausarbeitung ist noch nicht bewertet. B bleibt eine helle Alternative. Alle Screens sind Anschauungsbilder; dieses Paket verändert keine Godot-Runtime, Szenen, Bedienung oder Spielregeln.
+Der Nutzer hat **A für die Mission und C als Staging-Grundlage** gewählt. Aktuell zeigt A4 die engere Aktionsgruppe mit Innenlabels sowie Aktionen → Ziel/Auftrag → Team mit Haltung/Feuerregel darunter. A3 und A2 bleiben als vorherige Versuche erhalten. Die aktuelle A4-Ausarbeitung ist noch nicht bewertet. B bleibt eine helle Alternative. Alle Screens sind Anschauungsbilder; dieses Paket verändert keine Godot-Runtime, Szenen, Bedienung oder Spielregeln.
 
 ## Sichtprüfung der Layouts
 
@@ -42,7 +42,7 @@ Die Erkennbarkeit bei tatsächlichen 24/32px ist **noch nicht visuell abgenommen
 
 ## Offene Entscheidungen für die nächste Runde
 
-A ist als Missionsrichtung gewählt; offen sind die konkrete A3-Ausarbeitung, Staging-C-Dichte, Iconvereinfachung bei kleinen Größen sowie native Schrift-/Panelgrößen. Die Workbench exportiert Bewertungen und Notizen, speichert sie aber nicht automatisch über Sitzungen hinweg. Der wiedergefundene Erstrundenexport wird als dokumentierter Ausgangsstand angezeigt.
+A ist als Missionsrichtung gewählt; offen sind die konkrete A4-Ausarbeitung, Staging-C-Dichte, Iconvereinfachung bei kleinen Größen sowie native Schrift-/Panelgrößen. Die Workbench exportiert Bewertungen und Notizen, speichert sie aber nicht automatisch über Sitzungen hinweg. Der wiedergefundene Erstrundenexport wird als dokumentierter Ausgangsstand angezeigt.
 
 ## Revision A2: Sichtprüfung nach dem Nutzerfeedback
 
@@ -68,3 +68,14 @@ A ist als Missionsrichtung gewählt; offen sind die konkrete A3-Ausarbeitung, St
 - Das Band ist im Raster höher als die angefragten etwa 90–96px. Für eine exakt kompakte native Fassung Innenabstände, Kontext und Beschriftungszeile kontrollieren; den Bildmaßstab nicht blind übernehmen. Schrift und lange deutsche Labels dürfen dabei nicht unlesbar werden.
 - Landschaft wirkt nach den Bildbearbeitungen weicher als A2. Dies ist ein Mockup-Artefakt und kein Auftrag, im Spiel einen Unschärfefilter oder weichere Weltgrafik einzuführen. „Normal“ bleibt nur der illustrative Haltungszustand.
 - Unabhängige zweite Bildsichtung bestätigt die gewünschten räumlichen Änderungen ohne schwere Layoutinkonsistenz. JavaScript-Syntax und die Umschaltung A3/A2/A einschließlich übereinstimmender Bild-/Zoomziele, Metadaten und unveränderter Iconurteile sind offline geprüft: `EXPORT_PRUEFUNG_REVISION3.json`. Kein automatisierter Browser- oder Godot-Nachweis.
+
+## Revision A4: Innenlabels und umgestellte Blöcke
+
+- Aktueller Kandidat: `mockup_a4_band_bloecke_kompakt.png`, 1672×941px RGB. Erster Versuch mit zu großen Tasten: `mockup_a4_band_versuch1.png`. Ein zweiter Aufruf verkleinerte die Aktionsgruppe und zog die Folgeblöcke nach links. Alle bisherigen Bilder und Icons bleiben erhalten.
+- Fünf bestehende Aktionen bleiben in gleicher Reihenfolge. Alle Beschriftungen liegen innerhalb ihrer Tasten; „Plan ausführen“ ist zweizeilig im cyanfarbenen Quadrat. Keine externe Beschriftungszeile unter den Tasten.
+- Die sichtbare Folge lautet Aktionen → Ziel/Auftrag → ALPHA. Haltung und Feuerregel sind unter dem ALPHA-/FTL-/Bereit-Header links ausgerichtet. Ziel/Auftrag steht dadurch zwischen den bisherigen ersten und zweiten Funktionsblöcken.
+- Die Gesamtgruppe der fünf Aktionen ist enger als A3, ungefähr bis x=430 statt x=536 im Raster; die Beschriftungszeile ist integriert. Einzelne Tastenkörper sind dadurch nicht zwingend kleiner als A3 ohne Beschriftung. Zielmaße um 60px und 4–6px Abstand sind im Raster nicht exakt erreicht. Für die native Umsetzung Größen, Abstände und Textlayout kontrollieren.
+- Unter der ersten Reihe bleibt eine freie Reserve von ungefähr 40px. Das belegt noch keinen Platz für eine vollständige zweite Reihe in endgültiger Größe. Eine spätere native Grid-Anordnung muss zwei echte Reihen einschließlich Text, Abstand und Fokusrahmen aufnehmen können. Keine neuen aktiven oder ausgegrauten Fantasiebefehle sind hinzugefügt.
+- Das Band bleibt bündig am Rand. Seine Oberkante liegt im Raster geringfügig höher als A3; eine exakt unveränderte oder kleinere Bandhöhe wird deshalb nicht behauptet. Teamkarten und separates Log bleiben darüber, obere rechte Bereiche und fehlender Spieltitel bleiben erhalten.
+- Die Welt bleibt illustriertes Anschauungsmaterial und ist weiterhin weicher als in der Ausgangsreferenz. Daraus keine Änderung der Runtime-Grafik ableiten. Kleine Schrift und deutsche Langtexte später nativ prüfen, nicht aus dem Raster als akzeptiert übernehmen.
+- Zweite unabhängige Bildsichtung bestätigt die gewünschte Innenbeschriftung und Blockanordnung ohne schwere Inkonsistenz. Vier Umschaltstände A4/A3/A2/A mit Bild-/Zoom-/Titel-/Metadaten sowie unveränderten Iconurteilen sind offline geprüft: `EXPORT_PRUEFUNG_REVISION4.json`. Browser-, native Eingabe- und Godot-Prüfung bleiben offen.

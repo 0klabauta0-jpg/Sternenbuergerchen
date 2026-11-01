@@ -1,0 +1,16 @@
+{
+  "schema": "sternenbuergerchen.ui_prompts.revision4_correction.v1",
+  "date": "2026-11-01",
+  "tool": "built-in image_gen.imagegen",
+  "reason": "First A4 had correct block order and internal labels but larger buttons and insufficient second-row reserve; targeted shrink and leftward regroup",
+  "items": [
+    {
+      "id": "mockup_a4_band_bloecke_final",
+      "file": "mockup_a4_band_bloecke_kompakt.png",
+      "references": [
+        "C:/Users/bjoer/.codex/worktrees/ui-entwuerfe-20261101/SternenBuergerchen/docs/reports/assets/ui-2026-11-01/mockup_a4_band_versuch1.png"
+      ],
+      "prompt": "Use-case: precise-object-edit / ui-mockup. One tightly targeted correction to the supplied A4 screenshot. This image is the EDIT TARGET. Preserve EVERYTHING ABOVE the bottom strip exactly, including world camera, buildings, figures, ALPHA/BRAVO cards, separate log, mission and compact Dropship. Preserve the bottom strip at its CURRENT HEIGHT AND EDGE POSITION: top near y814, bottom y941, flush x0..1672. DO NOT make strip taller. The previous image got the THREE-BLOCK ORDER and LABELS INSIDE right but made the five action buttons TOO LARGE. REQUIRED: SHRINK THE FIVE SQUARE ACTION BUTTONS SIGNIFICANTLY, from current about82px square to about58px square, with6px gaps. The ENTIRE five-button group INCLUDING GAPS AND LEFT PADDING must occupy ONLY x12..326, NOT x20..490. Concrete square positions in this1672x941canvas: button1x12..70, button2x76..134, button3x140..198, button4x204..262, button5x268..326. All five at y824..882, exactly one row. Each square retains SMALL ICON ABOVE ITS READABLE GERMAN CAPTION INSIDE THE SQUARE, never outside: Bewegen, Nehmen, Verteidigen, Flankieren, Plan ausführen. Use crisp condensed UI type so labels fit; Plan ausführen can be two lines inside cyan execute square. The square silhouettes and tight gaps MUST LOOK VISIBLY SMALLER THAN INPUT. There must be a clear EMPTY area UNDER this row, roughly y888..941 within x12..326, as future second-row space. Draw NO ghost buttons, new controls, placeholders or future-row labels in that empty area. Keep distinct cyan Play execute square immediately after Flankieren. After shrinking group, PULL BOTH FOLLOWING BLOCKS TO THE LEFT to eliminate old wasted space: TARGET/ORDER block at x342..545, title 'Ziel gewählt' over dropdown 'Auftrag: Bewegen'. Then thin divider. ALPHA TEAM BLOCK at x564..900, header 'ALPHA4/4 · FTL Mara · Bereit', with stance 'Vorsichtig · Normal · Aggressiv' directly UNDER and LEFT-ALIGNED with this header, Normal selected, then 'Feuer erwidern' dropdown UNDER stance. Keep team header + stance + fire in ONE compact aligned column. Exact overall logical order remains ACTIONS → TARGET/ORDER → TEAM/STANCE/FIRE. Remaining strip to right of x920 is mostly quiet empty space, not new features. No duplicate controls. No external labels under action buttons. Do not move/duplicate the log into strip. Keep existing top panels and world untouched, no game title. Correct ONLY bottom grouping and dimensions; match colors/style/font, no image crop or reframing."
+    }
+  ]
+}

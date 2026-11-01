@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "scope": "Actual revision4 export and four image-switch functions offline in Node VM with synthetic controls; not browser execution",
+  "checks": [
+    "A4/A3/A2/A1 preview and zoom agree",
+    "title/alt/caption follow selection",
+    "active image version mapping exported",
+    "comparison A4/A3 metadata",
+    "four unchanged icon verdicts and two open v2 candidates retained",
+    "checks remain unapproved",
+    "no runtime integration claim"
+  ],
+  "browser_agent_qa": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL"
+}

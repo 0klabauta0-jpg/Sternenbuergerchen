@@ -98,6 +98,20 @@
       "real_alpha": "not_required",
       "small_size_visual_acceptance": "not_applicable",
       "revision": "a3_edge_square"
+    },
+    {
+      "file": "mockup_a4_band_versuch1.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a4_compact_blocks"
+    },
+    {
+      "file": "mockup_a4_band_bloecke_kompakt.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a4_compact_blocks"
     }
   ]
 }

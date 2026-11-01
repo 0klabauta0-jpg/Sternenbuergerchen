@@ -304,10 +304,38 @@
       "height": 941,
       "mode": "RGB",
       "revision": "a3_edge_square"
+    },
+    {
+      "id": "mockup_a4_band_versuch1",
+      "kind": "mockup",
+      "status": "prior_attempt_oversized_action_tiles_retained",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a4_band_versuch1.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-960fee2b-ac8a-4423-bb29-a65f65eca833.png",
+      "sha256": "ff2ce595256c5b6ee31530ddcd0b4c564c4a5363d00fafefba75907f60e8a0ec",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2520823,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a4_compact_blocks"
+    },
+    {
+      "id": "mockup_a4_band_bloecke_kompakt",
+      "kind": "mockup",
+      "status": "revision4_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a4_band_bloecke_kompakt.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-1a4858e2-cee0-4460-9b5b-092d39236f11.png",
+      "sha256": "c8c4c0ff925c7f5e209e197768438361b2710d81b43e435658e688b119d012d7",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2515024,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a4_compact_blocks"
     }
   ],
-  "current_revision": "a3_edge_square",
-  "revision_base_sha": "c976edcea",
+  "current_revision": "a4_compact_blocks",
+  "revision_base_sha": "040e5f4e2",
   "revision2_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision2.json",
   "revision2_prompt_file_sha256": "c7ef1a7c96569d7d3dee3b6125e16d1fc5f66e378e6a214b88cb72eb2246cbeb",
   "review_selection": {
@@ -335,8 +363,8 @@
     "scope": "original concept directions only; revision2 assets remain unreviewed"
   },
   "review_assets": {
-    "mission_proposal": "mockup_a3_randband_quadratisch.png",
-    "prior_mission": "mockup_a2_kommandodeck_kompakt.png",
+    "mission_proposal": "mockup_a4_band_bloecke_kompakt.png",
+    "prior_mission": "mockup_a3_randband_quadratisch.png",
     "staging": "mockup_c_einsatztafel.png",
     "icons": [
       "icon_move.png",
@@ -347,6 +375,8 @@
       "icon_loadout.png"
     ],
     "mission_history": [
+      "mockup_a4_band_versuch1.png",
+      "mockup_a3_randband_quadratisch.png",
       "mockup_a3_randband_versuch1.png",
       "mockup_a2_kommandodeck_kompakt.png",
       "mockup_a_kommandodeck.png"
@@ -375,5 +405,24 @@
     "first_attempt": "mockup_a3_randband_versuch1.png",
     "finding": "protocol embedded in strip despite requested position",
     "targeted_correction": "protocol moved above strip and padding reduced"
+  },
+  "revision4_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision4.json",
+  "revision4_prompt_file_sha256": "9fd681ecd98e85eb8dd7959efe2fe3d0c69a4dfee42d7490c6294479cd2a0d65",
+  "revision4_correction_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision4_korrektur.json",
+  "revision4_correction_prompt_file_sha256": "ed465e720884bae8ed3416af4f1b6cd32dd42e59c58c42f121c43fa01df5ab97",
+  "revision4_feedback": {
+    "source": "current user chat message",
+    "requests": [
+      "tighter compact action buttons with text inside",
+      "space for possible future second row",
+      "target/order between actions and team block",
+      "stance and fire rule directly under Alpha header, shifted left"
+    ],
+    "scope": "visual concept; no additional active commands or runtime change"
+  },
+  "revision4_iteration": {
+    "first_attempt": "mockup_a4_band_versuch1.png",
+    "finding": "right block order and inside captions but oversized action tiles",
+    "targeted_correction": "smaller action cluster and following blocks pulled left"
   }
 }

@@ -51,7 +51,9 @@ Quelle: Export `C:/Users/bjoer/Downloads/sternenbuergerchen_ui_20261101_2026-11-
 - Der Export bleibt unverändert archiviert. Alle fünf Sichtprüfungs-Checkboxen waren unmarkiert; keine technische oder native Freigabe daraus ableiten.
 - Keine Runtime-, Input-, Gameplay-, Szenen- oder aktiven Assetänderungen. GO bleibt Planausführung und keine Pause.
 
-## Aktuelle Revision A3 · Randband und quadratische Buttons
+## Historische Revision A3 · Randband und quadratische Buttons
+
+Die Randverankerung bleibt für A4 bestehen. A3s außerhalb liegende Labels und die bisherige Blockanordnung werden durch die nachfolgende Rückmeldung ersetzt.
 
 Die neueste Rückmeldung präzisiert denselben Konzeptauftrag: Das Befehlsband liegt bündig am absoluten unteren Bildrand, beginnt an der linken unteren Ecke und läuft kompakt nach rechts. Die Teamkarten wandern nach oben; das Band beginnt darunter. Das Log wandert ebenfalls nach oben über das Band.
 
@@ -70,3 +72,21 @@ Die neueste Rückmeldung präzisiert denselben Konzeptauftrag: Das Befehlsband l
 - Teamkarten und Log sind vollständig über dem Band; obere rechte Bereiche bleiben vorhanden und Dropship/LZ wird nur behutsam verdichtet.
 - Gestaltungsziel und tatsächliches Bildergebnis werden getrennt dokumentiert. Für andere Ausgabegrößen gilt die Randverankerung relativ zur echten Bildhöhe, keine feste A2-Pixelkoordinate.
 - Kein Runtime-/Input-/Gameplay- oder Assetintegrationsauftrag; GO bleibt Planausführung, Echtzeit bleibt ohne Pause.
+
+## Aktuelle Revision A4 · Innenbeschriftung und drei kompakte Blöcke
+
+Neuester Nutzerwunsch: Buttons unten links noch kompakter und enger; **Text innerhalb der Buttons**, damit später eine zweite Reihe Platz hat. Unter dem Alpha-/Bereit-Header stehen Haltung und Feuerregel; die Gruppe rückt nach links. „Ziel gewählt / Auftrag: Bewegen“ liegt zwischen Aktionsblock und Alpha-/Haltungsblock. Die bereits mitgeteilte Auslegung lautet von links nach rechts **Aktionen → Ziel/Auftrag → Alpha + Haltung + Feuerregel**; sie ist eine konkrete Layoutausarbeitung, keine zusätzliche Gameplay-Funktion.
+
+- Assistentenziel, keine exakte Nutzermaßangabe: fünf kompakte quadratische Bildkörper um 60px mit 4–6px Abstand; Icon oben und kurzes lesbares Label im selben Button. „Plan ausführen“ bei Bedarf zweizeilig im Button.
+- Reihenfolge der fünf Aktionen bleibt Bewegen, Nehmen, Verteidigen, Flankieren, Plan ausführen. Die frühere Außenbeschriftung aus A3 gilt nicht mehr.
+- Ziel/Auftrag als schmaler Mittelblock, danach eine dezente Trennung und der kompakte Alpha-Header mit Haltung/Feuerregel darunter. Keine neue Zielaktion und keine zusätzliche Bestätigung erfinden.
+- Unter der ersten Aktionsreihe bleibt freie Layoutreserve für eine spätere zweite Reihe; keine neuen aktiven oder angedeuteten Platzhalterbuttons. Bandhöhe dafür nicht vergrößern.
+- Bündige untere/ linke Bandkante bleibt. Welt, Teamkarten, Log, obere rechte Bereiche und aktuelle sechs Iconmotive bleiben gegenüber A3 unverändert.
+- Ein neuer Kandidat aus A3: `docs/reports/assets/ui-2026-11-01/mockup_a4_band_bloecke_kompakt.png`; vorherige Bilder bleiben erhalten.
+
+### Akzeptanz A4
+
+- Beschriftungen liegen sichtbar innerhalb aller fünf Buttons; die erste Reihe wirkt dichter, ohne Schrift zur Platzrettung zu verkleinern.
+- Drei Blöcke sind eindeutig in der Reihenfolge Aktionen → Ziel/Auftrag → Team/Haltung/Feuerregel erkennbar. Haltung und Feuerregel liegen unter dem Alpha-Header.
+- Platzreserve ist leer, Bandhöhe und übrige Bildbereiche bleiben gegenüber A3 erhalten. Tatsächliche Abweichungen werden im Bildprüfbericht benannt.
+- Unverändert Konzeptrevision ohne Runtime-, Input-, Gameplay- oder aktive Assetänderungen.

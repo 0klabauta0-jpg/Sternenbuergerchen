@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### UI-Konzept 2026-11-01 – Revision A4: Innenlabels und kompakte Blockfolge
+- Status: angeforderte Fortsetzung des bestehenden, noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`; Revisionsbasis `040e5f4e2`. Keine Runtime-Aenderung.
+- Aenderung: enger gruppierte Aktionstasten mit Innenbeschriftung; Ziel/Auftrag steht zwischen Aktionen und ALPHA. Haltung/Feuerregel unter dem ALPHA-Header links ausgerichtet. Freie Reserve unter der ersten Reihe; keine neuen aktiven Befehle.
+- Ein erster A4-Versuch hatte zu grosse Tasten; der gezielte zweite Aufruf verdichtete die Aktionsgruppe und zog Folgegruppen nach links. Beide Bilder und Prompts erhalten; A4 ist die neue Standardvorschau, A3/A2/A bleiben vergleichbar. Iconauswahl und bestehender JSON-Review unveraendert.
+- Pruefung: zwei Bildsichtungen, Quellen-/Hash-/Verweispruefung, Syntax und vier Vorschau-/Exportzustaende offline. Exakte native Masse und vollstaendige zweite Buttonreihe nicht nachgewiesen; Band im Raster geringfuegig hoeher als A3. Kein Browser- oder Godot-Nachweis.
+- Einstieg: bestehende Review-HTML, `UEBERGABE.md`, `FEEDBACK_20261101.md`, `PRUEFUNG.md`; neue Eingaben `prompts_revision4*.json`. A4 ist ein neuer, noch nicht bewerteter Bildvorschlag.
+
 ### UI-Konzept 2026-11-01 – Revision A3: quadratisches Randband
 - Status: angeforderte Fortsetzung desselben noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`; Revisionsbasis `c976edcea`. Keine Runtime-Aenderung.
 - Aenderung: Band beginnt buendig links unten und endet an der unteren Bildkante; kompakte quadratische Tasten mit Planausfuehrung direkt nach Flankieren; Teamkarten und separates Protokoll darueber. Dropship/LZ oben rechts kleiner, Zielkasten beibehalten. Kein neuer Iconpass.
