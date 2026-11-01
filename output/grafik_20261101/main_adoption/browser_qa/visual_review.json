@@ -1,0 +1,12 @@
+{
+  "html_sha256": "86edd3811d9282cbd2249450c799122a12000d405a467ce2e89557b1401c0b3d",
+  "all_17_layouts_opened_as_contact_sheet": true,
+  "individually_opened": [
+    "desktop_pair_cutlass_front.png",
+    "desktop_runtime_04_lz_approach.png",
+    "mobile_pair.png",
+    "mobile_dialog.png"
+  ],
+  "new_visual_blockers": [],
+  "scope": "Static layout review plus automated controls/export/decode checks; no general game UI redesign."
+}

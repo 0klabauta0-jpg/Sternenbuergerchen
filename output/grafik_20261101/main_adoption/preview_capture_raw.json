@@ -1,0 +1,650 @@
+{
+  "access_layout": {
+    "anchors": {
+      "habitat": {
+        "bounds": "[P: (7.0925, 0.0, 4.9575), S: (2.414999, 1.05175, 2.485)]",
+        "ground": "(8.3, 8.0405)",
+        "outward": "(0.0, 1.0)",
+        "step_front": "(8.3, 7.6405)",
+        "step_height": 0.057,
+        "step_width": 0.833749871253967,
+        "surface_height": 0.014
+      },
+      "hall": {
+        "bounds": "[P: (11.3625, 0.0, 4.98375), S: (3.674999, 1.47, 2.4325)]",
+        "ground": "(12.8325, 8.01425)",
+        "outward": "(0.0, 1.0)",
+        "step_front": "(12.8325, 7.61425)",
+        "step_height": 0.057,
+        "step_width": 2.2144995880127,
+        "surface_height": 0.014
+      },
+      "pad01": {
+        "ground": "(9.96, 10.9)",
+        "outward": "(1.0, 0.0)",
+        "surface_height": 0.014,
+        "width": 0.9
+      },
+      "pad02": {
+        "ground": "(16.14, 11.8)",
+        "outward": "(-1.0, 0.0)",
+        "surface_height": 0.014,
+        "width": 0.9
+      }
+    },
+    "apron": "[P: (11.025, 7.4), S: (4.35, 1.25)]",
+    "entrance_ramps": [
+      {
+        "high": "(8.3, 0.057, 7.6405)",
+        "id": "HabitatEntry",
+        "low": "(8.3, 0.014, 8.0405)",
+        "width": 0.68
+      },
+      {
+        "high": "(12.8325, 0.057, 7.61425)",
+        "id": "HallEntry",
+        "low": "(12.8325, 0.014, 8.01425)",
+        "width": 2.2144995880127
+      }
+    ],
+    "paths": [
+      {
+        "id": "service_spine",
+        "points": [
+          "(9.96, 10.9)",
+          "(10.72, 10.9)",
+          "(11.3, 10.9)",
+          "(14.6, 10.9)",
+          "(15.25, 11.8)",
+          "(16.14, 11.8)"
+        ],
+        "samples": "[(9.96, 10.9), (10.03754, 10.9), (10.13005, 10.9), (10.18036, 10.9), (10.23253, 10.9), (10.28595, 10.9), (10.34, 10.9), (10.39405, 10.9), (10.44747, 10.9), (10.49965, 10.9), (10.54995, 10.9), (10.64246, 10.9), (10.72, 10.9), (10.77819, 10.9), (10.8221, 10.9), (10.9038, 10.9), (10.95997, 10.9), (11.0386, 10.9), (11.08921, 10.9), (11.14888, 10.9), (11.21876, 10.9), (11.3, 10.9), (11.34909, 10.89969), (11.40858, 10.89881), (11.4778, 10.89742), (11.55603, 10.89557), (11.64261, 10.89333), (11.73682, 10.89074), (11.78657, 10.88935), (11.83798, 10.88789), (11.89095, 10.88637), (11.94539, 10.88481), (12.00123, 10.88321), (12.05837, 10.88158), (12.11673, 10.87992), (12.17622, 10.87825), (12.23676, 10.87656), (12.29825, 10.87488), (12.36062, 10.87319), (12.42377, 10.87152), (12.48762, 10.86987), (12.55208, 10.86825), (12.61707, 10.86666), (12.68249, 10.86512), (12.74827, 10.86362), (12.81431, 10.86218), (12.88054, 10.8608), (12.94685, 10.8595), (13.01317, 10.85828), (13.07941, 10.85714), (13.14549, 10.85609), (13.21131, 10.85515), (13.27679, 10.85431), (13.34184, 10.8536), (13.40638, 10.853), (13.47032, 10.85254), (13.53358, 10.85221), (13.59606, 10.85203), (13.65768, 10.85201), (13.71836, 10.85214), (13.77801, 10.85245), (13.83653, 10.85292), (13.89385, 10.85358), (13.94988, 10.85444), (14.00453, 10.85549), (14.05772, 10.85674), (14.10935, 10.85821), (14.15934, 10.8599), (14.25407, 10.86396), (14.34121, 10.86899), (14.42006, 10.87505), (14.48994, 10.8822), (14.55015, 10.8905), (14.6, 10.9), (14.68307, 10.92791), (14.75526, 10.96968), (14.8177, 11.02316), (14.87149, 11.08619), (14.91777, 11.1566), (14.95765, 11.23223), (14.99223, 11.31091), (15.02265, 11.3905), (15.05002, 11.46882), (15.07545, 11.54371), (15.10007, 11.61301), (15.12498, 11.67456), (15.15132, 11.7262), (15.18019, 11.76576), (15.25, 11.8), (15.34081, 11.8), (15.39315, 11.8), (15.44914, 11.8), (15.50805, 11.8), (15.56915, 11.8), (15.63171, 11.8), (15.695, 11.8), (15.75829, 11.8), (15.82085, 11.8), (15.88195, 11.8), (15.94086, 11.8), (15.99685, 11.8), (16.04919, 11.8), (16.14, 11.8)]",
+        "service_lane": true,
+        "width": 1.04
+      },
+      {
+        "id": "habitat",
+        "points": [
+          "(8.3, 8.0405)",
+          "(8.3, 8.8005)",
+          "(8.6, 9.65)",
+          "(9.6, 10.3)",
+          "(10.3, 10.9)",
+          "(10.92, 10.9)"
+        ],
+        "samples": "[(8.3, 8.0405), (8.3, 8.118043), (8.3, 8.210549), (8.3, 8.260856), (8.3, 8.31303), (8.3, 8.366453), (8.3, 8.4205), (8.3, 8.474546), (8.300001, 8.527969), (8.3, 8.580145), (8.3, 8.630449), (8.3, 8.722956), (8.3, 8.8005), (8.306493, 8.881989), (8.314318, 8.931209), (8.324938, 8.98488), (8.33816, 9.042109), (8.353789, 9.101997), (8.371634, 9.163651), (8.3915, 9.226172), (8.413195, 9.288664), (8.436523, 9.350231), (8.461294, 9.409976), (8.487312, 9.467003), (8.514386, 9.520415), (8.54232, 9.569317), (8.6, 9.65), (8.634698, 9.685305), (8.679391, 9.723439), (8.732733, 9.76395), (8.793375, 9.80638), (8.859971, 9.850279), (8.931172, 9.895188), (9.005631, 9.940656), (9.082001, 9.986227), (9.158932, 10.03145), (9.235079, 10.07586), (9.309093, 10.11902), (9.379625, 10.16046), (9.445331, 10.19973), (9.50486, 10.23638), (9.556866, 10.26996), (9.6, 10.3), (9.639846, 10.33146), (9.682546, 10.36885), (9.727602, 10.41107), (9.774512, 10.45703), (9.822779, 10.50563), (9.871899, 10.55576), (9.921371, 10.60633), (9.970701, 10.65625), (10.01938, 10.70441), (10.06691, 10.74971), (10.1128, 10.79105), (10.15654, 10.82734), (10.23557, 10.88037), (10.3, 10.9), (10.36326, 10.9), (10.43873, 10.9), (10.52233, 10.9), (10.61, 10.9), (10.69767, 10.9), (10.78127, 10.9), (10.85674, 10.9), (10.92, 10.9)]",
+        "service_lane": false,
+        "width": 0.68
+      },
+      {
+        "id": "hall",
+        "points": [
+          "(12.8325, 8.65)",
+          "(12.8325, 9.4)",
+          "(12.8325, 10.15)",
+          "(12.8325, 10.9)"
+        ],
+        "samples": "[(12.8325, 8.65), (12.8325, 8.726523), (12.8325, 8.817813), (12.8325, 8.867455), (12.8325, 8.918945), (12.8325, 8.971664), (12.8325, 9.025), (12.8325, 9.078335), (12.8325, 9.131054), (12.8325, 9.182544), (12.8325, 9.232187), (12.8325, 9.323476), (12.8325, 9.4), (12.8325, 9.476523), (12.8325, 9.567812), (12.8325, 9.617455), (12.8325, 9.668945), (12.8325, 9.721665), (12.8325, 9.775), (12.8325, 9.828335), (12.8325, 9.881054), (12.8325, 9.932544), (12.8325, 9.982187), (12.8325, 10.07348), (12.8325, 10.15), (12.8325, 10.22652), (12.8325, 10.31781), (12.8325, 10.36746), (12.8325, 10.41895), (12.8325, 10.47167), (12.8325, 10.525), (12.8325, 10.57833), (12.8325, 10.63105), (12.8325, 10.68254), (12.8325, 10.73219), (12.8325, 10.82348), (12.8325, 10.9)]",
+        "service_lane": false,
+        "width": 0.84
+      },
+      {
+        "id": "utility",
+        "points": [
+          "(16.1, 8.73)",
+          "(16.1, 9.45)",
+          "(16.1, 10.25)",
+          "(15.3, 10.9)",
+          "(14.3, 10.9)"
+        ],
+        "samples": "[(16.1, 8.73), (16.1, 8.803463), (16.1, 8.8911), (16.1, 8.988187), (16.1, 9.038798), (16.1, 9.09), (16.1, 9.141202), (16.1, 9.191813), (16.1, 9.2889), (16.1, 9.376537), (16.1, 9.45), (16.10394, 9.526851), (16.1135, 9.623431), (16.11934, 9.677071), (16.12531, 9.733183), (16.13101, 9.790951), (16.136, 9.84955), (16.13987, 9.908164), (16.14219, 9.965973), (16.14254, 10.02216), (16.1405, 10.07589), (16.12756, 10.17276), (16.1, 10.25), (16.04791, 10.32789), (16.01109, 10.3746), (15.96825, 10.42497), (15.92025, 10.47786), (15.86797, 10.53213), (15.81226, 10.58664), (15.754, 10.64025), (15.69405, 10.69182), (15.63328, 10.74021), (15.57256, 10.78429), (15.51275, 10.82291), (15.45472, 10.85493), (15.39934, 10.87921), (15.34748, 10.89461), (15.3, 10.9), (15.25186, 10.9), (15.19797, 10.9), (15.13916, 10.9), (15.07625, 10.9), (15.01006, 10.9), (14.94141, 10.9), (14.87111, 10.9), (14.8, 10.9), (14.72889, 10.9), (14.65859, 10.9), (14.58994, 10.9), (14.52375, 10.9), (14.46084, 10.9), (14.40203, 10.9), (14.34814, 10.9), (14.3, 10.9)]",
+        "service_lane": false,
+        "width": 0.64
+      }
+    ],
+    "paving_height": 0.014
+  },
+  "active_campaign_integration": false,
+  "actors": 4,
+  "canonical_star_citizen_dimensions": false,
+  "captures": [
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 12.0,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+      "error": 0,
+      "id": "overview",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/overview.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 12.0,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+      "error": 0,
+      "id": "hex_grid",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/hex_grid.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 2.5,
+      "camera_transform": "[X: (1.0, 0.0, 0.0), Y: (0.0, 0.978148, -0.207912), Z: (0.0, 0.207912, 0.978148), O: (12.15, 4.04241, 27.00666)]",
+      "error": 0,
+      "id": "crew",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/crew.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 4.2,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+      "error": 0,
+      "id": "workshop",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/workshop.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 23.0,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+      "error": 0,
+      "id": "landscape",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/landscape.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 3.6,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+      "error": 0,
+      "id": "cutaway",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/cutaway.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 18.0,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (17.60601, 13.9888, 19.76988)]",
+      "error": 0,
+      "id": "outpost",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/outpost.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 4.8,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.190951, 0.882948, -0.428884), Z: (0.359127, 0.469472, 0.806613), O: (12.96429, 9.100488, 25.41903)]",
+      "error": 0,
+      "id": "cutlass_front",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/cutlass_front.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 4.8,
+      "camera_transform": "[X: (-0.913545, 0.0, 0.406737), Y: (0.190951, 0.882948, 0.428884), Z: (-0.359127, 0.469472, -0.806613), O: (0.035712, 9.100488, -3.619031)]",
+      "error": 0,
+      "id": "cutlass_rear",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/cutlass_rear.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 3.8,
+      "camera_transform": "[X: (0.999848, 0.0, 0.017452), Y: (0.012123, 0.71934, -0.694553), Z: (-0.012554, 0.694658, 0.71923), O: (18.97403, 13.05385, 24.74614)]",
+      "error": 0,
+      "id": "buccaneer_front",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/buccaneer_front.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 3.8,
+      "camera_transform": "[X: (-0.999848, 0.0, -0.017452), Y: (-0.008193, 0.882948, 0.4694), Z: (0.01541, 0.469472, -0.882813), O: (19.47737, 9.000488, -4.090635)]",
+      "error": 0,
+      "id": "buccaneer_rear",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/buccaneer_rear.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 2.5,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.190951, 0.882948, -0.428884), Z: (0.359127, 0.469472, 0.806613), O: (22.56429, 8.870488, 22.71903)]",
+      "error": 0,
+      "id": "utility",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/utility.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": true,
+      "camera_projection": 1,
+      "camera_size": 18.0,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (17.60601, 13.9888, 19.76988)]",
+      "error": 0,
+      "id": "closed_outpost",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/closed_outpost.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": true,
+      "camera_projection": 1,
+      "camera_size": 3.6,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+      "error": 0,
+      "id": "closed_habitat",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/closed_habitat.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": true,
+      "camera_projection": 1,
+      "camera_size": 4.2,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+      "error": 0,
+      "id": "closed_hall",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/closed_hall.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": true,
+      "camera_projection": 1,
+      "camera_size": 10.5,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.40602, 13.9888, 18.36988)]",
+      "error": 0,
+      "id": "lived_outpost",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/lived_outpost.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": true,
+      "camera_projection": 1,
+      "camera_size": 4.8,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.344932, 0.529919, -0.77473), Z: (0.215538, 0.848048, 0.484105), O: (19.37968, 15.46487, 17.6139)]",
+      "error": 0,
+      "id": "ground_detail",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/ground_detail.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": true,
+      "camera_projection": 1,
+      "camera_size": 8.5,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.250412, 0.788011, -0.562435), Z: (0.320513, 0.615662, 0.719884), O: (25.86923, 11.28191, 15.4579)]",
+      "error": 0,
+      "id": "geology_detail",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/geology_detail.png",
+      "profile_enabled": true,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "building_shells_visible": false,
+      "camera_projection": 1,
+      "camera_size": 12.0,
+      "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+      "error": 0,
+      "id": "baseline",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/baseline.png",
+      "profile_enabled": false,
+      "viewport_size": "(1920.0, 1080.0)"
+    },
+    {
+      "camera_size": 2.5,
+      "error": 0,
+      "id": "walk_pose",
+      "path": "res://docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/walk_pose.png",
+      "profile_enabled": true
+    }
+  ],
+  "comparison_note": "P07 environment, cameras, global light and crew placement retained. Both ship resources replaced byte-for-byte by Astra refinement_03 through the shared visual catalog. This synthetic fixture is separate from normal mission/menu runtime evidence.",
+  "contact_gravel_count": 190,
+  "engine": {
+    "build": "official",
+    "hash": "71f334935c000924d403448e698df4441130df18",
+    "hex": 263682,
+    "major": 4,
+    "minor": 6,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.6.2-stable (official)",
+    "timestamp": 0
+  },
+  "flat_hex_cap_count": 0,
+  "grid_topology": "hex_axial_v1",
+  "launch_arguments": [
+    "res://scenes/tests/frontier_art_preview.tscn"
+  ],
+  "light": {
+    "adjustment_brightness": 1.0,
+    "adjustment_contrast": 1.04999995231628,
+    "adjustment_enabled": true,
+    "adjustment_saturation": 0.939999997615814,
+    "ambient_light_color": "b6bfcdff",
+    "ambient_light_energy": 0.340000003576279,
+    "background_color": "aa6e58ff",
+    "energy": 0.949999988079071,
+    "rotation_degrees": "(-52.0, -32.0, 0.0)",
+    "shadow_blur": 1.79999995231628,
+    "shadow_enabled": true,
+    "shadow_opacity": 0.720000028610229,
+    "tonemap_enabled": true,
+    "tonemap_mode": "aces"
+  },
+  "local_avoidance_enabled": false,
+  "missing_asset_mapping_count": 0,
+  "models": [
+    {
+      "bounds_world": "[P: (7.0925, 0.0, 4.9575), S: (2.414999, 1.05175, 2.485)]",
+      "id": "habitat_cutaway_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+      "scale": 0.35,
+      "source_sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+    },
+    {
+      "bounds_world": "[P: (11.3625, 0.0, 4.98375), S: (3.674999, 1.47, 2.4325)]",
+      "id": "freihafen_hall_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+      "scale": 0.35,
+      "source_sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+    },
+    {
+      "bounds_world": "[P: (15.281, 0.0, 7.633), S: (1.638, 0.9345, 1.134)]",
+      "id": "utility_fuel_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+      "scale": 0.35,
+      "source_sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+    },
+    {
+      "bounds_min": [
+        5.17138290405273,
+        0.159999996423721,
+        9.13999938964844
+      ],
+      "bounds_size": [
+        2.65723419189453,
+        1.26425921916962,
+        3.52000045776367
+      ],
+      "bounds_world": "[P: (5.171383, 0.16, 9.139999), S: (2.657234, 1.264259, 3.52)]",
+      "canonical_star_citizen_dimensions": false,
+      "catalog_id": "frontier_ships_astra_ref03_v1",
+      "id": "cutlass_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+      "revision": "astra_refinement_03",
+      "scale": 0.22,
+      "source_sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "status": "user-directed adopted Ref03 visual; not a claim of exact concept reconstruction",
+      "yaw_degrees": 0.0
+    },
+    {
+      "bounds_min": [
+        17.5164546966553,
+        0.159999996423721,
+        10.1567726135254
+      ],
+      "bounds_size": [
+        3.36709213256836,
+        0.906347990036011,
+        3.28645515441895
+      ],
+      "bounds_world": "[P: (17.51645, 0.16, 10.15677), S: (3.367092, 0.906348, 3.286455)]",
+      "canonical_star_citizen_dimensions": false,
+      "catalog_id": "frontier_ships_astra_ref03_v1",
+      "id": "buccaneer_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb",
+      "revision": "astra_refinement_03",
+      "scale": 0.22,
+      "source_sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+      "status": "user-directed adopted Ref03 visual; not a claim of exact concept reconstruction",
+      "yaw_degrees": -24.9999980926514
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "operator",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb",
+      "scale": 0.35,
+      "source_sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c"
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "pilot",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/pilot.glb",
+      "scale": 0.35,
+      "source_sha256": "4548eb634e41a4a94965d616b45a51339e3da150bd0d1d708016e1f625c4ac00"
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "mechanic",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/mechanic.glb",
+      "scale": 0.35,
+      "source_sha256": "03ec6f35421d2cebfaa03f7fa911db71f4c6120ac8858dd369f7bbcd9b878496"
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "medic",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/medic.glb",
+      "scale": 0.35,
+      "source_sha256": "e7c0c690f0ae9a85a93d18ecf7d765c9c16756f74e847bd926379f3cfd1e4f79"
+    }
+  ],
+  "movement_authority": "SimulationRoot",
+  "pads": [
+    {
+      "center": [
+        6.5,
+        10.8999996185303
+      ],
+      "deck_height": 0.16,
+      "id": "01",
+      "reservation": "[P: (4.0, 8.7), S: (5.96, 4.4)]",
+      "size": [
+        5.0,
+        4.40000009536743
+      ],
+      "visual_only": true
+    },
+    {
+      "center": [
+        19.2000007629395,
+        11.8000001907349
+      ],
+      "deck_height": 0.16,
+      "id": "02",
+      "reservation": "[P: (16.14, 9.75), S: (5.16, 4.1)]",
+      "size": [
+        4.19999980926514,
+        4.09999990463257
+      ],
+      "visual_only": true
+    }
+  ],
+  "pass": "main_adoption",
+  "renderer": "forward_plus / vulkan",
+  "report_ready": false,
+  "report_revision": "env08",
+  "runtime_sources_sha256": {
+    "res://data/frontier_ship_visual_catalog.json": "abdac64b7c680f35535677b470d48853c32e5fb4ae4aeeb08ebe47e6fdc2db65",
+    "res://data/mission_scenarios/frontier_workyard_24x20.json": "024b00ffe107b56fb822454678322453d985f991781376f1617db8e59ee80302",
+    "res://data/terrain_3d_asset_mapping.json": "bfa8d8db5271a90fcf23d1bf25c5fefd0c3e30db6ac5362f6a7bf315b991dfea",
+    "res://data/terrain_surface_visual_theme_catalog.json": "4639959d89ccb680c6633046b22b98d3433fc3f32c3f43a044ae17d8bfe79554",
+    "res://data/terrain_tile_catalog.json": "910e00d86d742351fca0876f9fe34d38b880eed82ebf9ff5ecf003d85ab1c9de",
+    "res://maps/frontier_workyard_24x20.json": "de2845f4b653e081161cbc6a3787e3b123c8e31948d0144f7ed9af64da185952",
+    "res://scripts/editor/map_editor.gd": "296b547f6b798d97c5f8e6afe568841f533ee424fb2dc3f87149b0aaf5bf8c9a",
+    "res://scripts/terrain/frontier_access_anchors.gd": "87f63e39592899102d5878f4edd8724a5274c4de4c95164565816056d70f7b43",
+    "res://scripts/terrain/frontier_art_dressing.gd": "aeb7b9d887a04d477f932265edfcae6b6a5a3afa4119b6c1f02481938471ffd0",
+    "res://scripts/terrain/frontier_art_geology.gd": "e0c68350e32e041956d41a6b383661db76d01be5aa2ee18596bd22380000ae58",
+    "res://scripts/terrain/frontier_art_profile.gd": "8b6e8e6af6e832e0eda04bfc39baddd5400192135d3e8202447078c6fc1986d4",
+    "res://scripts/terrain/frontier_closed_buildings.gd": "a17fcd6fd3ec462ffe49225396bd31e8c063da015204c7a0f8925d9b3b8e8f62",
+    "res://scripts/terrain/frontier_outpost_pad.gd": "1301ddd9ddf8b17490615ab5bb50419d0e05b58f958586dae658e81209679772",
+    "res://scripts/terrain/frontier_ship_visuals.gd": "9399c171e0c942ef961ed34b6854003e7b56574a680b22515f2605f02d678351",
+    "res://scripts/terrain/frontier_worklife.gd": "15f26e2e951a34a60c111f3c69b36ab7490c0336e36065efa9a01721c9174656",
+    "res://scripts/terrain/terrain_map_3d_view.gd": "c01f81415c5c15e0217237d7ff993aed9b85c5d30ed23ff64c0d02bc854b0ea6",
+    "res://scripts/tests/frontier_art_preview.gd": "cd706492a775201dc9b8f410fc946f7e62984a6e1de93e7e4a7da3625a6c1e26",
+    "res://scripts/tests/mission_test_setup.gd": "e7564b350e4fda6775423bdf7836ed633f0a7103e89b4ed64b013784400b1222",
+    "res://shaders/terrain/frontier_building_wear.gdshader": "57463c649ee0f1b900b4d3e40e4f3586e21f222350bdfa9310e9948760d8734b",
+    "res://shaders/terrain/frontier_contact_paint.gdshader": "ff8d87e7082dc6e6f4611db6bd18cdb0514720efd7ca0a07108ffd2807389e2f",
+    "res://shaders/terrain/frontier_ground.gdshader": "9e45599df3fb3a57ce70f371db86a179740ef1c0fc23836eb4c84c194884a4a7"
+  },
+  "ship_catalog": {
+    "catalog_id": "frontier_ships_astra_ref03_v1",
+    "roles": {
+      "dropship": "cutlass_01",
+      "fighter_reference": "buccaneer_01"
+    },
+    "schema_version": 1.0,
+    "ships": {
+      "buccaneer_01": {
+        "asset_id": "buccaneer_01",
+        "bounds_min": [
+          -5.87889051437378,
+          0.0,
+          -5.49999856948853
+        ],
+        "bounds_size": [
+          11.7577810287476,
+          4.11976337432861,
+          10.9999985694885
+        ],
+        "canonical_star_citizen_dimensions": false,
+        "display_name": "Buccaneer",
+        "forward_axis": "+Z",
+        "geometry_status": "user-directed solid lower cockpit tub; static fighter reference only",
+        "ground_pivot_y": 0.0,
+        "materials": 8.0,
+        "model_path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb",
+        "revision": "astra_refinement_03",
+        "root_rotation_y_degrees": 0.0,
+        "scale": 0.22,
+        "sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+        "triangle_budget": 25000.0,
+        "triangles": 19672.0
+      },
+      "cutlass_01": {
+        "asset_id": "cutlass_01",
+        "bounds_min": [
+          -6.03916931152344,
+          0.0,
+          -8.0
+        ],
+        "bounds_size": [
+          12.0783386230469,
+          5.74663257598877,
+          16.0
+        ],
+        "canonical_star_citizen_dimensions": false,
+        "display_name": "Cutlass",
+        "forward_axis": "+Z",
+        "geometry_status": "user-directed four-engine stylized reconstruction",
+        "ground_pivot_y": 0.0,
+        "materials": 8.0,
+        "model_path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+        "revision": "astra_refinement_03",
+        "root_rotation_y_degrees": 0.0,
+        "scale": 0.22,
+        "sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+        "triangle_budget": 25000.0,
+        "triangles": 22496.0
+      }
+    },
+    "source_manifest": "res://art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_03/manifest.json",
+    "visual_only": true
+  },
+  "structure_and_citizen_scale": 0.35,
+  "stylized_ship_scale": 0.22,
+  "synthetic_fixture": true,
+  "tile_count": 396,
+  "unit_spacing_enabled": false,
+  "use_groups": [
+    "HabitatArrival",
+    "FreihafenDelivery",
+    "SupplyService"
+  ],
+  "worklife_sources": [
+    {
+      "atlas_path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+      "atlas_sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1",
+      "grounded_bounds": "[P: (9.867235, 0.0, 7.740388), S: (0.631915, 0.3, 0.734899)]",
+      "id": "working_table-display",
+      "license": "Kenney Space Station CC0; original GLB and atlas unchanged",
+      "license_path": "res://Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "material_route": "instance-duplicated warm tint, original textures and UV unchanged",
+      "path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+      "scale": 0.5,
+      "source_sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3",
+      "support_height": 0.0,
+      "yaw": -65.0
+    },
+    {
+      "atlas_path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+      "atlas_sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1",
+      "grounded_bounds": "[P: (10.59925, 0.24, 8.016194), S: (0.141534, 0.165218, 0.136924)]",
+      "id": "working_computer",
+      "license": "Kenney Space Station CC0; original GLB and atlas unchanged",
+      "license_path": "res://Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "material_route": "instance-duplicated warm tint, original textures and UV unchanged",
+      "path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+      "scale": 0.25,
+      "source_sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7",
+      "support_height": 0.24,
+      "yaw": -65.0
+    },
+    {
+      "atlas_path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+      "atlas_sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1",
+      "grounded_bounds": "[P: (15.15241, 0.0, 7.032408), S: (0.295183, 0.301, 0.295184)]",
+      "id": "working_container-wide",
+      "license": "Kenney Space Station CC0; original GLB and atlas unchanged",
+      "license_path": "res://Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "material_route": "instance-duplicated warm tint, original textures and UV unchanged",
+      "path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+      "scale": 0.43,
+      "source_sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0",
+      "support_height": 0.0,
+      "yaw": 9.0
+    }
+  ]
+}

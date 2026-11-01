@@ -31,4 +31,10 @@ Hintergrund- und Schiffsvisualkatalog, GM01-Theme, TerrainMap3DView-Dropshipdars
 Main macht einen großen vorhandenen Versionssprung. Die bestehende Tactical-Releasefreigabe bleibt blockiert; ein Main-Merge ist keine Releasefreigabe. Die aktiven Ref03-Modelle setzen die letzten Nutzeränderungen um, sind aber keine perfekte Rekonstruktion der älteren 2D-Bilder. Keine pauschale neue Terrain- oder Kampagnenmigration.
 
 ## Ergebnis
-In Arbeit. Konkrete Prüfberichte und Commitbezug werden nach der tatsächlichen Integration ergänzt.
+Abgeschlossen: Code `177991ac4962c17be0d02ef909949826967c7f57` nach bestandenem Gate auf Main fast-forwarded und gepusht. Main-Checkout hat keine getrackten lokalen Änderungen. Der Abschlusscommit ergänzt die folgenden eingefrorenen Belege und die Workbench.
+
+- Aktuelle Matrix 29/29; echtes normales Deployment/GO 33/33 headless und45/45 nativ. Main-Checkout-Startgrafik 27/27. Ref03-Modellgate86/86. Zwei historische Asset-/Budgetorakel durch neue versionierte Adoptionsgates ersetzt, keine historischen Grenzen still geändert.
+- 20 gleiche native Vergleichskameras, sechs echte Startbilder, sauberes Menümotiv. 31 beim Capturen erfasste Produktionsquellen gegen gestagte Gitblobs vor Commit geprüft; endgültiger Nachweis bindet36 Sourceblobs an den Codecommit.
+- Offline-Workbench204/204 Browserchecks,40Bilder/80Derivate,17Screenshots geöffnet und zwei echteJSONdownloads. FinaleHTML-SHA86edd3811d9282cbd2249450c799122a12000d405a467ce2e89557b1401c0b3d. Anfangs falsches Banner-Testorakel separat als Diagnose erhalten; unveränderteHTMLbytes danach erneut vollständig bestanden.
+- Normale Editorimporte melden alte Plugin-/UID-/Shutdown-Leakdiagnosen. Recoverymode schaltet notwendige Terrain3D-Typen aus und wurde als ungeeignete Diagnose verworfen. Isolierter frischer Import identischer aktiver GLBs/PNG ist sauber, tatsächliche Spielruntime separat grün. NativeWrapper erfasste keinen gesonderten OS-Exitcode; kein erfundener Exit0-Claim.
+- UI unverändert. GM01 bleibt Square8, Hex-Werft separat. Buccaneer statisch integriert, Cutlass echter Missionsanflug. Keine allgemeine Releasefreigabe.

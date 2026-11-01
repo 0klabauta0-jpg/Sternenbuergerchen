@@ -501,7 +501,7 @@
   ],
   "pass": "main_adoption",
   "renderer": "forward_plus / vulkan",
-  "report_ready": false,
+  "report_ready": true,
   "report_revision": "env08",
   "runtime_sources_sha256": {
     "res://data/frontier_ship_visual_catalog.json": "abdac64b7c680f35535677b470d48853c32e5fb4ae4aeeb08ebe47e6fdc2db65",

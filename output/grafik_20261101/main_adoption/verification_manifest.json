@@ -1,0 +1,390 @@
+{
+  "schema": "sternenbuergerchen.main_graphics_adoption.v1",
+  "code_commit": "177991ac4962c17be0d02ef909949826967c7f57",
+  "main_integrated": true,
+  "origin_main_verified": "177991ac4962c17be0d02ef909949826967c7f57",
+  "engine_checks_passed": 29,
+  "engine_checks_selected": 29,
+  "native_start_passed": 45,
+  "headless_start_passed": 33,
+  "native_captures": 27,
+  "local_checks": "29/29 aktuelle strenge Gates; echter Normalstart 33/33 headless und 45/45 nativ; Ref03-Modellgate 86/86. Die historischen R02-20k- und P06-alle-Assets-unverändert-Prüfungen sind ausdrücklich durch neue versionierte Adoptionsgates ersetzt. Alte Quellen/Diagnosen bleiben erhalten.",
+  "git_status": "Code 177991ac4962c17be0d02ef909949826967c7f57 auf Main und origin/main bestätigt. Der abschließende Reportcommit ergänzt nur Dokumentation und Browserbelege.",
+  "material_route": "Ref03-GLBs und Originalmaterialien bytegleich übernommen; Umgebung/Kameras/Licht aus P07 erhalten.",
+  "scope": "Neue Startgrafik, gespeichertes Frontier-Theme auf GM01 und echter Cutlass-Anflug. GM01 bleibt square8; Hex-Werft gesondert. Buccaneer ist aktives statisches Modell, kein neuer Fighter-Spielpfad. Keine allgemeine Kampagnen-, Performance- oder gestalterische Abnahme.",
+  "full_editor_import_clean": false,
+  "editor_import_limits": "Normale Projektimporte: Exit0 mit bestehenden Asset-Placer-UID-Warnungen und Plugin-Shutdown-Leak. Recovery-Mode-Diagnose verworfen: deaktiviert Terrain3D-Typen. Isolierter frischer Import identischer aktiver GLBs/PNG ist fehler-/leakfrei; reale Runtime-Gates oben separat.",
+  "native_os_exit_code_collected": false,
+  "native_exit_evidence": "Native45/0 JSON, Erfolgsmarker, beendeter Prozess und Runtimefehler-freies Log; externer OS-Exitcode wurde vom nativen Wrapper nicht gesondert erfasst.",
+  "evidence": [
+    {
+      "path": "output/grafik_20261101/main_adoption/final_check_runs/20261101T213909Z-pid27448/metadata/report.json",
+      "sha256": "e0e6b9be58539d56d649fb52600dce6253031ea5d71d4568d128ff870d63a684"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/native_final.json",
+      "sha256": "ce650a62fa63ee0c1e42b2bfb0efdd8480558972ce8b60b50f0f729c65cd1013"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/headless_probe_r02.json",
+      "sha256": "35f8983e4c5053eba4d0063f70d6ca174d2ff4b29929bf13f856075b7177e709"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/main_adoption/manifest.json",
+      "sha256": "048fc91a8d8d3b20b8143f330eaebd01ca92aac5cccd09da6a96c022dbf166db"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/native_visual_review.json",
+      "sha256": "cbda24b4798ab56b19b29e8df6dbf81c110e7e35ce77c43f564a9f6c6ac0b47e"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/fresh_asset_import/import.log",
+      "sha256": "bce8bd672f17acf48d81a32a152a37ad014c79f8c37a2482445abc381fa9d990"
+    }
+  ],
+  "source_records": [
+    {
+      "path": "data/frontier_ship_visual_catalog.json",
+      "sha256": "abdac64b7c680f35535677b470d48853c32e5fb4ae4aeeb08ebe47e6fdc2db65",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "data/mission_scenarios/frontier_workyard_24x20.json",
+      "sha256": "024b00ffe107b56fb822454678322453d985f991781376f1617db8e59ee80302",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "data/terrain_3d_asset_mapping.json",
+      "sha256": "bfa8d8db5271a90fcf23d1bf25c5fefd0c3e30db6ac5362f6a7bf315b991dfea",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "data/terrain_surface_visual_theme_catalog.json",
+      "sha256": "4639959d89ccb680c6633046b22b98d3433fc3f32c3f43a044ae17d8bfe79554",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "data/terrain_tile_catalog.json",
+      "sha256": "910e00d86d742351fca0876f9fe34d38b880eed82ebf9ff5ecf003d85ab1c9de",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "maps/frontier_workyard_24x20.json",
+      "sha256": "de2845f4b653e081161cbc6a3787e3b123c8e31948d0144f7ed9af64da185952",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/editor/map_editor.gd",
+      "sha256": "296b547f6b798d97c5f8e6afe568841f533ee424fb2dc3f87149b0aaf5bf8c9a",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/terrain/frontier_access_anchors.gd",
+      "sha256": "87f63e39592899102d5878f4edd8724a5274c4de4c95164565816056d70f7b43",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/terrain/frontier_art_dressing.gd",
+      "sha256": "aeb7b9d887a04d477f932265edfcae6b6a5a3afa4119b6c1f02481938471ffd0",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/terrain/frontier_art_geology.gd",
+      "sha256": "e0c68350e32e041956d41a6b383661db76d01be5aa2ee18596bd22380000ae58",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/terrain/frontier_art_profile.gd",
+      "sha256": "8b6e8e6af6e832e0eda04bfc39baddd5400192135d3e8202447078c6fc1986d4",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/terrain/frontier_closed_buildings.gd",
+      "sha256": "a17fcd6fd3ec462ffe49225396bd31e8c063da015204c7a0f8925d9b3b8e8f62",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/terrain/frontier_outpost_pad.gd",
+      "sha256": "1301ddd9ddf8b17490615ab5bb50419d0e05b58f958586dae658e81209679772",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/terrain/frontier_ship_visuals.gd",
+      "sha256": "9399c171e0c942ef961ed34b6854003e7b56574a680b22515f2605f02d678351",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/terrain/frontier_worklife.gd",
+      "sha256": "15f26e2e951a34a60c111f3c69b36ab7490c0336e36065efa9a01721c9174656",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "c01f81415c5c15e0217237d7ff993aed9b85c5d30ed23ff64c0d02bc854b0ea6",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/tests/frontier_art_preview.gd",
+      "sha256": "cd706492a775201dc9b8f410fc946f7e62984a6e1de93e7e4a7da3625a6c1e26",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/tests/mission_test_setup.gd",
+      "sha256": "e7564b350e4fda6775423bdf7836ed633f0a7103e89b4ed64b013784400b1222",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "shaders/terrain/frontier_building_wear.gdshader",
+      "sha256": "57463c649ee0f1b900b4d3e40e4f3586e21f222350bdfa9310e9948760d8734b",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "shaders/terrain/frontier_contact_paint.gdshader",
+      "sha256": "ff8d87e7082dc6e6f4611db6bd18cdb0514720efd7ca0a07108ffd2807389e2f",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "shaders/terrain/frontier_ground.gdshader",
+      "sha256": "9e45599df3fb3a57ce70f371db86a179740ef1c0fc23836eb4c84c194884a4a7",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/tools/capture_frontier_main_background.gd",
+      "sha256": "7e0f763ed83a11ccd2448565f09b16dd3ee6094d9ee07a3d080d2e205ef8229f",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb",
+      "sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+      "sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "project.godot",
+      "sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scenes/meta/meta_layer_test.tscn",
+      "sha256": "e8e0f22fa3292ded594daebe72498dbf062ca76213335753283a1b7b74d29051",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scenes/tests/mission_reactivity_test.tscn",
+      "sha256": "e3d5e05923b8042cdaad829eff049447bb6560351a0129c916a8a00dd168a8ce",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scenes/ui/main_menu.tscn",
+      "sha256": "148ac78102575a8691cab391dcc38e3257f0d52869e1cdf4e74f7f0dd3ad5b4b",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/meta/meta_layer_flow.gd",
+      "sha256": "137d3e9aee900e733853afc9dfa954a1991f5e1470a34a0dddc9464c4ebf31ce",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/tests/frontier_main_startup_verifier.gd",
+      "sha256": "d8d31ca036f880b854c1eaddce3972551f4da407c39cfe160bc77b73d8ac79b5",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/ui/main_menu_screen.gd",
+      "sha256": "77211508aab83e7bc7ef66ffcf65bed33de11bc13b43c1b1eb173ed6d7c3694c",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "data/background_image_catalog.json",
+      "sha256": "072881f7eed07fd668396e19cb94dbe87e1bd1a8a7ede061191414a8b9849825",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "maps/Ground_Mission01_32x32.json",
+      "sha256": "eb51df71c4767023b8e87ed7e2c136f13d847cabddb25578d1f52fda1c46c8d8",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/tests/frontier_start_graphics_verifier.gd",
+      "sha256": "07e0eadf3bebcad0823fba8d875ccdccd37203a5c71a1bbed2f90ba67990d99f",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/tests/frontier_main_environment_verifier.gd",
+      "sha256": "ecb42f4542f81ea14fe9582795b3298feed785d7aca42630836f128c4cd0e17f",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    },
+    {
+      "path": "scripts/tests/frontier_main_ship_adoption_verifier.gd",
+      "sha256": "f4b0cabf206c38466fb1e4b0acc28b899a4becb1bf46a7f5881c7bd4371355c4",
+      "git_source_commit": "177991ac4962c17be0d02ef909949826967c7f57"
+    }
+  ],
+  "capture_records": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/overview.png",
+      "sha256": "a05c33dd63bf7eed8b9799462df2d2c14a9fe90444f4d06b84499fc67cb15b8d",
+      "id": "overview",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/hex_grid.png",
+      "sha256": "073f1235f3b8db8d02565bedc44a4be207b2ac1314bb87f4cf19603c5a9b065e",
+      "id": "hex_grid",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/crew.png",
+      "sha256": "7d9ba0b59964a8b348c844aa6ae5502afab73c7d9080cde3ebf43f152929b51c",
+      "id": "crew",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/workshop.png",
+      "sha256": "f35734a518ccf5a23652ea83e079c7f2a33a6f92a61a535a989df46d40b5b791",
+      "id": "workshop",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/landscape.png",
+      "sha256": "f4f62c30b157fb478f95c0a9c1714399ca6235b4c31f013a7881edfe284705b5",
+      "id": "landscape",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/cutaway.png",
+      "sha256": "2a2224af1bb9c1b70f2000645946fa93996ce36026eaddaca04cfc7a1e571c21",
+      "id": "cutaway",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/outpost.png",
+      "sha256": "4f8043dc52e698b5b3efc35ededc9a5a7d06775fd91efc509d932df1e63235eb",
+      "id": "outpost",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/cutlass_front.png",
+      "sha256": "181b6c3b630cdd35fe79bfe407ef689e0d060b0729c86ec62eb62957e638b284",
+      "id": "cutlass_front",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/cutlass_rear.png",
+      "sha256": "6c8fb77d1c4139a1a438788471451a6674d118e3f3e374ab754d064e2c5190da",
+      "id": "cutlass_rear",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/buccaneer_front.png",
+      "sha256": "6551c4a627b9ec60c16c158adec3c011e352274ce42dc6e13a395e5019a81bc2",
+      "id": "buccaneer_front",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/buccaneer_rear.png",
+      "sha256": "412ec725a38dd582d340dabbd5ced6f85b4f330882b1dbde00087acdb098dade",
+      "id": "buccaneer_rear",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/utility.png",
+      "sha256": "08462904c3dd5a46ad228f06f8be1fe7a1c3512d4aff667429015d0aca0ac56e",
+      "id": "utility",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/closed_outpost.png",
+      "sha256": "2657e10b12f4c4381709e397444d479d1f60ed4ea53ebffd7e96b5ee70cdcc7d",
+      "id": "closed_outpost",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/closed_habitat.png",
+      "sha256": "ed405f0a7a555e8dc95d1d00cb1a80031250980cbda8d2e222d2701d79c15c5f",
+      "id": "closed_habitat",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/closed_hall.png",
+      "sha256": "8079329f98308c8914ee681c18efb0aa5ddee293ac16dcd2e7ce928519fde283",
+      "id": "closed_hall",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/lived_outpost.png",
+      "sha256": "32f6201141ba45cf84c673953703b495f139f1df7ba788732e6ee80273cdf776",
+      "id": "lived_outpost",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/ground_detail.png",
+      "sha256": "a3d8d66348b38ef86013d134fdb9076fac47d1a2ea710a49b61d3a1db142f081",
+      "id": "ground_detail",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/geology_detail.png",
+      "sha256": "dd0f2504ca79f35e8b374d80b77eed45f37ca2183516a0eabbe871b241a9394b",
+      "id": "geology_detail",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/baseline.png",
+      "sha256": "d47de379f39b8e6952299b5ec135dca6f832942ad16f1ab4888be45ba932b7c3",
+      "id": "baseline",
+      "kind": "fixture"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/walk_pose.png",
+      "sha256": "abda2fdb0ed2873b33a8e409e8eb5b0110b3bcbaf6239f316408d07b8c122095",
+      "id": "walk_pose",
+      "kind": "fixture"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/native_final_captures/01_main_menu.png",
+      "sha256": "ce380fde29c38581c31722c71c69d25cf5231b6cb52265f9a8a78db802a7a989",
+      "id": "01_main_menu",
+      "kind": "real_normal_start"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/native_final_captures/02_homebase.png",
+      "sha256": "4820c7319b0f495722763d076e1ea15f8d543a109c905bf679f8d195ac65a0e1",
+      "id": "02_homebase",
+      "kind": "real_normal_start"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/native_final_captures/03_default_mission.png",
+      "sha256": "51de8efd0e882d3d9e3dd20a10bb37f33bd1acedb585c76ca0d139623b7bfb53",
+      "id": "03_default_mission",
+      "kind": "real_normal_start"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/native_final_captures/04_lz_approach.png",
+      "sha256": "cd739eca9726339c1205bbce502332a40de085472137cbc433cca9d40cd122af",
+      "id": "04_lz_approach",
+      "kind": "real_normal_start"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/native_final_captures/05_deployed.png",
+      "sha256": "52f71d163ecc4be43287d04e78d5e32b2d6d10cde8407b3aaccbf7ed6a4ce735",
+      "id": "05_deployed",
+      "kind": "real_normal_start"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/native_final_captures/06_go_movement.png",
+      "sha256": "06c8db8ddd7b3838fc28429eb68874fe81c13c777649788c65842a703142a8a9",
+      "id": "06_go_movement",
+      "kind": "real_normal_start"
+    }
+  ],
+  "menu_image": {
+    "path": "Assets/curated/main_menu/frontier_outpost_main_20261101.png",
+    "sha256": "35c52473d92cbec346577a7be269553f8270d586f69f241067952a3be49bcea6"
+  },
+  "known_legacy_limits": "TASK158/159 bleiben mit13/6 alten Fehlern dokumentiert; ihr früherer isolierter Baselinevergleich bleibt historisch, hier keine neue Vollsuite/Releasefreigabe."
+}
