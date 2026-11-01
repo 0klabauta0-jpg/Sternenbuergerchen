@@ -12,16 +12,16 @@
     "02_menschen_stilstudie.png"
   ],
   "latest_citizen_choice": "Original Kenney astronauts are the provisional base; rejected custom figures stay outside runtime. Future armor, equipment and appearance changes are explicitly requested.",
-  "engine_capture": "output/grafik_20261101/pass06_environment_after_capture.json",
-  "previous_engine_capture": "output/grafik_20261101/pass05_environment_after_capture.json",
+  "engine_capture": "output/grafik_20261101/pass07_paths_after_capture.json",
+  "previous_engine_capture": "output/grafik_20261101/pass06_environment_after_capture.json",
   "additional_user_references": "output/grafik_20261101/reference_manifest.json",
-  "before_after_verification": "output/grafik_20261101/pass06_environment_verification_manifest.json",
+  "before_after_verification": "output/grafik_20261101/pass07_paths_verification_manifest.json",
   "kenney_component_provenance": "art/frontier_illustrated_20261101/structures/pass04/manifest.json",
   "ship_model_provenance": [
     "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/manifest.json",
     "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/manifest.json"
   ],
-  "report_revision": "env06",
+  "report_revision": "env07",
   "ship_user_status": "R02 remains criticized and not visually accepted; separate Astra Ultra Blender revision commissioned",
   "ship_followup_chat": "01a197d8-ebd0-7100-8d12-21ff6bc52c0d",
   "outpost_pad_reference": "output/grafik_20261101/pass04_reference_manifest.json",
@@ -30,7 +30,7 @@
   "scope": [
     {
       "id": "terrain",
-      "actual": "Pass06: echte Sediment-/Talusfaecher innerhalb der unveraenderten14Sperrhuellen, ungleich lange lokale Erosionsrinnen, weichere Pigment-/Staubfelder und selektiver Wegeabrieb; spielbarer Boden weiter eben",
+      "actual": "Pass07: gerade gemeinsame Eingangs-/Padanker, planare Strassennormalen und Rampenleisten korrigiert; neue gespeicherte Frontier-Hexkarte im regulaeren Editor-/Missionspfad. Geologie bleibt P06.",
       "runtime_changed": true,
       "mesh_changed": true,
       "changed_in_current_pass": true,
@@ -38,7 +38,7 @@
     },
     {
       "id": "structures",
-      "actual": "Pass06: unveraenderte geschlossene Geometrie mit rollenbezogenem Materialabrieb, Dachbleichung und Sockelstaub. Originale Kenney-Cutaway-/Versorgungs-GLBs sowie Arbeitsgruppen unveraendert",
+      "actual": "Pass07: unveraenderte Gebaeude-/Utility-GLBs, neue grafische Eingangszugaenge; originales Utility jetzt einmal im regulaeren Objektkatalog mit gespeicherten Reservierungen.",
       "runtime_changed": true,
       "mesh_changed": false,
       "changed_in_current_pass": true,
@@ -142,8 +142,8 @@
     }
   ],
   "active_mapping": {
-    "model_entries": 351,
-    "unique_model_paths": 318,
+    "model_entries": 352,
+    "unique_model_paths": 319,
     "ship_identity": "Legacy mapping retains Kenney craft_speederB; the synthetic art preview separately loads new Cutlass/Buccaneer GLBs from ships_pass04_r02. No campaign mapping adoption claimed"
   },
   "official_ship_shape_sources": [
@@ -161,19 +161,20 @@
   "generation_manifest": "output/grafik_20261101/generation_manifest.json",
   "native_study_index": "output/grafik_20261101/model_studies/study_index.json",
   "limitations": [
-    "Synthetischer Hex-Basis-Ausschnitt auf unintegriertem Grafikbranch; keine Main-/Kampagnenmigration.",
-    "Echtes Relief ist auf bestehende gesperrte Geologiehuellen begrenzt; frei begehbarer Boden bleibt eben.",
-    "Felsgrossformen und Kronen bleiben breit/prismatisch, Materialfelder prozedural und ruhiger als die2D-Gebrauchsdichte; keine handgemalte Bake.",
-    "NeunprimaereGLBs, originale Kenney-Cutaways/Citizens und kritisierte R02-Schiffe unveraendert. Separate Astra-Ausgaben nicht adoptiert.",
-    "Gebaeudewear betrifft eigene geschlossene Huellen bei identischer Geometrie; C ist ein grafischer Umschalter, keine Innenraum-/Tor-/Logistiksimulation.",
-    "Keine gestalterische Nutzerfreigabe oder allgemeine Gameplay-/Performance-/Multiplayer-/Release-Abnahme."
+    "Weiter unintegrierter Grafikbranch; die erste regulaere24x20Hexkarte ist keine gesamte Kampagnen-/Hex-Toolmigration.",
+    "P07-Wegequelle und echteEditor-/Missionskontrollen sind getrennteNachweise. PrimaereGLBs, P06-Geologie/Citizens und kritisierte R02-Schiffe unveraendert.",
+    "27fokussierteGates aus26Matrixresultaten plus eigenemgruenenHex-Retry; FileOpen-Fehllauf unveraendert erhalten. TASK158/159 bleiben exaktbaselinegleich mit13/6Fehlern rot.",
+    "40/40nativeRuntimechecks, beschleunigteLeaderdiagnose3x und vierKontrollbilder belegen weder vollstaendigeTeamankunft noch LZ/Deployment/Performance-/Releaseabnahme.",
+    "Ein ehrlicherNo-Cover-Authoringhinweis bleibt; keine neueCover-/Basisbau-/Innenraum-/Tor-/Flug-/Wirtschaftssimulation.",
+    "GrosseGebaeude/Pads benoetigen gespeicherte mehrzelligeAuthoring-/Rampenfakten; weitereMalerarbeit und feinereFels-/Bodenformen bleiben Zielabstand."
   ],
   "environment_analysis": "docs/reports/FRONTIER_UMGEBUNG_ANALYSE_2026-11-01.md",
   "environment_manifests": [
-    "art/frontier_illustrated_20261101/environment/pass06/buildings/manifest.json",
-    "art/frontier_illustrated_20261101/environment/pass06/geology/manifest.json",
-    "art/frontier_illustrated_20261101/environment/pass06/ground_paint/manifest.json"
+    "art/frontier_illustrated_20261101/environment/pass07/paths/manifest.json",
+    "art/frontier_illustrated_20261101/environment/pass07/runtime/manifest.json"
   ],
-  "current_environment_task": "docs/tasks/ART_2026_11_01_pass06_environment.md",
-  "current_code_commit": "5929d3dabf8535ba5652065110ae2252d5f38b69"
+  "current_environment_task": "docs/tasks/ART_2026_11_01_pass07_paths_runtime.md",
+  "current_code_commit": "278c5b61fb6a1584420fbfaa4e526c30640fea69",
+  "runtime_evidence": "output/grafik_20261101/pass07_runtime/native_check.json",
+  "legacy_baseline_comparison": "output/grafik_20261101/pass07_runtime/legacy_baseline_comparison.json"
 }

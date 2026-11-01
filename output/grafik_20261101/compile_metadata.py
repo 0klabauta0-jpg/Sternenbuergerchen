@@ -117,5 +117,25 @@ manifest["limitations"]=["Synthetischer Hex-Basis-Ausschnitt auf unintegriertem 
  "NeunprimaereGLBs, originale Kenney-Cutaways/Citizens und kritisierte R02-Schiffe unveraendert. Separate Astra-Ausgaben nicht adoptiert.",
  "Gebaeudewear betrifft eigene geschlossene Huellen bei identischer Geometrie; C ist ein grafischer Umschalter, keine Innenraum-/Tor-/Logistiksimulation.",
  "Keine gestalterische Nutzerfreigabe oder allgemeine Gameplay-/Performance-/Multiplayer-/Release-Abnahme."]
+# P07: actual path corrections and the first opt-in regular-map graphics slice.
+manifest.update(report_revision="env07",engine_capture="output/grafik_20261101/pass07_paths_after_capture.json",
+ previous_engine_capture="output/grafik_20261101/pass06_environment_after_capture.json",
+ before_after_verification="output/grafik_20261101/pass07_paths_verification_manifest.json",
+ current_environment_task="docs/tasks/ART_2026_11_01_pass07_paths_runtime.md",
+ current_code_commit="278c5b61fb6a1584420fbfaa4e526c30640fea69",
+ runtime_evidence="output/grafik_20261101/pass07_runtime/native_check.json",
+ legacy_baseline_comparison="output/grafik_20261101/pass07_runtime/legacy_baseline_comparison.json",
+ environment_manifests=["art/frontier_illustrated_20261101/environment/pass07/"+part+"/manifest.json" for part in ("paths","runtime")])
+for row in manifest["scope"]:
+ row["changed_in_current_pass"]=row["id"] in ("terrain","structures")
+ row["mesh_changed"]=row["id"]=="terrain"
+ if row["id"]=="terrain":row["actual"]="Pass07: gerade gemeinsame Eingangs-/Padanker, planare Strassennormalen und Rampenleisten korrigiert; neue gespeicherte Frontier-Hexkarte im regulaeren Editor-/Missionspfad. Geologie bleibt P06."
+ if row["id"]=="structures":row["actual"]="Pass07: unveraenderte Gebaeude-/Utility-GLBs, neue grafische Eingangszugaenge; originales Utility jetzt einmal im regulaeren Objektkatalog mit gespeicherten Reservierungen."
+manifest["limitations"]=["Weiter unintegrierter Grafikbranch; die erste regulaere24x20Hexkarte ist keine gesamte Kampagnen-/Hex-Toolmigration.",
+ "P07-Wegequelle und echteEditor-/Missionskontrollen sind getrennteNachweise. PrimaereGLBs, P06-Geologie/Citizens und kritisierte R02-Schiffe unveraendert.",
+ "27fokussierteGates aus26Matrixresultaten plus eigenemgruenenHex-Retry; FileOpen-Fehllauf unveraendert erhalten. TASK158/159 bleiben exaktbaselinegleich mit13/6Fehlern rot.",
+ "40/40nativeRuntimechecks, beschleunigteLeaderdiagnose3x und vierKontrollbilder belegen weder vollstaendigeTeamankunft noch LZ/Deployment/Performance-/Releaseabnahme.",
+ "Ein ehrlicherNo-Cover-Authoringhinweis bleibt; keine neueCover-/Basisbau-/Innenraum-/Tor-/Flug-/Wirtschaftssimulation.",
+ "GrosseGebaeude/Pads benoetigen gespeicherte mehrzelligeAuthoring-/Rampenfakten; weitereMalerarbeit und feinereFels-/Bodenformen bleiben Zielabstand."]
 (PACKAGE/"asset_source_manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 print(json.dumps(dict(targets=len(gen["targets"]),sources=len(source_entries),scope=len(scope),mapping_entries=len(paths),unique_models=len(set(paths)))))

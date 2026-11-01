@@ -78,6 +78,17 @@ Geologie/Schiffs-/Citizenquellen und Referenzen bleiben erhalten.
 - NeueFlatmap von480Cliff-Hinweisen bereinigt(edge_type=none); verbleibend
   ein no_cover_tiles-Authoringhinweis. Keine erfundene Cover-/Basisbaumechanik.
 
+## HTML-Abschluss
+P06-HTML und20Vorher-PNGs bytegleich archiviert. P07-Workbench mit39Bildern,
+12festenPreviewpaaren und4getrennten regulaerenKartenkontrollen, Quellstatus,
+Notizen/Entscheidungen undJSONexport.238/238frischeBrowserchecks samtSichtpruefung,
+78Derivate,37geoeffneteScreenshotlayouts,3echteDownloads; keine externenRequests,
+Console-/Pagefehler. ErstesQA-Archivpfad-Oracle korrigiert, Erstlauf erhalten,
+HTMLbytes blieben unveraendert. ExakterSHA256:
+9b24e1089961ad58c6f21dcb99f7fd299458e755469114bd066be946f96c03c0.
+Code278c5b61fb6a1584420fbfaa4e526c30640fea69 erfolgreichgepusht;
+Bericht/Browserbelege eigenesUebergabepaket, keine Main-Integration.
+
 ## Verbleibende Grenzen
 Die Formulierung Grafik-/Spielaufbau wird als Grafikumbau im bestehenden Spiel
 verstanden, nicht als Auftrag fuer neue Bau-Gameplaymechanik. Der erste Slice
