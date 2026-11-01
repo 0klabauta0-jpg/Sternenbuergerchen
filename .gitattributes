@@ -3,3 +3,5 @@
 
 # Offline handoff is byte-hashed by the browser QA report.
 docs/reports/STERNENBUERGERCHEN_GRAFIK_2026-11-01.html -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/reports/STERNENBUERGERCHEN_GRAFIK_PASS02_2026-11-01.html -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/reports/STERNENBUERGERCHEN_GRAFIK_PASS03_2026-11-01.html -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

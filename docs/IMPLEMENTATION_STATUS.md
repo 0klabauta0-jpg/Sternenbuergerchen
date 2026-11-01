@@ -1,5 +1,15 @@
 # IMPLEMENTATION_STATUS
 
+### ART 2026-11-01 Pass03 - Kenney-Cutaway, Freihafen und gebrochene Felsen
+- Fortsetzung des noch nicht integrierten Grafikbranches `task/grafikreferenzen-20261101`, Ausgang `7a37f5d9a`. Code `723163544f4174c85b77e34e8b55cf7b09711454` committed/gepusht, keine Main-Integration.
+- Zwei neue grafische Strukturkandidaten verwenden zehn echte Kenney-GLB-Quellen aus Space Station1.0/Factory3.0: Waende, Betten, Konsolen, Container, ausgeschnittener offener Hallenrahmen, Lift und Tank. Eigene Montage/Farb-/Groessenanpassung und Quellobjekte im `art/frontier_illustrated_20261101/structures/pass03/manifest.json` nachvollziehbar; Originaldateien und Lizenzhashes unveraendert.
+- Cutaway-Habitat zeigt vier eingerichtete Raumgruppen; kleine Freihafen-Halle mit Lagerregalen/Buero, Ladevorplatz, externen Containergruppen und statischem Lader. Funkmast ergaenzt. Die Figuren/Ausruestung aus Pass02 unveraendert.
+- Gelaende: 14 Anker mit55 gebrochenen Teilkoerpern statt Ringstapeln, konservative Navhuellen erhalten. Polygonale Farbspruenge des Bodens im Shader durch Integer-Lattice-Hash behoben; gebrochene breite Pigmentlagen statt regelmaessiger Farbringe.
+- Source-/frischer GLB-Roundtrip bestanden: 4935/6251Tris, je1Mesh/8Materialien. 13/11 verdeckte Kontakt-/Montagewarnungen begruendet akzeptiert; keine wasserdichte Druckhuelle behauptet. Alle neuen Modelle nativ geoeffnet, keine fehlenden Assets.
+- 16/16 strenge Godot-Laeufe PASS, Geologie-Verifier12/12. Acht native Vulkan-Ansichten; fuenf Paare bei identischen Kamera-Transforms, Projektion, Licht und1600x900. Neue Cutaway-Nahansicht zusaetzlich. Beleg `output/grafik_20261101/pass03_verification_manifest.json`.
+- Bisheriger Pass02-HTML-Report und Vorherbilder bytegleich erhalten. Aktuelle HTML mit eigener Pass03-Notiz-/Entscheidungsnamespace; Browserbelege unter `output/grafik_20261101/browser_qa_pass03/`.
+- Umfang bleibt synthetischer grafischer Hex-Ausschnitt: keine Innenraum-/Wirtschafts-/Fahrzeugmechanik, Kampagnen-/Editor-Migration oder allgemeine Art-/Release-/Performance-Abnahme. Weitere Komposition/Material-/Raumvarianten und Schiffmodelluebernahme bleiben offen.
+
 ### ART 2026-11-01 Pass02 - Nativer Grafikpass und Vorher/Nachher
 - Bewusste Fortsetzung des noch nicht integrierten Grafikbranches `task/grafikreferenzen-20261101`, Ausgang `93bdf43ff`. Implementierung `4e21697fce43aa2cf89da3f8d527bd48d09b4d58` committed und gepusht; keine Main-Integration.
 - Tatsaechlich umgesetzt: 14 deterministische geschichtete Klippenformen, Fels-/Pflanzengruppen, gebaute markierte Verbindungen, Padmarkierung, kontinuierliche Bodenfarbe, ueberarbeitetes Licht. Drei creme-orange Gebaeude ueberarbeitet, Werkbank/Regal lesbarer. Vier neue modulare Ausruestungskandidaten auf originalen Kenney-Koerpern mit originalen Idle/Walk-Clips; alte Stock-GLBs bleiben erhalten.

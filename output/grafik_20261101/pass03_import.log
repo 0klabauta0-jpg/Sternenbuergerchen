@@ -1,0 +1,77 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+[Godot MCP] Plugin loading...
+[MCP] Connecting to ws://127.0.0.1:6505...
+[Godot MCP] Plugin loaded - connecting to MCP server...
+WARNING: res://addons/asset_placer/ui/components/asset_resource_preview.tscn:3 - ext_resource, invalid UID: uid://dacpe4563g5x2 - using text path instead: res://addons/asset_placer/ui/components/asset_resource_preview.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://addons/asset_placer/ui/components/asset_resource_preview.tscn:5 - ext_resource, invalid UID: uid://dephufwlu765k - using text path instead: res://addons/asset_placer/ui/components/asset_thumbnail.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.tscn:3 - ext_resource, invalid UID: uid://b4c5hlcpl1sor - using text path instead: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.tscn:4 - ext_resource, invalid UID: uid://dmicn3kmr620j - using text path instead: res://addons/asset_placer/utils/system_icon.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://addons/asset_placer/ui/manage_collections/component/checkable_asset_item.tscn:3 - ext_resource, invalid UID: uid://b6ywapljcr4hk - using text path instead: res://addons/asset_placer/ui/manage_collections/component/checkable_asset_item.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started Registering global classes... (7 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  12% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  25% ] [90m[1mupdate_scripts_classes[22m | TerrainMap3DView[39m[0m
+[  37% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  62% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  75% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Scanning actions... (2 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | freihafen_hall_01.glb[39m[0m
+[  33% ] [90m[1m_update_scan_actions[22m | habitat_cutaway_01.glb[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (2 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[  33% ] [90m[1mreimport[22m | Preparing files to reimport...[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing pre-reimport operations...[39m[0m
+[   0% ] [90m[1mreimport[22m | freihafen_hall_01.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  33% ] [90m[1mreimport[22m | habitat_cutaway_01.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Import Scene (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Importing Scene...[39m[0m
+[   1% ] [90m[1mimport[22m | Running Custom Script...[39m[0m
+[  99% ] [90m[1mimport[22m | Saving...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  66% ] [90m[1mreimport[22m | Finalizing Asset Import...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started (Re)Importing Assets (2 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Executing post-reimport operations...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[  33% ] [90m[1mloading_editor_layout[22m | Reopening scenes...[39m[0m
+[  50% ] [90m[1mloading_editor_layout[22m | Loading central editor layout...[39m[0m
+[  66% ] [90m[1mloading_editor_layout[22m | Loading plugin window layout...[39m[0m
+[  83% ] [90m[1mloading_editor_layout[22m | Editor layout ready.[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+[Godot MCP] Plugin unloading...
+[Godot MCP] Plugin unloaded
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2641)

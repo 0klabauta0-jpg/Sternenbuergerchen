@@ -9,24 +9,24 @@ Differenzen und lokale Notizen/Entscheidungen mit JSON-Export.
 In diesem Checkout `output/grafik_20261101/START_HEX_BASIS.ps1` ausfuehren.
 Godot 4.6.2 muss als `godot_console.exe` oder `godot.exe` im PATH liegen.
 Der Launcher importiert und startet `scenes/tests/frontier_art_preview.tscn`
-mit Vulkan/Forward+. `-Capture` erstellt sieben Pass02-Ansichten.
+mit Vulkan/Forward+. `-Capture` erstellt acht Pass03-Ansichten.
 
-Tasten: 1 Gesamtansicht, 2 Werkstatt, 3 Crew, 4 Gelaende, G Hexraster, Leertaste Bewegung,
+Tasten: 1 Gesamtansicht, 2 Halle, 3 Crew, 4 Gelaende, 5 Cutaway-Basis,
+G Hexraster, Leertaste Bewegung,
 Mausrad Zoom, Linksklick Feldauswahl, Escape schliessen.
 
 ## Tatsaechlicher Stand
 
-Pass02 des synthetischen nativen Ausschnitts mit 396 Hexfeldern: geschichtete
-Klippen, Fels-/Pflanzengruppen, markierte Wege und Landeflaeche, neues Licht,
-drei ueberarbeitete Gebaeude und vier modulare Ausruestungskandidaten auf
-unveraenderter Kenney-Grundfigur mit originalen Idle-/Walk-Clips. Die frueheren
-eigenen Citizen-Koerper bleiben verworfen. Neue Kandidaten sind keine bereits
-erfolgte gestalterische Nutzerabnahme.
+Pass03 des synthetischen nativen Ausschnitts mit 396 Hexfeldern: gebrochene
+Felskoerper, zusammenhaengende Bodenfarbe, neue Cutaway-Basis und Freihafen-Halle
+auf zehn echten Kenney-Space-Station-/Factory-Quellmodulen. Eigene Montage und
+Anpassungen, Ladevorplatz/Container/Lader/Funkmast. Figuren, Originalkoerper und
+Ausruestungskandidaten aus Pass02 unveraendert; keine Nutzerabnahme behauptet.
 
-Vier Vorher-/Nachher-Paare haben dieselben festen Kameras/1600x900 und denselben
-Renderer; Licht und dargestellte Assets wurden bewusst ueberarbeitet. Vorher
-bleibt bytegleich unter `engine_pass02/before`, Nachher unter `engine_pass02/after`.
-Eine neue weite Gelaendeansicht hat kein vorgetaeuschtes Vorher-Gegenstueck.
+Fuenf Vorher-/Nachher-Paare haben dieselben Kamera-Transforms, Projektion,
+1600x900, Renderer und Beleuchtung. Pass02 bleibt bytegleich unter
+`engine_pass03/before`, Nachher unter `engine_pass03/after`. Die neue
+Cutaway-Nahansicht hat kein vorgetaeuschtes Vorher-Gegenstueck.
 Die drei ergaenzten Nutzerreferenzen und acht historische Kontextbilder sind
 mit Herkunft/Hashes katalogisiert; Quadratfelder im Kartenbild aendern Hex nicht.
 
@@ -38,6 +38,17 @@ oder Spaetspiel-Performance. Cutlass/Buccaneer sind vereinfachte 2D-Ziele;
 die alten Rohgeometrie-Materialstudien sind nicht als Runtime-Modelle geeignet.
 
 ## Belege und Reproduktion
+
+- `pass03_verification_manifest.json`: aktueller Code-SHA, 16/16 strenge
+  Engine-Laeufe, fuenf unveraendert gerahmte Bildpaare und acht Aufnahmen.
+- `engine_checks_pass03.json`, `pass03_check_runs/`, `pass03_*_capture.json`:
+  aktuelle Verifier, Kamera-/Licht-/Modell-/Quellenhashes.
+- `browser_qa_pass03/`: frischer Browsernachweis und echte JSON-Exporte.
+- `art/frontier_illustrated_20261101/structures/pass03/manifest.json`:
+  zehn Kenney-Quellen/Lizenzen und genaue Uebernahme/Aenderungen; Roh-QA
+  inklusive begruendet akzeptierter Kontakt-/Montagewarnungen.
+
+Die folgenden Belege dokumentieren den erhaltenen Pass02:
 
 - `pass02_verification_manifest.json`: aktueller Code-SHA, 15/15 strenge
   Engine-Laeufe, vier Bildpaare, sieben native Aufnahmen und genaue Grenzen.

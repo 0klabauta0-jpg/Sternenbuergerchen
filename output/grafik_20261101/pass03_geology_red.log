@@ -1,0 +1,5 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: large plateaus include attached masses with unequal top heights
+FRONTIER_PASS03_GEOLOGY {"failed":1,"footprint_digest":"2e872c27d2fb7e4de9766e8b70d7918c9962b73c523af9ecb87d26b23ba17898","geometry":{"caps_up":true,"degenerate_triangles":0,"digest":"e6769f25c9e00f628275a613ac118145091a79052811dea036c63ea43d5d64e8","finite":true,"meshes":14,"outside_footprint_vertices":0,"terraced_groups":0,"vertices":13524,"walls_out":true},"passed":10,"synthetic_fixture":true}
