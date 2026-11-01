@@ -1,5 +1,7 @@
 extends Node2D
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
@@ -327,6 +329,7 @@ func _ready() -> void:
 	_ensure_marker_overlay()
 	_ensure_3d_primary_view()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
+	_apply_native_editor_theme()
 
 
 func _apply_contextual_help_ids() -> void:
@@ -2854,15 +2857,25 @@ func _apply_editor_control_panel_style() -> void:
 		palette_title.add_theme_color_override("font_color", Color(0.82, 0.96, 1.0, 1.0))
 
 
-func _apply_panel_style(panel: PanelContainer, bg_color: Color, border_color: Color) -> void:
+func _apply_panel_style(panel: PanelContainer, _bg_color: Color, _border_color: Color) -> void:
 	if panel == null:
 		return
-	var style := StyleBoxFlat.new()
-	style.bg_color = bg_color
-	style.border_color = border_color
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(6)
-	panel.add_theme_stylebox_override("panel", style)
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(panel)
+	panel.add_theme_stylebox_override("panel", TACTICAL_UI_THEME_SCRIPT.get_theme().get_stylebox("panel", "PanelContainer"))
+
+
+func _apply_native_editor_theme() -> void:
+	# The editor owns a CanvasLayer rather than a Control root. Apply the
+	# inherited resource once to its direct UI roots, including popup Windows.
+	var ui := get_node_or_null("UI")
+	if ui == null:
+		return
+	for child in ui.get_children():
+		if child is Control:
+			TACTICAL_UI_THEME_SCRIPT.apply_screen(child as Control)
+			child.set_meta("native_ui_screen_family", "map_editor")
+		elif child is Window:
+			(child as Window).theme = TACTICAL_UI_THEME_SCRIPT.get_theme()
 
 
 func _add_patrol_tool_controls() -> void:

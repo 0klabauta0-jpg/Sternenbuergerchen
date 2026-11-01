@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### Native UI R1 2026-11-01 – bestaetigte Entwuerfe im Spiel
+- Nutzerfreigabe: Gestaltung positiv bewertet und native Umsetzung beauftragt. Neuer Branch `task/ui-umsetzung-r1-20261101`, bewusst auf noch nicht integriertem Konzeptstand `135466b5c` auf Basis `integration/core-foundation` aufgebaut.
+- Gemeinsames gecachtes natives Theme fuer Fenster, Karten, Buttons, Dropdowns, Inputs, Tabs, Scrollbars und Fokus; MetaUISkin delegiert. Hauptmenue/Creator, Settings/Escape/Hilfe, Lobby, Heimatbasis/FOB, Personenbogen, Debrief und Editor angebunden. Separate rechte Teamlibrary, begrenzte scrollbare Settings-/Creatorfenster mit festen Aktionen.
+- Mission: zwei kompakte Reihen vorhandener 64px-Aktionen, Ziel/Auftrag vor Team, Haltung und vier Feuerregeln; Karten/Log ueber dem Randband, Kontrolle oben rechts. Kontextbefehle/Callbacks erhalten, Personenoverlay ueber Mini-Karten; unveraenderte Refreshes schreiben keine Geometrie. Vorhandene eingeschiffte Mitglieder werden deaktiviert angezeigt.
+- Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_NATIVE_R1_2026-11-01.html` mit 13 echten Captureansichten und JSON-Feedback; `docs/qa/ui_native_r1_20261101/README.md`, `VERIFIKATION.json`, `docs/dev/ui_native_design_contract.md`.
+- Pruefung: 16 gezielte Checks mit jeweils sauberem Endnachweis; nach letzten Korrekturen nur betroffene A5-/Hierarchie-/Shell-Checks wiederholt. Native A5 352 Assertions, Shell 63 Assertions; HTML-Export offline 9/9. Details und Quellenhashes im QA-Paket.
+- Pruefgrenzen: echte Godot-4.6.2-/GL-Captures mit Fixturedaten; 1280-Bilder skalieren den 1920-Viewport, getrennte Strukturchecks pruefen 1280-Layout. Keine menschliche Bedien-/Release-/allgemeine Performanceabnahme. Rostergenerator-/Store-Validierungsrandfall beobachtet und separat dokumentiert; keine Balance-/Generatoraenderung.
+
 ### UI-Konzept 2026-11-01 – A5 und Menü-/Kartenfamilie
 - Status: angeforderte Fortsetzung des bestehenden, noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`; Revisionsbasis `478bceac3`. Keine Runtime-Aenderung.
 - Elf neue Bild-KI-Tafeln: Mission A5 mit zwei belegten Reihen bestehender Aktionen; Hauptmenue, Heimatbasis, FOB/Loadout, Charakterbogen/kompakte Karten, Detailkarten, Debrief, Lobby, Settings/Hilfe/Escape, Karteneditor und Teameditor. Fuenf gezielte Korrekturen; alle ersten Versuche erhalten. Gesamtpaket 32 PNG-Artefakte plus zwei Referenzen.

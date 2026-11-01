@@ -1,6 +1,8 @@
 class_name FOBTestScreen
 extends Control
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
@@ -80,6 +82,8 @@ var _pending_transport_remove: Dictionary = {}
 
 
 func _ready() -> void:
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(self)
+	set_meta("native_ui_screen_family", "fob")
 	META_UI_SKIN_SCRIPT.apply_fob(self)
 	_apply_drop_light_fixed_layout()
 	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
@@ -3490,22 +3494,10 @@ func _calculate_member_loadout_weight(member_loadout: Dictionary) -> float:
 
 
 func _apply_loadout_member_row_style(panel: PanelContainer, is_lead: bool) -> void:
-	var stylebox := StyleBoxFlat.new()
-	stylebox.border_width_left = 2
-	stylebox.border_width_top = 2
-	stylebox.border_width_right = 2
-	stylebox.border_width_bottom = 2
-	stylebox.corner_radius_top_left = 6
-	stylebox.corner_radius_top_right = 6
-	stylebox.corner_radius_bottom_left = 6
-	stylebox.corner_radius_bottom_right = 6
-	if is_lead:
-		stylebox.bg_color = Color(0.20, 0.23, 0.28, 1.0)
-		stylebox.border_color = Color(0.64, 0.69, 0.76, 1.0)
-	else:
-		stylebox.bg_color = Color(0.14, 0.16, 0.19, 1.0)
-		stylebox.border_color = Color(0.36, 0.40, 0.46, 1.0)
-	panel.add_theme_stylebox_override("panel", stylebox)
+	var border: Color = TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT if is_lead else TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER
+	panel.add_theme_stylebox_override("panel", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
+		TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL, border, 6, 1, Vector4.ZERO
+	))
 
 
 func _apply_help_id(control: Control, help_id: String) -> void:
@@ -3569,22 +3561,11 @@ func _ensure_focused_fireteam_id() -> void:
 
 
 func _apply_fireteam_row_style(panel: PanelContainer, is_selected: bool) -> void:
-	var stylebox := StyleBoxFlat.new()
-	stylebox.border_width_left = 2
-	stylebox.border_width_top = 2
-	stylebox.border_width_right = 2
-	stylebox.border_width_bottom = 2
-	stylebox.corner_radius_top_left = 6
-	stylebox.corner_radius_top_right = 6
-	stylebox.corner_radius_bottom_left = 6
-	stylebox.corner_radius_bottom_right = 6
-	if is_selected:
-		stylebox.bg_color = Color(0.20, 0.23, 0.28, 1.0)
-		stylebox.border_color = Color(0.64, 0.69, 0.76, 1.0)
-	else:
-		stylebox.bg_color = Color(0.14, 0.16, 0.19, 1.0)
-		stylebox.border_color = Color(0.36, 0.40, 0.46, 1.0)
-	panel.add_theme_stylebox_override("panel", stylebox)
+	panel.add_theme_stylebox_override("panel", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
+		TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_SELECTED if is_selected else TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL,
+		TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if is_selected else TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER,
+		6, 2 if is_selected else 1, Vector4.ZERO
+	))
 
 
 func _clear_container(container: Node) -> void:

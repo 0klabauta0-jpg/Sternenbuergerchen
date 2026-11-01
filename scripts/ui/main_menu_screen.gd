@@ -1,5 +1,7 @@
 extends Control
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+
 const BACKGROUND_PATH: String = "res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg"
 const SINGLEPLAYER_SCENE_PATH: String = "res://scenes/meta/meta_layer_test.tscn"
 const MULTIPLAYER_SCENE_PATH: String = "res://scenes/ui/multiplayer_lobby.tscn"
@@ -82,7 +84,7 @@ var _new_roster_button: Button = null
 var _mission_save_button: Button = null
 var _mission_load_button: Button = null
 var _team_editor_toggle_button: Button = null
-var _team_library_panel: PanelContainer = null
+var _team_library_panel: Panel = null
 var _team_library_list: VBoxContainer = null
 var _team_library_status_label: Label = null
 var _team_library_activate_button: Button = null
@@ -90,7 +92,7 @@ var _team_library_edit_button: Button = null
 var _team_library_delete_button: Button = null
 var _team_library_entries: Array = []
 var _selected_roster_entry_path: String = ""
-var _team_editor_panel: PanelContainer = null
+var _team_editor_panel: Panel = null
 var _team_editor_open: bool = false
 var _team_editor_roster_path: String = ""
 var _team_editor_roster: Dictionary = {}
@@ -146,9 +148,14 @@ var _release_singleplayer_deeplink_target: String = ""
 
 
 func _ready() -> void:
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(self)
+	set_meta("native_ui_screen_family", "main_menu")
 	set_meta("main_menu_shell", true)
 	_ensure_owned_ui_timers()
 	_apply_background_texture()
+	var menu_rail := get_node_or_null("MenuRail") as ColorRect
+	if menu_rail != null:
+		menu_rail.color = TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL
 	_load_comic_bubble_settings()
 	_ensure_audio_event_bus()
 	_ensure_settings_screen_nodes()
@@ -162,6 +169,10 @@ func _ready() -> void:
 	_configure_routes()
 	_connect_signals()
 	close_settings_panel()
+	var viewport := get_viewport()
+	if viewport != null and not viewport.size_changed.is_connected(_layout_native_shell_windows):
+		viewport.size_changed.connect(_layout_native_shell_windows)
+	_layout_native_shell_windows()
 	call_deferred("_apply_release_deeplink")
 
 
@@ -780,6 +791,7 @@ func open_settings_panel() -> void:
 	_draft_gameplay_settings = _gameplay_settings.duplicate(true)
 	_draft_comic_bubble_settings = _comic_bubble_settings.duplicate(true)
 	_refresh_settings_controls_from_draft()
+	_layout_native_shell_windows()
 	_settings_panel.visible = true
 	_settings_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_settings_back_button.grab_focus()
@@ -901,6 +913,87 @@ func _ensure_settings_screen_nodes() -> void:
 		action_row.add_child(_settings_reset_button)
 	_settings_back_button.text = "Abbrechen"
 	_order_settings_nodes(action_row)
+	_configure_native_settings_window(action_row)
+
+
+func _configure_native_settings_window(action_row: HBoxContainer) -> void:
+	# Keep the existing Control instances and callback references. Only their
+	# presentation hosts change: a bounded body scrolls below the fixed title,
+	# while the existing action buttons form an always reachable footer.
+	if _settings_vbox.get_node_or_null("SettingsBodyScroll") != null:
+		return
+	if _settings_panel is PanelContainer:
+		var old_frame := _settings_panel
+		var frame := Panel.new()
+		var parent := old_frame.get_parent()
+		var child_index := old_frame.get_index()
+		parent.remove_child(old_frame)
+		frame.name = "SettingsPanel"
+		parent.add_child(frame)
+		parent.move_child(frame, child_index)
+		for child in old_frame.get_children():
+			child.reparent(frame, false)
+		_settings_panel = frame
+		old_frame.free()
+		var margin := _settings_panel.get_node("SettingsMargin") as MarginContainer
+		margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_settings_panel.grow_horizontal = Control.GROW_DIRECTION_END
+	_settings_panel.grow_vertical = Control.GROW_DIRECTION_END
+	_settings_panel.z_index = 60
+	_settings_panel.clip_contents = true
+	_settings_panel.custom_minimum_size = Vector2.ZERO
+	var title := _settings_vbox.get_node_or_null("SettingsTitleLabel") as Label
+	var scroll := ScrollContainer.new()
+	scroll.name = "SettingsBodyScroll"
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.custom_minimum_size = Vector2(0.0, 96.0)
+	var content := VBoxContainer.new()
+	content.name = "SettingsContent"
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 12)
+	scroll.add_child(content)
+	for child in _settings_vbox.get_children():
+		if child == title or child == action_row or child == _settings_back_button:
+			continue
+		child.reparent(content)
+	_settings_vbox.add_child(scroll)
+	_settings_vbox.move_child(scroll, 1 if title != null else 0)
+	_settings_back_button.reparent(action_row)
+	_settings_back_button.custom_minimum_size = Vector2(132.0, 44.0)
+	_settings_back_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for button in [_settings_apply_button, _settings_reset_button]:
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	TACTICAL_UI_THEME_SCRIPT.style_command_button(_settings_apply_button, "accent")
+	_settings_vbox.move_child(action_row, _settings_vbox.get_child_count() - 1)
+	_settings_panel.set_meta("native_ui_bounded_scroll", true)
+
+
+func _layout_native_shell_windows() -> void:
+	var viewport_size := get_viewport_rect().size
+	if _settings_panel != null:
+		var settings_size := Vector2(minf(680.0, viewport_size.x - 64.0), maxf(280.0, minf(900.0, viewport_size.y - 96.0)))
+		_settings_panel.set_as_top_level(true)
+		_settings_panel.anchor_left = 0.0
+		_settings_panel.anchor_top = 0.0
+		_settings_panel.anchor_right = 0.0
+		_settings_panel.anchor_bottom = 0.0
+		_settings_panel.position = Vector2(maxf(32.0, viewport_size.x - settings_size.x - 48.0), 48.0)
+		_settings_panel.size = settings_size
+	if _team_library_panel != null:
+		var library_size := Vector2(minf(640.0, maxf(480.0, viewport_size.x - 600.0)), minf(320.0, viewport_size.y - 160.0))
+		_team_library_panel.position = Vector2(maxf(544.0, viewport_size.x - library_size.x - 32.0), maxf(80.0, viewport_size.y - library_size.y - 64.0))
+		_team_library_panel.size = library_size
+	if _team_editor_panel != null:
+		_team_editor_panel.set_as_top_level(true)
+		_team_editor_panel.anchor_left = 0.0
+		_team_editor_panel.anchor_top = 0.0
+		_team_editor_panel.anchor_right = 0.0
+		_team_editor_panel.anchor_bottom = 0.0
+		_team_editor_panel.position = Vector2(32.0, 32.0)
+		_team_editor_panel.size = Vector2(maxf(600.0, viewport_size.x - 64.0), maxf(360.0, viewport_size.y - 64.0))
 
 
 func _ensure_start_roster_button() -> void:
@@ -1004,13 +1097,8 @@ func _apply_release_first_play_polish() -> void:
 	_singleplayer_button.set_meta("release_first_play_style_id", RELEASE_FIRST_PLAY_STYLE_ID)
 	_singleplayer_button.set_meta("release_priority", "primary")
 	_singleplayer_button.set_meta("release_action_hint", "Startet die vorbereitete Singleplayer-Sortie.")
+	TACTICAL_UI_THEME_SCRIPT.style_command_button(_singleplayer_button, "accent")
 	_singleplayer_button.add_theme_font_size_override("font_size", 20)
-	_singleplayer_button.add_theme_color_override("font_color", Color(0.98, 0.98, 0.94, 1.0))
-	_singleplayer_button.add_theme_color_override("font_hover_color", Color(1.0, 0.96, 0.76, 1.0))
-	_singleplayer_button.add_theme_stylebox_override("normal", _build_release_first_play_button_style(Color(0.08, 0.20, 0.23, 0.96), Color(0.90, 0.70, 0.22, 1.0), 2))
-	_singleplayer_button.add_theme_stylebox_override("hover", _build_release_first_play_button_style(Color(0.12, 0.30, 0.34, 0.98), Color(1.0, 0.80, 0.28, 1.0), 2))
-	_singleplayer_button.add_theme_stylebox_override("pressed", _build_release_first_play_button_style(Color(0.06, 0.15, 0.18, 0.98), Color(0.78, 0.60, 0.18, 1.0), 2))
-	_singleplayer_button.add_theme_stylebox_override("focus", _build_release_first_play_button_style(Color(0.0, 0.0, 0.0, 0.0), Color(1.0, 0.86, 0.34, 1.0), 3))
 	_singleplayer_button.call_deferred("grab_focus")
 	_apply_release_secondary_button_polish(_multiplayer_button, "secondary", "Host/Join-Lobby fuer Testteams.")
 	_apply_release_secondary_button_polish(_editor_button, "secondary", "Map-Editor oeffnen.")
@@ -1027,13 +1115,14 @@ func _apply_release_secondary_button_polish(button: Button, priority: String, to
 	button.set_meta("release_priority", priority)
 	if button.tooltip_text.strip_edges().is_empty():
 		button.tooltip_text = tooltip
+	TACTICAL_UI_THEME_SCRIPT.style_command_button(button)
 	button.add_theme_font_size_override("font_size", 15 if priority == "secondary" else 13)
 	if priority == "secondary":
 		button.custom_minimum_size = Vector2(maxf(button.custom_minimum_size.x, 360.0), 50.0)
 	else:
 		button.custom_minimum_size = Vector2(button.custom_minimum_size.x, minf(button.custom_minimum_size.y, 44.0))
-	button.add_theme_color_override("font_color", Color(0.82, 0.88, 0.88, 0.94))
-	button.add_theme_color_override("font_hover_color", Color(0.96, 0.98, 0.98, 1.0))
+	button.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
+	button.add_theme_color_override("font_hover_color", TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
 
 
 func _build_release_first_play_button_style(background: Color, border: Color, border_width: int) -> StyleBoxFlat:
@@ -1073,12 +1162,19 @@ func _refresh_mission_save_load_buttons() -> void:
 
 
 func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
-	_team_library_panel = menu_buttons.get_node_or_null("TeamLibraryPanel") as PanelContainer
+	_team_library_panel = menu_buttons.get_node_or_null("TeamLibraryPanel") as Panel
 	if _team_library_panel == null:
-		_team_library_panel = PanelContainer.new()
+		_team_library_panel = Panel.new()
 		_team_library_panel.name = "TeamLibraryPanel"
 		menu_buttons.add_child(_team_library_panel)
-	_team_library_panel.custom_minimum_size = Vector2(360.0, 154.0)
+	_team_library_panel.set_as_top_level(true)
+	_team_library_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_team_library_panel.custom_minimum_size = Vector2(480.0, 240.0)
+	_team_library_panel.clip_contents = true
+	_team_library_panel.grow_vertical = Control.GROW_DIRECTION_END
+	_team_library_panel.grow_horizontal = Control.GROW_DIRECTION_END
+	_team_library_panel.z_index = 10
+	_team_library_panel.set_meta("native_ui_detached_library", true)
 	_team_library_panel.visible = not _team_editor_open
 	var margin := _team_library_panel.get_node_or_null("TeamLibraryMargin") as MarginContainer
 	if margin == null:
@@ -1089,6 +1185,7 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 		margin.add_theme_constant_override("margin_right", 10)
 		margin.add_theme_constant_override("margin_bottom", 8)
 		_team_library_panel.add_child(margin)
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var vbox := margin.get_node_or_null("TeamLibraryVBox") as VBoxContainer
 	if vbox == null:
 		vbox = VBoxContainer.new()
@@ -1107,8 +1204,8 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 		header_label.name = "TeamLibraryHeaderLabel"
 		header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header_row.add_child(header_label)
-	header_label.text = "Erstellte Teams"
-	header_label.add_theme_font_size_override("font_size", 13)
+	header_label.text = "Deine Teams"
+	header_label.add_theme_font_size_override("font_size", 20)
 	_team_library_activate_button = header_row.get_node_or_null("TeamLibraryActivateButton") as Button
 	if _team_library_activate_button == null:
 		_team_library_activate_button = Button.new()
@@ -1150,6 +1247,7 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		vbox.add_child(scroll)
 	scroll.custom_minimum_size = Vector2(340.0, 74.0)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_team_library_list = scroll.get_node_or_null("TeamLibraryList") as VBoxContainer
 	if _team_library_list == null:
 		_team_library_list = VBoxContainer.new()
@@ -1160,9 +1258,9 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 
 
 func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
-	_team_editor_panel = get_node_or_null("TeamEditorPanel") as PanelContainer
+	_team_editor_panel = get_node_or_null("TeamEditorPanel") as Panel
 	if _team_editor_panel == null:
-		_team_editor_panel = PanelContainer.new()
+		_team_editor_panel = Panel.new()
 		_team_editor_panel.name = "TeamEditorPanel"
 		add_child(_team_editor_panel)
 	_team_editor_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1172,7 +1270,10 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 	_team_editor_panel.offset_bottom = -56.0
 	_team_editor_panel.z_index = 70
 	_team_editor_panel.set_meta("team_editor_window", true)
-	_team_editor_panel.custom_minimum_size = Vector2(1540.0, 860.0)
+	_team_editor_panel.custom_minimum_size = Vector2.ZERO
+	_team_editor_panel.clip_contents = true
+	_team_editor_panel.grow_horizontal = Control.GROW_DIRECTION_END
+	_team_editor_panel.grow_vertical = Control.GROW_DIRECTION_END
 	_team_editor_panel.visible = _team_editor_open
 	_team_editor_panel.mouse_filter = Control.MOUSE_FILTER_STOP if _team_editor_open else Control.MOUSE_FILTER_IGNORE
 	var margin := _team_editor_panel.get_node_or_null("TeamEditorMargin") as MarginContainer
@@ -1206,6 +1307,8 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 		header_row.add_child(_team_editor_title_label)
 	_team_editor_title_label.text = "Team-Editor"
 	_team_editor_title_label.add_theme_font_size_override("font_size", 26)
+	_team_editor_title_label.clip_text = true
+	_team_editor_title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_team_editor_title_label.tooltip_text = "Eigene Ansicht fuer Teamname, Team-Bild, Rookie-Punkte und NPC-Karten."
 
 	var view_row := header_row.get_node_or_null("TeamEditorViewModeRow") as HBoxContainer
@@ -1395,7 +1498,7 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 	if _team_editor_sheet_scroll == null:
 		_team_editor_sheet_scroll = ScrollContainer.new()
 		_team_editor_sheet_scroll.name = "TeamEditorSheetScroll"
-		_team_editor_sheet_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		_team_editor_sheet_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 		_team_editor_sheet_scroll.custom_minimum_size = Vector2(760.0, 0.0)
 		_team_editor_sheet_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_team_editor_sheet_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -1410,6 +1513,22 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 		_team_editor_sheet_host.add_theme_constant_override("separation", 8)
 		_team_editor_sheet_scroll.add_child(_team_editor_sheet_host)
 	_team_editor_sheet_host.custom_minimum_size = Vector2(760.0, 0.0)
+	_ensure_native_team_editor_body_scroll(vbox, body_row)
+
+
+func _ensure_native_team_editor_body_scroll(vbox: VBoxContainer, body_row: HBoxContainer) -> void:
+	if vbox.get_node_or_null("TeamEditorBodyScroll") != null:
+		return
+	var scroll := ScrollContainer.new()
+	scroll.name = "TeamEditorBodyScroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.custom_minimum_size = Vector2(0.0, 96.0)
+	vbox.add_child(scroll)
+	body_row.reparent(scroll)
+	_team_editor_panel.set_meta("native_ui_bounded_scroll", true)
 
 
 func _configure_team_editor_sheet_only_view_row(view_row: HBoxContainer) -> void:
@@ -1488,6 +1607,7 @@ func _set_team_editor_open(open: bool) -> void:
 		_flush_team_editor_metric_save()
 	_team_editor_open = open
 	if _team_editor_panel != null:
+		_layout_native_shell_windows()
 		_team_editor_panel.visible = _team_editor_open
 		_team_editor_panel.mouse_filter = Control.MOUSE_FILTER_STOP if _team_editor_open else Control.MOUSE_FILTER_IGNORE
 	if _team_library_panel != null:
@@ -1546,7 +1666,10 @@ func _refresh_team_library() -> void:
 		row.set_meta("team_name", String(entry.get("team_name", "")))
 		row.set_meta("active_roster", bool(entry.get("active", false)))
 		row.set_meta("archived_roster", bool(entry.get("archived", false)))
-		row.set_pressed_no_signal(String(entry.get("path", "")) == _selected_roster_entry_path)
+		var selected: bool = String(entry.get("path", "")) == _selected_roster_entry_path
+		row.set_pressed_no_signal(selected)
+		TACTICAL_UI_THEME_SCRIPT.style_command_button(row, "selected" if selected else "neutral")
+		row.add_theme_font_size_override("font_size", 14)
 		row.pressed.connect(_on_team_library_row_pressed.bind(String(entry.get("path", ""))))
 		var row_input_callable := Callable(self, "_on_team_library_row_gui_input").bind(String(entry.get("path", "")))
 		if not row.gui_input.is_connected(row_input_callable):

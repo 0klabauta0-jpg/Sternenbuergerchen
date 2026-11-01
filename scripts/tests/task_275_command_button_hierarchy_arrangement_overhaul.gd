@@ -158,14 +158,15 @@ func _test_mission_scene_hierarchy() -> void:
 	_assert_button_metadata(controller, "approach_nw", str(CONTRACT_SCRIPT.get("BUTTON_PATH_APPROACH_NW")), "air_lz", "#18")
 
 	var command_grid := controller.get_node_or_null(str(CONTRACT_SCRIPT.get("BUTTON_PATH_MOVE")).get_base_dir()) as GridContainer
-	_assert(command_grid != null and int(command_grid.columns) == 5, "#16 command grid uses five columns for the fixed 5x4 command matrix")
+	_assert(command_grid != null and int(command_grid.columns) == 5, "#16 preserves five columns for the native two-row action layout")
 	if command_grid != null:
 		var order: PackedStringArray = PackedStringArray(command_grid.get_meta("command_hierarchy_order", PackedStringArray()))
 		_assert(order.size() >= 8 and order[0] == "move" and order[1] == "take" and order.has("delete_order") and order.has("sort_fireteam"), "#16 command grid order includes Move/Take plus Delete/Sort")
-		_assert(command_grid.get_child_count() >= 20, "#16 command grid exposes the full 5x4 slot frame")
-		_assert(int(command_grid.get_meta("command_placeholder_slots", 0)) >= 5, "#16 command grid keeps the five current reserve slots marked for communication")
+		_assert(command_grid.get_child_count() >= 20, "#16 retains existing contextual controls and callback paths")
+		_assert(bool(command_grid.get_meta("native_a5_layout", false)), "#16 applies the native A5 presentation")
 		var sort_button := command_grid.get_node_or_null("SortCommandMatrixButton") as Button
-		_assert(sort_button != null and sort_button.get_index() == 9, "Sort command occupies #16.10")
+		var move_button := command_grid.get_node_or_null("MoveButton") as Button
+		_assert(sort_button != null and move_button != null and sort_button.get_global_rect().position.y > move_button.get_global_rect().position.y, "Sort remains a real action in the second row")
 
 	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
 	await _wait_frames(3)

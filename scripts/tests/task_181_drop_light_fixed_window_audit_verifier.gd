@@ -4,6 +4,7 @@ const FOB_TEST_SCENE: PackedScene = preload("res://scenes/meta/fob_test_screen.t
 const HOMEBASE_TEST_SCENE: PackedScene = preload("res://scenes/meta/homebase_test_screen.tscn")
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
+const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 
 var _passed: int = 0
 var _failed: int = 0
@@ -66,6 +67,7 @@ func _test_homebase_windows_are_actual_fixed_rects() -> void:
 	var screen: Control = HOMEBASE_TEST_SCENE.instantiate()
 	screen.visible = true
 	root.add_child(screen)
+	screen.call("setup_roster", UNIT_ROSTER_PRESETS_SCRIPT.call("get_homebase_roster"))
 	await _wait_frames(4)
 
 	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout")
@@ -76,16 +78,32 @@ func _test_homebase_windows_are_actual_fixed_rects() -> void:
 			"topbar": "DropLightTopbar",
 			"mission_brief": "Panel/Margin/VBox/MissionPanel",
 			"roster": "Panel/Margin/VBox/ContentRow/RosterPanel",
-			"transfer_team": "Panel/Margin/VBox/ContentRow/TeamPanel",
+			"fireteams": "Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel",
 			"flightdeck": "Panel/Margin/VBox/ContentRow/AircraftPanel",
-			"character_sheet": "Panel/Margin/VBox/ContentRow/InfoPanel",
+			"character_popup": "CharacterSheetPopup",
 		},
 		"Homebase"
 	)
 	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/RosterPanel", "Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll", "Homebase roster scroll stays inside the fixed #02 window")
-	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/TeamPanel", "Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox/SelectedTeamScroll", "Homebase transfer-team scroll stays inside the fixed #03 window")
+	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel", "Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll", "Homebase fireteam scroll stays inside the active fixed window")
 	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/AircraftPanel", "Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll", "Homebase flightdeck shipcards stay inside the fixed #05 window")
-	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/InfoPanel", "Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll", "Homebase character-sheet scroll stays inside the fixed #07 window")
+	var legacy_team_panel := screen.get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel") as Control
+	var legacy_info_panel := screen.get_node_or_null("Panel/Margin/VBox/ContentRow/InfoPanel") as Control
+	var popup := screen.get_node_or_null("CharacterSheetPopup") as Control
+	_assert(legacy_team_panel != null and not legacy_team_panel.visible and bool(legacy_team_panel.get_meta("homebase_legacy_transfer_window_disabled", false)), "Homebase retired transfer window stays disabled")
+	_assert(legacy_info_panel != null and not legacy_info_panel.visible and bool(legacy_info_panel.get_meta("homebase_legacy_character_sheet_window_disabled", false)), "Homebase retired character-sheet window stays disabled")
+	_assert(popup != null and not popup.visible, "Homebase character popup starts closed")
+
+	# Use the existing card-open path and allow visible containers to lay out
+	# before checking the current sheet scroll, rather than hidden legacy nodes.
+	screen.call("_on_compact_card_open_requested", "unit_alpha", null, "roster")
+	await _wait_frames(3)
+	var popup_scroll := screen.get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll") as ScrollContainer
+	_assert(popup != null and popup.is_visible_in_tree() and popup_scroll != null and popup_scroll.is_visible_in_tree(), "Homebase card-open request shows the actual character popup and scroll")
+	_assert_inside(screen, "CharacterSheetPopup", "CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll", "Homebase visible character scroll stays inside the current popup")
+	screen.call("_on_close_sheet_button_pressed")
+	await _wait_frames(2)
+	_assert(popup != null and not popup.visible, "Homebase character popup closes through its existing callback")
 
 	screen.queue_free()
 	await _wait_frames(2)
@@ -113,7 +131,9 @@ func _test_mission_hud_windows_are_actual_fixed_rects() -> void:
 	)
 	_assert_inside(scene, "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel", "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll", "Mission command scroll stays inside the fixed #16 window")
 	_assert_inside(scene, "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel", "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll", "Mission fireteam status scroll stays inside the fixed #17 window")
-	_assert_inside(scene, "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel", "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll", "Mission fireteam cards scroll stays inside the fixed #17 window")
+	var members := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll") as Control
+	var band := scene.get_node_or_null("TacticalUI/BottomDock") as Control
+	_assert(members != null and band != null and members.get_global_rect().end.y <= band.get_global_rect().position.y, "Mission member cards remain above the compact A5 band")
 	_assert_inside(scene, "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll", "Mission control scroll stays inside the fixed #18 window")
 
 	var phase_panel := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel") as Control

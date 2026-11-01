@@ -1,5 +1,7 @@
 # SternenBürgerchen: UI-Entwürfe und Übergabe
 
+**Fortschreibung:** Der Nutzer hat diese Gestaltung bestätigt und die native Umsetzung beauftragt. Die erste Umsetzung steht in [Native UI R1](../../qa/ui_native_r1_20261101/README.md) und der [neuen Spielbild-Workbench](../../reports/STERNENBUERGERCHEN_UI_NATIVE_R1_2026-11-01.html). Für weitere Änderungen zuerst den aktuellen Implementierungsstatus und `docs/dev/ui_native_design_contract.md` lesen. Diese Datei dokumentiert weiterhin die Entwurfsgeschichte.
+
 Stand: 01.11.2026. Auftrag: bestehende Funktionen ansehen, visuelle Alternativen und Bildgenerator-Icons entwickeln und die Gestaltung für den nächsten Chat nachvollziehbar machen.
 
 **Status: Konzeptpaket, keine Runtime-Integration und keine allgemeine Spielabnahme.** Die erzeugten Bilder sind Kandidaten. In Bildern gezeichnete Zahlen, Karten, Figuren und Beschriftungen sind illustrative Beispiele, keine neuen Spielregeln.

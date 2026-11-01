@@ -1,0 +1,320 @@
+{
+  "status": "PASS_SCOPED_NATIVE_UI_R1",
+  "base_sha": "135466b5c",
+  "branch": "task/ui-umsetzung-r1-20261101",
+  "engine": "4.6.2.stable.official.71f334935",
+  "selected_checks": 16,
+  "accepted_checks": [
+    {
+      "name": "theme",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-theme.log"
+    },
+    {
+      "name": "native_a5",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_post_review/20261101T223408Z-pid135792/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_post_review/20261101T223408Z-pid135792/logs/check-native_a5.log"
+    },
+    {
+      "name": "native_shell",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_shell_final/20261101T224351Z-pid132608/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_shell_final/20261101T224351Z-pid132608/logs/check-native_shell.log"
+    },
+    {
+      "name": "task_361",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_361.log"
+    },
+    {
+      "name": "task_226",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_226.log"
+    },
+    {
+      "name": "task_227",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_227.log"
+    },
+    {
+      "name": "task_300",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_300.log"
+    },
+    {
+      "name": "task_275",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_post_review/20261101T223408Z-pid135792/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_post_review/20261101T223408Z-pid135792/logs/check-task_275.log"
+    },
+    {
+      "name": "task_628",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_628.log"
+    },
+    {
+      "name": "task_181",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_181.log"
+    },
+    {
+      "name": "task_312",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_312.log"
+    },
+    {
+      "name": "task_315",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_315.log"
+    },
+    {
+      "name": "task_406",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_406.log"
+    },
+    {
+      "name": "task_571",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_571.log"
+    },
+    {
+      "name": "task_1043",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_1043.log"
+    },
+    {
+      "name": "task_1044",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "marker_found": true,
+      "report": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/metadata/report.json",
+      "log": "docs/qa/ui_native_r1_20261101/checks_final/20261101T223218Z-pid128984/logs/check-task_1044.log"
+    }
+  ],
+  "evidence_policy": "Latest full run plus focused reruns replace only changed A5/hierarchy and shell checks; initial RED/failure runs retained as history.",
+  "assertions_native_a5": 352,
+  "assertions_native_shell": 63,
+  "native_captures": [
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/characters_1920x1080.png",
+      "sha256": "9e01429b90d2d3dbd04ff151bb23fc133f3545b84da8b6ca263bd61ea7c02d79",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/characters_1920x1080.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/debrief_1920x1080.png",
+      "sha256": "967834c00f1df0c426365a0b426d881eb41062da018cef2913d74aa7f7548360",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/debrief_1920x1080.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/editor_1920x1080.png",
+      "sha256": "2007bab87ec7599800072ee7cba45e805723b39a6b624a917a284efa5194dc7b",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/editor_1920x1080.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/escape_1920x1080.png",
+      "sha256": "81d2a0e61f6053a0bb87b6d56fae9f3689184ec42cb3fc59be7ecf1b6f2b9191",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/escape_1920x1080.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/fob_1920x1080.png",
+      "sha256": "452f0b40515889394b8cfa95a15c82d9bf54ea3808c4919afcd87031efb4ce68",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/fob_1920x1080.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/homebase_1920x1080.png",
+      "sha256": "4eb886b4ff248e12ff4adada4e73fe5a728d52cc28e9e714a68e44abda0f9281",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/homebase_1920x1080.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/lobby_1920x1080.png",
+      "sha256": "f82ff4a491e87d04e755a2508ce602bcc6f7eb9d694ed8fe7c78c6e59a5d543e",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/lobby_1920x1080.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/main_menu_1920x1080.png",
+      "sha256": "c6a6e2072e4a878d0eccb5b853c9bdc70bbf092ad7073991c378d0aca7fd42de",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/main_menu_1920x1080.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/mission_1280x720.png",
+      "sha256": "7d9118e0a897785db6c278ec70eb8b9b1d07f382571f7ac1c00c1048b0074543",
+      "size": [
+        1280,
+        720
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/mission_1280x720.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/mission_1920x1080.png",
+      "sha256": "7c21561603d6eaa9de6406a47d670b9e29bfb7e3c7de0a0c31a79ba733de5898",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/mission_1920x1080.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/settings_1280x720.png",
+      "sha256": "e4d52a3316a5051ec1dcfa47691d556feeff2ded9c73c0469efd4f5a7f20429f",
+      "size": [
+        1280,
+        720
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/settings_1280x720.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/settings_1920x1080.png",
+      "sha256": "9865f9ab0d7ff669eee82e34eaba18ffaba90b810a6a19113dabc593e7cc66c5",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/settings_1920x1080.json"
+    },
+    {
+      "file": "docs/qa/ui_native_r1_20261101/captures/teameditor_1920x1080.png",
+      "sha256": "27c78d2ab460281ba301e0e06caedfda2a8f7dde71c96365b714f071767a95ab",
+      "size": [
+        1920,
+        1080
+      ],
+      "metadata": "docs/qa/ui_native_r1_20261101/captures/teameditor_1920x1080.json"
+    }
+  ],
+  "html_export_checks": 9,
+  "html_sha256": "def32dbcf62016d2f783acb34e1e74c1bd1af930aeb541d835ef1d8c9b4bfa25",
+  "local_references": "PASS",
+  "external_dependencies": [],
+  "asset_integrity": "six byte-identical generated candidates; four mission icons consumed",
+  "source_sha256": {
+    "scripts/editor/map_editor.gd": "8f6af93636f98172b678f492555f890862fe8bbdc3b6c00da1af61011866b31a",
+    "scripts/meta/character_sheet_view.gd": "448cecbedfab5d6e969a6325b1434c2466791512db9fc85b62c1ce967a6f4f38",
+    "scripts/meta/debrief_screen.gd": "71d89db2200028aec3a0a0503fa247c4547982da1e415ca77b5343761383b8df",
+    "scripts/meta/drop_light_layout_contract.gd": "ac0610031301ff06dec16e1c6edc8a30d07edab5b5f2b7068ee35e7e446f7666",
+    "scripts/meta/fob_screen.gd": "57db58947bed419285a5fbdfb96bcf43b7951799790e03146435d16f74640eb2",
+    "scripts/meta/homebase_screen.gd": "3b1a63d9d9322faa979d32ba8aa7ea5d8c43b69acea595b3292caa3dab7509a1",
+    "scripts/meta/meta_ui_skin.gd": "67b70a497bfc6636200db8b39c0dacd137c368448575862305a6012ff624d87f",
+    "scripts/meta/npc_compact_card.gd": "5abb2c271dcddccfcac6f37ef8eec7adee2222ac26e4265d75fa2294ae4f612f",
+    "scripts/tests/mission_tactical_sandbox_controller.gd": "93b4f8a14763d252d3d52ef90f28246381b5dd8f610b07c7d17211eb457f50ed",
+    "scripts/tests/task_181_drop_light_fixed_window_audit_verifier.gd": "6037f700c7b6e882accc4d475f462da60f9d1b9017a3b7c2da2ebb6d7ee3c91b",
+    "scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd": "da5f7a000261106f6ff82a474e4433f35d70b1a1f0daf769800591ec790a09dd",
+    "scripts/tests/task_312_dropship_command_matrix_lz_go_layout.gd": "5dd8f966e3b19fc0619b317bf2cab7d3b8dc7fa28bb1a868827da5c95048bdb3",
+    "scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd": "9d0b1837e69cfda45a47fdb49690d42ec82ca67437cfcf8b18ba98ef4b8826e9",
+    "scripts/tests/ui_a5_native_hud_verifier.gd": "4e281196775653455fc748f9cfe7bcc007eaebe63f9b8864a8523567127fa75c",
+    "scripts/tests/ui_native_capture.gd": "f8cf5bdb43bca9a03daad9b70569376b9c078ba31072a2659b0bcc78b438b98a",
+    "scripts/tests/ui_native_design_system_verifier.gd": "108fd8de3b1d6ffba5c39506eb9bfcb300153989c97b19294eb6b885b492663f",
+    "scripts/tests/ui_native_shell_layout_verifier.gd": "32d09328395af04444c680e08da1c35468baa529cdf9ab1bcb96a5bef736375b",
+    "scripts/ui/contextual_help_popup.gd": "4961fdfd1ff3ffb6c945edd96086d33469f8110f8fe903de877e280d0fcd1250",
+    "scripts/ui/global_escape_menu.gd": "e08b36a94f156ccb45c707dc380ea489f673497ee7f9d596902845f959bda766",
+    "scripts/ui/main_menu_screen.gd": "5f8b724fa1a3baa05eb124a0906c4072de4ce59f3a478afe45edb447a29dec41",
+    "scripts/ui/mission_a5_hud_layout.gd": "1ad84d39d25a61a87c2da1b715410df8ce1a8e95dc851b8c107a97e1811b938d",
+    "scripts/ui/multiplayer_lobby_screen.gd": "69025c18b4f99d3a0edca20705fdba2d59c4e78b1f47ddf235ebcbc69ffc8ea7",
+    "scripts/ui/native_ui_icons.gd": "cf0f945235bb2ff55d471ea956beca228b9c294db44101d52b5cfa955231832c",
+    "scripts/ui/tactical_ui_theme.gd": "2f29da9aa68444334e177c16c91b95f131dba95faa7222bc67aef63ab503610f"
+  },
+  "project_and_authoritative_simulation_diff_empty": true,
+  "browser_qa": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL",
+  "human_usability_acceptance": false,
+  "performance_release_acceptance": false,
+  "known_separate_data_edge": "Generator may produce toughness below Store range for recorded seeds; UI fixture uses legal controlled metrics; production generator unchanged",
+  "default_renderer_smoke": {
+    "status": "PASS",
+    "engine_exit_code": 0,
+    "renderer": "D3D12 Forward+",
+    "iterations": 60,
+    "log": "docs/qa/ui_native_r1_20261101/default_renderer_smoke.log",
+    "scope": "Actual project main scene startup; not a played mission"
+  },
+  "import_history_archive": "docs/qa/ui_native_r1_20261101/import_history.zip"
+}

@@ -1,6 +1,8 @@
 class_name NPCCompactCard
 extends PanelContainer
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+
 const META_UNIT_PROFILE_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
@@ -56,6 +58,8 @@ var _drag_preview_text_width: float = 0.0
 
 
 func _ready() -> void:
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(self)
+	set_meta("native_ui_screen_family", "person_card")
 	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if _is_drag_preview or _fixed_size else Control.SIZE_EXPAND_FILL
 	_apply_canvas_order()
 	set_meta("drag_preview_z_index_contract", int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX")))
@@ -492,7 +496,8 @@ func _refresh_card() -> void:
 	portrait_rect.modulate = Color(1.0, 1.0, 1.0, 1.0) if portrait_texture != null else Color(0.35, 0.37, 0.42, 1.0)
 	progress_bar.visible = _show_progress
 	progress_bar.value = _progress_value
-	progress_bar.modulate = Color(0.48, 0.82, 0.58, 1.0) if not _is_disabled else Color(0.42, 0.46, 0.44, 0.92)
+	TACTICAL_UI_THEME_SCRIPT.style_progress_bar(progress_bar, "accent" if not _is_disabled else "neutral")
+	progress_bar.modulate = Color.WHITE
 	_apply_density(margin, hbox, text_vbox, portrait_rect, name_label, data_a_label, data_b_label, badge_row, progress_bar)
 
 	_apply_state_visuals(name_label, data_a_label, data_b_label)
@@ -665,31 +670,21 @@ func _badge_tooltips_available(badge_row: HBoxContainer) -> bool:
 	return true
 
 
+
 func _apply_state_visuals(name_label: Label, data_a_label: Label, data_b_label: Label) -> void:
-	var stylebox := StyleBoxFlat.new()
-	stylebox.border_width_left = 2
-	stylebox.border_width_top = 2
-	stylebox.border_width_right = 2
-	stylebox.border_width_bottom = 2
-	stylebox.corner_radius_top_left = 6
-	stylebox.corner_radius_top_right = 6
-	stylebox.corner_radius_bottom_right = 6
-	stylebox.corner_radius_bottom_left = 6
-
-	var name_color := Color("edf3f6")
-	var detail_color := Color("a9b4bc")
+	var fill: Color = TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL
+	var border: Color = TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER
+	var name_color: Color = TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT
+	var detail_color: Color = TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT_MUTED
 	if _is_disabled:
-		stylebox.bg_color = Color("1a2024")
-		stylebox.border_color = Color("3d454b")
-		name_color = Color("707981")
-		detail_color = Color("5b646c")
+		fill = TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_ALT
+		border = TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER.darkened(0.2)
+		name_color = TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT_MUTED
+		detail_color = TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT_MUTED
 	elif _is_selected:
-		stylebox.bg_color = Color("0c1114")
-		stylebox.border_color = SELECTED_BORDER_COLOR
-	else:
-		stylebox.bg_color = Color("151c21")
-		stylebox.border_color = Color("4d5a63")
-
+		fill = TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_SELECTED
+		border = SELECTED_BORDER_COLOR
+	var stylebox: StyleBoxFlat = TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(fill, border, 6, 2, Vector4.ZERO)
 	add_theme_stylebox_override("panel", stylebox)
 	name_label.add_theme_color_override("font_color", name_color)
 	data_a_label.add_theme_color_override("font_color", detail_color)

@@ -1,0 +1,1150 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: _build_overlay (res://scripts/ui/global_escape_menu.gd:272)
+   GDScript backtrace (most recent call first):
+       [0] _build_overlay (res://scripts/ui/global_escape_menu.gd:272)
+       [1] _ready (res://scripts/ui/global_escape_menu.gd:40)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Native A5 Mission HUD ===
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: Cannot open file 'res://.godot/imported/crater.glb-14d79023e6ef1209abea973e51aa879d.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://.godot/imported/crater.glb-14d79023e6ef1209abea973e51aa879d.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://Assets/kenney_space-kit/Models/GLTF format/crater.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/curated/kenney/space_station/models/floor-panel.glb': In external resource #0, invalid UID: 'uid://t1buipt0kqg4' - using text path instead: 'res://Assets/curated/kenney/space_station/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _get_ground_batch_source (res://scripts/terrain/terrain_map_3d_view.gd:3800)
+       [3] _queue_ground_model_batch (res://scripts/terrain/terrain_map_3d_view.gd:3709)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3597)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Cannot open file 'res://.godot/imported/corridor_wallCorner.glb-919e57e823e52b8e85165924547c48e9.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://.godot/imported/corridor_wallCorner.glb-919e57e823e52b8e85165924547c48e9.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://Assets/kenney_space-kit/Models/GLTF format/corridor_wallCorner.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Cannot open file 'res://.godot/imported/corridor_wall.glb-7dca7a064076cb6e6163722950c222b4.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://.godot/imported/corridor_wall.glb-7dca7a064076cb6e6163722950c222b4.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://Assets/kenney_space-kit/Models/GLTF format/corridor_wall.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/curated/kenney/space_station/models/table-display.glb': In external resource #0, invalid UID: 'uid://t1buipt0kqg4' - using text path instead: 'res://Assets/curated/kenney/space_station/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Cannot open file 'res://.godot/imported/barrels.glb-2c2adee121751850db87de7cbeb19eac.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://.godot/imported/barrels.glb-2c2adee121751850db87de7cbeb19eac.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://Assets/kenney_space-kit/Models/GLTF format/barrels.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/curated/kenney/space_station/models/computer.glb': In external resource #0, invalid UID: 'uid://t1buipt0kqg4' - using text path instead: 'res://Assets/curated/kenney/space_station/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/curated/kenney/space_station/models/container-wide.glb': In external resource #0, invalid UID: 'uid://t1buipt0kqg4' - using text path instead: 'res://Assets/curated/kenney/space_station/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/curated/kenney/space_station/models/bed-single.glb': In external resource #0, invalid UID: 'uid://t1buipt0kqg4' - using text path instead: 'res://Assets/curated/kenney/space_station/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Cannot open file 'res://.godot/imported/blaster-a.glb-8b404a3df95f5b9ce2e510ed4c6b724c.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Failed loading resource: res://.godot/imported/blaster-a.glb-8b404a3df95f5b9ce2e510ed4c6b724c.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Failed loading resource: res://Assets/used/npc/blaster_kit/models/blaster-a.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Cannot open file 'res://.godot/imported/blaster-b.glb-1f3a089db2b0c2cab587cf5e7b66402f.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Failed loading resource: res://.godot/imported/blaster-b.glb-1f3a089db2b0c2cab587cf5e7b66402f.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Failed loading resource: res://Assets/used/npc/blaster_kit/models/blaster-b.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Cannot open file 'res://.godot/imported/blaster-f.glb-3dc022d15d0ba53c852d63e29bc57e87.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Failed loading resource: res://.godot/imported/blaster-f.glb-3dc022d15d0ba53c852d63e29bc57e87.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Failed loading resource: res://Assets/used/npc/blaster_kit/models/blaster-f.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Cannot open file 'res://.godot/imported/blaster-p.glb-32d7e2611db1d5f8850f6e3db8c9433b.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Failed loading resource: res://.godot/imported/blaster-p.glb-32d7e2611db1d5f8850f6e3db8c9433b.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: Failed loading resource: res://Assets/used/npc/blaster_kit/models/blaster-p.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18429)
+       [5] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18252)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:772)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+SCRIPT ERROR: Invalid call. Nonexistent function 'apply_screen' in base 'GDScript'.
+   at: NPCCompactCard._ready (res://scripts/meta/npc_compact_card.gd:61)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [1] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4669)
+       [2] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4196)
+       [3] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4040)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:780)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:31)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: Cannot open file 'res://.godot/imported/crater.glb-14d79023e6ef1209abea973e51aa879d.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://.godot/imported/crater.glb-14d79023e6ef1209abea973e51aa879d.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://Assets/kenney_space-kit/Models/GLTF format/crater.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/curated/kenney/space_station/models/floor-panel.glb': In external resource #0, invalid UID: 'uid://t1buipt0kqg4' - using text path instead: 'res://Assets/curated/kenney/space_station/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _get_ground_batch_source (res://scripts/terrain/terrain_map_3d_view.gd:3800)
+       [3] _queue_ground_model_batch (res://scripts/terrain/terrain_map_3d_view.gd:3709)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3597)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Cannot open file 'res://.godot/imported/corridor_wallCorner.glb-919e57e823e52b8e85165924547c48e9.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://.godot/imported/corridor_wallCorner.glb-919e57e823e52b8e85165924547c48e9.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://Assets/kenney_space-kit/Models/GLTF format/corridor_wallCorner.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Cannot open file 'res://.godot/imported/corridor_wall.glb-7dca7a064076cb6e6163722950c222b4.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://.godot/imported/corridor_wall.glb-7dca7a064076cb6e6163722950c222b4.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://Assets/kenney_space-kit/Models/GLTF format/corridor_wall.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3617)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/curated/kenney/space_station/models/table-display.glb': In external resource #0, invalid UID: 'uid://t1buipt0kqg4' - using text path instead: 'res://Assets/curated/kenney/space_station/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Cannot open file 'res://.godot/imported/barrels.glb-2c2adee121751850db87de7cbeb19eac.scn'.
+   at: load (core/io/resource_format_binary.cpp:1220)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://.godot/imported/barrels.glb-2c2adee121751850db87de7cbeb19eac.scn.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+ERROR: Failed loading resource: res://Assets/kenney_space-kit/Models/GLTF format/barrels.glb.
+   at: _load (core/io/resource_loader.cpp:343)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/curated/kenney/space_station/models/computer.glb': In external resource #0, invalid UID: 'uid://t1buipt0kqg4' - using text path instead: 'res://Assets/curated/kenney/space_station/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/curated/kenney/space_station/models/container-wide.glb': In external resource #0, invalid UID: 'uid://t1buipt0kqg4' - using text path instead: 'res://Assets/curated/kenney/space_station/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/curated/kenney/space_station/models/bed-single.glb': In external resource #0, invalid UID: 'uid://t1buipt0kqg4' - using text path instead: 'res://Assets/curated/kenney/space_station/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:13452)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5020)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:3626)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:3620)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1394)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1263)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:994)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-a.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-b.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-f.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+WARNING: 'res://Assets/used/npc/blaster_kit/models/blaster-p.glb': In external resource #0, invalid UID: 'uid://blxwvy173lgw7' - using text path instead: 'res://Assets/used/npc/blaster_kit/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13477)
+       [1] _attach_unit_blaster (res://scripts/terrain/terrain_map_3d_view.gd:12432)
+       [2] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11597)
+       [3] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:10872)
+       [4] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1423)
+       [5] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:996)
+ERROR: 1920x1080: band leaves the map the main surface
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: target/order has a separate native middle panel
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: MoveButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: TakeButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: HoldButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: FlankButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: GoCommandMatrixButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: GoCommandMatrixButton follows its row without overlap
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: TargetButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: ClearTargetButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: ClearTargetButton follows its row without overlap
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: DeleteOrderButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: DeleteOrderButton follows its row without overlap
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: SortCommandMatrixButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: SortCommandMatrixButton follows its row without overlap
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: actions occupy two actual rows
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: FireRuleHoldButton belongs to selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: FireRuleReturnButton belongs to selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: FireRuleFreeButton belongs to selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: FireRuleSuppressButton belongs to selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: old reserve slots are not shown as fake active actions
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: old reserve slots are not shown as fake active actions
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: old reserve slots are not shown as fake active actions
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: old reserve slots are not shown as fake active actions
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1920x1080: old reserve slots are not shown as fake active actions
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: band leaves the map the main surface
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: target/order has a separate native middle panel
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: MoveButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: TakeButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: HoldButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: FlankButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: GoCommandMatrixButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: GoCommandMatrixButton follows its row without overlap
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: TargetButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: ClearTargetButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: ClearTargetButton follows its row without overlap
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: DeleteOrderButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: DeleteOrderButton follows its row without overlap
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: SortCommandMatrixButton has a real 64x64 action body
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: SortCommandMatrixButton follows its row without overlap
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: actions occupy two actual rows
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: FireRuleHoldButton belongs to selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: FireRuleReturnButton belongs to selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: FireRuleFreeButton belongs to selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: FireRuleSuppressButton belongs to selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: old reserve slots are not shown as fake active actions
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: old reserve slots are not shown as fake active actions
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: old reserve slots are not shown as fake active actions
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: old reserve slots are not shown as fake active actions
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+ERROR: 1280x720: old reserve slots are not shown as fake active actions
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:107)
+Native A5: 272 checks, 50 failures
+WARNING: 1 RID of type "CanvasItem" was leaked.
+   at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2690)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2641)

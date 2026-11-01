@@ -2,6 +2,7 @@ class_name TacticalInputController
 extends Node
 
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
+const NATIVE_A5_HUD_LAYOUT_SCRIPT: GDScript = preload("res://scripts/ui/mission_a5_hud_layout.gd")
 const TACTICAL_CARD_SCRIPT: GDScript = preload("res://scripts/ui/components/tactical_card.gd")
 const STATUS_BADGE_SCRIPT: GDScript = preload("res://scripts/ui/components/status_badge.gd")
 const COMMAND_BUTTON_SCRIPT: GDScript = preload("res://scripts/ui/components/command_button.gd")
@@ -3898,6 +3899,7 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 		"../TacticalUI/MissionTint",
 		"../TacticalUI/MissionIdentityPanel",
 		"../TacticalUI/MissionDropshipPanel",
+		"../TacticalUI/A5TargetOrderPanel",
 		"../TacticalUI/TopNavPanel",
 		FIRETEAM_MINI_PANEL_PATH,
 		TACTICAL_EVENT_LOG_PANEL_PATH,
@@ -4613,8 +4615,9 @@ func _refresh_selected_fireteam_cards() -> void:
 	var selected_cards_fireteam_id: String = _get_selected_member_cards_fireteam_id()
 	var units: Array = []
 	if not selected_cards_fireteam_id.is_empty():
+		# The selected roster also shows embarked members read-only (TASK_628).
+		# Ground filtering belongs to ground selection/commands, not this list.
 		units = _get_fireteam_units(selected_cards_fireteam_id, true)
-		units = _filter_ground_fireteam_card_units(units)
 	else:
 		units = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
 		units = _filter_ground_fireteam_card_units(units)
@@ -10577,10 +10580,11 @@ func _apply_release_firefight_hud_real_window_label_contract(label: Label) -> vo
 	label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.92))
 	label.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_HUD_REAL_WINDOW_FONT_SIZE)
 	label.add_theme_constant_override("outline_size", RELEASE_FIREFIGHT_HUD_REAL_WINDOW_OUTLINE_SIZE)
-	label.custom_minimum_size = Vector2(
-		maxf(label.custom_minimum_size.x, 640.0),
-		maxf(label.custom_minimum_size.y, RELEASE_FIREFIGHT_HUD_REAL_WINDOW_MIN_HEIGHT)
-	)
+	if not bool(label.get_meta("native_a5_layout", false)):
+		label.custom_minimum_size = Vector2(
+			maxf(label.custom_minimum_size.x, 640.0),
+			maxf(label.custom_minimum_size.y, RELEASE_FIREFIGHT_HUD_REAL_WINDOW_MIN_HEIGHT)
+		)
 	label.set_meta("release_firefight_hud_real_window_style_id", RELEASE_FIREFIGHT_HUD_REAL_WINDOW_STYLE_ID)
 	label.set_meta("release_firefight_hud_real_window_task", "TASK_834")
 
@@ -14934,16 +14938,56 @@ func _apply_drop_light_fixed_hud_layout() -> void:
 
 
 func _enforce_drop_light_fixed_hud_layout() -> void:
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
-	_apply_fixed_hud_window_contract("../TacticalUI/MissionIdentityPanel", layout.get("mission_identity"))
-	_apply_fixed_hud_window_contract("../TacticalUI/TopNavPanel", layout.get("top_nav"))
-	_apply_fixed_hud_window_contract(FIRETEAM_MINI_PANEL_PATH, layout.get("fireteam_mini"))
-	_apply_fixed_hud_window_contract(TACTICAL_EVENT_LOG_PANEL_PATH, layout.get("event_log"))
-	_apply_fixed_hud_window_contract("../TacticalUI/BottomDock", layout.get("bottom_dock"))
-	_apply_fixed_hud_window_contract("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel", layout.get("command_matrix"))
-	_apply_fixed_hud_window_contract(FIRETEAM_PANEL_PATH, layout.get("selected_fireteam"))
-	_apply_fixed_hud_window_contract("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel", layout.get("mission_control"))
-	_apply_left_tactical_stack_1280_air_anchor_polish()
+	var viewport_size := Vector2i(get_viewport().get_visible_rect().size)
+	if get_meta("native_a5_window_viewport", Vector2i.ZERO) != viewport_size:
+		set_meta("native_a5_window_viewport", viewport_size)
+		var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout", viewport_size)
+		_apply_fixed_hud_window_contract("../TacticalUI/MissionIdentityPanel", layout.get("mission_identity"))
+		_apply_fixed_hud_window_contract("../TacticalUI/TopNavPanel", layout.get("top_nav"))
+		_apply_fixed_hud_window_contract(FIRETEAM_MINI_PANEL_PATH, layout.get("fireteam_mini"))
+		_apply_fixed_hud_window_contract(TACTICAL_EVENT_LOG_PANEL_PATH, layout.get("event_log"))
+		_apply_fixed_hud_window_contract("../TacticalUI/BottomDock", layout.get("bottom_dock"))
+		_apply_fixed_hud_window_contract("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel", layout.get("command_matrix"))
+		_apply_fixed_hud_window_contract(FIRETEAM_PANEL_PATH, layout.get("selected_fireteam"))
+		_apply_fixed_hud_window_contract("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel", layout.get("mission_control"))
+	_apply_native_a5_hud_layout()
+
+
+func _apply_native_a5_hud_layout() -> void:
+	NATIVE_A5_HUD_LAYOUT_SCRIPT.configure(self, {
+		"target_armed": _is_target_placement_armed,
+		"fire_rule": _get_selected_fire_rule_consensus(),
+	})
+	var source := get_node_or_null(command_feedback_label_path) as Label
+	var order_text := "Auftrag: Keine Befehle geplant"
+	var target_text := "Ziel auswählen"
+	var detail_text := ""
+	if source != null:
+		detail_text = source.text
+		for line in source.text.split("\n", false):
+			if String(line).begins_with("TARGET "):
+				target_text = String(line).trim_prefix("TARGET ")
+	var focused_order = _get_area_order_from_ref(_focused_area_order_ref)
+	if focused_order == null:
+		focused_order = _get_waypoint_from_ref(_focused_waypoint_ref)
+	if focused_order != null:
+		order_text = "Auftrag: %s" % _get_waypoint_command_display_name(String(focused_order.command_type))
+	else:
+		var waypoint_count := _count_selected_phase_waypoints()
+		var area_count := _count_selected_area_orders()
+		if waypoint_count > 0 or area_count > 0:
+			order_text = "Auftrag: %d Wegpunkte · %d Gebiete" % [waypoint_count, area_count]
+	if _selected_fireteam_ids.is_empty():
+		order_text = "Auftrag: Fireteam auswählen"
+	NATIVE_A5_HUD_LAYOUT_SCRIPT.refresh(self, {
+		"visible": _tactical_ui_visible,
+		"target": _format_world_position(_selected_tile_world_position) if _has_selected_tile else target_text,
+		"target_selected": _has_selected_tile,
+		"order": order_text,
+		"detail": detail_text,
+		"feedback": _last_command_text,
+		"team": "Fireteam %s" % _get_fireteam_name() if not _selected_fireteam_ids.is_empty() else "Kein Fireteam ausgewählt",
+	})
 
 
 func _deferred_enforce_drop_light_fixed_hud_layout() -> void:
@@ -15131,6 +15175,9 @@ func _get_compact_command_matrix_icon(cache_key: String, source: Texture2D) -> T
 
 
 func _apply_command_matrix_1280_readability() -> void:
+	if bool(get_meta("native_a5_legacy_setup_complete", false)):
+		_apply_native_a5_hud_layout()
+		return
 	var command_grid := get_node_or_null(COMMAND_GRID_PATH) as GridContainer
 	if command_grid == null:
 		return
@@ -15159,6 +15206,7 @@ func _apply_command_matrix_1280_readability() -> void:
 		_apply_command_matrix_compact_content_margins(button)
 		button.set_meta("command_matrix_1280_font_size", font_size)
 		button.set_meta("command_matrix_1280_readability_style_id", COMMAND_MATRIX_1280_READABILITY_STYLE_ID)
+	_apply_native_a5_hud_layout()
 
 
 func _apply_command_matrix_compact_content_margins(button: Button) -> void:
@@ -16382,6 +16430,9 @@ func _build_drop_light_drop_button_label() -> String:
 
 
 func _apply_compact_mission_control_layout() -> void:
+	if bool(get_meta("native_a5_legacy_setup_complete", false)):
+		_enforce_drop_light_fixed_hud_layout()
+		return
 	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
 	var small_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SMALL_ACTION_BUTTON_SIZE")
 	var top_nav_panel := get_node_or_null("../TacticalUI/TopNavPanel") as Control
@@ -16508,8 +16559,8 @@ func _apply_compact_mission_control_layout() -> void:
 		_apply_fireteam_mini_overlay_style()
 	_apply_fireteam_panel_action_button_contract()
 	_apply_card_bound_mission_control_layout()
+	set_meta("native_a5_legacy_setup_complete", true)
 	_enforce_drop_light_fixed_hud_layout()
-	_apply_command_matrix_1280_readability()
 
 
 func _apply_card_bound_mission_control_layout() -> void:
@@ -17101,6 +17152,8 @@ func _apply_fireteam_mini_overlay_style() -> void:
 func _apply_left_tactical_stack_1280_air_anchor_polish() -> void:
 	var mini_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
 	var event_log_panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	if mini_panel != null and bool(mini_panel.get_meta("native_a5_layout", false)):
+		return
 	var card_host := get_node_or_null(FIRETEAM_MINI_CARDS_VBOX_PATH) as VBoxContainer
 	if card_host != null:
 		card_host.add_theme_constant_override("separation", LEFT_TACTICAL_STACK_1280_MIN_CARD_SEPARATION)

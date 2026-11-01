@@ -1,6 +1,8 @@
 class_name DebriefTestScreen
 extends Control
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
@@ -28,6 +30,8 @@ var _mission_result: Dictionary = {}
 
 
 func _ready() -> void:
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(self)
+	set_meta("native_ui_screen_family", "debrief")
 	_apply_background_texture()
 	var to_fob_button: Button = get_node("Panel/Margin/VBox/ButtonRow/ReturnToFOBButton")
 	var to_homebase_button: Button = get_node("Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton")
@@ -1310,22 +1314,9 @@ func _ensure_background_nodes() -> Dictionary:
 
 
 func _apply_debrief_panel_style(panel: PanelContainer) -> void:
-	var stylebox := StyleBoxFlat.new()
-	stylebox.bg_color = Color(0.145, 0.176, 0.200, 0.58)
-	stylebox.border_color = Color(0.302, 0.353, 0.388, 0.82)
-	stylebox.border_width_left = 1
-	stylebox.border_width_top = 1
-	stylebox.border_width_right = 1
-	stylebox.border_width_bottom = 1
-	stylebox.corner_radius_top_left = 6
-	stylebox.corner_radius_top_right = 6
-	stylebox.corner_radius_bottom_left = 6
-	stylebox.corner_radius_bottom_right = 6
-	stylebox.content_margin_left = 14
-	stylebox.content_margin_top = 12
-	stylebox.content_margin_right = 14
-	stylebox.content_margin_bottom = 12
-	panel.add_theme_stylebox_override("panel", stylebox)
+	if panel == null:
+		return
+	panel.add_theme_stylebox_override("panel", TACTICAL_UI_THEME_SCRIPT.get_theme().get_stylebox("panel", "PanelContainer"))
 
 
 func _ensure_personnel_events_label() -> Label:

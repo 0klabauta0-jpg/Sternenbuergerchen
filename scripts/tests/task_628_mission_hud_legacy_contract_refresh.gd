@@ -11,10 +11,10 @@ const COMMAND_GRID_PATH: String = "TacticalUI/BottomDock/BottomMargin/BottomRow/
 const SELECTED_CARDS_ROW_PATH: String = "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsRow"
 
 const FIRE_RULE_BUTTONS := [
-	{"name": "FireRuleHoldButton", "slot": 11, "text": "HF"},
-	{"name": "FireRuleReturnButton", "slot": 12, "text": "RF"},
-	{"name": "FireRuleFreeButton", "slot": 13, "text": "FW"},
-	{"name": "FireRuleSuppressButton", "slot": 14, "text": "SUP"},
+	{"name": "FireRuleHoldButton", "text": "FH"},
+	{"name": "FireRuleReturnButton", "text": "AF"},
+	{"name": "FireRuleFreeButton", "text": "FF"},
+	{"name": "FireRuleSuppressButton", "text": "UN"},
 ]
 
 var _passed: int = 0
@@ -55,8 +55,8 @@ func _test_docs_track_task() -> void:
 	_assert(roadmap_text.contains("TASK_628 - Mission HUD Legacy Contract Refresh (implementiert)"), "Roadmap marks TASK_628 implemented")
 	_assert(contract_text.contains("Mission-HUD-Legacy-Contract-Refresh"), "Mission command feedback contract documents TASK_628")
 	_assert(report_text.contains("TASK_628 Mission HUD Legacy Contract Refresh"), "Rolling report tracks TASK_628")
-	_assert(report_text.contains('latest_completed_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Rolling report advances latest completed beyond TASK_628")
-	_assert(handbook_text.contains('current_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Status handbook current task advances beyond TASK_628")
+	_assert(_has_current_task_record(report_text, "latest_completed_task"), "Rolling report retains a non-stale task-progress record")
+	_assert(_has_current_task_record(handbook_text, "current_task"), "Status handbook retains a non-stale current-task record")
 
 
 func _test_command_matrix_fire_rule_slots() -> void:
@@ -66,13 +66,13 @@ func _test_command_matrix_fire_rule_slots() -> void:
 
 	var command_grid := scene.get_node(COMMAND_GRID_PATH) as GridContainer
 	_assert(command_grid != null, "Mission scene exposes command grid")
-	_assert(command_grid != null and int(command_grid.get_meta("command_placeholder_slots", 0)) >= 6, "#16 keeps current reserve-slot count")
+	_assert(command_grid != null and bool(command_grid.get_meta("native_a5_layout", false)), "#16 uses the native A5 layout while preserving existing controls")
+	var team_panel := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel") as Control
 	for fire_rule_variant in FIRE_RULE_BUTTONS:
 		var spec: Dictionary = Dictionary(fire_rule_variant)
 		var button := command_grid.get_node_or_null(String(spec.get("name", ""))) as Button
-		var expected_index: int = int(spec.get("slot", 0)) - 1
 		_assert(button != null, "%s exists" % String(spec.get("name", "")))
-		_assert(button != null and button.get_index() == expected_index, "%s stays in slot #%s" % [String(spec.get("name", "")), str(spec.get("slot", ""))])
+		_assert(button != null and team_panel != null and team_panel.get_global_rect().encloses(button.get_global_rect()), "%s is reachable in the selected-team parameters" % String(spec.get("name", "")))
 		_assert(button != null and bool(button.get_meta("fire_rule_control", false)), "%s is marked as fire-rule control" % String(spec.get("name", "")))
 		_assert(button != null and String(button.text) == String(spec.get("text", "")), "%s keeps compact fire-rule label" % String(spec.get("name", "")))
 
@@ -103,6 +103,7 @@ func _test_inbound_selected_fireteam_cards_remain_visible() -> void:
 
 	var fireteam_id: String = String(available_fireteams[0])
 	var units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
+	_assert(not units.is_empty(), "Inbound fixture uses actual members from the existing fireteam")
 	var embarked_unit_ids: Array = []
 	for unit in units:
 		if unit != null and unit.has_method("get_unit_id"):
@@ -122,11 +123,27 @@ func _test_inbound_selected_fireteam_cards_remain_visible() -> void:
 	var disabled_card_count: int = 0
 	for child in selected_card_row.get_children():
 		if child is Control and bool((child as Control).get_meta("mission_selected_fireteam_member_in_drop_transit", false)):
-			disabled_card_count += 1
+			var card_state: Dictionary = child.call("get_card_userology_snapshot")
+			if bool(child.get("_is_disabled")) and not bool(card_state.get("drag_enabled", true)):
+				disabled_card_count += 1
 	_assert(disabled_card_count >= min(units.size(), selected_card_row.get_child_count()), "Inbound member cards render as disabled/read-only")
 
 	scene.queue_free()
 	await _wait_frames(2)
+
+
+func _has_current_task_record(text: String, key: String) -> bool:
+	# These rolling documents move forward independently of this historical
+	# verifier. Check their record, not an unrelated later task's exact title.
+	var record := RegEx.new()
+	record.compile(key + ':\\s*"([^"]+)"')
+	var record_match := record.search(text)
+	if record_match == null:
+		return false
+	var value := record_match.get_string(1).strip_edges()
+	if value.begins_with("TASK_"):
+		return int(value.trim_prefix("TASK_").get_slice(" ", 0)) >= 628
+	return not value.is_empty()
 
 
 func _read_text(path: String) -> String:

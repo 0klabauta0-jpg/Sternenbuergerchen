@@ -2,6 +2,8 @@ extends Control
 
 signal back_requested
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+
 const MAIN_MENU_SCENE_PATH: String = "res://scenes/ui/main_menu.tscn"
 const MISSION_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const MULTIPLAYER_SESSION_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_session.gd")
@@ -107,6 +109,8 @@ var _release_contact_approach_evidence: Dictionary = {}
 
 
 func _ready() -> void:
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(self)
+	set_meta("native_ui_screen_family", "multiplayer_lobby")
 	set_meta("multiplayer_lobby_screen", true)
 	set_process(false)
 	_ensure_background_nodes()
@@ -991,6 +995,14 @@ func _enforce_lobby_panel_geometry() -> void:
 	panel.offset_bottom = panel_position.y + panel_size.y
 	panel.position = panel_position
 	panel.size = panel_size
+	var scroll := get_node_or_null("Panel/Margin") as ScrollContainer
+	if scroll != null:
+		scroll.add_theme_stylebox_override("panel", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
+			Color.TRANSPARENT, Color.TRANSPARENT, 0, 0, Vector4(16, 16, 16, 16)
+		))
+	var content := get_node_or_null("Panel/Margin/VBox") as VBoxContainer
+	if content != null:
+		content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 
 func _add_setup_label(parent: Node, text: String, help_id: String) -> Label:

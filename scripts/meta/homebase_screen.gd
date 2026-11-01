@@ -1,6 +1,8 @@
 class_name HomebaseTestScreen
 extends Control
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
@@ -144,6 +146,8 @@ var _post_mission_skill_delta_by_unit_id: Dictionary = {}
 
 
 func _ready() -> void:
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(self)
+	set_meta("native_ui_screen_family", "homebase")
 	set_process(true)
 	META_UI_SKIN_SCRIPT.apply_homebase(self)
 	_apply_drop_light_fixed_layout()
@@ -8366,24 +8370,17 @@ func _build_empty_state_label(text: String) -> Label:
 
 
 func _build_shipcard_stylebox(is_selected: bool, craft_busy: bool, craft_in_transit: bool = false) -> StyleBoxFlat:
-	var stylebox := StyleBoxFlat.new()
-	stylebox.bg_color = Color(0.12, 0.14, 0.17, 0.72) if craft_in_transit else Color(0.12, 0.14, 0.17, 1.0)
+	var border: Color = TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER
 	if is_selected:
-		stylebox.border_color = Color(0.40, 0.92, 0.56, 1.0)
+		border = TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED
 	elif craft_in_transit:
-		stylebox.border_color = Color(0.56, 0.58, 0.62, 0.82)
-	else:
-		stylebox.border_color = Color(0.55, 0.46, 0.22, 1.0) if craft_busy else Color(0.31, 0.36, 0.42, 1.0)
-	var border_width: int = 2 if is_selected else 1
-	stylebox.border_width_left = border_width
-	stylebox.border_width_top = border_width
-	stylebox.border_width_right = border_width
-	stylebox.border_width_bottom = border_width
-	stylebox.corner_radius_top_left = 8
-	stylebox.corner_radius_top_right = 8
-	stylebox.corner_radius_bottom_left = 8
-	stylebox.corner_radius_bottom_right = 8
-	return stylebox
+		border = TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT
+	elif craft_busy:
+		border = TACTICAL_UI_THEME_SCRIPT.COLOR_WARNING
+	return TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
+		TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_SELECTED if is_selected else TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL,
+		border, 6, 2 if is_selected else 1, Vector4.ZERO
+	)
 
 
 func _build_shipcard_cargo_status_text(craft_def: Dictionary, craft_id: String) -> String:

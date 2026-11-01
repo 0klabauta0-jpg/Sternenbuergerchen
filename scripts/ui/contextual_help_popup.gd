@@ -1,6 +1,8 @@
 class_name ContextualHelpPopup
 extends Control
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+
 const SERVICE_SCRIPT: GDScript = preload("res://scripts/ui/contextual_help_service.gd")
 
 const EDGE_MARGIN: float = 16.0
@@ -119,6 +121,8 @@ static func calculate_popup_rect(target_rect: Rect2, viewport_size: Vector2, det
 func _ensure_nodes() -> void:
 	if _title_label != null and is_instance_valid(_title_label):
 		return
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(self)
+	set_meta("native_ui_screen_family", "contextual_help")
 	clip_contents = true
 	_frame = PanelContainer.new()
 	_frame.name = "HelpFrame"

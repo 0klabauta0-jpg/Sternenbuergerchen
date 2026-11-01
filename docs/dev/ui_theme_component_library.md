@@ -2,6 +2,16 @@
 
 Status: TASK_164 implementiert
 
+## Fortschreibung Native UI R1 · 01.11.2026
+
+Die bestätigten UI-Entwürfe werden jetzt in allen bestehenden Screenfamilien nativ verwendet. Verbindliche Gestaltungsrollen und Grenzen: [ui_native_design_contract.md](ui_native_design_contract.md). Bilder, technische Nachweise und weitere Prüfpunkte: [Native-R1-QA](../qa/ui_native_r1_20261101/README.md).
+
+- `TacticalUITheme.get_theme()` liefert eine gecachte Theme-Ressource; `apply_screen(Control)` setzt sie an der Wurzel. Dynamische Kinder und Popups erben die Basis.
+- Bestehende `style_*`-APIs bleiben erhalten. `style_action_tile(Button, selected, primary)` ergänzt die kompakten Missionsaktionen. MetaUISkin delegiert an dieselben Token und StyleBox-Fabriken.
+- Fenster, Inputs, Dropdowns, Listen, Tabs, Scrollbars, Tooltips, Fokus und Auswahl teilen dieselben Rollenfarben. Keine globale Traversierung bei Runtime-Refreshes.
+- Der neue A5-Helfer ordnet vorhandene Controls an und aktualisiert Darstellung. Geometrie-/Style-Signaturen vermeiden unveränderte Schreibvorgänge; keine neue Gameplay-Wahrheit.
+- Der unten beschriebene TASK164-Selected-Fireteam-Slice ist historisch und inzwischen stillgelegt. Aktuelle Integration wird durch die nativen Theme-/A5-/Shell-Verifier und gezielte bestehende Bedienprüfungen belegt; der alte TASK164-Verifier erwartet noch den stillgelegten Besitzer.
+
 ## Zweck
 Diese kleine UI-Basis ist eine gemeinsame Darstellungs-Schicht fuer Homebase, FOB und Mission. Sie ersetzt keine Screen-Logik und haelt keinen Gameplay-State. Komponenten bekommen fertige Daten/Snapshots von bestehenden Runtime- oder Meta-Pfaden und zeigen sie nur an.
 
