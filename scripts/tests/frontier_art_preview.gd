@@ -12,10 +12,11 @@ const BACKDROP = preload("res://scripts/terrain/frontier_art_geology.gd")
 const DRESSING = preload("res://scripts/terrain/frontier_art_dressing.gd")
 const PAD = preload("res://scripts/terrain/frontier_outpost_pad.gd")
 const CLOSED_BUILDING = preload("res://scripts/terrain/frontier_closed_buildings.gd")
+const WORKLIFE = preload("res://scripts/terrain/frontier_worklife.gd")
 const ART_ROOT := "res://Assets/curated/frontier_illustrated_20261101/"
 const MODEL_SCALE := 0.35
 const SHIP_SCALE := 0.22 # Deliberately compact fiction scale, not SC canonical metres.
-const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass04/after/"
+const CAPTURE_ROOT := "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/"
 
 var _view
 var _data
@@ -35,6 +36,7 @@ var _pad_facts: Array = []
 var _closed_shells: Array[Node3D] = []
 var _cutaway_buildings: Array[Node3D] = []
 var _buildings_closed := true
+var _worklife: Node3D
 
 func _ready() -> void:
 	_capture_mode = OS.get_cmdline_user_args().has("--capture-frontier-art")
@@ -66,6 +68,10 @@ func _ready() -> void:
 	dressing.name = "FrontierWorkingGround"
 	_stage.add_child(dressing)
 	_reserve_footprints(dressing.build(_profile))
+	_worklife = WORKLIFE.new()
+	_worklife.name = "FrontierUseGroups"
+	_stage.add_child(_worklife)
+	_reserve_footprints(_worklife.build())
 	_registry = REGISTRY.new()
 	_registry.name = "TerrainRegistry"
 	add_child(_registry)
@@ -85,8 +91,10 @@ func _ready() -> void:
 	add_child(_sim)
 	_view.set_external_terrain_object_visuals(_external_visual_owners)
 	_view.configure_from_map(_data)
+	var crew_places := [Vector2(10.7,8.9),Vector2(10.4,10.9),Vector2(15.1,9.5),Vector2(11.8,8.9)]
 	for index in range(4):
-		_add_citizen(["operator","pilot","mechanic","medic"][index],Vector2(10.6+float(index)*1.05,9.4))
+		_add_citizen(["operator","pilot","mechanic","medic"][index],crew_places[index])
+		_crew[index]["visual"].rotation_degrees.y = [-150.0,-95.0,140.0,-90.0][index]
 	_build_ui()
 	_set_buildings_closed(true)
 	_camera_view("outpost")
@@ -288,7 +296,7 @@ func _build_ui() -> void:
 	panel.add_theme_stylebox_override("panel",style)
 	layer.add_child(panel)
 	_status = Label.new()
-	_status.text = "STERNENBÜRGERCHEN  /  HEX-BASIS\nGrafik- und Bewegungsprobe · kein Kampagnenstand\n1 Übersicht   2 Halle   3 Citizens   4 Gelände   5 Basis\n6 Außenposten   7 Cutlass   8 Buccaneer   9 Versorgung\nC Außenhülle / Schnitt   G Hexraster\nLeertaste Gehen   Mausrad Zoom"
+	_status.text = "STERNENBÜRGERCHEN  /  HEX-BASIS\nGrafik- und Bewegungsprobe · kein Kampagnenstand\n1 Übersicht   2 Halle   3 Citizens   4 Gelände   5 Basis\n6 Außenposten   7 Cutlass   8 Buccaneer   9 Versorgung\n0 Arbeitsbereiche\nC Außenhülle / Schnitt   G Hexraster\nLeertaste Gehen   Mausrad Zoom"
 	_status.add_theme_font_size_override("font_size",15)
 	panel.add_child(_status)
 
@@ -339,6 +347,18 @@ func _camera_view(id: String, reset_zoom: bool = true) -> void:
 		size = 2.5
 		pitch = 28.0
 		target_height = 0.42
+	elif id=="lived_outpost":
+		focus = Vector2(11.7,7.8)
+		size = 10.5
+		pitch = 50.0
+	elif id=="ground_detail":
+		focus = Vector2(15.5,8.9)
+		size = 4.8
+		pitch = 58.0
+	elif id=="geology_detail":
+		focus = Vector2(20.1,2.5)
+		size = 8.5
+		pitch = 38.0
 	size *= _preview_zoom_factor
 	_view.set("_focus_grid_position",HEX.plane_to_axial(focus))
 	_view.set("_camera_size",size)
@@ -368,6 +388,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_7: _camera_view("cutlass_front")
 			KEY_8: _camera_view("buccaneer_front")
 			KEY_9: _camera_view("utility")
+			KEY_0: _camera_view("lived_outpost")
 			KEY_C: _set_buildings_closed(not _buildings_closed)
 			KEY_G:
 				_view.set_hex_grid_visible(not bool(_view.get("_hex_grid_visible")))
@@ -392,12 +413,14 @@ func _walk_demo() -> void:
 func _capture_all() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://output/grafik_20261101"))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CAPTURE_ROOT))
+	_view.call("_request_viewport_redraw",true,60000)
 	for i in range(30): await get_tree().process_frame
 	var captures: Array = []
-	for id in ["overview","hex_grid","crew","workshop","landscape","cutaway","outpost","cutlass_front","cutlass_rear","buccaneer_front","buccaneer_rear","utility","closed_outpost","closed_habitat","closed_hall","baseline"]:
+	for id in ["overview","hex_grid","crew","workshop","landscape","cutaway","outpost","cutlass_front","cutlass_rear","buccaneer_front","buccaneer_rear","utility","closed_outpost","closed_habitat","closed_hall","lived_outpost","ground_detail","geology_detail","baseline"]:
 		_view.set_frontier_art_enabled(id!="baseline")
 		_view.set_hex_grid_visible(id=="hex_grid")
-		_set_buildings_closed(String(id).begins_with("closed_"))
+		_set_buildings_closed(String(id).begins_with("closed_") or id in ["lived_outpost","ground_detail","geology_detail"])
+		_view.call("_request_viewport_redraw",true,60000)
 		var camera_id: String = {"closed_outpost":"outpost","closed_habitat":"cutaway","closed_hall":"workshop"}.get(id,id)
 		_camera_view("overview" if id in ["hex_grid","baseline"] else camera_id)
 		for i in range(12): await get_tree().process_frame
@@ -416,11 +439,11 @@ func _capture_all() -> void:
 	captures.append({"id":"walk_pose","path":CAPTURE_ROOT+"walk_pose.png","camera_size":_view.get_camera_size(),"profile_enabled":true})
 	var renderer: String = RenderingServer.get_current_rendering_method()+" / "+RenderingServer.get_current_rendering_driver_name()
 	var sources := {}
-	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://scripts/terrain/frontier_outpost_pad.gd","res://scripts/terrain/frontier_closed_buildings.gd","res://shaders/terrain/frontier_ground.gdshader"]:
+	for source in ["res://scripts/tests/frontier_art_preview.gd","res://scripts/terrain/frontier_art_geology.gd","res://scripts/terrain/frontier_art_dressing.gd","res://scripts/terrain/frontier_art_profile.gd","res://scripts/terrain/frontier_outpost_pad.gd","res://scripts/terrain/frontier_closed_buildings.gd","res://scripts/terrain/frontier_worklife.gd","res://shaders/terrain/frontier_contact_paint.gdshader","res://shaders/terrain/frontier_ground.gdshader"]:
 		sources[source] = FileAccess.get_sha256(source)
 	var snapshot: Dictionary = _view.get_render_snapshot()
-	var report := {"report_ready":false,"pass":"04","report_revision":"r02","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"pads":_pad_facts,"captures":captures,"structure_and_citizen_scale":MODEL_SCALE,"stylized_ship_scale":SHIP_SCALE,"canonical_star_citizen_dimensions":false,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Six fixed cameras, resolution, renderer and lighting preserved from pass03. New ship, utility and outpost close views are after-only. Ship dimensions are stylized, not canonical. Hex cells remain authoritative and selectable."}
-	var report_file := FileAccess.open("res://output/grafik_20261101/pass04_after_capture.json",FileAccess.WRITE)
+	var report := {"report_ready":false,"pass":"05_environment","report_revision":"env05","engine":Engine.get_version_info(),"renderer":renderer,"launch_arguments":OS.get_cmdline_args(),"synthetic_fixture":true,"active_campaign_integration":false,"grid_topology":_data.get_grid_topology(),"tile_count":_data.get_tiles().size(),"actors":_crew.size(),"models":_model_facts,"worklife_sources":_worklife.source_facts,"use_groups":_worklife.use_groups,"contact_gravel_count":_worklife.gravel_count,"pads":_pad_facts,"captures":captures,"structure_and_citizen_scale":MODEL_SCALE,"stylized_ship_scale":SHIP_SCALE,"canonical_star_citizen_dimensions":false,"movement_authority":"SimulationRoot","unit_spacing_enabled":false,"local_avoidance_enabled":false,"light":_view.call("_build_editor_light_snapshot"),"runtime_sources_sha256":sources,"missing_asset_mapping_count":snapshot.get("missing_asset_mapping_count",-1),"flat_hex_cap_count":snapshot.get("ground_multimesh_tile_count",-1),"comparison_note":"Nine fixed environment cameras, resolution, renderer and global light preserved from pass04. Buildings/geology/contacts/use groups revised; four original citizen starts and facing authored around use areas. Ship GLBs and citizen geometry unchanged; ships remain criticized interim assets under separate Astra revision. Hex facts remain authoritative."}
+	var report_file := FileAccess.open("res://output/grafik_20261101/pass05_environment_after_capture.json",FileAccess.WRITE)
 	if report_file == null:
 		push_error("Cannot write frontier engine capture report")
 		get_tree().quit(1)

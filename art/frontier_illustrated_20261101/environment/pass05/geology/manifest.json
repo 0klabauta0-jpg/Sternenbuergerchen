@@ -1,0 +1,271 @@
+{
+  "schema": "sternenbuergerchen.pass05_geology.v1",
+  "task": "docs/tasks/ART_2026_11_01_pass05_environment.md",
+  "based_on_unintegrated_branch": "task/grafikreferenzen-20261101",
+  "base_commit": "fbcac03d1",
+  "status": "frozen geometry candidate; user visual acceptance pending; full preview integration belongs to parent",
+  "runtime_source": {
+    "path": "scripts/terrain/frontier_art_geology.gd",
+    "sha256": "f3441b0c5b4a4e4ca93ac32f2cf0f57000e309ecd5729170be21e260d8e0ec70"
+  },
+  "editable_source_copy": {
+    "path": "art/frontier_illustrated_20261101/environment/pass05/geology/source/frontier_art_geology_pass05.gd",
+    "sha256": "f3441b0c5b4a4e4ca93ac32f2cf0f57000e309ecd5729170be21e260d8e0ec70"
+  },
+  "before_source": {
+    "path": "art/frontier_illustrated_20261101/environment/pass05/geology/source/frontier_art_geology_pass04.gd",
+    "sha256": "a987305579549a196d02b5e2172f1104bf7ea8a889c0a535adb478576288a4ec"
+  },
+  "early_rejected_shape_study": {
+    "source": {
+      "path": "art/frontier_illustrated_20261101/environment/pass05/geology/source/frontier_art_geology_pass05_r01.gd",
+      "sha256": "b04eae5c5a7fcdfa68fbaa81b89474d356954b3cb907c55006e5eb19514a7236"
+    },
+    "images_directory": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/r01",
+    "reason": "different outlines but too smooth/prismatic at first near-view review"
+  },
+  "references": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+      "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+      "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+      "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e"
+    }
+  ],
+  "inspected_pass04_images": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/landscape.png",
+      "sha256": "3614e8a86307d4dd9af390a2efee5cc897d103a81dd8a1b90a79ced6c0b2a2ef"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/closed_outpost.png",
+      "sha256": "46eb623067dd6dc561b1a77654c40cd47c1bce3abb5eaedaf7ebacc181df03a3"
+    }
+  ],
+  "reference_classification": "user style images; old square picture topology and labels are not gameplay instructions; Hex decision and facts remain unchanged",
+  "geometry": {
+    "caps_up": true,
+    "degenerate_triangles": 0,
+    "digest": "7fb6a93e41085ed8074f18e36a7d6b06a9c16bf417cd3151c9baeea228395355",
+    "finite": true,
+    "meshes": 54,
+    "outside_footprint_vertices": 0,
+    "terraced_groups": 14,
+    "vertices": 23112,
+    "walls_out": true,
+    "triangles": 7704,
+    "previous_pass04_meshes": 55,
+    "previous_pass04_vertices": 21744,
+    "budget_vertices": 30000,
+    "budget_note": "23112 vertices remains within the existing unmodified 30k verifier gate; requested45k ceiling not needed"
+  },
+  "contract": {
+    "failed": 0,
+    "footprint_digest": "46cd64cbe1874df344c4ea2c011c4cf2c87308a627a61edaf4d295b35d2e5523",
+    "geometry": {
+      "caps_up": true,
+      "degenerate_triangles": 0,
+      "digest": "7fb6a93e41085ed8074f18e36a7d6b06a9c16bf417cd3151c9baeea228395355",
+      "finite": true,
+      "meshes": 54,
+      "outside_footprint_vertices": 0,
+      "terraced_groups": 14,
+      "vertices": 23112,
+      "walls_out": true
+    },
+    "max_pass02_footprint_delta_m": 9.5367431640625e-07,
+    "passed": 12,
+    "synthetic_fixture": true
+  },
+  "contract_report": {
+    "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/check_runs/20261101T174053Z-pid120688/metadata/report.json",
+    "sha256": "eb19662e7f4c314d10768dc2733f42be8efba742405057001fd7393e4b6e9f35"
+  },
+  "contract_log": {
+    "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/check_runs/20261101T174053Z-pid120688/logs/check-geology_contract.log",
+    "sha256": "d514a98027fd97b913b1779387cc132a8a0060e81d61f1973ddb091735449e41"
+  },
+  "strict_runner": "exit0 + success marker + no script/parse/ERROR/leak lines; no editor import per parent authorization",
+  "native_probe": {
+    "captures": [
+      {
+        "camera_size": 23.0,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+        "error": 0,
+        "path": "res://art/frontier_illustrated_20261101/environment/pass05/geology/qa/landscape_before.png",
+        "revision": "before",
+        "view": "landscape"
+      },
+      {
+        "camera_size": 23.0,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+        "error": 0,
+        "path": "res://art/frontier_illustrated_20261101/environment/pass05/geology/qa/landscape_after.png",
+        "revision": "after",
+        "view": "landscape"
+      },
+      {
+        "camera_size": 9.80000019073486,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.227444, 0.829038, -0.510848), Z: (0.3372, 0.559193, 0.757363), O: (18.8696, 12.26547, 9.832542)]",
+        "error": 0,
+        "path": "res://art/frontier_illustrated_20261101/environment/pass05/geology/qa/wall_detail_before.png",
+        "revision": "before",
+        "view": "wall_detail"
+      },
+      {
+        "camera_size": 9.80000019073486,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.227444, 0.829038, -0.510848), Z: (0.3372, 0.559193, 0.757363), O: (18.8696, 12.26547, 9.832542)]",
+        "error": 0,
+        "path": "res://art/frontier_illustrated_20261101/environment/pass05/geology/qa/wall_detail_after.png",
+        "revision": "after",
+        "view": "wall_detail"
+      },
+      {
+        "camera_size": 5.19999980926514,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.250412, 0.788011, -0.562435), Z: (0.320513, 0.615662, 0.719884), O: (8.119231, 12.08191, 19.9579)]",
+        "error": 0,
+        "path": "res://art/frontier_illustrated_20261101/environment/pass05/geology/qa/near_detail_before.png",
+        "revision": "before",
+        "view": "near_detail"
+      },
+      {
+        "camera_size": 5.19999980926514,
+        "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.250412, 0.788011, -0.562435), Z: (0.320513, 0.615662, 0.719884), O: (8.119231, 12.08191, 19.9579)]",
+        "error": 0,
+        "path": "res://art/frontier_illustrated_20261101/environment/pass05/geology/qa/near_detail_after.png",
+        "revision": "after",
+        "view": "near_detail"
+      },
+      {
+        "camera_size": 9.80000019073486,
+        "camera_transform": "[X: (-0.913545, 0.0, 0.406737), Y: (0.227444, 0.829038, 0.510848), Z: (-0.3372, 0.559193, -0.757363), O: (6.730401, 12.26547, -17.43254)]",
+        "error": 0,
+        "path": "res://art/frontier_illustrated_20261101/environment/pass05/geology/qa/rear_detail_before.png",
+        "revision": "before",
+        "view": "rear_detail"
+      },
+      {
+        "camera_size": 9.80000019073486,
+        "camera_transform": "[X: (-0.913545, 0.0, 0.406737), Y: (0.227444, 0.829038, 0.510848), Z: (-0.3372, 0.559193, -0.757363), O: (6.730401, 12.26547, -17.43254)]",
+        "error": 0,
+        "path": "res://art/frontier_illustrated_20261101/environment/pass05/geology/qa/rear_detail_after.png",
+        "revision": "after",
+        "view": "rear_detail"
+      }
+    ],
+    "engine": {
+      "build": "official",
+      "hash": "71f334935c000924d403448e698df4441130df18",
+      "hex": 263682,
+      "major": 4,
+      "minor": 6,
+      "patch": 2,
+      "status": "stable",
+      "string": "4.6.2-stable (official)",
+      "timestamp": 0
+    },
+    "ground_shader_sha256": "406b093c14c4dceaf4142f5a210711221c2b7dbb5fbfb2e5e8062bd5c0116842",
+    "isolated_geology_only": true,
+    "light_color": "(1.0, 0.9412, 0.851, 1.0)",
+    "light_energy": 0.949999988079071,
+    "light_transform": "[X: (0.848048, 0.0, 0.529919), Y: (0.417582, 0.615662, -0.668271), Z: (-0.326251, 0.788011, 0.522111), O: (0.0, 0.0, 0.0)]",
+    "no_gpu_exclusivity_claim": true,
+    "pass": true,
+    "profile_sha256": "9ea54d24eb732ea804e750d2543e15fd85c4f1ba3b4f1d19c78c591629f26c0f",
+    "renderer": "forward_plus / vulkan",
+    "source_sha256": "f3441b0c5b4a4e4ca93ac32f2cf0f57000e309ecd5729170be21e260d8e0ec70"
+  },
+  "native_probe_source": {
+    "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/probe_geology.gd",
+    "sha256": "39f6153c163e352e7edeea24f4ba25fd7c8d71f897245adfd859404a646ff1a6"
+  },
+  "native_log": {
+    "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/native_probe_final.log",
+    "sha256": "f5fa362d128d6a85f5bbea5c6d50fd088eab7db61813ec9140dc44411eba943c"
+  },
+  "opened_images": [
+    {
+      "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/landscape_before.png",
+      "sha256": "18a0c879313d37e68c7fddc7fbf6a37f32cd2cc07127401c61e22569f3848942"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/landscape_after.png",
+      "sha256": "d77fa3a70d8a182eb2c0d80e2f1cdbc7c5ecc64d9209335ebde6a85ac25c5319"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/wall_detail_before.png",
+      "sha256": "5106a9f58fa1dbc319ba0a7309df35ce6fa7b11a079183c74654b5e83be5650c"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/wall_detail_after.png",
+      "sha256": "54ed9439aade086b8eb72718d74bc8245aad106bc501b59b9b00826850d9aced"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/near_detail_before.png",
+      "sha256": "5df14f76beaa3a83c49268650cb5fd7b4fde7736672c8baf5d7f350956165289"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/near_detail_after.png",
+      "sha256": "7e02b1f8935c6c7ba30c3e157a85941726af347a23be350196551e0f9181803c"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/rear_detail_before.png",
+      "sha256": "606205c94c19ec0ef2c4bfa492112db5f6c2ee39b5244881519afa946697e9c8"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/rear_detail_after.png",
+      "sha256": "bb690c755b9afb52bb5e58c0ad3b2aa0b59f7ebf969ab4a5f5485796a1914139"
+    }
+  ],
+  "scope": {
+    "fourteen_anchors_unchanged": true,
+    "conservative_nav_envelopes_unchanged": true,
+    "palette_strings_unchanged": true,
+    "shader_or_profile_edited": false,
+    "map_facts_edited": false,
+    "per_frame_build": false,
+    "ships_or_astra_touched": false,
+    "tests_or_reports_edited": false,
+    "godot_editor_import_performed": false,
+    "gpu_exclusivity_claimed": false
+  },
+  "visual_changes": [
+    "seed-dependent asymmetrical rounded/blocky polar outlines and narrow visible fissure",
+    "unequal height sections with two local retreat/overhang zones; no alternating full-circumference chip rings",
+    "seed-dependent offset crowns, lower buttresses and broader irregular foot hierarchy",
+    "one unequal chipped crown bevel rather than a repeated strata lip",
+    "zero to four graded one-sided talus pieces instead of identical pairs",
+    "existing rock colors assigned to local fracture faces instead of complete height rings"
+  ],
+  "remaining_visual_distance": [
+    "illustrations retain much richer middle-scale erosion and debris transitions",
+    "broad top caps stay horizontal; back walls intentionally quieter than broken frontal zones",
+    "fourteen protected anchors remain separate masses, not a continuous reshaped canyon",
+    "material/shader changes and wider ground-contact dressing belong to parent scope"
+  ],
+  "not_claimed": [
+    "user art acceptance",
+    "identical illustrated fidelity",
+    "full campaign/editor integration",
+    "general runtime performance or release acceptance"
+  ],
+  "pair_material_note": "Each isolated pair uses the same runtime-loaded profile/shader and light. Before means Pass04 geometry with the paired current probe route, not historical Pass04 material equality. Parent changes Pass05 material route separately.",
+  "analysis": {
+    "path": "art/frontier_illustrated_20261101/environment/pass05/geology/ANALYSIS.md",
+    "sha256": "19e1019ef266370492c15d514ccb37c37b917b67180875bbd8317804f51fa79c"
+  },
+  "readme": {
+    "path": "art/frontier_illustrated_20261101/environment/pass05/geology/README.md",
+    "sha256": "400b68ca8343c3f1043463baf165356002fce9cfdbb8a04990a27bea48d6922f"
+  },
+  "metadata_helper": {
+    "path": "art/frontier_illustrated_20261101/environment/pass05/geology/qa/refresh_manifest.py",
+    "sha256": "ccab769a6c543d76a3ce53df2b036f146c13474e1edbd9bec664aa2f1e565c74"
+  }
+}

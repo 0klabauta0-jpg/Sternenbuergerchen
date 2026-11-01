@@ -26,7 +26,8 @@ func build(profile) -> Array[Rect2]:
 
 func _loading_yard() -> void:
 	# Flat authored apron: decoration does not introduce a second floor height.
-	_box(self,"LoadingApron",Vector3(4.35,0.012,1.20),Vector3(13.7,0.0,7.98),"969485")
+	var apron := _box(self,"LoadingApron",Vector3(4.35,0.012,1.20),Vector3(13.7,0.0,7.98),"858b7c")
+	apron.material_override = _paving_material("858b7c")
 	for x in [12.0,12.7,13.4,14.1,14.8,15.5]:
 		_box(self,"ApronBayStripe",Vector3(0.026,0.004,0.32),Vector3(x,0.009,8.32),"e0d2a0")
 	for center in [Vector2(15.8,5.0),Vector2(16.7,5.6),Vector2(15.8,6.25)]:
@@ -89,6 +90,13 @@ func _material(color: String) -> StandardMaterial3D:
 	_materials[color] = material
 	return material
 
+func _paving_material(color: String) -> ShaderMaterial:
+	var material := ShaderMaterial.new()
+	material.shader = GROUND_SHADER
+	material.set_shader_parameter("base_color",Color(color))
+	material.set_shader_parameter("paved_surface",true)
+	return material
+
 func _box(parent: Node3D,label: String,size: Vector3,position: Vector3,color: String) -> MeshInstance3D:
 	var instance := MeshInstance3D.new()
 	instance.name = label
@@ -110,7 +118,7 @@ func _path(points: Array,width: float,service_lane: bool = false) -> void:
 	# Warm dusty shoulders merge with the red soil; the deck stays matte and low.
 	_ribbon(samples,width+0.14,0.007,"b47b53")
 	_ribbon(samples,width,0.010,"686f63")
-	_ribbon(samples,width-0.10,0.012,"818375")
+	_ribbon(samples,width-0.10,0.012,"747c6c")
 	for index in range(3,samples.size()-3,7):
 		var a: Vector2 = samples[index]
 		var direction: Vector2 = (samples[index+1]-samples[index-1]).normalized()
@@ -162,11 +170,7 @@ func _finish_paths() -> void:
 		var instance := MeshInstance3D.new()
 		instance.name = "JoinedServicePaths"
 		instance.mesh = surface.commit()
-		var material := ShaderMaterial.new()
-		material.shader = GROUND_SHADER
-		material.set_shader_parameter("base_color",Color(color))
-		material.set_shader_parameter("rock_strata",false)
-		instance.material_override = material
+		instance.material_override = _paving_material(color)
 		add_child(instance)
 
 func _rock_group(center: Vector2,profile) -> void:

@@ -1,0 +1,14 @@
+{
+  "purpose": "isolated contact-layer ablation; viewport continuously redrawn and actor poses paused, not a before/after art verdict",
+  "changed_bbox": [
+    270,
+    183,
+    1218,
+    769
+  ],
+  "mean_absolute_rgb_delta": [
+    0.3329,
+    0.6682194444444445,
+    0.2852152777777778
+  ]
+}
