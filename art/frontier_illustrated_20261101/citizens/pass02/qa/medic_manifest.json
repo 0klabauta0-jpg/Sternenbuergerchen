@@ -1,0 +1,127 @@
+{
+  "role": "medic",
+  "status": "separate equipment candidate; no user visual approval inferred",
+  "source_bundle": "Kenney Animated Characters Bundle 4.0",
+  "license": "CC0; new equipment original procedural work",
+  "stock_blend": "art\\frontier_illustrated_20261101\\citizens\\medic_stock.blend",
+  "stock_blend_sha256": "002a0c995e1cee186d4459b4620e56b26ae34aa597386f25822d5f7b85ce46b1",
+  "stock_glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens\\medic.glb",
+  "stock_glb_sha256": "9f0eea0c570c1af5e5ced3a628cbb1a659d9636f0095faa6a9c773dd9fa5e42f",
+  "body_geometry_uv_weight_signature_before": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+  "body_geometry_uv_weight_signature_after": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+  "body_vertices": 804,
+  "body_triangles": 1604,
+  "source_blend": "art\\frontier_illustrated_20261101\\citizens\\pass02\\source\\medic_equipment.blend",
+  "source_blend_sha256": "e3b3da81dc1cfc62ee789cda78b2eb277dc7169858f2e90f6fae2cf009ab228a",
+  "glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\medic.glb",
+  "glb_sha256": "e7c0c690f0ae9a85a93d18ecf7d765c9c16756f74e847bd926379f3cfd1e4f79",
+  "rig": "original Root; no new bones; rigid equipment groups on existing deform bones",
+  "bone_count_source": 45,
+  "equipment_binding": {
+    "pass": true,
+    "errors": [],
+    "modules": [
+      {
+        "name": "Gear_Breastplate",
+        "bone": "UpperChest",
+        "vertices": 112,
+        "triangles": 220
+      },
+      {
+        "name": "Gear_ChestIdentifier",
+        "bone": "UpperChest",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_LeftShoulder",
+        "bone": "LeftArm",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_LeftKnee",
+        "bone": "LeftLeg",
+        "vertices": 112,
+        "triangles": 220
+      },
+      {
+        "name": "Gear_RightShoulder",
+        "bone": "RightArm",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_RightKnee",
+        "bone": "RightLeg",
+        "vertices": 112,
+        "triangles": 220
+      },
+      {
+        "name": "Gear_Backpack",
+        "bone": "Chest",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_BackpackLid",
+        "bone": "Chest",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_MedicalKitMarkVertical",
+        "bone": "Chest",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_MedicalKitMarkHorizontal",
+        "bone": "Chest",
+        "vertices": 56,
+        "triangles": 108
+      }
+    ]
+  },
+  "stats_rest": {
+    "vertices": 1532,
+    "triangles": 3020,
+    "bounds_blender_m": {
+      "min": [
+        -0.8553459644317627,
+        -0.2431384027004242,
+        -2.1517188031339174e-09
+      ],
+      "max": [
+        0.8555741310119629,
+        0.29350003600120544,
+        1.779999852180481
+      ]
+    },
+    "dimensions_blender_m": [
+      1.7109200954437256,
+      0.5366384387016296,
+      1.7799998543321998
+    ]
+  },
+  "mesh_count_glb": 2,
+  "skin_count_glb": 1,
+  "material_count_glb": 4,
+  "embedded_images": 1,
+  "animations": [
+    "idle",
+    "walk"
+  ],
+  "coordinates": "metres; rest height 1.78; feet Z0; Blender -Y front / Z up -> Godot +Z front / Y up; existing runtime scale 0.35",
+  "raw_qa_pass": true,
+  "body_uv_qa_pass": true,
+  "errors": [],
+  "warnings": [],
+  "qa_scope": "Full new assembled geometry at rest; original body UV separately. New constant-color gear intentionally has no UVs. No expensive-check skips.",
+  "references": [
+    "docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+    "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+    "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+    "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png"
+  ]
+}

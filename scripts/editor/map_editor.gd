@@ -783,7 +783,8 @@ func _rebuild_registry_from_map_data() -> void:
 	_terrain_registry.configure_iso_grid(
 		_terrain_map_data.call("get_grid_origin"),
 		float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH)),
-		float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
+		float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT)),
+		String(_terrain_map_data.call("get_grid_topology"))
 	)
 	for tile_data in _terrain_map_data.call("get_tiles"):
 		_terrain_registry.register_tile(tile_data)

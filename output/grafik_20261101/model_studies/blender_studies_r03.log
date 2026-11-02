@@ -1,0 +1,41 @@
+C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\output\grafik_20261101\generator\create_ship_studies.py:112: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world=bpy.data.worlds.new('Study_PaleSky');world.use_nodes=True
+00:05.172  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\cutlass_source_front.png'
+00:08.735  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\cutlass_source_rear.png'
+00:11.438  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\cutlass_source_distance.png'
+00:17.328  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\cutlass_candidate_front.png'
+00:20.563  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\cutlass_candidate_rear.png'
+00:23.391  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\cutlass_candidate_distance.png'
+00:27.047  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\cutlass_qa_solid.png'
+00:27.125  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\cutlass_qa_wire.png'
+Info: Saved as "neutral_source.blend"
+Info: Saved as "material_candidate.blend"
+INFO Draco is available, use library at C:\Users\bjoer\AppData\Local\Programs\Blender Foundation\Blender 5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Users\bjoer\AppData\Local\Programs\Blender Foundation\Blender 5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+12:50:27 | INFO: Starting glTF 2.0 export
+12:50:27 | INFO: Extracting primitive: DRAKE-CUTLASS
+12:50:27 | INFO: Primitives created: 6
+12:50:28 | INFO: Finished glTF 2.0 export in 0.22687816619873047 s
+
+STUDY_FINAL {"ship": "cutlass", "qa_pass": false, "glb": {"bytes": 7752068, "meshes": 1, "materials": 6, "triangles": 265435, "images": 0, "animations": 0, "skins": 0, "extensions_used": []}, "elapsed": 27.32}
+00:32.266  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\buccaneer_source_front.png'
+00:35.844  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\buccaneer_source_rear.png'
+00:38.750  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\buccaneer_source_distance.png'
+00:43.938  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\buccaneer_candidate_front.png'
+00:47.672  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\buccaneer_candidate_rear.png'
+00:50.516  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\buccaneer_candidate_distance.png'
+00:51.766  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\buccaneer_qa_solid.png'
+00:51.875  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\docs\reports\assets\grafik-2026-11-01\ship_studies\buccaneer_qa_wire.png'
+Info: Saved as "neutral_source.blend"
+Info: Saved as "material_candidate.blend"
+12:50:52 | INFO: Starting glTF 2.0 export
+12:50:52 | INFO: Extracting primitive: DRAKE-BUCCANEER
+12:50:52 | INFO: Primitives created: 6
+12:50:52 | INFO: Finished glTF 2.0 export in 0.10899853706359863 s
+
+STUDY_FINAL {"ship": "buccaneer", "qa_pass": false, "glb": {"bytes": 3732912, "meshes": 1, "materials": 6, "triangles": 132384, "images": 0, "animations": 0, "skins": 0, "extensions_used": []}, "elapsed": 24.33}
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+OBJ import of 'DRAKE-CUTLASS.obj' took 145.89 ms
+OBJ import of 'DRAKE-BUCCANEER.obj' took 227.97 ms
+
+Blender quit

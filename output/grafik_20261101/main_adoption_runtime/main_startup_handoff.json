@@ -1,0 +1,114 @@
+{
+  "captured_progress": 77.6588611602783,
+  "bindings": [
+    {
+      "path": "scripts/tests/frontier_main_startup_verifier.gd",
+      "sha256": "d8d31ca036f880b854c1eaddce3972551f4da407c39cfe160bc77b73d8ac79b5"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/headless_probe.json",
+      "sha256": "9dff1821a74df2d130eb546c4e0c454cc84dea7b57b36dbb78e8256d508c94d1"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/headless_probe_r02.json",
+      "sha256": "35f8983e4c5053eba4d0063f70d6ca174d2ff4b29929bf13f856075b7177e709"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/native_final.json",
+      "sha256": "ce650a62fa63ee0c1e42b2bfb0efdd8480558972ce8b60b50f0f729c65cd1013"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption_runtime/README.md",
+      "sha256": "8f901eba47b4ef30abc4e857710e9a524cc9eca3e005bc05e1776601c0c4b3a0"
+    }
+  ],
+  "driver_frozen": true,
+  "retained_warning_count": 2,
+  "headless": {
+    "exit_code": 0,
+    "passed": 33,
+    "failed": 0
+  },
+  "native": {
+    "driver": "vulkan",
+    "all_six_captures_opened": true,
+    "separate_process_exit_code_recorded": false,
+    "method": "forward_plus",
+    "failed": 0,
+    "passed": 45
+  },
+  "scope": "Bounded normal startup, timed transport/deployment and Move/GO; no campaign, combat, performance or art acceptance",
+  "source_binding_mismatches": 0,
+  "captures": [
+    {
+      "error": 0,
+      "height": 1080,
+      "id": "01_main_menu",
+      "path": "res://output/grafik_20261101/main_adoption_runtime/native_final_captures/01_main_menu.png",
+      "scene": "res://scenes/ui/main_menu.tscn",
+      "sha256": "ce380fde29c38581c31722c71c69d25cf5231b6cb52265f9a8a78db802a7a989",
+      "width": 1920
+    },
+    {
+      "error": 0,
+      "height": 1080,
+      "id": "02_homebase",
+      "path": "res://output/grafik_20261101/main_adoption_runtime/native_final_captures/02_homebase.png",
+      "scene": "res://scenes/meta/meta_layer_test.tscn",
+      "sha256": "4820c7319b0f495722763d076e1ea15f8d543a109c905bf679f8d195ac65a0e1",
+      "width": 1920
+    },
+    {
+      "camera_projection": 1,
+      "camera_size": 34.0,
+      "camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (46.96496, 34.02369, 34.96496)]",
+      "error": 0,
+      "height": 1080,
+      "id": "03_default_mission",
+      "path": "res://output/grafik_20261101/main_adoption_runtime/native_final_captures/03_default_mission.png",
+      "scene": "res://scenes/meta/meta_layer_test.tscn",
+      "sha256": "51de8efd0e882d3d9e3dd20a10bb37f33bd1acedb585c76ca0d139623b7bfb53",
+      "width": 1920
+    },
+    {
+      "camera_projection": 1,
+      "camera_size": 34.0,
+      "camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (40.96496, 34.02369, 52.96496)]",
+      "error": 0,
+      "height": 1080,
+      "id": "04_lz_approach",
+      "path": "res://output/grafik_20261101/main_adoption_runtime/native_final_captures/04_lz_approach.png",
+      "scene": "res://scenes/meta/meta_layer_test.tscn",
+      "sha256": "cd739eca9726339c1205bbce502332a40de085472137cbc433cca9d40cd122af",
+      "width": 1920
+    },
+    {
+      "camera_projection": 1,
+      "camera_size": 34.0,
+      "camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (40.96496, 34.02369, 52.96496)]",
+      "error": 0,
+      "height": 1080,
+      "id": "05_deployed",
+      "path": "res://output/grafik_20261101/main_adoption_runtime/native_final_captures/05_deployed.png",
+      "scene": "res://scenes/meta/meta_layer_test.tscn",
+      "sha256": "52f71d163ecc4be43287d04e78d5e32b2d6d10cde8407b3aaccbf7ed6a4ce735",
+      "width": 1920
+    },
+    {
+      "camera_projection": 1,
+      "camera_size": 34.0,
+      "camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (40.96496, 34.02369, 52.96496)]",
+      "error": 0,
+      "height": 1080,
+      "id": "06_go_movement",
+      "path": "res://output/grafik_20261101/main_adoption_runtime/native_final_captures/06_go_movement.png",
+      "scene": "res://scenes/meta/meta_layer_test.tscn",
+      "sha256": "06c8db8ddd7b3838fc28429eb68874fe81c13c777649788c65842a703142a8a9",
+      "width": 1920
+    }
+  ],
+  "script_or_parse_error_count": 0,
+  "schema": "sternenbuergerchen.frontier_main_startup_handoff.v1",
+  "captured_phase": "inbound",
+  "capture_binding_mismatches": 0
+}

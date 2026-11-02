@@ -1,0 +1,441 @@
+{
+  "schema": "sternenbuergerchen.pass06_building_wear.v1",
+  "task": "docs/tasks/ART_2026_11_01_pass06_environment.md",
+  "status": "material candidate frozen for parent integration; no artistic user approval",
+  "runtime_sources": [
+    {
+      "path": "scripts/terrain/frontier_closed_buildings.gd",
+      "sha256": "f29315d4b3aa782149a8ad42312658fc53973595f289fab2b257e557c5a07b9e"
+    },
+    {
+      "path": "shaders/terrain/frontier_building_wear.gdshader",
+      "sha256": "57463c649ee0f1b900b4d3e40e4f3586e21f222350bdfa9310e9948760d8734b"
+    }
+  ],
+  "before_builder": {
+    "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/source/frontier_closed_buildings_before.gd",
+    "sha256": "0055e1faba87a0fbbc5073a614a3d8670f00a43789e246608b9e4f899f72dc97"
+  },
+  "editable_sources": [
+    "source/frontier_closed_buildings_pass06.gd",
+    "source/frontier_building_wear.gdshader"
+  ],
+  "assets": [
+    {
+      "id": "habitat",
+      "geometry": {
+        "bounds_max": [
+          1.2924998998642,
+          1.20255744457245,
+          1.46049988269806
+        ],
+        "bounds_min": [
+          -1.2924998998642,
+          0.0,
+          -1.27499997615814
+        ],
+        "clockwise_normal_errors": 0,
+        "combined_bounds_local": "[P: (-1.2925, 0.0, -1.275), S: (2.585, 1.202557, 2.7355)]",
+        "conservative_detached_candidates": [],
+        "degenerate_triangles": 0,
+        "finite": true,
+        "height_extension": 0.150807499885559,
+        "id": "habitat",
+        "includes_label_bounds": true,
+        "mesh_count": 57,
+        "nonpaired_welded_edges": 0,
+        "original_bounds_local": "[P: (-1.2075, 0.0, -1.2425), S: (2.415, 1.05175, 2.485)]",
+        "roof_parts": [
+          "HabitatRoofWell",
+          "HabitatWestRoof",
+          "HabitatRearRoof",
+          "HabitatFrontRoof",
+          "HabitatLifeSupportBase",
+          "HabitatLifeSupportInset",
+          "LifeSupportLouver",
+          "HabitatRoofServicePlate"
+        ],
+        "triangles": 2588,
+        "window_frames_clear": true,
+        "xz_extensions": [
+          0.0849999189376831,
+          0.0849999189376831,
+          0.0325000286102295,
+          0.217999935150146
+        ]
+      },
+      "materials": {
+        "emissive_meshes": 4,
+        "exempt_materials_preserved": true,
+        "geometry_identical": true,
+        "glass_meshes": 4,
+        "id": "habitat",
+        "p05_geometry_sha256": "6bfe701f0177e976fcceae8adf26b9aa34402488f1eab8ca2098446563e111ce",
+        "p06_geometry_sha256": "6bfe701f0177e976fcceae8adf26b9aa34402488f1eab8ca2098446563e111ce",
+        "per_part_bounds_valid": true,
+        "preserved_standard_or_emissive_meshes": 13,
+        "roles": {
+          "painterly_wear:base": 5,
+          "painterly_wear:paint": 17,
+          "painterly_wear:roof": 6,
+          "painterly_wear:structure": 16
+        },
+        "shared_wear_materials": 26,
+        "translated_origin_valid": true,
+        "wear_meshes": 44
+      },
+      "geometry_change": false
+    },
+    {
+      "id": "hall",
+      "geometry": {
+        "bounds_max": [
+          1.92249989509583,
+          1.61680018901825,
+          1.42925000190735
+        ],
+        "bounds_min": [
+          -1.92249989509583,
+          0.0,
+          -1.24624991416931
+        ],
+        "clockwise_normal_errors": 0,
+        "combined_bounds_local": "[P: (-1.9225, 0.0, -1.24625), S: (3.845, 1.6168, 2.6755)]",
+        "conservative_detached_candidates": [],
+        "degenerate_triangles": 0,
+        "finite": true,
+        "height_extension": 0.14680016040802,
+        "id": "hall",
+        "includes_label_bounds": true,
+        "mesh_count": 58,
+        "nonpaired_welded_edges": 0,
+        "original_bounds_local": "[P: (-1.8375, 0.0, -1.21625), S: (3.675, 1.47, 2.4325)]",
+        "roof_parts": [
+          "IndustrialBayRoof",
+          "OfficeRoofShoulder",
+          "OfficeRoofField",
+          "HallRoofMonitorBase",
+          "HallRoofMonitorCap",
+          "MonitorClerestory",
+          "HallRoofCrossRib"
+        ],
+        "triangles": 2508,
+        "window_frames_clear": true,
+        "xz_extensions": [
+          0.0849999189376831,
+          0.0849999189376831,
+          0.0299999713897705,
+          0.213000059127808
+        ]
+      },
+      "materials": {
+        "emissive_meshes": 3,
+        "exempt_materials_preserved": true,
+        "geometry_identical": true,
+        "glass_meshes": 2,
+        "id": "hall",
+        "p05_geometry_sha256": "ad712251330587b47e79a76ae382e0a5fab2359c05e9f3aa1fa64d65d7d1c01f",
+        "p06_geometry_sha256": "ad712251330587b47e79a76ae382e0a5fab2359c05e9f3aa1fa64d65d7d1c01f",
+        "per_part_bounds_valid": true,
+        "preserved_standard_or_emissive_meshes": 15,
+        "roles": {
+          "painterly_wear:base": 5,
+          "painterly_wear:paint": 12,
+          "painterly_wear:roof": 8,
+          "painterly_wear:structure": 18
+        },
+        "shared_wear_materials": 26,
+        "translated_origin_valid": true,
+        "wear_meshes": 43
+      },
+      "geometry_change": false
+    }
+  ],
+  "references_opened": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+      "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+      "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_habitat.png",
+      "sha256": "bd61fb85432ec22d8eb4119b87d2f3cfe8e7b29f66fd3604e97a07507f0964cd"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_hall.png",
+      "sha256": "ae411ef8cbd550196c39fd894850ff9cc4cf794477624ac65be2f087bdc05712"
+    }
+  ],
+  "material_route": {
+    "painted_surfaces": "Shared ShaderMaterial per original color and semantic role (paint, roof, structure, base); building-relative static fields, local component AABB instance uniforms for selected edge wear.",
+    "preserved": "Original StandardMaterial3D color/energy route for glass, emissive strips/windows, narrow graphic markings and deep gaps; numeric properties checked against P05.",
+    "wear_hierarchy": "Metre-scale soft pigment and broad faded upper fields; weaker middle brush scale; base dust and sparse long facade wash; only selected physical edges receive small dark undercoat scuffs.",
+    "visual_adjustment": "First opened native study too faint. Broad/middle amplitude increased0.22/0.065 to0.38/0.075; upper bleaching and base dust increased with all noise frequencies unchanged.",
+    "strength_zero_control": "Same new shader route with wear_strength0 matches P05 StandardMaterial rendering nearly exactly; direct numerical evidence retained."
+  },
+  "preserved_contract": {
+    "geometry": "All generated mesh arrays and transforms match P05 SHA256 fingerprints, including normals and indices.",
+    "bounds": "P05 AABBs unchanged including signs; original XZ+0.22m and height+0.20m retained.",
+    "visibility": "all parts remain under same existing closed/cutaway root; no process/update loop added",
+    "lights_and_gameplay": "No lighting/environment, collision/nav, door/interior, simulation or source-asset change.",
+    "shader_motion": "No vertex displacement, normal perturbation or TIME-driven animation."
+  },
+  "qa": {
+    "driver": "art/frontier_illustrated_20261101/environment/pass06/buildings/look_probe.gd",
+    "success_marker": "BUILDING_PASS06_QA",
+    "passed": 39,
+    "failed": 0,
+    "raw": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/geometry_raw.json",
+    "render_response": {
+      "passed": 6,
+      "failed": 0,
+      "scope": "Same static camera/light, whole-image deltas incl. unchanged background; tests clean PBR-route equivalence and actual nontrivial shader response, not artistic quality. Isolated probe shadow dither remains present in both states.",
+      "views": [
+        {
+          "view": "habitat_front",
+          "standard_to_zero_wear_mean_rgb_delta_8bit": 0.00015711805555555555,
+          "zero_wear_to_enabled_mean_rgb_delta_8bit": 1.9573914930555556,
+          "enabled_max_channel_delta_8bit": 58.0,
+          "fraction_pixels_rgb_mean_delta_above4": 0.12922135416666666
+        },
+        {
+          "view": "hall_front",
+          "standard_to_zero_wear_mean_rgb_delta_8bit": 0.0,
+          "zero_wear_to_enabled_mean_rgb_delta_8bit": 2.1480966435185187,
+          "enabled_max_channel_delta_8bit": 68.0,
+          "fraction_pixels_rgb_mean_delta_above4": 0.16133940972222222
+        },
+        {
+          "view": "ensemble_game",
+          "standard_to_zero_wear_mean_rgb_delta_8bit": 0.0,
+          "zero_wear_to_enabled_mean_rgb_delta_8bit": 0.9192586805555556,
+          "enabled_max_channel_delta_8bit": 64.0,
+          "fraction_pixels_rgb_mean_delta_above4": 0.06614409722222223
+        }
+      ]
+    },
+    "scope": "Full generated vertices/normals/triangle areas, clockwise normal consistency, closed welded topology per mesh, XZ/height envelopes, hierarchy and conservative component-AABB connectivity. Not a general geometry intersection/zfight oracle.",
+    "limits": "AABB connectivity remains conservative, not an exact intersection/zfight oracle. Checks and image deltas do not imply artistic approval or general performance/release acceptance."
+  },
+  "isolated_native_views": [
+    {
+      "building": "habitat",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_habitat_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "before",
+      "size": 4.0,
+      "view": "front",
+      "sha256": "0323a64c1759c87705e1b3508bd871796430a7cc831241012d07dde66ff28b06",
+      "opened": true
+    },
+    {
+      "building": "habitat",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_habitat_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "before",
+      "size": 4.0,
+      "view": "rear",
+      "sha256": "e101ce08eb4b02e1db48f000ea1d65a62620dc9f7b4242cf79332630dba2e15c",
+      "opened": true
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_hall_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "before",
+      "size": 4.90000009536743,
+      "view": "front",
+      "sha256": "2cc15112143b45a638257ded54e0b3bffe7b0e21d2efe9ca558dfe3227c80171",
+      "opened": true
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_hall_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "before",
+      "size": 4.90000009536743,
+      "view": "rear",
+      "sha256": "d9204e8ffb87d4e19438573cedcbc94d8450b081bad1081718d6a1c5fb96b7a4",
+      "opened": true
+    },
+    {
+      "building": "ensemble",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_ensemble_game.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "before",
+      "size": 9.5,
+      "view": "game",
+      "sha256": "6c5ef5742fa1cd7077040a43cb72d8527b532cf0de202a3866ca13e363c87114",
+      "opened": true
+    },
+    {
+      "building": "habitat",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_habitat_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "wear_disabled",
+      "size": 4.0,
+      "view": "front",
+      "sha256": "168d097b99b59c4bfda1e5a02c8657207ce2fa3107391e139a7bae9119602e39",
+      "opened": true
+    },
+    {
+      "building": "habitat",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_habitat_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "wear_disabled",
+      "size": 4.0,
+      "view": "rear",
+      "sha256": "d1ba5166f62fe59769b864d474ae8beb76ad2c45f6079205f5761517f56776eb",
+      "opened": true
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_hall_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "wear_disabled",
+      "size": 4.90000009536743,
+      "view": "front",
+      "sha256": "2cc15112143b45a638257ded54e0b3bffe7b0e21d2efe9ca558dfe3227c80171",
+      "opened": true
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_hall_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "wear_disabled",
+      "size": 4.90000009536743,
+      "view": "rear",
+      "sha256": "d9204e8ffb87d4e19438573cedcbc94d8450b081bad1081718d6a1c5fb96b7a4",
+      "opened": true
+    },
+    {
+      "building": "ensemble",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_ensemble_game.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "wear_disabled",
+      "size": 9.5,
+      "view": "game",
+      "sha256": "6c5ef5742fa1cd7077040a43cb72d8527b532cf0de202a3866ca13e363c87114",
+      "opened": true
+    },
+    {
+      "building": "habitat",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_habitat_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "after",
+      "size": 4.0,
+      "view": "front",
+      "sha256": "868447085f6fb22fc076ff92ae1f1d800a55e9c8fb31c77e0f9002ff0d44a4eb",
+      "opened": true
+    },
+    {
+      "building": "habitat",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_habitat_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "after",
+      "size": 4.0,
+      "view": "rear",
+      "sha256": "37298fa7b94bbebf720c42af08584c497d49084b6a0e60c96549de9071cb5655",
+      "opened": true
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_hall_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "after",
+      "size": 4.90000009536743,
+      "view": "front",
+      "sha256": "679c1330f92a042316e12e61c1d35b444e03a90d4cb03060be0c330dddeb590e",
+      "opened": true
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_hall_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "after",
+      "size": 4.90000009536743,
+      "view": "rear",
+      "sha256": "91b2d253f75daf32aa1c7bce56d0eea7a8a9522c5fab0fc7fd44ef9c63b818a5",
+      "opened": true
+    },
+    {
+      "building": "ensemble",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_ensemble_game.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "after",
+      "size": 9.5,
+      "view": "game",
+      "sha256": "c6398ba9284accc5c49bd0c2207ca3b83bbeee5b356b03e7abf54f002267e020",
+      "opened": true
+    }
+  ],
+  "visual_review": {
+    "opened": true,
+    "findings": "Compared same-camera P05/zero-wear/after images. Broad roof fading and warmer lower dust now visibly break the clean uniform fields; sparse downward marks appear on selected fascia zones. Original silhouette, glass, signs and warm lights remain readable.",
+    "remaining_differences": "Still much cleaner and less individually painted than the rich illustrations; edge chips are intentionally sparse and remain small at game distance. No sculpted corrosion/depth or texture-authoring pass.",
+    "probe_limitation": "The isolated probe has fine checker/shadow-dither visible in the background and both old/new states. It is not a new wear pattern; parent combined native captures do not show it and remain the main visual evidence.",
+    "acceptance": "candidate review only, not user art acceptance"
+  },
+  "production_capture": "Parent owns combined scene captures/strict suite/report and frozen model-hash verification. This package does not claim those as performed here.",
+  "scope": [
+    "scripts/terrain/frontier_closed_buildings.gd",
+    "shaders/terrain/frontier_building_wear.gdshader",
+    "art/frontier_illustrated_20261101/environment/pass06/buildings/"
+  ],
+  "not_changed_by_this_subtask": [
+    "geometry",
+    "Kenney/Citizen/ship GLBs",
+    "preview/renderer/dressing/tests/reports",
+    "global light/environment",
+    "imports/commits/pushes"
+  ],
+  "branch": "task/grafikreferenzen-20261101, intentional continuation of the unintegrated graphics branch"
+}

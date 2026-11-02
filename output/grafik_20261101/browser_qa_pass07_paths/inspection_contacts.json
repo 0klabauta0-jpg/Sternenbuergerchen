@@ -1,0 +1,69 @@
+[
+  {
+    "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass07_paths\\inspection_contact_01.jpg",
+    "sha256": "b3a5e59b7c786e18d9bc7ec433358729d3de057640ae847662ab931ec7565481",
+    "screenshots": [
+      "desktop_hero.png",
+      "desktop_regular_map_runtime_editor.png",
+      "desktop_regular_map_runtime_mission_start.png",
+      "desktop_direct_runtime_mission_start.png",
+      "desktop_regular_map_runtime_mission_after_move.png",
+      "desktop_regular_map_runtime_utility_close.png",
+      "desktop_pair_lived_outpost.png",
+      "desktop_pair_ground_detail.png"
+    ]
+  },
+  {
+    "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass07_paths\\inspection_contact_02.jpg",
+    "sha256": "87b22a9dbd3c24130f9a54a52a1c0650061d44487f9f643afef3cdff5b03e82b",
+    "screenshots": [
+      "desktop_direct_pair_ground_detail.png",
+      "desktop_pair_geology_detail.png",
+      "desktop_direct_pair_geology_detail.png",
+      "desktop_pair_closed_outpost.png",
+      "desktop_pair_closed_habitat.png",
+      "desktop_pair_closed_hall.png",
+      "desktop_direct_pair_closed_hall.png",
+      "desktop_pair_landscape.png"
+    ]
+  },
+  {
+    "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass07_paths\\inspection_contact_03.jpg",
+    "sha256": "24470519763f1d6de1ec0c0d0544bfc316c06ae79910c4f259be38a2863d1454",
+    "screenshots": [
+      "desktop_direct_pair_landscape.png",
+      "desktop_pair_overview.png",
+      "desktop_pair_workshop.png",
+      "desktop_pair_crew.png",
+      "desktop_direct_pair_crew.png",
+      "desktop_pair_hex_grid.png",
+      "desktop_pair_cutaway.png",
+      "desktop_lightbox.png"
+    ]
+  },
+  {
+    "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass07_paths\\inspection_contact_04.jpg",
+    "sha256": "3db9fed69fc3953444d9684786e761f4238d735ee3a15350aba56551e34ad37a",
+    "screenshots": [
+      "desktop_wipe.png",
+      "desktop_sources.png",
+      "mobile_hero.png",
+      "mobile_regular_map_runtime_editor.png",
+      "mobile_regular_map_runtime_mission_start.png",
+      "mobile_regular_map_runtime_mission_after_move.png",
+      "mobile_regular_map_runtime_utility_close.png",
+      "mobile_pair_lived_outpost.png"
+    ]
+  },
+  {
+    "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass07_paths\\inspection_contact_05.jpg",
+    "sha256": "08c7bae40d89533a8e463ba2c77c0982888d4f8c08dde57059fdc449afe61cc7",
+    "screenshots": [
+      "mobile_pair_ground_detail.png",
+      "mobile_pair_geology_detail.png",
+      "mobile_pair_closed_hall.png",
+      "mobile_lightbox.png",
+      "mobile_sources.png"
+    ]
+  }
+]

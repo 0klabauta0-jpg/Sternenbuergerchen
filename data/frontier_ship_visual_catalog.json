@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "catalog_id": "frontier_ships_astra_ref03_v1",
+  "visual_only": true,
+  "source_manifest": "res://art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_03/manifest.json",
+  "roles": {"dropship": "cutlass_01", "fighter_reference": "buccaneer_01"},
+  "ships": {
+    "cutlass_01": {
+      "asset_id": "cutlass_01",
+      "display_name": "Cutlass",
+      "revision": "astra_refinement_03",
+      "model_path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+      "sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "scale": 0.22,
+      "root_rotation_y_degrees": 0.0,
+      "forward_axis": "+Z",
+      "ground_pivot_y": 0.0,
+      "bounds_min": [-6.0391693115234375, 0.0, -8.0],
+      "bounds_size": [12.078338623046875, 5.7466325759887695, 16.0],
+      "triangles": 22496,
+      "materials": 8,
+      "triangle_budget": 25000,
+      "canonical_star_citizen_dimensions": false,
+      "geometry_status": "user-directed four-engine stylized reconstruction"
+    },
+    "buccaneer_01": {
+      "asset_id": "buccaneer_01",
+      "display_name": "Buccaneer",
+      "revision": "astra_refinement_03",
+      "model_path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb",
+      "sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+      "scale": 0.22,
+      "root_rotation_y_degrees": 0.0,
+      "forward_axis": "+Z",
+      "ground_pivot_y": 0.0,
+      "bounds_min": [-5.878890514373779, 0.0, -5.499998569488525],
+      "bounds_size": [11.757781028747559, 4.119763374328613, 10.999998569488525],
+      "triangles": 19672,
+      "materials": 8,
+      "triangle_budget": 25000,
+      "canonical_star_citizen_dimensions": false,
+      "geometry_status": "user-directed solid lower cockpit tub; static fighter reference only"
+    }
+  }
+}

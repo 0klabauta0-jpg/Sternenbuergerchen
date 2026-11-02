@@ -1,0 +1,43 @@
+{
+  "pass": true,
+  "html_sha256": "ab79aeec33e86fcf2c4cbe1751937dba6e1b6b8f81b84f2e355d2a51981a28aa",
+  "script_sha256": "145b61aef4e2f24fec091387f00ad9b7fe7fc7ceb6086d21b376fac8cc8b7a47",
+  "created_at": "2026-11-01T18:24:04.983Z",
+  "screenshots": [
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass05_environment\\inspection_analysis_outpost.png",
+      "sha256": "c19cd9b1dbcef4df040820f6060ee01461499d136712f9e613fbaf9c9580b977"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass05_environment\\inspection_analysis_hall.png",
+      "sha256": "4bc2ffd3eade6f30b043a5ca94422c0d69eb39d071cb8b314c7a419d25c11b8b"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass05_environment\\inspection_analysis_terrain.png",
+      "sha256": "398f5dc4e1e8420dfc3cc69c038d3a915414874519931ca14be822554c7b1bb2"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass05_environment\\inspection_after_only_details.png",
+      "sha256": "3483f95b16230cf076cee6ace059335e2d67ac8937194fac751cf708614e4423"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass05_environment\\inspection_crew_placement.png",
+      "sha256": "e7e0ea530fd79cd75f8aef730b96b32e09c1788a74cc343fa2d6efb96dd1dd87"
+    }
+  ],
+  "analysis_pair_identities": {
+    "outpost": [
+      "ref_rostgrenze",
+      "env05_before_closed_outpost"
+    ],
+    "hall": [
+      "ref_freihafen",
+      "env05_before_closed_hall"
+    ],
+    "terrain": [
+      "ref_tactical",
+      "env05_before_landscape"
+    ]
+  },
+  "crew_caption": "Gleiche Kamera, gleicher Viewport und gleiches globales Licht · beide Zustände grafischer Schnitt · Schiffs-/Citizen-GLBs unverändert. Vier erhaltene Citizens stehen in drei Tiefen; die alte Crewkamera zeigt drei. Geändert sind Aufstellung/Blickrichtung."
+}

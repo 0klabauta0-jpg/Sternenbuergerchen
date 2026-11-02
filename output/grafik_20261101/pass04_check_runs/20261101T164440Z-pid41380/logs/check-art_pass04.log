@@ -1,0 +1,4 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FRONTIER_PASS04 {"diagnostics":{"buccaneer_01":{"bounds":"[P: (17.30835, 0.16, 10.05973), S: (3.783306, 1.003941, 3.480539)]","triangles":17324},"cutlass_01":{"bounds":"[P: (5.216903, 0.16, 9.139999), S: (2.566194, 1.197748, 3.52)]","triangles":16696}},"failed":0,"passed":22,"synthetic_fixture":true}

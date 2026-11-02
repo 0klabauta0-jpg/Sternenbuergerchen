@@ -108,6 +108,20 @@
 	],
 	"tile_types": [
 		{
+			"type_id": "frontier_utility_fuel_01",
+			"display_name": "Frontier Versorgung (P04 Modell)",
+			"palette_group": "technik",
+			"placement_layer": "object",
+			"surface_type": "ground",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0,
+			"edge_type": "none",
+			"preserve_hill_fields": true
+		},
+		{
 			"type_id": "ground_flat",
 			"display_name": "Boden",
 			"palette_group": "terrain",

@@ -1,0 +1,379 @@
+{
+  "schema": "sternenbuergerchen.refinement_matched_conditions.v1",
+  "pass": true,
+  "errors": [],
+  "checks": [
+    {
+      "left": "previous",
+      "right": "new",
+      "view": "front",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "previous",
+      "right": "new",
+      "view": "rear",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "previous",
+      "right": "new",
+      "view": "side",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "previous",
+      "right": "new",
+      "view": "top",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "previous",
+      "right": "new",
+      "view": "game",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "new",
+      "right": "roundtrip",
+      "view": "front",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "new",
+      "right": "roundtrip",
+      "view": "rear",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    },
+    {
+      "left": "new",
+      "right": "roundtrip",
+      "view": "game",
+      "pass": true,
+      "conditions": {
+        "both_material_shots": true,
+        "location": true,
+        "rotation_euler": true,
+        "ortho_scale": true,
+        "resolution": true,
+        "azimuth": true,
+        "elevation": true,
+        "target_length": true,
+        "target": true,
+        "engine": true,
+        "samples": true,
+        "color_management": true,
+        "lights": true,
+        "floor": true,
+        "transparent": true
+      }
+    }
+  ],
+  "hash_bindings": [
+    {
+      "type": "render_input",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_02\\cutlass\\source\\final\\cutlass_01.blend",
+      "expected": "be3c808f384872f0e9a112535a02c3a6cb3e135aa4f06c1fdbe78e96626fc5a6",
+      "actual": "be3c808f384872f0e9a112535a02c3a6cb3e135aa4f06c1fdbe78e96626fc5a6",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\previous\\material_front.png",
+      "expected": "de523bd71501372d84c37d6a262441bd3479b5e237aa9d9b2d7a937fd3b6a114",
+      "actual": "de523bd71501372d84c37d6a262441bd3479b5e237aa9d9b2d7a937fd3b6a114",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\previous\\material_rear.png",
+      "expected": "308e61984c098a29590dad7018fd12dc0d5a91a2b18fb9f03e1ad34a199086b5",
+      "actual": "308e61984c098a29590dad7018fd12dc0d5a91a2b18fb9f03e1ad34a199086b5",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\previous\\material_side.png",
+      "expected": "046fea932fd84b5cb086e336e1ab3dd84ede0c9ec3f0ffdce4db1ead84514718",
+      "actual": "046fea932fd84b5cb086e336e1ab3dd84ede0c9ec3f0ffdce4db1ead84514718",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\previous\\material_top.png",
+      "expected": "e43abe510415393ffc779d2c64d167b7440c8980e08e0e57c6129249162baef7",
+      "actual": "e43abe510415393ffc779d2c64d167b7440c8980e08e0e57c6129249162baef7",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "previous",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\previous\\material_game.png",
+      "expected": "4c5c6ba4b5a3ee719b4acc88383d4d04ff6a7dbc2f7f03bbc92132cee17e0339",
+      "actual": "4c5c6ba4b5a3ee719b4acc88383d4d04ff6a7dbc2f7f03bbc92132cee17e0339",
+      "pass": true
+    },
+    {
+      "type": "render_input",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\cutlass\\source\\final\\cutlass_01.blend",
+      "expected": "9ad68207a8ee30dc307df4b53a7735e422335363031b3e1343f5731b58fdc9cd",
+      "actual": "9ad68207a8ee30dc307df4b53a7735e422335363031b3e1343f5731b58fdc9cd",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\new\\material_front.png",
+      "expected": "33b3cd6bcbe25bcd8050e3b89a8f539d0a12ca46063db1d081b6551b87b11397",
+      "actual": "33b3cd6bcbe25bcd8050e3b89a8f539d0a12ca46063db1d081b6551b87b11397",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\new\\material_rear.png",
+      "expected": "dfe64c0813ba55dbf37385a816fb44f1b28f79b5c571883948d1a2bbaea4ee58",
+      "actual": "dfe64c0813ba55dbf37385a816fb44f1b28f79b5c571883948d1a2bbaea4ee58",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\new\\material_side.png",
+      "expected": "9db8c94d13a60680cf9136c636e7b6b368ab49de12e1a5edbe9f419042285576",
+      "actual": "9db8c94d13a60680cf9136c636e7b6b368ab49de12e1a5edbe9f419042285576",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\new\\material_top.png",
+      "expected": "d71b2f515135e498a79e35872b7449161b2089965e646ab1ee45711fccf66818",
+      "actual": "d71b2f515135e498a79e35872b7449161b2089965e646ab1ee45711fccf66818",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\new\\material_game.png",
+      "expected": "6ac33606126c49c5f5007215b0f9eec1d96dc77c343ffa7ad6bf5943b30cd7c0",
+      "actual": "6ac33606126c49c5f5007215b0f9eec1d96dc77c343ffa7ad6bf5943b30cd7c0",
+      "pass": true
+    },
+    {
+      "type": "render_input",
+      "set": "roundtrip",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\frontier_illustrated_20261101\\ships_pass05_astra_ultra\\refinement_03\\cutlass_01.glb",
+      "expected": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "actual": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "roundtrip",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\roundtrip\\material_front.png",
+      "expected": "69725dd538b7828ce3842646e5e488dd324d2eb6919e303301691c85f9baa9fb",
+      "actual": "69725dd538b7828ce3842646e5e488dd324d2eb6919e303301691c85f9baa9fb",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "roundtrip",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\roundtrip\\material_rear.png",
+      "expected": "5aff5c0e5388a4f86a92cbfafa60d3a3e5d6f34476ae0d8db9eb7839fa23dd8a",
+      "actual": "5aff5c0e5388a4f86a92cbfafa60d3a3e5d6f34476ae0d8db9eb7839fa23dd8a",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "roundtrip",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\roundtrip\\material_game.png",
+      "expected": "7bde40e6ee41d039cc862b97f592e053703ad19c5bc48807ab19a1932f7a56c8",
+      "actual": "7bde40e6ee41d039cc862b97f592e053703ad19c5bc48807ab19a1932f7a56c8",
+      "pass": true
+    },
+    {
+      "type": "render_input",
+      "set": "source_diagnostics",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\cutlass\\source\\final\\cutlass_01.blend",
+      "expected": "9ad68207a8ee30dc307df4b53a7735e422335363031b3e1343f5731b58fdc9cd",
+      "actual": "9ad68207a8ee30dc307df4b53a7735e422335363031b3e1343f5731b58fdc9cd",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "source_diagnostics",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\source_diagnostics\\random_front.png",
+      "expected": "778953f3c33bff753dba250219f378854f456dff49e68f082f11581d08104a45",
+      "actual": "778953f3c33bff753dba250219f378854f456dff49e68f082f11581d08104a45",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "source_diagnostics",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\source_diagnostics\\random_rear.png",
+      "expected": "b4655c97d8123e1c8899fb1f4649849535bd32c780deee0f0e463bc178571df5",
+      "actual": "b4655c97d8123e1c8899fb1f4649849535bd32c780deee0f0e463bc178571df5",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "source_diagnostics",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\source_diagnostics\\wire_front.png",
+      "expected": "6fff77bb9acd377634d589c33db8dbde68de0644f541139b0cb3c9f8174740c3",
+      "actual": "6fff77bb9acd377634d589c33db8dbde68de0644f541139b0cb3c9f8174740c3",
+      "pass": true
+    },
+    {
+      "type": "image",
+      "set": "source_diagnostics",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\source_diagnostics\\wire_rear.png",
+      "expected": "4b2e8c532bf5b226a104441a5a6797107bacab9c557e8b5ad9376825667a359b",
+      "actual": "4b2e8c532bf5b226a104441a5a6797107bacab9c557e8b5ad9376825667a359b",
+      "pass": true
+    },
+    {
+      "type": "numeric_audit_input",
+      "set": "new",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\cutlass\\source\\final\\cutlass_01.blend",
+      "expected": "9ad68207a8ee30dc307df4b53a7735e422335363031b3e1343f5731b58fdc9cd",
+      "actual": "9ad68207a8ee30dc307df4b53a7735e422335363031b3e1343f5731b58fdc9cd",
+      "pass": true
+    },
+    {
+      "type": "numeric_audit_input",
+      "set": "roundtrip",
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\frontier_illustrated_20261101\\ships_pass05_astra_ultra\\refinement_03\\cutlass_01.glb",
+      "expected": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "actual": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "pass": true
+    }
+  ],
+  "numeric_audit": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\cutlass\\review\\final\\independent_qa.json",
+  "note": "Blender diagnostic comparison of frozen previous candidate and refinement; not native Godot or user acceptance."
+}

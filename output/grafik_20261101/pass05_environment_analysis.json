@@ -1,0 +1,131 @@
+{
+  "schema": "sternenbuergerchen.environment_visual_analysis.v1",
+  "task": "docs/tasks/ART_2026_11_01_pass05_environment.md",
+  "baseline": "Pass04/R02 after sourcefix794261191f4165d997f729fb105a5ef0c028774c",
+  "status": "baseline_images_opened_analysis_complete_implementation_pending",
+  "images": [
+    {
+      "id": "ref_rostgrenze",
+      "title": "Rostgrenze · Cutaway",
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+      "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8",
+      "kind": "2d_user_reference",
+      "opened": true
+    },
+    {
+      "id": "ref_freihafen",
+      "title": "Freihafen · Distributionszentrum",
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+      "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530",
+      "kind": "2d_user_reference",
+      "opened": true
+    },
+    {
+      "id": "ref_tactical",
+      "title": "Rostwelt · taktische Gesamtansicht",
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+      "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e",
+      "kind": "2d_user_reference",
+      "opened": true
+    },
+    {
+      "id": "pass04_after_closed_outpost",
+      "title": "P4 · geschlossener Außenposten",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/closed_outpost.png",
+      "sha256": "46eb623067dd6dc561b1a77654c40cd47c1bce3abb5eaedaf7ebacc181df03a3",
+      "kind": "native_pass04",
+      "opened": true
+    },
+    {
+      "id": "pass04_after_landscape",
+      "title": "P4 · Gelände",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/landscape.png",
+      "sha256": "3614e8a86307d4dd9af390a2efee5cc897d103a81dd8a1b90a79ced6c0b2a2ef",
+      "kind": "native_pass04",
+      "opened": true
+    },
+    {
+      "id": "pass04_after_closed_hall",
+      "title": "P4 · geschlossene Halle",
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/closed_hall.png",
+      "sha256": "67ed88ef55227f197eba0198e952e0d79c4c60c7cd407be6b57ca897ee7a2af3",
+      "kind": "native_pass04",
+      "opened": true
+    }
+  ],
+  "findings": [
+    {
+      "rank": 1,
+      "category": "Formhierarchie",
+      "gap": "Beide geschlossenen P4-Gebäude besitzen fast dieselbe Dachwanne mit einem mittigen Lüfter und eine ähnliche helle Fassadenmasse. In Freihafen unterscheiden versetzte Dachkörper, tiefe Portale und Nebenmassen die Funktionsgruppen schon aus Spielabstand.",
+      "change": "Dachtechnik, Vorzonen und Sockel-/Fassadenstaffelung pro Gebäude unterschiedlich gewichten. Große und mittlere Formen zuerst.",
+      "evidence": [
+        "ref_freihafen",
+        "pass04_after_closed_outpost",
+        "pass04_after_closed_hall"
+      ],
+      "check": "Geschlossene Basis/Halle und Außenposten in denselben Kameras; Silhouetten müssen ohne Kleinteile unterscheidbar sein."
+    },
+    {
+      "rank": 2,
+      "category": "Bodenanschluss",
+      "gap": "Weg, Gebäudesockel und Klippen enden in P4 an sauberen harten Kanten auf gleichmäßigem Rot. Die Vorlagen staffeln dort Geröll, dunkleren Staub, Abbrüche und einzelne Pflanzen.",
+      "change": "Asymmetrische Kontaktsäume an Sockeln/Felsen, lokaler Staub und abnehmende Ablagerungsgrößen zur freien Bewegungsfläche.",
+      "evidence": [
+        "ref_rostgrenze",
+        "ref_tactical",
+        "pass04_after_landscape"
+      ],
+      "check": "Gelände und geschlossener Außenposten; Kontakte als Übergang lesen, begehbare Wegzentren frei halten."
+    },
+    {
+      "rank": 3,
+      "category": "Komposition",
+      "gap": "P4 stellt Häuser und viele Fels-/Pflanzengruppen mit ähnlichen Abständen frei. Die Vorlagen bündeln ungleich große Nutzungsinseln neben bewusst ruhigen Flächen; Felsspitzen und große Bruchmassen bilden eine Staffelung.",
+      "change": "Wenige ungleiche große/mittlere/kleine Gruppen, zusammenhängende Vorzonen und aufbrechende Felsprofile statt gleichmäßiger Verteilung.",
+      "evidence": [
+        "ref_tactical",
+        "ref_freihafen",
+        "pass04_after_landscape",
+        "pass04_after_closed_outpost"
+      ],
+      "check": "Weite Ansicht zuerst beurteilen, bevor Nahdetails als Fortschritt gelten."
+    },
+    {
+      "rank": 4,
+      "category": "Alltagsgruppen",
+      "gap": "Vier Citizens stehen in P4 als Präsentationsreihe vor den Fassaden. Container bleiben einzelne Stapel; Zusammenhang zwischen Eingang, Arbeit und Versorgung ist schwach.",
+      "change": "Ein bis zwei klare statische Rollenbezüge: kleine Crewgruppe am Eingang/Arbeitsplatz, Lagergruppe an der Halle, Versorgung mit Anschlussgruppe.",
+      "evidence": [
+        "ref_rostgrenze",
+        "ref_freihafen",
+        "pass04_after_closed_hall"
+      ],
+      "check": "Gesamtbild und Crewansicht; nur Aufstellung/visuelle Gruppen, keine neue KI, Innenraum- oder Wirtschaftssimulation."
+    },
+    {
+      "rank": 5,
+      "category": "Material",
+      "gap": "Ähnliche saubere Creme-/Grauflächen und gleichmäßiges Bodengeräusch schwächen das Gewicht der Hauptformen. In den Vorlagen bündeln dunkle Sockel, Schattenfugen, warme Eingänge und gerichteter Abrieb die Kontraste.",
+      "change": "Wenige breite Material-/Gebrauchsfelder mit Richtung und Kontaktbezug; keine flächendeckende Nieten- oder Schmutzverteilung.",
+      "evidence": [
+        "ref_freihafen",
+        "ref_rostgrenze",
+        "pass04_after_closed_hall"
+      ],
+      "check": "Farb- und Hell-Dunkelgruppen im Spielabstand prüfen; Lesbarkeit erhalten."
+    },
+    {
+      "rank": 6,
+      "category": "Licht",
+      "gap": "P4 besitzt bereits lesbare Sonne und Schlagschatten. Der Eindruck entsteht vor allem durch ähnliche Formen und gleichmäßige Flächen; globale Stimmung allein behebt das nicht.",
+      "change": "Paarlicht unverändert lassen. Sparsame warme Fenster-/Eingangsakzente nur zur lokalen Hierarchie.",
+      "evidence": [
+        "ref_rostgrenze",
+        "pass04_after_closed_outpost"
+      ],
+      "check": "Licht-/Rendererwerte je Paar vergleichen; eine globale Lookdev-Änderung separat kennzeichnen."
+    }
+  ],
+  "limits": "Image-based ranking, not a geometric/performance measurement or user art approval. Ships and Astra outputs excluded from this environment revision."
+}

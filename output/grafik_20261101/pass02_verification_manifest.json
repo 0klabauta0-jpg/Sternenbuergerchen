@@ -1,0 +1,56 @@
+{
+  "schema": "sternenbuergerchen.graphics_pass02_verification.v1",
+  "code_commit": "4e21697fce43aa2cf89da3f8d527bd48d09b4d58",
+  "code_commit_pushed": true,
+  "based_on_unintegrated_graphics_branch": "task/grafikreferenzen-20261101",
+  "previous_handoff_commit": "93bdf43ff0355df44e22a9b09b04d5e138a3639b",
+  "engine_report": "output/grafik_20261101/pass02_check_runs/20261101T135343Z-pid108400/metadata/report.json",
+  "engine_checks_passed": 15,
+  "pass02_assertions_passed": 27,
+  "native_captures": 7,
+  "pairs": [
+    {
+      "view": "overview",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/overview.png",
+      "before_sha256": "15a562b49cb326416d70d0caca4f0f2cc128c9622790568fbd331d11b2ba9905",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/overview.png",
+      "after_sha256": "2692c612bbd1c4e39b3d2ac73657117d2a906ce58f58311ae04d67a6ab8c25d3",
+      "camera_size": 12.0
+    },
+    {
+      "view": "workshop",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/workshop.png",
+      "before_sha256": "713e7e6c80dd9689c2673dda36870b99ee6c5e00a1d770066e6facf1bf85de7c",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/workshop.png",
+      "after_sha256": "7045ddccf3c80a12a40593b89855a9d33208d8a76e659e08f64a6c69745d9728",
+      "camera_size": 4.2
+    },
+    {
+      "view": "crew",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/crew.png",
+      "before_sha256": "d6051f45e1360d744885c45d60eb723d8d3dc901a881fcbd45c457cd296b8965",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/crew.png",
+      "after_sha256": "0df080533c336d8e659f891747e93aef2087d026fa521732f223997d0cd7123e",
+      "camera_size": 2.5
+    },
+    {
+      "view": "hex_grid",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass02/before/hex_grid.png",
+      "before_sha256": "66cf97cd6bafadc4ae36414a805f393b56e2549b7d40878f932271685ac30e51",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass02/after/hex_grid.png",
+      "after_sha256": "e0944980fdded24a391cacd86c46f8544409ac8875de98eae8ff2de25c3df9e7",
+      "camera_size": 12.0
+    }
+  ],
+  "renderer_match": true,
+  "lighting_deliberately_changed": true,
+  "additional_after_only_view": "landscape",
+  "asset_source_qa": "art/frontier_illustrated_20261101/structures/manifest.json",
+  "citizen_source_qa": "art/frontier_illustrated_20261101/citizens/pass02/manifest.json",
+  "reference_manifest": "output/grafik_20261101/reference_manifest.json",
+  "scope": "Native synthetic Hex base graphics pass; not complete campaign/editor migration, no interior/logistics simulation, no ship model adoption or release acceptance.",
+  "remaining_visual_differences": "Cliffs remain more regular and the scene less dense than the concepts. Cutaway rooms, Freihafen hall ensemble and complete terrain composition are not implemented by this pass.",
+  "browser_qa": "output/grafik_20261101/browser_qa_pass02/browser_qa.json",
+  "browser_qa_html_sha256": "97a79d60ae65a3178f037ad226c082c46ce5e773b59e9484a225293ee83879c9",
+  "browser_checks_passed": 114
+}

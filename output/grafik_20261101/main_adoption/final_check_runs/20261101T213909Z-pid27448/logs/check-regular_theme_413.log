@@ -1,0 +1,72 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_413 Terrain Theme Packs and Ground Mission Variant ===
+  PASS: Task file exists
+  PASS: Surface visual theme catalog parses
+  PASS: Theme catalog is visual-only
+  PASS: Surface type remains gameplay truth
+  PASS: Legacy root surface model remains Space Kit: ground
+  PASS: Legacy root surface model remains Space Kit: sand
+  PASS: Legacy root surface model remains Space Kit: rock
+  PASS: Legacy root surface model remains Space Kit: road
+  PASS: Theme catalog includes compatibility pack
+  PASS: Theme catalog includes Nature dirt pack
+  PASS: Theme catalog includes Ground Mission mixed pack
+  PASS: Ground Mission theme is marked visual-only
+  PASS: Ground Mission theme swaps ground to Nature dirt
+  PASS: Ground Mission theme keeps authored roads readable
+  PASS: Ground Mission 02 map loads
+  PASS: Ground Mission 02 has no load issue
+  PASS: Ground Mission 02 is 128x128
+  PASS: Ground Mission 02 selects the mixed terrain theme
+  PASS: Ground Mission 02 keeps 16384 logical tiles
+  PASS: Ground Mission 02 marker exists: spawn_alpha
+  PASS: Ground Mission 02 marker exists: spawn_bravo
+  PASS: Ground Mission 02 marker exists: objective_point
+  PASS: Ground Mission 02 marker exists: spawn_enemy_patrol
+  PASS: Ground Mission 02 marker exists: spawn_enemy_defense
+  PASS: Ground Mission 02 marker exists: spawn_enemy_air_defense
+  PASS: Ground Mission 02 has main patrol route
+  PASS: Ground Mission 02 has outer probe route
+  PASS: Ground Mission 02 has authored road corridors
+  PASS: Ground Mission 02 has sand terrain
+  PASS: Ground Mission 02 has rock terrain
+  PASS: Ground Mission 02 has H1 and H2 terrain
+  PASS: Ground Mission 02 has slopes and cliffs
+  PASS: Ground Mission 02 contains Nature cover props
+  PASS: Ground Mission 02 has Station/Modular objective floor
+  PASS: Ground Mission 02 has Space Kit turret objects
+  PASS: Objective tile is walkable
+  PASS: Spawn Alpha tile is walkable
+  PASS: Spawn Bravo tile is walkable
+  PASS: Registry builds from Ground Mission 02
+  PASS: Pathfinder reaches objective from Spawn Alpha
+  PASS: Pathfinder reaches objective from Spawn Bravo
+  PASS: HPA graph builds for Ground Mission 02
+  PASS: HPA stats report 16384 map tiles
+  PASS: HPA stats report 256 clusters for 128x128
+  PASS: HPA stats report portals
+  PASS: Ground Mission 02 scenario loads
+  PASS: Ground Mission 02 scenario validates: []
+  PASS: Scenario id is stable
+  PASS: Scenario references Ground Mission 02 map
+  PASS: Scenario defines twelve enemy IDs
+  PASS: Scenario defines three enemy groups
+  PASS: Scenario exposes one air-asset threat group
+  PASS: Air-defense group carries watch-warning risk
+  PASS: Render smoke receives map data
+  PASS: Render snapshot marks map terrain theme active
+  PASS: Render snapshot exposes the selected terrain theme
+  PASS: Render snapshot sees theme catalog packs
+  PASS: Ground Mission 02 enables visual streaming
+  PASS: Render snapshot keeps full logical tile count
+  PASS: Streaming renders a smaller active window
+  PASS: Streaming window ground stays batched
+  PASS: Theme renders Nature ground visuals
+  PASS: Objective area renders Station/Space assets
+  PASS: Streaming window renders Nature props
+  PASS: Streaming window batches static Nature props
+  PASS: Ground Mission 02 has no missing map asset mappings
+=== RESULTS: 66 passed, 0 failed ===
+ALL TESTS PASSED

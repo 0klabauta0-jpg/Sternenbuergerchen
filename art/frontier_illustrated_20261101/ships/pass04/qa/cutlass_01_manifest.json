@@ -1,0 +1,176 @@
+{
+  "asset": "cutlass_01",
+  "status": "new simplified illustration-led model candidate; not a stock SC model or accepted final art",
+  "construction": "new original low-poly mesh reconstruction; no old OBJ/material-study/Kenney ship geometry imported",
+  "source": "art/frontier_illustrated_20261101/ships/pass04/source/cutlass_01.blend",
+  "source_sha256": "a7c476234797209a15cb7e3f30580fca0905f55fc19f901a42fc3933f8022075",
+  "export": {
+    "path": "Assets/curated/frontier_illustrated_20261101/ships_pass04/cutlass_01.glb",
+    "sha256": "7622173a239ac1142902d8692ba590065764f83b596a561c688518e790177b32",
+    "bytes": 230632,
+    "meshes": 1,
+    "materials": 7,
+    "triangles": 4184,
+    "nodes": 1,
+    "skins": 0,
+    "animations": 0
+  },
+  "triangles": 4184,
+  "vertices": 2234,
+  "editable_parts": 75,
+  "dimensions_blender_m": [
+    12.360864639282227,
+    16.0,
+    4.940279960632324
+  ],
+  "bounds_blender_m": {
+    "min": [
+      -6.180432319641113,
+      -8.0,
+      0.0
+    ],
+    "max": [
+      6.180432319641113,
+      8.0,
+      4.940279960632324
+    ]
+  },
+  "normalization_length_m": 16.0,
+  "normalization_uniform_factor": 1.0165184391780564,
+  "scale_status": "explicitly stylized display normalization, NOT canonical Star Citizen measurements",
+  "pivot": "full BBox XY center / groundZ0 on static feet",
+  "front_blender": "-Y",
+  "front_godot": "+Z",
+  "runtime_scale_suggested": 0.22,
+  "palette": {
+    "Ivory": "e4dccb",
+    "Petrol": "4c6870",
+    "Frame": "2d3e43",
+    "Steel": "8b9693",
+    "Ochre": "d99b45",
+    "Glass": "2d4a59",
+    "WarmCore": "a66a36",
+    "GlassWarm": "674f3c"
+  },
+  "no_emission": true,
+  "reference_images": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png",
+      "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/09_cutlass_hinten_wimmel.png",
+      "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9"
+    }
+  ],
+  "qa_pass": true,
+  "qa_errors": [],
+  "qa_warnings": [],
+  "qa_scope": "entire static assembly, no expensive-check skips; UV excluded for solid-color materials",
+  "identity": {
+    "identity": [
+      "faceted transport cargo body",
+      "lowered segmented cockpit",
+      "two forward stubwings/endplates and fork guns",
+      "two separate outboard aft engines on pylons",
+      "central closed loading ramp",
+      "small dorsal twin turret"
+    ],
+    "limits": [
+      "closed graphic cargo ramp, no interior",
+      "four-pad original simplified static display undercarriage, not canonical source gear",
+      "no textures, flight or weapon mechanics"
+    ]
+  },
+  "groups": {
+    "Cutlass_aft_engine_mounts": [
+      "Cutlass_EnginePylon_L",
+      "Cutlass_EnginePylonCap_L",
+      "Cutlass_EngineBody_L",
+      "Cutlass_ArmoredEngineCowl_L",
+      "Cutlass_EngineFrontVent_L",
+      "Cutlass_ExhaustHousing_L",
+      "Cutlass_ExhaustLip_L",
+      "Cutlass_ExhaustRecess_L",
+      "Cutlass_ExhaustDarkCore_L",
+      "Cutlass_EngineSkirt_L-1",
+      "Cutlass_EngineSkirt_L1",
+      "Cutlass_EnginePylon_R",
+      "Cutlass_EnginePylonCap_R",
+      "Cutlass_EngineBody_R",
+      "Cutlass_ArmoredEngineCowl_R",
+      "Cutlass_EngineFrontVent_R",
+      "Cutlass_ExhaustHousing_R",
+      "Cutlass_ExhaustLip_R",
+      "Cutlass_ExhaustRecess_R",
+      "Cutlass_ExhaustDarkCore_R",
+      "Cutlass_EngineSkirt_R-1",
+      "Cutlass_EngineSkirt_R1"
+    ],
+    "Cutlass_canopy": [
+      "Cutlass_Canopy",
+      "Cutlass_ChinMount",
+      "Cutlass_ChinGun_-1",
+      "Cutlass_ChinGun_1"
+    ],
+    "Cutlass_cargo_ramp": [
+      "Cutlass_ClosedRearRamp",
+      "Cutlass_RampCrossbar_0",
+      "Cutlass_RampCrossbar_1",
+      "Cutlass_RampCrossbar_2",
+      "Cutlass_RampSideMark_-1",
+      "Cutlass_RampSideMark_1"
+    ],
+    "Cutlass_dorsal_turret": [
+      "Cutlass_TurretTurntable",
+      "Cutlass_TurretHousing",
+      "Cutlass_TurretBarrel_-1",
+      "Cutlass_TurretBarrel_1"
+    ],
+    "Cutlass_forward_forks": [
+      "Cutlass_ForeWing_L",
+      "Cutlass_EndPlate_L",
+      "Cutlass_EndPlateMark_L",
+      "Cutlass_WingRootBand_L",
+      "Cutlass_ForkBarrel_L",
+      "Cutlass_ForkKeel_L",
+      "Cutlass_ForeWing_R",
+      "Cutlass_EndPlate_R",
+      "Cutlass_EndPlateMark_R",
+      "Cutlass_WingRootBand_R",
+      "Cutlass_ForkBarrel_R",
+      "Cutlass_ForkKeel_R"
+    ],
+    "Cutlass_static_landing_gear": [
+      "Cutlass_Gear_0_Foot",
+      "Cutlass_Gear_0_Strut",
+      "Cutlass_Gear_0_Knee",
+      "Cutlass_Gear_0_Brace",
+      "Cutlass_Gear_1_Foot",
+      "Cutlass_Gear_1_Strut",
+      "Cutlass_Gear_1_Knee",
+      "Cutlass_Gear_1_Brace",
+      "Cutlass_Gear_2_Foot",
+      "Cutlass_Gear_2_Strut",
+      "Cutlass_Gear_2_Knee",
+      "Cutlass_Gear_2_Brace",
+      "Cutlass_Gear_3_Foot",
+      "Cutlass_Gear_3_Strut",
+      "Cutlass_Gear_3_Knee",
+      "Cutlass_Gear_3_Brace"
+    ],
+    "Cutlass_transport_hull": [
+      "Cutlass_CargoHull",
+      "Cutlass_DorsalShoulder_L",
+      "Cutlass_DorsalMark_L",
+      "Cutlass_CargoSideInset_L0",
+      "Cutlass_CargoSideInset_L1",
+      "Cutlass_CargoSideInset_L2",
+      "Cutlass_DorsalShoulder_R",
+      "Cutlass_DorsalMark_R",
+      "Cutlass_CargoSideInset_R0",
+      "Cutlass_CargoSideInset_R1",
+      "Cutlass_CargoSideInset_R2"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_287 Editor Save Multiplayer Contract Regression Review ===
+PASS: Task file marks TASK_287 implemented
+PASS: Task checklist is complete
+PASS: Implementation status marks TASK_287 implemented
+PASS: Roadmap marks TASK_287 implemented
+PASS: Review report contains ## Findings
+PASS: Review report contains Blocker
+PASS: Review report contains Important
+PASS: Review report contains Settings
+PASS: Review report contains Downloaded-Map
+PASS: Review report contains MissionScenarioData
+PASS: Review report contains Multiplayer
+PASS: Review report contains Snapshot
+PASS: Review report contains Roster
+PASS: Review report contains AirAsset
+PASS: Review report contains runtime_authority
+PASS: Valid tactical scenario validates
+PASS: Scenario exposes one AirAsset threat context
+PASS: Scenario threat names SimulationRoot authority
+PASS: Scenario threat does not grant UI truth
+PASS: Scenario validation rejects forbidden LZ runtime keys
+PASS: Scenario validation names top-level and nested LZ bleed
+PASS: Scenario serialization drops runtime status fields
+PASS: Scenario serialization does not duplicate terrain map data
+PASS: Scenario references terrain without storing tiles/markers/patrol paths
+PASS: PlayerRosterStore saves a local player roster
+PASS: PlayerRosterStore loads the local player roster
+PASS: Roster save declares local-player profile scope
+PASS: Local roster save may contain private profile fields
+PASS: Public roster preview validates
+PASS: Public roster preview strips private profile fields
+PASS: GameSettingsContract saves known settings
+PASS: Settings file contains expected settings keys
+PASS: Settings file excludes roster/map/runtime keys
+PASS: AirAssetRecoveryState is owned by the meta layer
+PASS: AirAssetRecoveryState does not grant UI truth
+PASS: Meta recovery patch gates transport availability
+PASS: Meta recovery patch does not write map/scenario authoring
+PASS: AirAsset status request is whitelisted as command intent
+PASS: Client cannot submit AirAssetStatus as command state
+PASS: Editor/scenario LZ source is rejected for runtime air command
+PASS: Role override is host-only
+PASS: Host can validate role override command
+PASS: Snapshot unit keeps ownership fields
+PASS: Snapshot unit strips private roster/profile fields
+PASS: Character gameplay snapshot strips private skill/progression fields
+PASS: Feedback bubble snapshot keeps keys, not raw text/assets
+PASS: Communication event snapshot strips raw payload
+PASS: AirAsset snapshot remains SimulationRoot-authoritative
+PASS: Snapshot metrics find no raw asset/path/text payload offenders
+PASS: Full snapshot contains no private roster fields
+PASS: Downloaded map manifest verifies safe map metadata
+PASS: Downloaded map with valid tactics is accepted into user cache
+PASS: Unsafe scenario path is rejected
+PASS: Downloaded map payload rejects nested script keys
+PASS: Downloaded map payload validates enemy team tactics
+PASS: Downloaded map cache root must stay under user://
+=== RESULTS: 56 passed, 0 failed ===
+ALL TESTS PASSED

@@ -1,0 +1,55 @@
+{
+  "schema": "sternenbuergerchen.pass07_paths.v1",
+  "status": "native path/access revision; no blanket artistic approval",
+  "based_on": "501201b0c",
+  "user_feedback": "P06 significantly improved; paths/entrances and remaining graphic defects need refinement before starting broader game graphics migration.",
+  "sources": [
+    {
+      "path": "scripts/terrain/frontier_access_anchors.gd",
+      "sha256": "87f63e39592899102d5878f4edd8724a5274c4de4c95164565816056d70f7b43",
+      "snapshot": "art/frontier_illustrated_20261101/environment/pass07/paths/source/frontier_access_anchors.gd"
+    },
+    {
+      "path": "scripts/terrain/frontier_art_dressing.gd",
+      "sha256": "aeb7b9d887a04d477f932265edfcae6b6a5a3afa4119b6c1f02481938471ffd0",
+      "snapshot": "art/frontier_illustrated_20261101/environment/pass07/paths/source/frontier_art_dressing.gd"
+    },
+    {
+      "path": "scripts/terrain/frontier_outpost_pad.gd",
+      "sha256": "1301ddd9ddf8b17490615ab5bb50419d0e05b58f958586dae658e81209679772",
+      "snapshot": "art/frontier_illustrated_20261101/environment/pass07/paths/source/frontier_outpost_pad.gd"
+    },
+    {
+      "path": "scripts/terrain/frontier_closed_buildings.gd",
+      "sha256": "a17fcd6fd3ec462ffe49225396bd31e8c063da015204c7a0f8925d9b3b8e8f62",
+      "snapshot": "art/frontier_illustrated_20261101/environment/pass07/paths/source/frontier_closed_buildings.gd"
+    },
+    {
+      "path": "shaders/terrain/frontier_ground.gdshader",
+      "sha256": "9e45599df3fb3a57ce70f371db86a179740ef1c0fc23836eb4c84c194884a4a7",
+      "snapshot": "art/frontier_illustrated_20261101/environment/pass07/paths/source/frontier_ground.gdshader"
+    },
+    {
+      "path": "scripts/tests/frontier_pass07_paths_verifier.gd",
+      "sha256": "62929802f39a763f0d158f66dabfc11bf031c637eca7bbf089e42bfa286bc5d1",
+      "snapshot": "art/frontier_illustrated_20261101/environment/pass07/paths/source/frontier_pass07_paths_verifier.gd"
+    }
+  ],
+  "changes": [
+    "shared measured doorway/pad access anchors",
+    "straight final Bezier spans and aligned hall offset portal",
+    "continuous14mm road/apron/ramp-toe contacts with57mm entry-step contacts",
+    "cutaway-only neutral treads preserve connection without duplicate coplanar closed-step faces",
+    "fixed up normals for planar triangulated road layers; global shadow/SSAO settings retained",
+    "pad rail endpoints derived from actual full3D ramp span"
+  ],
+  "evidence": {
+    "path_red": "output/grafik_20261101/pass07_paths_red.log",
+    "path_green": "output/grafik_20261101/pass07_paths_green.log",
+    "normal_diagnosis": "output/grafik_20261101/pass07_shadow_findings.md",
+    "normal_pixels": "output/grafik_20261101/pass07_shadow_pixels.json",
+    "pad_rails": "output/grafik_20261101/pass07_pad_rails_report.json"
+  },
+  "preserved": "All nine primary GLBs, P06 geology/14 envelopes, actor placement, global light and gameplay navigation/LOS facts. Regular map integration is a separate current-source package.",
+  "limitations": "Visual path foundation and one authored runtime map are a beginning, not whole game/Hex editor migration. No base-building/interior/vehicle simulation or Astra ship adoption."
+}

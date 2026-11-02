@@ -1,0 +1,679 @@
+{
+  "schema": "sternenbuergerchen.pass04_r02_buccaneer.v1",
+  "task": "docs/tasks/ART_2026_11_01_pass04.md",
+  "status": "frozen revised visual candidate; native integration and visual acceptance owned by parent task",
+  "blender": "5.2.3 LTS",
+  "generator": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/generator/build_buccaneer.py",
+  "dependencies": [
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/generator/build_buccaneer.py",
+      "sha256": "1f5188b97818f7abaf875e0288c06d69974fd7237a1a2ee80659120b0742150b"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/generator/review_buccaneer.py",
+      "sha256": "9c4ee4758ee631817d6ec0550f66595b804a980160318d85938abcfd45144d08"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/generator/verify_roundtrip.py",
+      "sha256": "c3b06cdc13eddc7757426acd7c17a4683bfb97642c513490640e073ccd87a774"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/generator/finalize_manifest.py",
+      "sha256": "75daf915a929c1307f205f3a83bebb04db7d1fb7466538bfd50538f88971b13e"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04/generator/build_ships.py",
+      "sha256": "47602815627c82be94d11628001e763c281710238b64833e6a6b215983683694"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04/generator/review_ships.py",
+      "sha256": "13cb1fad23444b211c4c02d9bd5ca2da852b3f2a3d1cbdcfacc93904141a5443"
+    }
+  ],
+  "qa_skill_script": {
+    "path": "C:/Users/bjoer/.codex/skills/blender-asset-qa/scripts/qa_check.py",
+    "sha256": "11b4fa11244bfa6719689a06eec58c050a3ad5b6d17ac0f75113f332f97b274b",
+    "unmodified": true
+  },
+  "assets": [
+    {
+      "asset": "buccaneer_01",
+      "iteration": 2,
+      "status": "unapproved revised visual candidate",
+      "source": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/source/buccaneer_01.blend",
+      "source_sha256": "1c9c6212a6df82a5c82b7ce65860723c2a7236c2db05f885f010311cca446ea3",
+      "export": {
+        "path": "Assets/curated/frontier_illustrated_20261101/ships_pass04_r02/buccaneer_01.glb",
+        "sha256": "4b33257d1610b5ccb0a287482f025b262f35bea2bfd12f4f8d78e6cf8a180c62",
+        "bytes": 869120,
+        "meshes": 1,
+        "materials": 10,
+        "triangles": 17324,
+        "nodes": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "triangles": 17324,
+      "editable_parts": 76,
+      "vertices": 8792,
+      "dimensions_blender_m": [
+        13.845233917236328,
+        11.0,
+        4.563366413116455
+      ],
+      "bounds_blender_m": {
+        "min": [
+          -6.922616958618164,
+          -5.5,
+          0.0
+        ],
+        "max": [
+          6.922616958618164,
+          5.500000476837158,
+          4.563366413116455
+        ]
+      },
+      "normalization_length_m": 11,
+      "normalization_uniform_factor": 1.089108921174804,
+      "scale_status": "stylized display normalization, not canonical SC size",
+      "front_blender": "-Y",
+      "front_godot": "+Z",
+      "runtime_scale_suggested": 0.22,
+      "pivot": "full BBox XY center / static feet minZ0",
+      "palette": {
+        "Ivory": "ddd0af",
+        "Petrol": "53696b",
+        "Frame": "27383c",
+        "Steel": "8a8d80",
+        "Ochre": "d39843",
+        "Glass": "2c4651",
+        "WarmCore": "a56e38",
+        "GlassWarm": "554b3e",
+        "UsedIvory": "bcb69e",
+        "UsedPetrol": "667776"
+      },
+      "no_emission": true,
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [],
+      "reference_images": [
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+          "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d"
+        },
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+          "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d"
+        }
+      ],
+      "retained_r01": {
+        "generator": "art/frontier_illustrated_20261101/ships/pass04/generator/build_ships.py",
+        "generator_sha256": "47602815627c82be94d11628001e763c281710238b64833e6a6b215983683694",
+        "source": "art/frontier_illustrated_20261101/ships/pass04/source/buccaneer_01.blend",
+        "source_sha256": "87fcabf3f78990b86647e44192265f957bac92d63437df10a197b8c40eeb8ce3"
+      },
+      "scope": "original new geometry using prior procedural helpers; no imported Kenney/SC mesh; source QA covers entire assembly without expensive-check skips; UV excluded for solid palette",
+      "changes": "segmented tapered pods/partial curved cowl, dark hollow intakes, deep large exhausts and six thick petals, shorter broad framed canopy, thick swept wings, large dorsal receiver/cannon; iteration2 adds broad bevels/panel fields/eight fastener heads",
+      "geometry": {
+        "triangles": 17324,
+        "vertices": 8792,
+        "editable_parts": 76,
+        "materials": 10
+      },
+      "qa": {
+        "pass": true,
+        "raw": {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_raw.json",
+          "sha256": "b89598d138657ad965860b1f4ae8ebeeb9b3cf103e34db6222c3e1b6ae5c9777"
+        },
+        "errors": [],
+        "warnings": []
+      },
+      "roundtrip": {
+        "asset": "buccaneer_01",
+        "pass": true,
+        "glb_sha256": "4b33257d1610b5ccb0a287482f025b262f35bea2bfd12f4f8d78e6cf8a180c62",
+        "import": "fresh empty Blender5.2.3; merge_vertices=True requested; no source/import geometry repair",
+        "mesh_count": 1,
+        "triangles": 17324,
+        "triangles_by_material": {
+          "M_Drake04_Petrol": 6252,
+          "M_Drake04_Ivory": 1598,
+          "M_Drake04_Frame": 6572,
+          "M_Drake04_GlassWarm": 16,
+          "M_Drake04_Glass": 8,
+          "M_Drake04_UsedPetrol": 208,
+          "M_Drake04_Ochre": 1106,
+          "M_Drake04_Steel": 872,
+          "M_Drake04_UsedIvory": 20,
+          "M_Drake04_WarmCore": 672
+        },
+        "material_assignments_match": true,
+        "bounds_blender_m": {
+          "min": [
+            -6.922616958618164,
+            -5.5,
+            0.0
+          ],
+          "max": [
+            6.922616958618164,
+            5.500000476837158,
+            4.563366413116455
+          ]
+        },
+        "dimensions_blender_m": [
+          13.845233917236328,
+          11.000000476837158,
+          4.563366413116455
+        ],
+        "ground_z": 0.0,
+        "maximum_bidirectional_nearest_vertex_error_m": 0.0,
+        "maximum_corner_normal_error": 1.2007000723488398e-05,
+        "finite_positions_and_normals": true,
+        "raw_qa": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/qa/buccaneer_01_roundtrip_raw.json",
+        "errors": [],
+        "warnings": [
+          "buccaneer_01: duplicate verts=14088 loose verts=0"
+        ],
+        "images": [
+          "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/qa/buccaneer_01_roundtrip_front.png",
+          "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/qa/buccaneer_01_roundtrip_rear.png",
+          "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/qa/buccaneer_01_roundtrip_game.png"
+        ]
+      },
+      "views": [
+        {
+          "view": "front",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_front.png",
+          "direction_blender": [
+            0.5221105217933655,
+            -0.668271005153656,
+            0.5299192667007446
+          ],
+          "orthographic_height_source_m": 10.756095269163586,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "rear",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_rear.png",
+          "direction_blender": [
+            -0.5221105217933655,
+            0.668271005153656,
+            0.5299192667007446
+          ],
+          "orthographic_height_source_m": 10.75609517294466,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "top",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_top.png",
+          "direction_blender": [
+            0.0,
+            -0.0010000000474974513,
+            1.0
+          ],
+          "orthographic_height_source_m": 12.432760883853769,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "game",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_game.png",
+          "direction_blender": [
+            0.2614452838897705,
+            -0.5872157216072083,
+            0.7660444378852844
+          ],
+          "orthographic_height_source_m": 54.54545454545455,
+          "runtime_scale_assumption": 0.22,
+          "camera_size_world": 12,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        }
+      ],
+      "opened_images": [
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_front.png",
+          "sha256": "13420ff1db21eabe1001fd00bde8a78956af12d00fcf20e674c68063f04401f5"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_rear.png",
+          "sha256": "0254f6e6542843e8d351f6d6dbb46d611b4973c3bd806ac4e1cbd5105381b449"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_game.png",
+          "sha256": "9bd0782fa39a660738dfbe33cebc0eef24b1cb421846861e21132f182569ab93"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_top.png",
+          "sha256": "e3206bd46dc8b5ea3d7c8b50fb3446815fd3b9c56da4db71fd4d6b231fbd76a5"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_random.png",
+          "sha256": "4a6e59c2096977746eb184e28b4f277ade25746b7509cc62a74afcab32e3fa76"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_wire.png",
+          "sha256": "da82637cd5c688cb7b05f6d0bbb72b472e1b0fbe159b5bdc6432059ce7c18bf3"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/qa/buccaneer_01_roundtrip_front.png",
+          "sha256": "22aff3b6cbc08a6df79fa379ebaa18ab98c7222f3c53d0009212eb215d7ff082"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/qa/buccaneer_01_roundtrip_rear.png",
+          "sha256": "9f008c3b63a5fd129cdd021870f5cb7ccf704e6b43f6803210b07316d4460051"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/qa/buccaneer_01_roundtrip_game.png",
+          "sha256": "9fe4a22c1b5f8fa064bc6c95f307e58c68a7b8972a7834f1182419ffc65a244c"
+        }
+      ],
+      "warning_acceptance": {
+        "roundtrip_duplicate_positions": "The sole fresh-import warning is duplicate positions at intentional normal/material attribute seams (14088; no loose vertices). Exact positions/material triangle counts and corner normals were verified; source has zero errors/warnings. No imported mesh repair.",
+        "uv": "Untextured constant palette intentionally omits UVs."
+      },
+      "construction": "New original procedural low-poly shape revision using R01 helpers; no stock Kenney/SC mesh, old OBJ or material-study mesh imported.",
+      "remaining_visual_differences": [
+        "Cowls still more regular and cylindrical than the interlocked angular illustration.",
+        "Workbench glass/light surfaces darker than painted target; native light/material review belongs to parent.",
+        "Small static display gear is an original simplified support, not canonical SC landing gear.",
+        "No illustrated scratch/paint texture field or emissive engine effect; usage is represented by a few broad material zones."
+      ]
+    }
+  ],
+  "iterations": [
+    {
+      "asset": "buccaneer_01",
+      "iteration": 1,
+      "status": "unapproved revised visual candidate",
+      "source": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/source/buccaneer_01.blend",
+      "source_sha256": "85e79db0b3ee03d0757fb84554730996abfe007e2612b6721266917083aebf61",
+      "export": {
+        "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/buccaneer_01.glb",
+        "sha256": "b64445c4c61636fbe0d4e529c787b95d817355e35d0a2c2ccdf1d1d565d3ba64",
+        "bytes": 625684,
+        "meshes": 1,
+        "materials": 8,
+        "triangles": 13604,
+        "nodes": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "triangles": 13604,
+      "editable_parts": 74,
+      "vertices": 6928,
+      "dimensions_blender_m": [
+        13.836575508117676,
+        11.0,
+        4.563366413116455
+      ],
+      "bounds_blender_m": {
+        "min": [
+          -6.918287754058838,
+          -5.5,
+          0.0
+        ],
+        "max": [
+          6.918287754058838,
+          5.500000476837158,
+          4.563366413116455
+        ]
+      },
+      "normalization_length_m": 11,
+      "normalization_uniform_factor": 1.089108921174804,
+      "scale_status": "stylized display normalization, not canonical SC size",
+      "front_blender": "-Y",
+      "front_godot": "+Z",
+      "runtime_scale_suggested": 0.22,
+      "pivot": "full BBox XY center / static feet minZ0",
+      "palette": {
+        "Ivory": "ddd0af",
+        "Petrol": "53696b",
+        "Frame": "27383c",
+        "Steel": "8a8d80",
+        "Ochre": "d39843",
+        "Glass": "2c4651",
+        "WarmCore": "a56e38",
+        "GlassWarm": "554b3e",
+        "UsedIvory": "bcb69e",
+        "UsedPetrol": "667776"
+      },
+      "no_emission": true,
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [],
+      "reference_images": [
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+          "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d"
+        },
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+          "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d"
+        }
+      ],
+      "retained_r01": {
+        "generator": "art/frontier_illustrated_20261101/ships/pass04/generator/build_ships.py",
+        "generator_sha256": "47602815627c82be94d11628001e763c281710238b64833e6a6b215983683694",
+        "source": "art/frontier_illustrated_20261101/ships/pass04/source/buccaneer_01.blend",
+        "source_sha256": "87fcabf3f78990b86647e44192265f957bac92d63437df10a197b8c40eeb8ce3"
+      },
+      "scope": "original new geometry using prior procedural helpers; no imported Kenney/SC mesh; source QA covers entire assembly without expensive-check skips; UV excluded for solid palette",
+      "changes": "segmented tapered pods/partial curved cowl, dark hollow intakes, deep large exhausts and six thick petals, shorter broad framed canopy, thick swept wings, large dorsal receiver/cannon; iteration2 adds broad bevels/panel fields/eight fastener heads",
+      "views": [
+        {
+          "view": "front",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/qa/buccaneer_01_front.png",
+          "direction_blender": [
+            0.5221105217933655,
+            -0.668271005153656,
+            0.5299192667007446
+          ],
+          "orthographic_height_source_m": 10.739528294764629,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "rear",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/qa/buccaneer_01_rear.png",
+          "direction_blender": [
+            -0.5221105217933655,
+            0.668271005153656,
+            0.5299192667007446
+          ],
+          "orthographic_height_source_m": 10.739528583421407,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "top",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/qa/buccaneer_01_top.png",
+          "direction_blender": [
+            0.0,
+            -0.0010000000474974513,
+            1.0
+          ],
+          "orthographic_height_source_m": 12.432760883853769,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "game",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/qa/buccaneer_01_game.png",
+          "direction_blender": [
+            0.2614452838897705,
+            -0.5872157216072083,
+            0.7660444378852844
+          ],
+          "orthographic_height_source_m": 54.54545454545455,
+          "runtime_scale_assumption": 0.22,
+          "camera_size_world": 12,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        }
+      ],
+      "opened_images": [
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/qa/buccaneer_01_front.png",
+          "sha256": "d7b02e487bc369f8de705a907e0ad453b5fdaaee9cd8077b7e0bc25c11525be5"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/qa/buccaneer_01_rear.png",
+          "sha256": "8a1a807daf73357b63474a7b10fe5f0aa4792f7f2932383f7f48f9199d65d020"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/qa/buccaneer_01_game.png",
+          "sha256": "6cbf0a6f4d8655e2c0269a2e187aab3e2f53db60656b3a0f8ea24bea78a4203c"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/qa/buccaneer_01_top.png",
+          "sha256": "3e3a34ff85ef0de7e4d5843ac05a7e8bdbaee71827743008dcfe448c9cb45012"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/qa/buccaneer_01_random.png",
+          "sha256": "adefd90a66150162ce3a748fd2af395f740dfa559d5672d595cb9d3882479498"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i01/qa/buccaneer_01_wire.png",
+          "sha256": "7cfcfc383505fafea29e009d42ce180add49f1f329fde924a7e48a16e1ee3ec0"
+        }
+      ],
+      "selected_for_native": false
+    },
+    {
+      "asset": "buccaneer_01",
+      "iteration": 2,
+      "status": "unapproved revised visual candidate",
+      "source": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/source/buccaneer_01.blend",
+      "source_sha256": "1c9c6212a6df82a5c82b7ce65860723c2a7236c2db05f885f010311cca446ea3",
+      "export": {
+        "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/buccaneer_01.glb",
+        "sha256": "4b33257d1610b5ccb0a287482f025b262f35bea2bfd12f4f8d78e6cf8a180c62",
+        "bytes": 869120,
+        "meshes": 1,
+        "materials": 10,
+        "triangles": 17324,
+        "nodes": 1,
+        "animations": 0,
+        "skins": 0
+      },
+      "triangles": 17324,
+      "editable_parts": 76,
+      "vertices": 8792,
+      "dimensions_blender_m": [
+        13.845233917236328,
+        11.0,
+        4.563366413116455
+      ],
+      "bounds_blender_m": {
+        "min": [
+          -6.922616958618164,
+          -5.5,
+          0.0
+        ],
+        "max": [
+          6.922616958618164,
+          5.500000476837158,
+          4.563366413116455
+        ]
+      },
+      "normalization_length_m": 11,
+      "normalization_uniform_factor": 1.089108921174804,
+      "scale_status": "stylized display normalization, not canonical SC size",
+      "front_blender": "-Y",
+      "front_godot": "+Z",
+      "runtime_scale_suggested": 0.22,
+      "pivot": "full BBox XY center / static feet minZ0",
+      "palette": {
+        "Ivory": "ddd0af",
+        "Petrol": "53696b",
+        "Frame": "27383c",
+        "Steel": "8a8d80",
+        "Ochre": "d39843",
+        "Glass": "2c4651",
+        "WarmCore": "a56e38",
+        "GlassWarm": "554b3e",
+        "UsedIvory": "bcb69e",
+        "UsedPetrol": "667776"
+      },
+      "no_emission": true,
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [],
+      "reference_images": [
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+          "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d"
+        },
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+          "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d"
+        }
+      ],
+      "retained_r01": {
+        "generator": "art/frontier_illustrated_20261101/ships/pass04/generator/build_ships.py",
+        "generator_sha256": "47602815627c82be94d11628001e763c281710238b64833e6a6b215983683694",
+        "source": "art/frontier_illustrated_20261101/ships/pass04/source/buccaneer_01.blend",
+        "source_sha256": "87fcabf3f78990b86647e44192265f957bac92d63437df10a197b8c40eeb8ce3"
+      },
+      "scope": "original new geometry using prior procedural helpers; no imported Kenney/SC mesh; source QA covers entire assembly without expensive-check skips; UV excluded for solid palette",
+      "changes": "segmented tapered pods/partial curved cowl, dark hollow intakes, deep large exhausts and six thick petals, shorter broad framed canopy, thick swept wings, large dorsal receiver/cannon; iteration2 adds broad bevels/panel fields/eight fastener heads",
+      "views": [
+        {
+          "view": "front",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_front.png",
+          "direction_blender": [
+            0.5221105217933655,
+            -0.668271005153656,
+            0.5299192667007446
+          ],
+          "orthographic_height_source_m": 10.756095269163586,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "rear",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_rear.png",
+          "direction_blender": [
+            -0.5221105217933655,
+            0.668271005153656,
+            0.5299192667007446
+          ],
+          "orthographic_height_source_m": 10.75609517294466,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "top",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_top.png",
+          "direction_blender": [
+            0.0,
+            -0.0010000000474974513,
+            1.0
+          ],
+          "orthographic_height_source_m": 12.432760883853769,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "game",
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_game.png",
+          "direction_blender": [
+            0.2614452838897705,
+            -0.5872157216072083,
+            0.7660444378852844
+          ],
+          "orthographic_height_source_m": 54.54545454545455,
+          "runtime_scale_assumption": 0.22,
+          "camera_size_world": 12,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        }
+      ],
+      "opened_images": [
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_front.png",
+          "sha256": "13420ff1db21eabe1001fd00bde8a78956af12d00fcf20e674c68063f04401f5"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_rear.png",
+          "sha256": "0254f6e6542843e8d351f6d6dbb46d611b4973c3bd806ac4e1cbd5105381b449"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_game.png",
+          "sha256": "9bd0782fa39a660738dfbe33cebc0eef24b1cb421846861e21132f182569ab93"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_top.png",
+          "sha256": "e3206bd46dc8b5ea3d7c8b50fb3446815fd3b9c56da4db71fd4d6b231fbd76a5"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_random.png",
+          "sha256": "4a6e59c2096977746eb184e28b4f277ade25746b7509cc62a74afcab32e3fa76"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/qa/buccaneer_01_wire.png",
+          "sha256": "da82637cd5c688cb7b05f6d0bbb72b472e1b0fbe159b5bdc6432059ce7c18bf3"
+        }
+      ],
+      "selected_for_native": true
+    }
+  ],
+  "reference_images": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+      "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+      "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d"
+    }
+  ],
+  "retained_r01_originals": {
+    "source": {
+      "path": "art/frontier_illustrated_20261101/ships/pass04/source/buccaneer_01.blend",
+      "sha256": "87fcabf3f78990b86647e44192265f957bac92d63437df10a197b8c40eeb8ce3"
+    },
+    "export": {
+      "path": "Assets/curated/frontier_illustrated_20261101/ships_pass04/buccaneer_01.glb",
+      "sha256": "746c959a8f16e320db89c4194e44d939b3ebe90b29d5f05225187c3a18b3eded"
+    },
+    "generator": {
+      "path": "art/frontier_illustrated_20261101/ships/pass04/generator/build_ships.py",
+      "sha256": "47602815627c82be94d11628001e763c281710238b64833e6a6b215983683694"
+    },
+    "unchanged": true
+  },
+  "native_interface": {
+    "runtime_scale": 0.22,
+    "front_godot": "+Z",
+    "pivot": "full BBox XY center / static feet minZ0",
+    "normalization_length_m": 11,
+    "canonical_sc_dimensions": false,
+    "collision_navigation_lights": false
+  },
+  "normal_route": "Smooth-by-angle on shaped pod surfaces; source per-corner normals carried explicitly into assembled GLB; fresh import checked against source.",
+  "visual_review": {
+    "opened_source_images": 12,
+    "opened_fresh_glb_images": 3,
+    "directions": "R01 reference-facing front38/32deg, rear-142/32deg; game24/50deg with native world camera size12 at scale.22",
+    "iteration1": "New broad canopy/cannon, hollow inlets, curved open cowls, swept thick wings. Mounting gap fixed. Long cowl / overlaid wing panel / obscured rear warm ring prompted iteration2.",
+    "iteration2": "Shorter shoulder/neck cowl zones, recessed framed glazing, integrated shaped wing polygons with ivory outer field/ochre root zone, exposed warm deep rear throat, broad bevels and only eight structural fastener heads.",
+    "independent_review": "current_visuals opened source front/rear vs13/11: no gross visible hole/floating assembly or front/rear mix-up; remaining illustration differences stated; no visual user approval."
+  },
+  "qa_runs": {
+    "source_final": {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/build_i02_final.log",
+      "sha256": "1cd5001f048ae6d674c0384815da5d0402a7b136c0be687ceb5ffe4d011bc6ab"
+    },
+    "views_final": {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/review_i02_final.log",
+      "sha256": "3c15ac9a1e3589a2075ceb119194cb9eaf7f112d306209ec56859cfe8f887d59"
+    },
+    "roundtrip_final": {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/roundtrip_normals_final.log",
+      "sha256": "08fc553599992b096d879806c63d281d93caadeaefde092fb1f29a819aab0cb3"
+    },
+    "failed_iterations_retained": [
+      "iterations/i01/qa/buccaneer_01_raw_failed_mount_r01.json",
+      "iterations/i02/qa/buccaneer_01_raw_failed_fastener_mount.json"
+    ],
+    "note": "Failed mounting studies are historical and are not final QA evidence."
+  },
+  "not_claimed": [
+    "user visual approval",
+    "canonical SC geometry/size",
+    "flight/weapon/landing mechanics",
+    "Godot import performed by this generator",
+    "performance/release acceptance"
+  ]
+}

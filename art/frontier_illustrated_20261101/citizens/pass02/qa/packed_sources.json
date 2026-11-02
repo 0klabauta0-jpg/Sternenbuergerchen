@@ -1,0 +1,30 @@
+[
+  {
+    "role": "operator",
+    "packed_original_images": [
+      "astroMaleA.png"
+    ],
+    "glb_unchanged_sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c"
+  },
+  {
+    "role": "pilot",
+    "packed_original_images": [
+      "astroFemaleB.png"
+    ],
+    "glb_unchanged_sha256": "4548eb634e41a4a94965d616b45a51339e3da150bd0d1d708016e1f625c4ac00"
+  },
+  {
+    "role": "mechanic",
+    "packed_original_images": [
+      "astroMaleB.png"
+    ],
+    "glb_unchanged_sha256": "03ec6f35421d2cebfaa03f7fa911db71f4c6120ac8858dd369f7bbcd9b878496"
+  },
+  {
+    "role": "medic",
+    "packed_original_images": [
+      "astroFemaleA.png"
+    ],
+    "glb_unchanged_sha256": "e7c0c690f0ae9a85a93d18ecf7d765c9c16756f74e847bd926379f3cfd1e4f79"
+  }
+]

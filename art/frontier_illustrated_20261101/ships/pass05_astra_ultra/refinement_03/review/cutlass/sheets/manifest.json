@@ -1,0 +1,111 @@
+{
+  "asset": "Cutlass",
+  "sheets": [
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\sheets\\Ziel_und_Neu.png",
+      "sha256": "0ce28a5d2ed142013bdd6f04becb1e39efee765f2b748edf09c8d4f8a7ac12d9",
+      "inputs": [
+        {
+          "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\docs\\reports\\assets\\grafik-2026-11-01\\08_cutlass_vorne_wimmel.png",
+          "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17",
+          "display_crop_xyxy": null
+        },
+        {
+          "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\new\\material_front.png",
+          "sha256": "33b3cd6bcbe25bcd8050e3b89a8f539d0a12ca46063db1d081b6551b87b11397",
+          "display_crop_xyxy": [
+            80,
+            70,
+            1040,
+            760
+          ]
+        },
+        {
+          "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\docs\\reports\\assets\\grafik-2026-11-01\\09_cutlass_hinten_wimmel.png",
+          "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9",
+          "display_crop_xyxy": null
+        },
+        {
+          "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\new\\material_rear.png",
+          "sha256": "dfe64c0813ba55dbf37385a816fb44f1b28f79b5c571883948d1a2bbaea4ee58",
+          "display_crop_xyxy": [
+            80,
+            70,
+            1040,
+            760
+          ]
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\sheets\\Vorher_und_Neu.png",
+      "sha256": "63dc6d02d544c7f08e6031503138124e94ca55c74d5c6213e64c7af0275d8266",
+      "inputs": [
+        {
+          "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\previous\\material_front.png",
+          "sha256": "de523bd71501372d84c37d6a262441bd3479b5e237aa9d9b2d7a937fd3b6a114",
+          "display_crop_xyxy": [
+            80,
+            70,
+            1040,
+            760
+          ]
+        },
+        {
+          "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\new\\material_front.png",
+          "sha256": "33b3cd6bcbe25bcd8050e3b89a8f539d0a12ca46063db1d081b6551b87b11397",
+          "display_crop_xyxy": [
+            80,
+            70,
+            1040,
+            760
+          ]
+        },
+        {
+          "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\previous\\material_rear.png",
+          "sha256": "308e61984c098a29590dad7018fd12dc0d5a91a2b18fb9f03e1ad34a199086b5",
+          "display_crop_xyxy": [
+            80,
+            70,
+            1040,
+            760
+          ]
+        },
+        {
+          "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\new\\material_rear.png",
+          "sha256": "dfe64c0813ba55dbf37385a816fb44f1b28f79b5c571883948d1a2bbaea4ee58",
+          "display_crop_xyxy": [
+            80,
+            70,
+            1040,
+            760
+          ]
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\sheets\\Vorher_und_Neu_Oben.png",
+      "sha256": "cf3e09f25273021177bb53d89046d5c1e75ae8df1203f7a7ee1d1c7c9d9fafa1",
+      "inputs": [
+        {
+          "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\previous\\material_top.png",
+          "sha256": "e43abe510415393ffc779d2c64d167b7440c8980e08e0e57c6129249162baef7",
+          "display_crop_xyxy": null
+        },
+        {
+          "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\new\\material_top.png",
+          "sha256": "d71b2f515135e498a79e35872b7449161b2089965e646ab1ee45711fccf66818",
+          "display_crop_xyxy": null
+        }
+      ],
+      "method": "Side-by-side original full 1200x900 top frames, identical uniform fit, no crop or per-model fitting."
+    }
+  ],
+  "fixed_model_display_crop_xyxy": [
+    80,
+    70,
+    1040,
+    760
+  ],
+  "method": "Original full renders preserved. Front/rear sheets use identical fixed (80,70,1040,760) display crop for model images; references uncropped. Top sheet uses full frames without crop. All fitting is uniform, with no per-model fitting or image content generation."
+}

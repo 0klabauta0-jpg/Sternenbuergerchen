@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "geology_contract",
+      "script": "res://scripts/tests/frontier_pass03_geology_verifier.gd",
+      "args": [],
+      "success_marker": "FRONTIER_PASS03_GEOLOGY",
+      "timeout": 40
+    }
+  ]
+}

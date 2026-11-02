@@ -1,0 +1,47 @@
+{
+  "schema": "sternenbuergerchen.art_pass06_ground_paint.v1",
+  "status": "Native Godot shader/dressing revision on unintegrated graphics branch; no user art approval.",
+  "based_on": "04e934f60",
+  "sources": [
+    {
+      "path": "shaders/terrain/frontier_ground.gdshader",
+      "sha256": "240231803877d0bcfe77563f859a623dc8ff38eb97d042942fcccb77357eec4b"
+    },
+    {
+      "path": "shaders/terrain/frontier_contact_paint.gdshader",
+      "sha256": "ff8d87e7082dc6e6f4611db6bd18cdb0514720efd7ca0a07108ffd2807389e2f"
+    },
+    {
+      "path": "scripts/terrain/frontier_art_dressing.gd",
+      "sha256": "86fc88c484dbe82e0f989edea7c0c58a38388ad70bf7e5c5b8410295ff1c74b0"
+    },
+    {
+      "path": "scripts/tests/frontier_pass06_environment_verifier.gd",
+      "sha256": "4b9426425aaf92b0f6504443655a8fa07eee7c3b7ea4651f72ee38a22b33f822"
+    }
+  ],
+  "references": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+      "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+      "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+      "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e"
+    }
+  ],
+  "scope": [
+    "soft multiscale pigment/silt fields",
+    "localized cliff wash and broken strata paint",
+    "paving aggregate scuff and selective marking loss",
+    "broken dusty object contact banks"
+  ],
+  "geometry_route": "Existing continuous flat plane and unchanged road/apron geometry. Real blocked-area relief belongs to the separate geology package.",
+  "preserved": "Nine primary GLBs, original characters/animation, shared light, Hex facts, actor starts and cameras.",
+  "material_route": "World-coordinate integer hash noise; shared/cached ShaderMaterial for soil, cliffs, paving and marking colors. No per-frame mesh rebuilding.",
+  "limits": "Procedural paint; no hand-painted texture bake. Walkable soil remains flat. Fine painted wear is intentionally quieter at strategic distance."
+}

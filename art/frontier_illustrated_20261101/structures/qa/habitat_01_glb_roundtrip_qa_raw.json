@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    "habitat_01: duplicate verts=12984 loose verts=0",
+    "hidden back-to-back faces: habitat_01 (55 pairs) - delete to save tris"
+  ],
+  "ground_z": 0.0,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [
+    {
+      "where": "habitat_01",
+      "tri_pairs": 55
+    }
+  ],
+  "enclosed": [],
+  "objects": {
+    "habitat_01": {
+      "verts": 25969,
+      "faces": 13184,
+      "tris": 13184,
+      "ngons": 0,
+      "boundary_edges": 25970,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 12984,
+      "islands": 6396,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 8
+    }
+  }
+}

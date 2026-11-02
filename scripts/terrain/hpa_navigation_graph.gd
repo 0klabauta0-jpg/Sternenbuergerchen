@@ -2,6 +2,7 @@ class_name HPANavigationGraph
 extends RefCounted
 
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 
 const DEFAULT_CLUSTER_SIZE: int = 8
 
@@ -16,6 +17,7 @@ var _abstract_neighbors_by_component: Dictionary = {}
 var _last_build_stats: Dictionary = {}
 var _revision: int = 0
 var _pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
+var _grid_topology: String = "square8"
 
 
 func clear() -> void:
@@ -37,6 +39,7 @@ func build_from_registry(registry, next_cluster_size: int = DEFAULT_CLUSTER_SIZE
 		return false
 
 	cluster_size = maxi(next_cluster_size, 1)
+	_grid_topology = String(registry.call("get_grid_topology")) if registry.has_method("get_grid_topology") else "square8"
 	var tiles: Array = Array(registry.call("get_all_tiles"))
 	tiles.sort_custom(_sort_tiles_by_grid)
 	for tile_data in tiles:
@@ -78,7 +81,8 @@ func rebuild_dirty_clusters_from_registry(registry, dirty_grids: Array, next_clu
 	var effective_cluster_size: int = cluster_size
 	if next_cluster_size > 0:
 		effective_cluster_size = maxi(next_cluster_size, 1)
-	if _clusters_by_id.is_empty() or effective_cluster_size != cluster_size:
+	var next_topology: String = String(registry.call("get_grid_topology")) if registry.has_method("get_grid_topology") else "square8"
+	if _clusters_by_id.is_empty() or effective_cluster_size != cluster_size or next_topology != _grid_topology:
 		return build_from_registry(registry, effective_cluster_size)
 
 	var tiles: Array = Array(registry.call("get_all_tiles"))
@@ -249,7 +253,7 @@ func _collect_component_tiles(start_grid: Vector2i, cluster_id: Vector2i, walkab
 	var result: Array = []
 	var queue: Array = [start_grid]
 	visited[start_grid] = true
-	var directions: Array = _pathfinder.call("get_neighbor_directions")
+	var directions: Array = _pathfinder.call("get_neighbor_directions", registry)
 	while not queue.is_empty():
 		var current: Vector2i = Vector2i(queue.pop_front())
 		result.append(current)
@@ -274,7 +278,7 @@ func _build_portals(registry) -> void:
 
 
 func _build_portals_for_clusters(registry, cluster_ids: Array) -> void:
-	var directions: Array = _pathfinder.call("get_neighbor_directions")
+	var directions: Array = _pathfinder.call("get_neighbor_directions", registry)
 	for cluster_id_variant in cluster_ids:
 		var cluster_id: Vector2i = Vector2i(cluster_id_variant)
 		var cluster: Dictionary = Dictionary(_clusters_by_id.get(cluster_id, {}))
@@ -386,7 +390,8 @@ func _expand_dirty_cluster_lookup_for_portals(dirty_cluster_lookup: Dictionary) 
 		var cluster_id: Vector2i = Vector2i(cluster_variant)
 		if _clusters_by_id.has(cluster_id):
 			result[cluster_id] = true
-		for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var offsets: Array = HEX_GRID_SCRIPT.neighbor_directions() if _grid_topology == HEX_GRID_SCRIPT.TOPOLOGY_ID else [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+		for offset in offsets:
 			var neighbor_cluster_id: Vector2i = cluster_id + offset
 			if _clusters_by_id.has(neighbor_cluster_id):
 				result[neighbor_cluster_id] = true

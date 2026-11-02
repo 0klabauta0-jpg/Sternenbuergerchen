@@ -1,0 +1,199 @@
+{
+  "created": "2026-11-01",
+  "tool": "image_gen.imagegen built-in",
+  "latest_user_corrections": [
+    "mehr im Wimmelbildstil",
+    "ein bisschen weniger Details"
+  ],
+  "targets": [
+    {
+      "id": "terrain",
+      "file": "01_rostwelt_landschaft.png",
+      "prompt": "Use case: stylized-concept. Create an original 2D ART-DIRECTION TARGET illustration for SternenBuergerchen, a readable isometric sci-fi strategy game. The attached InselKrieg island illustration is STYLE reference only: transfer its richly illustrated miniature-world quality, clean precise primary forms, matte painted broad colors, warm sun and cool shadows, functional clustered everyday details; do not copy its island, old aircraft, sea or historical architecture. Subject: a broad beautiful rust-red and warm ochre alien highland, stratified eroded mesas, large angular rock formations grounded naturally, pale dusty basin with a winding service track and deliberately open navigable routes. One compact frontier outpost with ivory and muted slate-teal modular habitat, workshop with open working bay, a raised landing pad with simple small utilitarian shuttle, connected footpaths, service pipes, solar array and water tanks; several tiny naturally proportioned suited crew give scale and activity. Dry sage plants in small meaningful clusters, occasional grounded boulders. Composition landscape 16:9, elevated 3/4 isometric camera, scene fills frame, farther mesas and pale turquoise atmospheric sky, bright midday clarity, long readable planes, believable human-door scale. The ground should be warm LIGHT stone/terracotta and the structures distinguishable; quiet empty space is intentional. Detailed high-quality painterly game illustration, sharply readable silhouettes, no photorealistic texture grit, no toy plastic, no dense uniform scattering, no night darkness, no neon cyan grid, no text, no logos, no UI, no borders. This is an authored 2D target, not a runtime screenshot.",
+      "refs": [
+        "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+      ],
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-799ba7ec-054a-4b58-9d79-a859f876d704.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/01_rostwelt_landschaft.png",
+      "status": "2d_target_proposal",
+      "sha256": "e72d18f790117bf3add45f91433582c543c41c9a28f14d586eb26a66a06bc3ea",
+      "bytes": 3232166
+    },
+    {
+      "id": "people",
+      "file": "02_menschen_stilstudie.png",
+      "prompt": "Use case: stylized-concept. Create one coherent 2D character ART-DIRECTION TARGET sheet for SternenBuergerchen in the clear detailed illustrated miniature-world aesthetic of the attached InselKrieg style reference, adapted to a grounded frontier science-fiction world. Four full-body adult human crew with naturally proportioned anatomies, all same approximately 7-head-tall scale, entire feet and heads visible with generous separation on a pale dusty sandstone ground and soft muted blue-sky backdrop: (1) field operator in matte slate-teal segmented suit and cream shoulder/chest plates, amber visor and small rifle held safely lowered with both hands naturally contacting grips; (2) female pilot in practical muted terracotta pressure suit and ivory helmet under one arm, clear face and short dark hair; (3) male or female field mechanic in warm grey workwear with ochre utility vest, compact toolbox carried with relaxed grounded arm; (4) medic in off-white padded protective suit with muted teal panels, compact medical bag with a simple non-branded square green indicator. Subtle humanity and weight, coherent shoulder/armpit volumes and elbow/knee structure, boots, useful pockets, understated backpack/life-support. Clean large matte color panels, restrained weathering, crisp illustrated edges, soft sunlight, cool blue shadow, plausible worn equipment. Front 3/4 views, orthographic-like modeling reference clarity, relaxed nonidentical poses; proportions practical rather than heroic or cartoon-chibi. Maintain the same painterly illustrated storybook/wimmelbild rendering quality as the style reference but do not copy historical uniforms or people. No red cross symbol, no insignia, no brand logos, no words, no labels, no UI, no extra limbs, no floating props. Important: this is 2D concept reference art, not a 3D render or game screenshot.",
+      "refs": [
+        "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+      ],
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-dd8734f5-c07c-461c-83fe-3481123271b8.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+      "status": "2d_target_proposal",
+      "sha256": "994454732fc6b6b8713dd6eca6494c95d87f3984c3dbcb410230c0f3d8aff811",
+      "bytes": 2767466
+    },
+    {
+      "id": "outpost",
+      "file": "03_aussenposten_stilstudie.png",
+      "prompt": "Use case: stylized-concept. Create an original high-quality 2D environment/modeling target illustration for SternenBuergerchen, in the clear matte richly illustrated strategy-world aesthetic of the attached InselKrieg style image, adapted to Star Citizen-like functional frontier science-fiction construction. Three related small structures shown as a coherent open courtyard kit with spatial separation so their forms are legible: a cream and muted slate-teal habitat with meaningful segmented roof, visible human-height airlock and a small access stair/porch; a workshop with open front bay, structural ribs and compact machine bench under supported canopy, an ochre hoist inside; a small service module with grounded water tank, power unit and attached pipes leading into the workshop. Pale dusty terracotta terrain, one meandering connected service path, purposeful crates only by loading bay, three normal adult crew for credible scale, dry plants clustered at outer rocks. Doors and windows logically embedded in solid supporting walls, roofs and stairs plausible. Elevated 3/4 isometric angle at moderate distance; light blue sky band and warm sandstone mesa in the background; bright soft sun, matte broad ivory/teal/ochre blocks, fine illustrated construction detail, warm highlights and cool cast shadows. Keep the whole kit visible and legible, no sci-fi city, no excessive antenna forest, no floating unsupported panels, no neon bloom, no dark maroon ground, no repeating tile pedestals, no text, no logo, no interface. Match Insel illustration sophistication, not a photoreal rendering. It is a fresh 2D art target, not an implemented game scene.",
+      "refs": [
+        "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+      ],
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-bedb5b9c-22b9-4b53-92f9-1a974ad3299c.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+      "status": "2d_target_proposal",
+      "sha256": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+      "bytes": 3411898
+    },
+    {
+      "id": "cutlass_front",
+      "file": "04_cutlass_vorne.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/output/grafik_20261101/model_studies/cutlass/inspect_yplus.png",
+        "C:/Users/bjoer/AppData/Local/Temp/codex_ship_sources_20261101/cutlass_all.jpg",
+        "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png",
+        "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2025-11-04_21-28-50-B29.jpg"
+      ],
+      "prompt": "Use case: stylized-concept. Create a carefully faithful 2D painted modeling-reference illustration of the exact DRAKE spacecraft shown in the supplied neutral model view. Image roles: the grey OBJ model view is the EXACT GEOMETRY and CAMERA reference, the RSI colored view is the ship identity/surface construction reference, the InselKrieg illustration is rendering STYLE reference only, and the local Star Citizen sky screenshot is SKY/LIGHT reference only (do NOT copy its different ship). Transfer the richly illustrated strategy-game / storybook Wimmelbild quality: precise readable volumes, matte broad surfaces, fine but restrained panel detail, warm sun highlights and soft cool blue shadows. Blue-turquoise open daylight sky with sparse softly painted clouds; one ship only, full silhouette visible, centered occupying ~78% width, generous edge margin. A clear modeling reference with mild orthographic-like perspective; not a cinematic lens, not photorealistic, no motion blur, no pixel art, no blueprint, no labels, no logo, no text, no weapons firing, no UI. Ship remains industrial and believable; preserve the exact cockpit/hull/wing/engine relationships and count, do not turn it into a generic airplane or generic spaceship. Palette dark desaturated slate-teal body, selected warm ivory top armor panels, sparse small ochre maintenance markings, near-black glazed cockpit, small warm engines. Engine nozzles face aft, circular engine front faces are not exhausts. Landing gear retracted. SHIP: Cutlass Black. FRONT/ABOVE 3/4 view, match the grey geometry reference. Characteristic long thick rectangular cargo fuselage behind the forward down-curving angular glazed cockpit, short front shoulder wing/stub booms with tall rectangular vertical endplates, separate large rear engine pods on transverse pylons, single small dorsal twin-gun turret behind canopy. Keep front stub wings short, rear engines high and separate. Preserve source ship shape/proportions exactly; industrial transport with mass and utility, not a tiny sleek fighter. Warm ivory top armor is restrained and does not erase structural breaks.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-4a2cd3a2-f7cb-4b34-b4bb-e3bcbab7de5c.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/04_cutlass_vorne.png",
+      "status": "superseded_2d_target_preserved",
+      "sha256": "91821edff5c1c2353a14272c39be13e9718f393c3b9458f78a67fbbb13b7c615",
+      "bytes": 2170178
+    },
+    {
+      "id": "buccaneer_front",
+      "file": "06_buccaneer_vorne.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/output/grafik_20261101/model_studies/buccaneer/inspect_yplus.png",
+        "C:/Users/bjoer/AppData/Local/Temp/codex_ship_sources_20261101/bucc_action1.png",
+        "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png",
+        "C:/Users/bjoer/Pictures/StarCitizen - Screenshots/LIVE/4.6.0-live.11377160/ScreenShot-2025-11-04_21-28-50-B29.jpg"
+      ],
+      "prompt": "Use case: stylized-concept. Create a carefully faithful 2D painted modeling-reference illustration of the exact DRAKE spacecraft shown in the supplied neutral model view. Image roles: the grey OBJ model view is the EXACT GEOMETRY and CAMERA reference, the RSI colored view is the ship identity/surface construction reference, the InselKrieg illustration is rendering STYLE reference only, and the local Star Citizen sky screenshot is SKY/LIGHT reference only (do NOT copy its different ship). Transfer the richly illustrated strategy-game / storybook Wimmelbild quality: precise readable volumes, matte broad surfaces, fine but restrained panel detail, warm sun highlights and soft cool blue shadows. Blue-turquoise open daylight sky with sparse softly painted clouds; one ship only, full silhouette visible, centered occupying ~78% width, generous edge margin. A clear modeling reference with mild orthographic-like perspective; not a cinematic lens, not photorealistic, no motion blur, no pixel art, no blueprint, no labels, no logo, no text, no weapons firing, no UI. Ship remains industrial and believable; preserve the exact cockpit/hull/wing/engine relationships and count, do not turn it into a generic airplane or generic spaceship. Palette dark desaturated slate-teal body, selected warm ivory top armor panels, sparse small ochre maintenance markings, near-black glazed cockpit, small warm engines. Engine nozzles face aft, circular engine front faces are not exhausts. Landing gear retracted. SHIP: Drake Buccaneer. FRONT/ABOVE 3/4 view, match the grey geometry reference. A narrow long pointed framed cockpit pod projecting well ahead of the transverse engine pair, two huge cylindrical engine pods either side of the rear body, short trapezoid wing sections OUTSIDE the pods, long center dorsal gun/spine pointing FORWARD above canopy. Slightly wider than long, low height; small angular support frames and purposeful fixed guns. Engine forward circular faces must be DARK intake/machinery, no exhaust flames in front. Rear exhaust is only aft and mostly hidden from this view. Preserve compact scrappy light-fighter silhouette; no Cutlass-like cargo hull, no third big engine, no overlong airplane wings.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-0f6388d6-7de6-4d25-908b-d3d9a29b47f6.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/06_buccaneer_vorne.png",
+      "status": "superseded_2d_target_preserved",
+      "sha256": "f21e8c31cd20b5e8e94d20b6371379a18871d2688f501a0f1e9a37d5be1ee176",
+      "bytes": 2390828
+    },
+    {
+      "id": "cutlass_rear",
+      "file": "05_cutlass_hinten.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/output/grafik_20261101/model_studies/cutlass/inspect_yminus.png",
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/04_cutlass_vorne.png"
+      ],
+      "prompt": "Use case: stylized-concept. Create a carefully faithful 2D painted modeling-reference illustration of the exact DRAKE spacecraft shown in the supplied neutral model view. Image roles: the grey OBJ model view is the EXACT GEOMETRY and CAMERA reference, the RSI colored view is the ship identity/surface construction reference, the InselKrieg illustration is rendering STYLE reference only, and the local Star Citizen sky screenshot is SKY/LIGHT reference only (do NOT copy its different ship). Transfer the richly illustrated strategy-game / storybook Wimmelbild quality: precise readable volumes, matte broad surfaces, fine but restrained panel detail, warm sun highlights and soft cool blue shadows. Blue-turquoise open daylight sky with sparse softly painted clouds; one ship only, full silhouette visible, centered occupying ~78% width, generous edge margin. A clear modeling reference with mild orthographic-like perspective; not a cinematic lens, not photorealistic, no motion blur, no pixel art, no blueprint, no labels, no logo, no text, no weapons firing, no UI. Ship remains industrial and believable; preserve the exact cockpit/hull/wing/engine relationships and count, do not turn it into a generic airplane or generic spaceship. Palette dark desaturated slate-teal body, selected warm ivory top armor panels, sparse small ochre maintenance markings, near-black glazed cockpit, small warm engines. Engine nozzles face aft, circular engine front faces are not exhausts. Landing gear retracted. Images for this task: FIRST is the exact rear/above geometry AND CAMERA, SECOND is the already created front view of THE SAME SHIP with the exact paint/lighting/illustration style to preserve. Ignore the generic image-role list above and use these two roles. Create the matching REAR/ABOVE 3/4 view of that same Cutlass Black. It must face AWAY, showing the broad closed cargo rear ramp in center and the TWO separate large rear engine nozzles clearly, one each side on pylons; the cockpit is at the far end and partly hidden. Exact same continuous ivory stripe on cockpit/top center spine and ivory top shells on both pods, slate-teal hull, small ochre accents as the front target. No new engines or rear cabin, no new tall tail or airplane wings, no extra vertical stabilizers. Preserve front wing tip plates and upper turret from the exact grey geometry. Restrained small orange glow INSIDE rear exhaust nozzles only. Same daylight blue sky and sparse painted clouds, same full-ship margin. This is a real second view, not mirrored front view.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-1ae5c293-eb2a-47a3-a3f9-a0d408f656ea.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/05_cutlass_hinten.png",
+      "status": "superseded_2d_target_preserved",
+      "sha256": "458db594763b2a4d9f40cd51d573ca4fe531d56133a33150c12fec9f75034266",
+      "bytes": 2179635
+    },
+    {
+      "id": "buccaneer_rear",
+      "file": "07_buccaneer_hinten.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/output/grafik_20261101/model_studies/buccaneer/inspect_yminus.png",
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/06_buccaneer_vorne.png"
+      ],
+      "prompt": "Use case: stylized-concept. Create a carefully faithful 2D painted modeling-reference illustration of the exact DRAKE spacecraft shown in the supplied neutral model view. Image roles: the grey OBJ model view is the EXACT GEOMETRY and CAMERA reference, the RSI colored view is the ship identity/surface construction reference, the InselKrieg illustration is rendering STYLE reference only, and the local Star Citizen sky screenshot is SKY/LIGHT reference only (do NOT copy its different ship). Transfer the richly illustrated strategy-game / storybook Wimmelbild quality: precise readable volumes, matte broad surfaces, fine but restrained panel detail, warm sun highlights and soft cool blue shadows. Blue-turquoise open daylight sky with sparse softly painted clouds; one ship only, full silhouette visible, centered occupying ~78% width, generous edge margin. A clear modeling reference with mild orthographic-like perspective; not a cinematic lens, not photorealistic, no motion blur, no pixel art, no blueprint, no labels, no logo, no text, no weapons firing, no UI. Ship remains industrial and believable; preserve the exact cockpit/hull/wing/engine relationships and count, do not turn it into a generic airplane or generic spaceship. Palette dark desaturated slate-teal body, selected warm ivory top armor panels, sparse small ochre maintenance markings, near-black glazed cockpit, small warm engines. Engine nozzles face aft, circular engine front faces are not exhausts. Landing gear retracted. Images for this task: FIRST is the exact rear/above geometry AND CAMERA, SECOND is the already created front view of THE SAME SHIP with the exact paint/lighting/illustration style to preserve. Ignore the generic image-role list above and use these two roles. Create the matching REAR/ABOVE 3/4 view of that same Drake Buccaneer, in the precise pose of the grey model. Rear engines CLOSE to camera, long pointed framed cockpit pointing AWAY at far end; two large aft exhaust assemblies have exposed radial metal fins/petals around their dark circular interiors and tiny warm orange glow deep inside. Center dorsal long cannon still points forward away from camera. Short trapezoid wings outside pods with same ivory panels, desaturated slate-teal mechanical body, ivory top strips on both engine pods and central cockpit, thin ochre forward ring on each engine as front picture. NO central cargo box, NO Cutlass nose, NO additional ship, NO third main engine or big extra vertical tails. Fully faithful compact low silhouette, same daylight blue sky and clouds. The entire ship visible. This is a true reverse view, not a mirrored front view.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-2261c1ea-49a7-422b-bee2-f653ff0803a3.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/07_buccaneer_hinten.png",
+      "status": "superseded_2d_target_preserved",
+      "sha256": "bd0118b46c05c602cb9c375b826ff4c04a582355fb848abf4d2fde146ca4c56e",
+      "bytes": 2379763
+    },
+    {
+      "id": "cutlass_front_v2",
+      "file": "08_cutlass_vorne_wimmel.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/04_cutlass_vorne.png",
+        "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit the supplied ship illustration into a SIMPLER, MORE PAINTED WIMMELBILD / illustrated strategy-game model reference. User correction: a bit fewer details. FIRST IMAGE is the exact SHIP AND VIEW to keep. SECOND IMAGE is the InselKrieg style reference, used ONLY for hand-painted matte miniature-world style, NOT for historical objects. Make the SHIP itself visibly simpler: remove about two-thirds of tiny panel seams, scratches, bolts, wire bundles, engine micro-ribs and miscellaneous small greebles; merge them into broad deliberately shaped matte planes with clean edge highlights. Preserve the original full silhouette, main cockpit, major wings, engine number/placement and turret/central cannon identity. Crisp charming 2D painted illustration, slightly softened broad form, readable as a detailed miniature in a Wimmelbild game, clean volumetric painted shade and sunlit warm upper faces, cool shadow under planes. No shiny metal/no photorealistic material/no glossy PBR/no dense outlines/no microtexture/no etched filigree/no high-frequency clutter. Keep slate-teal / warm ivory / sparse ochre paint distribution. Calm light blue sky with a few soft painted cloud shapes, minimal background, no tiny people or extra props. The ship is whole and occupies 75-80% frame width with margins. No labels, logos, words, borders, UI, motion blur or weapons fire. Do NOT make a generic fighter, don't turn engines into airplane propellers. This is a simplified 2D MODEL TARGET; preserve the existing ship and view while simplifying its surface treatment. CUTLASS BLACK FRONT/ABOVE 3/4. Keep thick central cargo hull, forward drooped cockpit with dark broad panes, short front lateral booms ending in vertical plates, TWO large rear engine pods and small dorsal twin turret. Simplify mechanical clusters below engines into a few large recognizable blocks; wing edges clean. Entire ship in front view, same pose.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-1b0bec8d-9952-4cd3-b636-24e6c5d524d7.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png",
+      "status": "current_2d_target_proposal",
+      "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17",
+      "bytes": 1972494
+    },
+    {
+      "id": "cutlass_rear_v2",
+      "file": "09_cutlass_hinten_wimmel.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/05_cutlass_hinten.png",
+        "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit the supplied ship illustration into a SIMPLER, MORE PAINTED WIMMELBILD / illustrated strategy-game model reference. User correction: a bit fewer details. FIRST IMAGE is the exact SHIP AND VIEW to keep. SECOND IMAGE is the InselKrieg style reference, used ONLY for hand-painted matte miniature-world style, NOT for historical objects. Make the SHIP itself visibly simpler: remove about two-thirds of tiny panel seams, scratches, bolts, wire bundles, engine micro-ribs and miscellaneous small greebles; merge them into broad deliberately shaped matte planes with clean edge highlights. Preserve the original full silhouette, main cockpit, major wings, engine number/placement and turret/central cannon identity. Crisp charming 2D painted illustration, slightly softened broad form, readable as a detailed miniature in a Wimmelbild game, clean volumetric painted shade and sunlit warm upper faces, cool shadow under planes. No shiny metal/no photorealistic material/no glossy PBR/no dense outlines/no microtexture/no etched filigree/no high-frequency clutter. Keep slate-teal / warm ivory / sparse ochre paint distribution. Calm light blue sky with a few soft painted cloud shapes, minimal background, no tiny people or extra props. The ship is whole and occupies 75-80% frame width with margins. No labels, logos, words, borders, UI, motion blur or weapons fire. Do NOT make a generic fighter, don't turn engines into airplane propellers. This is a simplified 2D MODEL TARGET; preserve the existing ship and view while simplifying its surface treatment. CUTLASS BLACK REAR/ABOVE 3/4. Keep the broad central closed rear cargo ramp, TWO big aft circular nozzles, far forward cockpit, short front wing endplates and dorsal twin turret. Two rear nozzles have just a few thick concentric rings and tiny warm core, no dense fins or wiring. Preserve ivory dorsal center stripe and ivory engine top shells. Simplify mechanical clusters to a few major masses; same reverse pose.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-715eaf96-701d-419c-ad11-7e91aad59f0b.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/09_cutlass_hinten_wimmel.png",
+      "status": "current_2d_target_proposal",
+      "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9",
+      "bytes": 2017632
+    },
+    {
+      "id": "buccaneer_front_v2",
+      "file": "10_buccaneer_vorne_wimmel.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/06_buccaneer_vorne.png",
+        "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit the supplied ship illustration into a SIMPLER, MORE PAINTED WIMMELBILD / illustrated strategy-game model reference. User correction: a bit fewer details. FIRST IMAGE is the exact SHIP AND VIEW to keep. SECOND IMAGE is the InselKrieg style reference, used ONLY for hand-painted matte miniature-world style, NOT for historical objects. Make the SHIP itself visibly simpler: remove about two-thirds of tiny panel seams, scratches, bolts, wire bundles, engine micro-ribs and miscellaneous small greebles; merge them into broad deliberately shaped matte planes with clean edge highlights. Preserve the original full silhouette, main cockpit, major wings, engine number/placement and turret/central cannon identity. Crisp charming 2D painted illustration, slightly softened broad form, readable as a detailed miniature in a Wimmelbild game, clean volumetric painted shade and sunlit warm upper faces, cool shadow under planes. No shiny metal/no photorealistic material/no glossy PBR/no dense outlines/no microtexture/no etched filigree/no high-frequency clutter. Keep slate-teal / warm ivory / sparse ochre paint distribution. Calm light blue sky with a few soft painted cloud shapes, minimal background, no tiny people or extra props. The ship is whole and occupies 75-80% frame width with margins. No labels, logos, words, borders, UI, motion blur or weapons fire. Do NOT make a generic fighter, don't turn engines into airplane propellers. This is a simplified 2D MODEL TARGET; preserve the existing ship and view while simplifying its surface treatment. DRAKE BUCCANEER FRONT/ABOVE 3/4. Keep narrow projecting pointed framed cockpit, TWO oversized cylindrical engine pods beside rear half, short trapezoid outer wings, one long central dorsal gun pointing forward. Circular faces at FRONT of engine pods are DARK intakes/machinery, NEVER flames or lights. Simplify each pod to smooth thick readable cylinder with just 2-3 broad rings, big ivory top stripe, sparse ochre accent. Remove thin micro-pipes and most panel seams. Keep just main fixed weapons as bold simple shapes. Same front pose.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-37b6fa02-98d5-4a8c-83cd-c42300ae78eb.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/10_buccaneer_vorne_wimmel.png",
+      "status": "superseded_equipment_simplification_preserved",
+      "sha256": "214ce60690a687717aab040447cb031a0da0a3d5e06f48af8ddb5e47b10905e9",
+      "bytes": 2077532
+    },
+    {
+      "id": "buccaneer_rear_v2",
+      "file": "11_buccaneer_hinten_wimmel.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/07_buccaneer_hinten.png",
+        "C:/dev/InselKrieg/game/docs/art/referenzen/Illustrationsserie_20261029/01_sichelbucht.png"
+      ],
+      "prompt": "Use case: style-transfer. Edit the supplied ship illustration into a SIMPLER, MORE PAINTED WIMMELBILD / illustrated strategy-game model reference. User correction: a bit fewer details. FIRST IMAGE is the exact SHIP AND VIEW to keep. SECOND IMAGE is the InselKrieg style reference, used ONLY for hand-painted matte miniature-world style, NOT for historical objects. Make the SHIP itself visibly simpler: remove about two-thirds of tiny panel seams, scratches, bolts, wire bundles, engine micro-ribs and miscellaneous small greebles; merge them into broad deliberately shaped matte planes with clean edge highlights. Preserve the original full silhouette, main cockpit, major wings, engine number/placement and turret/central cannon identity. Crisp charming 2D painted illustration, slightly softened broad form, readable as a detailed miniature in a Wimmelbild game, clean volumetric painted shade and sunlit warm upper faces, cool shadow under planes. No shiny metal/no photorealistic material/no glossy PBR/no dense outlines/no microtexture/no etched filigree/no high-frequency clutter. Keep slate-teal / warm ivory / sparse ochre paint distribution. Calm light blue sky with a few soft painted cloud shapes, minimal background, no tiny people or extra props. The ship is whole and occupies 75-80% frame width with margins. No labels, logos, words, borders, UI, motion blur or weapons fire. Do NOT make a generic fighter, don't turn engines into airplane propellers. This is a simplified 2D MODEL TARGET; preserve the existing ship and view while simplifying its surface treatment. DRAKE BUCCANEER REAR/ABOVE 3/4. Cockpit points away at far end, TWO engine exhausts near camera. Keep the same radial petal-like exhaust shapes but simplify to a few broad thick painted vanes, NOT dozens of thin separate rods. Cylindrical pods smooth broad slate/ivory paint, just 2-3 broad rings and restrained ochre detail; outer short trapezoid wings with clean ivory upper panel. One dorsal central gun points forward away. No central cargo cabin. Same reverse pose. This should clearly match the simplified front view in form and palette.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-c0cb0af0-c482-4504-a558-83ca5e062e54.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+      "status": "current_2d_target_proposal",
+      "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d",
+      "bytes": 2079946
+    },
+    {
+      "id": "buccaneer_rear_v3",
+      "file": "12_buccaneer_hinten_wimmel_konsistent.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/10_buccaneer_vorne_wimmel.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Image1 is the EDIT TARGET: simplified Wimmelbild-style Drake Buccaneer REAR/ABOVE view. Image2 is the same ship FRONT/ABOVE view and serves only as equipment-consistency reference. Change only ONE small thing in image1: restore the small simple dark paired fixed gun barrels under the outer wing edges, matching their location and length on image2; especially the clearly visible near wing at lower-right in the REAR view must have its small two-barrel assembly pointing toward the NOSE (away from the camera, toward upper-right), not toward the rear/exhaust. Also retain the symmetrical opposite assembly where it would be visible. These are only a few clean understated shapes, with no bolts, no cables, no firing. Keep EVERY other part of image1 unchanged: exact camera, full silhouette, both engines and simplified aft petals, center cannon, painted matte style, reduced detail, slate/ivory/ochre colors, sky/clouds and framing. Do not add any other equipment. No text, logos, labels, UI. Keep the entire image as the same clean hand-painted 2D game modeling reference.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-3482611d-f770-443b-a31c-33096828e072.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/12_buccaneer_hinten_wimmel_konsistent.png",
+      "status": "rejected_pair_direction_trial_preserved",
+      "sha256": "cc7d7db4776f6b957a28f7297275678368b2d017b35bcd91d512a64095699454",
+      "bytes": 2054975
+    },
+    {
+      "id": "buccaneer_front_v3",
+      "file": "13_buccaneer_vorne_wimmel_vereinfacht.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/10_buccaneer_vorne_wimmel.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Edit only this one small detail on the supplied simplified painted Buccaneer front/above illustration. REMOVE the small paired gun barrels sticking out UNDER the far-right outer wing tip, and REMOVE the corresponding small gun barrels under the near-left outer wing tip. Cleanly paint matching sky or wing surface in the tiny removed areas. Keep the large CENTRAL DORSAL CANNON completely unchanged. The user's instruction is 'a little fewer details', so the little under-wing weapons are intentionally omitted from this simplified game-art interpretation. Change nothing else: exact same ship silhouette, cockpit, engine pods, outer wing panels, central cannon, all colors, shadows, sky and clouds, camera, framing, image dimensions, painted Wimmelbild illustration style. No new detail, no new guns, no text, no logo, no UI. This should look like exactly the original image with just those tiny under-wing barrels removed.",
+      "source": "C:\\Users\\bjoer\\.codex\\generated_images\\01a196e5-da26-7c90-acdc-aaa1a53ff8cd\\exec-61af0d60-f605-4973-81af-d490a7d0b621.png",
+      "project_file": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+      "status": "current_2d_target_proposal",
+      "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d",
+      "bytes": 1942254
+    }
+  ],
+  "latest_ship_targets": [
+    "cutlass_front_v2",
+    "cutlass_rear_v2",
+    "buccaneer_front_v3",
+    "buccaneer_rear_v2"
+  ],
+  "final_consistency_note": "Small underwing gun barrels intentionally omitted from both simplified Buccaneer 2D views; main dorsal cannon retained. Rejected rear barrel-direction trial12 retained only for provenance."
+}

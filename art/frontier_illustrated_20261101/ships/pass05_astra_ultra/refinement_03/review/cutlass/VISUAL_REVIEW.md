@@ -1,0 +1,9 @@
+# Cutlass – Sichtprüfung Refinement 03
+
+Die unabhängige Prüfung öffnete alle zwölf finalen Render (fünf Material-, vier Baugruppen-/Draht-, drei frische GLB-Ansichten) und drei Vergleichstafeln. Root öffnete zusätzlich alle drei finalen Tafeln und die erste Front-/Draufsichtprobe. `package_binding.json` bindet Quelle, GLB, Audit, Renderbefehle und Vergleichsmanifest. Acht identische Kamera-/Lichtpaare und 23 Hash-Bindungen bestehen ohne Fehler.
+
+Im vollständigen Draufsichtvergleich sind die schmaleren Vorderflügel und die beiden neuen kleinen Frontpods eindeutig sichtbar. Die großen hinteren Pods bleiben trotz kleinerem Durchmesser die äußerste Seitenkontur. Die Vorderpods folgen ungefähr deren Achsen, sitzen jedoch leicht weiter innen. Cockpit und bemannter Turm bleiben sichtbar erhalten. Der Front-/Heckvergleich zeigt dieselbe vierteilige Antriebsanordnung; eine entfernte Frontgondel wird in der vorderen Dreiviertelansicht teilweise von ihrer Endplatte verdeckt. Quellmodell und frisch importierter GLB wirken in den drei gemeinsamen Ansichten konsistent. Keine neu sichtbaren abgetrennten Baugruppen oder auffälligen Schattierungsfehler.
+
+Gemessene Verhältnisse stehen in `../../cutlass/review/final/evaluated_proportions.json`: Frontdüsendurchmesser 50 % der Heckdüse, hintere äußere Kontur 0,818 m pro Seite weiter außen, Vorderflügelspanne −29,2 %, erhaltene Kanzel-/Turmgeometrie. Die Form ist eine bewusste Nutzeränderung gegenüber den Originalillustrationen, kein Anspruch engerer Originalrekonstruktion.
+
+Große ruhige Flächen, einfache Glaswirkung und reduzierte Mechanik bleiben stilistische Vereinfachungen. Größenproxy im Turm ist kein vollständiger Innenraum-/Ergonomienachweis. Technisch geprüfter statischer Kandidat, keine ästhetische Nutzerfreigabe und keine native Godot-Abnahme.

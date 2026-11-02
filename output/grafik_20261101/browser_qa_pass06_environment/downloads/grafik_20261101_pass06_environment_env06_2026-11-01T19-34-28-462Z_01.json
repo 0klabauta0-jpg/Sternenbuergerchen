@@ -1,0 +1,1839 @@
+{
+  "schema": "sternenbuergerchen.html_workbench.v1",
+  "report_id": "grafik_20261101_pass06_environment_env06",
+  "title": "SternenBürgerchen · Pass06 Umgebung",
+  "exported_at": "2026-11-01T19:34:28.459Z",
+  "controls": {
+    "comparison": {
+      "view": "closed_hall",
+      "mode": "wipe",
+      "wipe": 63,
+      "decision": "closer"
+    },
+    "catalog": {
+      "query": "",
+      "group": "all"
+    },
+    "asset_decisions": {
+      "ref_rostgrenze": "open",
+      "ref_freihafen": "open",
+      "ref_tactical": "open",
+      "after_closed_hall": "revise"
+    }
+  },
+  "notes": {
+    "comparison": "QA P06: Randrelief gegen P05 erkennbar prüfen.",
+    "global": "QA P06: Materialroute und Spielabstand, keine Nutzerabnahme.",
+    "assets": {
+      "ref_rostgrenze": "",
+      "ref_freihafen": "",
+      "ref_tactical": "",
+      "after_closed_hall": "QA P06: Abrieb an der Hallenfront prüfen — äöü."
+    }
+  },
+  "active_choices": {
+    "target": "ref_tactical",
+    "view": "closed_hall",
+    "mode": "wipe",
+    "group": "all"
+  },
+  "computed": {
+    "revision": "env06",
+    "pairs": 12,
+    "native_captures": 20,
+    "targets": 3,
+    "images": 35,
+    "primary_glbs_unchanged": true,
+    "raw_stock_sources_unchanged": true,
+    "legacy_campaign_migrated": false
+  },
+  "metadata": {
+    "working_notes_only": true,
+    "storage_available": true,
+    "verification": {
+      "schema": "sternenbuergerchen.graphics_pass06_environment_verification.v1",
+      "report_revision": "env06",
+      "code_commit": "5929d3dabf8535ba5652065110ae2252d5f38b69",
+      "code_commit_pushed": true,
+      "based_on_unintegrated_graphics_branch": "task/grafikreferenzen-20261101",
+      "previous_handoff_commit": "04e934f60",
+      "engine_report": "output/grafik_20261101/pass06_environment_check_runs/20261101T192055Z-pid105384/metadata/report.json",
+      "engine_report_sha256": "6e665945b19670949d7f82841db96f498bb8b2c228cb18113e2d2013435a97de",
+      "engine_checks_passed": 21,
+      "engine_checks_selected": 21,
+      "native_captures": 20,
+      "capture_records": [
+        {
+          "id": "overview",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/overview.png",
+          "sha256": "7aff4279abc4fbd3d4541aa2b3d9ec34d0eec5a14cc06a78a081ded6a71ee634"
+        },
+        {
+          "id": "hex_grid",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/hex_grid.png",
+          "sha256": "70bbe55bd3d6d59f801f10b0e5a5b7b941fd7056e2b7c9191684cd16e0629e52"
+        },
+        {
+          "id": "crew",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/crew.png",
+          "sha256": "60c1442c40ee9389565868f47c7dd43a136955c7da4edb3eb80b03202574d2e8"
+        },
+        {
+          "id": "workshop",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/workshop.png",
+          "sha256": "03a4e7a6500203aa8444274f9efc789579b4cff6e8738c5358c3c087f86433ea"
+        },
+        {
+          "id": "landscape",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/landscape.png",
+          "sha256": "04bebc262c0836a354a2c99f933de766f76100edfbfc5b176bdaa41a3d217659"
+        },
+        {
+          "id": "cutaway",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutaway.png",
+          "sha256": "11bca3e0761c3ed350a265c91908f7dfab4604373247103f176d2e49134f76e9"
+        },
+        {
+          "id": "outpost",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/outpost.png",
+          "sha256": "8bf3d49686cda559dd8dcc0716e34e03b3973fbdea821b7d3aaaa5c7fec558af"
+        },
+        {
+          "id": "cutlass_front",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutlass_front.png",
+          "sha256": "4fe895dcae105afc9a3e318d457de68fdab2b5bbaed3cbc5a51600155dd8da03"
+        },
+        {
+          "id": "cutlass_rear",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutlass_rear.png",
+          "sha256": "227963cf4b81053e9b283d98d4bcbb6a2d74b0aad026208fdc03d42502e409ab"
+        },
+        {
+          "id": "buccaneer_front",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/buccaneer_front.png",
+          "sha256": "61737b8577574f71b1e87bb77e21528e74e512cdb36cfbd1582013b16c42e00a"
+        },
+        {
+          "id": "buccaneer_rear",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/buccaneer_rear.png",
+          "sha256": "ab6645db8f8f062a8524cedd736f5bb6f61ebfe4abbd151b2674cd821323ebd0"
+        },
+        {
+          "id": "utility",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/utility.png",
+          "sha256": "00490bfa62af9808ab5f8d8882f03f749263c64ef9c9c27d9f36c3f93948473b"
+        },
+        {
+          "id": "closed_outpost",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_outpost.png",
+          "sha256": "06b3067b8d8fc454472962f20d8d803798e79deecc3398491e836206ec10b4bf"
+        },
+        {
+          "id": "closed_habitat",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_habitat.png",
+          "sha256": "ec3fb7d1bf6c9023822f0930093460d22fbbedafdd9d517190650e5562b6ec00"
+        },
+        {
+          "id": "closed_hall",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_hall.png",
+          "sha256": "fe4d54b9830ca37f4a4b641f9fec60f9d6a0c718553b41a691e54b993b9c8d65"
+        },
+        {
+          "id": "lived_outpost",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/lived_outpost.png",
+          "sha256": "4579f503d72fe0ec9c85ceb31ed97fe2c0c5a22d92be856149c3269f09a9bf5d"
+        },
+        {
+          "id": "ground_detail",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/ground_detail.png",
+          "sha256": "d625b813a6e9d4dc082679afb0c48f256c6151554086e77c7b17172dccebb566"
+        },
+        {
+          "id": "geology_detail",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/geology_detail.png",
+          "sha256": "b810377f840315c4a39a42ec8c7117505550a81175e72fc7d3e42f248dddce2b"
+        },
+        {
+          "id": "baseline",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/baseline.png",
+          "sha256": "22d7a285ead8986b3264d240f92d7e3fb89d0b6ab23eacdb09f8fa98409f881f"
+        },
+        {
+          "id": "walk_pose",
+          "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/walk_pose.png",
+          "sha256": "d8cb7a37d5c131c99d99ba9d8ab0bccb59a71721bef12f18203fa3a5fb2ace41"
+        }
+      ],
+      "pairs": [
+        {
+          "id": "lived_outpost",
+          "title": "Arbeitsbereich",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/lived_outpost.png",
+          "before_sha256": "91976f10b91c83398a4f2f1d1b964ea8e02b06284a1332c145d5fe6c93f6221d",
+          "before_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 10.5,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.40602, 13.9888, 18.36988)]",
+            "error": 0,
+            "id": "lived_outpost",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/lived_outpost.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/lived_outpost.png",
+          "after_sha256": "4579f503d72fe0ec9c85ceb31ed97fe2c0c5a22d92be856149c3269f09a9bf5d",
+          "after_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 10.5,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.40602, 13.9888, 18.36988)]",
+            "error": 0,
+            "id": "lived_outpost",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/lived_outpost.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "ground_detail",
+          "title": "Boden / Kontakte",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/ground_detail.png",
+          "before_sha256": "c5183707cf47a495506140ec5c706005d376d69c48b383e36e80cd1c367272fa",
+          "before_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 4.8,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.344932, 0.529919, -0.77473), Z: (0.215538, 0.848048, 0.484105), O: (19.37968, 15.46487, 17.6139)]",
+            "error": 0,
+            "id": "ground_detail",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/ground_detail.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/ground_detail.png",
+          "after_sha256": "d625b813a6e9d4dc082679afb0c48f256c6151554086e77c7b17172dccebb566",
+          "after_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 4.8,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.344932, 0.529919, -0.77473), Z: (0.215538, 0.848048, 0.484105), O: (19.37968, 15.46487, 17.6139)]",
+            "error": 0,
+            "id": "ground_detail",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/ground_detail.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "geology_detail",
+          "title": "Felsdetail",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/geology_detail.png",
+          "before_sha256": "26d6722362c49554aa6b666670f29f1064e78050d9ec87d3394b179a771265e5",
+          "before_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 8.5,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.250412, 0.788011, -0.562435), Z: (0.320513, 0.615662, 0.719884), O: (25.86923, 11.28191, 15.4579)]",
+            "error": 0,
+            "id": "geology_detail",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/geology_detail.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/geology_detail.png",
+          "after_sha256": "b810377f840315c4a39a42ec8c7117505550a81175e72fc7d3e42f248dddce2b",
+          "after_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 8.5,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.250412, 0.788011, -0.562435), Z: (0.320513, 0.615662, 0.719884), O: (25.86923, 11.28191, 15.4579)]",
+            "error": 0,
+            "id": "geology_detail",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/geology_detail.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "closed_outpost",
+          "title": "Außenposten geschlossen",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_outpost.png",
+          "before_sha256": "4de4b4f369896fb4466ef97f33ade16f3488be2c6f61c84882406ea5599803cd",
+          "before_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 18,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (17.60601, 13.9888, 19.76988)]",
+            "error": 0,
+            "id": "closed_outpost",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_outpost.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_outpost.png",
+          "after_sha256": "06b3067b8d8fc454472962f20d8d803798e79deecc3398491e836206ec10b4bf",
+          "after_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 18,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (17.60601, 13.9888, 19.76988)]",
+            "error": 0,
+            "id": "closed_outpost",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_outpost.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "closed_habitat",
+          "title": "Basis geschlossen",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_habitat.png",
+          "before_sha256": "bd61fb85432ec22d8eb4119b87d2f3cfe8e7b29f66fd3604e97a07507f0964cd",
+          "before_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 3.6,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+            "error": 0,
+            "id": "closed_habitat",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_habitat.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_habitat.png",
+          "after_sha256": "ec3fb7d1bf6c9023822f0930093460d22fbbedafdd9d517190650e5562b6ec00",
+          "after_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 3.6,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+            "error": 0,
+            "id": "closed_habitat",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_habitat.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "closed_hall",
+          "title": "Halle geschlossen",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_hall.png",
+          "before_sha256": "ae411ef8cbd550196c39fd894850ff9cc4cf794477624ac65be2f087bdc05712",
+          "before_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 4.2,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+            "error": 0,
+            "id": "closed_hall",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_hall.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_hall.png",
+          "after_sha256": "fe4d54b9830ca37f4a4b641f9fec60f9d6a0c718553b41a691e54b993b9c8d65",
+          "after_camera": {
+            "building_shells_visible": true,
+            "camera_projection": 1,
+            "camera_size": 4.2,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+            "error": 0,
+            "id": "closed_hall",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_hall.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "landscape",
+          "title": "Weites Gelände",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/landscape.png",
+          "before_sha256": "90b41a35153a6ef53dbc9a8096e7ac00adda35d5342ecd046f525dd4db986cae",
+          "before_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 23,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+            "error": 0,
+            "id": "landscape",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/landscape.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/landscape.png",
+          "after_sha256": "04bebc262c0836a354a2c99f933de766f76100edfbfc5b176bdaa41a3d217659",
+          "after_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 23,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+            "error": 0,
+            "id": "landscape",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/landscape.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "overview",
+          "title": "Übersicht / Schnitt",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/overview.png",
+          "before_sha256": "dbed07bbebcc3e9f544aa8037ecde74ad295d6af636b5c5e959ff2c78880c293",
+          "before_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 12,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+            "error": 0,
+            "id": "overview",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/overview.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/overview.png",
+          "after_sha256": "7aff4279abc4fbd3d4541aa2b3d9ec34d0eec5a14cc06a78a081ded6a71ee634",
+          "after_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 12,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+            "error": 0,
+            "id": "overview",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/overview.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "workshop",
+          "title": "Werkstatt / Schnitt",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/workshop.png",
+          "before_sha256": "0a18924f063d7821e72feb9dc61d2a5999b5cef0189f478958ca8567b1afef14",
+          "before_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 4.2,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+            "error": 0,
+            "id": "workshop",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/workshop.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/workshop.png",
+          "after_sha256": "03a4e7a6500203aa8444274f9efc789579b4cff6e8738c5358c3c087f86433ea",
+          "after_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 4.2,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+            "error": 0,
+            "id": "workshop",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/workshop.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "crew",
+          "title": "Crew",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/crew.png",
+          "before_sha256": "c6572de7164b3d5141be22cbd148ee73f92e19307a86dea4be5d886b96547151",
+          "before_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 2.5,
+            "camera_transform": "[X: (1.0, 0.0, 0.0), Y: (0.0, 0.978148, -0.207912), Z: (0.0, 0.207912, 0.978148), O: (12.15, 4.04241, 27.00666)]",
+            "error": 0,
+            "id": "crew",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/crew.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/crew.png",
+          "after_sha256": "60c1442c40ee9389565868f47c7dd43a136955c7da4edb3eb80b03202574d2e8",
+          "after_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 2.5,
+            "camera_transform": "[X: (1.0, 0.0, 0.0), Y: (0.0, 0.978148, -0.207912), Z: (0.0, 0.207912, 0.978148), O: (12.15, 4.04241, 27.00666)]",
+            "error": 0,
+            "id": "crew",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/crew.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "hex_grid",
+          "title": "Hexraster",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/hex_grid.png",
+          "before_sha256": "90445757369cdcea8d53c2883796bed6c5378868fc2ba139a3f81b30563133e2",
+          "before_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 12,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+            "error": 0,
+            "id": "hex_grid",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/hex_grid.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/hex_grid.png",
+          "after_sha256": "70bbe55bd3d6d59f801f10b0e5a5b7b941fd7056e2b7c9191684cd16e0629e52",
+          "after_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 12,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+            "error": 0,
+            "id": "hex_grid",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/hex_grid.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        },
+        {
+          "id": "cutaway",
+          "title": "Basis / Schnitt",
+          "before": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/cutaway.png",
+          "before_sha256": "d8b590e50f0fd45e0523c1fbce6dd310ae5b0d891c057b62348060fe8bf839ac",
+          "before_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 3.6,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+            "error": 0,
+            "id": "cutaway",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/cutaway.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "after": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutaway.png",
+          "after_sha256": "11bca3e0761c3ed350a265c91908f7dfab4604373247103f176d2e49134f76e9",
+          "after_camera": {
+            "building_shells_visible": false,
+            "camera_projection": 1,
+            "camera_size": 3.6,
+            "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (13.00602, 13.9888, 16.76988)]",
+            "error": 0,
+            "id": "cutaway",
+            "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutaway.png",
+            "profile_enabled": true,
+            "viewport_size": "(1920.0, 1080.0)"
+          },
+          "camera_match": true
+        }
+      ],
+      "runtime_sources_sha256": {
+        "res://scripts/terrain/frontier_art_dressing.gd": "86fc88c484dbe82e0f989edea7c0c58a38388ad70bf7e5c5b8410295ff1c74b0",
+        "res://scripts/terrain/frontier_art_geology.gd": "e0c68350e32e041956d41a6b383661db76d01be5aa2ee18596bd22380000ae58",
+        "res://scripts/terrain/frontier_art_profile.gd": "9ea54d24eb732ea804e750d2543e15fd85c4f1ba3b4f1d19c78c591629f26c0f",
+        "res://scripts/terrain/frontier_closed_buildings.gd": "f29315d4b3aa782149a8ad42312658fc53973595f289fab2b257e557c5a07b9e",
+        "res://scripts/terrain/frontier_outpost_pad.gd": "0f2ac2200330f473c1fcd2fa3c57ef779a530f55c0d9c62991ba5713b24805b2",
+        "res://scripts/terrain/frontier_worklife.gd": "15f26e2e951a34a60c111f3c69b36ab7490c0336e36065efa9a01721c9174656",
+        "res://scripts/tests/frontier_art_preview.gd": "2ccde357cd185f6991e615d211ae43956f00852d27d9a523b1f0411f410f9003",
+        "res://shaders/terrain/frontier_building_wear.gdshader": "57463c649ee0f1b900b4d3e40e4f3586e21f222350bdfa9310e9948760d8734b",
+        "res://shaders/terrain/frontier_contact_paint.gdshader": "ff8d87e7082dc6e6f4611db6bd18cdb0514720efd7ca0a07108ffd2807389e2f",
+        "res://shaders/terrain/frontier_ground.gdshader": "240231803877d0bcfe77563f859a623dc8ff38eb97d042942fcccb77357eec4b"
+      },
+      "after_capture_sha256": "c5ed380994bacbb0514eb94a0e984af40a02e22c7e87f40b15b5fb2ff332e60c",
+      "before_capture_sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610",
+      "before_manifest": "output/grafik_20261101/pass06_environment_before_manifest.json",
+      "before_manifest_sha256": "3fdc9953fe281844c8a70dbfe825ee4169e4faad2a0804471c92c5db2620cce6",
+      "archived_pass05_html_sha256": "ab79aeec33e86fcf2c4cbe1751937dba6e1b6b8f81b84f2e355d2a51981a28aa",
+      "source_packages": {
+        "buildings": {
+          "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/manifest.json",
+          "sha256": "9c5c6b9a99cb3697aa74e41f38517a55351f6de5bbf7b81f213fd6ea47865be7"
+        },
+        "geology": {
+          "path": "art/frontier_illustrated_20261101/environment/pass06/geology/manifest.json",
+          "sha256": "bcdb03545193f527f24d7a26e81e42f4ec22657878aeaed0cea715ad70b4b059"
+        },
+        "ground_paint": {
+          "path": "art/frontier_illustrated_20261101/environment/pass06/ground_paint/manifest.json",
+          "sha256": "adfa01715395f6eb889bbedfb630eb05597e92550678456853666b10e741d0a0"
+        }
+      },
+      "primary_glb_hashes_unchanged": true,
+      "raw_stock_sources_unchanged": true,
+      "renderer_match": true,
+      "lighting_match": true,
+      "camera_transforms_match": true,
+      "material_route": "Intentionally revised: ground/rock/building wear is part of P06, not a constant material assumption.",
+      "scope": "Relief limited to protected geology envelopes; finer erosion and material wear. Playable hex centers, paths/pads, height/LOS facts, ships/citizens/Astra and global lighting are not migrated.",
+      "remaining_visual_differences": "Playable ground remains flat and real relief is limited to the existing protected geology envelopes. Cliff masses/crowns remain broad and prismatic. The2Dreferences retain more small depressions, denser usage detail and richer composition. Wear concerns authored closed shells; original GLB cutaways/citizens/ships remain unchanged. Technical checks are not user artistic or general performance/release acceptance.",
+      "ship_user_status": "Retained criticized R02 models; separate Astra work is not automatically adopted."
+    },
+    "source_packages": {
+      "buildings": {
+        "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/manifest.json",
+        "sha256": "9c5c6b9a99cb3697aa74e41f38517a55351f6de5bbf7b81f213fd6ea47865be7",
+        "data": {
+          "schema": "sternenbuergerchen.pass06_building_wear.v1",
+          "task": "docs/tasks/ART_2026_11_01_pass06_environment.md",
+          "status": "material candidate frozen for parent integration; no artistic user approval",
+          "runtime_sources": [
+            {
+              "path": "scripts/terrain/frontier_closed_buildings.gd",
+              "sha256": "f29315d4b3aa782149a8ad42312658fc53973595f289fab2b257e557c5a07b9e"
+            },
+            {
+              "path": "shaders/terrain/frontier_building_wear.gdshader",
+              "sha256": "57463c649ee0f1b900b4d3e40e4f3586e21f222350bdfa9310e9948760d8734b"
+            }
+          ],
+          "before_builder": {
+            "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/source/frontier_closed_buildings_before.gd",
+            "sha256": "0055e1faba87a0fbbc5073a614a3d8670f00a43789e246608b9e4f899f72dc97"
+          },
+          "editable_sources": [
+            "source/frontier_closed_buildings_pass06.gd",
+            "source/frontier_building_wear.gdshader"
+          ],
+          "assets": [
+            {
+              "id": "habitat",
+              "geometry": {
+                "bounds_max": [
+                  1.2924998998642,
+                  1.20255744457245,
+                  1.46049988269806
+                ],
+                "bounds_min": [
+                  -1.2924998998642,
+                  0,
+                  -1.27499997615814
+                ],
+                "clockwise_normal_errors": 0,
+                "combined_bounds_local": "[P: (-1.2925, 0.0, -1.275), S: (2.585, 1.202557, 2.7355)]",
+                "conservative_detached_candidates": [],
+                "degenerate_triangles": 0,
+                "finite": true,
+                "height_extension": 0.150807499885559,
+                "id": "habitat",
+                "includes_label_bounds": true,
+                "mesh_count": 57,
+                "nonpaired_welded_edges": 0,
+                "original_bounds_local": "[P: (-1.2075, 0.0, -1.2425), S: (2.415, 1.05175, 2.485)]",
+                "roof_parts": [
+                  "HabitatRoofWell",
+                  "HabitatWestRoof",
+                  "HabitatRearRoof",
+                  "HabitatFrontRoof",
+                  "HabitatLifeSupportBase",
+                  "HabitatLifeSupportInset",
+                  "LifeSupportLouver",
+                  "HabitatRoofServicePlate"
+                ],
+                "triangles": 2588,
+                "window_frames_clear": true,
+                "xz_extensions": [
+                  0.0849999189376831,
+                  0.0849999189376831,
+                  0.0325000286102295,
+                  0.217999935150146
+                ]
+              },
+              "materials": {
+                "emissive_meshes": 4,
+                "exempt_materials_preserved": true,
+                "geometry_identical": true,
+                "glass_meshes": 4,
+                "id": "habitat",
+                "p05_geometry_sha256": "6bfe701f0177e976fcceae8adf26b9aa34402488f1eab8ca2098446563e111ce",
+                "p06_geometry_sha256": "6bfe701f0177e976fcceae8adf26b9aa34402488f1eab8ca2098446563e111ce",
+                "per_part_bounds_valid": true,
+                "preserved_standard_or_emissive_meshes": 13,
+                "roles": {
+                  "painterly_wear:base": 5,
+                  "painterly_wear:paint": 17,
+                  "painterly_wear:roof": 6,
+                  "painterly_wear:structure": 16
+                },
+                "shared_wear_materials": 26,
+                "translated_origin_valid": true,
+                "wear_meshes": 44
+              },
+              "geometry_change": false
+            },
+            {
+              "id": "hall",
+              "geometry": {
+                "bounds_max": [
+                  1.92249989509583,
+                  1.61680018901825,
+                  1.42925000190735
+                ],
+                "bounds_min": [
+                  -1.92249989509583,
+                  0,
+                  -1.24624991416931
+                ],
+                "clockwise_normal_errors": 0,
+                "combined_bounds_local": "[P: (-1.9225, 0.0, -1.24625), S: (3.845, 1.6168, 2.6755)]",
+                "conservative_detached_candidates": [],
+                "degenerate_triangles": 0,
+                "finite": true,
+                "height_extension": 0.14680016040802,
+                "id": "hall",
+                "includes_label_bounds": true,
+                "mesh_count": 58,
+                "nonpaired_welded_edges": 0,
+                "original_bounds_local": "[P: (-1.8375, 0.0, -1.21625), S: (3.675, 1.47, 2.4325)]",
+                "roof_parts": [
+                  "IndustrialBayRoof",
+                  "OfficeRoofShoulder",
+                  "OfficeRoofField",
+                  "HallRoofMonitorBase",
+                  "HallRoofMonitorCap",
+                  "MonitorClerestory",
+                  "HallRoofCrossRib"
+                ],
+                "triangles": 2508,
+                "window_frames_clear": true,
+                "xz_extensions": [
+                  0.0849999189376831,
+                  0.0849999189376831,
+                  0.0299999713897705,
+                  0.213000059127808
+                ]
+              },
+              "materials": {
+                "emissive_meshes": 3,
+                "exempt_materials_preserved": true,
+                "geometry_identical": true,
+                "glass_meshes": 2,
+                "id": "hall",
+                "p05_geometry_sha256": "ad712251330587b47e79a76ae382e0a5fab2359c05e9f3aa1fa64d65d7d1c01f",
+                "p06_geometry_sha256": "ad712251330587b47e79a76ae382e0a5fab2359c05e9f3aa1fa64d65d7d1c01f",
+                "per_part_bounds_valid": true,
+                "preserved_standard_or_emissive_meshes": 15,
+                "roles": {
+                  "painterly_wear:base": 5,
+                  "painterly_wear:paint": 12,
+                  "painterly_wear:roof": 8,
+                  "painterly_wear:structure": 18
+                },
+                "shared_wear_materials": 26,
+                "translated_origin_valid": true,
+                "wear_meshes": 43
+              },
+              "geometry_change": false
+            }
+          ],
+          "references_opened": [
+            {
+              "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+              "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8"
+            },
+            {
+              "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+              "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530"
+            },
+            {
+              "path": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_habitat.png",
+              "sha256": "bd61fb85432ec22d8eb4119b87d2f3cfe8e7b29f66fd3604e97a07507f0964cd"
+            },
+            {
+              "path": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_hall.png",
+              "sha256": "ae411ef8cbd550196c39fd894850ff9cc4cf794477624ac65be2f087bdc05712"
+            }
+          ],
+          "material_route": {
+            "painted_surfaces": "Shared ShaderMaterial per original color and semantic role (paint, roof, structure, base); building-relative static fields, local component AABB instance uniforms for selected edge wear.",
+            "preserved": "Original StandardMaterial3D color/energy route for glass, emissive strips/windows, narrow graphic markings and deep gaps; numeric properties checked against P05.",
+            "wear_hierarchy": "Metre-scale soft pigment and broad faded upper fields; weaker middle brush scale; base dust and sparse long facade wash; only selected physical edges receive small dark undercoat scuffs.",
+            "visual_adjustment": "First opened native study too faint. Broad/middle amplitude increased0.22/0.065 to0.38/0.075; upper bleaching and base dust increased with all noise frequencies unchanged.",
+            "strength_zero_control": "Same new shader route with wear_strength0 matches P05 StandardMaterial rendering nearly exactly; direct numerical evidence retained."
+          },
+          "preserved_contract": {
+            "geometry": "All generated mesh arrays and transforms match P05 SHA256 fingerprints, including normals and indices.",
+            "bounds": "P05 AABBs unchanged including signs; original XZ+0.22m and height+0.20m retained.",
+            "visibility": "all parts remain under same existing closed/cutaway root; no process/update loop added",
+            "lights_and_gameplay": "No lighting/environment, collision/nav, door/interior, simulation or source-asset change.",
+            "shader_motion": "No vertex displacement, normal perturbation or TIME-driven animation."
+          },
+          "qa": {
+            "driver": "art/frontier_illustrated_20261101/environment/pass06/buildings/look_probe.gd",
+            "success_marker": "BUILDING_PASS06_QA",
+            "passed": 39,
+            "failed": 0,
+            "raw": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/geometry_raw.json",
+            "render_response": {
+              "passed": 6,
+              "failed": 0,
+              "scope": "Same static camera/light, whole-image deltas incl. unchanged background; tests clean PBR-route equivalence and actual nontrivial shader response, not artistic quality. Isolated probe shadow dither remains present in both states.",
+              "views": [
+                {
+                  "view": "habitat_front",
+                  "standard_to_zero_wear_mean_rgb_delta_8bit": 0.00015711805555555555,
+                  "zero_wear_to_enabled_mean_rgb_delta_8bit": 1.9573914930555556,
+                  "enabled_max_channel_delta_8bit": 58,
+                  "fraction_pixels_rgb_mean_delta_above4": 0.12922135416666666
+                },
+                {
+                  "view": "hall_front",
+                  "standard_to_zero_wear_mean_rgb_delta_8bit": 0,
+                  "zero_wear_to_enabled_mean_rgb_delta_8bit": 2.1480966435185187,
+                  "enabled_max_channel_delta_8bit": 68,
+                  "fraction_pixels_rgb_mean_delta_above4": 0.16133940972222222
+                },
+                {
+                  "view": "ensemble_game",
+                  "standard_to_zero_wear_mean_rgb_delta_8bit": 0,
+                  "zero_wear_to_enabled_mean_rgb_delta_8bit": 0.9192586805555556,
+                  "enabled_max_channel_delta_8bit": 64,
+                  "fraction_pixels_rgb_mean_delta_above4": 0.06614409722222223
+                }
+              ]
+            },
+            "scope": "Full generated vertices/normals/triangle areas, clockwise normal consistency, closed welded topology per mesh, XZ/height envelopes, hierarchy and conservative component-AABB connectivity. Not a general geometry intersection/zfight oracle.",
+            "limits": "AABB connectivity remains conservative, not an exact intersection/zfight oracle. Checks and image deltas do not imply artistic approval or general performance/release acceptance."
+          },
+          "isolated_native_views": [
+            {
+              "building": "habitat",
+              "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_habitat_front.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "before",
+              "size": 4,
+              "view": "front",
+              "sha256": "0323a64c1759c87705e1b3508bd871796430a7cc831241012d07dde66ff28b06",
+              "opened": true
+            },
+            {
+              "building": "habitat",
+              "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_habitat_rear.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "before",
+              "size": 4,
+              "view": "rear",
+              "sha256": "e101ce08eb4b02e1db48f000ea1d65a62620dc9f7b4242cf79332630dba2e15c",
+              "opened": true
+            },
+            {
+              "building": "hall",
+              "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_hall_front.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "before",
+              "size": 4.90000009536743,
+              "view": "front",
+              "sha256": "2cc15112143b45a638257ded54e0b3bffe7b0e21d2efe9ca558dfe3227c80171",
+              "opened": true
+            },
+            {
+              "building": "hall",
+              "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_hall_rear.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "before",
+              "size": 4.90000009536743,
+              "view": "rear",
+              "sha256": "d9204e8ffb87d4e19438573cedcbc94d8450b081bad1081718d6a1c5fb96b7a4",
+              "opened": true
+            },
+            {
+              "building": "ensemble",
+              "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_before_ensemble_game.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "before",
+              "size": 9.5,
+              "view": "game",
+              "sha256": "6c5ef5742fa1cd7077040a43cb72d8527b532cf0de202a3866ca13e363c87114",
+              "opened": true
+            },
+            {
+              "building": "habitat",
+              "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_habitat_front.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "wear_disabled",
+              "size": 4,
+              "view": "front",
+              "sha256": "168d097b99b59c4bfda1e5a02c8657207ce2fa3107391e139a7bae9119602e39",
+              "opened": true
+            },
+            {
+              "building": "habitat",
+              "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_habitat_rear.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "wear_disabled",
+              "size": 4,
+              "view": "rear",
+              "sha256": "d1ba5166f62fe59769b864d474ae8beb76ad2c45f6079205f5761517f56776eb",
+              "opened": true
+            },
+            {
+              "building": "hall",
+              "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_hall_front.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "wear_disabled",
+              "size": 4.90000009536743,
+              "view": "front",
+              "sha256": "2cc15112143b45a638257ded54e0b3bffe7b0e21d2efe9ca558dfe3227c80171",
+              "opened": true
+            },
+            {
+              "building": "hall",
+              "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_hall_rear.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "wear_disabled",
+              "size": 4.90000009536743,
+              "view": "rear",
+              "sha256": "d9204e8ffb87d4e19438573cedcbc94d8450b081bad1081718d6a1c5fb96b7a4",
+              "opened": true
+            },
+            {
+              "building": "ensemble",
+              "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_wear_disabled_ensemble_game.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "wear_disabled",
+              "size": 9.5,
+              "view": "game",
+              "sha256": "6c5ef5742fa1cd7077040a43cb72d8527b532cf0de202a3866ca13e363c87114",
+              "opened": true
+            },
+            {
+              "building": "habitat",
+              "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_habitat_front.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "after",
+              "size": 4,
+              "view": "front",
+              "sha256": "868447085f6fb22fc076ff92ae1f1d800a55e9c8fb31c77e0f9002ff0d44a4eb",
+              "opened": true
+            },
+            {
+              "building": "habitat",
+              "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_habitat_rear.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "after",
+              "size": 4,
+              "view": "rear",
+              "sha256": "37298fa7b94bbebf720c42af08584c497d49084b6a0e60c96549de9071cb5655",
+              "opened": true
+            },
+            {
+              "building": "hall",
+              "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_hall_front.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "after",
+              "size": 4.90000009536743,
+              "view": "front",
+              "sha256": "679c1330f92a042316e12e61c1d35b444e03a90d4cb03060be0c330dddeb590e",
+              "opened": true
+            },
+            {
+              "building": "hall",
+              "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_hall_rear.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "after",
+              "size": 4.90000009536743,
+              "view": "rear",
+              "sha256": "91b2d253f75daf32aa1c7bce56d0eea7a8a9522c5fab0fc7fd44ef9c63b818a5",
+              "opened": true
+            },
+            {
+              "building": "ensemble",
+              "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+              "light": "unchanged FrontierArtProfile",
+              "path": "art/frontier_illustrated_20261101/environment/pass06/buildings/qa/native_after_ensemble_game.png",
+              "renderer": "forward_plus/vulkan",
+              "resolution": "(1280, 900)",
+              "revision": "after",
+              "size": 9.5,
+              "view": "game",
+              "sha256": "c6398ba9284accc5c49bd0c2207ca3b83bbeee5b356b03e7abf54f002267e020",
+              "opened": true
+            }
+          ],
+          "visual_review": {
+            "opened": true,
+            "findings": "Compared same-camera P05/zero-wear/after images. Broad roof fading and warmer lower dust now visibly break the clean uniform fields; sparse downward marks appear on selected fascia zones. Original silhouette, glass, signs and warm lights remain readable.",
+            "remaining_differences": "Still much cleaner and less individually painted than the rich illustrations; edge chips are intentionally sparse and remain small at game distance. No sculpted corrosion/depth or texture-authoring pass.",
+            "probe_limitation": "The isolated probe has fine checker/shadow-dither visible in the background and both old/new states. It is not a new wear pattern; parent combined native captures do not show it and remain the main visual evidence.",
+            "acceptance": "candidate review only, not user art acceptance"
+          },
+          "production_capture": "Parent owns combined scene captures/strict suite/report and frozen model-hash verification. This package does not claim those as performed here.",
+          "scope": [
+            "scripts/terrain/frontier_closed_buildings.gd",
+            "shaders/terrain/frontier_building_wear.gdshader",
+            "art/frontier_illustrated_20261101/environment/pass06/buildings/"
+          ],
+          "not_changed_by_this_subtask": [
+            "geometry",
+            "Kenney/Citizen/ship GLBs",
+            "preview/renderer/dressing/tests/reports",
+            "global light/environment",
+            "imports/commits/pushes"
+          ],
+          "branch": "task/grafikreferenzen-20261101, intentional continuation of the unintegrated graphics branch"
+        }
+      },
+      "geology": {
+        "path": "art/frontier_illustrated_20261101/environment/pass06/geology/manifest.json",
+        "sha256": "bcdb03545193f527f24d7a26e81e42f4ec22657878aeaed0cea715ad70b4b059",
+        "data": {
+          "schema": "sternenbuergerchen.pass06_geology.v1",
+          "task": "docs/tasks/ART_2026_11_01_pass06_environment.md",
+          "base_commit": "04e934f60",
+          "branch": "task/grafikreferenzen-20261101",
+          "status": "frozen geometry and technically verified candidate; user visual acceptance pending",
+          "runtime_source": {
+            "path": "scripts/terrain/frontier_art_geology.gd",
+            "sha256": "e0c68350e32e041956d41a6b383661db76d01be5aa2ee18596bd22380000ae58"
+          },
+          "source": {
+            "path": "art/frontier_illustrated_20261101/environment/pass06/geology/source/frontier_art_geology_pass06.gd",
+            "sha256": "e0c68350e32e041956d41a6b383661db76d01be5aa2ee18596bd22380000ae58"
+          },
+          "before_source": {
+            "path": "art/frontier_illustrated_20261101/environment/pass06/geology/source/frontier_art_geology_pass05.gd",
+            "sha256": "f3441b0c5b4a4e4ca93ac32f2cf0f57000e309ecd5729170be21e260d8e0ec70"
+          },
+          "references": [
+            {
+              "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+              "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8"
+            },
+            {
+              "path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+              "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e"
+            }
+          ],
+          "geometry": {
+            "caps_up": true,
+            "degenerate_triangles": 0,
+            "digest": "f4355463dc47e17e177567bff29f2e6019b014609cbb8d30daeb792159b977f6",
+            "finite": true,
+            "known_kinds": true,
+            "meshes": 68,
+            "outside_footprint_vertices": 0,
+            "relief_meshes": 14,
+            "relief_up": true,
+            "terraced_groups": 14,
+            "vertices": 42363,
+            "walls_out": true,
+            "triangles": 14121,
+            "previous_pass05_meshes": 54,
+            "previous_pass05_vertices": 23112,
+            "budget_vertices": 60000
+          },
+          "contract": {
+            "failed": 0,
+            "footprint_digest": "46cd64cbe1874df344c4ea2c011c4cf2c87308a627a61edaf4d295b35d2e5523",
+            "geometry": {
+              "caps_up": true,
+              "degenerate_triangles": 0,
+              "digest": "f4355463dc47e17e177567bff29f2e6019b014609cbb8d30daeb792159b977f6",
+              "finite": true,
+              "known_kinds": true,
+              "meshes": 68,
+              "outside_footprint_vertices": 0,
+              "relief_meshes": 14,
+              "relief_up": true,
+              "terraced_groups": 14,
+              "vertices": 42363,
+              "walls_out": true
+            },
+            "max_pass02_footprint_delta_m": 9.5367431640625e-7,
+            "passed": 14,
+            "synthetic_fixture": true
+          },
+          "relief_checks": {
+            "detailed_rocks": 24,
+            "eroded_meshes": 54,
+            "failed": 0,
+            "maximum_channels": 5,
+            "minimum_relief_area_ratio": 0.726774153373948,
+            "minimum_relief_height_span_m": 0.202570930123329,
+            "minimum_relief_normal_y": 0.471848785877228,
+            "passed": 10,
+            "relief_meshes": 14,
+            "synthetic_fixture": true,
+            "vertices": 42363
+          },
+          "strict_local_report": {
+            "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/check_runs/20261101T191801Z-pid126152/metadata/report.json",
+            "sha256": "bf08636671444442c0a8db62b8240bc0113c81df3ce90ca32c34f816b2a80aa9"
+          },
+          "strict_root_report": {
+            "path": "output/grafik_20261101/pass06_environment_check_runs/20261101T192055Z-pid105384/metadata/report.json",
+            "sha256": "6e665945b19670949d7f82841db96f498bb8b2c228cb18113e2d2013435a97de"
+          },
+          "root_final_checks": 21,
+          "runtime_test_updates": [
+            {
+              "path": "scripts/tests/frontier_pass02_verifier.gd",
+              "sha256": "2f111bc02b719ff39025a9cc8e73cc29988f32ec69289a029af7d99ba01a6367"
+            },
+            {
+              "path": "scripts/tests/frontier_pass03_geology_verifier.gd",
+              "sha256": "b4b26051fd1b5abdf55725ee28ffcc744fa44a319b244aa2ead82ad8ffcb675c"
+            }
+          ],
+          "new_verifier": {
+            "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/frontier_pass06_geology_verifier.gd",
+            "sha256": "04c9cdab25cdd2c37d15a8b7f79ab5280a7882abb35cf2c3f8841c2ac03229ab"
+          },
+          "success_marker": "FRONTIER_PASS06_GEOLOGY",
+          "native_probe": {
+            "captures": [
+              {
+                "camera_size": 23,
+                "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+                "error": 0,
+                "path": "res://art/frontier_illustrated_20261101/environment/pass06/geology/qa/landscape_before.png",
+                "revision": "before",
+                "view": "landscape"
+              },
+              {
+                "camera_size": 23,
+                "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+                "error": 0,
+                "path": "res://art/frontier_illustrated_20261101/environment/pass06/geology/qa/landscape_after.png",
+                "revision": "after",
+                "view": "landscape"
+              },
+              {
+                "camera_size": 9.80000019073486,
+                "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.227444, 0.829038, -0.510848), Z: (0.3372, 0.559193, 0.757363), O: (18.8696, 12.26547, 9.832542)]",
+                "error": 0,
+                "path": "res://art/frontier_illustrated_20261101/environment/pass06/geology/qa/wall_detail_before.png",
+                "revision": "before",
+                "view": "wall_detail"
+              },
+              {
+                "camera_size": 9.80000019073486,
+                "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.227444, 0.829038, -0.510848), Z: (0.3372, 0.559193, 0.757363), O: (18.8696, 12.26547, 9.832542)]",
+                "error": 0,
+                "path": "res://art/frontier_illustrated_20261101/environment/pass06/geology/qa/wall_detail_after.png",
+                "revision": "after",
+                "view": "wall_detail"
+              },
+              {
+                "camera_size": 5.19999980926514,
+                "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.250412, 0.788011, -0.562435), Z: (0.320513, 0.615662, 0.719884), O: (8.119231, 12.08191, 19.9579)]",
+                "error": 0,
+                "path": "res://art/frontier_illustrated_20261101/environment/pass06/geology/qa/near_detail_before.png",
+                "revision": "before",
+                "view": "near_detail"
+              },
+              {
+                "camera_size": 5.19999980926514,
+                "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.250412, 0.788011, -0.562435), Z: (0.320513, 0.615662, 0.719884), O: (8.119231, 12.08191, 19.9579)]",
+                "error": 0,
+                "path": "res://art/frontier_illustrated_20261101/environment/pass06/geology/qa/near_detail_after.png",
+                "revision": "after",
+                "view": "near_detail"
+              },
+              {
+                "camera_size": 9.80000019073486,
+                "camera_transform": "[X: (-0.913545, 0.0, 0.406737), Y: (0.227444, 0.829038, 0.510848), Z: (-0.3372, 0.559193, -0.757363), O: (6.730401, 12.26547, -17.43254)]",
+                "error": 0,
+                "path": "res://art/frontier_illustrated_20261101/environment/pass06/geology/qa/rear_detail_before.png",
+                "revision": "before",
+                "view": "rear_detail"
+              },
+              {
+                "camera_size": 9.80000019073486,
+                "camera_transform": "[X: (-0.913545, 0.0, 0.406737), Y: (0.227444, 0.829038, 0.510848), Z: (-0.3372, 0.559193, -0.757363), O: (6.730401, 12.26547, -17.43254)]",
+                "error": 0,
+                "path": "res://art/frontier_illustrated_20261101/environment/pass06/geology/qa/rear_detail_after.png",
+                "revision": "after",
+                "view": "rear_detail"
+              }
+            ],
+            "engine": {
+              "build": "official",
+              "hash": "71f334935c000924d403448e698df4441130df18",
+              "hex": 263682,
+              "major": 4,
+              "minor": 6,
+              "patch": 2,
+              "status": "stable",
+              "string": "4.6.2-stable (official)",
+              "timestamp": 0
+            },
+            "ground_shader_sha256": "240231803877d0bcfe77563f859a623dc8ff38eb97d042942fcccb77357eec4b",
+            "isolated_geology_only": true,
+            "light_color": "(1.0, 0.9412, 0.851, 1.0)",
+            "light_energy": 0.949999988079071,
+            "light_transform": "[X: (0.848048, 0.0, 0.529919), Y: (0.417582, 0.615662, -0.668271), Z: (-0.326251, 0.788011, 0.522111), O: (0.0, 0.0, 0.0)]",
+            "no_gpu_exclusivity_claim": true,
+            "pass": true,
+            "profile_sha256": "9ea54d24eb732ea804e750d2543e15fd85c4f1ba3b4f1d19c78c591629f26c0f",
+            "renderer": "forward_plus / vulkan",
+            "source_sha256": "e0c68350e32e041956d41a6b383661db76d01be5aa2ee18596bd22380000ae58"
+          },
+          "opened_images": [
+            {
+              "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/landscape_before.png",
+              "sha256": "b2988094a70b172656ea3575a3cf896776052d363dac9ef175f44230ec4a0edb"
+            },
+            {
+              "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/landscape_after.png",
+              "sha256": "05b45359d8e1d505b90bf69cc49a0b94c6cd3b34c8594ee4fb8b18af4449271d"
+            },
+            {
+              "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/wall_detail_before.png",
+              "sha256": "0afa5467995c0e5e2b068ce46094f1e332eea55dd78ccd61b7239793094ead40"
+            },
+            {
+              "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/wall_detail_after.png",
+              "sha256": "b863849139b79bf6d6452a81b02ace04511ddc9b4e9be4803c0628dd45977026"
+            },
+            {
+              "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/near_detail_before.png",
+              "sha256": "4d3cb71b9c993eb1a80cd9bff8ba1a6e94eeb5586f2cf24c0876035fe9ec23ff"
+            },
+            {
+              "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/near_detail_after.png",
+              "sha256": "7fa84d4adee1fe1cc5b56e01c0d916f70b1a2d5743b4073aa4d26317372a6432"
+            },
+            {
+              "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/rear_detail_before.png",
+              "sha256": "3b2f152099c3aa258351e48381457281bf5d639b7dd1c7fce25033bee6569546"
+            },
+            {
+              "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/rear_detail_after.png",
+              "sha256": "8a39ea1416ac8376232c2c9a0a97d07740392ca09d1e95bd2126fb6f532d6032"
+            }
+          ],
+          "native_log": {
+            "path": "art/frontier_illustrated_20261101/environment/pass06/geology/qa/native_probe_final.log",
+            "sha256": "fe9a829e431d18d999dd2698e5831dd6a0433c71b3c7b44c09b058b6e667bca8"
+          },
+          "visual_review": {
+            "isolated_pairs": "P05/P06 geometry with identical respective loaded P06 shader/profile/light/camera per pair; not historical P05 material equality",
+            "independent": "ship_sources reopened final near_detail_after and landscape_after after height clamp: no gross holes, suspended main bodies or detached feet; no user art acceptance",
+            "changes": "bounded interrupted V-shaped erosion channels with unequal height windows and slight lateral drift; fourteen actual multi-band lobed sediment/talus fans ending below the flat ground",
+            "remaining": "large plateau caps and some wall faces remain broad; erosion is simplified low-poly geometry and still less rich than illustration; relief deliberately confined to blocked envelopes"
+          },
+          "scope": {
+            "fourteen_hulls_identical_to_pass05": true,
+            "footprint_digest": "46cd64cbe1874df344c4ea2c011c4cf2c87308a627a61edaf4d295b35d2e5523",
+            "new_navigation_truth": false,
+            "picking_height_changes": false,
+            "shader_profile_changes_by_this_agent": false,
+            "ships_astra_changes": false,
+            "imports_by_this_agent": false,
+            "per_frame_build": false,
+            "commits_by_this_agent": false
+          },
+          "failed_attempts": "earlier strict runs preserved; relief slope limiter was tightened until minimum normalY0.47185 exceeded unchanged0.45 threshold. Final14 rock/relief contract and10 new relief checks passed."
+        }
+      },
+      "ground_paint": {
+        "path": "art/frontier_illustrated_20261101/environment/pass06/ground_paint/manifest.json",
+        "sha256": "adfa01715395f6eb889bbedfb630eb05597e92550678456853666b10e741d0a0",
+        "data": {
+          "schema": "sternenbuergerchen.art_pass06_ground_paint.v1",
+          "status": "Native Godot shader/dressing revision on unintegrated graphics branch; no user art approval.",
+          "based_on": "04e934f60",
+          "sources": [
+            {
+              "path": "shaders/terrain/frontier_ground.gdshader",
+              "sha256": "240231803877d0bcfe77563f859a623dc8ff38eb97d042942fcccb77357eec4b"
+            },
+            {
+              "path": "shaders/terrain/frontier_contact_paint.gdshader",
+              "sha256": "ff8d87e7082dc6e6f4611db6bd18cdb0514720efd7ca0a07108ffd2807389e2f"
+            },
+            {
+              "path": "scripts/terrain/frontier_art_dressing.gd",
+              "sha256": "86fc88c484dbe82e0f989edea7c0c58a38388ad70bf7e5c5b8410295ff1c74b0"
+            },
+            {
+              "path": "scripts/tests/frontier_pass06_environment_verifier.gd",
+              "sha256": "4b9426425aaf92b0f6504443655a8fa07eee7c3b7ea4651f72ee38a22b33f822"
+            }
+          ],
+          "references": [
+            {
+              "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+              "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8"
+            },
+            {
+              "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+              "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530"
+            },
+            {
+              "path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+              "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e"
+            }
+          ],
+          "scope": [
+            "soft multiscale pigment/silt fields",
+            "localized cliff wash and broken strata paint",
+            "paving aggregate scuff and selective marking loss",
+            "broken dusty object contact banks"
+          ],
+          "geometry_route": "Existing continuous flat plane and unchanged road/apron geometry. Real blocked-area relief belongs to the separate geology package.",
+          "preserved": "Nine primary GLBs, original characters/animation, shared light, Hex facts, actor starts and cameras.",
+          "material_route": "World-coordinate integer hash noise; shared/cached ShaderMaterial for soil, cliffs, paving and marking colors. No per-frame mesh rebuilding.",
+          "limits": "Procedural paint; no hand-painted texture bake. Walkable soil remains flat. Fine painted wear is intentionally quieter at strategic distance."
+        }
+      }
+    },
+    "asset_assignments": [
+      {
+        "id": "ref_rostgrenze",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+        "title": "Rostgrenze · Außenposten-Cutaway",
+        "group": "targets",
+        "status": "2D-Nutzerziel · keine Modellabnahme",
+        "description": "Rote Schichtklippen, helle orange eingefasste Module, sichtbar gruppierte Arbeitsräume und ein gebauter Weg zwischen Eingang und Landepad. Raumaufteilung ist eine Formreferenz. Bettenzahlen, Erweiterungsmarken und Beschriftungen beauftragen keine Innenraum-, Basis- oder Wirtschaftssimulation.",
+        "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8",
+        "dimensions": [
+          1672,
+          941
+        ],
+        "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+        "source_original_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-03f6c8c2-a842-4970-8104-e3c33497f729.png"
+      },
+      {
+        "id": "ref_freihafen",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+        "title": "Freihafen · Distribution Center",
+        "group": "targets",
+        "status": "2D-Nutzerziel · keine Modellabnahme",
+        "description": "Zusammengehörige creme-orange Hallen, breite Torrahmen, Arbeitsbuchten, geordnete Containergruppen und verbundene graue Plattformen vor roten Klippen. Der Grafikpass übernimmt Formhierarchie und Funktionsgruppen. Eine komplette Lagerhalle, Warenwirtschaft, Fahrzeuge oder Logistiksimulation sind damit nicht implementiert oder zusätzlich beauftragt.",
+        "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530",
+        "dimensions": [
+          1672,
+          941
+        ],
+        "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+        "source_original_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-1f877621-9b3e-4afa-919a-7c8e41fbe0cc.png"
+      },
+      {
+        "id": "ref_tactical",
+        "path": "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+        "title": "Rostwelt · Taktische Gesamtansicht",
+        "group": "targets",
+        "status": "2D-Nutzerziel · keine Modellabnahme",
+        "description": "Weite isometrische Spiellandschaft mit geschichteter Klippenkante, einzelnen Felstürmen, offenen Bewegungsräumen und einer verbundenen Gruppe heller Cutaway-Module. Die sichtbaren Quadratfelder sind Bildinhalt. Der ausdrücklich beauftragte Spielvertrag bleibt hex_axial_v1; das Bild löst keine Rückmigration zu Quadratfeldern aus.",
+        "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e",
+        "dimensions": [
+          1672,
+          941
+        ],
+        "origin": "user attachment re-supplied in the active chat on 2026-11-01",
+        "source_original_path": "C:/Users/bjoer/AppData/Local/Temp/codex-clipboard-720890b3-d6c0-4574-8cc3-053eeede46f7.png"
+      },
+      {
+        "id": "before_lived_outpost",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/lived_outpost.png",
+        "title": "Vorher · Pass05 · Arbeitsbereich",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "91976f10b91c83398a4f2f1d1b964ea8e02b06284a1332c145d5fe6c93f6221d",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_ground_detail",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/ground_detail.png",
+        "title": "Vorher · Pass05 · Boden / Kontakte",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "c5183707cf47a495506140ec5c706005d376d69c48b383e36e80cd1c367272fa",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_geology_detail",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/geology_detail.png",
+        "title": "Vorher · Pass05 · Felsdetail",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "26d6722362c49554aa6b666670f29f1064e78050d9ec87d3394b179a771265e5",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_closed_outpost",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_outpost.png",
+        "title": "Vorher · Pass05 · Außenposten geschlossen",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "4de4b4f369896fb4466ef97f33ade16f3488be2c6f61c84882406ea5599803cd",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_closed_habitat",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_habitat.png",
+        "title": "Vorher · Pass05 · Basis geschlossen",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "bd61fb85432ec22d8eb4119b87d2f3cfe8e7b29f66fd3604e97a07507f0964cd",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_closed_hall",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/closed_hall.png",
+        "title": "Vorher · Pass05 · Halle geschlossen",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "ae411ef8cbd550196c39fd894850ff9cc4cf794477624ac65be2f087bdc05712",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_landscape",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/landscape.png",
+        "title": "Vorher · Pass05 · Weites Gelände",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "90b41a35153a6ef53dbc9a8096e7ac00adda35d5342ecd046f525dd4db986cae",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_overview",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/overview.png",
+        "title": "Vorher · Pass05 · Übersicht / Schnitt",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "dbed07bbebcc3e9f544aa8037ecde74ad295d6af636b5c5e959ff2c78880c293",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_workshop",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/workshop.png",
+        "title": "Vorher · Pass05 · Werkstatt / Schnitt",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "0a18924f063d7821e72feb9dc61d2a5999b5cef0189f478958ca8567b1afef14",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_crew",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/crew.png",
+        "title": "Vorher · Pass05 · Crew",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "c6572de7164b3d5141be22cbd148ee73f92e19307a86dea4be5d886b96547151",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_hex_grid",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/hex_grid.png",
+        "title": "Vorher · Pass05 · Hexraster",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "90445757369cdcea8d53c2883796bed6c5378868fc2ba139a3f81b30563133e2",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "before_cutaway",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/before/cutaway.png",
+        "title": "Vorher · Pass05 · Basis / Schnitt",
+        "group": "before",
+        "status": "Native Godot-Aufnahme · bytegleicher Pass05-Vorherstand",
+        "description": "Gesicherter Ausgangsstand; derselbe Sichtzustand und dieselbe Kamera wie im P06-Paar.",
+        "sha256": "d8b590e50f0fd45e0523c1fbce6dd310ae5b0d891c057b62348060fe8bf839ac",
+        "dimensions": [
+          1600,
+          900
+        ]
+      },
+      {
+        "id": "after_overview",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/overview.png",
+        "title": "Pass06 · Übersicht / Schnitt",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "7aff4279abc4fbd3d4541aa2b3d9ec34d0eec5a14cc06a78a081ded6a71ee634",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "overview"
+      },
+      {
+        "id": "after_hex_grid",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/hex_grid.png",
+        "title": "Pass06 · Hexraster",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "70bbe55bd3d6d59f801f10b0e5a5b7b941fd7056e2b7c9191684cd16e0629e52",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "hex_grid"
+      },
+      {
+        "id": "after_crew",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/crew.png",
+        "title": "Pass06 · Crew",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "60c1442c40ee9389565868f47c7dd43a136955c7da4edb3eb80b03202574d2e8",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "crew"
+      },
+      {
+        "id": "after_workshop",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/workshop.png",
+        "title": "Pass06 · Werkstatt / Schnitt",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "03a4e7a6500203aa8444274f9efc789579b4cff6e8738c5358c3c087f86433ea",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "workshop"
+      },
+      {
+        "id": "after_landscape",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/landscape.png",
+        "title": "Pass06 · Weites Gelände",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "04bebc262c0836a354a2c99f933de766f76100edfbfc5b176bdaa41a3d217659",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "landscape"
+      },
+      {
+        "id": "after_cutaway",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutaway.png",
+        "title": "Pass06 · Basis / Schnitt",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "11bca3e0761c3ed350a265c91908f7dfab4604373247103f176d2e49134f76e9",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "cutaway"
+      },
+      {
+        "id": "after_outpost",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/outpost.png",
+        "title": "Pass06 · Außenposten / Schnitt",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · zusätzliche Kontrollansicht außerhalb der zwölf Paare",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "8bf3d49686cda559dd8dcc0716e34e03b3973fbdea821b7d3aaaa5c7fec558af",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": false,
+        "view": "outpost"
+      },
+      {
+        "id": "after_cutlass_front",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutlass_front.png",
+        "title": "Pass06 · Cutlass / vorn",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · zusätzliche Kontrollansicht außerhalb der zwölf Paare",
+        "description": "Kontrollansicht der unveränderten, weiter kritisierten R02-Schiffsmodelle in der neuen Umgebung. Kein neuer Schiffsmodellpass und keine automatische Astra-Adoption.",
+        "sha256": "4fe895dcae105afc9a3e318d457de68fdab2b5bbaed3cbc5a51600155dd8da03",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": false,
+        "view": "cutlass_front"
+      },
+      {
+        "id": "after_cutlass_rear",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/cutlass_rear.png",
+        "title": "Pass06 · Cutlass / Heck",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · zusätzliche Kontrollansicht außerhalb der zwölf Paare",
+        "description": "Kontrollansicht der unveränderten, weiter kritisierten R02-Schiffsmodelle in der neuen Umgebung. Kein neuer Schiffsmodellpass und keine automatische Astra-Adoption.",
+        "sha256": "227963cf4b81053e9b283d98d4bcbb6a2d74b0aad026208fdc03d42502e409ab",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": false,
+        "view": "cutlass_rear"
+      },
+      {
+        "id": "after_buccaneer_front",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/buccaneer_front.png",
+        "title": "Pass06 · Buccaneer / vorn",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · zusätzliche Kontrollansicht außerhalb der zwölf Paare",
+        "description": "Kontrollansicht der unveränderten, weiter kritisierten R02-Schiffsmodelle in der neuen Umgebung. Kein neuer Schiffsmodellpass und keine automatische Astra-Adoption.",
+        "sha256": "61737b8577574f71b1e87bb77e21528e74e512cdb36cfbd1582013b16c42e00a",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": false,
+        "view": "buccaneer_front"
+      },
+      {
+        "id": "after_buccaneer_rear",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/buccaneer_rear.png",
+        "title": "Pass06 · Buccaneer / Heck",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · zusätzliche Kontrollansicht außerhalb der zwölf Paare",
+        "description": "Kontrollansicht der unveränderten, weiter kritisierten R02-Schiffsmodelle in der neuen Umgebung. Kein neuer Schiffsmodellpass und keine automatische Astra-Adoption.",
+        "sha256": "ab6645db8f8f062a8524cedd736f5bb6f61ebfe4abbd151b2674cd821323ebd0",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": false,
+        "view": "buccaneer_rear"
+      },
+      {
+        "id": "after_utility",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/utility.png",
+        "title": "Pass06 · Versorgung",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · zusätzliche Kontrollansicht außerhalb der zwölf Paare",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "00490bfa62af9808ab5f8d8882f03f749263c64ef9c9c27d9f36c3f93948473b",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": false,
+        "view": "utility"
+      },
+      {
+        "id": "after_closed_outpost",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_outpost.png",
+        "title": "Pass06 · Außenposten geschlossen",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "06b3067b8d8fc454472962f20d8d803798e79deecc3398491e836206ec10b4bf",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "closed_outpost"
+      },
+      {
+        "id": "after_closed_habitat",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_habitat.png",
+        "title": "Pass06 · Basis geschlossen",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "ec3fb7d1bf6c9023822f0930093460d22fbbedafdd9d517190650e5562b6ec00",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "closed_habitat"
+      },
+      {
+        "id": "after_closed_hall",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/closed_hall.png",
+        "title": "Pass06 · Halle geschlossen",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "fe4d54b9830ca37f4a4b641f9fec60f9d6a0c718553b41a691e54b993b9c8d65",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "closed_hall"
+      },
+      {
+        "id": "after_lived_outpost",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/lived_outpost.png",
+        "title": "Pass06 · Arbeitsbereich",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "4579f503d72fe0ec9c85ceb31ed97fe2c0c5a22d92be856149c3269f09a9bf5d",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "lived_outpost"
+      },
+      {
+        "id": "after_ground_detail",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/ground_detail.png",
+        "title": "Pass06 · Boden / Kontakte",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "d625b813a6e9d4dc082679afb0c48f256c6151554086e77c7b17172dccebb566",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "ground_detail"
+      },
+      {
+        "id": "after_geology_detail",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/geology_detail.png",
+        "title": "Pass06 · Felsdetail",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · festes Vergleichspaar",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "b810377f840315c4a39a42ec8c7117505550a81175e72fc7d3e42f248dddce2b",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": true,
+        "view": "geology_detail"
+      },
+      {
+        "id": "after_baseline",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/baseline.png",
+        "title": "Pass06 · Farbprofil aus",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · zusätzliche Kontrollansicht außerhalb der zwölf Paare",
+        "description": "Tatsächlicher P06-Stand. Geometrisches Relief bleibt auf gesperrte Felszonen begrenzt; die Materialroute ist bewusst Gegenstand der Revision. Technische Prüfung ist keine gestalterische Nutzerannahme.",
+        "sha256": "22d7a285ead8986b3264d240f92d7e3fb89d0b6ab23eacdb09f8fa98409f881f",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": false,
+        "view": "baseline"
+      },
+      {
+        "id": "after_walk_pose",
+        "path": "docs/reports/assets/grafik-2026-11-01/engine_pass06_environment/after/walk_pose.png",
+        "title": "Pass06 · Crew / Gehpose",
+        "group": "after",
+        "status": "Native Godot-Aufnahme · zusätzliche Kontrollansicht außerhalb der zwölf Paare",
+        "description": "Momentaufnahme einer laufenden Gehpose mit unveränderten GLBs/Clips. Keine zeitsynchrone Vorher-/Nachher-Animationsprüfung; diese Kontrollansicht gehört nicht zu den zwölf festen Paaren.",
+        "sha256": "d8cb7a37d5c131c99d99ba9d8ab0bccb59a71721bef12f18203fa3a5fb2ace41",
+        "dimensions": [
+          1600,
+          900
+        ],
+        "paired": false,
+        "view": "walk_pose"
+      }
+    ],
+    "archive_pass05_sha256": "ab79aeec33e86fcf2c4cbe1751937dba6e1b6b8f81b84f2e355d2a51981a28aa"
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "input": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\Assets\\curated\\frontier_illustrated_20261101\\ships_pass05_astra_ultra\\refinement_03\\cutlass_01.glb",
+  "input_sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+  "collection": "GLB_ALL_MESHES",
+  "source_mesh_count": 1,
+  "evaluated_mesh_count": 1,
+  "target_length": 16.0,
+  "target": [
+    0.0,
+    0.0,
+    2.4000000953674316
+  ],
+  "engine": "BLENDER_EEVEE",
+  "samples": 48,
+  "blender_version": "5.2.3 LTS",
+  "color_management": "Khronos PBR Neutral; exposure 0; gamma 1",
+  "camera_policy": "Fixed world target and ortho scale derived only from target-length, never fitted to model bounds. Azimuth 0 looks from Blender -Y; positive rotates toward +X.",
+  "bounds_min": [
+    -6.0391693115234375,
+    -8.0,
+    0.0
+  ],
+  "bounds_max": [
+    6.0391693115234375,
+    8.0,
+    5.7466325759887695
+  ],
+  "lights": [
+    {
+      "name": "Key",
+      "position_factor": [
+        -0.65,
+        -0.9,
+        1.5
+      ],
+      "watts_factor_L_squared": 12.0,
+      "size_factor_L": 1.0,
+      "color": [
+        1,
+        0.94,
+        0.84
+      ]
+    },
+    {
+      "name": "Fill",
+      "position_factor": [
+        1.0,
+        -0.1,
+        0.8
+      ],
+      "watts_factor_L_squared": 5.0,
+      "size_factor_L": 1.1,
+      "color": [
+        0.82,
+        0.9,
+        1
+      ]
+    },
+    {
+      "name": "Rim",
+      "position_factor": [
+        0.3,
+        1.0,
+        1.1
+      ],
+      "watts_factor_L_squared": 8.0,
+      "size_factor_L": 0.8,
+      "color": [
+        1,
+        0.98,
+        0.9
+      ]
+    }
+  ],
+  "floor": true,
+  "transparent": false,
+  "shots": [
+    {
+      "view": "front",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\roundtrip\\material_front.png",
+      "azimuth": -52.0,
+      "elevation": 35.0,
+      "location": [
+        -41.31203842163086,
+        -32.27650451660156,
+        39.10889434814453
+      ],
+      "rotation_euler": [
+        0.9599311947822571,
+        7.7628762085169e-08,
+        -0.9075713753700256
+      ],
+      "ortho_scale": 26.399999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "69725dd538b7828ce3842646e5e488dd324d2eb6919e303301691c85f9baa9fb"
+    },
+    {
+      "view": "rear",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\roundtrip\\material_rear.png",
+      "azimuth": -128.0,
+      "elevation": 35.0,
+      "location": [
+        -41.31203842163086,
+        32.27650451660156,
+        39.10889434814453
+      ],
+      "rotation_euler": [
+        0.9599310159683228,
+        -5.4428106466275494e-08,
+        -2.2340214252471924
+      ],
+      "ortho_scale": 26.399999618530273,
+      "resolution": [
+        1200,
+        900
+      ],
+      "sha256": "5aff5c0e5388a4f86a92cbfafa60d3a3e5d6f34476ae0d8db9eb7839fa23dd8a"
+    },
+    {
+      "view": "game",
+      "mode": "material",
+      "file": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\refinement_03\\review\\cutlass\\roundtrip\\material_game.png",
+      "azimuth": -38.0,
+      "elevation": 48.0,
+      "location": [
+        -26.36530876159668,
+        -33.746055603027344,
+        49.96126937866211
+      ],
+      "rotation_euler": [
+        0.7330384254455566,
+        -1.6110604406094353e-08,
+        -0.6632252335548401
+      ],
+      "ortho_scale": 72.0,
+      "resolution": [
+        512,
+        512
+      ],
+      "sha256": "7bde40e6ee41d039cc862b97f592e053703ad19c5bc48807ab19a1932f7a56c8"
+    }
+  ]
+}

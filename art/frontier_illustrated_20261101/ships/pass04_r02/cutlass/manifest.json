@@ -1,0 +1,600 @@
+{
+  "schema": "sternenbuergerchen.cutlass_pass04_r02.v1",
+  "task": "docs/tasks/ART_2026_11_01_pass04.md",
+  "status": "R02 iteration02 frozen technical intermediate; user criticized remaining reference deviation; no artistic acceptance",
+  "assets": [
+    {
+      "asset": "cutlass_01",
+      "iteration": 2,
+      "source": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/source/iteration02/cutlass_01.blend",
+      "source_sha256": "7d46b2bba751c2262edd100725891129e5347d26aabe597d6fd057591cd05d12",
+      "export": {
+        "path": "Assets/curated/frontier_illustrated_20261101/ships_pass04_r02/cutlass_01.glb",
+        "sha256": "561cbe1297f2f6c72bd14c7c8f4ae33bc53ced7464d44a6a4bdfa49947fcda50",
+        "bytes": 352092,
+        "meshes": 1,
+        "materials": 9,
+        "nodes": 1,
+        "triangles": 16696,
+        "animations": 0,
+        "skins": 0
+      },
+      "triangles": 16696,
+      "vertices": 8540,
+      "editable_parts": 104,
+      "dimensions_blender_m": [
+        11.66451644897461,
+        16.0,
+        5.444308280944824
+      ],
+      "bounds_blender_m": {
+        "min": [
+          -5.832258224487305,
+          -7.999999523162842,
+          0.0
+        ],
+        "max": [
+          5.832258224487305,
+          8.0,
+          5.444308280944824
+        ]
+      },
+      "normalization_length_m": 16,
+      "runtime_scale": 0.22,
+      "front_blender": "-Y",
+      "front_godot": "+Z",
+      "pivot": "full BBox XY center, groundZ0",
+      "palette": {
+        "Ivory": "e2d5b9",
+        "Petrol": "4f6569",
+        "Slate": "657a7d",
+        "Frame": "293a40",
+        "Steel": "8a9694",
+        "Ochre": "d49b48",
+        "Glass": "274d60",
+        "WarmCore": "ba773d",
+        "Inset": "3a5058"
+      },
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [],
+      "raw_source_qa": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/source_raw.json",
+      "groups": {
+        "01_Stepped_transport_hull": [
+          "Cargo_stepped_hull",
+          "Cargo_shoulder_Forward_L",
+          "Cargo_shoulder_Aft_L",
+          "Cargo_shoulder_Forward_R",
+          "Cargo_shoulder_Aft_R"
+        ],
+        "02_Broad_glazed_cockpit": [
+          "Cockpit_rounded_angular_shell",
+          "Cockpit_lower_chin",
+          "Chin_cannon_-1",
+          "Chin_cannon_1"
+        ],
+        "03_Profiled_forward_forks": [
+          "Fork_structural_shoulder_L",
+          "Fork_armor_endplate_L",
+          "Fork_lower_claw_L",
+          "Fork_gun_receiver_L",
+          "Fork_gun_barrel_L",
+          "Fork_ochre_panel_L",
+          "Fork_structural_shoulder_R",
+          "Fork_armor_endplate_R",
+          "Fork_lower_claw_R",
+          "Fork_gun_receiver_R",
+          "Fork_gun_barrel_R",
+          "Fork_ochre_panel_R"
+        ],
+        "04_Articulated_separate_engine_pods": [
+          "Engine_structural_pylon_L",
+          "Engine_pivot_L",
+          "Engine_pivot_hub_L",
+          "Engine_core_L",
+          "Engine_forward_cowl_L",
+          "Engine_aft_cowl_L",
+          "Engine_ochre_collar_L",
+          "Engine_inlet_L",
+          "Engine_lower_rail_L-1",
+          "Engine_lower_rail_L1",
+          "Engine_nozzle_housing_L",
+          "Engine_nozzle_lip_L",
+          "Engine_nozzle_trim_L",
+          "Engine_warm_recess_L",
+          "Engine_dark_core_L",
+          "Engine_exposed_link_L-1",
+          "Engine_exposed_link_L1",
+          "Engine_ochre_joint_L-1",
+          "Engine_ochre_joint_L1",
+          "Engine_structural_pylon_R",
+          "Engine_pivot_R",
+          "Engine_pivot_hub_R",
+          "Engine_core_R",
+          "Engine_forward_cowl_R",
+          "Engine_aft_cowl_R",
+          "Engine_ochre_collar_R",
+          "Engine_inlet_R",
+          "Engine_lower_rail_R-1",
+          "Engine_lower_rail_R1",
+          "Engine_nozzle_housing_R",
+          "Engine_nozzle_lip_R",
+          "Engine_nozzle_trim_R",
+          "Engine_warm_recess_R",
+          "Engine_dark_core_R",
+          "Engine_exposed_link_R-1",
+          "Engine_exposed_link_R1",
+          "Engine_ochre_joint_R-1",
+          "Engine_ochre_joint_R1"
+        ],
+        "05_Closed_loading_ramp": [
+          "Rear_ramp_frame",
+          "Ramp_lower_sill",
+          "Ramp_door_panel_0",
+          "Ramp_door_panel_1",
+          "Ramp_door_panel_2",
+          "Ramp_hinge_mount_-1",
+          "Ramp_hinge_pin_-1",
+          "Ramp_hinge_mount_1",
+          "Ramp_hinge_pin_1",
+          "Rear_haunch_-1",
+          "Rear_haunch_1"
+        ],
+        "06_Dorsal_twin_turret": [
+          "Turret_turntable",
+          "Turret_armored_housing",
+          "Turret_receiver_-1",
+          "Turret_barrel_-1",
+          "Turret_receiver_1",
+          "Turret_barrel_1"
+        ],
+        "07_Supported_static_gear": [
+          "Gear_0_Foot",
+          "Gear_0_Leg",
+          "Gear_0_Brace",
+          "Gear_0_Mount",
+          "Gear_1_Foot",
+          "Gear_1_Leg",
+          "Gear_1_Brace",
+          "Gear_1_Mount",
+          "Gear_2_Foot",
+          "Gear_2_Leg",
+          "Gear_2_Brace",
+          "Gear_2_Mount",
+          "Gear_3_Foot",
+          "Gear_3_Leg",
+          "Gear_3_Brace",
+          "Gear_3_Mount"
+        ],
+        "08_Sparse_panel_connections": [
+          "Shoulder_fastener_-1_0",
+          "Shoulder_fastener_-1_1",
+          "Fork_fastener_-1_0",
+          "Fork_fastener_-1_1",
+          "Cowl_fastener_-1_0",
+          "Cowl_fastener_-1_1",
+          "Shoulder_fastener_1_0",
+          "Shoulder_fastener_1_1",
+          "Fork_fastener_1_0",
+          "Fork_fastener_1_1",
+          "Cowl_fastener_1_0",
+          "Cowl_fastener_1_1"
+        ]
+      },
+      "status": "documented technical intermediate: user also criticized the R02 target deviation; NOT artistically accepted",
+      "selected_iteration": 2,
+      "normalization": "16 Blender-m total length; explicitly stylized, not canonical Star Citizen dimensions",
+      "geometry_provenance": "New original mesh reconstruction after the assigned target pair. No R01/old high-poly/stock ship mesh is imported. Generator utility patterns revised from prior own code; R01 source and export hashes checked unchanged.",
+      "reference_images": [
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png",
+          "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17",
+          "role": "generated current two-view target, not a game screenshot"
+        },
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/09_cutlass_hinten_wimmel.png",
+          "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9",
+          "role": "generated current two-view target, not a game screenshot"
+        }
+      ],
+      "roundtrip": {
+        "pass": true,
+        "asset": "cutlass_01",
+        "blender": "5.2.3 LTS",
+        "glb_sha256": "561cbe1297f2f6c72bd14c7c8f4ae33bc53ced7464d44a6a4bdfa49947fcda50",
+        "import": "fresh factory-empty scene, merge_vertices=True; no post-import repair",
+        "mesh_count": 1,
+        "materials": 9,
+        "triangles": 16696,
+        "material_triangles_match": true,
+        "triangles_by_material": {
+          "M_CutlassR02_Ivory": 1512,
+          "M_CutlassR02_Petrol": 5514,
+          "M_CutlassR02_Slate": 958,
+          "M_CutlassR02_Frame": 5072,
+          "M_CutlassR02_Inset": 324,
+          "M_CutlassR02_Ochre": 996,
+          "M_CutlassR02_Glass": 180,
+          "M_CutlassR02_Steel": 1956,
+          "M_CutlassR02_WarmCore": 184
+        },
+        "bounds_blender_m": {
+          "min": [
+            -5.832258224487305,
+            -7.999999523162842,
+            0.0
+          ],
+          "max": [
+            5.832258224487305,
+            8.0,
+            5.444308280944824
+          ]
+        },
+        "dimensions_blender_m": [
+          11.66451644897461,
+          15.999999523162842,
+          5.444308280944824
+        ],
+        "maximum_bidirectional_nearest_vertex_error_m": 0.0,
+        "maximum_bidirectional_corner_normal_error_degrees": 0.30321504757025436,
+        "normal_comparison_tolerance_degrees": 0.5,
+        "normal_note": "Normals are not claimed bit-exact: corner normals are encoded/reconstructed when combining and importing the GLB. Maximum measured angular difference is retained and must be below0.5degree, followed by opened imported renders.",
+        "raw_qa": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/roundtrip_raw.json",
+        "errors": [],
+        "warnings": [],
+        "images": [
+          "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/roundtrip_front.png",
+          "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/roundtrip_rear.png",
+          "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/roundtrip_game.png"
+        ]
+      },
+      "scale_status": "intentionally stylized source length16m, runtime scale0.22",
+      "runtime_dimensions_width_length_height_m": [
+        2.566193618774414,
+        3.52,
+        1.1977478218078614
+      ],
+      "no_emission": true,
+      "uv": "absent by design for constant-color material fields; UV QA disabled, full geometry QA enabled",
+      "collision_navigation_lights_animations": false
+    }
+  ],
+  "selected_iteration": 2,
+  "previous_user_verdict": {
+    "revision": "pass04 R01",
+    "status": "explicitly rejected artistically by user; historical comparison only"
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "role": "retained broad-form study, not native selection",
+      "source": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/source/iteration01/cutlass_01.blend",
+      "source_sha256": "de0dd25a1a91251b39c9bf7b48f0af7f5998a3508ab66137a95d6cbd0e8fbee9",
+      "export": {
+        "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/iterations/iteration01/cutlass_01.glb",
+        "sha256": "7e90a0b98f4a8d2c801a00b6e429dcfffbe5b4bcaebfe7db9d47337fc236da31",
+        "bytes": 278880,
+        "meshes": 1,
+        "materials": 9,
+        "nodes": 1,
+        "triangles": 13304,
+        "animations": 0,
+        "skins": 0
+      },
+      "triangles": 13304,
+      "qa_pass": true,
+      "images": "qa/iteration01/"
+    },
+    {
+      "iteration": 2,
+      "role": "selected new candidate; structural roof/wing insets, panelled ramp, joined cowl, sparse fasteners, warm recessed nozzles",
+      "source": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/source/iteration02/cutlass_01.blend",
+      "export": {
+        "path": "Assets/curated/frontier_illustrated_20261101/ships_pass04_r02/cutlass_01.glb",
+        "sha256": "561cbe1297f2f6c72bd14c7c8f4ae33bc53ced7464d44a6a4bdfa49947fcda50",
+        "bytes": 352092,
+        "meshes": 1,
+        "materials": 9,
+        "nodes": 1,
+        "triangles": 16696,
+        "animations": 0,
+        "skins": 0
+      },
+      "qa_pass": true,
+      "images": "qa/iteration02/"
+    }
+  ],
+  "previous_r01_preserved": {
+    "source": "art/frontier_illustrated_20261101/ships/pass04/source/cutlass_01.blend",
+    "source_sha256": "a7c476234797209a15cb7e3f30580fca0905f55fc19f901a42fc3933f8022075",
+    "export": {
+      "path": "Assets/curated/frontier_illustrated_20261101/ships_pass04/cutlass_01.glb",
+      "sha256": "7622173a239ac1142902d8692ba590065764f83b596a561c688518e790177b32",
+      "bytes": 230632,
+      "meshes": 1,
+      "materials": 7,
+      "triangles": 4184,
+      "nodes": 1,
+      "skins": 0,
+      "animations": 0
+    },
+    "triangles": 4184
+  },
+  "measured_form_comparison": {
+    "r01": {
+      "cargo": {
+        "object": "Cutlass_CargoHull",
+        "dimensions_blender_m": [
+          5.184244155883789,
+          10.927573204040527,
+          2.744599938392639
+        ],
+        "length_width_ratio": 2.107843086757097
+      },
+      "cockpit": {
+        "object": "Cutlass_Canopy",
+        "dimensions_blender_m": [
+          2.1956799030303955,
+          4.249047040939331,
+          2.3278273344039917
+        ],
+        "length_width_ratio": 1.935185103746204
+      },
+      "forward_shoulder": {
+        "object": "Cutlass_ForeWing_L",
+        "dimensions_blender_m": [
+          4.59281325340271,
+          2.7579896450042725,
+          0.40660738945007324
+        ],
+        "length_width_ratio": 0.600501151001718
+      }
+    },
+    "r02_iteration02": {
+      "cargo": {
+        "object": "Cargo_stepped_hull",
+        "dimensions_blender_m": [
+          6.234838485717773,
+          10.425806045532227,
+          3.489032030105591
+        ],
+        "length_width_ratio": 1.6721854253987105
+      },
+      "cockpit": {
+        "object": "Cockpit_rounded_angular_shell",
+        "dimensions_blender_m": [
+          3.055483818054199,
+          4.356128692626953,
+          2.7045159339904785
+        ],
+        "length_width_ratio": 1.4256755892102986
+      },
+      "forward_shoulder": {
+        "object": "Fork_structural_shoulder_L",
+        "dimensions_blender_m": [
+          3.7715824842453003,
+          3.4515726566314697,
+          1.8944263458251953
+        ],
+        "length_width_ratio": 0.9151523719948909
+      }
+    }
+  },
+  "visual_review": {
+    "opened": true,
+    "improvement_over_r01": "Much fuller blunt cockpit, thicker shaped forward shoulders, broader sloped cargo hull, true inset side/roof fields and segmented structural cowls. Iteration02 gives the formerly blank roof and black rear a readable panel structure; large color regions and twelve isolated fasteners stay sparse.",
+    "remaining_differences": "Cleaner and more symmetrical than the painted targets, less broken industrial layering, simplified engine joint and canopy window contours. The central spine remains relatively broad; no painted wear or texture-based illustration. Original static landing supports are functional display geometry, not canonical landing gear. Candidate appearance requires native/user review.",
+    "comparison_conditions": "R01/R02 Workbench Front/Rear/Game cameras matched in direction, target and orthographic size. Additional fresh-GLB EEVEE pairs match camera, lighting, exposure and resolution. WB and EEVEE are distinct routes, not native Godot capture.",
+    "normal_precision": "Position/material triangle data exact; measured bidirectional corner-normal discrepancy0.3033degrees after encoding/reconstruction, explicitly retained rather than claimed exact.",
+    "acceptance": "Measured form improvements are a comparison finding only. User subsequently criticized the R02 reference gap; no artistic approval and no finished ship art claimed."
+  },
+  "opened_images": [
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration01/front.png",
+      "sha256": "1048ebf86e70ecd05c8ea8bb44a63f399de3f01246c82d10b31dc0327f9cc890",
+      "iteration": 1,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration01/game.png",
+      "sha256": "e3bf3bd31bd5fc3caa6999302c2bb95fc35a4940da62e21a7b8535da52bb84ad",
+      "iteration": 1,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration01/random.png",
+      "sha256": "d7f0fdd1e214baa18c2f968326afb68fbb04042caf38569c651242b4d8f5b137",
+      "iteration": 1,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration01/rear.png",
+      "sha256": "c507ef545f69acfcd0c9f41582717bd2b875d142c0ceedf6753ee68db0ded10f",
+      "iteration": 1,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration01/side.png",
+      "sha256": "097f15309b5c8364a599e433e71071e755b8f291635ec18429ebc3f0f5efdd31",
+      "iteration": 1,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration01/top.png",
+      "sha256": "fa1aa577d408a0f2cb7591ae88ec51eca8671104292b6990cebed2e07dd49c7e",
+      "iteration": 1,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration01/wire.png",
+      "sha256": "19a5d8386fe47fa4b9908437fe0cc5ec53522852b8c854ef3b8ceccc3f0e465c",
+      "iteration": 1,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/front.png",
+      "sha256": "db9e974ab66fc3804ad949ab343c394e4508a33c06ab7b51d67602bc562e939f",
+      "iteration": 2,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/game.png",
+      "sha256": "156f9cdc6981732c2f8b85210d2e913238bb491836ef9bfbe95e36f9cc433cfb",
+      "iteration": 2,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/presentation_r01_front.png",
+      "sha256": "d33526e055f1f7b5ec1e9ce46c41ebe5d127c4a8fc485225b50b7fcae26e3a67",
+      "iteration": 2,
+      "opened": true,
+      "kind": "EEVEE fresh GLB comparison"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/presentation_r01_rear.png",
+      "sha256": "797251dcc4b4b28742d435033ab32f4a3b51c5bb5ad2da0475319a78b6c0c9c5",
+      "iteration": 2,
+      "opened": true,
+      "kind": "EEVEE fresh GLB comparison"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/presentation_r02_front.png",
+      "sha256": "c86db4037a906ac33f07a9ab8c0525c6a24375087f5565979b421e3721934f89",
+      "iteration": 2,
+      "opened": true,
+      "kind": "EEVEE fresh GLB comparison"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/presentation_r02_rear.png",
+      "sha256": "19b5b1752a6e2a28e775f432cbd02c6d06514e98a2533ed6f9646fb80627124d",
+      "iteration": 2,
+      "opened": true,
+      "kind": "EEVEE fresh GLB comparison"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/r01_matched_front.png",
+      "sha256": "ba160b599aec4e926c94416d5b9a2fab3f8271e54bbbc38e491ba1ba7b05717e",
+      "iteration": 2,
+      "opened": true,
+      "kind": "R01 matched Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/r01_matched_game.png",
+      "sha256": "765774e7d090862a66347ccbdabf434a10a84ceceb983be047052318ca981735",
+      "iteration": 2,
+      "opened": true,
+      "kind": "R01 matched Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/r01_matched_rear.png",
+      "sha256": "f160fc81e77204858b9e5333ef4e14bab35993b84671e34976d1400f27413483",
+      "iteration": 2,
+      "opened": true,
+      "kind": "R01 matched Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/random.png",
+      "sha256": "05dc6070a65d6c0cacb6975b45b5f5398373d3f80c954521bee3a72ffc8cff9d",
+      "iteration": 2,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/rear.png",
+      "sha256": "36d46ca0fd2a7752561d975817eef842c1eee2ee66e21b65f6f1d96cf2cd1f19",
+      "iteration": 2,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/roundtrip_front.png",
+      "sha256": "1d56b7101b53408ed3ff658fc191f4d48b37a7b637d055a9206aa102e96323f2",
+      "iteration": 2,
+      "opened": true,
+      "kind": "fresh GLB Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/roundtrip_game.png",
+      "sha256": "05cc6810f0a8f1cbc938c93884eb15ec0e84d2a9983b87ca22f022dc275c9045",
+      "iteration": 2,
+      "opened": true,
+      "kind": "fresh GLB Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/roundtrip_rear.png",
+      "sha256": "ec510e64b6a1c4daecb4ac52752a73ad8f71752c744ba048ac0b2c7990ee6b93",
+      "iteration": 2,
+      "opened": true,
+      "kind": "fresh GLB Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/side.png",
+      "sha256": "aa6c267f48f61b75bba8052bbd0dc56f1560bcdf08fd99bc9ce467693349f51f",
+      "iteration": 2,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/top.png",
+      "sha256": "06f99377db4638565f2c94c585929fb2e5bb39f2c173c1e7541ccabdb72e8881",
+      "iteration": 2,
+      "opened": true,
+      "kind": "editable source Workbench"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration02/wire.png",
+      "sha256": "2c166e832a5ba517b26e808fe7eb3420d7c3b9c445dc09051065062cad8a6da9",
+      "iteration": 2,
+      "opened": true,
+      "kind": "editable source Workbench"
+    }
+  ],
+  "generator_files": [
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/generator/build_cutlass.py",
+      "sha256": "221d383216305dff702c2ce5f7a721c35ed225129b712276ee1fa0061b598004"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/generator/finalize_manifest.py",
+      "sha256": "7a9516b62c0f5125f9cbfbe3ba1688da320ba343c2b968de9d04a52bc7ce8d6d"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/generator/measure_forms.py",
+      "sha256": "5949c23a56279e5ef3b090e8166bd814c240706a3e134e35cccdd442989645e8"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/generator/presentation.py",
+      "sha256": "cde558a8b67849cf1ed14fe03998ba8c5a3c6080149bb261ed5ef30c3125fd61"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/generator/review_cutlass.py",
+      "sha256": "046e1bc32ce2e593292bfdcd8bcf4b98d0bc96f531ab56d7862e60cc21b28fc4"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/generator/verify_roundtrip.py",
+      "sha256": "ab929c9e1ba5f5bb84d8cdd83547c558c44b5bf6ea906b53ced348cbb147c26d"
+    }
+  ],
+  "qa_history": "Initial raw reports retained as initial_source_raw_failed.json. Generated bevel collapses, eight initially floating fasteners and hidden ramp cap contacts were corrected. Both retained final iterations pass SourceQA without errors/warnings; selected GLB passes fresh raw QA without errors/warnings.",
+  "not_claimed": [
+    "user art approval",
+    "canonical Star Citizen dimensions or original game mesh provenance",
+    "native Godot verification by this subtask",
+    "flight or weapon mechanisms",
+    "general performance/release acceptance"
+  ],
+  "r02_user_verdict": {
+    "status": "reference deviation still criticized; this revision is a documented technical intermediate",
+    "continuation": "User explicitly requested a separate Astra Ultra chat for both ships; parent started chat01a197d8-ebd0-7100-8d12-21ff6bc52c0d. No further modeling round in this subtask."
+  },
+  "native_integration_status": "Parent reports R02 native import/capture performed; this manifest retains Blender source/GLB evidence only, native capture evidence belongs to the separate report."
+}

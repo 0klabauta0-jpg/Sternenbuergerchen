@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\pass07_runtime\\strict_runs\\20261101T202704Z-pid119892",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\environment\\pass07\\runtime\\checks.json",
+  "godot": "C:/Users/bjoer/AppData/Local/Programs/Godot/Godot_v4.6.2-stable_win64_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "C:/Users/bjoer/AppData/Local/Programs/Godot/Godot_v4.6.2-stable_win64_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.043,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\pass07_runtime\\strict_runs\\20261101T202704Z-pid119892\\logs\\version.log",
+    "passed": true
+  },
+  "filter": "cli_override",
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-01T20:27:04.882691+00:00",
+  "finished_at": "2026-11-01T20:27:10.495290+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "C:/Users/bjoer/AppData/Local/Programs/Godot/Godot_v4.6.2-stable_win64_console.exe",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\pass07_runtime\\strict_runs\\20261101T202704Z-pid119892\\logs\\engine-check-cli_override.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\scripts\\tests\\frontier_runtime_map_slice_verifier.gd",
+        "--",
+        "--frontier-art-v1",
+        "--cli-profile-check"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 5.562,
+      "name": "cli_override",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\pass07_runtime\\strict_runs\\20261101T202704Z-pid119892\\logs\\check-cli_override.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\pass07_runtime\\strict_runs\\20261101T202704Z-pid119892\\logs\\engine-check-cli_override.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

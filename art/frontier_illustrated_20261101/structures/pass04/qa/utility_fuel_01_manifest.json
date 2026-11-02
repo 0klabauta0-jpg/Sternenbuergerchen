@@ -1,0 +1,341 @@
+{
+  "asset": "utility_fuel_01",
+  "status": "Pass04 Kenney-based visual candidate; user approval pending",
+  "geometry": {
+    "vertices": 1828,
+    "triangles": 3100,
+    "editable_parts": 32,
+    "materials": 12
+  },
+  "dimensions_blender_m": [
+    4.679999828338623,
+    3.240000009536743,
+    2.6700000762939453
+  ],
+  "bounds_blender_m": {
+    "min": [
+      -2.3399999141693115,
+      -1.6200000047683716,
+      0.0
+    ],
+    "max": [
+      2.3399999141693115,
+      1.6200000047683716,
+      2.6700000762939453
+    ]
+  },
+  "pivot": "full BBox XY-centered, groundZ0",
+  "front_blender": "-Y",
+  "front_godot": "+Z",
+  "units": "metres",
+  "runtime_scale": 0.35,
+  "source": "art\\frontier_illustrated_20261101\\structures\\pass04\\source\\utility_fuel_01.blend",
+  "source_sha256": "1eac0e0f11a1fe88dd96a2bdc6618f53cf731fe9d2312b29468d2455566fcc9b",
+  "export": {
+    "path": "Assets\\curated\\frontier_illustrated_20261101\\structures_pass04\\utility_fuel_01.glb",
+    "sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274",
+    "bytes": 176460,
+    "meshes": 1,
+    "materials": 6,
+    "triangles": 3100,
+    "animations": 0,
+    "skins": 0,
+    "nodes": 1
+  },
+  "qa_pass": true,
+  "qa_errors": [],
+  "qa_warnings": [
+    "Kenney_Factory_Pump: duplicate verts=26 loose verts=0",
+    "Kenney_Factory_ControlPanel: duplicate verts=2 loose verts=0",
+    "Kenney_Factory_ManifoldValve: duplicate verts=24 loose verts=0",
+    "Utility_PumpFeed: duplicate verts=12 loose verts=0",
+    "Utility_DispenseHose: duplicate verts=12 loose verts=0",
+    "hidden back-to-back faces: Utility_ServiceDeck<->Utility_ControlCabinet (2 pairs) - delete to save tris"
+  ],
+  "kenney_geometry_reuse": [
+    {
+      "source": "Assets/curated/kenney/factory/models/detail-tank.glb",
+      "source_sha256": "b1edc2953c590c16f1d8280dfeb9073af6c710ac3d587f3dba144f69363d799b",
+      "pack": "Kenney Factory Kit 3.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/factory/License.txt",
+      "license_sha256": "341034a1b5417251a98b3bb9901bbf45ecb5cfc42331a9d9a6a35c2c22c8ff28",
+      "instance": "Kenney_UprightTank_0",
+      "retained_objects": [
+        "detail-tank"
+      ],
+      "new_objects": [
+        "Kenney_UprightTank_0"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "detail-tank",
+          "original_vertices": 286,
+          "original_faces": 236,
+          "derivative_vertices": 144,
+          "derivative_triangles": 236,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 rotate actual tank source around Y to vertical pressure-vessel axis; fit1.25x1.25x2.40m; inherited bands/mount shapes retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        2.25,
+        1.12,
+        1.12
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        0,
+        0
+      ],
+      "bottom_before_pivot_normalization_m": 0,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null,
+      "upright_tank_fit_m": [
+        1.25,
+        1.25,
+        2.4
+      ]
+    },
+    {
+      "source": "Assets/curated/kenney/factory/models/detail-tank.glb",
+      "source_sha256": "b1edc2953c590c16f1d8280dfeb9073af6c710ac3d587f3dba144f69363d799b",
+      "pack": "Kenney Factory Kit 3.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/factory/License.txt",
+      "license_sha256": "341034a1b5417251a98b3bb9901bbf45ecb5cfc42331a9d9a6a35c2c22c8ff28",
+      "instance": "Kenney_UprightTank_1",
+      "retained_objects": [
+        "detail-tank"
+      ],
+      "new_objects": [
+        "Kenney_UprightTank_1"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "detail-tank",
+          "original_vertices": 286,
+          "original_faces": 236,
+          "derivative_vertices": 144,
+          "derivative_triangles": 236,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 rotate actual tank source around Y to vertical pressure-vessel axis; fit1.25x1.25x2.40m; inherited bands/mount shapes retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        2.25,
+        1.12,
+        1.12
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        0,
+        0
+      ],
+      "bottom_before_pivot_normalization_m": 0,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null,
+      "upright_tank_fit_m": [
+        1.25,
+        1.25,
+        2.4
+      ]
+    },
+    {
+      "source": "art/frontier_illustrated_20261101/structures/pass04/source_assets/Assets/curated/kenney/factory/models/machine-connection-pipe.glb",
+      "source_sha256": "b2893e5f6ae2484b8d5be0d4538bc90e50dba98715976ac8c82f55b413f8985f",
+      "pack": "Kenney Factory Kit 3.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "art/frontier_illustrated_20261101/structures/pass04/source_assets/Assets/curated/kenney/factory/License.txt",
+      "license_sha256": "61e86565dd297e143ad631594980eda0a17fc81a4cd7c6d71acf2f5e0cad30b6",
+      "instance": "Kenney_Factory_Pump",
+      "retained_objects": [
+        "machine-connection-pipe"
+      ],
+      "new_objects": [
+        "Kenney_Factory_Pump"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "machine-connection-pipe",
+          "original_vertices": 404,
+          "original_faces": 342,
+          "derivative_vertices": 236,
+          "derivative_triangles": 336,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 14
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        0.88,
+        0.78,
+        1.14
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -1.52,
+        -0.68
+      ],
+      "bottom_before_pivot_normalization_m": 0.265,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null,
+      "original_pack_path": "C:/Users/bjoer/Pictures/Kenney Game Assets All-in-1 3.4.0/kenney_factory-kit_3.0/Models/GLB format/machine-connection-pipe.glb"
+    },
+    {
+      "source": "art/frontier_illustrated_20261101/structures/pass04/source_assets/Assets/curated/kenney/factory/models/screen-panel-small.glb",
+      "source_sha256": "e3b43cfb99a49382de983f476bc19c0c76b79c199008f663d19b7faf9b8543a3",
+      "pack": "Kenney Factory Kit 3.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "art/frontier_illustrated_20261101/structures/pass04/source_assets/Assets/curated/kenney/factory/License.txt",
+      "license_sha256": "61e86565dd297e143ad631594980eda0a17fc81a4cd7c6d71acf2f5e0cad30b6",
+      "instance": "Kenney_Factory_ControlPanel",
+      "retained_objects": [
+        "screen-panel-small"
+      ],
+      "new_objects": [
+        "Kenney_Factory_ControlPanel"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "screen-panel-small",
+          "original_vertices": 184,
+          "original_faces": 144,
+          "derivative_vertices": 84,
+          "derivative_triangles": 144,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 1
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        0.62,
+        0.35,
+        0.47
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        1.52,
+        -0.91
+      ],
+      "bottom_before_pivot_normalization_m": 1.17,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null,
+      "original_pack_path": "C:/Users/bjoer/Pictures/Kenney Game Assets All-in-1 3.4.0/kenney_factory-kit_3.0/Models/GLB format/screen-panel-small.glb"
+    },
+    {
+      "source": "art/frontier_illustrated_20261101/structures/pass04/source_assets/Assets/curated/kenney/factory/models/pipe-large-valve.glb",
+      "source_sha256": "57126374dce5b172e06d5d6f8cbaab97c9cffe3e5e726060eb14c50a5bd519b6",
+      "pack": "Kenney Factory Kit 3.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "art/frontier_illustrated_20261101/structures/pass04/source_assets/Assets/curated/kenney/factory/License.txt",
+      "license_sha256": "61e86565dd297e143ad631594980eda0a17fc81a4cd7c6d71acf2f5e0cad30b6",
+      "instance": "Kenney_Factory_ManifoldValve",
+      "retained_objects": [
+        "pipe-large-valve"
+      ],
+      "new_objects": [
+        "Kenney_Factory_ManifoldValve"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "pipe-large-valve",
+          "original_vertices": 424,
+          "original_faces": 456,
+          "derivative_vertices": 296,
+          "derivative_triangles": 456,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 16
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        0.62,
+        0.29,
+        0.32
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        0,
+        -0.46
+      ],
+      "bottom_before_pivot_normalization_m": 0.4,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null,
+      "original_pack_path": "C:/Users/bjoer/Pictures/Kenney Game Assets All-in-1 3.4.0/kenney_factory-kit_3.0/Models/GLB format/pipe-large-valve.glb"
+    }
+  ],
+  "qa_scope": "entire assembled source; full contact/zfight/normal checks; UV excluded for untextured palette",
+  "functional": {
+    "groups": [
+      "two vertical original Kenney tank derivatives",
+      "carrying steel frame and footings",
+      "actual Factory connection machine as pump",
+      "Factory panel and valve",
+      "connected outlet collars/manifold/flexible lines"
+    ],
+    "static_only": true,
+    "no_vehicle": true,
+    "no_refuelling_mechanic": true
+  },
+  "intent": "compact stationary pressure-vessel/pump assembly with useful service front; no horizontal rice-roll tank or toy vehicle"
+}

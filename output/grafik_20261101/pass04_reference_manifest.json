@@ -1,0 +1,26 @@
+{
+  "schema": "sternenbuergerchen.graphics_pass04_visual_reference.v1",
+  "task": "docs/tasks/ART_2026_11_01_pass04.md",
+  "references": [
+    {
+      "id": "ref_thedus",
+      "title": "HDMS-Thedus · Außenposten-Pads",
+      "source_path": "C:/Users/bjoer/Downloads/HDMS_Thedus.png",
+      "package_path": "docs/reports/assets/grafik-2026-11-01/references/pass04/HDMS_Thedus.png",
+      "sha256": "166ed00aa40c195e0697755eead20a1d923d2fe1dedd222add3817fb8a93ba58",
+      "bytes": 4633458,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "copy_byte_identical": true,
+      "artwork_modified": false,
+      "image_url": "https://media.starcitizen.tools/d/d3/HDMS_Thedus.png",
+      "page_url": "https://starcitizen.tools/HDMS-Thedus",
+      "attribution": "Community-gehosteter Star-Citizen-Ingame-Screenshot, Star Citizen Wiki; historische visuelle Vorlage, keine offizielle aktuelle Technikquelle.",
+      "assignment": "Pad-/Außenpostenform: flache rechteckige Metalldecks mit kleinen Fasen, gebrochenen Landelinien, niedrigen Randlichtern und seitlichen Zugangsrampen.",
+      "scope": "visual reference only; no model geometry imported and no game/performance/technical specifications inferred",
+      "license_note": "Underlying Star Citizen game image; no Kenney CC0 license attribution inferred."
+    }
+  ]
+}

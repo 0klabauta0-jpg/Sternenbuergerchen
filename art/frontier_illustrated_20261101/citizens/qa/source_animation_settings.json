@@ -1,0 +1,44 @@
+[
+  {
+    "clip": "idle",
+    "fps": 30,
+    "fps_base": 1.0,
+    "actions": [
+      {
+        "name": "0.Targeting Pose",
+        "range": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Idle",
+        "range": [
+          0.0,
+          32.0
+        ]
+      }
+    ]
+  },
+  {
+    "clip": "walk",
+    "fps": 30,
+    "fps_base": 1.0,
+    "actions": [
+      {
+        "name": "0.Targeting Pose",
+        "range": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Walk",
+        "range": [
+          0.0,
+          32.0
+        ]
+      }
+    ]
+  }
+]

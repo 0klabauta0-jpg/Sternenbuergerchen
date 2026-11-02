@@ -1,0 +1,4 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FRONTIER_PASS03_GEOLOGY {"failed":0,"footprint_digest":"46cd64cbe1874df344c4ea2c011c4cf2c87308a627a61edaf4d295b35d2e5523","geometry":{"caps_up":true,"degenerate_triangles":0,"digest":"86bed12ed493a14b185209d3b69615b56a5a8d9b219b247ebeff3385b49faf03","finite":true,"meshes":58,"outside_footprint_vertices":0,"terraced_groups":14,"vertices":14880,"walls_out":true},"passed":11,"synthetic_fixture":true}

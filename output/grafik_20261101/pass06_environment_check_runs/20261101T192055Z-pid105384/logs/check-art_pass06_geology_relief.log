@@ -1,0 +1,4 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FRONTIER_PASS06_GEOLOGY {"detailed_rocks":24,"eroded_meshes":54,"failed":0,"maximum_channels":5,"minimum_relief_area_ratio":0.726774153373948,"minimum_relief_height_span_m":0.202570930123329,"minimum_relief_normal_y":0.471848785877228,"passed":10,"relief_meshes":14,"synthetic_fixture":true,"vertices":42363}

@@ -1,0 +1,564 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Project initialization (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Scanning file structure...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Loading global class names...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | Verifying GDExtensions...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Creating autoload scripts...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Initializing plugins...[39m[0m
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:20)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:21)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:24)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:399)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:44)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:82)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:109)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:185)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:223)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:229)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:233)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:234)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:373)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:374)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:400)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:414)
+ERROR: Failed to load script "res://addons/terrain_3d/src/editor_plugin.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+WARNING: res://addons/asset_placer/ui/components/asset_resource_preview.tscn:3 - ext_resource, invalid UID: uid://dacpe4563g5x2 - using text path instead: res://addons/asset_placer/ui/components/asset_resource_preview.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://addons/asset_placer/ui/components/asset_resource_preview.tscn:5 - ext_resource, invalid UID: uid://dephufwlu765k - using text path instead: res://addons/asset_placer/ui/components/asset_thumbnail.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.tscn:3 - ext_resource, invalid UID: uid://b4c5hlcpl1sor - using text path instead: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://addons/asset_placer/ui/manage_collections/component/checkable_collection_item.tscn:4 - ext_resource, invalid UID: uid://dmicn3kmr620j - using text path instead: res://addons/asset_placer/utils/system_icon.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://addons/asset_placer/ui/manage_collections/component/checkable_asset_item.tscn:3 - ext_resource, invalid UID: uid://b6ywapljcr4hk - using text path instead: res://addons/asset_placer/ui/manage_collections/component/checkable_asset_item.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Starting file scan...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DData" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/region_gizmo.gd:37)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DData" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/region_gizmo.gd:37)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DData" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/region_gizmo.gd:49)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:48)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:52)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:53)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:54)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:55)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:151)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:151)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:529)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "tool_changed".
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:83)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "picking".
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:87)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:99)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:99)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:142)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:143)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:165)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:170)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:174)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:174)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:176)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:180)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:188)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:192)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:204)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:215)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:226)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:226)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:226)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:231)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:266)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:300)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:301)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:304)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:306)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:307)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:309)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:342)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DMaterial" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:357)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:358)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:364)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:371)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:380)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:384)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:386)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:388)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:401)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:403)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:410)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:417)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:420)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:423)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:426)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:428)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:431)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:434)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:437)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:440)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:443)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:446)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:449)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:452)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:460)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:536)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:540)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:550)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:553)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:553)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:555)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DRegion" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:556)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:557)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:559)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:561)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:569)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "pick".
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:572)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:20)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:21)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:24)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:399)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:44)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:82)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:109)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:185)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:223)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:229)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:233)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:234)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:373)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:374)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:400)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:414)
+[   0% ] [90m[1mloading_editor_layout[22m | Started Loading editor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Loading editor layout...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Loading docks...[39m[0m
+[  33% ] [90m[1mloading_editor_layout[22m | Reopening scenes...[39m[0m
+[  50% ] [90m[1mloading_editor_layout[22m | Loading central editor layout...[39m[0m
+[  66% ] [90m[1mloading_editor_layout[22m | Loading plugin window layout...[39m[0m
+[  83% ] [90m[1mloading_editor_layout[22m | Editor layout ready.[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+SCRIPT ERROR: Parse Error: Could not resolve class "res://addons/terrain_3d/src/operation_builder.gd".
+   at: GDScript::reload (res://addons/terrain_3d/src/gradient_operation_builder.gd:3)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/gradient_operation_builder.gd:25)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/gradient_operation_builder.gd:34)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/operation_builder.gd:16)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/operation_builder.gd:24)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:5)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:342)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:346)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:363)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:368)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:77)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:82)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:87)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:107)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:116)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:120)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DUtil" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:283)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:348)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:350)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:352)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:356)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:358)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:364)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/tool_settings.gd:369)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:5)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:5)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:36)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:37)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:38)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:42)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:43)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:44)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:46)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:47)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:49)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:50)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:51)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:53)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:54)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:58)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:59)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:61)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:62)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:64)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:65)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:66)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:70)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:71)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:72)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:74)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:75)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:76)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:80)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:81)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:82)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:84)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:85)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:86)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:88)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:89)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:90)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:154)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/toolbar.gd:154)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "find_terrain_nav_regions".
+   at: GDScript::reload (res://addons/terrain_3d/menu/terrain_menu.gd:74)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/menu/terrain_menu.gd:78)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "find_nav_region_terrains".
+   at: GDScript::reload (res://addons/terrain_3d/menu/terrain_menu.gd:78)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DData" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/region_gizmo.gd:37)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DData" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/region_gizmo.gd:37)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DData" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/region_gizmo.gd:49)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:48)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:52)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:53)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:54)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:55)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:151)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:151)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:529)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "tool_changed".
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:83)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "picking".
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:87)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:99)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:99)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:142)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:143)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:165)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:170)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:174)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:174)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:176)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:180)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:188)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:192)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:204)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:215)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:226)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:226)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:226)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:231)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:266)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:300)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:301)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:304)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:306)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:307)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:309)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:342)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DMaterial" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:357)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:358)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:364)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:371)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:380)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:384)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:386)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:388)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:401)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:403)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:410)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:417)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:420)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:423)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:426)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:428)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:431)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:434)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:437)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:440)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:443)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:446)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:449)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:452)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:460)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:536)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:540)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:550)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:553)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:553)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:555)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DRegion" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:556)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:557)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:559)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:561)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:569)
+SCRIPT ERROR: Parse Error: Could not resolve external class member "pick".
+   at: GDScript::reload (res://addons/terrain_3d/src/ui.gd:572)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:20)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:21)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3DEditor" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:24)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:399)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:44)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:82)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:109)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:185)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:223)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:229)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:233)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:234)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:373)
+SCRIPT ERROR: Parse Error: Identifier "Terrain3DEditor" not declared in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:374)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:400)
+SCRIPT ERROR: Parse Error: Could not find type "Terrain3D" in the current scope.
+   at: GDScript::reload (res://addons/terrain_3d/src/editor_plugin.gd:414)

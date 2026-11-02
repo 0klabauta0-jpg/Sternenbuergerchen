@@ -1,0 +1,292 @@
+{
+  "schema": "frontier.main_adoption.native_visual_review.v1",
+  "reviewer": "independent ship integration subagent /root/ship_sources",
+  "review_utc": "2026-11-01T21:37:33.449570+00:00",
+  "status": "no_new_visible_blocker_in_reviewed_static_views",
+  "artistic_user_acceptance": false,
+  "scope": "20 native synthetic preview captures; 8 individually opened at full native resolution, all20 inspected through individual or contact-sheet views;10 prior same-camera P07 PNGs compared. Four Ref03 comparison sheets opened. No source/model/runtime/Git edits.",
+  "capture_metadata": {
+    "path": "output/grafik_20261101/main_adoption_after_capture.json",
+    "sha256": "eca6fead09e023ddb8881468ff399038d94949d37cd89aec6420300018457ad8",
+    "bytes": 31336,
+    "opened_as": "parsed_metadata"
+  },
+  "previous_metadata": {
+    "path": "output/grafik_20261101/pass07_paths_after_capture.json",
+    "sha256": "4db213f5775ef4bbc92f6cf350fadd2ba9ecb09ae1377cc349c15330a1aef23c",
+    "bytes": 29339,
+    "opened_as": "parsed_metadata"
+  },
+  "renderer": "forward_plus / vulkan",
+  "opened_files": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/overview.png",
+      "sha256": "a05c33dd63bf7eed8b9799462df2d2c14a9fe90444f4d06b84499fc67cb15b8d",
+      "bytes": 1273193,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/hex_grid.png",
+      "sha256": "073f1235f3b8db8d02565bedc44a4be207b2ac1314bb87f4cf19603c5a9b065e",
+      "bytes": 1335030,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/crew.png",
+      "sha256": "7d9ba0b59964a8b348c844aa6ae5502afab73c7d9080cde3ebf43f152929b51c",
+      "bytes": 629618,
+      "opened_as": "individual_full_native_png"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/workshop.png",
+      "sha256": "f35734a518ccf5a23652ea83e079c7f2a33a6f92a61a535a989df46d40b5b791",
+      "bytes": 924470,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/landscape.png",
+      "sha256": "f4f62c30b157fb478f95c0a9c1714399ca6235b4c31f013a7881edfe284705b5",
+      "bytes": 1417337,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/cutaway.png",
+      "sha256": "2a2224af1bb9c1b70f2000645946fa93996ce36026eaddaca04cfc7a1e571c21",
+      "bytes": 863708,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/outpost.png",
+      "sha256": "4f8043dc52e698b5b3efc35ededc9a5a7d06775fd91efc509d932df1e63235eb",
+      "bytes": 1342262,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/cutlass_front.png",
+      "sha256": "181b6c3b630cdd35fe79bfe407ef689e0d060b0729c86ec62eb62957e638b284",
+      "bytes": 910560,
+      "opened_as": "individual_full_native_png"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/cutlass_rear.png",
+      "sha256": "6c8fb77d1c4139a1a438788471451a6674d118e3f3e374ab754d064e2c5190da",
+      "bytes": 874789,
+      "opened_as": "individual_full_native_png"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/buccaneer_front.png",
+      "sha256": "6551c4a627b9ec60c16c158adec3c011e352274ce42dc6e13a395e5019a81bc2",
+      "bytes": 542511,
+      "opened_as": "individual_full_native_png"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/buccaneer_rear.png",
+      "sha256": "412ec725a38dd582d340dabbd5ced6f85b4f330882b1dbde00087acdb098dade",
+      "bytes": 602602,
+      "opened_as": "individual_full_native_png"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/utility.png",
+      "sha256": "08462904c3dd5a46ad228f06f8be1fe7a1c3512d4aff667429015d0aca0ac56e",
+      "bytes": 713835,
+      "opened_as": "individual_full_native_png"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/closed_outpost.png",
+      "sha256": "2657e10b12f4c4381709e397444d479d1f60ed4ea53ebffd7e96b5ee70cdcc7d",
+      "bytes": 1336829,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/closed_habitat.png",
+      "sha256": "ed405f0a7a555e8dc95d1d00cb1a80031250980cbda8d2e222d2701d79c15c5f",
+      "bytes": 827612,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/closed_hall.png",
+      "sha256": "8079329f98308c8914ee681c18efb0aa5ddee293ac16dcd2e7ce928519fde283",
+      "bytes": 927702,
+      "opened_as": "individual_full_native_png"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/lived_outpost.png",
+      "sha256": "32f6201141ba45cf84c673953703b495f139f1df7ba788732e6ee80273cdf776",
+      "bytes": 1228864,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/ground_detail.png",
+      "sha256": "a3d8d66348b38ef86013d134fdb9076fac47d1a2ea710a49b61d3a1db142f081",
+      "bytes": 895394,
+      "opened_as": "individual_full_native_png"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/geology_detail.png",
+      "sha256": "dd0f2504ca79f35e8b374d80b77eed45f37ca2183516a0eabbe871b241a9394b",
+      "bytes": 1032995,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/baseline.png",
+      "sha256": "d47de379f39b8e6952299b5ec135dca6f832942ad16f1ab4888be45ba932b7c3",
+      "bytes": 1045468,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_main_adoption/after/walk_pose.png",
+      "sha256": "abda2fdb0ed2873b33a8e409e8eb5b0110b3bcbaf6239f316408d07b8c122095",
+      "bytes": 631816,
+      "opened_as": "environment_contact_sheet_thumbnail"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/cutlass_front.png",
+      "sha256": "ca5545488319b2bc96a837df3f9836f39e35c28a96e97a01b992ad990ed64553",
+      "bytes": 903301,
+      "opened_as": "same_camera_before_after_contact_sheet"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/cutlass_rear.png",
+      "sha256": "ff3ceee442d82b3213d5ad542db13a6e794eed4f20374131a5a8b83940b4cce6",
+      "bytes": 869881,
+      "opened_as": "same_camera_before_after_contact_sheet"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/buccaneer_front.png",
+      "sha256": "89dee370df36e383b5fc1ce940019953707e9efddbdd88ab0cf0067c582c2c61",
+      "bytes": 597202,
+      "opened_as": "same_camera_before_after_contact_sheet"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/buccaneer_rear.png",
+      "sha256": "f3847d87965e9636febb684c836e4dcd2cf3b7a41fd82cb375c8e55acb5e3c8c",
+      "bytes": 641300,
+      "opened_as": "same_camera_before_after_contact_sheet"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/overview.png",
+      "sha256": "7bd3c39eb61bcab78280397a3685ae398df9f91fb43119e8490d9b899f2fa51e",
+      "bytes": 1280424,
+      "opened_as": "same_camera_before_after_contact_sheet"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/closed_habitat.png",
+      "sha256": "5c3242670fcc5c04d24b1bf80a07b4e08ad6bad37f7342519ed0795d0e5a53a2",
+      "bytes": 839439,
+      "opened_as": "same_camera_before_after_contact_sheet"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/closed_hall.png",
+      "sha256": "8079329f98308c8914ee681c18efb0aa5ddee293ac16dcd2e7ce928519fde283",
+      "bytes": 927702,
+      "opened_as": "same_camera_before_after_contact_sheet"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/utility.png",
+      "sha256": "65781a4316a30ac934c1c1f2ad1ed4b332e4d7dce957d40026e4ef01dcb192e6",
+      "bytes": 725601,
+      "opened_as": "same_camera_before_after_contact_sheet"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/crew.png",
+      "sha256": "7925ca337a3975fa4cf47756e86f63b0c9f484a170e46c683994c5a9f92ed3a0",
+      "bytes": 629687,
+      "opened_as": "same_camera_before_after_contact_sheet"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/ground_detail.png",
+      "sha256": "f4e2f1f49122b556cae72d2828dba7e92bbf0f9ab7439bac17c7303650ebb51d",
+      "bytes": 904953,
+      "opened_as": "same_camera_before_after_contact_sheet"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_03/review/cutlass/sheets/Vorher_und_Neu_Oben.png",
+      "sha256": "cf3e09f25273021177bb53d89046d5c1e75ae8df1203f7a7ee1d1c7c9d9fafa1",
+      "bytes": 1496172,
+      "opened_as": "individual_ref03_source_comparison_sheet"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_03/review/buccaneer/sheets/Vorher_und_Neu_Seite.png",
+      "sha256": "3aa75a672401f4d619f3c4063ebcc2b5d670e18c30f89974770a0632fe5166b0",
+      "bytes": 784296,
+      "opened_as": "individual_ref03_source_comparison_sheet"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_03/review/cutlass/sheets/Ziel_und_Neu.png",
+      "sha256": "0ce28a5d2ed142013bdd6f04becb1e39efee765f2b748edf09c8d4f8a7ac12d9",
+      "bytes": 4603431,
+      "opened_as": "individual_ref03_source_comparison_sheet"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_03/review/buccaneer/sheets/Ziel_und_Neu.png",
+      "sha256": "df4f5df2d26f5e78d1733aa648db03422d9d7eacaa38e48da834c3876a3068f9",
+      "bytes": 4605557,
+      "opened_as": "individual_ref03_source_comparison_sheet"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/native_review/ship_before_after_sheet.png",
+      "sha256": "9548d7a03889465292b71819f88bdb5e398daa0ea14dfc8180e883423fe2f01b",
+      "bytes": 1572436,
+      "opened_as": "generated_and_opened_diagnostic_contact_sheet"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/native_review/environment_contact_sheet.png",
+      "sha256": "5b55ac430a1a3ff39473eb24a01d214b3e5d1a6650d70c36301ee70c1eb83e12",
+      "bytes": 2496499,
+      "opened_as": "generated_and_opened_diagnostic_contact_sheet"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/native_review/environment_before_after_sheet.png",
+      "sha256": "ccbf4b3f167d7b44bbc08f718aeec6cf8e924784b8a91fc6bf9eccc7ffe80cab",
+      "bytes": 2286187,
+      "opened_as": "generated_and_opened_diagnostic_contact_sheet"
+    }
+  ],
+  "blocking_findings": [],
+  "observations": [
+    {
+      "area": "Cutlass",
+      "result": "Front and rear show four supported connected engine groups, smaller forepods, narrower forewings, separate large rear pods, strong cockpit and preserved turret. Landing feet appear on the pad; ship and shadows remain within deck, without scene occlusion or visible open/missing main surfaces."
+    },
+    {
+      "area": "Buccaneer",
+      "result": "Narrow central fuselage, two separated large pods, short outer wings and dorsal gun remain readable. Rear view exposes planted rear footplates; forefoot is partly hidden by the hull in the front camera. No obvious clipping or detached components."
+    },
+    {
+      "area": "Materials and normals",
+      "result": "Cream/petrol/ochre materials and dark glazing are present in all4 ship views. No missing-material color, visibly inverted exterior face or unexplained black hole was seen. Engine interiors/glass are intentionally very dark; flat faceting remains visible on cowls."
+    },
+    {
+      "area": "Environment continuity",
+      "result": "Comparison sheets show the same terrain, paths, access ramps, utility, closed shells and crew placement as P07. Larger utility/ground/hall/crew PNGs show no new gross floating contact, missing part or crossing defect. Existing partial bollard occlusion of the foreground citizen remains in both P07 and adoption."
+    }
+  ],
+  "comparison_contract": {
+    "capture_count": 20,
+    "all_capture_errors_zero": true,
+    "same_camera_metadata_as_p07": true,
+    "same_global_light_as_p07": true,
+    "newer_user_direction": "Ref03 four-engine Cutlass with reduced forewing/rear-pod size and Buccaneer upper-half glazing over closed cockpit tub supersede literal original2D geometry; Ref03 top/side comparison sheets inspected.",
+    "original_2d_remaining_difference": "Glass/interior, nozzle treatment, mechanical connections and painterly material variation are still simplified; no claim of exact illustration reconstruction."
+  },
+  "technical_evidence_separate": {
+    "path": "output/grafik_20261101/main_adoption/ships/adoption_check.json",
+    "sha256": "674d297b13db53ea339deaed29e9f24b72ce8bb335766aaae3bdfb4e6abb75f9",
+    "bytes": 9565,
+    "opened_as": "parsed_86_check_headless_gate_reference_not_visual_inference"
+  },
+  "source_hash_mismatches_against_native_capture": [],
+  "curated_package_manifest": {
+    "path": "art/frontier_illustrated_20261101/ships/main_adoption/manifest.json",
+    "sha256": "048fc91a8d8d3b20b8143f330eaebd01ca92aac5cccd09da6a96c022dbf166db",
+    "bytes": 55313,
+    "opened_as": "hash_rechecked_no_rewrite_needed"
+  },
+  "curated_package_hash_mismatches": [],
+  "limitations": [
+    "Static screenshots cannot rule out temporal z-fighting or every hidden face; this review is bounded to the20 named fixed views.",
+    "Not all landing feet are simultaneously visible; imported bounds/contact/normals/material counts are covered by the separate86/86 gate, not inferred solely from shadows.",
+    "No normal mission/menu UI or full gameplay acceptance is implied by the synthetic art fixture; root owns separate productive-entry evidence.",
+    "No new art pass or source retuning was performed. Original Ref03 candidate review status remains preserved separately from user-authorized integration."
+  ]
+}

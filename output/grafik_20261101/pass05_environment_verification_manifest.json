@@ -1,0 +1,157 @@
+{
+  "schema": "sternenbuergerchen.graphics_pass05_environment_verification.v1",
+  "code_commit": "5499c976028b8200b8a61bb92d5a6879f8ad57a9",
+  "code_commit_pushed": true,
+  "based_on_unintegrated_graphics_branch": "task/grafikreferenzen-20261101",
+  "previous_handoff_commit": "fbcac03d1",
+  "engine_report": "output/grafik_20261101/pass05_environment_check_runs/20261101T175813Z-pid100460/metadata/report.json",
+  "engine_checks_passed": 18,
+  "native_captures": 20,
+  "pairs": [
+    {
+      "view": "overview",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/overview.png",
+      "before_sha256": "6c3a1d41e61cfa8ed8aa1c49109f01d90647d137c1d3e6c1b52f9d597a93f4a1",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/overview.png",
+      "after_sha256": "dbed07bbebcc3e9f544aa8037ecde74ad295d6af636b5c5e959ff2c78880c293",
+      "camera_size": 12.0
+    },
+    {
+      "view": "workshop",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/workshop.png",
+      "before_sha256": "74ef744460820ff1033e946dd956ec6c1ec4e8ccd805fa606a8b002025f3938f",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/workshop.png",
+      "after_sha256": "0a18924f063d7821e72feb9dc61d2a5999b5cef0189f478958ca8567b1afef14",
+      "camera_size": 4.2
+    },
+    {
+      "view": "crew",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/crew.png",
+      "before_sha256": "7ebda2daea4a806acd2f3c7ef8a62f8f198136bd2451231145646949e566769d",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/crew.png",
+      "after_sha256": "c6572de7164b3d5141be22cbd148ee73f92e19307a86dea4be5d886b96547151",
+      "camera_size": 2.5
+    },
+    {
+      "view": "hex_grid",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/hex_grid.png",
+      "before_sha256": "0447659e23c32c1ff467bbdd8bf2317b40fe4e0f7145862004df84dacb19b2fe",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/hex_grid.png",
+      "after_sha256": "90445757369cdcea8d53c2883796bed6c5378868fc2ba139a3f81b30563133e2",
+      "camera_size": 12.0
+    },
+    {
+      "view": "landscape",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/landscape.png",
+      "before_sha256": "3614e8a86307d4dd9af390a2efee5cc897d103a81dd8a1b90a79ced6c0b2a2ef",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/landscape.png",
+      "after_sha256": "90b41a35153a6ef53dbc9a8096e7ac00adda35d5342ecd046f525dd4db986cae",
+      "camera_size": 23.0
+    },
+    {
+      "view": "cutaway",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/cutaway.png",
+      "before_sha256": "52ca75e3d08e09b32f50983d992120f374938914b0477e1c16189008729af71b",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/cutaway.png",
+      "after_sha256": "d8b590e50f0fd45e0523c1fbce6dd310ae5b0d891c057b62348060fe8bf839ac",
+      "camera_size": 3.6
+    },
+    {
+      "view": "closed_outpost",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/closed_outpost.png",
+      "before_sha256": "46eb623067dd6dc561b1a77654c40cd47c1bce3abb5eaedaf7ebacc181df03a3",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_outpost.png",
+      "after_sha256": "4de4b4f369896fb4466ef97f33ade16f3488be2c6f61c84882406ea5599803cd",
+      "camera_size": 18.0
+    },
+    {
+      "view": "closed_habitat",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/closed_habitat.png",
+      "before_sha256": "ff3ed6743fb56ec55faf52247a28e5e1de26aeee1523a3e25671254846ea2fce",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_habitat.png",
+      "after_sha256": "bd61fb85432ec22d8eb4119b87d2f3cfe8e7b29f66fd3604e97a07507f0964cd",
+      "camera_size": 3.6
+    },
+    {
+      "view": "closed_hall",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/closed_hall.png",
+      "before_sha256": "67ed88ef55227f197eba0198e952e0d79c4c60c7cd407be6b57ca897ee7a2af3",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/after/closed_hall.png",
+      "after_sha256": "ae411ef8cbd550196c39fd894850ff9cc4cf794477624ac65be2f087bdc05712",
+      "camera_size": 4.2
+    }
+  ],
+  "geology_manifest": "art/frontier_illustrated_20261101/environment/pass05/geology/manifest.json",
+  "worklife_sources": [
+    {
+      "atlas_path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+      "atlas_sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1",
+      "grounded_bounds": "[P: (9.867235, 0.0, 7.740388), S: (0.631915, 0.3, 0.734899)]",
+      "id": "working_table-display",
+      "license": "Kenney Space Station CC0; original GLB and atlas unchanged",
+      "license_path": "res://Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "material_route": "instance-duplicated warm tint, original textures and UV unchanged",
+      "path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+      "scale": 0.5,
+      "source_sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3",
+      "support_height": 0.0,
+      "yaw": -65.0
+    },
+    {
+      "atlas_path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+      "atlas_sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1",
+      "grounded_bounds": "[P: (10.59925, 0.24, 8.016194), S: (0.141534, 0.165218, 0.136924)]",
+      "id": "working_computer",
+      "license": "Kenney Space Station CC0; original GLB and atlas unchanged",
+      "license_path": "res://Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "material_route": "instance-duplicated warm tint, original textures and UV unchanged",
+      "path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+      "scale": 0.25,
+      "source_sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7",
+      "support_height": 0.24,
+      "yaw": -65.0
+    },
+    {
+      "atlas_path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+      "atlas_sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1",
+      "grounded_bounds": "[P: (15.15241, 0.0, 7.032408), S: (0.295183, 0.301, 0.295184)]",
+      "id": "working_container-wide",
+      "license": "Kenney Space Station CC0; original GLB and atlas unchanged",
+      "license_path": "res://Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "material_route": "instance-duplicated warm tint, original textures and UV unchanged",
+      "path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+      "scale": 0.43,
+      "source_sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0",
+      "support_height": 0.0,
+      "yaw": 9.0
+    }
+  ],
+  "use_groups": [
+    "HabitatArrival",
+    "FreihafenDelivery",
+    "SupplyService"
+  ],
+  "primary_glb_hashes_unchanged": true,
+  "renderer_match": true,
+  "lighting_match": true,
+  "camera_transforms_match": true,
+  "archived_pass04_html_sha256": "7ae0d52d3b258b2ae17b617d743a734de8ede0bd871b6843166ae559a7cbc5e6",
+  "structure_manifest": "art/frontier_illustrated_20261101/environment/pass05/buildings/manifest.json",
+  "scope": "Native synthetic Hex environment: differentiated closed building masses, fractured geology, material/soil contacts and functional use groups with four repositioned original citizens. Original GLB sources unchanged; no new ship, interior, AI or campaign simulation.",
+  "remaining_visual_differences": "Building silhouettes and use groups now vary, but terrain remains flat, broad cliff crowns and quieter back faces are simpler, and overall building scale/composition/material weathering remain less rich than2D. No user art approval or general release acceptance.",
+  "report_revision": "env05",
+  "ship_user_status": "R01 rejected; R02 still criticized as far from 2D targets. Separate Astra Ultra Blender revision commissioned.",
+  "ship_followup_chat": "01a197d8-ebd0-7100-8d12-21ff6bc52c0d",
+  "ship_manifests": [
+    "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/manifest.json",
+    "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/manifest.json"
+  ],
+  "rejected_r01": "output/grafik_20261101/pass04_rejected_r01_manifest.json",
+  "closed_shell_source": "scripts/terrain/frontier_closed_buildings.gd",
+  "browser_report": "output/grafik_20261101/browser_qa_pass05_environment/browser_qa.json",
+  "browser_checks_passed": 297,
+  "browser_html_sha256": "ab79aeec33e86fcf2c4cbe1751937dba6e1b6b8f81b84f2e355d2a51981a28aa"
+}

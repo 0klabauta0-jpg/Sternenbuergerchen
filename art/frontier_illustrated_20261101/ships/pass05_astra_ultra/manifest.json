@@ -1,0 +1,2373 @@
+{
+  "schema": "sternenbuergerchen.ship_revision.pass05.v1",
+  "date": "2026-11-01",
+  "status": "reviewable_candidates_not_integrated_not_user_approved",
+  "branch": "task/grafikreferenzen-20261101",
+  "observed_git_head": "039840e52e04c6cf22a900a184e7a81a1b291435",
+  "assets": [
+    {
+      "status": "separate_candidate_for_user_review",
+      "integrated": false,
+      "user_approved": false,
+      "blend": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/cutlass/source/final/cutlass_01.blend",
+        "bytes": 4305400,
+        "sha256": "9c3770a679cb8cd1d0b2fa06f2026a46c3aeec70fdccc436a959f91152c17f14"
+      },
+      "glb": {
+        "path": "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/cutlass_01.glb",
+        "bytes": 1135848,
+        "sha256": "21cfa4485f5d54f5107fbd16ac30e60eccb8e6e42429ebd0116450605920c87b"
+      },
+      "audit": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/cutlass/review/final/independent_qa.json",
+        "bytes": 325978,
+        "sha256": "989d24ef11259dda8811d852faac56c076b14b001513048e95a3d44455cc1bd2"
+      },
+      "triangles": 15148,
+      "material_count": 8,
+      "material_names": [
+        "M_Petrol",
+        "M_Ivory",
+        "M_Glass",
+        "M_Dark",
+        "M_PetrolLight",
+        "M_Ochre",
+        "M_Steel",
+        "M_Thrust"
+      ],
+      "bbox_blender": {
+        "min": [
+          -6.160887718200684,
+          -8.0,
+          0.0
+        ],
+        "max": [
+          6.160887718200684,
+          8.0,
+          4.971253871917725
+        ],
+        "size": [
+          12.321775436401367,
+          16.0,
+          4.971253871917725
+        ],
+        "center": [
+          0.0,
+          0.0,
+          2.4856269359588623
+        ]
+      },
+      "bbox_godot_size_xyz": [
+        12.321775436401367,
+        4.971253871917725,
+        16.0
+      ],
+      "runtime_scale_suggestion": 0.22,
+      "scaled_bbox_godot_size_xyz": [
+        2.7107905960083007,
+        1.0936758518218994,
+        3.52
+      ],
+      "stylized_length_m": 16,
+      "canonical_star_citizen_dimensions": false,
+      "axis_contract": "Blender -Y front, Z up -> glTF/Godot +Z front, Y up; meter units; whole XY BBox centered; ground pivot zero",
+      "source_qa": {
+        "pass": true,
+        "errors": [],
+        "warnings": []
+      },
+      "connected_contact_components": 1,
+      "roundtrip": {
+        "direct_glb_comparison": {
+          "pass": true,
+          "errors": [],
+          "source_triangles": 15148,
+          "target_triangles": 15148,
+          "matched_corners": 45444,
+          "max_position_error_m": 0.0,
+          "max_normal_vector_error": 8.64013324188318e-05,
+          "max_uv_coordinate_error": 1.1920928955078125e-07,
+          "uv_presence_errors": 0,
+          "worst_normal_case": {
+            "source_corner": 39378,
+            "target_corner": 19457,
+            "material": "M_Dark",
+            "source_position": [
+              -4.044788837432861,
+              0.16857875883579254,
+              4.234288692474365
+            ],
+            "target_position": [
+              -4.044788837432861,
+              0.16857875883579254,
+              4.234288692474365
+            ],
+            "source_normal": [
+              -0.3353109657764435,
+              -0.9007352590560913,
+              0.27612072229385376
+            ],
+            "target_normal": [
+              -0.33530452847480774,
+              -0.9007121324539185,
+              0.2762037217617035
+            ],
+            "source_uv": [
+              0.4100712835788727,
+              0.7694350630044937
+            ],
+            "target_uv": [
+              0.4100712835788727,
+              0.7694350481033325
+            ]
+          },
+          "worst_uv_case": {
+            "source_corner": 36643,
+            "target_corner": 23863,
+            "material": "M_Dark",
+            "source_position": [
+              -0.8174811005592346,
+              4.757845878601074,
+              1.752618670463562
+            ],
+            "target_position": [
+              -0.8174811005592346,
+              4.757845878601074,
+              1.752618670463562
+            ],
+            "source_normal": [
+              -0.5455871224403381,
+              0.545571506023407,
+              -0.6361497640609741
+            ],
+            "target_normal": [
+              -0.545604944229126,
+              0.545604944229126,
+              -0.6361057758331299
+            ],
+            "source_uv": [
+              0.6927556991577148,
+              0.9806868135929108
+            ],
+            "target_uv": [
+              0.6927558183670044,
+              0.9806867837905884
+            ]
+          },
+          "normal_tolerance_vector": 0.0002,
+          "position_tolerance_m": 2e-05,
+          "unmatched_examples": [],
+          "materials": {
+            "pass": true,
+            "matches": [
+              {
+                "source": "M_Petrol",
+                "target": "2",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Petrol_basecolor.png",
+                    "filepath": "//..\\..\\textures\\Petrol_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "50a3f97f88fb5db7f10c7531158c145403fc19a573b05106ca4a9dd7b44e0c38",
+                    "decoded_effective_pixels_sha256": "55f5bfb419a6286f7980dbae9987087069aabfb8d0b28cf6e3e6d523c078099e",
+                    "encoded_sha256": "c1380278055af046d62e45ac43927a749639a4cff0a58ed3d1b74df52116c9fd",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//..\\..\\textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "decoded_effective_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "encoded_sha256": "22737d5e34a629e18a30d4049cb5cb39f972cd837856aa61c7e77e3d3d68a4b9",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_2_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_2_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "50a3f97f88fb5db7f10c7531158c145403fc19a573b05106ca4a9dd7b44e0c38",
+                    "decoded_effective_pixels_sha256": "55f5bfb419a6286f7980dbae9987087069aabfb8d0b28cf6e3e6d523c078099e",
+                    "encoded_sha256": "c1380278055af046d62e45ac43927a749639a4cff0a58ed3d1b74df52116c9fd"
+                  },
+                  "roughness": {
+                    "image": "image_1_Non-Color.png.001",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 1
+                  },
+                  "metallic": {
+                    "image": "image_1_Non-Color.png.001",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 2
+                  }
+                }
+              },
+              {
+                "source": "M_Ivory",
+                "target": "0",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Ivory_basecolor.png",
+                    "filepath": "//..\\..\\textures\\Ivory_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "edb00798e42b8bb71233eca1ce67ae61ec07ce8e82925ae8bd3e6ff77a103c32",
+                    "decoded_effective_pixels_sha256": "73a3caa964ed2cc01d2d2f72fc0b2f86f1c98decd866d9eb79c22ec26807d60b",
+                    "encoded_sha256": "4b0194c6c76ce57441e0122db36c333f0901495c13c38e1ce6def83f7ee92582",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//..\\..\\textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "decoded_effective_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "encoded_sha256": "22737d5e34a629e18a30d4049cb5cb39f972cd837856aa61c7e77e3d3d68a4b9",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_0_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_0_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "edb00798e42b8bb71233eca1ce67ae61ec07ce8e82925ae8bd3e6ff77a103c32",
+                    "decoded_effective_pixels_sha256": "73a3caa964ed2cc01d2d2f72fc0b2f86f1c98decd866d9eb79c22ec26807d60b",
+                    "encoded_sha256": "4b0194c6c76ce57441e0122db36c333f0901495c13c38e1ce6def83f7ee92582"
+                  },
+                  "roughness": {
+                    "image": "image_1_Non-Color.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 1
+                  },
+                  "metallic": {
+                    "image": "image_1_Non-Color.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 2
+                  }
+                }
+              },
+              {
+                "source": "M_Glass",
+                "target": "1",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": false,
+                "source_textures": {},
+                "target_textures": {}
+              },
+              {
+                "source": "M_Dark",
+                "target": "3",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": false,
+                "source_textures": {},
+                "target_textures": {}
+              },
+              {
+                "source": "M_PetrolLight",
+                "target": "4",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "PetrolLight_basecolor.png",
+                    "filepath": "//..\\..\\textures\\PetrolLight_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "ae06df5119988ad83c087b217a1c6fb907679db131a7490b7ead590ee7419d9c",
+                    "decoded_effective_pixels_sha256": "ab8027e9ff328fa01406dac1612d648dc6d0a69e507d263cb599989222077907",
+                    "encoded_sha256": "063b5821b172e3440c8ecbdb19321b30ed0f53633ab9e7bf7d612dabc86f2ba6",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//..\\..\\textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "decoded_effective_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "encoded_sha256": "22737d5e34a629e18a30d4049cb5cb39f972cd837856aa61c7e77e3d3d68a4b9",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_3_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_3_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "ae06df5119988ad83c087b217a1c6fb907679db131a7490b7ead590ee7419d9c",
+                    "decoded_effective_pixels_sha256": "ab8027e9ff328fa01406dac1612d648dc6d0a69e507d263cb599989222077907",
+                    "encoded_sha256": "063b5821b172e3440c8ecbdb19321b30ed0f53633ab9e7bf7d612dabc86f2ba6"
+                  },
+                  "roughness": {
+                    "image": "image_1_Non-Color.png.002",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 1
+                  },
+                  "metallic": {
+                    "image": "image_1_Non-Color.png.002",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 2
+                  }
+                }
+              },
+              {
+                "source": "M_Ochre",
+                "target": "6",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Ochre_basecolor.png",
+                    "filepath": "//..\\..\\textures\\Ochre_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "d810990d7d65ac1093eb0a70b2ff56766b9456dacbef449076960534c33d9856",
+                    "decoded_effective_pixels_sha256": "f9dba94915e64079e0d96ea01a32e51a1e8362d89ece8653d5ea1123ec08c5a9",
+                    "encoded_sha256": "3df4398a2ad47f40bae1d7ed369dbf5777f8234d9ad64279c3536267bd8ddf18",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//..\\..\\textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "decoded_effective_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "encoded_sha256": "22737d5e34a629e18a30d4049cb5cb39f972cd837856aa61c7e77e3d3d68a4b9",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_4_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_4_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "d810990d7d65ac1093eb0a70b2ff56766b9456dacbef449076960534c33d9856",
+                    "decoded_effective_pixels_sha256": "f9dba94915e64079e0d96ea01a32e51a1e8362d89ece8653d5ea1123ec08c5a9",
+                    "encoded_sha256": "3df4398a2ad47f40bae1d7ed369dbf5777f8234d9ad64279c3536267bd8ddf18"
+                  },
+                  "roughness": {
+                    "image": "image_1_Non-Color.png.003",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 1
+                  },
+                  "metallic": {
+                    "image": "image_1_Non-Color.png.003",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\cutlass\\review\\final\\independent_qa_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 2
+                  }
+                }
+              },
+              {
+                "source": "M_Steel",
+                "target": "5",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": false,
+                "source_textures": {},
+                "target_textures": {}
+              },
+              {
+                "source": "M_Thrust",
+                "target": "7",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": false,
+                "source_textures": {},
+                "target_textures": {}
+              }
+            ],
+            "errors": []
+          },
+          "method": "One-to-one material-labelled triangle-corner multiset; KD radius positions, then nearest split normal. Multiplicities retained.",
+          "axis_contract": "Blender (X,Y,Z) -> glTF/Godot (X,Z,-Y); -Y front -> +Z front"
+        },
+        "roundtrip_comparison": {
+          "pass": true,
+          "errors": [],
+          "source_triangles": 15148,
+          "target_triangles": 15148,
+          "matched_corners": 45444,
+          "max_position_error_m": 0.0,
+          "max_normal_vector_error": 0.001105122496122052,
+          "max_uv_coordinate_error": 1.1920928955078125e-07,
+          "uv_presence_errors": 0,
+          "worst_normal_case": {
+            "source_corner": 27707,
+            "target_corner": 15575,
+            "material": "M_Dark",
+            "source_position": [
+              5.531620025634766,
+              6.136508464813232,
+              3.4703280925750732
+            ],
+            "target_position": [
+              5.531620025634766,
+              6.136508464813232,
+              3.4703280925750732
+            ],
+            "source_normal": [
+              -0.7023752927780151,
+              -0.11550114303827286,
+              -0.7023734450340271
+            ],
+            "target_normal": [
+              -0.7024796605110168,
+              -0.11440353840589523,
+              -0.7024487257003784
+            ],
+            "source_uv": [
+              0.28314104676246643,
+              0.6032786965370178
+            ],
+            "target_uv": [
+              0.28314104676246643,
+              0.6032786965370178
+            ]
+          },
+          "worst_uv_case": {
+            "source_corner": 36643,
+            "target_corner": 23863,
+            "material": "M_Dark",
+            "source_position": [
+              -0.8174811005592346,
+              -1.752618670463562,
+              4.757845878601074
+            ],
+            "target_position": [
+              -0.8174811005592346,
+              -1.752618670463562,
+              4.757845878601074
+            ],
+            "source_normal": [
+              -0.5455871224403381,
+              0.6361497640609741,
+              0.545571506023407
+            ],
+            "target_normal": [
+              -0.5455871224403381,
+              0.6361497640609741,
+              0.545571506023407
+            ],
+            "source_uv": [
+              0.6927556991577148,
+              0.019313186407089233
+            ],
+            "target_uv": [
+              0.6927558183670044,
+              0.01931321620941162
+            ]
+          },
+          "normal_tolerance_vector": 0.002,
+          "position_tolerance_m": 2e-05,
+          "unmatched_examples": [],
+          "materials": {
+            "pass": true,
+            "matches": [
+              {
+                "source": "M_Petrol",
+                "target": "M_Petrol",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Petrol_basecolor.png",
+                    "filepath": "//..\\..\\textures\\Petrol_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "50a3f97f88fb5db7f10c7531158c145403fc19a573b05106ca4a9dd7b44e0c38",
+                    "decoded_effective_pixels_sha256": "55f5bfb419a6286f7980dbae9987087069aabfb8d0b28cf6e3e6d523c078099e",
+                    "encoded_sha256": "c1380278055af046d62e45ac43927a749639a4cff0a58ed3d1b74df52116c9fd",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//..\\..\\textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "decoded_effective_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "encoded_sha256": "22737d5e34a629e18a30d4049cb5cb39f972cd837856aa61c7e77e3d3d68a4b9",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "Petrol_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "50a3f97f88fb5db7f10c7531158c145403fc19a573b05106ca4a9dd7b44e0c38",
+                    "decoded_effective_pixels_sha256": "55f5bfb419a6286f7980dbae9987087069aabfb8d0b28cf6e3e6d523c078099e",
+                    "encoded_sha256": "c1380278055af046d62e45ac43927a749639a4cff0a58ed3d1b74df52116c9fd",
+                    "channel": "RGBA"
+                  },
+                  "metallic": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 2
+                  },
+                  "roughness": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 1
+                  }
+                }
+              },
+              {
+                "source": "M_Ivory",
+                "target": "M_Ivory",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Ivory_basecolor.png",
+                    "filepath": "//..\\..\\textures\\Ivory_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "edb00798e42b8bb71233eca1ce67ae61ec07ce8e82925ae8bd3e6ff77a103c32",
+                    "decoded_effective_pixels_sha256": "73a3caa964ed2cc01d2d2f72fc0b2f86f1c98decd866d9eb79c22ec26807d60b",
+                    "encoded_sha256": "4b0194c6c76ce57441e0122db36c333f0901495c13c38e1ce6def83f7ee92582",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//..\\..\\textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "decoded_effective_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "encoded_sha256": "22737d5e34a629e18a30d4049cb5cb39f972cd837856aa61c7e77e3d3d68a4b9",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "Ivory_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "edb00798e42b8bb71233eca1ce67ae61ec07ce8e82925ae8bd3e6ff77a103c32",
+                    "decoded_effective_pixels_sha256": "73a3caa964ed2cc01d2d2f72fc0b2f86f1c98decd866d9eb79c22ec26807d60b",
+                    "encoded_sha256": "4b0194c6c76ce57441e0122db36c333f0901495c13c38e1ce6def83f7ee92582",
+                    "channel": "RGBA"
+                  },
+                  "metallic": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 2
+                  },
+                  "roughness": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 1
+                  }
+                }
+              },
+              {
+                "source": "M_Glass",
+                "target": "M_Glass",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": false,
+                "source_textures": {},
+                "target_textures": {}
+              },
+              {
+                "source": "M_Dark",
+                "target": "M_Dark",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": false,
+                "source_textures": {},
+                "target_textures": {}
+              },
+              {
+                "source": "M_PetrolLight",
+                "target": "M_PetrolLight",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "PetrolLight_basecolor.png",
+                    "filepath": "//..\\..\\textures\\PetrolLight_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "ae06df5119988ad83c087b217a1c6fb907679db131a7490b7ead590ee7419d9c",
+                    "decoded_effective_pixels_sha256": "ab8027e9ff328fa01406dac1612d648dc6d0a69e507d263cb599989222077907",
+                    "encoded_sha256": "063b5821b172e3440c8ecbdb19321b30ed0f53633ab9e7bf7d612dabc86f2ba6",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//..\\..\\textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "decoded_effective_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "encoded_sha256": "22737d5e34a629e18a30d4049cb5cb39f972cd837856aa61c7e77e3d3d68a4b9",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "PetrolLight_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "ae06df5119988ad83c087b217a1c6fb907679db131a7490b7ead590ee7419d9c",
+                    "decoded_effective_pixels_sha256": "ab8027e9ff328fa01406dac1612d648dc6d0a69e507d263cb599989222077907",
+                    "encoded_sha256": "063b5821b172e3440c8ecbdb19321b30ed0f53633ab9e7bf7d612dabc86f2ba6",
+                    "channel": "RGBA"
+                  },
+                  "metallic": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 2
+                  },
+                  "roughness": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 1
+                  }
+                }
+              },
+              {
+                "source": "M_Ochre",
+                "target": "M_Ochre",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Ochre_basecolor.png",
+                    "filepath": "//..\\..\\textures\\Ochre_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "d810990d7d65ac1093eb0a70b2ff56766b9456dacbef449076960534c33d9856",
+                    "decoded_effective_pixels_sha256": "f9dba94915e64079e0d96ea01a32e51a1e8362d89ece8653d5ea1123ec08c5a9",
+                    "encoded_sha256": "3df4398a2ad47f40bae1d7ed369dbf5777f8234d9ad64279c3536267bd8ddf18",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//..\\..\\textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "decoded_effective_pixels_sha256": "84baa594814a9e3b1550ad3342ebb6cc45e9d9f5f0db286727cc9cdc160baf92",
+                    "encoded_sha256": "22737d5e34a629e18a30d4049cb5cb39f972cd837856aa61c7e77e3d3d68a4b9",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "Ochre_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "d810990d7d65ac1093eb0a70b2ff56766b9456dacbef449076960534c33d9856",
+                    "decoded_effective_pixels_sha256": "f9dba94915e64079e0d96ea01a32e51a1e8362d89ece8653d5ea1123ec08c5a9",
+                    "encoded_sha256": "3df4398a2ad47f40bae1d7ed369dbf5777f8234d9ad64279c3536267bd8ddf18",
+                    "channel": "RGBA"
+                  },
+                  "metallic": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 2
+                  },
+                  "roughness": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "decoded_effective_pixels_sha256": "0f0f4106ea71593ef5f634d0468d969d9446aec9eda897a89d42d23d8df0f543",
+                    "encoded_sha256": "b79e6270c0eaa249418960d54850819cf3fd0b4f3b955580a39b84bfe616d206",
+                    "channel": 1
+                  }
+                }
+              },
+              {
+                "source": "M_Steel",
+                "target": "M_Steel",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": false,
+                "source_textures": {},
+                "target_textures": {}
+              },
+              {
+                "source": "M_Thrust",
+                "target": "M_Thrust",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": false,
+                "source_textures": {},
+                "target_textures": {}
+              }
+            ],
+            "errors": []
+          },
+          "method": "One-to-one material-labelled triangle-corner multiset; KD radius positions, then nearest split normal. Multiplicities retained."
+        }
+      },
+      "matched_render_manifests": [
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/comparison_cutlass/new/render_manifest.json",
+          "bytes": 5542,
+          "sha256": "58b38933dc3a59d746da014297e4698aad84acba6c2bf1d8338e29ae484a7031"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/comparison_cutlass/r02/render_manifest.json",
+          "bytes": 5540,
+          "sha256": "7405b1b53e66bcf2811c65beeeedc2657e2a72232db7a5e02a6c803ab00d1064"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/comparison_cutlass/matched_conditions.json",
+          "bytes": 5912,
+          "sha256": "fb63805c451538bb4dde6c366ceed5469091c1b042979469ab0cad00815df101"
+        }
+      ],
+      "comparison_images": [
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/handover/cutlass_target_comparison.png",
+          "bytes": 1640631,
+          "sha256": "35fa42df0233c6357ba940713fd1f5de6b1d1c992ee859974d7313e3fb018ea8"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/handover/cutlass_r02_comparison.png",
+          "bytes": 1216073,
+          "sha256": "0c9272c30a8fed6d03b3ecf594be48c1029b6fb5654805d207cdfd76f4b2a1e7"
+        }
+      ],
+      "native_godot_validation": "Not run in this side chat by explicit instruction; integration owner must perform fresh engine import and native verification."
+    },
+    {
+      "status": "separate_candidate_for_user_review",
+      "integrated": false,
+      "user_approved": false,
+      "blend": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/buccaneer/buccaneer_master.blend",
+        "bytes": 4509283,
+        "sha256": "8b85b71caf8fa00982dcb8d6a7c2b33995521a9035b3f6b62c009ea493b8bbc6"
+      },
+      "glb": {
+        "path": "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/buccaneer_01.glb",
+        "bytes": 1603256,
+        "sha256": "f1960edbc4f1c318d92286f45fa05439bbe36d676f4b58fd64fd42bc64c657af"
+      },
+      "audit": {
+        "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/buccaneer_final/audit.json",
+        "bytes": 287387,
+        "sha256": "8dc1e4b01f3a5c6bad107111882d1f3f1d19757726a578a0e46c71a56ff53993"
+      },
+      "triangles": 22480,
+      "material_count": 8,
+      "material_names": [
+        "M_Ivory",
+        "M_Petrol",
+        "M_PetrolShade",
+        "M_Graphite",
+        "M_Ochre",
+        "M_Glass",
+        "M_Steel",
+        "M_WarmCore"
+      ],
+      "bbox_blender": {
+        "min": [
+          -5.878890514373779,
+          -5.5,
+          0.0
+        ],
+        "max": [
+          5.878890514373779,
+          5.499998569488525,
+          4.119763374328613
+        ],
+        "size": [
+          11.757781028747559,
+          10.999998569488525,
+          4.119763374328613
+        ],
+        "center": [
+          0.0,
+          -7.152557373046875e-07,
+          2.0598816871643066
+        ]
+      },
+      "bbox_godot_size_xyz": [
+        11.757781028747559,
+        4.119763374328613,
+        10.999998569488525
+      ],
+      "runtime_scale_suggestion": 0.22,
+      "scaled_bbox_godot_size_xyz": [
+        2.586711826324463,
+        0.9063479423522949,
+        2.4199996852874754
+      ],
+      "stylized_length_m": 11,
+      "canonical_star_citizen_dimensions": false,
+      "axis_contract": "Blender -Y front, Z up -> glTF/Godot +Z front, Y up; meter units; whole XY BBox centered; ground pivot zero",
+      "source_qa": {
+        "pass": true,
+        "errors": [],
+        "warnings": []
+      },
+      "connected_contact_components": 1,
+      "roundtrip": {
+        "direct_glb_comparison": {
+          "pass": true,
+          "errors": [],
+          "source_triangles": 22480,
+          "target_triangles": 22480,
+          "matched_corners": 67440,
+          "max_position_error_m": 0.0,
+          "max_normal_vector_error": 8.356077165105259e-05,
+          "max_uv_coordinate_error": 1.7881393432617188e-07,
+          "uv_presence_errors": 0,
+          "worst_normal_case": {
+            "source_corner": 24341,
+            "target_corner": 557,
+            "material": "M_Ochre",
+            "source_position": [
+              -2.9441463947296143,
+              3.976924419403076,
+              -2.3536534309387207
+            ],
+            "target_position": [
+              -2.9441463947296143,
+              3.976924419403076,
+              -2.3536534309387207
+            ],
+            "source_normal": [
+              -0.7069475054740906,
+              0.706952691078186,
+              0.021049872040748596
+            ],
+            "target_normal": [
+              -0.7069008350372314,
+              0.7070008516311646,
+              0.021000023931264877
+            ],
+            "source_uv": [
+              0.846837043762207,
+              0.03662663698196411
+            ],
+            "target_uv": [
+              0.846837043762207,
+              0.03662663698196411
+            ]
+          },
+          "worst_uv_case": {
+            "source_corner": 65720,
+            "target_corner": 20258,
+            "material": "M_Graphite",
+            "source_position": [
+              2.3816096782684326,
+              0.2805972099304199,
+              -2.855360984802246
+            ],
+            "target_position": [
+              2.3816096782684326,
+              0.2805972099304199,
+              -2.855360984802246
+            ],
+            "source_normal": [
+              0.19506551325321198,
+              -0.9348479509353638,
+              -0.2966627776622772
+            ],
+            "target_normal": [
+              0.19510526955127716,
+              -0.9348252415657043,
+              -0.29670801758766174
+            ],
+            "source_uv": [
+              0.7209998369216919,
+              0.03738296031951904
+            ],
+            "target_uv": [
+              0.7210000157356262,
+              0.03738296031951904
+            ]
+          },
+          "normal_tolerance_vector": 0.0002,
+          "position_tolerance_m": 2e-05,
+          "unmatched_examples": [],
+          "materials": {
+            "pass": true,
+            "matches": [
+              {
+                "source": "M_Ivory",
+                "target": "5",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Ivory_basecolor.png",
+                    "filepath": "//textures\\Ivory_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "5b376ba7bf0f1113eea0d0b5ed5a012c01e2de878966636917a5e1dc54375849",
+                    "decoded_effective_pixels_sha256": "43062ef4e46b832bd206affba94ee583b3e54f734e253e5de63a8def1ae8fa7e",
+                    "encoded_sha256": "f329246c4715b687748c4c734bf7d036524d07554f05e9a8c71aa222e93db465",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "decoded_effective_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "encoded_sha256": "1d25cdda0830ece3b6d6c75e17cc68aed9aed66ca723227d615e964a4f5f4e66",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_6_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_6_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "5b376ba7bf0f1113eea0d0b5ed5a012c01e2de878966636917a5e1dc54375849",
+                    "decoded_effective_pixels_sha256": "43062ef4e46b832bd206affba94ee583b3e54f734e253e5de63a8def1ae8fa7e",
+                    "encoded_sha256": "f329246c4715b687748c4c734bf7d036524d07554f05e9a8c71aa222e93db465"
+                  },
+                  "roughness": {
+                    "image": "image_1_Non-Color.png.004",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 1
+                  },
+                  "metallic": {
+                    "image": "image_1_Non-Color.png.004",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 2
+                  }
+                }
+              },
+              {
+                "source": "M_Petrol",
+                "target": "4",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Petrol_basecolor.png",
+                    "filepath": "//textures\\Petrol_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "6fa371a82aa08711825e203d58d3877f906779ab226a3c1464d44b66c6326871",
+                    "decoded_effective_pixels_sha256": "410363f4e3f00b8e9fb042645fe831e3b853bae054c2eedc9c9ede15299056eb",
+                    "encoded_sha256": "69e35a2d2e2a3a63a4f3c810992f45a47297d6ef07da9923a45f9ae54c4e0dd9",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "decoded_effective_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "encoded_sha256": "1d25cdda0830ece3b6d6c75e17cc68aed9aed66ca723227d615e964a4f5f4e66",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_5_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_5_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "6fa371a82aa08711825e203d58d3877f906779ab226a3c1464d44b66c6326871",
+                    "decoded_effective_pixels_sha256": "410363f4e3f00b8e9fb042645fe831e3b853bae054c2eedc9c9ede15299056eb",
+                    "encoded_sha256": "69e35a2d2e2a3a63a4f3c810992f45a47297d6ef07da9923a45f9ae54c4e0dd9"
+                  },
+                  "roughness": {
+                    "image": "image_1_Non-Color.png.003",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 1
+                  },
+                  "metallic": {
+                    "image": "image_1_Non-Color.png.003",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 2
+                  }
+                }
+              },
+              {
+                "source": "M_PetrolShade",
+                "target": "3",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "PetrolShade_basecolor.png",
+                    "filepath": "//textures\\PetrolShade_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "b2a0ab973eab3d40febd1cc1ca607a3b8a414e7dc12e69fff62b5580f094cf6d",
+                    "decoded_effective_pixels_sha256": "1ff63303d8c2858ab330a960b6f43d94028f8fa19a23a851d89d19551abbb128",
+                    "encoded_sha256": "7691e954733b36b4dc94c5e876bc00102dea219f2d3350bedd4ee0563151899f",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "decoded_effective_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "encoded_sha256": "1d25cdda0830ece3b6d6c75e17cc68aed9aed66ca723227d615e964a4f5f4e66",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_4_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_4_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "b2a0ab973eab3d40febd1cc1ca607a3b8a414e7dc12e69fff62b5580f094cf6d",
+                    "decoded_effective_pixels_sha256": "1ff63303d8c2858ab330a960b6f43d94028f8fa19a23a851d89d19551abbb128",
+                    "encoded_sha256": "7691e954733b36b4dc94c5e876bc00102dea219f2d3350bedd4ee0563151899f"
+                  },
+                  "roughness": {
+                    "image": "image_1_Non-Color.png.002",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 1
+                  },
+                  "metallic": {
+                    "image": "image_1_Non-Color.png.002",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 2
+                  }
+                }
+              },
+              {
+                "source": "M_Graphite",
+                "target": "1",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Graphite_basecolor.png",
+                    "filepath": "//textures\\Graphite_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "3fb4269bd8ec89269bc46ba7805ffa81192d1c9c22e1faa096cdc38e48ca4d70",
+                    "decoded_effective_pixels_sha256": "c61cc8815d3d72b560fd9773b5f9c4b2acbf204a2dec9bbb227ce4fb669c2d22",
+                    "encoded_sha256": "eaba1c4a9a5eee1422fcc6a5b7a69981f99d4596c6ae1da1db3df2b45c35942d",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "decoded_effective_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "encoded_sha256": "1d25cdda0830ece3b6d6c75e17cc68aed9aed66ca723227d615e964a4f5f4e66",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_2_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_2_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "3fb4269bd8ec89269bc46ba7805ffa81192d1c9c22e1faa096cdc38e48ca4d70",
+                    "decoded_effective_pixels_sha256": "c61cc8815d3d72b560fd9773b5f9c4b2acbf204a2dec9bbb227ce4fb669c2d22",
+                    "encoded_sha256": "eaba1c4a9a5eee1422fcc6a5b7a69981f99d4596c6ae1da1db3df2b45c35942d"
+                  },
+                  "roughness": {
+                    "image": "image_1_Non-Color.png.001",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 1
+                  },
+                  "metallic": {
+                    "image": "image_1_Non-Color.png.001",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 2
+                  }
+                }
+              },
+              {
+                "source": "M_Ochre",
+                "target": "0",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Ochre_basecolor.png",
+                    "filepath": "//textures\\Ochre_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "17e5af0493a4606155f1a9e6e2005594977221c3f9576dcc883857936d2b6326",
+                    "decoded_effective_pixels_sha256": "4dcb45d18098d3dce025796bad075271713540d3ae5bf54c6b451f295264d3f6",
+                    "encoded_sha256": "37bb83a6a0e7937e106e69b97fe650fb7076003682902d45145684090682504a",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "decoded_effective_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "encoded_sha256": "1d25cdda0830ece3b6d6c75e17cc68aed9aed66ca723227d615e964a4f5f4e66",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_0_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_0_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "17e5af0493a4606155f1a9e6e2005594977221c3f9576dcc883857936d2b6326",
+                    "decoded_effective_pixels_sha256": "4dcb45d18098d3dce025796bad075271713540d3ae5bf54c6b451f295264d3f6",
+                    "encoded_sha256": "37bb83a6a0e7937e106e69b97fe650fb7076003682902d45145684090682504a"
+                  },
+                  "roughness": {
+                    "image": "image_1_Non-Color.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 1
+                  },
+                  "metallic": {
+                    "image": "image_1_Non-Color.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_1_Non-Color.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 2
+                  }
+                }
+              },
+              {
+                "source": "M_Glass",
+                "target": "6",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Glass_basecolor.png",
+                    "filepath": "//textures\\Glass_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "901ed5c331ed4efaa9cbae035217e0e9a2099938b1ad43b03aac0b6825ff7616",
+                    "decoded_effective_pixels_sha256": "1c9980cf45d62ff3e2de32336f8e87a8345eeefd73641140b03f36fe31f369fd",
+                    "encoded_sha256": "1b8ede1a83d65f5fdeee5db51f901fc2faa06b232b0789fcf58443c950661d58",
+                    "channel": "RGBA"
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_7_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_7_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "901ed5c331ed4efaa9cbae035217e0e9a2099938b1ad43b03aac0b6825ff7616",
+                    "decoded_effective_pixels_sha256": "1c9980cf45d62ff3e2de32336f8e87a8345eeefd73641140b03f36fe31f369fd",
+                    "encoded_sha256": "1b8ede1a83d65f5fdeee5db51f901fc2faa06b232b0789fcf58443c950661d58"
+                  }
+                }
+              },
+              {
+                "source": "M_Steel",
+                "target": "2",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Steel_basecolor.png",
+                    "filepath": "//textures\\Steel_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "413b5cee954ef790362ad591c132031e3aa3a960abc50d8812aaa825bacebb91",
+                    "decoded_effective_pixels_sha256": "87b018909878fd55dbe70f8835a623fce57ad51e83b607fd24c9342b96d103d7",
+                    "encoded_sha256": "e87f53cbb056fa3015838bcdf2fa200089cbcd4a60b9e083db5b69e8587e797f",
+                    "channel": "RGBA"
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_3_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_3_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "413b5cee954ef790362ad591c132031e3aa3a960abc50d8812aaa825bacebb91",
+                    "decoded_effective_pixels_sha256": "87b018909878fd55dbe70f8835a623fce57ad51e83b607fd24c9342b96d103d7",
+                    "encoded_sha256": "e87f53cbb056fa3015838bcdf2fa200089cbcd4a60b9e083db5b69e8587e797f"
+                  }
+                }
+              },
+              {
+                "source": "M_WarmCore",
+                "target": "7",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "WarmCore_basecolor.png",
+                    "filepath": "//textures\\WarmCore_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "f352fecafb06982be806255f16f21f31ca8c83f77bdec399d0b2cbb35451b3cb",
+                    "decoded_effective_pixels_sha256": "1dce7ebdf0e94eeeee5cb378809b594621209f59ac981bc5f0be92302be3d113",
+                    "encoded_sha256": "837f5f5c24677f66f563c79b1474a428fb1290652cd99ba1f959fe61a44f5251",
+                    "channel": "RGBA"
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "image_8_sRGB.png",
+                    "filepath": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\buccaneer_final\\audit_embedded_images\\image_8_sRGB.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "f352fecafb06982be806255f16f21f31ca8c83f77bdec399d0b2cbb35451b3cb",
+                    "decoded_effective_pixels_sha256": "1dce7ebdf0e94eeeee5cb378809b594621209f59ac981bc5f0be92302be3d113",
+                    "encoded_sha256": "837f5f5c24677f66f563c79b1474a428fb1290652cd99ba1f959fe61a44f5251"
+                  }
+                }
+              }
+            ],
+            "errors": []
+          },
+          "method": "One-to-one material-labelled triangle-corner multiset; KD radius positions, then nearest split normal. Multiplicities retained.",
+          "axis_contract": "Blender (X,Y,Z) -> glTF/Godot (X,Z,-Y); -Y front -> +Z front"
+        },
+        "roundtrip_comparison": {
+          "pass": true,
+          "errors": [],
+          "source_triangles": 22480,
+          "target_triangles": 22480,
+          "matched_corners": 67440,
+          "max_position_error_m": 0.0,
+          "max_normal_vector_error": 0.0017552764744763567,
+          "max_uv_coordinate_error": 1.7881393432617188e-07,
+          "uv_presence_errors": 0,
+          "worst_normal_case": {
+            "source_corner": 48426,
+            "target_corner": 61596,
+            "material": "M_Petrol",
+            "source_position": [
+              2.4375598430633545,
+              -0.263484388589859,
+              1.974319338798523
+            ],
+            "target_position": [
+              2.4375598430633545,
+              -0.263484388589859,
+              1.974319338798523
+            ],
+            "source_normal": [
+              0.49647754430770874,
+              -0.03305812180042267,
+              -0.8674197793006897
+            ],
+            "target_normal": [
+              0.49495387077331543,
+              -0.0331435389816761,
+              -0.8682870268821716
+            ],
+            "source_uv": [
+              0.27924013137817383,
+              0.01990642584860325
+            ],
+            "target_uv": [
+              0.27924013137817383,
+              0.01990640163421631
+            ]
+          },
+          "worst_uv_case": {
+            "source_corner": 65720,
+            "target_corner": 20258,
+            "material": "M_Graphite",
+            "source_position": [
+              2.3816096782684326,
+              2.855360984802246,
+              0.2805972099304199
+            ],
+            "target_position": [
+              2.3816096782684326,
+              2.855360984802246,
+              0.2805972099304199
+            ],
+            "source_normal": [
+              0.19506551325321198,
+              0.2966627776622772,
+              -0.9348479509353638
+            ],
+            "target_normal": [
+              0.19506381452083588,
+              0.29666417837142944,
+              -0.9348478317260742
+            ],
+            "source_uv": [
+              0.7209998369216919,
+              0.962617039680481
+            ],
+            "target_uv": [
+              0.7210000157356262,
+              0.962617039680481
+            ]
+          },
+          "normal_tolerance_vector": 0.002,
+          "position_tolerance_m": 2e-05,
+          "unmatched_examples": [],
+          "materials": {
+            "pass": true,
+            "matches": [
+              {
+                "source": "M_Ivory",
+                "target": "M_Ivory",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Ivory_basecolor.png",
+                    "filepath": "//textures\\Ivory_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "5b376ba7bf0f1113eea0d0b5ed5a012c01e2de878966636917a5e1dc54375849",
+                    "decoded_effective_pixels_sha256": "43062ef4e46b832bd206affba94ee583b3e54f734e253e5de63a8def1ae8fa7e",
+                    "encoded_sha256": "f329246c4715b687748c4c734bf7d036524d07554f05e9a8c71aa222e93db465",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "decoded_effective_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "encoded_sha256": "1d25cdda0830ece3b6d6c75e17cc68aed9aed66ca723227d615e964a4f5f4e66",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "Ivory_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "5b376ba7bf0f1113eea0d0b5ed5a012c01e2de878966636917a5e1dc54375849",
+                    "decoded_effective_pixels_sha256": "43062ef4e46b832bd206affba94ee583b3e54f734e253e5de63a8def1ae8fa7e",
+                    "encoded_sha256": "f329246c4715b687748c4c734bf7d036524d07554f05e9a8c71aa222e93db465",
+                    "channel": "RGBA"
+                  },
+                  "metallic": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 2
+                  },
+                  "roughness": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 1
+                  }
+                }
+              },
+              {
+                "source": "M_Petrol",
+                "target": "M_Petrol",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Petrol_basecolor.png",
+                    "filepath": "//textures\\Petrol_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "6fa371a82aa08711825e203d58d3877f906779ab226a3c1464d44b66c6326871",
+                    "decoded_effective_pixels_sha256": "410363f4e3f00b8e9fb042645fe831e3b853bae054c2eedc9c9ede15299056eb",
+                    "encoded_sha256": "69e35a2d2e2a3a63a4f3c810992f45a47297d6ef07da9923a45f9ae54c4e0dd9",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "decoded_effective_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "encoded_sha256": "1d25cdda0830ece3b6d6c75e17cc68aed9aed66ca723227d615e964a4f5f4e66",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "Petrol_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "6fa371a82aa08711825e203d58d3877f906779ab226a3c1464d44b66c6326871",
+                    "decoded_effective_pixels_sha256": "410363f4e3f00b8e9fb042645fe831e3b853bae054c2eedc9c9ede15299056eb",
+                    "encoded_sha256": "69e35a2d2e2a3a63a4f3c810992f45a47297d6ef07da9923a45f9ae54c4e0dd9",
+                    "channel": "RGBA"
+                  },
+                  "metallic": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 2
+                  },
+                  "roughness": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 1
+                  }
+                }
+              },
+              {
+                "source": "M_PetrolShade",
+                "target": "M_PetrolShade",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "PetrolShade_basecolor.png",
+                    "filepath": "//textures\\PetrolShade_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "b2a0ab973eab3d40febd1cc1ca607a3b8a414e7dc12e69fff62b5580f094cf6d",
+                    "decoded_effective_pixels_sha256": "1ff63303d8c2858ab330a960b6f43d94028f8fa19a23a851d89d19551abbb128",
+                    "encoded_sha256": "7691e954733b36b4dc94c5e876bc00102dea219f2d3350bedd4ee0563151899f",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "decoded_effective_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "encoded_sha256": "1d25cdda0830ece3b6d6c75e17cc68aed9aed66ca723227d615e964a4f5f4e66",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "PetrolShade_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "b2a0ab973eab3d40febd1cc1ca607a3b8a414e7dc12e69fff62b5580f094cf6d",
+                    "decoded_effective_pixels_sha256": "1ff63303d8c2858ab330a960b6f43d94028f8fa19a23a851d89d19551abbb128",
+                    "encoded_sha256": "7691e954733b36b4dc94c5e876bc00102dea219f2d3350bedd4ee0563151899f",
+                    "channel": "RGBA"
+                  },
+                  "metallic": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 2
+                  },
+                  "roughness": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 1
+                  }
+                }
+              },
+              {
+                "source": "M_Graphite",
+                "target": "M_Graphite",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Graphite_basecolor.png",
+                    "filepath": "//textures\\Graphite_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "3fb4269bd8ec89269bc46ba7805ffa81192d1c9c22e1faa096cdc38e48ca4d70",
+                    "decoded_effective_pixels_sha256": "c61cc8815d3d72b560fd9773b5f9c4b2acbf204a2dec9bbb227ce4fb669c2d22",
+                    "encoded_sha256": "eaba1c4a9a5eee1422fcc6a5b7a69981f99d4596c6ae1da1db3df2b45c35942d",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "decoded_effective_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "encoded_sha256": "1d25cdda0830ece3b6d6c75e17cc68aed9aed66ca723227d615e964a4f5f4e66",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "Graphite_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "3fb4269bd8ec89269bc46ba7805ffa81192d1c9c22e1faa096cdc38e48ca4d70",
+                    "decoded_effective_pixels_sha256": "c61cc8815d3d72b560fd9773b5f9c4b2acbf204a2dec9bbb227ce4fb669c2d22",
+                    "encoded_sha256": "eaba1c4a9a5eee1422fcc6a5b7a69981f99d4596c6ae1da1db3df2b45c35942d",
+                    "channel": "RGBA"
+                  },
+                  "metallic": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 2
+                  },
+                  "roughness": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 1
+                  }
+                }
+              },
+              {
+                "source": "M_Ochre",
+                "target": "M_Ochre",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Ochre_basecolor.png",
+                    "filepath": "//textures\\Ochre_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "17e5af0493a4606155f1a9e6e2005594977221c3f9576dcc883857936d2b6326",
+                    "decoded_effective_pixels_sha256": "4dcb45d18098d3dce025796bad075271713540d3ae5bf54c6b451f295264d3f6",
+                    "encoded_sha256": "37bb83a6a0e7937e106e69b97fe650fb7076003682902d45145684090682504a",
+                    "channel": "RGBA"
+                  },
+                  "roughness": {
+                    "image": "paint_roughness.png",
+                    "filepath": "//textures\\paint_roughness.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "decoded_effective_pixels_sha256": "b44c250b99e969cd814bc797d8bea9b3b9709c7b392535a0fd1dc5ae40f1aede",
+                    "encoded_sha256": "1d25cdda0830ece3b6d6c75e17cc68aed9aed66ca723227d615e964a4f5f4e66",
+                    "channel": 0
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "Ochre_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "17e5af0493a4606155f1a9e6e2005594977221c3f9576dcc883857936d2b6326",
+                    "decoded_effective_pixels_sha256": "4dcb45d18098d3dce025796bad075271713540d3ae5bf54c6b451f295264d3f6",
+                    "encoded_sha256": "37bb83a6a0e7937e106e69b97fe650fb7076003682902d45145684090682504a",
+                    "channel": "RGBA"
+                  },
+                  "metallic": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 2
+                  },
+                  "roughness": {
+                    "image": "paint_roughness",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "Non-Color",
+                    "decoded_storage_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "decoded_effective_pixels_sha256": "e68e978f01b3c0d7b3c084d7d6d27fe7faed101fcbe5a68063c5dffb6b7c08c9",
+                    "encoded_sha256": "e5a364d36cb8e2b65c3b71ebde1e740159c86d67e7006ea5bf860c93b8d9f6e0",
+                    "channel": 1
+                  }
+                }
+              },
+              {
+                "source": "M_Glass",
+                "target": "M_Glass",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Glass_basecolor.png",
+                    "filepath": "//textures\\Glass_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "901ed5c331ed4efaa9cbae035217e0e9a2099938b1ad43b03aac0b6825ff7616",
+                    "decoded_effective_pixels_sha256": "1c9980cf45d62ff3e2de32336f8e87a8345eeefd73641140b03f36fe31f369fd",
+                    "encoded_sha256": "1b8ede1a83d65f5fdeee5db51f901fc2faa06b232b0789fcf58443c950661d58",
+                    "channel": "RGBA"
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "Glass_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "901ed5c331ed4efaa9cbae035217e0e9a2099938b1ad43b03aac0b6825ff7616",
+                    "decoded_effective_pixels_sha256": "1c9980cf45d62ff3e2de32336f8e87a8345eeefd73641140b03f36fe31f369fd",
+                    "encoded_sha256": "1b8ede1a83d65f5fdeee5db51f901fc2faa06b232b0789fcf58443c950661d58",
+                    "channel": "RGBA"
+                  }
+                }
+              },
+              {
+                "source": "M_Steel",
+                "target": "M_Steel",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "Steel_basecolor.png",
+                    "filepath": "//textures\\Steel_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "413b5cee954ef790362ad591c132031e3aa3a960abc50d8812aaa825bacebb91",
+                    "decoded_effective_pixels_sha256": "87b018909878fd55dbe70f8835a623fce57ad51e83b607fd24c9342b96d103d7",
+                    "encoded_sha256": "e87f53cbb056fa3015838bcdf2fa200089cbcd4a60b9e083db5b69e8587e797f",
+                    "channel": "RGBA"
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "Steel_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "413b5cee954ef790362ad591c132031e3aa3a960abc50d8812aaa825bacebb91",
+                    "decoded_effective_pixels_sha256": "87b018909878fd55dbe70f8835a623fce57ad51e83b607fd24c9342b96d103d7",
+                    "encoded_sha256": "e87f53cbb056fa3015838bcdf2fa200089cbcd4a60b9e083db5b69e8587e797f",
+                    "channel": "RGBA"
+                  }
+                }
+              },
+              {
+                "source": "M_WarmCore",
+                "target": "M_WarmCore",
+                "max_value_error": 0.0,
+                "full_effective_image_pixels_compared": true,
+                "source_textures": {
+                  "base_color": {
+                    "image": "WarmCore_basecolor.png",
+                    "filepath": "//textures\\WarmCore_basecolor.png",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "f352fecafb06982be806255f16f21f31ca8c83f77bdec399d0b2cbb35451b3cb",
+                    "decoded_effective_pixels_sha256": "1dce7ebdf0e94eeeee5cb378809b594621209f59ac981bc5f0be92302be3d113",
+                    "encoded_sha256": "837f5f5c24677f66f563c79b1474a428fb1290652cd99ba1f959fe61a44f5251",
+                    "channel": "RGBA"
+                  }
+                },
+                "target_textures": {
+                  "base_color": {
+                    "image": "WarmCore_basecolor",
+                    "filepath": "",
+                    "size": [
+                      512,
+                      512
+                    ],
+                    "colorspace": "sRGB",
+                    "decoded_storage_pixels_sha256": "f352fecafb06982be806255f16f21f31ca8c83f77bdec399d0b2cbb35451b3cb",
+                    "decoded_effective_pixels_sha256": "1dce7ebdf0e94eeeee5cb378809b594621209f59ac981bc5f0be92302be3d113",
+                    "encoded_sha256": "837f5f5c24677f66f563c79b1474a428fb1290652cd99ba1f959fe61a44f5251",
+                    "channel": "RGBA"
+                  }
+                }
+              }
+            ],
+            "errors": []
+          },
+          "method": "One-to-one material-labelled triangle-corner multiset; KD radius positions, then nearest split normal. Multiplicities retained."
+        }
+      },
+      "matched_render_manifests": [
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/comparison_buccaneer/new/render_manifest.json",
+          "bytes": 5562,
+          "sha256": "fcf9ac41f2d4fc6bdbba139d5239c952ec62962e4e02a5842a249b349c5e4752"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/comparison_buccaneer/r02/render_manifest.json",
+          "bytes": 5557,
+          "sha256": "fb645c12ecaf7d4d6f972f035132da14aef2cc1c5951cc413f5567d6588cc9aa"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/comparison_buccaneer/matched_conditions.json",
+          "bytes": 5918,
+          "sha256": "e5947ea812f1c865cee26bec0efd725f192962ee0c9c8f809cae9cc3ac604d2c"
+        }
+      ],
+      "comparison_images": [
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/handover/buccaneer_target_comparison.png",
+          "bytes": 1703362,
+          "sha256": "7df79689c659917e7e79529b5ef5ae14c2e74345915b9f7e3898a8ea9bacdc01"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/handover/buccaneer_r02_comparison.png",
+          "bytes": 1317345,
+          "sha256": "f2c8deedd0c20eed7db896db6c41ea63039b4e071e9533c6af6c186796becc38"
+        }
+      ],
+      "native_godot_validation": "Not run in this side chat by explicit instruction; integration owner must perform fresh engine import and native verification."
+    }
+  ],
+  "references": {
+    "sources": [
+      {
+        "path": "docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png",
+        "bytes": 1972494,
+        "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17",
+        "package_copy": {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/08_cutlass_vorne_wimmel.png",
+          "bytes": 1972494,
+          "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17"
+        },
+        "kind": "existing_generated_2D_target",
+        "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+      },
+      {
+        "path": "docs/reports/assets/grafik-2026-11-01/09_cutlass_hinten_wimmel.png",
+        "bytes": 2017632,
+        "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9",
+        "package_copy": {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/09_cutlass_hinten_wimmel.png",
+          "bytes": 2017632,
+          "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9"
+        },
+        "kind": "existing_generated_2D_target",
+        "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+      },
+      {
+        "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+        "bytes": 1942254,
+        "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d",
+        "package_copy": {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/13_buccaneer_vorne_wimmel_vereinfacht.png",
+          "bytes": 1942254,
+          "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d"
+        },
+        "kind": "existing_generated_2D_target",
+        "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+      },
+      {
+        "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+        "bytes": 2079946,
+        "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d",
+        "package_copy": {
+          "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/references/11_buccaneer_hinten_wimmel.png",
+          "bytes": 2079946,
+          "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d"
+        },
+        "kind": "existing_generated_2D_target",
+        "rights": "Existing user-project concept source. No new license grant for underlying third-party spacecraft designs asserted."
+      }
+    ],
+    "raw_obj_usage": "Neither local DRAKE OBJ is used in the new geometry. Original independently authored mesh reconstruction from the supplied images."
+  },
+  "tools": {
+    "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/tool_manifest.json",
+    "bytes": 4362,
+    "sha256": "8a7e04e2a8b2d25a4660a5a163e64c407eb0690b7f182f079ccc49aa12057084"
+  },
+  "documentation": [
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/README.md",
+      "bytes": 5021,
+      "sha256": "0767a8bb0447fa68c11fef4ad1caacd5bb134ac3db95716ed4082cc2d73a2dd1"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/buccaneer/README.md",
+      "bytes": 4332,
+      "sha256": "124420d967ffc5ae4044539cebffbebd10729221fad00cac8d2c23992db5b45c"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/cutlass/README.md",
+      "bytes": 4173,
+      "sha256": "ebcd2dffb1c90e0849fd1800f8b1e422ac2c2d1cff3e457cef4b63e86e093bd4"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/cutlass/manifest.json",
+      "bytes": 10761,
+      "sha256": "e8a00587cd54f332402a74bd4d94a231dd538d3d63ebb73c7abf12c1e447bd72"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/comparison_cutlass/VISUAL_REVIEW.md",
+      "bytes": 3817,
+      "sha256": "40f2c2c7043a468aa3969a6fa049d670fceb846ea3dbd2f0f7b19c44502a78ec"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/comparison_buccaneer/VISUAL_REVIEW.md",
+      "bytes": 3746,
+      "sha256": "9a0297a53dbf2cef493332a42968fde379b015f0f33e23d6619ac16b1f5dc8ba"
+    }
+  ],
+  "generators": [
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/buccaneer/build_buccaneer.py",
+      "bytes": 21146,
+      "sha256": "674eba4c0ca1bfa1364e2c7ece014edaa6b303086768068b063cad03e1f3ae7b"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/buccaneer/check_source.py",
+      "bytes": 452,
+      "sha256": "998cfaa28850d21a659454ef3b467223b1a43065165e588f86e2ce7ed0efe691"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/buccaneer/finalize_buccaneer.py",
+      "bytes": 4621,
+      "sha256": "c2eddf2861934b176e54dc62be5cf604694d1e79036aff441795ff3b5023a770"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/buccaneer/make_paint_textures.py",
+      "bytes": 1782,
+      "sha256": "f7762ed57be926a568d7dea382a16434fa61c726e66914a7b09e97a449757e27"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/cutlass/build/build_cutlass.py",
+      "bytes": 21324,
+      "sha256": "0b4f1e54130a6e2ac5dc63cf9a9a9a9917a865b1495b9d9e3ba477bf3dd7f5f6"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/cutlass/build/finalize_manifest.py",
+      "bytes": 4520,
+      "sha256": "c3de6a2277a8bdc1820300ca071c670787d4d8e975fc9a4cd182565092fbce02"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/cutlass/build/make_paint.py",
+      "bytes": 1295,
+      "sha256": "c3814b56d1af88f4de320e41501daf0691ea22ab7e06e3bc3ad606a457a4ec52"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/cutlass/build/review_cutlass.py",
+      "bytes": 3589,
+      "sha256": "9cc7b3791782f6c16f38852f5b067bb30e8bf6804e91bd5cb5917072a83f64d7"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/cutlass/source/final/generator_snapshot.py",
+      "bytes": 21324,
+      "sha256": "0b4f1e54130a6e2ac5dc63cf9a9a9a9917a865b1495b9d9e3ba477bf3dd7f5f6"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/make_manifest.py",
+      "bytes": 9879,
+      "sha256": "26b1b8237d5c7ab97f566c6200fc551602adc57c783bc3ce5041359956255e68"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/package_handover.py",
+      "bytes": 3916,
+      "sha256": "aaa4ee62c793b68a321cf9a5b0af7c5b1957d877bdb5200bd4c2778b6aa7572c"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/check_ngon_planarity.py",
+      "bytes": 3473,
+      "sha256": "15c79c233dc176771eafa14480851ca3b286b60762410252c329933ad0b08f2d"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/consolidate_glb.py",
+      "bytes": 8468,
+      "sha256": "c1de14c481f5361bc985c53f6cc39616ebe21da9cf57abf42e3736486202c28b"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/probe_consolidation.py",
+      "bytes": 3956,
+      "sha256": "a104915caef51f9e0cb4e3d1e4205f1b040deb22ce71491bc717401bf206088c"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/render_matched.py",
+      "bytes": 11882,
+      "sha256": "95873c664fed9512285f9b571848a8e56320db0620bc58376a5d3b866425dd76"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/verify_render_conditions.py",
+      "bytes": 2292,
+      "sha256": "1804e5a3f9978da0671103bd50b14a0f977edc6ab9766d69b710d9ec29997fca"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/verify_ship.py",
+      "bytes": 33373,
+      "sha256": "9ecc94bc5db1e005e3338f4f5c09c4d34cacd58a738d7a6f4ac908c43158526b"
+    },
+    {
+      "path": "art/frontier_illustrated_20261101/ships/pass05_astra_ultra/qa_tools/write_tool_manifest.py",
+      "bytes": 1070,
+      "sha256": "7e2a43404d427a25a243c78aed8e7cda850a2d720a7deca72e58336bbc4334b7"
+    }
+  ],
+  "license_status": "Original project candidate work; no separate asset license grant invented. Source identities/references retain their existing rights. External unchanged Blender QA skill scripts declare MIT.",
+  "scope": "Only candidate package, matching curated GLBs, and own task file; no runtime/report integration, checkout, reset, commit, push, or native Godot import."
+}

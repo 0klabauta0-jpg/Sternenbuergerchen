@@ -1,0 +1,54 @@
+{
+  "pass": true,
+  "errors": [],
+  "modules": [
+    {
+      "name": "Gear_Breastplate",
+      "bone": "UpperChest",
+      "vertices": 112,
+      "triangles": 220
+    },
+    {
+      "name": "Gear_ChestIdentifier",
+      "bone": "UpperChest",
+      "vertices": 56,
+      "triangles": 108
+    },
+    {
+      "name": "Gear_LeftShoulder",
+      "bone": "LeftArm",
+      "vertices": 56,
+      "triangles": 108
+    },
+    {
+      "name": "Gear_LeftKnee",
+      "bone": "LeftLeg",
+      "vertices": 112,
+      "triangles": 220
+    },
+    {
+      "name": "Gear_RightShoulder",
+      "bone": "RightArm",
+      "vertices": 56,
+      "triangles": 108
+    },
+    {
+      "name": "Gear_RightKnee",
+      "bone": "RightLeg",
+      "vertices": 112,
+      "triangles": 220
+    },
+    {
+      "name": "Gear_Backpack",
+      "bone": "Chest",
+      "vertices": 56,
+      "triangles": 108
+    },
+    {
+      "name": "Gear_BackpackLid",
+      "bone": "Chest",
+      "vertices": 56,
+      "triangles": 108
+    }
+  ]
+}

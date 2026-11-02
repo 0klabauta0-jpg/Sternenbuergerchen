@@ -1,0 +1,4 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FRONTIER_PASS02 {"diagnostics":{"dressing_reserved_cells":25,"fallback_without_owner":1,"geology":{"cap_vertices":2640,"caps_up":true,"digest":"94c714a5c12a876cea32cb15c48f3e8abe934f8ee4a4c25959f4a2b14b9de0f3","finite":true,"mesh_count":55,"vertex_count":14448,"wall_normals":11508,"walls_out":true},"geology_reserved_cells":73,"walkable_obstacle_centers":0},"failed":0,"passed":27,"synthetic_fixture":true}

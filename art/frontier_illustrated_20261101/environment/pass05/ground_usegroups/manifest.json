@@ -1,0 +1,105 @@
+{
+  "schema": "sternenbuergerchen.environment_usegroups.env05",
+  "status": "native candidate; no user art acceptance",
+  "source_entries": [
+    {
+      "runtime": "scripts/terrain/frontier_worklife.gd",
+      "sha256": "15f26e2e951a34a60c111f3c69b36ab7490c0336e36065efa9a01721c9174656",
+      "editable_source": "art/frontier_illustrated_20261101/environment/pass05/ground_usegroups/source/frontier_worklife.gd"
+    },
+    {
+      "runtime": "scripts/terrain/frontier_art_dressing.gd",
+      "sha256": "c55d766a26a9ee19139537afcff8b08d592e636e8b4baca7e3e596922e12ac5e",
+      "editable_source": "art/frontier_illustrated_20261101/environment/pass05/ground_usegroups/source/frontier_art_dressing.gd"
+    },
+    {
+      "runtime": "shaders/terrain/frontier_contact_paint.gdshader",
+      "sha256": "d6f7db9bab8011118a5ec6a82cf57450189ac29eb45ffa48740779b27cd11674",
+      "editable_source": "art/frontier_illustrated_20261101/environment/pass05/ground_usegroups/source/frontier_contact_paint.gdshader"
+    },
+    {
+      "runtime": "shaders/terrain/frontier_ground.gdshader",
+      "sha256": "67790907c49e9b41b0113f8d904e9d3a6bae507c4a9aa33a1d8de34e1a477585",
+      "editable_source": "art/frontier_illustrated_20261101/environment/pass05/ground_usegroups/source/frontier_ground.gdshader"
+    }
+  ],
+  "use_groups": [
+    "HabitatArrival",
+    "FreihafenDelivery",
+    "SupplyService"
+  ],
+  "gravel_count": 190,
+  "kenney_props": [
+    {
+      "atlas_path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+      "atlas_sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1",
+      "grounded_bounds": "[P: (9.867235, 0.0, 7.740388), S: (0.631915, 0.3, 0.734899)]",
+      "id": "working_table-display",
+      "license": "Kenney Space Station CC0; original GLB and atlas unchanged",
+      "license_path": "res://Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "material_route": "instance-duplicated warm tint, original textures and UV unchanged",
+      "path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+      "scale": 0.5,
+      "source_sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3",
+      "support_height": 0.0,
+      "yaw": -65.0
+    },
+    {
+      "atlas_path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+      "atlas_sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1",
+      "grounded_bounds": "[P: (10.59925, 0.24, 8.016194), S: (0.141534, 0.165218, 0.136924)]",
+      "id": "working_computer",
+      "license": "Kenney Space Station CC0; original GLB and atlas unchanged",
+      "license_path": "res://Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "material_route": "instance-duplicated warm tint, original textures and UV unchanged",
+      "path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+      "scale": 0.25,
+      "source_sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7",
+      "support_height": 0.24,
+      "yaw": -65.0
+    },
+    {
+      "atlas_path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+      "atlas_sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1",
+      "grounded_bounds": "[P: (15.15241, 0.0, 7.032408), S: (0.295183, 0.301, 0.295184)]",
+      "id": "working_container-wide",
+      "license": "Kenney Space Station CC0; original GLB and atlas unchanged",
+      "license_path": "res://Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "material_route": "instance-duplicated warm tint, original textures and UV unchanged",
+      "path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+      "scale": 0.43,
+      "source_sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0",
+      "support_height": 0.0,
+      "yaw": 9.0
+    }
+  ],
+  "contact_layer_probe": {
+    "purpose": "isolated contact-layer ablation; viewport continuously redrawn and actor poses paused, not a before/after art verdict",
+    "changed_bbox": [
+      270,
+      183,
+      1218,
+      769
+    ],
+    "mean_absolute_rgb_delta": [
+      0.3329,
+      0.6682194444444445,
+      0.2852152777777778
+    ]
+  },
+  "global_light_unchanged": true,
+  "new_ai_or_civilian_simulation": false,
+  "changes": [
+    "source GLBs preserved, duplicated instance warm-tint materials",
+    "functional terminal/table/arrival bench, palletized delivery and supported service conduit",
+    "low gravel as one bounded MultiMesh outside authored circulation exclusions",
+    "soil dust banks, compacted approaches, noncoplanar contact paint, road/apron tire wear"
+  ],
+  "limits": [
+    "small static authored groups, four existing citizens placed and faced differently",
+    "flat terrain remains; painterly texture and continuous erosion still simpler than2D"
+  ]
+}

@@ -1,0 +1,660 @@
+{
+  "schema": "sternenbuergerchen.pass04_ships.v1",
+  "task": "docs/tasks/ART_2026_11_01_pass04.md",
+  "status": "new illustration-led simplified model candidates; parent owns native Godot integration and user visual acceptance",
+  "blender": "5.2.3 LTS",
+  "generator": "art/frontier_illustrated_20261101/ships/pass04/generator/build_ships.py",
+  "generator_sha256": "47602815627c82be94d11628001e763c281710238b64833e6a6b215983683694",
+  "assets": [
+    {
+      "asset": "cutlass_01",
+      "status": "new simplified illustration-led model candidate; not a stock SC model or accepted final art",
+      "construction": "new original low-poly mesh reconstruction; no old OBJ/material-study/Kenney ship geometry imported",
+      "source": "art/frontier_illustrated_20261101/ships/pass04/source/cutlass_01.blend",
+      "source_sha256": "a7c476234797209a15cb7e3f30580fca0905f55fc19f901a42fc3933f8022075",
+      "export": {
+        "path": "Assets/curated/frontier_illustrated_20261101/ships_pass04/cutlass_01.glb",
+        "sha256": "7622173a239ac1142902d8692ba590065764f83b596a561c688518e790177b32",
+        "bytes": 230632,
+        "meshes": 1,
+        "materials": 7,
+        "triangles": 4184,
+        "nodes": 1,
+        "skins": 0,
+        "animations": 0
+      },
+      "triangles": 4184,
+      "vertices": 2234,
+      "editable_parts": 75,
+      "dimensions_blender_m": [
+        12.360864639282227,
+        16.0,
+        4.940279960632324
+      ],
+      "bounds_blender_m": {
+        "min": [
+          -6.180432319641113,
+          -8.0,
+          0.0
+        ],
+        "max": [
+          6.180432319641113,
+          8.0,
+          4.940279960632324
+        ]
+      },
+      "normalization_length_m": 16.0,
+      "normalization_uniform_factor": 1.0165184391780564,
+      "scale_status": "explicitly stylized display normalization, NOT canonical Star Citizen measurements",
+      "pivot": "full BBox XY center / groundZ0 on static feet",
+      "front_blender": "-Y",
+      "front_godot": "+Z",
+      "runtime_scale_suggested": 0.22,
+      "palette": {
+        "Ivory": "e4dccb",
+        "Petrol": "4c6870",
+        "Frame": "2d3e43",
+        "Steel": "8b9693",
+        "Ochre": "d99b45",
+        "Glass": "2d4a59",
+        "WarmCore": "a66a36",
+        "GlassWarm": "674f3c"
+      },
+      "no_emission": true,
+      "reference_images": [
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/08_cutlass_vorne_wimmel.png",
+          "sha256": "3c8bc711217daf077cef318496863cd349dd2ebbd1fd23868d9e0fb4e5da7e17"
+        },
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/09_cutlass_hinten_wimmel.png",
+          "sha256": "8b8fc3a83afa85b4f483083a90660efb19af4089ba685ce0faa39d37d1e999b9"
+        }
+      ],
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [],
+      "qa_scope": "entire static assembly, no expensive-check skips; UV excluded for solid-color materials",
+      "identity": {
+        "identity": [
+          "faceted transport cargo body",
+          "lowered segmented cockpit",
+          "two forward stubwings/endplates and fork guns",
+          "two separate outboard aft engines on pylons",
+          "central closed loading ramp",
+          "small dorsal twin turret"
+        ],
+        "limits": [
+          "closed graphic cargo ramp, no interior",
+          "four-pad original simplified static display undercarriage, not canonical source gear",
+          "no textures, flight or weapon mechanics"
+        ]
+      },
+      "groups": {
+        "Cutlass_aft_engine_mounts": [
+          "Cutlass_EnginePylon_L",
+          "Cutlass_EnginePylonCap_L",
+          "Cutlass_EngineBody_L",
+          "Cutlass_ArmoredEngineCowl_L",
+          "Cutlass_EngineFrontVent_L",
+          "Cutlass_ExhaustHousing_L",
+          "Cutlass_ExhaustLip_L",
+          "Cutlass_ExhaustRecess_L",
+          "Cutlass_ExhaustDarkCore_L",
+          "Cutlass_EngineSkirt_L-1",
+          "Cutlass_EngineSkirt_L1",
+          "Cutlass_EnginePylon_R",
+          "Cutlass_EnginePylonCap_R",
+          "Cutlass_EngineBody_R",
+          "Cutlass_ArmoredEngineCowl_R",
+          "Cutlass_EngineFrontVent_R",
+          "Cutlass_ExhaustHousing_R",
+          "Cutlass_ExhaustLip_R",
+          "Cutlass_ExhaustRecess_R",
+          "Cutlass_ExhaustDarkCore_R",
+          "Cutlass_EngineSkirt_R-1",
+          "Cutlass_EngineSkirt_R1"
+        ],
+        "Cutlass_canopy": [
+          "Cutlass_Canopy",
+          "Cutlass_ChinMount",
+          "Cutlass_ChinGun_-1",
+          "Cutlass_ChinGun_1"
+        ],
+        "Cutlass_cargo_ramp": [
+          "Cutlass_ClosedRearRamp",
+          "Cutlass_RampCrossbar_0",
+          "Cutlass_RampCrossbar_1",
+          "Cutlass_RampCrossbar_2",
+          "Cutlass_RampSideMark_-1",
+          "Cutlass_RampSideMark_1"
+        ],
+        "Cutlass_dorsal_turret": [
+          "Cutlass_TurretTurntable",
+          "Cutlass_TurretHousing",
+          "Cutlass_TurretBarrel_-1",
+          "Cutlass_TurretBarrel_1"
+        ],
+        "Cutlass_forward_forks": [
+          "Cutlass_ForeWing_L",
+          "Cutlass_EndPlate_L",
+          "Cutlass_EndPlateMark_L",
+          "Cutlass_WingRootBand_L",
+          "Cutlass_ForkBarrel_L",
+          "Cutlass_ForkKeel_L",
+          "Cutlass_ForeWing_R",
+          "Cutlass_EndPlate_R",
+          "Cutlass_EndPlateMark_R",
+          "Cutlass_WingRootBand_R",
+          "Cutlass_ForkBarrel_R",
+          "Cutlass_ForkKeel_R"
+        ],
+        "Cutlass_static_landing_gear": [
+          "Cutlass_Gear_0_Foot",
+          "Cutlass_Gear_0_Strut",
+          "Cutlass_Gear_0_Knee",
+          "Cutlass_Gear_0_Brace",
+          "Cutlass_Gear_1_Foot",
+          "Cutlass_Gear_1_Strut",
+          "Cutlass_Gear_1_Knee",
+          "Cutlass_Gear_1_Brace",
+          "Cutlass_Gear_2_Foot",
+          "Cutlass_Gear_2_Strut",
+          "Cutlass_Gear_2_Knee",
+          "Cutlass_Gear_2_Brace",
+          "Cutlass_Gear_3_Foot",
+          "Cutlass_Gear_3_Strut",
+          "Cutlass_Gear_3_Knee",
+          "Cutlass_Gear_3_Brace"
+        ],
+        "Cutlass_transport_hull": [
+          "Cutlass_CargoHull",
+          "Cutlass_DorsalShoulder_L",
+          "Cutlass_DorsalMark_L",
+          "Cutlass_CargoSideInset_L0",
+          "Cutlass_CargoSideInset_L1",
+          "Cutlass_CargoSideInset_L2",
+          "Cutlass_DorsalShoulder_R",
+          "Cutlass_DorsalMark_R",
+          "Cutlass_CargoSideInset_R0",
+          "Cutlass_CargoSideInset_R1",
+          "Cutlass_CargoSideInset_R2"
+        ]
+      },
+      "roundtrip": {
+        "asset": "cutlass_01",
+        "pass": true,
+        "glb_sha256": "7622173a239ac1142902d8692ba590065764f83b596a561c688518e790177b32",
+        "import": "fresh empty Blender5.2.3; merge_vertices=True requested; no source/import geometry repair",
+        "mesh_count": 1,
+        "triangles": 4184,
+        "triangles_by_material": {
+          "M_Drake04_Petrol": 1300,
+          "M_Drake04_Ivory": 240,
+          "M_Drake04_Ochre": 416,
+          "M_Drake04_Frame": 1626,
+          "M_Drake04_Glass": 18,
+          "M_Drake04_Steel": 464,
+          "M_Drake04_WarmCore": 120
+        },
+        "material_assignments_match": true,
+        "bounds_blender_m": {
+          "min": [
+            -6.180432319641113,
+            -8.0,
+            0.0
+          ],
+          "max": [
+            6.180432319641113,
+            8.0,
+            4.940279960632324
+          ]
+        },
+        "dimensions_blender_m": [
+          12.360864639282227,
+          16.0,
+          4.940279960632324
+        ],
+        "ground_z": 0.0,
+        "maximum_bidirectional_nearest_vertex_error_m": 0.0,
+        "raw_qa": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_raw.json",
+        "errors": [],
+        "warnings": [
+          "cutlass_01: duplicate verts=4152 loose verts=0"
+        ],
+        "images": [
+          "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_front.png",
+          "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_rear.png",
+          "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_game.png"
+        ]
+      },
+      "source_raw_qa": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_raw.json",
+      "views": [
+        {
+          "view": "front",
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_front.png",
+          "direction_blender": [
+            0.5221105217933655,
+            -0.668271005153656,
+            0.5299192667007446
+          ],
+          "orthographic_height_source_m": 14.632020257016583,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "rear",
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_rear.png",
+          "direction_blender": [
+            -0.5221105217933655,
+            0.668271005153656,
+            0.5299192667007446
+          ],
+          "orthographic_height_source_m": 14.632021026767996,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "top",
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_top.png",
+          "direction_blender": [
+            0.0,
+            -0.0010000000474974513,
+            1.0
+          ],
+          "orthographic_height_source_m": 18.082750986872707,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "game",
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_game.png",
+          "direction_blender": [
+            0.2614452838897705,
+            -0.5872157216072083,
+            0.7660444378852844
+          ],
+          "orthographic_height_source_m": 54.54545454545455,
+          "runtime_scale_assumption": 0.22,
+          "camera_size_world": 12,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        }
+      ],
+      "opened_images": [
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_front.png",
+          "sha256": "672aa873a4f534506f1f8e690ee8d832994d4fe7840cf55b993c2d47330b733c"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_rear.png",
+          "sha256": "b489857b2f73149cb2ab7bec1b9b2bdec82f110bcdcb9d7825a2a6a6a3bcd9cf"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_top.png",
+          "sha256": "b350d9d7bf75835f28824bb830eb5ae6652b1d92de8aa6e83f0a502f5ccc9155"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_game.png",
+          "sha256": "e08f986c4e9c0ded80bd0bc2e869b27745e6cd48ff61f937467ac7ab675583de"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_random.png",
+          "sha256": "b01fdba8573aebe8eec7f2809013b83210211b5cac27fb4169a0160e407f925f"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_wire.png",
+          "sha256": "26aa7e7934fcdc7313ca20e8ad48abf20ee516207f34a460a3272d3bff593ba3"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_front.png",
+          "sha256": "01142bdf276576e25869a31f6fd3ed2993bc313332a095ec302116c6e2f2ed99"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_rear.png",
+          "sha256": "09d9e29809ee109210fa6c1c03c97c5b4c6e558527646c2b500b1b8131b879c0"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_game.png",
+          "sha256": "e0a968ad2add912cd8fed80a41dd16b331309396562ac7666e6e8befd272e77a"
+        }
+      ],
+      "warning_acceptance": "Only roundtrip format-attribute seam duplicate vertices may remain in raw import report. New source is closed and error/warning-free; no z-fight, floating, degenerate, inconsistent or inverted geometry. No expensive checks skipped. UV intentionally absent for solid colors."
+    },
+    {
+      "asset": "buccaneer_01",
+      "status": "new simplified illustration-led model candidate; not a stock SC model or accepted final art",
+      "construction": "new original low-poly mesh reconstruction; no old OBJ/material-study/Kenney ship geometry imported",
+      "source": "art/frontier_illustrated_20261101/ships/pass04/source/buccaneer_01.blend",
+      "source_sha256": "87fcabf3f78990b86647e44192265f957bac92d63437df10a197b8c40eeb8ce3",
+      "export": {
+        "path": "Assets/curated/frontier_illustrated_20261101/ships_pass04/buccaneer_01.glb",
+        "sha256": "746c959a8f16e320db89c4194e44d939b3ebe90b29d5f05225187c3a18b3eded",
+        "bytes": 197680,
+        "meshes": 1,
+        "materials": 7,
+        "triangles": 3800,
+        "nodes": 1,
+        "skins": 0,
+        "animations": 0
+      },
+      "triangles": 3800,
+      "vertices": 2004,
+      "editable_parts": 62,
+      "dimensions_blender_m": [
+        12.065033912658691,
+        11.0,
+        4.015793323516846
+      ],
+      "bounds_blender_m": {
+        "min": [
+          -6.032516956329346,
+          -5.499999523162842,
+          0.0
+        ],
+        "max": [
+          6.032516956329346,
+          5.5,
+          4.015793323516846
+        ]
+      },
+      "normalization_length_m": 11.0,
+      "normalization_uniform_factor": 1.0140892670605064,
+      "scale_status": "explicitly stylized display normalization, NOT canonical Star Citizen measurements",
+      "pivot": "full BBox XY center / groundZ0 on static feet",
+      "front_blender": "-Y",
+      "front_godot": "+Z",
+      "runtime_scale_suggested": 0.22,
+      "palette": {
+        "Ivory": "e4dccb",
+        "Petrol": "4c6870",
+        "Frame": "2d3e43",
+        "Steel": "8b9693",
+        "Ochre": "d99b45",
+        "Glass": "2d4a59",
+        "WarmCore": "a66a36",
+        "GlassWarm": "674f3c"
+      },
+      "no_emission": true,
+      "reference_images": [
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+          "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d"
+        },
+        {
+          "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+          "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d"
+        }
+      ],
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [],
+      "qa_scope": "entire static assembly, no expensive-check skips; UV excluded for solid-color materials",
+      "identity": {
+        "identity": [
+          "very narrow central fuselage and pointed glazed nose",
+          "two large parallel cylindrical pods, dark front inlets and smaller petalled rear nozzles",
+          "short swept outer wings",
+          "central dorsal cannon",
+          "open negative space between fuselage and pods at front"
+        ],
+        "limits": [
+          "tripod original simplified static undercarriage, not a canonical animated landing system",
+          "intake/exhaust internals reduced to broad concentric shapes and six rear petals per pod",
+          "no textures or flight/weapon mechanics"
+        ]
+      },
+      "groups": {
+        "Buccaneer_canopy": [
+          "Buccaneer_Canopy"
+        ],
+        "Buccaneer_dorsal_gun_and_keels": [
+          "Buccaneer_CannonMount",
+          "Buccaneer_CannonReceiver",
+          "Buccaneer_DorsalBarrel",
+          "Buccaneer_DorsalMuzzle",
+          "Buccaneer_AftKeel_-1",
+          "Buccaneer_SpineIvory_-1",
+          "Buccaneer_AftKeel_1",
+          "Buccaneer_SpineIvory_1"
+        ],
+        "Buccaneer_narrow_fuselage": [
+          "Buccaneer_SlimSpine"
+        ],
+        "Buccaneer_pod_pylons": [
+          "Buccaneer_InnerPylon_L",
+          "Buccaneer_InnerFairing_L",
+          "Buccaneer_InnerPylon_R",
+          "Buccaneer_InnerFairing_R"
+        ],
+        "Buccaneer_short_outer_wings": [
+          "Buccaneer_OuterWing_L",
+          "Buccaneer_WingIvory_L",
+          "Buccaneer_WingOchre_L",
+          "Buccaneer_OuterWing_R",
+          "Buccaneer_WingIvory_R",
+          "Buccaneer_WingOchre_R"
+        ],
+        "Buccaneer_static_landing_gear": [
+          "Buccaneer_NoseGear_Foot",
+          "Buccaneer_NoseGear_Strut",
+          "Buccaneer_NoseGear_Knee",
+          "Buccaneer_NoseGear_Brace",
+          "Buccaneer_PodGear_0_Foot",
+          "Buccaneer_PodGear_0_Strut",
+          "Buccaneer_PodGear_0_Knee",
+          "Buccaneer_PodGear_0_Brace",
+          "Buccaneer_PodGear_1_Foot",
+          "Buccaneer_PodGear_1_Strut",
+          "Buccaneer_PodGear_1_Knee",
+          "Buccaneer_PodGear_1_Brace"
+        ],
+        "Buccaneer_twin_engine_pods": [
+          "Buccaneer_EnginePod_L",
+          "Buccaneer_FrontIntake_L",
+          "Buccaneer_IntakeLip_L",
+          "Buccaneer_IntakeDepth_L",
+          "Buccaneer_IntakeInnerRing_L",
+          "Buccaneer_RearNozzle_L",
+          "Buccaneer_RearLip_L",
+          "Buccaneer_RecessWarm_L",
+          "Buccaneer_RecessDark_L",
+          "Buccaneer_ExhaustPetal_L0",
+          "Buccaneer_ExhaustPetal_L1",
+          "Buccaneer_ExhaustPetal_L2",
+          "Buccaneer_ExhaustPetal_L3",
+          "Buccaneer_ExhaustPetal_L4",
+          "Buccaneer_ExhaustPetal_L5",
+          "Buccaneer_EnginePod_R",
+          "Buccaneer_FrontIntake_R",
+          "Buccaneer_IntakeLip_R",
+          "Buccaneer_IntakeDepth_R",
+          "Buccaneer_IntakeInnerRing_R",
+          "Buccaneer_RearNozzle_R",
+          "Buccaneer_RearLip_R",
+          "Buccaneer_RecessWarm_R",
+          "Buccaneer_RecessDark_R",
+          "Buccaneer_ExhaustPetal_R0",
+          "Buccaneer_ExhaustPetal_R1",
+          "Buccaneer_ExhaustPetal_R2",
+          "Buccaneer_ExhaustPetal_R3",
+          "Buccaneer_ExhaustPetal_R4",
+          "Buccaneer_ExhaustPetal_R5"
+        ]
+      },
+      "roundtrip": {
+        "asset": "buccaneer_01",
+        "pass": true,
+        "glb_sha256": "746c959a8f16e320db89c4194e44d939b3ebe90b29d5f05225187c3a18b3eded",
+        "import": "fresh empty Blender5.2.3; merge_vertices=True requested; no source/import geometry repair",
+        "mesh_count": 1,
+        "triangles": 3800,
+        "triangles_by_material": {
+          "M_Drake04_Petrol": 1140,
+          "M_Drake04_Frame": 1590,
+          "M_Drake04_Ivory": 372,
+          "M_Drake04_GlassWarm": 18,
+          "M_Drake04_Ochre": 216,
+          "M_Drake04_Steel": 344,
+          "M_Drake04_WarmCore": 120
+        },
+        "material_assignments_match": true,
+        "bounds_blender_m": {
+          "min": [
+            -6.032516956329346,
+            -5.499999523162842,
+            0.0
+          ],
+          "max": [
+            6.032516956329346,
+            5.5,
+            4.015793323516846
+          ]
+        },
+        "dimensions_blender_m": [
+          12.065033912658691,
+          10.999999523162842,
+          4.015793323516846
+        ],
+        "ground_z": 0.0,
+        "maximum_bidirectional_nearest_vertex_error_m": 0.0,
+        "raw_qa": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_raw.json",
+        "errors": [],
+        "warnings": [
+          "buccaneer_01: duplicate verts=3520 loose verts=0"
+        ],
+        "images": [
+          "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_front.png",
+          "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_rear.png",
+          "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_game.png"
+        ]
+      },
+      "source_raw_qa": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_raw.json",
+      "views": [
+        {
+          "view": "front",
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_front.png",
+          "direction_blender": [
+            0.5221105217933655,
+            -0.668271005153656,
+            0.5299192667007446
+          ],
+          "orthographic_height_source_m": 9.568034872813316,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "rear",
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_rear.png",
+          "direction_blender": [
+            -0.5221105217933655,
+            0.668271005153656,
+            0.5299192667007446
+          ],
+          "orthographic_height_source_m": 9.56803477659439,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "top",
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_top.png",
+          "direction_blender": [
+            0.0,
+            -0.0010000000474974513,
+            1.0
+          ],
+          "orthographic_height_source_m": 12.430833056287373,
+          "runtime_scale_assumption": null,
+          "camera_size_world": null,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        },
+        {
+          "view": "game",
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_game.png",
+          "direction_blender": [
+            0.2614452838897705,
+            -0.5872157216072083,
+            0.7660444378852844
+          ],
+          "orthographic_height_source_m": 54.54545454545455,
+          "runtime_scale_assumption": 0.22,
+          "camera_size_world": 12,
+          "engine": "Blender5.2.3 Workbench; not native Godot"
+        }
+      ],
+      "opened_images": [
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_front.png",
+          "sha256": "cfcaa94c52823d92db1505c90c66b5d8ab3d973c0e49298dde9dafdb6b16bc09"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_rear.png",
+          "sha256": "2b6d1a3a61fb6ec0e3077a2966fe5186161094552421360ccdd018f0f0fd12d1"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_top.png",
+          "sha256": "0346b9abba8c68e7f5f93b7d23b5250a0d25dfa2ed8cf1bae19e02a9c14fa83a"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_game.png",
+          "sha256": "e0d92f580240d652db5a9cadad183e09ca24a3ce7ce1deed1c68565c960145e0"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_random.png",
+          "sha256": "5d56cf47b9f70c3aa583bcfc4382c152feab8a853971401f24da21f716139928"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_wire.png",
+          "sha256": "fac8507b5505e01b63feee5944258bf1839b639a500b354685aec28703fc4982"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_front.png",
+          "sha256": "50a319262e89fd7dfda5e41d5e07a8de6531762fda0ff486a144391f485c1fb5"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_rear.png",
+          "sha256": "be10d05182933c4c0f7d52013e5dbc2a6fb21e52923fd5cf814183d3964d29c3"
+        },
+        {
+          "path": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_game.png",
+          "sha256": "e83a9a11b012c163a14e37db33cf1a3d19f264fac604597fe1fd2155e33d3ed7"
+        }
+      ],
+      "warning_acceptance": "Only roundtrip format-attribute seam duplicate vertices may remain in raw import report. New source is closed and error/warning-free; no z-fight, floating, degenerate, inconsistent or inverted geometry. No expensive checks skipped. UV intentionally absent for solid colors."
+    }
+  ],
+  "normalization": "Cutlass total length16Blender-metres, Buccaneer11; deliberately stylized scene normalization, NOT canonical Star Citizen dimensions. Uniform whole-asset scaling includes undercarriage; BBox XY center, lowest footZ0, Godot+Zfront.",
+  "geometry_provenance": "Every exported mesh is newly constructed by the retained generator after viewing the assigned local image pairs. No high-poly OBJ, old material candidate or generic Kenney ship mesh is imported or relabeled.",
+  "reference_pair_consistency": {
+    "cutlass": "Both views refer to this single mesh: separate aft pods, angled cargo hull, forward endplates, lowered cockpit, dorsal twin turret and closed center ramp.",
+    "buccaneer": "Both views refer to this single mesh: large dark front pod inlets, narrower petalled rear nozzles, narrow pointed cockpit, swept short wings and dorsal cannon. Front/rear details are coordinated rather than generated independently."
+  },
+  "visual_review": {
+    "opened": true,
+    "method": "front/rear/overview-distance, top, random-part and true wire images; fresh GLB front/rear/game images; original four targets opened first",
+    "improvements": "Broad distinctive silhouettes and ivory/petrol zones; few ochre fields; thick structural connections, visible inset nozzle rings and supported static landing feet.",
+    "remaining_differences": "More faceted and cleaner than the painted target art; panel scuffs, small pipes, tiny cutouts and most tertiary details omitted. Canopy and pod cowl contours are simplified. Added original static landing supports are not shown in flying image targets and are not a canonical gear recreation. No animated deployment, flight, weapons or interior."
+  },
+  "integration_interface": {
+    "exports": "Assets/curated/frontier_illustrated_20261101/ships_pass04/{cutlass_01,buccaneer_01}.glb",
+    "static_meshes_per_asset": 1,
+    "materials_max": 8,
+    "runtime_scale_suggested": 0.22,
+    "front_godot": "+Z",
+    "pivot": "BBox XY-center, groundZ0",
+    "collision_navigation_lights": false
+  },
+  "not_claimed": [
+    "canonical Star Citizen scale",
+    "official game mesh provenance",
+    "new geometry derived from old defective OBJ material studies",
+    "native Godot verification performed by this subtask",
+    "user visual approval",
+    "flight/weapon/vehicle mechanics",
+    "general performance or release acceptance"
+  ]
+}

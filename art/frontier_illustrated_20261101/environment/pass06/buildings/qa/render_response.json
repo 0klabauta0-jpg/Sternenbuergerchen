@@ -1,0 +1,28 @@
+{
+  "passed": 6,
+  "failed": 0,
+  "scope": "Same static camera/light, whole-image deltas incl. unchanged background; tests clean PBR-route equivalence and actual nontrivial shader response, not artistic quality. Isolated probe shadow dither remains present in both states.",
+  "views": [
+    {
+      "view": "habitat_front",
+      "standard_to_zero_wear_mean_rgb_delta_8bit": 0.00015711805555555555,
+      "zero_wear_to_enabled_mean_rgb_delta_8bit": 1.9573914930555556,
+      "enabled_max_channel_delta_8bit": 58.0,
+      "fraction_pixels_rgb_mean_delta_above4": 0.12922135416666666
+    },
+    {
+      "view": "hall_front",
+      "standard_to_zero_wear_mean_rgb_delta_8bit": 0.0,
+      "zero_wear_to_enabled_mean_rgb_delta_8bit": 2.1480966435185187,
+      "enabled_max_channel_delta_8bit": 68.0,
+      "fraction_pixels_rgb_mean_delta_above4": 0.16133940972222222
+    },
+    {
+      "view": "ensemble_game",
+      "standard_to_zero_wear_mean_rgb_delta_8bit": 0.0,
+      "zero_wear_to_enabled_mean_rgb_delta_8bit": 0.9192586805555556,
+      "enabled_max_channel_delta_8bit": 64.0,
+      "fraction_pixels_rgb_mean_delta_above4": 0.06614409722222223
+    }
+  ]
+}

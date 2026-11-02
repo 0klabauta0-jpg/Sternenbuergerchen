@@ -1,0 +1,79 @@
+{
+  "asset": "buccaneer_01",
+  "iteration": 2,
+  "status": "unapproved revised visual candidate",
+  "source": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/source/buccaneer_01.blend",
+  "source_sha256": "81e856793060ac566247adb1fa2c887a6d7ee0ffc6364a705920386605dc630a",
+  "export": {
+    "path": "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/iterations/i02/buccaneer_01.glb",
+    "sha256": "e27cfb3c0c626800d04158f0819036ae52329887134d10df6bb9c11d98f94f52",
+    "bytes": 924568,
+    "meshes": 1,
+    "materials": 10,
+    "triangles": 17468,
+    "nodes": 1,
+    "animations": 0,
+    "skins": 0
+  },
+  "triangles": 17468,
+  "editable_parts": 84,
+  "vertices": 8880,
+  "dimensions_blender_m": [
+    13.836575508117676,
+    11.0,
+    4.563366413116455
+  ],
+  "bounds_blender_m": {
+    "min": [
+      -6.918287754058838,
+      -5.5,
+      0.0
+    ],
+    "max": [
+      6.918287754058838,
+      5.500000476837158,
+      4.563366413116455
+    ]
+  },
+  "normalization_length_m": 11,
+  "normalization_uniform_factor": 1.089108921174804,
+  "scale_status": "stylized display normalization, not canonical SC size",
+  "front_blender": "-Y",
+  "front_godot": "+Z",
+  "runtime_scale_suggested": 0.22,
+  "pivot": "full BBox XY center / static feet minZ0",
+  "palette": {
+    "Ivory": "ddd0af",
+    "Petrol": "53696b",
+    "Frame": "27383c",
+    "Steel": "8a8d80",
+    "Ochre": "d39843",
+    "Glass": "2c4651",
+    "WarmCore": "a56e38",
+    "GlassWarm": "554b3e",
+    "UsedIvory": "bcb69e",
+    "UsedPetrol": "667776"
+  },
+  "no_emission": true,
+  "qa_pass": true,
+  "qa_errors": [],
+  "qa_warnings": [],
+  "reference_images": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/13_buccaneer_vorne_wimmel_vereinfacht.png",
+      "sha256": "33e872ca92390473143a4c618fd04fec417a4f2792000ee5fbffba02e7d9b64d"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/11_buccaneer_hinten_wimmel.png",
+      "sha256": "eaf8a5190f7966740ee21d8e0211a9b1f275da50b081e8c9d5a206779dfea08d"
+    }
+  ],
+  "retained_r01": {
+    "generator": "art/frontier_illustrated_20261101/ships/pass04/generator/build_ships.py",
+    "generator_sha256": "47602815627c82be94d11628001e763c281710238b64833e6a6b215983683694",
+    "source": "art/frontier_illustrated_20261101/ships/pass04/source/buccaneer_01.blend",
+    "source_sha256": "87fcabf3f78990b86647e44192265f957bac92d63437df10a197b8c40eeb8ce3"
+  },
+  "scope": "original new geometry using prior procedural helpers; no imported Kenney/SC mesh; source QA covers entire assembly without expensive-check skips; UV excluded for solid palette",
+  "changes": "segmented tapered pods/partial curved cowl, dark hollow intakes, deep large exhausts and six thick petals, shorter broad framed canopy, thick swept wings, large dorsal receiver/cannon; iteration2 adds broad bevels/panel fields/eight fastener heads"
+}

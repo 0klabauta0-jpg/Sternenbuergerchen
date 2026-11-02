@@ -1,0 +1,2255 @@
+{
+  "schema": "sternenbuergerchen.graphics_pass03_browser_qa.v1",
+  "html": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\docs\\reports\\STERNENBUERGERCHEN_GRAFIK_2026-11-01.html",
+  "html_sha256_start": "b2e4b6c86b08175112de59a8fd4a6d04e8429d776f70feef4b4f74785e38f9a3",
+  "script_sha256": "a817e72e2c0c1ebab2d2ee10c5b09f36151b38d944277095e7ccb80a405d5171",
+  "started_at": "2026-11-01T15:08:46.821Z",
+  "checks": [
+    {
+      "name": "pass02_archive_byte_identical",
+      "pass": true
+    },
+    {
+      "name": "desktop_initial_images_decode",
+      "pass": true
+    },
+    {
+      "name": "new_report_id",
+      "pass": true
+    },
+    {
+      "name": "old_notes_and_approval_not_inherited",
+      "pass": true
+    },
+    {
+      "name": "after_explicitly_released",
+      "pass": true
+    },
+    {
+      "name": "comparison_correct_pass_number",
+      "pass": true
+    },
+    {
+      "name": "five_actual_comparison_pairs",
+      "pass": true
+    },
+    {
+      "name": "pair_file_hash_overview",
+      "pass": true
+    },
+    {
+      "name": "pair_file_hash_workshop",
+      "pass": true
+    },
+    {
+      "name": "pair_file_hash_crew",
+      "pass": true
+    },
+    {
+      "name": "pair_file_hash_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "pair_file_hash_landscape",
+      "pass": true
+    },
+    {
+      "name": "additional_views_do_not_duplicate_pairs",
+      "pass": true
+    },
+    {
+      "name": "cutaway_is_additional_after_only",
+      "pass": true
+    },
+    {
+      "name": "landscape_is_fifth_real_pair",
+      "pass": true
+    },
+    {
+      "name": "four_equipment_candidates",
+      "pass": true
+    },
+    {
+      "name": "hero_is_after_overview",
+      "pass": true
+    },
+    {
+      "name": "three_primary_reference_cards",
+      "pass": true
+    },
+    {
+      "name": "three_distinct_provenance_categories",
+      "pass": true
+    },
+    {
+      "name": "actual_kenney_source_records_present",
+      "pass": true
+    },
+    {
+      "name": "ten_actual_kenney_glbs",
+      "pass": true
+    },
+    {
+      "name": "ten_source_rows",
+      "pass": true
+    },
+    {
+      "name": "two_atlases_are_support_only",
+      "pass": true
+    },
+    {
+      "name": "kenney_glb_and_license_hashes",
+      "pass": true
+    },
+    {
+      "name": "unused_inspected_sources_not_counted",
+      "pass": true
+    },
+    {
+      "name": "eight_historical_reference_cards",
+      "pass": true
+    },
+    {
+      "name": "visual_and_gameplay_scope_separate",
+      "pass": true
+    },
+    {
+      "name": "desktop_no_horizontal_overflow",
+      "pass": true,
+      "dimensions": {
+        "viewport": 1440,
+        "document": 1440,
+        "body": 1440
+      }
+    },
+    {
+      "name": "all_embedded_thumbnails_and_full_images_decode",
+      "pass": true,
+      "assets": 69,
+      "decodes": 138
+    },
+    {
+      "name": "all_original_image_hashes_match",
+      "pass": true
+    },
+    {
+      "name": "all_relative_document_links_exist",
+      "pass": true,
+      "missing": []
+    },
+    {
+      "name": "no_stale_verification_link",
+      "pass": true
+    },
+    {
+      "name": "before_matches_frozen_verification_manifest",
+      "pass": true
+    },
+    {
+      "name": "pair_selector_overview",
+      "pass": true
+    },
+    {
+      "name": "pair_side_mode_overview",
+      "pass": true
+    },
+    {
+      "name": "pair_wipe_mode_overview",
+      "pass": true
+    },
+    {
+      "name": "wipe_keyboard_overview",
+      "pass": true
+    },
+    {
+      "name": "pair_selector_workshop",
+      "pass": true
+    },
+    {
+      "name": "pair_side_mode_workshop",
+      "pass": true
+    },
+    {
+      "name": "pair_wipe_mode_workshop",
+      "pass": true
+    },
+    {
+      "name": "wipe_keyboard_workshop",
+      "pass": true
+    },
+    {
+      "name": "pair_selector_crew",
+      "pass": true
+    },
+    {
+      "name": "pair_side_mode_crew",
+      "pass": true
+    },
+    {
+      "name": "pair_wipe_mode_crew",
+      "pass": true
+    },
+    {
+      "name": "wipe_keyboard_crew",
+      "pass": true
+    },
+    {
+      "name": "pair_selector_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "pair_side_mode_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "pair_wipe_mode_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "wipe_keyboard_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "pair_selector_landscape",
+      "pass": true
+    },
+    {
+      "name": "pair_side_mode_landscape",
+      "pass": true
+    },
+    {
+      "name": "pair_wipe_mode_landscape",
+      "pass": true
+    },
+    {
+      "name": "wipe_keyboard_landscape",
+      "pass": true
+    },
+    {
+      "name": "cutaway_after_only_dialog_image",
+      "pass": true
+    },
+    {
+      "name": "cutaway_after_only_identity",
+      "pass": true
+    },
+    {
+      "name": "cutaway_after_only_hash",
+      "pass": true
+    },
+    {
+      "name": "landscape_dialog_image",
+      "pass": true
+    },
+    {
+      "name": "landscape_identity",
+      "pass": true
+    },
+    {
+      "name": "landscape_hash",
+      "pass": true
+    },
+    {
+      "name": "landscape_has_real_before_pair",
+      "pass": true
+    },
+    {
+      "name": "crew_after_dialog_image",
+      "pass": true
+    },
+    {
+      "name": "crew_after_identity",
+      "pass": true
+    },
+    {
+      "name": "crew_after_hash",
+      "pass": true
+    },
+    {
+      "name": "modal_zoom_on",
+      "pass": true
+    },
+    {
+      "name": "modal_keyboard_next",
+      "pass": true
+    },
+    {
+      "name": "modal_keyboard_previous",
+      "pass": true
+    },
+    {
+      "name": "modal_typing_does_not_navigate",
+      "pass": true
+    },
+    {
+      "name": "modal_escape_and_focus_return",
+      "pass": true
+    },
+    {
+      "name": "ref_rostgrenze_dialog_image",
+      "pass": true
+    },
+    {
+      "name": "ref_rostgrenze_identity",
+      "pass": true
+    },
+    {
+      "name": "ref_rostgrenze_hash",
+      "pass": true
+    },
+    {
+      "name": "ref_rostgrenze_source_provenance",
+      "pass": true
+    },
+    {
+      "name": "ref_freihafen_dialog_image",
+      "pass": true
+    },
+    {
+      "name": "ref_freihafen_identity",
+      "pass": true
+    },
+    {
+      "name": "ref_freihafen_hash",
+      "pass": true
+    },
+    {
+      "name": "ref_freihafen_source_provenance",
+      "pass": true
+    },
+    {
+      "name": "ref_tactical_dialog_image",
+      "pass": true
+    },
+    {
+      "name": "ref_tactical_identity",
+      "pass": true
+    },
+    {
+      "name": "ref_tactical_hash",
+      "pass": true
+    },
+    {
+      "name": "ref_tactical_source_provenance",
+      "pass": true
+    },
+    {
+      "name": "reference_search_current",
+      "pass": true
+    },
+    {
+      "name": "reference_search_empty",
+      "pass": true
+    },
+    {
+      "name": "historical_shadowfall_dialog_image",
+      "pass": true
+    },
+    {
+      "name": "historical_shadowfall_identity",
+      "pass": true
+    },
+    {
+      "name": "historical_shadowfall_hash",
+      "pass": true
+    },
+    {
+      "name": "history_separate_status",
+      "pass": true
+    },
+    {
+      "name": "target_filter_all",
+      "pass": true
+    },
+    {
+      "name": "target_filter_terrain",
+      "pass": true
+    },
+    {
+      "name": "target_filter_buildings",
+      "pass": true
+    },
+    {
+      "name": "target_filter_people",
+      "pass": true
+    },
+    {
+      "name": "target_filter_cutlass",
+      "pass": true
+    },
+    {
+      "name": "target_filter_buccaneer",
+      "pass": true
+    },
+    {
+      "name": "target_search_case_insensitive",
+      "pass": true
+    },
+    {
+      "name": "five_preserved_old_targets",
+      "pass": true
+    },
+    {
+      "name": "rejected_twelve_absent",
+      "pass": true
+    },
+    {
+      "name": "old_ship_rear_compare",
+      "pass": true
+    },
+    {
+      "name": "old_ship_distance_control",
+      "pass": true
+    },
+    {
+      "name": "old_engine_selector_overview",
+      "pass": true
+    },
+    {
+      "name": "old_engine_selector_hex_grid",
+      "pass": true
+    },
+    {
+      "name": "old_engine_selector_crew",
+      "pass": true
+    },
+    {
+      "name": "old_engine_selector_workshop",
+      "pass": true
+    },
+    {
+      "name": "old_engine_selector_walk_pose",
+      "pass": true
+    },
+    {
+      "name": "old_engine_selector_baseline",
+      "pass": true
+    },
+    {
+      "name": "storage_reference_note",
+      "pass": true
+    },
+    {
+      "name": "storage_reference_decision",
+      "pass": true
+    },
+    {
+      "name": "storage_comparison_note",
+      "pass": true
+    },
+    {
+      "name": "storage_wipe_and_view",
+      "pass": true
+    },
+    {
+      "name": "separate_pass03_storage_key",
+      "pass": true
+    },
+    {
+      "name": "storage_global_note",
+      "pass": true
+    },
+    {
+      "name": "unique_timestamped_json_downloads",
+      "pass": true
+    },
+    {
+      "name": "export_contract_schema",
+      "pass": true
+    },
+    {
+      "name": "export_reference_values",
+      "pass": true
+    },
+    {
+      "name": "export_comparison_values",
+      "pass": true
+    },
+    {
+      "name": "export_dialog_note",
+      "pass": true
+    },
+    {
+      "name": "export_accurate_counts",
+      "pass": true
+    },
+    {
+      "name": "export_asset_assignments",
+      "pass": true
+    },
+    {
+      "name": "export_visible_text_fallback",
+      "pass": true
+    },
+    {
+      "name": "copy_button_has_working_fallback",
+      "pass": true
+    },
+    {
+      "name": "desktop_after_controls_no_overflow",
+      "pass": true,
+      "dimensions": {
+        "viewport": 1440,
+        "document": 1440,
+        "body": 1440
+      }
+    },
+    {
+      "name": "mobile_initial_images_decode",
+      "pass": true
+    },
+    {
+      "name": "mobile_top_no_overflow",
+      "pass": true,
+      "dimensions": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      }
+    },
+    {
+      "name": "mobile_wipe_operates",
+      "pass": true
+    },
+    {
+      "name": "mobile_crew_dialog_image",
+      "pass": true
+    },
+    {
+      "name": "mobile_crew_identity",
+      "pass": true
+    },
+    {
+      "name": "mobile_crew_hash",
+      "pass": true
+    },
+    {
+      "name": "mobile_dialog_no_overflow",
+      "pass": true,
+      "dimensions": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      }
+    },
+    {
+      "name": "mobile_dialog_note_editable",
+      "pass": true
+    },
+    {
+      "name": "mobile_notes_persist",
+      "pass": true
+    },
+    {
+      "name": "mobile_historical_archive",
+      "pass": true
+    },
+    {
+      "name": "mobile_after_controls_no_overflow",
+      "pass": true,
+      "dimensions": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      }
+    },
+    {
+      "name": "mobile_dialog_note_in_export",
+      "pass": true
+    },
+    {
+      "name": "mobile_export_text_fallback",
+      "pass": true
+    },
+    {
+      "name": "html_hash_stable",
+      "pass": true
+    },
+    {
+      "name": "browser_console_errors_zero",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "name": "browser_page_errors_zero",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "name": "external_requests_zero",
+      "pass": true,
+      "requests": []
+    }
+  ],
+  "failures": [],
+  "screenshots": [
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\01_desktop_hero_after.png",
+      "sha256": "1d9447739cde254a6a6dd27a607651bfab9d336f8163d7e5c766f82d1e05e4cb"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\02_desktop_pair_overview.png",
+      "sha256": "64b719e8fb868d124f89532bdcf94c06d921546b83eb9224d4eb2cdf8a21eaaa"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\02_desktop_pair_workshop.png",
+      "sha256": "dc88b309472924fd4f63e12ce226ed0f249689ecda1328ba94b0c6420ec581c1"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\02_desktop_pair_crew.png",
+      "sha256": "a7196e12c925d166cf7a7fd10c6651d4c69af160253b81f3faca7781a78890f2"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\02_desktop_pair_hex_grid.png",
+      "sha256": "66805ff13b1fc7810b6ae624d1baf5cf757a0fee0760a553d4d34cbd85d289ae"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\02_desktop_pair_landscape.png",
+      "sha256": "bb448c1bdd0be9e4e70d99e9fdf614fa87b5febbc22e41f8d97e5064e33f7fe7"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\03_desktop_wipe_overview.png",
+      "sha256": "88ba4bc47127fa96450bed0e2cec14704f733a02753afbb4f5915828c3af0fd4"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\04_desktop_landscape_pair.png",
+      "sha256": "3c1e1699c318b11c46c5b0206ef90fb61c93dd611b3f9270f444f1b2fcdf9eb8"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\04b_desktop_provenance.png",
+      "sha256": "ebfd811df541beaa8d948ebaf7535c902de0ec6db6299cef60e4066e7ca47451"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\04c_desktop_cutaway.png",
+      "sha256": "6ed7d4cbf2bbbbdfa15ff77b6f4a1b3d99e5c291eba6e902ffa3ec8d0bd9ca7d"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\05_desktop_after_lightbox.png",
+      "sha256": "9eb389767495d861d939d8c57e86b20c962b82d5f92fa9228f25878bd3a2eb7e"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\06_desktop_primary_references.png",
+      "sha256": "61a5ced1be0cbb5590e60a0d0ec6cff34ba6c4f5476e1aa17bc37fcce599cad7"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\07_mobile_hero_after.png",
+      "sha256": "f6d9c3fe5119da9ad5c874354c536540e986fc284073ea8791482a3655045f4d"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\08_mobile_crew_pair.png",
+      "sha256": "926f521f129057c79f4e4e7c67c8f2628f8b44278ff758ec48e187dbbdba09e3"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\09_mobile_wipe.png",
+      "sha256": "6065cd146428e42a10ab956cfa37a9ccf58b6c4bda68c7482f40a26489e13822"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\10_mobile_lightbox.png",
+      "sha256": "12b5ee997fdb17f38ecac8f7d69f0ee811875dd074737692cf511fb955e587ea"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\11_mobile_reference.png",
+      "sha256": "9001aef0cad02688ffcc599422623a537d6c53f9b8b405d8aca40330013ed99a"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\12_mobile_terrain_pair.png",
+      "sha256": "3a6bac815576bb30a60753dd07cb030454d159c9141f0f8fa18b06dbac872ece"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\13_mobile_provenance.png",
+      "sha256": "3e5a1f847f1a212c40a162d3387a88ac8b4b6b187ab93e52cdb417fe07fd0477"
+    }
+  ],
+  "downloads": [
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\downloads\\grafik_20261101_pass03_2026-11-01T15-09-16-528Z_01.json",
+      "sha256": "c2ae131497c2d5a72019492d445cf8ff3a8575658921e1e558ef4d2963fa0c78"
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa_pass03\\downloads\\grafik_20261101_pass03_2026-11-01T15-09-16-738Z_02.json",
+      "sha256": "b8ee619d8871ed2ea836b54594e309f4b8fa06d664f330616b7f497fbc6d4a9a"
+    }
+  ],
+  "console_errors": [],
+  "page_errors": [],
+  "external_requests": [],
+  "visual_inspection": {
+    "pass": true,
+    "reviewed_at": "2026-11-01T15:11:05.668850+00:00",
+    "html_sha256": "b2e4b6c86b08175112de59a8fd4a6d04e8429d776f70feef4b4f74785e38f9a3",
+    "screenshot_layouts_reviewed": 19,
+    "method": "All 19 final screenshots inspected as contact sheet; final mobile landscape pair inspected in detail. New native overview/landscape/cutaway/workshop/crew and detailed desktop/mobile provenance cards were opened separately.",
+    "findings": "Corrected the genuine stale Pass02 comparison label, rebuilt, repeated the entire suite, then visually confirmed the Pass03 label. Five pairs and cutaway-only extra view clearly distinguished; genuine Kenney geometry/own assemblies/style references separate; mobile layout and cue contrast readable.",
+    "limits": "UI/offline report evidence only, no artistic user acceptance or campaign/performance acceptance. New user criticism of sterile assets, tank/cart, paths/pad and ships belongs to forthcoming Pass04; Pass03 is preserved unchanged."
+  },
+  "browser_version": "151.0.7922.34",
+  "data_summary": {
+    "assets": 69,
+    "after_ready": true,
+    "current_references": 3,
+    "historical": 8,
+    "pairs": [
+      {
+        "id": "overview",
+        "title": "Übersicht",
+        "before_id": "pass03_before_overview",
+        "before_path": "docs/reports/assets/grafik-2026-11-01/engine_pass03/before/overview.png",
+        "before_sha256": "2692c612bbd1c4e39b3d2ac73657117d2a906ce58f58311ae04d67a6ab8c25d3",
+        "before_camera": {
+          "camera_projection": 1,
+          "camera_size": 12,
+          "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+          "error": 0,
+          "id": "overview",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/overview.png",
+          "profile_enabled": true,
+          "viewport_size": "(1920.0, 1080.0)"
+        },
+        "after_id": "pass03_after_overview",
+        "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass03/after/overview.png",
+        "after_sha256": "2baa2bd5fb66cf5520cd7f27ad129e456cadbc6202d06dd9c8b44dc89bd90b59",
+        "after_camera": {
+          "camera_projection": 1,
+          "camera_size": 12,
+          "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+          "error": 0,
+          "id": "overview",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/overview.png",
+          "profile_enabled": true,
+          "viewport_size": "(1920.0, 1080.0)"
+        },
+        "camera_size_match": true,
+        "camera_transform_match": true,
+        "camera_projection_match": true
+      },
+      {
+        "id": "workshop",
+        "title": "Werkstatt",
+        "before_id": "pass03_before_workshop",
+        "before_path": "docs/reports/assets/grafik-2026-11-01/engine_pass03/before/workshop.png",
+        "before_sha256": "7045ddccf3c80a12a40593b89855a9d33208d8a76e659e08f64a6c69745d9728",
+        "before_camera": {
+          "camera_projection": 1,
+          "camera_size": 4.2,
+          "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+          "error": 0,
+          "id": "workshop",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/workshop.png",
+          "profile_enabled": true,
+          "viewport_size": "(1920.0, 1080.0)"
+        },
+        "after_id": "pass03_after_workshop",
+        "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass03/after/workshop.png",
+        "after_sha256": "c05a693c8cc958d409907ac5083f349e29d5194280c5cfbfaf9671e07f7ed6a3",
+        "after_camera": {
+          "camera_projection": 1,
+          "camera_size": 4.2,
+          "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.27216, 0.743145, -0.611281), Z: (0.302264, 0.669131, 0.678897), O: (18.64076, 12.24435, 19.02014)]",
+          "error": 0,
+          "id": "workshop",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/workshop.png",
+          "profile_enabled": true,
+          "viewport_size": "(1920.0, 1080.0)"
+        },
+        "camera_size_match": true,
+        "camera_transform_match": true,
+        "camera_projection_match": true
+      },
+      {
+        "id": "crew",
+        "title": "Crew",
+        "before_id": "pass03_before_crew",
+        "before_path": "docs/reports/assets/grafik-2026-11-01/engine_pass03/before/crew.png",
+        "before_sha256": "0df080533c336d8e659f891747e93aef2087d026fa521732f223997d0cd7123e",
+        "before_camera": {
+          "camera_projection": 1,
+          "camera_size": 2.5,
+          "camera_transform": "[X: (1.0, 0.0, 0.0), Y: (0.0, 0.978148, -0.207912), Z: (0.0, 0.207912, 0.978148), O: (12.15, 4.04241, 27.00666)]",
+          "error": 0,
+          "id": "crew",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/crew.png",
+          "profile_enabled": true,
+          "viewport_size": "(1920.0, 1080.0)"
+        },
+        "after_id": "pass03_after_crew",
+        "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass03/after/crew.png",
+        "after_sha256": "3ff57c3b554c98af32380dd2c7ddd73aa141d8c695b2cd026962eba4ff47af17",
+        "after_camera": {
+          "camera_projection": 1,
+          "camera_size": 2.5,
+          "camera_transform": "[X: (1.0, 0.0, 0.0), Y: (0.0, 0.978148, -0.207912), Z: (0.0, 0.207912, 0.978148), O: (12.15, 4.04241, 27.00666)]",
+          "error": 0,
+          "id": "crew",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/crew.png",
+          "profile_enabled": true,
+          "viewport_size": "(1920.0, 1080.0)"
+        },
+        "camera_size_match": true,
+        "camera_transform_match": true,
+        "camera_projection_match": true
+      },
+      {
+        "id": "hex_grid",
+        "title": "Hexraster",
+        "before_id": "pass03_before_hex_grid",
+        "before_path": "docs/reports/assets/grafik-2026-11-01/engine_pass03/before/hex_grid.png",
+        "before_sha256": "e0944980fdded24a391cacd86c46f8544409ac8875de98eae8ff2de25c3df9e7",
+        "before_camera": {
+          "camera_projection": 1,
+          "camera_size": 12,
+          "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+          "error": 0,
+          "id": "hex_grid",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/hex_grid.png",
+          "profile_enabled": true,
+          "viewport_size": "(1920.0, 1080.0)"
+        },
+        "after_id": "pass03_after_hex_grid",
+        "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass03/after/hex_grid.png",
+        "after_sha256": "ec546afd10a3ee100bbdf68aaf1d1c2625defafa7223bf2350f25d07b877ed02",
+        "after_camera": {
+          "camera_projection": 1,
+          "camera_size": 12,
+          "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (16.50602, 13.9888, 17.76988)]",
+          "error": 0,
+          "id": "hex_grid",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/hex_grid.png",
+          "profile_enabled": true,
+          "viewport_size": "(1920.0, 1080.0)"
+        },
+        "camera_size_match": true,
+        "camera_transform_match": true,
+        "camera_projection_match": true
+      },
+      {
+        "id": "landscape",
+        "title": "Gelände",
+        "before_id": "pass03_before_landscape",
+        "before_path": "docs/reports/assets/grafik-2026-11-01/engine_pass03/before/landscape.png",
+        "before_sha256": "d3ef19634ba45ff8c82f83e484842f05a9ec4db7a761b130b1f28e53cf2442a9",
+        "before_camera": {
+          "camera_projection": 1,
+          "camera_size": 23,
+          "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+          "error": 0,
+          "id": "landscape",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass02/after/landscape.png",
+          "profile_enabled": true,
+          "viewport_size": "(1920.0, 1080.0)"
+        },
+        "after_id": "pass03_after_landscape",
+        "after_path": "docs/reports/assets/grafik-2026-11-01/engine_pass03/after/landscape.png",
+        "after_sha256": "00194743feeddb37cda25f136845df767d58dedd3edeaa509d122ee05f470d7b",
+        "after_camera": {
+          "camera_projection": 1,
+          "camera_size": 23,
+          "camera_transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.292582, 0.694658, -0.65715), Z: (0.282543, 0.71934, 0.634602), O: (17.08577, 13.14812, 17.02284)]",
+          "error": 0,
+          "id": "landscape",
+          "path": "res://docs/reports/assets/grafik-2026-11-01/engine_pass03/after/landscape.png",
+          "profile_enabled": true,
+          "viewport_size": "(1920.0, 1080.0)"
+        },
+        "camera_size_match": true,
+        "camera_transform_match": true,
+        "camera_projection_match": true
+      }
+    ],
+    "extras": [
+      {
+        "id": "pass03_after_cutaway",
+        "view": "cutaway",
+        "title": "Rostgrenze · Cutaway-Nahansicht",
+        "description": "Zusätzliche native Nahansicht der grafischen Raumgruppen. Kein identisches Vorherbild; kein begehbarer oder simulierter Innenraum."
+      },
+      {
+        "id": "pass03_after_baseline",
+        "view": "baseline",
+        "title": "Pass 03 · Farbprofil aus",
+        "description": "Derselbe Pass-03-Ausschnitt mit ausgeschaltetem Frontier-Farbprofil. Das ist ein Profilvergleich, kein zusätzlicher Vorherstand."
+      },
+      {
+        "id": "pass03_after_walk_pose",
+        "view": "walk_pose",
+        "title": "Crew · Gehpose",
+        "description": "Native Walk-Momentaufnahme. Die Ausrüstungskandidaten aus Pass 02 bleiben erhalten; eine Pose ersetzt keinen vollständigen Bewegungstest."
+      }
+    ],
+    "citizens": [
+      {
+        "role": "operator",
+        "triangles": 2804,
+        "meshes": 2,
+        "materials": 4,
+        "skins": 1,
+        "stock_body_triangles": 1604,
+        "stock_files_unchanged": true,
+        "path": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\operator.glb",
+        "sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c"
+      },
+      {
+        "role": "pilot",
+        "triangles": 3344,
+        "meshes": 2,
+        "materials": 4,
+        "skins": 1,
+        "stock_body_triangles": 1604,
+        "stock_files_unchanged": true,
+        "path": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\pilot.glb",
+        "sha256": "4548eb634e41a4a94965d616b45a51339e3da150bd0d1d708016e1f625c4ac00"
+      },
+      {
+        "role": "mechanic",
+        "triangles": 2912,
+        "meshes": 2,
+        "materials": 4,
+        "skins": 1,
+        "stock_body_triangles": 1604,
+        "stock_files_unchanged": true,
+        "path": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\mechanic.glb",
+        "sha256": "03ec6f35421d2cebfaa03f7fa911db71f4c6120ac8858dd369f7bbcd9b878496"
+      },
+      {
+        "role": "medic",
+        "triangles": 3020,
+        "meshes": 2,
+        "materials": 4,
+        "skins": 1,
+        "stock_body_triangles": 1604,
+        "stock_files_unchanged": true,
+        "path": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\medic.glb",
+        "sha256": "e7c0c690f0ae9a85a93d18ecf7d765c9c16756f74e847bd926379f3cfd1e4f79"
+      }
+    ],
+    "kenney_sources": [
+      {
+        "path": "Assets/curated/kenney/space_station/models/wall.glb",
+        "sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+        "pack": "Kenney Space Station Kit 1.0",
+        "license": "Creative Commons Zero (CC0)",
+        "license_path": "Assets/curated/kenney/space_station/License.txt",
+        "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+        "usages": [
+          {
+            "asset": "habitat_cutaway_01",
+            "instances": [
+              "Kenney_Habitat_BackWall_00",
+              "Kenney_Habitat_BackWall_01",
+              "Kenney_Habitat_BackWall_02",
+              "Kenney_Habitat_LeftWall_00",
+              "Kenney_Habitat_LeftWall_01",
+              "Kenney_Habitat_LeftWall_02",
+              "Kenney_Habitat_RightCut_00",
+              "Kenney_Habitat_RightCut_01",
+              "Kenney_Habitat_RightCut_02",
+              "Kenney_Habitat_FrontCut_Left",
+              "Kenney_Habitat_FrontCut_Right"
+            ],
+            "retained_objects": [
+              "wall"
+            ]
+          },
+          {
+            "asset": "freihafen_hall_01",
+            "instances": [
+              "Kenney_Hall_BackWall_00",
+              "Kenney_Hall_BackWall_01",
+              "Kenney_Hall_BackWall_02",
+              "Kenney_Hall_BackWall_03",
+              "Kenney_Hall_LeftWall_00",
+              "Kenney_Hall_LeftWall_01",
+              "Kenney_Hall_LeftWall_02",
+              "Kenney_Office_BackWall_00",
+              "Kenney_Office_BackWall_01",
+              "Kenney_Office_SharedWall_00",
+              "Kenney_Office_RightCut_00",
+              "Kenney_Office_RightCut_01",
+              "Kenney_Office_FrontCut_00"
+            ],
+            "retained_objects": [
+              "wall"
+            ]
+          }
+        ],
+        "modifications": [
+          "attribute seam weld1micrometre",
+          "remove zero-area faces / dissolve short edges in derivative",
+          "split nonmanifold source mounting contacts if needed",
+          "recalculate outward winding",
+          "constant palette replacing original texture atlas",
+          "freeze sampled movable modules; remove imported object animation on static derivative",
+          "nonuniform fit to source-metre dimensions; apply rotation/scale"
+        ],
+        "original_file_unchanged": true
+      },
+      {
+        "path": "Assets/curated/kenney/space_station/models/bed-single.glb",
+        "sha256": "5eca54cb1f72da773380ded3a326e1c116e9353aebdf202b9353ed7ddc1cc6db",
+        "pack": "Kenney Space Station Kit 1.0",
+        "license": "Creative Commons Zero (CC0)",
+        "license_path": "Assets/curated/kenney/space_station/License.txt",
+        "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+        "usages": [
+          {
+            "asset": "habitat_cutaway_01",
+            "instances": [
+              "Kenney_Bed_0",
+              "Kenney_Bed_1"
+            ],
+            "retained_objects": [
+              "bed-single"
+            ]
+          }
+        ],
+        "modifications": [
+          "attribute seam weld1micrometre",
+          "remove zero-area faces / dissolve short edges in derivative",
+          "split nonmanifold source mounting contacts if needed",
+          "recalculate outward winding",
+          "constant palette replacing original texture atlas",
+          "freeze sampled movable modules; remove imported object animation on static derivative",
+          "nonuniform fit to source-metre dimensions; apply rotation/scale"
+        ],
+        "original_file_unchanged": true
+      },
+      {
+        "path": "Assets/curated/kenney/space_station/models/table-display.glb",
+        "sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3",
+        "pack": "Kenney Space Station Kit 1.0",
+        "license": "Creative Commons Zero (CC0)",
+        "license_path": "Assets/curated/kenney/space_station/License.txt",
+        "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+        "usages": [
+          {
+            "asset": "habitat_cutaway_01",
+            "instances": [
+              "Kenney_Stay_DisplayTable"
+            ],
+            "retained_objects": [
+              "table-display"
+            ]
+          }
+        ],
+        "modifications": [
+          "attribute seam weld1micrometre",
+          "remove zero-area faces / dissolve short edges in derivative",
+          "split nonmanifold source mounting contacts if needed",
+          "recalculate outward winding",
+          "constant palette replacing original texture atlas",
+          "freeze sampled movable modules; remove imported object animation on static derivative",
+          "nonuniform fit to source-metre dimensions; apply rotation/scale",
+          "Any source objects outside ['table-display']"
+        ],
+        "original_file_unchanged": true
+      },
+      {
+        "path": "Assets/curated/kenney/space_station/models/computer.glb",
+        "sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7",
+        "pack": "Kenney Space Station Kit 1.0",
+        "license": "Creative Commons Zero (CC0)",
+        "license_path": "Assets/curated/kenney/space_station/License.txt",
+        "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+        "usages": [
+          {
+            "asset": "habitat_cutaway_01",
+            "instances": [
+              "Kenney_Stay_Terminal"
+            ],
+            "retained_objects": [
+              "computer"
+            ]
+          }
+        ],
+        "modifications": [
+          "attribute seam weld1micrometre",
+          "remove zero-area faces / dissolve short edges in derivative",
+          "split nonmanifold source mounting contacts if needed",
+          "recalculate outward winding",
+          "constant palette replacing original texture atlas",
+          "freeze sampled movable modules; remove imported object animation on static derivative",
+          "nonuniform fit to source-metre dimensions; apply rotation/scale"
+        ],
+        "original_file_unchanged": true
+      },
+      {
+        "path": "Assets/curated/kenney/space_station/models/container-wide.glb",
+        "sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0",
+        "pack": "Kenney Space Station Kit 1.0",
+        "license": "Creative Commons Zero (CC0)",
+        "license_path": "Assets/curated/kenney/space_station/License.txt",
+        "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+        "usages": [
+          {
+            "asset": "habitat_cutaway_01",
+            "instances": [
+              "Kenney_Storage_CanisterA",
+              "Kenney_Storage_CanisterB"
+            ],
+            "retained_objects": [
+              "container-wide"
+            ]
+          },
+          {
+            "asset": "freihafen_hall_01",
+            "instances": [
+              "Kenney_Hall_CargoCanister"
+            ],
+            "retained_objects": [
+              "container-wide"
+            ]
+          }
+        ],
+        "modifications": [
+          "attribute seam weld1micrometre",
+          "remove zero-area faces / dissolve short edges in derivative",
+          "split nonmanifold source mounting contacts if needed",
+          "recalculate outward winding",
+          "constant palette replacing original texture atlas",
+          "freeze sampled movable modules; remove imported object animation on static derivative",
+          "nonuniform fit to source-metre dimensions; apply rotation/scale"
+        ],
+        "original_file_unchanged": true
+      },
+      {
+        "path": "Assets/curated/kenney/factory/models/door.glb",
+        "sha256": "1995868d11013b5f00598cf2280ece883581162aabe2921f3fde0341d0628ddd",
+        "pack": "Kenney Factory Kit 3.0",
+        "license": "Creative Commons Zero (CC0)",
+        "license_path": "Assets/curated/kenney/factory/License.txt",
+        "license_sha256": "341034a1b5417251a98b3bb9901bbf45ecb5cfc42331a9d9a6a35c2c22c8ff28",
+        "usages": [
+          {
+            "asset": "freihafen_hall_01",
+            "instances": [
+              "Kenney_Factory_OpenPortal"
+            ],
+            "retained_objects": [
+              "door.001"
+            ]
+          }
+        ],
+        "modifications": [
+          "attribute seam weld1micrometre",
+          "remove zero-area faces / dissolve short edges in derivative",
+          "split nonmanifold source mounting contacts if needed",
+          "recalculate outward winding",
+          "constant palette replacing original texture atlas",
+          "freeze sampled movable modules; remove imported object animation on static derivative",
+          "nonuniform fit to source-metre dimensions; apply rotation/scale",
+          "retain actual jamb/header regions; omit closed leaf and lower sill; cap derivative cuts"
+        ],
+        "original_file_unchanged": true
+      },
+      {
+        "path": "Assets/curated/kenney/factory/models/crane-lift.glb",
+        "sha256": "060197cd67598ed4359ecbcb0af980d4505992213c1ab6cc9f56812dff7bbf07",
+        "pack": "Kenney Factory Kit 3.0",
+        "license": "Creative Commons Zero (CC0)",
+        "license_path": "Assets/curated/kenney/factory/License.txt",
+        "license_sha256": "341034a1b5417251a98b3bb9901bbf45ecb5cfc42331a9d9a6a35c2c22c8ff28",
+        "usages": [
+          {
+            "asset": "freihafen_hall_01",
+            "instances": [
+              "Kenney_Factory_Lift"
+            ],
+            "retained_objects": [
+              "chain",
+              "crane-lift",
+              "magnet"
+            ]
+          }
+        ],
+        "modifications": [
+          "attribute seam weld1micrometre",
+          "remove zero-area faces / dissolve short edges in derivative",
+          "split nonmanifold source mounting contacts if needed",
+          "recalculate outward winding",
+          "constant palette replacing original texture atlas",
+          "freeze sampled movable modules; remove imported object animation on static derivative",
+          "nonuniform fit to source-metre dimensions; apply rotation/scale"
+        ],
+        "original_file_unchanged": true
+      },
+      {
+        "path": "Assets/curated/kenney/space_station/models/wall-window.glb",
+        "sha256": "55053731040bad9e0a02cd5cbef4d6ce4516f40019d41488eb36a5bdebcda6f3",
+        "pack": "Kenney Space Station Kit 1.0",
+        "license": "Creative Commons Zero (CC0)",
+        "license_path": "Assets/curated/kenney/space_station/License.txt",
+        "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+        "usages": [
+          {
+            "asset": "freihafen_hall_01",
+            "instances": [
+              "Kenney_Office_WindowWall"
+            ],
+            "retained_objects": [
+              "wall-window"
+            ]
+          }
+        ],
+        "modifications": [
+          "attribute seam weld1micrometre",
+          "remove zero-area faces / dissolve short edges in derivative",
+          "split nonmanifold source mounting contacts if needed",
+          "recalculate outward winding",
+          "constant palette replacing original texture atlas",
+          "freeze sampled movable modules; remove imported object animation on static derivative",
+          "nonuniform fit to source-metre dimensions; apply rotation/scale"
+        ],
+        "original_file_unchanged": true
+      },
+      {
+        "path": "Assets/curated/kenney/factory/models/detail-tank.glb",
+        "sha256": "b1edc2953c590c16f1d8280dfeb9073af6c710ac3d587f3dba144f69363d799b",
+        "pack": "Kenney Factory Kit 3.0",
+        "license": "Creative Commons Zero (CC0)",
+        "license_path": "Assets/curated/kenney/factory/License.txt",
+        "license_sha256": "341034a1b5417251a98b3bb9901bbf45ecb5cfc42331a9d9a6a35c2c22c8ff28",
+        "usages": [
+          {
+            "asset": "freihafen_hall_01",
+            "instances": [
+              "Kenney_Office_RoofTank"
+            ],
+            "retained_objects": [
+              "detail-tank"
+            ]
+          }
+        ],
+        "modifications": [
+          "attribute seam weld1micrometre",
+          "remove zero-area faces / dissolve short edges in derivative",
+          "split nonmanifold source mounting contacts if needed",
+          "recalculate outward winding",
+          "constant palette replacing original texture atlas",
+          "freeze sampled movable modules; remove imported object animation on static derivative",
+          "nonuniform fit to source-metre dimensions; apply rotation/scale"
+        ],
+        "original_file_unchanged": true
+      },
+      {
+        "path": "Assets/curated/kenney/space_station/models/computer-wide.glb",
+        "sha256": "62420ce928f288f91ce85e2245e80e6c9efbee9b6e91b7ea9b83d0289fa647c4",
+        "pack": "Kenney Space Station Kit 1.0",
+        "license": "Creative Commons Zero (CC0)",
+        "license_path": "Assets/curated/kenney/space_station/License.txt",
+        "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+        "usages": [
+          {
+            "asset": "freihafen_hall_01",
+            "instances": [
+              "Kenney_Office_Console"
+            ],
+            "retained_objects": [
+              "computer-wide"
+            ]
+          }
+        ],
+        "modifications": [
+          "attribute seam weld1micrometre",
+          "remove zero-area faces / dissolve short edges in derivative",
+          "split nonmanifold source mounting contacts if needed",
+          "recalculate outward winding",
+          "constant palette replacing original texture atlas",
+          "freeze sampled movable modules; remove imported object animation on static derivative",
+          "nonuniform fit to source-metre dimensions; apply rotation/scale"
+        ],
+        "original_file_unchanged": true
+      }
+    ],
+    "kenney_supporting": [
+      {
+        "path": "Assets/curated/kenney/space_station/models/Textures/colormap.png",
+        "sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1",
+        "license": "Kenney CC0",
+        "role": "original atlas sampled to identify source color fields; replaced by constant target palette, not embedded in derivative GLBs"
+      },
+      {
+        "path": "Assets/curated/kenney/factory/models/Textures/colormap.png",
+        "sha256": "4a912ef8e95fbec4ac0cacc295b9221a4b66c482d4f90bec4e2277689c21a623",
+        "license": "Kenney CC0",
+        "role": "original atlas sampled to identify source color fields; replaced by constant target palette, not embedded in derivative GLBs"
+      }
+    ]
+  },
+  "embedded_image_decode": [
+    {
+      "id": "terrain",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "terrain",
+      "mode": "full",
+      "pass": true,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "id": "people",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "people",
+      "mode": "full",
+      "pass": true,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "id": "outpost",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "outpost",
+      "mode": "full",
+      "pass": true,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "id": "cutlass_front_v1",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 520
+    },
+    {
+      "id": "cutlass_front_v1",
+      "mode": "full",
+      "pass": true,
+      "width": 1476,
+      "height": 1065
+    },
+    {
+      "id": "cutlass_rear_v1",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 520
+    },
+    {
+      "id": "cutlass_rear_v1",
+      "mode": "full",
+      "pass": true,
+      "width": 1476,
+      "height": 1065
+    },
+    {
+      "id": "buccaneer_front_v1",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 520
+    },
+    {
+      "id": "buccaneer_front_v1",
+      "mode": "full",
+      "pass": true,
+      "width": 1476,
+      "height": 1065
+    },
+    {
+      "id": "buccaneer_rear_v1",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 520
+    },
+    {
+      "id": "buccaneer_rear_v1",
+      "mode": "full",
+      "pass": true,
+      "width": 1476,
+      "height": 1065
+    },
+    {
+      "id": "cutlass_front",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 520
+    },
+    {
+      "id": "cutlass_front",
+      "mode": "full",
+      "pass": true,
+      "width": 1476,
+      "height": 1065
+    },
+    {
+      "id": "cutlass_rear",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 520
+    },
+    {
+      "id": "cutlass_rear",
+      "mode": "full",
+      "pass": true,
+      "width": 1476,
+      "height": 1065
+    },
+    {
+      "id": "buccaneer_front_v2_previous",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 520
+    },
+    {
+      "id": "buccaneer_front_v2_previous",
+      "mode": "full",
+      "pass": true,
+      "width": 1476,
+      "height": 1065
+    },
+    {
+      "id": "buccaneer_rear",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 520
+    },
+    {
+      "id": "buccaneer_rear",
+      "mode": "full",
+      "pass": true,
+      "width": 1476,
+      "height": 1065
+    },
+    {
+      "id": "buccaneer_front",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 520
+    },
+    {
+      "id": "buccaneer_front",
+      "mode": "full",
+      "pass": true,
+      "width": 1476,
+      "height": 1065
+    },
+    {
+      "id": "engine_overview",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "engine_overview",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "engine_hex_grid",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "engine_hex_grid",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "engine_crew",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "engine_crew",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "engine_workshop",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "engine_workshop",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "engine_walk_pose",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "engine_walk_pose",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "engine_baseline",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "engine_baseline",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "cutlass_source_front",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "cutlass_source_front",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "cutlass_source_rear",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "cutlass_source_rear",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "cutlass_source_distance",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "cutlass_source_distance",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "cutlass_candidate_front",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "cutlass_candidate_front",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "cutlass_candidate_rear",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "cutlass_candidate_rear",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "cutlass_candidate_distance",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "cutlass_candidate_distance",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "cutlass_godot_front",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "cutlass_godot_front",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "cutlass_godot_rear",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "cutlass_godot_rear",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "cutlass_qa_solid",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "cutlass_qa_solid",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "cutlass_qa_wire",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "cutlass_qa_wire",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "buccaneer_source_front",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "buccaneer_source_front",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "buccaneer_source_rear",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "buccaneer_source_rear",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "buccaneer_source_distance",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "buccaneer_source_distance",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "buccaneer_candidate_front",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "buccaneer_candidate_front",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "buccaneer_candidate_rear",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "buccaneer_candidate_rear",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "buccaneer_candidate_distance",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "buccaneer_candidate_distance",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "buccaneer_godot_front",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "buccaneer_godot_front",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "buccaneer_godot_rear",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "buccaneer_godot_rear",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "buccaneer_qa_solid",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "buccaneer_qa_solid",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "buccaneer_qa_wire",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 506
+    },
+    {
+      "id": "buccaneer_qa_wire",
+      "mode": "full",
+      "pass": true,
+      "width": 1280,
+      "height": 900
+    },
+    {
+      "id": "ref_terrain",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 301
+    },
+    {
+      "id": "ref_terrain",
+      "mode": "full",
+      "pass": true,
+      "width": 1800,
+      "height": 753
+    },
+    {
+      "id": "ref_arches",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 301
+    },
+    {
+      "id": "ref_arches",
+      "mode": "full",
+      "pass": true,
+      "width": 1800,
+      "height": 753
+    },
+    {
+      "id": "ref_industry",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 301
+    },
+    {
+      "id": "ref_industry",
+      "mode": "full",
+      "pass": true,
+      "width": 1800,
+      "height": 753
+    },
+    {
+      "id": "ref_crew",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 301
+    },
+    {
+      "id": "ref_crew",
+      "mode": "full",
+      "pass": true,
+      "width": 1800,
+      "height": 753
+    },
+    {
+      "id": "ref_armor",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "ref_armor",
+      "mode": "full",
+      "pass": true,
+      "width": 1800,
+      "height": 1013
+    },
+    {
+      "id": "ref_sky",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 301
+    },
+    {
+      "id": "ref_sky",
+      "mode": "full",
+      "pass": true,
+      "width": 1800,
+      "height": 753
+    },
+    {
+      "id": "ref_insel",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "ref_insel",
+      "mode": "full",
+      "pass": true,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "id": "ref_rostgrenze",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "ref_rostgrenze",
+      "mode": "full",
+      "pass": true,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "id": "ref_freihafen",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "ref_freihafen",
+      "mode": "full",
+      "pass": true,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "id": "ref_tactical",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "ref_tactical",
+      "mode": "full",
+      "pass": true,
+      "width": 1672,
+      "height": 941
+    },
+    {
+      "id": "history_menu",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 402
+    },
+    {
+      "id": "history_menu",
+      "mode": "full",
+      "pass": true,
+      "width": 1376,
+      "height": 768
+    },
+    {
+      "id": "history_explosion",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 402
+    },
+    {
+      "id": "history_explosion",
+      "mode": "full",
+      "pass": true,
+      "width": 1376,
+      "height": 768
+    },
+    {
+      "id": "history_hangar",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 411
+    },
+    {
+      "id": "history_hangar",
+      "mode": "full",
+      "pass": true,
+      "width": 1344,
+      "height": 768
+    },
+    {
+      "id": "history_night",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 402
+    },
+    {
+      "id": "history_night",
+      "mode": "full",
+      "pass": true,
+      "width": 1376,
+      "height": 768
+    },
+    {
+      "id": "history_space_simple",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 402
+    },
+    {
+      "id": "history_space_simple",
+      "mode": "full",
+      "pass": true,
+      "width": 1376,
+      "height": 768
+    },
+    {
+      "id": "history_space",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 402
+    },
+    {
+      "id": "history_space",
+      "mode": "full",
+      "pass": true,
+      "width": 1376,
+      "height": 768
+    },
+    {
+      "id": "history_desert",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 402
+    },
+    {
+      "id": "history_desert",
+      "mode": "full",
+      "pass": true,
+      "width": 1376,
+      "height": 768
+    },
+    {
+      "id": "history_shadowfall",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 480
+    },
+    {
+      "id": "history_shadowfall",
+      "mode": "full",
+      "pass": true,
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "id": "pass03_before_overview",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_before_overview",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_after_overview",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_after_overview",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_before_workshop",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_before_workshop",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_after_workshop",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_after_workshop",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_before_crew",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_before_crew",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_after_crew",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_after_crew",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_before_hex_grid",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_before_hex_grid",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_after_hex_grid",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_after_hex_grid",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_before_landscape",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_before_landscape",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_after_landscape",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_after_landscape",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_after_cutaway",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_after_cutaway",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_after_baseline",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_after_baseline",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    },
+    {
+      "id": "pass03_after_walk_pose",
+      "mode": "thumb",
+      "pass": true,
+      "width": 720,
+      "height": 405
+    },
+    {
+      "id": "pass03_after_walk_pose",
+      "mode": "full",
+      "pass": true,
+      "width": 1600,
+      "height": 900
+    }
+  ],
+  "html_sha256_end": "b2e4b6c86b08175112de59a8fd4a6d04e8429d776f70feef4b4f74785e38f9a3",
+  "completed_at": "2026-11-01T15:09:19.866Z",
+  "pass": true,
+  "status": "pass",
+  "fresh_html_hash_verified_after_visual_review": true,
+  "preserved_archive": {
+    "path": "docs/reports/STERNENBUERGERCHEN_GRAFIK_PASS03_2026-11-01.html",
+    "sha256": "b2e4b6c86b08175112de59a8fd4a6d04e8429d776f70feef4b4f74785e38f9a3",
+    "byte_identical": true
+  }
+}

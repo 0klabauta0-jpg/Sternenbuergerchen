@@ -1,0 +1,1144 @@
+{
+  "asset": "freihafen_hall_01",
+  "status": "Pass04 Kenney-based visual candidate; user approval pending",
+  "geometry": {
+    "vertices": 3576,
+    "triangles": 6393,
+    "editable_parts": 126,
+    "materials": 12
+  },
+  "dimensions_blender_m": [
+    10.5,
+    6.949999809265137,
+    4.199999809265137
+  ],
+  "bounds_blender_m": {
+    "min": [
+      -5.25,
+      -3.4749999046325684,
+      0.0
+    ],
+    "max": [
+      5.25,
+      3.4749999046325684,
+      4.199999809265137
+    ]
+  },
+  "pivot": "full BBox XY-centered, groundZ0",
+  "front_blender": "-Y",
+  "front_godot": "+Z",
+  "units": "metres",
+  "runtime_scale": 0.35,
+  "source": "art\\frontier_illustrated_20261101\\structures\\pass04\\source\\freihafen_hall_01.blend",
+  "source_sha256": "f68134c56b40d7678dde2fb200922afc38888b15797d0eb50cbefa5aa46b6d0a",
+  "export": {
+    "path": "Assets\\curated\\frontier_illustrated_20261101\\structures_pass04\\freihafen_hall_01.glb",
+    "sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508",
+    "bytes": 362600,
+    "meshes": 1,
+    "materials": 12,
+    "triangles": 6393,
+    "animations": 0,
+    "skins": 0,
+    "nodes": 1
+  },
+  "qa_pass": true,
+  "qa_errors": [],
+  "qa_warnings": [
+    "Kenney_Factory_OpenPortal: duplicate verts=48 loose verts=0",
+    "hidden back-to-back faces: Kenney_Factory_Lift_2 (23 pairs) - delete to save tris",
+    "hidden back-to-back faces: Kenney_Office_RightCut_00<->Kenney_Office_RightCut_01 (21 pairs) - delete to save tris",
+    "hidden back-to-back faces: Kenney_Hall_BackWall_00<->Kenney_Hall_BackWall_01 (21 pairs) - delete to save tris",
+    "hidden back-to-back faces: Kenney_Hall_BackWall_02<->Kenney_Hall_BackWall_03 (21 pairs) - delete to save tris",
+    "hidden back-to-back faces: Kenney_Hall_BackWall_01<->Kenney_Hall_BackWall_02 (21 pairs) - delete to save tris",
+    "hidden back-to-back faces: Kenney_Hall_LeftWall_01<->Kenney_Hall_LeftWall_02 (21 pairs) - delete to save tris",
+    "hidden back-to-back faces: Kenney_Office_BackWall_00<->Kenney_Office_BackWall_01 (21 pairs) - delete to save tris",
+    "hidden back-to-back faces: Kenney_Hall_LeftWall_00<->Kenney_Hall_LeftWall_01 (21 pairs) - delete to save tris",
+    "hidden back-to-back faces: Kenney_Office_WindowWall (6 pairs) - delete to save tris",
+    "hidden back-to-back faces: Kenney_Factory_Lift_0<->Kenney_Factory_Lift_2 (4 pairs) - delete to save tris"
+  ],
+  "kenney_geometry_reuse": [
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Hall_BackWall_00",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Hall_BackWall_00"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.7625,
+        0.22,
+        3.79
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -4.21875,
+        2.97
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Hall_BackWall_01",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Hall_BackWall_01"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.7625,
+        0.22,
+        3.79
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -2.45625,
+        2.97
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Hall_BackWall_02",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Hall_BackWall_02"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.7625,
+        0.22,
+        3.79
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -0.6937499999999996,
+        2.97
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Hall_BackWall_03",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Hall_BackWall_03"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.7625,
+        0.22,
+        3.79
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        1.0687500000000005,
+        2.97
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Hall_LeftWall_00",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Hall_LeftWall_00"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.92,
+        0.22,
+        3.775
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -4.99,
+        -1.9500000000000002
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 1.5707963267948966,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Hall_LeftWall_01",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Hall_LeftWall_01"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.92,
+        0.22,
+        3.775
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -4.99,
+        -0.03000000000000025
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 1.5707963267948966,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Hall_LeftWall_02",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Hall_LeftWall_02"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.92,
+        0.22,
+        3.775
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -4.99,
+        1.8899999999999997
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 1.5707963267948966,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/factory/models/door.glb",
+      "source_sha256": "1995868d11013b5f00598cf2280ece883581162aabe2921f3fde0341d0628ddd",
+      "pack": "Kenney Factory Kit 3.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/factory/License.txt",
+      "license_sha256": "341034a1b5417251a98b3bb9901bbf45ecb5cfc42331a9d9a6a35c2c22c8ff28",
+      "instance": "Kenney_Factory_OpenPortal",
+      "retained_objects": [
+        "door.001"
+      ],
+      "new_objects": [
+        "Kenney_Factory_OpenPortal"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "door.001",
+          "original_vertices": 184,
+          "original_faces": 156,
+          "derivative_vertices": 174,
+          "derivative_triangles": 221,
+          "closed_leaf_and_sill_omitted": true,
+          "closed_leaf_faces_omitted": null,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 31
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        7.07,
+        0.37,
+        3.91
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -1.595,
+        -2.945
+      ],
+      "bottom_before_pivot_normalization_m": 0.24,
+      "rotation_z_radians": 0,
+      "frame_cut": true,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/factory/models/crane-lift.glb",
+      "source_sha256": "060197cd67598ed4359ecbcb0af980d4505992213c1ab6cc9f56812dff7bbf07",
+      "pack": "Kenney Factory Kit 3.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/factory/License.txt",
+      "license_sha256": "341034a1b5417251a98b3bb9901bbf45ecb5cfc42331a9d9a6a35c2c22c8ff28",
+      "instance": "Kenney_Factory_Lift",
+      "retained_objects": [
+        "chain",
+        "crane-lift",
+        "magnet"
+      ],
+      "new_objects": [
+        "Kenney_Factory_Lift_0",
+        "Kenney_Factory_Lift_1",
+        "Kenney_Factory_Lift_2"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "chain",
+          "original_vertices": 24,
+          "original_faces": 12,
+          "derivative_vertices": 8,
+          "derivative_triangles": 12,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        },
+        {
+          "source_object": "crane-lift",
+          "original_vertices": 64,
+          "original_faces": 120,
+          "derivative_vertices": 32,
+          "derivative_triangles": 60,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        },
+        {
+          "source_object": "magnet",
+          "original_vertices": 196,
+          "original_faces": 172,
+          "derivative_vertices": 98,
+          "derivative_triangles": 172,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        0.43,
+        0.43,
+        1.5
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -1.6,
+        -2.945
+      ],
+      "bottom_before_pivot_normalization_m": 2.54,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Office_BackWall_00",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Office_BackWall_00"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.6300000000000001,
+        0.22,
+        2.64
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        2.665,
+        2.96
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Office_BackWall_01",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Office_BackWall_01"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.6300000000000001,
+        0.22,
+        2.64
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        4.295,
+        2.96
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Office_SharedWall_00",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Office_SharedWall_00"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        2.06,
+        0.22,
+        2.625
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        1.99,
+        1.9100000000000001
+      ],
+      "bottom_before_pivot_normalization_m": 0.238,
+      "rotation_z_radians": 1.5707963267948966,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall-window.glb",
+      "source_sha256": "55053731040bad9e0a02cd5cbef4d6ce4516f40019d41488eb36a5bdebcda6f3",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Office_WindowWall",
+      "retained_objects": [
+        "wall-window"
+      ],
+      "new_objects": [
+        "Kenney_Office_WindowWall"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall-window",
+          "original_vertices": 140,
+          "original_faces": 104,
+          "derivative_vertices": 56,
+          "derivative_triangles": 104,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        2.08,
+        0.23,
+        2.64
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        5.0,
+        1.9
+      ],
+      "bottom_before_pivot_normalization_m": 0.235,
+      "rotation_z_radians": 1.5707963267948966,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Office_RightCut_00",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Office_RightCut_00"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.8350000000000002,
+        0.22,
+        1.04
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        5.0,
+        -1.9475000000000002
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 1.5707963267948966,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Office_RightCut_01",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Office_RightCut_01"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.8350000000000002,
+        0.22,
+        1.04
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        5.0,
+        -0.11249999999999982
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 1.5707963267948966,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/wall.glb",
+      "source_sha256": "561253375e765f825899d13031e52c07b84304d394e1d69579e0749e23fba42f",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Office_FrontCut_00",
+      "retained_objects": [
+        "wall"
+      ],
+      "new_objects": [
+        "Kenney_Office_FrontCut_00"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "wall",
+          "original_vertices": 68,
+          "original_faces": 44,
+          "derivative_vertices": 24,
+          "derivative_triangles": 44,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.96,
+        0.22,
+        1.04
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        4.140000000000001,
+        -2.97
+      ],
+      "bottom_before_pivot_normalization_m": 0.25,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/factory/models/detail-tank.glb",
+      "source_sha256": "b1edc2953c590c16f1d8280dfeb9073af6c710ac3d587f3dba144f69363d799b",
+      "pack": "Kenney Factory Kit 3.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/factory/License.txt",
+      "license_sha256": "341034a1b5417251a98b3bb9901bbf45ecb5cfc42331a9d9a6a35c2c22c8ff28",
+      "instance": "Kenney_Office_RoofTank",
+      "retained_objects": [
+        "detail-tank"
+      ],
+      "new_objects": [
+        "Kenney_Office_RoofTank"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "detail-tank",
+          "original_vertices": 286,
+          "original_faces": 236,
+          "derivative_vertices": 144,
+          "derivative_triangles": 236,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.45,
+        0.82,
+        0.58
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        3.5,
+        2.21
+      ],
+      "bottom_before_pivot_normalization_m": 3.065,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/computer-wide.glb",
+      "source_sha256": "62420ce928f288f91ce85e2245e80e6c9efbee9b6e91b7ea9b83d0289fa647c4",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Office_Console",
+      "retained_objects": [
+        "computer-wide"
+      ],
+      "new_objects": [
+        "Kenney_Office_Console"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "computer-wide",
+          "original_vertices": 230,
+          "original_faces": 174,
+          "derivative_vertices": 108,
+          "derivative_triangles": 174,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.32,
+        0.66,
+        0.68
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        3.53,
+        0.04
+      ],
+      "bottom_before_pivot_normalization_m": 1.215,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "Assets/curated/kenney/space_station/models/container-wide.glb",
+      "source_sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0",
+      "pack": "Kenney Space Station Kit 1.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "Assets/curated/kenney/space_station/License.txt",
+      "license_sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3",
+      "instance": "Kenney_Hall_CargoCanister",
+      "retained_objects": [
+        "container-wide"
+      ],
+      "new_objects": [
+        "Kenney_Hall_CargoCanister"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "container-wide",
+          "original_vertices": 128,
+          "original_faces": 116,
+          "derivative_vertices": 64,
+          "derivative_triangles": 116,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        1.17,
+        0.89,
+        0.86
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -3.72,
+        -1.85
+      ],
+      "bottom_before_pivot_normalization_m": 0.3,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null
+    },
+    {
+      "source": "art/frontier_illustrated_20261101/structures/pass04/source_assets/Assets/curated/kenney/factory/models/box-small.glb",
+      "source_sha256": "fd2ea1ac4f24a9515dc9c53a4a589a8897c824fa5865771799f965a252f684f0",
+      "pack": "Kenney Factory Kit 3.0",
+      "license": "Creative Commons Zero (CC0)",
+      "license_path": "art/frontier_illustrated_20261101/structures/pass04/source_assets/Assets/curated/kenney/factory/License.txt",
+      "license_sha256": "61e86565dd297e143ad631594980eda0a17fc81a4cd7c6d71acf2f5e0cad30b6",
+      "instance": "Kenney_Hall_MaintenanceCase",
+      "retained_objects": [
+        "box-small"
+      ],
+      "new_objects": [
+        "Kenney_Hall_MaintenanceCase"
+      ],
+      "geometry_taken": "Actual imported source vertices/faces, including distinctive profiles; not recreated from primitives",
+      "changes": [
+        {
+          "source_object": "box-small",
+          "original_vertices": 84,
+          "original_faces": 70,
+          "derivative_vertices": 44,
+          "derivative_triangles": 70,
+          "closed_leaf_and_sill_omitted": false,
+          "closed_leaf_faces_omitted": 0,
+          "degenerate_faces_removed_or_dissolved": 0,
+          "source_nonmanifold_mount_edges_split": 0
+        }
+      ],
+      "operations": [
+        "attribute seam weld1micrometre",
+        "remove zero-area faces / dissolve short edges in derivative",
+        "split nonmanifold source mounting contacts if needed",
+        "recalculate outward winding",
+        "constant palette replacing original texture atlas",
+        "freeze sampled movable modules; remove imported object animation on static derivative",
+        "nonuniform fit to source-metre dimensions; apply rotation/scale",
+        "Pass04 retained assembly: subtle solid-color panel/base wear; selected cargo grouping shifted/rotated; original mesh identity retained"
+      ],
+      "fit_dimensions_before_rotation_m": [
+        0.61,
+        0.48,
+        0.38
+      ],
+      "center_xy_before_pivot_normalization_m": [
+        -4.33,
+        0.72
+      ],
+      "bottom_before_pivot_normalization_m": 0.3,
+      "rotation_z_radians": 0,
+      "frame_cut": false,
+      "omitted_objects": null,
+      "original_pack_path": "C:/Users/bjoer/Pictures/Kenney Game Assets All-in-1 3.4.0/kenney_factory-kit_3.0/Models/GLB format/box-small.glb"
+    }
+  ],
+  "qa_scope": "entire assembled source; full contact/zfight/normal checks; UV excluded for untextured palette",
+  "retained_pass03_source": "art\\frontier_illustrated_20261101\\structures\\pass03\\source\\freihafen_hall_01.blend",
+  "retained_pass03_source_sha256": "5d0be0a9d307d2ac6e166a173162dd7c97c774761531e3d996b1af813f27058f",
+  "retained_pass03_export_sha256": "42db36cabc71e4820a3a06ce6000d54f80c9d1fecfe8a8ab6f41b2359625a3ec",
+  "functional": {
+    "functional_zones": [
+      "tall freight hall: two six-case racks, grouped cargo containers and staging pallet",
+      "clear central loading aisle",
+      "attached lower office: desk, terminal, chair, cabinet and roof service unit"
+    ],
+    "cutaway": "hall roof retained only at rear and left; front open under supported chamfered portal; office front/right low and forward roof removed",
+    "human_scale": "main opening6.3m wide/3.5m high; office doorway0.83m wide; desk0.85m above floor; lower office roof2.97m"
+  },
+  "material_faces_reassigned": 1213,
+  "intent": "retain room layout and readable Kenney forms; warmer quiet panels, dusty base color fields and asymmetric working groups"
+}

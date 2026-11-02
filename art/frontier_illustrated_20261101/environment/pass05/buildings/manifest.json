@@ -1,0 +1,329 @@
+{
+  "schema": "sternenbuergerchen.pass05_closed_buildings.v1",
+  "task": "docs/tasks/ART_2026_11_01_pass05_environment.md",
+  "status": "bounded native geometry candidate; no user artistic acceptance claimed",
+  "source": {
+    "runtime_path": "scripts/terrain/frontier_closed_buildings.gd",
+    "sha256": "0055e1faba87a0fbbc5073a614a3d8670f00a43789e246608b9e4f899f72dc97",
+    "before_path": "art/frontier_illustrated_20261101/environment/pass05/buildings/source/frontier_closed_buildings_before.gd",
+    "before_sha256": "967129250a0be1e9529f48e67d14de88b1d582b72983f6dd90b8e969cf68842d",
+    "editable_snapshot": "art/frontier_illustrated_20261101/environment/pass05/buildings/source/frontier_closed_buildings_pass05.gd",
+    "snapshot_sha256": "0055e1faba87a0fbbc5073a614a3d8670f00a43789e246608b9e4f899f72dc97",
+    "generator_api": "build(bounds:AABB,hall:bool); once-only Godot geometry, no Blender/GLB conversion"
+  },
+  "assets": [
+    {
+      "bounds_max": [
+        1.2924998998642,
+        1.20255744457245,
+        1.46049988269806
+      ],
+      "bounds_min": [
+        -1.2924998998642,
+        0.0,
+        -1.27499997615814
+      ],
+      "clockwise_normal_errors": 0,
+      "combined_bounds_local": "[P: (-1.2925, 0.0, -1.275), S: (2.585, 1.202557, 2.7355)]",
+      "conservative_detached_candidates": [],
+      "degenerate_triangles": 0,
+      "finite": true,
+      "height_extension": 0.150807499885559,
+      "id": "habitat",
+      "includes_label_bounds": true,
+      "mesh_count": 57,
+      "nonpaired_welded_edges": 0,
+      "original_bounds_local": "[P: (-1.2075, 0.0, -1.2425), S: (2.415, 1.05175, 2.485)]",
+      "roof_parts": [
+        "HabitatRoofWell",
+        "HabitatWestRoof",
+        "HabitatRearRoof",
+        "HabitatFrontRoof",
+        "HabitatLifeSupportBase",
+        "HabitatLifeSupportInset",
+        "LifeSupportLouver",
+        "HabitatRoofServicePlate"
+      ],
+      "triangles": 2588,
+      "window_frames_clear": true,
+      "xz_extensions": [
+        0.0849999189376831,
+        0.0849999189376831,
+        0.0325000286102295,
+        0.217999935150146
+      ]
+    },
+    {
+      "bounds_max": [
+        1.92249989509583,
+        1.61680018901825,
+        1.42925000190735
+      ],
+      "bounds_min": [
+        -1.92249989509583,
+        0.0,
+        -1.24624991416931
+      ],
+      "clockwise_normal_errors": 0,
+      "combined_bounds_local": "[P: (-1.9225, 0.0, -1.24625), S: (3.845, 1.6168, 2.6755)]",
+      "conservative_detached_candidates": [],
+      "degenerate_triangles": 0,
+      "finite": true,
+      "height_extension": 0.14680016040802,
+      "id": "hall",
+      "includes_label_bounds": true,
+      "mesh_count": 58,
+      "nonpaired_welded_edges": 0,
+      "original_bounds_local": "[P: (-1.8375, 0.0, -1.21625), S: (3.675, 1.47, 2.4325)]",
+      "roof_parts": [
+        "IndustrialBayRoof",
+        "OfficeRoofShoulder",
+        "OfficeRoofField",
+        "HallRoofMonitorBase",
+        "HallRoofMonitorCap",
+        "MonitorClerestory",
+        "HallRoofCrossRib"
+      ],
+      "triangles": 2508,
+      "window_frames_clear": true,
+      "xz_extensions": [
+        0.0849999189376831,
+        0.0849999189376831,
+        0.0299999713897705,
+        0.213000059127808
+      ]
+    }
+  ],
+  "references": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+      "sha256": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8",
+      "role": "generated style/form target"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+      "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530",
+      "role": "generated style/form target"
+    }
+  ],
+  "opened_previous_native_views": [
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/closed_habitat.png",
+      "sha256": "ff3ed6743fb56ec55faf52247a28e5e1de26aeee1523a3e25671254846ea2fce",
+      "role": "archived native P4 closed view, opened before modeling"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/closed_hall.png",
+      "sha256": "67ed88ef55227f197eba0198e952e0d79c4c60c7cd407be6b57ca897ee7a2af3",
+      "role": "archived native P4 closed view, opened before modeling"
+    },
+    {
+      "path": "docs/reports/assets/grafik-2026-11-01/engine_pass05_environment/before/closed_outpost.png",
+      "sha256": "46eb623067dd6dc561b1a77654c40cd47c1bce3abb5eaedaf7ebacc181df03a3",
+      "role": "archived native P4 closed view, opened before modeling"
+    }
+  ],
+  "unchanged_cutaway_assets": [
+    {
+      "path": "Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+      "sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f",
+      "role": "existing Kenney-based cutaway asset, not edited/re-exported by this task"
+    },
+    {
+      "path": "Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+      "sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508",
+      "role": "existing Kenney-based cutaway asset, not edited/re-exported by this task"
+    }
+  ],
+  "implemented": {
+    "habitat": "Three varied chamfered petrol roof masses, lower service channel and compact life-support unit; deep cast portal with supported hood, warm insets; broad recessed facade bays and grounded dark plinth.",
+    "hall": "Actual asymmetric high industrial bay/lower office profile, heavy portal and dark segmented shutter; raised longitudinal roof monitor and supported exhaust manifold; structural facade ribs and office window.",
+    "shared": "Finite closed clockwise mesh geometry with physical chamfers, restrained broad panel repair colors, shared local material cache; all shell geometry under one visibility root."
+  },
+  "interface": {
+    "closed_cutaway": "existing parent visibility toggle, no state/door/interior behavior added",
+    "stable_node_names": [
+      "DoorFrame",
+      "FrontWindowFrame"
+    ],
+    "navigation": "unchanged original footprints/reservations; all mesh and sign AABBs fit original XZ+0.22m, height<=original+0.20m",
+    "new_collision_navigation_light_nodes": false,
+    "environment_and_directional_light": "unchanged FrontierArtProfile; warm accents are only framed emissive material surfaces",
+    "front_godot": "+Z",
+    "source_units": "existing fixture world units at underlying structure scale0.35"
+  },
+  "qa": {
+    "geometry_raw": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/geometry_raw.json",
+    "geometry_checks": {
+      "passed": 21,
+      "failed": 0
+    },
+    "legacy_regression": {
+      "script": "scripts/tests/frontier_pass04_verifier.gd",
+      "passed": 22,
+      "failed": 0,
+      "log": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/pass04_regression.log"
+    },
+    "scope": "Full generated vertices/normals/triangle areas, clockwise normal consistency, closed welded topology per mesh, XZ/height envelopes, hierarchy and conservative component-AABB connectivity. Not a general geometry intersection/zfight oracle.",
+    "ground": "minimum visual Y0.0; supported overlapping assembly parts are intentional",
+    "limitations": "AABB assembly connectivity is conservative, not an exact triangle contact/intersection oracle. Closed topology is per generated mesh, not a boolean-unioned single building. No general runtime/performance/release acceptance."
+  },
+  "native_views": [
+    {
+      "building": "habitat",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/native_before_habitat_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "before",
+      "size": 4.0,
+      "view": "front",
+      "sha256": "f99be42331b00337ecb1d6db9d74b22dda751c21a637af0bbf0daba56c5e7471",
+      "opened": true
+    },
+    {
+      "building": "habitat",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/native_before_habitat_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "before",
+      "size": 4.0,
+      "view": "rear",
+      "sha256": "14399602115fb618f59af5eb500a8bac7b4b2b5f3e3ed002c0191b0474aafe4f",
+      "opened": true
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/native_before_hall_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "before",
+      "size": 4.90000009536743,
+      "view": "front",
+      "sha256": "adcf1f40823912d20da9eeec40952c9e9ae300a9db58e4865e4ee987e3f28944",
+      "opened": true
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/native_before_hall_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "before",
+      "size": 4.90000009536743,
+      "view": "rear",
+      "sha256": "7242f459b5a210b31bfcda7cf091d9be6f4796c559988591ba3c6cf403f55e17",
+      "opened": true
+    },
+    {
+      "building": "ensemble",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/native_before_ensemble_game.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "before",
+      "size": 9.5,
+      "view": "game",
+      "sha256": "ff96671afb3a3f2ca19c7825e1137437fec5bc30fc5d7d21583dbbe39ac78a18",
+      "opened": true
+    },
+    {
+      "building": "habitat",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 7.967766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/native_after_habitat_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "after",
+      "size": 4.0,
+      "view": "front",
+      "sha256": "22a18bacb34f288861bb2e3c73beeac841170d3b1298cea50a41540afbcd55d4",
+      "opened": true
+    },
+    {
+      "building": "habitat",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 7.967766, -9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/native_after_habitat_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "after",
+      "size": 4.0,
+      "view": "rear",
+      "sha256": "d9f12b6a2609e569bb18d1f2b7e26201b010b88a2e9c4ffb1a1d77291dcb2619",
+      "opened": true
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/native_after_hall_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "after",
+      "size": 4.90000009536743,
+      "view": "front",
+      "sha256": "a3d2c1d5f782d25aceefb1ba8ad30d6bcd66dc548313da344d0585bf578cf2d0",
+      "opened": true
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/native_after_hall_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "after",
+      "size": 4.90000009536743,
+      "view": "rear",
+      "sha256": "dd4f7f17503bee4f663fd45818d98ecb1083ce31541dc0e38c7794abbacff9ef",
+      "opened": true
+    },
+    {
+      "building": "ensemble",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "light": "unchanged FrontierArtProfile",
+      "path": "art/frontier_illustrated_20261101/environment/pass05/buildings/qa/native_after_ensemble_game.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "revision": "after",
+      "size": 9.5,
+      "view": "game",
+      "sha256": "6b32efcb0f8ecc97a8acb01a09c030335054b02bd4f977f94ab3d5fbdd00a946",
+      "opened": true
+    }
+  ],
+  "native_conditions": {
+    "isolated_probe": "look_probe.gd -- --render; actual Godot4.6.2 Forward+/Vulkan",
+    "lighting": "unchanged scripts/terrain/frontier_art_profile.gd",
+    "lighting_source_sha256": "9ea54d24eb732ea804e750d2543e15fd85c4f1ba3b4f1d19c78c591629f26c0f",
+    "resolution": [
+      1280,
+      900
+    ],
+    "before_after_match": "same camera transform/orthographic size/light/environment per pair; production scene captures remain parent-owned",
+    "new_lights": "none in the builder; probe contains the same single directional light prescribed by FrontierArtProfile"
+  },
+  "visual_review": {
+    "opened": true,
+    "findings": "Silhouettes and roof function now differ at ensemble distance; entrances and shutter have real depth, dark plinths contact the ground. No visible missing/cull-flipped parts in front/rear views.",
+    "remaining_differences": "Still compact, cleaner and more geometric than the rich painted references. Rear elevations remain restrained. Full service yard, worn ground/rock contacts and lived-in functional groups belong to the parent environment pass. Closed roof interpretation is inferred from cutaway references, not an exact closed-building tracing.",
+    "acceptance": "technical and visual candidate review only; no user approval inferred"
+  },
+  "scope_exclusions": [
+    "ships",
+    "citizen models",
+    "Kenney originals",
+    "renderer/dressing/preview/test/report edits",
+    "global lighting changes",
+    "imports/commits/pushes"
+  ],
+  "branch": "task/grafikreferenzen-20261101, intentional continuation of the unintegrated graphics branch"
+}

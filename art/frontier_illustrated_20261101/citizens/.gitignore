@@ -1,0 +1,18 @@
+# Final stock sources are versioned; rejected/exploratory generations remain local.
+*
+!.gitignore
+!README.md
+!KENNEY_LICENSE.txt
+!build_stock_citizens.py
+!verify_stock_exports.py
+!*_stock.blend
+!qa/
+qa/*
+!qa/*_stock_manifest.json
+!qa/*_stock_raw.json
+!qa/stock_manifest.json
+!qa/stock_roundtrip.json
+!qa/STOCK_VISUAL_REVIEW.md
+!qa/source_animation_settings.json
+!pass02/
+!pass02/.gitignore

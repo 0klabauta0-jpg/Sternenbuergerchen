@@ -116,6 +116,10 @@ Solche Reports sollen:
 - den Export lokal per `file://` ohne Server und ohne externe Abhaengigkeiten erzeugen
 - aus `docs/reports/_html_workbench_template.html` abgeleitet werden, wenn keine passendere bestehende Workbench als Vorlage dient
 
+## Grafikreferenzen und Modellrevisionen
+
+Bei Grafikaufgaben den [Grafikreferenz- und Revisionsvertrag](docs/dev/graphics_reference_revision_contract.md) lesen: eigene 2D-Ziele zuordnen, Bild- und Modellstatus kenntlich machen und tatsaechliche Kandidaten vergleichbar pruefen.
+
 ---
 
 # 5. Performance- und Hotpath-Regeln

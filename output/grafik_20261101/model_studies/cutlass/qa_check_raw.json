@@ -1,0 +1,44 @@
+{
+  "ok": true,
+  "pass": false,
+  "errors": [
+    "Study_cutlass: 301 closed parts with normals pointing inward",
+    "Study_cutlass: 16 edges with inconsistent face winding",
+    "Study_cutlass: degenerate faces=621 zero-len edges=257"
+  ],
+  "warnings": [
+    "Study_cutlass: non-manifold edges=5 wire=0",
+    "Study_cutlass: duplicate verts=494 loose verts=0",
+    "265435 tris > max_tris 100000: z-fighting/floating checks skipped",
+    "asset lowest point z=-5.3732 (not resting on ground plane z=0)"
+  ],
+  "ground_z": -5.3732,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [],
+  "enclosed": [],
+  "objects": {
+    "Study_cutlass": {
+      "verts": 149983,
+      "faces": 265435,
+      "tris": 265435,
+      "ngons": 0,
+      "boundary_edges": 30729,
+      "nonmanifold_edges": 5,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 621,
+      "zero_length_edges": 257,
+      "inconsistent_normals_edges": 16,
+      "duplicate_verts": 494,
+      "islands": 2146,
+      "inside_out_islands": 301,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 6
+    }
+  }
+}

@@ -1,0 +1,113 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_158 Editor-to-Live Mission Validation Verifier ===
+PASS: Smoke scenario validates before editor load
+PASS: Smoke scenario contains no stored LZ fields
+PASS: Map editor scene instantiates
+PASS: Editor loads the TASK_158 smoke scenario
+PASS: Editor scenario references the expected map
+PASS: Editor authoring data still has no LZ
+PASS: Editor saves the live-test scenario scratch file
+PASS: Editor creates the live mission scene
+PASS: Live mission receives the editor-saved scenario path
+PASS: Scenario objective radius reaches SimulationRoot
+PASS: Scenario objective marker reaches SimulationRoot
+PASS: Scenario wave count and wave size reach EnemyWaveController
+PASS: Scenario wave delay reaches EnemyWaveController
+PASS: Delta patrol binding reaches EnemyWaveController
+PASS: Echo patrol binding reaches EnemyWaveController
+PASS: Live mission starts without stored/visible player LZ
+PASS: Live mission receives scenario map/objective/waves/patrols without LZ
+PASS: First enemy wave starts from scenario config
+PASS: Second scenario wave can arrive through EnemyWaveController
+PASS: Scenario enemies are visible after their waves arrive
+PASS: Live mission has TacticalController for LZ/drop smoke
+PASS: Waiting dropship state does not create an LZ by itself
+ERROR: FAIL: Waiting dropship is mirrored into the 2.5D primary view without auto LZ
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_player_lz_and_dropship (res://scripts/tests/task_158_verifier.gd:148)
+       [2] _wait_frames (res://scripts/tests/task_158_verifier.gd:335)
+ERROR: FAIL: Waiting dropship uses the calibrated Kenney speeder GLB in the 3D primary view
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_player_lz_and_dropship (res://scripts/tests/task_158_verifier.gd:149)
+       [2] _wait_frames (res://scripts/tests/task_158_verifier.gd:335)
+PASS: Waiting dropship does not fall back to the flat isometric Sprite3D card when the calibrated model exists
+ERROR: FAIL: Player/controller LZ path sets the mission LZ
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_player_lz_and_dropship (res://scripts/tests/task_158_verifier.gd:153)
+       [2] _wait_frames (res://scripts/tests/task_158_verifier.gd:335)
+ERROR: FAIL: LZ becomes visible only after player path placement
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_player_lz_and_dropship (res://scripts/tests/task_158_verifier.gd:159)
+       [2] _wait_frames (res://scripts/tests/task_158_verifier.gd:335)
+ERROR: FAIL: Calling dropship starts the inbound live sequence
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_player_lz_and_dropship (res://scripts/tests/task_158_verifier.gd:163)
+       [2] _wait_frames (res://scripts/tests/task_158_verifier.gd:335)
+ERROR: FAIL: Dropship deploys and switches to outbound after reaching LZ
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_player_lz_and_dropship (res://scripts/tests/task_158_verifier.gd:170)
+       [2] _wait_frames (res://scripts/tests/task_158_verifier.gd:335)
+ERROR: FAIL: Selected fireteam deploys through dropship state
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_player_lz_and_dropship (res://scripts/tests/task_158_verifier.gd:171)
+       [2] _wait_frames (res://scripts/tests/task_158_verifier.gd:335)
+PASS: Deployed fireteam becomes visible on the live mission map
+PASS: Live tactical systems are present for smoke execution
+ERROR: FAIL: Objective reports live friendly capture progress
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_tactical_area_contact_objective_and_visuals (res://scripts/tests/task_158_verifier.gd:188)
+       [2] _wait_physics_frames (res://scripts/tests/task_158_verifier.gd:340)
+PASS: Live mission creates an Attack Area from editor-started scenario
+PASS: Area Order visual bridge exposes the created Attack Area
+ERROR: FAIL: GO executes the created Attack Area
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_tactical_area_contact_objective_and_visuals (res://scripts/tests/task_158_verifier.gd:195)
+       [2] _wait_physics_frames (res://scripts/tests/task_158_verifier.gd:340)
+ERROR: FAIL: Tactical controller tracks active Attack Area execution
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_tactical_area_contact_objective_and_visuals (res://scripts/tests/task_158_verifier.gd:196)
+       [2] _wait_physics_frames (res://scripts/tests/task_158_verifier.gd:340)
+ERROR: FAIL: Live contact system exposes scenario enemy contacts
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_tactical_area_contact_objective_and_visuals (res://scripts/tests/task_158_verifier.gd:214)
+       [2] _wait_frames (res://scripts/tests/task_158_verifier.gd:335)
+ERROR: FAIL: Contact overlay visual bridge shows live contacts
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_tactical_area_contact_objective_and_visuals (res://scripts/tests/task_158_verifier.gd:215)
+       [2] _wait_frames (res://scripts/tests/task_158_verifier.gd:335)
+ERROR: FAIL: Friendly and enemy live visuals are visible
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_158_verifier.gd:390)
+       [1] _verify_tactical_area_contact_objective_and_visuals (res://scripts/tests/task_158_verifier.gd:216)
+       [2] _wait_frames (res://scripts/tests/task_158_verifier.gd:335)
+PASS: FireteamOrderVisualizer bridge node is attached
+PASS: ContactMapOverlay bridge node is attached
+=== RESULTS: 29 passed, 13 failed ===
+FAIL

@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    "workshop_01: duplicate verts=9939 loose verts=0",
+    "hidden back-to-back faces: workshop_01 (50 pairs) - delete to save tris"
+  ],
+  "ground_z": 0.0,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [
+    {
+      "where": "workshop_01",
+      "tri_pairs": 50
+    }
+  ],
+  "enclosed": [],
+  "objects": {
+    "workshop_01": {
+      "verts": 19878,
+      "faces": 9992,
+      "tris": 9992,
+      "ngons": 0,
+      "boundary_edges": 19888,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 9939,
+      "islands": 4938,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 9
+    }
+  }
+}

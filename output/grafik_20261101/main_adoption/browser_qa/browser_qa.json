@@ -1,0 +1,903 @@
+{
+  "passed": 204,
+  "failed": 0,
+  "checks": [
+    {
+      "label": "report title",
+      "passed": true
+    },
+    {
+      "label": "released adoption banner",
+      "passed": true
+    },
+    {
+      "label": "six fixed pairs and six actual startup views",
+      "passed": true
+    },
+    {
+      "label": "actual integrated source commit",
+      "passed": true
+    },
+    {
+      "label": "no invented pending acceptance",
+      "passed": true
+    },
+    {
+      "label": "asset source identity ref_rostgrenze",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes ref_rostgrenze",
+      "passed": true
+    },
+    {
+      "label": "asset source identity ref_freihafen",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes ref_freihafen",
+      "passed": true
+    },
+    {
+      "label": "asset source identity ref_tactical",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes ref_tactical",
+      "passed": true
+    },
+    {
+      "label": "asset source identity target_cutlass_front",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes target_cutlass_front",
+      "passed": true
+    },
+    {
+      "label": "asset source identity target_cutlass_rear",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes target_cutlass_rear",
+      "passed": true
+    },
+    {
+      "label": "asset source identity target_buccaneer_front",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes target_buccaneer_front",
+      "passed": true
+    },
+    {
+      "label": "asset source identity target_buccaneer_rear",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes target_buccaneer_rear",
+      "passed": true
+    },
+    {
+      "label": "asset source identity before_cutlass_front",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes before_cutlass_front",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_cutlass_front",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_cutlass_front",
+      "passed": true
+    },
+    {
+      "label": "asset source identity before_cutlass_rear",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes before_cutlass_rear",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_cutlass_rear",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_cutlass_rear",
+      "passed": true
+    },
+    {
+      "label": "asset source identity before_buccaneer_front",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes before_buccaneer_front",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_buccaneer_front",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_buccaneer_front",
+      "passed": true
+    },
+    {
+      "label": "asset source identity before_buccaneer_rear",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes before_buccaneer_rear",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_buccaneer_rear",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_buccaneer_rear",
+      "passed": true
+    },
+    {
+      "label": "asset source identity before_closed_outpost",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes before_closed_outpost",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_closed_outpost",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_closed_outpost",
+      "passed": true
+    },
+    {
+      "label": "asset source identity before_overview",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes before_overview",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_overview",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_overview",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_hex_grid",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_hex_grid",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_crew",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_crew",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_workshop",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_workshop",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_landscape",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_landscape",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_cutaway",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_cutaway",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_outpost",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_outpost",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_utility",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_utility",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_closed_habitat",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_closed_habitat",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_closed_hall",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_closed_hall",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_lived_outpost",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_lived_outpost",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_ground_detail",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_ground_detail",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_geology_detail",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_geology_detail",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_baseline",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_baseline",
+      "passed": true
+    },
+    {
+      "label": "asset source identity after_walk_pose",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes after_walk_pose",
+      "passed": true
+    },
+    {
+      "label": "asset source identity menu_background",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes menu_background",
+      "passed": true
+    },
+    {
+      "label": "asset source identity runtime_01_main_menu",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes runtime_01_main_menu",
+      "passed": true
+    },
+    {
+      "label": "asset source identity runtime_02_homebase",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes runtime_02_homebase",
+      "passed": true
+    },
+    {
+      "label": "asset source identity runtime_03_default_mission",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes runtime_03_default_mission",
+      "passed": true
+    },
+    {
+      "label": "asset source identity runtime_04_lz_approach",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes runtime_04_lz_approach",
+      "passed": true
+    },
+    {
+      "label": "asset source identity runtime_05_deployed",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes runtime_05_deployed",
+      "passed": true
+    },
+    {
+      "label": "asset source identity runtime_06_go_movement",
+      "passed": true
+    },
+    {
+      "label": "actual source bytes runtime_06_go_movement",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode ref_rostgrenze/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode ref_rostgrenze/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode ref_freihafen/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode ref_freihafen/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode ref_tactical/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode ref_tactical/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode target_cutlass_front/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode target_cutlass_front/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode target_cutlass_rear/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode target_cutlass_rear/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode target_buccaneer_front/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode target_buccaneer_front/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode target_buccaneer_rear/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode target_buccaneer_rear/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_cutlass_front/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_cutlass_front/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_cutlass_front/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_cutlass_front/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_cutlass_rear/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_cutlass_rear/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_cutlass_rear/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_cutlass_rear/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_buccaneer_front/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_buccaneer_front/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_buccaneer_front/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_buccaneer_front/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_buccaneer_rear/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_buccaneer_rear/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_buccaneer_rear/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_buccaneer_rear/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_closed_outpost/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_closed_outpost/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_closed_outpost/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_closed_outpost/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_overview/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode before_overview/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_overview/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_overview/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_hex_grid/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_hex_grid/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_crew/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_crew/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_workshop/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_workshop/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_landscape/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_landscape/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_cutaway/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_cutaway/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_outpost/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_outpost/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_utility/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_utility/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_closed_habitat/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_closed_habitat/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_closed_hall/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_closed_hall/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_lived_outpost/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_lived_outpost/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_ground_detail/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_ground_detail/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_geology_detail/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_geology_detail/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_baseline/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_baseline/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_walk_pose/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode after_walk_pose/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode menu_background/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode menu_background/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_01_main_menu/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_01_main_menu/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_02_homebase/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_02_homebase/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_03_default_mission/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_03_default_mission/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_04_lz_approach/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_04_lz_approach/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_05_deployed/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_05_deployed/full",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_06_go_movement/thumb",
+      "passed": true
+    },
+    {
+      "label": "embedded derivative decode runtime_06_go_movement/full",
+      "passed": true
+    },
+    {
+      "label": "before status cutlass_front",
+      "passed": true
+    },
+    {
+      "label": "actual paired image cutlass_front",
+      "passed": true
+    },
+    {
+      "label": "same native camera cutlass_front",
+      "passed": true
+    },
+    {
+      "label": "before status cutlass_rear",
+      "passed": true
+    },
+    {
+      "label": "actual paired image cutlass_rear",
+      "passed": true
+    },
+    {
+      "label": "same native camera cutlass_rear",
+      "passed": true
+    },
+    {
+      "label": "before status buccaneer_front",
+      "passed": true
+    },
+    {
+      "label": "actual paired image buccaneer_front",
+      "passed": true
+    },
+    {
+      "label": "same native camera buccaneer_front",
+      "passed": true
+    },
+    {
+      "label": "before status buccaneer_rear",
+      "passed": true
+    },
+    {
+      "label": "actual paired image buccaneer_rear",
+      "passed": true
+    },
+    {
+      "label": "same native camera buccaneer_rear",
+      "passed": true
+    },
+    {
+      "label": "before status closed_outpost",
+      "passed": true
+    },
+    {
+      "label": "actual paired image closed_outpost",
+      "passed": true
+    },
+    {
+      "label": "same native camera closed_outpost",
+      "passed": true
+    },
+    {
+      "label": "before status overview",
+      "passed": true
+    },
+    {
+      "label": "actual paired image overview",
+      "passed": true
+    },
+    {
+      "label": "same native camera overview",
+      "passed": true
+    },
+    {
+      "label": "wipe mode visible",
+      "passed": true
+    },
+    {
+      "label": "wipe parameter changes",
+      "passed": true
+    },
+    {
+      "label": "large source image dialog",
+      "passed": true
+    },
+    {
+      "label": "dialog navigation",
+      "passed": true
+    },
+    {
+      "label": "actual normal-start image 01_main_menu",
+      "passed": true
+    },
+    {
+      "label": "actual normal-start image 02_homebase",
+      "passed": true
+    },
+    {
+      "label": "actual normal-start image 03_default_mission",
+      "passed": true
+    },
+    {
+      "label": "actual normal-start image 04_lz_approach",
+      "passed": true
+    },
+    {
+      "label": "actual normal-start image 05_deployed",
+      "passed": true
+    },
+    {
+      "label": "actual normal-start image 06_go_movement",
+      "passed": true
+    },
+    {
+      "label": "catalog search and group intersect",
+      "passed": true
+    },
+    {
+      "label": "catalog returns every asset",
+      "passed": true
+    },
+    {
+      "label": "required offline export schema",
+      "passed": true
+    },
+    {
+      "label": "asset, playtest and global notes exported",
+      "passed": true
+    },
+    {
+      "label": "actual downloaded JSON 0",
+      "passed": true
+    },
+    {
+      "label": "actual downloaded JSON 1",
+      "passed": true
+    },
+    {
+      "label": "unique filenames for repeated exports",
+      "passed": true
+    },
+    {
+      "label": "local notes survive reload",
+      "passed": true
+    },
+    {
+      "label": "mobile has no horizontal document overflow",
+      "passed": true
+    },
+    {
+      "label": "no browser/page/console errors",
+      "passed": true
+    },
+    {
+      "label": "no external requests",
+      "passed": true
+    }
+  ],
+  "screens": [
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_start.png",
+      "sha256": "e6f7e69317d4621efa63abeaa084b4d5870f727a8f56911aed54760a9394ad39"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_pair_cutlass_front.png",
+      "sha256": "8369ff7b09d6506b3516b4fbdd32d42be7eb6a645f3e8beabee08f7c564a3fad"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_pair_cutlass_rear.png",
+      "sha256": "eca5b9b1728d5ae5275f1ada02d578182a2c85d574260a1f8270853517bf6c33"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_pair_buccaneer_front.png",
+      "sha256": "be9dfd26b3cf04d3149ada333fc1b7b03de763b522fdc6ae7ef01ed7cb4653ed"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_pair_buccaneer_rear.png",
+      "sha256": "9ff53df5e66a1ca7ab10fd7c8cd96bd1d7f80d517aa0390fec481a0209e86031"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_pair_closed_outpost.png",
+      "sha256": "60b9b785f2e4265a95e1f57faa1c82a94735ac9595e44f8844e55411fe34cdca"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_pair_overview.png",
+      "sha256": "6145ea2ecfe2dd2a03c6944121175ab3564aaf64c587424f656f276e52651de0"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_dialog.png",
+      "sha256": "625c72c9e8e8ebbc4ae74d7e63f49b259b69a920f6a3fb2960399e020110cfe9"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_runtime_01_main_menu.png",
+      "sha256": "bf1a49a87be5f007689b3e82c92ed89ddb66352399a32efb5f2c321c89b8a05e"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_runtime_02_homebase.png",
+      "sha256": "866135c76f3f2299366e119c8dd76086ed2f067b174f39a4856bff77cb890a9a"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_runtime_03_default_mission.png",
+      "sha256": "d512956361364b65ca494306b23c2b2f54a7da3440f5dbd320e1df695e08c431"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_runtime_04_lz_approach.png",
+      "sha256": "b224fecb426b11d164a5f616deaa96879a061088f3dc52f318d00d02413cf9cc"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_runtime_05_deployed.png",
+      "sha256": "22944b7869ac18912673648d45b38ad531240215af656c76d30d6efc9af3a74d"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/desktop_runtime_06_go_movement.png",
+      "sha256": "bbfce2037dbcb64e243408b9fe6fa36d46381c3678cf9a266ec66d669b21d967"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/mobile_pair.png",
+      "sha256": "1d07936cbaec103f992b5a7f1948073ead54506e6b708ee3f2151fb68c4a748a"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/mobile_dialog.png",
+      "sha256": "20d7e2793f6589c5ed58a4356dabbc3f8f27e02715e71401c0faf267a47f6fd7"
+    },
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/mobile_notes.png",
+      "sha256": "70a96cc616db99de387faad6aa113bf3e0fad7e0e7609679286a9bae83141971"
+    }
+  ],
+  "errors": [],
+  "external_requests": [],
+  "asset_count": 40,
+  "derivative_decodes": 80,
+  "html_sha256": "86edd3811d9282cbd2249450c799122a12000d405a467ce2e89557b1401c0b3d",
+  "html_bytes": 8964252,
+  "mode": "standalone offline Chrome file artifact; no server",
+  "downloads": [
+    "grafik_20261101_main_adoption_ref03_v1_2026-11-01T21-52-11-474Z_01.json",
+    "grafik_20261101_main_adoption_ref03_v1_2026-11-01T21-52-11-980Z_02.json"
+  ]
+}

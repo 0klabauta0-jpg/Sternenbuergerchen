@@ -2,6 +2,7 @@ class_name HPAPathfinder
 extends RefCounted
 
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 
 const STATUS_INVALID: String = "invalid"
 const STATUS_SAME_COMPONENT: String = "same_component"
@@ -38,7 +39,7 @@ func find_path_with_status(from_grid: Vector2i, to_grid: Vector2i, registry, gra
 			"status": STATUS_SAME_COMPONENT if not same_component_path.is_empty() else STATUS_LOCAL_PATH_FAILED,
 		}
 
-	var portal_route: Array = _find_portal_route(from_component, to_component, to_grid, graph, registry, options)
+	var portal_route: Array = _find_portal_route(from_component, to_component, to_grid, graph, registry, options, from_grid)
 	if portal_route.is_empty():
 		return {"path": [], "status": STATUS_NO_ABSTRACT_ROUTE}
 
@@ -49,13 +50,15 @@ func find_path_with_status(from_grid: Vector2i, to_grid: Vector2i, registry, gra
 	}
 
 
-func _find_portal_route(from_component: String, to_component: String, to_grid: Vector2i, graph, registry, options: Dictionary = {}) -> Array:
+func _find_portal_route(from_component: String, to_component: String, to_grid: Vector2i, graph, registry, options: Dictionary = {}, from_grid: Vector2i = Vector2i.ZERO) -> Array:
 	var adjacency: Dictionary = _get_portal_adjacency(graph)
 	var open_set: Array = [from_component]
 	var came_from_edge: Dictionary = {}
 	var g_score: Dictionary = {from_component: 0.0}
 	var f_score: Dictionary = {from_component: 0.0}
 	var visited: Dictionary = {}
+	var hex_mode: bool = registry.has_method("get_grid_topology") and String(registry.call("get_grid_topology")) == HEX_GRID_SCRIPT.TOPOLOGY_ID
+	var entered_grid_by_component: Dictionary = {from_component: from_grid}
 
 	while not open_set.is_empty():
 		var current_component: String = _pop_lowest_score_component(open_set, f_score)
@@ -73,13 +76,41 @@ func _find_portal_route(from_component: String, to_component: String, to_grid: V
 			if neighbor_component.is_empty():
 				continue
 			var edge_cost: float = _get_portal_edge_cost(edge, registry, options)
+			if hex_mode:
+				# Hex routes account for actual local travel to each selected portal.
+				# The legacy component scoring remains untouched for old maps.
+				var entry_grid: Vector2i = Vector2i(entered_grid_by_component.get(current_component, from_grid))
+				var portal_grid: Vector2i = Vector2i(edge.get("from_grid", entry_grid))
+				var entry_path: Array = Array(_terrain_pathfinder.call("find_path_with_options", entry_grid, portal_grid, registry, options))
+				if entry_path.is_empty():
+					continue
+				var entry_score: Dictionary = Dictionary(_terrain_pathfinder.call("score_path", entry_path, registry, options))
+				edge_cost += float(entry_score.get("path_cost", 0.0))
+				if neighbor_component == to_component:
+					var exit_path: Array = Array(_terrain_pathfinder.call("find_path_with_options", Vector2i(edge.get("to_grid", to_grid)), to_grid, registry, options))
+					if exit_path.is_empty():
+						continue
+					var exit_score: Dictionary = Dictionary(_terrain_pathfinder.call("score_path", exit_path, registry, options))
+					edge_cost += float(exit_score.get("path_cost", 0.0))
 			var tentative_g_score: float = float(g_score.get(current_component, INF)) + edge_cost
-			if tentative_g_score >= float(g_score.get(neighbor_component, INF)):
+			var previous_score: float = float(g_score.get(neighbor_component, INF))
+			if tentative_g_score > previous_score:
 				continue
+			if tentative_g_score == previous_score:
+				if not hex_mode:
+					continue
+				var old_entry: Vector2i = Vector2i(entered_grid_by_component.get(neighbor_component, to_grid))
+				var new_entry: Vector2i = Vector2i(edge.get("to_grid", to_grid))
+				if HEX_GRID_SCRIPT.distance(new_entry, to_grid) >= HEX_GRID_SCRIPT.distance(old_entry, to_grid):
+					continue
 			came_from_edge[neighbor_component] = edge
 			g_score[neighbor_component] = tentative_g_score
 			var neighbor_grid: Vector2i = Vector2i(edge.get("to_grid", Vector2i.ZERO))
-			f_score[neighbor_component] = tentative_g_score + Vector2(neighbor_grid).distance_to(Vector2(to_grid))
+			entered_grid_by_component[neighbor_component] = neighbor_grid
+			var heuristic: float = Vector2(neighbor_grid).distance_to(Vector2(to_grid))
+			if hex_mode:
+				heuristic = 0.0 if neighbor_component == to_component else float(HEX_GRID_SCRIPT.distance(neighbor_grid, to_grid)) * TERRAIN_PATHFINDER_SCRIPT.MIN_SURFACE_PATH_COST
+			f_score[neighbor_component] = tentative_g_score + heuristic
 			if not open_set.has(neighbor_component):
 				open_set.append(neighbor_component)
 
@@ -218,5 +249,8 @@ func _get_portal_edge_cost(edge: Dictionary, registry, options: Dictionary = {})
 	var to_grid: Vector2i = Vector2i(edge.get("to_grid", Vector2i.ZERO))
 	var step_cost: float = float(_terrain_pathfinder.call("get_step_cost", from_grid, to_grid, registry, options))
 	if is_inf(step_cost):
-		step_cost = Vector2(from_grid).distance_to(Vector2(to_grid)) + 1.0
+		if registry != null and registry.has_method("get_grid_topology") and String(registry.call("get_grid_topology")) == HEX_GRID_SCRIPT.TOPOLOGY_ID:
+			step_cost = float(HEX_GRID_SCRIPT.distance(from_grid, to_grid)) + 1.0
+		else:
+			step_cost = Vector2(from_grid).distance_to(Vector2(to_grid)) + 1.0
 	return maxf(step_cost, 0.001)

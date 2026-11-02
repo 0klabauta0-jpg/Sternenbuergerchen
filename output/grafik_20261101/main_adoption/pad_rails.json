@@ -1,0 +1,107 @@
+{
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"failed": 0,
+	"passed": 56,
+	"rails": [
+		{
+			"angle": -0.143560022115707,
+			"box_half_thickness_projection": 0.00101147192735104,
+			"center": "(2.955, 0.087, -0.405)",
+			"envelope_overhang": 0.00100111961364746,
+			"length": 1.02049791812897,
+			"pad_size": "(5.0, 4.4)",
+			"side": 1.0,
+			"toe_error": 0.00000000186264514923096,
+			"top_error": 0.000000238418579101563
+		},
+		{
+			"angle": -0.143560022115707,
+			"box_half_thickness_projection": 0.00101147192735104,
+			"center": "(2.955, 0.087, 0.405)",
+			"envelope_overhang": 0.00100111961364746,
+			"length": 1.02049791812897,
+			"pad_size": "(5.0, 4.4)",
+			"side": 1.0,
+			"toe_error": 0.00000000186264514923096,
+			"top_error": 0.000000238418579101563
+		},
+		{
+			"angle": 0.143560022115707,
+			"box_half_thickness_projection": 0.00101147192735104,
+			"center": "(-2.555, 0.087, -0.405)",
+			"envelope_overhang": 0.00100135803222656,
+			"length": 1.02049791812897,
+			"pad_size": "(4.2, 4.1)",
+			"side": -1.0,
+			"toe_error": 0.00000000186264514923096,
+			"top_error": 0.000000238418579101563
+		},
+		{
+			"angle": 0.143560022115707,
+			"box_half_thickness_projection": 0.00101147192735104,
+			"center": "(-2.555, 0.087, 0.405)",
+			"envelope_overhang": 0.00100135803222656,
+			"length": 1.02049791812897,
+			"pad_size": "(4.2, 4.1)",
+			"side": -1.0,
+			"toe_error": 0.00000000186264514923096,
+			"top_error": 0.000000238418579101563
+		},
+		{
+			"angle": 0.143560022115707,
+			"box_half_thickness_projection": 0.00101147192735104,
+			"center": "(-2.955, 0.087, -0.405)",
+			"envelope_overhang": 0.00100135803222656,
+			"length": 1.02049791812897,
+			"pad_size": "(5.0, 4.4)",
+			"side": -1.0,
+			"toe_error": 0.00000000186264514923096,
+			"top_error": 0.000000238418579101563
+		},
+		{
+			"angle": 0.143560022115707,
+			"box_half_thickness_projection": 0.00101147192735104,
+			"center": "(-2.955, 0.087, 0.405)",
+			"envelope_overhang": 0.00100135803222656,
+			"length": 1.02049791812897,
+			"pad_size": "(5.0, 4.4)",
+			"side": -1.0,
+			"toe_error": 0.00000000186264514923096,
+			"top_error": 0.000000238418579101563
+		},
+		{
+			"angle": -0.143560022115707,
+			"box_half_thickness_projection": 0.00101147192735104,
+			"center": "(2.555, 0.087, -0.405)",
+			"envelope_overhang": 0.00100159645080566,
+			"length": 1.02049791812897,
+			"pad_size": "(4.2, 4.1)",
+			"side": 1.0,
+			"toe_error": 0.00000000186264514923096,
+			"top_error": 0.000000238418579101563
+		},
+		{
+			"angle": -0.143560022115707,
+			"box_half_thickness_projection": 0.00101147192735104,
+			"center": "(2.555, 0.087, 0.405)",
+			"envelope_overhang": 0.00100159645080566,
+			"length": 1.02049791812897,
+			"pad_size": "(4.2, 4.1)",
+			"side": 1.0,
+			"toe_error": 0.00000000186264514923096,
+			"top_error": 0.000000238418579101563
+		}
+	],
+	"scope": "Centerlines match the existing ramp; returned reservation, pivot and all other mesh arrays unchanged. Existing 14mm box thickness produces at most ~1mm projection beyond centerline endpoints.",
+	"source_sha256": "1301ddd9ddf8b17490615ab5bb50419d0e05b58f958586dae658e81209679772"
+}

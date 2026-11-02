@@ -1,0 +1,100 @@
+{
+  "pass": true,
+  "blender": "5.2.3 LTS",
+  "assets": [
+    {
+      "asset": "cutlass_01",
+      "pass": true,
+      "glb_sha256": "7622173a239ac1142902d8692ba590065764f83b596a561c688518e790177b32",
+      "import": "fresh empty Blender5.2.3; merge_vertices=True requested; no source/import geometry repair",
+      "mesh_count": 1,
+      "triangles": 4184,
+      "triangles_by_material": {
+        "M_Drake04_Petrol": 1300,
+        "M_Drake04_Ivory": 240,
+        "M_Drake04_Ochre": 416,
+        "M_Drake04_Frame": 1626,
+        "M_Drake04_Glass": 18,
+        "M_Drake04_Steel": 464,
+        "M_Drake04_WarmCore": 120
+      },
+      "material_assignments_match": true,
+      "bounds_blender_m": {
+        "min": [
+          -6.180432319641113,
+          -8.0,
+          0.0
+        ],
+        "max": [
+          6.180432319641113,
+          8.0,
+          4.940279960632324
+        ]
+      },
+      "dimensions_blender_m": [
+        12.360864639282227,
+        16.0,
+        4.940279960632324
+      ],
+      "ground_z": 0.0,
+      "maximum_bidirectional_nearest_vertex_error_m": 0.0,
+      "raw_qa": "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_raw.json",
+      "errors": [],
+      "warnings": [
+        "cutlass_01: duplicate verts=4152 loose verts=0"
+      ],
+      "images": [
+        "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_front.png",
+        "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_rear.png",
+        "art/frontier_illustrated_20261101/ships/pass04/qa/cutlass_01_roundtrip_game.png"
+      ]
+    },
+    {
+      "asset": "buccaneer_01",
+      "pass": true,
+      "glb_sha256": "746c959a8f16e320db89c4194e44d939b3ebe90b29d5f05225187c3a18b3eded",
+      "import": "fresh empty Blender5.2.3; merge_vertices=True requested; no source/import geometry repair",
+      "mesh_count": 1,
+      "triangles": 3800,
+      "triangles_by_material": {
+        "M_Drake04_Petrol": 1140,
+        "M_Drake04_Frame": 1590,
+        "M_Drake04_Ivory": 372,
+        "M_Drake04_GlassWarm": 18,
+        "M_Drake04_Ochre": 216,
+        "M_Drake04_Steel": 344,
+        "M_Drake04_WarmCore": 120
+      },
+      "material_assignments_match": true,
+      "bounds_blender_m": {
+        "min": [
+          -6.032516956329346,
+          -5.499999523162842,
+          0.0
+        ],
+        "max": [
+          6.032516956329346,
+          5.5,
+          4.015793323516846
+        ]
+      },
+      "dimensions_blender_m": [
+        12.065033912658691,
+        10.999999523162842,
+        4.015793323516846
+      ],
+      "ground_z": 0.0,
+      "maximum_bidirectional_nearest_vertex_error_m": 0.0,
+      "raw_qa": "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_raw.json",
+      "errors": [],
+      "warnings": [
+        "buccaneer_01: duplicate verts=3520 loose verts=0"
+      ],
+      "images": [
+        "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_front.png",
+        "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_rear.png",
+        "art/frontier_illustrated_20261101/ships/pass04/qa/buccaneer_01_roundtrip_game.png"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "ok": true,
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    "characterMedium: duplicate verts=44 loose verts=0",
+    "Gear_Modular: duplicate verts=1893 loose verts=0"
+  ],
+  "ground_z": -0.0,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [],
+  "enclosed": [],
+  "objects": {
+    "characterMedium": {
+      "verts": 848,
+      "faces": 1604,
+      "tris": 1604,
+      "ngons": 0,
+      "boundary_edges": 88,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 44,
+      "islands": 3,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 1,
+      "unweighted_verts": 0,
+      "verts_over_4_influences": 0
+    },
+    "Gear_Modular": {
+      "verts": 3786,
+      "faces": 1416,
+      "tris": 1416,
+      "ngons": 0,
+      "boundary_edges": 4056,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 1893,
+      "islands": 1050,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 3,
+      "unweighted_verts": 0,
+      "verts_over_4_influences": 0
+    }
+  }
+}

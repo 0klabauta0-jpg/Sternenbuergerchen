@@ -512,6 +512,12 @@ func _get_observer_reach_grid_radius(observer_state: Dictionary, terrain_registr
 	if sight_range_world < 0.0:
 		return 0
 	var origin: Vector2 = terrain_registry.call("grid_to_world", Vector2i.ZERO)
+	if _uses_hex_grid(terrain_registry):
+		var neighbor: Vector2 = terrain_registry.call("grid_to_world", Vector2i(1, 0))
+		var hex_spacing: float = maxf(_range_distance(origin, neighbor, terrain_registry), 0.001)
+		# A physical circle has wider axial coordinate extents: the two axial
+		# basis vectors are 60 degrees apart, so max |q|/|r| is 2R/sqrt(3).
+		return maxi(ceili((sight_range_world / hex_spacing) * (2.0 / sqrt(3.0))) + 2, 1)
 	var axis_x_spacing: float = origin.distance_to(Vector2(terrain_registry.call("grid_to_world", Vector2i(1, 0))))
 	var axis_y_spacing: float = origin.distance_to(Vector2(terrain_registry.call("grid_to_world", Vector2i(0, 1))))
 	var grid_spacing: float = maxf(minf(axis_x_spacing, axis_y_spacing), 0.001)
@@ -553,7 +559,7 @@ func _collect_pending_dirty_candidate_tiles(work: Dictionary, lookup_budget_tile
 		var region: Dictionary = Dictionary(regions[region_index])
 		var observer_state: Dictionary = Dictionary(region.get("observer_state", {}))
 		var tile_data = terrain_registry.call("get_tile_at_grid", Vector2i(grid_x, grid_y))
-		if tile_data != null and _tile_is_within_observer_reach(tile_data, observer_state):
+		if tile_data != null and _tile_is_within_observer_reach(tile_data, observer_state, terrain_registry):
 			var tile_id: String = _tile_id_for_tile(tile_data)
 			if not tile_id.is_empty() and not candidate_tile_ids.has(tile_id):
 				candidate_tile_ids[tile_id] = true
@@ -582,11 +588,11 @@ func _collect_pending_dirty_candidate_tiles(work: Dictionary, lookup_budget_tile
 	work["candidate_scan_pending"] = false
 
 
-func _tile_is_within_observer_reach(tile_data, observer_state: Dictionary) -> bool:
+func _tile_is_within_observer_reach(tile_data, observer_state: Dictionary, terrain_registry = null) -> bool:
 	if tile_data == null:
 		return false
 	var sight_range_world: float = float(observer_state.get("sight_range_world", 0.0))
-	return sight_range_world < 0.0 or Vector2(observer_state.get("position", Vector2.ZERO)).distance_to(Vector2(tile_data.world_position)) <= sight_range_world
+	return sight_range_world < 0.0 or _range_distance(Vector2(observer_state.get("position", Vector2.ZERO)), Vector2(tile_data.world_position), terrain_registry) <= sight_range_world
 
 
 func _collect_dirty_chunks(candidate_tiles: Array, chunk_size: int) -> Dictionary:
@@ -612,7 +618,7 @@ func _evaluate_tile_visibility(tile_data, mode: String, observer_states: Diction
 		var observer_position: Vector2 = Vector2(observer_state.get("position", Vector2.ZERO))
 		var sight_range_world: float = float(observer_state.get("sight_range_world", 0.0))
 		checked_tile_count += 1
-		if sight_range_world >= 0.0 and observer_position.distance_to(target_position) > sight_range_world:
+		if sight_range_world >= 0.0 and _range_distance(observer_position, target_position, terrain_registry) > sight_range_world:
 			los_blocked_count += 1
 			continue
 		if los_system != null:
@@ -816,7 +822,7 @@ func _observer_can_see_tile(observer: Node2D, tile_data, terrain_registry, los_s
 		return false
 	var target_position: Vector2 = tile_data.world_position
 	var effective_sight_range_world: float = _get_observer_sight_range_world(observer, sight_range_world)
-	if effective_sight_range_world >= 0.0 and observer.global_position.distance_to(target_position) > effective_sight_range_world:
+	if effective_sight_range_world >= 0.0 and _range_distance(observer.global_position, target_position, terrain_registry) > effective_sight_range_world:
 		return false
 	if los_system != null:
 		if los_system.has_method("has_line_of_sight_between_points"):
@@ -824,6 +830,16 @@ func _observer_can_see_tile(observer: Node2D, tile_data, terrain_registry, los_s
 		if los_system.has_method("has_line_of_sight_with_terrain"):
 			return bool(los_system.call("has_line_of_sight_with_terrain", observer.global_position, target_position, terrain_registry, effective_sight_range_world))
 	return true
+
+
+func _uses_hex_grid(terrain_registry) -> bool:
+	return terrain_registry != null and terrain_registry.has_method("get_grid_topology") and String(terrain_registry.call("get_grid_topology")) == "hex_axial_v1"
+
+
+func _range_distance(source_position: Vector2, target_position: Vector2, terrain_registry) -> float:
+	if _uses_hex_grid(terrain_registry):
+		return float(terrain_registry.call("get_movement_distance", source_position, target_position))
+	return source_position.distance_to(target_position)
 
 
 func _get_observer_sight_range_world(observer: Node2D, base_sight_range_world: float) -> float:

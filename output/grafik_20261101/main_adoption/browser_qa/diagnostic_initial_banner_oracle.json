@@ -1,0 +1,22 @@
+{
+  "error": "Error: no pending capture banner",
+  "checks": [
+    {
+      "label": "report title",
+      "passed": true
+    },
+    {
+      "label": "no pending capture banner",
+      "passed": false
+    }
+  ],
+  "errors": [],
+  "external_requests": [],
+  "screens": [
+    {
+      "path": "output/grafik_20261101/main_adoption/browser_qa/failure.png",
+      "sha256": "e6f7e69317d4621efa63abeaa084b4d5870f727a8f56911aed54760a9394ad39"
+    }
+  ],
+  "html_sha256": "86edd3811d9282cbd2249450c799122a12000d405a467ce2e89557b1401c0b3d"
+}

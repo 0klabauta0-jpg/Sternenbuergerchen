@@ -1,0 +1,148 @@
+{
+  "asset": "cutlass_01",
+  "iteration": 1,
+  "source": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/source/iteration01/cutlass_01.blend",
+  "source_sha256": "de0dd25a1a91251b39c9bf7b48f0af7f5998a3508ab66137a95d6cbd0e8fbee9",
+  "export": {
+    "path": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/iterations/iteration01/cutlass_01.glb",
+    "sha256": "7e90a0b98f4a8d2c801a00b6e429dcfffbe5b4bcaebfe7db9d47337fc236da31",
+    "bytes": 278880,
+    "meshes": 1,
+    "materials": 9,
+    "nodes": 1,
+    "triangles": 13304,
+    "animations": 0,
+    "skins": 0
+  },
+  "triangles": 13304,
+  "vertices": 6786,
+  "editable_parts": 75,
+  "dimensions_blender_m": [
+    11.64387035369873,
+    16.0,
+    5.444308280944824
+  ],
+  "bounds_blender_m": {
+    "min": [
+      -5.821935176849365,
+      -7.999999523162842,
+      0.0
+    ],
+    "max": [
+      5.821935176849365,
+      8.0,
+      5.444308280944824
+    ]
+  },
+  "normalization_length_m": 16,
+  "runtime_scale": 0.22,
+  "front_blender": "-Y",
+  "front_godot": "+Z",
+  "pivot": "full BBox XY center, groundZ0",
+  "palette": {
+    "Ivory": "e2d5b9",
+    "Petrol": "4f6569",
+    "Slate": "657a7d",
+    "Frame": "293a40",
+    "Steel": "8a9694",
+    "Ochre": "d49b48",
+    "Glass": "274d60",
+    "WarmCore": "ba773d",
+    "Inset": "3a5058"
+  },
+  "qa_pass": true,
+  "qa_errors": [],
+  "qa_warnings": [],
+  "raw_source_qa": "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/qa/iteration01/source_raw.json",
+  "groups": {
+    "01_Stepped_transport_hull": [
+      "Cargo_stepped_hull",
+      "Cargo_shoulder_L",
+      "Cargo_shoulder_R"
+    ],
+    "02_Broad_glazed_cockpit": [
+      "Cockpit_rounded_angular_shell",
+      "Cockpit_lower_chin",
+      "Chin_cannon_-1",
+      "Chin_cannon_1"
+    ],
+    "03_Profiled_forward_forks": [
+      "Fork_structural_shoulder_L",
+      "Fork_armor_endplate_L",
+      "Fork_lower_claw_L",
+      "Fork_gun_receiver_L",
+      "Fork_gun_barrel_L",
+      "Fork_ochre_panel_L",
+      "Fork_structural_shoulder_R",
+      "Fork_armor_endplate_R",
+      "Fork_lower_claw_R",
+      "Fork_gun_receiver_R",
+      "Fork_gun_barrel_R",
+      "Fork_ochre_panel_R"
+    ],
+    "04_Articulated_separate_engine_pods": [
+      "Engine_structural_pylon_L",
+      "Engine_pivot_L",
+      "Engine_pivot_hub_L",
+      "Engine_core_L",
+      "Engine_forward_cowl_L",
+      "Engine_aft_cowl_L",
+      "Engine_ochre_collar_L",
+      "Engine_inlet_L",
+      "Engine_lower_rail_L-1",
+      "Engine_lower_rail_L1",
+      "Engine_nozzle_housing_L",
+      "Engine_nozzle_lip_L",
+      "Engine_nozzle_trim_L",
+      "Engine_warm_recess_L",
+      "Engine_dark_core_L",
+      "Engine_structural_pylon_R",
+      "Engine_pivot_R",
+      "Engine_pivot_hub_R",
+      "Engine_core_R",
+      "Engine_forward_cowl_R",
+      "Engine_aft_cowl_R",
+      "Engine_ochre_collar_R",
+      "Engine_inlet_R",
+      "Engine_lower_rail_R-1",
+      "Engine_lower_rail_R1",
+      "Engine_nozzle_housing_R",
+      "Engine_nozzle_lip_R",
+      "Engine_nozzle_trim_R",
+      "Engine_warm_recess_R",
+      "Engine_dark_core_R"
+    ],
+    "05_Closed_loading_ramp": [
+      "Rear_ramp_frame",
+      "Ramp_lower_sill",
+      "Rear_haunch_-1",
+      "Rear_haunch_1"
+    ],
+    "06_Dorsal_twin_turret": [
+      "Turret_turntable",
+      "Turret_armored_housing",
+      "Turret_receiver_-1",
+      "Turret_barrel_-1",
+      "Turret_receiver_1",
+      "Turret_barrel_1"
+    ],
+    "07_Supported_static_gear": [
+      "Gear_0_Foot",
+      "Gear_0_Leg",
+      "Gear_0_Brace",
+      "Gear_0_Mount",
+      "Gear_1_Foot",
+      "Gear_1_Leg",
+      "Gear_1_Brace",
+      "Gear_1_Mount",
+      "Gear_2_Foot",
+      "Gear_2_Leg",
+      "Gear_2_Brace",
+      "Gear_2_Mount",
+      "Gear_3_Foot",
+      "Gear_3_Leg",
+      "Gear_3_Brace",
+      "Gear_3_Mount"
+    ]
+  }
+}

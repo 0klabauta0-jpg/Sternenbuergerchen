@@ -1,0 +1,437 @@
+{
+  "schema": "sternenbuergerchen.frontier_structures.v1",
+  "blender": "5.2.3 LTS",
+  "assets": {
+    "habitat_01": {
+      "asset": "habitat_01",
+      "front_axis_blender": "-Y",
+      "front_axis_godot": "+Z",
+      "units": "metres",
+      "dimensions_blender_xyz": [
+        6.679999828338623,
+        6.744999885559082,
+        4.349999904632568
+      ],
+      "pivot": "full bounds XY centre, ground Z=0",
+      "part_count": 116,
+      "palette": [
+        "Cream",
+        "PaleTrim",
+        "SlateTeal",
+        "DarkFrame",
+        "Hardware",
+        "Ochre",
+        "Glass",
+        "Deck",
+        "Roof"
+      ],
+      "source_blend": "art/frontier_illustrated_20261101/structures/source/habitat_01.blend",
+      "source_blend_sha256": "312ed90a2ba8b93cd74c4b634a10198156ce387e9baa10beac24fd767a23f098",
+      "export_glb": "Assets/curated/frontier_illustrated_20261101/structures/habitat_01.glb",
+      "glb": {
+        "bytes": 709044,
+        "sha256": "1da24faad755ea8b5c8e33a9420b8633f1f8c56053b155bdda0e9ef0e8c20e52",
+        "meshes": 1,
+        "materials": 8,
+        "triangles": 13184,
+        "animations": 0,
+        "skins": 0,
+        "nodes": 1
+      },
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [
+        "hidden back-to-back faces: Habitat_AirlockSeal<->Habitat_AirlockDoor (6 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing.001<->Habitat_FrontWindow_SideFrame.002 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing<->Habitat_FrontWindow_SideFrame.001 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing<->Habitat_FrontWindow_SideFrame (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing.001<->Habitat_FrontWindow_SideFrame.003 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing.001<->Habitat_FrontWindow_Sill.003 (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing<->Habitat_FrontWindow_Sill.001 (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing.001<->Habitat_FrontWindow_Sill.002 (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_FrontWindow_Glazing<->Habitat_FrontWindow_Sill (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideHeader.001<->Habitat_SideWindowSill.005 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideHeader.001<->Habitat_SideWindowSill.007 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideHeader<->Habitat_SideWindowSill.001 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideHeader<->Habitat_SideWindowSill.003 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideLower.001<->Habitat_SideWindowSill.004 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideLower.001<->Habitat_SideWindowSill.006 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_ServicePanel<->Habitat_OrangeRearBand (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideLower<->Habitat_SideWindowSill (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_SideLower<->Habitat_SideWindowSill.002 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Habitat_DoorLintel<->Habitat_AirlockSeal (2 pairs) - delete to save tris",
+        "2 parts fully enclosed, not touching (eyes/internals?): ['Habitat_DoorHandle', 'Habitat_DoorHandle.001']"
+      ],
+      "warning_acceptance": {
+        "hidden back-to-back faces": "Accepted internal mounting/contact caps at separately editable closed parts. No visible coplanar overlap; not a watertight boolean union.",
+        "fully enclosed handles": "Heuristic on nested airlock ring; both ochre handle bars visibly protrude and were inspected in front/side view."
+      },
+      "qa_scope": "all new geometry, including z-fight/contact checks; UV excluded for constant-color untextured palette",
+      "door_height_m": 2.1,
+      "references": [
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png"
+      ],
+      "status": "pass02 static visual candidate; user visual acceptance pending; no collision/navigation",
+      "revision": "pass02",
+      "reference_scope": "03 shape family + current warm pale shells/orange bands and coherent work/storage groups. No room capacity, cutaway gameplay or logistics.",
+      "generator": "art/frontier_illustrated_20261101/structures/generator/build_structures.py",
+      "generator_sha256": "67dbcc2e0fc9b9dcedfa57430059ef6d5c639fb46fa62b49f5069f36ccaadeea",
+      "changes": [
+        "pale neutral roof panels",
+        "warm pale shell palette",
+        "continuous orange wall bands",
+        "orange chamfered airlock accents"
+      ],
+      "native_import_checked": false,
+      "user_visual_acceptance": false,
+      "evaluated_source_totals": {
+        "verts": 6820,
+        "faces": 6808,
+        "tris": 13184,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "inside_out_islands": 0
+      },
+      "views_opened": [
+        "front",
+        "rear",
+        "random",
+        "wire"
+      ],
+      "view_renderer": "Blender Workbench, same geometry; material front/rear plus deterministic per-part colors and wire; native Godot acceptance belongs to parent preview task",
+      "qa_image_sha256": {
+        "front": "a3f9de29eb81f09553d2fbfd9644d5ae06f7e444089ad43388310dbdcd0e27e9",
+        "rear": "c96486e3bdd56d1b68b97f453e9c5d0d02a85b21c3f45e8988e678c2e6a7e861",
+        "random": "0bf8768d09f74acc5d0ae20b19ceebfc1b5dcf42eacb9a05e6bc930f06ebd18d",
+        "wire": "c3483976305a5caade388a2a20bfe7ea417e8bc597016e11b54352f28f11faf4"
+      },
+      "source_reference_sha256": {
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+        "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8",
+        "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530"
+      },
+      "glb_roundtrip": {
+        "pass": true,
+        "glb_sha256": "1da24faad755ea8b5c8e33a9420b8633f1f8c56053b155bdda0e9ef0e8c20e52",
+        "objects": 1,
+        "triangles": 13184,
+        "dimensions_blender_xyz": [
+          6.679999828338623,
+          6.744999885559082,
+          4.349999904632568
+        ],
+        "bounds_min": [
+          -3.3399999141693115,
+          -3.372499942779541,
+          0.0
+        ],
+        "bounds_max": [
+          3.3399999141693115,
+          3.372499942779541,
+          4.349999904632568
+        ],
+        "materials": 8,
+        "geometry_qa_pass": true,
+        "warnings": [
+          "habitat_01: duplicate verts=12984 loose verts=0",
+          "hidden back-to-back faces: habitat_01 (55 pairs) - delete to save tris"
+        ],
+        "source_bounds_match_tolerance_m": 0.0001
+      },
+      "glb_roundtrip_warning_acceptance": {
+        "duplicate verts": "glTF corner vertices split for flat face normals and palette material boundaries; no loose vertices; editable source part topology separately checked.",
+        "hidden back-to-back faces": "Closed editable components retain hidden contact caps; shelves support cases and frames contact shells. No same-facing coplanar overlap found."
+      },
+      "footprint_delta_from_pass01_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "visual_review_note": "All four final views opened; supported workbench, rack/cases, frame/bands and service connections inspected. Candidate only; native play-distance and user acceptance remain separate.",
+      "technical_file_checks_pass": true
+    },
+    "workshop_01": {
+      "asset": "workshop_01",
+      "front_axis_blender": "-Y",
+      "front_axis_godot": "+Z",
+      "units": "metres",
+      "dimensions_blender_xyz": [
+        7.039999961853027,
+        5.7179999351501465,
+        4.222499847412109
+      ],
+      "pivot": "full bounds XY centre, ground Z=0",
+      "part_count": 92,
+      "palette": [
+        "Cream",
+        "PaleTrim",
+        "SlateTeal",
+        "DarkFrame",
+        "Hardware",
+        "Ochre",
+        "Glass",
+        "Deck",
+        "Roof"
+      ],
+      "source_blend": "art/frontier_illustrated_20261101/structures/source/workshop_01.blend",
+      "source_blend_sha256": "cee0568d6b2a8559bdc0140b71c332d7aa2017f86a2d8daf2d46df9db7075b39",
+      "export_glb": "Assets/curated/frontier_illustrated_20261101/structures/workshop_01.glb",
+      "glb": {
+        "bytes": 544544,
+        "sha256": "28e5d97863f5c97e8a54d3f28a44867f9a38b372d31f4d80e7b668946d24a7ec",
+        "meshes": 1,
+        "materials": 9,
+        "triangles": 9992,
+        "animations": 0,
+        "skins": 0,
+        "nodes": 1
+      },
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [
+        "hidden back-to-back faces: Workshop_GroundPlinth<->Workshop_PortalFrame.001 (6 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_GroundPlinth<->Workshop_PortalFrame (6 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_EntryBumper<->Workshop_SafetyBand (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_ToolCabinet<->Workshop_CabinetDoor (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_RackShelf.002<->Workshop_StoredCase.004 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_ToolCabinet<->Workshop_CabinetDoor.001 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_EntryBumper.001<->Workshop_SafetyBand.001 (4 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_RackShelf<->Workshop_StoredCase (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_RackShelf<->Workshop_StoredCase.001 (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_RackShelf.001<->Workshop_StoredCase.003 (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_RackShelf.001<->Workshop_StoredCase.002 (3 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_Deck<->Workshop_BayFloorMark.001 (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_Deck<->Workshop_BayFloorMark (2 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_CabinetDoor<->Workshop_CabinetHandle (1 pairs) - delete to save tris",
+        "hidden back-to-back faces: Workshop_CabinetDoor.001<->Workshop_CabinetHandle (1 pairs) - delete to save tris"
+      ],
+      "warning_acceptance": {
+        "hidden back-to-back faces": "Accepted internal mounting/contact caps at separately editable closed parts. No visible coplanar overlap; not a watertight boolean union.",
+        "fully enclosed handles": "Heuristic on nested airlock ring; both ochre handle bars visibly protrude and were inspected in front/side view."
+      },
+      "qa_scope": "all new geometry, including z-fight/contact checks; UV excluded for constant-color untextured palette",
+      "door_height_m": null,
+      "references": [
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png"
+      ],
+      "status": "pass02 static visual candidate; user visual acceptance pending; no collision/navigation",
+      "revision": "pass02",
+      "reference_scope": "03 shape family + current warm pale shells/orange bands and coherent work/storage groups. No room capacity, cutaway gameplay or logistics.",
+      "generator": "art/frontier_illustrated_20261101/structures/generator/build_structures.py",
+      "generator_sha256": "67dbcc2e0fc9b9dcedfa57430059ef6d5c639fb46fa62b49f5069f36ccaadeea",
+      "changes": [
+        "pale neutral roof panels",
+        "orange wall/portal bands",
+        "existing workbench moved 1.45m toward open front",
+        "supported cargo rack inside unchanged width/height"
+      ],
+      "native_import_checked": false,
+      "user_visual_acceptance": false,
+      "evaluated_source_totals": {
+        "verts": 5180,
+        "faces": 5074,
+        "tris": 9992,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "inside_out_islands": 0
+      },
+      "views_opened": [
+        "front",
+        "rear",
+        "random",
+        "wire"
+      ],
+      "view_renderer": "Blender Workbench, same geometry; material front/rear plus deterministic per-part colors and wire; native Godot acceptance belongs to parent preview task",
+      "qa_image_sha256": {
+        "front": "339ae3c87cef7d419fe7a65551202ed140fa491a38d3fb54f08b38cdffb44368",
+        "rear": "26c5ff65403d68034b3b8ec3fcd1943b06b1c8adfc16e0b1395c84449b8fb110",
+        "random": "36cc75a140ad05bf30777c3c84b3e999c361ad891a0932e69e5a7ec07e961386",
+        "wire": "09efee6cc1f2f64911cf013e7f0c7bbc7272b8ebd434a8c059add47b0fb3f7a9"
+      },
+      "source_reference_sha256": {
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+        "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8",
+        "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530"
+      },
+      "glb_roundtrip": {
+        "pass": true,
+        "glb_sha256": "28e5d97863f5c97e8a54d3f28a44867f9a38b372d31f4d80e7b668946d24a7ec",
+        "objects": 1,
+        "triangles": 9992,
+        "dimensions_blender_xyz": [
+          7.039999961853027,
+          5.7179999351501465,
+          4.222499847412109
+        ],
+        "bounds_min": [
+          -3.5199999809265137,
+          -2.8589999675750732,
+          0.0
+        ],
+        "bounds_max": [
+          3.5199999809265137,
+          2.8589999675750732,
+          4.222499847412109
+        ],
+        "materials": 9,
+        "geometry_qa_pass": true,
+        "warnings": [
+          "workshop_01: duplicate verts=9939 loose verts=0",
+          "hidden back-to-back faces: workshop_01 (50 pairs) - delete to save tris"
+        ],
+        "source_bounds_match_tolerance_m": 0.0001
+      },
+      "glb_roundtrip_warning_acceptance": {
+        "duplicate verts": "glTF corner vertices split for flat face normals and palette material boundaries; no loose vertices; editable source part topology separately checked.",
+        "hidden back-to-back faces": "Closed editable components retain hidden contact caps; shelves support cases and frames contact shells. No same-facing coplanar overlap found."
+      },
+      "footprint_delta_from_pass01_m": [
+        0.0,
+        0.028,
+        0.0
+      ],
+      "visual_review_note": "All four final views opened; supported workbench, rack/cases, frame/bands and service connections inspected. Candidate only; native play-distance and user acceptance remain separate.",
+      "technical_file_checks_pass": true
+    },
+    "service_unit_01": {
+      "asset": "service_unit_01",
+      "front_axis_blender": "-Y",
+      "front_axis_godot": "+Z",
+      "units": "metres",
+      "dimensions_blender_xyz": [
+        4.849999904632568,
+        3.200000047683716,
+        2.7100000381469727
+      ],
+      "pivot": "full bounds XY centre, ground Z=0",
+      "part_count": 81,
+      "palette": [
+        "Cream",
+        "PaleTrim",
+        "SlateTeal",
+        "DarkFrame",
+        "Hardware",
+        "Ochre",
+        "Glass",
+        "Deck",
+        "Roof"
+      ],
+      "source_blend": "art/frontier_illustrated_20261101/structures/source/service_unit_01.blend",
+      "source_blend_sha256": "0eb7d22e075e5997464678fbdc967de5d19f5cfea73b1452e8cb7c0a586bc750",
+      "export_glb": "Assets/curated/frontier_illustrated_20261101/structures/service_unit_01.glb",
+      "glb": {
+        "bytes": 355600,
+        "sha256": "81a2d1fb532db4082d586bb9834ba0559b3d5cd5fda3b7814f27c74a39518ea3",
+        "meshes": 1,
+        "materials": 7,
+        "triangles": 6760,
+        "animations": 0,
+        "skins": 0,
+        "nodes": 1
+      },
+      "qa_pass": true,
+      "qa_errors": [],
+      "qa_warnings": [],
+      "warning_acceptance": {
+        "hidden back-to-back faces": "Accepted internal mounting/contact caps at separately editable closed parts. No visible coplanar overlap; not a watertight boolean union.",
+        "fully enclosed handles": "Heuristic on nested airlock ring; both ochre handle bars visibly protrude and were inspected in front/side view."
+      },
+      "qa_scope": "all new geometry, including z-fight/contact checks; UV excluded for constant-color untextured palette",
+      "door_height_m": null,
+      "references": [
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+        "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png"
+      ],
+      "status": "pass02 static visual candidate; user visual acceptance pending; no collision/navigation",
+      "revision": "pass02",
+      "reference_scope": "03 shape family + current warm pale shells/orange bands and coherent work/storage groups. No room capacity, cutaway gameplay or logistics.",
+      "generator": "art/frontier_illustrated_20261101/structures/generator/build_structures.py",
+      "generator_sha256": "67dbcc2e0fc9b9dcedfa57430059ef6d5c639fb46fa62b49f5069f36ccaadeea",
+      "changes": [
+        "orange tank belt",
+        "pale pump lid",
+        "two connected front service couplings"
+      ],
+      "native_import_checked": false,
+      "user_visual_acceptance": false,
+      "evaluated_source_totals": {
+        "verts": 3540,
+        "faces": 3851,
+        "tris": 6760,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "inside_out_islands": 0
+      },
+      "views_opened": [
+        "front",
+        "rear",
+        "random",
+        "wire"
+      ],
+      "view_renderer": "Blender Workbench, same geometry; material front/rear plus deterministic per-part colors and wire; native Godot acceptance belongs to parent preview task",
+      "qa_image_sha256": {
+        "front": "53579dcc866063bc8c4b7e625ffd5b431329c08c4cdfa7c9fbf71c154cba72ef",
+        "rear": "8730151b1a388519d0de794b25461dc43cadbf85f85e83fb3b0f02a536a1ed65",
+        "random": "cb2c4290fda058527b50aa53a7d0ca76c6804162b07cfeb62f02b98bcc974a52",
+        "wire": "1c774c9e330dd157a2987f3ba48f6fd757a5937d6fcef30135e23c1377035f65"
+      },
+      "source_reference_sha256": {
+        "docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+        "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png": "3216d5c0134b4dc37ed93d659d08f018264092b6e49b3dd3c1bd0328b4fbd8f8",
+        "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530"
+      },
+      "glb_roundtrip": {
+        "pass": true,
+        "glb_sha256": "81a2d1fb532db4082d586bb9834ba0559b3d5cd5fda3b7814f27c74a39518ea3",
+        "objects": 1,
+        "triangles": 6760,
+        "dimensions_blender_xyz": [
+          4.849999904632568,
+          3.200000047683716,
+          2.7100000381469727
+        ],
+        "bounds_min": [
+          -2.424999952316284,
+          -1.600000023841858,
+          0.0
+        ],
+        "bounds_max": [
+          2.424999952316284,
+          1.600000023841858,
+          2.7100000381469727
+        ],
+        "materials": 7,
+        "geometry_qa_pass": true,
+        "warnings": [
+          "service_unit_01: duplicate verts=6439 loose verts=0"
+        ],
+        "source_bounds_match_tolerance_m": 0.0001
+      },
+      "glb_roundtrip_warning_acceptance": {
+        "duplicate verts": "glTF corner vertices split for flat face normals and palette material boundaries; no loose vertices; editable source part topology separately checked.",
+        "hidden back-to-back faces": "Closed editable components retain hidden contact caps; shelves support cases and frames contact shells. No same-facing coplanar overlap found."
+      },
+      "footprint_delta_from_pass01_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "visual_review_note": "All four final views opened; supported workbench, rack/cases, frame/bands and service connections inspected. Candidate only; native play-distance and user acceptance remain separate.",
+      "technical_file_checks_pass": true
+    }
+  }
+}

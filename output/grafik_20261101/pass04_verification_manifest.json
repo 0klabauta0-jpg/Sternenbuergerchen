@@ -1,0 +1,79 @@
+{
+  "schema": "sternenbuergerchen.graphics_pass04_verification.v1",
+  "code_commit": "794261191f4165d997f729fb105a5ef0c028774c",
+  "code_commit_pushed": true,
+  "based_on_unintegrated_graphics_branch": "task/grafikreferenzen-20261101",
+  "previous_handoff_commit": "104609cc6922bf5916fc463b21e607e47e8c6792",
+  "engine_report": "output/grafik_20261101/pass04_check_runs/20261101T164440Z-pid41380/metadata/report.json",
+  "engine_checks_passed": 17,
+  "native_captures": 17,
+  "pairs": [
+    {
+      "view": "overview",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass04/before/overview.png",
+      "before_sha256": "2baa2bd5fb66cf5520cd7f27ad129e456cadbc6202d06dd9c8b44dc89bd90b59",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/overview.png",
+      "after_sha256": "6c3a1d41e61cfa8ed8aa1c49109f01d90647d137c1d3e6c1b52f9d597a93f4a1",
+      "camera_size": 12.0
+    },
+    {
+      "view": "workshop",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass04/before/workshop.png",
+      "before_sha256": "c05a693c8cc958d409907ac5083f349e29d5194280c5cfbfaf9671e07f7ed6a3",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/workshop.png",
+      "after_sha256": "74ef744460820ff1033e946dd956ec6c1ec4e8ccd805fa606a8b002025f3938f",
+      "camera_size": 4.2
+    },
+    {
+      "view": "crew",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass04/before/crew.png",
+      "before_sha256": "3ff57c3b554c98af32380dd2c7ddd73aa141d8c695b2cd026962eba4ff47af17",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/crew.png",
+      "after_sha256": "7ebda2daea4a806acd2f3c7ef8a62f8f198136bd2451231145646949e566769d",
+      "camera_size": 2.5
+    },
+    {
+      "view": "hex_grid",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass04/before/hex_grid.png",
+      "before_sha256": "ec546afd10a3ee100bbdf68aaf1d1c2625defafa7223bf2350f25d07b877ed02",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/hex_grid.png",
+      "after_sha256": "0447659e23c32c1ff467bbdd8bf2317b40fe4e0f7145862004df84dacb19b2fe",
+      "camera_size": 12.0
+    },
+    {
+      "view": "landscape",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass04/before/landscape.png",
+      "before_sha256": "00194743feeddb37cda25f136845df767d58dedd3edeaa509d122ee05f470d7b",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/landscape.png",
+      "after_sha256": "3614e8a86307d4dd9af390a2efee5cc897d103a81dd8a1b90a79ced6c0b2a2ef",
+      "camera_size": 23.0
+    },
+    {
+      "view": "cutaway",
+      "before": "docs/reports/assets/grafik-2026-11-01/engine_pass04/before/cutaway.png",
+      "before_sha256": "fa6eded2704e04b354e624cf2d47892b7bfeaeeaa5bb5685a76f030f0a1a6101",
+      "after": "docs/reports/assets/grafik-2026-11-01/engine_pass04/after/cutaway.png",
+      "after_sha256": "52ca75e3d08e09b32f50983d992120f374938914b0477e1c16189008729af71b",
+      "camera_size": 3.6
+    }
+  ],
+  "renderer_match": true,
+  "lighting_match": true,
+  "camera_transforms_match": true,
+  "archived_pass03_html_sha256": "b2e4b6c86b08175112de59a8fd4a6d04e8429d776f70feef4b4f74785e38f9a3",
+  "structure_manifest": "art/frontier_illustrated_20261101/structures/pass04/manifest.json",
+  "scope": "Native synthetic Hex base: revised ships after rejected R01, worked Kenney sets, supported utility, closed/cutaway display shells, new pads/paths/chipped strata. No flight/refuelling/interior/logistics simulation or campaign/editor migration.",
+  "remaining_visual_differences": "Simplified candidates, with clearer forms and bevels but less painterly material and environmental richness than the targets. No user art approval or general release acceptance.",
+  "report_revision": "r02",
+  "ship_user_status": "R01 rejected; R02 still criticized as far from 2D targets. Separate Astra Ultra Blender revision commissioned.",
+  "ship_followup_chat": "01a197d8-ebd0-7100-8d12-21ff6bc52c0d",
+  "ship_manifests": [
+    "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/manifest.json",
+    "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/manifest.json"
+  ],
+  "rejected_r01": "output/grafik_20261101/pass04_rejected_r01_manifest.json",
+  "closed_shell_source": "scripts/terrain/frontier_closed_buildings.gd",
+  "browser_report": "output/grafik_20261101/browser_qa_pass04/browser_qa.json",
+  "browser_checks_passed": 180,
+  "browser_html_sha256": "7ae0d52d3b258b2ae17b617d743a734de8ede0bd871b6843166ae559a7cbc5e6"
+}

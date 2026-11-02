@@ -1,0 +1,930 @@
+{
+  "html": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\docs\\reports\\STERNENBUERGERCHEN_GRAFIK_2026-11-01.html",
+  "html_sha256_start": "4a4993b3a2cc5714ba0f998dbd6b73ef9261801a1b3dd6bada78750686c986b5",
+  "started_at": "2026-11-01T13:21:37.518Z",
+  "checks": [
+    {
+      "name": "desktop_initial_DOM_images_loaded",
+      "pass": true,
+      "count": 33,
+      "failures": []
+    },
+    {
+      "name": "desktop_viewport",
+      "pass": true
+    },
+    {
+      "name": "desktop_horizontal_overflow_zero",
+      "pass": true,
+      "dimensions": {
+        "viewport": 1440,
+        "document": 1440,
+        "body": 1440
+      }
+    },
+    {
+      "name": "all_embedded_full_images_decode",
+      "pass": true,
+      "count": 45,
+      "failures": []
+    },
+    {
+      "name": "seven_current_targets",
+      "pass": true
+    },
+    {
+      "name": "engine_selector_overview",
+      "pass": true,
+      "title": "Godot · Hex-Basis · Übersicht"
+    },
+    {
+      "name": "engine_selector_hex_grid",
+      "pass": true,
+      "title": "Godot · Hex-Basis · Hexraster"
+    },
+    {
+      "name": "engine_selector_crew",
+      "pass": true,
+      "title": "Godot · Hex-Basis · Kenney-Citizens"
+    },
+    {
+      "name": "engine_selector_workshop",
+      "pass": true,
+      "title": "Godot · Hex-Basis · Werkstatt"
+    },
+    {
+      "name": "engine_selector_walk_pose",
+      "pass": true,
+      "title": "Godot · Hex-Basis · Gehpose"
+    },
+    {
+      "name": "engine_selector_baseline",
+      "pass": true,
+      "title": "Godot · Hex-Basis · Profil aus"
+    },
+    {
+      "name": "engine_six_distinct_titles",
+      "pass": true,
+      "titles": {
+        "overview": "Godot · Hex-Basis · Übersicht",
+        "hex_grid": "Godot · Hex-Basis · Hexraster",
+        "crew": "Godot · Hex-Basis · Kenney-Citizens",
+        "workshop": "Godot · Hex-Basis · Werkstatt",
+        "walk_pose": "Godot · Hex-Basis · Gehpose",
+        "baseline": "Godot · Hex-Basis · Profil aus"
+      }
+    },
+    {
+      "name": "lightbox_source_and_hash",
+      "pass": true
+    },
+    {
+      "name": "lightbox_zoom_on",
+      "pass": true
+    },
+    {
+      "name": "lightbox_arrow_right",
+      "pass": true
+    },
+    {
+      "name": "lightbox_arrow_left",
+      "pass": true
+    },
+    {
+      "name": "lightbox_text_cursor_does_not_navigate",
+      "pass": true
+    },
+    {
+      "name": "lightbox_escape_closes",
+      "pass": true
+    },
+    {
+      "name": "lightbox_close_button",
+      "pass": true
+    },
+    {
+      "name": "catalog_group_all",
+      "pass": true,
+      "expected": 7,
+      "actual": 7
+    },
+    {
+      "name": "catalog_group_terrain",
+      "pass": true,
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "name": "catalog_group_buildings",
+      "pass": true,
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "name": "catalog_group_people",
+      "pass": true,
+      "expected": 1,
+      "actual": 1
+    },
+    {
+      "name": "catalog_group_cutlass",
+      "pass": true,
+      "expected": 2,
+      "actual": 2
+    },
+    {
+      "name": "catalog_group_buccaneer",
+      "pass": true,
+      "expected": 2,
+      "actual": 2
+    },
+    {
+      "name": "combined_filter_empty_state",
+      "pass": true
+    },
+    {
+      "name": "search_buccaneer",
+      "pass": true
+    },
+    {
+      "name": "search_case_insensitive",
+      "pass": true
+    },
+    {
+      "name": "archive_five_preserved_targets",
+      "pass": true
+    },
+    {
+      "name": "ship_rear_views",
+      "pass": true,
+      "ids": [
+        "cutlass_source_rear",
+        "cutlass_rear",
+        "cutlass_candidate_rear",
+        "buccaneer_source_rear",
+        "buccaneer_rear",
+        "buccaneer_candidate_rear"
+      ]
+    },
+    {
+      "name": "ship_front_views",
+      "pass": true,
+      "ids": [
+        "cutlass_source_front",
+        "cutlass_front",
+        "cutlass_candidate_front",
+        "buccaneer_source_front",
+        "buccaneer_front",
+        "buccaneer_candidate_front"
+      ]
+    },
+    {
+      "name": "ship_distance_state",
+      "pass": true,
+      "ids": [
+        "cutlass_source_distance",
+        "cutlass_front",
+        "cutlass_candidate_distance",
+        "buccaneer_source_distance",
+        "buccaneer_front",
+        "buccaneer_candidate_distance"
+      ]
+    },
+    {
+      "name": "ship_near_restores_rear_control",
+      "pass": true
+    },
+    {
+      "name": "localstorage_global_note",
+      "pass": true
+    },
+    {
+      "name": "localstorage_checkbox",
+      "pass": true
+    },
+    {
+      "name": "localstorage_choices",
+      "pass": true
+    },
+    {
+      "name": "localstorage_ship_note",
+      "pass": true
+    },
+    {
+      "name": "localstorage_ship_decision",
+      "pass": true
+    },
+    {
+      "name": "localstorage_contenteditable",
+      "pass": true
+    },
+    {
+      "name": "timestamped_distinct_downloads",
+      "pass": true,
+      "downloads": [
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa\\downloads\\grafik_20261101_2026-11-01T13-21-50-310Z_01.json",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa\\downloads\\grafik_20261101_2026-11-01T13-21-50-408Z_02.json"
+      ]
+    },
+    {
+      "name": "json_required_schema",
+      "pass": true
+    },
+    {
+      "name": "json_actual_controls",
+      "pass": true
+    },
+    {
+      "name": "json_actual_notes_and_decisions",
+      "pass": true
+    },
+    {
+      "name": "json_active_choices",
+      "pass": true
+    },
+    {
+      "name": "json_asset_assignments_and_status",
+      "pass": true,
+      "count": 45
+    },
+    {
+      "name": "json_visible_text_fallback",
+      "pass": true
+    },
+    {
+      "name": "import_optional_absent",
+      "pass": true,
+      "note": "No import control; contract makes import optional."
+    },
+    {
+      "name": "desktop_overflow_after_controls",
+      "pass": true,
+      "dimensions": {
+        "viewport": 1440,
+        "document": 1440,
+        "body": 1440
+      }
+    },
+    {
+      "name": "mobile_initial_DOM_images_loaded",
+      "pass": true,
+      "count": 33,
+      "failures": []
+    },
+    {
+      "name": "mobile_horizontal_overflow_zero",
+      "pass": true,
+      "dimensions": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      }
+    },
+    {
+      "name": "mobile_lightbox_horizontal_overflow_zero",
+      "pass": true,
+      "dimensions": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      }
+    },
+    {
+      "name": "mobile_dialog_image_loaded",
+      "pass": true
+    },
+    {
+      "name": "mobile_filter_people",
+      "pass": true
+    },
+    {
+      "name": "mobile_search_empty",
+      "pass": true
+    },
+    {
+      "name": "mobile_overflow_after_search",
+      "pass": true,
+      "dimensions": {
+        "viewport": 390,
+        "document": 390,
+        "body": 390
+      }
+    },
+    {
+      "name": "console_errors_zero",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "name": "page_errors_zero",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "name": "external_requests_zero",
+      "pass": true,
+      "requests": []
+    }
+  ],
+  "screenshots": [
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa\\01_desktop_top.png",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa\\02_desktop_engine_crew.png",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa\\03_desktop_lightbox.png",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa\\04_mobile_top.png",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa\\05_mobile_engine_crew.png",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\output\\grafik_20261101\\browser_qa\\06_mobile_lightbox.png"
+  ],
+  "console_errors": [],
+  "page_errors": [],
+  "external_requests": [],
+  "failures": [],
+  "dom_inventory": [
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Native Godot-Aufnahme ↗",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Übersicht",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Hexraster",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Kenney-Citizens",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Werkstatt",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Gehpose",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Profil aus",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "engineImageButton",
+      "text": "Native Aufnahme vergrößern ↗",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "JSON exportieren ↓",
+      "type": "button"
+    },
+    {
+      "tag": "INPUT",
+      "id": "searchInput",
+      "text": "",
+      "type": "search",
+      "exportKey": "catalog.search"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Alle",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Landschaft",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Gebäude",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Menschen",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Cutlass",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Buccaneer",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-terrain",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-terrain",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-people",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-people",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-outpost",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-outpost",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-cutlass_front",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-cutlass_front",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-cutlass_rear",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-cutlass_rear",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-buccaneer_front",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-buccaneer_front",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-buccaneer_rear",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-buccaneer_rear",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-cutlass_front_v1",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-cutlass_front_v1",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-cutlass_rear_v1",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-cutlass_rear_v1",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-buccaneer_front_v1",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-buccaneer_front_v1",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-buccaneer_rear_v1",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-buccaneer_rear_v1",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "decision-buccaneer_front_v2_previous",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "note-buccaneer_front_v2_previous",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Vorn / oben",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Heck / oben",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Nahansicht",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "Spielabstand (Probe)",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "ship-decision-cutlass",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "ship-note-cutlass",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "ship-decision-buccaneer",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "ship-note-buccaneer",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "text": "",
+      "type": "button"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "text": "",
+      "type": "checkbox",
+      "exportKey": "review.wimmelbild"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "text": "",
+      "type": "checkbox",
+      "exportKey": "review.detail_level"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "text": "",
+      "type": "checkbox",
+      "exportKey": "review.ship_pairs"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "text": "",
+      "type": "checkbox",
+      "exportKey": "review.world_coherence"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "text": "",
+      "type": "checkbox",
+      "exportKey": "review.native_gap_understood"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "globalNotes",
+      "text": "",
+      "type": "textarea",
+      "exportKey": "review.global_notes"
+    },
+    {
+      "tag": "DIV",
+      "id": "decisionNote",
+      "text": "",
+      "noteKey": "review.decision"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "exportJsonButton",
+      "text": "JSON exportieren ↓",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "showJsonButton",
+      "text": "JSON anzeigen",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "copyJsonButton",
+      "text": "JSON kopieren",
+      "type": "button"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "jsonOutput",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "closeDialog",
+      "text": "×",
+      "type": "button"
+    },
+    {
+      "tag": "SELECT",
+      "id": "dialogDecision",
+      "text": "Noch offenRichtung passtBitte ändernWichtigste Vorlage",
+      "type": "select-one"
+    },
+    {
+      "tag": "TEXTAREA",
+      "id": "dialogNotes",
+      "text": "",
+      "type": "textarea"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "previousImage",
+      "text": "←",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "nextImage",
+      "text": "→",
+      "type": "button"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "zoomImage",
+      "text": "Größer ansehen",
+      "type": "button"
+    }
+  ],
+  "html_sha256_end": "4a4993b3a2cc5714ba0f998dbd6b73ef9261801a1b3dd6bada78750686c986b5",
+  "html_changed_during_run": false,
+  "completed_at": "2026-11-01T13:21:51.423Z",
+  "pass": true
+}

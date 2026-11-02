@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "pass": true,
+  "errors": [],
+  "warnings": [
+    "service_unit_01: duplicate verts=6439 loose verts=0"
+  ],
+  "ground_z": 0.0,
+  "zfighting": [],
+  "floating": [],
+  "back_to_back": [],
+  "enclosed": [],
+  "objects": {
+    "service_unit_01": {
+      "verts": 12879,
+      "faces": 6760,
+      "tris": 6760,
+      "ngons": 0,
+      "boundary_edges": 12888,
+      "nonmanifold_edges": 0,
+      "wire_edges": 0,
+      "loose_verts": 0,
+      "degenerate_faces": 0,
+      "zero_length_edges": 0,
+      "inconsistent_normals_edges": 0,
+      "duplicate_verts": 6439,
+      "islands": 3057,
+      "inside_out_islands": 0,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "materials": 7
+    }
+  }
+}

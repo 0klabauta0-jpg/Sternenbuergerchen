@@ -1,0 +1,180 @@
+{
+  "schema": "sternenbuergerchen.graphics_reference_package.v1",
+  "date": "2026-11-01",
+  "base_commit": "3cae5a216d380b58fef92724540e95fbc49bde7e",
+  "branch": "task/grafikreferenzen-20261101",
+  "runtime_unchanged": false,
+  "generated_target_count": 13,
+  "latest_ship_target_count": 4,
+  "approved_2d_references": [
+    "01_rostwelt_landschaft.png",
+    "03_aussenposten_stilstudie.png",
+    "02_menschen_stilstudie.png"
+  ],
+  "latest_citizen_choice": "Original Kenney astronauts are the provisional base; rejected custom figures stay outside runtime. Future armor, equipment and appearance changes are explicitly requested.",
+  "engine_capture": "output/grafik_20261101/pass07_paths_after_capture.json",
+  "previous_engine_capture": "output/grafik_20261101/pass06_environment_after_capture.json",
+  "additional_user_references": "output/grafik_20261101/reference_manifest.json",
+  "before_after_verification": "output/grafik_20261101/pass07_paths_verification_manifest.json",
+  "kenney_component_provenance": "art/frontier_illustrated_20261101/structures/pass04/manifest.json",
+  "ship_model_provenance": [
+    "art/frontier_illustrated_20261101/ships/pass04_r02/cutlass/manifest.json",
+    "art/frontier_illustrated_20261101/ships/pass04_r02/buccaneer/manifest.json"
+  ],
+  "report_revision": "env07",
+  "ship_user_status": "R02 remains criticized and not visually accepted; separate Astra Ultra Blender revision commissioned",
+  "ship_followup_chat": "01a197d8-ebd0-7100-8d12-21ff6bc52c0d",
+  "outpost_pad_reference": "output/grafik_20261101/pass04_reference_manifest.json",
+  "rejected_ship_revision": "output/grafik_20261101/pass04_rejected_r01_manifest.json",
+  "hex_contract": "docs/dev/hex_grid_v1_contract.md",
+  "scope": [
+    {
+      "id": "terrain",
+      "actual": "Pass07: gerade gemeinsame Eingangs-/Padanker, planare Strassennormalen und Rampenleisten korrigiert; neue gespeicherte Frontier-Hexkarte im regulaeren Editor-/Missionspfad. Geologie bleibt P06.",
+      "runtime_changed": true,
+      "mesh_changed": true,
+      "changed_in_current_pass": true,
+      "materials_changed": true
+    },
+    {
+      "id": "structures",
+      "actual": "Pass07: unveraenderte Gebaeude-/Utility-GLBs, neue grafische Eingangszugaenge; originales Utility jetzt einmal im regulaeren Objektkatalog mit gespeicherten Reservierungen.",
+      "runtime_changed": true,
+      "mesh_changed": false,
+      "changed_in_current_pass": true,
+      "materials_changed": true
+    },
+    {
+      "id": "people",
+      "actual": "Unveraenderter P05-Stand: vier Original-Kenney-Citizen-/Gear-GLBs mit originalen Idle/Walk und identischen Startpositionen/Blickrichtungen",
+      "runtime_changed": true,
+      "mesh_changed": false,
+      "changed_in_current_pass": false,
+      "materials_changed": false
+    },
+    {
+      "id": "cutlass",
+      "actual": "Unveraenderter kritisierter R02-Stand; separate Astra-Modellarbeit wird nicht automatisch uebernommen",
+      "runtime_changed": true,
+      "mesh_changed": false,
+      "changed_in_current_pass": false,
+      "materials_changed": false
+    },
+    {
+      "id": "buccaneer",
+      "actual": "Unveraenderter kritisierter R02-Stand; separate Astra-Modellarbeit wird nicht automatisch uebernommen",
+      "runtime_changed": true,
+      "mesh_changed": false,
+      "changed_in_current_pass": false,
+      "materials_changed": false
+    },
+    {
+      "id": "rules",
+      "actual": "Grafikvertrag und verlinkte Arbeitsregeln",
+      "runtime_changed": false,
+      "changed_in_current_pass": false,
+      "mesh_changed": false,
+      "materials_changed": false
+    },
+    {
+      "id": "hex",
+      "actual": "Versionierte Hexkoordinaten, A*/HPA, Registry, Bewegungsmass, LOS/FoW, native Auswahl und Picking; Legacy square8 kompatibel",
+      "runtime_changed": true,
+      "changed_in_current_pass": false,
+      "mesh_changed": false,
+      "materials_changed": false
+    }
+  ],
+  "source_images_and_models": [
+    {
+      "id": "insel_style",
+      "path": "C:\\dev\\InselKrieg\\game\\docs\\art\\referenzen\\Illustrationsserie_20261029\\01_sichelbucht.png",
+      "sha256": "c4150be1a2ee0befa056833b2f088e0431f2d926fce98475865bb19d49ef316e",
+      "role": "Freigegebene InselKrieg-2D-Stilreferenz; keine SternenBuergerchen-Integration"
+    },
+    {
+      "id": "sc_ground",
+      "path": "C:\\Users\\bjoer\\Pictures\\StarCitizen - Screenshots\\LIVE\\4.6.0-live.11377160\\ScreenShot-2026-03-08_16-00-35-254.jpg",
+      "sha256": "8ec584cf16240c539e9fbd8dd1e261e43ee22590edc95d8def9e6e9f58c1ba94",
+      "role": "Nutzerscreenshot: Boden/Klippen, keine Schiff-Formvorlage"
+    },
+    {
+      "id": "sc_landscape",
+      "path": "C:\\Users\\bjoer\\Pictures\\StarCitizen - Screenshots\\LIVE\\4.6.0-live.11377160\\ScreenShot-2025-09-15_21-57-40-AD5.jpg",
+      "sha256": "f9e33c8b96721e66df24ddd33a72e91ffabc8c2c86a1d6cdca255b6de98cd13b",
+      "role": "Nutzerscreenshot: Landschaft und Himmel"
+    },
+    {
+      "id": "sc_industry",
+      "path": "C:\\Users\\bjoer\\Pictures\\StarCitizen - Screenshots\\LIVE\\4.6.0-live.11377160\\ScreenShot-2026-01-19_20-55-35-867.jpg",
+      "sha256": "b787fce017d0077de742d93c039447be0487862714baadd77bc4119638e9736d",
+      "role": "Nutzerscreenshot: Industriekonstruktion und Arbeitsflaechen"
+    },
+    {
+      "id": "sc_people",
+      "path": "C:\\Users\\bjoer\\Pictures\\StarCitizen - Screenshots\\LIVE\\4.6.0-live.11377160\\ScreenShot-2026-02-15_20-07-35-C11.jpg",
+      "sha256": "df8e5d8ce77652bbd55e939df06c9a7859c76349769f0146bf28fa5f60e27292",
+      "role": "Nutzerscreenshot: Raumanzuege/Helme/Rucksaecke"
+    },
+    {
+      "id": "sc_armor",
+      "path": "C:\\Users\\bjoer\\Pictures\\StarCitizen - Screenshots\\LIVE\\4.6.0-live.11377160\\Squadron_42_-_Star_Citizen_Screenshot_2025.01.10_-_20.41.59.11.png",
+      "sha256": "cc4cd52fe0a2b52118b35d1aaa65e0b52a26c9246a9bf1dbf0996af5d9674194",
+      "role": "Nutzerscreenshot: Ruestung und Oberflaechen"
+    },
+    {
+      "id": "sc_sky",
+      "path": "C:\\Users\\bjoer\\Pictures\\StarCitizen - Screenshots\\LIVE\\4.6.0-live.11377160\\ScreenShot-2025-11-04_21-28-50-B29.jpg",
+      "sha256": "dbe590177d0bedd110b14ff66a04c19a74406761ebcc4e8cc9a8f7e3a55bd7af",
+      "role": "Nutzerscreenshot: Himmel/Licht; abgebildetes Schiff ist keine Cutlass/Buccaneer"
+    },
+    {
+      "id": "cutlass_obj",
+      "path": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-CUTLASS.obj",
+      "sha256": "8c9998b2d29b359a63ab9b72b6f7065fbf9ed63068b5856d7f09376035eb8a60",
+      "role": "Unveraenderte lokale Geometrie-Referenz; kein integriertes Spielmodell"
+    },
+    {
+      "id": "buccaneer_obj",
+      "path": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+      "sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191",
+      "role": "Unveraenderte lokale Geometrie-Referenz; kein integriertes Spielmodell"
+    }
+  ],
+  "active_mapping": {
+    "model_entries": 352,
+    "unique_model_paths": 319,
+    "ship_identity": "Legacy mapping retains Kenney craft_speederB; the synthetic art preview separately loads new Cutlass/Buccaneer GLBs from ships_pass04_r02. No campaign mapping adoption claimed"
+  },
+  "official_ship_shape_sources": [
+    {
+      "title": "CIG Cutlass Black 2017 Galerie",
+      "url": "https://robertsspaceindustries.com/en/promotions/promocutlassblack2017",
+      "image_url": "https://robertsspaceindustries.com/media/m3vgrlxyx9978r/source/Drake_Cutlass_Black_WhiteRoom.jpg"
+    },
+    {
+      "title": "CIG Drake Lineup 2017 / Buccaneer",
+      "url": "https://robertsspaceindustries.com/en/comm-link/transmission/15805-Drake-Sale-The-2947-Lineup",
+      "image_url": "https://robertsspaceindustries.com/media/wlj2pveux0yjqr/source/Buccaneer_Action_01.png"
+    }
+  ],
+  "generation_manifest": "output/grafik_20261101/generation_manifest.json",
+  "native_study_index": "output/grafik_20261101/model_studies/study_index.json",
+  "limitations": [
+    "Weiter unintegrierter Grafikbranch; die erste regulaere24x20Hexkarte ist keine gesamte Kampagnen-/Hex-Toolmigration.",
+    "P07-Wegequelle und echteEditor-/Missionskontrollen sind getrennteNachweise. PrimaereGLBs, P06-Geologie/Citizens und kritisierte R02-Schiffe unveraendert.",
+    "27fokussierteGates aus26Matrixresultaten plus eigenemgruenenHex-Retry; FileOpen-Fehllauf unveraendert erhalten. TASK158/159 bleiben exaktbaselinegleich mit13/6Fehlern rot.",
+    "40/40nativeRuntimechecks, beschleunigteLeaderdiagnose3x und vierKontrollbilder belegen weder vollstaendigeTeamankunft noch LZ/Deployment/Performance-/Releaseabnahme.",
+    "Ein ehrlicherNo-Cover-Authoringhinweis bleibt; keine neueCover-/Basisbau-/Innenraum-/Tor-/Flug-/Wirtschaftssimulation.",
+    "GrosseGebaeude/Pads benoetigen gespeicherte mehrzelligeAuthoring-/Rampenfakten; weitereMalerarbeit und feinereFels-/Bodenformen bleiben Zielabstand."
+  ],
+  "environment_analysis": "docs/reports/FRONTIER_UMGEBUNG_ANALYSE_2026-11-01.md",
+  "environment_manifests": [
+    "art/frontier_illustrated_20261101/environment/pass07/paths/manifest.json",
+    "art/frontier_illustrated_20261101/environment/pass07/runtime/manifest.json"
+  ],
+  "current_environment_task": "docs/tasks/ART_2026_11_01_pass07_paths_runtime.md",
+  "current_code_commit": "278c5b61fb6a1584420fbfaa4e526c30640fea69",
+  "runtime_evidence": "output/grafik_20261101/pass07_runtime/native_check.json",
+  "legacy_baseline_comparison": "output/grafik_20261101/pass07_runtime/legacy_baseline_comparison.json"
+}

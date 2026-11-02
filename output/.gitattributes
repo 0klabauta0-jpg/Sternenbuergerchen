@@ -1,0 +1,4 @@
+# Raw reports and their recorded hashes retain the bytes written by the tools.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Preserve verbatim console evidence, including spaces emitted by existing tests.
+*.log -whitespace

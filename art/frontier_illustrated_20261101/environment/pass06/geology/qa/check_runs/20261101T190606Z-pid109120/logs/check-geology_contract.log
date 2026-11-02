@@ -1,0 +1,5 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: fourteen tagged foot-relief meshes have upward terrain normals
+FRONTIER_PASS03_GEOLOGY {"failed":1,"footprint_digest":"46cd64cbe1874df344c4ea2c011c4cf2c87308a627a61edaf4d295b35d2e5523","geometry":{"caps_up":true,"degenerate_triangles":0,"digest":"a265043df521a232a4f89d2d1833a1cd6b76f5121b9d4814491efb672ce63016","finite":true,"known_kinds":true,"meshes":68,"outside_footprint_vertices":0,"relief_meshes":14,"relief_up":false,"terraced_groups":14,"vertices":42363,"walls_out":true},"max_pass02_footprint_delta_m":0.00000095367431640625,"passed":13,"synthetic_fixture":true}

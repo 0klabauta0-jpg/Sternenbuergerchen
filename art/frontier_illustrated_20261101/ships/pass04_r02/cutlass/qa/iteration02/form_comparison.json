@@ -1,0 +1,60 @@
+{
+  "r01": {
+    "cargo": {
+      "object": "Cutlass_CargoHull",
+      "dimensions_blender_m": [
+        5.184244155883789,
+        10.927573204040527,
+        2.744599938392639
+      ],
+      "length_width_ratio": 2.107843086757097
+    },
+    "cockpit": {
+      "object": "Cutlass_Canopy",
+      "dimensions_blender_m": [
+        2.1956799030303955,
+        4.249047040939331,
+        2.3278273344039917
+      ],
+      "length_width_ratio": 1.935185103746204
+    },
+    "forward_shoulder": {
+      "object": "Cutlass_ForeWing_L",
+      "dimensions_blender_m": [
+        4.59281325340271,
+        2.7579896450042725,
+        0.40660738945007324
+      ],
+      "length_width_ratio": 0.600501151001718
+    }
+  },
+  "r02_iteration02": {
+    "cargo": {
+      "object": "Cargo_stepped_hull",
+      "dimensions_blender_m": [
+        6.234838485717773,
+        10.425806045532227,
+        3.489032030105591
+      ],
+      "length_width_ratio": 1.6721854253987105
+    },
+    "cockpit": {
+      "object": "Cockpit_rounded_angular_shell",
+      "dimensions_blender_m": [
+        3.055483818054199,
+        4.356128692626953,
+        2.7045159339904785
+      ],
+      "length_width_ratio": 1.4256755892102986
+    },
+    "forward_shoulder": {
+      "object": "Fork_structural_shoulder_L",
+      "dimensions_blender_m": [
+        3.7715824842453003,
+        3.4515726566314697,
+        1.8944263458251953
+      ],
+      "length_width_ratio": 0.9151523719948909
+    }
+  }
+}

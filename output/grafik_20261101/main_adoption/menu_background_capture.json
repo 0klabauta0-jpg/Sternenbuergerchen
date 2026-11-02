@@ -1,0 +1,151 @@
+{
+  "active_mission_screenshot": false,
+  "camera": {
+    "h_offset": -3.0,
+    "size": 18.0,
+    "transform": "[X: (0.913545, 0.0, -0.406737), Y: (-0.311578, 0.642788, -0.699816), Z: (0.261445, 0.766044, 0.587216), O: (17.60601, 13.9888, 19.76988)]"
+  },
+  "debug_canvas_hidden": true,
+  "engine": {
+    "build": "official",
+    "hash": "71f334935c000924d403448e698df4441130df18",
+    "hex": 263682,
+    "major": 4,
+    "minor": 6,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.6.2-stable (official)",
+    "timestamp": 0
+  },
+  "height": 1080,
+  "image": "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png",
+  "menu_runtime_uses_static_png_only": true,
+  "models": [
+    {
+      "bounds_world": "[P: (7.0925, 0.0, 4.9575), S: (2.414999, 1.05175, 2.485)]",
+      "id": "habitat_cutaway_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+      "scale": 0.35,
+      "source_sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+    },
+    {
+      "bounds_world": "[P: (11.3625, 0.0, 4.98375), S: (3.674999, 1.47, 2.4325)]",
+      "id": "freihafen_hall_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+      "scale": 0.35,
+      "source_sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+    },
+    {
+      "bounds_world": "[P: (15.281, 0.0, 7.633), S: (1.638, 0.9345, 1.134)]",
+      "id": "utility_fuel_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+      "scale": 0.35,
+      "source_sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+    },
+    {
+      "bounds_min": [
+        5.17138290405273,
+        0.159999996423721,
+        9.13999938964844
+      ],
+      "bounds_size": [
+        2.65723419189453,
+        1.26425921916962,
+        3.52000045776367
+      ],
+      "bounds_world": "[P: (5.171383, 0.16, 9.139999), S: (2.657234, 1.264259, 3.52)]",
+      "canonical_star_citizen_dimensions": false,
+      "catalog_id": "frontier_ships_astra_ref03_v1",
+      "id": "cutlass_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+      "revision": "astra_refinement_03",
+      "scale": 0.22,
+      "source_sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "status": "user-directed adopted Ref03 visual; not a claim of exact concept reconstruction",
+      "yaw_degrees": 0.0
+    },
+    {
+      "bounds_min": [
+        17.5164546966553,
+        0.159999996423721,
+        10.1567726135254
+      ],
+      "bounds_size": [
+        3.36709213256836,
+        0.906347990036011,
+        3.28645515441895
+      ],
+      "bounds_world": "[P: (17.51645, 0.16, 10.15677), S: (3.367092, 0.906348, 3.286455)]",
+      "canonical_star_citizen_dimensions": false,
+      "catalog_id": "frontier_ships_astra_ref03_v1",
+      "id": "buccaneer_01",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb",
+      "revision": "astra_refinement_03",
+      "scale": 0.22,
+      "source_sha256": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+      "status": "user-directed adopted Ref03 visual; not a claim of exact concept reconstruction",
+      "yaw_degrees": -24.9999980926514
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "operator",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/operator.glb",
+      "scale": 0.35,
+      "source_sha256": "00c378d03bd508d67c6e04d5e257827eaca053d48b072072255ad217e63f325c"
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "pilot",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/pilot.glb",
+      "scale": 0.35,
+      "source_sha256": "4548eb634e41a4a94965d616b45a51339e3da150bd0d1d708016e1f625c4ac00"
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "mechanic",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/mechanic.glb",
+      "scale": 0.35,
+      "source_sha256": "03ec6f35421d2cebfaa03f7fa911db71f4c6120ac8858dd369f7bbcd9b878496"
+    },
+    {
+      "animations": [
+        "idle",
+        "walk"
+      ],
+      "id": "medic",
+      "path": "res://Assets/curated/frontier_illustrated_20261101/citizens_pass02/medic.glb",
+      "scale": 0.35,
+      "source_sha256": "e7c0c690f0ae9a85a93d18ecf7d765c9c16756f74e847bd926379f3cfd1e4f79"
+    }
+  ],
+  "provenance": "Native Godot render of the project Frontier scene. Kenney-derived structures and characters plus project/Astra ship geometry; no third-party license claim for the composite image.",
+  "renderer": "forward_plus",
+  "save_error": 0,
+  "sha256": "35c52473d92cbec346577a7be269553f8270d586f69f241067952a3be49bcea6",
+  "source_sha256": {
+    "res://scripts/terrain/frontier_access_anchors.gd": "87f63e39592899102d5878f4edd8724a5274c4de4c95164565816056d70f7b43",
+    "res://scripts/terrain/frontier_art_dressing.gd": "aeb7b9d887a04d477f932265edfcae6b6a5a3afa4119b6c1f02481938471ffd0",
+    "res://scripts/terrain/frontier_art_geology.gd": "e0c68350e32e041956d41a6b383661db76d01be5aa2ee18596bd22380000ae58",
+    "res://scripts/terrain/frontier_art_profile.gd": "8b6e8e6af6e832e0eda04bfc39baddd5400192135d3e8202447078c6fc1986d4",
+    "res://scripts/terrain/frontier_closed_buildings.gd": "a17fcd6fd3ec462ffe49225396bd31e8c063da015204c7a0f8925d9b3b8e8f62",
+    "res://scripts/terrain/frontier_outpost_pad.gd": "1301ddd9ddf8b17490615ab5bb50419d0e05b58f958586dae658e81209679772",
+    "res://scripts/terrain/frontier_worklife.gd": "15f26e2e951a34a60c111f3c69b36ab7490c0336e36065efa9a01721c9174656",
+    "res://scripts/terrain/terrain_map_3d_view.gd": "c01f81415c5c15e0217237d7ff993aed9b85c5d30ed23ff64c0d02bc854b0ea6",
+    "res://scripts/tests/frontier_art_preview.gd": "cd706492a775201dc9b8f410fc946f7e62984a6e1de93e7e4a7da3625a6c1e26",
+    "res://scripts/tools/capture_frontier_main_background.gd": "7e0f763ed83a11ccd2448565f09b16dd3ee6094d9ee07a3d080d2e205ef8229f",
+    "res://shaders/terrain/frontier_building_wear.gdshader": "57463c649ee0f1b900b4d3e40e4f3586e21f222350bdfa9310e9948760d8734b",
+    "res://shaders/terrain/frontier_contact_paint.gdshader": "ff8d87e7082dc6e6f4611db6bd18cdb0514720efd7ca0a07108ffd2807389e2f",
+    "res://shaders/terrain/frontier_ground.gdshader": "9e45599df3fb3a57ce70f371db86a179740ef1c0fc23836eb4c84c194884a4a7"
+  },
+  "synthetic_outpost_render": true,
+  "width": 1920
+}

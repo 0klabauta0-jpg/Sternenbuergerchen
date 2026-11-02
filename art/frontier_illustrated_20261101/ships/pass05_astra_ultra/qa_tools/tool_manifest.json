@@ -1,0 +1,75 @@
+{
+  "schema": "sternenbuergerchen.ship_qa_tools.v1",
+  "tool_files": [
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\check_ngon_planarity.py",
+      "sha256": "15c79c233dc176771eafa14480851ca3b286b60762410252c329933ad0b08f2d",
+      "bytes": 3473
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\consolidate_glb.py",
+      "sha256": "c1de14c481f5361bc985c53f6cc39616ebe21da9cf57abf42e3736486202c28b",
+      "bytes": 8468
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\probe_consolidation.py",
+      "sha256": "a104915caef51f9e0cb4e3d1e4205f1b040deb22ce71491bc717401bf206088c",
+      "bytes": 3956
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\render_matched.py",
+      "sha256": "95873c664fed9512285f9b571848a8e56320db0620bc58376a5d3b866425dd76",
+      "bytes": 11882
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\selftest_fixture.py",
+      "sha256": "b9b2502fe2a267a881b40870a4dfcb6bb21294fd45ae8969c6f3c7220658398a",
+      "bytes": 3321
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\selftest_texture_corruption.py",
+      "sha256": "a81494f28050a55038b253f1ad16e4e772303e3814a5a4f03fe37ab9ae35990b",
+      "bytes": 1558
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\verify_render_conditions.py",
+      "sha256": "1804e5a3f9978da0671103bd50b14a0f977edc6ab9766d69b710d9ec29997fca",
+      "bytes": 2292
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\verify_ship.py",
+      "sha256": "9ecc94bc5db1e005e3338f4f5c09c4d34cacd58a738d7a6f4ac908c43158526b",
+      "bytes": 33373
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\write_tool_manifest.py",
+      "sha256": "7e2a43404d427a25a243c78aed8e7cda850a2d720a7deca72e58336bbc4334b7",
+      "bytes": 1070
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\README.md",
+      "sha256": "7e0c16de9d84f2e3965d6d90462716d924eb3e3652701118694f8b31c0f4c59d",
+      "bytes": 7955
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\worktrees\\grafikreferenzen-20261101\\SternenBuergerchen\\art\\frontier_illustrated_20261101\\ships\\pass05_astra_ultra\\qa_tools\\README_RENDER.md",
+      "sha256": "c536f658983181ee0089b319ef88f32effb1f99b8fe2269e9334ce707c5374cd",
+      "bytes": 2976
+    }
+  ],
+  "external_dependencies": [
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\skills\\blender-asset-qa\\scripts\\qa_check.py",
+      "sha256": "11b4fa11244bfa6719689a06eec58c050a3ad5b6d17ac0f75113f332f97b274b",
+      "bytes": 16590
+    },
+    {
+      "path": "C:\\Users\\bjoer\\.codex\\skills\\blender-asset-qa\\scripts\\_bpyx.py",
+      "sha256": "a3339ba8a678469e8ed29510e32a7331e0235202191ca4edb977af4720819b4b",
+      "bytes": 4503
+    }
+  ],
+  "external_license": "blender-asset-qa SKILL.md declares MIT; external scripts unmodified",
+  "runtime": "Blender 5.2.3 LTS / bundled Python and numpy; Pillow only for deliberate test-image corruption",
+  "scope": "Standalone source/GLB geometry-material-texture audit and matched Blender renders; not native Godot or user acceptance"
+}

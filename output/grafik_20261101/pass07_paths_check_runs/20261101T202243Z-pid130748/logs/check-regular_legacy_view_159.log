@@ -1,0 +1,128 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_159 2.5D Editor and Mission Primary View Verifier ===
+[PASS] Map editor scene instantiates
+[PASS] Editor attaches Primary3DView
+[PASS] Editor Primary3DView renders terrain tiles
+[PASS] Editor Primary3DView renders calibrated 3D ground meshes
+ERROR: [FAIL] Editor Primary3DView renders visible field borders
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_159_verifier.gd:451)
+       [1] _test_editor_uses_3d_primary_view (res://scripts/tests/task_159_verifier.gd:49)
+       [2] _wait_frames (res://scripts/tests/task_159_verifier.gd:437)
+[PASS] Editor Primary3DView renders calibrated Kenney GLB asset models
+[PASS] Editor Primary3DView has no missing mapped 3D assets
+[PASS] Editor 2.5D asset nodes contain loaded 3D model meshes
+[PASS] Editor Primary3DView map render stays below freeze threshold
+[PASS] Editor legacy Camera2D is disabled
+[PASS] Editor legacy 2D map containers are hidden
+[PASS] Editor Camera3D can rotate
+[PASS] Editor 3D view roundtrips screen picking to map world coordinates
+[PASS] Editor exposes 2.5D height authoring controls
+[PASS] Editor height verifier finds a terrain tile
+[PASS] Editor height tool raises a terrain field as a slope
+[PASS] Editor height tool can set terrain to height level 2
+[PASS] Editor height tool lowers terrain by one level
+[PASS] Editor height edits keep the 2.5D terrain mesh path active
+[PASS] Visual parity test map and catalog instantiate
+[PASS] Visual parity map applies wall_straight_se
+[PASS] Visual parity map applies wall_corner_ne
+[PASS] Visual parity map applies large satellite object
+[PASS] Visual parity map applies rock_large
+[PASS] Visual parity 3D map renders every tile as calibrated ground mesh
+ERROR: [FAIL] Visual parity 3D map renders field borders for every tile
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_159_verifier.gd:451)
+       [1] _test_authored_2_5d_visual_parity_contract (res://scripts/tests/task_159_verifier.gd:129)
+       [2] _wait_frames (res://scripts/tests/task_159_verifier.gd:437)
+[PASS] Visual parity 3D map does not use flat Sprite3D texture cards as primary terrain
+[PASS] Visual parity 3D map renders wall, wall corner, rock and satellite as calibrated GLB models
+[PASS] Visual parity 3D map does not fall back to isometric Sprite3D asset cards for mapped assets
+[PASS] Visual parity 3D map does not use block placeholders for mapped assets
+[PASS] Visual parity 3D map resolves all authored 3D asset mappings
+ERROR: [FAIL] Visual parity ground tile uses the Kenney terrain GLB
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_159_verifier.gd:451)
+       [1] _test_authored_2_5d_visual_parity_contract (res://scripts/tests/task_159_verifier.gd:137)
+       [2] _wait_frames (res://scripts/tests/task_159_verifier.gd:437)
+ERROR: [FAIL] Visual parity ground tile keeps the Kenney terrain material
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_159_verifier.gd:451)
+       [1] _test_authored_2_5d_visual_parity_contract (res://scripts/tests/task_159_verifier.gd:138)
+       [2] _wait_frames (res://scripts/tests/task_159_verifier.gd:437)
+[PASS] Visual parity wall_straight_se loads the calibrated corridor wall model
+[PASS] Visual parity wall_straight_se keeps calibrated SE straight-wall rotation
+[PASS] Visual parity wall_corner_ne loads the calibrated corridor corner model
+[PASS] Visual parity wall_corner_ne keeps calibrated NE corner rotation
+[PASS] Visual parity satellite loads the calibrated satelliteDish_large model
+[PASS] Visual parity rock_large loads the calibrated rock model
+[PASS] Visual parity large satellite keeps larger calibrated 3D scale than wall
+[PASS] Visual parity wall corner keeps model materials instead of fallback override
+[PASS] Visual parity rock keeps model materials instead of fallback override
+[PASS] Strict mapping guard map instantiates
+[PASS] Strict mapping guard still renders mapped Kenney terrain ground
+[PASS] Strict mapping guard records the missing asset mapping
+[PASS] Strict mapping guard refuses Sprite3D texture fallback
+[PASS] Strict mapping guard refuses block placeholder fallback
+[PASS] Strict mapping guard places a visible missing-asset marker
+[PASS] Live mission scene instantiates
+[PASS] Live mission attaches Primary3DView
+[PASS] Live Primary3DView renders map and runtime unit proxies
+[PASS] Live Primary3DView renders calibrated 3D ground meshes
+[PASS] Live Primary3DView renders calibrated Kenney asset models
+[PASS] Live Primary3DView has no missing mapped 3D assets
+[PASS] Live Primary3DView renders runtime units with configured 3D model assets
+[PASS] Live Primary3DView does not use unit texture/capsule fallbacks when GLBs exist
+[PASS] Live 2.5D asset nodes contain loaded 3D model meshes
+[PASS] Live 2.5D unit proxies contain loaded configured model meshes
+[PASS] Live Primary3DView map render stays below freeze threshold
+ERROR: [FAIL] Live 2.5D unit proxy faces its movement target
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_159_verifier.gd:451)
+       [1] _test_live_mission_uses_3d_primary_view (res://scripts/tests/task_159_verifier.gd:211)
+       [2] _wait_frames (res://scripts/tests/task_159_verifier.gd:437)
+[PASS] Live 2.5D unit model scale remains calibrated
+[PASS] Live legacy MapRoot is hidden
+[PASS] Live legacy Camera2D is disabled
+[PASS] Live runtime UnitAlpha node remains visible for simulation/selection
+[PASS] Live old UnitAlpha Sprite2D visual is hidden
+[PASS] Live mission TacticalController is present
+[PASS] TacticalController places LZ through 3D picking
+[PASS] LZ is mirrored into the 3D primary view
+[PASS] LZ placement snaps to a terrain field center
+[PASS] LZ is visualized as a selected terrain field
+[PASS] Old 2D LZ marker stays hidden
+ERROR: [FAIL] Live 2.5D dropship faces its approach target
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_159_verifier.gd:451)
+       [1] _test_live_mission_uses_3d_primary_view (res://scripts/tests/task_159_verifier.gd:254)
+       [2] _wait_frames (res://scripts/tests/task_159_verifier.gd:437)
+[PASS] Live Primary3DView does not use dropship texture/box fallbacks when the GLB exists
+[PASS] Live Primary3DView keeps generic dropship proxy boxes out of the primary path
+[PASS] Attack Area is mirrored into the 3D primary view
+[PASS] Attack Area is visualized as terrain field markers
+[PASS] Calibration 3D map scene instantiates
+[PASS] Calibration 3D map scene attaches Primary3DView
+[PASS] Calibration 3D map scene renders terrain tiles
+[PASS] Calibration 3D map scene renders calibrated ground meshes
+[PASS] Calibration 3D map scene renders calibrated asset models
+[PASS] Calibration 3D map scene has no missing mapped 3D assets
+[PASS] Calibration 3D map scene keeps loaded 3D asset meshes
+[PASS] Calibration 3D map scene render stays below freeze threshold
+[PASS] Render spike 3D map scene instantiates
+[PASS] Render spike 3D map scene attaches Primary3DView
+[PASS] Render spike 3D map scene renders terrain tiles
+[PASS] Render spike 3D map scene renders calibrated ground meshes
+[PASS] Render spike 3D map scene renders calibrated asset models
+[PASS] Render spike 3D map scene has no missing mapped 3D assets
+[PASS] Render spike 3D map scene keeps loaded 3D asset meshes
+[PASS] Render spike 3D map scene render stays below freeze threshold
+=== RESULTS: 86 passed, 6 failed ===
+FAIL

@@ -1,0 +1,15 @@
+00:00.469  blend            | Read blend: "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\source\habitat_01.blend"
+00:02.047  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\qa\habitat_01_front.png'
+00:02.172  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\qa\habitat_01_rear.png'
+00:02.375  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\qa\habitat_01_wire.png'
+00:02.391  blend            | Read blend: "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\source\workshop_01.blend"
+00:02.625  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\qa\workshop_01_front.png'
+00:02.719  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\qa\workshop_01_rear.png'
+00:02.875  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\qa\workshop_01_wire.png'
+00:02.875  blend            | Read blend: "C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\source\service_unit_01.blend"
+00:03.078  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\qa\service_unit_01_front.png'
+00:03.172  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\qa\service_unit_01_rear.png'
+00:03.297  render           | Saved: 'C:\Users\bjoer\.codex\worktrees\grafikreferenzen-20261101\SternenBuergerchen\art\frontier_illustrated_20261101\structures\qa\service_unit_01_wire.png'
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

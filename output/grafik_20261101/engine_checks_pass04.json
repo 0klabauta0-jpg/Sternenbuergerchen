@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "hex_foundation",
+      "script": "res://scripts/tests/frontier_hex_foundation_verifier.gd",
+      "success_marker": "FRONTIER_HEX_FOUNDATION_ALL_PASS",
+      "timeout": 60
+    },
+    {
+      "name": "hex_movement",
+      "script": "res://scripts/tests/frontier_hex_movement_verifier.gd",
+      "success_marker": "FRONTIER_HEX_MOVEMENT",
+      "timeout": 60
+    },
+    {
+      "name": "hex_render",
+      "script": "res://scripts/tests/frontier_hex_render_verifier.gd",
+      "success_marker": "FRONTIER_HEX_RENDER",
+      "timeout": 60
+    },
+    {
+      "name": "hex_visibility",
+      "script": "res://scripts/tests/frontier_hex_visibility_verifier.gd",
+      "success_marker": "76 passed, 0 failed",
+      "timeout": 60
+    },
+    {
+      "name": "art_profile",
+      "script": "res://scripts/tests/frontier_art_profile_verifier.gd",
+      "success_marker": "FRONTIER_ART_RESULT",
+      "timeout": 60
+    },
+    {
+      "name": "art_integration",
+      "script": "res://scripts/tests/frontier_art_integration_verifier.gd",
+      "success_marker": "FRONTIER_ART_INTEGRATION",
+      "timeout": 60
+    },
+    {
+      "name": "combat_authority",
+      "script": "res://scripts/tests/task_162_combat_authority_contract_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "multiplayer_authority",
+      "script": "res://scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "multiplayer_snapshot",
+      "script": "res://scripts/tests/task_168_multiplayer_snapshot_contract_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "legacy_fow_visual",
+      "script": "res://scripts/tests/task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "legacy_heights",
+      "script": "res://scripts/tests/task_184_gameplay_hill_semantics_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "legacy_avoidance",
+      "script": "res://scripts/tests/task_475_fireteam_pathfinding_avoidance_stability_pass.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "legacy_corridor",
+      "script": "res://scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "authority_boundary",
+      "script": "res://scripts/tests/task_284_gameplay_truth_architecture_boundary_audit.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "art_pass02",
+      "script": "res://scripts/tests/frontier_pass02_verifier.gd",
+      "success_marker": "FRONTIER_PASS02",
+      "timeout": 60
+    },
+    {
+      "name": "art_pass03_geology",
+      "script": "res://scripts/tests/frontier_pass03_geology_verifier.gd",
+      "success_marker": "FRONTIER_PASS03_GEOLOGY",
+      "timeout": 60
+    },
+    {
+      "name": "art_pass04",
+      "script": "res://scripts/tests/frontier_pass04_verifier.gd",
+      "success_marker": "FRONTIER_PASS04",
+      "timeout": 60
+    }
+  ]
+}

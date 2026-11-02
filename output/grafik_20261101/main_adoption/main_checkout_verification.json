@@ -1,0 +1,16 @@
+{
+  "main_code": "177991ac4962c17be0d02ef909949826967c7f57",
+  "start_graphics_gate": {
+    "passed": 27,
+    "failed": 0,
+    "exit_code": 0,
+    "log": "output/grafik_20261101/main_adoption/main_checkout_start_graphics.log"
+  },
+  "tracked_clean_after_import_and_smoke": true,
+  "full_editor_import": {
+    "exit_code": 0,
+    "script_or_parse_errors": 0,
+    "existing_plugin_shutdown_leak": true
+  },
+  "user_files": "No cleanup performed; pre-merge untracked/target path collision check passed. Foundation adds ignores for Unity caches and sidecars, so current untracked status is not comparable to the old count."
+}

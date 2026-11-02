@@ -1,0 +1,31 @@
+{
+  "basis": "Explicit user-designed four-engine layout. This is a deliberate departure from original references 08/09.",
+  "normalization_factor": 1.0410566430652601,
+  "rear_radial_scale_from_refinement02": 0.87,
+  "forepod_radial_scale_relative_to_new_rear": 0.5,
+  "forepod_longitudinal_scale_relative_to_rear": 0.43,
+  "rear_axis_x_authored": [
+    -4.67,
+    4.67
+  ],
+  "front_axis_x_authored": [
+    -4.45,
+    4.45
+  ],
+  "old_to_new_endplate_span_authored": [
+    11.46,
+    8.2
+  ],
+  "cabin_and_turret_geometry": "unchanged from refinement02",
+  "turret_clearance_m": [
+    1.4574793002913642,
+    1.4574793002913642,
+    1.3533736359848383
+  ],
+  "seated_proxy_m": [
+    0.6454551187004612,
+    1.176394006663744,
+    1.2909102374009225
+  ],
+  "clearance_note": "Simple hidden wire envelopes inside upper cabin. The rotating ring opens into the dorsal spine; no interior or rig authored."
+}

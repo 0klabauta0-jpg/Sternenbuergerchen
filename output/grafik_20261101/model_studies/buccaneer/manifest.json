@@ -1,0 +1,139 @@
+{
+  "schema": "sternenbuergerchen.ship_material_study.v1",
+  "ship": "buccaneer",
+  "tool": "Blender 5.2.3 LTS",
+  "source_path": "C:\\Users\\bjoer\\3D Objects\\drive-download-20250521T120706Z-1-001\\DRAKE\\DRAKE-BUCCANEER.obj",
+  "source_sha256": "63380da3abc131ef59ac6ce730cf884eabc76ce2a73efacd9c5428b171950191",
+  "source_material_information": "None present in OBJ. Neutral baseline is a new clay material, not original game appearance.",
+  "geometry_change": "None beyond common centering and nominal length normalization before both baseline and candidate. Identical normalized vertices and topology.",
+  "raw_import_dimensions": [
+    1590.6651611328125,
+    1458.348388671875,
+    373.4947509765625
+  ],
+  "uniform_scale_applied": 0.010457034464612065,
+  "nominal_length_m": 15.25,
+  "source_front": "positive Y in Blender after OBJ import (-Z forward, Y up)",
+  "geometry_sha256_before": "0b784a0190fa2d73e34e56021a77cf29526dae9a93b0530fe0a1bfb75f912e69",
+  "geometry_sha256_after": "0b784a0190fa2d73e34e56021a77cf29526dae9a93b0530fe0a1bfb75f912e69",
+  "geometry_unchanged": true,
+  "objects": [
+    {
+      "name": "Study_buccaneer",
+      "vertices": 77966,
+      "faces": 132384,
+      "triangles": 132384,
+      "dimensions_m": [
+        16.63364028930664,
+        15.25,
+        3.905646324157715
+      ],
+      "uv_layers": 1,
+      "materials": 6,
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "material_face_counts": {
+    "M_SlateTeal": 58438,
+    "M_WarmIvory": 11090,
+    "M_Ochre": 5193,
+    "M_DarkGlaze": 2647,
+    "M_EngineHardware": 53950,
+    "M_WarmEngine": 1066
+  },
+  "baseline_renders": {
+    "front": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_front.png",
+    "rear": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_rear.png",
+    "distance": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_source_distance.png"
+  },
+  "candidate_renders": {
+    "front": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_front.png",
+    "rear": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_rear.png",
+    "distance": "docs/reports/assets/grafik-2026-11-01/ship_studies/buccaneer_candidate_distance.png"
+  },
+  "qa_raw_file": "qa_check_raw.json",
+  "qa_pass": false,
+  "qa_errors": [
+    "Study_buccaneer: 421 closed parts with normals pointing inward",
+    "Study_buccaneer: 1430 edges with inconsistent face winding",
+    "Study_buccaneer: degenerate faces=6 zero-len edges=0"
+  ],
+  "qa_warnings": [
+    "Study_buccaneer: non-manifold edges=748 wire=0",
+    "Study_buccaneer: duplicate verts=321 loose verts=0",
+    "132384 tris > max_tris 100000: z-fighting/floating checks skipped",
+    "asset lowest point z=-1.9528 (not resting on ground plane z=0)"
+  ],
+  "qa_scope": "Full topology scan. Expensive intertriangle z-fighting/floating checks skipped above 100000 tris. UV scan disabled because source has no UV layers, recorded explicitly in raw stats.",
+  "status": "Isolated high-poly material reference study; not runtime ready; no integration, collision or navigation.",
+  "glb": {
+    "bytes": 3732912,
+    "meshes": 1,
+    "materials": 6,
+    "triangles": 132384,
+    "images": 0,
+    "animations": 0,
+    "skins": 0,
+    "extensions_used": []
+  },
+  "render_conditions": {
+    "engine": "Cycles",
+    "device": "OptiX GPU",
+    "samples": 32,
+    "view_transform": "Khronos PBR Neutral",
+    "resolution": [
+      1280,
+      900
+    ],
+    "world": "Pale blue constant sky",
+    "camera": "Orthographic, matched source/candidate per view",
+    "distance_ortho_scale": 52.612500000000004
+  },
+  "elapsed_seconds": 24.33,
+  "files": {
+    "neutral_source.blend": {
+      "bytes": 5480026,
+      "sha256": "457e051678a67c58f0694d2790e8ac4b546e639dad474da91eec82e4e5bffbaa"
+    },
+    "material_candidate.blend": {
+      "bytes": 5500945,
+      "sha256": "11a5682ab8b06cbc688138adf01096194cb7eef19638590887aa1949866d9ec4"
+    },
+    "material_candidate.glb": {
+      "bytes": 3732912,
+      "sha256": "300ea976a348aa5de72edf050585d377da0c4a0d2d5fd36ebac4e096dec287de"
+    },
+    "qa_check_raw.json": {
+      "bytes": 1183,
+      "sha256": "412387e794148d1fb629ef0e4d4c273570909450c87b0fec1069dc721a34bd27"
+    }
+  },
+  "godot_import_check": {
+    "geometry_unchanged": true,
+    "engine_triangle_count_matches": true,
+    "engine_materials_present": true,
+    "native_capture_files_written": true
+  },
+  "godot_visual_review": "All four native engine captures opened. Front axis, silhouette, pivot and scale are consistent. Black backface areas and jagged shading expose inherited source normal/topology defects; visual/runtime gate is not passed.",
+  "blender_visual_review": "Front, rear, game-distance comparisons and true barycentric wire views opened. Ivory masses, slate shell, dark glazing and small ochre accents are visible. Original fine greebles remain. Geometric paint masks still have rough boundaries; authored semantic panel assignment is needed.",
+  "game_distance_limit": "Illustrative orthographic distance check only; no production tactical camera or gameplay scene acceptance.",
+  "latest_direction_gap": "Source geometry was not simplified. Wimmelbild/fewer-details target remains pending in 3D.",
+  "qa_wire_render": "Cycles barycentric shader, 0.5 pixel wires; temporary QA material only, saved candidate geometry unmodified.",
+  "qa_uv_maps": 0,
+  "renders_sha256": {
+    "buccaneer_candidate_distance.png": "6672d51c0288b5ff17a9d7aea7f908aca06fe0a1cc83e22024131b336a3f655f",
+    "buccaneer_candidate_front.png": "ecd505bf56844048e7c486fb238e7a5902a5eee53828fc9a7271c236e0c3d305",
+    "buccaneer_candidate_rear.png": "7f868c2b75519ab150dc444cd8fd266b449bd5e6a61b0d8ce75bb6515daf7e39",
+    "buccaneer_godot_front.png": "24a2e3d79641d768e2ef06d07f31f6b0b5e2a9811aac6321f020408b1798eefa",
+    "buccaneer_godot_rear.png": "6ccaa2c4ccd50ea43c88f3cef51efcbaab7ee106e193554ca5dbc4a184ced4e4",
+    "buccaneer_qa_solid.png": "de800604ae45499e45d4ed730a008f52234335d0849aa144f2a350612a867aae",
+    "buccaneer_qa_wire.png": "0395e4400794a8979c18eb8805970cf47a28effa65cc5398caf528eb7db133a4",
+    "buccaneer_source_distance.png": "74a0830fe8fea524cce478f45380c990df46edf157cd834703a1d26d8ae2e2df",
+    "buccaneer_source_front.png": "c386870c65734f98df9eadef660c34da7b70151fc3ecae4455fd1f0c890fa222",
+    "buccaneer_source_rear.png": "79f793a957a9dbd6a8ba2df7fd0e722f3b60e98e97edf6c2926ce5aadc6ea69b"
+  }
+}

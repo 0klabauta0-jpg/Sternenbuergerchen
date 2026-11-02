@@ -1,0 +1,145 @@
+{
+  "role": "pilot",
+  "status": "separate equipment candidate; no user visual approval inferred",
+  "source_bundle": "Kenney Animated Characters Bundle 4.0",
+  "license": "CC0; new equipment original procedural work",
+  "stock_blend": "art\\frontier_illustrated_20261101\\citizens\\pilot_stock.blend",
+  "stock_blend_sha256": "b5916218f0ae73fb8ad1520b62ef6a3e91c13d6c3b292d415781abe63855a7d4",
+  "stock_glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens\\pilot.glb",
+  "stock_glb_sha256": "b4a7669b0f2c659098beb37e9639af35b3b8c69c0f11ee4df832503c15087194",
+  "body_geometry_uv_weight_signature_before": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+  "body_geometry_uv_weight_signature_after": "fc6e031256273244abb3679a3162bc8dd12df1b8ef40a248b644f4d913190991",
+  "body_vertices": 804,
+  "body_triangles": 1604,
+  "source_blend": "art\\frontier_illustrated_20261101\\citizens\\pass02\\source\\pilot_equipment.blend",
+  "source_blend_sha256": "b7b84460775f004be248f5e6fff8f06baabd708bef5bc25da5961e06d05f4895",
+  "glb": "Assets\\curated\\frontier_illustrated_20261101\\citizens_pass02\\pilot.glb",
+  "glb_sha256": "4548eb634e41a4a94965d616b45a51339e3da150bd0d1d708016e1f625c4ac00",
+  "rig": "original Root; no new bones; rigid equipment groups on existing deform bones",
+  "bone_count_source": 45,
+  "equipment_binding": {
+    "pass": true,
+    "errors": [],
+    "modules": [
+      {
+        "name": "Gear_Breastplate",
+        "bone": "UpperChest",
+        "vertices": 112,
+        "triangles": 220
+      },
+      {
+        "name": "Gear_ChestIdentifier",
+        "bone": "UpperChest",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_LeftShoulder",
+        "bone": "LeftArm",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_LeftKnee",
+        "bone": "LeftLeg",
+        "vertices": 112,
+        "triangles": 220
+      },
+      {
+        "name": "Gear_RightShoulder",
+        "bone": "RightArm",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_RightKnee",
+        "bone": "RightLeg",
+        "vertices": 112,
+        "triangles": 220
+      },
+      {
+        "name": "Gear_Backpack",
+        "bone": "Chest",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_BackpackLid",
+        "bone": "Chest",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_LeftHeadsetCup",
+        "bone": "Head",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_LeftHeadsetCover",
+        "bone": "Head",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_RightHeadsetCup",
+        "bone": "Head",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_RightHeadsetCover",
+        "bone": "Head",
+        "vertices": 56,
+        "triangles": 108
+      },
+      {
+        "name": "Gear_HeadsetRearBridge",
+        "bone": "Head",
+        "vertices": 56,
+        "triangles": 108
+      }
+    ]
+  },
+  "stats_rest": {
+    "vertices": 1700,
+    "triangles": 3344,
+    "bounds_blender_m": {
+      "min": [
+        -0.8553459644317627,
+        -0.2431384027004242,
+        -2.1517188031339174e-09
+      ],
+      "max": [
+        0.8555741310119629,
+        0.2695000171661377,
+        1.779999852180481
+      ]
+    },
+    "dimensions_blender_m": [
+      1.7109200954437256,
+      0.5126384198665619,
+      1.7799998543321998
+    ]
+  },
+  "mesh_count_glb": 2,
+  "skin_count_glb": 1,
+  "material_count_glb": 4,
+  "embedded_images": 1,
+  "animations": [
+    "idle",
+    "walk"
+  ],
+  "coordinates": "metres; rest height 1.78; feet Z0; Blender -Y front / Z up -> Godot +Z front / Y up; existing runtime scale 0.35",
+  "raw_qa_pass": true,
+  "body_uv_qa_pass": true,
+  "errors": [],
+  "warnings": [],
+  "qa_scope": "Full new assembled geometry at rest; original body UV separately. New constant-color gear intentionally has no UVs. No expensive-check skips.",
+  "references": [
+    "docs/reports/assets/grafik-2026-11-01/02_menschen_stilstudie.png",
+    "docs/reports/assets/grafik-2026-11-01/references/current/01_rostgrenze_cutaway.png",
+    "docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+    "docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png"
+  ]
+}

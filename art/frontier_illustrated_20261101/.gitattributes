@@ -1,0 +1,10 @@
+# Preserve the exact bytes referenced by source and raw QA SHA-256 records.
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+structures/pass04/references/*.html -whitespace
+structures/pass04/source_assets/** -whitespace
+environment/pass05/**/*.log -whitespace
+environment/pass06/**/*.log -whitespace
+
+# Imported immutable Astra source bytes: preserve original trailing blank lines.
+ships/pass05_astra_ultra/refinement_03/buccaneer/finalize_buccaneer.py -whitespace
+ships/pass05_astra_ultra/refinement_03/write_manifest.py -whitespace
