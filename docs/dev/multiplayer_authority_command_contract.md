@@ -15,6 +15,14 @@ Dieser Vertrag begrenzt Multiplayer-Eingaben auf erlaubte Commands. Clients send
 - `fireteam`: darf nur Commands fuer zugewiesene Fireteams ausfuehren.
 - `spectator`: ist vorbereitet, darf aber keine Commands ausfuehren.
 
+Bei der Rolle `fireteam` bestimmt fuer eine auf der Authority bekannte Unit
+deren Runtime-Fireteam die Zugriffskontrolle. Dieses Fireteam muss dem Peer
+zugewiesen sein. Ein nichtleerer Fireteam-Hinweis der Payload muss dazu passen;
+auch ein Peer mit beiden Fireteams darf eine bekannte Unit nicht umetikettieren
+(`unit_fireteam_mismatch`). Ohne bekannte Runtime-Fireteam-Metadaten bleibt der
+bisherige explizite, dem Peer zugewiesene Payload-Hinweis erlaubt. Die bestehenden
+Host- und Commanderrechte werden dadurch nicht eingeschraenkt.
+
 Peer-Zuweisungen liegen bewusst in `SimulationRoot`:
 - `set_peer_team(peer_id, team_id)`
 - `set_peer_role(peer_id, role_id)`

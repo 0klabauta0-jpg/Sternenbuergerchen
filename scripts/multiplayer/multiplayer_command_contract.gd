@@ -377,6 +377,11 @@ func _validate_peer_rights(ownership: Dictionary, context: Dictionary) -> Dictio
 	var unit_fireteam_id: String = String(context.get("unit_fireteam_id", "")).strip_edges().to_lower()
 	var resolved_fireteam_id: String = command_fireteam_id if not command_fireteam_id.is_empty() else unit_fireteam_id
 	if role_id == ROLE_FIRETEAM:
+		if not unit_fireteam_id.is_empty():
+			if not peer_fireteam_ids.has(unit_fireteam_id):
+				return _reject("fireteam_not_assigned_to_peer")
+			if not command_fireteam_id.is_empty() and command_fireteam_id != unit_fireteam_id:
+				return _reject("unit_fireteam_mismatch")
 		if resolved_fireteam_id.is_empty():
 			return _reject("fireteam_role_missing_fireteam")
 		if not peer_fireteam_ids.has(resolved_fireteam_id):

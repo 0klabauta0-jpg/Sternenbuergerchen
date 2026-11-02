@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "cycle_fireteam_authority",
+      "script": "res://scripts/tests/review_cycles_20261103_fireteam_authority_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_FIRETEAM_AUTHORITY_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "network_authority166",
+      "script": "res://scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "command_authority1186",
+      "script": "res://scripts/tests/task_1186_simulation_root_command_authority.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 45
+    },
+    {
+      "name": "two_peer_transport1083",
+      "script": "res://scripts/tests/task_1083_two_instance_roe_ownership_playtest.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "interaction_payload1099",
+      "script": "res://scripts/tests/task_1099_connected_interaction_snapshot_payload_budget.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    },
+    {
+      "name": "interaction_jitter1100",
+      "script": "res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "dropship_pending1114",
+      "script": "res://scripts/tests/task_1114_connected_dropship_pending_card_visual_polish.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    }
+  ]
+}

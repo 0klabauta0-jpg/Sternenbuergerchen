@@ -1,0 +1,14 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-382e9b03dfb942578740f206833669d1
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1186 SimulationRoot Command Authority ===
+PASS: Producer accepts a valid command payload
+PASS: Producer does not mutate the unit before the root tick
+PASS: Producer enqueues the command on SimulationRoot
+PASS: SimulationRoot commits the accepted command
+PASS: Committed command keeps its token
+PASS: Rejected stale command never changes the unit
+PASS: Rejected stale command is drained and not requeued
+PASS: Root records the stale-token rejection
+=== RESULTS: 8 passed, 0 failed ===

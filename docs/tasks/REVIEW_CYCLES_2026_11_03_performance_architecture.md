@@ -45,7 +45,44 @@ keine native FPS-/GPU-/Release-Abnahme. Der vorhandene TASK_348-Baselinefehler
 bleibt bis zu einem passenden bestaetigten Fix separat sichtbar.
 
 ## Rundenstatus
-- [ ] Runde 1: Review, bestaetigte Befunde, Fixes und Regressionen.
+- [x] Runde 1: Review, bestaetigte Befunde, Fixes und Regressionen.
 - [ ] Runde 2: erneuter Review des neuen Stands, Fixes und Regressionen.
 - [ ] Runde 3: erneuter Review, Fixes und gemeinsame Abschlusspruefung.
 - [ ] Unabhaengiger Abschlussreview, gezielte Commits und Task-Push.
+
+## Bestaetigte Ursachen / Testziele
+### Runde 1 - Fireteam-Autoritaet
+Der Netzwerkcontract vertraut bei Unit-Commands der behaupteten `fireteam_id`
+vor der Fireteam-Zuordnung der bekannten Unit. Peer-Zugriff muss die auf der
+Authority bekannten Ziel-Units und alle tatsaechlich kommandierten Fireteams
+abdecken. Eine Payload darf durch andere Labels keine Rechte erweitern.
+Legitime eigene Units, Commander-/Hostrechte und bisher erlaubte Payloads
+bleiben kompatibel. Contract: `multiplayer_authority_command_contract.md`.
+
+### Runde 2 - Cooldown-Zeitbasis
+Der spaeter eingefuehrte Combat-Decision-Throttle kehrt vor den drei relativen
+Cooldown-Zaehlern zurueck. Deren unveraenderte Tickwerte muessen weiterhin pro
+Simulationstick ablaufen; die teure Ziel-/Feuerentscheidung bleibt gethrottelt.
+Die Regression prueft den echten Driver-Tickpfad statt nur die drei Helfer.
+
+### Runde 3 - Terrain-Preview und Visual-Lifecycle
+Commander-Area-Order-Preview projiziert fuer kleine Bildschirmrechtecke alle
+Tiles. Begrenzte Kandidaten muessen dieselben Tilezentren in derselben Reihenfolge
+wie der bisherige exhaustive Pfad liefern, auch bei Hex, H0-H2 und Kamera-Yaw.
+Ausserdem muss eine nach `render_map()` unveraenderte Contact-Heatmap wieder
+sichtbar sein, ohne dass UI/Visuals Gameplay-Kontakte mutieren.
+
+Betroffene produktive Pfade: `multiplayer_command_contract.gd`,
+`mission_combat_loop_driver.gd`, `terrain_map_3d_view.gd` sowie zugehoerige Tests.
+Jeder Kandidat wird vor dem jeweiligen Produktivfix durch RED verifiziert.
+
+## Ergebnis Runde 1
+- P1 behoben: Fireteam-Rechte verwenden bekannte Runtime-Zuordnung; widersprechende
+  Payload-Hinweise koennen keine Unit umetikettieren. Nur fuenf Produktionszeilen.
+- Echte Authority-Fixture RED 13/9 -> GREEN 22/0. Sechs relevante alte Gates
+  (166, 1186, 1083, 1099, 1100, 1114) ebenfalls strikt gruen; effektiv sieben
+  Gates / 151 Assertions. Unabhaengiger Nachreview APPROVED.
+- Erstes Testfixture nutzte versehentlich lokalen Non-Authority-Bypass; korrigiert,
+  Originalcontract exakt fuer erneuten RED eingesetzt und Fix per SHA256 wieder
+  hergestellt. Keine Assertions abgeschwaecht, Rohberichte bleiben erhalten.
+- Alle Runtime-Laeufe isoliert; Rosterbytes, Laenge und Schreibzeit unveraendert.
