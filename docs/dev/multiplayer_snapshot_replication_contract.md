@@ -45,6 +45,23 @@ Anzeige-/Mission-Felder:
 - Mission-Result: `reliable`, bleibt fuer bestehende Combat-Result-RPCs und wird zusaetzlich im Snapshot-Schema gespiegelt.
 - Start/Load: `reliable`, bleibt bei der Session-/Lobby-Schicht aus TASK_167.
 
+### Begrenzte Chunk-Reassembly (Review 2, 2026-11-02)
+- Teilstaende bleiben auch bei mehreren Ticks Chunk-Versatz zusammensetzbar,
+  solange kein neuerer Snapshot angewendet wurde und die Puffergrenzen gelten.
+  Chunks mit `tick <= last_applied_tick` werden nicht erneut gepuffert; nach
+  erfolgreicher Anwendung werden ueberholte Teilstaende entfernt.
+- Maximal 32 unvollstaendige Ticks bleiben gepuffert. Bei Ueberschreitung
+  entfallen die kleinsten Ticks zuerst. Ein Teilstand laeuft 1500 ms nach seinem
+  ersten Chunk ab; weitere Chunks verlaengern diese Frist nicht. Auch ohne neue
+  Pakete prueft der laufende `_process()` den Puffer im Abstand von 250 ms.
+- Pro Snapshot gelten maximal 256 Chunks mit je 1000 Byte Nutzlast und maximal
+  8 MiB unkomprimierte Daten. Chunk-Anzahl, Raw-Groesse und Kompressionsflag
+  muessen innerhalb eines Ticks uebereinstimmen. Der dekodierte Snapshot-Tick
+  muss dem Chunk-Header-Tick entsprechen, bevor der State angewendet wird.
+- Unvollstaendige, abgelaufene oder verworfene Teilstaende erzeugen keine
+  Gameplay-Commands oder Effects. Debugdaten melden pending, expired, evicted
+  und stale sowie das Pufferlimit und die Ablaufzeit.
+
 ### Transportuebergreifende Vital-Reihenfolge (Review 2026-11-02)
 - Jeder neue Unit-Vitalsnapshot und jedes Reliable-Vital-Delta traegt `vital_tick`.
   Die drei Vitalwerte werden gemeinsam angewendet, nur wenn dieser Tick neuer

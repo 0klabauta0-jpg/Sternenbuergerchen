@@ -61,6 +61,7 @@ func get_contact_snapshot(current_tick: int = -1) -> Array:
 func update(current_tick: int, contact_observations: Array, known_fireteam_ids: Array, leadership_by_fireteam: Dictionary = {}) -> bool:
 	var changed: bool = false
 	var observed_keys: Dictionary = {}
+	var observations_by_key: Dictionary = {}
 	for observation_variant in contact_observations:
 		if typeof(observation_variant) != TYPE_DICTIONARY:
 			continue
@@ -73,6 +74,17 @@ func update(current_tick: int, contact_observations: Array, known_fireteam_ids: 
 		if key.is_empty():
 			continue
 		observed_keys[key] = true
+		var aggregated: Dictionary = observation.duplicate(true)
+		if observations_by_key.has(key):
+			var previous: Dictionary = observations_by_key[key]
+			aggregated["detection_complete"] = bool(previous.get("detection_complete", false)) or bool(observation.get("detection_complete", false))
+			if previous.has("contact_report_confidence") or previous.has("confidence") or observation.has("contact_report_confidence") or observation.has("confidence"):
+				aggregated["contact_report_confidence"] = maxf(float(previous.get("contact_report_confidence", previous.get("confidence", 0.0))), float(observation.get("contact_report_confidence", observation.get("confidence", 0.0))))
+		observations_by_key[key] = aggregated
+	var ordered_keys: Array = observations_by_key.keys()
+	ordered_keys.sort()
+	for key in ordered_keys:
+		var observation: Dictionary = observations_by_key[key]
 		if _apply_observation(current_tick, observation, known_fireteam_ids, leadership_by_fireteam):
 			changed = true
 	if _mark_stale_visual_contacts_lost(current_tick, observed_keys):
@@ -92,11 +104,15 @@ func _apply_observation(current_tick: int, observation: Dictionary, known_firete
 	var entry: Dictionary = Dictionary(_entries_by_key.get(entry_key, {})).duplicate(true)
 	var last_seen_tick: int = int(entry.get("last_seen_tick", -999999))
 	var los_ticks: int = 1
-	if last_seen_tick == current_tick - 1:
+	var detection_complete: bool = bool(observation.get("detection_complete", false))
+	if last_seen_tick == current_tick:
+		los_ticks = int(entry.get("los_ticks", 1))
+		detection_complete = detection_complete or bool(entry.get("detection_complete_this_tick", false))
+	elif last_seen_tick == current_tick - 1:
 		los_ticks = int(entry.get("los_ticks", 0)) + 1
 	var position: Vector2 = _coerce_vector2(observation.get("last_known_position", observation.get("position", Vector2.ZERO)), Vector2.ZERO)
 	var next_state: String = STATE_SPOTTED
-	if bool(observation.get("detection_complete", false)) and los_ticks >= CONFIRM_AFTER_LOS_TICKS:
+	if detection_complete and los_ticks >= CONFIRM_AFTER_LOS_TICKS:
 		next_state = STATE_CONFIRMED
 	entry["fireteam_id"] = fireteam_id
 	entry["unit_id"] = enemy_unit_id
@@ -108,6 +124,7 @@ func _apply_observation(current_tick: int, observation: Dictionary, known_firete
 	entry["last_updated_tick"] = current_tick
 	entry["last_seen_tick"] = current_tick
 	entry["los_ticks"] = los_ticks
+	entry["detection_complete_this_tick"] = detection_complete
 	if observation.has("confidence") or observation.has("contact_report_confidence"):
 		entry["contact_report_confidence_hint"] = clampf(float(observation.get("contact_report_confidence", observation.get("confidence", 0.0))), 0.0, 1.0)
 	_store_entry(entry_key, entry)
@@ -142,6 +159,9 @@ func _schedule_confirmed_relays(current_tick: int, source_fireteam_id: String, e
 		if receiver_fireteam_id.is_empty() or receiver_fireteam_id == source_fireteam_id:
 			continue
 		var relay_key: String = _make_relay_key(source_fireteam_id, receiver_fireteam_id, enemy_unit_id)
+		var due_tick: int = current_tick + delay_ticks
+		if _relay_queue_by_key.has(relay_key):
+			due_tick = mini(due_tick, int(Dictionary(_relay_queue_by_key[relay_key]).get("due_tick", due_tick)))
 		_relay_queue_by_key[relay_key] = {
 			"source_fireteam_id": source_fireteam_id,
 			"receiver_fireteam_id": receiver_fireteam_id,
@@ -152,7 +172,7 @@ func _schedule_confirmed_relays(current_tick: int, source_fireteam_id: String, e
 			"detected_by": Array(entry.get("detected_by", [])).duplicate(true),
 			"last_seen_tick": int(entry.get("last_seen_tick", current_tick)),
 			"contact_report_confidence_hint": float(entry.get("contact_report_confidence_hint", -1.0)),
-			"due_tick": current_tick + delay_ticks,
+			"due_tick": due_tick,
 		}
 
 
@@ -173,6 +193,14 @@ func _deliver_due_relays(current_tick: int) -> bool:
 		var previous_public: String = JSON.stringify(_build_public_entry(Dictionary(_entries_by_key.get(entry_key, {})), current_tick))
 		var entry: Dictionary = Dictionary(_entries_by_key.get(entry_key, {})).duplicate(true)
 		var current_state: String = String(entry.get("detection_state", STATE_UNKNOWN))
+		if current_state == STATE_SPOTTED or current_state == STATE_CONFIRMED:
+			# Direct observations were applied for this tick before relay delivery.
+			# Merge provenance without replacing their fresher LOS/position state.
+			entry["detected_by"] = _merge_detected_by(Array(entry.get("detected_by", [])), Array(relay.get("detected_by", [])) + [receiver_fireteam_id])
+			_store_entry(entry_key, entry)
+			if previous_public != JSON.stringify(_build_public_entry(entry, current_tick)):
+				changed = true
+			continue
 		if current_state != STATE_SPOTTED and current_state != STATE_CONFIRMED:
 			entry["detection_state"] = STATE_SUSPECTED
 		entry["fireteam_id"] = receiver_fireteam_id

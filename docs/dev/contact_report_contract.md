@@ -28,6 +28,24 @@ Contact Reports beschreiben Feindwissen fuer UI, Preview und Event-Log, ohne dar
 - Stale-Kontakte bleiben sichtbar, wenn FoW/Overlay das erlaubt, muessen aber als unsicher erkennbar sein.
 - Event-Log-Meldungen werden aus Contact-Snapshot-Aenderungen abgeleitet und sind visual-only.
 
+## Beobachter und Relays (Review 2, 2026-11-02)
+- `ContactTracker.update()` aggregiert die Beobachtungen je Fireteam/Ziel vor
+  der Anwendung: `detection_complete` per OR und vorhandene Confidence-Hinweise
+  per Maximum. Ein unvollstaendiger Observer stuft damit die vollstaendige
+  Beobachtung eines anderen Observers desselben Updates nicht zurueck.
+- LOS-Dauer waechst einmal pro aufeinanderfolgendem Simulationstick. Erneute
+  Anwendung im selben Tick erhaelt LOS-Zaehler und bereits erreichte Detection-
+  Vollstaendigkeit. Eine echte LOS-Luecke setzt den Kontakt auf `lost`; nach
+  Wiederaufnahme beginnt die LOS-Bestaetigung erneut.
+- Erneute bestaetigte Sichtung aktualisiert den Payload eines wartenden Relays,
+  behaelt aber dessen frueheste Faelligkeit. Die bestehende Leadership-Verzoegerung
+  bleibt erhalten; ein bereits wartender Bericht wird auch nach Sichtverlust
+  mit der zuletzt tatsaechlich beobachteten Position und deren Tick zugestellt.
+- Hat der Empfaenger im Zustelltick direkte `spotted`-/`confirmed`-Sicht, erhaelt
+  das Relay dessen eigenen LOS-Zaehler, Detection-State und Position. Es ergaenzt
+  nur die `detected_by`-Herkunft; ohne direkte Sicht bleibt der Relay-Pfad
+  vermutetes Kontaktwissen (`suspected`).
+
 ## Nicht-Ziele
 - Keine neue FoW-Wahrheit.
 - Kein Combat-Rewrite.

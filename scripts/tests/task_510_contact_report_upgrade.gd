@@ -5,6 +5,8 @@ const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/vis
 const TACTICAL_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/mission_tactical_sandbox_controller.gd")
 const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 const EVENT_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_event.gd")
+const RUNTIME_INDEX_SCRIPT: GDScript = preload("res://scripts/tactical/mission_runtime_index.gd")
+const HUD_READ_MODEL_SCRIPT: GDScript = preload("res://scripts/tactical/mission_hud_read_model.gd")
 
 var _passed: int = 0
 var _failed: int = 0
@@ -88,9 +90,19 @@ func _test_contact_map_overlay_keeps_report_fields() -> void:
 
 
 func _test_controller_emits_contact_report_log_entries() -> void:
+	# Match the normal mission's owned read-model nodes; the standalone
+	# controller's legacy fallbacks otherwise have no scene owner to free them.
+	var fixture := Node.new()
+	root.add_child(fixture)
+	var runtime_index = RUNTIME_INDEX_SCRIPT.new()
+	runtime_index.name = "MissionRuntimeIndex"
+	fixture.add_child(runtime_index)
+	var hud_read_model = HUD_READ_MODEL_SCRIPT.new()
+	hud_read_model.name = "MissionHudReadModel"
+	fixture.add_child(hud_read_model)
 	var controller = TACTICAL_CONTROLLER_SCRIPT.new()
 	controller.fireteamleader_feedback_bubbles_enabled = false
-	root.add_child(controller)
+	fixture.add_child(controller)
 	await _wait_frames(2)
 	controller.call("_emit_contact_report_events_from_snapshot", [{
 		"fireteam_id": "blue",
@@ -109,7 +121,7 @@ func _test_controller_emits_contact_report_log_entries() -> void:
 	_assert(_has_event_type(entries, EVENT_SCRIPT.EVENT_CONTACT_REPORT), "Controller derives contact_report event-log entries from contact snapshots")
 	var entry: Dictionary = _find_event_type(entries, EVENT_SCRIPT.EVENT_CONTACT_REPORT)
 	_assert(String(entry.get("short_text", "")).find("rifleman") >= 0, "Contact event-log entry carries the report text")
-	controller.queue_free()
+	fixture.queue_free()
 	await _wait_frames(2)
 
 

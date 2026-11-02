@@ -29,6 +29,9 @@ const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
 const SNAPSHOT_CHUNK_PAYLOAD_BYTES: int = 1000
 const SNAPSHOT_MAX_CHUNK_COUNT: int = 256
+const SNAPSHOT_MAX_RAW_BYTES: int = 8 * 1024 * 1024
+const SNAPSHOT_REASSEMBLY_MAX_PENDING_TICKS: int = 32
+const SNAPSHOT_REASSEMBLY_TIMEOUT_MSEC: int = 1500
 const NETWORK_COMMAND_DEDUPE_MAX_IDS: int = 2048
 const SNAPSHOT_COMPRESSION_MODE: int = FileAccess.COMPRESSION_ZSTD
 
@@ -121,6 +124,10 @@ var _snapshot_transport_last_raw_bytes: int = 0
 var _snapshot_transport_last_wire_bytes: int = 0
 var _snapshot_transport_reassembled_count: int = 0
 var _snapshot_transport_reassembly_failure_count: int = 0
+var _snapshot_transport_expired_tick_count: int = 0
+var _snapshot_transport_evicted_tick_count: int = 0
+var _snapshot_transport_stale_chunk_count: int = 0
+var _snapshot_transport_next_prune_msec: int = 0
 var _snapshot_transport_last_pack_usec: int = 0
 var _snapshot_transport_last_reassembly_usec: int = 0
 var _snapshot_broadcast_paused: bool = false
@@ -659,6 +666,11 @@ func get_snapshot_transport_debug_snapshot() -> Dictionary:
 		"last_pack_usec": _snapshot_transport_last_pack_usec,
 		"last_reassembly_usec": _snapshot_transport_last_reassembly_usec,
 		"pending_tick_count": _incoming_snapshot_chunks_by_tick.size(),
+		"max_pending_tick_count": SNAPSHOT_REASSEMBLY_MAX_PENDING_TICKS,
+		"reassembly_timeout_msec": SNAPSHOT_REASSEMBLY_TIMEOUT_MSEC,
+		"expired_tick_count": _snapshot_transport_expired_tick_count,
+		"evicted_tick_count": _snapshot_transport_evicted_tick_count,
+		"stale_chunk_count": _snapshot_transport_stale_chunk_count,
 		"broadcast_paused": _snapshot_broadcast_paused,
 		"blocked_peer_ids": _snapshot_blocked_peer_ids.keys(),
 		"read_only": true,
@@ -862,15 +874,23 @@ func _receive_tick_state(state_dict: Dictionary) -> void:
 
 @rpc("authority", "unreliable")
 func _receive_tick_state_chunk(tick: int, chunk_index: int, chunk_count: int, raw_size: int, compressed: bool, chunk: PackedByteArray) -> void:
-	if tick < 0 or chunk_count <= 0 or chunk_count > SNAPSHOT_MAX_CHUNK_COUNT or chunk_index < 0 or chunk_index >= chunk_count:
+	if tick < 0 or chunk_count <= 0 or chunk_count > SNAPSHOT_MAX_CHUNK_COUNT or chunk_index < 0 or chunk_index >= chunk_count or raw_size <= 0 or raw_size > SNAPSHOT_MAX_RAW_BYTES:
 		_snapshot_transport_reassembly_failure_count += 1
 		return
 	if chunk.size() > SNAPSHOT_CHUNK_PAYLOAD_BYTES:
 		_snapshot_transport_reassembly_failure_count += 1
 		return
+	if tick <= _last_applied_snapshot_tick:
+		_snapshot_transport_stale_chunk_count += 1
+		return
+	_prune_incoming_snapshot_chunks(tick)
 	var entry: Dictionary = Dictionary(_incoming_snapshot_chunks_by_tick.get(tick, {}))
-	if entry.is_empty() or int(entry.get("chunk_count", -1)) != chunk_count or int(entry.get("raw_size", -1)) != raw_size or bool(entry.get("compressed", false)) != compressed:
+	if not entry.is_empty() and (int(entry.get("chunk_count", -1)) != chunk_count or int(entry.get("raw_size", -1)) != raw_size or bool(entry.get("compressed", false)) != compressed):
+		_snapshot_transport_reassembly_failure_count += 1
+		return
+	if entry.is_empty():
 		entry = {
+			"first_received_msec": Time.get_ticks_msec(),
 			"chunk_count": chunk_count,
 			"raw_size": raw_size,
 			"compressed": compressed,
@@ -881,6 +901,8 @@ func _receive_tick_state_chunk(tick: int, chunk_index: int, chunk_count: int, ra
 	entry["chunks"] = chunks
 	_incoming_snapshot_chunks_by_tick[tick] = entry
 	_prune_incoming_snapshot_chunks(tick)
+	if not _incoming_snapshot_chunks_by_tick.has(tick):
+		return
 	if chunks.size() < chunk_count:
 		return
 	var reassembly_started_usec: int = Time.get_ticks_usec()
@@ -899,15 +921,30 @@ func _receive_tick_state_chunk(tick: int, chunk_index: int, chunk_count: int, ra
 	if typeof(decoded) != TYPE_DICTIONARY:
 		_snapshot_transport_reassembly_failure_count += 1
 		return
+	if int(decoded.get("tick", -1)) != tick:
+		_snapshot_transport_reassembly_failure_count += 1
+		return
 	_snapshot_transport_reassembled_count += 1
 	_apply_remote_state(Dictionary(decoded))
+	_prune_incoming_snapshot_chunks(tick)
 	_snapshot_transport_last_reassembly_usec = Time.get_ticks_usec() - reassembly_started_usec
 
 
-func _prune_incoming_snapshot_chunks(latest_tick: int) -> void:
+func _prune_incoming_snapshot_chunks(_latest_tick: int) -> void:
+	var now_msec: int = Time.get_ticks_msec()
 	for tick_variant in _incoming_snapshot_chunks_by_tick.keys():
-		if int(tick_variant) < latest_tick - 2:
+		var entry: Dictionary = _incoming_snapshot_chunks_by_tick[tick_variant]
+		if int(tick_variant) <= _last_applied_snapshot_tick:
 			_incoming_snapshot_chunks_by_tick.erase(tick_variant)
+		elif now_msec - int(entry.get("first_received_msec", now_msec)) >= SNAPSHOT_REASSEMBLY_TIMEOUT_MSEC:
+			_incoming_snapshot_chunks_by_tick.erase(tick_variant)
+			_snapshot_transport_expired_tick_count += 1
+	if _incoming_snapshot_chunks_by_tick.size() > SNAPSHOT_REASSEMBLY_MAX_PENDING_TICKS:
+		var pending_ticks: Array = _incoming_snapshot_chunks_by_tick.keys()
+		pending_ticks.sort()
+		while _incoming_snapshot_chunks_by_tick.size() > SNAPSHOT_REASSEMBLY_MAX_PENDING_TICKS:
+			_incoming_snapshot_chunks_by_tick.erase(pending_ticks.pop_front())
+			_snapshot_transport_evicted_tick_count += 1
 
 
 @rpc("authority", "reliable")
@@ -952,6 +989,17 @@ func _copy_current_remote_vitals(unit, payload: Dictionary) -> void:
 		return
 	payload.merge(current_vitals, true)
 	payload["vital_tick"] = int(_last_applied_vital_tick_by_unit_id.get(String(current_vitals["unit_id"]), -1))
+
+
+func _process(_delta: float) -> void:
+	# A stopped packet stream must not retain incomplete buffers indefinitely.
+	if _incoming_snapshot_chunks_by_tick.is_empty():
+		return
+	var now_msec: int = Time.get_ticks_msec()
+	if now_msec < _snapshot_transport_next_prune_msec:
+		return
+	_snapshot_transport_next_prune_msec = now_msec + 250
+	_prune_incoming_snapshot_chunks(-1)
 
 
 # Commands are committed before effects on every authoritative physics tick.
@@ -1146,6 +1194,9 @@ func _broadcast_tick_state() -> void:
 func _broadcast_tick_state_chunks(state_dict: Dictionary, recipient_peer_ids: PackedInt32Array) -> void:
 	var pack_started_usec: int = Time.get_ticks_usec()
 	var raw_bytes: PackedByteArray = var_to_bytes(state_dict)
+	if raw_bytes.size() > SNAPSHOT_MAX_RAW_BYTES:
+		push_warning("SimulationRoot snapshot exceeds raw transport capacity: %d bytes." % raw_bytes.size())
+		return
 	var compressed_bytes: PackedByteArray = raw_bytes.compress(SNAPSHOT_COMPRESSION_MODE)
 	var use_compression: bool = not compressed_bytes.is_empty() and compressed_bytes.size() < raw_bytes.size()
 	var wire_bytes: PackedByteArray = compressed_bytes if use_compression else raw_bytes
@@ -2428,6 +2479,9 @@ func _enforce_unit_minimum_spacing() -> void:
 			"unit_count": units.size(),
 			"moved_unit_ids": [],
 			"minimum_distance_after": INF,
+			"minimum_distance_measured": unit_minimum_spacing_debug_enabled,
+			"solver_pair_check_count": 0,
+			"diagnostic_pair_check_count": 0,
 			"blocked_pair_count": 0,
 			"downed_units_keep_space": true,
 		}
@@ -2437,7 +2491,8 @@ func _enforce_unit_minimum_spacing() -> void:
 		units,
 		unit_minimum_spacing_distance,
 		_get_terrain_registry(),
-		unit_minimum_spacing_solver_iterations
+		unit_minimum_spacing_solver_iterations,
+		unit_minimum_spacing_debug_enabled
 	))
 	var positions_by_unit_id: Dictionary = Dictionary(result.get("positions_by_unit_id", {}))
 	var moved_unit_ids: Array = Array(result.get("moved_unit_ids", []))
@@ -2462,6 +2517,9 @@ func _enforce_unit_minimum_spacing() -> void:
 		"enabled": true,
 		"minimum_distance": float(result.get("minimum_distance", unit_minimum_spacing_distance)),
 		"minimum_distance_after": float(result.get("minimum_distance_after", INF)),
+		"minimum_distance_measured": bool(result.get("minimum_distance_measured", false)),
+		"solver_pair_check_count": int(result.get("solver_pair_check_count", 0)),
+		"diagnostic_pair_check_count": int(result.get("diagnostic_pair_check_count", 0)),
 		"unit_count": units.size(),
 		"moved_unit_ids": moved_unit_ids,
 		"active_unit_ids": Array(result.get("active_unit_ids", [])),

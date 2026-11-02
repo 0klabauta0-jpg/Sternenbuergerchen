@@ -136,7 +136,8 @@ func resolve_minimum_spacing_positions(
 	units: Array,
 	minimum_distance: float = DEFAULT_MINIMUM_SPACING,
 	terrain_registry = null,
-	max_iterations: int = 4
+	max_iterations: int = 4,
+	measure_global_minimum_distance: bool = false
 ) -> Dictionary:
 	var sorted_units: Array = units.duplicate()
 	sorted_units.sort_custom(_sort_units_by_id)
@@ -154,18 +155,25 @@ func resolve_minimum_spacing_positions(
 		initial_positions_by_unit_id[unit_id] = (unit as Node2D).global_position
 
 	var resolved_minimum_distance: float = maxf(minimum_distance, 0.0)
+	var spacing_cell_size: float = maxf(resolved_minimum_distance, 1.0)
+	var spacing_cells: Dictionary = {}
+	for unit_id in active_unit_ids:
+		_append_spacing_cell_agent(spacing_cells, String(unit_id), Vector2(positions_by_unit_id[unit_id]), spacing_cell_size)
 	var blocked_pairs: Array = []
 	var resolved_pair_count: int = 0
+	var solver_pair_check_count: int = 0
 	var iteration_count: int = maxi(max_iterations, 0)
 	for _iteration in range(iteration_count):
 		var moved_this_iteration: bool = false
-		for index_a in range(active_unit_ids.size()):
-			for index_b in range(index_a + 1, active_unit_ids.size()):
-				var unit_id_a: String = String(active_unit_ids[index_a])
-				var unit_id_b: String = String(active_unit_ids[index_b])
+		for unit_id_a_variant in active_unit_ids:
+			var unit_id_a: String = String(unit_id_a_variant)
+			var candidate_ids: Array = _spacing_candidate_ids(spacing_cells, Vector2(positions_by_unit_id[unit_id_a]), spacing_cell_size, unit_id_a)
+			while not candidate_ids.is_empty():
+				var unit_id_b: String = String(candidate_ids.pop_front())
 				var position_a: Vector2 = Vector2(positions_by_unit_id.get(unit_id_a, Vector2.ZERO))
 				var position_b: Vector2 = Vector2(positions_by_unit_id.get(unit_id_b, Vector2.ZERO))
 				var delta: Vector2 = position_b - position_a
+				solver_pair_check_count += 1
 				var distance: float = delta.length()
 				if distance >= resolved_minimum_distance - 0.001:
 					continue
@@ -190,6 +198,12 @@ func resolve_minimum_spacing_positions(
 						positions_by_unit_id[unit_id_b] = candidate_b_full
 						moved_pair = true
 				if moved_pair:
+					var cell_changed_a: bool = _update_spacing_cell_agent(spacing_cells, unit_id_a, position_a, Vector2(positions_by_unit_id[unit_id_a]), spacing_cell_size)
+					_update_spacing_cell_agent(spacing_cells, unit_id_b, position_b, Vector2(positions_by_unit_id[unit_id_b]), spacing_cell_size)
+					# A correction can bring a later ID into range across a cell edge.
+					# Refresh only future pairs, preserving the original sorted order.
+					if cell_changed_a:
+						candidate_ids = _spacing_candidate_ids(spacing_cells, Vector2(positions_by_unit_id[unit_id_a]), spacing_cell_size, unit_id_b)
 					moved_this_iteration = true
 					resolved_pair_count += 1
 				else:
@@ -215,11 +229,51 @@ func resolve_minimum_spacing_positions(
 		"moved_unit_ids": moved_unit_ids,
 		"active_unit_ids": active_unit_ids,
 		"minimum_distance": resolved_minimum_distance,
-		"minimum_distance_after": _calculate_minimum_distance_between_positions(positions_by_unit_id),
+		"minimum_distance_after": _calculate_minimum_distance_between_positions(positions_by_unit_id) if measure_global_minimum_distance else INF,
+		"minimum_distance_measured": measure_global_minimum_distance,
+		"solver_pair_check_count": solver_pair_check_count,
+		"diagnostic_pair_check_count": active_unit_ids.size() * (active_unit_ids.size() - 1) / 2 if measure_global_minimum_distance else 0,
 		"resolved_pair_count": resolved_pair_count,
 		"blocked_pair_count": blocked_pairs.size(),
 		"blocked_pairs": blocked_pairs,
 	}
+
+
+func _spacing_cell_for_position(position: Vector2, spacing_cell_size: float) -> Vector2i:
+	return Vector2i(floori(position.x / spacing_cell_size), floori(position.y / spacing_cell_size))
+
+
+func _append_spacing_cell_agent(cells: Dictionary, unit_id: String, position: Vector2, spacing_cell_size: float) -> void:
+	var cell: Vector2i = _spacing_cell_for_position(position, spacing_cell_size)
+	var entries: Array = cells.get(cell, [])
+	entries.append(unit_id)
+	cells[cell] = entries
+
+
+func _update_spacing_cell_agent(cells: Dictionary, unit_id: String, previous_position: Vector2, position: Vector2, spacing_cell_size: float) -> bool:
+	var previous_cell: Vector2i = _spacing_cell_for_position(previous_position, spacing_cell_size)
+	if previous_cell == _spacing_cell_for_position(position, spacing_cell_size):
+		return false
+	var entries: Array = cells.get(previous_cell, [])
+	entries.erase(unit_id)
+	if entries.is_empty():
+		cells.erase(previous_cell)
+	else:
+		cells[previous_cell] = entries
+	_append_spacing_cell_agent(cells, unit_id, position, spacing_cell_size)
+	return true
+
+
+func _spacing_candidate_ids(cells: Dictionary, position: Vector2, spacing_cell_size: float, after_unit_id: String) -> Array:
+	var center: Vector2i = _spacing_cell_for_position(position, spacing_cell_size)
+	var result: Array = []
+	for x in range(center.x - 1, center.x + 2):
+		for y in range(center.y - 1, center.y + 2):
+			for unit_id in Array(cells.get(Vector2i(x, y), [])):
+				if String(unit_id) > after_unit_id:
+					result.append(String(unit_id))
+	result.sort()
+	return result
 
 
 func get_neighbors(position: Vector2, radius: float, exclude_unit_id: String = "", max_neighbors: int = DEFAULT_MAX_NEIGHBORS) -> Array:
