@@ -2,6 +2,9 @@ class_name MetaUISkin
 extends RefCounted
 
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+const NATIVE_UI_ICONS_SCRIPT: GDScript = preload("res://scripts/ui/native_ui_icons.gd")
+const FRONTIER_STAGE_PATH := "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png"
+static var _frontier_stage_texture: Texture2D
 
 const COLOR_FRAME := TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_ALT
 const COLOR_FRAME_BORDER := TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER
@@ -235,6 +238,66 @@ static func style_header_label(label: Node, font_size: int = 12) -> void:
 	var typed_label := label as Label
 	if typed_label != null:
 		typed_label.add_theme_font_size_override("font_size", font_size)
+
+
+static func style_preparation_heading(label: Label, font_size: int = 20, icon_id: String = "") -> void:
+	if label == null:
+		return
+	TACTICAL_UI_THEME_SCRIPT.style_section_heading(label, font_size)
+	label.set_meta("native_r4_preparation_heading", true)
+	if icon_id.is_empty():
+		return
+	var icon := label.get_node_or_null("R4SectionIcon") as TextureRect
+	if icon == null:
+		icon = TextureRect.new()
+		icon.name = "R4SectionIcon"
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		label.add_child(icon)
+		icon.anchor_top = 0.5
+		icon.anchor_bottom = 0.5
+		icon.offset_left = 4.0
+		icon.offset_right = 28.0
+		icon.offset_top = -12.0
+		icon.offset_bottom = 12.0
+	icon.texture = NATIVE_UI_ICONS_SCRIPT.get_icon(icon_id)
+	var heading_style := label.get_theme_stylebox("normal").duplicate() as StyleBox
+	heading_style.set_content_margin(SIDE_LEFT, 36.0)
+	label.add_theme_stylebox_override("normal", heading_style)
+
+
+static func update_frontier_stage(screen: Control, target: Rect2i, visible_stage: bool = true) -> void:
+	# A static curated Main capture fills otherwise unused space. It never reads
+	# transport readiness, adds an actor, or intercepts the real cards above it.
+	var panel := screen.get_node_or_null("Panel") as Control
+	if panel == null:
+		return
+	var stage := panel.get_node_or_null("R4FrontierStage") as PanelContainer
+	if stage == null:
+		stage = PanelContainer.new()
+		stage.name = "R4FrontierStage"
+		stage.set_as_top_level(true)
+		stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stage.clip_contents = true
+		stage.set_meta("native_r4_decorative_frontier_stage", true)
+		stage.set_meta("visual_only", true)
+		stage.set_meta("source_resource", FRONTIER_STAGE_PATH)
+		style_tactical_panel(stage, "thin_frame")
+		panel.add_child(stage)
+		panel.move_child(stage, 0)
+		var image := TextureRect.new()
+		image.name = "FrontierImage"
+		image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		if _frontier_stage_texture == null:
+			_frontier_stage_texture = load(FRONTIER_STAGE_PATH) as Texture2D
+		image.texture = _frontier_stage_texture
+		stage.add_child(image)
+	stage.visible = visible_stage and target.size.x > 0 and target.size.y >= 80
+	stage.position = Vector2(target.position)
+	stage.size = Vector2(target.size)
 
 
 static func style_body_label(label: Node, font_size: int = 10) -> void:

@@ -1,0 +1,84 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "stylebox" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/mission_tactical_sandbox_controller.gd:5369)
+ERROR: Failed to load script "res://scripts/tests/mission_tactical_sandbox_controller.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_275 Command Button Hierarchy Arrangement Overhaul ===
+PASS: Mission command hierarchy contract file exists
+PASS: Group order contains goal
+PASS: Group order contains rule
+PASS: Group order contains plan
+PASS: Group order contains air_lz
+PASS: Group order contains breakout
+PASS: Catalog contains action move
+PASS: Catalog contains action take
+PASS: Catalog contains action defend
+PASS: Catalog contains action engage
+PASS: Catalog contains action secure
+PASS: Catalog contains action recon
+PASS: Catalog contains action withdraw
+PASS: Catalog contains action delete_order
+PASS: Catalog contains action tempo
+PASS: Catalog contains action fire_rule
+PASS: Catalog contains action contact_response
+PASS: Catalog contains action cover_priority
+PASS: Catalog contains action security_mode
+PASS: Catalog contains action role_suggestion
+PASS: Catalog contains action swap_roles
+PASS: Catalog contains action preview_plan
+PASS: Catalog contains action sort_fireteam
+PASS: Catalog contains action go_plan
+PASS: Catalog contains action set_lz
+PASS: Catalog contains action call_dropship
+PASS: Catalog contains action lz_secure
+PASS: Catalog contains action evac_recover
+PASS: Catalog contains action confirm
+PASS: Catalog contains action override
+PASS: Catalog contains action abort
+PASS: Catalog contains action regroup
+PASS: Contract snapshot is visual-only
+PASS: Contract snapshot does not set gameplay truth
+PASS: Rule actions live in #17
+PASS: Set LZ is grouped as Air/LZ
+PASS: Sort lives in #16 for the fixed HUD command matrix
+PASS: GO lives in #16 for the fixed HUD command matrix
+PASS: Breakout actions are reserved for TASK_276
+PASS: Command hierarchy dev doc exists
+PASS: Dev doc contains #16
+PASS: Dev doc contains #17
+PASS: Dev doc contains #18
+PASS: Dev doc contains goal
+PASS: Dev doc contains rule
+PASS: Dev doc contains plan
+PASS: Dev doc contains air_lz
+PASS: Dev doc contains breakout
+PASS: Dev doc contains visual_only
+PASS: Dev doc contains ui_sets_gameplay_truth = false
+PASS: Dev doc contains Vorher Matrix
+PASS: Dev doc contains Nachher Gruppen
+PASS: Dev doc contains Disabled Reasons
+PASS: Dev doc contains Offene UX-Fragen
+PASS: Help catalog contains mission.command.group.goal
+PASS: Help catalog contains mission.command.group.rule
+PASS: Help catalog contains mission.command.group.plan
+PASS: Help catalog contains mission.command.group.air_lz
+PASS: Help catalog contains mission.command.group.breakout
+ERROR: FAIL: Controller exposes command hierarchy snapshot
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:258)
+       [1] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:131)
+       [2] _wait_frames (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:249)
+SCRIPT ERROR: Invalid call. Nonexistent function 'get_command_hierarchy_snapshot (via call)' in base 'Node'.
+   at: _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:135)
+   GDScript backtrace (most recent call first):
+       [0] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:135)
+       [1] _wait_frames (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:249)
+PASS: Task file marks TASK_275 implemented
+PASS: Task checklist is complete
+PASS: Implementation status mentions TASK_275 implemented
+PASS: Roadmap mentions TASK_275 implemented
+=== RESULTS: 63 passed, 1 failed ===
+FAIL

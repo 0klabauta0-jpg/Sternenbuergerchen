@@ -1,0 +1,28 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "stylebox" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/mission_tactical_sandbox_controller.gd:5369)
+ERROR: Failed to load script "res://scripts/tests/mission_tactical_sandbox_controller.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_571 Fire Rule Controls Readability Polish ===
+[PASS] TASK_571 task file exists
+[PASS] TASK_571 task file names the polish
+[PASS] Implementation status tracks TASK_571
+[PASS] Roadmap tracks TASK_571
+[PASS] HTML report tracks TASK_571
+[PASS] HTML report names TASK_572 follow-up
+[PASS] HTML report keeps TASK_571 completion context
+[PASS] Mission command feedback contract documents TASK_571
+[PASS] Command hierarchy exposes fire-rule button paths
+[PASS] Command hierarchy exposes suppress fire-rule action
+[PASS] Mission controller exposes fire-rule controls snapshot
+[PASS] Mission controller wires fire-rule button presses
+[PASS] Mission fixture exposes TacticalController
+SCRIPT ERROR: Invalid call. Nonexistent function '_set_selected_fireteams (via call)' in base 'Node'.
+   at: _test_fire_rule_controls_in_mission_hud (res://scripts/tests/task_571_fire_rule_controls_readability_polish.gd:77)
+   GDScript backtrace (most recent call first):
+       [0] _test_fire_rule_controls_in_mission_hud (res://scripts/tests/task_571_fire_rule_controls_readability_polish.gd:77)
+       [1] _wait_frames (res://scripts/tests/task_571_fire_rule_controls_readability_polish.gd:180)
+=== RESULTS: 13 passed, 0 failed ===
+TASK_571: ALL PASSED

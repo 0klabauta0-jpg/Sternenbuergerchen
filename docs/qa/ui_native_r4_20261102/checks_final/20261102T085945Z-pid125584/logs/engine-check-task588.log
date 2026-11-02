@@ -1,0 +1,49 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "stylebox" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/mission_tactical_sandbox_controller.gd:5369)
+ERROR: Failed to load script "res://scripts/tests/mission_tactical_sandbox_controller.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_588 Debrief AAR Data Bridge ===
+PASS: TASK_588 task file exists
+PASS: TASK_588 task file names the task
+PASS: Implementation status tracks TASK_588
+PASS: Implementation status still tracks TASK_587
+PASS: Roadmap marks TASK_588 implemented
+PASS: Roadmap names TASK_589 follow-up
+PASS: Review workbench tracks TASK_588
+PASS: Review workbench names TASK_589 follow-up
+PASS: Review workbench keeps the rolling HTML work report
+PASS: Mission feedback contract documents TASK_588
+PASS: Debrief screen exposes TASK_588 snapshot
+PASS: Debrief screen renders AAR chips
+PASS: MetaLayerFlow extracts mini AAR debrief payload
+PASS: MetaLayerFlow writes mini_aar_debrief into mission result
+PASS: MetaLayerFlow bridges mini AAR debrief schema
+PASS: Bridged mini AAR payload remains read-only
+PASS: Bridged mini AAR payload does not set gameplay truth
+PASS: Bridged mini AAR payload keeps FIRE summary
+PASS: Bridged mini AAR payload keeps chips
+PASS: Debrief AAR bridge reports stable schema
+PASS: Debrief AAR bridge gate passes
+PASS: Debrief AAR bridge snapshot is read-only
+PASS: Debrief AAR bridge does not set gameplay truth
+PASS: Debrief AAR bridge reports source schema
+PASS: Debrief AAR bridge section is visible
+PASS: Debrief AAR summary shows FIRE
+PASS: Debrief AAR summary shows SUP
+PASS: Debrief AAR bridge renders at least five chips
+PASS: Debrief AAR bridge renders at least four rows
+PASS: Debrief AAR bridge shows no-XP limit
+PASS: Debrief AAR bridge shows no-Ammo limit
+PASS: Debrief AAR bridge shows no-real-suppression limit
+PASS: Debrief visual polish stays green
+PASS: AAR chips visible check passes
+PASS: AAR limits check passes
+=== RESULTS: 35 passed, 0 failed ===
+TASK_588: ALL PASSED

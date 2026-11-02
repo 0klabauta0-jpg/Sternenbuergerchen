@@ -1,0 +1,64 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: (1920, 1080) Debrief has native ResultCard
+PASS: (1920, 1080) ResultCard stays inside logical viewport
+PASS: (1920, 1080) Debrief has native PeopleCard
+PASS: (1920, 1080) PeopleCard stays inside logical viewport
+PASS: (1920, 1080) Debrief has native FeedbackCard
+PASS: (1920, 1080) Debrief has native EventsCard
+PASS: (1920, 1080) Debrief has native ProgressCard
+PASS: (1920, 1080) Debrief has native ReturnCard
+PASS: (1920, 1080) ReturnCard stays inside logical viewport
+PASS: (1920, 1080) actual person-card list exists
+PASS: (1920, 1080) all six supplied people remain represented
+PASS: (1920, 1080) missing health remains explicitly unknown
+R2 DEBRIEF GEOMETRY (1920, 1080) ReturnToFOBButton rect=[P: (372.0, 783.0), S: (67.0, 40.0)] row=[P: (372.0, 783.0), S: (1176.0, 40.0)] slot=[P: (372.0, 783.0), S: (1176.0, 40.0)]
+R2 DEBRIEF LEAF (1920, 1080) ReturnToFOBButton top_level=true assigned_slot=ButtonRow passes=2
+PASS: (1920, 1080) existing ReturnToFOBButton stays reachable
+R2 DEBRIEF GEOMETRY (1920, 1080) ReturnToHomebaseButton rect=[P: (451.0, 783.0), S: (119.0, 40.0)] row=[P: (372.0, 783.0), S: (1176.0, 40.0)] slot=[P: (372.0, 783.0), S: (1176.0, 40.0)]
+R2 DEBRIEF LEAF (1920, 1080) ReturnToHomebaseButton top_level=true assigned_slot=ButtonRow passes=2
+PASS: (1920, 1080) existing ReturnToHomebaseButton stays reachable
+PASS: (1920, 1080) original return callbacks each emit once
+PASS: (1920, 1080) presentation preserves the complete mission result
+PASS: (1920, 1080) absent awards are not invented
+R2 DEBRIEF GEOMETRY (1920, 1080) events=[P: (747.0, 389.0), S: (809.0, 62.0)] label=[P: (755.0, 423.0), S: (793.0, 22.0)] slot=[P: (755.0, 423.0), S: (793.0, 22.0)]
+R2 DEBRIEF LEAF (1920, 1080) events top_level=true assigned_slot=CharacterEventsLabel
+PASS: (1920, 1080) current event summary retains the supplied original report without a fabricated timeline
+PASS: (1920, 1080) idle frames do not poll or rebuild the card layout
+PASS: (1920, 1080) empty result has an honest person-data empty state
+PASS: (1280, 720) Debrief has native ResultCard
+PASS: (1280, 720) ResultCard stays inside logical viewport
+PASS: (1280, 720) Debrief has native PeopleCard
+PASS: (1280, 720) PeopleCard stays inside logical viewport
+PASS: (1280, 720) Debrief has native FeedbackCard
+PASS: (1280, 720) Debrief has native EventsCard
+PASS: (1280, 720) Debrief has native ProgressCard
+PASS: (1280, 720) Debrief has native ReturnCard
+PASS: (1280, 720) ReturnCard stays inside logical viewport
+PASS: (1280, 720) actual person-card list exists
+PASS: (1280, 720) all six supplied people remain represented
+PASS: (1280, 720) missing health remains explicitly unknown
+R2 DEBRIEF GEOMETRY (1280, 720) ReturnToFOBButton rect=[P: (56.0, 603.0), S: (67.0, 40.0)] row=[P: (56.0, 603.0), S: (1168.0, 40.0)] slot=[P: (56.0, 603.0), S: (1168.0, 40.0)]
+R2 DEBRIEF LEAF (1280, 720) ReturnToFOBButton top_level=true assigned_slot=ButtonRow passes=2
+PASS: (1280, 720) existing ReturnToFOBButton stays reachable
+R2 DEBRIEF GEOMETRY (1280, 720) ReturnToHomebaseButton rect=[P: (135.0, 603.0), S: (119.0, 40.0)] row=[P: (56.0, 603.0), S: (1168.0, 40.0)] slot=[P: (56.0, 603.0), S: (1168.0, 40.0)]
+R2 DEBRIEF LEAF (1280, 720) ReturnToHomebaseButton top_level=true assigned_slot=ButtonRow passes=2
+PASS: (1280, 720) existing ReturnToHomebaseButton stays reachable
+PASS: (1280, 720) original return callbacks each emit once
+PASS: (1280, 720) presentation preserves the complete mission result
+PASS: (1280, 720) absent awards are not invented
+R2 DEBRIEF GEOMETRY (1280, 720) events=[P: (428.0, 209.0), S: (804.0, 62.0)] label=[P: (436.0, 243.0), S: (788.0, 22.0)] slot=[P: (436.0, 243.0), S: (788.0, 22.0)]
+R2 DEBRIEF LEAF (1280, 720) events top_level=true assigned_slot=CharacterEventsLabel
+PASS: (1280, 720) current event summary retains the supplied original report without a fabricated timeline
+PASS: (1280, 720) idle frames do not poll or rebuild the card layout
+PASS: (1280, 720) empty result has an honest person-data empty state
+PASS: R2 disposable UI fixture saves through the real store
+PASS: Library presents a real saved record
+PASS: Library selection preserves a usable keyboard focus owner
+PASS: Audio exposes channel and current draft value: MasterVolumeCaption
+PASS: Audio exposes channel and current draft value: MusicVolumeCaption
+PASS: Audio exposes channel and current draft value: SfxVolumeCaption
+PASS: Audio cancel does not persist draft settings
+RESULTS: 47 passed, 0 failed
+PASS: native R2 debrief and shell

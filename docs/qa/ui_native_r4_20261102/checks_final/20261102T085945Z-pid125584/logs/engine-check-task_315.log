@@ -1,0 +1,50 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "stylebox" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/mission_tactical_sandbox_controller.gd:5369)
+ERROR: Failed to load script "res://scripts/tests/mission_tactical_sandbox_controller.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_315 Mission Grid Tile Selection Command Gate ===
+  PASS: Mission exposes TacticalController and Primary3DView
+  PASS: Primary mission view renders terrain grid lines
+  PASS: Grid line highlight is thick enough for mission readability
+  PASS: Grid line stays close to tile surface
+  PASS: Grid remains depth-tested
+  PASS: Grid no longer uses the old low-contrast amber color
+SCRIPT ERROR: Invalid call. Nonexistent function 'get_selected_tile_snapshot (via call)' in base 'Node'.
+   at: _test_live_grid_and_default_tile_selection (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:56)
+   GDScript backtrace (most recent call first):
+       [0] _test_live_grid_and_default_tile_selection (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:56)
+       [1] _wait_frames (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:193)
+  PASS: Mission command gate scene exposes controller and 3D view
+SCRIPT ERROR: Invalid call. Nonexistent function '_get_fireteam_id_for_flow_driver (via call)' in base 'Node'.
+   at: _get_alpha_driver_fireteam_id (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:160)
+   GDScript backtrace (most recent call first):
+       [0] _get_alpha_driver_fireteam_id (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:160)
+       [1] _test_tile_required_command_gate (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:79)
+       [2] _wait_frames (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:193)
+  FAIL: Verifier resolves a fireteam with an active flow driver
+SCRIPT ERROR: Invalid call. Nonexistent function 'get_planning_state (via call)' in base 'Node'.
+   at: _test_tile_required_command_gate (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:81)
+   GDScript backtrace (most recent call first):
+       [0] _test_tile_required_command_gate (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:81)
+       [1] _wait_frames (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:193)
+SCRIPT ERROR: Invalid call. Nonexistent function 'new' in base 'GDScript'.
+   at: _test_meta_bootstrap_clamp_without_viewport (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:141)
+   GDScript backtrace (most recent call first):
+       [0] _test_meta_bootstrap_clamp_without_viewport (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:141)
+       [1] _run_tests (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:23)
+       [2] _test_tile_required_command_gate (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:81)
+       [3] _wait_frames (res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd:193)
+  PASS: move action requires a selected map tile
+  PASS: take action requires a selected map tile
+  PASS: defend action requires a selected map tile
+  PASS: flank action requires a selected map tile
+  PASS: Contract disables Move without a selected tile
+  PASS: TASK_315 task file exists
+  PASS: TASK_315 is marked implemented
+  PASS: Implementation status mentions TASK_315
+  PASS: Roadmap mentions TASK_315
+=== RESULTS: 16 passed, 1 failed ===
+FAIL

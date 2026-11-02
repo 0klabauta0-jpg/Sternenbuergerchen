@@ -1,0 +1,72 @@
+{
+	"display_driver": "Windows",
+	"fixture_data": true,
+	"fixture_summary": {
+		"award_applied": true,
+		"has_aar": true,
+		"person_count": 12
+	},
+	"fixture_variant": "rich",
+	"image": "res://docs/qa/ui_native_r4_20261102/captures/debrief_rich_1920x1080.png",
+	"image_size": [
+		1920,
+		1080
+	],
+	"logical_size": [
+		1920,
+		1080
+	],
+	"note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+	"renderer": "gl_compatibility",
+	"requested_window_size": [
+		1920,
+		1080
+	],
+	"save_error": 0,
+	"scaled_capture": false,
+	"source_capture": true,
+	"synthetic_image_fallback": false,
+	"ui_metrics": {
+		"return_card": {
+			"rect": [
+				264.0,
+				730.0,
+				1392.0,
+				106.0
+			],
+			"visible": true
+		},
+		"return_row": {
+			"rect": [
+				272.0,
+				790.0,
+				1376.0,
+				40.0
+			],
+			"visible": true
+		},
+		"return_slot": {
+			"rect": [
+				272.0,
+				790.0,
+				1376.0,
+				40.0
+			],
+			"visible": true
+		},
+		"window": {
+			"rect": [
+				240.0,
+				220.0,
+				1440.0,
+				640.0
+			],
+			"visible": true
+		}
+	},
+	"view": "debrief",
+	"viewport_size": [
+		1920.0,
+		1080.0
+	]
+}

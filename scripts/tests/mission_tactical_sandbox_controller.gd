@@ -11,6 +11,7 @@ const MISSION_CONTROL_STATE_PRESENTER_SCRIPT: GDScript = preload("res://scripts/
 const TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT: GDScript = preload("res://scripts/ui/tactical_hud_language_presenter.gd")
 const PROGRESS_LINE_SCRIPT: GDScript = preload("res://scripts/ui/components/progress_line.gd")
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
@@ -5242,7 +5243,9 @@ func _apply_fireteam_mini_card_leader_portrait(card: Control, lead) -> void:
 		portrait_rect = TextureRect.new()
 		portrait_rect.name = "LeaderPortraitRect"
 		portrait_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		portrait_rect.custom_minimum_size = Vector2(34.0, 34.0)
+		# Identity is carried by the full member row below the team name. Keep
+		# this existing leader marker compact rather than duplicating a large face.
+		portrait_rect.custom_minimum_size = Vector2(24.0, 24.0)
 		portrait_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		header_row.add_child(portrait_rect)
@@ -5343,8 +5346,11 @@ func _apply_left_tactical_stack_1280_mini_card_style(card: Control, selected_fir
 	card.set_meta("left_tactical_stack_1280_ui_sets_gameplay_truth", false)
 	var title_edit := card.get_node_or_null("Margin/VBox/HeaderRow/TitleEdit") as LineEdit
 	if title_edit != null:
-		title_edit.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE)
-		title_edit.set_meta("left_tactical_stack_1280_font_size", LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE)
+		title_edit.add_theme_font_size_override("font_size", maxi(16, LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE))
+		title_edit.add_theme_font_override("font", TACTICAL_UI_THEME_SCRIPT.get_heading_font())
+		title_edit.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
+		title_edit.add_theme_color_override("font_uneditable_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
+		title_edit.set_meta("left_tactical_stack_1280_font_size", title_edit.get_theme_font_size("font_size"))
 	var stage_label := card.get_node_or_null("Margin/VBox/StageLabel") as Label
 	if stage_label != null:
 		stage_label.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE)
@@ -5361,18 +5367,13 @@ func _apply_left_tactical_stack_1280_mini_card_style(card: Control, selected_fir
 	)
 	card.set_meta("left_tactical_stack_1280_detail_polish_style_id", LEFT_TACTICAL_STACK_1280_DETAIL_POLISH_STYLE_ID)
 	card.set_meta("left_tactical_stack_1280_detail_polish_style_applied", true)
-	var stylebox := StyleBoxFlat.new()
-	stylebox.bg_color = Color(0.17, 0.20, 0.24, 1.0) if selected_fireteam else Color(0.12, 0.15, 0.18, 0.96)
-	stylebox.border_color = Color("f2c94c") if selected_fireteam else Color(0.42, 0.50, 0.57, 1.0)
-	stylebox.border_width_left = LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
-	stylebox.border_width_top = LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
-	stylebox.border_width_right = LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
-	stylebox.border_width_bottom = LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
-	stylebox.corner_radius_top_left = 6
-	stylebox.corner_radius_top_right = 6
-	stylebox.corner_radius_bottom_left = 6
-	stylebox.corner_radius_bottom_right = 6
+	var stylebox: StyleBoxFlat = TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
+		TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_ALT if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL,
+		TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER,
+		4, LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
+	)
 	card.add_theme_stylebox_override("panel", stylebox)
+	card.set_meta("native_r4_portrait_card", true)
 
 
 func _compact_fireteam_mini_identity_text(lead_summary: String, member_count: int) -> String:
@@ -5624,6 +5625,9 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		strip.add_theme_constant_override("separation", 3)
 		row_host.add_child(strip)
+		# The actual member portraits form the card identity immediately below
+		# the existing header, ahead of the owner-provided status/leader lines.
+		row_host.move_child(strip, 1)
 	var resolved_units: Array = units.duplicate()
 	if resolved_units.is_empty():
 		resolved_units = _filter_ground_fireteam_card_units(_get_fireteam_units(fireteam_id, true))
@@ -5632,7 +5636,9 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		strip.visible = not resolved_units.is_empty()
 		return
 	strip.visible = not resolved_units.is_empty()
-	strip.custom_minimum_size = Vector2(0.0, 20.0)
+	var portrait_edge := minf(36.0, floorf((216.0 - maxf(0.0, float(resolved_units.size() - 1)) * 3.0) / maxf(1.0, float(resolved_units.size()))))
+	portrait_edge = maxf(18.0, portrait_edge)
+	strip.custom_minimum_size = Vector2(0.0, portrait_edge)
 	strip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	while strip.get_child_count() > resolved_units.size():
 		var stale_child := strip.get_child(strip.get_child_count() - 1)
@@ -5642,7 +5648,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		var portrait := TextureRect.new()
 		portrait.name = "MemberPortrait%02d" % (strip.get_child_count() + 1)
 		portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		portrait.custom_minimum_size = Vector2(18.0, 18.0)
+		portrait.custom_minimum_size = Vector2(portrait_edge, portrait_edge)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		strip.add_child(portrait)
@@ -5651,6 +5657,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		var portrait_rect := strip.get_child(index) as TextureRect
 		if unit == null or portrait_rect == null:
 			continue
+		portrait_rect.custom_minimum_size = Vector2(portrait_edge, portrait_edge)
 		var profile_variant: Variant = _build_profile_from_unit(unit)
 		var profile: Dictionary = Dictionary(profile_variant) if typeof(profile_variant) == TYPE_DICTIONARY else {}
 		var portrait_id: String = String(profile.get("portrait_id", "")).strip_edges()
@@ -5663,6 +5670,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		portrait_rect.set_meta("mission_fireteam_member_portrait", true)
 	strip.set_meta("mission_fireteam_member_portrait_strip", true)
 	strip.set_meta("mission_fireteam_member_portrait_signature", portrait_signature)
+	strip.set_meta("native_r4_portrait_edge", portrait_edge)
 
 
 func _build_fireteam_mini_member_portrait_signature(units: Array) -> String:
@@ -12122,7 +12130,7 @@ func _refresh_mission_dropship_panel() -> void:
 		var is_transit: bool = _is_mission_dropship_card_in_transit(card)
 		var craft_id: String = String(card.get("craft_id", "")).strip_edges()
 		var is_selected: bool = not craft_id.is_empty() and craft_id == _mission_drop_craft_id.strip_edges()
-		var ship_texture := _get_mission_dropship_texture(card)
+		var ship_texture := _get_mission_dropship_card_texture(card)
 		var card_panel := PanelContainer.new()
 		card_panel.name = "MissionDropshipCard_%s" % _sanitize_node_name(craft_id)
 		card_panel.custom_minimum_size = MISSION_DROPSHIP_PANEL_SIZE
@@ -12712,7 +12720,7 @@ func _refresh_mission_control_craft_summary() -> void:
 	var selected_card: Dictionary = _find_mission_dropship_card_entry(selected_craft_id)
 	var ship_texture := panel.get_node_or_null("Margin/Row/ShipTexture") as TextureRect
 	if ship_texture != null:
-		ship_texture.texture = _get_mission_dropship_texture(selected_card)
+		ship_texture.texture = _get_mission_dropship_card_texture(selected_card)
 	var name_label := panel.get_node_or_null("Margin/Row/Info/NameLabel") as Label
 	if name_label != null:
 		name_label.text = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else String(selected_card.get("display_name", "Dropship")).strip_edges()
@@ -12942,7 +12950,7 @@ func _refresh_legacy_mission_dropship_panel() -> void:
 	if panel == null:
 		return
 	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _mission_drop_state == "to_homebase"
-	var ship_texture := _get_mission_dropship_texture()
+	var ship_texture := _get_mission_dropship_card_texture()
 	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
 		panel,
 		{
@@ -13050,6 +13058,11 @@ func _set_control_tree_mouse_filter(root: Node, mouse_filter: Control.MouseFilte
 
 
 func _build_mission_dropship_title_text(card: Dictionary = {}) -> String:
+	var identity_card: Dictionary = card if not card.is_empty() else {"display_name": _mission_drop_display_name}
+	return FRONTIER_SHIP_VISUALS_SCRIPT.decorate_ui_title(_build_mission_dropship_base_title_text(card), identity_card, "dropship")
+
+
+func _build_mission_dropship_base_title_text(card: Dictionary = {}) -> String:
 	var air_status: Dictionary = get_air_asset_status_snapshot()
 	var air_state: String = str(air_status.get("state", "intact")).strip_edges().to_lower()
 	var air_suffix: String = ""
@@ -14964,7 +14977,14 @@ func _apply_drop_light_fixed_hud_layout() -> void:
 
 
 func _enforce_drop_light_fixed_hud_layout() -> void:
-	var viewport_size := Vector2i(get_viewport().get_visible_rect().size)
+	# MetaFlow may hydrate planning/selection before this mission enters the
+	# tree. Ready performs the normal first layout once a viewport is available.
+	if not is_inside_tree():
+		return
+	var viewport: Viewport = get_viewport()
+	if viewport == null:
+		return
+	var viewport_size := Vector2i(viewport.get_visible_rect().size)
 	if get_meta("native_a5_window_viewport", Vector2i.ZERO) != viewport_size:
 		set_meta("native_a5_window_viewport", viewport_size)
 		var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout", viewport_size)
@@ -17124,6 +17144,9 @@ func _apply_fireteam_panel_action_button_contract() -> void:
 		elif button.name != "GoPhaseButton":
 			continue
 		_configure_square_hud_button(button, action_button_size, 7)
+	# Availability/status/phase paths can call this final legacy presenter after
+	# the lightweight readout. Keep its gates and restore only A5 typography.
+	NATIVE_A5_HUD_LAYOUT_SCRIPT.refresh_selected_stance(self)
 
 
 func _refresh_dynamic_button_styles() -> void:
@@ -35277,6 +35300,12 @@ func _get_dropship_marker_texture() -> Texture2D:
 			return _get_dropship_texture_for_angle(_get_drop_sequence_approach_angle_name())
 		_:
 			return _get_dropship_texture_for_angle(_get_opposite_approach_angle_name(_get_drop_sequence_approach_angle_name()))
+
+
+func _get_mission_dropship_card_texture(card: Dictionary = {}) -> Texture2D:
+	# Static UI preview only. World sprites still use the existing directional path.
+	var preview: Texture2D = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_preview_texture(card, "dropship")
+	return preview if preview != null else _get_mission_dropship_texture(card)
 
 
 func _get_mission_dropship_texture(card: Dictionary = {}) -> Texture2D:

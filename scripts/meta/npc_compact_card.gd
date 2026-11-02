@@ -23,7 +23,7 @@ const COMPACT_REMOVE_BUTTON_SIZE := 18.0
 const COMPACT_MARGIN_WIDTH := 8.0
 const COMPACT_HBOX_SEPARATION := 6.0
 const CARD_Z_INDEX := 24
-const SELECTED_BORDER_COLOR := Color("f2c94c")
+const SELECTED_BORDER_COLOR := TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED
 
 var _profile = null
 var _uses_readonly_profile_reference: bool = false
@@ -485,6 +485,9 @@ func _refresh_card() -> void:
 		portrait_texture = _load_portrait_texture(String(_profile.portrait_id), String(_profile.portrait_path))
 
 	name_label.text = display_name
+	# Identity uses the same cached display face as the screen headings. Body
+	# information and all host-supplied compact sizes keep their existing fonts.
+	name_label.add_theme_font_override("font", TACTICAL_UI_THEME_SCRIPT.get_heading_font())
 	data_a_label.text = data_a_text
 	data_b_label.text = data_b_text
 	tooltip_text = _card_tooltip_override if _has_card_tooltip_override else ""

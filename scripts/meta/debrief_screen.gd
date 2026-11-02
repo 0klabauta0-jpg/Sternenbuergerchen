@@ -9,6 +9,7 @@ const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.g
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const BACKGROUND_ID: String = "debrief_desert_explosion_base"
+const FRONTIER_STAGE_PATH := "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png"
 const DEBRIEF_SUMMARY_CHIP_COUNT_MIN := 5
 const DEBRIEF_TEAM_STATUS_MAX_CHARS := 180
 const DEBRIEF_AAR_CHIP_COUNT_MIN := 5
@@ -38,6 +39,7 @@ var _native_review_aar_rows: VBoxContainer
 var _native_review_details: Control
 var _native_review_original_text: TextEdit
 var _native_review_details_close: Button
+var _native_review_outcome_symbol: Label
 
 
 func _ready() -> void:
@@ -450,6 +452,7 @@ func get_background_catalog_snapshot() -> Dictionary:
 		"stretch_mode": int(background.stretch_mode) if background != null else -1,
 		"shade_alpha": shade.color.a if shade != null else 0.0,
 		"panel_alpha": panel_style.bg_color.a if panel_style != null else 0.0,
+		"native_frontier_backdrop": FRONTIER_STAGE_PATH if get_node_or_null("NativeFrontierBackdrop") != null else "",
 		"visual_only": true,
 	}
 
@@ -625,10 +628,13 @@ func _refresh_native_review_cards() -> void:
 			var texture := PORTRAIT_IDENTITY_CATALOG_SCRIPT.load_texture(portrait_id, portrait_path) as Texture2D
 			if texture != null:
 				var portrait := TextureRect.new()
+				portrait.name = "Portrait"
 				portrait.custom_minimum_size = Vector2(48, 48)
 				portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 				portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 				portrait.texture = texture
+				portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				portrait.set_meta("source_unit_id", String(member.get("unit_id", "")))
 				identity_row.add_child(portrait)
 		var identity := Label.new()
 		identity.name = "IdentityLabel"
@@ -638,7 +644,7 @@ func _refresh_native_review_cards() -> void:
 		identity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		identity.clip_text = true
 		identity.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		TACTICAL_UI_THEME_SCRIPT.style_label(identity, false, 16)
+		TACTICAL_UI_THEME_SCRIPT.style_section_heading(identity, 18)
 		identity_row.add_child(identity)
 		var status := Label.new()
 		status.name = "StatusLabel"
@@ -647,6 +653,8 @@ func _refresh_native_review_cards() -> void:
 		var fireteam := String(member.get("fireteam_id", "")).to_upper()
 		status.text = "%s%s" % [status_names.get(vital, "Status unbekannt"), " · " + fireteam if not fireteam.is_empty() else ""]
 		TACTICAL_UI_THEME_SCRIPT.style_label(status, true, 12)
+		if vital in ["wounded", "down", "dead"]:
+			status.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_WARNING if vital == "wounded" else TACTICAL_UI_THEME_SCRIPT.COLOR_DANGER)
 		contents.add_child(status)
 		var health := Label.new()
 		health.name = "HealthLabel"
@@ -690,6 +698,11 @@ func _apply_player_readout_texts() -> void:
 	var result_code := String(_mission_result.get("result", ""))
 	var ended := result_code in ["victory", "success", "defeat", "failure", "draw", "ended"] or String(_mission_result.get("mission_outcome", "")) in ["completed", "ended", "success", "failure"]
 	_native_review_heading.text = "Bericht noch nicht verfügbar" if not has_report else ("Einsatz abgeschlossen" if ended else "Bericht unvollständig")
+	var successful := result_code in ["victory", "success"]
+	var failed := result_code in ["defeat", "failure"]
+	_native_review_outcome_symbol.text = "✓" if successful else ("×" if failed else ("—" if ended else "?"))
+	_native_review_outcome_symbol.tooltip_text = "Erfolg" if successful else ("Niederlage" if failed else ("Einsatz beendet" if ended else "Ergebnis noch offen"))
+	_native_review_outcome_symbol.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_DANGER if failed else TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT)
 	(vbox.get_node("ResultLabel") as Label).text = "Noch kein Einsatzbericht übergeben." if not has_report else "Ergebnis und Folgen des abgeschlossenen Einsatzes."
 	(vbox.get_node("SummaryStrip") as Control).visible = has_report
 	var result_names := {"victory": "Erfolg", "success": "Erfolg", "defeat": "Niederlage", "failure": "Niederlage", "draw": "Unentschieden", "ended": "Beendet"}
@@ -1021,11 +1034,37 @@ func _ensure_native_review_cards() -> void:
 	old_vbox.add_child(layout)
 	var result := _make_review_card(layout, "ResultCard", "")
 	_add_review_slot(result, "TitleLabel", 22)
+	var outcome_row := HBoxContainer.new()
+	outcome_row.name = "OutcomeHeaderRow"
+	outcome_row.add_theme_constant_override("separation", 12)
+	outcome_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	result.add_child(outcome_row)
+	_native_review_outcome_symbol = Label.new()
+	_native_review_outcome_symbol.name = "OutcomeSymbol"
+	_native_review_outcome_symbol.custom_minimum_size = Vector2(40, 40)
+	_native_review_outcome_symbol.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_native_review_outcome_symbol.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_native_review_outcome_symbol.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	TACTICAL_UI_THEME_SCRIPT.style_screen_heading(_native_review_outcome_symbol, 30)
+	_native_review_outcome_symbol.add_theme_stylebox_override("normal", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_ALT, TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT, 8, 2, Vector4(3, 0, 3, 0)))
+	outcome_row.add_child(_native_review_outcome_symbol)
 	_native_review_heading = Label.new()
 	_native_review_heading.name = "OutcomeHeading"
-	TACTICAL_UI_THEME_SCRIPT.style_label(_native_review_heading, false, 26)
-	_native_review_heading.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT)
-	result.add_child(_native_review_heading)
+	_native_review_heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_native_review_heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_native_review_heading.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	TACTICAL_UI_THEME_SCRIPT.style_screen_heading(_native_review_heading, 32)
+	outcome_row.add_child(_native_review_heading)
+	var hero := TextureRect.new()
+	hero.name = "NativeFrontierHero"
+	hero.custom_minimum_size = Vector2(220, 0)
+	hero.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	hero.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	hero.texture = load(FRONTIER_STAGE_PATH) as Texture2D
+	hero.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hero.set_meta("visual_only", true)
+	hero.set_meta("source_resource", FRONTIER_STAGE_PATH)
+	outcome_row.add_child(hero)
 	_add_review_slot(result, "ResultLabel", 20)
 	_add_review_slot(result, "SummaryStrip", 28)
 	_native_review_missing = Label.new()
@@ -1121,13 +1160,14 @@ func _make_review_card(parent: Node, card_name: String, heading: String) -> VBox
 	var contents := VBoxContainer.new()
 	contents.name = "Contents"
 	contents.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	contents.add_theme_constant_override("separation", 6)
+	contents.add_theme_constant_override("separation", 4)
 	card.add_child(contents)
 	if not heading.is_empty():
 		var title := Label.new()
+		title.name = "SectionHeading"
 		title.text = heading
 		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		TACTICAL_UI_THEME_SCRIPT.style_label(title, false, 16)
+		TACTICAL_UI_THEME_SCRIPT.style_section_heading(title, 20)
 		contents.add_child(title)
 	return contents
 
@@ -1706,7 +1746,7 @@ func _apply_aar_chip_style() -> void:
 		if chip == null:
 			continue
 		var style_key: String = String(chip.get_meta("style_key", "neutral"))
-		chip.add_theme_color_override("font_color", Color("10161b"))
+		chip.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT_DARK if style_key in ["good", "warn", "accent"] else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
 		chip.add_theme_font_size_override("font_size", 11)
 		chip.add_theme_stylebox_override("normal", _build_aar_chip_stylebox(style_key))
 
@@ -1724,8 +1764,8 @@ func _build_aar_chip_stylebox(style_key: String) -> StyleBoxFlat:
 			stylebox.bg_color = Color("62d4dd")
 			stylebox.border_color = Color("9ce8ed")
 		_:
-			stylebox.bg_color = Color("d7e2e8")
-			stylebox.border_color = Color("94a6b0")
+			stylebox.bg_color = TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_ALT
+			stylebox.border_color = TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER
 	return stylebox
 
 
@@ -1804,15 +1844,15 @@ func _apply_summary_chip_style() -> void:
 		var chip := child as Label
 		if chip == null:
 			continue
-		chip.add_theme_color_override("font_color", Color("172026"))
+		chip.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
 		chip.add_theme_font_size_override("font_size", 11)
 		chip.add_theme_stylebox_override("normal", _build_chip_stylebox())
 
 
 func _build_chip_stylebox() -> StyleBoxFlat:
 	var stylebox := StyleBoxFlat.new()
-	stylebox.bg_color = Color("d7e2e8")
-	stylebox.border_color = Color("94a6b0")
+	stylebox.bg_color = TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_ALT
+	stylebox.border_color = TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER
 	stylebox.border_width_left = 1
 	stylebox.border_width_top = 1
 	stylebox.border_width_right = 1
@@ -1926,6 +1966,26 @@ func _apply_background_texture() -> void:
 		background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		background.set_meta("background_id", BACKGROUND_ID)
 		background.set_meta("visual_only", true)
+	_ensure_native_frontier_backdrop()
+
+
+func _ensure_native_frontier_backdrop() -> void:
+	# Preserve the original catalog node and snapshot. This separate Main-native
+	# image is decorative; the result and every interactive control stay native.
+	var backdrop := get_node_or_null("NativeFrontierBackdrop") as TextureRect
+	if backdrop != null:
+		return
+	backdrop = TextureRect.new()
+	backdrop.name = "NativeFrontierBackdrop"
+	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	backdrop.texture = load(FRONTIER_STAGE_PATH) as Texture2D
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backdrop.set_meta("visual_only", true)
+	backdrop.set_meta("source_resource", FRONTIER_STAGE_PATH)
+	add_child(backdrop)
+	move_child(backdrop, 1)
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
 func _ensure_background_nodes() -> Dictionary:

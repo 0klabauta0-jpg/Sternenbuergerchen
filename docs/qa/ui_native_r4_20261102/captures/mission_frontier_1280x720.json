@@ -1,0 +1,45 @@
+{
+  "view": "mission",
+  "variant": "frontier",
+  "fixture": false,
+  "source_capture": true,
+  "synthetic_image_fallback": false,
+  "scaled_capture": false,
+  "logical_size": [
+    1280,
+    720
+  ],
+  "image_size": [
+    1280,
+    720
+  ],
+  "renderer": {
+    "display": "Windows",
+    "driver": "vulkan",
+    "method": "forward_plus"
+  },
+  "profile": {
+    "dropship_model_visible": false,
+    "dropship_visual_count": 0,
+    "frontier_art_enabled": true,
+    "frontier_art_override": -1,
+    "frontier_art_profile_id": "frontier_illustrated_v1",
+    "grid_topology": "square8",
+    "missing_asset_mapping_count": 0,
+    "missing_dropship_model_count": 0,
+    "read_only": true,
+    "tile_count": 1024,
+    "ui_sets_gameplay_truth": false,
+    "unit_model_count": 11
+  },
+  "image_sha256": "3686c68dc0e2b17b4bc4359ecac4a2915d3e7951f34e398dc4d286bbc3c0126a",
+  "source_image": "docs/qa/ui_native_r4_20261102/frontier/1280x720_20261102T104405Z/startup_captures/06_go_movement.png",
+  "source_report": "docs/qa/ui_native_r4_20261102/frontier/1280x720_20261102T104405Z/startup.json",
+  "normal_start_checks": 45,
+  "normal_start_failures": 0,
+  "scope": "Real menu -> Homebase -> saved GM01 -> timed transport -> LZ -> deployment -> Move/GO. No full campaign, combat, release or performance acceptance.",
+  "exit_code": 0,
+  "error_count": 0,
+  "isolated_user_data": true,
+  "project_restored_byte_exact": true
+}

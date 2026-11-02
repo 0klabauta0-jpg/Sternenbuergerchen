@@ -1,0 +1,41 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: actual first-player factory retains its stable craft ID and type
+PASS: actual first-player factory uses a declared texture path, not a hidden direct Speeder override
+PASS: declared dropship role resolves the actual Cutlass identity
+PASS: UI identity points at the active exact Ref03 GLB
+PASS: active model bytes match the visual catalog
+PASS: preview is documented as a native exact-model capture
+PASS: native preview provenance pins the exact model bytes
+PASS: preview does not alter model geometry or materials
+PASS: Cutlass preview replaces the generic Speeder resource
+PASS: model preview retains a transparent background
+PASS: same native UI preview resource is cached and reused
+PASS: default first-ship label visibly names the Cutlass class
+PASS: player-selected ship names remain verbatim beside the class
+PASS: class projection retains order number, custom name and context
+PASS: UI projection never changes craft IDs, names, texture paths or state
+PASS: other craft classes are not relabeled or pictured as Cutlass
+PASS: non-dropship label remains unchanged
+PASS: explicit unknown visual identity does not impersonate the default Cutlass
+PASS: a different known model without this preview cannot borrow the Cutlass picture
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd:58)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd:58)
+PASS: Homebase shipcards use the exact native Cutlass preview
+PASS: actual first-player definition reaches the exact preview in Homebase
+PASS: an obsolete direct Speeder texture cannot override the declared Cutlass visual model
+ERROR: Node not found: "MarginContainer/ShipcardVBox/ShipcardTopRow/ShipVisualButton/ShipTexture" (relative to "Shipcard_dropship_1").
+   at: get_node (scene/main/node.cpp:1963)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd:67)
+SCRIPT ERROR: Invalid access to property or key 'texture' on a base object of type 'null instance'.
+   at: _run (res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd:68)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd:68)

@@ -1,0 +1,132 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: (1920, 1080) empty Homebase transport is a short actionable card
+PASS: (1920, 1080) empty Homebase team target does not reserve a full column
+PASS: (1920, 1080) empty transport retains native add callback
+PASS: (1920, 1080) compact briefing does not expose a clipped detail-frame fragment
+PASS: (1920, 1080) full original briefing is explicitly reachable
+PASS: (1920, 1080) returning hides the complete detail body again
+PASS: (1920, 1080) late personnel/result setters keep compact detail body folded
+PASS: (1920, 1080) late notices retain existing source text while folded
+PASS: (1920, 1080) explicit details reveal the late personnel notice
+PASS: (1920, 1080) explicit details reveal the late confirmed result notice
+PASS: (1920, 1080) closing late-notice details folds both original sections again
+PASS: (1920, 1080) primary title uses player wording: Einsatzvorbereitung
+PASS: (1920, 1080) primary title uses player wording: Personalreserve
+PASS: (1920, 1080) primary title uses player wording: Trupps
+PASS: (1920, 1080) primary title uses player wording: Transport
+PASS: (1920, 1080) ground team grows when real members need space
+PASS: (1920, 1080) Homebase transport grows for a real ship
+PASS: (1920, 1080) actual existing ship drop stages the same team owner
+PASS: (1920, 1080) team workspace contracts after its card moves to transport
+PASS: (1920, 1080) moving team location preserves selected identities
+PASS: (1920, 1080) existing return drop restores the ground work area
+PASS: (1920, 1080) populated Homebase retains all five actual shipcards
+PASS: (1920, 1080) shipcard Shipcard_r3_ship_0 has no horizontal clipping
+PASS: (1920, 1080) shipcard Shipcard_r3_ship_1 has no horizontal clipping
+PASS: (1920, 1080) shipcard Shipcard_r3_ship_2 has no horizontal clipping
+PASS: (1920, 1080) shipcard Shipcard_r3_ship_3 has no horizontal clipping
+PASS: (1920, 1080) shipcard Shipcard_r3_ship_4 has no horizontal clipping
+PASS: (1920, 1080) twelve actual ships expose native vertical scrolling
+GEOMETRY (1920, 1080) Panel/Margin/VBox/ContentRow/RosterPanel [P: (16.0, 192.0), S: (464.0, 872.0)]
+PASS: (1920, 1080) RosterPanel remains bounded
+GEOMETRY (1920, 1080) Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel [P: (496.0, 192.0), S: (520.0, 470.0)]
+PASS: (1920, 1080) HomebaseFireteamPanel remains bounded
+GEOMETRY (1920, 1080) Panel/Margin/VBox/ContentRow/AircraftPanel [P: (1032.0, 192.0), S: (872.0, 872.0)]
+PASS: (1920, 1080) AircraftPanel remains bounded
+PASS: (1920, 1080) no free FOB team cards leaves a short context/action area
+PASS: (1920, 1080) missing FOB transport does not reserve a full empty deck/status column
+PASS: (1920, 1080) released team-space moves actual loadout upward
+PASS: (1920, 1080) compact FOB retains all three real loadout rows
+PASS: (1920, 1080) primary title uses player wording: FOB Â· Einsatzvorbereitung
+PASS: (1920, 1080) primary title uses player wording: Trupps
+PASS: (1920, 1080) primary title uses player wording: AusrÃ¼stung
+PASS: (1920, 1080) primary title uses player wording: Transport
+FAIL: (1920, 1080) loadout summary uses understandable player wording
+PASS: (1920, 1080) public craft-state update expands the FOB deck without resize
+FAIL: (1920, 1080) focus-only context follows actual free team location
+FAIL: (1920, 1080) focus-only context restores actual loadout location
+PASS: (1920, 1080) populated FOB deck keeps real craft scroll reachability
+PASS: (1920, 1080) BoardButton preserves its existing input/callback boundary
+PASS: (1920, 1080) SendButton preserves its existing input/callback boundary
+GEOMETRY (1920, 1080) Panel/Margin/VBox/ContentRow/AvailablePanel [P: (16.0, 88.0), S: (336.0, 976.0)]
+PASS: (1920, 1080) AvailablePanel remains bounded
+GEOMETRY (1920, 1080) Panel/Margin/VBox/ContentRow/FireteamPanel [P: (368.0, 88.0), S: (672.0, 224.0)]
+PASS: (1920, 1080) FireteamPanel remains bounded
+GEOMETRY (1920, 1080) Panel/Margin/VBox/ContentRow/StagingPanel [P: (368.0, 328.0), S: (672.0, 736.0)]
+PASS: (1920, 1080) StagingPanel remains bounded
+GEOMETRY (1920, 1080) Panel/Margin/VBox/ContentRow/DropshipPanel [P: (1056.0, 88.0), S: (848.0, 728.0)]
+PASS: (1920, 1080) DropshipPanel remains bounded
+GEOMETRY (1920, 1080) Panel/Margin/VBox/DropLightBottomRow/BoardingStatusPanel [P: (1056.0, 824.0), S: (848.0, 104.0)]
+PASS: (1920, 1080) BoardingStatusPanel remains bounded
+GEOMETRY (1920, 1080) Panel/Margin/VBox/DropLightBottomRow/ActionsPanel [P: (1056.0, 936.0), S: (848.0, 128.0)]
+PASS: (1920, 1080) ActionsPanel remains bounded
+PASS: (1920, 1080) removing final craft contracts deck on real state update
+PASS: (1280, 720) empty Homebase transport is a short actionable card
+PASS: (1280, 720) empty Homebase team target does not reserve a full column
+PASS: (1280, 720) empty transport retains native add callback
+PASS: (1280, 720) compact briefing does not expose a clipped detail-frame fragment
+PASS: (1280, 720) full original briefing is explicitly reachable
+PASS: (1280, 720) returning hides the complete detail body again
+PASS: (1280, 720) late personnel/result setters keep compact detail body folded
+PASS: (1280, 720) late notices retain existing source text while folded
+PASS: (1280, 720) explicit details reveal the late personnel notice
+PASS: (1280, 720) explicit details reveal the late confirmed result notice
+PASS: (1280, 720) closing late-notice details folds both original sections again
+PASS: (1280, 720) primary title uses player wording: Einsatzvorbereitung
+PASS: (1280, 720) primary title uses player wording: Personalreserve
+PASS: (1280, 720) primary title uses player wording: Trupps
+PASS: (1280, 720) primary title uses player wording: Transport
+PASS: (1280, 720) ground team grows when real members need space
+PASS: (1280, 720) Homebase transport grows for a real ship
+PASS: (1280, 720) actual existing ship drop stages the same team owner
+PASS: (1280, 720) team workspace contracts after its card moves to transport
+PASS: (1280, 720) moving team location preserves selected identities
+PASS: (1280, 720) existing return drop restores the ground work area
+PASS: (1280, 720) populated Homebase retains all five actual shipcards
+PASS: (1280, 720) shipcard Shipcard_r3_ship_0 has no horizontal clipping
+PASS: (1280, 720) shipcard Shipcard_r3_ship_1 has no horizontal clipping
+PASS: (1280, 720) shipcard Shipcard_r3_ship_2 has no horizontal clipping
+PASS: (1280, 720) shipcard Shipcard_r3_ship_3 has no horizontal clipping
+PASS: (1280, 720) shipcard Shipcard_r3_ship_4 has no horizontal clipping
+PASS: (1280, 720) twelve actual ships expose native vertical scrolling
+GEOMETRY (1280, 720) Panel/Margin/VBox/ContentRow/RosterPanel [P: (16.0, 192.0), S: (304.0, 512.0)]
+PASS: (1280, 720) RosterPanel remains bounded
+GEOMETRY (1280, 720) Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel [P: (336.0, 192.0), S: (344.0, 470.0)]
+PASS: (1280, 720) HomebaseFireteamPanel remains bounded
+GEOMETRY (1280, 720) Panel/Margin/VBox/ContentRow/AircraftPanel [P: (696.0, 192.0), S: (568.0, 512.0)]
+PASS: (1280, 720) AircraftPanel remains bounded
+PASS: (1280, 720) no free FOB team cards leaves a short context/action area
+PASS: (1280, 720) missing FOB transport does not reserve a full empty deck/status column
+PASS: (1280, 720) released team-space moves actual loadout upward
+PASS: (1280, 720) compact FOB retains all three real loadout rows
+PASS: (1280, 720) primary title uses player wording: FOB Â· Einsatzvorbereitung
+PASS: (1280, 720) primary title uses player wording: Trupps
+PASS: (1280, 720) primary title uses player wording: AusrÃ¼stung
+PASS: (1280, 720) primary title uses player wording: Transport
+FAIL: (1280, 720) loadout summary uses understandable player wording
+PASS: (1280, 720) public craft-state update expands the FOB deck without resize
+FAIL: (1280, 720) focus-only context follows actual free team location
+FAIL: (1280, 720) focus-only context restores actual loadout location
+PASS: (1280, 720) populated FOB deck keeps real craft scroll reachability
+PASS: (1280, 720) BoardButton preserves its existing input/callback boundary
+PASS: (1280, 720) SendButton preserves its existing input/callback boundary
+GEOMETRY (1280, 720) Panel/Margin/VBox/ContentRow/AvailablePanel [P: (16.0, 88.0), S: (216.0, 616.0)]
+PASS: (1280, 720) AvailablePanel remains bounded
+GEOMETRY (1280, 720) Panel/Margin/VBox/ContentRow/FireteamPanel [P: (248.0, 88.0), S: (440.0, 224.0)]
+PASS: (1280, 720) FireteamPanel remains bounded
+GEOMETRY (1280, 720) Panel/Margin/VBox/ContentRow/StagingPanel [P: (248.0, 328.0), S: (440.0, 376.0)]
+PASS: (1280, 720) StagingPanel remains bounded
+GEOMETRY (1280, 720) Panel/Margin/VBox/ContentRow/DropshipPanel [P: (704.0, 88.0), S: (560.0, 368.0)]
+PASS: (1280, 720) DropshipPanel remains bounded
+GEOMETRY (1280, 720) Panel/Margin/VBox/DropLightBottomRow/BoardingStatusPanel [P: (704.0, 464.0), S: (560.0, 104.0)]
+PASS: (1280, 720) BoardingStatusPanel remains bounded
+GEOMETRY (1280, 720) Panel/Margin/VBox/DropLightBottomRow/ActionsPanel [P: (704.0, 576.0), S: (560.0, 128.0)]
+PASS: (1280, 720) ActionsPanel remains bounded
+PASS: (1280, 720) removing final craft contracts deck on real state update
+RESULTS: 100 passed, 6 failed

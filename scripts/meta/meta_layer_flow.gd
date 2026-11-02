@@ -4140,6 +4140,7 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 			{
 				"unit_id": resolved_unit_id,
 				"display_name": String(unit.get("display_name")),
+				"portrait_path": _resolve_unit_portrait_path(resolved_unit_id),
 				"fireteam_id": String(unit.get("fireteam_id")),
 				"vital_state": vital_state,
 				"health_points": health_points,

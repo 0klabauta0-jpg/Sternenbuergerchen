@@ -1,0 +1,5 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 621.01 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+CUTLASS_PREVIEW: {"asset_id":"cutlass_01","display_name":"Cutlass","geometry_material_override":false,"image_sha256":"f47437b3001c95bb88ccaa026ece5cbfbd03f637afa9ab6fb828fb1e95382570","kind":"native_exact_model_ui_preview","renderer":"gl_compatibility","save_error":0,"size":[768,512],"source_model":"res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb","source_sha256":"21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf","transparent_background":true,"visual_only":true}

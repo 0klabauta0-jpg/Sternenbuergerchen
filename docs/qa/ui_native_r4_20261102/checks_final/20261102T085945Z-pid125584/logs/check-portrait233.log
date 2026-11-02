@@ -1,0 +1,497 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_233 Portrait Identity Catalog and Roster Presentation ===
+PASS: Portrait catalog JSON exists and parses
+PASS: Portrait inventory doc exists
+PASS: Portrait catalog schema is v1
+PASS: Portrait catalog has stable catalog id
+PASS: Inventory records all source PNGs under Assets/Char
+PASS: Inventory doc records total PNG count
+PASS: Inventory doc documents fixed UI target sizes
+PASS: Portrait catalog validates
+PASS: Portrait catalog contains at least 30 entries
+PASS: Portrait catalog contains at least 30 start-roster candidates
+PASS: Portrait catalog contains at least 30 loadable portraits
+PASS: Large source PNGs are diagnosed
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_001
+PASS: Portrait path uses project res path: char_portrait_001
+PASS: Portrait path is not an absolute local path: char_portrait_001
+PASS: ResourceLoader sees portrait path: char_portrait_001
+PASS: ResourceLoader loads portrait texture: char_portrait_001
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_002
+PASS: Portrait path uses project res path: char_portrait_002
+PASS: Portrait path is not an absolute local path: char_portrait_002
+PASS: ResourceLoader sees portrait path: char_portrait_002
+PASS: ResourceLoader loads portrait texture: char_portrait_002
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_003
+PASS: Portrait path uses project res path: char_portrait_003
+PASS: Portrait path is not an absolute local path: char_portrait_003
+PASS: ResourceLoader sees portrait path: char_portrait_003
+PASS: ResourceLoader loads portrait texture: char_portrait_003
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_004
+PASS: Portrait path uses project res path: char_portrait_004
+PASS: Portrait path is not an absolute local path: char_portrait_004
+PASS: ResourceLoader sees portrait path: char_portrait_004
+PASS: ResourceLoader loads portrait texture: char_portrait_004
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_005
+PASS: Portrait path uses project res path: char_portrait_005
+PASS: Portrait path is not an absolute local path: char_portrait_005
+PASS: ResourceLoader sees portrait path: char_portrait_005
+PASS: ResourceLoader loads portrait texture: char_portrait_005
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_006
+PASS: Portrait path uses project res path: char_portrait_006
+PASS: Portrait path is not an absolute local path: char_portrait_006
+PASS: ResourceLoader sees portrait path: char_portrait_006
+PASS: ResourceLoader loads portrait texture: char_portrait_006
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_007
+PASS: Portrait path uses project res path: char_portrait_007
+PASS: Portrait path is not an absolute local path: char_portrait_007
+PASS: ResourceLoader sees portrait path: char_portrait_007
+PASS: ResourceLoader loads portrait texture: char_portrait_007
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_008
+PASS: Portrait path uses project res path: char_portrait_008
+PASS: Portrait path is not an absolute local path: char_portrait_008
+PASS: ResourceLoader sees portrait path: char_portrait_008
+PASS: ResourceLoader loads portrait texture: char_portrait_008
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_009
+PASS: Portrait path uses project res path: char_portrait_009
+PASS: Portrait path is not an absolute local path: char_portrait_009
+PASS: ResourceLoader sees portrait path: char_portrait_009
+PASS: ResourceLoader loads portrait texture: char_portrait_009
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_010
+PASS: Portrait path uses project res path: char_portrait_010
+PASS: Portrait path is not an absolute local path: char_portrait_010
+PASS: ResourceLoader sees portrait path: char_portrait_010
+PASS: ResourceLoader loads portrait texture: char_portrait_010
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_011
+PASS: Portrait path uses project res path: char_portrait_011
+PASS: Portrait path is not an absolute local path: char_portrait_011
+PASS: ResourceLoader sees portrait path: char_portrait_011
+PASS: ResourceLoader loads portrait texture: char_portrait_011
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_012
+PASS: Portrait path uses project res path: char_portrait_012
+PASS: Portrait path is not an absolute local path: char_portrait_012
+PASS: ResourceLoader sees portrait path: char_portrait_012
+PASS: ResourceLoader loads portrait texture: char_portrait_012
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_013
+PASS: Portrait path uses project res path: char_portrait_013
+PASS: Portrait path is not an absolute local path: char_portrait_013
+PASS: ResourceLoader sees portrait path: char_portrait_013
+PASS: ResourceLoader loads portrait texture: char_portrait_013
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_014
+PASS: Portrait path uses project res path: char_portrait_014
+PASS: Portrait path is not an absolute local path: char_portrait_014
+PASS: ResourceLoader sees portrait path: char_portrait_014
+PASS: ResourceLoader loads portrait texture: char_portrait_014
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_015
+PASS: Portrait path uses project res path: char_portrait_015
+PASS: Portrait path is not an absolute local path: char_portrait_015
+PASS: ResourceLoader sees portrait path: char_portrait_015
+PASS: ResourceLoader loads portrait texture: char_portrait_015
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_016
+PASS: Portrait path uses project res path: char_portrait_016
+PASS: Portrait path is not an absolute local path: char_portrait_016
+PASS: ResourceLoader sees portrait path: char_portrait_016
+PASS: ResourceLoader loads portrait texture: char_portrait_016
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_017
+PASS: Portrait path uses project res path: char_portrait_017
+PASS: Portrait path is not an absolute local path: char_portrait_017
+PASS: ResourceLoader sees portrait path: char_portrait_017
+PASS: ResourceLoader loads portrait texture: char_portrait_017
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_018
+PASS: Portrait path uses project res path: char_portrait_018
+PASS: Portrait path is not an absolute local path: char_portrait_018
+PASS: ResourceLoader sees portrait path: char_portrait_018
+PASS: ResourceLoader loads portrait texture: char_portrait_018
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_019
+PASS: Portrait path uses project res path: char_portrait_019
+PASS: Portrait path is not an absolute local path: char_portrait_019
+PASS: ResourceLoader sees portrait path: char_portrait_019
+PASS: ResourceLoader loads portrait texture: char_portrait_019
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_020
+PASS: Portrait path uses project res path: char_portrait_020
+PASS: Portrait path is not an absolute local path: char_portrait_020
+PASS: ResourceLoader sees portrait path: char_portrait_020
+PASS: ResourceLoader loads portrait texture: char_portrait_020
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_021
+PASS: Portrait path uses project res path: char_portrait_021
+PASS: Portrait path is not an absolute local path: char_portrait_021
+PASS: ResourceLoader sees portrait path: char_portrait_021
+PASS: ResourceLoader loads portrait texture: char_portrait_021
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_022
+PASS: Portrait path uses project res path: char_portrait_022
+PASS: Portrait path is not an absolute local path: char_portrait_022
+PASS: ResourceLoader sees portrait path: char_portrait_022
+PASS: ResourceLoader loads portrait texture: char_portrait_022
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_023
+PASS: Portrait path uses project res path: char_portrait_023
+PASS: Portrait path is not an absolute local path: char_portrait_023
+PASS: ResourceLoader sees portrait path: char_portrait_023
+PASS: ResourceLoader loads portrait texture: char_portrait_023
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_024
+PASS: Portrait path uses project res path: char_portrait_024
+PASS: Portrait path is not an absolute local path: char_portrait_024
+PASS: ResourceLoader sees portrait path: char_portrait_024
+PASS: ResourceLoader loads portrait texture: char_portrait_024
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_025
+PASS: Portrait path uses project res path: char_portrait_025
+PASS: Portrait path is not an absolute local path: char_portrait_025
+PASS: ResourceLoader sees portrait path: char_portrait_025
+PASS: ResourceLoader loads portrait texture: char_portrait_025
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_026
+PASS: Portrait path uses project res path: char_portrait_026
+PASS: Portrait path is not an absolute local path: char_portrait_026
+PASS: ResourceLoader sees portrait path: char_portrait_026
+PASS: ResourceLoader loads portrait texture: char_portrait_026
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_027
+PASS: Portrait path uses project res path: char_portrait_027
+PASS: Portrait path is not an absolute local path: char_portrait_027
+PASS: ResourceLoader sees portrait path: char_portrait_027
+PASS: ResourceLoader loads portrait texture: char_portrait_027
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_028
+PASS: Portrait path uses project res path: char_portrait_028
+PASS: Portrait path is not an absolute local path: char_portrait_028
+PASS: ResourceLoader sees portrait path: char_portrait_028
+PASS: ResourceLoader loads portrait texture: char_portrait_028
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_029
+PASS: Portrait path uses project res path: char_portrait_029
+PASS: Portrait path is not an absolute local path: char_portrait_029
+PASS: ResourceLoader sees portrait path: char_portrait_029
+PASS: ResourceLoader loads portrait texture: char_portrait_029
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_030
+PASS: Portrait path uses project res path: char_portrait_030
+PASS: Portrait path is not an absolute local path: char_portrait_030
+PASS: ResourceLoader sees portrait path: char_portrait_030
+PASS: ResourceLoader loads portrait texture: char_portrait_030
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_031
+PASS: Portrait path uses project res path: char_portrait_031
+PASS: Portrait path is not an absolute local path: char_portrait_031
+PASS: ResourceLoader sees portrait path: char_portrait_031
+PASS: ResourceLoader loads portrait texture: char_portrait_031
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_032
+PASS: Portrait path uses project res path: char_portrait_032
+PASS: Portrait path is not an absolute local path: char_portrait_032
+PASS: ResourceLoader sees portrait path: char_portrait_032
+PASS: ResourceLoader loads portrait texture: char_portrait_032
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_033
+PASS: Portrait path uses project res path: char_portrait_033
+PASS: Portrait path is not an absolute local path: char_portrait_033
+PASS: ResourceLoader sees portrait path: char_portrait_033
+PASS: ResourceLoader loads portrait texture: char_portrait_033
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_034
+PASS: Portrait path uses project res path: char_portrait_034
+PASS: Portrait path is not an absolute local path: char_portrait_034
+PASS: ResourceLoader sees portrait path: char_portrait_034
+PASS: ResourceLoader loads portrait texture: char_portrait_034
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_035
+PASS: Portrait path uses project res path: char_portrait_035
+PASS: Portrait path is not an absolute local path: char_portrait_035
+PASS: ResourceLoader sees portrait path: char_portrait_035
+PASS: ResourceLoader loads portrait texture: char_portrait_035
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_036
+PASS: Portrait path uses project res path: char_portrait_036
+PASS: Portrait path is not an absolute local path: char_portrait_036
+PASS: ResourceLoader sees portrait path: char_portrait_036
+PASS: ResourceLoader loads portrait texture: char_portrait_036
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_037
+PASS: Portrait path uses project res path: char_portrait_037
+PASS: Portrait path is not an absolute local path: char_portrait_037
+PASS: ResourceLoader sees portrait path: char_portrait_037
+PASS: ResourceLoader loads portrait texture: char_portrait_037
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_038
+PASS: Portrait path uses project res path: char_portrait_038
+PASS: Portrait path is not an absolute local path: char_portrait_038
+PASS: ResourceLoader sees portrait path: char_portrait_038
+PASS: ResourceLoader loads portrait texture: char_portrait_038
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_039
+PASS: Portrait path uses project res path: char_portrait_039
+PASS: Portrait path is not an absolute local path: char_portrait_039
+PASS: ResourceLoader sees portrait path: char_portrait_039
+PASS: ResourceLoader loads portrait texture: char_portrait_039
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_040
+PASS: Portrait path uses project res path: char_portrait_040
+PASS: Portrait path is not an absolute local path: char_portrait_040
+PASS: ResourceLoader sees portrait path: char_portrait_040
+PASS: ResourceLoader loads portrait texture: char_portrait_040
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_041
+PASS: Portrait path uses project res path: char_portrait_041
+PASS: Portrait path is not an absolute local path: char_portrait_041
+PASS: ResourceLoader sees portrait path: char_portrait_041
+PASS: ResourceLoader loads portrait texture: char_portrait_041
+PASS: Portrait entry has stable id
+PASS: Portrait id is unique: char_portrait_042
+PASS: Portrait path uses project res path: char_portrait_042
+PASS: Portrait path is not an absolute local path: char_portrait_042
+PASS: ResourceLoader sees portrait path: char_portrait_042
+PASS: ResourceLoader loads portrait texture: char_portrait_042
+PASS: Portrait assignment returns requested 30 entries
+PASS: Same seed returns same portrait assignment
+PASS: Different seed changes portrait assignment order
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_011
+PASS: Assigned portrait path is loadable: char_portrait_011
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_022
+PASS: Assigned portrait path is loadable: char_portrait_022
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_033
+PASS: Assigned portrait path is loadable: char_portrait_033
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_002
+PASS: Assigned portrait path is loadable: char_portrait_002
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_013
+PASS: Assigned portrait path is loadable: char_portrait_013
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_024
+PASS: Assigned portrait path is loadable: char_portrait_024
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_035
+PASS: Assigned portrait path is loadable: char_portrait_035
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_004
+PASS: Assigned portrait path is loadable: char_portrait_004
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_015
+PASS: Assigned portrait path is loadable: char_portrait_015
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_026
+PASS: Assigned portrait path is loadable: char_portrait_026
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_037
+PASS: Assigned portrait path is loadable: char_portrait_037
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_006
+PASS: Assigned portrait path is loadable: char_portrait_006
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_017
+PASS: Assigned portrait path is loadable: char_portrait_017
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_028
+PASS: Assigned portrait path is loadable: char_portrait_028
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_039
+PASS: Assigned portrait path is loadable: char_portrait_039
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_008
+PASS: Assigned portrait path is loadable: char_portrait_008
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_019
+PASS: Assigned portrait path is loadable: char_portrait_019
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_030
+PASS: Assigned portrait path is loadable: char_portrait_030
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_041
+PASS: Assigned portrait path is loadable: char_portrait_041
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_010
+PASS: Assigned portrait path is loadable: char_portrait_010
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_021
+PASS: Assigned portrait path is loadable: char_portrait_021
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_032
+PASS: Assigned portrait path is loadable: char_portrait_032
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_001
+PASS: Assigned portrait path is loadable: char_portrait_001
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_012
+PASS: Assigned portrait path is loadable: char_portrait_012
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_023
+PASS: Assigned portrait path is loadable: char_portrait_023
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_034
+PASS: Assigned portrait path is loadable: char_portrait_034
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_003
+PASS: Assigned portrait path is loadable: char_portrait_003
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_014
+PASS: Assigned portrait path is loadable: char_portrait_014
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_025
+PASS: Assigned portrait path is loadable: char_portrait_025
+PASS: Thirty-entry assignment does not repeat portrait id: char_portrait_036
+PASS: Assigned portrait path is loadable: char_portrait_036
+PASS: Generated roster remains valid with portrait catalog
+PASS: Roster validator accepts catalog portrait paths
+PASS: Generated roster can fill 30 portrait-backed NPCs
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_009
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_020
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_031
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_042
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_011
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_022
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_033
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_002
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_013
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_024
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_035
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_004
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_015
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_026
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_037
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_006
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_017
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_028
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_039
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_008
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_019
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_030
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_041
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_010
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_021
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_032
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_001
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_012
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_023
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Generated unit has catalog portrait id
+PASS: Generated 30-unit roster does not repeat portrait id: char_portrait_034
+PASS: Generated unit portrait path stays under Assets/Char
+PASS: Generated unit portrait path is loadable
+PASS: MetaUnitProfile preserves portrait id and path
+PASS: Character sheet creates a portrait TextureRect
+PASS: Character sheet portrait loads through catalog helper
+PASS: Character sheet portrait uses 96x120 target
+PASS: Character sheet portrait is constrained by TextureRect crop
+PASS: Roster card portrait loads through catalog helper
+PASS: Roster card portrait uses 64x64 target
+ERROR: FAIL: Compact roster card portrait uses 38x38 target
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_233_portrait_identity_catalog_and_roster_presentation.gd:199)
+       [1] _test_character_sheet_and_roster_card_contract (res://scripts/tests/task_233_portrait_identity_catalog_and_roster_presentation.gd:143)
+=== RESULTS: 486 passed, 1 failed ===
+FAIL

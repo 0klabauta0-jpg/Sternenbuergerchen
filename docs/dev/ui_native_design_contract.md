@@ -1,4 +1,4 @@
-# Native UI Design Contract · R1 / R2 / R3
+# Native UI Design Contract · R1 / R2 / R3 / R4
 
 Gültig für den vom Nutzer am 01.11.2026 beauftragten Umsetzungsschritt auf Basis der bestätigten UI-Konzepte. Die Bilder bestimmen Formsprache und Gruppierung; bestehende Runtime-/Datenverträge bestimmen Inhalt und erlaubte Aktionen.
 
@@ -57,3 +57,16 @@ Native Strukturchecks prüfen Controls, Quadrate, Positionen, Erreichbarkeit und
 - Legacy-Rohtexte und v1-Diagnoseformate bleiben getrennt von sichtbaren Spielerlabels erhalten. Haltungswörter und mindestens 13px-Schrift werden auch nach echten Lightrefreshes restauriert. Die Restaurierung durchsucht nur bekannte Controls und schreibt keine Layoutrects.
 - Zahlen in Auswertungs-Chips stehen sichtbar vor gegebenenfalls gekürzter Beschreibung. Tatsächliche Contentbreite und Fontbreite müssen den vollständigen Wert aufnehmen; der volle Kontext ist per Tooltip erreichbar. Keine kleinere Schrift als Platzersatz.
 - Separat platzierte Debrief-Controls folgen ihren nativen Slots auch nach reinen Bewegungen übergeordneter Container. Die begrenzte Ancestorkette wird einmal beim Aufbau signalgebunden, nicht pro Frame durchsucht. Rückwegzeile und Slot müssen nach Layoutabschluss übereinstimmen und vollständig in der Rückwegkarte liegen.
+
+## Visuelle Referenznähe R4
+- Die finale 2D-Menüfamilie und A5 bleiben visuelle Grundlage. Neue Brückenbilder erklären Übersetzung; ihre Beispielgesichter, Enable-Zustände und Szenen sind keine Runtimeautorität.
+- R4 überschreibt die frühe graue Palette: Petrol `071f29`/`102f3b`, dunkel gewählte Fläche `092630`, Cyanrahmen `2e7b8a`, Interaktion `29e1e7`, Auswahl `ffd348`, Creme-Schrift `f4f2e9`, Nebeninformation `a8c0ca`. Cremefarbene Modulgehäuse gehören zur Illustration, UI-Panels bleiben dunkel.
+- Abschnitt und Identität erhalten die gebündelte Barlow Condensed Bold (SIL-OFL, Quelle/Hash/Lizenz unter `Assets/curated/ui_native_r4/`). Körper-/Buttonschrift, 64px-Aktionen und kompakte Geometrien bleiben erhalten. Große Überschriften dürfen native Breiten nicht erzwingen; lange Leerzustände umbrechen.
+- Heimatbasis/FOB zeigen den kuratierten Main-Außenposten im tatsächlich freien rechten Bereich. Die Bühne ist input-ignore/visual_only und verschwindet bei Platzmangel; sie verdrängt keine Zuordnungs-/Transportwege. Debrief hat eine eigene explizite Frontier-Hintergrundebene, ohne alte Katalogsnapshotfelder umzudeuten.
+- MetaFlow ergänzt vorhandene Portraitpfade in Ergebnis-Personendaten ausschließlich über denselben bestehenden Unit-/Rosterlookup. Keine zufälligen Ersatzgesichter aus Bildtafeln. Der kompakte Portraitvertrag bleibt 38px; prominente Missions-Teamreihen verwenden vorhandene Portraits mit bis zu 36px in den bestehenden Kartenrects.
+- Das Missionsband erhält eine eigene passive deckende Oberfläche, weil der vorhandene BottomDock ein Control ist. Hintergrund und Module nutzen dieselben berechneten 160px-Layoutgrenzen; kein neuer per-frame Geometriepfad und keine veränderten Input-/Sichtbarkeitsregeln.
+- Neutrale Ergebnis-/AAR-Chips verwenden dunkle Flächen mit heller Schrift; gefüllte semantische Chips verwenden dunkle Schrift. Werte bleiben sichtbar vorne, Originalkontext erreichbar.
+- Main `7f594530f` liefert die aktuelle gespeicherte Frontier-GM01 und Ref03-Schiffe. GM01 bleibt Square8. Die tatsächliche normale Start-/Transport-/LZ-/GO-Route und Fixture-Renderbilder werden separat gekennzeichnet und geprüft.
+
+- Nutzerpräzisierung Cutlass: Das erste Spielerdropship projiziert Klasse und statische UI-Vorschau aus derselben bestehenden Visualrolle wie das aktive Ref03-Modell. Kein neuer Crafttyp, keine Umbenennung gespeicherter Namen/IDs und keine Bild-KI-Neuinterpretation. Die Vorschau ist ein nativer transparenter Render exakt dieser GLB-Bytes; aktuelle Quelle und SHA stehen daneben. Homebase wählt 94×62 / Position 0 vor dem ersten Größenwrite, damit kein alter Speeder-Minimumcache/Crop die Silhouette abschneidet. FOB und Missionskarten behalten die ganze Silhouette. Welt-Richtungssprites bleiben vom UI-Preview getrennt.
+- Bei kleiner Viewporthöhe bleibt das Protokoll unter der einzelnen Transportkarte:1280×720 Log y344–440/Höhe96, FullHD unverändert. Gleicher nativer Scroll, gleiche Schrift und Eingabe; reine Rectberechnung ohne Runtime-State.

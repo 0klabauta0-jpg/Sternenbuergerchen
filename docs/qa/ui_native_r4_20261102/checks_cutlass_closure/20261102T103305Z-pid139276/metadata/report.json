@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_cutlass_closure\\20261102T103305Z-pid139276",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_cutlass_closure.json",
+  "godot": "godot_console",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.053,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_cutlass_closure\\20261102T103305Z-pid139276\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-02T10:33:05.218963+00:00",
+  "finished_at": "2026-11-02T10:33:21.576712+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_cutlass_closure\\20261102T103305Z-pid139276\\logs\\engine-check-cutlass_ui.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\ui_native_r4_cutlass_identity_verifier.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 8.328,
+      "name": "cutlass_ui",
+      "marker_found": false,
+      "errors": [
+        "ERROR: FAIL: old Speeder crop cannot clip the complete Cutlass silhouette"
+      ],
+      "error_count": 1,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_cutlass_closure\\20261102T103305Z-pid139276\\logs\\check-cutlass_ui.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_cutlass_closure\\20261102T103305Z-pid139276\\logs\\engine-check-cutlass_ui.log",
+      "passed": false,
+      "reasons": [
+        "exit 1",
+        "1 error(s)",
+        "missing success marker"
+      ]
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_cutlass_closure\\20261102T103305Z-pid139276\\logs\\engine-check-connected1114.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_1114_connected_dropship_pending_card_visual_polish.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 7.969,
+      "name": "connected1114",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_cutlass_closure\\20261102T103305Z-pid139276\\logs\\check-connected1114.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_cutlass_closure\\20261102T103305Z-pid139276\\logs\\engine-check-connected1114.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 2,
+    "passed": 1,
+    "failed": 1
+  }
+}

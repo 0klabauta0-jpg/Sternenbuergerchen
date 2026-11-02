@@ -5,6 +5,7 @@ extends RefCounted
 const THEME := preload("res://scripts/ui/tactical_ui_theme.gd")
 const LAYOUT := preload("res://scripts/meta/drop_light_layout_contract.gd")
 const ICONS := preload("res://scripts/ui/native_ui_icons.gd")
+const TARGET_ICON := preload("res://Assets/curated/kenney/tactical_icons/target_marker.png")
 const BASE := "../TacticalUI/BottomDock/BottomMargin/BottomRow/"
 const GRID := BASE + "CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"
 const INFO := BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox"
@@ -24,11 +25,18 @@ const STRATEGIC_SOURCES := STRATEGIC + "/StrategicMargin/StrategicScroll/Strateg
 
 
 static func configure(controller: Node, state: Dictionary = {}) -> void:
+	# MetaFlow supplies planning state before entering the mission into the
+	# SceneTree. The normal ready/layout pass owns the first viewport geometry.
+	if controller == null or not controller.is_inside_tree():
+		return
+	var viewport: Viewport = controller.get_viewport()
+	if viewport == null:
+		return
 	var layer := controller.get_node_or_null("../TacticalUI") as CanvasLayer
 	var grid := controller.get_node_or_null(GRID) as GridContainer
 	if layer == null or grid == null:
 		return
-	var viewport_size := Vector2i(controller.get_viewport().get_visible_rect().size)
+	var viewport_size := Vector2i(viewport.get_visible_rect().size)
 	var character_overlay := layer.get_node_or_null("CharacterOverlay") as Control
 	if character_overlay != null:
 		character_overlay.z_as_relative = false
@@ -49,7 +57,7 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 	var team_panel := controller.get_node_or_null(BASE + "FireteamPanel") as PanelContainer
 	if team_panel != null:
 		_ensure_team_controls(controller, team_panel, layer)
-		_ensure_label(team_panel, "A5TeamIdentity", 16)
+		THEME.style_section_heading(_ensure_label(team_panel, "A5TeamIdentity", 16), 16)
 		(team_panel.get_node("A5TeamIdentity") as Label).max_lines_visible = 1
 		_place(team_panel.get_node("A5TeamIdentity") as Control, Rect2(team.position + Vector2i(8, 6), Vector2i(team.size.x - 176, 24)))
 		var summary := _ensure_label(team_panel, "A5TeamSummary", 12)
@@ -66,17 +74,32 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 		fire_heading.z_index = 12
 		_place(team_panel.get_node("A5FireRuleSelector") as Control, Rect2(team.position + Vector2i(8, 130), Vector2i(team.size.x - 16, 28)))
 		_place(team_panel.get_node("A5DetailsButton") as Control, Rect2(team.position + Vector2i(team.size.x - 160, 6), Vector2i(76, 26)))
-		THEME.style_card(team_panel)
-	var band_panel := controller.get_node_or_null("../TacticalUI/BottomDock") as PanelContainer
-	if band_panel != null:
-		band_panel.theme = THEME.get_theme()
-		if not band_panel.has_meta("a5_band_style"):
-			var style: StyleBoxFlat = THEME.build_flat_stylebox(THEME.COLOR_PANEL, THEME.COLOR_BORDER, 0, 1, Vector4.ZERO).duplicate()
+		_style_dock_module(team_panel, true)
+	var command_panel := controller.get_node_or_null(BASE + "CommandPanel") as PanelContainer
+	if command_panel != null:
+		_style_dock_module(command_panel, false)
+	var band_root := controller.get_node_or_null("../TacticalUI/BottomDock") as Control
+	if band_root != null:
+		# Production scenes own a plain Control here, not a PanelContainer.
+		# A passive child supplies the complete opaque instrument surface while
+		# every existing command and absolute A5 slot stays in its original owner.
+		var band_panel := band_root.get_node_or_null("A5InstrumentSurface") as Panel
+		if band_panel == null:
+			band_panel = Panel.new()
+			band_panel.name = "A5InstrumentSurface"
+			band_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			band_panel.focus_mode = Control.FOCUS_NONE
+			band_panel.theme = THEME.get_theme()
+			var style: StyleBoxFlat = THEME.build_flat_stylebox(THEME.COLOR_PANEL, THEME.COLOR_ACCENT.darkened(0.55), 0, 1, Vector4.ZERO).duplicate()
 			style.border_width_left = 0
 			style.border_width_right = 0
 			style.border_width_bottom = 0
-			band_panel.set_meta("a5_band_style", style)
-		band_panel.add_theme_stylebox_override("panel", band_panel.get_meta("a5_band_style"))
+			band_panel.add_theme_stylebox_override("panel", style)
+			band_root.add_child(band_panel)
+		_place(band_panel, Rect2(band))
+		band_panel.z_as_relative = false
+		band_panel.z_index = 0
+		band_root.set_meta("native_r4_continuous_instrument_surface", true)
 	for path in [BASE + "CommandPanel", BASE + "CommandPanel/CommandMargin", BASE + "CommandPanel/CommandMargin/CommandScroll", BASE + "CommandPanel/CommandMargin/CommandScroll/CommandVBox", GRID, BASE + "FireteamPanel", BASE + "FireteamPanel/FireteamMargin", BASE + "FireteamPanel/FireteamMargin/FireteamVBox", BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow"]:
 		var control := controller.get_node_or_null(path) as Control
 		if control != null:
@@ -459,11 +482,17 @@ static func refresh_player_readout(controller: Node, context: Dictionary) -> voi
 			_set_text(label, String(model.get(String(spec[1]), "")))
 	# The production light refresh runs the legacy stance writer first. Restore
 	# only these three known controls; no configure(), placement or tree scan.
-	var stance := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
-	if stance != null:
-		_refresh_stance_buttons(stance)
+	refresh_selected_stance(controller)
 	_hide_raw_readouts(controller)
 	_refresh_details_text(controller)
+
+
+static func refresh_selected_stance(controller: Node) -> void:
+	# This bounded restore is also called after the owner's direct button-state
+	# refresh, which can run after the ordinary readout in a live mission.
+	var stance := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
+	if stance != null and bool(stance.get_meta("native_a5_layout", false)):
+		_refresh_stance_buttons(stance)
 
 
 static func _layout_player_readouts(controller: Node, viewport_size: Vector2i) -> void:
@@ -475,13 +504,20 @@ static func _layout_player_readouts(controller: Node, viewport_size: Vector2i) -
 		var rect: Rect2 = spec[1]
 		_place(panel, rect)
 		panel.clip_contents = false
-		var heading := _ensure_label(panel, String(spec[2]), 13)
+		var heading := _ensure_label(panel, String(spec[2]), 17)
+		THEME.style_section_heading(heading, 17)
 		var body := _ensure_label(panel, String(spec[3]), 14)
 		for label in [heading, body]:
 			label.clip_text = true
 			label.max_lines_visible = 2
-		_place(heading, Rect2(rect.position + Vector2(10, 6), Vector2(rect.size.x - 104, 20)))
-		_place(body, Rect2(rect.position + Vector2(10, 30), Vector2(rect.size.x - 20, 36)))
+		_place(heading, Rect2(rect.position + Vector2(44, 6), Vector2(rect.size.x - 140, 22)))
+		_place(body, Rect2(rect.position + Vector2(44, 30), Vector2(rect.size.x - 54, 36)))
+		var icon_id := "dropship" if String(spec[0]) == STRATEGIC else "target"
+		var icon := _ensure_readout_icon(panel, icon_id)
+		_place(icon, Rect2(rect.position + Vector2(10, 20), Vector2(26, 30)))
+		var card := panel as PanelContainer
+		if card != null:
+			THEME.style_card(card)
 		if String(spec[0]) == STRATEGIC:
 			var details := panel.get_node_or_null("A5ReadoutDetailsButton") as Button
 			if details == null:
@@ -631,14 +667,16 @@ static func _ensure_target_panel(layer: CanvasLayer) -> PanelContainer:
 	panel = PanelContainer.new()
 	panel.name = "A5TargetOrderPanel"
 	panel.theme = THEME.get_theme()
-	THEME.style_card(panel)
+	_style_dock_module(panel, true)
 	panel.set_meta("ui_sets_gameplay_truth", false)
 	layer.add_child(panel)
 	var contents := VBoxContainer.new()
 	contents.name = "Contents"
 	contents.add_theme_constant_override("separation", 6)
 	panel.add_child(contents)
-	_ensure_label(contents, "Heading", 13).text = "ZIEL / AUFTRAG"
+	var heading := _ensure_label(contents, "Heading", 16)
+	THEME.style_section_heading(heading, 16)
+	heading.text = "ZIEL / AUFTRAG"
 	_ensure_label(contents, "Target", 14)
 	_ensure_label(contents, "Order", 13).max_lines_visible = 2
 	_ensure_label(contents, "Feedback", 12).max_lines_visible = 2
@@ -649,13 +687,39 @@ static func _layout_target_labels(panel: PanelContainer, rect: Rect2) -> void:
 	var contents := panel.get_node("Contents") as Control
 	contents.clip_contents = false
 	contents.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var slots := {"Heading": Rect2(8, 8, 232, 18), "Target": Rect2(8, 32, 232, 26), "Order": Rect2(8, 62, 232, 30), "Feedback": Rect2(8, 96, 232, 20)}
+	var slots := {"Heading": Rect2(8, 6, 232, 22), "Target": Rect2(8, 32, 232, 26), "Order": Rect2(8, 62, 232, 30), "Feedback": Rect2(8, 96, 232, 20)}
 	for name in slots:
 		var label := contents.get_node(NodePath(name)) as Label
 		var slot: Rect2 = slots[name]
 		_place(label, Rect2(rect.position + slot.position, slot.size))
 		label.max_lines_visible = 1 if name in ["Heading", "Feedback"] else 2
 		label.clip_text = true
+
+
+static func _style_dock_module(panel: PanelContainer, divider: bool) -> void:
+	# One continuous instrument surface; separators group the existing modules
+	# without drawing three unrelated rounded dialog frames over the band.
+	var key := "native_r4_dock_divider" if divider else "native_r4_dock_clear"
+	if not panel.has_meta(key):
+		var style: StyleBoxFlat = THEME.build_flat_stylebox(Color.TRANSPARENT, THEME.COLOR_BORDER, 0, 0, Vector4.ZERO).duplicate()
+		style.border_width_left = 1 if divider else 0
+		panel.set_meta(key, style)
+	panel.add_theme_stylebox_override("panel", panel.get_meta(key))
+
+
+static func _ensure_readout_icon(panel: Control, icon_id: String) -> TextureRect:
+	var icon := panel.get_node_or_null("A5ReadoutIcon") as TextureRect
+	if icon == null:
+		icon = TextureRect.new()
+		icon.name = "A5ReadoutIcon"
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.texture = TARGET_ICON if icon_id == "target" else ICONS.get_icon(icon_id)
+		icon.modulate = THEME.COLOR_ACCENT if icon_id == "target" else Color.WHITE
+		icon.set_meta("native_r4_decorative_readout_icon", true)
+		panel.add_child(icon)
+	return icon
 
 
 static func _style_execute_tile(button: Button) -> void:

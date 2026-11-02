@@ -1,19 +1,20 @@
 class_name TacticalUITheme
 extends RefCounted
 
-const COLOR_PANEL := Color("151c21")
-const COLOR_PANEL_ALT := Color("252d33")
-const COLOR_PANEL_SELECTED := Color("0c1114")
-const COLOR_BORDER := Color("4d5a63")
-const COLOR_BORDER_SELECTED := Color("f2c94c")
-const COLOR_TEXT := Color("edf3f6")
-const COLOR_TEXT_MUTED := Color("a9b4bc")
-const COLOR_TEXT_DARK := Color("1e252a")
-const COLOR_ACCENT := Color("63d1d2")
-const COLOR_SUCCESS := Color("69c391")
-const COLOR_WARNING := Color("d89b31")
-const COLOR_DANGER := Color("d66c66")
-const COLOR_NEUTRAL := Color("8e9aa3")
+const COLOR_PANEL := Color("071f29")
+const COLOR_PANEL_ALT := Color("102f3b")
+const COLOR_PANEL_SELECTED := Color("092630")
+const COLOR_BORDER := Color("2e7b8a")
+const COLOR_BORDER_SELECTED := Color("ffd348")
+const COLOR_TEXT := Color("f4f2e9")
+const COLOR_TEXT_MUTED := Color("a8c0ca")
+const COLOR_TEXT_DARK := Color("07202a")
+const COLOR_ACCENT := Color("29e1e7")
+const COLOR_SUCCESS := Color("37d9bf")
+const COLOR_WARNING := Color("ffd348")
+const COLOR_DANGER := Color("f47572")
+const COLOR_NEUTRAL := Color("8caab8")
+const HEADING_FONT_PATH: String = "res://Assets/curated/ui_native_r4/BarlowCondensed-Bold.ttf"
 
 const CORNER_RADIUS := 6
 const SPACING := 8
@@ -32,6 +33,7 @@ const FEEDBACK_BUBBLE_LABEL_FONT_SIZE := 11
 
 static var _flat_stylebox_cache: Dictionary = {}
 static var _native_theme: Theme
+static var _heading_font: Font
 
 
 static func get_theme() -> Theme:
@@ -137,6 +139,31 @@ static func apply_screen(root: Control) -> void:
 		root.theme = get_theme()
 
 
+static func get_heading_font() -> Font:
+	if _heading_font == null:
+		_heading_font = load(HEADING_FONT_PATH) as Font
+	return _heading_font
+
+
+static func style_section_heading(label: Label, font_size: int = 20) -> void:
+	_style_heading(label, font_size, "section")
+
+
+static func style_screen_heading(label: Label, font_size: int = 26) -> void:
+	_style_heading(label, font_size, "screen")
+
+
+static func _style_heading(label: Label, font_size: int, kind: String) -> void:
+	if label == null:
+		return
+	label.add_theme_font_override("font", get_heading_font())
+	label.add_theme_font_size_override("font_size", font_size)
+	label.add_theme_color_override("font_color", COLOR_TEXT)
+	label.add_theme_color_override("font_shadow_color", Color("02141c"))
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	label.set_meta("native_heading_kind", kind)
+
+
 static func _set_button_theme(result: Theme, type_name: String) -> void:
 	result.set_stylebox("normal", type_name, build_flat_stylebox(COLOR_PANEL_ALT, COLOR_BORDER, 5, 1, Vector4(8, 6, 8, 6)))
 	result.set_stylebox("hover", type_name, build_flat_stylebox(COLOR_PANEL_ALT.lightened(0.08), COLOR_ACCENT, 5, 1, Vector4(8, 6, 8, 6)))
@@ -216,7 +243,7 @@ static func style_command_button(button: Button, status_key: String = "neutral")
 		return
 	button.theme = get_theme()
 	var primary := status_key in ["accent", "command", "go"]
-	var normal_fill := COLOR_ACCENT if primary else COLOR_PANEL_ALT
+	var normal_fill := (COLOR_BORDER_SELECTED if status_key == "go" else COLOR_ACCENT) if primary else COLOR_PANEL_ALT
 	var border := COLOR_BORDER_SELECTED if status_key == "selected" else COLOR_BORDER
 	var normal_text := COLOR_TEXT_DARK if primary else COLOR_TEXT
 	if status_key == "danger":
@@ -248,7 +275,7 @@ static func style_progress_bar(progress_bar: ProgressBar, status_key: String = "
 	if progress_bar == null:
 		return
 	var color := status_color(status_key)
-	progress_bar.add_theme_stylebox_override("background", build_flat_stylebox(Color("0b1014"), Color("35414a"), 6, 1, Vector4.ZERO))
+	progress_bar.add_theme_stylebox_override("background", build_flat_stylebox(COLOR_PANEL, COLOR_BORDER, 6, 1, Vector4.ZERO))
 	progress_bar.add_theme_stylebox_override("fill", build_flat_stylebox(color, color, 5, 0, Vector4.ZERO))
 
 

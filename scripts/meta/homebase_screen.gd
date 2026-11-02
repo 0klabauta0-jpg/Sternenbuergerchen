@@ -2,6 +2,7 @@ class_name HomebaseTestScreen
 extends Control
 
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
@@ -1977,6 +1978,26 @@ func _enforce_drop_light_fixed_layout() -> void:
 	_disable_legacy_homebase_window("Panel/Margin/VBox/ContentRow/TeamPanel", "homebase_legacy_transfer_window_disabled")
 	_disable_legacy_homebase_window("Panel/Margin/VBox/ContentRow/InfoPanel", "homebase_legacy_character_sheet_window_disabled")
 	_apply_character_popup_rect()
+	_apply_r4_preparation_visuals(layout)
+
+
+func _apply_r4_preparation_visuals(layout: Dictionary) -> void:
+	# Presentation follows the existing occupancy-driven rectangles. The image
+	# occupies only free space below the real transport work area.
+	for entry in [
+		["Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel", 20, ""],
+		["Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterHeaderLabel", 20, ""],
+		["Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel", 20, ""],
+		["Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftHeaderLabel", 20, "dropship"],
+	]:
+		META_UI_SKIN_SCRIPT.style_preparation_heading(get_node_or_null(entry[0]) as Label, entry[1], entry[2])
+	var title := get_node_or_null("DropLightTopbar/Margin/Row/TitleLabel") as Label
+	if title != null:
+		TACTICAL_UI_THEME_SCRIPT.style_screen_heading(title, 26)
+	var deck: Rect2i = layout.flightdeck
+	var viewport: Rect2i = layout.viewport
+	var stage_top := deck.end.y + 12
+	META_UI_SKIN_SCRIPT.update_frontier_stage(self, Rect2i(deck.position.x, stage_top, deck.size.x, maxi(0, viewport.size.y - stage_top - 16)), not _r2_briefing_details_open)
 
 
 func get_native_r2_layout_snapshot() -> Dictionary:
@@ -8100,7 +8121,7 @@ func _build_transfer_entry_card(title: String, detail: String, entry: Dictionary
 
 func _build_shipcard(craft_def: Dictionary) -> Control:
 	var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
-	var craft_name: String = String(craft_def.get("display_name", craft_id)).strip_edges()
+	var craft_name: String = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_display_name(craft_def)
 	var assigned_pilot_id: String = _get_assigned_pilot_id(craft_id)
 	var craft_in_transit: bool = _is_craft_in_transit(craft_id)
 	var craft_busy: bool = _has_active_pilot_transfer_for_craft(craft_id) or craft_in_transit
@@ -8160,17 +8181,26 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var ship_texture := TextureRect.new()
 	ship_texture.name = "ShipTexture"
-	ship_texture.texture = _get_aircraft_texture(craft_def)
 	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ship_texture.custom_minimum_size = HOMEBASE_SHIPCARD_IMAGE_SIZE
-	ship_texture.size = HOMEBASE_SHIPCARD_IMAGE_SIZE
-	ship_texture.position = HOMEBASE_SHIPCARD_IMAGE_OFFSET
+	var selected_texture: Texture2D = _get_aircraft_texture(craft_def)
+	var model_preview: Texture2D = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_preview_texture(craft_def)
+	var is_model_preview: bool = model_preview != null and selected_texture == model_preview
+	# Choose the model's uncropped geometry before the first size write. Setting
+	# the old Speeder minimum first would clamp this detached Control to 128x84.
+	var image_size: Vector2 = HOMEBASE_SHIPCARD_BUTTON_SIZE if is_model_preview else HOMEBASE_SHIPCARD_IMAGE_SIZE
+	ship_texture.custom_minimum_size = image_size
+	ship_texture.texture = selected_texture
+	ship_texture.size = image_size
+	ship_texture.position = Vector2.ZERO if is_model_preview else HOMEBASE_SHIPCARD_IMAGE_OFFSET
+	if is_model_preview:
+		ship_texture.set_meta("frontier_model_preview", true)
+		ship_texture.set_meta("frontier_visual_asset_id", String(FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_identity(craft_def).get("asset_id", "")))
 	ship_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ship_texture.set_meta("homebase_shipcard_visual_anchor", "left_top")
-	ship_texture.set_meta("homebase_shipcard_visual_offset", HOMEBASE_SHIPCARD_IMAGE_OFFSET)
-	ship_texture.set_meta("homebase_shipcard_visual_enlarged", true)
-	ship_texture.set_meta("homebase_shipcard_visual_crop_compensates_transparency", true)
+	ship_texture.set_meta("homebase_shipcard_visual_offset", ship_texture.position)
+	ship_texture.set_meta("homebase_shipcard_visual_enlarged", ship_texture.size.x > HOMEBASE_SHIPCARD_BUTTON_SIZE.x)
+	ship_texture.set_meta("homebase_shipcard_visual_crop_compensates_transparency", not bool(ship_texture.get_meta("frontier_model_preview", false)))
 	if ship_texture.texture != null:
 		ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.46 if craft_in_transit or air_asset_unavailable else 1.0)
 	else:
@@ -8665,7 +8695,7 @@ func _populate_aircraft_selector(selector: OptionButton) -> void:
 	for craft_option_variant in _build_default_aircraft_definitions():
 		var craft_option: Dictionary = Dictionary(craft_option_variant)
 		var craft_type: String = String(craft_option.get("craft_type", "dropship")).strip_edges()
-		selector.add_item(String(craft_option.get("display_name", craft_type)).strip_edges())
+		selector.add_item(FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_display_name(craft_option))
 		selector.set_item_metadata(selector.item_count - 1, craft_type)
 		if craft_type == selected_type:
 			selected_index = selector.item_count - 1
@@ -8692,6 +8722,9 @@ func _build_craft_display_name(craft_id: String) -> String:
 
 
 func _get_aircraft_texture(craft_def: Dictionary) -> Texture2D:
+	var preview: Texture2D = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_preview_texture(craft_def)
+	if preview != null:
+		return preview
 	var direct_texture = craft_def.get("texture", null)
 	if direct_texture is Texture2D:
 		return direct_texture as Texture2D

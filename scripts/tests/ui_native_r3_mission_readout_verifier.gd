@@ -87,11 +87,20 @@ func _check_scene(size: Vector2i) -> void:
 	root.content_scale_size = Vector2i.ZERO
 	root.size = size
 	var scene := SCENE.instantiate()
+	var detached_controller := scene.get_node("TacticalController")
+	var detached_grid := scene.get_node(BASE + "CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid")
+	_hud.call("configure", detached_controller, {})
+	_check(not detached_controller.is_inside_tree() and not detached_grid.has_meta("native_a5_geometry_signature"), "%dx%d: pre-tree planning configuration leaves viewport geometry to normal ready" % [size.x, size.y])
+	# Exercise the same public hydration entry used by MetaFlow before add_child,
+	# including its selection/UI/runtime-surface callbacks, not only the helper.
+	detached_controller.call("set_planning_state", {"has_selected_tile": false})
+	_check(not detached_controller.has_meta("native_a5_window_viewport") and not detached_grid.has_meta("native_a5_geometry_signature"), "%dx%d: public set_planning_state before tree entry performs no viewport layout" % [size.x, size.y])
 	root.add_child(scene)
 	for _frame in range(16):
 		await process_frame
 	var prefix := "%dx%d: " % [size.x, size.y]
 	var controller := scene.get_node("TacticalController")
+	_check(detached_grid.has_meta("native_a5_geometry_signature"), prefix + "normal ready configures deferred mission geometry after tree entry")
 	var identity := scene.get_node(IDENTITY) as Control
 	var strategic := scene.get_node(STRATEGIC) as Control
 	_check(strategic.get_global_rect().size.y <= 96.0, prefix + "ordinary mission control is bounded to its short contents")
@@ -148,6 +157,7 @@ func _check_scene(size: Vector2i) -> void:
 		_check(confirmed.has(ids[0]) and int(running_context.get("executing_count", 0)) == 1, prefix + "real GO callback activates the existing owner before the running readout appears")
 		var feedback := scene.get_node("TacticalUI/A5TargetOrderPanel/Contents/Feedback") as Label
 		_check(order.text == "Auftrag: Wird ausgeführt" and feedback.text == "Ausführung läuft", prefix + "real running plan has no redundant start-again instruction")
+		await _check_stance_after_light_refresh(scene, controller, prefix + "after actual GO: ")
 	var selector := scene.get_node(TEAM + "/A5FireRuleSelector") as OptionButton
 	_check(selector.item_count == 4, prefix + "readout work preserves all original fire-rule choices")
 	var cards := scene.get_node_or_null("TacticalUI/MissionDropshipPanel") as Control
@@ -198,6 +208,10 @@ func _check_stance_after_light_refresh(scene: Node, controller: Node, prefix: St
 	# the legacy stance writer. A full-refresh-only fixture hid this regression.
 	for _refresh in range(16):
 		controller.call("_update_ui", false, false)
+		# The normal mission can refresh command availability after the readout.
+		# This path used to overwrite full words with the old 9px abbreviations.
+		controller.call("_refresh_button_state")
+		controller.call("_apply_fireteam_panel_action_button_contract")
 		await process_frame
 		for spec in [["CautiousButton", "Vorsichtig"], ["NormalButton", "Normal"], ["AggressiveButton", "Offensiv"]]:
 			var button := scene.get_node(stance_path + String(spec[0])) as Button

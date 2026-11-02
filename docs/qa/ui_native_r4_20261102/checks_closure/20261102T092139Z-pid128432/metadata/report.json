@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure.json",
+  "godot": "godot_console",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.042,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-02T09:21:39.705409+00:00",
+  "finished_at": "2026-11-02T09:22:33.542278+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-task_181.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_181_drop_light_fixed_window_audit_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 8.976,
+      "name": "task_181",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\check-task_181.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-task_181.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-debrief_shell_r2.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\ui_native_r2_debrief_shell_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 3.432,
+      "name": "debrief_shell_r2",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\check-debrief_shell_r2.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-debrief_shell_r2.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-preparation_r2.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\ui_native_r2_preparation_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 8.331,
+      "name": "preparation_r2",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\check-preparation_r2.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-preparation_r2.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-task588.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_588_debrief_aar_data_bridge.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 13.047,
+      "name": "task588",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\check-task588.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-task588.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-task593.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_593_skill_progress_award_contract.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.197,
+      "name": "task593",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\check-task593.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-task593.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-preparation_r3.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\ui_native_r3_preparation_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 14.249,
+      "name": "preparation_r3",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\check-preparation_r3.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-preparation_r3.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-debrief_r3.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\ui_native_r3_debrief_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 4.537,
+      "name": "debrief_r3",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\check-debrief_r3.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r4_20261102\\checks_closure\\20261102T092139Z-pid128432\\logs\\engine-check-debrief_r3.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 7,
+    "passed": 7,
+    "failed": 0
+  }
+}

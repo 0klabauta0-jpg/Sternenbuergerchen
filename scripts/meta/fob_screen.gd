@@ -2,6 +2,7 @@ class_name FOBTestScreen
 extends Control
 
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
@@ -262,6 +263,30 @@ func _enforce_drop_light_fixed_layout() -> void:
 	var popup_size := Vector2i(mini(920, int(layout.viewport.size.x) - 32), mini(840, int(layout.viewport.size.y) - 64))
 	_apply_fixed_window_contract("CharacterOverlay/OverlayPanel", Rect2i((Vector2i(layout.viewport.size) - popup_size) / 2, popup_size))
 	_apply_r2_team_context()
+	_apply_r4_preparation_visuals(layout)
+
+
+func _apply_r4_preparation_visuals(layout: Dictionary) -> void:
+	for entry in [
+		["Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel", 22, ""],
+		["Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHeaderLabel", 20, ""],
+		["Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderLabel", 20, ""],
+		["Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox/RespawnHeaderLabel", 18, ""],
+		["Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow/LoadoutHeaderLabel", 20, "loadout"],
+		["Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/DropshipHeaderLabel", 20, "dropship"],
+	]:
+		META_UI_SKIN_SCRIPT.style_preparation_heading(get_node_or_null(entry[0]) as Label, entry[1], entry[2])
+	var reserve_title := get_node_or_null("Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHeaderLabel") as Label
+	if reserve_title != null:
+		# The display heading may not force the narrow real roster column wider.
+		reserve_title.text = "Personal"
+		reserve_title.clip_text = true
+		reserve_title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		reserve_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var actions: Rect2i = layout.actions
+	var viewport: Rect2i = layout.viewport
+	var stage_top := actions.end.y + 12
+	META_UI_SKIN_SCRIPT.update_frontier_stage(self, Rect2i(actions.position.x, stage_top, actions.size.x, maxi(0, viewport.size.y - stage_top - 16)))
 
 
 func get_native_r2_layout_snapshot() -> Dictionary:
@@ -407,6 +432,10 @@ func _refresh_r2_layout_after_minimum_change() -> void:
 
 
 func _apply_drop_light_topbar_compaction() -> void:
+	var mission_margin := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin") as MarginContainer
+	if mission_margin != null:
+		mission_margin.add_theme_constant_override("margin_top", 1)
+		mission_margin.add_theme_constant_override("margin_bottom", 2)
 	var mission_vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
 	if mission_vbox != null:
 		mission_vbox.add_theme_constant_override("separation", 0)
@@ -3984,7 +4013,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			"ship_texture": _get_transport_craft_texture(craft_state),
 			"ship_texture_width": FOB_TRANSPORT_SHIP_TEXTURE_WIDTH,
 			"ship_texture_height": FOB_TRANSPORT_SHIP_TEXTURE_HEIGHT,
-			"ship_texture_stretch_mode": TextureRect.STRETCH_KEEP_ASPECT_COVERED,
+			"ship_texture_stretch_mode": TextureRect.STRETCH_KEEP_ASPECT_CENTERED if FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_preview_texture(craft_state) != null else TextureRect.STRETCH_KEEP_ASPECT_COVERED,
 			"content_minimum_height": FOB_TRANSPORT_SHIP_TEXTURE_HEIGHT,
 			"pilot_profile": _profiles_by_id.get(pilot_unit_id, null),
 			"pilot_text": _build_transport_craft_pilot_text(craft_state),
@@ -4052,7 +4081,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 
 
 func _build_transport_craft_title(craft_state: Dictionary) -> String:
-	var craft_name: String = String(craft_state.get("display_name", "craft")).strip_edges()
+	var craft_name: String = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_display_name(craft_state)
 	if bool(craft_state.get("air_asset_unavailable", false)):
 		var meta_state: String = String(craft_state.get("air_asset_meta_status", "")).strip_edges()
 		return "%s Â· REPLACE" % craft_name if meta_state == "destroyed_replacement_pending" else "%s Â· REPAIR" % craft_name
@@ -4127,6 +4156,9 @@ func _build_transport_craft_progress_value(craft_state: Dictionary) -> float:
 
 
 func _get_transport_craft_texture(craft_state: Dictionary) -> Texture2D:
+	var preview: Texture2D = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_preview_texture(craft_state)
+	if preview != null:
+		return preview
 	if String(craft_state.get("craft_type", "dropship")).strip_edges().to_lower() == "dropship":
 		if bool(craft_state.get("mission_transit_to_map", false)):
 			return DROPSHIP_TEXTURE_SE

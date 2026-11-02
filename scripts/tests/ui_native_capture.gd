@@ -229,6 +229,22 @@ func _build_character_fixture() -> Control:
 	return panel
 
 func _debrief_fixture() -> Dictionary:
+	if _fixture_variant == "portraits":
+		var result := _debrief_base_fixture()
+		var generator: GDScript = load("res://scripts/meta/start_roster_generator.gd")
+		var roster: Dictionary = generator.call("generate_start_roster", "native-ui-r4-debrief-portraits", 24)
+		var profiles: Array = roster.units
+		var states: Array = result["team_states"]
+		for index in range(states.size()):
+			var profile: Dictionary = profiles[index]
+			states[index]["unit_id"] = String(profile.get("unit_id", ""))
+			states[index]["display_name"] = String(profile.get("display_name", ""))
+			states[index]["portrait_id"] = String(profile.get("portrait_id", ""))
+			states[index]["portrait_path"] = String(profile.get("portrait_path", ""))
+		return result
+	return _debrief_base_fixture()
+
+func _debrief_base_fixture() -> Dictionary:
 	if _fixture_variant == "empty":
 		return {}
 	if _fixture_variant == "partial":

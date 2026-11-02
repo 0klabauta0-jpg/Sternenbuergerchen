@@ -81,12 +81,16 @@ static func get_homebase_layout() -> Dictionary:
 static func get_mission_hud_layout(viewport_size: Vector2i = TARGET_VIEWPORT) -> Dictionary:
 	var band_top := viewport_size.y - 160
 	var mini_height := mini(304, maxi(176, band_top - 352))
+	# On the supported 720px viewport, leave the existing single transport card
+	# unobscured while keeping the log above the member strip. Its native scroll
+	# retains the event rows; full-HD keeps the previous 160px log rectangle.
+	var event_log_height := mini(160, maxi(96, viewport_size.y - 624))
 	return {
 		"viewport": Rect2i(Vector2i.ZERO, viewport_size),
 		"mission_identity": Rect2i(viewport_size.x - 736, 24, 352, 72),
 		"top_nav": Rect2i(16, 16, 384, 56),
 		"fireteam_mini": Rect2i(32, 112, 240, mini_height),
-		"event_log": Rect2i(viewport_size.x - 368, band_top - 280, 352, 160),
+		"event_log": Rect2i(viewport_size.x - 368, band_top - 120 - event_log_height, 352, event_log_height),
 		"bottom_dock": Rect2i(0, band_top, viewport_size.x, 160),
 		"command_matrix": Rect2i(0, band_top, 360, 160),
 		"target_order": Rect2i(368, band_top, 248, 160),
