@@ -1,0 +1,30 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-af16896d467248898fe37e5a59647ad4
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_162 Combat Authority Contract Verifier ===
+PASS: Contract documents playability snapshot keys
+PASS: Contract documents objective state keys
+PASS: Contract documents contact state keys
+PASS: Contract documents mission result keys
+PASS: Contract documents read-only UI event keys
+PASS: Contract lists combat effects committed through SimulationRoot
+PASS: Contract lists dropship effects committed through SimulationRoot
+PASS: Contract accepts known authoritative effect type
+PASS: Contract rejects read-only UI events as authoritative effects
+PASS: Snapshot builder overlays mission result
+PASS: Snapshot builder preserves mission result win condition
+PASS: Snapshot builder clamps objective progress
+PASS: Snapshot builder includes objective contested state
+PASS: Snapshot builder includes captured state from mission result
+PASS: Remote event bridge marks combat UI event payloads
+PASS: Remote event bridge marks events read-only
+PASS: Remote event bridge preserves event text
+PASS: Remote event bridge preserves unit id
+PASS: Live CombatLoopDriver exposes authority contract snapshot
+PASS: Live CombatLoopDriver exposes playability snapshot
+PASS: Live driver contract includes damage as SimulationRoot effect
+PASS: Live driver playability snapshot keeps base combat keys
+PASS: Live driver playability snapshot includes objective state
+=== RESULTS: 23 passed, 0 failed ===
+ALL TESTS PASSED

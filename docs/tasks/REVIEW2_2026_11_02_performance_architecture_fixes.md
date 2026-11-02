@@ -85,7 +85,29 @@ Baseline SHA256 `d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edc
 - TASK_348 ist 14/17; ein isolierter HEAD-Baseline-Lauf zeigt exakt dieselben
   drei Fehlerlabels in derselben Reihenfolge. Keine neue P1-Regression und keine
   Abschwaechung dieses alten Tests; kein allgemeiner Release-Claim daraus.
-- P2 wird nach dem separaten P1-Commit umgesetzt.
+- P1 ist separat in `13bcaf3fb` committed; danach alle sechs P2 umgesetzt.
+- Neue Regressionen final: P1 60/60, Hoehe 9/9, Spacing 19/19, Picking 50/50,
+  Observer 22/22, Relay 28/28, Chunks 14/14; zusammen 202/202. Alle sieben
+  zuerst RED. Picking-Grenzgleichheit und Chunk-Ablauf ohne Paketverkehr wurden
+  nach zusaetzlichem RED ebenfalls abgesichert.
+- Gemessene Arbeit: Hoehenlookup bei 128x128/256x256 von 97530/391674 linearen
+  Tile-Lesungen auf 0; Picking von 16384/65536 Polygonen auf jeweils 9.
+  Spacing im 96-Unit-Idle ueber zehn Ticks von 45600 Solver- plus 45600
+  Diagnosepaaren auf 0+0. Explizite globale Debug-Minimum-Messung bleibt korrekt.
+  Vier-Tick-Chunkversatz: 0 -> 60/60 vollstaendig zugestellte Snapshots angewendet.
+- Abschlussmatrix effektiv 55 unterschiedliche strenge Gates gruen, darunter
+  Canary ohne numerische Assertions; die anderen 54 Gates bestehen 1650/1650
+  Assertions. Einzelne Source-/Evidence-Reviews und Gesamt-Diff APPROVED ohne
+  wichtige offene Befunde. Godot 4.6.2 headless, keine FPS-/GPU-/Release-Abnahme.
+- Der erste Gesamtlauf war 53/55: HUD 26/27 wegen fehlender `icon.svg.import`
+  im isolierten Overlay und Terrain 33/33 Exit0 mit falschem Manifestmarker.
+  Nur Harness/Marker korrigiert; beide gezielten Wiederholungen strikt gruen,
+  keine Assertions entfernt. Originalberichte bleiben erhalten. TASK_510 erhielt
+  eine korrekt besessene und freigegebene Index-/Readmodel-Fixture gegen Leaks.
+- Echte Rosterbytes, Laenge und Schreibzeit vor/nach jedem Test unveraendert.
+  `project.godot` unveraendert. Ergebnisindex und Quellhashes:
+  `output/review2_fixes_20261102/verification_summary.json`.
+  Reproduzierbare Auswahl: `scripts/tests/review2_20261102_checks.json`.
 
 ## Isolationstechnik
 `scripts/tests/run_review2_isolated.py` erzeugt vor jedem Prozessstart eine

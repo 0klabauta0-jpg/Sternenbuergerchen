@@ -1,0 +1,48 @@
+{
+  "schema": "sternenbuergerchen.review2_isolated_checks.v1",
+  "checks": [
+    {
+      "name": "review2_20261102_p2_spacing_verifier",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": false,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-b08cf4f17b8345db8eb762fd6c48a89c",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b08cf4f17b8345db8eb762fd6c48a89c\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_fixes_20261102\\runtime\\red\\20261102T210351Z-2efe681b\\review2_20261102_p2_spacing_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b08cf4f17b8345db8eb762fd6c48a89c\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b08cf4f17b8345db8eb762fd6c48a89c\\project\\scripts\\tests\\review2_20261102_p2_spacing_verifier.gd"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 0,
+    "failed": 1
+  },
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+    "length": 221426,
+    "mtime_ns": 1793651922023643800
+  },
+  "all_user_dirs_unique": true
+}

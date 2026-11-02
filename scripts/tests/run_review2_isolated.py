@@ -77,6 +77,12 @@ def create_overlay(source: Path, run_id: str) -> tuple[Path, str]:
     for pattern in ("*.svg", "*.tres", "*.res", "*.gdextension"):
         for resource in source.glob(pattern):
             shutil.copy2(resource, project / resource.name)
+            # Root resources need their import remap as well as the shared cache.
+            # Without it Godot cannot load e.g. icon.svg in an otherwise valid
+            # isolated project. Copy only metadata adjacent to copied resources.
+            remap = resource.with_name(resource.name + ".import")
+            if remap.is_file():
+                shutil.copy2(remap, project / remap.name)
     (project / "output").mkdir()
     (project / "tmp").mkdir()
     return project, app_name

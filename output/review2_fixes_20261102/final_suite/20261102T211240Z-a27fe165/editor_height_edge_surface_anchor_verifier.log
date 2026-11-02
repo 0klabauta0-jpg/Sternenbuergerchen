@@ -1,0 +1,32 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-4f007e1ab5874a3c9faffecc97de2fe1
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Editor Height Edge Surface Anchor Verifier ===
+  PASS: Map editor scene instantiates
+  PASS: Height edge fixture has center tile
+  PASS: Height tool raises selected tile to H1
+  PASS: Raised isolated tile receives selected cliff edge
+  PASS: Height tool writes west lower-neighbor cliff tile
+  PASS: Height tool writes east lower-neighbor cliff tile
+  PASS: Height tool writes north lower-neighbor cliff tile
+  PASS: Height tool writes south lower-neighbor cliff tile
+  PASS: Raised isolated tile renders explicit lower-neighbor cliff assets
+  PASS: Editor 3D view keeps ground visuals top-anchored to the surface
+  PASS: Stamp brush cliff fixture has center tile
+  PASS: Stamp brush clears the raised plateau interior edge
+  PASS: Stamp brush generates west straight cliff tile
+  PASS: Stamp brush generates east straight cliff tile
+  PASS: Stamp brush generates north straight cliff tile
+  PASS: Stamp brush generates south straight cliff tile
+  PASS: Stamp brush generates northwest lower cliff corner tile
+  PASS: Stamp brush generates northeast lower cliff corner tile
+  PASS: Stamp brush generates southwest lower cliff corner tile
+  PASS: Stamp brush generates southeast lower cliff corner tile
+  PASS: Plateau reconcile fixture has center tile
+  PASS: Auto edge reconcile clears plateau interior edge
+  PASS: Auto edge reconcile generates preferred slope when a lower neighbor appears
+  PASS: Lower H0 tile remains edge none
+  PASS: Auto edge reconcile preserves explicit edge none authoring mode
+=== RESULTS: 25 passed, 0 failed ===
+ALL TESTS PASSED

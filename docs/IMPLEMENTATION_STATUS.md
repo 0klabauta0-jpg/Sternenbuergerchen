@@ -1,5 +1,29 @@
 # IMPLEMENTATION_STATUS
 
+### REVIEW 2, 2026-11-02 - Sieben weitere Performance-/Architekturbefunde
+- Task `docs/tasks/REVIEW2_2026_11_02_performance_architecture_fixes.md`, Basis
+  integrierter Main `a7e883f1f`, eigener Task-Branch; noch keine Main-Integration.
+- P1 zuerst separat behoben: aktive Mission laeuft hinter Homebase/FOB weiter;
+  versteckte Eingabe, Visuals und Preview bleiben getrennt kontrolliert.
+- P2: indizierte Live-Tile-Hoehen, begrenzte Picking-Kandidaten bei unveraenderter
+  Grenzauswahl, keine Picks fuer Kameragesten; raeumliches deterministisches
+  Spacing mit optionaler globaler Diagnose; aggregierte Observer, faellige Relays
+  und begrenzte jittertolerante Snapshot-Reassembly samt Idle-Ablauf.
+- Sieben neue Regressionen RED->GREEN: 60/60, 9/9, 19/19, 50/50, 22/22,
+  28/28, 14/14. Effektiv 55 unterschiedliche strenge Gates / 1650 Assertions;
+  unabhaengige Slice-/Gesamt-Reviews APPROVED ohne wichtige offene Befunde.
+- Jeder Lauf mit frischen isolierten Nutzerdaten und vor-/nachher Rostervergleich.
+  Originalroster SHA256, 221426 Bytes und Schreibzeit unveraendert. Quellprojekt-
+  konfiguration unveraendert. Kein Testlauf schreibt ins normale Profil.
+- Hoehenlookup 97530/391674 -> 0 lineare Tile-Lesungen; Picking 16384/65536 ->
+  je 9 Polygone bei 128x128/256x256. 96-Unit-Idle: 45600+45600 -> 0+0 Paare
+  ueber zehn Ticks. Chunkversatz vier Ticks: 0 -> 60/60 gelieferte Snapshots.
+- Transparente Grenzen: erster Gesamtlauf 53/55, danach Icon-Importmetadaten
+  im Isolation-Harness und Terrain-Erfolgsmarker korrigiert, beide Retries gruen.
+  TASK_348 bleibt baseline-identisch 14/17. Keine Release-/FPS-/GPU-Abnahme.
+- Ergebnisindex `output/review2_fixes_20261102/verification_summary.json`,
+  Manifest `scripts/tests/review2_20261102_checks.json`.
+
 ### REVIEW 2026-11-02 - Performance und Architektur
 - Aktueller Task: `docs/tasks/REVIEW_2026_11_02_performance_architecture_fixes.md`.
 - P1 abgeschlossen: autoritative Bewegung stoppt kampfunfaehige Units samt

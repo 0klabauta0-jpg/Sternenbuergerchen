@@ -1,0 +1,57 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-bae95504a5304a4798a5b9801f2e07a0
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: _is_panning motion performs zero terrain picks
+PASS: _is_panning still changes its camera
+PASS: _is_rotating_3d_camera motion performs zero terrain picks
+PASS: _is_rotating_3d_camera still changes its camera
+PASS: Right-camera gesture press, drag and release perform zero picks
+PASS: Idle hover without an authoring tool performs zero picks
+PASS: A context click resolves its tile once on release
+PASS: Context click still selects before opening its menu
+PASS: marker uses one terrain pick
+PASS: marker receives the raised tile's world center
+PASS: patrol_drag uses one terrain pick
+PASS: patrol_drag receives the raised tile's world center
+PASS: selection_drag uses one terrain pick
+PASS: selection_drag receives the raised tile's world center
+PASS: height uses one terrain pick
+PASS: height receives the raised tile's world center
+PASS: eraser uses one terrain pick
+PASS: eraser receives the raised tile's world center
+PASS: brush uses one terrain pick
+PASS: brush receives the raised tile's world center
+PASS: network_drag uses one terrain pick
+PASS: network_drag receives the raised tile's world center
+PASS: patrol_hover uses one terrain pick
+PASS: patrol_hover receives the raised tile's world center
+PASS: brush_hover uses one terrain pick
+PASS: brush_hover receives the raised tile's world center
+PASS: 128 map picks the visible center tile
+PASS: 128 map projects at most 27 candidate polygons, got 9
+PICK_OPERATIONS {"candidate_polygons":9,"side":128,"tiles":16384}
+PASS: 256 map picks the visible center tile
+PASS: 256 map projects at most 27 candidate polygons, got 9
+PICK_OPERATIONS {"candidate_polygons":9,"side":256,"tiles":65536}
+PASS: square8 yaw 0 matches the original exhaustive polygon oracle including overlapping heights (0 mismatches)
+PASS: square8 yaw 45 matches the original exhaustive polygon oracle including overlapping heights (0 mismatches)
+PASS: square8 yaw 140 matches the original exhaustive polygon oracle including overlapping heights (0 mismatches)
+PASS: square8 yaw 255 matches the original exhaustive polygon oracle including overlapping heights (0 mismatches)
+PASS: square8 picking reads an in-place height edit
+PASS: square8 off-map pick returns no tile
+FAIL: square8 flat terrain yaw 0 retains boundary winners (28 mismatches)
+FAIL: square8 flat terrain yaw 90 retains boundary winners (45 mismatches)
+FAIL: square8 flat terrain yaw 180 retains boundary winners (12 mismatches)
+FAIL: square8 flat terrain yaw 270 retains boundary winners (25 mismatches)
+PASS: hex_axial_v1 yaw 0 matches the original exhaustive polygon oracle including overlapping heights (0 mismatches)
+PASS: hex_axial_v1 yaw 45 matches the original exhaustive polygon oracle including overlapping heights (0 mismatches)
+PASS: hex_axial_v1 yaw 140 matches the original exhaustive polygon oracle including overlapping heights (0 mismatches)
+PASS: hex_axial_v1 yaw 255 matches the original exhaustive polygon oracle including overlapping heights (0 mismatches)
+PASS: hex_axial_v1 picking reads an in-place height edit
+PASS: hex_axial_v1 off-map pick returns no tile
+FAIL: hex_axial_v1 flat terrain yaw 0 retains boundary winners (2 mismatches)
+PASS: hex_axial_v1 flat terrain yaw 90 retains boundary winners (0 mismatches)
+FAIL: hex_axial_v1 flat terrain yaw 180 retains boundary winners (11 mismatches)
+PASS: hex_axial_v1 flat terrain yaw 270 retains boundary winners (0 mismatches)
+REVIEW2_P2_EDITOR_PICKING_RESULT {"failed":6,"passed":44}

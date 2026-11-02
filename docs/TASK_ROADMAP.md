@@ -1,5 +1,17 @@
 # TASK_ROADMAP
 
+## Nutzerauftrag 2026-11-02 - Zweite Runde mit sieben Review-Befunden
+- Alle sieben behoben, P1 zuerst separat geprueft/reviewed/committed; sechs P2
+  danach. Neue Regressionen zusammen 202/202, jeweils vorher RED.
+- Abschluss effektiv 55 unterschiedliche strenge Gates / 1650 Assertions gruen,
+  unabhaengige Gesamt-Review APPROVED. Isolierte Nutzerdaten pro Lauf;
+  Originalroster einschliesslich Schreibzeit unveraendert.
+- Task `docs/tasks/REVIEW2_2026_11_02_performance_architecture_fixes.md`,
+  Ergebnisindex `output/review2_fixes_20261102/verification_summary.json`.
+- Basis `a7e883f1f`, Branch `task/review2-performance-architecture-fixes-20261102`;
+  Main-Integration bleibt separater Auftrag. Bekannter TASK_348-Baselinefehler
+  und Grenzen der headless Performance-Evidence bleiben dokumentiert.
+
 ## Nutzerauftrag 2026-11-02 - Sieben Performance-/Architekturbefunde
 - P1-Block abgeschlossen und unabhaengig reviewed: Movement, Tuer-HPA und
   Missionsindex; neue Regressionen 20/20, 72/72 und 31/31.

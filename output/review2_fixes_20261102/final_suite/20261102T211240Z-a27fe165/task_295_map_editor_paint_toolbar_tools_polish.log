@@ -1,0 +1,41 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-dcace14355a748ba8eab400d7c7a0c81
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_295 Map Editor Paint Toolbar Tools Polish ===
+  PASS: Map editor instantiates
+  PASS: Editor can activate tool: select
+  PASS: Snapshot reports active tool: select
+  PASS: Toolbar keeps tool exclusivity: select
+  PASS: Editor can activate tool: terrain_brush
+  PASS: Snapshot reports active tool: terrain_brush
+  PASS: Toolbar keeps tool exclusivity: terrain_brush
+  PASS: Editor can activate tool: eraser
+  PASS: Snapshot reports active tool: eraser
+  PASS: Toolbar keeps tool exclusivity: eraser
+  PASS: Editor can activate tool: height
+  PASS: Snapshot reports active tool: height
+  PASS: Toolbar keeps tool exclusivity: height
+  PASS: Editor can activate tool: marker
+  PASS: Snapshot reports active tool: marker
+  PASS: Toolbar keeps tool exclusivity: marker
+  PASS: Editor can activate tool: patrol
+  PASS: Snapshot reports active tool: patrol
+  PASS: Toolbar keeps tool exclusivity: patrol
+  PASS: Eraser test tile exists
+  PASS: Eraser can be activated for object clear
+  PASS: Eraser clears object_type_id
+  PASS: Eraser preserves terrain type_id under object-layer props
+  PASS: Eraser preserves height
+  PASS: Eraser preserves edge type
+  PASS: Eraser preserves surface
+  PASS: Eraser resets only object gameplay fields
+  PASS: Ground brush does not delete object layer
+  PASS: Toolbar manual checklist exists
+  PASS: Toolbar checklist covers Select
+  PASS: Toolbar checklist covers Brush
+  PASS: Toolbar checklist covers Eraser
+  PASS: Toolbar checklist covers Height
+  PASS: Toolbar checklist covers Undo
+=== RESULTS: 34 passed, 0 failed ===
+ALL TESTS PASSED

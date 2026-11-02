@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-b7f2c31710c748f19a510c0640ff1baf
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_510 Contact Report Upgrade Verifier ===
+  PASS: Contact report carries an enemy type
+  PASS: Fresh contact reports as current
+  PASS: Fresh contact exposes a confidence value
+  PASS: Fresh contact exposes a confidence bucket
+  PASS: Fresh contact exposes a short report text
+  PASS: Contact report snapshot is explicitly read-only UI data
+  PASS: Unobserved visual contact transitions to lost
+  PASS: Old lost contact reports as stale
+  PASS: Lost/stale contacts are marked as last-known for FoW-safe visuals
+  PASS: Stale medium-confidence contact exposes an approximate position
+  PASS: Relayed contact remains suspected for receiving fireteam
+  PASS: Relayed contact preserves the enemy type hint
+  PASS: Relayed contact preserves original last-seen tick
+  PASS: Relayed contact reports age from original sighting
+  PASS: 2D contact overlay keeps report contacts visible for selected fireteam
+  PASS: 2D overlay preserves stale report state
+  PASS: 2D overlay preserves report text
+  PASS: Controller derives contact_report event-log entries from contact snapshots
+  PASS: Contact event-log entry carries the report text
+  PASS: Primary 3D view exposes contact report visual entries
+  PASS: Primary 3D view preserves report state
+  PASS: Primary 3D view preserves confidence level
+  PASS: Primary 3D view preserves report text
+=== RESULTS: 23 passed, 0 failed ===
+ALL TESTS PASSED
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2641)
+ERROR: 2 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-722c48cc87804205afc2d5f6b9b08240
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Review 2 P2 contact relay deadlines ===
+PASS: Relay deadline fixtures use the project's 60 Hz physics rate
+PASS: Leadership 0.0 relay delivers at first confirmation plus 180 ticks during continuous LOS
+PASS: Relay receiver receives suspected knowledge without inventing direct LOS
+PASS: Pending relay refreshes position through its original deadline
+PASS: Delivered relay reports the latest source observation tick
+PASS: Relay retains source and receiver provenance
+PASS: Leadership 0.4 relay delivers at first confirmation plus 100 ticks during continuous LOS
+PASS: Relay receiver receives suspected knowledge without inventing direct LOS
+PASS: Pending relay refreshes position through its original deadline
+PASS: Delivered relay reports the latest source observation tick
+PASS: Relay retains source and receiver provenance
+PASS: Leadership 0.8 relay delivers at first confirmation plus 21 ticks during continuous LOS
+PASS: Relay receiver receives suspected knowledge without inventing direct LOS
+PASS: Pending relay refreshes position through its original deadline
+PASS: Delivered relay reports the latest source observation tick
+PASS: Relay retains source and receiver provenance
+PASS: Leadership 1.0 relay delivers at first confirmation plus 0 ticks during continuous LOS
+PASS: Relay receiver receives suspected knowledge without inventing direct LOS
+PASS: Pending relay refreshes position through its original deadline
+PASS: Delivered relay reports the latest source observation tick
+PASS: Relay retains source and receiver provenance
+PASS: Loss of source LOS does not bypass leadership delay
+PASS: Already queued report still arrives at its original deadline after LOS loss
+PASS: Relay after LOS loss keeps the last actual source observation and its age
+PASS: Delayed knowledge does not restore the source's lost visual contact
+PASS: Incoming relay cannot downgrade a receiver with continuous direct LOS on the following tick
+PASS: Fresh direct receiver observation wins over relayed position
+PASS: Relay delivery preserves the receiver's own continuous LOS count
+=== RESULTS: 28 passed, 0 failed ===

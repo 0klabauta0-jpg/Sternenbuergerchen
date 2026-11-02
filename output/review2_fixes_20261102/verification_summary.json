@@ -1,0 +1,1303 @@
+{
+  "schema": "sternenbuergerchen.review2_fix_verification.v1",
+  "generated_utc": "2026-11-02T21:20:29.130778+00:00",
+  "branch": "task/review2-performance-architecture-fixes-20261102",
+  "base_commit": "a7e883f1f939425894e0bb51d96cc11ca9f97458",
+  "implementation_commits": [
+    "13bcaf3fb6c90fd141bcef68057b6d300a8d23f1",
+    "c822b93764ad0b88f9c1fa51a9cf630e72c75cf4",
+    "287ab48f14d9db34966a69f67913dba5e9bafca4"
+  ],
+  "reviewed_implementation_head": "287ab48f14d9db34966a69f67913dba5e9bafca4",
+  "engine": "Godot 4.6.2.stable.official.71f334935; headless",
+  "result": {
+    "distinct_gates": 55,
+    "strict_passed_gates": 55,
+    "numeric_assertions_passed": 1650,
+    "numeric_assertions_failed": 0,
+    "new_regression_assertions": 202,
+    "canary_gates_without_numeric_assertions": 1,
+    "single_all_green_run": false,
+    "method": "Original sequential 55-check run plus two targeted replacements; no duplicate gate/assertion counting."
+  },
+  "original_final_suite": {
+    "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+    "summary": {
+      "selected": 55,
+      "passed": 53,
+      "failed": 2
+    },
+    "numeric_assertions": {
+      "passed": 1649,
+      "failed": 1
+    }
+  },
+  "retry_reports": [
+    "output/review2_fixes_20261102/final_retries/20261102T211752Z-bb5c77cb/report.json",
+    "output/review2_fixes_20261102/final_retries/20261102T211823Z-9fd5ee68/report.json"
+  ],
+  "resolved_harness_findings": [
+    {
+      "gate": "review_p2_dropship_hud",
+      "original": "26/27 plus loader error: overlay copied icon.svg without adjacent icon.svg.import",
+      "fix": "Copy existing import metadata adjacent to copied root resources; retain original assertion",
+      "retry": "27/27, strict exit0"
+    },
+    {
+      "gate": "frontier_hex_render_verifier",
+      "original": "33/33 exit0, no engine errors, but incorrect PASS success marker",
+      "fix": "Manifest now uses actual FRONTIER_HEX_RENDER marker",
+      "retry": "33/33, strict exit0"
+    },
+    {
+      "gate": "task_510_contact_report_upgrade",
+      "original": "23/23 assertions but unowned fallback Nodes leaked in standalone fixture",
+      "fix": "Own real sibling MissionRuntimeIndex/MissionHudReadModel under scoped fixture and free it",
+      "retry": "23/23 without engine errors or leaks"
+    },
+    {
+      "gate": "initial_isolation_canary",
+      "original": "disable_project_settings_override=true also suppressed CLI --script, causing isolated menu timeout",
+      "fix": "Explicit empty override path, no root override files, CLI enabled; normal profile remained unchanged",
+      "retry": "Verified canary strictPASS"
+    }
+  ],
+  "first_red_regressions": [
+    {
+      "name": "review2_20261102_p1_hidden_mission_verifier",
+      "report": "output/review2_fixes_20261102/lifecycle/red/20261102T205633Z-7c033a9e/report.json",
+      "assertions": {
+        "passed": 44,
+        "failed": 16
+      }
+    },
+    {
+      "name": "review2_20261102_p2_height_lookup_verifier",
+      "report": "output/review2_fixes_20261102/terrain/height_red/20261102T210347Z-f26d0757/report.json",
+      "assertions": {
+        "passed": 7,
+        "failed": 2
+      }
+    },
+    {
+      "name": "review2_20261102_p2_spacing_verifier",
+      "report": "output/review2_fixes_20261102/runtime/red/20261102T210351Z-2efe681b/report.json",
+      "assertions": {
+        "passed": 15,
+        "failed": 2
+      }
+    },
+    {
+      "name": "review2_20261102_p2_contact_observers_verifier",
+      "report": "output/review2_fixes_20261102/runtime/red/20261102T210352Z-da8d19f6/report.json",
+      "assertions": {
+        "passed": 8,
+        "failed": 14
+      }
+    },
+    {
+      "name": "review2_20261102_p2_contact_relays_verifier",
+      "report": "output/review2_fixes_20261102/runtime/red/20261102T210354Z-b93365b2/report.json",
+      "assertions": {
+        "passed": 11,
+        "failed": 17
+      }
+    },
+    {
+      "name": "review2_20261102_p2_editor_picking_verifier",
+      "report": "output/review2_fixes_20261102/terrain/picking_red/20261102T210408Z-9be8b647/report.json",
+      "assertions": {
+        "passed": 35,
+        "failed": 7
+      }
+    },
+    {
+      "name": "review2_20261102_p2_chunk_jitter_verifier",
+      "report": "output/review2_fixes_20261102/chunks/red/20261102T210621Z-1dd87a92/report.json",
+      "assertions": {
+        "passed": 8,
+        "failed": 6
+      }
+    }
+  ],
+  "effective_final_checks": [
+    {
+      "name": "review_p1_movement",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 20,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review_p1_movement.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9caf2115902843d6b34df53d1d46cfb8"
+    },
+    {
+      "name": "review_p1_navigation",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 72,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review_p1_navigation.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-768c9860eb7c4eda84c851b69c4c6c0d"
+    },
+    {
+      "name": "review_p1_runtime_index",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 31,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review_p1_runtime_index.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-513353c2e7a1462592d13edf8f11a060"
+    },
+    {
+      "name": "review_p2_hex_budget",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 26,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review_p2_hex_budget.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-22cb1be0bf95444696172343b25a55a7"
+    },
+    {
+      "name": "review_p2_fallback",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 42,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review_p2_fallback.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-2ea0ad8ecc70445c92abaa25c8c78c86"
+    },
+    {
+      "name": "review_p2_dropship_hud",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 27,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_retries/20261102T211752Z-bb5c77cb/report.json",
+      "log": "output/review2_fixes_20261102/final_retries/20261102T211752Z-bb5c77cb/review_p2_dropship_hud.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9a566d37aca24b539b9d8e28db423715"
+    },
+    {
+      "name": "review_p2_vital_order",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 21,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review_p2_vital_order.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d349e9f57d914e5d84f94f905e5f1904"
+    },
+    {
+      "name": "combat_authority162",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 23,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/combat_authority162.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-af16896d467248898fe37e5a59647ad4"
+    },
+    {
+      "name": "network_authority166",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 15,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/network_authority166.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-3f6e1496b87f4cf5b3215bbfd67c0dc2"
+    },
+    {
+      "name": "snapshot168",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 20,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/snapshot168.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-1cef9c43e5f240c2a7d4d39436841974"
+    },
+    {
+      "name": "command_authority1186",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 8,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/command_authority1186.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-58086f06bb3a44c5a0b5e7f6ba80dcdf"
+    },
+    {
+      "name": "movement_lifecycle501",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 10,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/movement_lifecycle501.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c09dcc73e7c645ed9a1f38c997ded35f"
+    },
+    {
+      "name": "navigation125",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 64,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/navigation125.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0efc1a3c99a24fd99e1c4e9817b505be"
+    },
+    {
+      "name": "navigation127",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 13,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/navigation127.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-23412400033f42178958cafc24b7c017"
+    },
+    {
+      "name": "requeue1199",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 18,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/requeue1199.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e9e76dd15be44ae1aa6c058f3f85afbd"
+    },
+    {
+      "name": "path_recompute_under_fire",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 4,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/path_recompute_under_fire.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4990e9a862254601adc448d73f9599ed"
+    },
+    {
+      "name": "avoidance475",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 17,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/avoidance475.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f6d28eb147fd45b984512d8f39015382"
+    },
+    {
+      "name": "mission_index1190",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 16,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/mission_index1190.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ff58b4397de94dab90a2a4d8184b366f"
+    },
+    {
+      "name": "hud_light1152",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 18,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/hud_light1152.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-52e1cf5111274161a818bf5db02f6b61"
+    },
+    {
+      "name": "command_readability1157",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 35,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/command_readability1157.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-08dea64c77404c5b88c3c8550984ea95"
+    },
+    {
+      "name": "incremental_hpa412",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 27,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/incremental_hpa412.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-42944efcf4b74a9e850fbdd74f886b7c"
+    },
+    {
+      "name": "doors692",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 34,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/doors692.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9db3644530eb470d810d794e7af198c6"
+    },
+    {
+      "name": "hex_foundation",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 41,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/hex_foundation.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-99dad8238d6148efa44a8a0765edbf88"
+    },
+    {
+      "name": "hex_movement",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 25,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/hex_movement.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6b9b91f0137543a5a5dbbef48c48f3be"
+    },
+    {
+      "name": "two_peer_transport1083",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 24,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/two_peer_transport1083.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-14b3b0952d864949bb7deded6744c825"
+    },
+    {
+      "name": "snapshot_payload221",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 63,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/snapshot_payload221.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0b8c657c819f4427a02dbd2d9f786f48"
+    },
+    {
+      "name": "interaction_payload1099",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 38,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/interaction_payload1099.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a71a251f2c7a4134ae4030ece1abccf6"
+    },
+    {
+      "name": "interaction_jitter1100",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 31,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/interaction_jitter1100.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-1e01dbad5bcd4a2eaf8c8e6089312794"
+    },
+    {
+      "name": "dropship_pending1114",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 13,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/dropship_pending1114.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d9b00437d96040ccace0cb0b49b6128e"
+    },
+    {
+      "name": "dropship_truth503",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 10,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/dropship_truth503.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e5478444d41e4292bb0b615e8eaa52d7"
+    },
+    {
+      "name": "dropship_ux397",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 12,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/dropship_ux397.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d39812ff7a85408aa43814daa8b55d76"
+    },
+    {
+      "name": "dropship_multi_cards",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 61,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/dropship_multi_cards.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-108552233a8343bdae7cb04f6afa2e82"
+    },
+    {
+      "name": "review2_20261102_isolation_canary_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 0,
+        "failed": 0,
+        "numeric_assertions": false
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review2_20261102_isolation_canary_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-19d39e8bc5624ad5befcb93def798a1d"
+    },
+    {
+      "name": "review2_20261102_p1_hidden_mission_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 60,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review2_20261102_p1_hidden_mission_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-2afed480ab4b42edb07c83d5a1bc8b9c"
+    },
+    {
+      "name": "review2_20261102_p2_height_lookup_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 9,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review2_20261102_p2_height_lookup_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-93e143bd5bf248ffb9188bc9c72d59ed"
+    },
+    {
+      "name": "review2_20261102_p2_editor_picking_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 50,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review2_20261102_p2_editor_picking_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e3eec1b445e34970be539dc75ae438ec"
+    },
+    {
+      "name": "review2_20261102_p2_spacing_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 19,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review2_20261102_p2_spacing_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e261d7a1dff342d1a32ef8fc14943f58"
+    },
+    {
+      "name": "review2_20261102_p2_contact_observers_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 22,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review2_20261102_p2_contact_observers_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d2a1e9dfed19496b8877064917583f6f"
+    },
+    {
+      "name": "review2_20261102_p2_contact_relays_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 28,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review2_20261102_p2_contact_relays_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c2c30c39189740c082e10876605816f6"
+    },
+    {
+      "name": "review2_20261102_p2_chunk_jitter_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 14,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/review2_20261102_p2_chunk_jitter_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-81ad48b4a1334c26bc999ce5624d712b"
+    },
+    {
+      "name": "task_096_recovery_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 19,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_096_recovery_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-101f2a49bbbb4a96ab15b739d3d108e4"
+    },
+    {
+      "name": "bugfix_release_singleplayer_normal_click_homebase_guard",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 40,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/bugfix_release_singleplayer_normal_click_homebase_guard.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d5d140e8726b4875894976dd10916251"
+    },
+    {
+      "name": "task_1185_tactical_input_ownership",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 116,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_1185_tactical_input_ownership.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-b1d7dfab3f684972b08a50efd3849d5f"
+    },
+    {
+      "name": "frontier_hex_render_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 33,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_retries/20261102T211823Z-9fd5ee68/report.json",
+      "log": "output/review2_fixes_20261102/final_retries/20261102T211823Z-9fd5ee68/frontier_hex_render_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-37e39b549f8b4e0dac059dd8b8d28a67"
+    },
+    {
+      "name": "task_292_editor_hill_cliff_grid_depth_repair",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 17,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_292_editor_hill_cliff_grid_depth_repair.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d6568f99518f4b7cb1935d6fd42d91f3"
+    },
+    {
+      "name": "task_295_map_editor_paint_toolbar_tools_polish",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 34,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_295_map_editor_paint_toolbar_tools_polish.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-dcace14355a748ba8eab400d7c7a0c81"
+    },
+    {
+      "name": "task_229_map_editor_usability_authoring_pass",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 57,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_229_map_editor_usability_authoring_pass.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e7b077158aed4940a1f5c1457ae55b62"
+    },
+    {
+      "name": "editor_height_edge_surface_anchor_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 25,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/editor_height_edge_surface_anchor_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4f007e1ab5874a3c9faffecc97de2fe1"
+    },
+    {
+      "name": "task_183_editor_hill_authoring_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 68,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_183_editor_hill_authoring_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c1a301a84ea1406db94d0c15954c9e8f"
+    },
+    {
+      "name": "task_163_map_editor_module_split_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 17,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_163_map_editor_module_split_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d17d4d2a8c004713a7abac965b19e54a"
+    },
+    {
+      "name": "task_112_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 14,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_112_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5519da6e834c418c874261a5401cdfe8"
+    },
+    {
+      "name": "task_187_npc_minimum_spacing_and_multiplayer_authority",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 16,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_187_npc_minimum_spacing_and_multiplayer_authority.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5473e32ebac44d3eb4993aaf28f8d638"
+    },
+    {
+      "name": "task_130_verifier",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 9,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_130_verifier.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-3697f151a1204891bda1a226b23fc552"
+    },
+    {
+      "name": "task_510_contact_report_upgrade",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 23,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_510_contact_report_upgrade.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9b3835f541fe482e8208ac7fd6ce7f5c"
+    },
+    {
+      "name": "task_218_simulation_combat_ai_tick_budget_pass",
+      "strict_pass": true,
+      "assertions": {
+        "passed": 81,
+        "failed": 0
+      },
+      "report": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "log": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/task_218_simulation_combat_ai_tick_budget_pass.log",
+      "isolated_user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-77a6bcbcc2bd40baa7f22502113f5ac2"
+    }
+  ],
+  "operation_evidence": {
+    "height_lookup": {
+      "maps": [
+        "128x128",
+        "256x256"
+      ],
+      "idle_units": 12,
+      "linear_tile_reads_before": [
+        97530,
+        391674
+      ],
+      "after": [
+        0,
+        0
+      ]
+    },
+    "editor_picking": {
+      "maps": [
+        "128x128",
+        "256x256"
+      ],
+      "projected_polygons_before": [
+        16384,
+        65536
+      ],
+      "after": [
+        9,
+        9
+      ],
+      "square_hex_yaw_boundary_groups": 8,
+      "final_boundary_mismatches": 0
+    },
+    "spacing": {
+      "separated_units": 96,
+      "ticks": 10,
+      "solver_pairs_before": 45600,
+      "diagnostic_pairs_before": 45600,
+      "solver_pairs_after": 0,
+      "diagnostic_pairs_after": 0,
+      "explicit_debug_exact_minimum_retained": true
+    },
+    "chunk_jitter": {
+      "delay_ticks": 4,
+      "fully_delivered_delayed_snapshots": 60,
+      "applied_before": 0,
+      "applied_after": 60,
+      "pending_tick_cap": 32,
+      "expiry_msec": 1500,
+      "idle_prune_interval_msec": 250
+    }
+  },
+  "protected_roster": {
+    "state_before": {
+      "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+      "length": 221426,
+      "mtime_ns": 1793651922023643800
+    },
+    "state_after": {
+      "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+      "length": 221426,
+      "mtime_ns": 1793651922023643800
+    },
+    "bytes_length_mtime_unchanged": true,
+    "backup": "Private safety copy outside repository; never restored or committed"
+  },
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "source_project_unchanged": true,
+  "isolation": "Unique copied project name and fresh user:// before startup, first-autoload synchronous guard, runtime canary, protected roster checks before/after every child; resource dirs/cache shared, output/tmp private.",
+  "source_sha256": {
+    "scripts/core/simulation_root.gd": "e4e74077b8ca4e061dd11c32dd99f722d3051ad5d9533bfac0d904cd2b5d7aa8",
+    "scripts/editor/map_editor.gd": "543e293e4c9ebd71caf2ef58b295fcee3b0eb27e13f95a329321975334ececf5",
+    "scripts/meta/meta_layer_flow.gd": "b981960608b14be6e01e9fc92471c83139ab5d3cb27d14afcda3e774d8f55150",
+    "scripts/tactical/contact_tracker.gd": "a03e630a20a599926c4cd86bf0ccefda4afa93dd9ff18f19a01bdd830ddf94b1",
+    "scripts/tactical/local_avoidance_resolver.gd": "c2e859ca03c9a32e258782b069eac3693b15fa78822b6c928ff58543b6939976",
+    "scripts/terrain/terrain_map_3d_view.gd": "ec0ab398745e266a70e593c8a4e4ff783335268601989559899796ca0036357f",
+    "scripts/tests/review2_20261102_checks.json": "cf4b284be8365eacee06cdf933a53166d5a2de68866204b650b897e4f83d91f0",
+    "scripts/tests/review2_20261102_isolation_canary_verifier.gd": "db4b6831294a11ed6848e7001f2f58ccc375d3408a884e0183d98f3f0c3f0f29",
+    "scripts/tests/review2_20261102_p1_hidden_mission_verifier.gd": "2909f0c0e860d397a6a48757adbe372db229af2e706abf4b52353295d098a3ec",
+    "scripts/tests/review2_20261102_p2_chunk_jitter_verifier.gd": "e08a2c7c694a2afb70179f1ad752587a2ae7097838f131450491b73c82d98766",
+    "scripts/tests/review2_20261102_p2_contact_observers_verifier.gd": "e99e04cf02c9b1266a58968a7e15d8c6f3f64a5e1e981f278e5b03db02fc3d74",
+    "scripts/tests/review2_20261102_p2_contact_relays_verifier.gd": "f2077d0d4ac402f0e9306b8a2e4885f855c9682996ce1e950c7b4d5d686fe177",
+    "scripts/tests/review2_20261102_p2_editor_picking_verifier.gd": "ea7504286f3224e8196fa3acc2620515000f2e8c7390111e694f46b330a8ec8d",
+    "scripts/tests/review2_20261102_p2_height_lookup_verifier.gd": "76de5981c73a78edd47d0fc56de59ca145b485f0b01f58e7e6ddc7bc1c21e37e",
+    "scripts/tests/review2_20261102_p2_spacing_verifier.gd": "f1fb9fb297a258a6c9c4ccbfbb3cc52e952875c3480c90aa3b69c57bc0a72e51",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "scripts/tests/run_review2_isolated.py": "0c7d37139826583ca304535dbcc75cc281ac99b1bb3ee71847e30f81eab24f2f",
+    "scripts/tests/task_510_contact_report_upgrade.gd": "fc9c57679a863ab34592ae100e5b1805f279001a3930c1400d6f777c611c5a41"
+  },
+  "independent_reviews": {
+    "p1": "APPROVED, no important findings",
+    "terrain": "APPROVED, no important findings",
+    "runtime_and_chunks": "APPROVED, no important findings",
+    "whole_branch": "APPROVED, no important findings",
+    "import_metadata_and_marker_followup": "APPROVED, no important findings",
+    "evidence_audit": "55 distinct gates / 1650 assertions independently confirmed"
+  },
+  "known_baseline_failure": {
+    "test": "TASK_348",
+    "result": "14 passed / 3 failed on both unmodified base and P1; identical labels/order",
+    "baseline_report": "output/review2_fixes_20261102/lifecycle/baseline_payload_isolation/20261102T210112Z-bf704c33/report.json",
+    "current_report": "output/review2_fixes_20261102/lifecycle/regression_payload_isolation/20261102T205900Z-43b74499/report.json",
+    "test_not_weakened": true
+  },
+  "limits": [
+    "Scoped headless regression/operation evidence; no native FPS/GPU/general release acceptance.",
+    "No main integration in this task.",
+    "Historical REDs, initial failures, baseline failure and retries retained."
+  ],
+  "raw_report_index": [
+    {
+      "path": "output/review2_fixes_20261102/chunks/final_green/20261102T210920Z-1f84c7f6/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/chunks/green/20261102T210752Z-247afaf3/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/chunks/idle_expiry_red/20261102T210912Z-1f222df4/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/chunks/red/20261102T210621Z-1dd87a92/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/final_retries/20261102T211752Z-bb5c77cb/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/final_retries/20261102T211823Z-9fd5ee68/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/final_suite/20261102T211240Z-a27fe165/report.json",
+      "summary": {
+        "selected": 55,
+        "passed": 53,
+        "failed": 2
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/isolation/20261102T205240Z-99dd37ca/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/isolation_debug/20261102T205504Z-1a5c13c9/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/isolation_verified/20261102T205557Z-5bedb0f1/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/lifecycle/baseline_payload_isolation/20261102T210112Z-bf704c33/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/lifecycle/green/20261102T205732Z-47150c23/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/lifecycle/red/20261102T205633Z-7c033a9e/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/lifecycle/regression_input_ownership/20261102T210009Z-55c30548/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/lifecycle/regression_normal_start/20261102T205823Z-1fe08fb1/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/lifecycle/regression_payload_isolation/20261102T205900Z-43b74499/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/lifecycle/regression_recovery/20261102T205848Z-30e37977/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/diagnosis/20261102T210710Z-dcdac6ab/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/final/20261102T210834Z-1ad01c79/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/final/20261102T210836Z-0d7d5f0b/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/final/20261102T210838Z-dcbc7f57/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/final/20261102T210839Z-75aec1d9/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/final/20261102T210841Z-71426c8b/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/green/20261102T210426Z-09a63a95/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/green/20261102T210440Z-379ce054/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/green/20261102T210543Z-ff584606/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/green/20261102T210805Z-917494f0/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/red/20261102T210351Z-2efe681b/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/red/20261102T210352Z-da8d19f6/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/red/20261102T210354Z-b93365b2/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/regressions/20261102T210530Z-952b03fc/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/regressions/20261102T210544Z-fe4de52e/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/regressions/20261102T210546Z-47942e38/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/regressions/20261102T210548Z-1492e3d5/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/runtime/regressions/20261102T210748Z-973061fd/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/final_render_gate/20261102T210808Z-e253671d/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/height_final/20261102T210804Z-34ad9162/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/height_green/20261102T210401Z-802f268b/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/height_red/20261102T210347Z-f26d0757/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/old_gates/20261102T210509Z-093d31cd/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/old_gates/20261102T210511Z-71207de3/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/old_gates/20261102T210513Z-d4aceb02/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/old_gates/20261102T210525Z-57a4d355/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/old_gates/20261102T210535Z-e7ecfd4a/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/old_gates/20261102T210546Z-e50028eb/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/old_gates/20261102T210552Z-2f6bc6b4/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/picking_boundaries/20261102T210617Z-e78eaa3a/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/picking_boundary_green/20261102T210735Z-cba5296c/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/picking_flat_boundaries/20261102T210640Z-d51dc19e/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/picking_green/20261102T210453Z-8772bba8/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "roster_unchanged": true
+    },
+    {
+      "path": "output/review2_fixes_20261102/terrain/picking_red/20261102T210408Z-9be8b647/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "roster_unchanged": true
+    }
+  ],
+  "recorded_runtime_processes": 105,
+  "all_recorded_user_dirs_unique": true,
+  "all_recorded_processes_isolation_verified": true
+}

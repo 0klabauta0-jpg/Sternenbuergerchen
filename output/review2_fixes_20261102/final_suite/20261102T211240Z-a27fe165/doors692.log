@@ -1,0 +1,41 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-9db3644530eb470d810d794e7af198c6
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_692 Door Runtime Collision/LOS Contract ===
+PASS: TASK_692 task file exists
+PASS: Task documents door runtime collision and LOS
+PASS: Interaction contract documents door collision/LOS overrides
+PASS: Implementation status tracks TASK_692
+PASS: Roadmap marks TASK_692 implemented
+PASS: Current handbook references TASK_692
+PASS: Current handbook exports TASK_692 manifest path
+PASS: Door runtime collision/LOS snapshot remains read-only
+PASS: Door snapshot declares no TerrainMapData mutation
+PASS: Door snapshot exports all three door states
+PASS: Door snapshot exports grid overrides
+PASS: Open door override is walkable
+PASS: Open door override clears LOS
+PASS: Open door override clears object height
+PASS: Half door remains blocked for movement
+PASS: Half door blocks LOS
+PASS: Closed door remains blocked for movement
+PASS: Closed door blocks LOS
+PASS: Closed static door tile starts non-walkable
+PASS: Closed static door tile starts as LOS blocker
+PASS: Closed static door blocks path
+PASS: Closed static door blocks LOS
+PASS: Open runtime override makes door tile walkable
+PASS: Open runtime override clears door LOS blocker
+PASS: Open runtime override clears object height
+PASS: Open runtime override opens path
+PASS: Open runtime override opens LOS
+PASS: Open override does not mutate stored tile walkability
+PASS: Open override does not mutate stored tile LOS
+PASS: Closed runtime override blocks movement again
+PASS: Closed runtime override blocks LOS again
+PASS: Closed runtime override closes path again
+PASS: Closed runtime override closes LOS again
+PASS: TASK_692 manifest is written
+=== RESULTS: 34 passed, 0 failed ===
+TASK_692: ALL PASSED
