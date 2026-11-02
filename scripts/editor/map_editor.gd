@@ -494,11 +494,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseMotion:
 		var mouse_motion := event as InputEventMouseMotion
-		var world_position: Vector2 = _screen_to_editor_world_position(mouse_motion.position)
-		if _update_marker_drag(world_position, mouse_motion.relative):
+		if _is_dragging_marker and not _dragged_marker_id.is_empty():
+			if not _is_pointer_over_control():
+				_update_marker_drag(_screen_to_editor_world_position(mouse_motion.position), mouse_motion.relative)
 			return
 		if _patrol_tool_enabled and _dragged_patrol_waypoint_index >= 0 and not _is_pointer_over_control():
-			_move_patrol_waypoint(_dragged_patrol_waypoint_index, world_position)
+			_move_patrol_waypoint(_dragged_patrol_waypoint_index, _screen_to_editor_world_position(mouse_motion.position))
 			return
 		if _right_mouse_pressed:
 			if mouse_motion.position.distance_to(_right_mouse_press_screen_position) >= RIGHT_CONTEXT_DRAG_THRESHOLD_PX:
@@ -506,7 +507,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if _selection_tool_enabled and not _is_pointer_over_control():
 				if _right_mouse_dragged:
 					_right_drag_selection_active = true
-					_select_grid_area_from_world(_right_mouse_press_world_position, world_position, _right_mouse_additive_selection)
+					_select_grid_area_from_world(_right_mouse_press_world_position, _screen_to_editor_world_position(mouse_motion.position), _right_mouse_additive_selection)
 				return
 		if _is_rotating_3d_camera:
 			var primary_3d_view = _get_primary_3d_view()
@@ -522,6 +523,13 @@ func _unhandled_input(event: InputEvent) -> void:
 				if camera != null:
 					camera.position -= mouse_motion.relative * camera.zoom
 			return
+		var needs_paint_position: bool = _is_painting and (_height_tool_enabled or _eraser_tool_enabled or (_is_brush_enabled() and _has_selected_type()))
+		var needs_preview_position: bool = not _is_pointer_over_control() and (_is_network_dragging or _patrol_tool_enabled or _is_brush_enabled())
+		if not needs_paint_position and not needs_preview_position:
+			_queue_patrol_route_preview_hide()
+			_queue_hover_preview_hide()
+			return
+		var world_position: Vector2 = _screen_to_editor_world_position(mouse_motion.position)
 		if _is_painting and _height_tool_enabled:
 			_apply_height_tool_at_world_position(world_position)
 			return
@@ -556,7 +564,9 @@ func _handle_right_mouse_press(mouse_button_event: InputEventMouseButton) -> voi
 		return
 	_right_mouse_pressed = true
 	_right_mouse_press_screen_position = mouse_button_event.position
-	_right_mouse_press_world_position = _screen_to_editor_world_position(mouse_button_event.position)
+	# Camera gestures need no terrain position; a context click resolves on release.
+	if _selection_tool_enabled:
+		_right_mouse_press_world_position = _screen_to_editor_world_position(mouse_button_event.position)
 	_right_mouse_additive_selection = mouse_button_event.ctrl_pressed
 	_is_rotating_3d_camera = not _selection_tool_enabled and _get_primary_3d_view() != null
 	_is_panning = not _selection_tool_enabled and _get_primary_3d_view() == null
@@ -574,12 +584,12 @@ func _handle_right_mouse_release(mouse_button_event: InputEventMouseButton) -> v
 	_is_panning = false
 	if not was_pressed or _is_pointer_over_control():
 		return
-	var release_world_position: Vector2 = _screen_to_editor_world_position(release_position)
 	if had_area_selection:
-		_select_grid_area_from_world(_right_mouse_press_world_position, release_world_position, _right_mouse_additive_selection)
+		_select_grid_area_from_world(_right_mouse_press_world_position, _screen_to_editor_world_position(release_position), _right_mouse_additive_selection)
 		return
 	if _right_mouse_dragged:
 		return
+	var release_world_position: Vector2 = _screen_to_editor_world_position(release_position)
 	_select_tile_at_world_position(release_world_position)
 	_show_editor_context_menu(release_position)
 

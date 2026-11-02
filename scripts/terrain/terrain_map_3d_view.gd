@@ -890,6 +890,7 @@ var _box_mesh_cache: Dictionary = {}
 var _material_cache: Dictionary = {}
 var _space_kit_terrain_top_color: Color = Color.TRANSPARENT
 var _render_tile_by_grid: Dictionary = {}
+var _render_tile_order_by_grid: Dictionary = {}
 var _unit_nodes: Array = []
 var _unit_proxies_by_id: Dictionary = {}
 var _unit_proxy_runtime_by_id: Dictionary = {}
@@ -1369,6 +1370,7 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_drop_root)
 	_clear_children(_feedback_bubble_hud_root)
 	_render_tile_by_grid.clear()
+	_render_tile_order_by_grid.clear()
 	_map_total_tile_count = 0
 	_map_tile_count = 0
 	_visual_streaming_active = false
@@ -1467,9 +1469,7 @@ func render_map(terrain_map_data = null) -> void:
 	_map_total_tile_count = tiles.size()
 	var render_tiles: Array = _select_tiles_for_visual_render(tiles)
 	_visual_streaming_skipped_tile_count = maxi(_map_total_tile_count - render_tiles.size(), 0)
-	for tile_data in tiles:
-		if tile_data != null:
-			_render_tile_by_grid[tile_data.grid_position] = tile_data
+	_rebuild_render_tile_index(tiles)
 	for tile_data in render_tiles:
 		_add_tile_visual(tile_data)
 	_flush_ground_model_batches()
@@ -2204,7 +2204,7 @@ func _pick_tile_at_screen_position(viewport_position: Vector2):
 	var best_score: float = INF
 	var camera_origin: Vector3 = _camera.global_position
 	var camera_forward: Vector3 = -_camera.global_transform.basis.z.normalized()
-	for tile_data in Array(_terrain_map_data.call("get_tiles")):
+	for tile_data in _get_tile_pick_candidates(viewport_position):
 		if tile_data == null:
 			continue
 		var screen_quad: Array[Vector2] = _get_tile_top_screen_quad(tile_data)
@@ -2219,6 +2219,53 @@ func _pick_tile_at_screen_position(viewport_position: Vector2):
 			best_score = score
 			best_tile = tile_data
 	return best_tile
+
+
+func _rebuild_render_tile_index(tiles: Array) -> void:
+	_render_tile_by_grid.clear()
+	_render_tile_order_by_grid.clear()
+	for tile_data in tiles:
+		if tile_data != null:
+			_render_tile_order_by_grid[tile_data.grid_position] = _render_tile_by_grid.size()
+			_render_tile_by_grid[tile_data.grid_position] = tile_data
+
+
+func _get_tile_pick_candidates(viewport_position: Vector2) -> Array:
+	var result: Array = []
+	var seen: Dictionary = {}
+	var ray_origin: Vector3 = _camera.project_ray_origin(viewport_position)
+	var ray_direction: Vector3 = _camera.project_ray_normal(viewport_position)
+	# TerrainTileData's legal H0/H1/H2 surfaces. Intersect each top plane so
+	# raised tiles can win even when their ground-plane grid coordinate differs.
+	for height_level in range(3):
+		var top_y: float = float(height_level) * _get_3d_height_step() + TILE_GRID_LINE_SURFACE_Y_OFFSET
+		var hit = Plane(Vector3.UP, top_y).intersects_ray(ray_origin, ray_direction)
+		if typeof(hit) != TYPE_VECTOR3:
+			continue
+		var grid_position: Vector2i = _world_to_grid_position(_position_3d_to_world(Vector3(hit)))
+		var nearby: Array[Vector2i] = [grid_position]
+		if _uses_hex_grid():
+			nearby.append_array(HEX_GRID_SCRIPT.neighbors(grid_position))
+		else:
+			for x in range(-1, 2):
+				for y in range(-1, 2):
+					if x != 0 or y != 0:
+						nearby.append(grid_position + Vector2i(x, y))
+		# Neighbor candidates retain the existing polygon tolerance on tile edges.
+		for candidate_grid in nearby:
+			if seen.has(candidate_grid):
+				continue
+			var tile_data = _render_tile_by_grid.get(candidate_grid, null)
+			if tile_data == null or int(tile_data.height_level) != height_level:
+				continue
+			seen[candidate_grid] = true
+			result.append(tile_data)
+	# The former exhaustive scan resolved exact score ties in source tile order.
+	# Preserve that boundary behavior while sorting only the bounded candidate set.
+	result.sort_custom(func(a, b) -> bool:
+		return int(_render_tile_order_by_grid.get(a.grid_position, 0)) < int(_render_tile_order_by_grid.get(b.grid_position, 0))
+	)
+	return result
 
 
 func _get_tile_top_screen_quad(tile_data) -> Array[Vector2]:
@@ -14588,9 +14635,11 @@ func _get_world_surface_y(world_position: Vector2) -> float:
 
 
 func _get_grid_surface_y(grid_position: Vector2i) -> float:
-	if _terrain_map_data == null or not _terrain_map_data.has_method("get_tile_at_grid"):
+	if _terrain_map_data == null:
 		return 0.0
-	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	# render_map indexes every source tile, including visually streamed-out ones.
+	# Read its live object so height edits need no separate cache invalidation.
+	var tile_data = _render_tile_by_grid.get(grid_position, null)
 	if tile_data == null:
 		return 0.0
 	return float(tile_data.height_level) * _get_3d_height_step()
