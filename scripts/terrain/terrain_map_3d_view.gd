@@ -269,6 +269,7 @@ const UNIT_LOCOMOTION_HEADING_ANIMATION_NAMES: PackedStringArray = [
 ]
 const UNIT_LOCOMOTION_HEADING_CONTROL_BONES: PackedStringArray = ["HipsCtrl", "Hips"]
 const EDITOR_EMPTY_BACKGROUND_COLOR: Color = Color(0.12, 0.13, 0.12, 1.0)
+const AUTHORED_GM01_OFFMAP_BACKGROUND_COLOR: Color = Color("102c38")
 const EDITOR_LIGHT_ROTATION_DEGREES: Vector3 = Vector3(-58.0, -32.0, 0.0)
 const EDITOR_LIGHT_ENERGY: float = 1.18
 const EDITOR_LIGHT_SHADOW_ENABLED_DEFAULT: bool = true
@@ -1367,6 +1368,12 @@ func _sync_authored_visual_layout() -> void:
 		requested_id = String(_terrain_map_data.call("get_authored_visual_layout_id"))
 	if requested_id != FRONTIER_GM01_LAYOUT_SCRIPT.LAYOUT_ID:
 		requested_id = ""
+	var saved_ground_grids: Array[Vector2i] = []
+	if not requested_id.is_empty():
+		for tile in _terrain_map_data.call("get_tiles"):
+			if tile != null:
+				saved_ground_grids.append(Vector2i(tile.grid_position))
+	var saved_ground_signature: String = FRONTIER_GM01_LAYOUT_SCRIPT.ground_grid_signature(saved_ground_grids)
 	_clear_authored_visual_ownership()
 	if requested_id != _authored_visual_layout_id or not is_instance_valid(_authored_visual_layout_root):
 		if is_instance_valid(_authored_visual_layout_root):
@@ -1378,7 +1385,7 @@ func _sync_authored_visual_layout() -> void:
 		_authored_visual_budget.clear()
 		_authored_visual_layout_id = ""
 		if not requested_id.is_empty() and _world_root != null:
-			_authored_visual_layout_facts = FRONTIER_GM01_LAYOUT_SCRIPT.build(_world_root)
+			_authored_visual_layout_facts = FRONTIER_GM01_LAYOUT_SCRIPT.build(_world_root, saved_ground_grids)
 			_authored_visual_layout_root = _authored_visual_layout_facts.get("root") as Node3D
 			if is_instance_valid(_authored_visual_layout_root):
 				_authored_visual_layout_id = requested_id
@@ -1390,7 +1397,14 @@ func _sync_authored_visual_layout() -> void:
 		return
 	var ground := _authored_visual_layout_facts.get("flat_ground") as MeshInstance3D
 	if is_instance_valid(ground):
+		# A same-layout map switch may have a different saved coverage. Update only
+		# its cold ground geometry; the source MapData remains untouched.
+		if String(ground.get_meta("ground_grid_signature", "")) != saved_ground_signature:
+			FRONTIER_GM01_LAYOUT_SCRIPT.configure_ground_mesh(ground, saved_ground_grids, true)
+			_authored_visual_budget = _build_node_budget_for_root(_authored_visual_layout_root)
 		_flat_ground_visual_owner = weakref(ground)
+	_authored_visual_layout_facts["saved_ground_signature"] = saved_ground_signature
+	_authored_visual_layout_facts["saved_ground_cell_count"] = saved_ground_grids.size()
 	for tile in _terrain_map_data.call("get_tiles"):
 		if tile != null and String(tile.object_type_id) == "frontier_scene_solid":
 			var grid: Vector2i = tile.grid_position
@@ -1548,7 +1562,9 @@ func render_map(terrain_map_data = null) -> void:
 		_ground_multimesh_tile_count += int(hex_counts["tile_count"])
 	_flush_surface_tint_batches()
 	_flush_static_prop_model_batches()
-	_add_tile_grid_lines(render_tiles)
+	# The fixed authored ground covers the complete saved field. Its visible
+	# grid cannot stop at a moving streaming-chunk border inside that surface.
+	_add_tile_grid_lines(tiles if is_instance_valid(_authored_visual_layout_root) else render_tiles)
 	for tile_data in render_tiles:
 		_add_height_edge_visuals(tile_data)
 	_flush_height_edge_model_batches()
@@ -1975,10 +1991,19 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 		return
 	var work_started_usec: int = Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
 	var can_apply_overlay_delta: bool = _can_apply_fow_overlay_delta(normalized_state)
+	var same_overlay: bool = _fow_overlay_multimesh != null and not _fow_overlay_slot_by_tile_id.is_empty() and String(normalized_state.get("mode", "")) == _fog_of_war_mode and String(normalized_state.get("team_id", "")) == _fog_of_war_team_id
+	var old_knowledge: Dictionary = Dictionary(_fog_of_war_state.get("terrain_knowledge", {}))
+	var new_knowledge: Dictionary = Dictionary(normalized_state.get("terrain_knowledge", {}))
+	var unchanged_terrain: bool = same_overlay and old_knowledge == new_knowledge
+	var continue_pending: bool = same_overlay and _fow_overlay_full_rebuild_pending
 	var previous_dynamic_visibility_signature: String = _build_fow_dynamic_visibility_signature(_fog_of_war_state)
 	_fog_of_war_state_signature = next_signature
 	_apply_fog_of_war_visual_state(normalized_state)
-	if not can_apply_overlay_delta or not _apply_fow_overlay_delta(normalized_state):
+	if unchanged_terrain:
+		_fow_overlay_visibility_revision = int(normalized_state.get("visibility_revision", 0))
+	elif continue_pending:
+		_apply_pending_fow_snapshot_changes(old_knowledge, new_knowledge)
+	elif not can_apply_overlay_delta or not _apply_fow_overlay_delta(normalized_state):
 		_rebuild_fog_of_war_visuals()
 	_rebuild_contact_visuals()
 	_fow_contact_visibility_refresh_count += 1
@@ -2529,17 +2554,36 @@ func _collect_world_mesh_diagnostic_entries(node: Node, parent_transform: Transf
 		_collect_world_mesh_diagnostic_entries(child, current_transform, entries)
 
 
+func _get_authored_ground_snapshot() -> Dictionary:
+	var ground := _authored_visual_layout_facts.get("flat_ground") as MeshInstance3D
+	if not is_instance_valid(ground) or ground.mesh == null:
+		return {}
+	var bounds: AABB = ground.mesh.get_aabb()
+	var count := int(ground.get_meta("ground_cell_count", 0))
+	return {
+		"cell_count": count,
+		"plane_bounds": {"min_x": bounds.position.x, "min_z": bounds.position.z, "max_x": bounds.end.x, "max_z": bounds.end.z},
+		"matches_saved_hex_coverage": String(ground.get_meta("ground_coverage_source", "")) == "saved_map_tiles" and String(ground.get_meta("ground_grid_signature", "")) == String(_authored_visual_layout_facts.get("saved_ground_signature", "")) and count == int(_authored_visual_layout_facts.get("saved_ground_cell_count", -1)),
+		"vertex_count": int(ground.get_meta("ground_vertex_count", 0)),
+	}
+
+
 func get_render_snapshot() -> Dictionary:
 	_render_snapshot_request_count += 1
 	var render_budget_by_category: Dictionary = _build_render_budget_by_category()
 	var render_budget_totals: Dictionary = _build_render_budget_totals(render_budget_by_category)
 	var render_monitor_snapshot: Dictionary = _build_render_monitor_snapshot()
+	var ground_snapshot: Dictionary = _get_authored_ground_snapshot()
 	return {
 		"authored_visual_layout_id": _authored_visual_layout_id,
 		"authored_visual_layout_active": is_instance_valid(_authored_visual_layout_root),
 		"authored_visual_owned_tile_count": _authored_visual_owned_grids.size(),
 		"authored_visual_grid_visible": _authored_visual_grid_visible,
 		"authored_visual_assets": _authored_visual_layout_facts.get("assets", []).duplicate(true),
+		"authored_ground_cell_count": ground_snapshot.get("cell_count", 0),
+		"authored_ground_plane_bounds": ground_snapshot.get("plane_bounds", {}),
+		"ground_matches_saved_hex_coverage": ground_snapshot.get("matches_saved_hex_coverage", false),
+		"authored_ground_vertex_count": ground_snapshot.get("vertex_count", 0),
 		"frontier_art_enabled": _frontier_art_enabled,
 		"frontier_art_override": _frontier_art_override,
 		"grid_topology": _active_grid_topology,
@@ -3581,6 +3625,11 @@ func _ensure_nodes() -> void:
 	environment.adjustment_saturation = EDITOR_ADJUSTMENT_SATURATION
 	if _frontier_art_enabled:
 		_frontier_art_profile.apply_environment(environment)
+	# This is empty space outside the saved Hex union, never decorative sand.
+	# Read the current MapData rather than the previous authored-root state:
+	# _ensure_nodes also runs before that root is swapped on a map change.
+	if _terrain_map_data != null and _terrain_map_data.has_method("get_authored_visual_layout_id") and String(_terrain_map_data.call("get_authored_visual_layout_id")) == FRONTIER_GM01_LAYOUT_SCRIPT.LAYOUT_ID:
+		environment.background_color = AUTHORED_GM01_OFFMAP_BACKGROUND_COLOR
 
 
 func _apply_editor_light_settings() -> void:
@@ -3727,7 +3776,10 @@ func _clamp_focus_to_map() -> void:
 
 
 func _select_tiles_for_visual_render(tiles: Array) -> Array:
-	_visual_streaming_active = tiles.size() > VISUAL_STREAMING_TILE_THRESHOLD
+	# The fixed stage already owns the full ground and its solid models. Keep its
+	# small set of raised tile caps/grid/FoW resident once instead of rebuilding
+	# the whole 9408-cell overlay whenever the camera crosses a chunk boundary.
+	_visual_streaming_active = tiles.size() > VISUAL_STREAMING_TILE_THRESHOLD and not is_instance_valid(_authored_visual_layout_root)
 	if not _visual_streaming_active:
 		_visual_streaming_active_chunk_key = "full"
 		_visual_streaming_active_chunks.clear()
@@ -6111,6 +6163,40 @@ func _process_pending_fow_overlay_full_rebuild() -> void:
 		_finalize_fow_overlay_full_rebuild()
 
 
+func _apply_pending_fow_snapshot_changes(previous: Dictionary, current: Dictionary) -> void:
+	# A moving observer may publish faster than the 512-cell initial batch.
+	# Compare complete snapshots, so skipped producer revisions cannot leave an
+	# already-built slot stale. The original batch cursor is never reset here.
+	var changed_ids: Dictionary = {}
+	for key in ["visible_tile_ids", "explored_tile_ids"]:
+		var old_ids: Dictionary = _build_fow_lookup(PackedStringArray(previous.get(key, [])))
+		var new_ids: Dictionary = _build_fow_lookup(PackedStringArray(current.get(key, [])))
+		for tile_id in old_ids:
+			if not new_ids.has(tile_id):
+				changed_ids[tile_id] = true
+		for tile_id in new_ids:
+			if not old_ids.has(tile_id):
+				changed_ids[tile_id] = true
+	var dirty_chunks: Dictionary = {}
+	for changed_id in changed_ids:
+		var tile_id: String = String(changed_id)
+		var tile_data = _fow_overlay_tile_by_id.get(tile_id, null)
+		if tile_data == null:
+			var grid: Variant = _try_parse_fow_tile_grid(tile_id)
+			if grid is Vector2i and _terrain_map_data != null:
+				tile_data = _terrain_map_data.call("get_tile_at_grid", grid)
+				if tile_data != null:
+					tile_id = _get_explicit_tile_id_for_fow(tile_data)
+		if tile_data == null or not _fow_overlay_slot_by_tile_id.has(tile_id):
+			continue
+		_set_fow_overlay_tile_state(tile_id, _get_fow_tile_state(tile_data))
+		_apply_fow_overlay_tile_to_multimesh(tile_id)
+		dirty_chunks[_get_fow_overlay_chunk_position(tile_data)] = true
+	_fow_overlay_dirty_chunk_rebuild_count += dirty_chunks.size()
+	_fow_overlay_delta_apply_count += 1
+	_fow_overlay_visibility_revision = int(_fog_of_war_state.get("visibility_revision", 0))
+
+
 func _finalize_fow_overlay_full_rebuild() -> void:
 	_fow_overlay_full_rebuild_pending = false
 	_fow_overlay_pending_tile_ids = PackedStringArray()
@@ -6316,7 +6402,9 @@ func _make_fow_tile_overlay_mesh(cell_size: float) -> Mesh:
 
 
 func _select_tiles_for_visual_overlay(all_tiles: Array) -> Array:
-	if not _visual_streaming_active:
+	# Authored ground is one persistent full-map surface. Its visibility mask
+	# must cover the same exact field, independently of streamed object chunks.
+	if not _visual_streaming_active or is_instance_valid(_authored_visual_layout_root):
 		return all_tiles
 	var result: Array = []
 	for tile_data in all_tiles:

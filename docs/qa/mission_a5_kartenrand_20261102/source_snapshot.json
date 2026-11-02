@@ -1,0 +1,751 @@
+{
+  "version": 1,
+  "recorded_utc": "2026-11-02T19:35:37.981712+00:00",
+  "scope": "Explicit current source/docs/map/scenario/Cutlass and selected capture/report byte snapshot; no engine or visual acceptance.",
+  "changed_tracked_sources": [
+    "docs/dev/gm01_frontier_map_contract.md",
+    "docs/dev/ui_native_design_contract.md",
+    "maps/Ground_Mission01_32x32.json",
+    "scripts/meta/drop_light_layout_contract.gd",
+    "scripts/terrain/frontier_gm01_layout.gd",
+    "scripts/terrain/hpa_pathfinder.gd",
+    "scripts/terrain/terrain_map_3d_view.gd",
+    "scripts/terrain/terrain_pathfinder.gd",
+    "scripts/tests/frontier_start_graphics_verifier.gd",
+    "scripts/tests/gm01_frontier_cover_radius_verifier.gd",
+    "scripts/tests/gm01_frontier_hex_fow_verifier.gd",
+    "scripts/tests/gm01_frontier_hex_minimap_verifier.gd",
+    "scripts/tests/gm01_frontier_rebuild_verifier.gd",
+    "scripts/tests/mission_tactical_sandbox_controller.gd",
+    "scripts/tests/ui_a5_native_hud_verifier.gd",
+    "scripts/tests/ui_mission_r2_verifier.gd",
+    "scripts/tests/ui_native_r3_mission_readout_verifier.gd",
+    "scripts/tools/build_gm01_frontier.gd",
+    "scripts/ui/mission_a5_hud_layout.gd",
+    "scripts/ui/reference_panel_frame.gd",
+    "scripts/ui/tactical_event_log_panel.gd",
+    "scripts/ui/tactical_hud_language_presenter.gd"
+  ],
+  "files": [
+    {
+      "path": "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+      "sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "bytes": 1473148
+    },
+    {
+      "path": "Assets/curated/ui_native_r4/cutlass_ref03_preview.json",
+      "sha256": "96ee48dc2fd92ee42407365ac25250afb0effee44e1a05a37c18e2d209e3426f",
+      "bytes": 568
+    },
+    {
+      "path": "Assets/curated/ui_native_r4/cutlass_ref03_preview.png",
+      "sha256": "f47437b3001c95bb88ccaa026ece5cbfbd03f637afa9ab6fb828fb1e95382570",
+      "bytes": 119647
+    },
+    {
+      "path": "data/mission_scenarios/ground_mission01_default.json",
+      "sha256": "792bff6b6dfa6fabf739a737e4e45d34c8e3729a4fdc7d6b62a74a374a27b45f",
+      "bytes": 3601
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha256": "a30d7542eba9503ec75718ef87a4f30ffebec27109459a78992f7be9020dc6e7",
+      "bytes": 4602
+    },
+    {
+      "path": "docs/CODEX_RULES.md",
+      "sha256": "3308c69c6833746899b917f2f0c13aabd58d5864ddf4c7c1ce3bbdbd08b9d2dd",
+      "bytes": 5008
+    },
+    {
+      "path": "docs/dev/gm01_frontier_map_contract.md",
+      "sha256": "e4e2166dd556611e587aee2267a79f201447aeb1bfdbf22df7e447aa330d985d",
+      "bytes": 7280
+    },
+    {
+      "path": "docs/dev/graphics_reference_revision_contract.md",
+      "sha256": "a040782b266350a4c43e95aacf7230d206f83d4d05bb81530a580344563d8822",
+      "bytes": 5859
+    },
+    {
+      "path": "docs/dev/ui_native_design_contract.md",
+      "sha256": "bd0243d4f8009291da9578f8c4b824b8b05611d4ff845015740e237994cf0ec2",
+      "bytes": 16618
+    },
+    {
+      "path": "docs/dev/ui_theme_component_library.md",
+      "sha256": "81278f4776ba812c59158fcef8a8fc222555ec9b13a4e4120a36ee9e8d0a92a5",
+      "bytes": 4911
+    },
+    {
+      "path": "docs/IMPLEMENTATION_STATUS.md",
+      "sha256": "e4501d0dbc281e63dad06a2efe4de0d37bd6b42c70fc41b4e2b072535a44650f",
+      "bytes": 1802554
+    },
+    {
+      "path": "docs/PROJECT_BRIEF.md",
+      "sha256": "bf014f2dd8d16202725e930cee656f31f129b31effa79c82322faa6791e6cdd3",
+      "bytes": 1700
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/_qa_common.py",
+      "sha256": "4e6ddf456045bd219381080e2c955b41ca8de806d7ad7a529026537beefc4d40",
+      "bytes": 2860
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/author_map.py",
+      "sha256": "3d17b07c92c33087b24df120fffdebc6bd87fe2b14c26bf5d04f9849c69efcce",
+      "bytes": 1931
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/authoring/20261102T172242_195859Z/authoring.json",
+      "sha256": "7444bb921fb5b524986d4124309a80d8b63c6e41662b4313293931d87e210096",
+      "bytes": 1027
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/authoring/20261102T172242_195859Z/authoring.log",
+      "sha256": "7442ab45d483b50c68fee0ce98584823f3b01a8e65e42533e8c185a83a17d074",
+      "bytes": 378
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/before/controller_before_tooltip.gd.txt",
+      "sha256": "43fc11daa4b28048d5d95ff9251ff510231edb457042504a61029cc1e9784d3c",
+      "bytes": 1839341
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/before/Ground_Mission01_48x48.json",
+      "sha256": "31daf2d4943ec4a2007fc4f5246249f309c52436a0675143184d060b6999c925",
+      "bytes": 621773
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/before/hpa_pathfinder_before.gd.txt",
+      "sha256": "34f12f351167c2f0c2358da6b427411faa4fb52dcfab1503a84669cecbc87eda",
+      "bytes": 11769
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/before/terrain_pathfinder_before.gd.txt",
+      "sha256": "190b34a0789734a967c28a57ee7b978973d2614849e50c5b476bc043ef701131",
+      "bytes": 17368
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/build_report.py",
+      "sha256": "93931d65441089bdb46ab303a1b95adeb33239257da099853ef09b3420ad2273",
+      "bytes": 21882
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/check_index.py",
+      "sha256": "93c153cbeb8733dbdc2ebf46a1a3c843d3d5b3b6731b04cdf9ea39413a7e7e0c",
+      "bytes": 1146
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/checks_final.json",
+      "sha256": "78513e032902597de1d4300c3ea25df492dde842c76247a2cc8e68535c4b276e",
+      "bytes": 2207
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/cover_radius/cover_radius_query_pairs_20261102T192418-pid152864.json",
+      "sha256": "256e199c38b0e41fcfbe6aa6d577efbde6eb4da783d70884a8f5893d0e047cb9",
+      "bytes": 9710
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/diagnostic_r3/20261102T190213_065310Z/process.json",
+      "sha256": "3504c5e8d921104c576d45b29bfb405e5afc299b49304bcfe7ada89b282fab95",
+      "bytes": 846
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/diagnostic_r3/20261102T190213_065310Z/profile.log",
+      "sha256": "71ae035d454659be12a357f91c9a4e4eaea7975a7ff1694503aae85447b11fac",
+      "bytes": 109176
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/diagnostic_r3/20261102T191223_877001Z/process.json",
+      "sha256": "3504c5e8d921104c576d45b29bfb405e5afc299b49304bcfe7ada89b282fab95",
+      "bytes": 846
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/diagnostic_r3/20261102T191223_877001Z/profile.log",
+      "sha256": "1d5625af1bc35363fc6e8bb2859e72aa5b685f0be54dfe89e5f193634d1d0d4c",
+      "bytes": 112454
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-cutlass_identity.log",
+      "sha256": "4ebdc063809770a1fb512c0d745fc329c0a51bcaab298de80d3b5d4988070cd5",
+      "bytes": 3313
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-hex_fow.log",
+      "sha256": "987851720871f8d0e5c6c8a90b67380de44c9ba3b7973ef5be5b7c8f8cc300fa",
+      "bytes": 7218
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-hex_hpa_pruning.log",
+      "sha256": "c70a3732443b4dccd13e52290a786026698a0a214a43970f61184ffc1656041d",
+      "bytes": 44548
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-hex_minimap.log",
+      "sha256": "8ecd5cac3c767d40569f390ac2dc05a9f5f9e14c68e685454b35ce7525899c00",
+      "bytes": 1238
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-hex_rebuild.log",
+      "sha256": "7672ba808f676824be0d1da6df282382ac5abfc0ca14eac77c62605536646d66",
+      "bytes": 6188
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-map_compat_cover.log",
+      "sha256": "b1a9d8ca8891772605f54237781042f7d545b907a5e371529c3f592b502ae5d7",
+      "bytes": 3152
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-map_compat_start.log",
+      "sha256": "ce7b71c4d7827318cf5844c130be22a229c196af46cb62dbc501a0e7bd759c30",
+      "bytes": 2059
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-map_edge.log",
+      "sha256": "dbfc1bbde7cd022b0279d679d8280e3c0bc333a7ae7bb6c2498ecf241698e19f",
+      "bytes": 3898
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-r2_mission_feedback.log",
+      "sha256": "46947b5d59638ca29f744d2e17a8da777631433af12c53681ffb1b41f2a49b98",
+      "bytes": 243
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-r3_readout.log",
+      "sha256": "df3d8a56a9224233346165aa866879d94ecc31d398a09789587fa9a5d91eb32b",
+      "bytes": 1156
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-stable_astar_frontier.log",
+      "sha256": "2bbe8b218c0d7c405159a163be5032a83a4a515788c4fb3958cdac0f9123c9fb",
+      "bytes": 11007
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-ui_a5.log",
+      "sha256": "8e7a820ed213305779b13ca5a9cc956a586ce7a735ebaacf0e9ae513734d86eb",
+      "bytes": 270
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/check-ui_reference_groups.log",
+      "sha256": "a794b0777fd6707d0ac25d357289d8f7b321477d3765a1517dbec0369ddab783",
+      "bytes": 256
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-cutlass_identity.log",
+      "sha256": "ece81ecf01dfba44c6c8f3102f3db9450cf790a7ed4aba62f163e371d4994e12",
+      "bytes": 3266
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-hex_fow.log",
+      "sha256": "f7e1db2e1d041d9c777122c0705e1c92e0dc19e7272237231849dcb3d7f2eb75",
+      "bytes": 7155
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-hex_hpa_pruning.log",
+      "sha256": "9fa5a8ae97cacf73fc92d2e163c63b8815d3f24421ad76d7910355fd148afc08",
+      "bytes": 44184
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-hex_minimap.log",
+      "sha256": "f10b02e0636eca088add41d1a7f0bfdbdd2d676bad5f5eed2584dbb8b87ae673",
+      "bytes": 1220
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-hex_rebuild.log",
+      "sha256": "9fb6ad446a06d500c53c6ee5399c1246fe22286f1703946767cfc45a733c2c40",
+      "bytes": 6107
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-map_compat_cover.log",
+      "sha256": "d266a0543887171e86653d0191f9d8169e13a2f15bb70077fc2211611bb7066e",
+      "bytes": 3117
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-map_compat_start.log",
+      "sha256": "3efb3b822cc0b7ea6a215c1bb05fd8df1982817c668a4f5a7ff6efbc27c7a510",
+      "bytes": 2026
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-map_edge.log",
+      "sha256": "6c71702b02a7970c63b7ded1b045dbb82f4c02dcab4376de4edf2636592bf46e",
+      "bytes": 3842
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-r2_mission_feedback.log",
+      "sha256": "bdcc249726d66081f58a16322a2338cd56e35e11cfbb00bf6cd54f43ee183fb9",
+      "bytes": 238
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-r3_readout.log",
+      "sha256": "1d1fb2334ab134d548c622bc8b922754498c94c024a34e2cf0e0bd1c8154d3b2",
+      "bytes": 1127
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-stable_astar_frontier.log",
+      "sha256": "0adff5ffcc8bcb5a8013c56bb18c39c2c48e0c29e824005c975642258e574663",
+      "bytes": 10863
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-ui_a5.log",
+      "sha256": "cc31449820c267ebf5a1b9017df8ac69b2b9f9b22a9a35d2b2bab63e1fe88b87",
+      "bytes": 264
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/logs/engine-check-ui_reference_groups.log",
+      "sha256": "055fea34cc151ddede3bd741f6b35ad6739dbaee5ed52f7b324aa1af02a69432",
+      "bytes": 251
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/checks/20261102T192410Z-pid142844/metadata/report.json",
+      "sha256": "768831c00eddc54c471e8bf61b25b589e7da471c7e2357bb41abddb0730c1347",
+      "bytes": 18923
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/headless/20261102T192409_938300Z/profile_isolation.json",
+      "sha256": "1ea2cc98d5b8c51c9e7744ac6dd2dc4656c212dee303f52e620052e7fcf1ea9d",
+      "bytes": 1088
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/html_export_qa.json",
+      "sha256": "4cd09de393a9abefeee16d81d326e9eba7fdc062a6ab185b1496e08cfaea28fd",
+      "bytes": 1762
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/html_qa.cjs",
+      "sha256": "7a99701229c9c93b81ed86777497368b3de3454718a32626401b15e82872b5da",
+      "bytes": 14780
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/import_once.py",
+      "sha256": "7db6761bcec33c758e124e5af806ac1bd9f74d06933f66ad9109c1cd6a3378cf",
+      "bytes": 1527
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/process.json",
+      "sha256": "3541afb1b6d6bec8de54b246cf66ec71ca75660978857961338111cac517d55e",
+      "bytes": 1108
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup.json",
+      "sha256": "8f0770d87a6fc4a6cf01e66a1d04e36d42f6da8d268d32b4becebfe1a8c11e86",
+      "bytes": 95767
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup.log",
+      "sha256": "127e3a55cae07fa93e27e448bc799a4802ccd5fce96eac7a455c829fc0fb052f",
+      "bytes": 156899
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/01_main_menu.png",
+      "sha256": "452a63d1264675e6c2ae3381cc0768738a78b5c10b1517c095f353e31b6b00f9",
+      "bytes": 474640
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/02_homebase.png",
+      "sha256": "4377b63ca2345c7668d7e761f4b685016c5e7f749726d4b94c6c9e1364cc419f",
+      "bytes": 228503
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/03_default_mission.png",
+      "sha256": "d7dcd78df75f31448bc5ce183ee454e95a5e80240d0853e0fca197a5455d9d89",
+      "bytes": 1237166
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/03b_dropship_details.png",
+      "sha256": "cbf34f096869cf6057876a6505fa43c18043e138d33bb6a2ab60c2cddfbc586a",
+      "bytes": 1026314
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/04_lz_approach.png",
+      "sha256": "33f1f6b6116569c7bcedb006ff2540e588c5517ca44df6bc7224dcc863b392e1",
+      "bytes": 1219541
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/05_deployed.png",
+      "sha256": "d6566877f71deae8334c815a4ced94be6fec37d42b8a3c42d90df22d0d1eaea2",
+      "bytes": 1196553
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/05b_character_details.png",
+      "sha256": "658923ffa6859351e7595c52770eb7ef6e9de985147e2ff0c16f9d6ad4a3f40d",
+      "bytes": 372306
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/06_go_movement.png",
+      "sha256": "79b52f165da78dfce503947298d0262f065fdffcfcac59b0bf437a161ec09a7d",
+      "bytes": 1217056
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/07_outpost_overview.png",
+      "sha256": "4cd7441ad49709c84ad4f90f5945e6abba6ac0d35ff13bad19ddcd54bb52df7e",
+      "bytes": 1210684
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/08_eastern_supply.png",
+      "sha256": "ad21b40498b0b9ea01471430311aa448b45b38b4d760e07f09e9409d21784f44",
+      "bytes": 1216270
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/09_expanded_map.png",
+      "sha256": "a1e6b47bd96059be2b8b3eb758d1f3e2dae07a9893b88030d4836c32993bfb8e",
+      "bytes": 1187380
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/process.json",
+      "sha256": "4115901cf13c825b9fc2a3d616c69f620aa5c6cc1dbb906a22116baa5f164d18",
+      "bytes": 1111
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup.json",
+      "sha256": "a284b600769bdaf030c1b84755436d573c86c5d8d1a5002814f3ac109611b855",
+      "bytes": 107951
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup.log",
+      "sha256": "0cd498d8e107826715d63ee6f5a2845c380e97312116269d7264140708069218",
+      "bytes": 160961
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/01_main_menu.png",
+      "sha256": "c4752fd2041806e52a45ba5cbbc2465c69f3297836e88fb6075d5d30dca7cf84",
+      "bytes": 1048599
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/02_homebase.png",
+      "sha256": "94140ce4ab07f420c91858c753ee61ae40fd84da3e211b4498ef795badcb2952",
+      "bytes": 694399
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/03_default_mission.png",
+      "sha256": "95c2b051fea60bf3655df9d75c694354886435f0b91f0e0415d9ebd777fbd2b2",
+      "bytes": 2982105
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/03b_dropship_details.png",
+      "sha256": "be1105626360557e5e60fcf2300af293324604a4221a85f6519926303599078c",
+      "bytes": 2796395
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/04_lz_approach.png",
+      "sha256": "02c3a9914b0b646ff1f4e3ffcf3839c69a98af33be432a29f11af6274c092461",
+      "bytes": 2937402
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/05_deployed.png",
+      "sha256": "e03d37995d8256e520a0d6f03fca551b8d04818ec3af1f7d4201de914767f376",
+      "bytes": 2918266
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/05b_character_details.png",
+      "sha256": "778831105bc53266fc1d6a1becad479cd90012171d25ff8a88d4d0b3fce30d44",
+      "bytes": 1397100
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/06_go_movement.png",
+      "sha256": "c25d13cdfb5b880971f838e56afc3f0e99843b88d0d32f757f1d622d032cf76a",
+      "bytes": 2975844
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/07_outpost_overview.png",
+      "sha256": "eb3c496f3c982228355b8b23aaa785b2d93c986408635e2035ef9374c72ee4da",
+      "bytes": 2955313
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/08_eastern_supply.png",
+      "sha256": "15a57a8a75ebcf21819ef95880ace9f1d7589593be9b332f4f5f8e51816b376b",
+      "bytes": 2959566
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/09_expanded_map.png",
+      "sha256": "527ffddc0a9fd317054ac65228a55284960a89f58803b9aadeae41d5c047d490",
+      "bytes": 2902087
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/10_all_saved_hexes.png",
+      "sha256": "1044b85f475a573737578edabbadedaa4a6e85e510d0dcb85ddb1968c0543e83",
+      "bytes": 1333682
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/11_old_border_crossed.png",
+      "sha256": "8d6fa3765ac5ad8b9c57705824ed09a8871d6bcbe535ce17127c9428d38c178b",
+      "bytes": 2934009
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/capture_results.json",
+      "sha256": "9097c384685c3844f0fbc7d0a40fce792573a4fc31bb481987cd05d87b12624a",
+      "bytes": 11719
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/PERFORMANCE_SCOPED.json",
+      "sha256": "e6c96ab777c7febf3eaf692be206e3bb42fb66b0956d26c064e64876b7359df3",
+      "bytes": 887
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/POST_CAPTURE_INPUT_FIX.json",
+      "sha256": "44a00e7a24f74ad1905f198a135f1f808af9abd3f69701b98ada2c1ba79128ed",
+      "bytes": 882
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/profile_r3.py",
+      "sha256": "4baf7cf2fbf1da545e4f2a13fe08411851f2addd47af9010a18d3b7500ecda0a",
+      "bytes": 1248
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/README.md",
+      "sha256": "041e4fce0519612040b4d0ff05dbc9b3c8068c9f62e29ad8ad8f4775a4f29304",
+      "bytes": 24867
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/rendered_fow/20261102T183817_216973Z/fow.log",
+      "sha256": "01cd02c91562bc12c4183270e1935f26af3897fbfd9c2fcedc3a50cb3c03d605",
+      "bytes": 7167
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/rendered_fow/20261102T183817_216973Z/process.json",
+      "sha256": "2fe58aec807b313c43513309df5ade2aab166dfc967be2cd60e6727c2dbdd068",
+      "bytes": 1081
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/rendered_fow.py",
+      "sha256": "bec873ecc1f0c1a934e7c99646c079e4634b260ef4394c00415b594fc3e95429",
+      "bytes": 1349
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/rendered_groups/20261102T192710_063100Z/groups.log",
+      "sha256": "b7d86b1d32e9819934e284e2efaa69d5e8c247fada74213d77eab1a8d9e8d2a3",
+      "bytes": 383
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/rendered_groups/20261102T192710_063100Z/process.json",
+      "sha256": "9742984638ce4967ae7cbc1697f2099696b18af11ef51a8af8e507f211a0e866",
+      "bytes": 1539
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/rendered_groups.py",
+      "sha256": "0672ec550c39bf9171355fadcbe2e64e9c02943bc2e33d9c7fdfd0518da68117",
+      "bytes": 1891
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/run_isolated_checks.py",
+      "sha256": "b9c2c6770a231a38baaace2860ebf2cbab422b3ccee1933cee1823c67818e6e1",
+      "bytes": 1928
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/source_snapshot.py",
+      "sha256": "45af76f30b06ec837063187114c5be10d501e9e62107a795b62dd13e66d4c4d0",
+      "bytes": 10853
+    },
+    {
+      "path": "docs/qa/mission_a5_kartenrand_20261102/startup_a5.py",
+      "sha256": "d0c1e9dfeb8e7c665b1d1d0a4f2ed0c6f849f555a41a1a66eb92fa2860a81b4b",
+      "bytes": 5714
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/06_go_movement.png",
+      "sha256": "600ed09128fbe1cfea9af82e51851b66c0b9c79bfe0defa2f4a653545d4d398c",
+      "bytes": 1057908
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/06_go_movement.png",
+      "sha256": "1f195bb2bbaf9bcc4ca320e4782d55b073d9324f2290cea826b0b4f41543d48b",
+      "bytes": 2608424
+    },
+    {
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png",
+      "sha256": "fc9edb8b1d28921653ba5b438e7be8da4db3e0b32b8c751e9b18c4ef94918149",
+      "bytes": 2558195
+    },
+    {
+      "path": "docs/reports/STERNENBUERGERCHEN_MISSION_A5_2026-11-02.html",
+      "sha256": "bd29eb307e0385123c67dbe25d02c2aa75771c86a6caa2bc0247b12484ec7745",
+      "bytes": 118916
+    },
+    {
+      "path": "docs/tasks/UI_2026_11_02_a5_kartenrand.md",
+      "sha256": "45f33181314a7d365bbb33525ecd652c4f6943728240a45f1594b7d069a125b7",
+      "bytes": 21912
+    },
+    {
+      "path": "docs/ui_concepts/ui_20261102_r4/BILDPRUEFUNG_UND_UEBERGABE.md",
+      "sha256": "8cd34b86af3f226de35ce50dd1b4ca80050afeeb656a3c55caa3630f95a05d05",
+      "bytes": 7456
+    },
+    {
+      "path": "maps/Ground_Mission01_32x32.json",
+      "sha256": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4",
+      "bytes": 2425578
+    },
+    {
+      "path": "project.godot",
+      "sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+      "bytes": 13602
+    },
+    {
+      "path": "scripts/meta/drop_light_layout_contract.gd",
+      "sha256": "49b172f94e4232c14282f35c1df1da4a0d488c7847d12bb9eb1b0daed317907e",
+      "bytes": 4287
+    },
+    {
+      "path": "scripts/meta/meta_ui_skin.gd",
+      "sha256": "64dbb2ee42cf81db94b96dd29a99d69517c3b92bcece703085e9e499e8254540",
+      "bytes": 21037
+    },
+    {
+      "path": "scripts/meta/npc_compact_card.gd",
+      "sha256": "c209cae813256360cc6b748b486aa0c9243bff842276924e78816ffaa2faeeaa",
+      "bytes": 31410
+    },
+    {
+      "path": "scripts/terrain/frontier_gm01_layout.gd",
+      "sha256": "428c7293b9d37a8e85662686981292d0f5db618138888ff87ece1c1cc70764d3",
+      "bytes": 20944
+    },
+    {
+      "path": "scripts/terrain/frontier_ship_visuals.gd",
+      "sha256": "1af4ee557a8b9b625ae7bebcaf7d3a10ed8e586fab336243e4e8eec799fbf228",
+      "bytes": 3819
+    },
+    {
+      "path": "scripts/terrain/hpa_pathfinder.gd",
+      "sha256": "28a70b4c041e981a513538b382bbf407a7eadfa9baa497609c01eabe02430663",
+      "bytes": 22074
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "0019c5c2d7e0e16c59fe8b3319dcbbfd92788237fb31617f6a55f8678988a5df",
+      "bytes": 852143
+    },
+    {
+      "path": "scripts/terrain/terrain_pathfinder.gd",
+      "sha256": "626f6f3f64ad6c2d197908754c46c6773edd622ba4d02bb4736b74339152b63c",
+      "bytes": 25599
+    },
+    {
+      "path": "scripts/tests/frontier_main_startup_verifier.gd",
+      "sha256": "22f1893838414963d2d5bbf70df524c2f9bc1815a69aa9ce924a847dfb0b2a3b",
+      "bytes": 21459
+    },
+    {
+      "path": "scripts/tests/frontier_start_graphics_verifier.gd",
+      "sha256": "72c348c4064bb105be9e605b30cb74b5b6087b5fd40834efa21c824a61d523fc",
+      "bytes": 6600
+    },
+    {
+      "path": "scripts/tests/gm01_frontier_cover_radius_verifier.gd",
+      "sha256": "50ccf09e478deba6e190a533a5db8c42ad39a58570802aa222b23a6020c329d1",
+      "bytes": 12931
+    },
+    {
+      "path": "scripts/tests/gm01_frontier_hex_fow_verifier.gd",
+      "sha256": "56673265a10a3ce467e41362a2dafb80c0dfa2b8d49a125d391b86c44f7eeeb3",
+      "bytes": 16509
+    },
+    {
+      "path": "scripts/tests/gm01_frontier_hex_minimap_verifier.gd",
+      "sha256": "03d7c4dea10a76b73644aba7e13068b4bafc04ed0f38d99634322bfe2eb0001c",
+      "bytes": 6971
+    },
+    {
+      "path": "scripts/tests/gm01_frontier_map_edge_verifier.gd",
+      "sha256": "f6a009ac54d05e4d549552e19214b7e4e46294baa7d96a04dd6a57d44304e99a",
+      "bytes": 12488
+    },
+    {
+      "path": "scripts/tests/gm01_frontier_normal_capture.gd",
+      "sha256": "25788d5f254064bf63ed24a897eb10da383c867a43ad954e63a178f8e0174672",
+      "bytes": 1869
+    },
+    {
+      "path": "scripts/tests/gm01_frontier_rebuild_verifier.gd",
+      "sha256": "8b2b0b4f6a0daccf4edf798dba9ef1101688f9f845af3fc8a7023e84020164ff",
+      "bytes": 25058
+    },
+    {
+      "path": "scripts/tests/gm01_hex_hpa_pruning_verifier.gd",
+      "sha256": "439751b7bec635f02ce53f8baf2ad5dce5ac103c5120c4aa3adcf9e9a12581d4",
+      "bytes": 33588
+    },
+    {
+      "path": "scripts/tests/gm01_stable_astar_frontier_verifier.gd",
+      "sha256": "d8f9ed10e1315358016421cbeb8dc3c43294838263f97dfad67bb53e9890443a",
+      "bytes": 23471
+    },
+    {
+      "path": "scripts/tests/mission_a5_kartenrand_capture.gd",
+      "sha256": "1709d8f3be200f290199ec646169fccdf01a9fec98036c53a8114fd6bf848cce",
+      "bytes": 12303
+    },
+    {
+      "path": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "sha256": "aca669d0674e1d18657aae29ec9421f8b7db88ddeb8b6efaeb0ff8d090300595",
+      "bytes": 1839341
+    },
+    {
+      "path": "scripts/tests/ui_a5_native_hud_verifier.gd",
+      "sha256": "827d0bb1653a31ad30f18db2b6f15e7375e42db99079e271b8586c16ffae1f4f",
+      "bytes": 12841
+    },
+    {
+      "path": "scripts/tests/ui_a5_reference_groups_verifier.gd",
+      "sha256": "75a29c554cf474a9284e5ea6587b7b9a28118f755fd9122f1087ff117bf87210",
+      "bytes": 22154
+    },
+    {
+      "path": "scripts/tests/ui_mission_r2_verifier.gd",
+      "sha256": "49ca2a1a53fc7422135ff870a937a20204b99741f765cd00a98eb20a9775b340",
+      "bytes": 10239
+    },
+    {
+      "path": "scripts/tests/ui_native_capture.gd",
+      "sha256": "155130b2ab4c92022a575398efdb99544259272c775ef5b29ddff3c2b9ba6ffb",
+      "bytes": 12910
+    },
+    {
+      "path": "scripts/tests/ui_native_r3_mission_readout_verifier.gd",
+      "sha256": "60fb71ad917bb6c981c72831a0b1ca2793d8c7c96546e9950d11aa7f814fffbb",
+      "bytes": 24722
+    },
+    {
+      "path": "scripts/tests/ui_native_r4_cutlass_identity_verifier.gd",
+      "sha256": "f396ba9b54d11abbe4c9f890b9538d54443a0f9d913c49a7c3ca6d6037598e2c",
+      "bytes": 7780
+    },
+    {
+      "path": "scripts/tools/build_gm01_frontier.gd",
+      "sha256": "8fd0104490dd04f9fd5c4060d3c6c327e71d9bfd4367aac27e4ee069c2baaf08",
+      "bytes": 12662
+    },
+    {
+      "path": "scripts/ui/mission_a5_dropship_presenter.gd",
+      "sha256": "55de32d9da1645eb179146f31b10b09e9dd3de36f3167aee10403f4c8cb93a1c",
+      "bytes": 18445
+    },
+    {
+      "path": "scripts/ui/mission_a5_hud_layout.gd",
+      "sha256": "600abd886bc85d83d66760c57a101bb7f4cad3a83c6d2739622084a96b6fe8aa",
+      "bytes": 45024
+    },
+    {
+      "path": "scripts/ui/reference_panel_frame.gd",
+      "sha256": "4b5c7b51f17356443d8e1bfa7ed49f72a47a33456bf149320e546c34e6cb30ce",
+      "bytes": 6114
+    },
+    {
+      "path": "scripts/ui/tactical_event_log_panel.gd",
+      "sha256": "a34cb7b08966c483b39d4ae3386f77e2ecc9c979a13ccb2e7ae2d28b38cc5960",
+      "bytes": 21856
+    },
+    {
+      "path": "scripts/ui/tactical_hud_language_presenter.gd",
+      "sha256": "e6457aee25e491a20ffbf08cd083422a6ece0be24faee65d31cbf4801fa8942b",
+      "bytes": 1662
+    },
+    {
+      "path": "scripts/ui/tactical_ui_theme.gd",
+      "sha256": "960f9829b8ee6bf47f32685bbcc8950c510bf6f6cefc63b8efe8ade96920c8f8",
+      "bytes": 17622
+    }
+  ]
+}

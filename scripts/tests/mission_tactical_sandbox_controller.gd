@@ -3,6 +3,7 @@ extends Node
 
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const NATIVE_A5_HUD_LAYOUT_SCRIPT: GDScript = preload("res://scripts/ui/mission_a5_hud_layout.gd")
+const NATIVE_A5_DROPSHIP_SCRIPT: GDScript = preload("res://scripts/ui/mission_a5_dropship_presenter.gd")
 const TACTICAL_CARD_SCRIPT: GDScript = preload("res://scripts/ui/components/tactical_card.gd")
 const STATUS_BADGE_SCRIPT: GDScript = preload("res://scripts/ui/components/status_badge.gd")
 const COMMAND_BUTTON_SCRIPT: GDScript = preload("res://scripts/ui/components/command_button.gd")
@@ -3913,6 +3914,9 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 	if overlay != null:
 		overlay.visible = is_visible and _character_overlay_open
 	if not is_visible:
+		var dropship_details := get_node_or_null("../TacticalUI/A5DropshipDetailsPopup") as PopupPanel
+		if dropship_details != null:
+			dropship_details.hide()
 		var details := get_node_or_null("../TacticalUI/A5TeamDetailsPopup") as PopupPanel
 		if details != null:
 			details.hide()
@@ -4811,6 +4815,7 @@ func _refresh_fireteam_mini_cards() -> void:
 		_apply_left_tactical_stack_1280_mini_card_style(card, normalized_fireteam_id == primary_focus_fireteam_id)
 		_increment_mission_fireteam_card_delta_rendering_count("runtime_status_apply")
 		_apply_fireteam_mini_card_leader_portrait(card, lead)
+		_apply_native_a5_fireteam_card(card, normalized_fireteam_id, units, selected_fireteam, runtime_inactive)
 		card.modulate = Color(1.0, 1.0, 1.0, 0.58) if runtime_inactive else Color.WHITE
 		if is_new_card:
 			var input_callable := Callable(self, "_on_fireteam_mini_card_gui_input").bind(normalized_fireteam_id)
@@ -4832,6 +4837,93 @@ func _refresh_fireteam_mini_cards() -> void:
 		child.queue_free()
 	if fireteam_panel != null:
 		fireteam_panel.visible = desired_index > 0
+
+
+func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: Array, selected: bool, inactive: bool) -> void:
+	# Reuse the existing card/portraits and confirmed status projection. Only the
+	# A5 identity row and one primary status stay on this compact tactical surface.
+	var box := card.get_node_or_null("Margin/VBox") as VBoxContainer
+	var header := card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
+	if box == null or header == null:
+		return
+	card.custom_minimum_size = Vector2(256, 128)
+	card.set_meta("native_a5_portrait_team_card", true)
+	card.add_theme_stylebox_override("panel", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
+		TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_SELECTED if selected else TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL,
+		TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected else TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER, 2, 1))
+	var margin := card.get_node("Margin") as MarginContainer
+	for side in ["margin_left", "margin_right"]:
+		margin.add_theme_constant_override(side, 8)
+	for side in ["margin_top", "margin_bottom"]:
+		margin.add_theme_constant_override(side, 5)
+	box.add_theme_constant_override("separation", 4)
+	for child in box.get_children():
+		if child is Control:
+			(child as Control).visible = child.name in ["HeaderRow", "FireteamMemberPortraitStrip", "StageLabel"]
+	for child in header.get_children():
+		if child is Control:
+			(child as Control).visible = child.name in ["TitleEdit", "A5MemberCount"]
+	var title := header.get_node("TitleEdit") as LineEdit
+	title.custom_minimum_size = Vector2(0, 24)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.add_theme_font_size_override("font_size", 19)
+	title.add_theme_stylebox_override("normal", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0))
+	title.add_theme_stylebox_override("read_only", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0))
+	var count := header.get_node_or_null("A5MemberCount") as Label
+	if count == null:
+		count = Label.new()
+		count.name = "A5MemberCount"
+		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		header.add_child(count)
+	var total := _get_fireteam_units(fireteam_id, true).size()
+	count.text = "%d/%d" % [units.size(), maxi(total, units.size())]
+	count.visible = true
+	TACTICAL_UI_THEME_SCRIPT.style_label(count, false, 16)
+	var snapshot: Dictionary = card.get_meta("mission_fireteam_status_card_snapshot", {})
+	var status := card.get_node("Margin/VBox/StageLabel") as Label
+	status.text = _native_a5_team_status(snapshot, inactive)
+	status.visible = true
+	status.max_lines_visible = 1
+	status.clip_text = true
+	status.autowrap_mode = TextServer.AUTOWRAP_OFF
+	TACTICAL_UI_THEME_SCRIPT.style_label(status, false, 13)
+	status.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_WARNING if int(snapshot.get("contact_count", 0)) > 0 else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
+	var legacy_tooltip := card.tooltip_text
+	card.tooltip_text = "%s\n%s\n\n%s\n%s\nPortrait doppelklicken: Charakter ansehen" % [
+		_get_fireteam_display_label(fireteam_id), String(card.get_meta("mission_fireteam_lead_summary", "")), String(snapshot.get("tooltip_text", "")), legacy_tooltip]
+	var details_label := card.get_node_or_null("Margin/VBox/MemberLabel") as Label
+	if details_label != null:
+		details_label.tooltip_text = card.tooltip_text
+
+
+func _native_a5_team_status(snapshot: Dictionary, inactive: bool) -> String:
+	if inactive:
+		return "Nicht aktiv"
+	var suppression := String(snapshot.get("suppression_state", "ready"))
+	if suppression in ["pinned", "suppressed"]:
+		return "Festgesetzt" if suppression == "pinned" else "Unter Beschuss"
+	var contacts := int(snapshot.get("contact_count", 0))
+	if contacts > 0:
+		return "%d Feindkontakt%s" % [contacts, "e" if contacts != 1 else ""]
+	var counts := Dictionary(Dictionary(snapshot.get("member_status", {})).get("counts", {}))
+	if int(counts.get("busy", 0)) > 0:
+		return "Auftrag wird ausgeführt"
+	if int(counts.get("down", 0)) > 0:
+		return "Verluste im Trupp"
+	if String(snapshot.get("readiness_state", "unavailable")) in ["high", "medium"]:
+		return "Bereit"
+	return "Im Einsatz"
+
+
+func _on_native_member_portrait_gui_input(event: InputEvent, unit_id: String, fireteam_id: String) -> void:
+	if event is InputEventMouseButton:
+		var mouse := event as InputEventMouseButton
+		if mouse.button_index == MOUSE_BUTTON_LEFT and mouse.pressed:
+			_cancel_selection_interaction()
+			_on_fireteam_group_pressed(fireteam_id)
+			if mouse.double_click:
+				_open_character_overlay(unit_id)
+			get_viewport().set_input_as_handled()
 
 
 func _build_fireteam_mini_card_static_signature(fireteam_id: String, lead, lead_summary: String) -> String:
@@ -5268,6 +5360,7 @@ func _apply_fireteam_mini_card_leader_portrait(card: Control, lead) -> void:
 	portrait_rect.visible = true
 	portrait_rect.set_meta("mission_fireteam_leader_portrait", true)
 	portrait_rect.set_meta("mission_fireteam_leader_portrait_signature", portrait_signature)
+	portrait_rect.visible = false # Member portraits carry identity in A5, without a duplicate tiny face.
 
 
 func _apply_fireteam_mini_card_status_context(card: Control, fireteam_id: String, units: Array = []) -> void:
@@ -5636,9 +5729,10 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		strip.visible = not resolved_units.is_empty()
 		return
 	strip.visible = not resolved_units.is_empty()
-	var portrait_edge := minf(36.0, floorf((216.0 - maxf(0.0, float(resolved_units.size() - 1)) * 3.0) / maxf(1.0, float(resolved_units.size()))))
+	var portrait_edge := minf(58.0, floorf((244.0 - maxf(0.0, float(resolved_units.size() - 1)) * 4.0) / maxf(1.0, float(resolved_units.size()))))
 	portrait_edge = maxf(18.0, portrait_edge)
-	strip.custom_minimum_size = Vector2(0.0, portrait_edge)
+	strip.add_theme_constant_override("separation", 4)
+	strip.custom_minimum_size = Vector2(0.0, 70.0)
 	strip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	while strip.get_child_count() > resolved_units.size():
 		var stale_child := strip.get_child(strip.get_child_count() - 1)
@@ -5647,8 +5741,8 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 	while strip.get_child_count() < resolved_units.size():
 		var portrait := TextureRect.new()
 		portrait.name = "MemberPortrait%02d" % (strip.get_child_count() + 1)
-		portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		portrait.custom_minimum_size = Vector2(portrait_edge, portrait_edge)
+		portrait.mouse_filter = Control.MOUSE_FILTER_STOP
+		portrait.custom_minimum_size = Vector2(portrait_edge, 70.0)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		strip.add_child(portrait)
@@ -5657,7 +5751,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		var portrait_rect := strip.get_child(index) as TextureRect
 		if unit == null or portrait_rect == null:
 			continue
-		portrait_rect.custom_minimum_size = Vector2(portrait_edge, portrait_edge)
+		portrait_rect.custom_minimum_size = Vector2(portrait_edge, 70.0)
 		var profile_variant: Variant = _build_profile_from_unit(unit)
 		var profile: Dictionary = Dictionary(profile_variant) if typeof(profile_variant) == TYPE_DICTIONARY else {}
 		var portrait_id: String = String(profile.get("portrait_id", "")).strip_edges()
@@ -5668,6 +5762,14 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		portrait_rect.modulate = Color.WHITE if portrait_rect.texture != null else Color(0.42, 0.46, 0.50, 1.0)
 		portrait_rect.tooltip_text = String(unit.call("get_display_name")) if unit.has_method("get_display_name") else unit.name
 		portrait_rect.set_meta("mission_fireteam_member_portrait", true)
+		var unit_id := String(unit.call("get_unit_id")) if unit.has_method("get_unit_id") else String(unit.name)
+		portrait_rect.set_meta("mission_member_unit_id", unit_id)
+		var input_callable := Callable(self, "_on_native_member_portrait_gui_input").bind(unit_id, fireteam_id)
+		if not portrait_rect.gui_input.is_connected(input_callable):
+			for connection in portrait_rect.get_signal_connection_list("gui_input"):
+				portrait_rect.gui_input.disconnect(connection.callable)
+			portrait_rect.gui_input.connect(input_callable)
+		TACTICAL_UI_THEME_SCRIPT.decorate_panel(portrait_rect, "portrait")
 	strip.set_meta("mission_fireteam_member_portrait_strip", true)
 	strip.set_meta("mission_fireteam_member_portrait_signature", portrait_signature)
 	strip.set_meta("native_r4_portrait_edge", portrait_edge)
@@ -12095,34 +12197,51 @@ func get_mission_team_chip_snapshot() -> Dictionary:
 
 
 func _ensure_mission_dropship_panel() -> void:
-	var tactical_ui := get_node_or_null("../TacticalUI") as CanvasLayer
-	if tactical_ui == null:
+	NATIVE_A5_DROPSHIP_SCRIPT.ensure(self)
+
+
+func _on_native_dropship_selected(index: int) -> void:
+	var selector := get_node_or_null("../TacticalUI/MissionDropshipPanel/CraftSelector") as OptionButton
+	if selector != null and index >= 0 and index < selector.item_count:
+		select_mission_dropship_craft(String(selector.get_item_metadata(index)))
+
+
+func _open_native_dropship_details() -> void:
+	NATIVE_A5_DROPSHIP_SCRIPT.ensure(self)
+	var popup := get_node_or_null("../TacticalUI/A5DropshipDetailsPopup") as PopupPanel
+	if popup == null or not _tactical_ui_visible:
 		return
-	var panel := tactical_ui.get_node_or_null("MissionDropshipPanel") as Control
-	if panel != null:
-		return
-	panel = VBoxContainer.new()
-	panel.name = "MissionDropshipPanel"
-	panel.visible = false
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.clip_contents = false
-	panel.add_theme_constant_override("separation", int(MISSION_DROPSHIP_PANEL_STACK_GAP))
-	_enforce_mission_dropship_panel_geometry(panel)
-	tactical_ui.add_child(panel)
-	_set_control_tree_mouse_filter(panel, Control.MOUSE_FILTER_IGNORE)
+	var available := get_viewport().get_visible_rect().size - Vector2(48, 48)
+	popup.popup_centered(Vector2i(Vector2(440, 180).min(available)))
+	_refresh_mission_dropship_panel()
+	var close := popup.get_node_or_null("Contents/CloseButton") as Button
+	if close != null:
+		close.grab_focus()
 
 
 func _refresh_mission_dropship_panel() -> void:
-	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as Control
+	var panel: Control = NATIVE_A5_DROPSHIP_SCRIPT.ensure(self)
 	if panel == null:
 		return
-	_enforce_mission_dropship_panel_geometry(panel)
 	var contact_focus_active: bool = _is_mission_contact_focus_active()
 	var card_entries: Array = _build_contact_focused_mission_dropship_card_entries(_get_mission_dropship_card_entries(), contact_focus_active)
+	NATIVE_A5_DROPSHIP_SCRIPT.refresh(self, card_entries, _tactical_ui_visible)
+	var popup := get_node_or_null("../TacticalUI/A5DropshipDetailsPopup") as PopupPanel
+	if popup == null or not popup.visible:
+		return
+	_enforce_mission_dropship_panel_geometry(panel)
 	var show_panel: bool = _tactical_ui_visible and not card_entries.is_empty()
 	if not show_panel:
 		panel.visible = false
 		return
+	# The full detail controls are refreshed from their existing owner snapshot.
+	# Retain real keyboard focus by the stable craft/action path across that
+	# replacement; a vanished/disabled action falls back to the modal close key.
+	var focused_path := NodePath()
+	var focus_owner := panel.get_viewport().gui_get_focus_owner()
+	if focus_owner != null and panel.is_ancestor_of(focus_owner):
+		focused_path = panel.get_path_to(focus_owner)
+	NATIVE_A5_DROPSHIP_SCRIPT.preserve_details_scroll(self)
 	panel.visible = false
 	_clear_mission_dropship_panel_cards(panel)
 	for card_variant in card_entries:
@@ -12133,8 +12252,8 @@ func _refresh_mission_dropship_panel() -> void:
 		var ship_texture := _get_mission_dropship_card_texture(card)
 		var card_panel := PanelContainer.new()
 		card_panel.name = "MissionDropshipCard_%s" % _sanitize_node_name(craft_id)
-		card_panel.custom_minimum_size = MISSION_DROPSHIP_PANEL_SIZE
-		card_panel.size_flags_horizontal = Control.SIZE_SHRINK_END
+		card_panel.custom_minimum_size = Vector2(336, 0)
+		card_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		card_panel.focus_mode = Control.FOCUS_ALL
 		card_panel.set_meta("mission_dropship_card", true)
@@ -12204,9 +12323,19 @@ func _refresh_mission_dropship_panel() -> void:
 		_populate_mission_dropship_passenger_content(card_panel, card)
 		_set_control_tree_mouse_filter(card_panel, Control.MOUSE_FILTER_IGNORE)
 		card_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+		NATIVE_A5_DROPSHIP_SCRIPT.style_details_card(card_panel)
 		_restore_mission_dropship_action_button_mouse_filters(card_panel)
 	_enforce_mission_dropship_panel_geometry(panel)
 	panel.visible = true
+	NATIVE_A5_DROPSHIP_SCRIPT.fit_details_popup(self)
+	if not focused_path.is_empty():
+		var next_focus := panel.get_node_or_null(focused_path) as Control
+		if next_focus != null and next_focus.is_visible_in_tree() and not (next_focus is BaseButton and (next_focus as BaseButton).disabled):
+			next_focus.grab_focus()
+		else:
+			var close := popup.get_node_or_null("Contents/CloseButton") as Button
+			if close != null:
+				close.grab_focus()
 	call_deferred("_deferred_enforce_mission_dropship_panel_geometry")
 
 
@@ -12418,9 +12547,10 @@ func _build_mission_dropship_fireteam_payload_card(fireteam_id: String, group_id
 	META_UI_SKIN_SCRIPT.style_body_label(header, 8)
 	vbox.add_child(header)
 
-	var portrait_row := HBoxContainer.new()
+	var portrait_row := HFlowContainer.new()
 	portrait_row.name = "PassengerPortraitRow"
-	portrait_row.add_theme_constant_override("separation", 2)
+	portrait_row.add_theme_constant_override("h_separation", 4)
+	portrait_row.add_theme_constant_override("v_separation", 4)
 	portrait_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	portrait_row.set_meta("mission_dropship_payload_portrait_row", true)
 	vbox.add_child(portrait_row)
@@ -12818,6 +12948,9 @@ func _on_mission_dropship_card_set_lz_pressed(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
 		return
+	var card := _find_mission_dropship_card_entry(normalized_craft_id)
+	if card.is_empty() or _is_network_dropship_command_pending(normalized_craft_id) or not _can_request_mission_dropship_card_lz(card):
+		return
 	if not _select_mission_dropship_craft(normalized_craft_id, false, false):
 		return
 	if not _can_edit_planning():
@@ -12828,6 +12961,11 @@ func _on_mission_dropship_card_set_lz_pressed(craft_id: String) -> void:
 	_is_lz_placement_armed = true
 	_lz_placement_craft_id = normalized_craft_id
 	_last_command_text = "CLICK MAP FOR LZ TILE: %s" % _mission_drop_display_name
+	var popup := get_node_or_null("../TacticalUI/A5DropshipDetailsPopup") as PopupPanel
+	if popup != null:
+		# Successful arming requires the next input on the map. Reject/pending
+		# branches above leave the details view open and do not pretend success.
+		popup.hide()
 	_refresh_button_state()
 	_update_ui()
 
@@ -13007,39 +13145,20 @@ func _refresh_legacy_mission_dropship_panel() -> void:
 func _enforce_mission_dropship_panel_geometry(panel: Control) -> void:
 	if panel == null:
 		return
-	var viewport := get_viewport()
-	var viewport_size: Vector2 = viewport.get_visible_rect().size if viewport != null else Vector2(1920.0, 1080.0)
-	var card_count: int = maxi(_get_mission_dropship_card_entries().size(), 1)
-	var panel_size := Vector2(
-		MISSION_DROPSHIP_PANEL_SIZE.x,
-		MISSION_DROPSHIP_PANEL_SIZE.y * float(card_count) + MISSION_DROPSHIP_PANEL_STACK_GAP * float(card_count - 1)
-	)
-	var panel_position := Vector2(
-		maxf(viewport_size.x - panel_size.x - MISSION_DROPSHIP_PANEL_MARGIN_RIGHT, 0.0),
-		_get_mission_dropship_panel_top_offset()
-	)
-	panel.top_level = true
-	panel.anchor_left = 0.0
-	panel.anchor_top = 0.0
-	panel.anchor_right = 0.0
-	panel.anchor_bottom = 0.0
-	panel.position = panel_position
-	panel.size = panel_size
-	panel.custom_minimum_size = panel_size
-	panel.offset_left = panel_position.x
-	panel.offset_top = panel_position.y
-	panel.offset_right = panel_position.x + panel_size.x
-	panel.offset_bottom = panel_position.y + panel_size.y
+	# The full controls now live in a native modal scroll, not on the map.
+	# Container geometry owns them; never restore the legacy absolute map rect.
+	panel.set_as_top_level(false)
+	panel.custom_minimum_size = Vector2(336, 0)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.clip_contents = false
-	panel.set_deferred("position", panel_position)
-	panel.set_deferred("size", panel_size)
 
 
 func _deferred_enforce_mission_dropship_panel_geometry() -> void:
-	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as Control
-	if panel == null:
-		return
-	_enforce_mission_dropship_panel_geometry(panel)
+	var panel := get_node_or_null(NATIVE_A5_DROPSHIP_SCRIPT.FULL_PATH) as Control
+	if panel != null:
+		_enforce_mission_dropship_panel_geometry(panel)
+		NATIVE_A5_DROPSHIP_SCRIPT.fit_details_popup(self)
+		NATIVE_A5_DROPSHIP_SCRIPT.restore_details_scroll(self)
 
 
 func _get_mission_dropship_panel_top_offset() -> float:

@@ -1,0 +1,56 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Regular saved GM01 loads through the actual Hex contract
+PASS: All 9408 real cells fill 96 columns and 98 rows without gaps, including negative r
+PASS: west edge is actual saved selectable/walkable ground
+PASS: west edge has an actual legal six-neighbor route from the original insertion
+PASS: west exterior has no invented gameplay cell
+PASS: east edge is actual saved selectable/walkable ground
+PASS: east edge has an actual legal six-neighbor route from the original insertion
+PASS: east exterior has no invented gameplay cell
+PASS: north edge is actual saved selectable/walkable ground
+PASS: north edge has an actual legal six-neighbor route from the original insertion
+PASS: north exterior has no invented gameplay cell
+PASS: south edge is actual saved selectable/walkable ground
+PASS: south edge has an actual legal six-neighbor route from the original insertion
+PASS: south exterior has no invented gameplay cell
+PASS: Native GO target (-8,12) is reachable beyond the former western border
+PASS: Runtime ground consumes precisely the loaded MapData cells, not an offline fallback
+PASS: Fixed authored ground/grid/FoW stay resident rather than rebuilding on camera chunks
+PASS: Every ground face uses Godot clockwise top-facing winding with upward shading normals
+PASS: Every rendered ground polygon belongs to exactly one saved Hex; no decorative outside PlaneMesh
+PASS: Exact scalloped Hex boundary encloses the formerly visible 96x84m ground
+PASS: Ground reconstruction preserves the original world-XZ material and model anchors
+PASS: west edge survives actual camera bounds, including negative coordinates
+PASS: west edge is picked as the exact real Hex
+PASS: west outside surface is not silently clamped to a playable Hex
+PASS: west real edge receives the same known-terrain mask
+PASS: east edge survives actual camera bounds, including negative coordinates
+PASS: east edge is picked as the exact real Hex
+PASS: east outside surface is not silently clamped to a playable Hex
+PASS: east real edge receives the same known-terrain mask
+PASS: north edge survives actual camera bounds, including negative coordinates
+PASS: north edge is picked as the exact real Hex
+PASS: north outside surface is not silently clamped to a playable Hex
+PASS: north real edge receives the same known-terrain mask
+PASS: south edge survives actual camera bounds, including negative coordinates
+PASS: south edge is picked as the exact real Hex
+PASS: south outside surface is not silently clamped to a playable Hex
+PASS: south real edge receives the same known-terrain mask
+PASS: Camera travel to all edges causes no full authored map/grid/FoW rebuild
+PASS: Full ground coverage preserves the independent dynamic enemy visibility gate
+PASS: Unknown mask protects all 9408 cells up to the real map edge
+PASS: west edge stays unknown in blackout mode
+PASS: east edge stays unknown in blackout mode
+PASS: north edge stays unknown in blackout mode
+PASS: south edge stays unknown in blackout mode
+PASS: Normal Save/Load retains every new edge and negative row
+PASS: Same-layout map switch uses its four actual saved cells, never leaves the large ground behind
+PASS: Only the actual authored GM01 has a distinct dark offmap background instead of apparent sand
+PASS: Legacy map switch removes the authored ground and its diagnostics
+PASS: Plain legacy map switch restores its normal editor/art-profile background
+PASS: Generic Frontier maps retain their existing art-profile background without the GM01-only override
+PASS: Ground, camera, masks, picking and roundtrip tests do not mutate source/Registry facts
+=== RESULTS: 51 passed, 0 failed ===
+GM01_FRONTIER_MAP_EDGE_ALL_PASS

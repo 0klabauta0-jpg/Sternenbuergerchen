@@ -1,0 +1,297 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Old HPA source remains byte-identical to the measured baseline
+PASS: Pinned old implementation compiles after removing only its global class_name
+PASS: Old TerrainPathfinder source remains byte-identical and independently pinned
+PASS: Old HPA uses a separately compiled old TerrainPathfinder, not the new heap
+PASS: Ordinary paths use the real minimum surface cost
+PASS: Cover bonuses use the lower clamped cover-aware floor
+PASS: Finite cover weight gives the tighter surface-minus-maximum-bonus floor
+PASS: Finite negative custom penalties remain valid under the existing clamps
+PASS: Nonfinite custom costs keep the complete old evaluation path
+PASS: Nonfinite custom exposure disables the lower bound
+PASS: Equality is evaluated by the unchanged original tie rule
+PASS: Near equality stays on the original path despite summation rounding
+PASS: A strictly losing finite candidate is rejected before A*
+PASS: Actual saved 9408-cell GM01 is the comparison fixture
+PASS: Actual GM01 builds the same full HPA graph
+PASS: gm01 measured GO pair: exact status
+PASS: gm01 measured GO pair: exact ordered path array including all tie choices
+PASS: gm01 measured GO pair: result contains no private context or new gameplay fields
+PASS: gm01 measured GO pair: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: gm01 measured GO pair: public HPA query leaves caller-owned options unchanged
+PASS: gm01 measured GO pair: query leaves terrain authority unchanged
+PASS: gm01 measured GO pair: diagnostic counter equals actual local A* calls
+PASS: gm01 measured GO pair: no extra A* evaluation
+PASS: gm01 measured GO pair: measured query actually avoids losing candidates
+HPA_PRUNING_QUERY {"case":"gm01 measured GO pair","debug":{"derived_only":true,"local_astar_evaluation_count":86,"lower_bound_pruned_count":24,"minimum_local_step_cost":0.7,"portal_candidate_count":92,"step_cost_cache_hit_count":13959,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":921,"target_cell_cache_hit_count":1348,"target_cell_compute_count":210,"traversability_cache_hit_count":15576,"traversability_compute_count":1005},"new_astar":86,"new_usec":111846,"old_astar":110,"old_usec":197533,"path_size":11,"status":"hpa"}
+PASS: gm01 new western cells: exact status
+PASS: gm01 new western cells: exact ordered path array including all tie choices
+PASS: gm01 new western cells: result contains no private context or new gameplay fields
+PASS: gm01 new western cells: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: gm01 new western cells: public HPA query leaves caller-owned options unchanged
+PASS: gm01 new western cells: query leaves terrain authority unchanged
+PASS: gm01 new western cells: diagnostic counter equals actual local A* calls
+PASS: gm01 new western cells: no extra A* evaluation
+PASS: gm01 new western cells: measured query actually avoids losing candidates
+HPA_PRUNING_QUERY {"case":"gm01 new western cells","debug":{"derived_only":true,"local_astar_evaluation_count":72,"lower_bound_pruned_count":35,"minimum_local_step_cost":0.7,"portal_candidate_count":95,"step_cost_cache_hit_count":24227,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":1227,"target_cell_cache_hit_count":1572,"target_cell_compute_count":256,"traversability_cache_hit_count":26093,"traversability_compute_count":1306},"new_astar":72,"new_usec":126474,"old_astar":107,"old_usec":348935,"path_size":10,"status":"hpa"}
+PASS: gm01 weighted GO pair: exact status
+PASS: gm01 weighted GO pair: exact ordered path array including all tie choices
+PASS: gm01 weighted GO pair: result contains no private context or new gameplay fields
+PASS: gm01 weighted GO pair: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: gm01 weighted GO pair: public HPA query leaves caller-owned options unchanged
+PASS: gm01 weighted GO pair: query leaves terrain authority unchanged
+PASS: gm01 weighted GO pair: diagnostic counter equals actual local A* calls
+PASS: gm01 weighted GO pair: no extra A* evaluation
+PASS: gm01 weighted GO pair: measured query actually avoids losing candidates
+HPA_PRUNING_QUERY {"case":"gm01 weighted GO pair","debug":{"derived_only":true,"local_astar_evaluation_count":86,"lower_bound_pruned_count":24,"minimum_local_step_cost":0.45,"portal_candidate_count":92,"step_cost_cache_hit_count":38127,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":1417,"target_cell_cache_hit_count":1806,"target_cell_compute_count":305,"traversability_cache_hit_count":42457,"traversability_compute_count":1542},"new_astar":86,"new_usec":251658,"old_astar":110,"old_usec":625275,"path_size":11,"status":"hpa"}
+PASS: gm01 production movement options: exact status
+PASS: gm01 production movement options: exact ordered path array including all tie choices
+PASS: gm01 production movement options: result contains no private context or new gameplay fields
+PASS: gm01 production movement options: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: gm01 production movement options: public HPA query leaves caller-owned options unchanged
+PASS: gm01 production movement options: query leaves terrain authority unchanged
+PASS: gm01 production movement options: diagnostic counter equals actual local A* calls
+PASS: gm01 production movement options: no extra A* evaluation
+PASS: gm01 production movement options: measured query actually avoids losing candidates
+HPA_PRUNING_QUERY {"case":"gm01 production movement options","debug":{"derived_only":true,"local_astar_evaluation_count":69,"lower_bound_pruned_count":14,"minimum_local_step_cost":0.1225,"portal_candidate_count":66,"step_cost_cache_hit_count":26907,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":927,"target_cell_cache_hit_count":1226,"target_cell_compute_count":211,"traversability_cache_hit_count":29855,"traversability_compute_count":1006},"new_astar":69,"new_usec":153546,"old_astar":83,"old_usec":1258424,"path_size":11,"status":"hpa"}
+PASS: Exact real-map comparisons never rewrite the saved map
+PASS: Small negative-coordinate fixture builds
+PASS: negative hex (-4, -3) to (4, 3): exact status
+PASS: negative hex (-4, -3) to (4, 3): exact ordered path array including all tie choices
+PASS: negative hex (-4, -3) to (4, 3): result contains no private context or new gameplay fields
+PASS: negative hex (-4, -3) to (4, 3): exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: negative hex (-4, -3) to (4, 3): public HPA query leaves caller-owned options unchanged
+PASS: negative hex (-4, -3) to (4, 3): query leaves terrain authority unchanged
+PASS: negative hex (-4, -3) to (4, 3): diagnostic counter equals actual local A* calls
+PASS: negative hex (-4, -3) to (4, 3): no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"negative hex (-4, -3) to (4, 3)","debug":{"derived_only":true,"local_astar_evaluation_count":63,"lower_bound_pruned_count":150,"minimum_local_step_cost":0.7,"portal_candidate_count":202,"step_cost_cache_hit_count":1193,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":406,"target_cell_cache_hit_count":495,"target_cell_compute_count":97,"traversability_cache_hit_count":1286,"traversability_compute_count":428},"new_astar":63,"new_usec":28988,"old_astar":214,"old_usec":49398,"path_size":15,"status":"hpa"}
+PASS: negative hex (4, 3) to (-4, -3): exact status
+PASS: negative hex (4, 3) to (-4, -3): exact ordered path array including all tie choices
+PASS: negative hex (4, 3) to (-4, -3): result contains no private context or new gameplay fields
+PASS: negative hex (4, 3) to (-4, -3): exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: negative hex (4, 3) to (-4, -3): public HPA query leaves caller-owned options unchanged
+PASS: negative hex (4, 3) to (-4, -3): query leaves terrain authority unchanged
+PASS: negative hex (4, 3) to (-4, -3): diagnostic counter equals actual local A* calls
+PASS: negative hex (4, 3) to (-4, -3): no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"negative hex (4, 3) to (-4, -3)","debug":{"derived_only":true,"local_astar_evaluation_count":77,"lower_bound_pruned_count":121,"minimum_local_step_cost":0.7,"portal_candidate_count":186,"step_cost_cache_hit_count":1579,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":423,"target_cell_cache_hit_count":563,"target_cell_compute_count":95,"traversability_cache_hit_count":1658,"traversability_compute_count":445},"new_astar":77,"new_usec":23561,"old_astar":198,"old_usec":50854,"path_size":15,"status":"hpa"}
+PASS: negative hex (-2, 1) to (2, -1): exact status
+PASS: negative hex (-2, 1) to (2, -1): exact ordered path array including all tie choices
+PASS: negative hex (-2, 1) to (2, -1): result contains no private context or new gameplay fields
+PASS: negative hex (-2, 1) to (2, -1): exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: negative hex (-2, 1) to (2, -1): public HPA query leaves caller-owned options unchanged
+PASS: negative hex (-2, 1) to (2, -1): query leaves terrain authority unchanged
+PASS: negative hex (-2, 1) to (2, -1): diagnostic counter equals actual local A* calls
+PASS: negative hex (-2, 1) to (2, -1): no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"negative hex (-2, 1) to (2, -1)","debug":{"derived_only":true,"local_astar_evaluation_count":28,"lower_bound_pruned_count":21,"minimum_local_step_cost":0.7,"portal_candidate_count":44,"step_cost_cache_hit_count":216,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":88,"target_cell_cache_hit_count":108,"target_cell_compute_count":38,"traversability_cache_hit_count":228,"traversability_compute_count":88},"new_astar":28,"new_usec":3708,"old_astar":52,"old_usec":11285,"path_size":5,"status":"hpa"}
+PASS: negative hex (-1, -1) to (-1, -1): exact status
+PASS: negative hex (-1, -1) to (-1, -1): exact ordered path array including all tie choices
+PASS: negative hex (-1, -1) to (-1, -1): result contains no private context or new gameplay fields
+PASS: negative hex (-1, -1) to (-1, -1): exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: negative hex (-1, -1) to (-1, -1): public HPA query leaves caller-owned options unchanged
+PASS: negative hex (-1, -1) to (-1, -1): query leaves terrain authority unchanged
+PASS: negative hex (-1, -1) to (-1, -1): diagnostic counter equals actual local A* calls
+PASS: negative hex (-1, -1) to (-1, -1): no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"negative hex (-1, -1) to (-1, -1)","debug":{"derived_only":true,"local_astar_evaluation_count":1,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":0,"step_cost_cache_hit_count":0,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":0,"target_cell_cache_hit_count":0,"target_cell_compute_count":0,"traversability_cache_hit_count":0,"traversability_compute_count":0},"new_astar":1,"new_usec":33,"old_astar":1,"old_usec":15,"path_size":1,"status":"same_component"}
+PASS: all weighted penalties and signed lane: exact status
+PASS: all weighted penalties and signed lane: exact ordered path array including all tie choices
+PASS: all weighted penalties and signed lane: result contains no private context or new gameplay fields
+PASS: all weighted penalties and signed lane: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: all weighted penalties and signed lane: public HPA query leaves caller-owned options unchanged
+PASS: all weighted penalties and signed lane: query leaves terrain authority unchanged
+PASS: all weighted penalties and signed lane: diagnostic counter equals actual local A* calls
+PASS: all weighted penalties and signed lane: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"all weighted penalties and signed lane","debug":{"derived_only":true,"local_astar_evaluation_count":91,"lower_bound_pruned_count":109,"minimum_local_step_cost":0.05,"portal_candidate_count":186,"step_cost_cache_hit_count":11297,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":493,"target_cell_cache_hit_count":683,"target_cell_compute_count":98,"traversability_cache_hit_count":12130,"traversability_compute_count":555},"new_astar":91,"new_usec":86653,"old_astar":200,"old_usec":825916,"path_size":12,"status":"hpa"}
+PASS: negative custom weights: exact status
+PASS: negative custom weights: exact ordered path array including all tie choices
+PASS: negative custom weights: result contains no private context or new gameplay fields
+PASS: negative custom weights: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: negative custom weights: public HPA query leaves caller-owned options unchanged
+PASS: negative custom weights: query leaves terrain authority unchanged
+PASS: negative custom weights: diagnostic counter equals actual local A* calls
+PASS: negative custom weights: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"negative custom weights","debug":{"derived_only":true,"local_astar_evaluation_count":63,"lower_bound_pruned_count":111,"minimum_local_step_cost":0.7,"portal_candidate_count":163,"step_cost_cache_hit_count":3269,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":409,"target_cell_cache_hit_count":494,"target_cell_compute_count":90,"traversability_cache_hit_count":3490,"traversability_compute_count":441},"new_astar":63,"new_usec":29792,"old_astar":176,"old_usec":130555,"path_size":11,"status":"hpa"}
+PASS: cover bonus clamps below surface floor: exact status
+PASS: cover bonus clamps below surface floor: exact ordered path array including all tie choices
+PASS: cover bonus clamps below surface floor: result contains no private context or new gameplay fields
+PASS: cover bonus clamps below surface floor: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: cover bonus clamps below surface floor: public HPA query leaves caller-owned options unchanged
+PASS: cover bonus clamps below surface floor: query leaves terrain authority unchanged
+PASS: cover bonus clamps below surface floor: diagnostic counter equals actual local A* calls
+PASS: cover bonus clamps below surface floor: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"cover bonus clamps below surface floor","debug":{"derived_only":true,"local_astar_evaluation_count":78,"lower_bound_pruned_count":59,"minimum_local_step_cost":0.05,"portal_candidate_count":124,"step_cost_cache_hit_count":9503,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":466,"target_cell_cache_hit_count":617,"target_cell_compute_count":95,"traversability_cache_hit_count":10642,"traversability_compute_count":522},"new_astar":78,"new_usec":55179,"old_astar":137,"old_usec":196783,"path_size":11,"status":"hpa"}
+PASS: Mixed-height Hex fixture updates its actual slope connectivity
+PASS: mixed-height weighted Hex exact: exact status
+PASS: mixed-height weighted Hex exact: exact ordered path array including all tie choices
+PASS: mixed-height weighted Hex exact: result contains no private context or new gameplay fields
+PASS: mixed-height weighted Hex exact: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: mixed-height weighted Hex exact: public HPA query leaves caller-owned options unchanged
+PASS: mixed-height weighted Hex exact: query leaves terrain authority unchanged
+PASS: mixed-height weighted Hex exact: diagnostic counter equals actual local A* calls
+PASS: mixed-height weighted Hex exact: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"mixed-height weighted Hex exact","debug":{"derived_only":true,"local_astar_evaluation_count":91,"lower_bound_pruned_count":109,"minimum_local_step_cost":0.05,"portal_candidate_count":186,"step_cost_cache_hit_count":11299,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":493,"target_cell_cache_hit_count":683,"target_cell_compute_count":98,"traversability_cache_hit_count":12136,"traversability_compute_count":555},"new_astar":91,"new_usec":78965,"old_astar":200,"old_usec":793055,"path_size":12,"status":"hpa"}
+PASS: missing destination: exact status
+PASS: missing destination: exact ordered path array including all tie choices
+PASS: missing destination: result contains no private context or new gameplay fields
+PASS: missing destination: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: missing destination: public HPA query leaves caller-owned options unchanged
+PASS: missing destination: query leaves terrain authority unchanged
+PASS: missing destination: diagnostic counter equals actual local A* calls
+PASS: missing destination: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"missing destination","debug":{"derived_only":true,"local_astar_evaluation_count":0,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":0,"step_cost_cache_hit_count":0,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":0,"target_cell_cache_hit_count":0,"target_cell_compute_count":0,"traversability_cache_hit_count":0,"traversability_compute_count":0},"new_astar":0,"new_usec":23,"old_astar":0,"old_usec":12,"path_size":0,"status":"no_component"}
+PASS: Blocked barrier rebuilds dirty clusters on the same graph
+PASS: blocked disconnected graph: exact status
+PASS: blocked disconnected graph: exact ordered path array including all tie choices
+PASS: blocked disconnected graph: result contains no private context or new gameplay fields
+PASS: blocked disconnected graph: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: blocked disconnected graph: public HPA query leaves caller-owned options unchanged
+PASS: blocked disconnected graph: query leaves terrain authority unchanged
+PASS: blocked disconnected graph: diagnostic counter equals actual local A* calls
+PASS: blocked disconnected graph: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"blocked disconnected graph","debug":{"derived_only":true,"local_astar_evaluation_count":26,"lower_bound_pruned_count":56,"minimum_local_step_cost":0.7,"portal_candidate_count":82,"step_cost_cache_hit_count":373,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":154,"target_cell_cache_hit_count":183,"target_cell_compute_count":42,"traversability_cache_hit_count":406,"traversability_compute_count":162},"new_astar":26,"new_usec":5922,"old_astar":82,"old_usec":10884,"path_size":0,"status":"no_abstract_route"}
+PASS: blocked source: exact status
+PASS: blocked source: exact ordered path array including all tie choices
+PASS: blocked source: result contains no private context or new gameplay fields
+PASS: blocked source: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: blocked source: public HPA query leaves caller-owned options unchanged
+PASS: blocked source: query leaves terrain authority unchanged
+PASS: blocked source: diagnostic counter equals actual local A* calls
+PASS: blocked source: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"blocked source","debug":{"derived_only":true,"local_astar_evaluation_count":0,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":0,"step_cost_cache_hit_count":0,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":0,"target_cell_cache_hit_count":0,"target_cell_compute_count":0,"traversability_cache_hit_count":0,"traversability_compute_count":0},"new_astar":0,"new_usec":19,"old_astar":0,"old_usec":7,"path_size":0,"status":"no_component"}
+PASS: Minimum-surface-cost fixture builds
+PASS: road summation and equal routes: exact status
+PASS: road summation and equal routes: exact ordered path array including all tie choices
+PASS: road summation and equal routes: result contains no private context or new gameplay fields
+PASS: road summation and equal routes: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: road summation and equal routes: public HPA query leaves caller-owned options unchanged
+PASS: road summation and equal routes: query leaves terrain authority unchanged
+PASS: road summation and equal routes: diagnostic counter equals actual local A* calls
+PASS: road summation and equal routes: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"road summation and equal routes","debug":{"derived_only":true,"local_astar_evaluation_count":53,"lower_bound_pruned_count":129,"minimum_local_step_cost":0.7,"portal_candidate_count":175,"step_cost_cache_hit_count":958,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":340,"target_cell_cache_hit_count":403,"target_cell_compute_count":93,"traversability_cache_hit_count":1016,"traversability_compute_count":344},"new_astar":53,"new_usec":11524,"old_astar":187,"old_usec":36750,"path_size":15,"status":"hpa"}
+PASS: equal-cost closer-entry tie improves: exact status
+PASS: equal-cost closer-entry tie improves: exact ordered path array including all tie choices
+PASS: equal-cost closer-entry tie improves: result contains no private context or new gameplay fields
+PASS: equal-cost closer-entry tie improves: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: equal-cost closer-entry tie improves: public HPA query leaves caller-owned options unchanged
+PASS: equal-cost closer-entry tie improves: query leaves terrain authority unchanged
+PASS: equal-cost closer-entry tie improves: diagnostic counter equals actual local A* calls
+PASS: equal-cost closer-entry tie improves: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"equal-cost closer-entry tie improves","debug":{"derived_only":true,"local_astar_evaluation_count":6,"lower_bound_pruned_count":0,"minimum_local_step_cost":0.7,"portal_candidate_count":2,"step_cost_cache_hit_count":23,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":25,"target_cell_cache_hit_count":18,"target_cell_compute_count":15,"traversability_cache_hit_count":42,"traversability_compute_count":25},"new_astar":6,"new_usec":1059,"old_astar":6,"old_usec":772,"path_size":4,"status":"hpa"}
+PASS: Tie fixture actually selects the later, closer entry
+PASS: equal-cost farther-entry tie rejected: exact status
+PASS: equal-cost farther-entry tie rejected: exact ordered path array including all tie choices
+PASS: equal-cost farther-entry tie rejected: result contains no private context or new gameplay fields
+PASS: equal-cost farther-entry tie rejected: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: equal-cost farther-entry tie rejected: public HPA query leaves caller-owned options unchanged
+PASS: equal-cost farther-entry tie rejected: query leaves terrain authority unchanged
+PASS: equal-cost farther-entry tie rejected: diagnostic counter equals actual local A* calls
+PASS: equal-cost farther-entry tie rejected: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"equal-cost farther-entry tie rejected","debug":{"derived_only":true,"local_astar_evaluation_count":6,"lower_bound_pruned_count":0,"minimum_local_step_cost":0.7,"portal_candidate_count":2,"step_cost_cache_hit_count":23,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":25,"target_cell_cache_hit_count":18,"target_cell_compute_count":15,"traversability_cache_hit_count":42,"traversability_compute_count":25},"new_astar":6,"new_usec":848,"old_astar":6,"old_usec":864,"path_size":4,"status":"hpa"}
+PASS: Legacy square fixture builds
+PASS: legacy square unchanged: exact status
+PASS: legacy square unchanged: exact ordered path array including all tie choices
+PASS: legacy square unchanged: result contains no private context or new gameplay fields
+PASS: legacy square unchanged: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: legacy square unchanged: public HPA query leaves caller-owned options unchanged
+PASS: legacy square unchanged: query leaves terrain authority unchanged
+PASS: legacy square unchanged: diagnostic counter equals actual local A* calls
+PASS: legacy square unchanged: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"legacy square unchanged","debug":{"derived_only":true,"local_astar_evaluation_count":4,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":66,"step_cost_cache_hit_count":27,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":111,"target_cell_cache_hit_count":61,"target_cell_compute_count":50,"traversability_cache_hit_count":72,"traversability_compute_count":111},"new_astar":4,"new_usec":2995,"old_astar":4,"old_usec":3711,"path_size":11,"status":"hpa"}
+PASS: legacy weighted unchanged: exact status
+PASS: legacy weighted unchanged: exact ordered path array including all tie choices
+PASS: legacy weighted unchanged: result contains no private context or new gameplay fields
+PASS: legacy weighted unchanged: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: legacy weighted unchanged: public HPA query leaves caller-owned options unchanged
+PASS: legacy weighted unchanged: query leaves terrain authority unchanged
+PASS: legacy weighted unchanged: diagnostic counter equals actual local A* calls
+PASS: legacy weighted unchanged: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"legacy weighted unchanged","debug":{"derived_only":true,"local_astar_evaluation_count":4,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":66,"step_cost_cache_hit_count":26,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":125,"target_cell_cache_hit_count":68,"target_cell_compute_count":57,"traversability_cache_hit_count":85,"traversability_compute_count":128},"new_astar":4,"new_usec":3082,"old_astar":4,"old_usec":2617,"path_size":12,"status":"hpa"}
+PASS: Legacy mixed-height fixture updates slope connectivity
+PASS: legacy diagonal mixed-height weighted exact: exact status
+PASS: legacy diagonal mixed-height weighted exact: exact ordered path array including all tie choices
+PASS: legacy diagonal mixed-height weighted exact: result contains no private context or new gameplay fields
+PASS: legacy diagonal mixed-height weighted exact: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: legacy diagonal mixed-height weighted exact: public HPA query leaves caller-owned options unchanged
+PASS: legacy diagonal mixed-height weighted exact: query leaves terrain authority unchanged
+PASS: legacy diagonal mixed-height weighted exact: diagnostic counter equals actual local A* calls
+PASS: legacy diagonal mixed-height weighted exact: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"legacy diagonal mixed-height weighted exact","debug":{"derived_only":true,"local_astar_evaluation_count":4,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":66,"step_cost_cache_hit_count":24,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":122,"target_cell_cache_hit_count":65,"target_cell_compute_count":57,"traversability_cache_hit_count":80,"traversability_compute_count":122},"new_astar":4,"new_usec":4744,"old_astar":4,"old_usec":8644,"path_size":12,"status":"hpa"}
+PASS: Memo freshness fixture builds its own small graph
+PASS: fresh cost query first: exact status
+PASS: fresh cost query first: exact ordered path array including all tie choices
+PASS: fresh cost query first: result contains no private context or new gameplay fields
+PASS: fresh cost query first: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: fresh cost query first: public HPA query leaves caller-owned options unchanged
+PASS: fresh cost query first: query leaves terrain authority unchanged
+PASS: fresh cost query first: diagnostic counter equals actual local A* calls
+PASS: fresh cost query first: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"fresh cost query first","debug":{"derived_only":true,"local_astar_evaluation_count":78,"lower_bound_pruned_count":83,"minimum_local_step_cost":0.4,"portal_candidate_count":148,"step_cost_cache_hit_count":7424,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":452,"target_cell_cache_hit_count":609,"target_cell_compute_count":94,"traversability_cache_hit_count":8028,"traversability_compute_count":506},"new_astar":78,"new_usec":49248,"old_astar":161,"old_usec":162377,"path_size":11,"status":"hpa"}
+PASS: fresh cost query repeated: exact status
+PASS: fresh cost query repeated: exact ordered path array including all tie choices
+PASS: fresh cost query repeated: result contains no private context or new gameplay fields
+PASS: fresh cost query repeated: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: fresh cost query repeated: public HPA query leaves caller-owned options unchanged
+PASS: fresh cost query repeated: query leaves terrain authority unchanged
+PASS: fresh cost query repeated: diagnostic counter equals actual local A* calls
+PASS: fresh cost query repeated: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"fresh cost query repeated","debug":{"derived_only":true,"local_astar_evaluation_count":78,"lower_bound_pruned_count":83,"minimum_local_step_cost":0.4,"portal_candidate_count":148,"step_cost_cache_hit_count":7424,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":452,"target_cell_cache_hit_count":609,"target_cell_compute_count":94,"traversability_cache_hit_count":8028,"traversability_compute_count":506},"new_astar":78,"new_usec":50812,"old_astar":161,"old_usec":170676,"path_size":11,"status":"hpa"}
+PASS: Repeated public query recomputes its own fresh cost context rather than reusing the previous query's cache
+PASS: Repeated public query also creates a fresh exact traversability context
+PASS: Repeated public query also creates fresh target-cell components for its exact options
+PASS: caller-supplied old context replaced: exact status
+PASS: caller-supplied old context replaced: exact ordered path array including all tie choices
+PASS: caller-supplied old context replaced: result contains no private context or new gameplay fields
+PASS: caller-supplied old context replaced: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: caller-supplied old context replaced: public HPA query leaves caller-owned options unchanged
+PASS: caller-supplied old context replaced: query leaves terrain authority unchanged
+PASS: caller-supplied old context replaced: diagnostic counter equals actual local A* calls
+PASS: caller-supplied old context replaced: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"caller-supplied old context replaced","debug":{"derived_only":true,"local_astar_evaluation_count":78,"lower_bound_pruned_count":83,"minimum_local_step_cost":0.4,"portal_candidate_count":148,"step_cost_cache_hit_count":7424,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":452,"target_cell_cache_hit_count":609,"target_cell_compute_count":94,"traversability_cache_hit_count":8028,"traversability_compute_count":506},"new_astar":78,"new_usec":54149,"old_astar":161,"old_usec":166403,"path_size":11,"status":"hpa"}
+PASS: Public HPA call replaces a supplied private context without touching or borrowing it
+PASS: Caller-supplied traversal cache is never borrowed or mutated
+PASS: new query changed cover options: exact status
+PASS: new query changed cover options: exact ordered path array including all tie choices
+PASS: new query changed cover options: result contains no private context or new gameplay fields
+PASS: new query changed cover options: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: new query changed cover options: public HPA query leaves caller-owned options unchanged
+PASS: new query changed cover options: query leaves terrain authority unchanged
+PASS: new query changed cover options: diagnostic counter equals actual local A* calls
+PASS: new query changed cover options: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"new query changed cover options","debug":{"derived_only":true,"local_astar_evaluation_count":78,"lower_bound_pruned_count":59,"minimum_local_step_cost":0.05,"portal_candidate_count":124,"step_cost_cache_hit_count":9503,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":466,"target_cell_cache_hit_count":617,"target_cell_compute_count":95,"traversability_cache_hit_count":10642,"traversability_compute_count":522},"new_astar":78,"new_usec":57567,"old_astar":137,"old_usec":228149,"path_size":11,"status":"hpa"}
+PASS: Changed runtime overrides update the same fixture graph
+PASS: new query after runtime override revision: exact status
+PASS: new query after runtime override revision: exact ordered path array including all tie choices
+PASS: new query after runtime override revision: result contains no private context or new gameplay fields
+PASS: new query after runtime override revision: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: new query after runtime override revision: public HPA query leaves caller-owned options unchanged
+PASS: new query after runtime override revision: query leaves terrain authority unchanged
+PASS: new query after runtime override revision: diagnostic counter equals actual local A* calls
+PASS: new query after runtime override revision: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"new query after runtime override revision","debug":{"derived_only":true,"local_astar_evaluation_count":48,"lower_bound_pruned_count":26,"minimum_local_step_cost":0.05,"portal_candidate_count":66,"step_cost_cache_hit_count":4588,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":414,"target_cell_cache_hit_count":470,"target_cell_compute_count":87,"traversability_cache_hit_count":5312,"traversability_compute_count":460},"new_astar":48,"new_usec":33318,"old_astar":74,"old_usec":109749,"path_size":11,"status":"hpa"}
+PASS: Changed source surface updates the same fixture graph
+PASS: new query after source terrain revision: exact status
+PASS: new query after source terrain revision: exact ordered path array including all tie choices
+PASS: new query after source terrain revision: result contains no private context or new gameplay fields
+PASS: new query after source terrain revision: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: new query after source terrain revision: public HPA query leaves caller-owned options unchanged
+PASS: new query after source terrain revision: query leaves terrain authority unchanged
+PASS: new query after source terrain revision: diagnostic counter equals actual local A* calls
+PASS: new query after source terrain revision: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"new query after source terrain revision","debug":{"derived_only":true,"local_astar_evaluation_count":78,"lower_bound_pruned_count":59,"minimum_local_step_cost":0.05,"portal_candidate_count":124,"step_cost_cache_hit_count":9407,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":460,"target_cell_cache_hit_count":611,"target_cell_compute_count":95,"traversability_cache_hit_count":10540,"traversability_compute_count":516},"new_astar":78,"new_usec":74377,"old_astar":137,"old_usec":234950,"path_size":11,"status":"hpa"}
+PASS: Changed runtime traversability updates the same fixture graph
+PASS: new query after runtime blocker revision: exact status
+PASS: new query after runtime blocker revision: exact ordered path array including all tie choices
+PASS: new query after runtime blocker revision: result contains no private context or new gameplay fields
+PASS: new query after runtime blocker revision: exact scoring floats against the separately pinned old TerrainPathfinder
+PASS: new query after runtime blocker revision: public HPA query leaves caller-owned options unchanged
+PASS: new query after runtime blocker revision: query leaves terrain authority unchanged
+PASS: new query after runtime blocker revision: diagnostic counter equals actual local A* calls
+PASS: new query after runtime blocker revision: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"new query after runtime blocker revision","debug":{"derived_only":true,"local_astar_evaluation_count":74,"lower_bound_pruned_count":63,"minimum_local_step_cost":0.05,"portal_candidate_count":124,"step_cost_cache_hit_count":7013,"step_cost_cache_invalidation_count":0,"step_cost_compute_count":456,"target_cell_cache_hit_count":583,"target_cell_compute_count":94,"traversability_cache_hit_count":8018,"traversability_compute_count":514},"new_astar":74,"new_usec":52671,"old_astar":137,"old_usec":204009,"path_size":11,"status":"hpa"}
+PASS: Exact comparisons include real pruning and fewer local A* evaluations
+PASS: Actual local A* and scoring calls reuse directed costs within their HPA query
+PASS: Actual local A* neighbor and cost checks reuse directed traversability within their HPA query
+PASS: Actual local A* and scoring calls reuse goal-independent target-cell components
+HPA_PRUNING_TOTALS {"checks":264,"failed":0,"memo_hits":195813,"new_astar":1420,"old_astar":2849,"pruned":1418,"target_cell_hits":14519,"traversability_hits":215890}
+GM01_HEX_HPA_PRUNING_ALL_PASS

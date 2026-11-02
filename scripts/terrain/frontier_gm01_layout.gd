@@ -4,7 +4,9 @@ extends RefCounted
 ## Keep the root at the original world origin: paving/contact wear uses world XZ.
 
 const LAYOUT_ID := "gm01_frontier_outpost_v1"
-const GRID_SIZE := Vector2i(48, 48)
+const GRID_SIZE := Vector2i(96, 98)
+const OFFSET_ORIGIN := Vector2i(-24, -25)
+const HEX = preload("res://scripts/terrain/hex_grid.gd")
 const PROFILE = preload("res://scripts/terrain/frontier_art_profile.gd")
 const GEOLOGY = preload("res://scripts/terrain/frontier_art_geology.gd")
 const DRESSING = preload("res://scripts/terrain/frontier_art_dressing.gd")
@@ -16,7 +18,7 @@ const MODEL_SCALE := 0.35
 const OBJECT_HEIGHT_STEP := 0.42
 
 
-static func build(parent: Node3D) -> Dictionary:
+static func build(parent: Node3D, saved_ground_grids = null) -> Dictionary:
 	assert(parent != null and parent.is_inside_tree(), "GM01 layout needs an in-tree parent for source bounds.")
 	var root := Node3D.new()
 	root.name = "FrontierGM01Outpost"
@@ -26,7 +28,7 @@ static func build(parent: Node3D) -> Dictionary:
 	var blockers: Array = []
 	var assets: Array = []
 	var anchors: Dictionary = {}
-	var ground := _ground(root, profile)
+	var ground := _ground(root, profile, saved_ground_grids)
 
 	for spec in [
 		["habitat_cutaway_01", Vector2(8.3, 6.2)],
@@ -119,15 +121,78 @@ static func build(parent: Node3D) -> Dictionary:
 	}
 
 
-static func _ground(root: Node3D, profile) -> MeshInstance3D:
+static func get_authoring_grid_positions() -> Array[Vector2i]:
+	# Offline coverage only. Runtime supplies the actual saved MapData cells.
+	var grids: Array[Vector2i] = []
+	var last_row := OFFSET_ORIGIN.y + GRID_SIZE.y - 1
+	var first_q := OFFSET_ORIGIN.x - floori(float(last_row) * 0.5)
+	var last_q := OFFSET_ORIGIN.x + GRID_SIZE.x - 1 - floori(float(OFFSET_ORIGIN.y) * 0.5)
+	for q in range(first_q, last_q + 1):
+		for row in range(OFFSET_ORIGIN.y, OFFSET_ORIGIN.y + GRID_SIZE.y):
+			var column := q + floori(float(row) * 0.5)
+			if column >= OFFSET_ORIGIN.x and column < OFFSET_ORIGIN.x + GRID_SIZE.x:
+				grids.append(Vector2i(q, row))
+	return grids
+
+
+static func ground_grid_signature(grids: Array) -> String:
+	var keys: PackedStringArray = []
+	for grid in grids:
+		keys.append("%d,%d" % [grid.x, grid.y])
+	keys.sort()
+	return "|".join(keys).sha256_text()
+
+
+static func configure_ground_mesh(ground: MeshInstance3D, grids: Array, saved_source: bool) -> void:
+	# The rendered surface is the union of real Hex polygons, including the
+	# scalloped outer boundary. No decorative PlaneMesh extends past the cells.
+	var vertices := PackedVector3Array()
+	var normals := PackedVector3Array()
+	var uvs := PackedVector2Array()
+	var indices := PackedInt32Array()
+	vertices.resize(grids.size() * 7)
+	normals.resize(vertices.size())
+	uvs.resize(vertices.size())
+	indices.resize(grids.size() * 18)
+	var corners: PackedVector2Array = HEX.corners()
+	for cell_index in range(grids.size()):
+		var center: Vector2 = HEX.axial_to_plane(Vector2(grids[cell_index]))
+		var offset := cell_index * 7
+		vertices[offset] = Vector3(center.x, 0.0015, center.y)
+		normals[offset] = Vector3.UP
+		uvs[offset] = center
+		for corner_index in range(6):
+			var point := center + corners[corner_index]
+			vertices[offset + 1 + corner_index] = Vector3(point.x, 0.0015, point.y)
+			normals[offset + 1 + corner_index] = Vector3.UP
+			uvs[offset + 1 + corner_index] = point
+			var triangle := cell_index * 18 + corner_index * 3
+			indices[triangle] = offset
+			# Godot front faces use clockwise winding, like the existing tile fill.
+			indices[triangle + 1] = offset + 1 + corner_index
+			indices[triangle + 2] = offset + 1 + (corner_index + 1) % 6
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	if not grids.is_empty():
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	ground.mesh = mesh
+	ground.position = Vector3.ZERO
+	ground.set_meta("ground_cell_count", grids.size())
+	ground.set_meta("ground_vertex_count", vertices.size())
+	ground.set_meta("ground_grid_signature", ground_grid_signature(grids))
+	ground.set_meta("ground_coverage_source", "saved_map_tiles" if saved_source else "offline_authoring_coverage")
+
+
+static func _ground(root: Node3D, profile, saved_ground_grids) -> MeshInstance3D:
 	var ground := MeshInstance3D.new()
 	ground.name = "ContinuousFrontierGround"
-	var plane := PlaneMesh.new()
-	# 48 odd-row columns/rows cover approximately 48 x 41 plane metres.
-	# This continuous surface preserves every original world-XZ wear anchor.
-	plane.size = Vector2(96.0, 84.0)
-	ground.mesh = plane
-	ground.position = Vector3(23.75, 0.0015, 20.35)
+	var grids: Array = get_authoring_grid_positions() if saved_ground_grids == null else saved_ground_grids
+	configure_ground_mesh(ground, grids, saved_ground_grids != null)
 	ground.material_override = profile.material_for(profile.surface_color("ground"))
 	root.add_child(ground)
 	return ground

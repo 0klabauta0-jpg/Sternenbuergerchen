@@ -44,6 +44,7 @@ var _release_first_exchange_hud_density_fire_visual_polish_active: bool = false
 
 
 func _ready() -> void:
+	set_meta("native_a5_quiet_frame", true)
 	_ensure_structure()
 	_apply_task_1159_background_style()
 	_refresh_display()
@@ -324,12 +325,18 @@ func _add_event_row(entry: Dictionary) -> void:
 
 	var text_label := Label.new()
 	text_label.name = "EventTextLabel"
+	# Labels otherwise ignore pointer hit testing, including their tooltip.
+	# Pass wheel/input onward to the native scroll while exposing full text.
+	text_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	text_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text_label.max_lines_visible = 2
+	text_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	text_label.add_theme_font_size_override("font_size", _get_row_font_size())
 	text_label.add_theme_color_override("font_color", _text_color_for_severity(String(entry.get("severity", "info"))))
 	text_label.text = _format_event_text(entry)
+	text_label.tooltip_text = "%s\n%s" % [time_label.text, text_label.text]
 	row.add_child(text_label)
 
 
@@ -359,7 +366,7 @@ func _apply_release_first_exchange_event_log_header_style() -> void:
 
 
 func _get_row_min_height() -> float:
-	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_MIN_HEIGHT
+	return 24.0
 
 
 func _get_header_font_size() -> int:
@@ -379,7 +386,7 @@ func _get_time_font_size() -> int:
 
 
 func _get_severity_strip_width() -> float:
-	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_STRIP_WIDTH if _release_first_exchange_hud_density_fire_visual_polish_active else 4.0
+	return 2.0
 
 
 func _apply_empty_state_layout(is_empty: bool) -> void:

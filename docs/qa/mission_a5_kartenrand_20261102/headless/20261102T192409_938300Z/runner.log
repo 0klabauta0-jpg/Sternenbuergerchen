@@ -1,0 +1,14 @@
+  map_compat_cover: PASS
+  map_compat_start: PASS
+  stable_astar_frontier: PASS
+  hex_hpa_pruning: PASS
+  map_edge: PASS
+  hex_rebuild: PASS
+  hex_fow: PASS
+  hex_minimap: PASS
+  ui_a5: PASS
+  ui_reference_groups: PASS
+  r2_mission_feedback: PASS
+  r3_readout: PASS
+  cutlass_identity: PASS
+13/13 checks passed; report: C:\Users\bjoer\.codex\worktrees\ui-entwuerfe-20261101\SternenBuergerchen\docs\qa\mission_a5_kartenrand_20261102\headless\20261102T192409_938300Z\checks\20261102T192410Z-pid142844\metadata\report.json

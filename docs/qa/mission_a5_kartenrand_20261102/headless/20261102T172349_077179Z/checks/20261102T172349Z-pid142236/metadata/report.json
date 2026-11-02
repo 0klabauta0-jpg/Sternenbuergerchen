@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T172349_077179Z\\checks\\20261102T172349Z-pid142236",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\checks_final.json",
+  "godot": "godot_console",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.052,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T172349_077179Z\\checks\\20261102T172349Z-pid142236\\logs\\version.log",
+    "passed": true
+  },
+  "filter": "map_edge",
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-02T17:23:49.173728+00:00",
+  "finished_at": "2026-11-02T17:23:55.101380+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T172349_077179Z\\checks\\20261102T172349Z-pid142236\\logs\\engine-check-map_edge.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\gm01_frontier_map_edge_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 5.864,
+      "name": "map_edge",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T172349_077179Z\\checks\\20261102T172349Z-pid142236\\logs\\check-map_edge.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T172349_077179Z\\checks\\20261102T172349Z-pid142236\\logs\\engine-check-map_edge.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

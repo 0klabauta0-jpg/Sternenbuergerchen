@@ -1,0 +1,25 @@
+{
+  "user_data_namespace": "SternenBuergerchen_Mission_A5_Edge_Contracts",
+  "isolated_user_data": true,
+  "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "test_project_sha256": "2ccfe8f51822916e34b93c9f72047bfd74e5720f187adc9fabe9e9747ab73a5c",
+  "project_restored_byte_exact": true,
+  "editor_plugins_temporarily_disabled": false,
+  "gdextensions_disabled": false,
+  "command": [
+    "C:\\Python314\\python.exe",
+    "C:\\Users\\bjoer\\.codex\\skills\\godot-game-verification\\scripts\\run_checks.py",
+    "--project",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+    "--manifest",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\checks_final.json",
+    "--godot",
+    "godot_console",
+    "--output",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T185745_353674Z\\checks",
+    "--filter",
+    "hex_hpa_pruning",
+    "--skip-import"
+  ],
+  "exit_code": 0
+}

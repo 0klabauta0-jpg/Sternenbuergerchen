@@ -8,11 +8,11 @@ static func mission_header(badge_text: String) -> String:
 
 
 static func event_log_header() -> String:
-	return "#19 EREIGNISSE"
+	return "Protokoll"
 
 
 static func selected_filter_label() -> String:
-	return "AUSW."
+	return "Auswahl"
 
 
 static func identity_snapshot(raw_text: String) -> Dictionary:
@@ -33,11 +33,11 @@ static func identity_snapshot(raw_text: String) -> Dictionary:
 
 static func event_text_snapshot(raw_text: String) -> Dictionary:
 	var display := raw_text.strip_edges()
-	display = display.replace("CONTACT PRESSURE:", "KONTAKTDRUCK:")
-	display = display.replace("CONTACT FIRE:", "FEUERKONTAKT:")
+	display = display.replace("CONTACT PRESSURE:", "Kontaktdruck:")
+	display = display.replace("CONTACT FIRE:", "Feuerkontakt:")
 	if display.begins_with("CONTACT:"):
-		display = display.replace("CONTACT:", "KONTAKT:")
-	display = display.replace("FIREFIGHT STATUS", "GEFECHTSLAGE")
+		display = display.replace("CONTACT:", "Kontakt:")
+	display = display.replace("FIREFIGHT STATUS", "Gefechtslage")
 	return {
 		"display_text": display,
 		"raw_text": raw_text,

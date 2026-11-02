@@ -1,0 +1,12 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "saved_ground_signature" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/terrain/terrain_map_3d_view.gd:1375)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+   at: GDScript::reload (res://scripts/tests/mission_test_setup.gd:0)
+SCRIPT ERROR: Compile Error: Failed to compile depended scripts.
+   at: GDScript::reload (res://scripts/tools/build_gm01_frontier.gd:0)
+ERROR: Failed to load script "res://scripts/tools/build_gm01_frontier.gd" with error "Compilation failed".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+GM01_FRONTIER_AUTHORED path=res://maps/Ground_Mission01_32x32.json layout=gm01_frontier_outpost_v1 tiles=9408 blockers=56 sha256=24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4

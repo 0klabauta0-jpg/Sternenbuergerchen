@@ -1,0 +1,78 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Default mission is a real Hex map
+PASS: Known terrain never receives a temporary all-black rectangle, including a cold rebuild
+PASS: Removing the known-map flash preserves dynamic enemy filtering
+PASS: Actual Hex edges are visible by default
+PASS: Visibility mask has six flat triangles, without doubled prism faces
+PASS: Unexplored mode retains its protective blackout while unknown cells are batched
+PASS: Unknown protection is above the actual tall meshes, independently of gameplay height classes
+PASS: Completed unknown-cell masks protect every saved cell and replace the temporary cover
+PASS: Continuous-snapshot regression uses all 9408 actual saved GM01 cells
+PASS: known_terrain/team_alpha continuous full snapshots: resident mask covers the actual map
+PASS: known_terrain/team_alpha continuous full snapshots: mode/team switch starts the original full build
+PASS: known_terrain/team_alpha continuous full snapshots: only unknown terrain starts with protective blackout
+PASS: known_terrain/team_alpha continuous full snapshots: finishes within the unchanged 48-frame bound despite continual updates
+PASS: known_terrain/team_alpha continuous full snapshots: setters never reset the original 512-cell cursor or replace its mask
+PASS: known_terrain/team_alpha continuous full snapshots: complete snapshots update both previously built and still-pending slots across skipped revisions
+PASS: known_terrain/team_alpha continuous full snapshots: contact-only updates preserve terrain work and keep the real contact/event filter current
+PASS: known_terrain/team_alpha continuous full snapshots: unknown protection survives to completion; known terrain never flashes black
+PASS: known_terrain/team_alpha continuous full snapshots: exactly one full build completes
+FOW_FINAL_SLOT_MISMATCH {"case":"known_terrain/team_alpha continuous full snapshots","display_server":"headless","mismatches":[{"actual":"known","actual_alpha":1.0,"authored_top":5.70001029968262,"expected":"known","expected_alpha":0.08,"position":[0.0,0.0,0.0],"slot":0,"tile_id":"tile_-60_72"},{"actual":"visible","actual_alpha":1.0,"authored_top":5.70001029968262,"expected":"visible","expected_alpha":0.0,"position":[0.0,0.0,0.0],"slot":1,"tile_id":"tile_-59_70"},{"actual":"known","actual_alpha":1.0,"authored_top":5.70001029968262,"expected":"known","expected_alpha":0.08,"position":[0.0,0.0,0.0],"slot":2,"tile_id":"tile_-59_71"}],"slot_count":9408,"state_count":9408}
+ERROR: FAIL: known_terrain/team_alpha continuous full snapshots: every final tile state and actual mask slot matches the latest complete snapshot
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://scripts/tests/gm01_frontier_hex_fow_verifier.gd:17)
+       [1] _assert_complete_snapshot (res://scripts/tests/gm01_frontier_hex_fow_verifier.gd:225)
+       [2] _test_continuous_snapshots (res://scripts/tests/gm01_frontier_hex_fow_verifier.gd:174)
+PASS: known_terrain/team_alpha continuous full snapshots: all aggregate counters equal the independently counted final states
+PASS: known_terrain/team_alpha continuous full snapshots: final mask revision equals the latest skipped producer revision
+PASS: known_terrain/team_alpha continuous full snapshots: completed terrain also ignores contact-only revisions without rebuilding
+FOW_CONTINUOUS_SNAPSHOT {"cells":9408,"frames":19,"last_revision":180,"mode":"known_terrain","team_id":"team_alpha"}
+PASS: unexplored_blackout/team_alpha continuous full snapshots: resident mask covers the actual map
+PASS: unexplored_blackout/team_alpha continuous full snapshots: mode/team switch starts the original full build
+PASS: unexplored_blackout/team_alpha continuous full snapshots: only unknown terrain starts with protective blackout
+PASS: unexplored_blackout/team_alpha continuous full snapshots: finishes within the unchanged 48-frame bound despite continual updates
+PASS: unexplored_blackout/team_alpha continuous full snapshots: setters never reset the original 512-cell cursor or replace its mask
+PASS: unexplored_blackout/team_alpha continuous full snapshots: complete snapshots update both previously built and still-pending slots across skipped revisions
+PASS: unexplored_blackout/team_alpha continuous full snapshots: contact-only updates preserve terrain work and keep the real contact/event filter current
+PASS: unexplored_blackout/team_alpha continuous full snapshots: unknown protection survives to completion; known terrain never flashes black
+PASS: unexplored_blackout/team_alpha continuous full snapshots: exactly one full build completes
+FOW_FINAL_SLOT_MISMATCH {"case":"unexplored_blackout/team_alpha continuous full snapshots","display_server":"headless","mismatches":[{"actual":"explored","actual_alpha":1.0,"authored_top":5.70001029968262,"expected":"explored","expected_alpha":0.62,"position":[0.0,0.0,0.0],"slot":0,"tile_id":"tile_-60_72"},{"actual":"visible","actual_alpha":1.0,"authored_top":5.70001029968262,"expected":"visible","expected_alpha":0.0,"position":[0.0,0.0,0.0],"slot":1,"tile_id":"tile_-59_70"},{"actual":"unknown","actual_alpha":1.0,"authored_top":5.70001029968262,"expected":"unknown","expected_alpha":1.0,"position":[0.0,0.0,0.0],"slot":2,"tile_id":"tile_-59_71"}],"slot_count":9408,"state_count":9408}
+ERROR: FAIL: unexplored_blackout/team_alpha continuous full snapshots: every final tile state and actual mask slot matches the latest complete snapshot
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://scripts/tests/gm01_frontier_hex_fow_verifier.gd:17)
+       [1] _assert_complete_snapshot (res://scripts/tests/gm01_frontier_hex_fow_verifier.gd:225)
+       [2] _test_continuous_snapshots (res://scripts/tests/gm01_frontier_hex_fow_verifier.gd:174)
+PASS: unexplored_blackout/team_alpha continuous full snapshots: all aggregate counters equal the independently counted final states
+PASS: unexplored_blackout/team_alpha continuous full snapshots: final mask revision equals the latest skipped producer revision
+PASS: unexplored_blackout/team_alpha continuous full snapshots: completed terrain also ignores contact-only revisions without rebuilding
+FOW_CONTINUOUS_SNAPSHOT {"cells":9408,"frames":19,"last_revision":180,"mode":"unexplored_blackout","team_id":"team_alpha"}
+PASS: unexplored_blackout/team_beta continuous full snapshots: resident mask covers the actual map
+PASS: unexplored_blackout/team_beta continuous full snapshots: mode/team switch starts the original full build
+PASS: unexplored_blackout/team_beta continuous full snapshots: only unknown terrain starts with protective blackout
+PASS: unexplored_blackout/team_beta continuous full snapshots: finishes within the unchanged 48-frame bound despite continual updates
+PASS: unexplored_blackout/team_beta continuous full snapshots: setters never reset the original 512-cell cursor or replace its mask
+PASS: unexplored_blackout/team_beta continuous full snapshots: complete snapshots update both previously built and still-pending slots across skipped revisions
+PASS: unexplored_blackout/team_beta continuous full snapshots: contact-only updates preserve terrain work and keep the real contact/event filter current
+PASS: unexplored_blackout/team_beta continuous full snapshots: unknown protection survives to completion; known terrain never flashes black
+PASS: unexplored_blackout/team_beta continuous full snapshots: exactly one full build completes
+FOW_FINAL_SLOT_MISMATCH {"case":"unexplored_blackout/team_beta continuous full snapshots","display_server":"headless","mismatches":[{"actual":"explored","actual_alpha":1.0,"authored_top":5.70001029968262,"expected":"explored","expected_alpha":0.62,"position":[0.0,0.0,0.0],"slot":0,"tile_id":"tile_-60_72"},{"actual":"visible","actual_alpha":1.0,"authored_top":5.70001029968262,"expected":"visible","expected_alpha":0.0,"position":[0.0,0.0,0.0],"slot":1,"tile_id":"tile_-59_70"},{"actual":"unknown","actual_alpha":1.0,"authored_top":5.70001029968262,"expected":"unknown","expected_alpha":1.0,"position":[0.0,0.0,0.0],"slot":2,"tile_id":"tile_-59_71"}],"slot_count":9408,"state_count":9408}
+ERROR: FAIL: unexplored_blackout/team_beta continuous full snapshots: every final tile state and actual mask slot matches the latest complete snapshot
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://scripts/tests/gm01_frontier_hex_fow_verifier.gd:17)
+       [1] _assert_complete_snapshot (res://scripts/tests/gm01_frontier_hex_fow_verifier.gd:225)
+       [2] _test_continuous_snapshots (res://scripts/tests/gm01_frontier_hex_fow_verifier.gd:174)
+PASS: unexplored_blackout/team_beta continuous full snapshots: all aggregate counters equal the independently counted final states
+PASS: unexplored_blackout/team_beta continuous full snapshots: final mask revision equals the latest skipped producer revision
+PASS: unexplored_blackout/team_beta continuous full snapshots: completed terrain also ignores contact-only revisions without rebuilding
+FOW_CONTINUOUS_SNAPSHOT {"cells":9408,"frames":19,"last_revision":180,"mode":"unexplored_blackout","team_id":"team_beta"}
+PASS: Negative axial coordinates remain reachable by the real camera clamp
+PASS: Streaming bounds include negative Hex chunks and reject distant chunks
+PASS: Default framing uses the physical Hex footprint
+PASS: Keyboard and drag panning use the camera's physical directions on Hex terrain
+=== RESULTS: 49 passed, 3 failed ===
+GM01_HEX_FOW_FAILED

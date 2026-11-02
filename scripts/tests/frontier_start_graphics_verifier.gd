@@ -56,7 +56,7 @@ func run() -> void:
 	check(FileAccess.get_sha256(SCENARIO) == ORIGINAL_SCENARIO_SHA, "scenario, enemy groups, objectives and patrol rules remain byte-identical")
 	var data = MAP.load_from_file(GM01)
 	check(data.get_grid_topology() == "hex_axial_v1", "normal MapData loader selects true Hex")
-	check(data.get_grid_size() == Vector2i(48, 48) and data.get_tiles().size() == 2304, "rebuilt default GM01 expands to all 2304 Hex cells at the user's request")
+	check(data.get_grid_size() == Vector2i(96, 98) and data.get_tiles().size() == 9408, "default GM01 covers the displayed ground up to its edge with 9408 real Hex cells")
 	var view = VIEW.new()
 	root.add_child(view)
 	view.configure_from_map(data)

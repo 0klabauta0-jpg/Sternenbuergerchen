@@ -26,6 +26,142 @@ const DEFAULT_EXPOSURE_MAX_GRID_DISTANCE: float = 8.0
 const MIN_COVER_AWARE_STEP_COST: float = 0.05
 const LANE_PENALTY_SCALE: float = 0.35
 const BLOCKER_CLEARANCE_PENALTY_SCALE: float = 0.4
+const STEP_COST_CONTEXT_OPTION: String = "_terrain_pathfinder_step_cost_context"
+
+
+class StepCostContext:
+	extends RefCounted
+	# One synchronous HPA call owns this object through its local options copy.
+	# Cost is directed and depends on these fixed options, not on local A* goals.
+	var _registry
+	var _supports_revision: bool = false
+	var _revision: int = -1
+	var costs_by_from_grid: Dictionary = {}
+	var traversability_by_from_grid: Dictionary = {}
+	var target_components_by_grid: Dictionary = {}
+	var compute_count: int = 0
+	var hit_count: int = 0
+	var traversability_compute_count: int = 0
+	var traversability_hit_count: int = 0
+	var target_cell_compute_count: int = 0
+	var target_cell_hit_count: int = 0
+	var invalidation_count: int = 0
+
+	func _init(registry) -> void:
+		_registry = registry
+		_supports_revision = registry != null and registry.has_method("get_revision")
+		if _supports_revision:
+			_revision = int(registry.call("get_revision"))
+
+	func prepare_for(registry) -> bool:
+		if not _supports_revision or registry == null or registry != _registry:
+			return false
+		var revision: int = int(registry.call("get_revision"))
+		if revision != _revision:
+			costs_by_from_grid.clear()
+			traversability_by_from_grid.clear()
+			target_components_by_grid.clear()
+			_revision = revision
+			invalidation_count += 1
+		return true
+
+
+class StablePathFrontier:
+	extends RefCounted
+	# Per-query open membership only. Equal priorities retain their original
+	# open-list insertion order, including decrease-key; reopening gets a new ID.
+	var _entries: Array = []
+	var _indices: Dictionary = {}
+	var _next_ordinal: int = 0
+	var _linear_mode: bool = false
+
+	func is_empty() -> bool:
+		return _entries.is_empty()
+
+	func is_linear_mode() -> bool:
+		return _linear_mode
+
+	func offer(grid: Vector2i, score: float) -> void:
+		if is_nan(score) and not _linear_mode:
+			# The old >= scan is not a total order for NaN. Reconstruct its
+			# exact current insertion list and preserve that behavior verbatim.
+			_linear_mode = true
+			_entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.ordinal) < int(b.ordinal))
+			_reindex_from(0)
+		if _indices.has(grid):
+			var index: int = int(_indices[grid])
+			_entries[index]["score"] = score
+			if not _linear_mode:
+				index = _sift_up(index)
+				_sift_down(index)
+			return
+		var entry := {"grid": grid, "score": score, "ordinal": _next_ordinal}
+		_next_ordinal += 1
+		_indices[grid] = _entries.size()
+		_entries.append(entry)
+		if not _linear_mode:
+			_sift_up(_entries.size() - 1)
+
+	func pop_lowest() -> Vector2i:
+		if _linear_mode:
+			var best_index: int = 0
+			var best_score: float = float(_entries[0].score)
+			for index in range(1, _entries.size()):
+				var candidate_score: float = float(_entries[index].score)
+				if candidate_score >= best_score:
+					continue
+				best_index = index
+				best_score = candidate_score
+			var grid: Vector2i = Vector2i(_entries[best_index].grid)
+			_entries.remove_at(best_index)
+			_indices.erase(grid)
+			_reindex_from(best_index)
+			return grid
+		var grid: Vector2i = Vector2i(_entries[0].grid)
+		var last: Dictionary = _entries.pop_back()
+		_indices.erase(grid)
+		if not _entries.is_empty():
+			_entries[0] = last
+			_indices[Vector2i(last.grid)] = 0
+			_sift_down(0)
+		return grid
+
+	func _before(a: Dictionary, b: Dictionary) -> bool:
+		var score_a: float = float(a.score)
+		var score_b: float = float(b.score)
+		if score_a == score_b:
+			return int(a.ordinal) < int(b.ordinal)
+		return score_a < score_b
+
+	func _swap(a: int, b: int) -> void:
+		var entry: Dictionary = _entries[a]
+		_entries[a] = _entries[b]
+		_entries[b] = entry
+		_indices[Vector2i(_entries[a].grid)] = a
+		_indices[Vector2i(_entries[b].grid)] = b
+
+	func _sift_up(index: int) -> int:
+		while index > 0:
+			var parent_index: int = int((index - 1) / 2)
+			if not _before(_entries[index], _entries[parent_index]):
+				break
+			_swap(index, parent_index)
+			index = parent_index
+		return index
+
+	func _sift_down(index: int) -> void:
+		while index * 2 + 1 < _entries.size():
+			var child: int = index * 2 + 1
+			if child + 1 < _entries.size() and _before(_entries[child + 1], _entries[child]):
+				child += 1
+			if not _before(_entries[child], _entries[index]):
+				break
+			_swap(index, child)
+			index = child
+
+	func _reindex_from(start: int) -> void:
+		for index in range(start, _entries.size()):
+			_indices[Vector2i(_entries[index].grid)] = index
 
 
 func find_path(from_grid: Vector2i, to_grid: Vector2i, registry) -> Array:
@@ -44,22 +180,23 @@ func find_path_with_options(from_grid: Vector2i, to_grid: Vector2i, registry, op
 		result.append(from_grid)
 		return result
 
-	var open_set: Array = [from_grid]
+	var open_set := StablePathFrontier.new()
 	var in_open_set: Dictionary = {from_grid: true}
 	var came_from: Dictionary = {}
 	var g_score: Dictionary = {from_grid: 0.0}
 	var f_score: Dictionary = {from_grid: _estimate_cost(from_grid, to_grid, registry, options)}
 	var neighbor_directions: Array = get_neighbor_directions(registry)
+	open_set.offer(from_grid, float(f_score[from_grid]))
 
 	while not open_set.is_empty():
-		var current: Vector2i = _pop_lowest_f_score(open_set, f_score)
+		var current: Vector2i = open_set.pop_lowest()
 		in_open_set.erase(current)
 		if current == to_grid:
 			return _reconstruct_path(came_from, current)
 
 		for direction in neighbor_directions:
 			var neighbor: Vector2i = current + direction
-			if not _is_neighbor_walkable(current, neighbor, registry):
+			if not _is_neighbor_walkable_scoped(current, neighbor, registry, options):
 				continue
 
 			var tentative_g_score: float = float(g_score.get(current, INF)) + _get_step_cost(current, neighbor, registry, options)
@@ -71,7 +208,7 @@ func find_path_with_options(from_grid: Vector2i, to_grid: Vector2i, registry, op
 			f_score[neighbor] = tentative_g_score + _estimate_cost(neighbor, to_grid, registry, options)
 			if not in_open_set.has(neighbor):
 				in_open_set[neighbor] = true
-				open_set.append(neighbor)
+			open_set.offer(neighbor, float(f_score[neighbor]))
 
 	return result
 
@@ -101,8 +238,9 @@ func score_path(path_grid_points: Array, registry, options: Dictionary = {}) -> 
 	var previous_grid: Variant = null
 	for grid_variant in path_grid_points:
 		var grid_position: Vector2i = Vector2i(grid_variant)
-		exposure_sum += get_exposure_score(grid_position, registry, options)
-		cover_sum += _get_cover_score(grid_position, registry, options)
+		var components: Dictionary = _get_target_cost_components(grid_position, registry, options)
+		exposure_sum += float(components["exposure_score"]) if not components.is_empty() else get_exposure_score(grid_position, registry, options)
+		cover_sum += float(components["cover_score"]) if not components.is_empty() else _get_cover_score(grid_position, registry, options)
 		if previous_grid != null:
 			path_cost += _get_step_cost(Vector2i(previous_grid), grid_position, registry, options)
 		previous_grid = grid_position
@@ -179,6 +317,23 @@ func _estimate_cost(from_grid: Vector2i, to_grid: Vector2i, registry = null, opt
 	return (straight_steps + (diagonal_steps * DIAGONAL_COST_MULTIPLIER)) * MIN_SURFACE_PATH_COST
 
 
+func _is_neighbor_walkable_scoped(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary) -> bool:
+	var context_variant: Variant = options.get(STEP_COST_CONTEXT_OPTION, null)
+	if context_variant is StepCostContext:
+		var context := context_variant as StepCostContext
+		if context.prepare_for(registry):
+			var by_neighbor: Dictionary = context.traversability_by_from_grid.get(current_grid, {})
+			if by_neighbor.has(neighbor_grid):
+				context.traversability_hit_count += 1
+				return bool(by_neighbor[neighbor_grid])
+			var traversable: bool = _is_neighbor_walkable(current_grid, neighbor_grid, registry)
+			by_neighbor[neighbor_grid] = traversable
+			context.traversability_by_from_grid[current_grid] = by_neighbor
+			context.traversability_compute_count += 1
+			return traversable
+	return _is_neighbor_walkable(current_grid, neighbor_grid, registry)
+
+
 func _is_neighbor_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -> bool:
 	if _is_hex_registry(registry):
 		return HEX_GRID_SCRIPT.are_neighbors(current_grid, neighbor_grid) and _is_grid_step_walkable(current_grid, neighbor_grid, registry)
@@ -222,11 +377,28 @@ func _is_grid_step_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, reg
 
 
 func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:
+	var context_variant: Variant = options.get(STEP_COST_CONTEXT_OPTION, null)
+	if context_variant is StepCostContext:
+		var context := context_variant as StepCostContext
+		if context.prepare_for(registry):
+			var by_neighbor: Dictionary = context.costs_by_from_grid.get(current_grid, {})
+			if by_neighbor.has(neighbor_grid):
+				context.hit_count += 1
+				return float(by_neighbor[neighbor_grid])
+			var cost: float = _compute_step_cost(current_grid, neighbor_grid, registry, options)
+			by_neighbor[neighbor_grid] = cost
+			context.costs_by_from_grid[current_grid] = by_neighbor
+			context.compute_count += 1
+			return cost
+	return _compute_step_cost(current_grid, neighbor_grid, registry, options)
+
+
+func _compute_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:
 	var current_tile = registry.call("get_tile_at_grid", current_grid)
 	var neighbor_tile = registry.call("get_tile_at_grid", neighbor_grid)
 	if current_tile == null or neighbor_tile == null:
 		return INF
-	if not _is_neighbor_walkable(current_grid, neighbor_grid, registry):
+	if not _is_neighbor_walkable_scoped(current_grid, neighbor_grid, registry, options):
 		return INF
 
 	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
@@ -240,20 +412,45 @@ func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, o
 		if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
 			base_cost = surface_cost + (float(height_difference) * 1.0)
 
+	var components: Dictionary = _get_target_cost_components(neighbor_grid, registry, options)
 	if bool(options.get("cover_aware_enabled", false)):
 		var exposure_weight: float = maxf(float(options.get("exposure_weight", 0.0)), 0.0)
 		var cover_weight: float = maxf(float(options.get("cover_weight", 0.0)), 0.0)
-		var exposure_score: float = get_exposure_score(neighbor_grid, registry, options)
-		var cover_score: float = _get_cover_score(neighbor_grid, registry, options)
+		var exposure_score: float = float(components["exposure_score"]) if not components.is_empty() else get_exposure_score(neighbor_grid, registry, options)
+		var cover_score: float = float(components["cover_score"]) if not components.is_empty() else _get_cover_score(neighbor_grid, registry, options)
 		base_cost = maxf(base_cost + (exposure_weight * exposure_score) - (cover_weight * cover_score), MIN_COVER_AWARE_STEP_COST)
-	base_cost += _get_corridor_penalty(neighbor_grid, options, registry)
-	base_cost += _get_lane_penalty(neighbor_grid, options, registry)
-	base_cost += _get_blocker_clearance_penalty(neighbor_grid, registry, options)
+	base_cost += float(components["corridor_penalty"]) if not components.is_empty() else _get_corridor_penalty(neighbor_grid, options, registry)
+	base_cost += float(components["lane_penalty"]) if not components.is_empty() else _get_lane_penalty(neighbor_grid, options, registry)
+	base_cost += float(components["blocker_clearance_penalty"]) if not components.is_empty() else _get_blocker_clearance_penalty(neighbor_grid, registry, options)
 
 	var delta: Vector2i = neighbor_grid - current_grid
 	if not _is_hex_registry(registry) and abs(delta.x) == 1 and abs(delta.y) == 1:
 		return base_cost * DIAGONAL_COST_MULTIPLIER
 	return base_cost
+
+
+func _get_target_cost_components(grid_position: Vector2i, registry, options: Dictionary) -> Dictionary:
+	var context_variant: Variant = options.get(STEP_COST_CONTEXT_OPTION, null)
+	if not context_variant is StepCostContext:
+		return {}
+	var context := context_variant as StepCostContext
+	if not context.prepare_for(registry):
+		return {}
+	if context.target_components_by_grid.has(grid_position):
+		context.target_cell_hit_count += 1
+		return Dictionary(context.target_components_by_grid[grid_position])
+	# These five pure inputs depend only on this target cell, the unchanged
+	# registry revision and the fixed HPA options. Preserve each original float;
+	# surface/height/diagonal math and ordered additions remain in the caller.
+	var components: Dictionary = {}
+	components["exposure_score"] = get_exposure_score(grid_position, registry, options)
+	components["cover_score"] = _get_cover_score(grid_position, registry, options)
+	components["corridor_penalty"] = _get_corridor_penalty(grid_position, options, registry)
+	components["lane_penalty"] = _get_lane_penalty(grid_position, options, registry)
+	components["blocker_clearance_penalty"] = _get_blocker_clearance_penalty(grid_position, registry, options)
+	context.target_components_by_grid[grid_position] = components
+	context.target_cell_compute_count += 1
+	return components
 
 
 func _get_cover_score(grid_position: Vector2i, registry, options: Dictionary = {}) -> float:

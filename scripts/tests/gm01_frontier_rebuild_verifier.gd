@@ -19,7 +19,8 @@ const SCENARIO_PATH := "res://data/mission_scenarios/ground_mission01_default.js
 const ORIGINAL := "res://docs/qa/gm01_frontier_20261102/original_Ground_Mission01_32x32.json"
 const ORIGINAL_SHA := "eb51df71c4767023b8e87ed7e2c136f13d847cabddb25578d1f52fda1c46c8d8"
 const SCENARIO_SHA := "792bff6b6dfa6fabf739a737e4e45d34c8e3729a4fdc7d6b62a74a374a27b45f"
-const EXPECTED_SIZE := Vector2i(48, 48)
+const EXPECTED_SIZE := Vector2i(96, 98)
+const EXPECTED_OFFSET_ORIGIN := Vector2i(-24, -25)
 const EXTENSION_PLANES := [Vector2(35, 27), Vector2(42, 26), Vector2(43, 30)]
 const STRUCTURE_HASHES := {
 	"habitat_cutaway_01.glb": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f",
@@ -62,7 +63,7 @@ func _run() -> void:
 	var raw: Dictionary = AUTHORING.read_dictionary(MAP_PATH)
 	_check(FileAccess.get_sha256(ORIGINAL) == ORIGINAL_SHA, "Original GM01 QA snapshot remains byte-identical")
 	_check(FileAccess.get_sha256(SCENARIO_PATH) == SCENARIO_SHA, "Scenario remains byte-identical, including IDs/tactics/limits")
-	_check(map_data.get_map_name() == "GM01 Frontier Hex 48x48" and map_data.get_grid_size() == EXPECTED_SIZE, "Regular GM01 is the expanded48x48 hex map with an accurate display name")
+	_check(map_data.get_map_name() == "GM01 Frontier Hex 96x98" and map_data.get_grid_size() == EXPECTED_SIZE, "Regular GM01 has 96x98 real Hex cells up to the displayed ground edge and an accurate name")
 	_check(map_data.get_grid_topology() == HEX.TOPOLOGY_ID and map_data.get_grid_origin() == Vector2.ZERO, "Real axial hex gameplay topology and unchanged art origin are explicit")
 	_check(map_data.get_tile_size() == {"half_width": 64.0, "half_height": 32.0}, "Iso tile geometry remains64/32")
 	_check(map_data.get_terrain_visual_theme_id() == "frontier_illustrated_v1", "Saved map selects the Frontier art family")
@@ -213,14 +214,17 @@ func _test_layout_facts(map_data, layout: Dictionary) -> void:
 	var unique: Dictionary = {}
 	var in_bounds := true
 	var negative_q_count := 0
+	var negative_r_count := 0
 	var blockers: Array = layout.get("blockers", [])
 	for tile in map_data.get_tiles():
 		var grid: Vector2i = tile.grid_position
 		unique[grid] = true
 		var column: int = grid.x + floori(float(grid.y) * 0.5)
-		in_bounds = in_bounds and column >= 0 and grid.y >= 0 and column < EXPECTED_SIZE.x and grid.y < EXPECTED_SIZE.y
+		in_bounds = in_bounds and column >= EXPECTED_OFFSET_ORIGIN.x and grid.y >= EXPECTED_OFFSET_ORIGIN.y and column < EXPECTED_OFFSET_ORIGIN.x + EXPECTED_SIZE.x and grid.y < EXPECTED_OFFSET_ORIGIN.y + EXPECTED_SIZE.y
 		if grid.x < 0:
 			negative_q_count += 1
+		if grid.y < 0:
+			negative_r_count += 1
 		var overlaps := false
 		var blocks_los := false
 		var height := 0
@@ -245,7 +249,7 @@ func _test_layout_facts(map_data, layout: Dictionary) -> void:
 				walkable_cover_count += 1
 		all_match = all_match and tile.type_id in ["ground_flat", "slope_se"]
 	var expected_count: int = EXPECTED_SIZE.x * EXPECTED_SIZE.y
-	_check(map_data.get_tiles().size() == expected_count and unique.size() == expected_count and in_bounds and negative_q_count > 0, "All%d axial cells fill48x48 offset coverage, including valid negative-q western cells" % expected_count)
+	_check(map_data.get_tiles().size() == expected_count and unique.size() == expected_count and in_bounds and negative_q_count > 0 and negative_r_count > 0, "All%d axial cells fill96x98 offset coverage, including valid negative-q and negative-r edges" % expected_count)
 	_check(all_match and solid_count > 80, "Every massive visible footprint matches saved walkability/LOS/object height/cover, with no phantom objects")
 	_check(walkable_cover_count > 20, "Concrete solid edges provide usable walkable adjacent cover")
 	var catalog = CATALOG.load_from_file()

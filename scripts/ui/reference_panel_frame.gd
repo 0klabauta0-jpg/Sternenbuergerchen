@@ -65,6 +65,11 @@ func _paint() -> void:
 			fill = style.bg_color
 			border = style.border_color
 	var selected := _selected or border.is_equal_approx(Color("ffd348"))
+	if bool(target.get_meta("native_a5_quiet_frame", false)):
+		# Mission A5 uses a single fine, cut-corner edge. Other screen families
+		# retain their existing layered frame until separately revised.
+		target.draw_polyline(_outline(Rect2(Vector2.ONE, target.size - Vector2.ONE * 2), 5.0), border, 1.0, true)
+		return
 	var compact := _variant in ["card", "thin_frame", "subtle", "panel", "body"]
 	var corner := 4.0 if compact else 7.0
 	var outer := Rect2(Vector2.ONE * 1.0, target.size - Vector2.ONE * 2.0)

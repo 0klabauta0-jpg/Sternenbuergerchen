@@ -68,12 +68,12 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 		fire_heading.autowrap_mode = TextServer.AUTOWRAP_OFF
 		fire_heading.max_lines_visible = 1
 		fire_heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		fire_heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		fire_heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		fire_heading.clip_text = true
 		fire_heading.visible = true
-		_place(fire_heading, Rect2(team.position + Vector2i(8, 94), Vector2i(220, 28)))
+		_place(fire_heading, Rect2(team.position + Vector2i(8, 94), Vector2i(88, 28)))
 		fire_heading.z_index = 12
-		_place(team_panel.get_node("A5FireRuleSelector") as Control, Rect2(team.position + Vector2i(236, 94), Vector2i(team.size.x - 244, 28)))
+		_place(team_panel.get_node("A5FireRuleSelector") as Control, Rect2(team.position + Vector2i(104, 94), Vector2i(team.size.x - 112, 28)))
 		_place(team_panel.get_node("A5DetailsButton") as Control, Rect2(team.position + Vector2i(team.size.x - 160, 6), Vector2i(76, 26)))
 		_style_dock_module(team_panel, true)
 	var command_panel := controller.get_node_or_null(BASE + "CommandPanel") as PanelContainer
@@ -176,10 +176,28 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 		members.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 		members.mouse_filter = Control.MOUSE_FILTER_PASS
 		members.clip_contents = true
+		# A5 carries member identity in the portrait-led team cards on the left.
+		# Keep the original NPC controls and their data/character paths available,
+		# but do not duplicate the same people as a second horizontal HUD strip.
+		members.visible = false
 	var mini := controller.get_node_or_null("../TacticalUI/FireteamMiniPanel") as Control
 	if mini != null:
 		_place(mini, Rect2(layout.fireteam_mini))
 		mini.set_meta("native_a5_layout", true)
+		var mini_header := mini.get_node_or_null("MiniMargin/MiniVBox/MiniHeaderLabel") as Control
+		if mini_header != null:
+			mini_header.visible = false
+		var mini_margin := mini.get_node_or_null("MiniMargin") as MarginContainer
+		if mini_margin != null:
+			for side in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
+				mini_margin.add_theme_constant_override(side, 0)
+		var mini_cards := mini.get_node_or_null("MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox") as VBoxContainer
+		if mini_cards != null:
+			mini_cards.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			mini_cards.alignment = BoxContainer.ALIGNMENT_END
+			mini_cards.add_theme_constant_override("separation", 8)
+		if mini is PanelContainer:
+			(mini as PanelContainer).add_theme_stylebox_override("panel", THEME.build_flat_stylebox(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0))
 	var log_panel := controller.get_node_or_null("../TacticalUI/TacticalEventLogPanel") as Control
 	if log_panel != null:
 		var log_rect := Rect2(layout.event_log)
@@ -337,8 +355,8 @@ static func _refresh_stance_buttons(stance: Control) -> void:
 			button.set_meta("mission_selected_fireteam_stance_player_label", button.text)
 			if button.get_theme_font_size("font_size") != 13:
 				button.add_theme_font_size_override("font_size", 13)
-			if button.custom_minimum_size != Vector2(104, 28):
-				button.custom_minimum_size = Vector2(104, 28)
+			if button.custom_minimum_size != Vector2(88, 28):
+				button.custom_minimum_size = Vector2(88, 28)
 
 
 static func refresh(controller: Node, view_model: Dictionary) -> void:
@@ -527,7 +545,8 @@ static func _layout_player_readouts(controller: Node, viewport_size: Vector2i) -
 		var card := panel as PanelContainer
 		if card != null:
 			THEME.style_card(card)
-		if String(spec[0]) == STRATEGIC:
+			card.set_meta("native_a5_quiet_frame", true)
+		if String(spec[0]) == IDENTITY:
 			var details := panel.get_node_or_null("A5ReadoutDetailsButton") as Button
 			if details == null:
 				details = Button.new()
@@ -543,6 +562,11 @@ static func _layout_player_readouts(controller: Node, viewport_size: Vector2i) -
 
 
 static func _hide_raw_readouts(controller: Node) -> void:
+	var strategic := controller.get_node_or_null(STRATEGIC) as Control
+	if strategic != null:
+		# The compact Cutlass card owns the visible transport projection. Keep
+		# the old source tree intact for the explicit diagnostic detail view.
+		strategic.visible = false
 	# Direct known labels only: owners keep writing their full source strings.
 	for path in [IDENTITY_SOURCES + "MissionIdentityHeaderLabel", IDENTITY_SOURCES + "MissionIdentityBodyLabel", STRATEGIC_SOURCES + "StrategicHeaderLabel", STRATEGIC_SOURCES + "StrategicStatusLabel", STRATEGIC_SOURCES + "MissionTeamChipLabel"]:
 		var label := controller.get_node_or_null(path) as Label
@@ -647,7 +671,16 @@ static func _refresh_fire_rule_selector(controller: Node, state: Dictionary) -> 
 	var heading := controller.get_node_or_null(BASE + "FireteamPanel/A5FireRuleHeading") as Label
 	if heading != null:
 		var feedback := String(state.get("feedback", ""))
-		_set_text(heading, "Feuerregel · Änderung angefragt" if feedback.begins_with("FIRE ") and feedback.contains(" REQUEST") else "Feuerregel")
+		var status := "Feuerregel"
+		if feedback.begins_with("FIRE "):
+			if feedback.contains(" REQUEST"):
+				status = "Angefragt"
+			elif feedback.contains("REJECT"):
+				status = "Abgelehnt"
+			elif feedback.contains("TIMEOUT"):
+				status = "Zeitablauf"
+		_set_text(heading, status)
+		heading.tooltip_text = "Feuerregel · Änderung angefragt" if status == "Angefragt" else feedback
 
 
 static func _refresh_details_text(controller: Node) -> void:
@@ -741,6 +774,9 @@ static func _style_execute_tile(button: Button) -> void:
 
 
 static func _layout_team_readouts(controller: Node, _rect: Rect2) -> void:
+	var members := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll") as Control
+	if members != null:
+		members.visible = false
 	# The source nodes remain owned and updated by their existing presenters.
 	# Their complete text is available in the explicit details popup.
 	for path in [BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel", INFO + "/CommandFeedbackLabel", INFO + "/HotkeyLegendLabel"]:

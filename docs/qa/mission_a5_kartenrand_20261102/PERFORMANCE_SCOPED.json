@@ -1,0 +1,21 @@
+{
+  "scope": "One matched opt-in headless R3 scene/GO sequence per variant, 16 process frames with 8 physics ticks per frame. Query wall time includes cold graph setup. Not a benchmark distribution, native FPS or whole-game performance acceptance.",
+  "before_result_cache": {
+    "log": "docs/qa/mission_a5_kartenrand_20261102/diagnostic_r3/20261102T190213_065310Z/profile.log",
+    "go_16_process_frames_msec": 10191,
+    "recorded_queries": 96,
+    "query_sum_usec": 7429780,
+    "last_hpa_tick_cache_hits": 0,
+    "observed_query_ticks": 32,
+    "failures": 0
+  },
+  "with_result_cache": {
+    "log": "docs/qa/mission_a5_kartenrand_20261102/diagnostic_r3/20261102T191223_877001Z/profile.log",
+    "go_16_process_frames_msec": 4400,
+    "recorded_queries": 96,
+    "query_sum_usec": 1558615,
+    "last_hpa_tick_cache_hits": 28,
+    "observed_query_ticks": 32,
+    "failures": 0
+  }
+}

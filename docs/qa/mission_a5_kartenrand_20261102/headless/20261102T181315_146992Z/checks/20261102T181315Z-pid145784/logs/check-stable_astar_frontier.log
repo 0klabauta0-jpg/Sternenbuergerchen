@@ -1,0 +1,91 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Linear-frontier TerrainPathfinder baseline is byte-pinned
+PASS: Old A* compiles after removing only its global class_name
+PASS: Decrease-key retains original ordinal ahead of equally ranked later entries
+PASS: Popped and reopened node receives a new ordinal behind existing equal entries
+PASS: Further decreases and complete draining match the original insertion scan
+PASS: Large deterministic replay preserves every pop under equal scores, key changes and repeated reopenings
+PASS: Signed zero and both infinities preserve old tie ordering
+PASS: NaN switches before selection and reconstructs the current old insertion list
+PASS: Every NaN fallback pop matches the original >= scan exactly
+PASS: Real saved GM01 remains the 9408-cell comparison source
+PASS: GM01 exact measured endpoints: exact ordered path array
+PASS: GM01 exact measured endpoints: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"GM01 exact measured endpoints","exact":true,"new_usec":5811,"old_usec":5296,"path_size":11}
+PASS: GM01 actual western cells: exact ordered path array
+PASS: GM01 actual western cells: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"GM01 actual western cells","exact":true,"new_usec":2288,"old_usec":2576,"path_size":10}
+PASS: Production option builders include cover, corridor, lane and blocker-clearance costs together
+PASS: GM01 production normal MOVE options: exact ordered path array
+PASS: GM01 production normal MOVE options: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"GM01 production normal MOVE options","exact":true,"new_usec":19178,"old_usec":16376,"path_size":11}
+PASS: A* comparisons never write the saved map
+PASS: Hex (-4, -3) to (4, 3): exact ordered path array
+PASS: Hex (-4, -3) to (4, 3): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex (-4, -3) to (4, 3)","exact":true,"new_usec":5071,"old_usec":4690,"path_size":15}
+PASS: Hex (4, 3) to (-4, -3): exact ordered path array
+PASS: Hex (4, 3) to (-4, -3): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex (4, 3) to (-4, -3)","exact":true,"new_usec":5668,"old_usec":4752,"path_size":15}
+PASS: Hex (-2, 1) to (2, -1): exact ordered path array
+PASS: Hex (-2, 1) to (2, -1): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex (-2, 1) to (2, -1)","exact":true,"new_usec":510,"old_usec":477,"path_size":5}
+PASS: Hex (-1, -1) to (-1, -1): exact ordered path array
+PASS: Hex (-1, -1) to (-1, -1): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex (-1, -1) to (-1, -1)","exact":true,"new_usec":3,"old_usec":8,"path_size":1}
+PASS: Hex (0, 0) to (30, 30): exact ordered path array
+PASS: Hex (0, 0) to (30, 30): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex (0, 0) to (30, 30)","exact":true,"new_usec":3,"old_usec":7,"path_size":0}
+PASS: Hex cover and road ties: exact ordered path array
+PASS: Hex cover and road ties: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex cover and road ties","exact":true,"new_usec":11155,"old_usec":10560,"path_size":16}
+PASS: Hex negative custom weights: exact ordered path array
+PASS: Hex negative custom weights: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex negative custom weights","exact":true,"new_usec":7273,"old_usec":6610,"path_size":15}
+PASS: Hex disconnected barrier: exact ordered path array
+PASS: Hex disconnected barrier: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex disconnected barrier","exact":true,"new_usec":2714,"old_usec":2274,"path_size":0}
+PASS: Hex blocked endpoint: exact ordered path array
+PASS: Hex blocked endpoint: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex blocked endpoint","exact":true,"new_usec":2416,"old_usec":2439,"path_size":0}
+PASS: legacy square (-4, -3) to (4, 3): exact ordered path array
+PASS: legacy square (-4, -3) to (4, 3): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square (-4, -3) to (4, 3)","exact":true,"new_usec":5915,"old_usec":5484,"path_size":9}
+PASS: legacy square (4, 3) to (-4, -3): exact ordered path array
+PASS: legacy square (4, 3) to (-4, -3): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square (4, 3) to (-4, -3)","exact":true,"new_usec":5523,"old_usec":5399,"path_size":9}
+PASS: legacy square (-2, 1) to (2, -1): exact ordered path array
+PASS: legacy square (-2, 1) to (2, -1): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square (-2, 1) to (2, -1)","exact":true,"new_usec":822,"old_usec":833,"path_size":5}
+PASS: legacy square (-1, -1) to (-1, -1): exact ordered path array
+PASS: legacy square (-1, -1) to (-1, -1): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square (-1, -1) to (-1, -1)","exact":true,"new_usec":4,"old_usec":7,"path_size":1}
+PASS: legacy square (0, 0) to (30, 30): exact ordered path array
+PASS: legacy square (0, 0) to (30, 30): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square (0, 0) to (30, 30)","exact":true,"new_usec":3,"old_usec":8,"path_size":0}
+PASS: legacy square cover and road ties: exact ordered path array
+PASS: legacy square cover and road ties: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square cover and road ties","exact":true,"new_usec":2096,"old_usec":2128,"path_size":9}
+PASS: legacy square negative custom weights: exact ordered path array
+PASS: legacy square negative custom weights: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square negative custom weights","exact":true,"new_usec":7568,"old_usec":6701,"path_size":9}
+PASS: legacy square disconnected barrier: exact ordered path array
+PASS: legacy square disconnected barrier: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square disconnected barrier","exact":true,"new_usec":4743,"old_usec":3818,"path_size":0}
+PASS: legacy square blocked endpoint: exact ordered path array
+PASS: legacy square blocked endpoint: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square blocked endpoint","exact":true,"new_usec":4029,"old_usec":3867,"path_size":0}
+PASS: invalid null registry: exact ordered path array
+STABLE_ASTAR_QUERY {"case":"invalid null registry","exact":true,"new_usec":1,"old_usec":2,"path_size":0}
+PASS: infinite clearance cost: exact ordered path array
+PASS: infinite clearance cost: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"infinite clearance cost","exact":true,"new_usec":64,"old_usec":71,"path_size":0}
+PASS: NaN custom lane cost: exact ordered path array
+PASS: NaN custom lane cost: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"NaN custom lane cost","exact":true,"new_usec":60,"old_usec":63,"path_size":2}
+PASS: NaN custom exposure: exact ordered path array
+PASS: NaN custom exposure: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"NaN custom exposure","exact":true,"new_usec":55,"old_usec":62,"path_size":2}
+Stable A* frontier: 61 passed, 0 failed
+GM01_STABLE_ASTAR_FRONTIER_ALL_PASS

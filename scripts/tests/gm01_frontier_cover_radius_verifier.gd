@@ -6,7 +6,7 @@ const MAP = preload("res://scripts/terrain/terrain_map_data.gd")
 const SETUP = preload("res://scripts/tests/mission_test_setup.gd")
 const MAP_PATH := "res://maps/Ground_Mission01_32x32.json"
 const SCENARIO_PATH := "res://data/mission_scenarios/ground_mission01_default.json"
-const REPORT_DIR := "res://docs/qa/gm01_frontier_20261102"
+const REPORT_DIR := "res://docs/qa/mission_a5_kartenrand_20261102/cover_radius"
 const QUERY_RADIUS := 220.0
 const WARMUP_PAIRS := 6
 const SAMPLE_PAIRS := 32
@@ -165,8 +165,8 @@ func _test_fixture(topology: String) -> void:
 func _test_actual_map_and_benchmark() -> void:
 	var map_sha := FileAccess.get_sha256(MAP_PATH)
 	var data = MAP.load_from_file(MAP_PATH)
-	_check(data != null and not data.has_load_issue() and data.get_tiles().size() == 2304 and data.get_grid_topology() == "hex_axial_v1", "Benchmark source is the actual 2304-cell saved Hex GM01")
-	if data == null or data.get_tiles().size() != 2304:
+	_check(data != null and not data.has_load_issue() and data.get_tiles().size() == 9408 and data.get_grid_topology() == "hex_axial_v1", "Reference comparison source is the actual 9408-cell saved Hex GM01; no performance comparison to the previous smaller map")
+	if data == null or data.get_tiles().size() != 9408:
 		return
 	var pair := _pair(data.get_tiles(), data.get_grid_topology(), data.get_grid_origin())
 	var size: Dictionary = data.get_tile_size()
@@ -247,6 +247,7 @@ func _summary(samples: Array) -> Dictionary:
 
 
 func _write_report() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(REPORT_DIR))
 	var stamp := Time.get_datetime_string_from_system(true).replace(":", "").replace("-", "")
 	var report_path := REPORT_DIR + "/cover_radius_query_pairs_" + stamp + "-pid" + str(OS.get_process_id()) + ".json"
 	var report := {"schema": "gm01.cover_radius_query_pairs.v1", "utc": Time.get_datetime_string_from_system(true),

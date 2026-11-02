@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T183333_175250Z\\checks\\20261102T183333Z-pid149084",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\checks_final.json",
+  "godot": "godot_console",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.052,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T183333_175250Z\\checks\\20261102T183333Z-pid149084\\logs\\version.log",
+    "passed": true
+  },
+  "filter": "hex_fow",
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-02T18:33:33.259521+00:00",
+  "finished_at": "2026-11-02T18:33:36.749064+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T183333_175250Z\\checks\\20261102T183333Z-pid149084\\logs\\engine-check-hex_fow.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\gm01_frontier_hex_fow_verifier.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 3.431,
+      "name": "hex_fow",
+      "marker_found": false,
+      "errors": [
+        "ERROR: FAIL: known_terrain/team_alpha continuous full snapshots: every final tile state and actual mask slot matches the latest complete snapshot",
+        "ERROR: FAIL: unexplored_blackout/team_alpha continuous full snapshots: every final tile state and actual mask slot matches the latest complete snapshot",
+        "ERROR: FAIL: unexplored_blackout/team_beta continuous full snapshots: every final tile state and actual mask slot matches the latest complete snapshot"
+      ],
+      "error_count": 3,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T183333_175250Z\\checks\\20261102T183333Z-pid149084\\logs\\check-hex_fow.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T183333_175250Z\\checks\\20261102T183333Z-pid149084\\logs\\engine-check-hex_fow.log",
+      "passed": false,
+      "reasons": [
+        "exit 1",
+        "3 error(s)",
+        "missing success marker"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 0,
+    "failed": 1
+  }
+}

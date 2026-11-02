@@ -13,8 +13,8 @@ const ORIGINAL := "res://docs/qa/gm01_frontier_20261102/original_Ground_Mission0
 const OUTPUT := "res://maps/Ground_Mission01_32x32.json"
 const SCENARIO := "res://data/mission_scenarios/ground_mission01_default.json"
 const SOLID_TYPE := "frontier_scene_solid"
-const GRID_SIZE := Vector2i(48, 48)
-const MAP_NAME := "GM01 Frontier Hex 48x48"
+const GRID_SIZE := LAYOUT.GRID_SIZE
+const MAP_NAME := "GM01 Frontier Hex 96x98"
 const EXTENSION_PLANES := [Vector2(35, 27), Vector2(42, 26), Vector2(43, 30)]
 const MARKER_PLANES := {
 	"spawn_alpha": Vector2(6, 11),
@@ -134,37 +134,32 @@ static func compose_payload(layout: Dictionary) -> Dictionary:
 	# Rectangular odd-row coverage in physical space; the saved keys remain
 	# genuine axial coordinates, including negative q on the western side.
 	# Iterate q/r in save order so normal MapData Save/Load is order-stable.
-	for q in range(-floori(float(GRID_SIZE.y - 1) * 0.5), GRID_SIZE.x):
-		for row in range(GRID_SIZE.y):
-			var column: int = q + floori(float(row) * 0.5)
-			if column < 0 or column >= GRID_SIZE.x:
+	for grid in LAYOUT.get_authoring_grid_positions():
+		var plane: Vector2 = HEX.axial_to_plane(Vector2(grid))
+		var tile: Dictionary = {
+			"grid_position": {"x": grid.x, "y": grid.y}, "type_id": "ground_flat",
+			"walkable": true, "blocks_los": false, "cover_value": 0,
+			"height_level": 0, "object_height": 0, "surface_type": "sand", "edge_type": "none",
+		}
+		if _on_authored_path(plane, Array(layout.get("paths", []))):
+			tile["surface_type"] = "road"
+		# Existing height contract remains a four-cell-wide loading-yard terrace.
+		if TERRACE.has_point(plane):
+			tile["height_level"] = 1
+			tile["surface_type"] = "ground"
+			tile["edge_type"] = "slope" if plane.x < 19.5 else "cliff"
+			tile["type_id"] = "slope_se" if plane.x < 19.5 else "ground_flat"
+		for blocker_variant in Array(layout.get("blockers", [])):
+			var blocker: Dictionary = blocker_variant
+			if not footprint_contains(blocker, grid):
 				continue
-			var grid := Vector2i(q, row)
-			var plane: Vector2 = HEX.axial_to_plane(Vector2(grid))
-			var tile: Dictionary = {
-				"grid_position": {"x": grid.x, "y": grid.y}, "type_id": "ground_flat",
-				"walkable": true, "blocks_los": false, "cover_value": 0,
-				"height_level": 0, "object_height": 0, "surface_type": "sand", "edge_type": "none",
-			}
-			if _on_authored_path(plane, Array(layout.get("paths", []))):
-				tile["surface_type"] = "road"
-			# Existing height contract remains a four-cell-wide loading-yard terrace.
-			if TERRACE.has_point(plane):
-				tile["height_level"] = 1
-				tile["surface_type"] = "ground"
-				tile["edge_type"] = "slope" if plane.x < 19.5 else "cliff"
-				tile["type_id"] = "slope_se" if plane.x < 19.5 else "ground_flat"
-			for blocker_variant in Array(layout.get("blockers", [])):
-				var blocker: Dictionary = blocker_variant
-				if not footprint_contains(blocker, grid):
-					continue
-				tile["object_type_id"] = SOLID_TYPE
-				tile["walkable"] = false
-				tile["blocks_los"] = bool(tile["blocks_los"]) or bool(blocker.get("blocks_los", true))
-				tile["object_height"] = maxi(int(tile["object_height"]), int(blocker.get("object_height", 1)))
-				tile["cover_value"] = maxi(int(tile["cover_value"]), int(blocker.get("cover_value", 0)))
-			tiles.append(tile)
-			by_grid[grid] = tile
+			tile["object_type_id"] = SOLID_TYPE
+			tile["walkable"] = false
+			tile["blocks_los"] = bool(tile["blocks_los"]) or bool(blocker.get("blocks_los", true))
+			tile["object_height"] = maxi(int(tile["object_height"]), int(blocker.get("object_height", 1)))
+			tile["cover_value"] = maxi(int(tile["cover_value"]), int(blocker.get("cover_value", 0)))
+		tiles.append(tile)
+		by_grid[grid] = tile
 	# Adjacent usable cover comes from actual solid edges, never random ground tags.
 	for grid_variant in by_grid:
 		var grid: Vector2i = grid_variant
@@ -214,7 +209,7 @@ static func validate_payload(payload: Dictionary, layout: Dictionary) -> PackedS
 		issues.append("Expected exactly%d authored cells" % (GRID_SIZE.x * GRID_SIZE.y))
 	var saved_size: Dictionary = payload.get("grid_size", {})
 	if Vector2i(int(saved_size.get("x", 0)), int(saved_size.get("y", 0))) != GRID_SIZE:
-		issues.append("Expected the real expanded48x48 odd-row hex coverage")
+		issues.append("Expected the real 96x98 odd-row hex coverage up to the visible map edge")
 	if String(payload.get("grid_topology", "")) != HEX.TOPOLOGY_ID:
 		issues.append("Expected real hex_axial_v1 gameplay topology")
 	if Array(layout.get("blockers", [])).is_empty() or Array(layout.get("assets", [])).is_empty():
@@ -255,6 +250,11 @@ static func validate_payload(payload: Dictionary, layout: Dictionary) -> PackedS
 		route_pairs.append([marker_grid("spawn_alpha"), target])
 		if not bool(registry.call("is_walkable", target)):
 			issues.append("New supply-yard/outer access anchor is blocked at%s" % target)
+	# New real ground on all four sides must connect to the original insertion.
+	for grid in [Vector2i(-8, 12), Vector2i(-24, 0), Vector2i(71, 0), Vector2i(13, -25), Vector2i(-36, 72)]:
+		route_pairs.append([marker_grid("spawn_alpha"), grid])
+		if not bool(registry.call("is_walkable", grid)):
+			issues.append("New map-edge probe is not real walkable ground at%s" % grid)
 	for pair in route_pairs:
 		if Array(pathfinder.call("find_path", pair[0], pair[1], registry)).is_empty():
 			issues.append("Disconnected required route %s→%s" % [pair[0], pair[1]])

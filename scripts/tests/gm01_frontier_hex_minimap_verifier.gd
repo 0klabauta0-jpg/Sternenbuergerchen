@@ -108,7 +108,7 @@ func _test_legacy_fixture() -> void:
 func _test_regular_map() -> void:
 	var source_sha := FileAccess.get_sha256(SOURCE)
 	var data = MAP.load_from_file(SOURCE)
-	_check(data != null and not data.has_load_issue() and data.get_grid_topology() == "hex_axial_v1" and data.get_grid_size() == Vector2i(48, 48), "Regular GM01 uses the actual saved 48x48 Hex map")
+	_check(data != null and not data.has_load_issue() and data.get_grid_topology() == "hex_axial_v1" and data.get_grid_size() == Vector2i(96, 98), "Regular GM01 uses the actual saved 96x98 Hex map")
 	if data == null or data.get_tiles().is_empty():
 		return
 	var before := _fingerprint(data)
@@ -122,7 +122,13 @@ func _test_regular_map() -> void:
 		max_world = max_world.max(tile.world_position)
 		if tile.grid_position.x < 0:
 			negative_count += 1
-	_check(negative_count > 0 and data.get_tiles().size() == 2304 and _near(_vector(bounds["min"]), min_world) and _near(_vector(bounds["max"]), max_world), "Regular GM01 minimap encloses all 2304 saved Hex cells, including its negative-q side")
+	_check(negative_count > 0 and data.get_tiles().size() == 9408 and _near(_vector(bounds["min"]), min_world) and _near(_vector(bounds["max"]), max_world), "Regular GM01 minimap encloses all 9408 saved Hex cells, including both negative-coordinate sides")
 	var visual: Dictionary = VISUAL.new().build_snapshot(data, snapshot)
-	_check(int(visual.get("sample_count", 0)) == 2304, "Regular GM01 minimap includes every cell at the existing 48-axis sampling limit")
+	var min_uv := Vector2.ONE
+	var max_uv := Vector2.ZERO
+	for sample in visual.get("terrain_samples", []):
+		var uv := _vector(Dictionary(sample.get("uv", {})))
+		min_uv = min_uv.min(uv)
+		max_uv = max_uv.max(uv)
+	_check(int(visual.get("sample_stride", 0)) == 3 and int(visual.get("sample_count", 0)) > 0 and int(visual.get("sample_count", 0)) <= 48 * 48 and min_uv.x < 0.04 and min_uv.y < 0.04 and max_uv.x > 0.96 and max_uv.y > 0.96, "Larger GM01 retains bounded coarse sampling with all four minimap sides represented")
 	_check(_fingerprint(data) == before and FileAccess.get_sha256(SOURCE) == source_sha, "Regular-map minimap checks change neither memory facts nor saved source bytes")

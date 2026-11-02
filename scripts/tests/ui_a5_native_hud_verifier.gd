@@ -88,7 +88,7 @@ func _check_mission(window_size: Vector2i) -> void:
 		_check(panel != null and panel.get_global_rect().end.y <= band_rect.position.y + 1.0, prefix + panel_path + " remains above the band")
 	var event_log := scene.get_node_or_null("TacticalUI/TacticalEventLogPanel") as Control
 	_check(event_log != null and event_log.get_global_rect().position.x >= viewport_rect.size.x * 0.5, prefix + "event log occupies the right side above the band")
-	var mission_control := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel") as Control
+	var mission_control := scene.get_node_or_null("TacticalUI/MissionDropshipPanel") as Control
 	_check(mission_control != null and mission_control.get_global_rect().position.y <= 144.0, prefix + "mission controls stay in the upper-right group")
 	_check(mission_control != null and event_log != null and not mission_control.get_global_rect().intersects(event_log.get_global_rect()), prefix + "mission controls and protocol remain separate")
 	for button_name in FIRE_RULES:

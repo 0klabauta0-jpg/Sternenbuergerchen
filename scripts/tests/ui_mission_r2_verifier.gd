@@ -40,7 +40,7 @@ func _check_scene(size: Vector2i) -> void:
 	_check(team.get_global_rect().size.x <= 560.0, prefix + "team parameters form a bounded compact group")
 	_check(band.get_global_rect().size.y <= 160.0, prefix + "band uses only the height needed by two readable action rows")
 	var members := scene.get_node(TEAM + "/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll") as Control
-	_check(members.size.y <= 112.0 and members.get_global_rect().end.y <= band.get_global_rect().position.y, prefix + "member strip is compact and remains above the band")
+	_check(not members.is_visible_in_tree(), prefix + "A5 team portraits replace the duplicate separate NPC strip")
 	var details := team.get_node_or_null("A5DetailsButton") as Button
 	_check(details != null and not details.get_signal_connection_list("pressed").is_empty(), prefix + "full technical information remains explicitly reachable")
 	for name in ["Cautious", "Normal", "Aggressive"]:
@@ -98,7 +98,8 @@ func _check_states(scene: Node, controller: Node, selector: OptionButton, prefix
 	HUD.refresh(controller, {"fire_rule": "free", "fire_rule_enabled": true, "feedback": "FIRE HOLD REQUEST (1)", "visible": true})
 	_check(_selected_rule(selector) == "free" and String(controller.call("get_fireteam_fire_rule", ids[0])) == "free", prefix + "pending display never turns a provisional UI selection into confirmed state")
 	var heading := scene.get_node(TEAM + "/A5FireRuleHeading") as Label
-	_check(heading.text.contains("Änderung angefragt") and heading.get_visible_line_count() >= 1, prefix + "pending rule feedback fits a drawable heading line")
+	var pending_feedback := scene.get_node("TacticalUI/A5TargetOrderPanel/Contents/Feedback") as Label
+	_check(heading.text == "Angefragt" and heading.get_visible_line_count() >= 1 and pending_feedback.is_visible_in_tree() and pending_feedback.text == "Anfrage wird geprüft", prefix + "compact pending heading and visible full feedback retain the request state")
 	_check(heading.get_theme_font("font").get_string_size(heading.text, HORIZONTAL_ALIGNMENT_LEFT, -1, heading.get_theme_font_size("font_size")).x <= heading.size.x, prefix + "complete pending heading fits the real content width")
 	controller.call("set_fireteams_fire_rule", PackedStringArray([ids[1]]), "hold")
 	controller.call("_set_selected_fireteams", PackedStringArray([ids[0], ids[1]]), false)
