@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "cycle_area_selection",
+      "script": "res://scripts/tests/review_cycles_20261103_area_selection_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_AREA_SELECTION_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_heatmap_lifecycle",
+      "script": "res://scripts/tests/review_cycles_20261103_heatmap_lifecycle_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_HEATMAP_LIFECYCLE_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "density377",
+      "script": "res://scripts/tests/task_377_contact_density_heat_map_layer.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "review2_20261102_p2_height_lookup_verifier",
+      "script": "res://scripts/tests/review2_20261102_p2_height_lookup_verifier.gd",
+      "success_marker": "RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "review2_20261102_p2_editor_picking_verifier",
+      "script": "res://scripts/tests/review2_20261102_p2_editor_picking_verifier.gd",
+      "success_marker": "RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "frontier_hex_render_verifier",
+      "script": "res://scripts/tests/frontier_hex_render_verifier.gd",
+      "success_marker": "FRONTIER_HEX_RENDER",
+      "timeout": 180
+    },
+    {
+      "name": "task_292_editor_hill_cliff_grid_depth_repair",
+      "script": "res://scripts/tests/task_292_editor_hill_cliff_grid_depth_repair.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "editor_height_edge_surface_anchor_verifier",
+      "script": "res://scripts/tests/editor_height_edge_surface_anchor_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_density_fow_refresh",
+      "script": "res://scripts/tests/review_cycles_20261103_density_fow_refresh_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_DENSITY_FOW_REFRESH_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "fow_dirty1189",
+      "script": "res://scripts/tests/task_1189_fow_dirty_region_fanout.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "fow_runtime224",
+      "script": "res://scripts/tests/task_224_fog_of_war_tile_visibility_height_cover_runtime.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "fow_overlay225",
+      "script": "res://scripts/tests/task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    }
+  ]
+}

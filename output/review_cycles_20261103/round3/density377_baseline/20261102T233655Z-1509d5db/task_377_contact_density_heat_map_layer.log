@@ -1,0 +1,45 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-ac5d84a7f0a245778552a74ffeb1ce75
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_377 Contact Density Heat Map Layer ===
+PASS: Overlay aggregates contacts into two heat clusters
+PASS: Heat cells are returned in snapshot
+PASS: Each cluster contains two contacts
+PASS: Overlay snapshot is visual-only and non-authoritative
+PASS: FoW density filter keeps visible current and recorded last-known contacts
+PASS: FoW density filter counts hidden contacts
+PASS: FoW density source list includes visible and last-known IDs
+PASS: FoW density source list does not expose hidden enemy IDs
+PASS: Primary view toggles contact density heatmap on
+PASS: Primary view reports two heat cells
+PASS: Primary view heatmap uses four allowed source contacts
+PASS: Heatmap aggregation does not rebuild again inside the update interval
+PASS: Heatmap reports interval-skipped updates
+PASS: Primary view toggles contact density heatmap off
+PASS: Disabled heatmap exposes zero heat cells
+ERROR: FAIL: Heatmap counts the hidden FoW contact
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_377_contact_density_heat_map_layer.gd:227)
+       [1] _test_primary_view_respects_fow_last_known_only (res://scripts/tests/task_377_contact_density_heat_map_layer.gd:144)
+       [2] _wait_frames (res://scripts/tests/task_377_contact_density_heat_map_layer.gd:218)
+PASS: Heatmap uses two visible contacts plus one last-known contact
+ERROR: FAIL: Heatmap source IDs include visible and last-known contacts
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_377_contact_density_heat_map_layer.gd:227)
+       [1] _test_primary_view_respects_fow_last_known_only (res://scripts/tests/task_377_contact_density_heat_map_layer.gd:146)
+       [2] _wait_frames (res://scripts/tests/task_377_contact_density_heat_map_layer.gd:218)
+ERROR: FAIL: Heatmap does not reveal hidden enemy IDs
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_377_contact_density_heat_map_layer.gd:227)
+       [1] _test_primary_view_respects_fow_last_known_only (res://scripts/tests/task_377_contact_density_heat_map_layer.gd:147)
+       [2] _wait_frames (res://scripts/tests/task_377_contact_density_heat_map_layer.gd:218)
+PASS: TASK_377 task file exists
+PASS: TASK_377 is marked implemented
+PASS: Implementation status mentions TASK_377
+PASS: Roadmap mentions TASK_377
+=== RESULTS: 20 passed, 3 failed ===
+FAIL

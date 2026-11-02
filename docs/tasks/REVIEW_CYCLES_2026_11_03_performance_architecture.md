@@ -47,7 +47,7 @@ bleibt bis zu einem passenden bestaetigten Fix separat sichtbar.
 ## Rundenstatus
 - [x] Runde 1: Review, bestaetigte Befunde, Fixes und Regressionen.
 - [x] Runde 2: erneuter Review des neuen Stands, Fixes und Regressionen.
-- [ ] Runde 3: erneuter Review, Fixes und gemeinsame Abschlusspruefung.
+- [x] Runde 3: erneuter Review, Fixes und gezielte Regressionen.
 - [ ] Unabhaengiger Abschlussreview, gezielte Commits und Task-Push.
 
 ## Bestaetigte Ursachen / Testziele
@@ -71,6 +71,10 @@ Tiles. Begrenzte Kandidaten muessen dieselben Tilezentren in derselben Reihenfol
 wie der bisherige exhaustive Pfad liefern, auch bei Hex, H0-H2 und Kamera-Yaw.
 Ausserdem muss eine nach `render_map()` unveraenderte Contact-Heatmap wieder
 sichtbar sein, ohne dass UI/Visuals Gameplay-Kontakte mutieren.
+Der Nachreview prueft zusaetzlich FoW-Deltas innerhalb des Heatmap-Intervalls:
+Ein normaler Kontaktrefresh darf den zuvor unterdrueckten Layer erst freigeben,
+wenn die gecachten Zellen zur aktuell erlaubten Quellenlage passen. Das Intervall
+darf erhalten bleiben, waehrend alte unerlaubte Zellen unsichtbar bleiben.
 
 Betroffene produktive Pfade: `multiplayer_command_contract.gd`,
 `mission_combat_loop_driver.gd`, `terrain_map_3d_view.gd` sowie zugehoerige Tests.
@@ -100,3 +104,23 @@ Jeder Kandidat wird vor dem jeweiligen Produktivfix durch RED verifiziert.
 - Erster Testlauf hatte einen typisierten Array-Fixturefehler und wurde gezielt
   beendet; unveraenderte Erwartungen danach als korrektes RED geprueft. Die
   Rohhistorik bleibt erhalten. Roster weiterhin unveraendert.
+
+## Ergebnis Runde 3
+- Frischer Review nach Runde 2 bestaetigt Area-Vollscan und verlorenen Heatmap-
+  Layer. Area RED 16/2 -> GREEN 18/0; Rebuild-Lifecycle RED 14/8 -> GREEN 22/0.
+- Area-Preview 128x128/256x256: statt 16384/65536 Projektionen und 32769/131073
+  Tile-Positionslesungen jetzt jeweils 25 Projektionen und 51 Lesungen. Original-
+  Auswahl, Quellreihenfolge, Square/Hex/H0-H2/Yaw und grosse Fallbacks erhalten.
+- Nachreview fand zusaetzlich den vorzeitigen FoW-Visibility-Reset im Heatmap-
+  Intervall. Eigene Regression RED 18/2 -> GREEN 20/0; Unterdrueckung bleibt bis
+  zu sicherem Signaturtreffer oder fertigem Rebuild bestehen. Intervall unveraendert.
+- Zwoelf gezielte Gates / 301 Assertions strikt gruen, inklusive drei FoW-Gates.
+  Unabhaengige Actual-Diff-Reviews fuer Area und Heatmap APPROVED.
+- Alter TASK377 war auf unveraenderter Basis ebenfalls 20/3. Seine Fixture fuehrt
+  nun nach dem oeffentlichen Updateintervall den normalen Kontaktrefresh aus;
+  alle 23 Erwartungen erhalten, auch mit Originalview 23/23. Neuer Immediate-
+  FoW-Test schuetzt gerade das dabei nicht abgedeckte Drosselfenster.
+- Ein erster neuer Timer-Fixturelauf wurde auf monotone Wallclock-Deadline
+  korrigiert, passend zur Produktionsuhr. Keine Assertions abgeschwaecht.
+- Gemeinsame Abschlussmatrix: `scripts/tests/review_cycles_20261103_checks.json`
+  mit 69 unterschiedlichen Gates; Ergebnis und Gesamt-Nachreview folgen.

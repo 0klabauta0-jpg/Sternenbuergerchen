@@ -1,0 +1,422 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "review_p1_movement",
+      "script": "res://scripts/tests/review_20261102_p1_movement_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 45
+    },
+    {
+      "name": "review_p1_navigation",
+      "script": "res://scripts/tests/review_20261102_p1_navigation_verifier.gd",
+      "success_marker": "REVIEW_20261102_P1_NAVIGATION_RESULT",
+      "timeout": 45
+    },
+    {
+      "name": "review_p1_runtime_index",
+      "script": "res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    },
+    {
+      "name": "review_p2_hex_budget",
+      "script": "res://scripts/tests/review_20261102_p2_hex_budget_verifier.gd",
+      "success_marker": "REVIEW_20261102_P2_HEX_RESULT",
+      "timeout": 45
+    },
+    {
+      "name": "review_p2_fallback",
+      "script": "res://scripts/tests/review_20261102_p2_fallback_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 45
+    },
+    {
+      "name": "review_p2_dropship_hud",
+      "script": "res://scripts/tests/review_20261102_p2_dropship_hud_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "review_p2_vital_order",
+      "script": "res://scripts/tests/review_20261102_p2_vital_order_verifier.gd",
+      "success_marker": "REVIEW_20261102_P2_VITAL_ORDER_RESULT",
+      "timeout": 45
+    },
+    {
+      "name": "combat_authority162",
+      "script": "res://scripts/tests/task_162_combat_authority_contract_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    },
+    {
+      "name": "network_authority166",
+      "script": "res://scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "snapshot168",
+      "script": "res://scripts/tests/task_168_multiplayer_snapshot_contract_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "command_authority1186",
+      "script": "res://scripts/tests/task_1186_simulation_root_command_authority.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 45
+    },
+    {
+      "name": "movement_lifecycle501",
+      "script": "res://scripts/tests/task_501_integrated_movement_command_lifecycle_hardening.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 45
+    },
+    {
+      "name": "navigation125",
+      "script": "res://scripts/tests/task_125_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "navigation127",
+      "script": "res://scripts/tests/task_127_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "requeue1199",
+      "script": "res://scripts/tests/task_1199_dominant_simulation_slice.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 45
+    },
+    {
+      "name": "path_recompute_under_fire",
+      "script": "res://scripts/tests/path_recompute_under_fire_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 45
+    },
+    {
+      "name": "avoidance475",
+      "script": "res://scripts/tests/task_475_fireteam_pathfinding_avoidance_stability_pass.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 45
+    },
+    {
+      "name": "mission_index1190",
+      "script": "res://scripts/tests/task_1190_mission_runtime_index_hud_delta.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    },
+    {
+      "name": "hud_light1152",
+      "script": "res://scripts/tests/task_1152_mission_hud_heavy_refresh_budget_pass.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    },
+    {
+      "name": "command_readability1157",
+      "script": "res://scripts/tests/task_1157_command_matrix_1280_readability.gd",
+      "success_marker": "TASK_1157 PASS",
+      "timeout": 60
+    },
+    {
+      "name": "incremental_hpa412",
+      "script": "res://scripts/tests/task_412_large_map_streaming_incremental_hpa.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 120
+    },
+    {
+      "name": "doors692",
+      "script": "res://scripts/tests/task_692_door_runtime_collision_los_contract.gd",
+      "success_marker": "TASK_692: ALL PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "hex_foundation",
+      "script": "res://scripts/tests/frontier_hex_foundation_verifier.gd",
+      "success_marker": "FRONTIER_HEX_FOUNDATION_ALL_PASS",
+      "timeout": 45
+    },
+    {
+      "name": "hex_movement",
+      "script": "res://scripts/tests/frontier_hex_movement_verifier.gd",
+      "args": [
+        "--evidence-output=res://output/review_fixes_20261102/hex_movement.json"
+      ],
+      "success_marker": "FRONTIER_HEX_MOVEMENT",
+      "timeout": 45
+    },
+    {
+      "name": "two_peer_transport1083",
+      "script": "res://scripts/tests/task_1083_two_instance_roe_ownership_playtest.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "snapshot_payload221",
+      "script": "res://scripts/tests/task_221_multiplayer_snapshot_serialization_performance_pass.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "interaction_payload1099",
+      "script": "res://scripts/tests/task_1099_connected_interaction_snapshot_payload_budget.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    },
+    {
+      "name": "interaction_jitter1100",
+      "script": "res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "dropship_pending1114",
+      "script": "res://scripts/tests/task_1114_connected_dropship_pending_card_visual_polish.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    },
+    {
+      "name": "dropship_truth503",
+      "script": "res://scripts/tests/task_503_mission_dropship_fireteam_hud_truth.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    },
+    {
+      "name": "dropship_ux397",
+      "script": "res://scripts/tests/task_397_mission_dropship_ux_hotfix.gd",
+      "success_marker": "TASK_397: ALL PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "dropship_multi_cards",
+      "script": "res://scripts/tests/bugfix_mission_multi_dropship_cards.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    },
+    {
+      "name": "review2_20261102_isolation_canary_verifier",
+      "script": "res://scripts/tests/review2_20261102_isolation_canary_verifier.gd",
+      "success_marker": "REVIEW2_ISOLATION_CANARY_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "review2_20261102_p1_hidden_mission_verifier",
+      "script": "res://scripts/tests/review2_20261102_p1_hidden_mission_verifier.gd",
+      "success_marker": "RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "review2_20261102_p2_height_lookup_verifier",
+      "script": "res://scripts/tests/review2_20261102_p2_height_lookup_verifier.gd",
+      "success_marker": "RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "review2_20261102_p2_editor_picking_verifier",
+      "script": "res://scripts/tests/review2_20261102_p2_editor_picking_verifier.gd",
+      "success_marker": "RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "review2_20261102_p2_spacing_verifier",
+      "script": "res://scripts/tests/review2_20261102_p2_spacing_verifier.gd",
+      "success_marker": "RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "review2_20261102_p2_contact_observers_verifier",
+      "script": "res://scripts/tests/review2_20261102_p2_contact_observers_verifier.gd",
+      "success_marker": "RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "review2_20261102_p2_contact_relays_verifier",
+      "script": "res://scripts/tests/review2_20261102_p2_contact_relays_verifier.gd",
+      "success_marker": "RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "review2_20261102_p2_chunk_jitter_verifier",
+      "script": "res://scripts/tests/review2_20261102_p2_chunk_jitter_verifier.gd",
+      "success_marker": "REVIEW2_CHUNK_JITTER_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "task_096_recovery_verifier",
+      "script": "res://scripts/tests/task_096_recovery_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "bugfix_release_singleplayer_normal_click_homebase_guard",
+      "script": "res://scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_1185_tactical_input_ownership",
+      "script": "res://scripts/tests/task_1185_tactical_input_ownership.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "frontier_hex_render_verifier",
+      "script": "res://scripts/tests/frontier_hex_render_verifier.gd",
+      "success_marker": "FRONTIER_HEX_RENDER",
+      "timeout": 180
+    },
+    {
+      "name": "task_292_editor_hill_cliff_grid_depth_repair",
+      "script": "res://scripts/tests/task_292_editor_hill_cliff_grid_depth_repair.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_295_map_editor_paint_toolbar_tools_polish",
+      "script": "res://scripts/tests/task_295_map_editor_paint_toolbar_tools_polish.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_229_map_editor_usability_authoring_pass",
+      "script": "res://scripts/tests/task_229_map_editor_usability_authoring_pass.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "editor_height_edge_surface_anchor_verifier",
+      "script": "res://scripts/tests/editor_height_edge_surface_anchor_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_183_editor_hill_authoring_verifier",
+      "script": "res://scripts/tests/task_183_editor_hill_authoring_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_163_map_editor_module_split_verifier",
+      "script": "res://scripts/tests/task_163_map_editor_module_split_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_112_verifier",
+      "script": "res://scripts/tests/task_112_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_187_npc_minimum_spacing_and_multiplayer_authority",
+      "script": "res://scripts/tests/task_187_npc_minimum_spacing_and_multiplayer_authority.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_130_verifier",
+      "script": "res://scripts/tests/task_130_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_510_contact_report_upgrade",
+      "script": "res://scripts/tests/task_510_contact_report_upgrade.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_218_simulation_combat_ai_tick_budget_pass",
+      "script": "res://scripts/tests/task_218_simulation_combat_ai_tick_budget_pass.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_fireteam_authority",
+      "script": "res://scripts/tests/review_cycles_20261103_fireteam_authority_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_FIRETEAM_AUTHORITY_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_cooldown",
+      "script": "res://scripts/tests/review_cycles_20261103_cooldown_cadence_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_COOLDOWN_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_area_selection",
+      "script": "res://scripts/tests/review_cycles_20261103_area_selection_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_AREA_SELECTION_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_heatmap_lifecycle",
+      "script": "res://scripts/tests/review_cycles_20261103_heatmap_lifecycle_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_HEATMAP_LIFECYCLE_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "medic_support",
+      "script": "res://scripts/tests/medic_support_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "discipline093",
+      "script": "res://scripts/tests/task_093_verifier.gd",
+      "success_marker": "TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "misidentification094",
+      "script": "res://scripts/tests/task_094_verifier.gd",
+      "success_marker": "TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "density377",
+      "script": "res://scripts/tests/task_377_contact_density_heat_map_layer.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "discipline_bridge570",
+      "script": "res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "responder118",
+      "script": "res://scripts/tests/task_118_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_density_fow_refresh",
+      "script": "res://scripts/tests/review_cycles_20261103_density_fow_refresh_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_DENSITY_FOW_REFRESH_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "fow_dirty1189",
+      "script": "res://scripts/tests/task_1189_fow_dirty_region_fanout.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "fow_runtime224",
+      "script": "res://scripts/tests/task_224_fog_of_war_tile_visibility_height_cover_runtime.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "fow_overlay225",
+      "script": "res://scripts/tests/task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    }
+  ]
+}

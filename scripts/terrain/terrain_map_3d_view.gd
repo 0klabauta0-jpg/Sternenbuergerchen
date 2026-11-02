@@ -1491,6 +1491,7 @@ func render_map(terrain_map_data = null) -> void:
 	_rebuild_selection_visuals()
 	_rebuild_order_visuals()
 	_rebuild_contact_visuals()
+	_rebuild_contact_density_heatmap(true)
 	_rebuild_drop_visuals()
 	_sync_unit_proxies()
 	_update_camera_transform()
@@ -1850,8 +1851,6 @@ func _build_live_fireteam_orientation_signature(fireteam_ids: PackedStringArray)
 
 func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedStringArray = PackedStringArray()) -> void:
 	_contact_payload_apply_count += 1
-	if _contact_density_root != null and is_instance_valid(_contact_density_root):
-		_contact_density_root.visible = true
 	_contact_entries.clear()
 	for entry_variant in contact_entries:
 		if typeof(entry_variant) == TYPE_DICTIONARY:
@@ -2188,13 +2187,58 @@ func screen_rect_to_tile_world_positions(screen_rect: Rect2) -> Array:
 	var result: Array = []
 	if _terrain_map_data == null or _camera == null:
 		return result
-	for tile_data in Array(_terrain_map_data.call("get_tiles")):
+	for tile_data in _get_screen_rect_tile_candidates(screen_rect):
 		if tile_data == null or typeof(tile_data.world_position) != TYPE_VECTOR2:
 			continue
 		var screen_position: Vector2 = world_to_screen_position(Vector2(tile_data.world_position))
 		if screen_rect.has_point(screen_position):
 			result.append(Vector2(tile_data.world_position))
 	return result
+
+
+func _get_screen_rect_tile_candidates(screen_rect: Rect2) -> Array:
+	if not screen_rect.has_area():
+		return []
+	if _camera.projection != Camera3D.PROJECTION_ORTHOGONAL or _render_tile_by_grid.is_empty():
+		return Array(_terrain_map_data.call("get_tiles"))
+	var min_grid := Vector2(INF, INF)
+	var max_grid := Vector2(-INF, -INF)
+	for screen_corner in [
+		screen_rect.position,
+		Vector2(screen_rect.end.x, screen_rect.position.y),
+		screen_rect.end,
+		Vector2(screen_rect.position.x, screen_rect.end.y),
+	]:
+		var ray_origin: Vector3 = _camera.project_ray_origin(screen_corner)
+		var ray_direction: Vector3 = _camera.project_ray_normal(screen_corner)
+		if absf(ray_direction.y) <= 0.000001:
+			return Array(_terrain_map_data.call("get_tiles"))
+		for height_level in range(3):
+			# The old center projection includes off-screen centers behind the ray
+			# origin, so intersect the infinite line instead of a forward-only ray.
+			var surface_y: float = float(height_level) * _get_3d_height_step()
+			var intersection: Vector3 = ray_origin + ray_direction * ((surface_y - ray_origin.y) / ray_direction.y)
+			var grid: Vector2 = _world_to_grid_float(_position_3d_to_world(intersection))
+			min_grid = min_grid.min(grid)
+			max_grid = max_grid.max(grid)
+	var first_grid := Vector2i(floori(min_grid.x) - 1, floori(min_grid.y) - 1)
+	var last_grid := Vector2i(ceili(max_grid.x) + 1, ceili(max_grid.y) + 1)
+	var candidate_area: float = float(last_grid.x - first_grid.x + 1) * float(last_grid.y - first_grid.y + 1)
+	# Large selections already need the exhaustive result. This fallback also
+	# prevents enormous empty grid loops for large or unusual screen rectangles.
+	if candidate_area >= float(_render_tile_by_grid.size()):
+		return Array(_terrain_map_data.call("get_tiles"))
+	var candidates: Array = []
+	for x in range(first_grid.x, last_grid.x + 1):
+		for y in range(first_grid.y, last_grid.y + 1):
+			var tile_data = _render_tile_by_grid.get(Vector2i(x, y), null)
+			if tile_data != null:
+				candidates.append(tile_data)
+	# Public selection returns source order, including maps loaded out of grid order.
+	candidates.sort_custom(func(a, b) -> bool:
+		return int(_render_tile_order_by_grid.get(a.grid_position, 0)) < int(_render_tile_order_by_grid.get(b.grid_position, 0))
+	)
+	return candidates
 
 
 func _pick_tile_at_screen_position(viewport_position: Vector2):
@@ -9630,6 +9674,7 @@ func _rebuild_contact_density_heatmap(force_rebuild: bool = false) -> void:
 	var first_non_empty_source: bool = _contact_density_entries.is_empty() and source_count > 0
 	var source_cleared: bool = _contact_density_source_count > 0 and source_count == 0
 	if not force_rebuild and signature == _contact_density_last_signature:
+		_contact_density_root.visible = true
 		return
 	if not force_rebuild and not first_non_empty_source and not source_cleared and _contact_density_last_rebuild_msec > 0 and now_msec - _contact_density_last_rebuild_msec < CONTACT_DENSITY_UPDATE_INTERVAL_MSEC:
 		_contact_density_skipped_interval_count += 1
@@ -9652,6 +9697,7 @@ func _rebuild_contact_density_heatmap(force_rebuild: bool = false) -> void:
 	for cell_variant in _contact_density_entries:
 		if typeof(cell_variant) == TYPE_DICTIONARY:
 			_add_contact_density_cell_visual(Dictionary(cell_variant))
+	_contact_density_root.visible = true
 
 
 func _reset_contact_density_heatmap(clear_visual: bool = false) -> void:

@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-976e7585f3e640ce9758e290fa68a826
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: 128 small rectangle contains a real tile center
+PASS: 128 small rectangle keeps the exhaustive selected centers
+PASS: 128 small rectangle visits bounded candidates, got 51 tile reads / 25 projections
+AREA_SELECTION_OPERATIONS {"projections":25,"selected":1,"side":128,"tile_world_reads":51,"tiles":16384}
+PASS: 256 small rectangle contains a real tile center
+PASS: 256 small rectangle keeps the exhaustive selected centers
+PASS: 256 small rectangle visits bounded candidates, got 51 tile reads / 25 projections
+AREA_SELECTION_OPERATIONS {"projections":25,"selected":1,"side":256,"tile_world_reads":51,"tiles":65536}
+PASS: square8 yaw 0 preserves height, boundary, empty, outside and source-order selection (0 mismatches)
+PASS: square8 yaw 45 preserves height, boundary, empty, outside and source-order selection (0 mismatches)
+PASS: square8 yaw 140 preserves height, boundary, empty, outside and source-order selection (0 mismatches)
+PASS: square8 yaw 255 preserves height, boundary, empty, outside and source-order selection (0 mismatches)
+PASS: square8 area selection reads an in-place height edit
+PASS: square8 whole-map drag keeps all 72 tile centers
+PASS: hex_axial_v1 yaw 0 preserves height, boundary, empty, outside and source-order selection (0 mismatches)
+PASS: hex_axial_v1 yaw 45 preserves height, boundary, empty, outside and source-order selection (0 mismatches)
+PASS: hex_axial_v1 yaw 140 preserves height, boundary, empty, outside and source-order selection (0 mismatches)
+PASS: hex_axial_v1 yaw 255 preserves height, boundary, empty, outside and source-order selection (0 mismatches)
+PASS: hex_axial_v1 area selection reads an in-place height edit
+PASS: hex_axial_v1 whole-map drag keeps all 72 tile centers
+REVIEW_CYCLES_AREA_SELECTION_RESULT passed=18 failed=0

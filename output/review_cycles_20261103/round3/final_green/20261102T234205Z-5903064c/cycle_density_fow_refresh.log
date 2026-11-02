@@ -1,0 +1,27 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-051fbbaa8a47403ba29d243c2ef26356
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: square8 fixture initially renders a real density source that will become hidden
+PASS: square8 FoW delta suppresses the old density meshes immediately
+PASS: square8 immediate normal contact refresh never exposes old forbidden density cells
+DENSITY_FOW_IMMEDIATE {"rebuild_count":2,"skipped_interval_count":1,"source_ids":["enemy_hidden","enemy_visible"],"topology":"square8","visible":false}
+PASS: square8 normal refresh restores actual allowed density meshes after the interval
+PASS: square8 restored density contains only the visible and last-known sources
+PASS: square8 restored density retains current/last-known/hidden accounting
+PASS: square8 unchanged safe contact refresh keeps meshes visible without reaggregation
+PASS: square8 another FoW delta suppresses the layer until its sources are checked
+PASS: square8 an unchanged allowed signature restores safe cached meshes after a FoW delta
+PASS: square8 disabling density clears all current and last-known meshes
+PASS: hex_axial_v1 fixture initially renders a real density source that will become hidden
+PASS: hex_axial_v1 FoW delta suppresses the old density meshes immediately
+PASS: hex_axial_v1 immediate normal contact refresh never exposes old forbidden density cells
+DENSITY_FOW_IMMEDIATE {"rebuild_count":2,"skipped_interval_count":1,"source_ids":["enemy_hidden","enemy_visible"],"topology":"hex_axial_v1","visible":false}
+PASS: hex_axial_v1 normal refresh restores actual allowed density meshes after the interval
+PASS: hex_axial_v1 restored density contains only the visible and last-known sources
+PASS: hex_axial_v1 restored density retains current/last-known/hidden accounting
+PASS: hex_axial_v1 unchanged safe contact refresh keeps meshes visible without reaggregation
+PASS: hex_axial_v1 another FoW delta suppresses the layer until its sources are checked
+PASS: hex_axial_v1 an unchanged allowed signature restores safe cached meshes after a FoW delta
+PASS: hex_axial_v1 disabling density clears all current and last-known meshes
+REVIEW_CYCLES_DENSITY_FOW_REFRESH_RESULT passed=20 failed=0

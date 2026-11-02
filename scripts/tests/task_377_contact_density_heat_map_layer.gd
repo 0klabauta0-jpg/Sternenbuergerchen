@@ -116,11 +116,12 @@ func _test_primary_view_respects_fow_last_known_only() -> void:
 	await _wait_frames(4)
 
 	primary_view.call("set_order_visual_payload", {"contact_density_heatmap_enabled": true})
-	primary_view.call("set_contact_entries", [
+	var contacts: Array = [
 		_contact("enemy_visible_a", "blue", Vector2(24.0, 24.0), "confirmed"),
 		_contact("enemy_visible_b", "blue", Vector2(72.0, 48.0), "spotted"),
 		_contact("enemy_hidden", "blue", Vector2(92.0, 92.0), "confirmed"),
-	], PackedStringArray())
+	]
+	primary_view.call("set_contact_entries", contacts, PackedStringArray())
 	primary_view.call("set_fog_of_war_state", {
 		"mode": FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_KNOWN_TERRAIN,
 		"team_id": "blue",
@@ -137,6 +138,12 @@ func _test_primary_view_respects_fow_last_known_only() -> void:
 			},
 		],
 	})
+	# FoW deltas suppress stale meshes; aggregation resumes through the ordinary
+	# contact refresh after the public update interval, not two render frames.
+	var density_state: Dictionary = primary_view.call("get_contact_density_heatmap_snapshot")
+	var interval_seconds: float = float(density_state.get("update_interval_msec", 250)) / 1000.0
+	await create_timer(interval_seconds + 0.02).timeout
+	primary_view.call("set_contact_entries", contacts, PackedStringArray())
 	await _wait_frames(2)
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	var heat_cells: Array = Array(snapshot.get("contact_density_heat_cells", []))

@@ -34,6 +34,21 @@ Contact-Tracker und FoW speichern Contact-Informationen, aggregieren sie aber ni
 - `TerrainMap3DView` zeichnet den optionalen Heatmap-Layer in einem separaten Root, nutzt ein Update-Intervall statt Frame-Rebuilds und exportiert Source-/Hidden-/Heat-Cell-Zaehler im Render-Snapshot.
 - `MissionTacticalSandboxController` reicht einen read-only Toggle an die Primary3D-Order-Payload weiter und meldet den Heatmap-Snapshot im Command-Feedback.
 
+### Visual-Lifecycle-Follow-up 2026-11-03
+Ein vollstaendiger Map-/Streaming-Rebuild loescht die abgeleiteten Heatmap-Meshes.
+`render_map()` stellt diesen Layer deshalb ueber den bestehenden erzwungenen
+Heatmap-Rebuild wieder her, auch wenn die Contact-Signatur gleich geblieben ist.
+Contact-State wird dabei nicht mutiert; FoW-Quellenfilter und deaktivierter Layer
+bleiben erhalten. Die Regression prueft echte Meshes und deren Sichtbarkeit fuer
+Square/Hex statt nur die weiterhin vorhandenen Snapshot-Zaehler.
+
+Nach einem FoW-Delta bleibt die unterdrueckte Heatmap beim getakteten
+Contact-Refresh verborgen, solange ihre alten Zellen noch nicht erneut als
+zulaessig bestaetigt sind. Sichtbar wird sie erst bei gleicher aktuell erlaubter
+Quellsignatur oder nach einer tatsaechlichen Neuberechnung. Das bestehende
+Updateintervall bleibt erhalten; ein normaler spaeterer Refresh stellt erlaubte
+Current-/Last-Known-Zellen wieder her, ohne alte verborgene Feinde aufzudecken.
+
 ## Erwartete Dateien
 - `scripts/core/fog_of_war_system.gd`
 - `scripts/terrain/terrain_map_3d_view.gd`

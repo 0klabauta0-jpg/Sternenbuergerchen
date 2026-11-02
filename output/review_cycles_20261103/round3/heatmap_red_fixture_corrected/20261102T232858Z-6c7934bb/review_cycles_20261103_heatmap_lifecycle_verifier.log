@@ -1,0 +1,27 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-3b4706e1d96d4f9a84e20400e3768448
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: square8 real contacts populate heat cells
+PASS: square8 heat cells have actual visible rendered mesh nodes
+PASS: square8 visual rebuild preserves read-only contact density facts
+FAIL: square8 map rebuild restores the visible heatmap without new contact data
+FAIL: square8 identical ordinary contact refresh cannot leave the heatmap missing
+FAIL: square8 explicit map refresh retains the enabled heatmap
+PASS: square8 FoW filters the hidden density source
+PASS: square8 restoring density after a map rebuild keeps the FoW filter
+FAIL: square8 allowed heatmap remains visible after a FoW-aware map rebuild
+PASS: square8 removing contacts clears both density data and meshes
+PASS: square8 rebuilding a disabled heatmap leaves it disabled and empty
+PASS: hex_axial_v1 real contacts populate heat cells
+PASS: hex_axial_v1 heat cells have actual visible rendered mesh nodes
+PASS: hex_axial_v1 visual rebuild preserves read-only contact density facts
+FAIL: hex_axial_v1 map rebuild restores the visible heatmap without new contact data
+FAIL: hex_axial_v1 identical ordinary contact refresh cannot leave the heatmap missing
+FAIL: hex_axial_v1 explicit map refresh retains the enabled heatmap
+PASS: hex_axial_v1 FoW filters the hidden density source
+PASS: hex_axial_v1 restoring density after a map rebuild keeps the FoW filter
+FAIL: hex_axial_v1 allowed heatmap remains visible after a FoW-aware map rebuild
+PASS: hex_axial_v1 removing contacts clears both density data and meshes
+PASS: hex_axial_v1 rebuilding a disabled heatmap leaves it disabled and empty
+REVIEW_CYCLES_HEATMAP_LIFECYCLE_RESULT passed=14 failed=8
