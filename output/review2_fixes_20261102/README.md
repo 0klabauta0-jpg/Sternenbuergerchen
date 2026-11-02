@@ -3,7 +3,11 @@
 Alle sieben Befunde auf Basis `a7e883f1f` behoben, P1 zuerst separat in
 `13bcaf3fb`, Terrain in `c822b9376`, Runtime/Netzwerk in `287ab48f1`.
 Unabhaengige Slice-, Gesamt- und Harness-Nachreviews: APPROVED ohne wichtige
-offene Befunde. Keine Main-Integration und keine allgemeine Release-Abnahme.
+offene Befunde. Dieser Fix-Abschluss erfolgte zunaechst ohne Main-Integration.
+Die anschliessend separat beauftragte Main-Uebernahme ist unter
+`output/review2_main_integration_20261102/README.md` dokumentiert: frischer
+sequenzieller Main-Lauf 55/55 Gates und 1650/1650 Assertions ohne Retries.
+Keine allgemeine Release-Abnahme.
 
 | Neue Regression | Finale Assertions |
 | --- | ---: |

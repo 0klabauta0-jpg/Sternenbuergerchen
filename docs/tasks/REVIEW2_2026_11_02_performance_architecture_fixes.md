@@ -24,7 +24,8 @@ SimulationRoot-/Registry-/Contract-Grenzen bleiben erhalten. Kein Schreiben am
 realen Roster und keine vermutete Wiederherstellung des frueheren Profilstands.
 Arbeit auf `task/review2-performance-architecture-fixes-20261102`: vom Integrations-
 branch angelegt und vor Aenderungen auf den integrierten Review-Main `a7e883f1f`
-fast-forwarded. Main-Integration erfolgt erst auf separaten Nutzerauftrag.
+fast-forwarded. Die anschliessend separat beauftragte Main-Uebernahme ist in
+`docs/tasks/REVIEW2_2026_11_02_main_integration.md` dokumentiert.
 
 ## Relevante Dokumente
 - `AGENTS.md`, `docs/PROJECT_BRIEF.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`
@@ -108,6 +109,11 @@ Baseline SHA256 `d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edc
   `project.godot` unveraendert. Ergebnisindex und Quellhashes:
   `output/review2_fixes_20261102/verification_summary.json`.
   Reproduzierbare Auswahl: `scripts/tests/review2_20261102_checks.json`.
+- Separater Integrationsauftrag: konfliktfrei auf Main fast-forwarded und auf
+  `b09547414` erneut alle 55 Gates / 1650 Assertions in einem isolierten Lauf
+  bestanden, ohne Retries. Keine weiteren Codeaenderungen; Roster und
+  Projektkonfiguration erneut unveraendert. Neuer Nachweis:
+  `output/review2_main_integration_20261102/verification_summary.json`.
 
 ## Isolationstechnik
 `scripts/tests/run_review2_isolated.py` erzeugt vor jedem Prozessstart eine

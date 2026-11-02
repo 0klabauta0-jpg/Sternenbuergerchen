@@ -1,0 +1,33 @@
+{
+  "created_utc": "2026-11-02T21:25:03.251401+00:00",
+  "tested_branch": "main",
+  "tested_commit": "b0954741460736d22d7664fdbff80bf33fd90d1a",
+  "old_main": "a7e883f1f939425894e0bb51d96cc11ca9f97458",
+  "fix_source": "dc5a3a6a1237465f1c2d9ba1037f9e51abd9d878",
+  "source_sha256": {
+    "scripts/core/simulation_root.gd": "e4e74077b8ca4e061dd11c32dd99f722d3051ad5d9533bfac0d904cd2b5d7aa8",
+    "scripts/editor/map_editor.gd": "543e293e4c9ebd71caf2ef58b295fcee3b0eb27e13f95a329321975334ececf5",
+    "scripts/meta/meta_layer_flow.gd": "b981960608b14be6e01e9fc92471c83139ab5d3cb27d14afcda3e774d8f55150",
+    "scripts/tactical/contact_tracker.gd": "a03e630a20a599926c4cd86bf0ccefda4afa93dd9ff18f19a01bdd830ddf94b1",
+    "scripts/tactical/local_avoidance_resolver.gd": "c2e859ca03c9a32e258782b069eac3693b15fa78822b6c928ff58543b6939976",
+    "scripts/terrain/terrain_map_3d_view.gd": "ec0ab398745e266a70e593c8a4e4ff783335268601989559899796ca0036357f",
+    "scripts/tests/review2_20261102_checks.json": "cf4b284be8365eacee06cdf933a53166d5a2de68866204b650b897e4f83d91f0",
+    "scripts/tests/review2_20261102_isolation_canary_verifier.gd": "db4b6831294a11ed6848e7001f2f58ccc375d3408a884e0183d98f3f0c3f0f29",
+    "scripts/tests/review2_20261102_p1_hidden_mission_verifier.gd": "2909f0c0e860d397a6a48757adbe372db229af2e706abf4b52353295d098a3ec",
+    "scripts/tests/review2_20261102_p2_chunk_jitter_verifier.gd": "e08a2c7c694a2afb70179f1ad752587a2ae7097838f131450491b73c82d98766",
+    "scripts/tests/review2_20261102_p2_contact_observers_verifier.gd": "e99e04cf02c9b1266a58968a7e15d8c6f3f64a5e1e981f278e5b03db02fc3d74",
+    "scripts/tests/review2_20261102_p2_contact_relays_verifier.gd": "f2077d0d4ac402f0e9306b8a2e4885f855c9682996ce1e950c7b4d5d686fe177",
+    "scripts/tests/review2_20261102_p2_editor_picking_verifier.gd": "ea7504286f3224e8196fa3acc2620515000f2e8c7390111e694f46b330a8ec8d",
+    "scripts/tests/review2_20261102_p2_height_lookup_verifier.gd": "76de5981c73a78edd47d0fc56de59ca145b485f0b01f58e7e6ddc7bc1c21e37e",
+    "scripts/tests/review2_20261102_p2_spacing_verifier.gd": "f1fb9fb297a258a6c9c4ccbfbb3cc52e952875c3480c90aa3b69c57bc0a72e51",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "scripts/tests/run_review2_isolated.py": "0c7d37139826583ca304535dbcc75cc281ac99b1bb3ee71847e30f81eab24f2f",
+    "scripts/tests/task_510_contact_report_upgrade.gd": "fc9c57679a863ab34592ae100e5b1805f279001a3930c1400d6f777c611c5a41"
+  },
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "roster_before": {
+    "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+    "length": 221426,
+    "mtime_ns": 1793651922023643800
+  }
+}

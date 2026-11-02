@@ -1,0 +1,1724 @@
+{
+  "schema": "sternenbuergerchen.review2_isolated_checks.v1",
+  "checks": [
+    {
+      "name": "review_p1_movement",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-933aa0729d9545c1b0653e6fed564cd9",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\933aa0729d9545c1b0653e6fed564cd9\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review_p1_movement.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\933aa0729d9545c1b0653e6fed564cd9\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\933aa0729d9545c1b0653e6fed564cd9\\project\\scripts\\tests\\review_20261102_p1_movement_verifier.gd"
+      ]
+    },
+    {
+      "name": "review_p1_navigation",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-86b01df67a3547248d20c3d7afb90dfb",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\86b01df67a3547248d20c3d7afb90dfb\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review_p1_navigation.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\86b01df67a3547248d20c3d7afb90dfb\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\86b01df67a3547248d20c3d7afb90dfb\\project\\scripts\\tests\\review_20261102_p1_navigation_verifier.gd"
+      ]
+    },
+    {
+      "name": "review_p1_runtime_index",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6dddcf000756472eb8d84f84c4b474ab",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6dddcf000756472eb8d84f84c4b474ab\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review_p1_runtime_index.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6dddcf000756472eb8d84f84c4b474ab\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6dddcf000756472eb8d84f84c4b474ab\\project\\scripts\\tests\\review_20261102_p1_runtime_index_verifier.gd"
+      ]
+    },
+    {
+      "name": "review_p2_hex_budget",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f17fac94663f4fe48284dce3b23880a0",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f17fac94663f4fe48284dce3b23880a0\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review_p2_hex_budget.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f17fac94663f4fe48284dce3b23880a0\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f17fac94663f4fe48284dce3b23880a0\\project\\scripts\\tests\\review_20261102_p2_hex_budget_verifier.gd"
+      ]
+    },
+    {
+      "name": "review_p2_fallback",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-17b685d7b4514869ac848e4d735df867",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\17b685d7b4514869ac848e4d735df867\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review_p2_fallback.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\17b685d7b4514869ac848e4d735df867\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\17b685d7b4514869ac848e4d735df867\\project\\scripts\\tests\\review_20261102_p2_fallback_verifier.gd"
+      ]
+    },
+    {
+      "name": "review_p2_dropship_hud",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-cccd7523b45c48ea80ea69c3aa3ec79e",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\cccd7523b45c48ea80ea69c3aa3ec79e\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review_p2_dropship_hud.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\cccd7523b45c48ea80ea69c3aa3ec79e\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\cccd7523b45c48ea80ea69c3aa3ec79e\\project\\scripts\\tests\\review_20261102_p2_dropship_hud_verifier.gd"
+      ]
+    },
+    {
+      "name": "review_p2_vital_order",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f45251326b204a0e82f78a1b71959356",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f45251326b204a0e82f78a1b71959356\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review_p2_vital_order.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f45251326b204a0e82f78a1b71959356\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f45251326b204a0e82f78a1b71959356\\project\\scripts\\tests\\review_20261102_p2_vital_order_verifier.gd"
+      ]
+    },
+    {
+      "name": "combat_authority162",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d517db985053492d984d30a3d4a3c141",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\d517db985053492d984d30a3d4a3c141\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\combat_authority162.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\d517db985053492d984d30a3d4a3c141\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\d517db985053492d984d30a3d4a3c141\\project\\scripts\\tests\\task_162_combat_authority_contract_verifier.gd"
+      ]
+    },
+    {
+      "name": "network_authority166",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d35d7fd6e7b54e7685c82d46838b861e",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\d35d7fd6e7b54e7685c82d46838b861e\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\network_authority166.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\d35d7fd6e7b54e7685c82d46838b861e\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\d35d7fd6e7b54e7685c82d46838b861e\\project\\scripts\\tests\\task_166_multiplayer_authority_command_contract_verifier.gd"
+      ]
+    },
+    {
+      "name": "snapshot168",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f3dfe7b0ad9548208ed5b28520ffd944",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f3dfe7b0ad9548208ed5b28520ffd944\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\snapshot168.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f3dfe7b0ad9548208ed5b28520ffd944\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f3dfe7b0ad9548208ed5b28520ffd944\\project\\scripts\\tests\\task_168_multiplayer_snapshot_contract_verifier.gd"
+      ]
+    },
+    {
+      "name": "command_authority1186",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-1b69ed92c5094e4c81fa0e03bcba9cfe",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\1b69ed92c5094e4c81fa0e03bcba9cfe\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\command_authority1186.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\1b69ed92c5094e4c81fa0e03bcba9cfe\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\1b69ed92c5094e4c81fa0e03bcba9cfe\\project\\scripts\\tests\\task_1186_simulation_root_command_authority.gd"
+      ]
+    },
+    {
+      "name": "movement_lifecycle501",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c26a5f37b9714e9db00109d716bf0a77",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c26a5f37b9714e9db00109d716bf0a77\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\movement_lifecycle501.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c26a5f37b9714e9db00109d716bf0a77\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c26a5f37b9714e9db00109d716bf0a77\\project\\scripts\\tests\\task_501_integrated_movement_command_lifecycle_hardening.gd"
+      ]
+    },
+    {
+      "name": "navigation125",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f8c7d7531f8a476fbf48728e95ecb77e",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f8c7d7531f8a476fbf48728e95ecb77e\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\navigation125.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f8c7d7531f8a476fbf48728e95ecb77e\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\f8c7d7531f8a476fbf48728e95ecb77e\\project\\scripts\\tests\\task_125_verifier.gd"
+      ]
+    },
+    {
+      "name": "navigation127",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ffc991060e6b44739baa9ad5442d5614",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\ffc991060e6b44739baa9ad5442d5614\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\navigation127.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\ffc991060e6b44739baa9ad5442d5614\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\ffc991060e6b44739baa9ad5442d5614\\project\\scripts\\tests\\task_127_verifier.gd"
+      ]
+    },
+    {
+      "name": "requeue1199",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a1893e763635443ca16b71cc103e649c",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a1893e763635443ca16b71cc103e649c\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\requeue1199.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a1893e763635443ca16b71cc103e649c\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a1893e763635443ca16b71cc103e649c\\project\\scripts\\tests\\task_1199_dominant_simulation_slice.gd"
+      ]
+    },
+    {
+      "name": "path_recompute_under_fire",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-aa5623fdbb534e9886e3a61f61b1af9e",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\aa5623fdbb534e9886e3a61f61b1af9e\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\path_recompute_under_fire.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\aa5623fdbb534e9886e3a61f61b1af9e\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\aa5623fdbb534e9886e3a61f61b1af9e\\project\\scripts\\tests\\path_recompute_under_fire_verifier.gd"
+      ]
+    },
+    {
+      "name": "avoidance475",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8290a9f2de4b4703a0cd3ca097346a6a",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\8290a9f2de4b4703a0cd3ca097346a6a\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\avoidance475.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\8290a9f2de4b4703a0cd3ca097346a6a\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\8290a9f2de4b4703a0cd3ca097346a6a\\project\\scripts\\tests\\task_475_fireteam_pathfinding_avoidance_stability_pass.gd"
+      ]
+    },
+    {
+      "name": "mission_index1190",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5283286be4894c21823548a74136b2bd",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\5283286be4894c21823548a74136b2bd\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\mission_index1190.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\5283286be4894c21823548a74136b2bd\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\5283286be4894c21823548a74136b2bd\\project\\scripts\\tests\\task_1190_mission_runtime_index_hud_delta.gd"
+      ]
+    },
+    {
+      "name": "hud_light1152",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e9756e8eb2bb4c1dad3050a731ec2315",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\e9756e8eb2bb4c1dad3050a731ec2315\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\hud_light1152.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\e9756e8eb2bb4c1dad3050a731ec2315\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\e9756e8eb2bb4c1dad3050a731ec2315\\project\\scripts\\tests\\task_1152_mission_hud_heavy_refresh_budget_pass.gd"
+      ]
+    },
+    {
+      "name": "command_readability1157",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c3f67c933a2c4d87be8f46f10f593eca",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c3f67c933a2c4d87be8f46f10f593eca\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\command_readability1157.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c3f67c933a2c4d87be8f46f10f593eca\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c3f67c933a2c4d87be8f46f10f593eca\\project\\scripts\\tests\\task_1157_command_matrix_1280_readability.gd"
+      ]
+    },
+    {
+      "name": "incremental_hpa412",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0734cb35141748229f99923e77df4fde",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\0734cb35141748229f99923e77df4fde\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\incremental_hpa412.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\0734cb35141748229f99923e77df4fde\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\0734cb35141748229f99923e77df4fde\\project\\scripts\\tests\\task_412_large_map_streaming_incremental_hpa.gd"
+      ]
+    },
+    {
+      "name": "doors692",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4a1b4f5ad2fe4dd2bcf89876ff7ff59f",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4a1b4f5ad2fe4dd2bcf89876ff7ff59f\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\doors692.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4a1b4f5ad2fe4dd2bcf89876ff7ff59f\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4a1b4f5ad2fe4dd2bcf89876ff7ff59f\\project\\scripts\\tests\\task_692_door_runtime_collision_los_contract.gd"
+      ]
+    },
+    {
+      "name": "hex_foundation",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-aee9aa08f5c949728baff4bdcf070aec",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\aee9aa08f5c949728baff4bdcf070aec\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\hex_foundation.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\aee9aa08f5c949728baff4bdcf070aec\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\aee9aa08f5c949728baff4bdcf070aec\\project\\scripts\\tests\\frontier_hex_foundation_verifier.gd"
+      ]
+    },
+    {
+      "name": "hex_movement",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d24f4b63bb904dea9e9a93ced68e970a",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\d24f4b63bb904dea9e9a93ced68e970a\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\hex_movement.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\d24f4b63bb904dea9e9a93ced68e970a\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\d24f4b63bb904dea9e9a93ced68e970a\\project\\scripts\\tests\\frontier_hex_movement_verifier.gd",
+        "--",
+        "--evidence-output=res://output/review_fixes_20261102/hex_movement.json"
+      ]
+    },
+    {
+      "name": "two_peer_transport1083",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-cedadd36f4e54e1bb472b544c515ad11",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\cedadd36f4e54e1bb472b544c515ad11\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\two_peer_transport1083.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\cedadd36f4e54e1bb472b544c515ad11\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\cedadd36f4e54e1bb472b544c515ad11\\project\\scripts\\tests\\task_1083_two_instance_roe_ownership_playtest.gd"
+      ]
+    },
+    {
+      "name": "snapshot_payload221",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-b14c2f62567c49a997da2b7bc0cf6701",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b14c2f62567c49a997da2b7bc0cf6701\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\snapshot_payload221.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b14c2f62567c49a997da2b7bc0cf6701\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b14c2f62567c49a997da2b7bc0cf6701\\project\\scripts\\tests\\task_221_multiplayer_snapshot_serialization_performance_pass.gd"
+      ]
+    },
+    {
+      "name": "interaction_payload1099",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5b9fa61c5d89441ba39aa0765dff0c18",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\5b9fa61c5d89441ba39aa0765dff0c18\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\interaction_payload1099.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\5b9fa61c5d89441ba39aa0765dff0c18\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\5b9fa61c5d89441ba39aa0765dff0c18\\project\\scripts\\tests\\task_1099_connected_interaction_snapshot_payload_budget.gd"
+      ]
+    },
+    {
+      "name": "interaction_jitter1100",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-b3aa1b97b59b47c388e6a6ae970a695f",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b3aa1b97b59b47c388e6a6ae970a695f\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\interaction_jitter1100.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b3aa1b97b59b47c388e6a6ae970a695f\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b3aa1b97b59b47c388e6a6ae970a695f\\project\\scripts\\tests\\task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd"
+      ]
+    },
+    {
+      "name": "dropship_pending1114",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-68d7c72709604ea1bfef4bc9f616765a",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\68d7c72709604ea1bfef4bc9f616765a\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\dropship_pending1114.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\68d7c72709604ea1bfef4bc9f616765a\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\68d7c72709604ea1bfef4bc9f616765a\\project\\scripts\\tests\\task_1114_connected_dropship_pending_card_visual_polish.gd"
+      ]
+    },
+    {
+      "name": "dropship_truth503",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0d79c7424d3249a0aaf52bcf85f03c5c",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\0d79c7424d3249a0aaf52bcf85f03c5c\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\dropship_truth503.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\0d79c7424d3249a0aaf52bcf85f03c5c\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\0d79c7424d3249a0aaf52bcf85f03c5c\\project\\scripts\\tests\\task_503_mission_dropship_fireteam_hud_truth.gd"
+      ]
+    },
+    {
+      "name": "dropship_ux397",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-53561016a8ff4e309a004268f1483a7a",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\53561016a8ff4e309a004268f1483a7a\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\dropship_ux397.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\53561016a8ff4e309a004268f1483a7a\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\53561016a8ff4e309a004268f1483a7a\\project\\scripts\\tests\\task_397_mission_dropship_ux_hotfix.gd"
+      ]
+    },
+    {
+      "name": "dropship_multi_cards",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-40b33f61f7e84289adbd4803a4c33a0d",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\40b33f61f7e84289adbd4803a4c33a0d\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\dropship_multi_cards.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\40b33f61f7e84289adbd4803a4c33a0d\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\40b33f61f7e84289adbd4803a4c33a0d\\project\\scripts\\tests\\bugfix_mission_multi_dropship_cards.gd"
+      ]
+    },
+    {
+      "name": "review2_20261102_isolation_canary_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7ba40a4077214f8ba7df47d7486b2ba6",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\7ba40a4077214f8ba7df47d7486b2ba6\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review2_20261102_isolation_canary_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\7ba40a4077214f8ba7df47d7486b2ba6\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\7ba40a4077214f8ba7df47d7486b2ba6\\project\\scripts\\tests\\review2_20261102_isolation_canary_verifier.gd"
+      ]
+    },
+    {
+      "name": "review2_20261102_p1_hidden_mission_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fb70393cf3a149cba38f59ed17422989",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\fb70393cf3a149cba38f59ed17422989\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review2_20261102_p1_hidden_mission_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\fb70393cf3a149cba38f59ed17422989\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\fb70393cf3a149cba38f59ed17422989\\project\\scripts\\tests\\review2_20261102_p1_hidden_mission_verifier.gd"
+      ]
+    },
+    {
+      "name": "review2_20261102_p2_height_lookup_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8d20916c1ca844f1b3ba1e1d2ba51282",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\8d20916c1ca844f1b3ba1e1d2ba51282\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review2_20261102_p2_height_lookup_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\8d20916c1ca844f1b3ba1e1d2ba51282\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\8d20916c1ca844f1b3ba1e1d2ba51282\\project\\scripts\\tests\\review2_20261102_p2_height_lookup_verifier.gd"
+      ]
+    },
+    {
+      "name": "review2_20261102_p2_editor_picking_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-2b2d0d7f9c894cb3865092643a8d958a",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\2b2d0d7f9c894cb3865092643a8d958a\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review2_20261102_p2_editor_picking_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\2b2d0d7f9c894cb3865092643a8d958a\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\2b2d0d7f9c894cb3865092643a8d958a\\project\\scripts\\tests\\review2_20261102_p2_editor_picking_verifier.gd"
+      ]
+    },
+    {
+      "name": "review2_20261102_p2_spacing_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6ed0324c4ab343a7869fc7dcead1b1dd",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6ed0324c4ab343a7869fc7dcead1b1dd\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review2_20261102_p2_spacing_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6ed0324c4ab343a7869fc7dcead1b1dd\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6ed0324c4ab343a7869fc7dcead1b1dd\\project\\scripts\\tests\\review2_20261102_p2_spacing_verifier.gd"
+      ]
+    },
+    {
+      "name": "review2_20261102_p2_contact_observers_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-674ece2030394a3e848bcece6b8c67e0",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\674ece2030394a3e848bcece6b8c67e0\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review2_20261102_p2_contact_observers_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\674ece2030394a3e848bcece6b8c67e0\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\674ece2030394a3e848bcece6b8c67e0\\project\\scripts\\tests\\review2_20261102_p2_contact_observers_verifier.gd"
+      ]
+    },
+    {
+      "name": "review2_20261102_p2_contact_relays_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-958aabb1c694401b89ef178202f14147",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\958aabb1c694401b89ef178202f14147\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review2_20261102_p2_contact_relays_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\958aabb1c694401b89ef178202f14147\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\958aabb1c694401b89ef178202f14147\\project\\scripts\\tests\\review2_20261102_p2_contact_relays_verifier.gd"
+      ]
+    },
+    {
+      "name": "review2_20261102_p2_chunk_jitter_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4dcd225a31794e1b9a4758283b337367",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4dcd225a31794e1b9a4758283b337367\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\review2_20261102_p2_chunk_jitter_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4dcd225a31794e1b9a4758283b337367\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4dcd225a31794e1b9a4758283b337367\\project\\scripts\\tests\\review2_20261102_p2_chunk_jitter_verifier.gd"
+      ]
+    },
+    {
+      "name": "task_096_recovery_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a8ef40fd1878476b832e5f327d5ba040",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a8ef40fd1878476b832e5f327d5ba040\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_096_recovery_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a8ef40fd1878476b832e5f327d5ba040\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a8ef40fd1878476b832e5f327d5ba040\\project\\scripts\\tests\\task_096_recovery_verifier.gd"
+      ]
+    },
+    {
+      "name": "bugfix_release_singleplayer_normal_click_homebase_guard",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5cee623c003443d395d35001d976404f",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\5cee623c003443d395d35001d976404f\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\bugfix_release_singleplayer_normal_click_homebase_guard.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\5cee623c003443d395d35001d976404f\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\5cee623c003443d395d35001d976404f\\project\\scripts\\tests\\bugfix_release_singleplayer_normal_click_homebase_guard.gd"
+      ]
+    },
+    {
+      "name": "task_1185_tactical_input_ownership",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-cc0def102aa6456890c2ef5a6465befa",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\cc0def102aa6456890c2ef5a6465befa\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_1185_tactical_input_ownership.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\cc0def102aa6456890c2ef5a6465befa\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\cc0def102aa6456890c2ef5a6465befa\\project\\scripts\\tests\\task_1185_tactical_input_ownership.gd"
+      ]
+    },
+    {
+      "name": "frontier_hex_render_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-47a78e9d278d43969157edc942582a1b",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\47a78e9d278d43969157edc942582a1b\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\frontier_hex_render_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\47a78e9d278d43969157edc942582a1b\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\47a78e9d278d43969157edc942582a1b\\project\\scripts\\tests\\frontier_hex_render_verifier.gd"
+      ]
+    },
+    {
+      "name": "task_292_editor_hill_cliff_grid_depth_repair",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ee873e631a6d4a31a7fd34f72e73b1e1",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\ee873e631a6d4a31a7fd34f72e73b1e1\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_292_editor_hill_cliff_grid_depth_repair.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\ee873e631a6d4a31a7fd34f72e73b1e1\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\ee873e631a6d4a31a7fd34f72e73b1e1\\project\\scripts\\tests\\task_292_editor_hill_cliff_grid_depth_repair.gd"
+      ]
+    },
+    {
+      "name": "task_295_map_editor_paint_toolbar_tools_polish",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c0c0b0a4071744c7a8b843dd9be03b75",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c0c0b0a4071744c7a8b843dd9be03b75\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_295_map_editor_paint_toolbar_tools_polish.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c0c0b0a4071744c7a8b843dd9be03b75\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c0c0b0a4071744c7a8b843dd9be03b75\\project\\scripts\\tests\\task_295_map_editor_paint_toolbar_tools_polish.gd"
+      ]
+    },
+    {
+      "name": "task_229_map_editor_usability_authoring_pass",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-252de614fb7547beb181f173a92d417e",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\252de614fb7547beb181f173a92d417e\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_229_map_editor_usability_authoring_pass.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\252de614fb7547beb181f173a92d417e\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\252de614fb7547beb181f173a92d417e\\project\\scripts\\tests\\task_229_map_editor_usability_authoring_pass.gd"
+      ]
+    },
+    {
+      "name": "editor_height_edge_surface_anchor_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4a1df6610a3143ed85b7bc3b4671f643",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4a1df6610a3143ed85b7bc3b4671f643\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\editor_height_edge_surface_anchor_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4a1df6610a3143ed85b7bc3b4671f643\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4a1df6610a3143ed85b7bc3b4671f643\\project\\scripts\\tests\\editor_height_edge_surface_anchor_verifier.gd"
+      ]
+    },
+    {
+      "name": "task_183_editor_hill_authoring_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-052c61da06784160ba5b83a75e0a9891",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\052c61da06784160ba5b83a75e0a9891\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_183_editor_hill_authoring_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\052c61da06784160ba5b83a75e0a9891\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\052c61da06784160ba5b83a75e0a9891\\project\\scripts\\tests\\task_183_editor_hill_authoring_verifier.gd"
+      ]
+    },
+    {
+      "name": "task_163_map_editor_module_split_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-631893046c39429e94a521ca68ad53fc",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\631893046c39429e94a521ca68ad53fc\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_163_map_editor_module_split_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\631893046c39429e94a521ca68ad53fc\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\631893046c39429e94a521ca68ad53fc\\project\\scripts\\tests\\task_163_map_editor_module_split_verifier.gd"
+      ]
+    },
+    {
+      "name": "task_112_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-62dc2fe597b14d8f8b3031fe357c29a7",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\62dc2fe597b14d8f8b3031fe357c29a7\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_112_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\62dc2fe597b14d8f8b3031fe357c29a7\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\62dc2fe597b14d8f8b3031fe357c29a7\\project\\scripts\\tests\\task_112_verifier.gd"
+      ]
+    },
+    {
+      "name": "task_187_npc_minimum_spacing_and_multiplayer_authority",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-af13ccd044cf42ffa19c9f286efa7f5e",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\af13ccd044cf42ffa19c9f286efa7f5e\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_187_npc_minimum_spacing_and_multiplayer_authority.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\af13ccd044cf42ffa19c9f286efa7f5e\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\af13ccd044cf42ffa19c9f286efa7f5e\\project\\scripts\\tests\\task_187_npc_minimum_spacing_and_multiplayer_authority.gd"
+      ]
+    },
+    {
+      "name": "task_130_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-51f3914f37e340f094eb37bc6bfedbf6",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\51f3914f37e340f094eb37bc6bfedbf6\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_130_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\51f3914f37e340f094eb37bc6bfedbf6\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\51f3914f37e340f094eb37bc6bfedbf6\\project\\scripts\\tests\\task_130_verifier.gd"
+      ]
+    },
+    {
+      "name": "task_510_contact_report_upgrade",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a5d91bba693740c4b45cc23ff636db0f",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a5d91bba693740c4b45cc23ff636db0f\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_510_contact_report_upgrade.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a5d91bba693740c4b45cc23ff636db0f\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a5d91bba693740c4b45cc23ff636db0f\\project\\scripts\\tests\\task_510_contact_report_upgrade.gd"
+      ]
+    },
+    {
+      "name": "task_218_simulation_combat_ai_tick_budget_pass",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-de98156cbea44a41989bb046aff1f45f",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\de98156cbea44a41989bb046aff1f45f\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review2_main_integration_20261102\\checks\\20261102T212503Z-73248908\\task_218_simulation_combat_ai_tick_budget_pass.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\de98156cbea44a41989bb046aff1f45f\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\de98156cbea44a41989bb046aff1f45f\\project\\scripts\\tests\\task_218_simulation_combat_ai_tick_budget_pass.gd"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 55,
+    "passed": 55,
+    "failed": 0
+  },
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+    "length": 221426,
+    "mtime_ns": 1793651922023643800
+  },
+  "all_user_dirs_unique": true
+}

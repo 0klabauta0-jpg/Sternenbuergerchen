@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-a1893e763635443ca16b71cc103e649c
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: oracle 0: movement requeues pass cmd directly
+PASS: oracle 0: enqueue copies once before storage
+PASS: oracle 1: mixed-priority order
+PASS: oracle 2: tick 1 exact position
+PASS: oracle 4: one continuation after tick 1
+PASS: oracle 4: continuation identity and target
+PASS: oracle 3: exact movement status
+PASS: oracle 2/4: tick 2 and exact requeue
+PASS: oracle 2/4: tick 3 reaches target with the existing final continuation
+PASS: oracle 2/4: tick 4 drains the final continuation without movement
+PASS: oracle 6: snapshots schema, transport and ticks
+PASS: oracle 6: before snapshot unit state
+PASS: oracle 6: tick 1 snapshot unit state
+PASS: oracle 6: reached-target snapshot unit state
+PASS: oracle 6: settled arrival snapshot unit state
+PASS: oracle 6: authoritative tactical rule
+PASS: oracle 5: direct requeue copy isolation and payload safety
+PASS: oracle 7: UI is not gameplay truth
+=== RESULTS: 18 passed, 0 failed ===

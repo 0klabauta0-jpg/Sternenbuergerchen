@@ -2,7 +2,9 @@
 
 ### REVIEW 2, 2026-11-02 - Sieben weitere Performance-/Architekturbefunde
 - Task `docs/tasks/REVIEW2_2026_11_02_performance_architecture_fixes.md`, Basis
-  integrierter Main `a7e883f1f`, eigener Task-Branch; noch keine Main-Integration.
+  integrierter Main `a7e883f1f`. Separat beauftragte Main-Uebernahme per
+  konfliktfreiem Fast-forward; Integrationstask
+  `docs/tasks/REVIEW2_2026_11_02_main_integration.md`.
 - P1 zuerst separat behoben: aktive Mission laeuft hinter Homebase/FOB weiter;
   versteckte Eingabe, Visuals und Preview bleiben getrennt kontrolliert.
 - P2: indizierte Live-Tile-Hoehen, begrenzte Picking-Kandidaten bei unveraenderter
@@ -23,6 +25,12 @@
   TASK_348 bleibt baseline-identisch 14/17. Keine Release-/FPS-/GPU-Abnahme.
 - Ergebnisindex `output/review2_fixes_20261102/verification_summary.json`,
   Manifest `scripts/tests/review2_20261102_checks.json`.
+- Frische Main-Pruefung auf `b09547414`: alle 55 Gates / 1650 Assertions in
+  einem sequenziellen isolierten Lauf strikt gruen, ohne Retries. Alle 18
+  geprueften Quellhashes und `project.godot` stimmen mit dem freigegebenen
+  Fix-Stand ueberein. Rosterbytes, Laenge und Schreibzeit erneut unveraendert.
+  Nach diesem Lauf nur Integrationsdokumentation/Evidence ergaenzt. Nachweis:
+  `output/review2_main_integration_20261102/verification_summary.json`.
 
 ### REVIEW 2026-11-02 - Performance und Architektur
 - Aktueller Task: `docs/tasks/REVIEW_2026_11_02_performance_architecture_fixes.md`.

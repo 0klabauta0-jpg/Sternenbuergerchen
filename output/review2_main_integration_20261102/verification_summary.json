@@ -1,0 +1,397 @@
+{
+  "schema": "sternenbuergerchen.review2_main_integration.v1",
+  "verified_utc": "2026-11-02T21:30:21.843764+00:00",
+  "old_main": "a7e883f1f939425894e0bb51d96cc11ca9f97458",
+  "reviewed_fix_source": "dc5a3a6a1237465f1c2d9ba1037f9e51abd9d878",
+  "tested_branch": "main",
+  "tested_commit": "b0954741460736d22d7664fdbff80bf33fd90d1a",
+  "integration": "Conflict-free fast-forward; only documentation/evidence may follow this tested source tree.",
+  "checks_report": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/report.json",
+  "result": {
+    "distinct_gates": 55,
+    "strict_passed_gates": 55,
+    "numeric_assertions_passed": 1650,
+    "numeric_assertions_failed": 0,
+    "canary_without_numeric_assertions": 1,
+    "single_sequential_all_green_run": true
+  },
+  "checks": [
+    {
+      "name": "review_p1_movement",
+      "passed": 20,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review_p1_movement.log"
+    },
+    {
+      "name": "review_p1_navigation",
+      "passed": 72,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review_p1_navigation.log"
+    },
+    {
+      "name": "review_p1_runtime_index",
+      "passed": 31,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review_p1_runtime_index.log"
+    },
+    {
+      "name": "review_p2_hex_budget",
+      "passed": 26,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review_p2_hex_budget.log"
+    },
+    {
+      "name": "review_p2_fallback",
+      "passed": 42,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review_p2_fallback.log"
+    },
+    {
+      "name": "review_p2_dropship_hud",
+      "passed": 27,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review_p2_dropship_hud.log"
+    },
+    {
+      "name": "review_p2_vital_order",
+      "passed": 21,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review_p2_vital_order.log"
+    },
+    {
+      "name": "combat_authority162",
+      "passed": 23,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/combat_authority162.log"
+    },
+    {
+      "name": "network_authority166",
+      "passed": 15,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/network_authority166.log"
+    },
+    {
+      "name": "snapshot168",
+      "passed": 20,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/snapshot168.log"
+    },
+    {
+      "name": "command_authority1186",
+      "passed": 8,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/command_authority1186.log"
+    },
+    {
+      "name": "movement_lifecycle501",
+      "passed": 10,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/movement_lifecycle501.log"
+    },
+    {
+      "name": "navigation125",
+      "passed": 64,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/navigation125.log"
+    },
+    {
+      "name": "navigation127",
+      "passed": 13,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/navigation127.log"
+    },
+    {
+      "name": "requeue1199",
+      "passed": 18,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/requeue1199.log"
+    },
+    {
+      "name": "path_recompute_under_fire",
+      "passed": 4,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/path_recompute_under_fire.log"
+    },
+    {
+      "name": "avoidance475",
+      "passed": 17,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/avoidance475.log"
+    },
+    {
+      "name": "mission_index1190",
+      "passed": 16,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/mission_index1190.log"
+    },
+    {
+      "name": "hud_light1152",
+      "passed": 18,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/hud_light1152.log"
+    },
+    {
+      "name": "command_readability1157",
+      "passed": 35,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/command_readability1157.log"
+    },
+    {
+      "name": "incremental_hpa412",
+      "passed": 27,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/incremental_hpa412.log"
+    },
+    {
+      "name": "doors692",
+      "passed": 34,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/doors692.log"
+    },
+    {
+      "name": "hex_foundation",
+      "passed": 41,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/hex_foundation.log"
+    },
+    {
+      "name": "hex_movement",
+      "passed": 25,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/hex_movement.log"
+    },
+    {
+      "name": "two_peer_transport1083",
+      "passed": 24,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/two_peer_transport1083.log"
+    },
+    {
+      "name": "snapshot_payload221",
+      "passed": 63,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/snapshot_payload221.log"
+    },
+    {
+      "name": "interaction_payload1099",
+      "passed": 38,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/interaction_payload1099.log"
+    },
+    {
+      "name": "interaction_jitter1100",
+      "passed": 31,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/interaction_jitter1100.log"
+    },
+    {
+      "name": "dropship_pending1114",
+      "passed": 13,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/dropship_pending1114.log"
+    },
+    {
+      "name": "dropship_truth503",
+      "passed": 10,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/dropship_truth503.log"
+    },
+    {
+      "name": "dropship_ux397",
+      "passed": 12,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/dropship_ux397.log"
+    },
+    {
+      "name": "dropship_multi_cards",
+      "passed": 61,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/dropship_multi_cards.log"
+    },
+    {
+      "name": "review2_20261102_isolation_canary_verifier",
+      "passed": 0,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review2_20261102_isolation_canary_verifier.log"
+    },
+    {
+      "name": "review2_20261102_p1_hidden_mission_verifier",
+      "passed": 60,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review2_20261102_p1_hidden_mission_verifier.log"
+    },
+    {
+      "name": "review2_20261102_p2_height_lookup_verifier",
+      "passed": 9,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review2_20261102_p2_height_lookup_verifier.log"
+    },
+    {
+      "name": "review2_20261102_p2_editor_picking_verifier",
+      "passed": 50,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review2_20261102_p2_editor_picking_verifier.log"
+    },
+    {
+      "name": "review2_20261102_p2_spacing_verifier",
+      "passed": 19,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review2_20261102_p2_spacing_verifier.log"
+    },
+    {
+      "name": "review2_20261102_p2_contact_observers_verifier",
+      "passed": 22,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review2_20261102_p2_contact_observers_verifier.log"
+    },
+    {
+      "name": "review2_20261102_p2_contact_relays_verifier",
+      "passed": 28,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review2_20261102_p2_contact_relays_verifier.log"
+    },
+    {
+      "name": "review2_20261102_p2_chunk_jitter_verifier",
+      "passed": 14,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/review2_20261102_p2_chunk_jitter_verifier.log"
+    },
+    {
+      "name": "task_096_recovery_verifier",
+      "passed": 19,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_096_recovery_verifier.log"
+    },
+    {
+      "name": "bugfix_release_singleplayer_normal_click_homebase_guard",
+      "passed": 40,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/bugfix_release_singleplayer_normal_click_homebase_guard.log"
+    },
+    {
+      "name": "task_1185_tactical_input_ownership",
+      "passed": 116,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_1185_tactical_input_ownership.log"
+    },
+    {
+      "name": "frontier_hex_render_verifier",
+      "passed": 33,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/frontier_hex_render_verifier.log"
+    },
+    {
+      "name": "task_292_editor_hill_cliff_grid_depth_repair",
+      "passed": 17,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_292_editor_hill_cliff_grid_depth_repair.log"
+    },
+    {
+      "name": "task_295_map_editor_paint_toolbar_tools_polish",
+      "passed": 34,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_295_map_editor_paint_toolbar_tools_polish.log"
+    },
+    {
+      "name": "task_229_map_editor_usability_authoring_pass",
+      "passed": 57,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_229_map_editor_usability_authoring_pass.log"
+    },
+    {
+      "name": "editor_height_edge_surface_anchor_verifier",
+      "passed": 25,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/editor_height_edge_surface_anchor_verifier.log"
+    },
+    {
+      "name": "task_183_editor_hill_authoring_verifier",
+      "passed": 68,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_183_editor_hill_authoring_verifier.log"
+    },
+    {
+      "name": "task_163_map_editor_module_split_verifier",
+      "passed": 17,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_163_map_editor_module_split_verifier.log"
+    },
+    {
+      "name": "task_112_verifier",
+      "passed": 14,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_112_verifier.log"
+    },
+    {
+      "name": "task_187_npc_minimum_spacing_and_multiplayer_authority",
+      "passed": 16,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_187_npc_minimum_spacing_and_multiplayer_authority.log"
+    },
+    {
+      "name": "task_130_verifier",
+      "passed": 9,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_130_verifier.log"
+    },
+    {
+      "name": "task_510_contact_report_upgrade",
+      "passed": 23,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_510_contact_report_upgrade.log"
+    },
+    {
+      "name": "task_218_simulation_combat_ai_tick_budget_pass",
+      "passed": 81,
+      "failed": 0,
+      "log": "output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/task_218_simulation_combat_ai_tick_budget_pass.log"
+    }
+  ],
+  "source_sha256": {
+    "scripts/core/simulation_root.gd": "e4e74077b8ca4e061dd11c32dd99f722d3051ad5d9533bfac0d904cd2b5d7aa8",
+    "scripts/editor/map_editor.gd": "543e293e4c9ebd71caf2ef58b295fcee3b0eb27e13f95a329321975334ececf5",
+    "scripts/meta/meta_layer_flow.gd": "b981960608b14be6e01e9fc92471c83139ab5d3cb27d14afcda3e774d8f55150",
+    "scripts/tactical/contact_tracker.gd": "a03e630a20a599926c4cd86bf0ccefda4afa93dd9ff18f19a01bdd830ddf94b1",
+    "scripts/tactical/local_avoidance_resolver.gd": "c2e859ca03c9a32e258782b069eac3693b15fa78822b6c928ff58543b6939976",
+    "scripts/terrain/terrain_map_3d_view.gd": "ec0ab398745e266a70e593c8a4e4ff783335268601989559899796ca0036357f",
+    "scripts/tests/review2_20261102_checks.json": "cf4b284be8365eacee06cdf933a53166d5a2de68866204b650b897e4f83d91f0",
+    "scripts/tests/review2_20261102_isolation_canary_verifier.gd": "db4b6831294a11ed6848e7001f2f58ccc375d3408a884e0183d98f3f0c3f0f29",
+    "scripts/tests/review2_20261102_p1_hidden_mission_verifier.gd": "2909f0c0e860d397a6a48757adbe372db229af2e706abf4b52353295d098a3ec",
+    "scripts/tests/review2_20261102_p2_chunk_jitter_verifier.gd": "e08a2c7c694a2afb70179f1ad752587a2ae7097838f131450491b73c82d98766",
+    "scripts/tests/review2_20261102_p2_contact_observers_verifier.gd": "e99e04cf02c9b1266a58968a7e15d8c6f3f64a5e1e981f278e5b03db02fc3d74",
+    "scripts/tests/review2_20261102_p2_contact_relays_verifier.gd": "f2077d0d4ac402f0e9306b8a2e4885f855c9682996ce1e950c7b4d5d686fe177",
+    "scripts/tests/review2_20261102_p2_editor_picking_verifier.gd": "ea7504286f3224e8196fa3acc2620515000f2e8c7390111e694f46b330a8ec8d",
+    "scripts/tests/review2_20261102_p2_height_lookup_verifier.gd": "76de5981c73a78edd47d0fc56de59ca145b485f0b01f58e7e6ddc7bc1c21e37e",
+    "scripts/tests/review2_20261102_p2_spacing_verifier.gd": "f1fb9fb297a258a6c9c4ccbfbb3cc52e952875c3480c90aa3b69c57bc0a72e51",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "scripts/tests/run_review2_isolated.py": "0c7d37139826583ca304535dbcc75cc281ac99b1bb3ee71847e30f81eab24f2f",
+    "scripts/tests/task_510_contact_report_upgrade.gd": "fc9c57679a863ab34592ae100e5b1805f279001a3930c1400d6f777c611c5a41"
+  },
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "tested_commit_and_current_source_hashes_match": true,
+  "protected_roster": {
+    "before": {
+      "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+      "length": 221426,
+      "mtime_ns": 1793651922023643800
+    },
+    "after": {
+      "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+      "length": 221426,
+      "mtime_ns": 1793651922023643800
+    },
+    "bytes_length_mtime_unchanged": true
+  },
+  "isolation": {
+    "fresh_unique_user_dirs": 55,
+    "all_runtime_guards_verified": true,
+    "all_before_after_roster_checks_match": true
+  },
+  "independent_pre_integration_audit": "APPROVED; ancestry, 18 source hashes, previous 55 gates / 1650 assertions and TASK_348 baseline verified read-only.",
+  "known_baseline_failure": "TASK_348 remains separately documented at 14/17, identical labels/order on original baseline and fixed branch; outside this selection of 55 green gates.",
+  "limits": [
+    "Headless Godot 4.6.2 operation/state regression; no native FPS/GPU or general release acceptance.",
+    "Existing untracked assets/builds/taskfiles remain outside integration."
+  ],
+  "independent_post_test_audit": "APPROVED; fresh 55-gate raw report and log totals independently verified at 1650/0; source hashes, roster integrity and completion documentation consistent."
+}

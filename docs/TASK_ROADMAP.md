@@ -9,8 +9,12 @@
 - Task `docs/tasks/REVIEW2_2026_11_02_performance_architecture_fixes.md`,
   Ergebnisindex `output/review2_fixes_20261102/verification_summary.json`.
 - Basis `a7e883f1f`, Branch `task/review2-performance-architecture-fixes-20261102`;
-  Main-Integration bleibt separater Auftrag. Bekannter TASK_348-Baselinefehler
-  und Grenzen der headless Performance-Evidence bleiben dokumentiert.
+  anschliessend separat beauftragte Main-Integration per Fast-forward.
+- Frischer Lauf auf Main `b09547414`: 55/55 strenge Gates und 1650/1650
+  Assertions in einem sequenziellen Lauf, mit isolierten Nutzerdaten und
+  unveraendertem Originalroster. Integrationsnachweis:
+  `output/review2_main_integration_20261102/verification_summary.json`.
+  Bekannter TASK_348-Baselinefehler und Grenzen der headless Evidence bleiben.
 
 ## Nutzerauftrag 2026-11-02 - Sieben Performance-/Architekturbefunde
 - P1-Block abgeschlossen und unabhaengig reviewed: Movement, Tuer-HPA und

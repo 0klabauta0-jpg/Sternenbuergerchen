@@ -51,6 +51,19 @@ Pruefung. Bestehende ungetrackte Dateien bleiben unberuehrt.
 ## Status
 - [x] Ausgangs-Main/Remote und Fast-forward-Ancestry bestaetigt.
 - [x] 18 freigegebene Quellhashes und unveraenderten Roster bestaetigt.
-- [ ] Main integriert und isolierte Abschlussmatrix erneut bestanden.
-- [ ] Status/Evidence aktualisiert und unabhhaengig geprueft.
-- [ ] Main gepusht, lokale/Remote-SHAs identisch und getrackter Stand sauber.
+- [x] Main integriert und isolierte Abschlussmatrix erneut bestanden.
+- [x] Status/Evidence aktualisiert und unabhaengig geprueft.
+- [x] Main gepusht, lokale/Remote-SHAs identisch und getrackter Stand sauber.
+
+## Verifikation
+Integrierter Main `b0954741460736d22d7664fdbff80bf33fd90d1a`: 55/55 strenge
+Gates und 1650/1650 numerische Assertions in einem sequenziellen Lauf, keine
+Retries, keine Engine-/Scriptfehler oder Leakwarnungen. Der Canary ist ein
+Gate ohne numerische Assertions. Alle 55 Nutzerdatenverzeichnisse frisch und
+eindeutig; jeder Runtime-Guard bestaetigt, alle Roster-Vor-/Nachvergleiche gleich.
+18 Quellhashes und `project.godot` entsprechen dem freigegebenen Fix-Stand.
+Unabhaengiger Nachreview der frischen Logs, Quellhashes, Rostervergleiche und
+Abschlussdokumentation APPROVED ohne wichtige offene Befunde.
+
+Bericht: `output/review2_main_integration_20261102/verification_summary.json`.
+Rohreport: `output/review2_main_integration_20261102/checks/20261102T212503Z-73248908/report.json`.
