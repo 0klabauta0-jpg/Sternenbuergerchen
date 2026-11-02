@@ -1,0 +1,723 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: (1920, 1080) controlled UI fixture satisfies the full store validation
+FIXTURE SAVE (1920, 1080) {"diagnostics":[],"error":0,"ok":true,"path":"user://native_ui_shell_fixtures/native_shell_1920_1080_1434092/roster.json","profile_id":"ui_native_shell_fixture"}
+PASS: (1920, 1080) valid isolated roster fixture is stored before menu startup
+PASS: (1920, 1080) real library contains the isolated fixture record
+LIBRARY (1920, 1080) {"activate_enabled":false,"active_path":"user://native_ui_shell_fixtures/native_shell_1920_1080_1434092/roster.json","active_team_name":"SignalWache Iona","delete_enabled":false,"edit_enabled":true,"entries":[{"active":true,"archived":false,"can_delete":false,"diagnostics":[],"entry_id":"user://native_ui_shell_fixtures/native_shell_1920_1080_1434092/roster.json","path":"user://native_ui_shell_fixtures/native_shell_1920_1080_1434092/roster.json","profile_id":"ui_native_shell_fixture","roster_size":24,"saved_at_unix_time":1793635480,"seed":"native_shell_fixture","source":"current","team_name":"SignalWache Iona","valid":true}],"entry_count":1,"selected_is_active":true,"selected_path":"user://native_ui_shell_fixtures/native_shell_1920_1080_1434092/roster.json","selected_team_name":"SignalWache Iona","visible":true}
+GEOMETRY (1920, 1080) library=[P: (1248.0, 696.0), S: (640.0, 320.0)]
+PASS: (1920, 1080) library is visible in the menu
+PASS: (1920, 1080) library stays within viewport
+PASS: (1920, 1080) library is separate from left menu rail
+PASS: (1920, 1080) fixture produces an actually selected library record
+PASS: (1920, 1080) selected record has yellow frame
+GEOMETRY (1920, 1080) settings=[P: (1192.0, 48.0), S: (680.0, 900.0)]
+PASS: (1920, 1080) settings window is bounded
+PASS: (1920, 1080) fixed settings title is visible
+PASS: (1920, 1080) settings body is scrollable
+PASS: (1920, 1080) footer is separate from scroll content
+PASS: (1920, 1080) SettingsApplyButton remains reachable
+PASS: (1920, 1080) SettingsResetButton remains reachable
+PASS: (1920, 1080) SettingsBackButton remains reachable
+PASS: (1920, 1080) long input overview exposes vertical scrolling
+PASS: (1920, 1080) body can actually scroll
+PASS: (1920, 1080) scrolling leaves title fixed
+PASS: (1920, 1080) scrolling leaves actions fixed
+PASS: (1920, 1080) cancel/close returns to visible team library
+GEOMETRY (1920, 1080) creator=[P: (32.0, 32.0), S: (1856.0, 1016.0)]
+PASS: (1920, 1080) Creator outer frame is bounded
+PASS: (1920, 1080) Creator body can scroll instead of expanding the window
+PASS: (1920, 1080) TeamEditorSaveButton remains reachable
+PASS: (1920, 1080) TeamEditorCloseButton remains reachable
+PASS: (1920, 1080) Creator scroll leaves Save/Close header fixed
+PASS: (1920, 1080) closing Creator restores the same team library
+PASS: (1280, 720) controlled UI fixture satisfies the full store validation
+FIXTURE SAVE (1280, 720) {"diagnostics":[],"error":0,"ok":true,"path":"user://native_ui_shell_fixtures/native_shell_1280_720_4435883/roster.json","profile_id":"ui_native_shell_fixture"}
+PASS: (1280, 720) valid isolated roster fixture is stored before menu startup
+PASS: (1280, 720) real library contains the isolated fixture record
+LIBRARY (1280, 720) {"activate_enabled":false,"active_path":"user://native_ui_shell_fixtures/native_shell_1280_720_4435883/roster.json","active_team_name":"SignalWache Iona","delete_enabled":false,"edit_enabled":true,"entries":[{"active":true,"archived":false,"can_delete":false,"diagnostics":[],"entry_id":"user://native_ui_shell_fixtures/native_shell_1280_720_4435883/roster.json","path":"user://native_ui_shell_fixtures/native_shell_1280_720_4435883/roster.json","profile_id":"ui_native_shell_fixture","roster_size":24,"saved_at_unix_time":1793635483,"seed":"native_shell_fixture","source":"current","team_name":"SignalWache Iona","valid":true}],"entry_count":1,"selected_is_active":true,"selected_path":"user://native_ui_shell_fixtures/native_shell_1280_720_4435883/roster.json","selected_team_name":"SignalWache Iona","visible":true}
+GEOMETRY (1280, 720) library=[P: (608.0, 336.0), S: (640.0, 320.0)]
+PASS: (1280, 720) library is visible in the menu
+PASS: (1280, 720) library stays within viewport
+PASS: (1280, 720) library is separate from left menu rail
+PASS: (1280, 720) fixture produces an actually selected library record
+PASS: (1280, 720) selected record has yellow frame
+GEOMETRY (1280, 720) settings=[P: (552.0, 48.0), S: (680.0, 624.0)]
+PASS: (1280, 720) settings window is bounded
+PASS: (1280, 720) fixed settings title is visible
+PASS: (1280, 720) settings body is scrollable
+PASS: (1280, 720) footer is separate from scroll content
+PASS: (1280, 720) SettingsApplyButton remains reachable
+PASS: (1280, 720) SettingsResetButton remains reachable
+PASS: (1280, 720) SettingsBackButton remains reachable
+PASS: (1280, 720) long input overview exposes vertical scrolling
+PASS: (1280, 720) body can actually scroll
+PASS: (1280, 720) scrolling leaves title fixed
+PASS: (1280, 720) scrolling leaves actions fixed
+PASS: (1280, 720) cancel/close returns to visible team library
+GEOMETRY (1280, 720) creator=[P: (32.0, 32.0), S: (1216.0, 656.0)]
+PASS: (1280, 720) Creator outer frame is bounded
+PASS: (1280, 720) Creator body can scroll instead of expanding the window
+PASS: (1280, 720) TeamEditorSaveButton remains reachable
+PASS: (1280, 720) TeamEditorCloseButton remains reachable
+PASS: (1280, 720) Creator scroll leaves Save/Close header fixed
+PASS: (1280, 720) closing Creator restores the same team library
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_panel_style (res://scripts/meta/meta_ui_skin.gd:324)
+       [4] apply_homebase (res://scripts/meta/meta_ui_skin.gd:37)
+       [5] _ready (res://scripts/meta/homebase_screen.gd:159)
+       [6] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [7] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [8] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_panel_style (res://scripts/meta/meta_ui_skin.gd:324)
+       [4] apply_homebase (res://scripts/meta/meta_ui_skin.gd:38)
+       [5] _ready (res://scripts/meta/homebase_screen.gd:159)
+       [6] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [7] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [8] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_panel_style (res://scripts/meta/meta_ui_skin.gd:324)
+       [4] apply_homebase (res://scripts/meta/meta_ui_skin.gd:39)
+       [5] _ready (res://scripts/meta/homebase_screen.gd:159)
+       [6] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [7] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [8] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_panel_style (res://scripts/meta/meta_ui_skin.gd:324)
+       [4] apply_homebase (res://scripts/meta/meta_ui_skin.gd:40)
+       [5] _ready (res://scripts/meta/homebase_screen.gd:159)
+       [6] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [7] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [8] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_panel_style (res://scripts/meta/meta_ui_skin.gd:324)
+       [4] apply_homebase (res://scripts/meta/meta_ui_skin.gd:41)
+       [5] _ready (res://scripts/meta/homebase_screen.gd:159)
+       [6] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [7] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [8] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_panel_style (res://scripts/meta/meta_ui_skin.gd:324)
+       [4] apply_homebase (res://scripts/meta/meta_ui_skin.gd:42)
+       [5] _ready (res://scripts/meta/homebase_screen.gd:159)
+       [6] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [7] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [8] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_panel_style (res://scripts/meta/meta_ui_skin.gd:324)
+       [4] apply_homebase (res://scripts/meta/meta_ui_skin.gd:45)
+       [5] _ready (res://scripts/meta/homebase_screen.gd:159)
+       [6] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [7] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [8] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _create_homebase_fireteam_panel (res://scripts/meta/homebase_screen.gd:2318)
+       [4] _ensure_homebase_direct_staging_panels (res://scripts/meta/homebase_screen.gd:2289)
+       [5] _apply_drop_light_fixed_layout (res://scripts/meta/homebase_screen.gd:1954)
+       [6] _ready (res://scripts/meta/homebase_screen.gd:160)
+       [7] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [8] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [9] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [10] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _create_homebase_loadout_panel (res://scripts/meta/homebase_screen.gd:2417)
+       [4] _ensure_homebase_direct_staging_panels (res://scripts/meta/homebase_screen.gd:2294)
+       [5] _apply_drop_light_fixed_layout (res://scripts/meta/homebase_screen.gd:1954)
+       [6] _ready (res://scripts/meta/homebase_screen.gd:160)
+       [7] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [8] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [9] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [10] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_homebase_flightdeck_staging_panel (res://scripts/meta/homebase_screen.gd:2525)
+       [4] _ensure_homebase_direct_staging_panels (res://scripts/meta/homebase_screen.gd:2304)
+       [5] _apply_drop_light_fixed_layout (res://scripts/meta/homebase_screen.gd:1954)
+       [6] _ready (res://scripts/meta/homebase_screen.gd:160)
+       [7] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [8] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [9] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [10] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_character_sheet_popup (res://scripts/meta/homebase_screen.gd:2649)
+       [4] _apply_drop_light_fixed_layout (res://scripts/meta/homebase_screen.gd:1955)
+       [5] _ready (res://scripts/meta/homebase_screen.gd:160)
+       [6] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [7] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [8] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_drop_light_flightdeck_stage (res://scripts/meta/homebase_screen.gd:2780)
+       [4] _apply_drop_light_fixed_layout (res://scripts/meta/homebase_screen.gd:1956)
+       [5] _ready (res://scripts/meta/homebase_screen.gd:160)
+       [6] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [7] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [8] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] update_frontier_stage (res://scripts/meta/meta_ui_skin.gd:287)
+       [4] _apply_r4_preparation_visuals (res://scripts/meta/homebase_screen.gd:2002)
+       [5] _enforce_drop_light_fixed_layout (res://scripts/meta/homebase_screen.gd:1983)
+       [6] _apply_drop_light_fixed_layout (res://scripts/meta/homebase_screen.gd:1957)
+       [7] _ready (res://scripts/meta/homebase_screen.gd:160)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [9] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [10] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [11] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_mission_briefing_panel (res://scripts/meta/homebase_screen.gd:4923)
+       [4] _update_mission_briefing_panel (res://scripts/meta/homebase_screen.gd:4830)
+       [5] _update_mission_info (res://scripts/meta/homebase_screen.gd:3897)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1909)
+       [7] _ready (res://scripts/meta/homebase_screen.gd:211)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [9] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [10] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [11] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_pre_mission_readiness_panel (res://scripts/meta/homebase_screen.gd:5006)
+       [4] _update_pre_mission_readiness_panel (res://scripts/meta/homebase_screen.gd:4898)
+       [5] _update_mission_info (res://scripts/meta/homebase_screen.gd:3898)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1909)
+       [7] _ready (res://scripts/meta/homebase_screen.gd:211)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:135)
+       [9] _run (res://scripts/tests/ui_native_shell_layout_verifier.gd:25)
+       [10] _test_shell (res://scripts/tests/ui_native_shell_layout_verifier.gd:129)
+       [11] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] reconcile (res://scripts/meta/homebase_card_pool.gd:49)
+       [5] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [6] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [7] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [8] _test_homebase_detail_owner (res://scripts/tests/ui_native_shell_layout_verifier.gd:138)
+       [9] _wait_frames (res://scripts/tests/ui_native_shell_layout_verifier.gd:242)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+PASS: Homebase has real compact roster cards
+PASS: Existing card detail signal opens the actual homebase popup
+PASS: Popup shows the requested person's identity
+PASS: Actual popup contains STATUS / RECOVERY:
+PASS: Actual popup contains KERNWERTE
+PASS: Actual popup contains TEAMFIT:
+PASS: Actual popup contains PROGRESS:
+PASS: Actual popup includes populated core-value bars
+PASS: Homebase popup remains a read-only character sheet
+PASS: Opening a detail sheet does not mutate the profile
+PASS: Retired InfoPanel is not mistaken for current character owner
+RESULTS: 63 passed, 0 failed
+PASS: native shell layout

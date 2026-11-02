@@ -5,6 +5,13 @@ Der Nutzer bezeichnet R3 als noch deutlich zu weit von den vorhandenen 2D-Bilder
 
 Vier getrennte Aufrufe des integrierten Bildgenerators verwendeten jeweils die finale 2D-Vorlage als Stilautorität, den tatsächlichen R3-Screenshot als Funktions-/Belegungsreferenz und den aktuellen Main-Außenpostenrender als Material-/Umgebungsreferenz. Alle exakten Prompts stehen in `prompts.json`, Dateien und SHA-256 in `manifest.json`. Die Originalausgaben wurden unverändert in dieses Projekt kopiert.
 
+## Fortschreibung nach Dokumentaudit · 02.11.2026
+Die folgenden R4-Entscheidungen und Bildbefunde dokumentieren den damaligen Durchgang. Sie sind kein neuer Auftrag, dessen native Pixelmaße oder vereinfachte Rahmen dauerhaft festzuschreiben. Die oben genannten bestätigten Original-2D-Ziele bleiben Gestaltungsautorität; Brückenbilder erläutern nur eine Übersetzung. Referenzgetreue Raster-/Nine-Patch-/mehrschichtige Rahmen sind um echte native Controls zulässig. Größen und Bühnenanteile dürfen weiter an die Zielbilder angenähert werden, solange Kompaktheit, lesbare Beschriftung, Fokus/Eingabe und tatsächliche Funktionen erhalten bleiben. Aktueller Vertrag: `docs/dev/ui_native_design_contract.md`.
+
+Die unten genannte Square8-Basis ist historisch: Der aktuelle Task-Stand besitzt die ausdrücklich beauftragte GM01 mit48×48Hex nach `docs/dev/gm01_frontier_map_contract.md`. Eine Mainintegration wird damit nicht behauptet. Aktivierte Hexgeometrie ist noch kein menschlicher Lesbarkeitsnachweis; tatsächliche1280×720- und1920×1080-Spielansichten müssen die Hexfelder dezent, aber erkennbar zeigen. Die Terrain-Bodenmaske besteht weiterhin; entfernt wurde im bekannten Terrainmodus der schwarze Aufbau-Schutzkasten. Dynamische Gegnerdarstellung bleibt davon unabhängig sichtgefiltert.
+
+Reihenfolge der nächsten Runde: Dokumentaudit/Korrektur abschließen, dann echte Enginebilder und ihre Original-2D-Ziele direkt vergleichen, daraus begrenzte visuelle Änderungen ableiten und nativ nachprüfen. Keine zufälligen KI-Gesichter oder neu interpretierten Schiffe übernehmen; exakte Cutlass und Zustandsbesitz bleiben verbindlich.
+
 ## Erklärung statt behaupteter interner Gedanken
 Die drei kurzen Erläuterungen im Bildfuß wurden ausdrücklich als sichtbare Designbegründungen angefordert. Die internen Gedanken des Bildgenerators sind nicht zugänglich. Folgende Zuordnung beschreibt Vorgabe, sichtbares Ergebnis und unsere technische Entscheidung:
 
@@ -27,7 +34,7 @@ Die drei kurzen Erläuterungen im Bildfuß wurden ausdrücklich als sichtbare De
 ## Übergabe für den nächsten Chat
 Zuerst die R4-Workbench und tatsächlichen nativen Bilder ansehen, dann Vorlage und Brücke daneben vergleichen. Layout/State nicht aus einem KI-Bild ablesen: IDs, Portraits, Bereitschaft, Planstatus, Gesundheitswerte und bestätigte Entwicklung müssen weiterhin vom vorhandenen Owner kommen. Eine dekorative Szene ist kein transportiertes Schiff und kein Nachweis eines Missionsereignisses.
 
-Die Main-Basis ist `7f594530f`, Grafikübernahme `177991ac4`: gespeicherte GM01 wählt `frontier_illustrated_v1`, behält aber Square8. Die neue Hex-Werft ist separat. R4 führt diese Basis im eigenen UI-Branch mit R3 zusammen; Main selbst wird nicht geändert.
+Historischer R4-Stand: Die Main-Basis war `7f594530f`, Grafikübernahme `177991ac4`: gespeicherte GM01 wählte `frontier_illustrated_v1`, behielt aber Square8. Die neue Hex-Werft war separat. R4 führte diese Basis im eigenen UI-Branch mit R3 zusammen; Main selbst wurde nicht geändert. Aktueller GM01-Hexstand siehe Fortschreibung oben.
 
 Visuelle Restabstände ehrlich prüfen: vorhandene echte Pixelportraits gegenüber illustrierten Portraittafeln, native Rendererwirkung gegenüber gemalten Szenen und belegungsabhängiger Bildanteil. Technische Checks allein sind keine Bestätigung, dass der Nutzer die Stilnähe jetzt ausreichend findet.
 

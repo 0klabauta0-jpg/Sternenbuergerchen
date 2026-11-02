@@ -15,12 +15,13 @@ const COLOR_WARNING := Color("ffd348")
 const COLOR_DANGER := Color("f47572")
 const COLOR_NEUTRAL := Color("8caab8")
 const HEADING_FONT_PATH: String = "res://Assets/curated/ui_native_r4/BarlowCondensed-Bold.ttf"
+const REFERENCE_PANEL_FRAME_SCRIPT: GDScript = preload("res://scripts/ui/reference_panel_frame.gd")
 
 const CORNER_RADIUS := 6
 const SPACING := 8
 const FONT_SIZE := 14
 const BUTTON_FONT_SIZE := 13
-const ACTION_TILE_SIZE := Vector2(64.0, 64.0)
+const ACTION_TILE_SIZE := Vector2(52.0, 52.0)
 const COMPACT_ICON_SIZE := Vector2(18.0, 18.0)
 const TOOL_ICON_SIZE := Vector2(24.0, 24.0)
 const CARD_PADDING := Vector4(8.0, 6.0, 8.0, 6.0)
@@ -137,6 +138,13 @@ static func get_theme() -> Theme:
 static func apply_screen(root: Control) -> void:
 	if root != null and root.theme != get_theme():
 		root.theme = get_theme()
+	if root is PanelContainer:
+		# Includes pooled NPC cards whose own state styles remain authoritative.
+		decorate_panel(root, "card")
+
+
+static func decorate_panel(control: Control, variant: String = "frame", selected: bool = false) -> void:
+	REFERENCE_PANEL_FRAME_SCRIPT.decorate(control, variant, selected)
 
 
 static func get_heading_font() -> Font:
@@ -220,6 +228,7 @@ static func style_card(panel: PanelContainer, selected: bool = false) -> void:
 			2
 		)
 	)
+	decorate_panel(panel, "card", selected)
 
 
 static func style_badge(label: Label, status_key: String) -> void:

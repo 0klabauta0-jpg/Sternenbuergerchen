@@ -79,7 +79,7 @@ static func get_homebase_layout() -> Dictionary:
 
 
 static func get_mission_hud_layout(viewport_size: Vector2i = TARGET_VIEWPORT) -> Dictionary:
-	var band_top := viewport_size.y - 160
+	var band_top := viewport_size.y - 128
 	var mini_height := mini(304, maxi(176, band_top - 352))
 	# On the supported 720px viewport, leave the existing single transport card
 	# unobscured while keeping the log above the member strip. Its native scroll
@@ -91,11 +91,11 @@ static func get_mission_hud_layout(viewport_size: Vector2i = TARGET_VIEWPORT) ->
 		"top_nav": Rect2i(16, 16, 384, 56),
 		"fireteam_mini": Rect2i(32, 112, 240, mini_height),
 		"event_log": Rect2i(viewport_size.x - 368, band_top - 120 - event_log_height, 352, event_log_height),
-		"bottom_dock": Rect2i(0, band_top, viewport_size.x, 160),
-		"command_matrix": Rect2i(0, band_top, 360, 160),
-		"target_order": Rect2i(368, band_top, 248, 160),
-		"selected_fireteam": Rect2i(624, band_top, mini(512, viewport_size.x - 632), 160),
-		"selected_members": Rect2i(368, band_top - 112, viewport_size.x - 384, 104),
+		"bottom_dock": Rect2i(0, band_top, viewport_size.x, 128),
+		"command_matrix": Rect2i(0, band_top, 296, 128),
+		"target_order": Rect2i(304, band_top, 248, 128),
+		"selected_fireteam": Rect2i(560, band_top, mini(512, viewport_size.x - 568), 128),
+		"selected_members": Rect2i(304, band_top - 112, viewport_size.x - 320, 104),
 		# R3: ordinary transport/time needs two readable lines, not a diagnostic
 		# scroll window. The original raw messages remain in explicit details.
 		"mission_control": Rect2i(viewport_size.x - 368, 24, 352, 72),

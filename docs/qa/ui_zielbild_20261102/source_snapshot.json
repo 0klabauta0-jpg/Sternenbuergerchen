@@ -1,0 +1,551 @@
+{
+  "version": 1,
+  "recorded_utc": "2026-11-02T16:34:34.884301+00:00",
+  "scope": "Explicit current source/docs/map/scenario/Cutlass and selected capture/report byte snapshot; no engine or visual acceptance.",
+  "changed_tracked_sources": [
+    "docs/dev/gm01_frontier_map_contract.md",
+    "docs/dev/ui_native_design_contract.md",
+    "docs/dev/ui_theme_component_library.md",
+    "scripts/meta/drop_light_layout_contract.gd",
+    "scripts/meta/meta_ui_skin.gd",
+    "scripts/meta/npc_compact_card.gd",
+    "scripts/terrain/terrain_map_3d_view.gd",
+    "scripts/tests/ui_a5_native_hud_verifier.gd",
+    "scripts/tests/ui_mission_r2_verifier.gd",
+    "scripts/ui/mission_a5_hud_layout.gd",
+    "scripts/ui/tactical_event_log_panel.gd",
+    "scripts/ui/tactical_ui_theme.gd"
+  ],
+  "files": [
+    {
+      "path": "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+      "sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "bytes": 1473148
+    },
+    {
+      "path": "Assets/curated/ui_native_r4/cutlass_ref03_preview.json",
+      "sha256": "96ee48dc2fd92ee42407365ac25250afb0effee44e1a05a37c18e2d209e3426f",
+      "bytes": 568
+    },
+    {
+      "path": "Assets/curated/ui_native_r4/cutlass_ref03_preview.png",
+      "sha256": "f47437b3001c95bb88ccaa026ece5cbfbd03f637afa9ab6fb828fb1e95382570",
+      "bytes": 119647
+    },
+    {
+      "path": "data/mission_scenarios/ground_mission01_default.json",
+      "sha256": "792bff6b6dfa6fabf739a737e4e45d34c8e3729a4fdc7d6b62a74a374a27b45f",
+      "bytes": 3601
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha256": "a6838ddfb497e97f2bafb0e4c081d3873dec67539a9885c7f7fcd3de196fc91f",
+      "bytes": 4566
+    },
+    {
+      "path": "docs/CODEX_RULES.md",
+      "sha256": "3308c69c6833746899b917f2f0c13aabd58d5864ddf4c7c1ce3bbdbd08b9d2dd",
+      "bytes": 5008
+    },
+    {
+      "path": "docs/dev/gm01_frontier_map_contract.md",
+      "sha256": "5cd6d0f31ce8e63383d54afc55f9d33475fd80503b47c2673dd77911fd545241",
+      "bytes": 5713
+    },
+    {
+      "path": "docs/dev/graphics_reference_revision_contract.md",
+      "sha256": "a040782b266350a4c43e95aacf7230d206f83d4d05bb81530a580344563d8822",
+      "bytes": 5859
+    },
+    {
+      "path": "docs/dev/ui_native_design_contract.md",
+      "sha256": "c0254dda21151e59b97ccd865b490b4d69dabd18fb6d9c6e3a902ed76b3422c2",
+      "bytes": 15442
+    },
+    {
+      "path": "docs/dev/ui_theme_component_library.md",
+      "sha256": "81278f4776ba812c59158fcef8a8fc222555ec9b13a4e4120a36ee9e8d0a92a5",
+      "bytes": 4911
+    },
+    {
+      "path": "docs/IMPLEMENTATION_STATUS.md",
+      "sha256": "dbf83378bc32e8d2aaeb707cf9a94a55cd1e1a8e4a46db7799922380830bd6b0",
+      "bytes": 1799142
+    },
+    {
+      "path": "docs/PROJECT_BRIEF.md",
+      "sha256": "bf014f2dd8d16202725e930cee656f31f129b31effa79c82322faa6791e6cdd3",
+      "bytes": 1700
+    },
+    {
+      "path": "docs/qa/gm01_frontier_20261102/captures/mission_frontier_1280x720.png",
+      "sha256": "8d4bebdba7975bd70d0caa804a91a5a4168555b261a555b9109ef74670d45955",
+      "bytes": 895955
+    },
+    {
+      "path": "docs/qa/gm01_frontier_20261102/captures/mission_frontier_1920x1080.png",
+      "sha256": "94d59ee5d7eaaba4ace9828e34909e1712ecc7a9dd39b7f8b0a12554e087420f",
+      "bytes": 2496419
+    },
+    {
+      "path": "docs/qa/gm01_frontier_20261102/frontier/1280x720_20261102T141144Z/startup_captures/02_homebase.png",
+      "sha256": "81694719f07d4f39d3a00c7b95ce95c0c5e236d0af7393280832f74411a2dc32",
+      "bytes": 223985
+    },
+    {
+      "path": "docs/qa/gm01_frontier_20261102/frontier/1920x1080_20261102T140614Z/startup_captures/02_homebase.png",
+      "sha256": "8658a50ed2dc61336b0e206b9d32e31c5956162008112dde35260817f68ce26a",
+      "bytes": 688927
+    },
+    {
+      "path": "docs/qa/ui_native_r4_20261102/captures/debrief_portraits_1280x720.png",
+      "sha256": "8476f92a982afc5eec63a3d063f01a19d7ff0c8ef5055f649212584b9b0bec04",
+      "bytes": 237061
+    },
+    {
+      "path": "docs/qa/ui_native_r4_20261102/captures/debrief_portraits_1920x1080.png",
+      "sha256": "4e1ae78728121b13c21c78de55444aa8843dab6a48c0f0af15aa2467ee445158",
+      "bytes": 901892
+    },
+    {
+      "path": "docs/qa/ui_native_r4_20261102/captures/fob_1280x720.png",
+      "sha256": "d84813013bdba4092f7dffe1c94128f495bc8a207c33645e1600eb2c042530e9",
+      "bytes": 343165
+    },
+    {
+      "path": "docs/qa/ui_native_r4_20261102/captures/fob_populated_1920x1080.png",
+      "sha256": "dfc30e354ee75da0f0c6ab6b181b1133c8d847a4aa61238d608e123d0bce0d08",
+      "bytes": 539336
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/.gitattributes",
+      "sha256": "06b78a663c84a9a194cf3768c95d0bfa9b53b9800c1c933cc29c5f622c2579e8",
+      "bytes": 55
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/.gitignore",
+      "sha256": "32dae3052f331ee34d628ef535709b301259a45df7c7522c4d35dcf49873f00b",
+      "bytes": 13
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/_qa_common.py",
+      "sha256": "75d8fc13c60511dcf832d851f2a3016bd116668fbeb6eda727ffb4b37df5e4d9",
+      "bytes": 2843
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/BILDVERGLEICH.md",
+      "sha256": "b57a33a5645b9a7b23cee2c4c3eade533874ecdae669545373c3089ed034a2be",
+      "bytes": 15106
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/build_report.py",
+      "sha256": "3d1949846e0b71676525e635bb99e8dc7edd58ce56228b6604e74621de31188c",
+      "bytes": 20432
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/capture_ui_zielbild.py",
+      "sha256": "38b5f88ac8a53951d896fda9a1a900ec3f97532b468ae14ab95d4c2d99c0a2ab",
+      "bytes": 5226
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/check_index.py",
+      "sha256": "93c153cbeb8733dbdc2ebf46a1a3c843d3d5b3b6731b04cdf9ea39413a7e7e0c",
+      "bytes": 1146
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/checks_final.json",
+      "sha256": "8e6e32977ed87fadccfec54da1148458f988b71ec0c846cb70b555cbf67aa1e1",
+      "bytes": 1583
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/capture_results.json",
+      "sha256": "8356737a2b17e96f295e694e01409c62b216bbec2efad397e0f78ece001e00db",
+      "bytes": 18712
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/debrief_portraits_1280x720.json",
+      "sha256": "c5eabfacd47d9ae0344f2403114038f4fdc95edd7d5986f9bf42b483b3cad589",
+      "bytes": 1160
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/debrief_portraits_1280x720.png",
+      "sha256": "da62246d2004f452b713b41652d55aeb427e97be432b584655a08d41ebda8615",
+      "bytes": 240921
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/debrief_portraits_1920x1080.json",
+      "sha256": "d5fccdd466943c9bcf1db6434389acbe849afb9a2b8611ca80a90ee5a74ae9fe",
+      "bytes": 1170
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/debrief_portraits_1920x1080.png",
+      "sha256": "1c21a0029ce3859e9d18f1aa54311a1ad8f590279b1a51537817302a918a9620",
+      "bytes": 905662
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/fob_populated_1280x720.json",
+      "sha256": "0bbbfea77157e2f9124b7feae127de605ec83274f8f26c4c5ace5bf6f8e19e6d",
+      "bytes": 1053
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/fob_populated_1280x720.png",
+      "sha256": "f07150dde40d4e52c22737667df888e18d1a0009801916a6277005d7692da0d7",
+      "bytes": 169031
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/fob_populated_1920x1080.json",
+      "sha256": "6d551ea56dedcd7f6ab0b5baab13b80bc330a4e90d838cf0bb3318e7677d7360",
+      "bytes": 1060
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/fob_populated_1920x1080.png",
+      "sha256": "a717d9b1c9b01e1a4628536054fca9f0eb0df939719f6e7dd4e1dd25599f3454",
+      "bytes": 543288
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/homebase_teams_1280x720.json",
+      "sha256": "6976738ef41f61fe0f6bf3ba0d49975f2640cf8709536f487c80852b406a759c",
+      "bytes": 955
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/homebase_teams_1280x720.png",
+      "sha256": "a7851b26bda483ddabddef806096d03e428977ad5e42a6a1fd3c28788e62f942",
+      "bytes": 415373
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/homebase_teams_1920x1080.json",
+      "sha256": "a8c3a8f6d64926b22889712f76b2cbb88344cf51de80cf58a9a7cbbf701bf605",
+      "bytes": 961
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/homebase_teams_1920x1080.png",
+      "sha256": "67c9b7c1f8b7bb72c9de6a2fe6cf68e4c67095cf005575eb764a932beed2b091",
+      "bytes": 896593
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/headless/20261102T161521_480369Z/checks/20261102T161521Z-pid142392/metadata/report.json",
+      "sha256": "cbb299b1fd1ae7e66010dc065be2011f4951097ea74fe99c6aafb9a1889d7cf0",
+      "bytes": 11818
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/headless/20261102T161521_480369Z/profile_isolation.json",
+      "sha256": "7e138809fac5546e2a86208f0abaacd6a4e30421bde2d58d442ad0a425873bb7",
+      "bytes": 1087
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/html_qa.cjs",
+      "sha256": "9afd53480ccb2899407c04b6385e2bea59e372cdf626b601f3396ed26aaae757",
+      "bytes": 14562
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/import/20261102T162313_374602Z/import_result.json",
+      "sha256": "e5487e5b2d87ebbf5f7cf13163d9c8c20d194b92c99f37c10852cc03c50f6fb7",
+      "bytes": 715
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/import_once.py",
+      "sha256": "ea538dd0459d6d3ff9be15b8c296762db9b5ea776cec5b8821c44596d5e3145e",
+      "bytes": 1523
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/NACHPRUEFUNG.md",
+      "sha256": "dc2bb7eedba9f8827da89d5bb4f830ea885532025793c9125f86fecc7988e216",
+      "bytes": 4735
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/process.json",
+      "sha256": "b7a6f5287e2fdc130a5befb1fd20b3236b6ac64be968930f915f9cb40acf0b44",
+      "bytes": 1099
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup.json",
+      "sha256": "a1ab420e69383270e3a8cd78d16b64ae8cbfdee8694b6c0ef3ed8869522bc762",
+      "bytes": 63955
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/01_main_menu.png",
+      "sha256": "452a63d1264675e6c2ae3381cc0768738a78b5c10b1517c095f353e31b6b00f9",
+      "bytes": 474640
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/02_homebase.png",
+      "sha256": "4377b63ca2345c7668d7e761f4b685016c5e7f749726d4b94c6c9e1364cc419f",
+      "bytes": 228503
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/03_default_mission.png",
+      "sha256": "1ee1e17e260f1dc9f0cf4685160969ce2ee720af7af87c271b07d9baa64351e6",
+      "bytes": 1099903
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/04_lz_approach.png",
+      "sha256": "adf3217aaaccc1e852d1dba52c8220c5a5597eacb6f6dcb10e91d3f534796e9e",
+      "bytes": 1010839
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/05_deployed.png",
+      "sha256": "84ec9b12442950b64e48f4d381a1bd72e012e97dc9ec89510835696d1b93bd07",
+      "bytes": 983551
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/06_go_movement.png",
+      "sha256": "600ed09128fbe1cfea9af82e51851b66c0b9c79bfe0defa2f4a653545d4d398c",
+      "bytes": 1057908
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/07_outpost_overview.png",
+      "sha256": "268c848cde817f485cf98c4009e93471a028e5876653833f6fe005bfa70bf13e",
+      "bytes": 1111130
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/08_eastern_supply.png",
+      "sha256": "4b1a5e750ba3950404eb02fd911759f3a8b6fa95373ac9b8c79b9c6ff75e1f97",
+      "bytes": 1130996
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/09_expanded_map.png",
+      "sha256": "782219cb3909080a52d793fe9c5bdb4957d4967d274a9cf783299d871c39982c",
+      "bytes": 1014202
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/process.json",
+      "sha256": "755bf6af2b166f8df6842c1c431087aaeeb19ff5bf94b1b9d2f5a3eeccaca627",
+      "bytes": 1102
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup.json",
+      "sha256": "ef09c6d08a49d2e8362883ccc7b3bf28a16cc1066e7993e7f9241b29898e81cd",
+      "bytes": 63974
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/01_main_menu.png",
+      "sha256": "c4752fd2041806e52a45ba5cbbc2465c69f3297836e88fb6075d5d30dca7cf84",
+      "bytes": 1048599
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/02_homebase.png",
+      "sha256": "94140ce4ab07f420c91858c753ee61ae40fd84da3e211b4498ef795badcb2952",
+      "bytes": 694399
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/03_default_mission.png",
+      "sha256": "b9f8c4fc8cd6acddc266b2a7e4908d9e7bb28c988d9ad31f174115e7e99cb3d0",
+      "bytes": 2736755
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/04_lz_approach.png",
+      "sha256": "66d29a3e40cd62a3b096c1fb5aeb152861e0bd84c93e12de1aedc1428459cdcc",
+      "bytes": 2602479
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/05_deployed.png",
+      "sha256": "fbaf3dd21df35095b1babc6c2899d2a634bcab9568efbb0298c07e0e9042f5e1",
+      "bytes": 2598371
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/06_go_movement.png",
+      "sha256": "1f195bb2bbaf9bcc4ca320e4782d55b073d9324f2290cea826b0b4f41543d48b",
+      "bytes": 2608424
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/07_outpost_overview.png",
+      "sha256": "1910a55fccff71a4d961e73ad169cc74c1511bc9aedcaf724148e1c413fec8be",
+      "bytes": 2772259
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/08_eastern_supply.png",
+      "sha256": "6d1f7aeff79c25d0e1041ffd9bab31574196e18a2ff92cc4d6c3b74806f92598",
+      "bytes": 2852113
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/09_expanded_map.png",
+      "sha256": "407cde40ef3ddaea2e39ae315b1369bd142086e5575f2e7a0c85f9de419821bc",
+      "bytes": 2533542
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/capture_results.json",
+      "sha256": "8d5a1ed80537fbd53019b4060b7046514319303b6d9b4f945ab027b1228c3004",
+      "bytes": 8309
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/README.md",
+      "sha256": "cccfb0e15fe4e7ff428e92257dbb1bf41af18ce20ff73b188c0380052c3cb193",
+      "bytes": 8347
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/REVIEW.md",
+      "sha256": "c79e17033efebed7e98ad1353334300d5a7d44eebb57554fcdbc02af495a7571",
+      "bytes": 1768
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/run_isolated_checks.py",
+      "sha256": "9acd5327fb3c8103c61b96b7e92279a6f71e54445ba8d0f2c2f2213c94deffe3",
+      "bytes": 1917
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/source_snapshot.py",
+      "sha256": "f47e829ce58975a88a4080d5490392fd1c5a60496404b22a1729d909aa489ab7",
+      "bytes": 8380
+    },
+    {
+      "path": "docs/qa/ui_zielbild_20261102/startup_ui_zielbild.py",
+      "sha256": "9314f2e71853bb72c2330af7bbaa53212c227b7c15e7399c9e211ad729633b67",
+      "bytes": 4501
+    },
+    {
+      "path": "docs/reports/assets/ui-2026-11-01/menu_debrief.png",
+      "sha256": "3d7600ded373bde99da4b6598211a45524d42e2b5a7daa85d58e6e46042f0c82",
+      "bytes": 2049277
+    },
+    {
+      "path": "docs/reports/assets/ui-2026-11-01/menu_fob_loadout.png",
+      "sha256": "ff97752096c4af99b2fc97beefd5337e396451c9d3c16d926467d3157b95cc1a",
+      "bytes": 2002569
+    },
+    {
+      "path": "docs/reports/assets/ui-2026-11-01/menu_heimatbasis.png",
+      "sha256": "2037cc5c58a8cf463040235d332c64c5522242a5a944c928e9040613bb495e92",
+      "bytes": 1963380
+    },
+    {
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png",
+      "sha256": "fc9edb8b1d28921653ba5b438e7be8da4db3e0b32b8c751e9b18c4ef94918149",
+      "bytes": 2558195
+    },
+    {
+      "path": "docs/reports/STERNENBUERGERCHEN_UI_ZIELBILD_2026-11-02.html",
+      "sha256": "00d0bc406fd0a0ce3b82272a204833a3dad632fb98fe6400c7136ac41c7f5eee",
+      "bytes": 48225
+    },
+    {
+      "path": "docs/tasks/UI_2026_11_02_zielbild_abgleich.md",
+      "sha256": "993d4c61d2e362d29b0aa22a6d81fdf81bee698fa5403e8a0ca7702dce1339dc",
+      "bytes": 6631
+    },
+    {
+      "path": "docs/ui_concepts/ui_20261102_r4/BILDPRUEFUNG_UND_UEBERGABE.md",
+      "sha256": "8cd34b86af3f226de35ce50dd1b4ca80050afeeb656a3c55caa3630f95a05d05",
+      "bytes": 7456
+    },
+    {
+      "path": "maps/Ground_Mission01_32x32.json",
+      "sha256": "31daf2d4943ec4a2007fc4f5246249f309c52436a0675143184d060b6999c925",
+      "bytes": 621773
+    },
+    {
+      "path": "project.godot",
+      "sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+      "bytes": 13602
+    },
+    {
+      "path": "scripts/meta/drop_light_layout_contract.gd",
+      "sha256": "cce3454baf3e9221eb5bdf3fce9a7fef4699ec1966afb40fddecbfb16a443b67",
+      "bytes": 4441
+    },
+    {
+      "path": "scripts/meta/meta_ui_skin.gd",
+      "sha256": "64dbb2ee42cf81db94b96dd29a99d69517c3b92bcece703085e9e499e8254540",
+      "bytes": 21037
+    },
+    {
+      "path": "scripts/meta/npc_compact_card.gd",
+      "sha256": "c209cae813256360cc6b748b486aa0c9243bff842276924e78816ffaa2faeeaa",
+      "bytes": 31410
+    },
+    {
+      "path": "scripts/terrain/frontier_gm01_layout.gd",
+      "sha256": "76165f3543e90e5f7b8e94d528e28484e29c3014b4deed64f5834916f6aecd24",
+      "bytes": 18014
+    },
+    {
+      "path": "scripts/terrain/frontier_ship_visuals.gd",
+      "sha256": "1af4ee557a8b9b625ae7bebcaf7d3a10ed8e586fab336243e4e8eec799fbf228",
+      "bytes": 3819
+    },
+    {
+      "path": "scripts/terrain/terrain_map_3d_view.gd",
+      "sha256": "d6bb29d432771b5fbfbb01a2bbf223d85bcdb3e43e907309fb87826f606f3dba",
+      "bytes": 846255
+    },
+    {
+      "path": "scripts/tests/frontier_main_startup_verifier.gd",
+      "sha256": "22f1893838414963d2d5bbf70df524c2f9bc1815a69aa9ce924a847dfb0b2a3b",
+      "bytes": 21459
+    },
+    {
+      "path": "scripts/tests/gm01_frontier_hex_fow_verifier.gd",
+      "sha256": "3e6c63e67bc653b5337530fa511c494d2078b204b5ce865de4506dfc51d88371",
+      "bytes": 4152
+    },
+    {
+      "path": "scripts/tests/gm01_frontier_normal_capture.gd",
+      "sha256": "25788d5f254064bf63ed24a897eb10da383c867a43ad954e63a178f8e0174672",
+      "bytes": 1869
+    },
+    {
+      "path": "scripts/tests/gm01_frontier_rebuild_verifier.gd",
+      "sha256": "725c85686aa65f26a6c3addcb0ffe30d0d03137fb9a95c73e485facfdf526224",
+      "bytes": 24787
+    },
+    {
+      "path": "scripts/tests/ui_a5_native_hud_verifier.gd",
+      "sha256": "447f703904266ae74500a2b682dc22eaf5a3c205767dc79484abc4d86e09eae5",
+      "bytes": 12869
+    },
+    {
+      "path": "scripts/tests/ui_mission_r2_verifier.gd",
+      "sha256": "097e2753e5e817da76597dde810d8bce44d121d5d1a4b1bcdbdf420a82f3b39a",
+      "bytes": 10093
+    },
+    {
+      "path": "scripts/tests/ui_native_capture.gd",
+      "sha256": "155130b2ab4c92022a575398efdb99544259272c775ef5b29ddff3c2b9ba6ffb",
+      "bytes": 12910
+    },
+    {
+      "path": "scripts/tests/ui_native_r2_preparation_verifier.gd",
+      "sha256": "c7e957cdabdafbd9f478d363b9ecf9a754cca6ba02af913b87e4229266156125",
+      "bytes": 17282
+    },
+    {
+      "path": "scripts/tests/ui_native_r3_mission_readout_verifier.gd",
+      "sha256": "91b2ba421414450421b210ddc146b5b3c10111bf718fa1c55a52baa93dfbd7c5",
+      "bytes": 18567
+    },
+    {
+      "path": "scripts/tests/ui_native_r4_cutlass_identity_verifier.gd",
+      "sha256": "f396ba9b54d11abbe4c9f890b9538d54443a0f9d913c49a7c3ca6d6037598e2c",
+      "bytes": 7780
+    },
+    {
+      "path": "scripts/tests/ui_native_shell_layout_verifier.gd",
+      "sha256": "32d09328395af04444c680e08da1c35468baa529cdf9ab1bcb96a5bef736375b",
+      "bytes": 13354
+    },
+    {
+      "path": "scripts/tests/ui_zielbild_normal_capture.gd",
+      "sha256": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+      "bytes": 2440
+    },
+    {
+      "path": "scripts/ui/mission_a5_hud_layout.gd",
+      "sha256": "780f306354d61f273789b83d2ae9961849a85ea481604eb9600d22c4c60a4120",
+      "bytes": 43176
+    },
+    {
+      "path": "scripts/ui/reference_panel_frame.gd",
+      "sha256": "d6f0e8e297a05919c38eb922a8abf785b9432c1711de89fe2994654f67acda8c",
+      "bytes": 5798
+    },
+    {
+      "path": "scripts/ui/tactical_event_log_panel.gd",
+      "sha256": "97b05afa2e44ddcaa05beb68ca2a051444c7c190fa50afed4f27a1fcb7e1ee8a",
+      "bytes": 21597
+    },
+    {
+      "path": "scripts/ui/tactical_ui_theme.gd",
+      "sha256": "960f9829b8ee6bf47f32685bbcc8950c510bf6f6cefc63b8efe8ade96920c8f8",
+      "bytes": 17622
+    }
+  ]
+}

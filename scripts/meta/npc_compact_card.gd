@@ -589,7 +589,7 @@ func _apply_density(
 		data_a_label.custom_minimum_size = Vector2(0.0, data_a_line_height * float(_compact_data_a_max_lines if _compact_wrap_text_enabled else 1))
 		data_b_label.custom_minimum_size = Vector2(0.0, data_b_line_height * float(_compact_data_b_max_lines if _compact_wrap_text_enabled else 1))
 		badge_row.custom_minimum_size = Vector2(0.0, 22.0)
-		var name_font_size: int = _compact_name_font_size_override if _compact_name_font_size_override > 0 else (10 if is_mission_drop_pilot else 12)
+		var name_font_size: int = _compact_name_font_size_override if _compact_name_font_size_override > 0 else (10 if is_mission_drop_pilot else 14)
 		var data_font_size: int = _compact_data_font_size_override if _compact_data_font_size_override > 0 else (8 if is_mission_drop_pilot else 10)
 		name_label.add_theme_font_size_override("font_size", name_font_size)
 		data_a_label.add_theme_font_size_override("font_size", data_font_size)

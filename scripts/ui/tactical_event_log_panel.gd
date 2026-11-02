@@ -2,6 +2,7 @@ class_name TacticalEventLogPanel
 extends PanelContainer
 
 const TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT: GDScript = preload("res://scripts/ui/tactical_hud_language_presenter.gd")
+const UI_THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 
 const DEFAULT_MAX_VISIBLE_EVENTS: int = 8
 const ROW_MIN_HEIGHT: float = 22.0
@@ -17,8 +18,8 @@ const LEFT_TACTICAL_STACK_DETAIL_EVENT_FILTER_MIN_WIDTH: float = 96.0
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_FONT_SIZE: int = 13
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_TIME_FONT_SIZE: int = 12
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_STRIP_WIDTH: float = 5.0
-const TASK_1159_EVENT_LOG_BACKGROUND_COLOR: Color = Color(0.035, 0.052, 0.060, 0.96)
-const TASK_1159_EVENT_LOG_BORDER_COLOR: Color = Color(0.24, 0.34, 0.39, 0.96)
+const TASK_1159_EVENT_LOG_BACKGROUND_COLOR: Color = Color(UI_THEME.COLOR_PANEL, 0.98)
+const TASK_1159_EVENT_LOG_BORDER_COLOR: Color = UI_THEME.COLOR_BORDER
 
 @export var max_visible_events: int = DEFAULT_MAX_VISIBLE_EVENTS
 @export var selected_only: bool = false
@@ -173,6 +174,7 @@ func _apply_task_1159_background_style() -> void:
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(4)
 	add_theme_stylebox_override("panel", style)
+	UI_THEME.decorate_panel(self, "thin_frame")
 
 
 func get_rendered_event_entries() -> Array:

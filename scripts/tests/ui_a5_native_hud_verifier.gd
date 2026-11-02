@@ -47,7 +47,7 @@ func _check_mission(window_size: Vector2i) -> void:
 		return
 	var band_rect := band.get_global_rect()
 	_check(is_equal_approx(band_rect.position.x, 0.0) and absf(band_rect.end.y - viewport_rect.end.y) <= 1.0, prefix + "band is flush with lower-left viewport edge")
-	_check(band_rect.size.y <= 200.0, prefix + "band leaves the map the main surface")
+	_check(band_rect.size.y <= 128.0, prefix + "compact band leaves the map the main surface")
 	_check(target != null, prefix + "target/order has a separate native middle panel")
 	if target != null:
 		var target_rect := target.get_global_rect()
@@ -67,7 +67,7 @@ func _check_mission(window_size: Vector2i) -> void:
 			var rect := button.get_global_rect()
 			all_buttons.append(button)
 			_check(button.is_visible_in_tree(), prefix + button_name + " is visible")
-			_check(absf(rect.size.x - rect.size.y) <= 1.0 and absf(rect.size.x - 64.0) <= 1.0, prefix + button_name + " has a real 64x64 action body (actual=%s, minimum=%s)" % [rect.size, button.get_combined_minimum_size()])
+			_check(absf(rect.size.x - rect.size.y) <= 1.0 and absf(rect.size.x - 52.0) <= 1.0, prefix + button_name + " has a real compact 52x52 action body (actual=%s, minimum=%s)" % [rect.size, button.get_combined_minimum_size()])
 			_check(not button.text.strip_edges().is_empty(), prefix + button_name + " has an inside label")
 			_check(not button.get_signal_connection_list("pressed").is_empty(), prefix + button_name + " retains its existing action callback")
 			_check(band_rect.encloses(rect), prefix + button_name + " is not clipped outside the band")
@@ -79,7 +79,7 @@ func _check_mission(window_size: Vector2i) -> void:
 			if target != null:
 				_check(rect.end.x <= target.get_global_rect().position.x + 1.0, prefix + button_name + " remains left of target/order")
 		row_y.append(current_y)
-	_check(row_y.size() == 2 and row_y[1] >= row_y[0] + 64.0, prefix + "actions occupy two actual rows")
+	_check(row_y.size() == 2 and row_y[1] >= row_y[0] + 52.0, prefix + "actions occupy two actual rows")
 	for first in range(all_buttons.size()):
 		for second in range(first + 1, all_buttons.size()):
 			_check(not all_buttons[first].get_global_rect().intersects(all_buttons[second].get_global_rect()), prefix + "primary action rectangles do not overlap")
@@ -110,6 +110,10 @@ func _check_mission(window_size: Vector2i) -> void:
 	_check(character_overlay != null and not character_overlay.z_as_relative and character_overlay.z_index > highest_card_z, prefix + "character overlay has absolute drawing priority above actual mini cards (%d)" % highest_card_z)
 	var stance := scene.get_node_or_null(TEAM_PATH + "/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/TacticalStancePanel") as Control
 	_check(identity != null and stance != null and identity.get_global_rect().end.y <= stance.get_global_rect().position.y, prefix + "team heading and stance have separate readable lines")
+	var summary := team.get_node("A5TeamSummary") as Label
+	var fire_heading := team.get_node("A5FireRuleHeading") as Label
+	_check(identity.get_global_rect().end.y <= summary.get_global_rect().position.y and summary.get_global_rect().end.y <= stance.get_global_rect().position.y, prefix + "identity, summary and stance have distinct non-overlapping slots")
+	_check(stance.get_global_rect().end.y <= fire_heading.get_global_rect().position.y, prefix + "actual stance minimum fits above the fire-rule row")
 	var status_readout := scene.get_node_or_null(TEAM_PATH + "/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel") as Label
 	var details := team.get_node_or_null("A5DetailsButton") as Button
 	_check(status_readout != null and details != null and details.is_visible_in_tree(), prefix + "existing tactical feedback remains reachable through explicit details")

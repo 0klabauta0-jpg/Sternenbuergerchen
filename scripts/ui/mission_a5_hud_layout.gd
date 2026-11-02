@@ -59,20 +59,21 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 		_ensure_team_controls(controller, team_panel, layer)
 		THEME.style_section_heading(_ensure_label(team_panel, "A5TeamIdentity", 16), 16)
 		(team_panel.get_node("A5TeamIdentity") as Label).max_lines_visible = 1
-		_place(team_panel.get_node("A5TeamIdentity") as Control, Rect2(team.position + Vector2i(8, 6), Vector2i(team.size.x - 176, 24)))
+		_place(team_panel.get_node("A5TeamIdentity") as Control, Rect2(team.position + Vector2i(8, 4), Vector2i(team.size.x - 176, 22)))
 		var summary := _ensure_label(team_panel, "A5TeamSummary", 12)
 		summary.max_lines_visible = 1
-		_place(summary, Rect2(team.position + Vector2i(8, 32), Vector2i(team.size.x - 16, 18)))
+		_place(summary, Rect2(team.position + Vector2i(8, 28), Vector2i(team.size.x - 16, 18)))
 		var fire_heading := _ensure_label(team_panel, "A5FireRuleHeading", 12)
 		fire_heading.text = "Feuerregel"
 		fire_heading.autowrap_mode = TextServer.AUTOWRAP_OFF
 		fire_heading.max_lines_visible = 1
 		fire_heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		fire_heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		fire_heading.clip_text = true
 		fire_heading.visible = true
-		_place(fire_heading, Rect2(team.position + Vector2i(8, 108), Vector2i(team.size.x - 16, 20)))
+		_place(fire_heading, Rect2(team.position + Vector2i(8, 94), Vector2i(220, 28)))
 		fire_heading.z_index = 12
-		_place(team_panel.get_node("A5FireRuleSelector") as Control, Rect2(team.position + Vector2i(8, 130), Vector2i(team.size.x - 16, 28)))
+		_place(team_panel.get_node("A5FireRuleSelector") as Control, Rect2(team.position + Vector2i(236, 94), Vector2i(team.size.x - 244, 28)))
 		_place(team_panel.get_node("A5DetailsButton") as Control, Rect2(team.position + Vector2i(team.size.x - 160, 6), Vector2i(76, 26)))
 		_style_dock_module(team_panel, true)
 	var command_panel := controller.get_node_or_null(BASE + "CommandPanel") as PanelContainer
@@ -124,12 +125,12 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 			var column := FIRST.find(name) if row == 0 else SECOND.find(name)
 			_present_primary_action(button, state)
 			button.visible = true
-			_place(button, Rect2(Vector2(band.position + Vector2i(8 + column * 70, 8 + row * 72)), Vector2(64, 64)))
+			_place(button, Rect2(Vector2(band.position + Vector2i(8 + column * 58, 8 + row * 58)), Vector2(52, 52)))
 			button.set_meta("native_a5_primary_action", true)
 		elif RULES.has(name):
 			var index := RULES.find(name)
 			_present_fire_rule(button, state)
-			_place(button, Rect2(Vector2(team.position + Vector2i(8 + index * 70, 122)), Vector2(64, 36)))
+			_place(button, Rect2(Vector2(team.position + Vector2i(8 + index * 58, 94)), Vector2(52, 28)))
 		elif bool(button.get_meta("drop_light_command_placeholder", false)):
 			var active_context := not button.disabled and not button.text.strip_edges().is_empty() and not button.get_signal_connection_list("pressed").is_empty()
 			button.visible = active_context
@@ -139,21 +140,21 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 	for index in range(context_buttons.size()):
 		var button := context_buttons[index]
 		_present_context_button(button)
-		_place(button, Rect2(368 + index * 128, band.position.y - 44, 120, 36))
-	_place_context_tool(controller, "DoorBreachButton", Rect2(Vector2(layout.target_order.position + Vector2i(8, 124)), Vector2(112, 32)), true)
-	_place_context_tool(controller, "WaypointEraseButton", Rect2(Vector2(layout.target_order.position + Vector2i(128, 124)), Vector2(112, 32)), false)
+		_place(button, Rect2(304 + index * 128, band.position.y - 44, 120, 36))
+	_place_context_tool(controller, "DoorBreachButton", _context_tool_rect(layout, 0), true)
+	_place_context_tool(controller, "WaypointEraseButton", _context_tool_rect(layout, 1), false)
 	var all_button := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton") as Button
 	if all_button != null:
 		_place(all_button, Rect2(Vector2(team.position + Vector2i(team.size.x - 76, 6)), Vector2(64, 26)))
 	var stance_panel := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
 	if stance_panel != null:
 		stance_panel.clip_contents = false
-		_place(stance_panel, Rect2(Vector2(team.position + Vector2i(8, 50)), Vector2(team.size.x - 16, 58)))
+		_place(stance_panel, Rect2(Vector2(team.position + Vector2i(8, 48)), Vector2(team.size.x - 16, 44)))
 		_refresh_stance_buttons(stance_panel)
 	var info_scroll := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll") as ScrollContainer
 	if info_scroll != null:
 		info_scroll.clip_contents = true
-		_place(info_scroll, Rect2(Vector2(team.position + Vector2i(8, 30)), Vector2(team.size.x - 16, 128)))
+		_place(info_scroll, Rect2(Vector2(team.position + Vector2i(8, 28)), Vector2(team.size.x - 16, 96)))
 		# Legacy status strings remain readable in the existing scroll and tooltip,
 		# but their old 640px/large-label minimum may not spill over the header.
 		for label_name in ["CommandFeedbackLabel", "HotkeyLegendLabel"]:
@@ -223,8 +224,8 @@ static func _refresh_presentation(controller: Node, grid: GridContainer, state: 
 		elif _is_active_context_button(button):
 			_present_context_button(button)
 	var layout: Dictionary = LAYOUT.get_mission_hud_layout(Vector2i(controller.get_viewport().get_visible_rect().size))
-	_place_context_tool(controller, "DoorBreachButton", Rect2(Vector2(layout.target_order.position + Vector2i(8, 124)), Vector2(112, 32)), true)
-	_place_context_tool(controller, "WaypointEraseButton", Rect2(Vector2(layout.target_order.position + Vector2i(128, 124)), Vector2(112, 32)), false)
+	_place_context_tool(controller, "DoorBreachButton", _context_tool_rect(layout, 0), true)
+	_place_context_tool(controller, "WaypointEraseButton", _context_tool_rect(layout, 1), false)
 	var stance := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
 	if stance != null:
 		_refresh_stance_buttons(stance)
@@ -272,6 +273,7 @@ static func _present_primary_action(button: Button, state: Dictionary) -> void:
 		if name == "GoCommandMatrixButton":
 			_style_execute_tile(button)
 		button.self_modulate = Color.WHITE
+		button.add_theme_font_override("font", THEME.get_heading_font())
 		button.add_theme_font_size_override("font_size", 12)
 		_remember_button_style(button, selected)
 	if button.text != LABELS[name]:
@@ -315,6 +317,13 @@ static func _present_context_button(button: Button) -> void:
 
 
 static func _refresh_stance_buttons(stance: Control) -> void:
+	# The legacy frame plus inner margin otherwise requires 56px even with the
+	# summary hidden. Keep one 8px frame inset around the 28px button row.
+	var margin := stance.get_node_or_null("MarginContainer") as MarginContainer
+	if margin != null:
+		for side in ["margin_top", "margin_bottom"]:
+			if margin.get_theme_constant(side) != 0:
+				margin.add_theme_constant_override(side, 0)
 	var summary := stance.get_node_or_null("MarginContainer/VBoxContainer/SummaryLabel") as Label
 	if summary != null:
 		summary.visible = false
@@ -687,7 +696,7 @@ static func _layout_target_labels(panel: PanelContainer, rect: Rect2) -> void:
 	var contents := panel.get_node("Contents") as Control
 	contents.clip_contents = false
 	contents.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var slots := {"Heading": Rect2(8, 6, 232, 22), "Target": Rect2(8, 32, 232, 26), "Order": Rect2(8, 62, 232, 30), "Feedback": Rect2(8, 96, 232, 20)}
+	var slots := {"Heading": Rect2(8, 4, 232, 22), "Target": Rect2(8, 28, 232, 22), "Order": Rect2(8, 52, 232, 30), "Feedback": Rect2(8, 84, 232, 20)}
 	for name in slots:
 		var label := contents.get_node(NodePath(name)) as Label
 		var slot: Rect2 = slots[name]
@@ -723,9 +732,8 @@ static func _ensure_readout_icon(panel: Control, icon_id: String) -> TextureRect
 
 
 static func _style_execute_tile(button: Button) -> void:
-	# "ausführen" needs 60px with the same readable 12px label. Its measured
-	# 68px minimum came from horizontal padding, so keep type size and trim only
-	# this tile's inside padding. Cached new styles leave shared boxes untouched.
+	# The condensed native face keeps the complete two-line label inside the
+	# compact square. Cached styles leave shared boxes and other buttons intact.
 	button.icon = null
 	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
 		var base := button.get_theme_stylebox(state) as StyleBoxFlat
@@ -783,6 +791,13 @@ static func _place(control: Control, rect: Rect2) -> void:
 		control.z_index = 5
 	if not control.has_meta("native_a5_layout"):
 		control.set_meta("native_a5_layout", true)
+
+
+static func _context_tool_rect(layout: Dictionary, index: int) -> Rect2:
+	# Context editing has a real slot after the team parameters, so pending,
+	# rejected and timed-out command feedback stays visible in the target block.
+	var team: Rect2i = layout.selected_fireteam
+	return Rect2(team.end.x + 8, team.position.y + 8 + index * 36, 176, 28)
 
 
 static func _place_context_tool(controller: Node, name: String, rect: Rect2, interaction: bool) -> void:

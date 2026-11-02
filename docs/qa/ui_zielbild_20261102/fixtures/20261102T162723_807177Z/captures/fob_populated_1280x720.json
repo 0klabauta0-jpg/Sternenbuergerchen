@@ -1,0 +1,67 @@
+{
+	"display_driver": "Windows",
+	"fixture_data": true,
+	"fixture_variant": "populated",
+	"image": "res://docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/fob_populated_1280x720.png",
+	"image_size": [
+		1280,
+		720
+	],
+	"logical_size": [
+		1280,
+		720
+	],
+	"note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+	"renderer": "gl_compatibility",
+	"requested_window_size": [
+		1280,
+		720
+	],
+	"save_error": 0,
+	"scaled_capture": false,
+	"source_capture": true,
+	"synthetic_image_fallback": false,
+	"ui_metrics": {
+		"boarding": {
+			"rect": [
+				704.0,
+				464.0,
+				560.0,
+				104.0
+			],
+			"visible": true
+		},
+		"flightdeck": {
+			"rect": [
+				704.0,
+				88.0,
+				560.0,
+				368.0
+			],
+			"visible": true
+		},
+		"loadout": {
+			"rect": [
+				248.0,
+				248.0,
+				440.0,
+				456.0
+			],
+			"visible": true
+		},
+		"teams": {
+			"rect": [
+				248.0,
+				88.0,
+				440.0,
+				144.0
+			],
+			"visible": true
+		}
+	},
+	"view": "fob",
+	"viewport_size": [
+		1280.0,
+		720.0
+	]
+}

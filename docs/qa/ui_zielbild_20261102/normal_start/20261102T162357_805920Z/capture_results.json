@@ -1,0 +1,192 @@
+[
+  {
+    "user_data_namespace": "SternenBuergerchen_UI_Zielbild_Normal_QA",
+    "isolated_user_data": true,
+    "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+    "test_project_sha256": "69133a38b01dd12366c41e570baf94216f67505825df2238c0d5083c2be153c3",
+    "project_restored_byte_exact": true,
+    "editor_plugins_temporarily_disabled": false,
+    "gdextensions_disabled": false,
+    "view": "mission",
+    "variant": "zielbild",
+    "fixture": false,
+    "source_capture": true,
+    "synthetic_image_fallback": false,
+    "scaled_capture": false,
+    "logical_size": [
+      1920,
+      1080
+    ],
+    "image_size": [
+      1920,
+      1080
+    ],
+    "renderer": {
+      "display": "Windows",
+      "driver": "vulkan",
+      "method": "forward_plus"
+    },
+    "profile": {
+      "authored_visual_assets": [
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+          "sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+        },
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+          "sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+        },
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+          "sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+          "sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+          "sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/License.txt",
+          "sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+          "sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+          "sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+        }
+      ],
+      "authored_visual_layout_active": true,
+      "authored_visual_layout_id": "gm01_frontier_outpost_v1",
+      "authored_visual_owned_tile_count": 817,
+      "dropship_model_visible": false,
+      "dropship_visual_count": 0,
+      "fog_of_war_mode": "known_terrain",
+      "fow_known_dim_tile_count": 512,
+      "fow_overlay_tile_count": 512,
+      "fow_unknown_tile_count": 0,
+      "frontier_art_enabled": true,
+      "frontier_art_override": -1,
+      "frontier_art_profile_id": "frontier_illustrated_v1",
+      "grid_topology": "hex_axial_v1",
+      "hex_grid_edge_style": "warm_dual_contrast",
+      "hex_grid_visible": true,
+      "hex_grid_width_world": 0.048,
+      "missing_asset_mapping_count": 0,
+      "missing_dropship_model_count": 0,
+      "read_only": true,
+      "tile_count": 2304,
+      "tile_grid_line_count": 7137,
+      "ui_sets_gameplay_truth": false,
+      "unit_model_count": 11
+    },
+    "image_sha256": "1f195bb2bbaf9bcc4ca320e4782d55b073d9324f2290cea826b0b4f41543d48b",
+    "source_image": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/06_go_movement.png",
+    "source_report": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup.json",
+    "normal_start_checks": 51,
+    "normal_start_failures": 0,
+    "exit_code": 0,
+    "error_count": 0,
+    "scope": "Real menu -> Homebase -> saved GM01 -> timed transport -> LZ -> deployment -> Move/GO. Native captures require separate visual review; no campaign, combat, release or performance acceptance."
+  },
+  {
+    "user_data_namespace": "SternenBuergerchen_UI_Zielbild_Normal_QA",
+    "isolated_user_data": true,
+    "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+    "test_project_sha256": "69133a38b01dd12366c41e570baf94216f67505825df2238c0d5083c2be153c3",
+    "project_restored_byte_exact": true,
+    "editor_plugins_temporarily_disabled": false,
+    "gdextensions_disabled": false,
+    "view": "mission",
+    "variant": "zielbild",
+    "fixture": false,
+    "source_capture": true,
+    "synthetic_image_fallback": false,
+    "scaled_capture": false,
+    "logical_size": [
+      1280,
+      720
+    ],
+    "image_size": [
+      1280,
+      720
+    ],
+    "renderer": {
+      "display": "Windows",
+      "driver": "vulkan",
+      "method": "forward_plus"
+    },
+    "profile": {
+      "authored_visual_assets": [
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+          "sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+        },
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+          "sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+        },
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+          "sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+          "sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+          "sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/License.txt",
+          "sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+          "sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+          "sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+        }
+      ],
+      "authored_visual_layout_active": true,
+      "authored_visual_layout_id": "gm01_frontier_outpost_v1",
+      "authored_visual_owned_tile_count": 817,
+      "dropship_model_visible": false,
+      "dropship_visual_count": 0,
+      "fog_of_war_mode": "known_terrain",
+      "fow_known_dim_tile_count": 512,
+      "fow_overlay_tile_count": 512,
+      "fow_unknown_tile_count": 0,
+      "frontier_art_enabled": true,
+      "frontier_art_override": -1,
+      "frontier_art_profile_id": "frontier_illustrated_v1",
+      "grid_topology": "hex_axial_v1",
+      "hex_grid_edge_style": "warm_dual_contrast",
+      "hex_grid_visible": true,
+      "hex_grid_width_world": 0.048,
+      "missing_asset_mapping_count": 0,
+      "missing_dropship_model_count": 0,
+      "read_only": true,
+      "tile_count": 2304,
+      "tile_grid_line_count": 7137,
+      "ui_sets_gameplay_truth": false,
+      "unit_model_count": 11
+    },
+    "image_sha256": "600ed09128fbe1cfea9af82e51851b66c0b9c79bfe0defa2f4a653545d4d398c",
+    "source_image": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/06_go_movement.png",
+    "source_report": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup.json",
+    "normal_start_checks": 51,
+    "normal_start_failures": 0,
+    "exit_code": 0,
+    "error_count": 0,
+    "scope": "Real menu -> Homebase -> saved GM01 -> timed transport -> LZ -> deployment -> Move/GO. Native captures require separate visual review; no campaign, combat, release or performance acceptance."
+  }
+]

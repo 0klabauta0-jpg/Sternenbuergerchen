@@ -223,6 +223,7 @@ static func style_tactical_panel(panel: PanelContainer, variant: String = "frame
 			panel.add_theme_stylebox_override("panel", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(COLOR_PANEL, COLOR_FRAME_BORDER, 6, 1, Vector4(8, 8, 8, 8), 1.0, 2))
 		_:
 			panel.add_theme_stylebox_override("panel", TACTICAL_UI_THEME_SCRIPT.get_theme().get_stylebox("panel", "PanelContainer"))
+	TACTICAL_UI_THEME_SCRIPT.decorate_panel(panel, variant)
 
 
 static func style_tactical_button(button: Button, is_active: bool = false) -> void:

@@ -1,0 +1,22 @@
+{
+  "user_data_namespace": "SternenBuergerchen_UI_Zielbild_Import_QA",
+  "isolated_user_data": true,
+  "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "test_project_sha256": "ce4f25b34acf13f425be936badedde0638eff2b4181967c233d677fa1794775d",
+  "project_restored_byte_exact": true,
+  "editor_plugins_temporarily_disabled": true,
+  "gdextensions_disabled": false,
+  "passed": true,
+  "exit_code": 0,
+  "error_count": 0,
+  "error_lines": [],
+  "command": [
+    "godot_console",
+    "--headless",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+    "--editor",
+    "--import",
+    "--quit"
+  ]
+}

@@ -99,6 +99,7 @@ func _check_states(scene: Node, controller: Node, selector: OptionButton, prefix
 	_check(_selected_rule(selector) == "free" and String(controller.call("get_fireteam_fire_rule", ids[0])) == "free", prefix + "pending display never turns a provisional UI selection into confirmed state")
 	var heading := scene.get_node(TEAM + "/A5FireRuleHeading") as Label
 	_check(heading.text.contains("Änderung angefragt") and heading.get_visible_line_count() >= 1, prefix + "pending rule feedback fits a drawable heading line")
+	_check(heading.get_theme_font("font").get_string_size(heading.text, HORIZONTAL_ALIGNMENT_LEFT, -1, heading.get_theme_font_size("font_size")).x <= heading.size.x, prefix + "complete pending heading fits the real content width")
 	controller.call("set_fireteams_fire_rule", PackedStringArray([ids[1]]), "hold")
 	controller.call("_set_selected_fireteams", PackedStringArray([ids[0], ids[1]]), false)
 	controller.call("_refresh_button_state")
@@ -118,6 +119,13 @@ func _check_states(scene: Node, controller: Node, selector: OptionButton, prefix
 		_check(not delete.disabled and bool(delete.get_meta("native_a5_selected", false)), prefix + "focused delete action retains its real highlight")
 		var sort := scene.get_node(GRID + "/SortCommandMatrixButton") as Button
 		_check(bool(sort.get_meta("native_a5_selected", false)), prefix + "available team arrangement preserves the source affordance")
+		var feedback := scene.get_node("TacticalUI/A5TargetOrderPanel/Contents/Feedback") as Label
+		for raw in ["FIRE HOLD REQUEST (1)", "FIRE HOLD REJECT (1)", "FIRE HOLD TIMEOUT (1)"]:
+			HUD.refresh(controller, {"fire_rule": "free", "fire_rule_enabled": true, "feedback": raw, "visible": true})
+			_check(feedback.is_visible_in_tree() and not feedback.text.is_empty(), prefix + "editable plan keeps visible command feedback: " + raw)
+			for tool_name in ["DoorBreachButton", "WaypointEraseButton"]:
+				var tool := scene.get_node(GRID + "/" + tool_name) as Button
+				_check(not tool.is_visible_in_tree() or not tool.get_global_rect().intersects(feedback.get_global_rect()), prefix + tool_name + " does not cover pending/rejected command feedback")
 	controller.call("_set_selected_fireteams", PackedStringArray(), false)
 	controller.call("_refresh_button_state")
 	controller.call("_apply_native_a5_hud_layout")

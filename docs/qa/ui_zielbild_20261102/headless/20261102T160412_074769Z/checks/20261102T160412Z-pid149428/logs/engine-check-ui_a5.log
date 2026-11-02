@@ -1,0 +1,891 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Native A5 Mission HUD ===
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] _apply_task_1159_background_style (res://scripts/ui/tactical_event_log_panel.gd:177)
+       [3] _ready (res://scripts/ui/tactical_event_log_panel.gd:48)
+       [4] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [5] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17234)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17234)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17234)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17234)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17234)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_tactical_stance_panel (res://scripts/tests/mission_tactical_sandbox_controller.gd:4301)
+       [4] _refresh_tactical_stance_panel (res://scripts/tests/mission_tactical_sandbox_controller.gd:4412)
+       [5] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17260)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_character_overlay (res://scripts/tests/mission_tactical_sandbox_controller.gd:7377)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:749)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_fireteam_phase_panel (res://scripts/tests/mission_tactical_sandbox_controller.gd:4354)
+       [4] _refresh_fireteam_phase_panel (res://scripts/tests/mission_tactical_sandbox_controller.gd:4460)
+       [5] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4018)
+       [6] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [7] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [8] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [10] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_mission_control_craft_summary (res://scripts/tests/mission_tactical_sandbox_controller.gd:12667)
+       [4] _refresh_mission_control_craft_summary (res://scripts/tests/mission_tactical_sandbox_controller.gd:12712)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4183)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_ad_hoc_panel (res://scripts/tests/mission_tactical_sandbox_controller.gd:4241)
+       [4] _refresh_ad_hoc_panel_visibility (res://scripts/tests/mission_tactical_sandbox_controller.gd:4565)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4207)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:20)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] _apply_task_1159_background_style (res://scripts/ui/tactical_event_log_panel.gd:177)
+       [3] _ready (res://scripts/ui/tactical_event_log_panel.gd:48)
+       [4] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [5] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [6] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17234)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17234)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17234)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17234)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17234)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_tactical_stance_panel (res://scripts/tests/mission_tactical_sandbox_controller.gd:4301)
+       [4] _refresh_tactical_stance_panel (res://scripts/tests/mission_tactical_sandbox_controller.gd:4412)
+       [5] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17260)
+       [6] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:727)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [8] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_character_overlay (res://scripts/tests/mission_tactical_sandbox_controller.gd:7377)
+       [4] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:749)
+       [5] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [6] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [7] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_fireteam_phase_panel (res://scripts/tests/mission_tactical_sandbox_controller.gd:4354)
+       [4] _refresh_fireteam_phase_panel (res://scripts/tests/mission_tactical_sandbox_controller.gd:4460)
+       [5] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4018)
+       [6] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [7] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [8] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [9] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [10] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [11] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_mission_control_craft_summary (res://scripts/tests/mission_tactical_sandbox_controller.gd:12667)
+       [4] _refresh_mission_control_craft_summary (res://scripts/tests/mission_tactical_sandbox_controller.gd:12712)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4183)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [12] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] style_tactical_panel (res://scripts/meta/meta_ui_skin.gd:226)
+       [3] _ensure_ad_hoc_panel (res://scripts/tests/mission_tactical_sandbox_controller.gd:4241)
+       [4] _refresh_ad_hoc_panel_visibility (res://scripts/tests/mission_tactical_sandbox_controller.gd:4565)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4207)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [12] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [12] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [12] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [12] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [12] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [12] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [12] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [12] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18625)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18448)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:774)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [11] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [12] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] decorate_panel (res://scripts/ui/tactical_ui_theme.gd:147)
+       [2] apply_screen (res://scripts/ui/tactical_ui_theme.gd:143)
+       [3] _ready (res://scripts/meta/npc_compact_card.gd:61)
+       [4] _refresh_selected_fireteam_cards (res://scripts/tests/mission_tactical_sandbox_controller.gd:4682)
+       [5] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4208)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4052)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:782)
+       [8] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:33)
+       [9] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:21)
+       [10] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:165)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+ERROR: The object does not have any 'meta' values with the key 'native_reference_panel_frame'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] decorate (res://scripts/ui/reference_panel_frame.gd:15)
+       [1] _bind_portrait_regions (res://scripts/ui/reference_panel_frame.gd:47)
+Native A5: 352 checks, 0 failures
+PASS: native A5 HUD

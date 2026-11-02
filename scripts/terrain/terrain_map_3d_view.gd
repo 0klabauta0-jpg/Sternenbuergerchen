@@ -3142,6 +3142,9 @@ func get_render_snapshot() -> Dictionary:
 		"requested_lz_position": _drop_payload.get("requested_lz_position", _drop_payload.get("target_lz_position", _drop_payload.get("lz_position", null))),
 		"resolved_lz_position": _drop_payload.get("resolved_lz_position", _drop_payload.get("actual_landing_position", null)),
 		"tile_grid_line_count": _tile_grid_line_count,
+		"hex_grid_visible": _uses_hex_grid() and _hex_grid_visible,
+		"hex_grid_edge_style": "warm_dual_contrast" if is_instance_valid(_authored_visual_layout_root) else "single_terrain_edge",
+		"hex_grid_width_world": 0.048 if is_instance_valid(_authored_visual_layout_root) else 0.010,
 		"tile_grid_line_effective_alpha": _get_tile_grid_line_color_for_release_polish(true).a,
 		"tile_grid_shadow_effective_alpha": _get_tile_grid_line_color_for_release_polish(false).a,
 		"contact_count": _contact_count,
@@ -4548,23 +4551,36 @@ func _add_tile_grid_lines(tiles: Array) -> void:
 func _add_hex_grid_lines(tiles: Array) -> void:
 	if not _hex_grid_visible:
 		return
+	var authored := is_instance_valid(_authored_visual_layout_root)
 	var material := _make_unshaded_material(Color(0.34, 0.24, 0.16, 0.38), true)
-	if is_instance_valid(_authored_visual_layout_root):
-		material = _make_unshaded_material(Color(0.24, 0.18, 0.10, 0.32), true)
+	if authored:
+		material = _make_unshaded_material(Color(0.23, 0.14, 0.07, 0.55), true)
 	var mesh := ImmediateMesh.new()
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
+	# A warm light core gives the edge contrast on dark service paths as well as
+	# noisy sand. Build once with the map; no camera/per-frame topology rebuild.
+	var highlight := ImmediateMesh.new()
+	if authored:
+		highlight.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _make_unshaded_material(Color(0.93, 0.70, 0.40, 0.48), true))
 	var edges: Dictionary = {}
 	var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, _get_3d_cell_size() / sqrt(3.0))
 	for tile in tiles:
 		var top: float = float(tile.height_level) * _get_3d_height_step() + 0.008
-		if is_instance_valid(_authored_visual_layout_root):
+		if authored:
 			top = float(tile.height_level) * _get_3d_height_step() + FOW_OVERLAY_SURFACE_Y_OFFSET + 0.006
 		var center := _grid_to_3d_position(Vector2(tile.grid_position), top)
 		for index in range(6):
 			var a := center + Vector3(corners[index].x, 0.0, corners[index].y)
 			var b := center + Vector3(corners[(index + 1) % 6].x, 0.0, corners[(index + 1) % 6].y)
-			_add_unique_grid_line_quad(mesh, edges, a, b, 0.014 if is_instance_valid(_authored_visual_layout_root) else 0.010)
+			if _add_unique_grid_line_quad(mesh, edges, a, b, 0.048 if authored else 0.010) and authored:
+				_add_grid_line_quad(highlight, a + Vector3(0, 0.001, 0), b + Vector3(0, 0.001, 0), 0.016)
 	mesh.surface_end()
+	if authored:
+		highlight.surface_end()
+		var highlights := MeshInstance3D.new()
+		highlights.name = "TileGridHighlightLines3D"
+		highlights.mesh = highlight
+		_map_root.add_child(highlights)
 	var lines := MeshInstance3D.new()
 	lines.name = "TileGridLines3D"
 	lines.mesh = mesh

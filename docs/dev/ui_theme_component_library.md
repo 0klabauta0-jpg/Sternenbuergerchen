@@ -12,6 +12,9 @@ Die bestätigten UI-Entwürfe werden jetzt in allen bestehenden Screenfamilien n
 - Der neue A5-Helfer ordnet vorhandene Controls an und aktualisiert Darstellung. Geometrie-/Style-Signaturen vermeiden unveränderte Schreibvorgänge; keine neue Gameplay-Wahrheit.
 - Der unten beschriebene TASK164-Selected-Fireteam-Slice ist historisch und inzwischen stillgelegt. Aktuelle Integration wird durch die nativen Theme-/A5-/Shell-Verifier und gezielte bestehende Bedienprüfungen belegt; der alte TASK164-Verifier erwartet noch den stillgelegten Besitzer.
 
+## Gestaltungsfortschreibung 02.11.2026
+Die bestätigten Original-2D-Ziele und aktuellen Nutzeranweisungen haben nach `ui_native_design_contract.md` Vorrang vor den bisherigen nativen Zwischenmaßen. Schlichte Rahmen oder die Beschränkung des damaligen TASK164 auf vorhandene Kenney-Assets sind keine dauerhafte Stilsperre. Referenzgetreue dekorative Rasterelemente, Nine-Patch-Rahmen und mehrschichtige Flächen dürfen echte native Controls ergänzen; gemeinsame Theme-Rollen, lesbare Texte, Eingabe/Fokus und bestehender Zustandsbesitz bleiben erhalten. Keine globale Runtime-Traversierung oder neue Gameplay-Wahrheit.
+
 ## Zweck
 Diese kleine UI-Basis ist eine gemeinsame Darstellungs-Schicht fuer Homebase, FOB und Mission. Sie ersetzt keine Screen-Logik und haelt keinen Gameplay-State. Komponenten bekommen fertige Daten/Snapshots von bestehenden Runtime- oder Meta-Pfaden und zeigen sie nur an.
 
@@ -31,8 +34,8 @@ Diese kleine UI-Basis ist eine gemeinsame Darstellungs-Schicht fuer Homebase, FO
 - `scripts/ui/components/ui_tooltip_icon_helper.gd`
   - Tooltip-/Icon-Helfer mit kleinem kuratiertem Asset-Manifest.
 
-## Erster Anwendungs-Slice
-Der Missions-Slice `FireteamStatusPanel` in `MissionTacticalSandboxController` nutzt jetzt:
+## Historischer erster Anwendungs-Slice (TASK164)
+Der damalige Missions-Slice `FireteamStatusPanel` in `MissionTacticalSandboxController` nutzte:
 - `TacticalCard` als Panelbasis
 - `StatusBadge` fuer den ausgewaehlten Fireteam-Zustand
 - `ProgressLine` fuer Suppression-Fortschritt
@@ -40,8 +43,8 @@ Der Missions-Slice `FireteamStatusPanel` in `MissionTacticalSandboxController` n
 
 Die bestehende lesbare `SuppressionLabel`-Zusammenfassung bleibt erhalten. Die neue UI liest nur bestehende Werte wie Suppression, Ad-hoc-Order und Plan-Rueckkehrbarkeit.
 
-## Kuratierte vorhandene Kenney-Assets
-Es wurden keine neuen Asset-Dateien importiert. Das Manifest verweist nur auf vorhandene Repo-Dateien:
+## Historische kuratierte Kenney-Assets (TASK164)
+In diesem Slice wurden keine neuen Asset-Dateien importiert. Sein Manifest verwies nur auf vorhandene Repo-Dateien:
 - `res://Assets/kenney_ui-pack/PNG/Grey/Default/icon_checkmark.png`
 - `res://Assets/kenney_ui-pack/PNG/Grey/Default/icon_cross.png`
 - `res://Assets/kenney_ui-pack/PNG/Grey/Default/icon_circle.png`
@@ -54,8 +57,7 @@ Es wurden keine neuen Asset-Dateien importiert. Das Manifest verweist nur auf vo
 ## Grenzen
 - Keine neue Gameplay-Funktion.
 - Keine zweite UI-Wahrheit neben `SimulationRoot`.
-- Kein kompletter Redesign-Pass.
-- Keine Masseneinbindung lokaler Assets.
+- Historischer TASK164-Scope: kein kompletter Redesign-Pass und keine Masseneinbindung lokaler Assets. Das beschränkt keine später ausdrücklich beauftragte UI-/Grafikrevision. Neue Assets benötigen weiterhin zugeordnete Referenz, Herkunft und Import-/Sichtprüfung.
 
 ## Verifier
 - `scripts/tests/task_164_ui_theme_component_verifier.gd`
