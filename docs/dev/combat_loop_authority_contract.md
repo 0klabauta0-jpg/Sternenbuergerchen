@@ -30,6 +30,16 @@ Read-only UI-Events wie `combat_ui_event` sind keine Effects und duerfen keinen 
 - Contact-State: kommt aus dem bestehenden `ContactTracker` und bleibt read-only fuer UI/Overlay.
 - Mission-Result: wird vom Combat-Loop gebaut, aber nicht von UI-Skripten mutiert.
 
+## Simulationstick und Decision-Kadenz
+Discipline-, Misidentification- und Medic-Support-Cooldowns laufen pro aktivem
+autoritativen Simulationstick weiter, auch wenn dieser Tick die teuren Combat-
+Entscheidungsscans auslaesst. Die teuren Decision-Scans bleiben auf jeden dritten
+Simulationstick begrenzt; Cooldowns von 10, 15 bzw. 12 Ticks werden dadurch nicht
+verlaengert. Return-Fire
+behaelt seine absolute Tickgrenze. Authority-, Missionsende-, fehlender-Root-
+und Startup-Grace-Gates gelten weiterhin vor der Cooldown-Verarbeitung;
+Renderframes oder eine pausierte Simulation verbrauchen keine Cooldowns.
+
 ## Lokale Pruefung
 ```powershell
 godot_console.exe --headless --path . --script scripts/tests/task_162_combat_authority_contract_verifier.gd

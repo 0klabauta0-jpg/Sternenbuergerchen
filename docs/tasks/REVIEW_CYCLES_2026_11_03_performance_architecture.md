@@ -46,7 +46,7 @@ bleibt bis zu einem passenden bestaetigten Fix separat sichtbar.
 
 ## Rundenstatus
 - [x] Runde 1: Review, bestaetigte Befunde, Fixes und Regressionen.
-- [ ] Runde 2: erneuter Review des neuen Stands, Fixes und Regressionen.
+- [x] Runde 2: erneuter Review des neuen Stands, Fixes und Regressionen.
 - [ ] Runde 3: erneuter Review, Fixes und gemeinsame Abschlusspruefung.
 - [ ] Unabhaengiger Abschlussreview, gezielte Commits und Task-Push.
 
@@ -86,3 +86,17 @@ Jeder Kandidat wird vor dem jeweiligen Produktivfix durch RED verifiziert.
   Originalcontract exakt fuer erneuten RED eingesetzt und Fix per SHA256 wieder
   hergestellt. Keine Assertions abgeschwaecht, Rohberichte bleiben erhalten.
 - Alle Runtime-Laeufe isoliert; Rosterbytes, Laenge und Schreibzeit unveraendert.
+
+## Ergebnis Runde 2
+- Erneuter unabhaengiger Review auf dem nach Runde 1 korrigierten Stand bestaetigt
+  die Zeitbasisregression. Bestehenden Cooldownblock vor den Decision-Return
+  verschoben; alle Authority-/Startup-/Missionsende-Gates bleiben davor.
+- Realer Driver-Ticktest RED 9/10 -> GREEN 19/0. Teure Entscheidungen laufen
+  weiterhin nur auf jedem dritten Simulationstick; absolute Return-Fire-Grenze
+  bleibt unveraendert. Der Fixture-Pausecheck ist keine gesamte Pause-Abnahme.
+- Sechs Gates / 191 Assertions strikt gruen: neuer Tickpfad, Medic-Support,
+  Discipline, Misidentification, Combat-Authority und Tick-Budget. Tatsaechlicher
+  Diff und Rawreport unabhaengig APPROVED.
+- Erster Testlauf hatte einen typisierten Array-Fixturefehler und wurde gezielt
+  beendet; unveraenderte Erwartungen danach als korrektes RED geprueft. Die
+  Rohhistorik bleibt erhalten. Roster weiterhin unveraendert.

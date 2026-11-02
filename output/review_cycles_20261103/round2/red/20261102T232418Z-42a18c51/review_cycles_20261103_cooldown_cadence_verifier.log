@@ -1,0 +1,8 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-eacc6aa103a44520adb76977cd32791a
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+SCRIPT ERROR: Invalid assignment of property or key 'friendly_unit_paths' with value of type 'Array' on a base object of type 'Node (mission_combat_loop_driver.gd)'.
+   at: _run (res://scripts/tests/review_cycles_20261103_cooldown_cadence_verifier.gd:42)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/review_cycles_20261103_cooldown_cadence_verifier.gd:42)

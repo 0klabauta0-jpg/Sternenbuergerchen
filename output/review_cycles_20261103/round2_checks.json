@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "cycle_cooldown",
+      "script": "res://scripts/tests/review_cycles_20261103_cooldown_cadence_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_COOLDOWN_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "medic_support",
+      "script": "res://scripts/tests/medic_support_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "discipline093",
+      "script": "res://scripts/tests/task_093_verifier.gd",
+      "success_marker": "TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "misidentification094",
+      "script": "res://scripts/tests/task_094_verifier.gd",
+      "success_marker": "TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "combat_authority162",
+      "script": "res://scripts/tests/task_162_combat_authority_contract_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 60
+    },
+    {
+      "name": "task_218_simulation_combat_ai_tick_budget_pass",
+      "script": "res://scripts/tests/task_218_simulation_combat_ai_tick_budget_pass.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    }
+  ]
+}

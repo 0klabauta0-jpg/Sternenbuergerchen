@@ -1498,6 +1498,13 @@ func _on_tick_processed(tick: int) -> void:
 	if profile_enabled:
 		profile_scopes["contact_tracking_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
+	_advance_discipline_cooldowns()
+	_advance_return_fire_windows()
+	_advance_misidentification_cooldowns()
+	_advance_medic_support_cooldowns()
+	if profile_enabled:
+		profile_scopes["cooldowns_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	if not _should_run_combat_decision_tick(tick):
 		if profile_enabled:
 			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "decision_cadence_skip")
@@ -1514,13 +1521,6 @@ func _on_tick_processed(tick: int) -> void:
 	_advance_flank_vulnerability_state()
 	if profile_enabled:
 		profile_scopes["flank_vulnerability_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_advance_discipline_cooldowns()
-	_advance_return_fire_windows()
-	_advance_misidentification_cooldowns()
-	_advance_medic_support_cooldowns()
-	if profile_enabled:
-		profile_scopes["cooldowns_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 	_try_enqueue_medic_support(simulation_root)
 	if profile_enabled:
