@@ -12098,16 +12098,23 @@ func _refresh_mission_dropship_panel() -> void:
 	var show_panel: bool = _tactical_ui_visible and not card_entries.is_empty()
 	if not show_panel:
 		panel.visible = false
+		if card_entries.is_empty():
+			_clear_mission_dropship_panel_cards(panel)
 		return
-	panel.visible = false
-	_clear_mission_dropship_panel_cards(panel)
+	var existing_cards: Dictionary = {}
+	for child in panel.get_children():
+		existing_cards[String(child.get_meta("mission_dropship_craft_id", ""))] = child
+	var card_order: int = 0
 	for card_variant in card_entries:
 		var card: Dictionary = Dictionary(card_variant)
 		var is_transit: bool = _is_mission_dropship_card_in_transit(card)
 		var craft_id: String = String(card.get("craft_id", "")).strip_edges()
 		var is_selected: bool = not craft_id.is_empty() and craft_id == _mission_drop_craft_id.strip_edges()
 		var ship_texture := _get_mission_dropship_texture(card)
-		var card_panel := PanelContainer.new()
+		var card_panel: PanelContainer = existing_cards.get(craft_id, null) as PanelContainer
+		existing_cards.erase(craft_id)
+		if card_panel == null:
+			card_panel = PanelContainer.new()
 		card_panel.name = "MissionDropshipCard_%s" % _sanitize_node_name(craft_id)
 		card_panel.custom_minimum_size = MISSION_DROPSHIP_PANEL_SIZE
 		card_panel.size_flags_horizontal = Control.SIZE_SHRINK_END
@@ -12122,11 +12129,12 @@ func _refresh_mission_dropship_panel() -> void:
 		var card_input_callable := Callable(self, "_on_mission_dropship_card_gui_input").bind(craft_id, card_panel)
 		if not card_panel.gui_input.is_connected(card_input_callable):
 			card_panel.gui_input.connect(card_input_callable)
-		panel.add_child(card_panel)
+		if card_panel.get_parent() == null:
+			panel.add_child(card_panel)
+		panel.move_child(card_panel, card_order)
+		card_order += 1
 		TRANSPORT_CRAFT_CARD_UI_SCRIPT.ensure_card_structure(card_panel)
-		TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
-			card_panel,
-			{
+		var render_state: Dictionary = {
 				"selected": is_selected,
 				"in_transit": is_transit,
 				"can_stage": false,
@@ -12174,16 +12182,74 @@ func _refresh_mission_dropship_panel() -> void:
 				"secondary_action": {
 					"visible": false,
 				},
-				"clear_extra_content": true,
+				"clear_extra_content": false,
 			}
-		)
+		_apply_mission_dropship_card_render_delta(card_panel, render_state)
 		_populate_mission_dropship_passenger_content(card_panel, card)
-		_set_control_tree_mouse_filter(card_panel, Control.MOUSE_FILTER_IGNORE)
-		card_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-		_restore_mission_dropship_action_button_mouse_filters(card_panel)
+	for removed_card in existing_cards.values():
+		panel.remove_child(removed_card)
+		removed_card.queue_free()
 	_enforce_mission_dropship_panel_geometry(panel)
 	panel.visible = true
 	call_deferred("_deferred_enforce_mission_dropship_panel_geometry")
+
+
+func _apply_mission_dropship_card_render_delta(card_panel: PanelContainer, state: Dictionary) -> void:
+	# Cache only rendered fields, never mission/transport gameplay state.
+	var pilot_profile = state.get("pilot_profile")
+	var pilot_fields: Dictionary = {}
+	if pilot_profile != null:
+		for key in ["unit_id", "display_name", "portrait_id", "portrait_path", "role_name", "secondary_text", "callsign", "homeworld", "rank_badges", "armor_id", "weapon_1_id", "weapon_2_id"]:
+			pilot_fields[key] = pilot_profile.get(key)
+	var next: Dictionary = {
+		"style": [state.selected, state.in_transit],
+		"pilot": [pilot_fields.duplicate(true), state.pilot_text, state.pilot_disabled],
+		"action": state.primary_action,
+	}
+	var previous: Dictionary = Dictionary(card_panel.get_meta("mission_dropship_rendered_fields", {}))
+	if previous.is_empty():
+		TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(card_panel, state)
+		_set_control_tree_mouse_filter(card_panel, Control.MOUSE_FILTER_IGNORE)
+		card_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	else:
+		if previous.get("style") != next.style:
+			card_panel.add_theme_stylebox_override("panel", TRANSPORT_CRAFT_CARD_UI_SCRIPT._build_transport_craft_stylebox(bool(state.selected), bool(state.in_transit), false))
+			card_panel.modulate = Color(1.0, 1.0, 1.0, 0.58) if bool(state.in_transit) else Color.WHITE
+		if previous.get("pilot") != next.pilot:
+			TRANSPORT_CRAFT_CARD_UI_SCRIPT._refresh_pilot_content(card_panel, state)
+		if previous.get("action") != next.action:
+			TRANSPORT_CRAFT_CARD_UI_SCRIPT._apply_action_button(card_panel.get_node("MarginContainer/VBox/HeaderRow/PrimaryActionButton") as Button, state.primary_action)
+	var title := card_panel.get_node("MarginContainer/VBox/HeaderRow/TitleLabel") as Label
+	_set_mission_label_text_delta(title, String(state.title_text))
+	var ship := card_panel.get_node("MarginContainer/VBox/ContentRow/ShipTexture") as TextureRect
+	ship.texture = state.ship_texture
+	ship.modulate = Color(1.0, 1.0, 1.0, 0.52) if bool(state.in_transit) else Color.WHITE
+	var info_host := card_panel.get_node("MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost")
+	for line_index in range(info_host.get_child_count()):
+		_set_mission_label_text_delta(info_host.get_child(line_index) as Label, String(state.info_lines[line_index]))
+	var progress := card_panel.get_node("MarginContainer/VBox/ProgressBar") as ProgressBar
+	progress.value = float(state.progress_value)
+	progress.visible = bool(state.progress_visible)
+	var return_button := card_panel.get_node("MarginContainer/VBox/HeaderRow/PrimaryActionButton") as Button
+	return_button.mouse_filter = Control.MOUSE_FILTER_STOP if return_button.visible else Control.MOUSE_FILTER_IGNORE
+	card_panel.set_meta("mission_dropship_rendered_fields", next)
+
+
+func _find_mission_dropship_unit_by_id(unit_id: String) -> Node:
+	_ensure_mission_runtime_read_models()
+	var unit: Node = _mission_runtime_index.call("get_unit_by_id", unit_id) if _mission_runtime_index != null else null
+	return unit if unit != null and String(unit.call("get_team_id")).strip_edges() == get_local_command_team_id() else null
+
+
+func _build_mission_dropship_payload_render_fields(card: Dictionary, payload_ids: Array) -> Array:
+	var fields: Array = [String(card.get("display_name", "")), Array(card.get("boarded_fireteam_ids", [])).duplicate(), _get_mission_dropship_card_feedback_text(card) == "Trupp ab"]
+	for unit_id in payload_ids:
+		var unit: Node = _find_mission_dropship_unit_by_id(String(unit_id))
+		var fireteam_id: String = String(unit.call("get_fireteam_id")) if unit != null else "unassigned"
+		fields.append([unit_id, fireteam_id, _get_fireteam_display_label(fireteam_id), String(unit.call("get_display_name")) if unit != null else "", String(unit.call("get_portrait_path")) if unit != null else ""])
+	for fireteam_id in Array(card.get("boarded_fireteam_ids", [])):
+		fields.append(_get_fireteam_display_label(String(fireteam_id)))
+	return fields
 
 
 func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, card: Dictionary) -> void:
@@ -12195,26 +12261,45 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 	var payload_ids: Array = _sanitize_drop_payload_ids(Array(card.get("embarked_unit_ids", [])))
 	host.set_meta("mission_dropship_passenger_content", true)
 	_append_mission_dropship_card_command_row(host, card)
+	_refresh_mission_dropship_card_command_row(host, card)
 	var feedback_text: String = _get_mission_dropship_card_feedback_text(card)
-	if not feedback_text.is_empty():
-		var feedback_label := Label.new()
+	var feedback_label := host.get_node_or_null("MissionDropshipCardFeedbackLabel") as Label
+	if feedback_label == null and not feedback_text.is_empty():
+		feedback_label = Label.new()
 		feedback_label.name = "MissionDropshipCardFeedbackLabel"
-		feedback_label.text = feedback_text
 		feedback_label.add_theme_font_size_override("font_size", 9)
-		feedback_label.set_meta("mission_dropship_card_feedback_text", feedback_text)
 		META_UI_SKIN_SCRIPT.style_body_label(feedback_label, 9)
-		_apply_mission_dropship_card_feedback_style(feedback_label, _get_mission_dropship_card_feedback_tone(card))
 		host.add_child(feedback_label)
+		host.move_child(feedback_label, 1)
+	if feedback_label != null:
+		_set_mission_label_text_delta(feedback_label, feedback_text)
+		feedback_label.visible = not feedback_text.is_empty()
+		feedback_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		feedback_label.set_meta("mission_dropship_card_feedback_text", feedback_text)
+		var tone: String = _get_mission_dropship_card_feedback_tone(card)
+		if String(feedback_label.get_meta("mission_dropship_feedback_tone", "")) != tone:
+			_apply_mission_dropship_card_feedback_style(feedback_label, tone)
+	var payload_fields: Array = _build_mission_dropship_payload_render_fields(card, payload_ids)
+	if host.has_meta("mission_dropship_payload_rendered_fields") and host.get_meta("mission_dropship_payload_rendered_fields") == payload_fields:
+		_refresh_mission_dropship_payload_progress(host, card)
+		return
+	host.set_meta("mission_dropship_payload_rendered_fields", payload_fields)
+	for child in host.get_children():
+		if child.name == "MissionDropshipCardCommandRow" or child.name == "MissionDropshipCardFeedbackLabel":
+			continue
+		host.remove_child(child)
+		child.queue_free()
 	if payload_ids.is_empty():
 		if feedback_text == "Trupp ab":
 			for fireteam_id_variant in _sanitize_drop_payload_ids(Array(card.get("boarded_fireteam_ids", []))):
 				var deployed_fireteam_card := _build_mission_dropship_fireteam_payload_card(String(fireteam_id_variant), [], card)
 				if deployed_fireteam_card != null:
 					host.add_child(deployed_fireteam_card)
-			if host.get_child_count() > 1:
+			if not Array(card.get("boarded_fireteam_ids", [])).is_empty():
 				return
 		var empty_label := Label.new()
 		empty_label.name = "PassengerEmptyLabel"
+		empty_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		empty_label.text = "Passengers: none"
 		empty_label.add_theme_font_size_override("font_size", 8)
 		META_UI_SKIN_SCRIPT.style_body_label(empty_label, 8)
@@ -12229,8 +12314,31 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 			host.add_child(fireteam_card)
 
 
+func _refresh_mission_dropship_payload_progress(host: VBoxContainer, card: Dictionary) -> void:
+	for group in host.get_children():
+		if not bool(group.get_meta("mission_dropship_fireteam_payload_card", false)):
+			continue
+		var value: float = _build_mission_dropship_fireteam_deboard_progress_value(card, Array(group.get_meta("mission_dropship_payload_unit_ids", [])))
+		group.set_meta("mission_dropship_deboard_progress", value)
+		var vbox := group.get_child(0).get_node("PassengerFireteamVBox") as VBoxContainer
+		var progress := vbox.get_node_or_null("PassengerDeboardProgress") as ProgressBar
+		var show_progress: bool = String(card.get("state", "")) == DROP_SEQUENCE_UNLOADING or value >= 100.0
+		if progress == null and show_progress:
+			progress = ProgressBar.new()
+			progress.name = "PassengerDeboardProgress"
+			progress.show_percentage = false
+			progress.custom_minimum_size = Vector2(0.0, 5.0)
+			progress.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			progress.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			vbox.add_child(progress)
+		if progress != null:
+			progress.value = value
+			progress.visible = show_progress
+			progress.set_meta("mission_dropship_deboard_progress", value)
+
+
 func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictionary) -> void:
-	if host == null:
+	if host == null or host.get_node_or_null("MissionDropshipCardCommandRow") != null:
 		return
 	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
 	if craft_id.is_empty():
@@ -12238,6 +12346,7 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 	var command_pending: bool = _is_network_dropship_command_pending(craft_id)
 	var row := HBoxContainer.new()
 	row.name = "MissionDropshipCardCommandRow"
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_theme_constant_override("separation", 2)
 	row.set_meta("mission_dropship_card_command_row", true)
 	row.set_meta("mission_dropship_craft_id", craft_id)
@@ -12254,6 +12363,7 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 	row.add_child(lz_button)
 	var active_approach_angle: String = _sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name())))
 	var approach_grid := GridContainer.new()
+	approach_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	approach_grid.name = "MissionDropshipApproachGrid_%s" % _sanitize_node_name(craft_id)
 	approach_grid.columns = 2
 	approach_grid.add_theme_constant_override("h_separation", 1)
@@ -12282,6 +12392,44 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 		"drop"
 	)
 	row.add_child(drop_button)
+
+
+func _refresh_mission_dropship_card_command_row(host: VBoxContainer, card: Dictionary) -> void:
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	var row := host.get_node_or_null("MissionDropshipCardCommandRow")
+	if row == null:
+		return
+	var pending: bool = _is_network_dropship_command_pending(craft_id)
+	var active_angle: String = _sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name())))
+	var lz_disabled: bool = pending or not _can_request_mission_dropship_card_lz(card)
+	for button in row.get_children():
+		if button is Button:
+			var action_id: String = String(button.get_meta("mission_dropship_card_command", ""))
+			if action_id == "set_lz":
+				_apply_mission_dropship_command_button_delta(button, "LZ", _build_mission_dropship_card_lz_tooltip(card), lz_disabled, false)
+			elif action_id == "drop":
+				_apply_mission_dropship_command_button_delta(button, _build_mission_dropship_card_drop_button_label(card), _build_mission_dropship_card_drop_tooltip(card), pending or not _can_request_mission_dropship_card_drop(card), false)
+		elif button is GridContainer:
+			for approach in button.get_children():
+				_apply_mission_dropship_command_button_delta(approach, approach.text, approach.tooltip_text, lz_disabled, String(approach.text) == active_angle)
+
+
+func _apply_mission_dropship_command_button_delta(button: Button, text: String, tooltip: String, disabled: bool, active: bool) -> void:
+	var fields: Array = [text, tooltip, disabled, active]
+	if button.get_meta("mission_dropship_button_rendered_fields", []) == fields:
+		return
+	button.text = text
+	button.tooltip_text = tooltip
+	button.disabled = disabled
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.set_meta("mission_dropship_card_command_active", active)
+	if not disabled and String(button.get_meta("mission_dropship_card_command", "")) == "drop":
+		META_UI_SKIN_SCRIPT.style_transfer_button(button, true)
+	elif active:
+		META_UI_SKIN_SCRIPT.style_tactical_button(button, true)
+	else:
+		META_UI_SKIN_SCRIPT.style_secondary_button(button)
+	button.set_meta("mission_dropship_button_rendered_fields", fields)
 
 
 func _build_mission_dropship_card_command_button(text: String, tooltip_text: String, disabled: bool, callback: Callable, craft_id: String, action_id: String, active: bool = false) -> Button:
@@ -12338,7 +12486,7 @@ func _group_payload_unit_ids_by_fireteam(payload_ids: Array) -> Dictionary:
 		if unit_id.is_empty():
 			continue
 		var fireteam_id: String = "unassigned"
-		var unit := _find_friendly_unit_by_id(unit_id)
+		var unit := _find_mission_dropship_unit_by_id(unit_id)
 		if unit != null and unit.has_method("get_fireteam_id"):
 			fireteam_id = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
 		if fireteam_id.is_empty():
@@ -12429,6 +12577,8 @@ func _build_mission_dropship_fireteam_payload_card(fireteam_id: String, group_id
 		feedback_label.set_meta("mission_dropship_fireteam_feedback_text", feedback_text)
 		META_UI_SKIN_SCRIPT.style_body_label(feedback_label, 8)
 		vbox.add_child(feedback_label)
+	_set_control_tree_mouse_filter(panel, Control.MOUSE_FILTER_IGNORE)
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	return panel
 
 
@@ -12436,7 +12586,7 @@ func _build_mission_dropship_passenger_portrait_chip(unit_id: String) -> Control
 	var normalized_unit_id: String = unit_id.strip_edges()
 	if normalized_unit_id.is_empty():
 		return null
-	var unit := _find_friendly_unit_by_id(normalized_unit_id)
+	var unit := _find_mission_dropship_unit_by_id(normalized_unit_id)
 	var display_name: String = normalized_unit_id
 	var portrait_path: String = ""
 	if unit != null:
@@ -12488,7 +12638,7 @@ func _build_mission_dropship_passenger_chip(unit_id: String) -> Control:
 	var normalized_unit_id: String = unit_id.strip_edges()
 	if normalized_unit_id.is_empty():
 		return null
-	var unit := _find_friendly_unit_by_id(normalized_unit_id)
+	var unit := _find_mission_dropship_unit_by_id(normalized_unit_id)
 	var display_name: String = normalized_unit_id
 	var callsign: String = ""
 	if unit != null:
@@ -13149,7 +13299,7 @@ func _build_mission_dropship_pilot_profile(card: Dictionary = {}):
 		var card_pilot_portrait_path: String = String(card.get("pilot_portrait_path", "")).strip_edges()
 		if card_pilot_display_name.is_empty() and card_pilot_portrait_path.is_empty():
 			return null
-		var card_pilot_unit = _find_friendly_unit_by_id(card_pilot_unit_id)
+		var card_pilot_unit = _find_mission_dropship_unit_by_id(card_pilot_unit_id)
 		if card_pilot_unit != null:
 			var card_pilot_profile = _build_profile_from_unit(card_pilot_unit)
 			if card_pilot_profile != null and card_pilot_profile.has_method("duplicate_profile"):
@@ -13171,7 +13321,7 @@ func _build_mission_dropship_pilot_profile(card: Dictionary = {}):
 		)
 	if _mission_drop_pilot_display_name.is_empty() and _mission_drop_pilot_portrait_path.is_empty():
 		return null
-	var pilot_unit = _find_friendly_unit_by_id(_mission_drop_pilot_unit_id)
+	var pilot_unit = _find_mission_dropship_unit_by_id(_mission_drop_pilot_unit_id)
 	if pilot_unit != null:
 		var pilot_profile = _build_profile_from_unit(pilot_unit)
 		if pilot_profile != null and pilot_profile.has_method("duplicate_profile"):
