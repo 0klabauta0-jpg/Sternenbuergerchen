@@ -1,0 +1,61 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-59cad4d8e4a6424a918bb133b2771c5a
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_570 Hold Fire Discipline Mission Bridge ===
+[PASS] TASK_570 task file exists
+[PASS] TASK_570 task file names the bridge
+[PASS] Implementation status tracks TASK_570
+[PASS] Roadmap marks TASK_570 implemented
+[PASS] Roadmap names TASK_571 follow-up
+[PASS] HTML report tracks TASK_570
+[PASS] HTML report names TASK_571 follow-up
+[PASS] Mission command feedback contract documents TASK_570
+[PASS] UnitCommand carries fire_rule
+[PASS] FireteamMovementController resolves fire_rule
+[PASS] Combat resolver accepts return-fire context
+[PASS] Mission controller exposes fire-rule setter
+[PASS] Combat driver owns return-fire window
+[PASS] hold blocks voluntary fire
+[PASS] return blocks without incoming-fire context
+[PASS] return fires when incoming-fire window is active
+[PASS] free keeps unit fire-ready
+[PASS] suppress keeps unit fire-ready for the MVP bridge
+[PASS] movement execution starts for fire rule hold
+[PASS] movement producer does not mutate Unit command before authority tick for hold
+[PASS] unit receives command for fire rule hold
+[PASS] UnitCommand stores fire rule hold
+[PASS] UnitCommand maps fire status for hold
+[PASS] movement state snapshots fire rule hold
+[PASS] SimulationRoot receives command for fire rule hold
+[PASS] queued command dict carries fire rule hold
+[PASS] authority tick executes movement for fire rule hold
+[PASS] movement execution starts for fire rule return
+[PASS] movement producer does not mutate Unit command before authority tick for return
+[PASS] unit receives command for fire rule return
+[PASS] UnitCommand stores fire rule return
+[PASS] UnitCommand maps fire status for return
+[PASS] movement state snapshots fire rule return
+[PASS] SimulationRoot receives command for fire rule return
+[PASS] queued command dict carries fire rule return
+[PASS] authority tick executes movement for fire rule return
+[PASS] movement execution starts for fire rule free
+[PASS] movement producer does not mutate Unit command before authority tick for free
+[PASS] unit receives command for fire rule free
+[PASS] UnitCommand stores fire rule free
+[PASS] UnitCommand maps fire status for free
+[PASS] movement state snapshots fire rule free
+[PASS] SimulationRoot receives command for fire rule free
+[PASS] queued command dict carries fire rule free
+[PASS] authority tick executes movement for fire rule free
+[PASS] movement execution starts for fire rule suppress
+[PASS] movement producer does not mutate Unit command before authority tick for suppress
+[PASS] unit receives command for fire rule suppress
+[PASS] UnitCommand stores fire rule suppress
+[PASS] UnitCommand maps fire status for suppress
+[PASS] movement state snapshots fire rule suppress
+[PASS] SimulationRoot receives command for fire rule suppress
+[PASS] queued command dict carries fire rule suppress
+[PASS] authority tick executes movement for fire rule suppress
+=== RESULTS: 54 passed, 0 failed ===
+TASK_570: ALL PASSED

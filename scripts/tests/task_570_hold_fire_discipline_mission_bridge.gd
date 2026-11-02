@@ -4,6 +4,9 @@ const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd
 const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_movement_controller.gd")
 const COMBAT_FIRE_DECISION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
 const TACTICAL_COMMAND_RULES_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_command_rules.gd")
+const SIMULATION_ROOT_SCRIPT: GDScript = preload("res://scripts/core/simulation_root.gd")
+const UNIT_REGISTRY_SCRIPT: GDScript = preload("res://scripts/registries/unit_registry.gd")
+const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 
 const TASK_PATH: String = "res://docs/tasks/TASK_570_hold_fire_discipline_mission_bridge.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
@@ -18,15 +21,6 @@ const COMBAT_DRIVER_PATH: String = "res://scripts/tests/mission_combat_loop_driv
 
 var _passed: int = 0
 var _failed: int = 0
-
-
-class FakeSimulationRoot:
-	extends Node
-
-	var commands: Array = []
-
-	func enqueue_command(command: Dictionary) -> void:
-		commands.append(command.duplicate(true))
 
 
 class FakeUnit:
@@ -137,11 +131,26 @@ func _test_movement_fire_rule_bridge() -> void:
 		TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS: UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL,
 	}
 	for fire_rule in expected_status_by_rule.keys():
-		var unit := FakeUnit.new("alpha_%s" % fire_rule, "team_alpha", "blue")
-		var simulation_root := FakeSimulationRoot.new()
+		# MovementController produces commands; only the real authority tick may
+		# commit them to a Unit. A queue-only fake cannot exercise this boundary.
+		var fixture := Node2D.new()
+		fixture.process_mode = Node.PROCESS_MODE_DISABLED
+		root.add_child(fixture)
+		var registry = UNIT_REGISTRY_SCRIPT.new()
+		registry.name = "UnitRegistry"
+		fixture.add_child(registry)
+		var simulation_root = SIMULATION_ROOT_SCRIPT.new()
+		simulation_root.name = "SimulationRoot"
+		simulation_root.unit_registry_path = NodePath("../UnitRegistry")
+		fixture.add_child(simulation_root)
+		simulation_root.set_physics_process(false)
+		var unit = TEST_UNIT_SCRIPT.new()
+		unit.unit_id = "alpha_%s" % fire_rule
+		unit.team_id = "team_alpha"
+		unit.fireteam_id = "blue"
+		fixture.add_child(unit)
+		registry.register_unit(unit.unit_id, unit)
 		var movement_controller = FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.new()
-		root.add_child(simulation_root)
-		root.add_child(unit)
 		var result: Dictionary = Dictionary(movement_controller.call(
 			"start_execution",
 			"blue",
@@ -155,6 +164,8 @@ func _test_movement_fire_rule_bridge() -> void:
 			null
 		))
 		_assert(bool(result.get("started", false)), "movement execution starts for fire rule %s" % fire_rule)
+		_assert(unit.get_current_unit_command() == null, "movement producer does not mutate Unit command before authority tick for %s" % fire_rule)
+		simulation_root._physics_process(1.0 / 60.0)
 		var command = unit.get_current_unit_command()
 		_assert(command != null, "unit receives command for fire rule %s" % fire_rule)
 		if command != null:
@@ -162,12 +173,12 @@ func _test_movement_fire_rule_bridge() -> void:
 			_assert(String(command.get("fire_status")) == String(expected_status_by_rule[fire_rule]), "UnitCommand maps fire status for %s" % fire_rule)
 			var state: Dictionary = Dictionary(result.get("movement_state", {}))
 			_assert(String(state.get("fire_rule", "")) == fire_rule, "movement state snapshots fire rule %s" % fire_rule)
-		_assert(simulation_root.commands.size() > 0, "SimulationRoot receives command for fire rule %s" % fire_rule)
-		if simulation_root.commands.size() > 0:
-			var command_dict: Dictionary = Dictionary(simulation_root.commands[0])
+		_assert(simulation_root.command_queue.size() > 0, "SimulationRoot receives command for fire rule %s" % fire_rule)
+		if simulation_root.command_queue.size() > 0:
+			var command_dict: Dictionary = Dictionary(simulation_root.command_queue[0])
 			_assert(String(command_dict.get("fire_rule")) == fire_rule, "queued command dict carries fire rule %s" % fire_rule)
-		unit.queue_free()
-		simulation_root.queue_free()
+		_assert(unit.position.x > 0.0, "authority tick executes movement for fire rule %s" % fire_rule)
+		fixture.free()
 
 
 func _can_unit_attack_for_rule(fire_rule: String, context: Dictionary) -> bool:

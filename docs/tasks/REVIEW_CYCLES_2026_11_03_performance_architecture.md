@@ -10,7 +10,9 @@ Basis ist der per Fetch bestaetigte Main `8eaeadd27e92d68539550058a4795c3ba626dc
 Eigener Branch `task/performance-architecture-cycles-20261103` vom aktuellen Main,
 wie fuer den Review explizit beauftragt. Nur bestaetigte Performance-/Architektur-
 und daraus folgende Verhaltensfehler beheben, keine pauschalen Refactors oder
-neuen Features. Keine automatische Main-Integration, keine Release-Abnahme.
+neuen Features. Den bisherigen Review-/Fix-/Pruef-/Main-Push-Ablauf selbststaendig
+abschliessen: nach gruenen Gates geprueften Stand per Fast-forward nach Main
+uebernehmen und verifizieren. Keine allgemeine Release-Abnahme.
 
 ## Dokumente / Contracts
 `AGENTS.md`, `PROJECT_BRIEF.md`, `ARCHITECTURE.md`, `CODEX_RULES.md`,
@@ -30,8 +32,9 @@ Befunde unter `docs/dev/`, bisherige Review2-Regressionen und deren Evidenz.
   Profilwiederherstellung, keine privaten Rosterbytes im Repository.
 - Relevante alte Gates und die gemeinsame Review2-Auswahl nach den Fixes pruefen.
   Bekannte Baselinefehler explizit erhalten/dokumentieren, Tests nicht abschwaechen.
-- Runde getrennt committen, Status/Ergebnisindex aktualisieren und Task-Branch
-  pushen. Bestehende fremde/ungetrackte Dateien bleiben unberuehrt.
+- Runden getrennt committen, Status/Ergebnisindex aktualisieren, Task-Branch und
+  geprueften Main pushen; nach Main-Fast-forward neue Regressionen erneut isoliert
+  pruefen. Bestehende fremde/ungetrackte Dateien bleiben unberuehrt.
 
 ## Betroffene Dateien / lokale Pruefung
 Erst nach Bestaetigung je Befund unten ergaenzen. Neue Regressionen unter
@@ -124,3 +127,12 @@ Jeder Kandidat wird vor dem jeweiligen Produktivfix durch RED verifiziert.
   korrigiert, passend zur Produktionsuhr. Keine Assertions abgeschwaecht.
 - Gemeinsame Abschlussmatrix: `scripts/tests/review_cycles_20261103_checks.json`
   mit 69 unterschiedlichen Gates; Ergebnis und Gesamt-Nachreview folgen.
+
+## Abschluss-Fixturehygiene
+Erster gemeinsamer Lauf: 68/69 Gates. TASK570 war auf Original-Main identisch
+30/4, weil eine Queue-Fake-Fixture eine inzwischen verbotene direkte Unit-Mutation
+erwartete. Die Bridge-Fixture nutzt jetzt echte SimulationRoot/Registry/Unit,
+prueft vor dem Tick fehlende Mutation und danach alle alten Rule-/Status-/Queue-
+Erwartungen sowie echte Bewegung. 54/54 sowohl auf Fix-Stand als auch Original-
+Source; unabhaengiger Testdiff-/Evidence-Nachreview APPROVED. Produktionscode
+dafuer unveraendert; gemeinsame Matrix wird auf dem finalen Stand wiederholt.
