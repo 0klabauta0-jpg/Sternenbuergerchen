@@ -66,6 +66,13 @@ Portale und Dirty-Nachbarcluster verwenden dieselben sechs Kanten. Hex-Portal-
 Scoring berücksichtigt lokale Wege und löst gleiche Eingangskosten zugunsten
 der näheren Zielseite auf; die Legacy-Scoringroute bleibt erhalten.
 
+Seit dem Performance-Review-Fix vom 2026-11-02 berechnet eine begrenzte
+Dijkstra-Traversierung die lokalen Portalkosten je Eintritt und Komponente
+gemeinsam. Eine gerichtete Rueckwaertskarte in der Zielkomponente liefert deren
+Austrittskosten. Beide Kostenkarten leben nur innerhalb einer Anfrage; sie
+verwenden dieselben effektiven Begehbarkeits-, Hoehen- und Kostenoptionen wie
+Terrain-A*. Das aeussere Query-Budget ist kein Ersatz fuer diese innere Begrenzung.
+
 HPA bleibt eine komponentenweise Annäherung. Der Verifier beweist die gleiche
 Pfadkostenfolge für eine offene gerade Route sowie legale Wege/Dirty-Portale,
 keine globale Optimalität auf beliebigen Karten und kein Großkartenbudget.

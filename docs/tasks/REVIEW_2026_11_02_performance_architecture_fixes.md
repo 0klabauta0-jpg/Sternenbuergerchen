@@ -77,13 +77,56 @@ lediglich abgeleitete Renderdaten cachen. Historische Release-/GPU-/Manuell-Gate
 werden durch diesen Task nicht als bestanden erklaert.
 
 ## Status
-- P1 fertig und unabhaengig reviewed: Movement RED 9/11 -> GREEN 20/0;
-  Navigation RED 54/18 -> GREEN 72/0; Index RED 15/16 -> GREEN 31/0.
-- Sequentieller P1-Lauf: 9/10 strenge Checks sofort bestanden; TASK_692 hatte
-  34/34 fachliche Checks, aber eine nicht freigegebene Registry-Testfixture.
-  Nach `registry.free()` besteht dessen separater strenger Wiederholungslauf.
-  Damit 10 betroffene Skripte / 292 Assertions ohne offene Laufzeitfehler geprueft.
+- Alle sieben Befunde implementiert und unabhaengig reviewed; keine wichtigen
+  offenen Review-Befunde. P1 zuerst in `86d4f6c6d`, P2 Navigation/Vitals in
+  `858286fc9`, P2 Dropship-HUD in `211b929f9` committed.
+
+| Befund | RED bestanden / fehlgeschlagen | Finale Regression |
+| --- | --- | --- |
+| P1 kampfunfaehige Bewegung | 9 / 11 | 20/20 |
+| P1 effektive Tuer-HPA | 54 / 18 | 72/72 |
+| P1 Missionsindex | 15 / 16 | 31/31 |
+| P2 Hex-Suchbudget | 11 / 4 | 26/26 |
+| P2 Fallback-Abschluss | 29 / 13 | 42/42 |
+| P2 Dropship-HUD | 16 / 8 | 27/27 |
+| P2 Vital-Ordering | 12 / 9 | 21/21 |
+
+- Effektive finale Abnahme: **32 unterschiedliche Verifier, 879 Assertions**,
+  alle Exit 0, Erfolgsmarker vorhanden und ohne Script-/Enginefehler oder Leaks.
+  Zuerst 27/28 im gemeinsamen Lauf; danach korrigierter TASK_1100 sowie die
+  finale HUD-Regression und vier zusaetzliche Dropship-Gates separat sequentiell
+  bestanden. Der Ergebnisindex verwendet je Check das letzte Ergebnis; der
+  urspruengliche rote Lauf bleibt unveraendert als Diagnose erhalten.
+- 24x20-Hexkarte/Cluster 8: 341 -> 5 innere A*-Aufrufe und 66284 -> 2459
+  gerichtete Schrittkostenberechnungen; legaler deterministischer Pfad weiter
+  43 Zellen. Query-lokale Kostenkarten halten keine veralteten Optionen vor.
+- Unveraenderte Dropship-Karte: sechs echte 0.35-s-Controllerupdates behalten
+  alle 44 Nodes, inklusive Actions; Fortschritt/Entladung, Pilot/Waffe, Payload,
+  Auswahl und Pending-Feedback werden weiterhin aktualisiert.
+- Bewegungscommands tragen intern `navigation_resolved_target_position` und
+  `navigation_path_terrain_revision`. Erreichte Ersatzpunkte beenden die Queue;
+  eine wirkliche Terrainrevision plant noch laufende Commands neu.
+- Netzwerk-Vitals tragen `vital_tick`; der Client ordnet pro Unit ueber beide
+  Transportwege. Die Delta-Dedupe vergleicht Inhalte vor Anhaengen des Ticks.
+
+## QA-Korrekturen und Nachweisgrenzen
+- TASK_692 gab seine als Node angelegte Registry-Fixture nicht frei. Nach dem
+  strengen ersten Leak-Befund wird sie explizit freigegeben; 34/34 bleiben erhalten.
+- TASK_1100 erwartete in sieben exakten Zeilen keinen Besitzer. Die bestehende
+  Anzeige und der aktuelle Contract verlangen `FT2`; nur die Erwartungen wurden
+  ergaenzt. Die Fortschrittsfunktion ist gegen die Review-Basis bytegleich;
+  Stale-Tick-, Gate-, Dauer- und Update-Count-Assertions bleiben unveraendert.
 - Import Exit 0, mit bestehender Editor-Shutdown-ObjectDB-Leakwarnung; kein
   fehlerfreier Import behauptet. Runtimechecks werden separat strikt ausgewertet.
-- P2 beginnt nach dem separaten P1-Commit. Der Vital-Ordering-Test ist bereits
-  RED (12/9, Exit 1), die produktive Netzwerkkorrektur ist noch nicht umgesetzt.
+- Kein neuer FPS-/GPU-/Release- oder manueller Sichtabnahmenachweis.
+- Manifest: `scripts/tests/review_20261102_checks.json`.
+- Ergebnisse, Quellhashes, Rohlogs und urspruengliche REDs:
+  `output/review_fixes_20261102/verification_summary.json`.
+
+## Wiederholung
+Nach dem projektweiten Import laesst sich die komplette Auswahl sequentiell
+mit dem installierten portablen Runner ausfuehren:
+
+```powershell
+python C:/Users/bjoer/.codex/skills/godot-game-verification/scripts/run_checks.py --project . --manifest scripts/tests/review_20261102_checks.json --godot godot_console.exe --skip-import --output output/review_fixes_20261102/repeat
+```

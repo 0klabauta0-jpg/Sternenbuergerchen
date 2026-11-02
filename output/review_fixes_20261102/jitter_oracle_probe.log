@@ -1,0 +1,65 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1100 Connected Interaction Snapshot Loss/Jitter Resilience ===
+PASS: Station Route gate contract loads for jitter checks
+PASS: Tick 10 is accepted
+ERROR: FAIL: Tick 10 surfaces 20 percent
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:122)
+       [1] _run_tests (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:29)
+PASS: Feedback exposes accepted source tick 10
+JITTER_ACTUAL {"compact_line":"COM 20% | 4/20s FT2","display_token":"COM","duration_seconds":20.0,"fireteam_id":"ft2","hold_seconds":4.0,"interaction_id":"station_computer","owner_fireteam_id":"ft2","parallel_owner_count":1,"parallel_owner_entries":[{"display_token":"COM","duration_seconds":20.0,"fireteam_id":"ft2","fireteam_token":"FT2","hold_seconds":4.0,"interaction_id":"station_computer","progress":0.2,"read_only":true}],"progress":0.2,"progress_fingerprint":"station_computer|COM|computer|ft2|20|4|20|false|station_computer:COM:ft2:20:4:20","progress_update_count":1,"read_only":true,"source_tick":10,"status":"in_progress","tone":"progress","ui_sets_gameplay_truth":false} / {"compact_line":"COM 80% | 16/20s FT2","display_token":"COM","duration_seconds":20.0,"fireteam_id":"ft2","hold_seconds":16.0,"interaction_id":"station_computer","owner_fireteam_id":"ft2","parallel_owner_count":1,"parallel_owner_entries":[{"display_token":"COM","duration_seconds":20.0,"fireteam_id":"ft2","fireteam_token":"FT2","hold_seconds":16.0,"interaction_id":"station_computer","progress":0.8,"read_only":true}],"progress":0.8,"progress_fingerprint":"station_computer|COM|computer|ft2|80|16|20|false|station_computer:COM:ft2:80:16:20","progress_update_count":2,"read_only":true,"source_tick":13,"status":"in_progress","tone":"progress","ui_sets_gameplay_truth":false}
+PASS: Tick 13 converges despite skipped intermediate snapshots
+ERROR: FAIL: Latest accepted snapshot surfaces 80 percent
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:122)
+       [1] _run_tests (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:38)
+PASS: Feedback advances to source tick 13
+PASS: Late tick 11 is rejected as out of order
+ERROR: FAIL: Late tick cannot regress visible progress
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:122)
+       [1] _run_tests (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:45)
+PASS: Late tick cannot regress visible source tick
+PASS: Late tick causes no label update
+PASS: Late tick cannot regress replicated runtime state
+PASS: Late tick cannot mutate replicated gate state
+PASS: Strictly newer authoritative hold reset is accepted
+ERROR: FAIL: Newer authoritative hold reset reaches the HUD
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:122)
+       [1] _run_tests (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:54)
+PASS: Newer authoritative hold reset reaches replicated runtime state
+PASS: Newer duration correction is accepted
+ERROR: FAIL: Rendered duration correction is not hidden by fingerprint dedupe
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:122)
+       [1] _run_tests (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:60)
+PASS: Rendered duration correction performs exactly one label update
+PASS: Completion tick 20 is accepted
+ERROR: FAIL: Completion is visible
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:122)
+       [1] _run_tests (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:68)
+PASS: Completion reaches replicated runtime state
+PASS: Late pre-completion tick 19 is rejected
+ERROR: FAIL: Late pre-completion tick cannot reopen completed feedback
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:122)
+       [1] _run_tests (C:/Users/bjoer/AppData/Local/Temp/sb_review_jitter_context_probe.gd:73)
+PASS: Late pre-completion tick cannot reopen replicated runtime state
+PASS: Late pre-completion tick cannot reopen replicated gate state
+PASS: Newer semantically identical completion tick is accepted
+PASS: Read-only feedback tracks the newest accepted source tick
+PASS: Identical completion creates no extra label update
+PASS: Snapshot jitter path creates no gameplay commands or effects
+PASS: Snapshot diagnostics count both stale packets
+=== RESULTS: 24 passed, 7 failed ===

@@ -34,29 +34,36 @@ bleiben abgeleitet; vorhandene Dirty-, Contract- und Revisionspfade verwenden.
   bestehende Gates; gemeinsamen P1-Diff pruefen und separat committen.
 
 ## P2 - nach P1-Green
-- [ ] Hex-HPA: lokale Distanzberechnung pro Eintritt/Komponente buendeln;
+- [x] Hex-HPA: lokale Distanzberechnung pro Eintritt/Komponente buendeln;
   `review_20261102_p2_hex_budget_verifier.gd` prueft 24x20-Suchbudget,
   Pfadlegalitaet, Optionen und Revisionen. Keine globale Optimalitaet versprechen.
-- [ ] Fallback: `simulation_root.gd`; Test
+- [x] Fallback: `simulation_root.gd`; Test
   `review_20261102_p2_fallback_verifier.gd` prueft Queueabschluss und
   stabile Queryanzahl nach Ersatzankunft, auch mit Avoidance.
-- [ ] Dropship HUD: bestehende Craft-ID-Karten behalten; Test
+- [x] Dropship HUD: bestehende Craft-ID-Karten behalten; Test
   `review_20261102_p2_dropship_hud_verifier.gd` prueft stabile Node-IDs,
   geaenderten Progress/Status/Payload/Buttons und keine neuen Tree-Scans.
-- [ ] Vital ordering: `simulation_root.gd`, Snapshot-Contract, ggf. TestUnit;
+- [x] Vital ordering: `simulation_root.gd`, Snapshot-Contract, ggf. TestUnit;
   `review_20261102_p2_vital_order_verifier.gd` prueft stale Reliable nach
   Snapshot sowie stale Snapshot nach Reliable, neuere Heilung/Respawn und
   side-effect-freien Apply. Versionierung im gemeinsamen Contract dokumentieren.
-- [ ] Je Slice RED -> minimaler Fix -> GREEN; bestehende Gates pruefen.
+- [x] Je Slice RED -> minimaler Fix -> GREEN; bestehende Gates pruefen.
 
 ## Abschluss
-- [ ] Sequentielles Manifest mit allen sieben Regressionen und passenden
+- [x] Sequentielles Manifest mit allen sieben Regressionen und passenden
   bestehenden Gates ausfuehren, Logs und report.json lesen.
-- [ ] Unabhaengige Review des gesamten Branch-Diffs; wichtige Befunde beheben.
-- [ ] Task, Implementation-Status und Roadmap mit wirklichen Ergebnissen ergaenzen.
-- [ ] Gezielte Commits und Task-Branch pushen; keine Main-Integration.
+- [x] Unabhaengige Review des gesamten Branch-Diffs; wichtige Befunde beheben.
+- [x] Task, Implementation-Status und Roadmap mit wirklichen Ergebnissen ergaenzen.
+- [x] Gezielte Fix-Commits; keine Main-Integration. Push wird als abschliessender
+  Auslieferungsschritt im finalen Git-Status gegen den Remote verifiziert.
 
 ## Arbeitsnotizen
+- Finale Auswahl: 32 unterschiedliche Verifier / 879 Assertions strikt gruen.
+  Ausgangslauf 27/28 bleibt erhalten; veralteter TASK_1100-FT2-Oracle korrigiert,
+  anschliessend 1/1 Jitter und 5/5 finale Dropship-Gates gruen.
+- Hex 341->5 A* / 66284->2459 Schrittkosten; unveraenderte HUD-Karte 44/44 Nodes
+  behalten. Alle sieben neuen Regressionen zuerst rot und danach gruen.
+- Abschliessende unabhaengige Review: APPROVED, keine offenen P1/P2-Befunde.
 - P1: 20/20 Movement, 72/72 Navigation, 31/31 Index; zwei unabhaengige
   Reviews ohne wichtige offene Befunde. Zehn betroffene Skripte (292 Assertions)
   strikt geprueft, TASK_692-Testfixture nach erstem Leaksignal freigegeben.

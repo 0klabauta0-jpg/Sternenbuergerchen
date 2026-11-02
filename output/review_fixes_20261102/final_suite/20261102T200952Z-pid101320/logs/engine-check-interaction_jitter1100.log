@@ -1,0 +1,64 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1100 Connected Interaction Snapshot Loss/Jitter Resilience ===
+PASS: Station Route gate contract loads for jitter checks
+PASS: Tick 10 is accepted
+ERROR: FAIL: Tick 10 surfaces 20 percent
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:121)
+       [1] _run_tests (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:29)
+PASS: Feedback exposes accepted source tick 10
+PASS: Tick 13 converges despite skipped intermediate snapshots
+ERROR: FAIL: Latest accepted snapshot surfaces 80 percent
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:121)
+       [1] _run_tests (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:37)
+PASS: Feedback advances to source tick 13
+PASS: Late tick 11 is rejected as out of order
+ERROR: FAIL: Late tick cannot regress visible progress
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:121)
+       [1] _run_tests (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:44)
+PASS: Late tick cannot regress visible source tick
+PASS: Late tick causes no label update
+PASS: Late tick cannot regress replicated runtime state
+PASS: Late tick cannot mutate replicated gate state
+PASS: Strictly newer authoritative hold reset is accepted
+ERROR: FAIL: Newer authoritative hold reset reaches the HUD
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:121)
+       [1] _run_tests (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:53)
+PASS: Newer authoritative hold reset reaches replicated runtime state
+PASS: Newer duration correction is accepted
+ERROR: FAIL: Rendered duration correction is not hidden by fingerprint dedupe
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:121)
+       [1] _run_tests (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:59)
+PASS: Rendered duration correction performs exactly one label update
+PASS: Completion tick 20 is accepted
+ERROR: FAIL: Completion is visible
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:121)
+       [1] _run_tests (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:67)
+PASS: Completion reaches replicated runtime state
+PASS: Late pre-completion tick 19 is rejected
+ERROR: FAIL: Late pre-completion tick cannot reopen completed feedback
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:121)
+       [1] _run_tests (res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd:72)
+PASS: Late pre-completion tick cannot reopen replicated runtime state
+PASS: Late pre-completion tick cannot reopen replicated gate state
+PASS: Newer semantically identical completion tick is accepted
+PASS: Read-only feedback tracks the newest accepted source tick
+PASS: Identical completion creates no extra label update
+PASS: Snapshot jitter path creates no gameplay commands or effects
+PASS: Snapshot diagnostics count both stale packets
+=== RESULTS: 24 passed, 7 failed ===

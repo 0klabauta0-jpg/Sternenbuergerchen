@@ -1,0 +1,82 @@
+[
+  {
+    "log": "p2_fallback_RED.log",
+    "exit_code": 1,
+    "passed": 29,
+    "failed": 13,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "p2_fallback_GREEN.log",
+    "exit_code": 0,
+    "passed": 42,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "review_20261102_p2_fallback_verifier.log",
+    "exit_code": 0,
+    "passed": 42,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "task_125_verifier.log",
+    "exit_code": 0,
+    "passed": 64,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "task_127_verifier.log",
+    "exit_code": 0,
+    "passed": 13,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "task_501_integrated_movement_command_lifecycle_hardening.log",
+    "exit_code": 0,
+    "passed": 10,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "review_20261102_p1_movement_verifier.log",
+    "exit_code": 0,
+    "passed": 20,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "path_recompute_under_fire_verifier.log",
+    "exit_code": 0,
+    "passed": 4,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "task_475_fireteam_pathfinding_avoidance_stability_pass.log",
+    "exit_code": 0,
+    "passed": 17,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "task_1199_dominant_simulation_slice.log",
+    "exit_code": 0,
+    "passed": 18,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  }
+]

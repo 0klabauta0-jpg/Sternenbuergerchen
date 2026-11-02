@@ -1,0 +1,117 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Review 2026-11-02 P1 runtime index ===
+PASS: Initial identity resolves the real runtime unit
+ERROR: FAIL: Identity config makes the new ID resolve on the same node
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:36)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: Identity config removes the old ID lookup
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:37)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: ID mutation invalidates one lazy rebuild
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:38)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: Team config removes the node from friendlies
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:40)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: Team config places the node in enemies
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:41)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: Enemy assignment leaves no stale friendly Fireteam entry
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:42)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: Fireteam setter removes the old Fireteam entry
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:45)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: Fireteam setter exposes the normalized new Fireteam
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:46)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: Identity config also invalidates Fireteam assignment
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:48)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: Exported identity property changes refresh ID lookup
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:52)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: Unused slots leave both active team lookups
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:53)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: An empty unit identity is excluded
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:55)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: An existing empty-ID slot is observed when its identity becomes valid
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:57)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+ERROR: FAIL: Restored slot retains the current Fireteam assignment
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_existing_unit_identity_changes (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:58)
+       [2] _run (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:17)
+PASS: Unchanged identity, display-only edits and repeated lookups remain scan-free
+PASS: Membership fixture indexes the first root
+PASS: Removing the slot discards its cached identity
+PASS: Detached unit changes do not invalidate the previous mission
+PASS: Rebinding observes the slot under its new root
+PASS: Root rebinding disconnects identity watchers from the old mission
+PASS: Rebinding back reads the current assignment
+PASS: Freed slots are removed without invalid object reads
+PASS: Real MetaLayerFlow initializes MissionSetup
+PASS: Live mission starts with three Blue members
+PASS: Late payload reuses the same active mission and root membership
+PASS: Late payload reuses all six existing runtime slot nodes
+PASS: MetaLayerFlow delivers the six-unit selection to live MissionSetup
+LIVE_SELECTION root_children=45 friendly=3 blue=3 gold=0
+ERROR: FAIL: Live index immediately includes newly activated existing slots
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_live_meta_selection_reuses_mission_slots (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:144)
+       [2] _wait_frames (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:163)
+ERROR: FAIL: Live index immediately exposes the three new Gold members
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:172)
+       [1] _test_live_meta_selection_reuses_mission_slots (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:145)
+       [2] _wait_frames (res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd:163)
+PASS: Live controller lookups remain scan-free after selection settles
+=== RESULTS: 15 passed, 16 failed ===

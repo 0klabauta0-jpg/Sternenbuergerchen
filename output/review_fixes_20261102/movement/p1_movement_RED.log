@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Review 2026-11-02 P1 incapacitated movement ===
+PASS: Fit unit starts a real tokenized move with a continuation
+PASS: Authoritative lethal damage downs the moving unit
+FAIL: Downed unit does not move on the next command tick
+FAIL: Downed unit's pending move is discarded without requeue
+FAIL: Rejected downed continuation does not recommit runtime command status
+FAIL: Downed unit stays still across further ticks
+FAIL: Respawn restores a fit unit without restarting its old move
+FAIL: Respawn has no old pending or committed move
+PASS: New valid tokenized movement is accepted after respawn
+PASS: New post-respawn move reaches its target and drains
+PASS: Fit unit starts a real engage-area movement
+PASS: Authoritative damage then bleedout reaches the terminal pre-respawn vital state
+FAIL: Bleedout discards an existing engage continuation without movement
+FAIL: Bleedout also rejects a newly queued explicit-speed engage command
+FAIL: Bleedout rejection never commits a new command or target
+PASS: Immediate-respawn fixture has a running move
+PASS: Damage and respawn effects preserve their authoritative same-tick order
+FAIL: Same-tick respawn cannot retain a pre-incapacitation continuation
+FAIL: Old token does not recommit movement after immediate respawn
+PASS: Immediate respawn accepts a newly issued move token
+=== RESULTS: 9 passed, 11 failed ===

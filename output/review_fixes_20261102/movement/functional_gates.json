@@ -1,0 +1,32 @@
+[
+  {
+    "script": "task_501_integrated_movement_command_lifecycle_hardening.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\movement\\task_501_integrated_movement_command_lifecycle_hardening.log"
+  },
+  {
+    "script": "task_1186_simulation_root_command_authority.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\movement\\task_1186_simulation_root_command_authority.log"
+  },
+  {
+    "script": "task_1199_dominant_simulation_slice.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\movement\\task_1199_dominant_simulation_slice.log"
+  },
+  {
+    "script": "task_162_combat_authority_contract_verifier.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\movement\\task_162_combat_authority_contract_verifier.log"
+  },
+  {
+    "script": "task_166_multiplayer_authority_command_contract_verifier.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\movement\\task_166_multiplayer_authority_command_contract_verifier.log"
+  },
+  {
+    "script": "task_168_multiplayer_snapshot_contract_verifier.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\movement\\task_168_multiplayer_snapshot_contract_verifier.log"
+  }
+]

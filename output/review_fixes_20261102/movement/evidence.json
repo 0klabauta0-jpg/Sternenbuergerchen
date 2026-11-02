@@ -1,0 +1,66 @@
+[
+  {
+    "log": "p1_movement_RED.log",
+    "exit_code": 1,
+    "passed": 9,
+    "failed": 11,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "p1_movement_GREEN.log",
+    "exit_code": 0,
+    "passed": 20,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "task_501_integrated_movement_command_lifecycle_hardening.log",
+    "exit_code": 0,
+    "passed": 10,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "task_1186_simulation_root_command_authority.log",
+    "exit_code": 0,
+    "passed": 8,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "task_1199_dominant_simulation_slice.log",
+    "exit_code": 0,
+    "passed": 18,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  {
+    "log": "task_162_combat_authority_contract_verifier.log",
+    "exit_code": 0,
+    "passed": 23,
+    "failed": 0,
+    "errors": 11,
+    "warnings": 0
+  },
+  {
+    "log": "task_166_multiplayer_authority_command_contract_verifier.log",
+    "exit_code": 0,
+    "passed": 15,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 2
+  },
+  {
+    "log": "task_168_multiplayer_snapshot_contract_verifier.log",
+    "exit_code": 0,
+    "passed": 20,
+    "failed": 0,
+    "errors": 0,
+    "warnings": 0
+  }
+]

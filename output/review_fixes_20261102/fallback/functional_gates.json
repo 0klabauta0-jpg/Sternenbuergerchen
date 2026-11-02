@@ -1,0 +1,42 @@
+[
+  {
+    "script": "review_20261102_p2_fallback_verifier.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\fallback\\review_20261102_p2_fallback_verifier.log"
+  },
+  {
+    "script": "task_125_verifier.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\fallback\\task_125_verifier.log"
+  },
+  {
+    "script": "task_127_verifier.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\fallback\\task_127_verifier.log"
+  },
+  {
+    "script": "task_501_integrated_movement_command_lifecycle_hardening.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\fallback\\task_501_integrated_movement_command_lifecycle_hardening.log"
+  },
+  {
+    "script": "review_20261102_p1_movement_verifier.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\fallback\\review_20261102_p1_movement_verifier.log"
+  },
+  {
+    "script": "path_recompute_under_fire_verifier.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\fallback\\path_recompute_under_fire_verifier.log"
+  },
+  {
+    "script": "task_475_fireteam_pathfinding_avoidance_stability_pass.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\fallback\\task_475_fireteam_pathfinding_avoidance_stability_pass.log"
+  },
+  {
+    "script": "task_1199_dominant_simulation_slice.gd",
+    "exit_code": 0,
+    "log": "output\\review_fixes_20261102\\fallback\\task_1199_dominant_simulation_slice.log"
+  }
+]

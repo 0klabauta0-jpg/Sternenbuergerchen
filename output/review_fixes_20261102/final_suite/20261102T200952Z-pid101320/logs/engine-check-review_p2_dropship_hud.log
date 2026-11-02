@@ -1,0 +1,30 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Review 2026-11-02 P2 Dropship HUD ===
+PASS: Real waiting card renders all three passengers
+WAITING_CARD before_nodes=44 after_nodes=44 before_root=410538479414 after_root=410538479414 retained_nodes=44
+PASS: Six real 0.35-second light HUD refreshes retain every unchanged card node
+PASS: Stable light refreshes do not rescan mission membership
+PASS: Transit changes retain the keyed craft card
+PASS: Transit updates visible dimming and accessibility
+PASS: Transit locks existing action buttons
+PASS: Progress-only changes retain the entire craft subtree
+PASS: Existing progress bar displays changed progress
+PASS: Existing info label displays changed ETA
+PASS: Waiting with LZ unlocks existing LZ and Drop actions
+PASS: Waiting restores full card visibility
+PASS: Dropship pilot, grouping and passenger lookups use the index without recursive tree searches
+PASS: Pilot profile changes refresh the existing pilot card
+PASS: Pilot loadout changes refresh its rendered profile
+PASS: Passenger name and portrait changes refresh visible payload content
+PASS: Changed payload removes only departed passenger visuals
+PASS: Payload changes retain the craft's command buttons
+PASS: Adding and reordering crafts retains the existing keyed card
+PASS: Selection styling follows the selected craft
+PASS: Reused command button has exactly one action connection
+PASS: Reused action invokes the original craft ID exactly once
+PASS: Bound approach action updates selected craft and active approach feedback
+PASS: Pending state updates feedback and locks only the affected craft
+PASS: Removing a craft discards only that craft's nodes
+=== RESULTS: 24 passed, 0 failed ===

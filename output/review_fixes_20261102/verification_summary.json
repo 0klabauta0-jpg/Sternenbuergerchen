@@ -1,0 +1,470 @@
+{
+  "schema": "sternenbuergerchen.review_fixes_20261102.v1",
+  "review_base": "7f594530f36f439d083d3ffae9873ef63be02639",
+  "branch": "task/performance-architecture-review-fixes-20261102",
+  "implementation_commits": [
+    "86d4f6c6d",
+    "858286fc9",
+    "211b929f9"
+  ],
+  "engine": "4.6.2.stable.official.71f334935",
+  "scope": "Seven reviewed fixes; structural CPU-operation and retained-node evidence; no FPS/GPU/release acceptance",
+  "tdd": [
+    {
+      "red_log": "movement/p1_movement_RED.log",
+      "finding": 1,
+      "green": 20,
+      "red_passed": 9,
+      "priority": "P1",
+      "red_failed": 11
+    },
+    {
+      "red_log": "navigation/p1_red.stdout.log",
+      "finding": 2,
+      "green": 72,
+      "red_passed": 54,
+      "priority": "P1",
+      "red_failed": 18
+    },
+    {
+      "red_log": "index/red.log",
+      "finding": 3,
+      "green": 31,
+      "red_passed": 15,
+      "priority": "P1",
+      "red_failed": 16
+    },
+    {
+      "red_log": "hex/p2_red.stdout.log",
+      "finding": 4,
+      "green": 26,
+      "red_passed": 11,
+      "priority": "P2",
+      "red_failed": 4
+    },
+    {
+      "red_log": "fallback/p2_fallback_RED.log",
+      "finding": 5,
+      "green": 42,
+      "red_passed": 29,
+      "priority": "P2",
+      "red_failed": 13
+    },
+    {
+      "red_log": "dropship/red.log",
+      "finding": 6,
+      "green": 27,
+      "red_passed": 16,
+      "priority": "P2",
+      "red_failed": 8
+    },
+    {
+      "red_log": "vital_red.log",
+      "finding": 7,
+      "green": 21,
+      "red_passed": 12,
+      "priority": "P2",
+      "red_failed": 9
+    }
+  ],
+  "operations": {
+    "path_cells_before": 43,
+    "step_cost_after": 2459,
+    "astar_after": 5,
+    "unchanged_hud_refreshes": 6,
+    "hex_map": "24x20",
+    "waiting_card_nodes_after": 44,
+    "path_cells_after": 43,
+    "step_cost_before": 66284,
+    "astar_before": 341,
+    "waiting_card_nodes_retained": 44,
+    "waiting_card_nodes_before": 44,
+    "hex_cluster": 8
+  },
+  "sequential_acceptance": {
+    "assertions_total": 879.0,
+    "checks": [
+      {
+        "name": "avoidance475",
+        "passed": true,
+        "assertions": 17,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-avoidance475.log"
+      },
+      {
+        "name": "combat_authority162",
+        "passed": true,
+        "assertions": 23,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-combat_authority162.log"
+      },
+      {
+        "name": "command_authority1186",
+        "passed": true,
+        "assertions": 8,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-command_authority1186.log"
+      },
+      {
+        "name": "command_readability1157",
+        "passed": true,
+        "assertions": 35,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-command_readability1157.log"
+      },
+      {
+        "name": "doors692",
+        "passed": true,
+        "assertions": 34,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-doors692.log"
+      },
+      {
+        "name": "dropship_multi_cards",
+        "passed": true,
+        "assertions": 61,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T201359Z-pid108864/logs/check-dropship_multi_cards.log"
+      },
+      {
+        "name": "dropship_pending1114",
+        "passed": true,
+        "assertions": 13,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T201359Z-pid108864/logs/check-dropship_pending1114.log"
+      },
+      {
+        "name": "dropship_truth503",
+        "passed": true,
+        "assertions": 10,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T201359Z-pid108864/logs/check-dropship_truth503.log"
+      },
+      {
+        "name": "dropship_ux397",
+        "passed": true,
+        "assertions": 12,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T201359Z-pid108864/logs/check-dropship_ux397.log"
+      },
+      {
+        "name": "hex_foundation",
+        "passed": true,
+        "assertions": 41,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-hex_foundation.log"
+      },
+      {
+        "name": "hex_movement",
+        "passed": true,
+        "assertions": 25,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-hex_movement.log"
+      },
+      {
+        "name": "hud_light1152",
+        "passed": true,
+        "assertions": 18,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-hud_light1152.log"
+      },
+      {
+        "name": "incremental_hpa412",
+        "passed": true,
+        "assertions": 27,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-incremental_hpa412.log"
+      },
+      {
+        "name": "interaction_jitter1100",
+        "passed": true,
+        "assertions": 31,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T201352Z-pid143140/logs/check-interaction_jitter1100.log"
+      },
+      {
+        "name": "interaction_payload1099",
+        "passed": true,
+        "assertions": 38,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-interaction_payload1099.log"
+      },
+      {
+        "name": "mission_index1190",
+        "passed": true,
+        "assertions": 16,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-mission_index1190.log"
+      },
+      {
+        "name": "movement_lifecycle501",
+        "passed": true,
+        "assertions": 10,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-movement_lifecycle501.log"
+      },
+      {
+        "name": "navigation125",
+        "passed": true,
+        "assertions": 64,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-navigation125.log"
+      },
+      {
+        "name": "navigation127",
+        "passed": true,
+        "assertions": 13,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-navigation127.log"
+      },
+      {
+        "name": "network_authority166",
+        "passed": true,
+        "assertions": 15,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-network_authority166.log"
+      },
+      {
+        "name": "path_recompute_under_fire",
+        "passed": true,
+        "assertions": 4,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-path_recompute_under_fire.log"
+      },
+      {
+        "name": "requeue1199",
+        "passed": true,
+        "assertions": 18,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-requeue1199.log"
+      },
+      {
+        "name": "review_p1_movement",
+        "passed": true,
+        "assertions": 20,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-review_p1_movement.log"
+      },
+      {
+        "name": "review_p1_navigation",
+        "passed": true,
+        "assertions": 72,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-review_p1_navigation.log"
+      },
+      {
+        "name": "review_p1_runtime_index",
+        "passed": true,
+        "assertions": 31,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-review_p1_runtime_index.log"
+      },
+      {
+        "name": "review_p2_dropship_hud",
+        "passed": true,
+        "assertions": 27,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T201359Z-pid108864/logs/check-review_p2_dropship_hud.log"
+      },
+      {
+        "name": "review_p2_fallback",
+        "passed": true,
+        "assertions": 42,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-review_p2_fallback.log"
+      },
+      {
+        "name": "review_p2_hex_budget",
+        "passed": true,
+        "assertions": 26,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-review_p2_hex_budget.log"
+      },
+      {
+        "name": "review_p2_vital_order",
+        "passed": true,
+        "assertions": 21,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-review_p2_vital_order.log"
+      },
+      {
+        "name": "snapshot_payload221",
+        "passed": true,
+        "assertions": 63,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-snapshot_payload221.log"
+      },
+      {
+        "name": "snapshot168",
+        "passed": true,
+        "assertions": 20,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-snapshot168.log"
+      },
+      {
+        "name": "two_peer_transport1083",
+        "passed": true,
+        "assertions": 24,
+        "exit_code": 0,
+        "error_count": 0,
+        "marker_found": true,
+        "log": "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/logs/check-two_peer_transport1083.log"
+      }
+    ],
+    "aggregation": "Latest result per named check. Initial 27/28 retained; TASK1100 corrected oracle rerun plus final HUD27 and four additional dropship gates supersede those affected initial results.",
+    "unique_checks": 32,
+    "all_passed": true,
+    "reports": [
+      "output/review_fixes_20261102/final_suite/20261102T200952Z-pid101320/metadata/report.json",
+      "output/review_fixes_20261102/final_suite/20261102T201352Z-pid143140/metadata/report.json",
+      "output/review_fixes_20261102/final_suite/20261102T201359Z-pid108864/metadata/report.json"
+    ]
+  },
+  "import": {
+    "log": "import.log",
+    "strict_pass": false,
+    "exit_code": 0,
+    "diagnostic": "Existing editor-shutdown ObjectDB instances leaked warning. Runtime checks separately strict."
+  },
+  "qa_corrections": [
+    "TASK692 frees its unmanaged Registry fixture; initial strict leak failure and clean rerun retained.",
+    "TASK1100 seven exact strings now include FT2 per current owning contract; progress formatting source unchanged from review base. No production workaround or weakened jitter assertions."
+  ],
+  "independent_review": "P1 navigation and runtime/index reviews approved; P2 algorithms approved; final whole-diff review approved without actionable P1/P2 findings.",
+  "source_sha256": [
+    {
+      "path": "scripts/core/simulation_root.gd",
+      "sha256": "d68571f7df35fd17baa5116cfb39a76e6eb76b5bcc4c245177cc7441fdc9be2c"
+    },
+    {
+      "path": "scripts/multiplayer/multiplayer_snapshot_contract.gd",
+      "sha256": "ae7a02f4c8d4b83a7e6335f245a9afce3d4a961855f7ac11e75816323da6e81f"
+    },
+    {
+      "path": "scripts/npc/test_unit.gd",
+      "sha256": "5270869c3e426e5c01610f794a79930ea2c73bde8f1db7fb12d3a17b8280fcad"
+    },
+    {
+      "path": "scripts/tactical/mission_runtime_index.gd",
+      "sha256": "68dc147a2b466f44ebb7d3b49274c2f188c2700a5c97e05f26edf162b7525f2d"
+    },
+    {
+      "path": "scripts/terrain/hpa_navigation_graph.gd",
+      "sha256": "24f492995ea3e2964dafa2a43f698c49663880b22bf16183b79d45d9c961c912"
+    },
+    {
+      "path": "scripts/terrain/hpa_pathfinder.gd",
+      "sha256": "782a20550253e14bd4f2c3e5752928c98cdd5dd8e7e3b24954504d78183fa1e1"
+    },
+    {
+      "path": "scripts/terrain/terrain_pathfinder.gd",
+      "sha256": "ef62c8bd320dd8e92c87001119454e50929ea8ce84beb82ba55c95c17f9214ce"
+    },
+    {
+      "path": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "sha256": "da09cc9a7d75d017cd2c8148d57f1dc1a2446448f1b6f27f39590f9069293beb"
+    },
+    {
+      "path": "scripts/tests/review_20261102_checks.json",
+      "sha256": "1ec22ed7a347bc4078bd6557b34ab748d525e010be16c77f157e02badee25219"
+    },
+    {
+      "path": "scripts/tests/review_20261102_p1_movement_verifier.gd",
+      "sha256": "4738b06b9f01e37d87e46a6337798d42747befa600ba03f9104487e227c25fff"
+    },
+    {
+      "path": "scripts/tests/review_20261102_p1_navigation_verifier.gd",
+      "sha256": "e0228d8d284c999d5df2af84a8981087828e22ca09571783f2ae9224469a4621"
+    },
+    {
+      "path": "scripts/tests/review_20261102_p1_runtime_index_verifier.gd",
+      "sha256": "5e9949fad18c26bdc772d1325a0ef52c8415bc21a7804b809aa26ef3d9864e54"
+    },
+    {
+      "path": "scripts/tests/review_20261102_p2_dropship_hud_verifier.gd",
+      "sha256": "c6f0db0bdd4f8c5bdba7ecc300f5d8f8778546ba5a1fd60a1f2e949a18281266"
+    },
+    {
+      "path": "scripts/tests/review_20261102_p2_fallback_verifier.gd",
+      "sha256": "82586fd4d238a69076d4b4106769c1623b373d14db5d2543acb57d1d7969972a"
+    },
+    {
+      "path": "scripts/tests/review_20261102_p2_hex_budget_verifier.gd",
+      "sha256": "9e981b5d2ad27fb074c6b3a6b58ab230a2d40a21a47199a6daaa56d2203284bb"
+    },
+    {
+      "path": "scripts/tests/review_20261102_p2_vital_order_verifier.gd",
+      "sha256": "dc83354f76b219b6ee8f3bb7007be73cfefeda5f540f8a229ec7280de0153c8f"
+    },
+    {
+      "path": "scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd",
+      "sha256": "95a04554924096986b7567662284e88898b313dbdc1f34122aa2f9340f36f4b5"
+    },
+    {
+      "path": "scripts/tests/task_692_door_runtime_collision_los_contract.gd",
+      "sha256": "4e49e1273e69a279e53c3e5eba187dd42411ff3ea3fff3fce203e791d01a863a"
+    }
+  ]
+}

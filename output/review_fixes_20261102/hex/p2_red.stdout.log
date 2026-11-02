@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+HEX_OPERATION_COUNTS {"a_star_calls":341,"map":"24x20","path_size":43,"step_cost_calls":66284}
+FAIL: 24x20 query needs at most 12 assembly A* calls, not one per portal
+FAIL: 24x20 local traversals stay within component-sized step budget
+PASS: 24x20 HPA returns a legal endpoint-preserving hex path
+PASS: Open 24x20 route retains 42 unit-cost steps
+PASS: Repeated query is deterministic
+FAIL: Repeated query retains bounded A* assembly work
+PASS: Plain hex route takes straight shortest corridor
+PASS: Exposure-weighted route remains legal
+PASS: Changed options avoid expensive exposure on same graph
+PASS: Mutating same options dictionary cannot reuse stale exposure distances
+PASS: Revision plus dirty rebuild respects effective blocked hex
+PASS: Reopening terrain restores deterministic original route
+PASS: Changed surface route remains legal
+PASS: Terrain cost changes do not reuse stale local distances
+FAIL: Shared component cost traversal exists
+REVIEW_20261102_P2_HEX_RESULT passed=11 failed=4

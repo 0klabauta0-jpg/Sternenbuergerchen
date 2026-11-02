@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T200055Z-pid158212",
+  "project": "C:\\dev\\SternenBuergerchen",
+  "manifest": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.055,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T200055Z-pid158212\\logs\\version.log",
+    "passed": true
+  },
+  "filter": "doors692",
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-02T20:00:55.777084+00:00",
+  "finished_at": "2026-11-02T20:00:56.491577+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T200055Z-pid158212\\logs\\engine-check-doors692.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\task_692_door_runtime_collision_los_contract.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.651,
+      "name": "doors692",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T200055Z-pid158212\\logs\\check-doors692.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T200055Z-pid158212\\logs\\engine-check-doors692.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

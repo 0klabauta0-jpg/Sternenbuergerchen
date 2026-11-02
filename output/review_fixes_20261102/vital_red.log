@@ -1,0 +1,70 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: New snapshot applies down state
+ERROR: FAIL: Late reliable vital update cannot resurrect snapshot state
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:107)
+       [1] _test_cross_transport_ordering (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:31)
+       [2] _run (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:14)
+ERROR: FAIL: Unversioned reliable data cannot replace ordered vital state
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:107)
+       [1] _test_cross_transport_ordering (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:33)
+       [2] _run (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:14)
+ERROR: FAIL: Duplicate vital tick does not apply a conflicting payload
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:107)
+       [1] _test_cross_transport_ordering (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:35)
+       [2] _run (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:14)
+PASS: Strictly newer reliable respawn is accepted
+PASS: Vital ordering is per unit rather than global snapshot tick
+PASS: Snapshot may advance non-vital state behind a newer reliable vital tick
+ERROR: FAIL: Older snapshot cannot replace a newer reliable vital update
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:107)
+       [1] _test_cross_transport_ordering (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:46)
+       [2] _run (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:14)
+PASS: Older vital data does not block valid snapshot movement
+PASS: Newer reliable respawn supersedes down state
+PASS: Position-only snapshot preserves vitals
+PASS: Position-only snapshot does not consume a unit vital tick
+PASS: Legacy snapshot vitals use their enclosing authoritative tick
+ERROR: FAIL: Legacy snapshot tick also guards the reliable path
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:107)
+       [1] _test_cross_transport_ordering (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:57)
+       [2] _run (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:14)
+PASS: Remote vital application creates no gameplay commands or effects
+ERROR: FAIL: Unit snapshot carries authoritative vital tick through normalization
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:107)
+       [1] _test_sender_versions_and_delta_dedupe (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:73)
+       [2] _run (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:15)
+ERROR: FAIL: Snapshot vital entries carry the same tick
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:107)
+       [1] _test_sender_versions_and_delta_dedupe (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:74)
+       [2] _run (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:15)
+ERROR: FAIL: Reliable delta carries the matching authoritative tick
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:107)
+       [1] _test_sender_versions_and_delta_dedupe (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:76)
+       [2] _run (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:15)
+PASS: Unchanged vitals do not emit a reliable delta every tick
+ERROR: FAIL: Changed vitals emit a new authoritative tick
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:107)
+       [1] _test_sender_versions_and_delta_dedupe (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:82)
+       [2] _run (res://scripts/tests/review_20261102_p2_vital_order_verifier.gd:15)
+PASS: Repeated build without state change remains deduplicated
+REVIEW_20261102_P2_VITAL_ORDER_RESULT passed=12 failed=9

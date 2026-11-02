@@ -1,0 +1,76 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Initial graph builds
+PASS: Initial full SimulationRoot endpoint is (7, 0)
+PASS: stored=false effective=true preserves stored tile data
+PASS: stored=false effective=true registry exposes effective walkability
+PASS: stored=false effective=true dirty build succeeds
+PASS: stored=false effective=true uses dirty build
+PASS: stored=false effective=true dirty component membership matches effective door
+PASS: stored=false effective=true dirty walkable membership matches effective door
+PASS: stored=false effective=true dirty direct A* confirms corridor reachability
+PASS: stored=false effective=true dirty HPA matches corridor reachability
+PASS: stored=false effective=true dirty crosses open door with legal corridor steps
+PASS: stored=false effective=true full build succeeds
+PASS: stored=false effective=true full component membership matches effective door
+PASS: stored=false effective=true full walkable membership matches effective door
+PASS: stored=false effective=true full direct A* confirms corridor reachability
+PASS: stored=false effective=true full HPA matches corridor reachability
+PASS: stored=false effective=true full crosses open door with legal corridor steps
+PASS: stored=false effective=true cached simulation SimulationRoot endpoint is (16, 0)
+PASS: stored=false effective=true simulation invalidates cached graph incrementally
+PASS: stored=false effective=true fresh simulation SimulationRoot endpoint is (16, 0)
+PASS: stored=false effective=false preserves stored tile data
+PASS: stored=false effective=false registry exposes effective walkability
+PASS: stored=false effective=false dirty build succeeds
+PASS: stored=false effective=false uses dirty build
+PASS: stored=false effective=false dirty component membership matches effective door
+PASS: stored=false effective=false dirty walkable membership matches effective door
+PASS: stored=false effective=false dirty direct A* confirms corridor reachability
+PASS: stored=false effective=false dirty HPA matches corridor reachability
+PASS: stored=false effective=false full build succeeds
+PASS: stored=false effective=false full component membership matches effective door
+PASS: stored=false effective=false full walkable membership matches effective door
+PASS: stored=false effective=false full direct A* confirms corridor reachability
+PASS: stored=false effective=false full HPA matches corridor reachability
+PASS: stored=false effective=false cached simulation SimulationRoot endpoint is (7, 0)
+PASS: stored=false effective=false simulation invalidates cached graph incrementally
+PASS: stored=false effective=false fresh simulation SimulationRoot endpoint is (7, 0)
+PASS: Initial graph builds
+PASS: Initial full SimulationRoot endpoint is (16, 0)
+PASS: stored=true effective=false preserves stored tile data
+PASS: stored=true effective=false registry exposes effective walkability
+PASS: stored=true effective=false dirty build succeeds
+PASS: stored=true effective=false uses dirty build
+PASS: stored=true effective=false dirty component membership matches effective door
+PASS: stored=true effective=false dirty walkable membership matches effective door
+PASS: stored=true effective=false dirty direct A* confirms corridor reachability
+PASS: stored=true effective=false dirty HPA matches corridor reachability
+PASS: stored=true effective=false full build succeeds
+PASS: stored=true effective=false full component membership matches effective door
+PASS: stored=true effective=false full walkable membership matches effective door
+PASS: stored=true effective=false full direct A* confirms corridor reachability
+PASS: stored=true effective=false full HPA matches corridor reachability
+PASS: stored=true effective=false cached simulation SimulationRoot endpoint is (7, 0)
+PASS: stored=true effective=false simulation invalidates cached graph incrementally
+PASS: stored=true effective=false fresh simulation SimulationRoot endpoint is (7, 0)
+PASS: stored=true effective=true preserves stored tile data
+PASS: stored=true effective=true registry exposes effective walkability
+PASS: stored=true effective=true dirty build succeeds
+PASS: stored=true effective=true uses dirty build
+PASS: stored=true effective=true dirty component membership matches effective door
+PASS: stored=true effective=true dirty walkable membership matches effective door
+PASS: stored=true effective=true dirty direct A* confirms corridor reachability
+PASS: stored=true effective=true dirty HPA matches corridor reachability
+PASS: stored=true effective=true dirty crosses open door with legal corridor steps
+PASS: stored=true effective=true full build succeeds
+PASS: stored=true effective=true full component membership matches effective door
+PASS: stored=true effective=true full walkable membership matches effective door
+PASS: stored=true effective=true full direct A* confirms corridor reachability
+PASS: stored=true effective=true full HPA matches corridor reachability
+PASS: stored=true effective=true full crosses open door with legal corridor steps
+PASS: stored=true effective=true cached simulation SimulationRoot endpoint is (16, 0)
+PASS: stored=true effective=true simulation invalidates cached graph incrementally
+PASS: stored=true effective=true fresh simulation SimulationRoot endpoint is (16, 0)
+REVIEW_20261102_P1_NAVIGATION_RESULT passed=72 failed=0

@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "p1_movement",
+      "success_marker": "=== RESULTS: 20 passed, 0 failed ===",
+      "timeout": 45,
+      "script": "res://scripts/tests/review_20261102_p1_movement_verifier.gd"
+    },
+    {
+      "name": "p1_navigation",
+      "success_marker": "REVIEW_20261102_P1_NAVIGATION_RESULT passed=72 failed=0",
+      "timeout": 45,
+      "script": "res://scripts/tests/review_20261102_p1_navigation_verifier.gd"
+    },
+    {
+      "name": "p1_runtime_index",
+      "success_marker": "=== RESULTS: 31 passed, 0 failed ===",
+      "timeout": 60,
+      "script": "res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd"
+    },
+    {
+      "name": "authority162",
+      "success_marker": "23 passed, 0 failed",
+      "timeout": 60,
+      "script": "res://scripts/tests/task_162_combat_authority_contract_verifier.gd"
+    },
+    {
+      "name": "movement501",
+      "success_marker": "10 passed, 0 failed",
+      "timeout": 45,
+      "script": "res://scripts/tests/task_501_integrated_movement_command_lifecycle_hardening.gd"
+    },
+    {
+      "name": "index1190",
+      "success_marker": "16 passed, 0 failed",
+      "timeout": 60,
+      "script": "res://scripts/tests/task_1190_mission_runtime_index_hud_delta.gd"
+    },
+    {
+      "name": "hud1152",
+      "success_marker": "18 passed, 0 failed",
+      "timeout": 60,
+      "script": "res://scripts/tests/task_1152_mission_hud_heavy_refresh_budget_pass.gd"
+    },
+    {
+      "name": "navigation412",
+      "success_marker": "passed, 0 failed",
+      "timeout": 60,
+      "script": "res://scripts/tests/task_412_large_map_streaming_incremental_hpa.gd"
+    },
+    {
+      "name": "doors692",
+      "success_marker": "passed, 0 failed",
+      "timeout": 60,
+      "script": "res://scripts/tests/task_692_door_runtime_collision_los_contract.gd"
+    },
+    {
+      "name": "hex_foundation",
+      "success_marker": "PASS:",
+      "timeout": 60,
+      "script": "res://scripts/tests/frontier_hex_foundation_verifier.gd"
+    }
+  ]
+}

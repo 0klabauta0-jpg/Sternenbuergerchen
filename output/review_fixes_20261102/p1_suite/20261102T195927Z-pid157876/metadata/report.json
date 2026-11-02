@@ -1,0 +1,270 @@
+{
+  "version": 1,
+  "run_dir": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876",
+  "project": "C:\\dev\\SternenBuergerchen",
+  "manifest": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_checks.json",
+  "godot": "godot_console.exe",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console.exe",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.055,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-02T19:59:27.035243+00:00",
+  "finished_at": "2026-11-02T20:00:08.830284+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-p1_movement.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\review_20261102_p1_movement_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.929,
+      "name": "p1_movement",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\check-p1_movement.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-p1_movement.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-p1_navigation.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\review_20261102_p1_navigation_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.019,
+      "name": "p1_navigation",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\check-p1_navigation.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-p1_navigation.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-p1_runtime_index.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\review_20261102_p1_runtime_index_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 13.63,
+      "name": "p1_runtime_index",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\check-p1_runtime_index.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-p1_runtime_index.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-authority162.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\task_162_combat_authority_contract_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 6.949,
+      "name": "authority162",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\check-authority162.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-authority162.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-movement501.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\task_501_integrated_movement_command_lifecycle_hardening.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.934,
+      "name": "movement501",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\check-movement501.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-movement501.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-index1190.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\task_1190_mission_runtime_index_hud_delta.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 7.131,
+      "name": "index1190",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\check-index1190.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-index1190.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-hud1152.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\task_1152_mission_hud_heavy_refresh_budget_pass.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 6.667,
+      "name": "hud1152",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\check-hud1152.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-hud1152.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-navigation412.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\task_412_large_map_streaming_incremental_hpa.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 2.665,
+      "name": "navigation412",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\check-navigation412.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-navigation412.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-doors692.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\task_692_door_runtime_collision_los_contract.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.756,
+      "name": "doors692",
+      "marker_found": true,
+      "errors": [
+        "WARNING: ObjectDB instances leaked at exit (run with --verbose for details).",
+        "ERROR: 2 resources still in use at exit (run with --verbose for details)."
+      ],
+      "error_count": 2,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\check-doors692.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-doors692.log",
+      "passed": false,
+      "reasons": [
+        "2 error(s)"
+      ]
+    },
+    {
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-hex_foundation.log",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\scripts\\tests\\frontier_hex_foundation_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.027,
+      "name": "hex_foundation",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\check-hex_foundation.log",
+      "godot_log": "C:\\dev\\SternenBuergerchen\\output\\review_fixes_20261102\\p1_suite\\20261102T195927Z-pid157876\\logs\\engine-check-hex_foundation.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 10,
+    "passed": 9,
+    "failed": 1
+  }
+}

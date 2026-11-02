@@ -5,11 +5,21 @@
 - P1 abgeschlossen: autoritative Bewegung stoppt kampfunfaehige Units samt
   alten Respawn-Continuations; Full-/Dirty-HPA liest effektive Tuer-Begehbarkeit;
   Missionsindex invalidiert auch bei ID-/Team-/Fireteamwechseln vorhandener Nodes.
-- Alle drei Regressionen zuerst rot, danach 20/20, 72/72 und 31/31 gruen;
-  unabhaengige Reviews ohne wichtige Befunde. Zehn betroffene Runtime-Skripte
-  mit 292 Assertions strikt geprueft. TASK_692 gibt nun seine Registry-Fixture frei.
-- P2 folgt im selben Task-Branch: Hex-Suchfanout, Fallback-Abschluss,
-  Dropship-Kartenwiederverwendung und transportuebergreifende Vital-Reihenfolge.
+- P2 abgeschlossen: Hex-Kostenkarten je Komponente/Eintritt statt pro Portal
+  wiederholter A*-Suchen; terminaler Fallback-Abschluss mit Terrainrevision;
+  stabile Craft-ID-HUD-Karten und zielgerichtete Renderupdates; `vital_tick`
+  ordnet Snapshot-/Reliable-Vitals pro Unit bei unveraenderter Delta-Dedupe.
+- Alle sieben Regressionen zuerst rot, danach 20/20, 72/72, 31/31, 26/26,
+  42/42, 27/27 und 21/21 gruen. Finale unabhaengige Review APPROVED ohne
+  wichtige offene Befunde. Effektiv 32 unterschiedliche Verifier / 879 Assertions
+  strikt gruen; Rohlaeufe inklusive erstem 27/28-Lauf bleiben erhalten.
+- Hex 24x20: 341->5 A*, 66284->2459 Schrittkosten, weiter 43 legale Pfadzellen.
+  Sechs unveraenderte HUD-Refreshes behalten 44/44 Kartennodes. Keine FPS-Aussage.
+- QA: TASK_692 gibt seine Registry-Fixture frei. TASK_1100 erwartet nun die im
+  bestehenden Contract geforderte Besitzerkennung FT2; keine Produktionsaenderung
+  fuer diesen Oracle-Fix. Import Exit0 hat weiterhin eine Editor-Shutdown-Leakwarnung.
+- Nachweise/Quellhashes: `output/review_fixes_20261102/verification_summary.json`;
+  Checkmanifest: `scripts/tests/review_20261102_checks.json`.
 - Keine Main-Integration, keine neue Release-/FPS-/GPU-Abnahme.
 
 ### ART 2026-11-01 Main-Adoption: Frontier und Astra Ref03
