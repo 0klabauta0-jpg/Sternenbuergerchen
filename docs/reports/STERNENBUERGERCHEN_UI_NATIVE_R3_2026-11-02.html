@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SternenBürgerchen · Native UI R3 · 02.11.2026</title>
+  <!-- Abgeleitet von docs/reports/_html_workbench_template.html und der vorhandenen
+       STERNENBUERGERCHEN_UI_2026-11-01.html. Exportprinzip: setPath, vollständige
+       Control-/Notizerfassung, Zeitstempeldatei und Download-/Textfallback.
+       Contract: docs/dev/html_report_workbench_contract.md. Keine Runtime-Anbindung. -->
+  <style>
+    :root{color-scheme:dark;--bg:#11181c;--panel:#1b252b;--panel2:#252d33;--line:#44535b;--text:#edf3f6;--muted:#a9b4bc;--cyan:#63d1d2;--yellow:#f2c94c;--cream:#eee7d8;--ink:#23343c;font-family:"Segoe UI",Arial,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);line-height:1.6}a{color:var(--cyan);text-underline-offset:4px}button,input,select,textarea{font:inherit}button{cursor:pointer;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;min-height:44px;padding:10px 16px}button:hover{border-color:var(--cyan)}:focus-visible{outline:3px solid var(--yellow);outline-offset:4px}button.primary{background:var(--cyan);color:var(--ink);border-color:var(--cyan);font-weight:700}input,select,textarea{background:#0d151a;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:11px 12px;max-width:100%}textarea{width:100%;min-height:110px;resize:vertical}label{display:block}input[type=checkbox]{width:19px;height:19px;accent-color:var(--cyan);margin-top:4px;flex:none}h1,h2,h3{line-height:1.15;margin:0;font-weight:600}h1{font-size:clamp(36px,5vw,66px);letter-spacing:-.045em}h2{font-size:clamp(27px,3vw,39px);letter-spacing:-.03em}h3{font-size:20px}p{margin:13px 0 0}.wrap{width:min(1460px,calc(100% - 64px));margin:auto}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.15em;font-weight:700;color:var(--cyan)}.muted{color:var(--muted)}.small{font-size:13px}.pill{display:inline-block;border:1px solid var(--line);border-radius:24px;padding:5px 11px;font-size:12px;color:var(--muted)}.pill.warning{border-color:#82703a;color:var(--yellow)}.pill.native{border-color:#437a7b;color:var(--cyan)}.skip{position:absolute;top:-100px;left:16px;background:var(--cream);color:var(--ink);padding:10px;z-index:50}.skip:focus{top:10px}header{background:linear-gradient(115deg,#24373d,#152027 75%);padding:27px 0 43px;border-bottom:1px solid var(--line)}.brandrow{display:flex;justify-content:space-between;align-items:center;gap:20px;padding-bottom:30px}.brand{font-weight:700}.intro{display:grid;grid-template-columns:1.3fr 1fr;gap:50px;align-items:end}.intro .eyebrow{margin-bottom:13px}.intro p{color:#c6d0d4;font-size:17px;max-width:520px}.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:23px}.nav{border-bottom:1px solid var(--line)}.nav .wrap{display:flex;gap:29px;overflow:auto}.nav a{padding:17px 0;text-decoration:none;color:var(--muted);white-space:nowrap;font-size:14px}.section{padding:44px 0;border-bottom:1px solid var(--line);scroll-margin-top:20px}.sectionhead{display:flex;justify-content:space-between;gap:32px;align-items:end;margin-bottom:24px}.sectionhead .eyebrow{margin-bottom:10px}.sectionhead p{max-width:530px;font-size:15px;color:var(--muted)}.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.summary-card{padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:9px}.summary-card h3{font-size:18px;color:var(--cyan)}.summary-card p{font-size:14px;color:var(--muted)}.notice{border-left:3px solid var(--yellow);padding:15px 20px;background:#262c28;color:#e0e0d0;font-size:14px;margin-bottom:23px}.screen-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:22px}.screen-tab{text-align:left;display:flex;align-items:center;gap:10px;font-size:13px;background:var(--panel);color:var(--muted)}.screen-tab .number{color:var(--cyan);font-size:11px}.screen-tab[aria-selected=true]{background:var(--cream);color:var(--ink);border-color:var(--cream)}.screen-tab[aria-selected=true] .number{color:#4b666f}[hidden]{display:none!important}figure{margin:0}.capture{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#080e12}.capture-head{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:13px 17px;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}.image-button{width:100%;padding:0;border:0;display:block;background:#080e12;border-radius:0}.image-button img{display:block;width:100%;height:auto}.capture figcaption{padding:13px 17px;font-size:13px;color:var(--muted)}.capture-links{display:flex;flex-wrap:wrap;gap:17px;padding:0 17px 15px;font-size:12px}.screen-review{display:grid;grid-template-columns:minmax(230px,1fr) 2fr;gap:22px;margin-top:23px;padding:23px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}.screen-review label{font-size:13px;color:var(--muted)}.screen-review select{width:100%;margin-top:8px}.screen-review textarea{margin-top:8px;min-height:94px}.checks-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.review-card{padding:25px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}.review-card h3{margin-bottom:18px}.checkline{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px}.checkline:last-child{border-bottom:0}.checkline span{flex:1}.note-edit{min-height:130px;padding:14px;border:1px solid var(--line);border-radius:6px;background:#0d151a}.note-edit:empty::before{content:attr(data-placeholder);color:var(--muted)}.context-input{width:100%;margin-top:8px}.exportbox{background:var(--cream);color:var(--ink);padding:30px;border-radius:11px}.exportbox .eyebrow{color:#4b6872}.exportbox p{color:#485d67;max-width:950px}.export-actions{display:flex;flex-wrap:wrap;gap:9px;margin:22px 0 17px}.exportbox button{background:#263e48;color:#fff;border-color:#263e48}.exportbox button.primary{background:#dfb947;color:#23343c;border-color:#a88d3c}.exportbox textarea{background:#faf6ed;color:#22343d;border-color:#aeb4b1;min-height:200px;font-family:Consolas,monospace;font-size:12px}.export-status{font-size:13px;color:#405965;margin-top:11px}.sources{display:flex;flex-wrap:wrap;gap:20px;font-size:14px;margin-top:23px}footer{padding:27px 0 40px;color:var(--muted);font-size:12px}dialog{max-width:calc(100vw - 30px);width:1600px;max-height:calc(100vh - 30px);padding:0;border:1px solid var(--line);border-radius:9px;background:#111a20;color:var(--text)}dialog::backdrop{background:rgba(0,0,0,.86)}.dialog-head{padding:12px 19px;display:flex;justify-content:space-between;align-items:center;gap:16px}.dialog-head h2{font-size:18px}dialog img{display:block;width:100%;max-height:calc(100vh - 145px);object-fit:contain}.dialog-caption{font-size:12px;padding:12px 19px;color:var(--muted)}
+    @media(max-width:1050px){.intro{grid-template-columns:1fr;gap:15px}.intro p{max-width:800px}.summary-grid{grid-template-columns:1fr}.screen-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}.sectionhead{display:block}.sectionhead p{max-width:800px}}
+    @media(max-width:650px){.wrap{width:calc(100% - 28px)}.brandrow{align-items:start;font-size:13px}.intro p{font-size:15px}.section{padding:32px 0}.screen-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.screen-tab{padding:10px;font-size:12px}.checks-grid,.screen-review{grid-template-columns:1fr}.screen-review{gap:16px;padding:19px}.capture-head{font-size:11px;align-items:start}.exportbox{padding:23px 18px}.nav .wrap{gap:23px}.capture-links{gap:12px}}
+    .comparison{margin-top:20px;padding:16px;border:1px solid var(--line);border-radius:8px}.comparison summary{cursor:pointer;color:var(--cyan)}.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.compare-grid img{width:100%;display:block}.compare-grid figcaption{font-size:12px;color:var(--muted)}@media(max-width:650px){.compare-grid{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  </style>
+</head>
+<body data-report-id="sternenbuergerchen_ui_native_r3_20261102" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <a href="#galerie" class="skip">Zur Screenshotgalerie</a>
+  <header><div class="wrap"><div class="brandrow"><span class="brand">SternenBürgerchen / Native UI</span><span class="small muted">02.11.2026 · R3</span></div><div class="intro"><div><div class="eyebrow">Von der Bildvorlage zu Godot-Controls</div><h1>Weniger Leerraum.<br>Klare Zustände.</h1></div><p>Runde 3 begrenzt leere Arbeitsbereiche nach ihrem Inhalt und ersetzt technische Statusdumps durch verständliche Anzeigen. Alle Bilder stammen aus echten Godot-Controls.</p></div><div class="pills"><span class="pill native">Native Godot-Viewportbilder</span><span class="pill">GL Compatibility · Testdaten</span><span class="pill warning">Menschlicher Klicktest offen</span><span class="pill">Kein Release-Nachweis</span></div></div></header>
+  <nav class="nav" aria-label="Reportbereiche"><div class="wrap"><a href="#stand">01 Erwartung &amp; Ist</a><a href="#galerie">02 Native Screens</a><a href="#pruefung">03 Prüfung &amp; Notizen</a><a href="#export">04 Übergabe</a></div></nav>
+  <main class="wrap">
+    <section id="stand" class="section" aria-labelledby="stand-title"><div class="sectionhead"><div><div class="eyebrow">01 / R3 einordnen</div><h2 id="stand-title">Echte Oberfläche. Begrenzter Nachweis.</h2></div><p>Der Entwurf gibt Formsprache und Gruppierung vor. Vorhandene Runtime-, Daten- und Eingabeverträge bestimmen weiterhin Werte und erlaubte Aktionen.</p></div><div class="summary-grid"><article class="summary-card"><h3>Erwartung</h3><p>Dunkle matte Flächen, helle Schrift, Cyan für Interaktion und Gelb für Auswahl. Einheitliche native Rahmen, Fokus und Popupflächen. In der Mission zwei echte Aktionsreihen mit Ziel/Auftrag vor den Teamparametern.</p></article><article class="summary-card"><h3>Ist-Stand dieser Runde</h3><p>Leere Arbeitsorte werden kurze Statuskarten. Ergebnisfenster und Karten richten sich nach dem vorhandenen Bericht. Primäre Missionsanzeigen benennen tatsächlichen Zustand und nächsten Schritt; Rohdetails bleiben erreichbar.</p></article><article class="summary-card"><h3>Prüfgrenze</h3><p>GL-Compatibility-Captures und technische Verifier ersetzen keinen menschlichen Klicktest. Daten sind Fixtures oder Beispiele. Englische Alttexte können noch vorkommen; Sprachpolish folgt. Kein Nachweis für eine abgeschlossene Kampagne oder das gesamte Release.</p></article></div></section>
+    <section class="section" aria-labelledby="density-title"><div class="sectionhead"><div><div class="eyebrow">Gemessener Unterschied · Full HD</div><h2 id="density-title">Die leeren Rahmen sind kleiner.</h2></div><p>Repräsentative Belegung bei 1920×1080. Arbeitslisten und vorhandene Detailwege bleiben erreichbar.</p></div><table style="width:100%;border-collapse:collapse;font-size:15px"><thead><tr style="text-align:left;border-bottom:1px solid var(--line)"><th style="padding:12px">Bereich</th><th>Runde 2</th><th>Runde 3</th></tr></thead><tbody><tr style="border-bottom:1px solid var(--line)"><td style="padding:12px">Leerer Truppbereich der Heimatbasis</td><td>848 px hoch</td><td>128 px hoch</td></tr><tr style="border-bottom:1px solid var(--line)"><td style="padding:12px">Leeres FOB-Flugdeck</td><td>712 px hoch</td><td>176 px hoch</td></tr><tr><td style="padding:12px">Fenster mit kurzem Ergebnisbericht</td><td>1872 × 1032 px</td><td>1240 × 624 px</td></tr></tbody></table><p class="small muted">Die Ergebnisfensterfläche ist in diesem Beispiel rund 60 % kleiner. Personal und Ausrüstung behalten ihre Arbeitslisten; seltene Diagnosen liegen in Details. <a href="../qa/ui_native_r3_20261102/density_comparison.json">Messdaten und Quellen ↗</a></p></section>
+    <section id="galerie" class="section" aria-labelledby="galerie-title"><div class="sectionhead"><div><div class="eyebrow">02 / Dreizehn gezielte native Aufnahmen</div><h2 id="galerie-title">Die R3-Ansichten im Vergleich.</h2></div><p>Ansicht auswählen, groß ansehen und separat bewerten. Die vier 1280×720-Ansichten werden diesmal mit echter logischer Größe 1280×720 aufgenommen. Die Metadaten dokumentieren Viewport und Ausgabe getrennt.</p></div><div class="notice">Hier werden <strong>keine KI-Mockups als Runtime-Bilder</strong> verwendet. Jede Aufnahme hat eine eigene Metadatendatei mit Renderer, Bild-/Viewportgröße und Fixture-Kennzeichnung. Ein Screenshot allein bestätigt weder den vollständigen Klickweg noch fehlerfreie Zustandsübergänge.</div><div id="screenNav" class="screen-tabs" role="tablist" aria-label="Native Ansicht wählen" data-choice-group="preview.screen"></div><div id="screenPanels"></div><p class="small muted" style="margin-top:22px">Die Bilddateien sind gerenderte Prüfausschnitte. Ihre Review-Felder bleiben unabhängig voneinander erhalten; beim Export werden auch gerade ausgeblendete Notizen erfasst.</p></section>
+    <section id="pruefung" class="section" aria-labelledby="pruefung-title"><div class="sectionhead"><div><div class="eyebrow">03 / Gemeinsam prüfen</div><h2 id="pruefung-title">Was fällt im echten Ablauf auf?</h2></div><p>Die Häkchen beginnen offen. Setze sie nach der passenden Sichtung oder dem tatsächlich durchgeführten Klicktest, nicht allein aufgrund vorhandener Bilddateien.</p></div><div class="checks-grid"><article class="review-card"><h3>Review-Checks</h3><label class="checkline"><input type="checkbox" data-export-key="checks.visual_consistency"><span>Rahmen, Karten, Buttons und Auswahl sind über die Ansichten konsistent.</span></label><label class="checkline"><input type="checkbox" data-export-key="checks.legibility"><span>Schrift und primäre Aktionen sind bei den relevanten Ausgabegrößen lesbar.</span></label><label class="checkline"><input type="checkbox" data-export-key="checks.keyboard_focus"><span>Fokus, Dropdowns und Modals wurden tatsächlich mit Tastatur und Maus geprüft.</span></label><label class="checkline"><input type="checkbox" data-export-key="checks.command_path"><span>Auswahl → Plan → GO → Rückmeldung wurde im Spiel durchgeführt.</span></label><label class="checkline"><input type="checkbox" data-export-key="checks.staging_path"><span>Basis → FOB → Loadout/Boarding → Einsatz → Ergebnis wurde durchgeführt.</span></label><p class="small muted">GO führt den Plan aus. Escape pausiert die Echtzeitmission nicht. Diese Seite verändert keine Spielwerte und sendet keine Gameplay-Commands.</p></article><article class="review-card"><h3>Freie Rückmeldung</h3><div class="note-edit" contenteditable="true" role="textbox" aria-label="Freie Rückmeldung zur nativen R3" aria-multiline="true" data-note-key="review.general" data-placeholder="Was funktioniert bereits? Wo fehlen Platz, Erklärung oder eine erreichbare Aktion? …"></div><label for="reviewContext" class="small muted" style="margin-top:20px">Prüfkontext</label><input id="reviewContext" class="context-input" data-export-key="review.context" placeholder="Auflösung, Skalierung, Eingabegerät und geprüfter Ablauf …"><label for="reviewPriority" class="small muted" style="margin-top:18px">Priorität für die nächste Runde</label><input id="reviewPriority" class="context-input" data-export-key="review.priority" placeholder="Konkrete Ansicht und wichtigste Änderung …"></article></div></section>
+    <section id="export" class="section" aria-labelledby="export-title"><div class="exportbox"><div class="eyebrow">04 / Review mitnehmen</div><h2 id="export-title" style="margin-top:12px">Beobachtung statt Erinnerung.</h2><p>Der Export enthält alle 13 Ansichten mit Status und Notiz, den aktuellen Vorschautab, Prüfhäkchen und freie Rückmeldung. Der Browser bestimmt Downloadordner und Speicherdialog. „JSON anzeigen“ und „JSON kopieren“ bleiben als Textfallback verfügbar.</p><div class="export-actions"><button id="exportJsonButton" class="primary" type="button">JSON exportieren</button><button id="showJsonButton" type="button">JSON anzeigen</button><button id="copyJsonButton" type="button">JSON kopieren</button></div><label for="jsonOutput" class="small">JSON zum Weitergeben</label><textarea id="jsonOutput" readonly spellcheck="false" placeholder="Der aktuelle Review-Stand erscheint hier."></textarea><div id="exportStatus" class="export-status" role="status" aria-live="polite">Keine automatische Speicherung über Sitzungen hinweg. Export oder Textkopie verwenden.</div></div><div class="sources"><a href="STERNENBUERGERCHEN_UI_2026-11-01.html">Bestätigte Bild-KI-Vorlagen ↗</a><a href="STERNENBUERGERCHEN_UI_NATIVE_R2_2026-11-02.html">Native Runde 2 zum Vergleich ↗</a><a href="../dev/ui_native_design_contract.md">Nativer Designvertrag R3 ↗</a><a href="../qa/ui_native_r3_20261102/README.md">Prüfprotokoll und offene Grenzen ↗</a><a href="../tasks/TASK_UI_VERDICHTUNG_R3_20261102.md">Umsetzungstask ↗</a></div></section>
+  </main>
+  <footer class="wrap">Native UI R3 · Quellszenen und Testdaten · Arbeitsbranch baut bewusst auf dem noch nicht integrierten R2 auf. Review-Notizen sind keine Runtime-Wahrheit.</footer>
+  <dialog id="imageDialog" aria-labelledby="dialogTitle"><div class="dialog-head"><h2 id="dialogTitle">Native Aufnahme</h2><button id="closeDialog" type="button">Schließen ×</button></div><img id="dialogImage" alt=""><div class="dialog-caption">Tatsächlich gerenderter Godot-Viewport · Fixture-/Beispieldaten · Escape schließt diese Bildansicht</div></dialog>
+  <script>
+    (()=>{
+      'use strict';
+      const $=selector=>document.querySelector(selector),$$=selector=>[...document.querySelectorAll(selector)];
+      const captureRoot='../qa/ui_native_r3_20261102/captures/';
+      const screens=[
+  {
+    "id": "fob",
+    "title": "FOB / Loadout",
+    "file": "fob_1920x1080",
+    "caption": "Leerer Transportort mit bestehender Ausrüstungsarbeit; keine künstliche Boardingfreigabe."
+  },
+  {
+    "id": "homebase",
+    "title": "Heimatbasis",
+    "file": "homebase_1920x1080",
+    "caption": "Vorhandene Meta-Szene: Team ist bereits am Flugdeck. Der frei gewordene Arbeitsort bleibt auffindbar und kompakt."
+  },
+  {
+    "id": "debrief",
+    "title": "Nachbesprechung",
+    "file": "debrief_1920x1080",
+    "caption": "Spärlicher regulärer Ergebnis-Fixture: drei Personen, FTL-Rückmeldung, keine erfundene Gefechtsauswertung."
+  },
+  {
+    "id": "mission",
+    "title": "Mission",
+    "file": "mission_1920x1080",
+    "caption": "Vorhandene Mission mit primären Spieleranzeigen und erreichbaren vollständigen Details."
+  },
+  {
+    "id": "fob_small",
+    "title": "FOB / Loadout · 1280",
+    "file": "fob_1280x720",
+    "caption": "Leerer Transportort mit bestehender Ausrüstungsarbeit; keine künstliche Boardingfreigabe. Echte logische und physische Größe 1280×720."
+  },
+  {
+    "id": "homebase_small",
+    "title": "Heimatbasis · 1280",
+    "file": "homebase_1280x720",
+    "caption": "Vorhandene Meta-Szene: Team ist bereits am Flugdeck. Der frei gewordene Arbeitsort bleibt auffindbar und kompakt. Echte logische und physische Größe 1280×720."
+  },
+  {
+    "id": "debrief_small",
+    "title": "Nachbesprechung · 1280",
+    "file": "debrief_1280x720",
+    "caption": "Spärlicher regulärer Ergebnis-Fixture: drei Personen, FTL-Rückmeldung, keine erfundene Gefechtsauswertung. Echte logische und physische Größe 1280×720."
+  },
+  {
+    "id": "mission_small",
+    "title": "Mission · 1280",
+    "file": "mission_1280x720",
+    "caption": "Vorhandene Mission mit primären Spieleranzeigen und erreichbaren vollständigen Details. Echte logische und physische Größe 1280×720."
+  },
+  {
+    "id": "debrief_empty",
+    "base": "debrief",
+    "title": "Ergebnis · keine Daten",
+    "file": "debrief_empty_1920x1080",
+    "previous": "debrief_1920x1080",
+    "caption": "Leeres übergebenes Ergebnis: fehlende Werte bleiben ausdrücklich fehlend. R2-Vergleich zeigt dessen Standardbeispiel mit anderen Daten."
+  },
+  {
+    "id": "debrief_rich",
+    "base": "debrief",
+    "title": "Ergebnis · viele Daten",
+    "file": "debrief_rich_1920x1080",
+    "previous": "debrief_1920x1080",
+    "caption": "Umfangreicher konstruierter Bericht aus bestehenden Datenverträgen. Mehr Personen, Auswertung und bestätigte Folgen bleiben über native Scrollwege erreichbar."
+  },
+  {
+    "id": "fob_populated",
+    "base": "fob",
+    "title": "FOB · Transport vorhanden",
+    "file": "fob_populated_1920x1080",
+    "previous": "fob_1920x1080",
+    "caption": "Öffentlicher Transport-Snapshot als Prüf-Fixture: belegter Transportort wächst, die realen Boarding-/Sendegates bleiben maßgeblich."
+  },
+  {
+    "id": "homebase_teams",
+    "base": "homebase",
+    "title": "Basis · Teams am Boden",
+    "file": "homebase_teams_1920x1080",
+    "previous": "homebase_1920x1080",
+    "caption": "Frischer Basis-Fixture mit Team am Boden. Derselbe Arbeitsort zeigt seine belegte Form; keine zweite bearbeitbare Teaminstanz."
+  },
+  {
+    "id": "debrief_partial",
+    "base": "debrief",
+    "title": "Ergebnis · Teilbericht",
+    "file": "debrief_partial_1920x1080",
+    "previous": "debrief_1920x1080",
+    "caption": "Nur das Ergebnis wurde übergeben. Fehlende Ziel- und Zeitangaben dürfen weder als Misserfolg noch als gemessene Null erscheinen."
+  }
+];
+      const concepts={main_menu:'menu_hauptmenue',mission:'mockup_a5_mission_zweireihig',homebase:'menu_heimatbasis',fob:'menu_fob_loadout',characters:'board_charakterkarten',teameditor:'menu_teameditor',lobby:'menu_lobby',settings:'menu_einstellungen_hilfe',debrief:'menu_debrief',editor:'menu_editor',escape:'menu_einstellungen_hilfe'};
+      for(const [index,screen] of screens.entries()){
+        const button=document.createElement('button');button.type='button';button.className=`choice screen-tab${index===0?' active':''}`;button.id=`tab-${screen.id}`;button.dataset.choiceValue=screen.id;button.setAttribute('role','tab');button.setAttribute('aria-selected',String(index===0));button.setAttribute('aria-controls',`panel-${screen.id}`);button.tabIndex=index===0?0:-1;button.innerHTML=`<span class="number">${String(index+1).padStart(2,'0')}</span><span>${screen.title}</span>`;$('#screenNav').appendChild(button);
+        const panel=document.createElement('div');panel.id=`panel-${screen.id}`;panel.className='screen-panel';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby',button.id);panel.tabIndex=0;panel.hidden=index!==0;
+        panel.innerHTML=`<figure class="capture"><div class="capture-head"><span>${screen.title}</span><span class="pill native">Native Aufnahme · Review offen</span></div><button class="image-button" type="button" data-image="${captureRoot}${screen.file}.png" data-title="${screen.title} · Native R3" aria-label="Native Aufnahme ${screen.title} vergrößern"><img src="${captureRoot}${screen.file}.png" alt="Nativ gerenderte Godot-R3-Oberfläche: ${screen.title}" loading="lazy"></button><figcaption>${screen.caption}</figcaption><div class="capture-links"><a href="${captureRoot}${screen.file}.png">Original-PNG öffnen ↗</a><a href="${captureRoot}${screen.file}.json">Capture-Metadaten ↗</a></div></figure><div class="screen-review"><div><label for="status-${screen.id}">Bewertung dieser Ansicht</label><select id="status-${screen.id}" data-export-key="screens.${screen.id}.status"><option value="open">Offen</option><option value="good">Gut als Grundlage</option><option value="change">Ändern / nacharbeiten</option></select><input type="hidden" data-export-key="screens.${screen.id}.capture" value="${screen.file}.png"></div><div><label for="note-${screen.id}">Beobachtung und gewünschte Änderung</label><textarea id="note-${screen.id}" data-export-key="screens.${screen.id}.note" placeholder="Konkretes Element, Situation und gewünschtes Verhalten …"></textarea></div></div><details class="comparison"><summary>Runde 2 und bestätigte Bildvorlage vergleichen</summary><div class="compare-grid"><figure><img loading="lazy" src="../qa/ui_native_r2_20261101/captures/${screen.previous||screen.file}.png" alt="Frühere native R2-Ansicht: ${screen.title}"><figcaption>Vorher · Native Runde 2 · Standardbeispiel, Fixture-Daten</figcaption></figure><figure><img loading="lazy" src="assets/ui-2026-11-01/${concepts[screen.base||screen.id.replace('_small','')]}.png" alt="Bestätigte Bild-KI-Vorlage für ${screen.title}"><figcaption>Gestaltungsvorlage · Bild-KI-Konzept mit Beispieltexten</figcaption></figure></div></details>`;$('#screenPanels').appendChild(panel);
+      }
+      function activateScreen(id,focus=false){const selected=$(`#tab-${id}`);if(!selected)return;$$('.screen-tab').forEach(button=>{const active=button===selected;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;});$$('.screen-panel').forEach(panel=>panel.hidden=panel.id!==`panel-${id}`);if(focus)selected.focus();}
+      $$('.screen-tab').forEach(button=>button.addEventListener('click',()=>activateScreen(button.dataset.choiceValue)));
+      $('#screenNav').addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;event.preventDefault();const tabs=$$('.screen-tab');const current=tabs.indexOf(document.activeElement);let next=current;if(event.key==='ArrowRight'||event.key==='ArrowDown')next=(current+1)%tabs.length;if(event.key==='ArrowLeft'||event.key==='ArrowUp')next=(current-1+tabs.length)%tabs.length;if(event.key==='Home')next=0;if(event.key==='End')next=tabs.length-1;activateScreen(tabs[next].dataset.choiceValue,true);});
+      const dialog=$('#imageDialog');let opener=null;
+      $$('[data-image]').forEach(button=>button.addEventListener('click',()=>{opener=button;$('#dialogTitle').textContent=button.dataset.title;$('#dialogImage').src=button.dataset.image;$('#dialogImage').alt=button.querySelector('img').alt;dialog.showModal();}));$('#closeDialog').addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>opener?.focus());
+      let exportSequence=0;
+      function setPath(target,path,value){const parts=String(path).split('.').filter(part=>part&&!['__proto__','prototype','constructor'].includes(part));let cursor=target;parts.forEach((part,index)=>{if(index===parts.length-1)cursor[part]=value;else{if(!cursor[part]||typeof cursor[part]!=='object')cursor[part]={};cursor=cursor[part];}});}
+      function readControlValue(element){if(element.type==='checkbox')return element.checked;if(element.type==='radio')return element.checked?element.value:undefined;if(element.type==='number'||element.type==='range')return Number(element.value);return element.value;}
+      function buildExport(){const payload={schema:document.body.dataset.reportSchema,report_id:document.body.dataset.reportId,title:document.title,exported_at:new Date().toISOString(),controls:{},notes:{},active_choices:{},computed:{},metadata:{url:location.href,user_agent:navigator.userAgent,task:'TASK_UI_VERDICHTUNG_R3_20261102',report_scope:'native_capture_review',capture_data:'fixture_or_example',capture_renderer:'gl_compatibility',human_clicktest:'open',template_origin:'docs/reports/_html_workbench_template.html',qa_readme:'../qa/ui_native_r3_20261102/README.md',captures:Object.fromEntries(screens.map(screen=>[screen.id,{image:captureRoot+screen.file+'.png',metadata:captureRoot+screen.file+'.json'}]))}};$$('[data-export-key]').forEach(element=>{const value=readControlValue(element);if(value!==undefined)setPath(payload.controls,element.dataset.exportKey,value);});$$('[data-note-key]').forEach(element=>setPath(payload.notes,element.dataset.noteKey,element.innerText.trim()));$$('[data-choice-group]').forEach(group=>{const active=group.querySelector('.choice.active');if(active)setPath(payload.active_choices,group.dataset.choiceGroup,active.dataset.choiceValue);});payload.computed.screens_total=screens.length;payload.computed.screens_reviewed=screens.filter(screen=>$(`#status-${screen.id}`).value!=='open').length;payload.computed.checks_checked=$$('[data-export-key^="checks."]:checked').length;payload.computed.checks_total=$$('[data-export-key^="checks."]').length;return payload;}
+      function showExport(){const payload=buildExport(),text=JSON.stringify(payload,null,2);$('#jsonOutput').value=text;return{payload,text};}
+      function buildExportFilename(stamp){exportSequence++;return `${document.body.dataset.reportId}_${stamp.replace(/[:.]/g,'-')}_${String(exportSequence).padStart(2,'0')}.json`;}
+      function downloadExport(text,filename){const url=URL.createObjectURL(new Blob([text],{type:'application/json;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+      $('#showJsonButton').addEventListener('click',()=>{showExport();$('#exportStatus').textContent='Aktueller Review-Stand angezeigt. Für die nächste Sitzung exportieren oder kopieren.';});$('#exportJsonButton').addEventListener('click',()=>{const{payload,text}=showExport(),filename=buildExportFilename(payload.exported_at);try{downloadExport(text,filename);$('#exportStatus').textContent=`Download angefordert: ${filename}. Speicherort und Dialog bestimmt der Browser; der Text bleibt hier verfügbar.`;}catch(error){$('#exportStatus').textContent='Download nicht verfügbar. JSON anzeigen oder kopieren und den Text als Datei speichern.';}});$('#copyJsonButton').addEventListener('click',async()=>{const{text}=showExport();try{if(!navigator.clipboard)throw new Error('Clipboard unavailable');await navigator.clipboard.writeText(text);$('#exportStatus').textContent='Review-JSON in die Zwischenablage kopiert.';}catch(error){$('#jsonOutput').focus();$('#jsonOutput').select();$('#exportStatus').textContent='JSON ist markiert. Mit Strg+C beziehungsweise ⌘C kopieren.';}});
+    })();
+  </script>
+</body>
+</html>

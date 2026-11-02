@@ -92,7 +92,9 @@ static func get_mission_hud_layout(viewport_size: Vector2i = TARGET_VIEWPORT) ->
 		"target_order": Rect2i(368, band_top, 248, 160),
 		"selected_fireteam": Rect2i(624, band_top, mini(512, viewport_size.x - 632), 160),
 		"selected_members": Rect2i(368, band_top - 112, viewport_size.x - 384, 104),
-		"mission_control": Rect2i(viewport_size.x - 368, 104, 352, mini(240, band_top - 400)),
+		# R3: ordinary transport/time needs two readable lines, not a diagnostic
+		# scroll window. The original raw messages remain in explicit details.
+		"mission_control": Rect2i(viewport_size.x - 368, 24, 352, 72),
 	}
 
 

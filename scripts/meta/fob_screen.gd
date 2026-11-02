@@ -80,6 +80,7 @@ var _mission_launch_ready_craft_id: String = ""
 var _unified_transit_entries: Array = []
 var _pending_transport_remove: Dictionary = {}
 var _r2_layout_refresh_pending: bool = false
+var _r3_geometry_signature: String = ""
 
 
 func _ready() -> void:
@@ -199,7 +200,7 @@ func _apply_drop_light_fixed_layout() -> void:
 
 	var available_header_label := get_node_or_null("Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHeaderLabel") as Label
 	if available_header_label != null:
-		available_header_label.text = "#09 NPC POOL"
+		available_header_label.text = "Personalreserve"
 
 	var staging_header_label := get_node_or_null("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/StagingHeaderLabel") as Label
 	if staging_header_label != null:
@@ -233,6 +234,7 @@ func _apply_drop_light_fixed_layout() -> void:
 
 func _enforce_drop_light_fixed_layout() -> void:
 	var layout := get_native_r2_layout_snapshot()
+	_r3_geometry_signature = _r3_fob_geometry_signature()
 	_ensure_r2_staging_scroll()
 	for label_path in [
 		"Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHelpLabel",
@@ -270,18 +272,48 @@ func get_native_r2_layout_snapshot() -> Dictionary:
 	var team_left := roster_width + 32
 	var transport_left := roster_width + team_width + 48
 	var transport_width := usable_width - roster_width - team_width
-	var flightdeck_height := maxi(240, viewport_size.y - 368)
+	var free_teams := 0
+	var free_members := 0
+	for definition: Dictionary in _fireteam_definitions:
+		var fireteam_id := String(definition.get("id", ""))
+		if _is_fireteam_staged_in_window(fireteam_id):
+			continue
+		free_teams += 1
+		free_members += _get_member_unit_ids_for_fireteam(fireteam_id).size()
+	var team_height := 144 if free_teams == 0 else mini(mini(320, int(float(viewport_size.y - 104) * 0.42)), 128 + free_teams * 96 + free_members * 56)
+	var loadout_top := 104 + team_height
+	var loadout_height := viewport_size.y - loadout_top - 16
+	if _loadout_staged_fireteam_id.is_empty() and _respawn_staged_fireteam_id.is_empty():
+		loadout_height = mini(loadout_height, 248)
+	var craft_count := _get_visible_transport_craft_states().size()
+	var boarding_height := 72 if _get_selected_transport_craft_state().is_empty() else 104
+	var max_flightdeck_height := viewport_size.y - 88 - boarding_height - 128 - 32
+	var flightdeck_height := mini(max_flightdeck_height, 176 if craft_count == 0 else 144 + craft_count * 280)
 	return {
 		"viewport": Rect2i(Vector2i.ZERO, viewport_size),
 		"topbar": Rect2i(0, 0, viewport_size.x, 72),
 		"unassigned_pool": Rect2i(16, 88, roster_width, viewport_size.y - 104),
-		"fireteams": Rect2i(team_left, 88, team_width, 192),
-		"loadout": Rect2i(team_left, 296, team_width, viewport_size.y - 312),
+		"fireteams": Rect2i(team_left, 88, team_width, team_height),
+		"loadout": Rect2i(team_left, loadout_top, team_width, loadout_height),
 		"flightdeck": Rect2i(transport_left, 88, transport_width, flightdeck_height),
-		"boarding_status": Rect2i(transport_left, 96 + flightdeck_height, transport_width, 104),
-		"actions": Rect2i(transport_left, 208 + flightdeck_height, transport_width, 128),
+		"boarding_status": Rect2i(transport_left, 96 + flightdeck_height, transport_width, boarding_height),
+		"actions": Rect2i(transport_left, 104 + flightdeck_height + boarding_height, transport_width, 128),
 		"ui_sets_gameplay_truth": false,
 	}
+
+
+func _r3_fob_geometry_signature() -> String:
+	var free_teams := PackedStringArray()
+	for definition: Dictionary in _fireteam_definitions:
+		var fireteam_id := String(definition.get("id", ""))
+		if not _is_fireteam_staged_in_window(fireteam_id):
+			free_teams.append("%s:%d" % [fireteam_id, _get_member_unit_ids_for_fireteam(fireteam_id).size()])
+	return "%s|%s|%d|%s|%s|%s" % [get_viewport_rect().size, free_teams, _get_visible_transport_craft_states().size(), _get_selected_transport_craft_state().is_empty(), _loadout_staged_fireteam_id.is_empty(), _respawn_staged_fireteam_id.is_empty()]
+
+
+func _queue_r3_fob_geometry_if_changed() -> void:
+	if _r3_geometry_signature != _r3_fob_geometry_signature():
+		_queue_r2_layout_refresh()
 
 
 func _ensure_r2_staging_scroll() -> void:
@@ -324,9 +356,9 @@ func _apply_r2_team_context() -> void:
 		host.move_child(label, mini(3, host.get_child_count() - 1))
 	var location := "Teamübersicht"
 	if _focused_fireteam_id == _loadout_staged_fireteam_id:
-		location = "Im Loadout · Ausrüstung unten bearbeiten"
+		location = "Bei der Ausrüstung · unten bearbeiten"
 	elif _focused_fireteam_id == _respawn_staged_fireteam_id:
-		location = "Am Respawnanker"
+		location = "Am Rückkehrpunkt"
 	elif _dropship_staged_fireteam_ids.has(_focused_fireteam_id):
 		location = "Am Transport · Boarding rechts"
 	var context_text := "%s · %s" % [_get_fireteam_label(_focused_fireteam_id), location]
@@ -344,14 +376,16 @@ func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
 	var rect: Rect2i = rect_variant
 	var fixed_position := Vector2(float(rect.position.x), float(rect.position.y))
 	var fixed_size := Vector2(float(rect.size.x), float(rect.size.y))
+	if control.get_global_rect().is_equal_approx(Rect2(fixed_position, fixed_size)) and control.custom_minimum_size == fixed_size:
+		return
 	control.set_as_top_level(true)
 	control.anchor_left = 0.0
 	control.anchor_top = 0.0
 	control.anchor_right = 0.0
 	control.anchor_bottom = 0.0
+	control.custom_minimum_size = fixed_size
 	control.position = fixed_position
 	control.size = fixed_size
-	control.custom_minimum_size = fixed_size
 	control.set_deferred("position", fixed_position)
 	control.set_deferred("size", fixed_size)
 	control.set_meta("drop_light_rect", rect)
@@ -433,10 +467,10 @@ func _ensure_drop_light_bottom_row(layout: Dictionary) -> void:
 	bottom_row.set_meta("drop_light_fixed_fullhd_layout", true)
 	vbox.add_child(bottom_row)
 
-	var boarding_panel := _create_drop_light_bottom_panel("BoardingStatusPanel", "BOARDING STATUS", layout.get("boarding_status"))
+	var boarding_panel := _create_drop_light_bottom_panel("BoardingStatusPanel", "Einschiffen", layout.get("boarding_status"))
 	bottom_row.add_child(boarding_panel)
 
-	var actions_panel := _create_drop_light_bottom_panel("ActionsPanel", "ACTIONS", layout.get("actions"))
+	var actions_panel := _create_drop_light_bottom_panel("ActionsPanel", "Transportaktionen", layout.get("actions"))
 	var actions_grid := GridContainer.new()
 	actions_grid.name = "ActionGrid"
 	actions_grid.columns = 6
@@ -445,12 +479,12 @@ func _ensure_drop_light_bottom_row(layout: Dictionary) -> void:
 	var actions_vbox := actions_panel.get_node("Margin/VBox") as VBoxContainer
 	actions_vbox.add_child(actions_grid)
 	for button_data in [
-		["BoardButton", "Board"],
-		["UnboardButton", "Unboard"],
-		["SendButton", "Send"],
-		["HoldButton", "Hold"],
-		["CargoButton", "Cargo"],
-		["MedbayLaterButton", "Medbay"],
+		["BoardButton", "Einschiffen"],
+		["UnboardButton", "Aussteigen"],
+		["SendButton", "Freigeben"],
+		["HoldButton", "Halten"],
+		["CargoButton", "Fracht"],
+		["MedbayLaterButton", "Versorgung"],
 	]:
 		var action_button := Button.new()
 		action_button.name = String(button_data[0])
@@ -1131,19 +1165,31 @@ func _refresh_dropship_status_ui() -> void:
 
 func _apply_block_labels() -> void:
 	var label_text_by_path: Dictionary = {
-		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_MISSION_BRIEF,
-		"Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_AVAILABLE_OPERATORS,
-		"Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_FIRETEAMS,
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel": "FOB · Einsatzvorbereitung",
+		"Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHeaderLabel": "Personalreserve",
+		"Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderLabel": "Trupps",
 		"Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/StagingHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_LOADOUT_STAGING,
-		"Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox/RespawnHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_RESPAWN,
-		"Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow/LoadoutHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_LOADOUT,
-		"Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/DropshipHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_DROPSHIP_WAIT_ZONE,
-		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow/OverlayHeaderLabel": UI_BLOCK_LABELS_SCRIPT.CHARACTER_OVERLAY,
+		"Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox/RespawnHeaderLabel": "Rückkehrpunkt",
+		"Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow/LoadoutHeaderLabel": "Ausrüstung",
+		"Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/DropshipHeaderLabel": "Transport",
+		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow/OverlayHeaderLabel": "Charakterbogen",
 	}
 	for path_variant in label_text_by_path.keys():
 		var label := get_node_or_null(String(path_variant)) as Label
 		if label != null:
 			label.text = String(label_text_by_path[path_variant])
+	for entry in [
+		["Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamToolbar/AssignFocusedUnitButton", "Zuweisen"],
+		["Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamToolbar/ClearFocusedUnitButton", "Zuordnung lösen"],
+		["Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/RemoveDropshipFireteamButton", "Trupp lösen"],
+		["Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow/ClearLoadoutButton", "Auswahl lösen"],
+		["Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox/RespawnButtonRow/SetRespawnButton", "Festlegen"],
+		["Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox/RespawnButtonRow/ClearRespawnButton", "Aufheben"],
+		["Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton", "Heimatbasis"],
+	]:
+		var button := get_node_or_null(entry[0]) as Button
+		if button != null:
+			button.text = entry[1]
 
 
 func _update_brief_panel() -> void:
@@ -1156,7 +1202,7 @@ func _update_brief_panel() -> void:
 	var pilot_count: int = _count_transport_pilot_slots()
 	var mission_slot_usage: int = _build_mission_slot_usage_count()
 
-	mission_header_label.text = UI_BLOCK_LABELS_SCRIPT.FOB_MISSION_BRIEF
+	mission_header_label.text = "FOB · Einsatzvorbereitung"
 	team_status_label.text = "Mission slots: %d / %d" % [mini(mission_slot_usage, _mission_slot_count), _mission_slot_count]
 	fireteam_status_label.text = "Mission: %s" % _mission_name
 	dropship_status_label.text = "Map: %s" % _mission_map_name
@@ -1354,18 +1400,19 @@ func _update_staging_panel() -> void:
 	var respawn_member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(respawn_fireteam_id)
 
 	if respawn_anchor_active:
-		respawn_status_label.text = "Respawn anchor: locating %s | %.0fs" % [respawn_fireteam_label, _respawn_anchor_seconds]
+		respawn_status_label.text = "Rückkehrpunkt: %s wird eingerichtet · %.0fs" % [respawn_fireteam_label, _respawn_anchor_seconds]
 	elif respawn_enabled:
-		respawn_status_label.text = "Respawn anchor: FOB active for %s" % respawn_fireteam_label
+		respawn_status_label.text = "Rückkehr zur FOB für %s aktiv" % respawn_fireteam_label
 	else:
-		respawn_status_label.text = "Respawn anchor: not set"
+		respawn_status_label.text = "Noch kein Rückkehrpunkt festgelegt"
 	set_respawn_button.disabled = respawn_fireteam_id.is_empty() or respawn_enabled or respawn_anchor_active
 	clear_respawn_button.disabled = respawn_fireteam_id.is_empty() or (not respawn_enabled and not respawn_anchor_active)
 
 	loadout_status_label.visible = has_loadout_fireteam
-	loadout_status_label.text = "Loadout: %s | Weight %.1f" % [String(loadout_definition.get("loadout", "medium")).strip_edges().to_upper(), _calculate_fireteam_loadout_weight(loadout_fireteam_id, member_ids)]
-	loadout_help_label.text = ""
-	loadout_help_label.visible = false
+	var armor_label := String({"light": "Leicht", "medium": "Mittel", "heavy": "Schwer"}.get(String(loadout_definition.get("loadout", "medium")), String(loadout_definition.get("loadout", "medium"))))
+	loadout_status_label.text = "Ausrüstung: %s · Last %.1f" % [armor_label, _calculate_fireteam_loadout_weight(loadout_fireteam_id, member_ids)]
+	loadout_help_label.text = "Truppkarte hier ablegen, um die Ausrüstung zu ändern."
+	loadout_help_label.visible = not has_loadout_fireteam
 	clear_loadout_button.disabled = not has_loadout_fireteam
 
 	_render_staging_fireteam_card(respawn_fireteam_list, respawn_fireteam_id, "", "respawn_staging", respawn_member_ids, respawn_lead_unit_id)
@@ -1380,6 +1427,12 @@ func _update_staging_panel() -> void:
 	respawn_margin.add_theme_constant_override("margin_bottom", 2)
 	_render_staging_fireteam_card(loadout_fireteam_list, loadout_fireteam_id, "", "loadout_staging")
 	_render_loadout_member_rows(loadout_member_list, loadout_fireteam_id, member_ids, lead_unit_id, has_loadout_fireteam)
+	loadout_fireteam_list.custom_minimum_size.y = 0.0
+	loadout_fireteam_list.visible = loadout_fireteam_list.get_child_count() > 0
+	var member_scroll := loadout_member_list.get_parent() as ScrollContainer
+	member_scroll.visible = has_loadout_fireteam and not member_ids.is_empty()
+	member_scroll.custom_minimum_size.y = 192.0 if member_scroll.visible else 0.0
+	_queue_r3_fob_geometry_if_changed()
 
 
 func _update_dropship_panel() -> void:
@@ -1417,6 +1470,7 @@ func _update_dropship_panel() -> void:
 	start_boarding_button.disabled = true
 	remove_dropship_fireteam_button.disabled = not _get_staged_fireteam_ids_for_craft(_dropship_transport_craft_id).has(_focused_fireteam_id)
 	_render_dropship_fireteam_cards(queue_list)
+	_queue_r3_fob_geometry_if_changed()
 
 
 func _update_drop_light_bottom_row() -> void:
@@ -1426,14 +1480,14 @@ func _update_drop_light_bottom_row() -> void:
 	var body_label := bottom_row.get_node_or_null("BoardingStatusPanel/Margin/VBox/BodyLabel") as Label
 	var selected_craft_state: Dictionary = _get_selected_transport_craft_state()
 	var selected_craft_name: String = String(selected_craft_state.get("display_name", "")).strip_edges()
-	if selected_craft_name.is_empty():
-		selected_craft_name = "no craft"
 	if body_label != null:
-		body_label.text = "Selected: %s\nQueue: %d fireteams\nInside dropship: %d NPC" % [
+		body_label.text = "Schiff: %s\nWartend: %d Trupps\nAn Bord: %d Kräfte" % [
 			selected_craft_name,
 			_boarding_order.size(),
 			_boarded_unit_ids.size(),
 		]
+		if selected_craft_state.is_empty():
+			body_label.text = "Noch kein Schiff an der FOB." if _get_visible_transport_craft_states().is_empty() else "Schiff für den Transport auswählen."
 
 	var action_grid := bottom_row.get_node_or_null("ActionsPanel/Margin/VBox/ActionGrid") as GridContainer
 	if action_grid == null:
@@ -1512,17 +1566,17 @@ func _build_available_help_text() -> String:
 	var inbound_count: int = _get_transit_to_fob_unit_ids().size()
 	if _focused_unit_id.is_empty():
 		if inbound_count > 0:
-			return "Unzugewiesene FOB-Operators stehen direkt links neben #10. Grau markierte Karten sind noch im Anflug."
-		return "Ziehe NPC-Karten von hier auf #10 FIRETEAMS oder zurueck in diesen Pool, um sie zu loesen."
+			return "Grau markierte Kräfte sind noch im Anflug."
+		return "Kräfte auf einen Trupp ziehen; zum Lösen zurück in die Personalreserve."
 
-	return "Focused operator: %s | Current fireteam: %s" % [_build_display_name(_focused_unit_id), _build_fireteam_display_text(_get_selected_fireteam_id_for_unit(_focused_unit_id))]
+	return "Gewählt: %s · Trupp: %s" % [_build_display_name(_focused_unit_id), _build_fireteam_display_text(_get_selected_fireteam_id_for_unit(_focused_unit_id))]
 
 
 func _build_fireteam_panel_summary_text() -> String:
 	if _selected_unit_ids.is_empty():
-		return "No transferred operators in FOB."
+		return "Noch keine Kräfte an der FOB."
 
-	return "Focused fireteam: %s | Lead: %s | Assigned operators: %d / %d" % [_get_fireteam_label(_focused_fireteam_id), _build_display_name(_get_fireteam_lead_unit_id(_focused_fireteam_id)), _count_assigned_operators(), _selected_unit_ids.size()]
+	return "Führung: %s · Truppzuordnung: %d/%d" % [_build_display_name(_get_fireteam_lead_unit_id(_focused_fireteam_id)), _count_assigned_operators(), _selected_unit_ids.size()]
 
 
 func _build_dropship_status_text(selected_craft_state: Dictionary = {}) -> String:
@@ -3926,7 +3980,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			"selected": is_selected,
 			"in_transit": is_in_transit or is_air_asset_recovery,
 			"can_stage": can_stage_fireteams,
-			"title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title(_build_transport_craft_title(craft_state)),
+			"title_text": _build_transport_craft_title(craft_state),
 			"ship_texture": _get_transport_craft_texture(craft_state),
 			"ship_texture_width": FOB_TRANSPORT_SHIP_TEXTURE_WIDTH,
 			"ship_texture_height": FOB_TRANSPORT_SHIP_TEXTURE_HEIGHT,
@@ -3949,7 +4003,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			"progress_value": _build_transport_craft_progress_value(craft_state),
 			"primary_action": {
 				"visible": true,
-				"text": "Board",
+				"text": "Einschiffen",
 				"disabled": not _can_start_boarding_for_craft(craft_state),
 				"square_size": 48.0,
 				"ready_style": true,
@@ -3957,7 +4011,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			},
 			"secondary_action": {
 				"visible": true,
-				"text": "Waiting" if is_waiting_on_mission else "En Route" if is_transit_to_mission else "Return" if is_transit_to_fob else "Ready" if is_launch_ready_in_fob else "Send",
+				"text": "Warten" if is_waiting_on_mission else "Unterwegs" if is_transit_to_mission else "Rückkehr" if is_transit_to_fob else "Bereit" if is_launch_ready_in_fob else "Freigeben",
 				"disabled": is_air_asset_recovery or is_launch_ready_in_fob or is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not can_send_to_mission,
 				"square_size": 48.0,
 				"ready_style": true,

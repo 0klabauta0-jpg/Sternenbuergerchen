@@ -1,0 +1,9 @@
+{
+  "tested_at": "2026-11-02T07:34:20.533461+00:00",
+  "concept_file": "docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html",
+  "change": "Visible local R3 navigation notice only; existing workbench data and JavaScript preserved.",
+  "inline_scripts_unchanged": true,
+  "export_note_keys_unchanged": true,
+  "script_sha256": "b620e45608a4c14243cbac4d6c0c70ffbe033075734325c8f6b933c1f5f019df",
+  "target_exists": true
+}

@@ -32,6 +32,12 @@ var _native_review_slots: Dictionary = {}
 var _native_review_people: VBoxContainer
 var _native_review_heading: Label
 var _native_review_pending := false
+var _native_review_missing: Label
+var _native_review_confirmation: Label
+var _native_review_aar_rows: VBoxContainer
+var _native_review_details: Control
+var _native_review_original_text: TextEdit
+var _native_review_details_close: Button
 
 
 func _ready() -> void:
@@ -50,6 +56,8 @@ func _ready() -> void:
 	_apply_contextual_help_ids()
 	if not resized.is_connected(_queue_native_review_layout):
 		resized.connect(_queue_native_review_layout)
+	if not visibility_changed.is_connected(_on_debrief_visibility_changed):
+		visibility_changed.connect(_on_debrief_visibility_changed)
 
 
 func set_mission_result(mission_result: Dictionary) -> void:
@@ -76,7 +84,8 @@ func get_debrief_visual_polish_snapshot() -> Dictionary:
 				continue
 			chips.append({
 				"name": chip_label.name,
-				"text": chip_label.text,
+				"text": _diagnostic_text(chip_label),
+				"visible_text": chip_label.text,
 				"style_id": String(chip_label.get_meta("debrief_chip_style_id", "")),
 			})
 	var checks: Array = []
@@ -105,13 +114,20 @@ func get_debrief_visual_polish_snapshot() -> Dictionary:
 		"has_mission_result": not _mission_result.is_empty(),
 		"summary_chip_count": chips.size(),
 		"summary_chips": chips,
-		"result_text": result_label.text if result_label != null else "",
-		"result_text_length": result_label.text.length() if result_label != null else 0,
+		"result_text": _diagnostic_text(result_label),
+		"visible_result_text": result_label.text if result_label != null else "",
+		"result_text_length": _diagnostic_text(result_label).length(),
+		"visible_result_text_length": result_label.text.length() if result_label != null else 0,
 		"result_line_count": result_label.get_line_count() if result_label != null else 0,
-		"team_status_text": team_state_label.text if team_state_label != null else "",
-		"team_status_length": team_state_label.text.length() if team_state_label != null else 0,
-		"primary_action_label": homebase_button.text if homebase_button != null else "",
-		"secondary_action_label": fob_button.text if fob_button != null else "",
+		"team_status_text": _diagnostic_text(team_state_label),
+		"visible_team_status_text": team_state_label.text if team_state_label != null else "",
+		"team_status_length": _diagnostic_text(team_state_label).length(),
+		"visible_team_status_length": team_state_label.text.length() if team_state_label != null else 0,
+		"primary_action_label": _diagnostic_text(homebase_button),
+		"secondary_action_label": _diagnostic_text(fob_button),
+		"visible_primary_action_label": homebase_button.text if homebase_button != null else "",
+		"visible_secondary_action_label": fob_button.text if fob_button != null else "",
+		"text_format": "legacy_diagnostic_with_visible_text_fields",
 		"visual_only": true,
 		"checks": checks,
 	}
@@ -131,13 +147,14 @@ func get_debrief_aar_data_bridge_snapshot() -> Dictionary:
 				continue
 			chips.append({
 				"name": chip_label.name,
-				"text": chip_label.text,
+				"text": _diagnostic_text(chip_label),
+				"visible_text": chip_label.text,
 				"style_id": String(chip_label.get_meta("debrief_aar_chip_style_id", "")),
 			})
 	var visual_snapshot: Dictionary = get_debrief_visual_polish_snapshot()
 	var row_count: int = int(rows_label.get_meta("debrief_aar_row_count", 0)) if rows_label != null else 0
-	var summary_text: String = summary_label.text if summary_label != null else ""
-	var limit_text: String = limit_label.text if limit_label != null else ""
+	var summary_text: String = _diagnostic_text(summary_label)
+	var limit_text: String = _diagnostic_text(limit_label)
 	var checks: Array = []
 	_append_visual_polish_check(checks, "source_schema_available", String(payload.get("schema", "")) == "sternenbuergerchen.mini_aar_debrief_screen_stub.v1", "Debrief should receive the mini AAR debrief snapshot.")
 	_append_visual_polish_check(checks, "aar_section_visible", summary_label != null and summary_label.visible and chip_strip != null and chip_strip.visible, "AAR section should be visible when data exists.")
@@ -167,7 +184,9 @@ func get_debrief_aar_data_bridge_snapshot() -> Dictionary:
 		"aar_chip_count": chips.size(),
 		"aar_chips": chips,
 		"aar_row_count": row_count,
-		"aar_rows_text": rows_label.text if rows_label != null else "",
+		"aar_rows_text": _diagnostic_text(rows_label),
+		"visible_aar_rows_text": rows_label.text if rows_label != null else "",
+		"text_format": "legacy_diagnostic_with_visible_text_fields",
 		"aar_limit_text": limit_text,
 		"visual_snapshot_gate": String(visual_snapshot.get("gate", "")),
 		"visual_only": true,
@@ -250,9 +269,9 @@ func get_debrief_aar_layout_polish_snapshot() -> Dictionary:
 	var chip_strip := get_node_or_null("Panel/Margin/VBox/AARChipStrip") as HBoxContainer
 	var rows_label := get_node_or_null("Panel/Margin/VBox/AARRowsLabel") as Label
 	var limit_label := get_node_or_null("Panel/Margin/VBox/AARLimitLabel") as Label
-	var summary_text: String = summary_label.text.strip_edges() if summary_label != null else ""
-	var rows_text: String = rows_label.text.strip_edges() if rows_label != null else ""
-	var limit_text: String = limit_label.text.strip_edges() if limit_label != null else ""
+	var summary_text: String = _diagnostic_text(summary_label).strip_edges()
+	var rows_text: String = _diagnostic_text(rows_label).strip_edges()
+	var limit_text: String = _diagnostic_text(limit_label).strip_edges()
 	var chips: Array = Array(bridge_snapshot.get("aar_chips", []))
 	var summary_style_id: String = String(summary_label.get_meta("debrief_aar_summary_style_id", "")) if summary_label != null else ""
 	var rows_style_id: String = String(rows_label.get_meta("debrief_aar_rows_style_id", "")) if rows_label != null else ""
@@ -321,13 +340,13 @@ func get_debrief_aar_layout_polish_snapshot() -> Dictionary:
 func get_debrief_skill_progress_preview_snapshot() -> Dictionary:
 	var aar_snapshot: Dictionary = get_debrief_aar_layout_polish_snapshot()
 	var skill_label := get_node_or_null("Panel/Margin/VBox/SkillProgressPreviewLabel") as Label
-	var text: String = skill_label.text.strip_edges() if skill_label != null else ""
+	var text: String = _diagnostic_text(skill_label).strip_edges()
 	var entries: Array = Array(skill_label.get_meta("debrief_skill_preview_entries", [])) if skill_label != null else []
 	var style_id: String = String(skill_label.get_meta("debrief_skill_preview_style_id", "")) if skill_label != null else ""
 	var checks: Array = []
 	_append_visual_polish_check(checks, "skill_preview_visible", skill_label != null and skill_label.visible, "Skill preview should be visible when mission result data exists.")
 	_append_visual_polish_check(checks, "skill_preview_compact", text.length() <= DEBRIEF_SKILL_PREVIEW_MAX_CHARS and text.count("\n") == 0, "Skill preview should stay one compact scan line.")
-	_append_visual_polish_check(checks, "skill_preview_named", text.begins_with("Skill Preview:"), "Skill preview should be explicitly marked as preview.")
+	_append_visual_polish_check(checks, "skill_preview_named", skill_label != null and skill_label.text.begins_with("Vorschau:"), "Visible player text should explicitly mark preview.")
 	_append_visual_polish_check(checks, "skill_preview_has_tokens", entries.size() >= DEBRIEF_SKILL_PREVIEW_TOKEN_COUNT_MIN, "Skill preview should expose multiple progress tokens.")
 	_append_visual_polish_check(checks, "skill_preview_style_applied", style_id == DEBRIEF_SKILL_PREVIEW_STYLE_ID, "Skill preview style should be applied.")
 	_append_visual_polish_check(checks, "aar_layout_still_green", String(aar_snapshot.get("gate", "")) == "pass", "Skill preview should not regress the Debrief AAR layout gate.")
@@ -347,6 +366,8 @@ func get_debrief_skill_progress_preview_snapshot() -> Dictionary:
 		"ui_sets_gameplay_truth": false,
 		"layout_key": DEBRIEF_SKILL_PREVIEW_STYLE_ID,
 		"preview_text": text,
+		"visible_preview_text": skill_label.text if skill_label != null else "",
+		"text_format": "legacy_diagnostic_with_visible_text_fields",
 		"preview_length": text.length(),
 		"preview_visible": skill_label != null and skill_label.visible,
 		"preview_entries": entries,
@@ -362,7 +383,7 @@ func get_debrief_skill_award_contract_snapshot() -> Dictionary:
 	var preview_snapshot: Dictionary = get_debrief_skill_progress_preview_snapshot()
 	var award_label := get_node_or_null("Panel/Margin/VBox/SkillAwardSummaryLabel") as Label
 	var award_summary: Dictionary = Dictionary(_mission_result.get("progression_award_summary", {})).duplicate(true)
-	var text: String = award_label.text.strip_edges() if award_label != null else ""
+	var text: String = _diagnostic_text(award_label).strip_edges()
 	var style_id: String = String(award_label.get_meta("debrief_skill_award_style_id", "")) if award_label != null else ""
 	var checks: Array = []
 	_append_visual_polish_check(checks, "award_summary_schema", String(award_summary.get("schema", "")) == SKILL_AWARD_SUMMARY_SCHEMA, "Award summary should use the stable resolver schema.")
@@ -371,7 +392,7 @@ func get_debrief_skill_award_contract_snapshot() -> Dictionary:
 	_append_visual_polish_check(checks, "award_applied", bool(award_summary.get("award_applied", false)), "Award summary should describe already applied progression.")
 	_append_visual_polish_check(checks, "award_label_visible", award_label != null and award_label.visible, "Debrief should show award summary when resolver data exists.")
 	_append_visual_polish_check(checks, "award_label_compact", text.length() <= DEBRIEF_SKILL_AWARD_MAX_CHARS and text.count("\n") == 0, "Award summary should stay one compact scan line.")
-	_append_visual_polish_check(checks, "award_label_named", text.begins_with("Skill Awards:"), "Award summary should be visibly distinct from preview.")
+	_append_visual_polish_check(checks, "award_label_named", award_label != null and award_label.text.begins_with("Bestätigte Folgen:"), "Visible player text should distinguish confirmed consequences from preview.")
 	_append_visual_polish_check(checks, "award_has_xp", int(award_summary.get("total_xp_delta", 0)) > 0, "Award summary should include XP totals.")
 	_append_visual_polish_check(checks, "award_has_growth_token", int(award_summary.get("skill_gain_count", 0)) > 0 or int(award_summary.get("ftl_tactical_gain_count", 0)) > 0, "Award summary should include skill or FTL growth tokens.")
 	_append_visual_polish_check(checks, "award_style_applied", style_id == DEBRIEF_SKILL_AWARD_STYLE_ID, "Award summary style should be applied.")
@@ -392,6 +413,8 @@ func get_debrief_skill_award_contract_snapshot() -> Dictionary:
 		"ui_sets_gameplay_truth": false,
 		"layout_key": DEBRIEF_SKILL_AWARD_STYLE_ID,
 		"award_text": text,
+		"visible_award_text": award_label.text if award_label != null else "",
+		"text_format": "legacy_diagnostic_with_visible_text_fields",
 		"award_length": text.length(),
 		"award_visible": award_label != null and award_label.visible,
 		"award_summary_schema": String(award_summary.get("schema", "")),
@@ -432,6 +455,10 @@ func get_background_catalog_snapshot() -> Dictionary:
 
 
 func _render_result() -> void:
+	for name in ["TitleLabel", "ResultLabel", "TeamStateLabel", "AirAssetEventsLabel", "FTLFeedbackLabel", "CharacterEventsLabel", "PersonnelEventsLabel"]:
+		var existing := get_node_or_null("Panel/Margin/VBox/" + name) as Control
+		if existing != null:
+			existing.show()
 	var result_label: Label = get_node("Panel/Margin/VBox/ResultLabel")
 	var team_state_label: Label = get_node("Panel/Margin/VBox/TeamStateLabel")
 	var summary_strip: HBoxContainer = _ensure_summary_strip()
@@ -569,7 +596,7 @@ func _render_result() -> void:
 
 func _refresh_native_review_cards() -> void:
 	_ensure_native_review_cards()
-	_native_review_heading.text = "Ergebnis ausstehend" if _mission_result.is_empty() else "Einsatz abgeschlossen"
+	_apply_player_readout_texts()
 	for child in _native_review_people.get_children():
 		_native_review_people.remove_child(child)
 		child.queue_free()
@@ -633,6 +660,9 @@ func _refresh_native_review_cards() -> void:
 		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		TACTICAL_UI_THEME_SCRIPT.style_label(empty, true, 14)
 		_native_review_people.add_child(empty)
+	var people_scroll := _native_review_people.get_parent() as ScrollContainer
+	people_scroll.custom_minimum_size.y = minf(260.0, maxf(34.0, _native_review_people.get_combined_minimum_size().y))
+	_refresh_native_report_sections()
 	for source_name in _native_review_slots:
 		var source := get_node_or_null("Panel/Margin/VBox/" + source_name) as Control
 		var slot := _native_review_slots[source_name] as Control
@@ -640,7 +670,330 @@ func _refresh_native_review_cards() -> void:
 	var layout := get_node("Panel/Margin/VBox/NativeReviewLayout")
 	layout.get_node("BodyRow/DetailsGrid/AARCard/Contents/EmptyLabel").visible = _extract_debrief_aar_payload().is_empty()
 	layout.get_node("BodyRow/DetailsGrid/ProgressCard/Contents/EmptyLabel").visible = not (get_node("Panel/Margin/VBox/SkillProgressPreviewLabel") as Label).visible and not (get_node("Panel/Margin/VBox/SkillAwardSummaryLabel") as Label).visible
+	_native_review_original_text.text = JSON.stringify(_mission_result, "  ")
 	_queue_native_review_layout()
+
+
+func _apply_player_readout_texts() -> void:
+	var vbox := get_node("Panel/Margin/VBox")
+	# v1 diagnostic snapshots retain their original format explicitly. Player
+	# labels below are independently checked as the actual visible UI in R3.
+	for child in vbox.get_children():
+		if child is Label:
+			child.set_meta("debrief_original_text", child.text)
+	for strip_name in ["SummaryStrip", "AARChipStrip"]:
+		for chip in vbox.get_node(strip_name).get_children():
+			if chip is Label:
+				chip.set_meta("debrief_original_text", chip.text)
+	(vbox.get_node("TitleLabel") as Label).hide()
+	var has_report := not _mission_result.is_empty()
+	var result_code := String(_mission_result.get("result", ""))
+	var ended := result_code in ["victory", "success", "defeat", "failure", "draw", "ended"] or String(_mission_result.get("mission_outcome", "")) in ["completed", "ended", "success", "failure"]
+	_native_review_heading.text = "Bericht noch nicht verfügbar" if not has_report else ("Einsatz abgeschlossen" if ended else "Bericht unvollständig")
+	(vbox.get_node("ResultLabel") as Label).text = "Noch kein Einsatzbericht übergeben." if not has_report else "Ergebnis und Folgen des abgeschlossenen Einsatzes."
+	(vbox.get_node("SummaryStrip") as Control).visible = has_report
+	var result_names := {"victory": "Erfolg", "success": "Erfolg", "defeat": "Niederlage", "failure": "Niederlage", "draw": "Unentschieden", "ended": "Beendet"}
+	var winner := String(_mission_result.get("winning_team_id", ""))
+	var side: String = {"team_alpha": "Alpha", "team_bravo": "Bravo"}.get(winner, "nicht angegeben")
+	var objective := "nicht angegeben"
+	if _mission_result.has("objective_captured") and typeof(_mission_result.objective_captured) == TYPE_BOOL:
+		objective = "gesichert" if _mission_result.objective_captured else "nicht gesichert"
+	var condition_code := String(_mission_result.get("win_condition_type", ""))
+	var condition := "nicht angegeben" if condition_code.is_empty() else ("Ziel sichern" if condition_code == "objective_capture" else "siehe Originalbericht")
+	var duration_text := "unbekannt"
+	if _mission_result.has("duration_seconds") and typeof(_mission_result.duration_seconds) in [TYPE_FLOAT, TYPE_INT] and is_finite(float(_mission_result.duration_seconds)) and float(_mission_result.duration_seconds) >= 0.0:
+		duration_text = _format_debrief_seconds(float(_mission_result.duration_seconds))
+	var outcome: String = result_names.get(result_code, "Ergebnis offen")
+	var summaries: Array = [outcome, "Seite: " + String(side), "Dauer: " + duration_text, "Auftrag: " + condition, "Ziel: " + objective]
+	var summary_strip := vbox.get_node("SummaryStrip") as HBoxContainer
+	for index in range(mini(summary_strip.get_child_count(), summaries.size())):
+		(summary_strip.get_child(index) as Label).text = summaries[index]
+	var counts: Dictionary = {}
+	var state_names := {"fit": "einsatzfähig", "wounded": "verletzt", "down": "ausgefallen", "dead": "verstorben"}
+	for member in Array(_mission_result.get("team_states", [])):
+		var state: String = state_names.get(String(member.get("vital_state", "")), "unbekannt")
+		counts[state] = int(counts.get(state, 0)) + 1
+	var count_parts := PackedStringArray()
+	for state in counts:
+		count_parts.append("%d %s" % [counts[state], state])
+	(vbox.get_node("TeamStateLabel") as Label).text = " · ".join(count_parts) if not count_parts.is_empty() else "Keine Personendaten im Bericht."
+	var recovery: Dictionary = _mission_result.get("air_asset_recovery", {})
+	(vbox.get_node("AirAssetEventsLabel") as Label).text = "Keine Angaben zu Luftfahrzeugen." if not has_report else ("Kein Verlust eines Luftfahrzeugs gemeldet." if recovery.is_empty() else "Luftfahrzeugstatus liegt vor · Einzelheiten im Originalbericht.")
+	(vbox.get_node("FTLFeedbackLabel") as Label).text = _player_ftl_feedback()
+	var events := Array(_mission_result.get("character_events", []))
+	var personnel := Array(_mission_result.get("personnel_events", []))
+	(vbox.get_node("CharacterEventsLabel") as Label).text = "%d Personenmeldungen · Originalbericht öffnen" % events.size() if not events.is_empty() else "Keine besonderen Vorkommnisse gemeldet."
+	(vbox.get_node("PersonnelEventsLabel") as Label).text = "%d Personaländerungen · Originalbericht öffnen" % personnel.size()
+	(vbox.get_node("PersonnelEventsLabel") as Label).visible = not personnel.is_empty()
+	var aar := _extract_debrief_aar_payload()
+	(vbox.get_node("AARSummaryLabel") as Label).text = "Gemeldete Gefechtsdaten"
+	(vbox.get_node("AARRowsLabel") as Label).text = "%d Kennzahlen · Liste scrollen" % Array(aar.get("rows", [])).size()
+	(vbox.get_node("AARLimitLabel") as Label).text = "Diese Auswertung vergibt selbst keine Erfahrung."
+	var chip_names := {"shots": "Schüsse", "hits": "Treffer", "ff": "Eigenbeschuss", "sup": "Unterdrückung", "wounded": "Verwundete", "extracted": "Geborgen"}
+	var chips: Array = aar.get("chips", [])
+	var strip := vbox.get_node("AARChipStrip") as HBoxContainer
+	for index in range(mini(chips.size(), strip.get_child_count())):
+		var chip: Dictionary = chips[index]
+		var label := strip.get_child(index) as Label
+		var metric_name: String = chip_names.get(String(chip.get("id", "")), "Messwert")
+		var value := String(chip.get("value_text", ""))
+		label.text = "%s · %s" % [value, metric_name]
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		label.tooltip_text = "%s: %s\nOriginal: %s %s" % [metric_name, value, chip.get("label", chip.get("id", "")), value]
+		label.mouse_filter = Control.MOUSE_FILTER_PASS
+	var preview := vbox.get_node("SkillProgressPreviewLabel") as Label
+	preview.text = "Vorschau: Einschätzung aus Einsatzdaten; keine zusätzliche Vergabe zugesagt."
+	preview.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT_MUTED)
+	var award := vbox.get_node("SkillAwardSummaryLabel") as Label
+	var award_data: Dictionary = _mission_result.get("progression_award_summary", {})
+	var confirmed := _has_confirmed_award(award_data)
+	award.visible = confirmed
+	var award_parts := PackedStringArray()
+	for pair in [["total_xp_delta", "EP"], ["skill_gain_count", "Wertefortschritte"], ["ftl_tactical_gain_count", "Fortschritte der Teamleitung"]]:
+		if award_data.has(pair[0]):
+			award_parts.append("%d %s" % [int(award_data[pair[0]]), pair[1]])
+	award.text = "Bestätigte Folgen: " + (" · ".join(award_parts) if not award_parts.is_empty() else "Einzelheiten im Originalbericht") if confirmed else ""
+	_native_review_confirmation.text = "Laut Einsatzbericht bereits übernommen." if confirmed else "Keine bestätigten Entwicklungsfolgen gemeldet."
+	for pair in [["ReturnToFOBButton", "Zur FOB"], ["ReturnToHomebaseButton", "Zur Heimatbasis"]]:
+		var button := vbox.get_node("ButtonRow/" + pair[0]) as Button
+		if not button.has_meta("debrief_original_text"):
+			button.set_meta("debrief_original_text", button.text)
+		button.text = pair[1]
+
+
+func _player_ftl_feedback() -> String:
+	var lines := PackedStringArray()
+	var entries: Array = _mission_result.get("fireteam_tactical_debrief", [])
+	for entry in entries:
+		if typeof(entry) != TYPE_DICTIONARY:
+			continue
+		var parts := PackedStringArray()
+		if entry.has("contact_report_count"):
+			parts.append("%d Kontakte gemeldet" % int(entry.contact_report_count))
+		if entry.has("reaction_delay_seconds"):
+			parts.append("Reaktion %s s" % ("%.2f" % float(entry.reaction_delay_seconds)).replace(".", ","))
+		if entry.has("plan_quality"):
+			parts.append("Plan: " + _format_debrief_quality_bucket(float(entry.plan_quality)))
+		lines.append("Team %s · %s" % [String(entry.get("fireteam_id", "unbekannt")).to_upper(), " · ".join(parts) if not parts.is_empty() else "Keine Einzelwerte gemeldet"])
+		if lines.size() >= 2:
+			break
+	if entries.size() > 2:
+		lines.append("Weitere Rückmeldungen im Originalbericht.")
+	return "\n".join(lines) if not lines.is_empty() else "Keine Rückmeldung der Teamleitung übergeben."
+
+
+func _has_confirmed_award(summary: Dictionary) -> bool:
+	return String(summary.get("schema", "")) == SKILL_AWARD_SUMMARY_SCHEMA and String(summary.get("authority", "")) == "MissionProgressionResolver" and String(summary.get("source", "")) == "progression_unit_updates" and bool(summary.get("award_applied", false)) and bool(summary.get("read_only", false)) and not bool(summary.get("ui_sets_gameplay_truth", true))
+
+
+func _refresh_native_report_sections() -> void:
+	var layout := get_node("Panel/Margin/VBox/NativeReviewLayout")
+	var body := layout.get_node("BodyRow") as HBoxContainer
+	var details := body.get_node("DetailsGrid") as GridContainer
+	var has_report := not _mission_result.is_empty()
+	var has_ftl := not Array(_mission_result.get("fireteam_tactical_debrief", [])).is_empty()
+	var aar := _extract_debrief_aar_payload()
+	var has_aar := not aar.is_empty()
+	var has_events := not Array(_mission_result.get("character_events", [])).is_empty() or not Array(_mission_result.get("personnel_events", [])).is_empty()
+	var preview := get_node("Panel/Margin/VBox/SkillProgressPreviewLabel") as Label
+	var award := get_node("Panel/Margin/VBox/SkillAwardSummaryLabel") as Label
+	body.visible = has_report
+	for pair in [["FeedbackCard", has_ftl, ["FTLFeedbackLabel"]], ["AARCard", has_aar, ["AARSummaryLabel", "AARChipStrip", "AARRowsLabel", "AARLimitLabel"]], ["EventsCard", has_events, ["CharacterEventsLabel", "PersonnelEventsLabel"]], ["ProgressCard", preview.visible or award.visible, ["SkillProgressPreviewLabel", "SkillAwardSummaryLabel"]]]:
+		(details.get_node(pair[0]) as Control).visible = has_report and bool(pair[1])
+		if not has_report or not bool(pair[1]):
+			for source_name in pair[2]:
+				(get_node("Panel/Margin/VBox/" + source_name) as Control).hide()
+	if not has_report:
+		(get_node("Panel/Margin/VBox/TeamStateLabel") as Control).hide()
+	var active_cards := 0
+	for child in details.get_children():
+		if child is Control and child.visible:
+			active_cards += 1
+	details.columns = 2 if active_cards >= 3 else 1
+	details.visible = active_cards > 0
+	var missing := PackedStringArray()
+	if not has_ftl:
+		missing.append("keine Rückmeldung der Teamleitung")
+	if not has_aar:
+		missing.append("keine Gefechtsauswertung")
+	if not has_events:
+		missing.append("keine besonderen Vorkommnisse")
+	_native_review_missing.text = "Berichtumfang: " + " · ".join(missing)
+	_native_review_missing.visible = has_report and not missing.is_empty()
+	var heights := {"TeamStateLabel": 22, "FTLFeedbackLabel": 72 if Array(_mission_result.get("fireteam_tactical_debrief", [])).size() > 1 else 44, "CharacterEventsLabel": 22, "PersonnelEventsLabel": 22, "SkillProgressPreviewLabel": 36, "SkillAwardSummaryLabel": 40, "AARSummaryLabel": 18, "AARChipStrip": 26, "AARRowsLabel": 18}
+	for source_name in heights:
+		var slot := _native_review_slots[source_name] as Control
+		slot.custom_minimum_size.y = heights[source_name]
+	for child in _native_review_aar_rows.get_children():
+		_native_review_aar_rows.remove_child(child)
+		child.queue_free()
+	for row in Array(aar.get("rows", [])):
+		if typeof(row) != TYPE_DICTIONARY:
+			continue
+		var label := Label.new()
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.text = "%s: %s" % [_player_metric_text(String(row.get("label", row.get("id", "Kennzahl")))), _player_metric_text(String(row.get("value_text", "Keine Angabe")))]
+		TACTICAL_UI_THEME_SCRIPT.style_label(label, false, 13)
+		_native_review_aar_rows.add_child(label)
+	var aar_scroll := _native_review_aar_rows.get_parent() as ScrollContainer
+	aar_scroll.custom_minimum_size.y = minf(64.0, maxf(24.0, _native_review_aar_rows.get_combined_minimum_size().y))
+
+
+func _player_metric_text(text: String) -> String:
+	var replacements := {"Friendly Fire": "Eigenbeschuss", "FIRE": "Schüsse", "Fire": "Schüsse", "HIT": "Treffer", "SUP": "Unterdrückung", "Suppress": "Unterdrückung", "WOUND": "Verwundet", "DOWN": "Ausgefallen", "EXT": "Geborgen", "Risk": "Risiko"}
+	for token in replacements:
+		text = text.replace(token, replacements[token])
+	return text
+
+
+func _resize_native_review_window() -> void:
+	var panel := get_node("Panel") as PanelContainer
+	var viewport_size := get_viewport_rect().size
+	var rich := Array(_mission_result.get("team_states", [])).size() > 6 or Array(_extract_debrief_aar_payload().get("rows", [])).size() > 4
+	var preferred_width := 880.0 if _mission_result.is_empty() else (1440.0 if rich else 1240.0)
+	var width := minf(preferred_width, viewport_size.x - 48.0)
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.custom_minimum_size = Vector2.ZERO
+	if not is_equal_approx(panel.size.x, width):
+		panel.size.x = width
+	var height := minf(viewport_size.y - 48.0, maxf(240.0, panel.get_combined_minimum_size().y))
+	var desired := Vector2(width, height)
+	if not panel.size.is_equal_approx(desired):
+		panel.size = desired
+	var window_position := ((viewport_size - desired) * 0.5).floor()
+	if not panel.position.is_equal_approx(window_position):
+		panel.position = window_position
+	if _native_review_details != null:
+		var detail_panel := _native_review_details.get_node("DetailPanel") as Control
+		var detail_size := Vector2(minf(1000, viewport_size.x - 48), minf(700, viewport_size.y - 48))
+		detail_panel.size = detail_size
+		detail_panel.position = ((viewport_size - detail_size) * 0.5).floor()
+
+
+func _ensure_debrief_details() -> void:
+	_native_review_details = Control.new()
+	_native_review_details.name = "DebriefDetailsOverlay"
+	_native_review_details.set_as_top_level(true)
+	_native_review_details.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_native_review_details.mouse_filter = Control.MOUSE_FILTER_STOP
+	_native_review_details.z_as_relative = false
+	_native_review_details.z_index = 200
+	_native_review_details.hide()
+	add_child(_native_review_details)
+	var shade := ColorRect.new()
+	shade.color = Color(0, 0, 0, 0.75)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_STOP
+	_native_review_details.add_child(shade)
+	var panel := PanelContainer.new()
+	panel.name = "DetailPanel"
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	TACTICAL_UI_THEME_SCRIPT.style_card(panel)
+	_native_review_details.add_child(panel)
+	var contents := VBoxContainer.new()
+	contents.add_theme_constant_override("separation", 10)
+	panel.add_child(contents)
+	var header := HBoxContainer.new()
+	contents.add_child(header)
+	var title := Label.new()
+	title.text = "Vollständiger Originalbericht · technische Angaben"
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	TACTICAL_UI_THEME_SCRIPT.style_label(title, false, 16)
+	header.add_child(title)
+	var close := Button.new()
+	_native_review_details_close = close
+	close.name = "CloseDebriefDetailsButton"
+	close.text = "Schließen"
+	close.pressed.connect(close_debrief_details)
+	TACTICAL_UI_THEME_SCRIPT.style_command_button(close)
+	header.add_child(close)
+	_native_review_original_text = TextEdit.new()
+	_native_review_original_text.name = "DebriefOriginalText"
+	_native_review_original_text.editable = false
+	_native_review_original_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_native_review_original_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_native_review_original_text.custom_minimum_size = Vector2(0, 120)
+	contents.add_child(_native_review_original_text)
+	for property in ["focus_next", "focus_previous", "focus_neighbor_left", "focus_neighbor_right", "focus_neighbor_top", "focus_neighbor_bottom"]:
+		_native_review_original_text.set(property, _native_review_original_text.get_path_to(close))
+		close.set(property, close.get_path_to(_native_review_original_text))
+
+
+func open_debrief_details() -> void:
+	if not is_visible_in_tree() or _native_review_details == null:
+		return
+	_resize_native_review_window()
+	_native_review_original_text.text = JSON.stringify(_mission_result, "  ")
+	_set_return_modal_input_blocked(true)
+	_native_review_details.move_to_front()
+	_native_review_details.show()
+	_native_review_original_text.grab_focus()
+
+
+func close_debrief_details() -> void:
+	if not is_instance_valid(_native_review_details):
+		return
+	var was_open := _native_review_details.visible
+	_native_review_details.hide()
+	_set_return_modal_input_blocked(false)
+	if was_open and is_visible_in_tree():
+		var button := get_node_or_null("Panel/Margin/VBox/ButtonRow/DebriefDetailsButton") as Button
+		if button != null:
+			button.grab_focus()
+
+
+func _on_debrief_visibility_changed() -> void:
+	if not is_visible_in_tree():
+		close_debrief_details()
+
+
+func _input(event: InputEvent) -> void:
+	if not is_instance_valid(_native_review_details) or not _native_review_details.visible or not event is InputEventKey or not event.pressed or event.echo:
+		return
+	var focused := get_viewport().gui_get_focus_owner()
+	if event.keycode == KEY_ESCAPE:
+		close_debrief_details()
+		get_viewport().set_input_as_handled()
+	elif event.keycode == KEY_TAB:
+		var controls: Array[Control] = [_native_review_original_text, _native_review_details_close]
+		var current := controls.find(focused)
+		var next := (current + (-1 if event.shift_pressed else 1) + controls.size()) % controls.size()
+		controls[next].grab_focus()
+		get_viewport().set_input_as_handled()
+	elif focused == null or not _native_review_details.is_ancestor_of(focused):
+		_native_review_original_text.grab_focus()
+		get_viewport().set_input_as_handled()
+
+
+func _set_return_modal_input_blocked(blocked: bool) -> void:
+	var row := get_node_or_null("Panel/Margin/VBox/ButtonRow") as Control
+	if row == null:
+		return
+	var controls: Array[Control] = [row]
+	for child in row.get_children():
+		if child is Button:
+			controls.append(child)
+	for control in controls:
+		if blocked:
+			if not control.has_meta("debrief_modal_input_restore"):
+				control.set_meta("debrief_modal_input_restore", {"mouse": control.mouse_filter, "focus": control.focus_mode})
+			control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			control.focus_mode = Control.FOCUS_NONE
+		elif control.has_meta("debrief_modal_input_restore"):
+			var original: Dictionary = control.get_meta("debrief_modal_input_restore")
+			control.mouse_filter = original.mouse
+			control.focus_mode = original.focus
+			control.remove_meta("debrief_modal_input_restore")
+
+
+func _exit_tree() -> void:
+	if is_instance_valid(_native_review_details):
+		_native_review_details.hide()
+
+
+func _diagnostic_text(control: Control) -> String:
+	return String(control.get_meta("debrief_original_text", control.get("text"))) if control != null else ""
 
 
 func _ensure_native_review_cards() -> void:
@@ -662,9 +1015,9 @@ func _ensure_native_review_cards() -> void:
 	var layout := VBoxContainer.new()
 	layout.name = "NativeReviewLayout"
 	layout.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	layout.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	layout.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	layout.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	layout.add_theme_constant_override("separation", 10)
+	layout.add_theme_constant_override("separation", 8)
 	old_vbox.add_child(layout)
 	var result := _make_review_card(layout, "ResultCard", "")
 	_add_review_slot(result, "TitleLabel", 22)
@@ -675,10 +1028,15 @@ func _ensure_native_review_cards() -> void:
 	result.add_child(_native_review_heading)
 	_add_review_slot(result, "ResultLabel", 20)
 	_add_review_slot(result, "SummaryStrip", 28)
+	_native_review_missing = Label.new()
+	_native_review_missing.name = "ReportScopeLabel"
+	_native_review_missing.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	TACTICAL_UI_THEME_SCRIPT.style_label(_native_review_missing, true, 13)
+	result.add_child(_native_review_missing)
 	var body := HBoxContainer.new()
 	body.name = "BodyRow"
 	body.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	body.add_theme_constant_override("separation", 12)
 	layout.add_child(body)
 	var people := _make_review_card(body, "PeopleCard", "Personenfolgen")
@@ -707,24 +1065,48 @@ func _ensure_native_review_cards() -> void:
 	details.add_theme_constant_override("h_separation", 10)
 	details.add_theme_constant_override("v_separation", 10)
 	body.add_child(details)
-	var feedback := _make_review_card(details, "FeedbackCard", "FTL-Rückmeldung")
+	var feedback := _make_review_card(details, "FeedbackCard", "Rückmeldung der Teamleitung")
 	_add_review_slot(feedback, "FTLFeedbackLabel", 64)
 	var aar := _make_review_card(details, "AARCard", "Gefechtsauswertung")
 	_add_review_slot(aar, "AARSummaryLabel", 20)
 	_add_review_slot(aar, "AARChipStrip", 26)
 	_add_review_slot(aar, "AARRowsLabel", 32)
 	_add_review_slot(aar, "AARLimitLabel", 28)
+	var aar_scroll := ScrollContainer.new()
+	aar_scroll.name = "DebriefAARRowsScroll"
+	aar_scroll.custom_minimum_size = Vector2(0, 64)
+	aar_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	aar_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	aar_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	aar.add_child(aar_scroll)
+	_native_review_aar_rows = VBoxContainer.new()
+	_native_review_aar_rows.name = "Rows"
+	_native_review_aar_rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_native_review_aar_rows.add_theme_constant_override("separation", 6)
+	aar_scroll.add_child(_native_review_aar_rows)
 	_add_review_empty(aar, "Keine Gefechtsauswertung im Bericht.")
 	var events := _make_review_card(details, "EventsCard", "Gemeldete Ereignisse")
 	_add_review_slot(events, "CharacterEventsLabel", 52)
 	_add_review_slot(events, "PersonnelEventsLabel", 52)
-	var progress := _make_review_card(details, "ProgressCard", "Entwicklung · Vorschau / bestätigte Folgen")
+	var progress := _make_review_card(details, "ProgressCard", "Entwicklung")
 	_add_review_slot(progress, "SkillProgressPreviewLabel", 44)
 	_add_review_slot(progress, "SkillAwardSummaryLabel", 44)
+	_native_review_confirmation = Label.new()
+	_native_review_confirmation.name = "ConfirmedConsequencesStatus"
+	_native_review_confirmation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	TACTICAL_UI_THEME_SCRIPT.style_label(_native_review_confirmation, true, 13)
+	progress.add_child(_native_review_confirmation)
 	_add_review_empty(progress, "Keine Entwicklungsdaten oder bestätigten Auszeichnungen im Bericht.")
-	var returns := _make_review_card(layout, "ReturnCard", "Rückweg · vorhandene Ziele")
+	var returns := _make_review_card(layout, "ReturnCard", "Weiter nach dem Einsatz")
 	_add_review_slot(returns, "AirAssetEventsLabel", 22)
 	_add_review_slot(returns, "ButtonRow", 40)
+	var details_button := Button.new()
+	details_button.name = "DebriefDetailsButton"
+	details_button.text = "Originalbericht"
+	details_button.pressed.connect(open_debrief_details)
+	TACTICAL_UI_THEME_SCRIPT.style_command_button(details_button)
+	get_node("Panel/Margin/VBox/ButtonRow").add_child(details_button)
+	_ensure_debrief_details()
 	set_meta("native_debrief_card_layout", "r2_snapshot_cards")
 
 
@@ -733,7 +1115,7 @@ func _make_review_card(parent: Node, card_name: String, heading: String) -> VBox
 	card.name = card_name
 	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.size_flags_vertical = Control.SIZE_EXPAND_FILL if parent is GridContainer or parent is HBoxContainer else Control.SIZE_FILL
+	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	TACTICAL_UI_THEME_SCRIPT.style_card(card)
 	parent.add_child(card)
 	var contents := VBoxContainer.new()
@@ -756,9 +1138,18 @@ func _add_review_slot(parent: VBoxContainer, source_name: String, height: int) -
 	slot.custom_minimum_size = Vector2(0, height)
 	slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(slot)
-	# Native containers can finish sorting after the first deferred render.
-	# Follow actual slot geometry changes, without polling or frame rebuilds.
-	slot.item_rect_changed.connect(_queue_native_review_layout)
+	# A slot's canvas rectangle can move while its local rectangle stays fixed
+	# (for example when the content-sized result window is centered again).
+	# Connect this bounded ancestor chain once; legacy top-level source leaves
+	# are outside it, so placing them cannot recursively dirty the layout.
+	var ancestor: Node = slot
+	while ancestor is Control:
+		var control := ancestor as Control
+		if not control.item_rect_changed.is_connected(_queue_native_review_layout):
+			control.item_rect_changed.connect(_queue_native_review_layout)
+		if control == self:
+			break
+		ancestor = ancestor.get_parent()
 	_native_review_slots[source_name] = slot
 
 
@@ -780,6 +1171,7 @@ func _queue_native_review_layout() -> void:
 
 func _apply_native_review_geometry() -> void:
 	_native_review_pending = false
+	_resize_native_review_window()
 	set_meta("native_debrief_layout_passes", int(get_meta("native_debrief_layout_passes", 0)) + 1)
 	for source_name in _native_review_slots:
 		var source := get_node_or_null("Panel/Margin/VBox/" + source_name) as Control
@@ -1588,8 +1980,10 @@ func _ensure_personnel_events_label() -> Label:
 
 
 func _on_return_to_fob_pressed() -> void:
+	close_debrief_details()
 	return_to_fob_requested.emit()
 
 
 func _on_return_to_homebase_pressed() -> void:
+	close_debrief_details()
 	return_to_homebase_requested.emit()

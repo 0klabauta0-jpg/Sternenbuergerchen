@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+ERROR: 1920x1080: repeated real light refreshes retain full readable selected-team stance labels
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:24)
+       [1] _check_scene (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:159)
+ERROR: 1920x1080: light-refreshed stance controls remain drawable with their existing callbacks
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:24)
+       [1] _check_scene (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:159)
+ERROR: 1280x720: repeated real light refreshes retain full readable selected-team stance labels
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:24)
+       [1] _check_scene (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:159)
+ERROR: 1280x720: light-refreshed stance controls remain drawable with their existing callbacks
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:24)
+       [1] _check_scene (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:159)
+Mission R3 readout: 92 checks, 4 failures

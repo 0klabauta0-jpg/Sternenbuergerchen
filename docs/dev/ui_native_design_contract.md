@@ -1,4 +1,4 @@
-# Native UI Design Contract · R1 / R2
+# Native UI Design Contract · R1 / R2 / R3
 
 Gültig für den vom Nutzer am 01.11.2026 beauftragten Umsetzungsschritt auf Basis der bestätigten UI-Konzepte. Die Bilder bestimmen Formsprache und Gruppierung; bestehende Runtime-/Datenverträge bestimmen Inhalt und erlaubte Aktionen.
 
@@ -45,3 +45,15 @@ Native Strukturchecks prüfen Controls, Quadrate, Positionen, Erreichbarkeit und
 - Die FOB-Teamkontextzeile aktualisiert sich am bestehenden Zustandsrefresh, auch bei reinem Fokuswechsel ohne Größenänderung. Mindestgrößensignale sind keine State-Änderungsquelle.
 - R2-Captures bei 1280×720 verwenden ausdrücklich auch diese logische Viewportgröße. R1-Bildskalierung wird nicht rückwirkend als kleiner Reflow ausgegeben.
 - Die Roster-Prüfung folgt dem bestehenden effektiven 0..1-Wertevertrag nach Traits, siehe `character_roster_generation_contract.md`. UI-Save-Fixtures dürfen gültige problematische Werte nicht neutralisieren.
+
+## Verdichtung und Klarheit R3
+- Leere Arbeitsorte erhalten kurze native Karten statt voller Listenhöhe. Sichtbare Belegung darf die vorhandenen Bereiche bis zur verfügbaren Höhe wachsen lassen; bei vielen Einträgen wird echt gescrollt. Dropziele, Add-/Auswahlaktionen und Ortszuordnung bleiben vorhanden. Inhaltssignaturen reagieren auf Belegung/Viewport, nicht auf jeden Fortschrittswert.
+- Heimatbasis: leere Truppfläche bis 168px, leerer Transport bis 192px. Kompakte Briefingdetails sind vollständig gefaltet; verspätete Hinweise bleiben erhalten und nach explizitem Öffnen lesbar. Schiffskartenspalten passen sich der tatsächlichen Breite an.
+- FOB: ohne Transport kurze Flugdeck-/Einschiffhinweise, leerer ausgelagerter Teamort bis 144px. Ausrüstungsarbeit rückt entsprechend nach oben. Bestehende Boarding-/Transportgates ändern sich dadurch nicht.
+- Der Debrief wird aus tatsächlicher nativer Mindestgröße und Viewport begrenzt zentriert. Wenige Daten strecken keine leeren Auswertungs-/Ereigniskarten auf volle Höhe; viele Personen/AAR-Zeilen haben native Scrollflächen. Vollständige ursprüngliche Resultate bleiben in einem lesenden Originalbericht zugänglich.
+- Fehlende Zeit, Zielangaben, Gesundheit oder Awardwerte sind unbekannt/nicht angegeben. Sie werden nicht als gemessene Null oder negatives Ergebnis ausgegeben. Bestätigte Entwicklung erfordert den bestehenden angewandten/read-only Resolververtrag; Vorschau bleibt ausdrücklich Vorschau.
+- Der Originalbericht blockiert Maus und Tastatur gegenüber darunter liegenden Aktionen. Tab/Shift-Tab bleiben im Detailbereich; Enter/Schließen/Hide/Rückweg stellen GUI-Einstellungen wieder her. Keine Änderung von Gameplaygates oder Pausenzustand.
+- Primäre Missionsanzeigen projizieren vorhandene Objective-, Routen-, Transport- und Planwerte. Ausstehende Anfragen bleiben ausstehend. Laufende Befehle lesen vorhandene Ausführungs-Owners und verlangen keinen erneuten GO-Start. Abgeschlossene leere Rückflüge verwenden denselben Abschlussfilter wie die bestehende Schiffskarte; aktive Abflüge bleiben enthalten.
+- Legacy-Rohtexte und v1-Diagnoseformate bleiben getrennt von sichtbaren Spielerlabels erhalten. Haltungswörter und mindestens 13px-Schrift werden auch nach echten Lightrefreshes restauriert. Die Restaurierung durchsucht nur bekannte Controls und schreibt keine Layoutrects.
+- Zahlen in Auswertungs-Chips stehen sichtbar vor gegebenenfalls gekürzter Beschreibung. Tatsächliche Contentbreite und Fontbreite müssen den vollständigen Wert aufnehmen; der volle Kontext ist per Tooltip erreichbar. Keine kleinere Schrift als Platzersatz.
+- Separat platzierte Debrief-Controls folgen ihren nativen Slots auch nach reinen Bewegungen übergeordneter Container. Die begrenzte Ancestorkette wird einmal beim Aufbau signalgebunden, nicht pro Frame durchsucht. Rückwegzeile und Slot müssen nach Layoutabschluss übereinstimmen und vollständig in der Rückwegkarte liegen.

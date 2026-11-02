@@ -43,7 +43,12 @@ func _test_homebase(viewport_size: Vector2i) -> void:
 	_check(brief.size.y <= 140, "%s Homebase briefing leaves height for preparation" % viewport_size)
 	for panel_name in ["RosterPanel", "HomebaseFireteamPanel", "AircraftPanel"]:
 		var panel := screen.get_node(HOME_WORK + panel_name) as Control
-		_check(panel.is_visible_in_tree() and panel.size.y >= viewport_size.y - 240, "%s Homebase %s is a full-height work area" % [viewport_size, panel_name])
+		if panel_name == "RosterPanel":
+			_check(panel.is_visible_in_tree() and panel.size.y >= viewport_size.y - 240, "%s Homebase roster retains full-height personnel work" % viewport_size)
+		elif panel_name == "AircraftPanel":
+			_check(panel.is_visible_in_tree() and panel.size.y <= 192, "%s empty Homebase transport remains a compact actionable area" % viewport_size)
+		else:
+			_check(panel.is_visible_in_tree() and panel.size.y >= 128 and panel.size.y <= 256, "%s empty Homebase team retains its native drop target without a full empty column" % viewport_size)
 	var briefing_scroll := screen.get_node("Panel/Margin/VBox/MissionPanel/MissionMargin") as ScrollContainer
 	_check(briefing_scroll != null and briefing_scroll.vertical_scroll_mode == ScrollContainer.SCROLL_MODE_AUTO, "%s complete briefing has a bounded native scroll" % viewport_size)
 	var roster_scroll := screen.get_node(HOME_WORK + "RosterPanel/RosterMargin/RosterVBox/RosterScroll") as ScrollContainer
@@ -126,14 +131,14 @@ func _test_fob(viewport_size: Vector2i) -> void:
 	var list := screen.get_node(FOB_LOADOUT + "LoadoutMemberScroll/LoadoutMemberList") as VBoxContainer
 	_check(list.get_child_count() == 3, "%s real FOB loadout state produces all three member rows" % viewport_size)
 	var context := screen.get_node(HOME_WORK + "FireteamPanel/FireteamMargin/FireteamVBox/R2TeamContext") as Label
-	_check(context.text.contains("Im Loadout"), "%s team context explains location of staged team" % viewport_size)
+	_check(context.text.contains("Ausrüstung"), "%s team context explains location of staged team" % viewport_size)
 	# Both existing focus callbacks must refresh feedback synchronously. Do not
 	# await a frame/resize: an incidental minimum-size notification hid this bug.
 	var unchanged_viewport_size := viewport.size
 	screen.call("_on_fireteam_card_pressed", "ft2")
-	_check(context.text.begins_with("BRAVO") and context.text.contains("Teamübersicht") and not context.text.contains("Im Loadout"), "%s card-only focus change immediately reads free BRAVO context" % viewport_size)
+	_check(context.text.begins_with("BRAVO") and context.text.contains("Teamübersicht") and not context.text.contains("Ausrüstung"), "%s card-only focus change immediately reads free BRAVO context" % viewport_size)
 	screen.call("_on_select_fireteam_pressed", "ft1")
-	_check(context.text.begins_with("ALPHA") and context.text.contains("Im Loadout"), "%s selection-only focus change immediately restores ALPHA loadout context" % viewport_size)
+	_check(context.text.begins_with("ALPHA") and context.text.contains("Ausrüstung"), "%s selection-only focus change immediately restores ALPHA loadout context" % viewport_size)
 	_check(viewport.size == unchanged_viewport_size, "%s team context refresh requires no viewport resize" % viewport_size)
 	var staging_scroll := screen.get_node(HOME_WORK + "StagingPanel/StagingMargin") as ScrollContainer
 	_check(staging_scroll != null, "%s full FOB staging remains in bounded native scroll" % viewport_size)

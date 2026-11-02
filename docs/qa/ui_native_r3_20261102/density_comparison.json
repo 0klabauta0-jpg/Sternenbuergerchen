@@ -1,0 +1,59 @@
+[
+  {
+    "capture": "homebase_1920x1080.png",
+    "metric": "teams",
+    "r2_rect": [
+      496,
+      216,
+      520,
+      848
+    ],
+    "r3_rect": [
+      496.0,
+      192.0,
+      520.0,
+      128.0
+    ],
+    "area_reduction_percent": 84.9,
+    "r2_source": "b1342b939 source layout plus preserved R2 native capture",
+    "r3_source": "docs/qa/ui_native_r3_20261102/captures/homebase_1920x1080.json"
+  },
+  {
+    "capture": "fob_1920x1080.png",
+    "metric": "flightdeck",
+    "r2_rect": [
+      1056,
+      88,
+      848,
+      712
+    ],
+    "r3_rect": [
+      1056.0,
+      88.0,
+      848.0,
+      176.0
+    ],
+    "area_reduction_percent": 75.3,
+    "r2_source": "b1342b939 source layout plus preserved R2 native capture",
+    "r3_source": "docs/qa/ui_native_r3_20261102/captures/fob_1920x1080.json"
+  },
+  {
+    "capture": "debrief_1920x1080.png",
+    "metric": "window",
+    "r2_rect": [
+      24,
+      24,
+      1872,
+      1032
+    ],
+    "r3_rect": [
+      340.0,
+      228.0,
+      1240.0,
+      624.0
+    ],
+    "area_reduction_percent": 59.9,
+    "r2_source": "b1342b939 source layout plus preserved R2 native capture",
+    "r3_source": "docs/qa/ui_native_r3_20261102/captures/debrief_1920x1080.json"
+  }
+]

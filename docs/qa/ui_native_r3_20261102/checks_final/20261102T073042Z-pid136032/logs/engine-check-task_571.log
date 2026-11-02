@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_571 Fire Rule Controls Readability Polish ===
+[PASS] TASK_571 task file exists
+[PASS] TASK_571 task file names the polish
+[PASS] Implementation status tracks TASK_571
+[PASS] Roadmap tracks TASK_571
+[PASS] HTML report tracks TASK_571
+[PASS] HTML report names TASK_572 follow-up
+[PASS] HTML report keeps TASK_571 completion context
+[PASS] Mission command feedback contract documents TASK_571
+[PASS] Command hierarchy exposes fire-rule button paths
+[PASS] Command hierarchy exposes suppress fire-rule action
+[PASS] Mission controller exposes fire-rule controls snapshot
+[PASS] Mission controller wires fire-rule button presses
+[PASS] Mission fixture exposes TacticalController
+[PASS] Fire-rule controls remain read-only UI
+[PASS] Four fire-rule buttons are snapshotted
+[PASS] All fire-rule buttons exist
+[PASS] Fire-rule buttons are disabled without selection
+[PASS] Fire-rule buttons are enabled with selected fireteam
+[PASS] Hold Fire button uses the German compact label
+[PASS] Return Fire button uses the German compact label
+[PASS] Fire at Will button uses the German compact label
+[PASS] Suppress button uses the German compact label
+[PASS] Hold Fire button carries help id
+[PASS] Hold and Free buttons are real BaseButton nodes
+[PASS] Hold button sets selected fireteam through controller
+[PASS] Hold button shows active state
+[PASS] Free button is inactive after Hold
+[PASS] Free button sets selected fireteam through controller
+[PASS] Free button shows active state
+[PASS] Snapshot exposes selected fire-rule consensus
+[PASS] Mixed selection is exposed as mixed
+[PASS] Mixed selection does not show a false single active fire-rule
+=== RESULTS: 32 passed, 0 failed ===
+TASK_571: ALL PASSED

@@ -1,0 +1,444 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+R3 DEBRIEF (1920, 1080) empty:  panel=[P: (24.0, 24.0), S: (1872.0, 1032.0)]
+PASS: (1920, 1080) empty: actual result window stays in the logical viewport
+PASS: (1920, 1080) empty: result window is centered
+ERROR: FAIL: (1920, 1080) empty: empty report is at most 980x380
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:42)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Skill Preview:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Skill Awards:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Winner team_
+ERROR: FAIL: (1920, 1080) empty: primary UI avoids diagnostic token Character updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) empty: primary UI avoids diagnostic token Personnel updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) empty: primary UI avoids diagnostic token FTL feedback:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token WIN TEAM_
+ERROR: FAIL: (1920, 1080) empty: primary UI avoids diagnostic token COND 
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) empty: primary UI avoids diagnostic token Air asset:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) empty: no missing awards are fabricated
+PASS: (1920, 1080) empty: ReturnToFOBButton remains reachable
+PASS: (1920, 1080) empty: ReturnToHomebaseButton remains reachable
+PASS: (1920, 1080) empty: presentation preserves the supplied result exactly
+ERROR: FAIL: (1920, 1080) empty: original-report action is explicitly reachable
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:74)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) empty: idle frames do not poll the layout
+R3 DEBRIEF (1920, 1080) sparse:  panel=[P: (24.0, 24.0), S: (1872.0, 1032.0)]
+PASS: (1920, 1080) sparse: actual result window stays in the logical viewport
+PASS: (1920, 1080) sparse: result window is centered
+ERROR: FAIL: (1920, 1080) sparse: sparse report has a bounded content-sized window
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:44)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: sparse window uses at most 55 percent of Full HD
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:46)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: AARCard does not stretch absent or brief data
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:49)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: EventsCard does not stretch absent or brief data
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:49)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: FeedbackCard does not stretch absent or brief data
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:49)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: primary UI avoids diagnostic token Skill Preview:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Skill Awards:
+ERROR: FAIL: (1920, 1080) sparse: primary UI avoids diagnostic token Winner team_
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: primary UI avoids diagnostic token Character updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: primary UI avoids diagnostic token Personnel updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: primary UI avoids diagnostic token FTL feedback:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: primary UI avoids diagnostic token WIN TEAM_
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: primary UI avoids diagnostic token COND 
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) sparse: primary UI avoids diagnostic token Air asset:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) sparse: preview and confirmation are explicitly distinguished
+PASS: (1920, 1080) sparse: no missing awards are fabricated
+PASS: (1920, 1080) sparse: ReturnToFOBButton remains reachable
+PASS: (1920, 1080) sparse: ReturnToHomebaseButton remains reachable
+PASS: (1920, 1080) sparse: presentation preserves the supplied result exactly
+ERROR: FAIL: (1920, 1080) sparse: original-report action is explicitly reachable
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:74)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) sparse: idle frames do not poll the layout
+R3 DEBRIEF (1920, 1080) rich:  panel=[P: (24.0, 24.0), S: (1872.0, 1032.0)]
+PASS: (1920, 1080) rich: actual result window stays in the logical viewport
+PASS: (1920, 1080) rich: result window is centered
+ERROR: FAIL: (1920, 1080) rich: primary UI avoids diagnostic token Skill Preview:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) rich: primary UI avoids diagnostic token Skill Awards:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) rich: primary UI avoids diagnostic token Winner team_
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) rich: primary UI avoids diagnostic token Character updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) rich: primary UI avoids diagnostic token Personnel updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) rich: primary UI avoids diagnostic token FTL feedback:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) rich: primary UI avoids diagnostic token WIN TEAM_
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) rich: primary UI avoids diagnostic token COND 
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1920, 1080) rich: primary UI avoids diagnostic token Air asset:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) rich: preview and confirmation are explicitly distinguished
+PASS: (1920, 1080) rich: many real people have a native scroll
+ERROR: FAIL: (1920, 1080) rich: all supplied AAR rows have a native scroll
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:61)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) rich: ReturnToFOBButton remains reachable
+PASS: (1920, 1080) rich: ReturnToHomebaseButton remains reachable
+PASS: (1920, 1080) rich: presentation preserves the supplied result exactly
+ERROR: FAIL: (1920, 1080) rich: original-report action is explicitly reachable
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:74)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) rich: idle frames do not poll the layout
+R3 DEBRIEF (1280, 720) empty:  panel=[P: (24.0, 24.0), S: (1232.0, 672.0)]
+PASS: (1280, 720) empty: actual result window stays in the logical viewport
+PASS: (1280, 720) empty: result window is centered
+ERROR: FAIL: (1280, 720) empty: empty report is at most 980x380
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:42)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Skill Preview:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Skill Awards:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Winner team_
+ERROR: FAIL: (1280, 720) empty: primary UI avoids diagnostic token Character updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) empty: primary UI avoids diagnostic token Personnel updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) empty: primary UI avoids diagnostic token FTL feedback:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) empty: primary UI avoids diagnostic token WIN TEAM_
+ERROR: FAIL: (1280, 720) empty: primary UI avoids diagnostic token COND 
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) empty: primary UI avoids diagnostic token Air asset:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) empty: no missing awards are fabricated
+PASS: (1280, 720) empty: ReturnToFOBButton remains reachable
+PASS: (1280, 720) empty: ReturnToHomebaseButton remains reachable
+PASS: (1280, 720) empty: presentation preserves the supplied result exactly
+ERROR: FAIL: (1280, 720) empty: original-report action is explicitly reachable
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:74)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) empty: idle frames do not poll the layout
+R3 DEBRIEF (1280, 720) sparse:  panel=[P: (24.0, 24.0), S: (1232.0, 672.0)]
+PASS: (1280, 720) sparse: actual result window stays in the logical viewport
+PASS: (1280, 720) sparse: result window is centered
+ERROR: FAIL: (1280, 720) sparse: sparse report has a bounded content-sized window
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:44)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) sparse: AARCard does not stretch absent or brief data
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:49)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) sparse: EventsCard does not stretch absent or brief data
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:49)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) sparse: FeedbackCard does not stretch absent or brief data
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:49)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) sparse: primary UI avoids diagnostic token Skill Preview:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Skill Awards:
+ERROR: FAIL: (1280, 720) sparse: primary UI avoids diagnostic token Winner team_
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) sparse: primary UI avoids diagnostic token Character updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) sparse: primary UI avoids diagnostic token Personnel updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) sparse: primary UI avoids diagnostic token FTL feedback:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) sparse: primary UI avoids diagnostic token WIN TEAM_
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) sparse: primary UI avoids diagnostic token COND 
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) sparse: primary UI avoids diagnostic token Air asset:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) sparse: preview and confirmation are explicitly distinguished
+PASS: (1280, 720) sparse: no missing awards are fabricated
+PASS: (1280, 720) sparse: ReturnToFOBButton remains reachable
+PASS: (1280, 720) sparse: ReturnToHomebaseButton remains reachable
+PASS: (1280, 720) sparse: presentation preserves the supplied result exactly
+ERROR: FAIL: (1280, 720) sparse: original-report action is explicitly reachable
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:74)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) sparse: idle frames do not poll the layout
+R3 DEBRIEF (1280, 720) rich:  panel=[P: (24.0, 24.0), S: (1232.0, 672.0)]
+PASS: (1280, 720) rich: actual result window stays in the logical viewport
+PASS: (1280, 720) rich: result window is centered
+ERROR: FAIL: (1280, 720) rich: primary UI avoids diagnostic token Skill Preview:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) rich: primary UI avoids diagnostic token Skill Awards:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) rich: primary UI avoids diagnostic token Winner team_
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) rich: primary UI avoids diagnostic token Character updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) rich: primary UI avoids diagnostic token Personnel updates:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) rich: primary UI avoids diagnostic token FTL feedback:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) rich: primary UI avoids diagnostic token WIN TEAM_
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) rich: primary UI avoids diagnostic token COND 
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+ERROR: FAIL: (1280, 720) rich: primary UI avoids diagnostic token Air asset:
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:52)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) rich: preview and confirmation are explicitly distinguished
+PASS: (1280, 720) rich: many real people have a native scroll
+ERROR: FAIL: (1280, 720) rich: all supplied AAR rows have a native scroll
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:61)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) rich: ReturnToFOBButton remains reachable
+PASS: (1280, 720) rich: ReturnToHomebaseButton remains reachable
+PASS: (1280, 720) rich: presentation preserves the supplied result exactly
+ERROR: FAIL: (1280, 720) rich: original-report action is explicitly reachable
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:74)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) rich: idle frames do not poll the layout
+RESULTS: 56 passed, 63 failed

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "debrief_shell_r2",
+      "script": "res://scripts/tests/ui_native_r2_debrief_shell_verifier.gd",
+      "success_marker": "PASS: native R2 debrief and shell",
+      "timeout": 100
+    },
+    {
+      "name": "task588",
+      "script": "res://scripts/tests/task_588_debrief_aar_data_bridge.gd",
+      "success_marker": "TASK_588: ALL PASSED",
+      "timeout": 100
+    },
+    {
+      "name": "task593",
+      "script": "res://scripts/tests/task_593_skill_progress_award_contract.gd",
+      "success_marker": "TASK_593: ALL PASSED",
+      "timeout": 100
+    },
+    {
+      "name": "debrief_r3",
+      "script": "res://scripts/tests/ui_native_r3_debrief_verifier.gd",
+      "success_marker": "PASS: native R3 debrief",
+      "timeout": 100
+    }
+  ]
+}

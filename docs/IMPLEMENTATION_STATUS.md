@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### Native UI R3 2026-11-02 – Leerraum und Anzeigen überarbeitet
+- Nutzerauftrag: verbliebene Leerflächen und unklare/veraltete Statusanzeigen beheben. Branch `task/ui-verdichtung-r3-20261102`, bewusst auf noch nicht integriertem R2 `b1342b939`; Integrationsbasis `3cae5a216`.
+- Heimatbasis/FOB: belegungsabhängige Team-/Transporthöhen, passende Schiffskartenspalten und vollständig gefaltete Briefingdetails. Leere Truppfläche 128 statt 848px, leeres FOB-Flugdeck 176 statt 712px. Bestehende Zuweisungs-, Loadout-, Boarding-, Transit- und Read-only-Pfade erhalten.
+- Mission: kompakte verständliche Hauptanzeigen aus vorhandenen Objective-/Transport-/Planowners. Geplant, laufend und ausstehend bleiben getrennt; abgeschlossene leere Rückflüge folgen dem bestehenden Filter. Rohdiagnose erreichbar; volle Haltungswörter bleiben auch nach Lightrefresh erhalten.
+- Debrief: Fenster nach Datenumfang; Standard 1240×624 statt 1872×1032px (rund 60 Prozent weniger Fläche). Fehlende Werte bleiben unbekannt, Vorschau und bestätigte Folgen getrennt. Originalbericht begrenzt Maus/Tastatur und stellt GUI wieder her; Zahlen stehen vor kürzbaren Beschreibungen. Rückwegzeile folgt dem nativen Slot auch bei Ancestorbewegung ohne Polling.
+- Nachweis: 19 gezielte Checks / 1.617 Assertions ohne Fehler, 13 reale Windows-/GL-Captures (vier echte logische/physische 1280×720), 10 Offline-HTML-/Exportprüfungen. Unabhängige Source-/Bildgegenprüfung; bestätigte Befunde gezielt RED/GREEN korrigiert. Letzte akzeptierte Einzelruns und Quellen-/Artefakthashes: `docs/qa/ui_native_r3_20261102/VERIFIKATION.json`.
+- Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_NATIVE_R3_2026-11-02.html` mit 13 Ansichten, Gründen, R2-/Konzeptvergleich und vollständigem lokalem JSON-Feedback. Alte Konzeptseite erhält nur einen Link; ihre Skripte/Exportfelder und historische Nachweise bleiben erhalten.
+- Grenzen: keine menschlich vollständig durchgespielte Runde, reale Mehrspielerpartie, Browserlayout-/Download-, Release-/EXE- oder Langzeitabnahme. Bestehende Lobby-Payload-Netzwerklücke außerhalb dieses Passes; Hauptcheckout unverändert.
+
 ### Native UI R2 2026-11-02 – Verdichtung und Funktionsprüfung
 - Nutzerauftrag: weiterer Pass näher an den bestätigten Bild-KI-Vorlagen, ausdrücklich mit Logik-/Funktionsprüfung. Branch `task/ui-umsetzung-r2-20261101`, bewusst auf dem noch nicht integrierten R1 `80593f416` und Konzeptstand `135466b5c`; Integrationsbasis `3cae5a216`.
 - Mission: 160px-Randband, begrenzte Teamgruppe, flacherer Mitgliederstreifen, verständliche Haltung und bestätigte Feuerregel im nativen Dropdown. Alte Callbacks/Gates bleiben Owner; Diagnose in Details, korrekte Aktionsmarkierungen, Popup schließt beim Metawechsel.

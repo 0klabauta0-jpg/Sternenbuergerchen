@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+ERROR: confirmed running plan is not presented as merely planned or waiting for another start
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:24)
+       [1] _check_scene (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:157)
+ERROR: mixed selection does not claim every selected team is executing
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:24)
+       [1] _check_scene (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:157)
+ERROR: 1920x1080: real GO callback activates the existing owner before the running readout appears
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:24)
+       [1] _check_scene (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:157)
+ERROR: 1920x1080: real running plan has no redundant start-again instruction
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:24)
+       [1] _check_scene (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:157)
+ERROR: 1280x720: real GO callback activates the existing owner before the running readout appears
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:24)
+       [1] _check_scene (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:157)
+ERROR: 1280x720: real running plan has no redundant start-again instruction
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:24)
+       [1] _check_scene (res://scripts/tests/ui_native_r3_mission_readout_verifier.gd:157)
+Mission R3 readout: 74 checks, 6 failures

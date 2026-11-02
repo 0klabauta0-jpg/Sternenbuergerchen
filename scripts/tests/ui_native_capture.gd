@@ -7,6 +7,7 @@ var _window_size := Vector2i(1920, 1080)
 var _logical_size := Vector2i(1920, 1080)
 var _output_dir := OUTPUT_DIR
 var _fixture_scope := "ui_native_r1_capture"
+var _fixture_variant := "standard"
 
 func _init() -> void:
 	for arg in OS.get_cmdline_user_args():
@@ -22,6 +23,8 @@ func _init() -> void:
 			_output_dir = arg.trim_prefix("--output=")
 		if arg.begins_with("--fixture-scope="):
 			_fixture_scope = arg.trim_prefix("--fixture-scope=")
+		if arg.begins_with("--variant="):
+			_fixture_variant = arg.trim_prefix("--variant=")
 	call_deferred("_run")
 
 func _run() -> void:
@@ -39,7 +42,7 @@ func _run() -> void:
 		"lobby":
 			scene = load("res://scenes/ui/multiplayer_lobby.tscn").instantiate()
 		"homebase":
-			scene = load("res://scenes/meta/meta_layer_test.tscn").instantiate()
+			scene = load("res://scenes/meta/homebase_test_screen.tscn" if _fixture_variant == "teams" else "res://scenes/meta/meta_layer_test.tscn").instantiate()
 		"fob":
 			scene = load("res://scenes/meta/fob_test_screen.tscn").instantiate()
 		"debrief":
@@ -74,6 +77,16 @@ func _run() -> void:
 			scene.call("open_team_editor")
 		"escape":
 			root.get_node("GlobalEscapeMenu").call("open_menu")
+		"homebase":
+			if _fixture_variant == "teams":
+				var generator: GDScript = load("res://scripts/meta/start_roster_generator.gd")
+				var roster: Dictionary = generator.call("generate_start_roster", "native-ui-r3-homebase", 24)
+				var units: Array = roster.units.slice(0, 6)
+				var ids := PackedStringArray()
+				for unit: Dictionary in units:
+					ids.append(String(unit.unit_id))
+				scene.call("setup_roster", units, PackedStringArray(ids.slice(0, 3)))
+				scene.call("set_fireteam_context", PackedStringArray(["ft1", "ft1", "ft1"]), [{"id": "ft1", "label": "ALPHA", "lead_unit_id": ids[0]}])
 		"fob":
 			var generator: GDScript = load("res://scripts/meta/start_roster_generator.gd")
 			var roster: Dictionary = generator.call("generate_start_roster", "native-ui-r1-fob", 24)
@@ -84,6 +97,13 @@ func _run() -> void:
 			scene.call("set_available_units", units)
 			scene.call("configure_transfer", ids, PackedStringArray(["ft1", "ft1", "", "", "", ""]), [{"id": "ft1", "label": "ALPHA", "lead_unit_id": ids[0], "member_unit_ids": PackedStringArray([ids[0], ids[1]])}])
 			scene.call("_on_staging_fireteam_dropped", "ft1", "loadout")
+			if _fixture_variant == "populated":
+				var pilot_id := ""
+				for unit: Dictionary in units:
+					if String(unit.get("roster_role_category", "")) == "pilot":
+						pilot_id = String(unit.unit_id)
+						break
+				scene.call("set_transport_craft_state", [{"craft_id": "r3_capture_ship", "craft_type": "dropship", "display_name": "Dropship 1", "visible_in_fob": true, "is_boardable": true, "is_in_transit": false, "pilot_unit_id": pilot_id}])
 		"debrief":
 			scene.call("set_mission_result", _debrief_fixture())
 	root.size = _window_size
@@ -113,7 +133,8 @@ func _run() -> void:
 		quit(1)
 		return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_output_dir))
-	var basename := "%s_%dx%d" % [_view, _window_size.x, _window_size.y]
+	var variant_suffix := "" if _fixture_variant == "standard" else "_" + _fixture_variant
+	var basename := "%s%s_%dx%d" % [_view, variant_suffix, _window_size.x, _window_size.y]
 	var image_path := _output_dir.path_join(basename + ".png")
 	var error := capture.save_png(image_path)
 	var evidence := {
@@ -122,6 +143,7 @@ func _run() -> void:
 		"source_capture": true,
 		"synthetic_image_fallback": false,
 		"fixture_data": true,
+		"fixture_variant": _fixture_variant,
 		"display_driver": DisplayServer.get_name(),
 		"renderer": RenderingServer.get_current_rendering_method(),
 		"image_size": [capture.get_width(), capture.get_height()],
@@ -131,7 +153,15 @@ func _run() -> void:
 		"viewport_size": [root.get_visible_rect().size.x, root.get_visible_rect().size.y],
 		"save_error": error,
 		"note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+		"ui_metrics": _capture_ui_metrics(scene),
 	}
+	if _view == "debrief":
+		var result: Dictionary = scene.call("get_mission_result")
+		evidence["fixture_summary"] = {
+			"person_count": Array(result.get("team_states", [])).size(),
+			"has_aar": not Dictionary(result.get("mini_aar_debrief", {})).is_empty(),
+			"award_applied": bool(Dictionary(result.get("progression_award_summary", {})).get("award_applied", false)),
+		}
 	var file := FileAccess.open(_output_dir.path_join(basename + ".json"), FileAccess.WRITE)
 	file.store_string(JSON.stringify(evidence, "\t") + "\n")
 	file.close()
@@ -140,6 +170,29 @@ func _run() -> void:
 	for _frame in range(3):
 		await process_frame
 	quit(0 if error == OK else 1)
+
+func _capture_ui_metrics(scene: Node) -> Dictionary:
+	var host := scene
+	var paths: Dictionary = {}
+	match _view:
+		"homebase":
+			if _fixture_variant != "teams":
+				host = scene.get_node_or_null("HomebaseScreen")
+			paths = {"briefing": "Panel/Margin/VBox/MissionPanel", "teams": "Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel", "flightdeck": "Panel/Margin/VBox/ContentRow/AircraftPanel"}
+		"fob":
+			paths = {"teams": "Panel/Margin/VBox/ContentRow/FireteamPanel", "loadout": "Panel/Margin/VBox/ContentRow/StagingPanel", "flightdeck": "Panel/Margin/VBox/ContentRow/DropshipPanel", "boarding": "Panel/Margin/VBox/DropLightBottomRow/BoardingStatusPanel"}
+		"debrief":
+			paths = {"window": "Panel", "return_card": "Panel/Margin/VBox/NativeReviewLayout/ReturnCard", "return_row": "Panel/Margin/VBox/ButtonRow", "return_slot": "Panel/Margin/VBox/NativeReviewLayout/ReturnCard/Contents/ButtonRowSlot"}
+		"mission":
+			paths = {"objective": "TacticalUI/MissionIdentityPanel", "transport": "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel"}
+	var metrics := {}
+	if host != null:
+		for key in paths:
+			var control := host.get_node_or_null(NodePath(paths[key])) as Control
+			if control != null:
+				var rect := control.get_global_rect()
+				metrics[key] = {"rect": [rect.position.x, rect.position.y, rect.size.x, rect.size.y], "visible": control.is_visible_in_tree()}
+	return metrics
 
 func _build_character_fixture() -> Control:
 	var theme_script: GDScript = load("res://scripts/ui/tactical_ui_theme.gd")
@@ -176,6 +229,15 @@ func _build_character_fixture() -> Control:
 	return panel
 
 func _debrief_fixture() -> Dictionary:
+	if _fixture_variant == "empty":
+		return {}
+	if _fixture_variant == "partial":
+		return {"result": "victory"}
+	if _fixture_variant == "rich":
+		# Pure stress fixture from the dedicated UI verifier. Loading its script
+		# does not instantiate a SceneTree or run the test harness.
+		var fixtures: Object = load("res://scripts/tests/ui_native_r3_debrief_verifier.gd")
+		return Dictionary(fixtures.call("build_fixture", "rich"))
 	return {
 		"winning_team_id": "team_alpha", "mission_outcome": "completed", "result": "victory",
 		"win_condition_type": "objective_capture", "objective_captured": true, "duration_seconds": 185.0,

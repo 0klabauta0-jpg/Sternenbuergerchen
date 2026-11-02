@@ -64,7 +64,8 @@ func _test_debrief(size: Vector2i) -> void:
 	var event_label := screen.get_node("Panel/Margin/VBox/CharacterEventsLabel") as Label
 	print("R2 DEBRIEF GEOMETRY %s events=%s label=%s slot=%s" % [size, events.get_global_rect() if events != null else Rect2(), event_label.get_global_rect(), screen.find_child("CharacterEventsLabelSlot", true, false).get_global_rect() if events != null else Rect2()])
 	print("R2 DEBRIEF LEAF %s events top_level=%s assigned_slot=%s" % [size, event_label.is_set_as_top_level(), event_label.get_meta("native_debrief_card_slot", "missing")])
-	_check(events != null and event_label.text.contains("Nur gemeldetes Ereignis") and events.get_global_rect().encloses(event_label.get_global_rect()), "%s event card exposes the supplied report without a fabricated timeline" % size)
+	var original := screen.find_child("DebriefOriginalText", true, false) as TextEdit
+	_check(events != null and event_label.text.contains("Personenmeldungen") and events.get_global_rect().encloses(event_label.get_global_rect()) and original != null and original.text.contains("Nur gemeldetes Ereignis"), "%s current event summary retains the supplied original report without a fabricated timeline" % size)
 	var passes := int(screen.get_meta("native_debrief_layout_passes", 0))
 	await _wait(3)
 	_check(int(screen.get_meta("native_debrief_layout_passes", 0)) == passes, "%s idle frames do not poll or rebuild the card layout" % size)

@@ -17,6 +17,10 @@ const ICON_IDS := {"MoveButton": "move", "TakeButton": "take", "HoldButton": "de
 const CHARACTER_OVERLAY_Z := 64
 const FIRE_CODES: PackedStringArray = ["hold", "return", "free", "suppress"]
 const FIRE_NAMES: PackedStringArray = ["Feuer halten", "Antwortfeuer", "Feuer frei", "Unterdrücken"]
+const IDENTITY := "../TacticalUI/MissionIdentityPanel"
+const IDENTITY_SOURCES := IDENTITY + "/MissionIdentityMargin/MissionIdentityVBox/"
+const STRATEGIC := BASE + "StrategicPanel"
+const STRATEGIC_SOURCES := STRATEGIC + "/StrategicMargin/StrategicScroll/StrategicVBox/"
 
 
 static func configure(controller: Node, state: Dictionary = {}) -> void:
@@ -161,8 +165,7 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 		log_panel.clip_contents = true
 	var strategic := controller.get_node_or_null(BASE + "StrategicPanel") as Control
 	if strategic != null:
-		_place(strategic, Rect2(layout.mission_control))
-	_keep_transport_and_control_separate(controller)
+		_layout_player_readouts(controller, viewport_size)
 	_refresh_fire_rule_selector(controller, state)
 	grid.set_meta("native_a5_geometry_signature", geometry_signature)
 
@@ -174,7 +177,7 @@ static func _geometry_signature(controller: Node, grid: GridContainer, viewport_
 			context.append("%s:%s" % [child.name, child.text])
 	var craft := controller.get_node_or_null("../TacticalUI/MissionDropshipPanel") as Control
 	var transport := str(craft.get_global_rect()) if craft != null and craft.visible else "hidden"
-	return "r2_heading1|%s|%d|%s|%s" % [viewport_size, grid.get_child_count(), "|".join(context), transport]
+	return "r3_readout1|%s|%d|%s|%s" % [viewport_size, grid.get_child_count(), "|".join(context), transport]
 
 
 static func _is_active_context_button(button: Button) -> bool:
@@ -203,6 +206,7 @@ static func _refresh_presentation(controller: Node, grid: GridContainer, state: 
 	if stance != null:
 		_refresh_stance_buttons(stance)
 	_layout_team_readouts(controller, Rect2(layout.selected_fireteam))
+	_hide_raw_readouts(controller)
 	_refresh_fire_rule_selector(controller, state)
 
 
@@ -310,13 +314,14 @@ static func refresh(controller: Node, view_model: Dictionary) -> void:
 	if panel == null:
 		return
 	panel.visible = bool(view_model.get("visible", true))
-	_set_text(panel.get_node("Contents/Target") as Label, "Ziel gewählt" if bool(view_model.get("target_selected", false)) else "Ziel auswählen")
-	_set_text(panel.get_node("Contents/Order") as Label, String(view_model.get("order", "Kein Plan ausgewählt")))
 	var feedback := String(view_model.get("feedback", ""))
-	var display_feedback := "Befehl auswählen" if feedback == "AWAITING INPUT" else feedback
-	if feedback.begins_with("FIRE ") and feedback.contains(" REQUEST"):
-		display_feedback = "Feuerregel wird geprüft"
-	_set_text(panel.get_node("Contents/Feedback") as Label, display_feedback)
+	if view_model.has("player_context"):
+		refresh_player_readout(controller, Dictionary(view_model.player_context))
+	else:
+		# Small presenter fixtures can refresh a rule independently of the full VM.
+		_set_text(panel.get_node("Contents/Target") as Label, "Ziel gewählt" if bool(view_model.get("target_selected", false)) else "Ziel auswählen")
+		_set_text(panel.get_node("Contents/Order") as Label, String(view_model.get("order", "Auftrag: Befehl auswählen")))
+		_set_text(panel.get_node("Contents/Feedback") as Label, _player_command_feedback(feedback))
 	panel.tooltip_text = "Ziel: %s\n%s\n%s\n\n%s" % [view_model.get("target", "—"), view_model.get("order", ""), feedback, view_model.get("detail", "")]
 	var title := controller.get_node_or_null(BASE + "FireteamPanel/A5TeamIdentity") as Label
 	if title != null:
@@ -326,6 +331,178 @@ static func refresh(controller: Node, view_model: Dictionary) -> void:
 		_set_text(summary, String(view_model.get("team_summary", "")))
 	_refresh_fire_rule_selector(controller, view_model)
 	_refresh_details_text(controller)
+
+
+static func build_player_readout(context: Dictionary) -> Dictionary:
+	# This projection consumes confirmed snapshots only. It never submits a
+	# command or promotes a request, selected control or fallback cue to truth.
+	var objective: Dictionary = Dictionary(context.get("objective", {}))
+	var mission_text := "Einsatzziel nicht verfügbar"
+	var mission_heading := "EINSATZ"
+	var local_team := String(context.get("local_team_id", "")).strip_edges().to_lower()
+	if bool(objective.get("available", false)):
+		mission_heading = "EINSATZZIEL"
+		var owner := String(objective.get("owning_team_id", "")).strip_edges().to_lower()
+		var progress := clampf(float(objective.get("capture_progress", 0.0)), 0.0, 1.0)
+		mission_text = "Einsatzziel sichern"
+		if bool(objective.get("contested", false)):
+			mission_text = "Einsatzziel umkämpft"
+		elif not owner.is_empty() and progress >= 1.0:
+			mission_text = "Einsatzziel besetzt" if local_team.is_empty() else ("Einsatzziel gesichert" if owner == local_team else "Einsatzziel gegnerisch besetzt")
+		elif progress > 0.0 and not local_team.is_empty() and String(objective.get("capturing_team_id", "")).to_lower() == local_team:
+			mission_text = "Einsatzziel sichern · %d %%" % int(floor(progress * 100.0))
+	# The old CUE WAIT fallback exists even without a route. Only an explicitly
+	# active route may replace the objective with its actual next runtime step.
+	if bool(context.get("route_active", false)):
+		var cue: Dictionary = Dictionary(context.get("route_cue", {}))
+		var route_text := _player_route_step(cue)
+		if not route_text.is_empty():
+			mission_heading = "EINSATZROUTE"
+			mission_text = route_text
+	var cards: Array = Array(context.get("transport_cards", []))
+	var transport_text := "Kein Dropship im Einsatz"
+	if cards.size() > 1:
+		transport_text = "%d Dropships im Einsatz" % cards.size()
+	elif cards.size() == 1:
+		var card: Dictionary = Dictionary(cards[0])
+		var transport_state := _player_transport_state(String(card.get("state", "")))
+		transport_text = "Dropship · %s" % transport_state
+		if String(card.get("state", "")) in ["to_mission", "to_fob", "to_homebase"] and float(card.get("eta_seconds", 0)) > 0.0:
+			transport_text += " · %d s" % int(ceil(float(card.eta_seconds)))
+	var remaining := float(context.get("remaining_seconds", -1.0))
+	if remaining >= 0.0:
+		var seconds := int(ceil(remaining))
+		transport_text += "\nZeitlimit %02d:%02d" % [int(seconds / 60), seconds % 60]
+	var order := "Auftrag: Befehl auswählen"
+	var selected := int(context.get("selection_count", 0))
+	var executing := clampi(int(context.get("executing_count", 0)), 0, maxi(selected, 0))
+	var planned := int(context.get("planned_count", 0))
+	var focused := String(context.get("focused_order_label", "")).strip_edges()
+	focused = String({"MOVE": "Bewegen", "TAKE": "Nehmen", "DEFEND": "Halten", "FLANK": "Flankieren", "ENGAGE": "Ziel bekämpfen"}.get(focused.to_upper(), focused))
+	if selected <= 0:
+		order = "Auftrag: Fireteam auswählen"
+	elif not focused.is_empty():
+		order = "Auftrag: %s" % focused
+	elif executing > 0:
+		order = "Auftrag: Wird ausgeführt" if executing == selected else "Auftrag: %d von %d Teams aktiv" % [executing, selected]
+	elif planned > 0:
+		order = "Auftrag: %d %s geplant" % [planned, "Befehl" if planned == 1 else "Befehle"]
+	var feedback := _player_command_feedback(String(context.get("feedback", "")))
+	if feedback.is_empty() and bool(context.get("target_armed", false)):
+		feedback = "Ziel auf Karte wählen"
+	elif feedback.is_empty() and executing > 0:
+		# A focused future order is still only a selection, not the running one.
+		feedback = "Ausführung läuft" if focused.is_empty() else "Team führt Befehle aus"
+	elif feedback.is_empty() and bool(context.get("can_execute", false)) and planned > 0:
+		feedback = "Mit Plan ausführen starten"
+	return {"read_only": true, "ui_sets_gameplay_truth": false, "mission_heading": mission_heading, "mission_text": mission_text, "transport_heading": "TRANSPORT / ZEIT" if remaining >= 0.0 else "TRANSPORT", "transport_text": transport_text, "target": "Ziel gewählt" if bool(context.get("target_selected", false)) else "Ziel auswählen", "order": order, "feedback": feedback}
+
+
+static func _player_route_step(cue: Dictionary) -> String:
+	var token := String(cue.get("next_token", "")).to_upper()
+	var labels := {"AA": "Luftabwehr ausschalten", "DOOR": "Tür öffnen", "COM": "Computer halten", "CARGO": "Fracht-Landezone sichern", "DONE": "Einsatzroute abgeschlossen"}
+	if not labels.has(token):
+		return ""
+	var label := String(labels[token])
+	match String(cue.get("runtime_status", "")):
+		"blocked": return "%s · blockiert" % label
+		"in_progress": return "%s · läuft" % label
+		"out_of_range": return "%s · näher heran" % label
+		"interrupted": return "%s · unterbrochen" % label
+		"departing": return "Fracht fliegt ab"
+		"departed": return "Fracht abgeflogen"
+		"complete": return "Einsatzroute abgeschlossen" if token == "DONE" else "%s · erledigt" % label
+	return label
+
+
+static func _player_transport_state(state: String) -> String:
+	match state.strip_edges().to_lower():
+		"waiting": return "Wartet"
+		"to_mission", "inbound": return "Im Anflug"
+		"on_mission", "landed": return "Vor Ort"
+		"unloading": return "Ausstieg läuft"
+		"to_fob": return "Rückflug zur FOB"
+		"to_homebase": return "Rückflug zur Heimatbasis"
+		"outbound": return "Verlässt das Einsatzgebiet"
+		"complete": return "Absetzen abgeschlossen"
+		"recovering": return "Wird geborgen"
+		"unavailable": return "Nicht verfügbar"
+		"destroyed", "lost": return "Verloren"
+	return "Status nicht verfügbar"
+
+
+static func _player_command_feedback(raw: String) -> String:
+	var code := raw.strip_edges().to_upper()
+	if code.contains("TIMEOUT"):
+		return "Keine Bestätigung · Details"
+	if code.contains("BLOCKED") or code.contains("BLOCKIERT") or code.contains("REJECT") or code.contains("FAILED"):
+		return "Aktion blockiert · Details"
+	if code.contains("REQUEST") or code.contains("WARTE AUF HOST") or code.contains("-> HOST") or code.contains("HOST PENDING"):
+		return "Anfrage wird geprüft"
+	match code:
+		"PREVIEW MODE": return "Vorschau · Einsatz zuerst starten"
+		"OBSERVER MODE": return "Beobachten · keine Befehlsfreigabe"
+		"NO TILE UNDER CURSOR", "SELECT TILE FIRST": return "Ziel auf Karte wählen"
+		"NO ORDERS TO EXECUTE", "NO ORDERS TO SEND": return "Zuerst einen Befehl planen"
+		"NO ORDER SELECTED": return "Befehl zum Löschen auswählen"
+		"ALTE PLANUNGSDATEN": return "Plan konnte nicht geladen werden"
+	if code.begins_with("WAIT FOR INSERTION"):
+		return "Fireteam muss zuerst aussteigen"
+	return ""
+
+
+static func refresh_player_readout(controller: Node, context: Dictionary) -> void:
+	var model := build_player_readout(context)
+	for spec in [[IDENTITY + "/A5MissionHeading", "mission_heading"], [IDENTITY + "/A5MissionState", "mission_text"], [STRATEGIC + "/A5TransportHeading", "transport_heading"], [STRATEGIC + "/A5TransportState", "transport_text"], ["../TacticalUI/A5TargetOrderPanel/Contents/Target", "target"], ["../TacticalUI/A5TargetOrderPanel/Contents/Order", "order"], ["../TacticalUI/A5TargetOrderPanel/Contents/Feedback", "feedback"]]:
+		var label := controller.get_node_or_null(String(spec[0])) as Label
+		if label != null:
+			_set_text(label, String(model.get(String(spec[1]), "")))
+	# The production light refresh runs the legacy stance writer first. Restore
+	# only these three known controls; no configure(), placement or tree scan.
+	var stance := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
+	if stance != null:
+		_refresh_stance_buttons(stance)
+	_hide_raw_readouts(controller)
+	_refresh_details_text(controller)
+
+
+static func _layout_player_readouts(controller: Node, viewport_size: Vector2i) -> void:
+	var layout: Dictionary = LAYOUT.get_mission_hud_layout(viewport_size)
+	for spec in [[IDENTITY, Rect2(layout.mission_identity), "A5MissionHeading", "A5MissionState"], [STRATEGIC, Rect2(layout.mission_control), "A5TransportHeading", "A5TransportState"]]:
+		var panel := controller.get_node_or_null(String(spec[0])) as Control
+		if panel == null:
+			continue
+		var rect: Rect2 = spec[1]
+		_place(panel, rect)
+		panel.clip_contents = false
+		var heading := _ensure_label(panel, String(spec[2]), 13)
+		var body := _ensure_label(panel, String(spec[3]), 14)
+		for label in [heading, body]:
+			label.clip_text = true
+			label.max_lines_visible = 2
+		_place(heading, Rect2(rect.position + Vector2(10, 6), Vector2(rect.size.x - 104, 20)))
+		_place(body, Rect2(rect.position + Vector2(10, 30), Vector2(rect.size.x - 20, 36)))
+		if String(spec[0]) == STRATEGIC:
+			var details := panel.get_node_or_null("A5ReadoutDetailsButton") as Button
+			if details == null:
+				details = Button.new()
+				details.name = "A5ReadoutDetailsButton"
+				details.text = "Details"
+				details.tooltip_text = "Vollständige Einsatz-, Transport- und Befehlsmeldungen anzeigen"
+				details.pressed.connect(Callable(controller, "_open_native_team_details"))
+				panel.add_child(details)
+				THEME.style_command_button(details)
+				details.add_theme_font_size_override("font_size", 13)
+			_place(details, Rect2(rect.position + Vector2(rect.size.x - 86, 4), Vector2(76, 24)))
+	_hide_raw_readouts(controller)
+
+
+static func _hide_raw_readouts(controller: Node) -> void:
+	# Direct known labels only: owners keep writing their full source strings.
+	for path in [IDENTITY_SOURCES + "MissionIdentityHeaderLabel", IDENTITY_SOURCES + "MissionIdentityBodyLabel", STRATEGIC_SOURCES + "StrategicHeaderLabel", STRATEGIC_SOURCES + "StrategicStatusLabel", STRATEGIC_SOURCES + "MissionTeamChipLabel"]:
+		var label := controller.get_node_or_null(path) as Label
+		if label != null and label.visible:
+			label.visible = false
 
 
 static func _ensure_team_controls(controller: Node, team: PanelContainer, layer: CanvasLayer) -> void:
@@ -374,7 +551,7 @@ static func _ensure_team_controls(controller: Node, team: PanelContainer, layer:
 		var header := HBoxContainer.new()
 		box.add_child(header)
 		var heading := Label.new()
-		heading.text = "Team- und Befehlsdetails"
+		heading.text = "Einsatz-, Team- und Befehlsdetails"
 		heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header.add_child(heading)
 		var close := Button.new()
@@ -433,10 +610,17 @@ static func _refresh_details_text(controller: Node) -> void:
 	if popup == null or not popup.visible:
 		return
 	var parts: PackedStringArray = []
-	for path in [BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel", INFO + "/CommandFeedbackLabel", INFO + "/HotkeyLegendLabel"]:
+	for path in [IDENTITY_SOURCES + "MissionIdentityHeaderLabel", IDENTITY_SOURCES + "MissionIdentityBodyLabel", STRATEGIC_SOURCES + "StrategicHeaderLabel", STRATEGIC_SOURCES + "MissionTeamChipLabel", STRATEGIC_SOURCES + "StrategicStatusLabel", BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel", INFO + "/CommandFeedbackLabel", INFO + "/HotkeyLegendLabel"]:
 		var source := controller.get_node_or_null(path) as Label
 		if source != null and not source.text.strip_edges().is_empty():
 			parts.append(source.text)
+			# The legacy 1280 presenter caps only its visible copy. Preserve its
+			# complete source and the detailed tooltips as well as that copy.
+			var full := String(source.get_meta("mission_control_1280_full_status_text", ""))
+			if not full.is_empty() and full != source.text:
+				parts.append(full)
+			if not source.tooltip_text.is_empty() and source.tooltip_text != source.text and source.tooltip_text != full:
+				parts.append(source.tooltip_text)
 	_set_text(popup.get_node("Margin/Box/Scroll/Text") as Label, "\n\n".join(parts))
 
 
@@ -555,19 +739,3 @@ static func _place_context_tool(controller: Node, name: String, rect: Rect2, int
 static func _set_text(label: Label, text: String) -> void:
 	if label.text != text:
 		label.text = text
-
-
-static func _keep_transport_and_control_separate(controller: Node) -> void:
-	var craft := controller.get_node_or_null("../TacticalUI/MissionDropshipPanel") as Control
-	var strategic := controller.get_node_or_null(BASE + "StrategicPanel") as Control
-	if strategic == null:
-		return
-	if craft != null and craft.visible and craft.get_global_rect().intersects(strategic.get_global_rect()):
-		var rect := strategic.get_global_rect()
-		rect.position = Vector2(craft.position.x - rect.size.x - 16.0, 112.0)
-		_place(strategic, rect)
-	var log_panel := controller.get_node_or_null("../TacticalUI/TacticalEventLogPanel") as Control
-	if log_panel != null and log_panel.get_global_rect().intersects(strategic.get_global_rect()):
-		var rect := strategic.get_global_rect()
-		rect.position = Vector2(log_panel.get_global_rect().position.x - rect.size.x - 16.0, 104.0)
-		_place(strategic, rect)

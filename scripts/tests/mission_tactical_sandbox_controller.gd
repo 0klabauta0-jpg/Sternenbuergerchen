@@ -4041,6 +4041,8 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		scopes_usec["mission_panels_usec"] = int(scopes_usec.get("panel_fireteam_phase_usec", 0)) + int(scopes_usec.get("panel_nav_identity_usec", 0)) + int(scopes_usec.get("panel_dropship_usec", 0)) + int(scopes_usec.get("panel_event_log_usec", 0))
 		scope_started_usec = Time.get_ticks_usec()
 	if not include_heavy_surfaces:
+		# Presentation-only projection; no heavy surface traversal or command.
+		NATIVE_A5_HUD_LAYOUT_SCRIPT.refresh_player_readout(self, _build_native_player_readout_context())
 		if profile_enabled:
 			scopes_usec["runtime_surfaces_usec"] = 0
 			scopes_usec["secondary_labels_usec"] = 0
@@ -11860,6 +11862,7 @@ func build_station_scenario_identity_body_snapshot(route_readout: Dictionary = {
 		"cue_visible": not cue_line.is_empty() and text.contains(cue_line),
 		"future_blocker_hidden_in_display": not text.contains("CARGO BLOCK") and not text.contains("CARGO BLOCKED") and not text.contains("CARGO blockiert"),
 		"route_next_token": String(resolved_route_readout.get("next_token", "")),
+		"route_cue": resolved_station_route_cue.duplicate(true),
 		"line_length": text.length(),
 		"line_char_limit": 120,
 		"line_within_limit": text.length() <= 120,
@@ -11996,6 +11999,8 @@ func _refresh_mission_identity_session_badge(route_readout: Dictionary = {}) -> 
 		body_label.set_meta("review_session_badge_task", "TASK_619")
 		body_label.set_meta("station_scenario_identity_body_style_id", String(identity_body.get("style_id", "")))
 		body_label.set_meta("station_scenario_route_visible", bool(identity_body.get("active", false)))
+		# Cache only the already-built presentation snapshot for the compact HUD.
+		body_label.set_meta("native_a5_route_cue", Dictionary(identity_body.get("route_cue", {})).duplicate(true))
 		body_label.set_meta("station_scenario_route_line", String(identity_body.get("route_line", "")))
 		body_label.set_meta("station_scenario_display_route_line", String(identity_body.get("display_route_line", "")))
 		body_label.set_meta("station_scenario_cue_line", String(identity_body.get("cue_line", "")))
@@ -15016,7 +15021,52 @@ func _apply_native_a5_hud_layout() -> void:
 		"team_summary": team_header.summary,
 		"fire_rule": _get_selected_fire_rule_consensus(),
 		"fire_rule_enabled": not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty(),
+		"player_context": _build_native_player_readout_context(),
 	})
+
+
+func _build_native_player_readout_context() -> Dictionary:
+	# Existing owners and contracts supply every value. This bounded snapshot is
+	# consumed immediately by a pure UI projection and never written back.
+	var focused_order = _get_area_order_from_ref(_focused_area_order_ref)
+	if focused_order == null:
+		focused_order = _get_waypoint_from_ref(_focused_waypoint_ref)
+	var focused_label := _get_waypoint_command_display_name(String(focused_order.command_type)) if focused_order != null else ""
+	var body := get_node_or_null(MISSION_IDENTITY_BODY_LABEL_PATH) as Label
+	var driver: Node = _get_combat_loop_driver() as Node
+	var remaining := -1.0
+	if driver != null and driver.has_method("get_remaining_time_limit_seconds"):
+		remaining = float(driver.call("get_remaining_time_limit_seconds"))
+	var go := get_node_or_null(COMMAND_GRID_PATH + "/GoCommandMatrixButton") as Button
+	var executing_count := 0
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id := String(fireteam_id_variant).strip_edges().to_lower()
+		var executing := not Dictionary(_phase_execution_by_fireteam.get(fireteam_id, {})).is_empty() \
+			or not Dictionary(_area_defense_execution_by_fireteam.get(fireteam_id, {})).is_empty() \
+			or not Dictionary(_area_attack_execution_by_fireteam.get(fireteam_id, {})).is_empty() \
+			or not Dictionary(_ad_hoc_execution_by_fireteam.get(fireteam_id, {})).is_empty()
+		if not executing and is_instance_valid(_fireteam_movement_controller) and _fireteam_movement_controller.has_method("has_active_execution"):
+			executing = bool(_fireteam_movement_controller.call("has_active_execution", fireteam_id))
+		if executing:
+			executing_count += 1
+	return {
+		"objective": _build_mission_objective_state_snapshot(),
+		"local_team_id": get_local_command_team_id(),
+		# Literal false selects only this existing helper's completed-return
+		# branch; contact-focus hiding of active departures is never applied.
+		"transport_cards": _build_contact_focused_mission_dropship_card_entries(_get_mission_dropship_card_entries(), false),
+		"remaining_seconds": remaining,
+		"route_active": bool(body.get_meta("station_scenario_route_visible", false)) if body != null else false,
+		"route_cue": Dictionary(body.get_meta("native_a5_route_cue", {})) if body != null else {},
+		"selection_count": _selected_fireteam_ids.size(),
+		"executing_count": executing_count,
+		"target_selected": _has_selected_tile,
+		"target_armed": _is_target_placement_armed,
+		"planned_count": _count_selected_phase_waypoints() + _count_selected_area_orders(),
+		"focused_order_label": focused_label,
+		"can_execute": go != null and not go.disabled,
+		"feedback": _last_command_text,
+	}
 
 
 func _build_native_team_header() -> Dictionary:
@@ -15327,7 +15377,7 @@ func _apply_mission_control_1280_readability() -> void:
 		status_label.text = source_text
 		status_label.set_meta("mission_control_1280_visible_trimmed", false)
 	status_label.tooltip_text = _merge_mission_control_1280_tooltip(status_label.tooltip_text, source_text)
-	status_label.visible = true
+	status_label.visible = get_node_or_null("%s/A5TransportState" % (NATIVE_A5_HUD_LAYOUT_SCRIPT.BASE + "StrategicPanel")) == null
 	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status_label.clip_text = false
 	status_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
