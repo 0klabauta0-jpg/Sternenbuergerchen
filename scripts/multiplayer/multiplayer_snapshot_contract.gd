@@ -192,6 +192,7 @@ func _normalize_unit_snapshots(value: Variant) -> Array:
 		_copy_string_if_present(entry, unit_snapshot, "enemy_posture_policy_id")
 		_copy_int_if_present(entry, unit_snapshot, "health")
 		_copy_int_if_present(entry, unit_snapshot, "bleedout_ticks")
+		_copy_int_if_present(entry, unit_snapshot, "vital_tick")
 		_copy_int_if_present(entry, unit_snapshot, "tactical_stance_revision")
 		_copy_int_if_present(entry, unit_snapshot, "weapon_tile_range")
 		_copy_float_if_present(entry, unit_snapshot, "weapon_range_world")
@@ -221,6 +222,7 @@ func _normalize_vital_updates(value: Variant) -> Array:
 			"health": maxi(int(entry.get("health", 0)), 0),
 			"bleedout_ticks": maxi(int(entry.get("bleedout_ticks", 0)), 0),
 		}
+		_copy_int_if_present(entry, vital_update, "vital_tick")
 		result.append(vital_update)
 	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return String(a.get("unit_id", "")) < String(b.get("unit_id", ""))

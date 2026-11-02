@@ -59,6 +59,11 @@ func _find_portal_route(from_component: String, to_component: String, to_grid: V
 	var visited: Dictionary = {}
 	var hex_mode: bool = registry.has_method("get_grid_topology") and String(registry.call("get_grid_topology")) == HEX_GRID_SCRIPT.TOPOLOGY_ID
 	var entered_grid_by_component: Dictionary = {from_component: from_grid}
+	# Query-local maps cannot retain terrain revisions or cost options from a
+	# previous order. One reverse goal map serves every candidate goal portal.
+	var goal_costs: Dictionary = {}
+	if hex_mode:
+		goal_costs = _terrain_pathfinder.call("build_local_cost_map", to_grid, graph.call("get_component_tiles", to_component), registry, options, true)
 
 	while not open_set.is_empty():
 		var current_component: String = _pop_lowest_score_component(open_set, f_score)
@@ -70,6 +75,10 @@ func _find_portal_route(from_component: String, to_component: String, to_grid: V
 
 		var edges: Array = Array(adjacency.get(current_component, []))
 		edges.sort_custom(_sort_edges)
+		var local_costs: Dictionary = {}
+		if hex_mode:
+			var entry_grid: Vector2i = Vector2i(entered_grid_by_component.get(current_component, from_grid))
+			local_costs = _terrain_pathfinder.call("build_local_cost_map", entry_grid, graph.call("get_component_tiles", current_component), registry, options)
 		for edge_variant in edges:
 			var edge: Dictionary = Dictionary(edge_variant)
 			var neighbor_component: String = String(edge.get("to_component", ""))
@@ -77,21 +86,17 @@ func _find_portal_route(from_component: String, to_component: String, to_grid: V
 				continue
 			var edge_cost: float = _get_portal_edge_cost(edge, registry, options)
 			if hex_mode:
-				# Hex routes account for actual local travel to each selected portal.
-				# The legacy component scoring remains untouched for old maps.
-				var entry_grid: Vector2i = Vector2i(entered_grid_by_component.get(current_component, from_grid))
-				var portal_grid: Vector2i = Vector2i(edge.get("from_grid", entry_grid))
-				var entry_path: Array = Array(_terrain_pathfinder.call("find_path_with_options", entry_grid, portal_grid, registry, options))
-				if entry_path.is_empty():
+				# All outgoing portals share this entry's component traversal.
+				var portal_grid: Vector2i = Vector2i(edge.get("from_grid", from_grid))
+				var entry_cost: float = float(local_costs.get(portal_grid, INF))
+				if is_inf(entry_cost):
 					continue
-				var entry_score: Dictionary = Dictionary(_terrain_pathfinder.call("score_path", entry_path, registry, options))
-				edge_cost += float(entry_score.get("path_cost", 0.0))
+				edge_cost += entry_cost
 				if neighbor_component == to_component:
-					var exit_path: Array = Array(_terrain_pathfinder.call("find_path_with_options", Vector2i(edge.get("to_grid", to_grid)), to_grid, registry, options))
-					if exit_path.is_empty():
+					var exit_cost: float = float(goal_costs.get(Vector2i(edge.get("to_grid", to_grid)), INF))
+					if is_inf(exit_cost):
 						continue
-					var exit_score: Dictionary = Dictionary(_terrain_pathfinder.call("score_path", exit_path, registry, options))
-					edge_cost += float(exit_score.get("path_cost", 0.0))
+					edge_cost += exit_cost
 			var tentative_g_score: float = float(g_score.get(current_component, INF)) + edge_cost
 			var previous_score: float = float(g_score.get(neighbor_component, INF))
 			if tentative_g_score > previous_score:

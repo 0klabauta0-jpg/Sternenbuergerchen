@@ -94,6 +94,47 @@ func get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, op
 	return _get_step_cost(current_grid, neighbor_grid, registry, options)
 
 
+# One Dijkstra traversal supplies all portal distances within a component.
+# Reverse traversal measures each grid -> from_grid using the original directed
+# step costs, which can differ by destination surface, cover and exposure.
+func build_local_cost_map(from_grid: Vector2i, component_grids: Array, registry, options: Dictionary = {}, reverse_steps: bool = false) -> Dictionary:
+	if registry == null or not registry.has_method("get_tile_at_grid"):
+		return {}
+	var allowed: Dictionary = {}
+	for grid_variant in component_grids:
+		var grid: Vector2i = Vector2i(grid_variant)
+		var tile = registry.call("get_tile_at_grid", grid)
+		if tile == null:
+			continue
+		var walkable: bool = bool(registry.call("is_walkable", grid)) if registry.has_method("is_walkable") else bool(tile.walkable)
+		if walkable:
+			allowed[grid] = true
+	if not allowed.has(from_grid):
+		return {}
+	var costs: Dictionary = {from_grid: 0.0}
+	var open_set: Array = [from_grid]
+	var in_open_set: Dictionary = {from_grid: true}
+	var settled: Dictionary = {}
+	var directions: Array = get_neighbor_directions(registry)
+	while not open_set.is_empty():
+		var current: Vector2i = _pop_lowest_f_score(open_set, costs)
+		in_open_set.erase(current)
+		settled[current] = true
+		for direction in directions:
+			var neighbor: Vector2i = current + Vector2i(direction)
+			if not allowed.has(neighbor) or settled.has(neighbor):
+				continue
+			var step_cost: float = _get_step_cost(neighbor, current, registry, options) if reverse_steps else _get_step_cost(current, neighbor, registry, options)
+			var next_cost: float = float(costs[current]) + step_cost
+			if next_cost >= float(costs.get(neighbor, INF)):
+				continue
+			costs[neighbor] = next_cost
+			if not in_open_set.has(neighbor):
+				in_open_set[neighbor] = true
+				open_set.append(neighbor)
+	return costs
+
+
 func score_path(path_grid_points: Array, registry, options: Dictionary = {}) -> Dictionary:
 	var exposure_sum: float = 0.0
 	var cover_sum: float = 0.0

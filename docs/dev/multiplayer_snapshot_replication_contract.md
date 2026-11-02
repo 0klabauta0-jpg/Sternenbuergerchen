@@ -28,6 +28,7 @@ Unit-Felder:
 - `vital_state`
 - `health`
 - `bleedout_ticks`
+- `vital_tick`: autoritativer Tick dieser Vitaldaten; gemeinsame Ordnung mit Reliable-Vital-Deltas.
 - `tactical_stance`
 - `tactical_stance_revision`
 - `fireteam_id`
@@ -43,6 +44,20 @@ Anzeige-/Mission-Felder:
 - Vital-Deltas: `reliable` ueber `SimulationRoot._receive_vital_state_updates`.
 - Mission-Result: `reliable`, bleibt fuer bestehende Combat-Result-RPCs und wird zusaetzlich im Snapshot-Schema gespiegelt.
 - Start/Load: `reliable`, bleibt bei der Session-/Lobby-Schicht aus TASK_167.
+
+### Transportuebergreifende Vital-Reihenfolge (Review 2026-11-02)
+- Jeder neue Unit-Vitalsnapshot und jedes Reliable-Vital-Delta traegt `vital_tick`.
+  Die drei Vitalwerte werden gemeinsam angewendet, nur wenn dieser Tick neuer
+  als der zuletzt angewendete Vital-Tick derselben Unit ist. Ein gleicher Tick
+  ist ein Duplikat. Die Markierung ist Receive-Metadatum, keine Gameplay-Wahrheit.
+- Alte Snapshot-Daten ohne `vital_tick` nutzen den umgebenden Snapshot-Tick.
+  Reliable-Daten ohne Version duerfen bereits geordnete Vitaldaten nicht ersetzen.
+- Ein Snapshot mit aelteren Vitaldaten darf weiterhin neuere Positions-/Runtime-
+  Daten tragen. Seine Vitalwerte bleiben auf dem bereits angewendeten Unitstand;
+  andere Units haben jeweils ihre eigene Versionsgrenze.
+- Positions-only-Snapshots verbrauchen keinen Vital-Tick. Neuere Heilungen und
+  Respawns bleiben gueltig. Delta-Dedupe vergleicht Vitalinhalte ohne Tick, damit
+  unveraenderte Units nicht jeden Simulationstick ein Reliable-Paket erzeugen.
 
 ## Anwendung auf Clients
 `SimulationRoot.apply_multiplayer_snapshot()`:

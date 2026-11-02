@@ -102,6 +102,7 @@ var _multiplayer_snapshot_context: Dictionary = {}
 var _authoritative_fire_rules_by_fireteam: Dictionary = {}
 var _air_asset_status_by_id: Dictionary = {}
 var _last_applied_snapshot_tick: int = -1
+var _last_applied_vital_tick_by_unit_id: Dictionary = {}
 var _snapshot_apply_count: int = 0
 var _snapshot_out_of_order_count: int = 0
 var _snapshot_missing_unit_count: int = 0
@@ -915,11 +916,42 @@ func _receive_vital_state_updates(vital_updates: Array) -> void:
 		if typeof(vital_update) != TYPE_DICTIONARY:
 			continue
 
-		var unit = _resolve_known_unit(String(vital_update.get("unit_id", "")))
+		var unit_id: String = String(vital_update.get("unit_id", "")).strip_edges()
+		var unit = _resolve_known_unit(unit_id)
 		if unit == null or not unit.has_method("apply_remote_vital_update"):
+			continue
+		if not _accept_remote_vital_tick(unit_id, vital_update):
 			continue
 
 		unit.call("apply_remote_vital_update", vital_update)
+
+
+func _has_remote_vital_fields(payload: Dictionary) -> bool:
+	return payload.has("vital_state") or payload.has("health") or payload.has("bleedout_ticks")
+
+
+func _accept_remote_vital_tick(unit_id: String, payload: Dictionary, snapshot_tick: int = -1) -> bool:
+	if not _has_remote_vital_fields(payload):
+		return false
+	var previous_tick: int = int(_last_applied_vital_tick_by_unit_id.get(unit_id, -1))
+	var vital_tick: int = int(payload.get("vital_tick", snapshot_tick))
+	if vital_tick < 0:
+		# Legacy reliable data is usable only before this unit has ordered state.
+		return previous_tick < 0
+	if vital_tick <= previous_tick:
+		return false
+	_last_applied_vital_tick_by_unit_id[unit_id] = vital_tick
+	return true
+
+
+func _copy_current_remote_vitals(unit, payload: Dictionary) -> void:
+	var current_vitals: Dictionary = _build_unit_vital_update(unit)
+	if current_vitals.is_empty():
+		for key in ["vital_state", "health", "bleedout_ticks", "vital_tick"]:
+			payload.erase(key)
+		return
+	payload.merge(current_vitals, true)
+	payload["vital_tick"] = int(_last_applied_vital_tick_by_unit_id.get(String(current_vitals["unit_id"]), -1))
 
 
 # Commands are committed before effects on every authoritative physics tick.
@@ -1224,6 +1256,7 @@ func _build_all_vital_state_snapshots() -> Array:
 		if vital_update.is_empty():
 			continue
 
+		vital_update["vital_tick"] = tick_counter
 		updates.append(vital_update)
 	return updates
 
@@ -1244,6 +1277,8 @@ func _build_vital_state_updates() -> Array:
 			continue
 
 		_last_broadcast_vital_state_by_unit_id[unit_id] = vital_update.duplicate(true)
+		# Dedupe the content before attaching its transport version.
+		vital_update["vital_tick"] = tick_counter
 		updates.append(vital_update)
 
 	return updates
@@ -1321,6 +1356,7 @@ func _build_unit_snapshot(unit) -> Dictionary:
 			snapshot["vital_state"] = String(vital_dict.get("state", ""))
 			snapshot["health"] = int(vital_dict.get("health_points", 0))
 			snapshot["bleedout_ticks"] = int(vital_dict.get("bleedout_ticks", 0))
+			snapshot["vital_tick"] = tick_counter
 
 	if unit.has_method("get_tactical_stance_badge_snapshot"):
 		var stance_snapshot_variant: Variant = unit.call("get_tactical_stance_badge_snapshot")
@@ -1399,7 +1435,6 @@ func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
 		return validation
 
 	var snapshot: Dictionary = Dictionary(validation.get("snapshot", {})).duplicate(true)
-	_last_server_state = snapshot.duplicate(true)
 	_last_applied_snapshot_tick = int(snapshot.get("tick", _last_applied_snapshot_tick))
 	_snapshot_apply_count += 1
 	_last_snapshot_reject_reason = ""
@@ -1427,12 +1462,23 @@ func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
 			missing_unit_count += 1
 			continue
 
+		if _has_remote_vital_fields(unit_snapshot) and not _accept_remote_vital_tick(String(unit_snapshot["unit_id"]), unit_snapshot, _last_applied_snapshot_tick):
+			# Keep movement/runtime updates while retaining the newer vital projection.
+			_copy_current_remote_vitals(unit, unit_snapshot)
 		if unit.has_method("apply_remote_snapshot"):
 			unit.call("apply_remote_snapshot", unit_snapshot)
 			continue
 
 		_apply_remote_snapshot_fallback(unit, unit_snapshot)
 
+	for vital_update in Array(snapshot.get("vital_updates", [])):
+		var unit_id: String = String(vital_update.get("unit_id", ""))
+		if int(vital_update.get("vital_tick", _last_applied_snapshot_tick)) >= int(_last_applied_vital_tick_by_unit_id.get(unit_id, -1)):
+			continue
+		var unit = _resolve_known_unit(unit_id)
+		if unit != null:
+			_copy_current_remote_vitals(unit, vital_update)
+	_last_server_state = snapshot.duplicate(true)
 	_snapshot_missing_unit_count += missing_unit_count
 	multiplayer_snapshot_applied.emit(snapshot.duplicate(true))
 	return {
@@ -1947,7 +1993,8 @@ func _apply_move_command_with_terrain(
 	if unit_node.has_method("refresh_terrain_readability"):
 		unit_node.call("refresh_terrain_readability")
 
-	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
+	var resolved_target_position: Vector2 = _coerce_vector2(cmd.get("navigation_resolved_target_position", target_position), target_position)
+	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(resolved_target_position) > 0.5):
 		enqueue_command(cmd)
 
 
@@ -2020,7 +2067,8 @@ func _apply_move_command_with_terrain_avoidance(
 	if unit_node.has_method("refresh_terrain_readability"):
 		unit_node.call("refresh_terrain_readability")
 
-	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
+	var resolved_target_position: Vector2 = _coerce_vector2(cmd.get("navigation_resolved_target_position", target_position), target_position)
+	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(resolved_target_position) > 0.5):
 		enqueue_command(cmd)
 
 
@@ -2107,8 +2155,10 @@ func _extract_or_build_path_world_points(
 	if _should_recompute_move_path(cmd, unit, existing_path, current_position, target_position, terrain_registry):
 		existing_path.clear()
 		cmd["path"] = []
+		cmd.erase("navigation_resolved_target_position")
 
 	if not existing_path.is_empty():
+		cmd["navigation_resolved_target_position"] = _coerce_vector2(existing_path[-1], target_position)
 		return existing_path
 
 	if not _try_begin_navigation_path_request(cmd, unit, current_position, target_position):
@@ -2116,6 +2166,9 @@ func _extract_or_build_path_world_points(
 
 	var path_world_points: Array = _build_path_world_points(current_position, target_position, terrain_registry, cmd, unit)
 	cmd["path"] = path_world_points.duplicate(true)
+	if not path_world_points.is_empty():
+		cmd["navigation_resolved_target_position"] = _coerce_vector2(path_world_points[-1], target_position)
+		cmd["navigation_path_terrain_revision"] = _get_terrain_registry_revision(terrain_registry)
 	if terrain_move_debug_enabled:
 		_record_terrain_move_debug(cmd, unit, current_position, target_position, terrain_registry, path_world_points)
 	return path_world_points
@@ -2142,6 +2195,9 @@ func _should_recompute_move_path(
 		_contact_path_recompute_ready_at_msec.erase(unit_id)
 		return true
 
+	if cmd.has("navigation_path_terrain_revision") and int(cmd["navigation_path_terrain_revision"]) != _get_terrain_registry_revision(terrain_registry):
+		return true
+
 	if not bool(cmd.get("requeue_until_target", true)) or not _is_unit_in_contact(unit):
 		_contact_path_recompute_ready_at_msec.erase(unit_id)
 		return false
@@ -2149,7 +2205,8 @@ func _should_recompute_move_path(
 	if existing_path.is_empty():
 		return false
 
-	var target_grid: Vector2i = terrain_registry.call("world_to_grid", target_position)
+	var resolved_target_position: Vector2 = _coerce_vector2(cmd.get("navigation_resolved_target_position", target_position), target_position)
+	var target_grid: Vector2i = terrain_registry.call("world_to_grid", resolved_target_position)
 	var current_final_waypoint: Vector2 = _coerce_vector2(existing_path[-1], target_position)
 	var current_final_grid: Vector2i = terrain_registry.call("world_to_grid", current_final_waypoint)
 	if current_final_grid != target_grid:
