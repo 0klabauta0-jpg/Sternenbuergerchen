@@ -3966,6 +3966,8 @@ func _start_mission() -> void:
 	_connect_planning_state_bridge(_active_mission)
 	_connect_mission_end(_active_mission)
 	_show_mission()
+	# MissionSetup adds its separate 3D CanvasLayer deferred during startup.
+	call_deferred("_sync_mission_host_visibility")
 
 
 func _start_or_update_active_mission() -> void:
@@ -6813,12 +6815,26 @@ func _set_mission_host_visible(is_visible: bool) -> void:
 		var tactical_controller := child.get_node_or_null("TacticalController")
 		if tactical_controller != null and tactical_controller.has_method("set_tactical_ui_visible"):
 			tactical_controller.call("set_tactical_ui_visible", is_visible)
-		child.process_mode = Node.PROCESS_MODE_INHERIT if is_visible else Node.PROCESS_MODE_DISABLED
+			# This controller also advances dropships and tactical execution.
+			# Hide only its input; the live mission must continue out of view.
+			tactical_controller.set_process_unhandled_input(is_visible)
+		var camera := child.get_node_or_null("MissionCamera")
+		if camera != null:
+			camera.process_mode = Node.PROCESS_MODE_INHERIT if is_visible else Node.PROCESS_MODE_DISABLED
+		var primary_view := child.get_node_or_null("Primary3DView")
+		if primary_view != null:
+			primary_view.process_mode = Node.PROCESS_MODE_INHERIT if is_visible else Node.PROCESS_MODE_DISABLED
+		child.process_mode = Node.PROCESS_MODE_INHERIT if is_visible or child == _active_mission else Node.PROCESS_MODE_DISABLED
 
 
 func _set_mission_instance_ui_visibility(mission_instance: Node, is_visible: bool) -> void:
 	if mission_instance == null:
 		return
+	# CanvasLayers do not inherit visibility from the mission's Node2D root.
+	for layer_path in ["TacticalUI", "Primary3DView"]:
+		var layer := mission_instance.get_node_or_null(layer_path) as CanvasLayer
+		if layer != null:
+			layer.visible = is_visible
 	for path in [
 		"TacticalUI/MissionTint",
 		"TacticalUI/MissionIdentityPanel",
