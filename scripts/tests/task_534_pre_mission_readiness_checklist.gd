@@ -65,6 +65,7 @@ func _test_presenter_blocks_empty_payload() -> void:
 
 func _test_homebase_renders_blocked_readiness() -> void:
 	var homebase: Node = await _build_homebase(false)
+	await _open_briefing_details(homebase, "Blocked readiness")
 	var snapshot: Dictionary = Dictionary(homebase.call("get_pre_mission_readiness_snapshot"))
 	_assert(bool(snapshot.get("panel_visible", false)), "Homebase renders readiness panel")
 	_assert(not bool(snapshot.get("ui_sets_gameplay_truth", true)), "Homebase readiness snapshot remains read-only")
@@ -88,7 +89,9 @@ func _test_homebase_renders_ready_direct_payload() -> void:
 	await process_frame
 	await process_frame
 
+	await _open_briefing_details(homebase, "Ready payload")
 	var snapshot: Dictionary = Dictionary(homebase.call("get_pre_mission_readiness_snapshot"))
+	_assert(bool(snapshot.get("panel_visible", false)), "Ready payload exposes its readiness details after opening")
 	_assert(bool(snapshot.get("can_start", false)), "Readiness snapshot mirrors the existing can-start guard")
 	_assert(String(snapshot.get("overall_state", "")) == "ready", "Ready direct payload has no blocking readiness items")
 	_assert(_find_item_state(snapshot, "team") == "ready", "Team item is ready")
@@ -98,6 +101,17 @@ func _test_homebase_renders_ready_direct_payload() -> void:
 	_assert(_find_item_state(snapshot, "start") == "ready", "Start item is ready")
 	_assert(String(snapshot.get("rendered_summary_text", "")).contains("Startbereit"), "Rendered readiness summary names start-ready state")
 	homebase.queue_free()
+	await process_frame
+
+
+func _open_briefing_details(homebase: Node, context: String) -> void:
+	var before: Dictionary = Dictionary(homebase.call("get_pre_mission_readiness_snapshot"))
+	_assert(not bool(before.get("panel_visible", true)), context + ": R4 initially folds the detailed checklist")
+	var button := homebase.get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/R2BriefingDetailsButton") as Button
+	_assert(button != null and button.text == "Briefingdetails", context + ": real briefing-details button is available")
+	if button != null:
+		button.pressed.emit()
+	await process_frame
 	await process_frame
 
 

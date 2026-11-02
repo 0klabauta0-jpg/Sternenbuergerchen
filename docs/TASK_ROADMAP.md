@@ -2410,3 +2410,6 @@ Dann:
 stoppen
 Problem melden
 nicht improvisieren
+
+## Zusatzauftrag 2026-11-02: reguläre GM01 mit Frontier-Grafiken
+Umgesetzt auf eigenem Taskbranch auf UI R4; keine Mainintegration. Auf weiteren Nutzerwunsch2304echteHexzellen mit vergrößertem Außenposten-/Versorgungsensemble, gespeicherten Hüllenfakten und sichtbarem Hexraster. Statische Editor-Komposition geschützt; Szenario unverändert. Logik-, Quellen-, Sichtmasken-, Readiness- und echte normale Cutlass-/LZ-/Entlade-/GO-Prüfungen bestanden. Performance bleibt gesondert begrenzt. Task: `docs/tasks/TASK_GM01_FRONTIER_REBUILD_20261102.md`; Nachweise: `docs/qa/gm01_frontier_20261102/README.md`.

@@ -1,0 +1,225 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_briefing_cache.json",
+  "godot": "godot_console",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.06,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-02T14:00:38.894314+00:00",
+  "finished_at": "2026-11-02T14:02:56.222913+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-briefing_cache.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\gm01_frontier_briefing_cache_verifier.gd"
+      ],
+      "exit_code": 1,
+      "timed_out": false,
+      "elapsed": 3.896,
+      "name": "briefing_cache",
+      "marker_found": false,
+      "errors": [
+        "ERROR: FAIL: Existing confirmed loadout action still applies through its command callback"
+      ],
+      "error_count": 1,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\check-briefing_cache.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-briefing_cache.log",
+      "passed": false,
+      "reasons": [
+        "exit 1",
+        "1 error(s)",
+        "missing success marker"
+      ]
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-briefing_panel.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_530_briefing_panel_renderer_mvp.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 8.9,
+      "name": "briefing_panel",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\check-briefing_panel.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-briefing_panel.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-briefing_minimap.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_531_briefing_minimap_visual_renderer.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 11.845,
+      "name": "briefing_minimap",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\check-briefing_minimap.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-briefing_minimap.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-loadout_bridge.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_533_recommended_loadout_selection_bridge.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 9.642,
+      "name": "loadout_bridge",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\check-loadout_bridge.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-loadout_bridge.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-readiness.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_534_pre_mission_readiness_checklist.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 11.407,
+      "name": "readiness",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\check-readiness.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-readiness.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-homebase_handoff.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_538_homebase_to_mission_launch_handoff_smoke.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 27.685,
+      "name": "homebase_handoff",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\check-homebase_handoff.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-homebase_handoff.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-homebase_bootstrap.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\bugfix_singleplayer_release_homebase_start_bootstrap.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 51.074,
+      "name": "homebase_bootstrap",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\check-homebase_bootstrap.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-homebase_bootstrap.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-homebase_actionable.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\bugfix_release_singleplayer_normal_click_homebase_guard.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 12.783,
+      "name": "homebase_actionable",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\check-homebase_actionable.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T140038Z-pid146512\\logs\\engine-check-homebase_actionable.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 8,
+    "passed": 7,
+    "failed": 1
+  }
+}

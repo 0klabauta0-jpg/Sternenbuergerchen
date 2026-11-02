@@ -120,7 +120,7 @@ func _test_main_menu_singleplayer_route_starts_with_playable_payload() -> void:
 	_assert(String(readiness.get("rendered_item_text", "")).find("STOP Dropship") < 0, "Menu-launched visible readiness no longer shows STOP Dropship")
 	_assert(String(readiness.get("rendered_item_text", "")).find("STOP Pilot") < 0, "Menu-launched visible readiness no longer shows STOP Pilot")
 	_assert(String(readiness.get("rendered_item_text", "")).find("STOP Boarding") < 0, "Menu-launched visible readiness no longer shows STOP Boarding")
-	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Menu-launched visible start button is actionable")
+	_assert(String(startflow.get("start_button_text", "")) == "Einsatz starten" and _has_enabled_german_start_button(homebase_screen), "Menu-launched actual German start button is visible and actionable")
 	_assert(not bool(startflow.get("start_button_disabled", true)), "Menu-launched visible start button is enabled")
 	_assert(Array(aircraft.get("visible_aircraft_definitions", [])).size() >= 1, "Menu-launched visible Flightdeck has a shipcard")
 	_assert(not String(aircraft.get("selected_status_text", "")).contains("Flight deck empty"), "Menu-launched Flightdeck does not render the empty blocker")
@@ -182,7 +182,7 @@ func _test_visible_homebase_deadend_is_repaired() -> void:
 	_assert(int(staging.get("payload_operator_count", 0)) >= 2, "Visible dead-end repair restores payload operators")
 	_assert(int(staging.get("boarded_operator_count", 0)) >= int(staging.get("payload_operator_count", 0)), "Visible dead-end repair boards payload")
 	_assert(String(readiness.get("overall_state", "")) == "ready", "Visible dead-end repair makes readiness ready")
-	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Visible dead-end repair restores Start Mission text")
+	_assert(String(startflow.get("start_button_text", "")) == "Einsatz starten" and _has_enabled_german_start_button(homebase_screen), "Visible dead-end repair restores the actual German start action")
 	_assert(not bool(startflow.get("start_button_disabled", true)), "Visible dead-end repair enables Start Mission")
 	_assert(bool(homebase_screen.call("can_request_mission_start", craft_id)), "Visible dead-end repair can request mission start")
 
@@ -221,7 +221,7 @@ func _test_visible_homebase_fob_transfer_selection_is_repaired() -> void:
 	_assert(String(bootstrap.get("selected_mission_id", "")) == "grid_sweep", "Visible Homebase guard restores the small direct-sortie mission")
 	_assert(bool(bootstrap.get("mission_selection_repaired", false)), "Visible Homebase guard records mission-selection repair")
 	_assert(String(readiness.get("overall_state", "")) == "ready", "Mission-selection repair leaves readiness ready")
-	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Mission-selection repair keeps Start Mission text")
+	_assert(String(startflow.get("start_button_text", "")) == "Einsatz starten" and _has_enabled_german_start_button(homebase_screen), "Mission-selection repair keeps the actual German start action")
 	_assert(not bool(startflow.get("start_button_disabled", true)), "Mission-selection repair keeps Start Mission enabled")
 
 	scene.queue_free()
@@ -276,7 +276,7 @@ func _test_post_show_visible_homebase_deadend_is_repaired() -> void:
 	_assert(int(staging.get("payload_operator_count", 0)) >= 2, "Post-show repair restores payload operators")
 	_assert(int(staging.get("boarded_operator_count", 0)) >= int(staging.get("payload_operator_count", 0)), "Post-show repair boards payload")
 	_assert(String(readiness.get("overall_state", "")) == "ready", "Post-show repair makes readiness ready")
-	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Post-show repair restores Start Mission text")
+	_assert(String(startflow.get("start_button_text", "")) == "Einsatz starten" and _has_enabled_german_start_button(homebase_screen), "Post-show repair restores the actual German start action")
 	_assert(not bool(startflow.get("start_button_disabled", true)), "Post-show repair enables Start Mission")
 	_assert(bool(homebase_screen.call("can_request_mission_start", craft_id)), "Post-show repair can request mission start")
 
@@ -350,7 +350,7 @@ func _test_partial_saved_start_state_is_repaired() -> void:
 	_assert(int(staging.get("payload_operator_count", 0)) >= 2, "Partial saved state has payload operators")
 	_assert(int(staging.get("boarded_operator_count", 0)) >= int(staging.get("payload_operator_count", 0)), "Partial saved state starts boarded")
 	_assert(String(readiness.get("overall_state", "")) == "ready", "Partial saved state readiness is ready")
-	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Partial saved state keeps Start Mission button")
+	_assert(String(startflow.get("start_button_text", "")) == "Einsatz starten" and _has_enabled_german_start_button(homebase_screen), "Partial saved state keeps the actual German start action")
 	_assert(not bool(startflow.get("start_button_disabled", true)), "Partial saved state start button is enabled")
 	_assert(Array(aircraft.get("visible_aircraft_definitions", [])).size() >= 1, "Partial saved state visible Flightdeck has a shipcard")
 	_assert(not String(aircraft.get("selected_status_text", "")).contains("Flight deck empty"), "Partial saved state Flightdeck does not render empty blocker")
@@ -391,11 +391,16 @@ func _test_stale_payload_seed_uses_visible_fireteam_fallback() -> void:
 	_assert(int(staging.get("payload_operator_count", 0)) >= 2, "Stale payload seed restores payload operators")
 	_assert(int(staging.get("boarded_operator_count", 0)) >= int(staging.get("payload_operator_count", 0)), "Stale payload seed boards restored payload")
 	_assert(String(readiness.get("overall_state", "")) == "ready", "Stale payload seed readiness becomes ready")
-	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Stale payload seed keeps Start Mission visible")
+	_assert(String(startflow.get("start_button_text", "")) == "Einsatz starten" and _has_enabled_german_start_button(homebase_screen), "Stale payload seed keeps the actual German start action visible")
 	_assert(not bool(startflow.get("start_button_disabled", true)), "Stale payload seed enables Start Mission")
 
 	scene.queue_free()
 	await _wait_frames(2)
+
+
+func _has_enabled_german_start_button(homebase: Node) -> bool:
+	var button := homebase.get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button
+	return button != null and button.text == "Einsatz starten" and not button.disabled and button.is_visible_in_tree()
 
 
 func _wait_frames(count: int) -> void:

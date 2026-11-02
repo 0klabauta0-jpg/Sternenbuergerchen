@@ -1,0 +1,2 @@
+# Preserve the original engine/process output bytes in this evidence folder.
+*.log -text

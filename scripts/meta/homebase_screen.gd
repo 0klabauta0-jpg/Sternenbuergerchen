@@ -138,6 +138,8 @@ var _mission_slot_usage_override: int = -1
 var _mission_pilot_count_override: int = -1
 var _mission_briefing_panel_presenter = MISSION_BRIEFING_PANEL_PRESENTER_SCRIPT.new()
 var _mission_briefing_panel_snapshot: Dictionary = {}
+var _mission_briefing_source_signature: String = ""
+var _mission_briefing_rendered_panel: WeakRef
 var _pre_mission_readiness_presenter = PRE_MISSION_READINESS_PRESENTER_SCRIPT.new()
 var _pre_mission_readiness_snapshot: Dictionary = {}
 var _aircraft_manager = AIRCRAFT_MANAGER_SCRIPT.new()
@@ -1350,7 +1352,7 @@ func get_release_candidate_first_mission_cta_visual_smoke_snapshot() -> Dictiona
 	_append_visual_audit_check(
 		checks,
 		"start_button_actionable",
-		String(polish.get("start_button_text", "")).strip_edges() == "Start Mission" \
+		String(polish.get("start_button_text", "")).strip_edges() == "Einsatz starten" \
 			and not bool(polish.get("start_button_disabled", true)),
 		"critical",
 		"The visible Start Mission button should be enabled for the release start path."
@@ -4826,17 +4828,21 @@ func _is_station_scenario_last_result() -> bool:
 func _update_mission_briefing_panel() -> void:
 	_selected_mission_scenario_path = _resolve_selected_mission_scenario_path()
 	var panel := _ensure_mission_briefing_panel()
-	if _selected_mission_scenario_path.strip_edges().is_empty():
-		_mission_briefing_panel_snapshot = Dictionary(_mission_briefing_panel_presenter.call("build_snapshot_from_files", "", _selected_mission_map_path, "multiplayer_pvp"))
-		panel.visible = false
-		return
-	_mission_briefing_panel_snapshot = Dictionary(_mission_briefing_panel_presenter.call(
-		"build_snapshot_from_files",
-		_selected_mission_scenario_path,
-		_selected_mission_map_path,
-		"multiplayer_pvp"
-	))
+	var source_signature := _build_mission_briefing_source_signature(
+		_selected_mission_scenario_path, _selected_mission_map_path, "multiplayer_pvp")
+	var source_changed := source_signature != _mission_briefing_source_signature or _mission_briefing_panel_snapshot.is_empty()
+	if source_changed:
+		_mission_briefing_panel_snapshot = Dictionary(_mission_briefing_panel_presenter.call(
+			"build_snapshot_from_files", _selected_mission_scenario_path,
+			_selected_mission_map_path, "multiplayer_pvp"))
+		_mission_briefing_source_signature = source_signature
 	panel.visible = bool(_mission_briefing_panel_snapshot.get("configured", false))
+	if not source_changed and _mission_briefing_rendered_panel != null and _mission_briefing_rendered_panel.get_ref() == panel:
+		# Only the file-derived presentation is reused. Roster/transport/loadout
+		# DTOs, readiness and start permission still refresh through their owners.
+		_update_mission_briefing_loadout_bridge_controls()
+		return
+	_mission_briefing_rendered_panel = weakref(panel)
 	_set_mission_briefing_label("BriefingTitleLabel", String(_mission_briefing_panel_snapshot.get("title", "Mission Briefing")).strip_edges())
 	_set_mission_briefing_label("BriefingSummaryLabel", String(_mission_briefing_panel_snapshot.get("summary", "")).strip_edges())
 	_set_mission_briefing_label("BriefingStatusLabel", String(_mission_briefing_panel_snapshot.get("panel_status_text", "")).strip_edges())
@@ -4848,6 +4854,44 @@ func _update_mission_briefing_panel() -> void:
 	_set_mission_briefing_minimap_visual(Dictionary(_mission_briefing_panel_snapshot.get("minimap_visual_snapshot", {})))
 	_set_mission_briefing_loadout_cards(Array(_mission_briefing_panel_snapshot.get("loadout_card_entries", [])))
 	panel.set_meta("mission_briefing_snapshot", _mission_briefing_panel_snapshot.duplicate(true))
+
+
+func _mission_briefing_catalog_source_paths() -> PackedStringArray:
+	# MapData normalization reads this external catalog. Marker/tactics/weapon
+	# definitions used by these presenters are already-loaded script constants.
+	return PackedStringArray(["res://data/terrain_tile_catalog.json"])
+
+
+func _build_mission_briefing_source_signature(scenario_path: String, map_path: String, play_mode: String) -> String:
+	var scenario_source := scenario_path.strip_edges()
+	var selected_map_source := map_path.strip_edges()
+	var scenario: Dictionary = {}
+	if not scenario_source.is_empty() and FileAccess.file_exists(scenario_source):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(scenario_source))
+		if parsed is Dictionary:
+			scenario = parsed
+	# Match PanelPresenter's actual source resolution when no explicit map wins.
+	var resolved_map_source := selected_map_source
+	if resolved_map_source.is_empty():
+		resolved_map_source = String(scenario.get("map_file_path", "")).strip_edges()
+	var briefing_variant: Variant = scenario.get("briefing", scenario.get("mission_briefing", {}))
+	var briefing: Dictionary = briefing_variant if briefing_variant is Dictionary else {}
+	var background_source := String(briefing.get("background_image_path", "")).strip_edges()
+	var sources: Array = []
+	for path in [scenario_source, resolved_map_source, background_source]:
+		sources.append(_mission_briefing_source_file_identity(path))
+	for path in _mission_briefing_catalog_source_paths():
+		sources.append(_mission_briefing_source_file_identity(path))
+	return JSON.stringify({"scenario": scenario_source, "selected_map": selected_map_source,
+		"resolved_map": resolved_map_source, "play_mode": play_mode, "sources": sources}).sha256_text()
+
+
+func _mission_briefing_source_file_identity(path: String) -> Dictionary:
+	var normalized := path.strip_edges()
+	var exists := not normalized.is_empty() and FileAccess.file_exists(normalized)
+	return {"path": normalized, "exists": exists,
+		"sha256": FileAccess.get_sha256(normalized) if exists else "",
+		"resource_exists": not normalized.is_empty() and ResourceLoader.exists(normalized)}
 
 
 func _update_pre_mission_readiness_panel() -> void:

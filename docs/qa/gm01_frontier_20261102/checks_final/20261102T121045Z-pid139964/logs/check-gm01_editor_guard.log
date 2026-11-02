@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: regular GM01 loads as a protected authored layout
+PASS: editor preserves the concrete layout identity
+PASS: regular map contains real persisted layout solids
+PASS: erase refuses to make a visible building or rock walkable
+PASS: inspector patch refuses altered navigation/LOS/height facts
+PASS: object rotation refuses divergence from the fixed visible geometry
+PASS: object scale refuses divergence from the fixed visible geometry
+PASS: internal footprint is not a standalone paintable asset
+PASS: palette hides the internal layout footprint
+PASS: network drawing refuses to replace fixed terrain
+PASS: marker movement preserves the authored objective route
+PASS: marker deletion is refused
+PASS: marker addition is refused
+PASS: all real brush, height, object, property, marker and patrol attempts preserve facts
+PASS: rejected edits do not create dirty state or undo transactions
+PASS: rejection explains the concrete layout restriction
+PASS: visible toolbar identifies protected layout and available saving
+PASS: tile inspection and selection remain available
+PASS: normal editor save still writes a scratch roundtrip
+PASS: editor save/load retains the layout identity
+PASS: editor save/load retains exact tile, marker and patrol facts
+PASS: editor verification preserves the actual standard-map file
+PASS: creating another map restores ordinary authoring
+PASS: ordinary maps retain their existing tile-edit behavior
+=== RESULTS: 24 passed, 0 failed ===
+GM01_FRONTIER_EDITOR_GUARD_ALL_PASS

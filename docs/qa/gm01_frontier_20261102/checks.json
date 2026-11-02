@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "gm01_rebuild",
+      "script": "res://scripts/tests/gm01_frontier_rebuild_verifier.gd",
+      "success_marker": "GM01_FRONTIER_REBUILD_RESULT",
+      "timeout": 100
+    },
+    {
+      "name": "default_graphics",
+      "script": "res://scripts/tests/frontier_start_graphics_verifier.gd",
+      "success_marker": "FRONTIER_START_GRAPHICS_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "gm01_enemies",
+      "script": "res://scripts/tests/task_344_ground_mission_default_enemy_visuals.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "gm01_objective",
+      "script": "res://scripts/tests/task_1179_ground_mission_objective_playthrough.gd",
+      "success_marker": "0 failed",
+      "timeout": 180
+    },
+    {
+      "name": "hex_foundation",
+      "script": "res://scripts/tests/frontier_hex_foundation_verifier.gd",
+      "success_marker": "FRONTIER_HEX_FOUNDATION_ALL_PASS",
+      "timeout": 100
+    }
+  ]
+}

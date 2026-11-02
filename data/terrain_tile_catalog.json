@@ -485,6 +485,19 @@
 			"texture_path": "res://Assets/kenney_space-kit/Isometric/rock_largeB_SW.png"
 		},
 		{
+			"type_id": "frontier_scene_solid",
+			"display_name": "Frontier Ensemble Footprint",
+			"palette_group": "gebaeude",
+			"placement_layer": "object",
+			"surface_type": "sand",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 55,
+			"height_level": 0,
+			"object_height": 3,
+			"prop_role": "authored_frontier_footprint"
+		},
+		{
 			"type_id": "nature_tree_blocker",
 			"display_name": "Nature Tree Blocker",
 			"palette_group": "nature_props",

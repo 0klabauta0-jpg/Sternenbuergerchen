@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_538 Homebase To Mission Launch Handoff Smoke ===
+PASS: TASK_538 task file exists
+PASS: TASK_538 task file marks implementation
+PASS: Implementation status tracks TASK_538
+PASS: Roadmap marks TASK_538 implemented
+PASS: Review workbench tracks TASK_538
+PASS: MetaLayer exposes Handoff snapshot
+PASS: Homebase startflow is ready before launch
+PASS: Homebase can request mission start for the boarded Dropship
+PASS: Homebase launch creates an active mission
+PASS: Handoff snapshot remains read-only
+PASS: Handoff gate passes after Homebase launch
+PASS: Handoff snapshot has no critical failures
+PASS: Handoff preserves selected mission id
+PASS: Handoff selected units match Homebase Fireteam
+PASS: Handoff selected Fireteam IDs match Homebase Fireteam
+PASS: Planning records Homebase-direct Dropship source
+PASS: Planning records launched Dropship id
+PASS: Planning passenger count matches Fireteam operators
+PASS: Planning embarked unit ids match selected operators
+PASS: MissionSetup snapshot is present
+PASS: MissionSetup receives selected units
+PASS: MissionSetup receives Fireteam IDs
+PASS: MissionSetup receives selected map
+PASS: MissionSetup receives selected scenario
+PASS: MissionSetup receives member loadouts
+PASS: TacticalController exposes planning state
+PASS: TacticalController receives Dropship planning reference
+PASS: MetaLayer starts the mission timer
+PASS: Handoff check confirms member loadouts
+PASS: Handoff check confirms unit selection
+=== RESULTS: 30 passed, 0 failed ===
+TASK_538: ALL PASSED

@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Initial real Homebase panel builds exactly one file-derived snapshot
+PASS: Repeated hidden roster/context/occupancy updates reuse the one snapshot and panel
+PASS: Hidden DTO refresh: every readiness semantic field remains fresh from current DTOs
+PASS: Hidden DTO refresh: compact summary and detailed action-cue readout match the current readiness model
+PASS: Public snapshot remains detached from the cached presentation
+PASS: Cached panel preserves real recommendation-button callbacks
+PASS: Cache hit disables apply immediately when selected operators become empty
+PASS: Empty selection: every readiness semantic field remains fresh from current DTOs
+PASS: Empty selection: compact summary and detailed action-cue readout match the current readiness model
+PASS: Cache hit re-enables the existing loadout action for a new selection
+ERROR: FAIL: Existing confirmed loadout action still applies through its command callback
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://scripts/tests/gm01_frontier_briefing_cache_verifier.gd:43)
+       [1] _run (res://scripts/tests/gm01_frontier_briefing_cache_verifier.gd:163)
+PASS: Changed loadout: every readiness semantic field remains fresh from current DTOs
+PASS: Changed loadout: compact summary and detailed action-cue readout match the current readiness model
+PASS: Changed roster/transport: every readiness semantic field remains fresh from current DTOs
+PASS: Changed roster/transport: compact summary and detailed action-cue readout match the current readiness model
+PASS: Loadout, roster and transport updates do not reload unchanged briefing sources
+PASS: Scratch map edit has identical byte length, path and modification second
+PASS: Changed map content SHA invalidates even a same-size same-second source
+PASS: Scratch scenario edit also preserves byte length/path/modification second
+PASS: Changed scenario content rebuilds and renders its new briefing
+PASS: Switching source paths invalidates the existing single snapshot
+PASS: Declared catalog content participates in the real guard, including production TerrainTileCatalog
+PASS: Repeated missing source is represented explicitly and remains bounded
+PASS: Missing scenario becoming present invalidates and renders the recovered source
+PASS: Blank explicit path fingerprints the actual scenario-resolved map, including missing-to-present recovery
+PASS: Recreated panel renders the existing snapshot without another heavy source build
+PASS: Recreated recommendation controls retain their callbacks
+PASS: Visible before actionability: every readiness semantic field remains fresh from current DTOs
+PASS: Visible before actionability: compact summary and detailed action-cue readout match the current readiness model
+PASS: Play mode participates in the source context
+=== RESULTS: 29 passed, 1 failed ===

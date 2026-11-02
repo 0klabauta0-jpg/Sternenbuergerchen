@@ -86,6 +86,14 @@ func _test_homebase_renders_briefing_panel() -> void:
 	await process_frame
 	_assert(homebase.has_method("get_mission_briefing_panel_snapshot"), "Homebase exposes briefing panel snapshot")
 	var snapshot: Dictionary = Dictionary(homebase.call("get_mission_briefing_panel_snapshot"))
+	_assert(not bool(snapshot.get("panel_visible", true)), "R4 initially folds the briefing details")
+	var details_button := homebase.get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/R2BriefingDetailsButton") as Button
+	_assert(details_button != null and details_button.text == "Briefingdetails", "Homebase exposes the real briefing-details action")
+	if details_button != null:
+		details_button.pressed.emit()
+	await process_frame
+	await process_frame
+	snapshot = Dictionary(homebase.call("get_mission_briefing_panel_snapshot"))
 	_assert(bool(snapshot.get("panel_visible", false)), "Homebase briefing panel is visible for scenario mission")
 	_assert(not bool(snapshot.get("ui_sets_gameplay_truth", true)), "Homebase briefing panel remains read-only")
 	_assert(String(snapshot.get("rendered_title_text", "")).contains("Operation Frontier Probe"), "Homebase renders briefing title")

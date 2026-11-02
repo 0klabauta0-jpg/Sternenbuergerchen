@@ -1,0 +1,2198 @@
+WorkerThreadPool: 16 threads, 4 max low-priority.
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+TextServer: Added interface "Dummy"
+TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+Unrecognized output string "misc2" in mapping:
+030000008a2e0000dd10000000000000,Hand Held Legend GC Ultimate,a:b0,b:b2,back:b17,dpdown:b5,dpleft:b6,dpright:b7,dpup:b4,guide:b18,leftshoulder:b10,leftstick:b8,lefttrigger:a3,leftx:a0,lefty:a1,misc1:b19,misc2:b24,paddle1:b13,paddle2:b12,rightshoulder:b11,rightstick:b9,righttrigger:a4,rightx:a2,righty:a5,start:b16,x:b1,y:b3,platform:Windows,
+Unrecognized output string "misc2" in mapping:
+030000000d0f00000202000000000000,Horipad O Nintendo Switch 2 Controller,a:b1,b:b0,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,misc1:b13,misc2:b14,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b3,y:b2,platform:Windows,
+Unrecognized output string "misc2" in mapping:
+030000000d0f00009601000000000000,Horipad Steam,a:b0,b:b1,back:b10,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b6,leftstick:b13,lefttrigger:b8,leftx:a0,lefty:a1,misc2:b2,paddle1:b5,paddle2:b15,paddle3:b18,paddle4:b19,rightshoulder:b7,rightstick:b14,righttrigger:b9,rightx:a3,righty:a4,start:b11,x:b3,y:b4,platform:Windows,
+Unrecognized output string "misc2" in mapping:
+030000007e0500006920000000000000,Nintendo Switch 2 Pro Controller,a:b0,b:b1,back:b14,dpdown:b8,dpleft:b10,dpright:b9,dpup:b11,guide:b16,leftshoulder:b12,leftstick:b15,lefttrigger:b13,leftx:a0,lefty:a1~,misc1:b17,misc2:b20,paddle1:b18,paddle2:b19,rightshoulder:b4,rightstick:b7,righttrigger:b5,rightx:a2,righty:a3~,start:b6,x:b2,y:b3,platform:Windows,
+WARNING: GENERAL - Message Id Number: 0 | Message Id Name: Loader Message
+	windows_read_data_files_in_registry: Registry lookup failed to get layer manifest files.
+	Objects - 1
+		Object[0] - VK_OBJECT_TYPE_INSTANCE, Handle 1771124965200
+   at: _debug_messenger_callback (drivers/vulkan/rendering_context_driver_vulkan.cpp:639)
+Accessibility: window 0 adapter created.
+Devices:
+  #0: NVIDIA NVIDIA GeForce RTX 4070 Ti SUPER - Supported, Discrete
+  #1: AMD AMD Radeon(TM) Graphics - Supported, Integrated
+Optional extension VK_EXT_fragment_density_map not found
+Optional extension VK_QCOM_fragment_density_map_offset not found
+Optional extension VK_EXT_astc_decode_mode not found
+Optional extension VK_EXT_texture_compression_astc_hdr not found
+Optional extension VK_KHR_external_memory_fd not found
+Optional extension VK_EXT_debug_marker not found
+- Vulkan Fragment Shading Rate supported:
+  Pipeline fragment shading rate
+  Primitive fragment shading rate
+  Attachment fragment shading rate, min texel size: (16, 16), max texel size: (16, 16), max fragment size: (4, 4)
+- Vulkan Fragment Density Map not supported
+- Vulkan multiview supported:
+  max view count: 32
+  max instances: 134217727
+- Vulkan subgroup:
+  size: 32
+  min size: 32
+  max size: 32
+  stages: STAGE_VERTEX, STAGE_TESSELLATION_CONTROL, STAGE_TESSELLATION_EVALUATION, STAGE_GEOMETRY, STAGE_FRAGMENT, STAGE_COMPUTE, STAGE_RAYGEN_KHR, STAGE_ANY_HIT_KHR, STAGE_CLOSEST_HIT_KHR, STAGE_MISS_KHR, STAGE_INTERSECTION_KHR, STAGE_CALLABLE_KHR, STAGE_TASK_NV, STAGE_MESH_NV
+  supported ops: FEATURE_BASIC, FEATURE_VOTE, FEATURE_ARITHMETIC, FEATURE_BALLOT, FEATURE_SHUFFLE, FEATURE_SHUFFLE_RELATIVE, FEATURE_CLUSTERED, FEATURE_QUAD, FEATURE_PARTITIONED_NV
+  quad operations in all stages
+Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+Startup PSO cache (12.6 MiB)
+SDL: Joystick VIRPIL Controls 20241226 VPC R1-FALCON Pedals connected
+SDL: Gamepad vJoy Device connected
+SDL: Init OK!
+Using "winink" pen tablet driver...
+Creating VMA small objects pool for memory type index 1
+Shader 'CanvasSdfShaderRD' (group 0) SHA256: 900d0f09be693ae3458cb4ea5ca3733f93a58e342a661879987fa33f019737ef
+Loading cache for shader CanvasSdfShaderRD, variant 0
+Loading cache for shader CanvasSdfShaderRD, variant 1
+Loading cache for shader CanvasSdfShaderRD, variant 2
+Loading cache for shader CanvasSdfShaderRD, variant 3
+Loading cache for shader CanvasSdfShaderRD, variant 4
+Loading cache for shader CanvasSdfShaderRD, variant 5
+Shader 'SkeletonShaderRD' (group 0) SHA256: f5464247670c8a6767c45f6d3608e1cde3ee7c170567663cf709cd4ed8b3a4c1
+Loading cache for shader SkeletonShaderRD, variant 0
+Loading cache for shader SkeletonShaderRD, variant 1
+Shader 'SortShaderRD' (group 0) SHA256: f9ec1d3b74a8fc2c04e3f2648f95f2f1bbdce58b6c290cf9c4851a0bac4771d4
+Loading cache for shader SortShaderRD, variant 0
+Loading cache for shader SortShaderRD, variant 1
+Loading cache for shader SortShaderRD, variant 2
+Shader 'ParticlesShaderRD' (group 0) SHA256: 06a8e27fb2eb40a42c7d1c26614ce38ae841d0048941bee0ae85d930f4cd7c10
+Loading cache for shader ParticlesShaderRD, variant 0
+Shader 'ParticlesCopyShaderRD' (group 0) SHA256: 07564cb3473afac407c6bcff5eeecd5e1775822696a97e9598ea6df01e255aa9
+Loading cache for shader ParticlesCopyShaderRD, variant 0
+Loading cache for shader ParticlesCopyShaderRD, variant 1
+Loading cache for shader ParticlesCopyShaderRD, variant 2
+Loading cache for shader ParticlesCopyShaderRD, variant 3
+Loading cache for shader ParticlesCopyShaderRD, variant 4
+Loading cache for shader ParticlesCopyShaderRD, variant 5
+Loading cache for shader ParticlesCopyShaderRD, variant 6
+Loading cache for shader ParticlesCopyShaderRD, variant 7
+Loading cache for shader ParticlesCopyShaderRD, variant 8
+Loading cache for shader ParticlesCopyShaderRD, variant 9
+Loading cache for shader ParticlesCopyShaderRD, variant 10
+Loading cache for shader ParticlesCopyShaderRD, variant 11
+Loading cache for shader ParticlesCopyShaderRD, variant 12
+Loading cache for shader ParticlesCopyShaderRD, variant 13
+Loading cache for shader ParticlesCopyShaderRD, variant 14
+Loading cache for shader ParticlesCopyShaderRD, variant 15
+Loading cache for shader ParticlesCopyShaderRD, variant 16
+Loading cache for shader ParticlesCopyShaderRD, variant 17
+Loading cache for shader ParticlesCopyShaderRD, variant 18
+Loading cache for shader ParticlesCopyShaderRD, variant 19
+Loading cache for shader ParticlesCopyShaderRD, variant 20
+Shader 'CanvasShaderRD' (group 0) SHA256: 44b626a71b331de17a1569c244e84cfc842a2c1ef1fe575d245ab80bccb9cb2d
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Shader 'CanvasOcclusionShaderRD' (group 0) SHA256: 6d0046303c5068df99b2c3945434a844674a052389ae79e4a466f8196188cd35
+Loading cache for shader CanvasOcclusionShaderRD, variant 0
+Loading cache for shader CanvasOcclusionShaderRD, variant 1
+Loading cache for shader CanvasOcclusionShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Shader 'ClusterRenderShaderRD' (group 0) SHA256: f863243f437e1e951de711609c6bf7e68a0d9b104c70be5c6a645fa26c179ccf
+Loading cache for shader ClusterRenderShaderRD, variant 0
+Loading cache for shader ClusterRenderShaderRD, variant 1
+Shader 'ClusterStoreShaderRD' (group 0) SHA256: 2b72ea813a706dc6e2daec5b08d2b7417fb67306de04679465b034b524dda1a8
+Loading cache for shader ClusterStoreShaderRD, variant 0
+Shader 'ClusterDebugShaderRD' (group 0) SHA256: b4dfb009f982372090b395f6b4b491ec859580fde542b137da30ba0125db4493
+Loading cache for shader ClusterDebugShaderRD, variant 0
+Shader 'SceneForwardClusteredShaderRD' (group 0) SHA256: 1d8f9fd61c770da8fbf2a971b3e81a1e4b82130a464dd2919dd0df65d3f4d4a6
+Shader 'SceneForwardClusteredShaderRD' (group 1) SHA256: 61876f5c8f74caba7a7352bfae952af71751831a37f90f1afd79cc9bd4e376cd
+Shader 'SceneForwardClusteredShaderRD' (group 2) SHA256: 3059d46f18b2976aeaa7b949a8584517842a7e1a4162a81aa64cd484e7658e71
+Shader 'SceneForwardClusteredShaderRD' (group 3) SHA256: b99b58d45433c5ad8ab8fa4eeccb58b7f548b169602e27513a45f2641c534d09
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Shader 'BestFitNormalShaderRD' (group 0) SHA256: 1ccb50327c01a8b810bcb5de747a978120c151a6fea245220edca74b9c528713
+Loading cache for shader BestFitNormalShaderRD, variant 0
+Shader 'IntegrateDfgShaderRD' (group 0) SHA256: 42d754357677605b691c5336a8e22e09202dcff00a57b792ac11d2e0b161b993
+Loading cache for shader IntegrateDfgShaderRD, variant 0
+Shader 'TaaResolveShaderRD' (group 0) SHA256: 80810a13c63cdcf213a9e1f7d092d977e0552d6453157bb11355fa7502e38656
+Loading cache for shader TaaResolveShaderRD, variant 0
+Shader 'Fsr2DepthClipPassShaderRD' (group 0) SHA256: 8139e61f52a7d4b68775c71117a41c46a3fc191dc962101f9cd42a92525d094b
+Shader 'Fsr2ReconstructPreviousDepthPassShaderRD' (group 0) SHA256: 07d073aac807c722a93491904901ac47bbe1595ebfecc3096b9089a709166054
+Shader 'Fsr2LockPassShaderRD' (group 0) SHA256: 3871e1f7a3e5b52437559b2065178ffc4fdef39925dc974b6975b4839cb2f7f4
+Shader 'Fsr2AccumulatePassShaderRD' (group 0) SHA256: c889e6fa9a4d7a667554e7d8c17ea756be78877961764099214e958069f95f6a
+Shader 'Fsr2RcasPassShaderRD' (group 0) SHA256: edf373fd0acee691346f60b3c987de3db2886aed3a6ab70ccd70479f5cbd5800
+Shader 'Fsr2ComputeLuminancePyramidPassShaderRD' (group 0) SHA256: 3a9e1f0a36bb2d58fc147e20667d91adca84a6d2518c6dc482cad018467ff3c4
+Shader 'Fsr2AutogenReactivePassShaderRD' (group 0) SHA256: f2cae4e3c0e2cc8fd38de9a4988949f8372a0791c88fed4e0a248812a9db7c85
+Shader 'Fsr2TcrAutogenPassShaderRD' (group 0) SHA256: 184b023c298c4462a1697d35240b8a6e617f673fcedfd97c3a4c1da3657fef2c
+Shader 'SsEffectsDownsampleShaderRD' (group 0) SHA256: 00b905de0ce61aa71e1203c86aadb464c5254c0f70c5df1c4a16ae369a011fd8
+Loading cache for shader SsEffectsDownsampleShaderRD, variant 0
+Loading cache for shader SsEffectsDownsampleShaderRD, variant 1
+Loading cache for shader SsEffectsDownsampleShaderRD, variant 2
+Loading cache for shader SsEffectsDownsampleShaderRD, variant 3
+Loading cache for shader SsEffectsDownsampleShaderRD, variant 4
+Loading cache for shader SsEffectsDownsampleShaderRD, variant 5
+Loading cache for shader SsEffectsDownsampleShaderRD, variant 6
+Shader 'SsilShaderRD' (group 0) SHA256: 3b05aa37155fafb48b5c5687c2743ee0d78977c853054b1533422ec2ef43dfc7
+Loading cache for shader SsilShaderRD, variant 0
+Loading cache for shader SsilShaderRD, variant 1
+Loading cache for shader SsilShaderRD, variant 2
+Shader 'SsilImportanceMapShaderRD' (group 0) SHA256: f06c8f5624e6170877d397deebb400e940cb4d625d05260d6a24d24e6682da98
+Loading cache for shader SsilImportanceMapShaderRD, variant 0
+Loading cache for shader SsilImportanceMapShaderRD, variant 1
+Loading cache for shader SsilImportanceMapShaderRD, variant 2
+Shader 'SsilBlurShaderRD' (group 0) SHA256: 4aebd32e075cc380fa044bbd25d6041f3b33e9642997142ff651a262e4919f58
+Loading cache for shader SsilBlurShaderRD, variant 0
+Loading cache for shader SsilBlurShaderRD, variant 1
+Loading cache for shader SsilBlurShaderRD, variant 2
+Shader 'SsilInterleaveShaderRD' (group 0) SHA256: adb7d726b7686b420a442a3227b89ebbec02e308f3eecaca78455b1334d3d124
+Loading cache for shader SsilInterleaveShaderRD, variant 0
+Loading cache for shader SsilInterleaveShaderRD, variant 1
+Loading cache for shader SsilInterleaveShaderRD, variant 2
+Shader 'SsaoShaderRD' (group 0) SHA256: 3d813e95740f9b60dfc54dc27d3e8bef0fe774cbe665ce8ca001911d8bddd779
+Loading cache for shader SsaoShaderRD, variant 0
+Loading cache for shader SsaoShaderRD, variant 1
+Loading cache for shader SsaoShaderRD, variant 2
+Shader 'SsaoImportanceMapShaderRD' (group 0) SHA256: 8dea32f8f998a2826251eaa6f2e79afd0d32fe7c8f5cbfa07ffaa7e6dd065adb
+Loading cache for shader SsaoImportanceMapShaderRD, variant 0
+Loading cache for shader SsaoImportanceMapShaderRD, variant 1
+Loading cache for shader SsaoImportanceMapShaderRD, variant 2
+Shader 'SsaoBlurShaderRD' (group 0) SHA256: b65a0faa61bd9bc74ffa0d5e350fbcfb41b509b462ba4efc099932750277c6c9
+Loading cache for shader SsaoBlurShaderRD, variant 0
+Loading cache for shader SsaoBlurShaderRD, variant 1
+Loading cache for shader SsaoBlurShaderRD, variant 2
+Shader 'SsaoInterleaveShaderRD' (group 0) SHA256: 37d20a08ed7c0df456d74fe2afcd709bb63683bf17844b96ef3a831708fe33d6
+Loading cache for shader SsaoInterleaveShaderRD, variant 0
+Loading cache for shader SsaoInterleaveShaderRD, variant 1
+Loading cache for shader SsaoInterleaveShaderRD, variant 2
+Shader 'ScreenSpaceReflectionDownsampleShaderRD' (group 0) SHA256: efffc9e5a7c66f8a0f9ff93c2de0f3ae0f0204238caf8bd81b886c65eab90fd4
+Loading cache for shader ScreenSpaceReflectionDownsampleShaderRD, variant 0
+Loading cache for shader ScreenSpaceReflectionDownsampleShaderRD, variant 1
+Loading cache for shader ScreenSpaceReflectionDownsampleShaderRD, variant 2
+Loading cache for shader ScreenSpaceReflectionDownsampleShaderRD, variant 3
+Shader 'ScreenSpaceReflectionHizShaderRD' (group 0) SHA256: 997ce3e6161596f9996f5616548734cb1b6ae9ba53707e753153b0855fe4e6ab
+Loading cache for shader ScreenSpaceReflectionHizShaderRD, variant 0
+Loading cache for shader ScreenSpaceReflectionHizShaderRD, variant 1
+Loading cache for shader ScreenSpaceReflectionHizShaderRD, variant 2
+Loading cache for shader ScreenSpaceReflectionHizShaderRD, variant 3
+Shader 'ScreenSpaceReflectionShaderRD' (group 0) SHA256: 435a8cc42eafc61cd0a165605df5c12a844b2638060a76140c926e7ae3f17370
+Loading cache for shader ScreenSpaceReflectionShaderRD, variant 0
+Shader 'ScreenSpaceReflectionFilterShaderRD' (group 0) SHA256: df57b17e0d3f8e6a2117eddae7b20ed4374b305ba8ca4574e4de35047a65e359
+Loading cache for shader ScreenSpaceReflectionFilterShaderRD, variant 0
+Shader 'ScreenSpaceReflectionResolveShaderRD' (group 0) SHA256: 33380c22729b8429fde29e1f93f85b5208c85e4ede0aa997a4929891c2c29ac3
+Loading cache for shader ScreenSpaceReflectionResolveShaderRD, variant 0
+Shader 'SubsurfaceScatteringShaderRD' (group 0) SHA256: 1b13b43aab403edf1776669251ef4c9219eb57ea9b8e86483f0c0b44cfbe566e
+Loading cache for shader SubsurfaceScatteringShaderRD, variant 0
+Loading cache for shader SubsurfaceScatteringShaderRD, variant 1
+Loading cache for shader SubsurfaceScatteringShaderRD, variant 2
+Shader 'SkyShaderRD' (group 0) SHA256: 35d1b4b37bab144dc90408dd6cf6ddeee4a134e13f3efe56f0e3ae92e83a5124
+Loading cache for shader SkyShaderRD, variant 0
+Loading cache for shader SkyShaderRD, variant 1
+Loading cache for shader SkyShaderRD, variant 2
+Loading cache for shader SkyShaderRD, variant 3
+Loading cache for shader SkyShaderRD, variant 4
+Loading cache for shader SkyShaderRD, variant 5
+Loading cache for shader SkyShaderRD, variant 0
+Loading cache for shader SkyShaderRD, variant 1
+Loading cache for shader SkyShaderRD, variant 2
+Loading cache for shader SkyShaderRD, variant 3
+Loading cache for shader SkyShaderRD, variant 4
+Loading cache for shader SkyShaderRD, variant 5
+Shader 'VoxelGiShaderRD' (group 0) SHA256: b12597d0afb0147a772f4ce6eab75f7a1d08b458e5ce7df8a01f34092bdb8984
+Loading cache for shader VoxelGiShaderRD, variant 0
+Loading cache for shader VoxelGiShaderRD, variant 1
+Loading cache for shader VoxelGiShaderRD, variant 2
+Loading cache for shader VoxelGiShaderRD, variant 3
+Loading cache for shader VoxelGiShaderRD, variant 4
+Loading cache for shader VoxelGiShaderRD, variant 5
+Loading cache for shader VoxelGiShaderRD, variant 6
+Loading cache for shader VoxelGiShaderRD, variant 7
+Shader 'VoxelGiDebugShaderRD' (group 0) SHA256: 0c11e2b01ffc801b382d12556a315f70379dc7769e0f04b55f281d9dfafc10e6
+Loading cache for shader VoxelGiDebugShaderRD, variant 0
+Loading cache for shader VoxelGiDebugShaderRD, variant 1
+Loading cache for shader VoxelGiDebugShaderRD, variant 2
+Loading cache for shader VoxelGiDebugShaderRD, variant 3
+Shader 'SdfgiPreprocessShaderRD' (group 0) SHA256: 8209c4e09174b46160bf3298a91fdd988a8aae6b7e81d6dd381d87b0aad47434
+Loading cache for shader SdfgiPreprocessShaderRD, variant 0
+Loading cache for shader SdfgiPreprocessShaderRD, variant 1
+Loading cache for shader SdfgiPreprocessShaderRD, variant 2
+Loading cache for shader SdfgiPreprocessShaderRD, variant 3
+Loading cache for shader SdfgiPreprocessShaderRD, variant 4
+Loading cache for shader SdfgiPreprocessShaderRD, variant 5
+Loading cache for shader SdfgiPreprocessShaderRD, variant 6
+Loading cache for shader SdfgiPreprocessShaderRD, variant 7
+Loading cache for shader SdfgiPreprocessShaderRD, variant 8
+Shader 'SdfgiDirectLightShaderRD' (group 0) SHA256: 2fb0b4bb5244e2878ed914d5c7091b8a29a281b7ef61c89bd41cb1af4833f6f1
+Loading cache for shader SdfgiDirectLightShaderRD, variant 0
+Loading cache for shader SdfgiDirectLightShaderRD, variant 1
+Shader 'SdfgiIntegrateShaderRD' (group 0) SHA256: b6bde7dbd199e845ade91714af87216fa88e23a5866f28aed59e0ee81da45cce
+Loading cache for shader SdfgiIntegrateShaderRD, variant 0
+Loading cache for shader SdfgiIntegrateShaderRD, variant 1
+Loading cache for shader SdfgiIntegrateShaderRD, variant 2
+Loading cache for shader SdfgiIntegrateShaderRD, variant 3
+Shader 'GiShaderRD' (group 0) SHA256: 154eef6b59156842af8c5b85ab6829061a5637da2edc33604b1a5e5949e5294a
+Shader 'GiShaderRD' (group 1) SHA256: 658562f56496c94b13de4ff1bebb405bc128c5befb4a4750bb72fa5cfa745e47
+Loading cache for shader GiShaderRD, variant 0
+Loading cache for shader GiShaderRD, variant 1
+Loading cache for shader GiShaderRD, variant 2
+Loading cache for shader GiShaderRD, variant 3
+Loading cache for shader GiShaderRD, variant 4
+Loading cache for shader GiShaderRD, variant 0
+Loading cache for shader GiShaderRD, variant 1
+Loading cache for shader GiShaderRD, variant 2
+Loading cache for shader GiShaderRD, variant 3
+Loading cache for shader GiShaderRD, variant 4
+Shader 'SdfgiDebugShaderRD' (group 0) SHA256: 770683c4abbe80e6aaa1fcce0e3aa9d0da557c3ab2aeb97c71adda2071ed6d9e
+Loading cache for shader SdfgiDebugShaderRD, variant 0
+Shader 'SdfgiDebugProbesShaderRD' (group 0) SHA256: c686dc153eb1e1b4ce9aa61259db41552f6a3d85a07bca8c284700c4e738a962
+Loading cache for shader SdfgiDebugProbesShaderRD, variant 0
+Loading cache for shader SdfgiDebugProbesShaderRD, variant 1
+Loading cache for shader SdfgiDebugProbesShaderRD, variant 2
+Loading cache for shader SdfgiDebugProbesShaderRD, variant 3
+Shader 'VolumetricFogShaderRD' (group 0) SHA256: cd13e32ed245f716549baa33205f90df569f0dee7cc4e2b9ae2aaba077053ee6
+Shader 'VolumetricFogShaderRD' (group 1) SHA256: 37c7e1dd67617aa03e3a6beb945ec96146ac1d1fcbc44d84705c39b8c74bce0c
+Shader 'VolumetricFogShaderRD' (group 2) SHA256: e1000919e80553e4e1df0331263cb2a0e46aa40a7e49b0a36818de89941c5685
+Shader 'VolumetricFogShaderRD' (group 3) SHA256: 38b203b68cdc65e4c30672e9d7e49fed354e415f18b86a7b1e34ff2ebb3a95d0
+Loading cache for shader VolumetricFogShaderRD, variant 0
+Shader 'VolumetricFogProcessShaderRD' (group 0) SHA256: dcafe7b4c3b1dd119e2840e2923481e9787edb3c613e438931d44b3fde5b8dd1
+Shader 'VolumetricFogProcessShaderRD' (group 1) SHA256: adc0632d1f9f8ce0e652606602aeef293c9a5002e4db7e5557b4a2c8d30d31ca
+Shader 'VolumetricFogProcessShaderRD' (group 2) SHA256: e7111e4619b756f12ede8cd7e1882d809c920d3cd1e92800d26dc2843c1d7951
+Shader 'VolumetricFogProcessShaderRD' (group 3) SHA256: 35306d664799f9fedcfa4dea2feab6509574141aa5cce1e28e56053018da5d27
+Loading cache for shader VolumetricFogProcessShaderRD, variant 0
+Loading cache for shader VolumetricFogProcessShaderRD, variant 1
+Loading cache for shader VolumetricFogProcessShaderRD, variant 2
+Loading cache for shader VolumetricFogProcessShaderRD, variant 3
+Loading cache for shader VolumetricFogProcessShaderRD, variant 4
+Shader 'BokehDofShaderRD' (group 0) SHA256: 5e76c505fe05e40992e5c54f643d9f694337f76d047ceb7ad161dc3efb2bf411
+Loading cache for shader BokehDofShaderRD, variant 0
+Loading cache for shader BokehDofShaderRD, variant 1
+Loading cache for shader BokehDofShaderRD, variant 3
+Loading cache for shader BokehDofShaderRD, variant 5
+Loading cache for shader BokehDofShaderRD, variant 6
+Shader 'CopyShaderRD' (group 0) SHA256: 65291954e15cb018018fc5f4646a638087a0a102918f3e04c7f5bd7b36a520d7
+Loading cache for shader CopyShaderRD, variant 0
+Loading cache for shader CopyShaderRD, variant 1
+Loading cache for shader CopyShaderRD, variant 2
+Loading cache for shader CopyShaderRD, variant 3
+Loading cache for shader CopyShaderRD, variant 4
+Loading cache for shader CopyShaderRD, variant 5
+Loading cache for shader CopyShaderRD, variant 6
+Loading cache for shader CopyShaderRD, variant 7
+Loading cache for shader CopyShaderRD, variant 8
+Loading cache for shader CopyShaderRD, variant 9
+Loading cache for shader CopyShaderRD, variant 10
+Loading cache for shader CopyShaderRD, variant 11
+Loading cache for shader CopyShaderRD, variant 12
+Shader 'CopyToFbShaderRD' (group 0) SHA256: 75d836894e920d01a392936493cf5f515633f4101cdab35e41710593c8961a8b
+Loading cache for shader CopyToFbShaderRD, variant 0
+Loading cache for shader CopyToFbShaderRD, variant 1
+Loading cache for shader CopyToFbShaderRD, variant 2
+Loading cache for shader CopyToFbShaderRD, variant 3
+Shader 'CubeToDpShaderRD' (group 0) SHA256: d7b798ab7df6267a749663467475b673a9c91bd0a35bf9b538439cb9902d869e
+Loading cache for shader CubeToDpShaderRD, variant 0
+Shader 'CubeToOctmapShaderRD' (group 0) SHA256: 945003e6f9984a03124090615d87289ba22cea98da96752bf1b0cf69baef54d7
+Loading cache for shader CubeToOctmapShaderRD, variant 0
+Shader 'OctmapDownsamplerShaderRD' (group 0) SHA256: b5d716a2f281f18de3f8145675905257c71ed306b08187f196135b4d6b900d18
+Loading cache for shader OctmapDownsamplerShaderRD, variant 0
+Loading cache for shader OctmapDownsamplerShaderRD, variant 1
+Shader 'OctmapFilterShaderRD' (group 0) SHA256: 29563446a265b7dd42bb80d9d6e3dc4d423069662549f27f646ae4dc33dd669a
+Loading cache for shader OctmapFilterShaderRD, variant 0
+Loading cache for shader OctmapFilterShaderRD, variant 1
+Loading cache for shader OctmapFilterShaderRD, variant 2
+Loading cache for shader OctmapFilterShaderRD, variant 3
+Loading cache for shader OctmapFilterShaderRD, variant 4
+Loading cache for shader OctmapFilterShaderRD, variant 5
+Loading cache for shader OctmapFilterShaderRD, variant 6
+Loading cache for shader OctmapFilterShaderRD, variant 7
+Shader 'OctmapRoughnessShaderRD' (group 0) SHA256: 5e2dc8eaf1a38f928f118fb3b4ec9041422acb08ba3628df371772294faef0a4
+Loading cache for shader OctmapRoughnessShaderRD, variant 0
+Loading cache for shader OctmapRoughnessShaderRD, variant 1
+Shader 'SpecularMergeShaderRD' (group 0) SHA256: 2c24bae3cdd8885d57ab9d12d4cfc7fc3bc7462a287e93293f3533163e9e82a3
+Loading cache for shader SpecularMergeShaderRD, variant 0
+Loading cache for shader SpecularMergeShaderRD, variant 1
+Loading cache for shader SpecularMergeShaderRD, variant 2
+Loading cache for shader SpecularMergeShaderRD, variant 3
+Shader 'ShadowFrustumShaderRD' (group 0) SHA256: 3deae303d647faccb68971539f74a832fa8321fe8d642826a8c88bbd3658b679
+Loading cache for shader ShadowFrustumShaderRD, variant 0
+Shader 'MotionVectorsShaderRD' (group 0) SHA256: e33ee4540533d576bfe475cc499a9491db25293c3cc5ae811495d43f58649020
+Loading cache for shader MotionVectorsShaderRD, variant 0
+Shader 'LuminanceReduceShaderRD' (group 0) SHA256: ef89847c3d5789777bf23f6024aa0d004fdc3a7fe82c8bf865c3946f50157f75
+Loading cache for shader LuminanceReduceShaderRD, variant 0
+Loading cache for shader LuminanceReduceShaderRD, variant 1
+Loading cache for shader LuminanceReduceShaderRD, variant 2
+Shader 'SmaaEdgeDetectionShaderRD' (group 0) SHA256: a6c5c7327054acd529d0181b07bf068fccf6773b47e3bc26742813607b59ba24
+Loading cache for shader SmaaEdgeDetectionShaderRD, variant 0
+Shader 'SmaaWeightCalculationShaderRD' (group 0) SHA256: 3893abaf810bdff4408209bba813141b7ed437601200519b8aee0a69f0349d05
+Loading cache for shader SmaaWeightCalculationShaderRD, variant 0
+Shader 'SmaaBlendingShaderRD' (group 0) SHA256: 6088fec0579720c9b0477de3d431bbc3b7de4b868060edc13f716d8818817556
+Loading cache for shader SmaaBlendingShaderRD, variant 0
+Shader 'TonemapShaderRD' (group 0) SHA256: a56bf793a5b570b67656c7c358d65edc055616e7e6979e80c0c9c15416159004
+Loading cache for shader TonemapShaderRD, variant 0
+Loading cache for shader TonemapShaderRD, variant 1
+Loading cache for shader TonemapShaderRD, variant 2
+Loading cache for shader TonemapShaderRD, variant 3
+Shader 'VrsShaderRD' (group 0) SHA256: bec481e78ad773e300f2715286758cbb133fa51b9dbe03fcb6a21b29de9a1c2a
+Loading cache for shader VrsShaderRD, variant 0
+Loading cache for shader VrsShaderRD, variant 2
+Loading cache for shader VrsShaderRD, variant 3
+Shader 'FsrUpscaleShaderRD' (group 0) SHA256: d466030127f157943b9e4db32b126dcb3d9e6a2babf5212166346d08e6261fe7
+Loading cache for shader FsrUpscaleShaderRD, variant 0
+Loading cache for shader FsrUpscaleShaderRD, variant 1
+Shader 'ResolveShaderRD' (group 0) SHA256: 62ad9cf399fd17bc950adc9b1604f70db504a8c531198a947df8f6d8dcd16b34
+Loading cache for shader ResolveShaderRD, variant 0
+Loading cache for shader ResolveShaderRD, variant 1
+Loading cache for shader ResolveShaderRD, variant 2
+Shader 'BlitShaderRD' (group 0) SHA256: e5ff0c7f50cb8a6ee532997afb4a3408b6de2b9b03ebcb87e157b46ab8593e39
+Loading cache for shader BlitShaderRD, variant 0
+Loading cache for shader BlitShaderRD, variant 1
+Loading cache for shader BlitShaderRD, variant 2
+Loading cache for shader BlitShaderRD, variant 3
+
+TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+CORE API HASH: 4039755037
+EDITOR API HASH: 223528947
+Loading resource: res://scripts/tests/gm01_frontier_normal_capture.gd
+SceneTreeFTI: traversal method DEFAULT
+Loading resource: res://scripts/ui/global_escape_menu.gd
+Loading resource: res://addons/netfox/network-time.gd
+Loading resource: res://addons/netfox/network-events.gd
+Loaded system CA certificates
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+Accessibility: window 0 adapter activated.
+PASS: Project normal entry is MainMenu
+Loading resource: res://scenes/ui/main_menu.tscn
+Loading resource: res://scripts/ui/main_menu_screen.gd
+Loading resource: res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg
+Loading resource: res://.godot/imported/sternenbuerger_main_menu_bg.jpeg-a7a8efa4b33437f23176650526548776.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/frontier_main_startup_verifier.gd:182)
+PASS: Normal main menu scene loads
+Loading resource: res://Assets/curated/main_menu/frontier_outpost_main_20261101.png
+Loading resource: res://.godot/imported/frontier_outpost_main_20261101.png-cceee0c8bccc14fa8ebeb0b4e980f92d.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/assets/background_image_catalog.gd:45)
+       [1] _apply_background_texture (res://scripts/ui/main_menu_screen.gd:810)
+       [2] _ready (res://scripts/ui/main_menu_screen.gd:156)
+       [3] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_31_45.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_31_45.png-3e4fd29aa888497d92f66c6b6cd051e8.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _load_res_texture (res://scripts/ui/main_menu_screen.gd:3139)
+       [1] _refresh_team_editor_emblems (res://scripts/ui/main_menu_screen.gd:2675)
+       [2] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1897)
+       [3] _ensure_start_roster_button (res://scripts/ui/main_menu_screen.gd:1059)
+       [4] _ready (res://scripts/ui/main_menu_screen.gd:163)
+       [5] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_33_31.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_33_31.png-a414cbe7de792569afeed9703fd4931b.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_rifle.png
+Loading resource: res://.godot/imported/badge_role_rifle.png-95c17957809f44efbfc418aec7f85357.ctex
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_ftl.png
+Loading resource: res://.godot/imported/badge_role_ftl.png-bfe34c54209e980f52d9878488d2e3b1.ctex
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_engineer.png
+Loading resource: res://.godot/imported/badge_role_engineer.png-83ebad5a0bc2cb1f283e81f17b8abd4f.ctex
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_medic.png
+Loading resource: res://.godot/imported/badge_role_medic.png-67064b4f183724f9ed8198c435b80330.ctex
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_pilot.png
+Loading resource: res://.godot/imported/badge_role_pilot.png-fa69e41bcc09ddb8acd198089c86aa84.ctex
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_heavy.png
+Loading resource: res://.godot/imported/badge_role_heavy.png-b0513b012815857afb9d16613c15a28a.ctex
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_35_32.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_35_32.png-13548baf40aa6202f11fe919a37d9f24.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_30_03.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_30_03.png-21efca39ad53a878acf91f7c940bae8b.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_15_16.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_15_16.png-1ff8f5275e7a8e21452bb1d4b37833c2.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_36_59.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_36_59.png-5c820b84f16fba359b2c66ed3decae31.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_41_25.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_41_25.png-493ac3f8eb23a94c8580b1daae8ec004.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_41_44.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_41_44.png-2b60eb4e9d5377caa2101929738606f3.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_26_33.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_26_33.png-fc86a602e93ad2a0819073510ec6e7a4.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_38_10.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_38_10.png-f958f5f1c2471407f6d7fcb059b97579.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_51_43.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_51_43.png-dded857f9ed395196bb8ebdfea323aa3.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_37_07.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_37_07.png-ac5b7955ba16dbfe3796ecc8eadee67f.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_28_35.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_28_35.png-062c344e0a0800de5be2147ef3b76ed8.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_39_46.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_39_46.png-eb9485b94e76a5916a9afbe104d2179d.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 23_11_37.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 23_11_37.png-c2e3f95ed9dae83f5a43ae6a308f3516.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_42_41.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_42_41.png-5c214144ae00857a976da0979d2da556.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_30_31.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_30_31.png-f11efb6a29838bdd66ad46594647b4fc.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_29_51.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_29_51.png-ae671bc1711597e29fee08e8e53d8e44.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Düsterer kybernetischer Arzt im Porträt.png
+Loading resource: res://.godot/imported/Düsterer kybernetischer Arzt im Porträt.png-0c23fe0f364fbd1ca7d9413ce9be8583.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_46_53.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_46_53.png-50ba769e370d83a1b9edd87d0724d419.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_32_46.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_32_46.png-c2b82f04bc11785f76b140dc7ce20bdf.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_33_34.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_33_34.png-13092aa3b10ad0f14f09afb51793a70e.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_22_42.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_22_42.png-11148afc5da2c8ba36408b8aebdc4dc9.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_54_19.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_54_19.png-de00be5bf5afc78d620cbcc646444df6.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_34_27.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_34_27.png-a3f96f90d811b224e51c0e146527c43b.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _build_team_editor_unit_card (res://scripts/ui/main_menu_screen.gd:2131)
+       [2] _refresh_team_editor_cards (res://scripts/ui/main_menu_screen.gd:1983)
+       [3] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1900)
+       [4] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [5] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [6] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Futuristischer Medizin-Soldat im Pixel-Stil.png
+Loading resource: res://.godot/imported/Futuristischer Medizin-Soldat im Pixel-Stil.png-1b78378835e2a26c7b2beb55eddff751.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_31_30.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_31_30.png-8518ed3fd91e13a918fc89af876b47f2.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_34_25.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_34_25.png-67098814535ba0af56986f424b510cd9.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_41_47.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_41_47.png-d0b1eb174cf7da882ccefffd0584fe7c.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_43_50.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_43_50.png-1d8c26e89ad219305175ecdd86d6c26f.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_49_28.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_49_28.png-bba6a754bb23081420d5e71fdb6ccb7d.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_24_54.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_24_54.png-f94211fff07f918bf966ec2be258fbc8.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_28_24.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_28_24.png-ce480630d2ddf125ae543cde75c242e0.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_29_21.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_29_21.png-6e35ed61f15205a1ebc808aef1f56e5f.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_32_20.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_32_20.png-433d73df3a4fe2705979585e62e08342.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_37_39.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_37_39.png-f22f92e99d558e6f5a4c2dd2f989bb93.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_39_22.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_39_22.png-098eeb29b64696cf3bd4272da4477aa4.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_27_17.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_27_17.png-8a1594742968164cd8ec7b2aef95b9f8.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_37_50.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_37_50.png-66fa9c7aef744994a39c64649b76c47e.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_42_49.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_42_49.png-fd354cecf5a2383e53c23e03c6ef57b0.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 23_08_28.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 23_08_28.png-77f6da83e69261c2ad5c9103a58a19b0.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 23_13_45.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 23_13_45.png-24e62ce92314123ace6e1f7ca197352e.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _populate_team_editor_unit_portrait_options (res://scripts/ui/main_menu_screen.gd:3086)
+       [2] _add_team_editor_character_edit_controls (res://scripts/ui/main_menu_screen.gd:2092)
+       [3] _refresh_team_editor_sheet (res://scripts/ui/main_menu_screen.gd:2006)
+       [4] _refresh_team_editor (res://scripts/ui/main_menu_screen.gd:1901)
+       [5] ensure_start_roster_exists (res://scripts/ui/main_menu_screen.gd:588)
+       [6] _ready (res://scripts/ui/main_menu_screen.gd:167)
+       [7] _run (res://scripts/tests/frontier_main_startup_verifier.gd:187)
+Loading resource: res://Assets/used/npc/blaster_kit/previews/blaster-a.png
+Loading resource: res://.godot/imported/blaster-a.png-cc38d1314f7dadf2b364fd376c9e68ce.ctex
+Loading resource: res://Assets/used/npc/weapon_pack/previews/sniper.png
+Loading resource: res://.godot/imported/sniper.png-19fcdaf78e38024c2ffdb018195a742b.ctex
+Loading resource: res://Assets/used/npc/weapon_pack/previews/rocketlauncherModern.png
+Loading resource: res://.godot/imported/rocketlauncherModern.png-e29d2eb1576541bc98da8e14d8e3fa4d.ctex
+Loading resource: res://Assets/used/npc/blaster_kit/previews/blaster-b.png
+Loading resource: res://.godot/imported/blaster-b.png-349d5970b7392d084944de5a7c62ebd8.ctex
+Accessibility: window 0 adapter initial update completed.
+PASS: MainMenu displays a background texture
+PASS: MainMenu background comes from the existing catalog
+PASS: Normal MainMenu catalog selects the Frontier start image
+FRONTIER_STARTUP_STAGE main_menu
+PASS: Capture target is new: 01_main_menu
+PASS: Native capture saved: 01_main_menu
+PASS: Real Singleplayer button is actionable
+Loading resource: res://Assets/used/audio/kenney_all_in_one/ui/ui_click_soft_01.ogg
+Loading resource: res://.godot/imported/ui_click_soft_01.ogg-26a68fc210d8ce8fe2f6a97bc8c95838.oggvorbisstr
+Loading resource: res://Assets/used/audio/kenney_all_in_one/ui/ui_confirm_01.ogg
+Loading resource: res://.godot/imported/ui_confirm_01.ogg-fc1b6c2a7eab8e496ccfc682840c2d30.oggvorbisstr
+Loading resource: res://scenes/meta/meta_layer_test.tscn
+Loading resource: res://scripts/meta/meta_layer_flow.gd
+Loading resource: res://scenes/tests/mission_reactivity_test.tscn
+Loading resource: res://scripts/core/simulation_root.gd
+Loading resource: res://scripts/core/event_router.gd
+Loading resource: res://scripts/registries/unit_registry.gd
+Loading resource: res://scripts/registries/ftl_registry.gd
+Loading resource: res://scripts/core/update_manager.gd
+Loading resource: res://scripts/ftl/runtime_leader.gd
+Loading resource: res://scripts/npc/test_unit.gd
+Loading resource: res://scripts/tests/mission_test_setup.gd
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_SW.png
+Loading resource: res://.godot/imported/terrain_SW.png-456d31afdea12591198b78e4cd42fe07.ctex
+Loading resource: res://Assets/curated/kenney/space_station/models/Textures/colormap.png
+Loading resource: res://.godot/imported/colormap.png-c6299e664a2c52f531da138f3fcbc028.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:202)
+       [3] _capture (res://scripts/tests/gm01_frontier_normal_capture.gd:30)
+       [4] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png
+Loading resource: res://.godot/imported/terrain_sideCliff_SE.png-27ee321830a35a068f52644c9f0d169d.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png
+Loading resource: res://.godot/imported/terrain_sideCliff_SW.png-27932181517a53eb2fdec7e9241cc067.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_NE.png
+Loading resource: res://.godot/imported/terrain_sideCliff_NE.png-4b73cbf37500c050e6e02521ff6eb9ee.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_NW.png
+Loading resource: res://.godot/imported/terrain_sideCliff_NW.png-1e2e51137722df27de4334741d690373.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SE.png
+Loading resource: res://.godot/imported/terrain_sideCorner_SE.png-b3730613d01c2dbf91083b1d8b953c3e.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SW.png
+Loading resource: res://.godot/imported/terrain_sideCorner_SW.png-7f126aa6da3abb26afe00c474dbce718.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NE.png
+Loading resource: res://.godot/imported/terrain_sideCorner_NE.png-2ade7e8853e13c9288cc1217cd184813.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NW.png
+Loading resource: res://.godot/imported/terrain_sideCorner_NW.png-7cbfa941aac6eb54d0f737a32d126528.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SE.png
+Loading resource: res://.godot/imported/terrain_rampLarge_SE.png-3220edf5f20d988e4ef6291269e9896d.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SW.png
+Loading resource: res://.godot/imported/terrain_rampLarge_SW.png-f0f0e6f8c03033866e42dbbbcc4936bf.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NE.png
+Loading resource: res://.godot/imported/terrain_rampLarge_NE.png-0d7504b066c964b932e3db44f16f662e.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NW.png
+Loading resource: res://.godot/imported/terrain_rampLarge_NW.png-d641573f4e52ccf5c7ffa9deb3e91f18.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_side_SE.png
+Loading resource: res://.godot/imported/terrain_side_SE.png-6c38aa15ac001a5b0c096f4535868112.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_side_SW.png
+Loading resource: res://.godot/imported/terrain_side_SW.png-5b9f4b677c8d39e532335d5f869fa464.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_side_NE.png
+Loading resource: res://.godot/imported/terrain_side_NE.png-8318529ad5538d88acff10915f5f7690.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/terrain_side_NW.png
+Loading resource: res://.godot/imported/terrain_side_NW.png-41b53c8dfb38d3d342c5d72dc0760526.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/corridor_wall_SE.png
+Loading resource: res://.godot/imported/corridor_wall_SE.png-05f80ac840ecf60ebaf786e37ec8acb5.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png
+Loading resource: res://.godot/imported/corridor_wall_SW.png-4360a23567c05b661eda409dc2981891.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png
+Loading resource: res://.godot/imported/corridor_wall_NE.png-d2e4767107367feb97391bb6dac1a010.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/corridor_wall_NW.png
+Loading resource: res://.godot/imported/corridor_wall_NW.png-13f2f9732df840821b92fe590586919b.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SE.png
+Loading resource: res://.godot/imported/corridor_wallCorner_SE.png-fb55494d968446b90a85a84c43b157ac.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SW.png
+Loading resource: res://.godot/imported/corridor_wallCorner_SW.png-4a73f3e08fa4baf1fad10469f36abc60.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NE.png
+Loading resource: res://.godot/imported/corridor_wallCorner_NE.png-e7b67f3aa59658eeaf37d034e43f544a.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NW.png
+Loading resource: res://.godot/imported/corridor_wallCorner_NW.png-47ab62d536f749c2a74ccfdb6ca0a467.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/rock_SW.png
+Loading resource: res://.godot/imported/rock_SW.png-659c2b8dc63404e5a6a27708c5c91378.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/rock_largeB_SW.png
+Loading resource: res://.godot/imported/rock_largeB_SW.png-39150e775007889429e69f55159426b7.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png
+Loading resource: res://.godot/imported/craft_speederB_SE.png-66143b6130aedc7a5dd7c0cbcfa71f65.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/astronautA_SW.png
+Loading resource: res://.godot/imported/astronautA_SW.png-5b9f3544eeadf6b5ff236f09970e992a.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/astronautB_SW.png
+Loading resource: res://.godot/imported/astronautB_SW.png-3cb7b3a2410951a093f25eb8af6fdeab.ctex
+Loading resource: res://shaders/terrain/frontier_ground.gdshader
+Loading resource: res://shaders/terrain/frontier_building_wear.gdshader
+Loading resource: res://shaders/terrain/frontier_contact_paint.gdshader
+Loading resource: res://scripts/tests/mission_command_flow_driver.gd
+Loading resource: res://scripts/tests/mission_combat_loop_driver.gd
+Loading resource: res://scripts/tests/mission_tactical_sandbox_controller.gd
+Loading resource: res://scenes/meta/components/npc_compact_card.tscn
+Loading resource: res://scripts/meta/npc_compact_card.gd
+Loading resource: res://Assets/curated/kenney/tactical_icons/target_marker.png
+Loading resource: res://.godot/imported/target_marker.png-dbd4d7377bb2f2a0b3acc2f4e2e647f8.ctex
+Loading resource: res://Assets/curated/kenney/tactical_icons/move_prompt.png
+Loading resource: res://.godot/imported/move_prompt.png-487bebeea4ec6603d06defc18f8663b3.ctex
+Loading resource: res://Assets/curated/kenney/tactical_icons/sword_attack.png
+Loading resource: res://.godot/imported/sword_attack.png-3bba2a7e7d562430c92912581e66f0b5.ctex
+Loading resource: res://Assets/curated/kenney/tactical_icons/pointer_triangle.png
+Loading resource: res://.godot/imported/pointer_triangle.png-1992a81ff1efb18425cd692fee8cb5b6.ctex
+Loading resource: res://Assets/curated/kenney/tactical_icons/dice_sword_attack.png
+Loading resource: res://.godot/imported/dice_sword_attack.png-8710bf9f12c20132fd5aab5ee4b4cbc7.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png
+Loading resource: res://.godot/imported/craft_speederB_NE.png-dbd6655bd3fa05b527ec95a8245471c4.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png
+Loading resource: res://.godot/imported/craft_speederB_NW.png-ce0bf520a9678d9c0661de991892a379.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/craft_speederB_SW.png
+Loading resource: res://.godot/imported/craft_speederB_SW.png-3785fe29f92ea40091d581db0bb73d3d.ctex
+Loading resource: res://scenes/maps/iso_map_v2_layout.tscn
+Loading resource: res://scripts/core/respawn_manager.gd
+Loading resource: res://scripts/tests/mission_objective_status_view.gd
+Loading resource: res://scripts/tests/mission_respawn_overlay.gd
+Loading resource: res://scripts/tests/enemy_wave_controller.gd
+Loading resource: res://scripts/terrain/terrain_registry.gd
+Loading resource: res://Assets/kenney_space-kit/Side/craft_speederB.png
+Loading resource: res://.godot/imported/craft_speederB.png-3e99c7ea703a389d786f2de2ab9689c5.ctex
+Loading resource: res://scripts/tests/phase_controller.gd
+Loading resource: res://scripts/tests/mission_map_camera_controller.gd
+Loading resource: res://scripts/ui/tactical_event_log_panel.gd
+Loading resource: res://scenes/meta/homebase_test_screen.tscn
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:202)
+       [3] _capture (res://scripts/tests/gm01_frontier_normal_capture.gd:30)
+       [4] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+Loading resource: res://scripts/meta/homebase_screen.gd
+Loading resource: res://Assets/kenney_space-kit/Isometric/platform_large_NW.png
+Loading resource: res://.godot/imported/platform_large_NW.png-d6b16f6e3dac230340412e7c17d7cc3e.ctex
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:202)
+       [3] _capture (res://scripts/tests/gm01_frontier_normal_capture.gd:30)
+       [4] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+Loading resource: res://scripts/meta/homebase_roster_drop_panel.gd
+Loading resource: res://scenes/meta/fob_test_screen.tscn
+Loading resource: res://scripts/meta/fob_screen.gd
+Loading resource: res://scripts/meta/fob_available_drop_panel.gd
+Loading resource: res://scenes/meta/debrief_test_screen.tscn
+Loading resource: res://scripts/meta/debrief_screen.gd
+Loading resource: res://Assets/used/backgrounds/ai_generated/bg_desert_explosion_base.jpg
+Loading resource: res://.godot/imported/bg_desert_explosion_base.jpg-edb36ff95498b2eab5b409bb94fc38c5.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:202)
+       [3] _capture (res://scripts/tests/gm01_frontier_normal_capture.gd:30)
+       [4] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+Loading resource: res://Assets/curated/ui_native_r4/BarlowCondensed-Bold.ttf
+Loading resource: res://.godot/imported/BarlowCondensed-Bold.ttf-169d4b01bffae81efcfbf6a876c06a73.fontdata
+Loading resource: res://Assets/curated/ui_native_r1/icon_dropship_v2.png
+Loading resource: res://.godot/imported/icon_dropship_v2.png-5cbff1abc5c9348cd3575208e4686280.ctex
+Loading resource: res://Assets/curated/main_menu/frontier_outpost_main_20261101.png
+Loading resource: res://.godot/imported/frontier_outpost_main_20261101.png-cceee0c8bccc14fa8ebeb0b4e980f92d.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] update_frontier_stage (res://scripts/meta/meta_ui_skin.gd:295)
+       [1] _apply_r4_preparation_visuals (res://scripts/meta/homebase_screen.gd:2002)
+       [2] _enforce_drop_light_fixed_layout (res://scripts/meta/homebase_screen.gd:1983)
+       [3] _apply_drop_light_fixed_layout (res://scripts/meta/homebase_screen.gd:1957)
+       [4] _ready (res://scripts/meta/homebase_screen.gd:160)
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_medic.png
+Loading resource: res://.godot/imported/badge_role_medic.png-67064b4f183724f9ed8198c435b80330.ctex
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_ftl.png
+Loading resource: res://.godot/imported/badge_role_ftl.png-bfe34c54209e980f52d9878488d2e3b1.ctex
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_heavy.png
+Loading resource: res://.godot/imported/badge_role_heavy.png-b0513b012815857afb9d16613c15a28a.ctex
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_pilot.png
+Loading resource: res://.godot/imported/badge_role_pilot.png-fa69e41bcc09ddb8acd198089c86aa84.ctex
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_engineer.png
+Loading resource: res://.godot/imported/badge_role_engineer.png-83ebad5a0bc2cb1f283e81f17b8abd4f.ctex
+Loading resource: res://Assets/curated/kenney/ranks/badge_role_rifle.png
+Loading resource: res://.godot/imported/badge_role_rifle.png-95c17957809f44efbfc418aec7f85357.ctex
+Loading resource: res://Assets/curated/ui_native_r1/icon_loadout.png
+Loading resource: res://.godot/imported/icon_loadout.png-c467efdfe6ca37c69fb75fc6d8381367.ctex
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_54_19.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_54_19.png-de00be5bf5afc78d620cbcc646444df6.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_36_59.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_36_59.png-5c820b84f16fba359b2c66ed3decae31.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 23_11_37.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 23_11_37.png-c2e3f95ed9dae83f5a43ae6a308f3516.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_32_46.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_32_46.png-c2b82f04bc11785f76b140dc7ce20bdf.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_28_35.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_28_35.png-062c344e0a0800de5be2147ef3b76ed8.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_41_44.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_41_44.png-2b60eb4e9d5377caa2101929738606f3.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_22_42.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_22_42.png-11148afc5da2c8ba36408b8aebdc4dc9.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_41_25.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_41_25.png-493ac3f8eb23a94c8580b1daae8ec004.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_38_10.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_38_10.png-f958f5f1c2471407f6d7fcb059b97579.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_29_51.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_29_51.png-ae671bc1711597e29fee08e8e53d8e44.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_33_34.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_33_34.png-13092aa3b10ad0f14f09afb51793a70e.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Düsterer kybernetischer Arzt im Porträt.png
+Loading resource: res://.godot/imported/Düsterer kybernetischer Arzt im Porträt.png-0c23fe0f364fbd1ca7d9413ce9be8583.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_26_33.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_26_33.png-fc86a602e93ad2a0819073510ec6e7a4.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_15_16.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_15_16.png-1ff8f5275e7a8e21452bb1d4b37833c2.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_37_07.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_37_07.png-ac5b7955ba16dbfe3796ecc8eadee67f.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_51_43.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_51_43.png-dded857f9ed395196bb8ebdfea323aa3.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_30_31.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_30_31.png-f11efb6a29838bdd66ad46594647b4fc.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_46_53.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_46_53.png-50ba769e370d83a1b9edd87d0724d419.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_34_27.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_34_27.png-a3f96f90d811b224e51c0e146527c43b.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_39_46.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_39_46.png-eb9485b94e76a5916a9afbe104d2179d.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_42_41.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_42_41.png-5c214144ae00857a976da0979d2da556.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_roster_pool_card (res://scripts/meta/homebase_screen.gd:3119)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_roster (res://scripts/meta/homebase_screen.gd:2924)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1905)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 23_33_31.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 23_33_31.png-a414cbe7de792569afeed9703fd4931b.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_staged_pool_card (res://scripts/meta/homebase_screen.gd:3151)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_staged_team (res://scripts/meta/homebase_screen.gd:2953)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1906)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_35_32.png
+Loading resource: res://.godot/imported/ChatGPT Image 12. Mai 2026, 22_35_32.png-13548baf40aa6202f11fe919a37d9f24.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_staged_pool_card (res://scripts/meta/homebase_screen.gd:3151)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_staged_team (res://scripts/meta/homebase_screen.gd:2953)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1906)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/Char/Use AI Image Apr 5, 2026, 22_30_03.png
+Loading resource: res://.godot/imported/Use AI Image Apr 5, 2026, 22_30_03.png-21efca39ad53a878acf91f7c940bae8b.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] load_texture (res://scripts/meta/portrait_identity_catalog.gd:153)
+       [1] _load_portrait_texture (res://scripts/meta/npc_compact_card.gd:709)
+       [2] _refresh_card (res://scripts/meta/npc_compact_card.gd:485)
+       [3] setup_from_profile (res://scripts/meta/npc_compact_card.gd:132)
+       [4] _configure_staged_pool_card (res://scripts/meta/homebase_screen.gd:3151)
+       [5] reconcile (res://scripts/meta/homebase_card_pool.gd:53)
+       [6] _render_staged_team (res://scripts/meta/homebase_screen.gd:2953)
+       [7] _rebuild_ui (res://scripts/meta/homebase_screen.gd:1906)
+       [8] setup_roster (res://scripts/meta/homebase_screen.gd:237)
+       [9] _refresh_homebase_screen (res://scripts/meta/meta_layer_flow.gd:4598)
+       [10] _ready (res://scripts/meta/meta_layer_flow.gd:245)
+Loading resource: res://Assets/used/npc/blaster_kit/previews/blaster-a.png
+Loading resource: res://.godot/imported/blaster-a.png-cc38d1314f7dadf2b364fd376c9e68ce.ctex
+Loading resource: res://Assets/used/npc/blaster_kit/previews/blaster-a.png
+Loading resource: res://.godot/imported/blaster-a.png-cc38d1314f7dadf2b364fd376c9e68ce.ctex
+Loading resource: res://Assets/used/npc/weapon_pack/previews/sniper.png
+Loading resource: res://.godot/imported/sniper.png-19fcdaf78e38024c2ffdb018195a742b.ctex
+Loading resource: res://Assets/used/npc/blaster_kit/previews/blaster-a.png
+Loading resource: res://.godot/imported/blaster-a.png-cc38d1314f7dadf2b364fd376c9e68ce.ctex
+Loading resource: res://Assets/used/npc/weapon_pack/previews/rocketlauncherModern.png
+Loading resource: res://.godot/imported/rocketlauncherModern.png-e29d2eb1576541bc98da8e14d8e3fa4d.ctex
+Loading resource: res://Assets/used/npc/blaster_kit/previews/blaster-b.png
+Loading resource: res://.godot/imported/blaster-b.png-349d5970b7392d084944de5a7c62ebd8.ctex
+Loading resource: res://Assets/curated/ui_native_r4/cutlass_ref03_preview.png
+Loading resource: res://.godot/imported/cutlass_ref03_preview.png-e854b02d6253cf21409d64776da49cbe.ctex
+PASS: Normal Singleplayer opens visible Homebase
+PASS: Original normal grid_sweep mission remains selected
+PASS: Normal Homebase bootstrap provides a playable team
+PASS: Normal Homebase has a craft and pilot
+PASS: Normal Homebase payload is ready without fixture mutation
+FRONTIER_STARTUP_STAGE homebase
+PASS: Capture target is new: 02_homebase
+PASS: Native capture saved: 02_homebase
+PASS: Normal Homebase launch command is accepted
+Loading resource: res://Assets/kenney_space-kit/Isometric/weapon_rifle_SW.png
+Loading resource: res://.godot/imported/weapon_rifle_SW.png-82f9f8229e6fea3dbf3a7b309b9a89c6.ctex
+Loading resource: res://Assets/curated/ui_native_r1/icon_move.png
+Loading resource: res://.godot/imported/icon_move.png-1129b227a7b9f76668cefcb384511d97.ctex
+Loading resource: res://Assets/curated/ui_native_r1/icon_take.png
+Loading resource: res://.godot/imported/icon_take.png-4b70686df57060957519e1594f900773.ctex
+Loading resource: res://Assets/curated/ui_native_r1/icon_defend.png
+Loading resource: res://.godot/imported/icon_defend.png-3c5ec65b9ef469078927abaa0bda3fa4.ctex
+Loading resource: res://Assets/curated/ui_native_r1/icon_flank_v2.png
+Loading resource: res://.godot/imported/icon_flank_v2.png-bd6230294d01b646ace86935526160bf.ctex
+Loading resource: res://Assets/kenney_space-kit/Isometric/weapon_gun_SW.png
+Loading resource: res://.godot/imported/weapon_gun_SW.png-413ff18201171b8a1e0a25ab7db517a0.ctex
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading resource: res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb
+Loading resource: res://.godot/imported/habitat_cutaway_01.glb-4ee05f92f9b0d64258851cc6035fc6d5.scn
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading resource: res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb
+Loading resource: res://.godot/imported/freihafen_hall_01.glb-9caaa4094f49dd7cb732844ed31e2af3.scn
+Loading resource: res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb
+Loading resource: res://.godot/imported/utility_fuel_01.glb-1babef97396c9f353be428cdf7363319.scn
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading resource: res://Assets/curated/kenney/space_station/models/table-display.glb
+Loading resource: res://.godot/imported/table-display.glb-18e556f2cd4676c7cba1de5eb93d88c4.scn
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading resource: res://Assets/curated/kenney/space_station/models/computer.glb
+Loading resource: res://.godot/imported/computer.glb-14267830a8320529dc05d3d17604ef30.scn
+Loading resource: res://Assets/curated/kenney/space_station/models/container-wide.glb
+Loading resource: res://.godot/imported/container-wide.glb-49533785e906d8e8fd2112299460cb75.scn
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading resource: res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb
+Loading resource: res://.godot/imported/freihafen_hall_01.glb-9caaa4094f49dd7cb732844ed31e2af3.scn
+Loading resource: res://Assets/curated/kenney/space_station/models/container-wide.glb
+Loading resource: res://.godot/imported/container-wide.glb-49533785e906d8e8fd2112299460cb75.scn
+Loading resource: res://Assets/curated/kenney/space_station/models/container-wide.glb
+Loading resource: res://.godot/imported/container-wide.glb-49533785e906d8e8fd2112299460cb75.scn
+Loading resource: res://Assets/curated/kenney/space_station/models/container-wide.glb
+Loading resource: res://.godot/imported/container-wide.glb-49533785e906d8e8fd2112299460cb75.scn
+Loading resource: res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb
+Loading resource: res://.godot/imported/terrain_rampLarge.glb-6299ad619e0f4a6e1c0f914b5dc2dc51.scn
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading resource: res://Assets/used/npc/animated_characters/models/characterMedium.fbx
+Loading resource: res://.godot/imported/characterMedium.fbx-9e51c2d44dae74452fe0b3d686030203.scn
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading resource: res://Assets/used/npc/animated_characters/skins/astroMaleA.png
+Loading resource: res://.godot/imported/astroMaleA.png-322dac7f941bda9cef6667e4e4eacdbf.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _apply_unit_visual_material (res://scripts/terrain/terrain_map_3d_view.gd:14578)
+       [1] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11922)
+       [2] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:11227)
+       [3] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1576)
+       [4] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:997)
+Loading resource: res://Assets/used/npc/animated_characters/animations/idle.fbx
+Loading resource: res://.godot/imported/idle.fbx-0ca5a654790bd04d23a887b92f93b264.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/walk.fbx
+Loading resource: res://.godot/imported/walk.fbx-b4e6799432387595e1a4a23aebb9d521.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/shoot.fbx
+Loading resource: res://.godot/imported/shoot.fbx-545577c3454556293ea37236105c4db1.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/attack.fbx
+Loading resource: res://.godot/imported/attack.fbx-5e6f42e77d9a85aa349b4231236b2390.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/crouch.fbx
+Loading resource: res://.godot/imported/crouch.fbx-a97c66e33070b12fdb1d30f5c38c67e2.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/crouchIdle.fbx
+Loading resource: res://.godot/imported/crouchIdle.fbx-20c93304b90e6e08250d88d1fa16b2a3.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/crouchWalk.fbx
+Loading resource: res://.godot/imported/crouchWalk.fbx-ab6b68b4d1f5922ecc5cf624c56977ac.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/death.fbx
+Loading resource: res://.godot/imported/death.fbx-faf28d99a39f25029f594c16dda2cc4d.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/interactGround.fbx
+Loading resource: res://.godot/imported/interactGround.fbx-87b24fb5c77fef1cf81b5576e30e4b5a.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/interactStanding.fbx
+Loading resource: res://.godot/imported/interactStanding.fbx-03ff6d12a7b13f4c195582f14abc720d.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/jump.fbx
+Loading resource: res://.godot/imported/jump.fbx-5f800efd6fdc2e00150066f16f8758bf.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/kick.fbx
+Loading resource: res://.godot/imported/kick.fbx-c74078bdfb1354c191cee1e7383bbec2.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/punch.fbx
+Loading resource: res://.godot/imported/punch.fbx-46c0ecd5fac9d74b312a2f077aeb4caa.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/racingIdle.fbx
+Loading resource: res://.godot/imported/racingIdle.fbx-c7f554c6cf8300327e84ea80e48894f4.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/racingLeft.fbx
+Loading resource: res://.godot/imported/racingLeft.fbx-0a632ce7cadcdf3b85c8961875478de3.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/racingRight.fbx
+Loading resource: res://.godot/imported/racingRight.fbx-1db822f7bc1a558b662899d34a43d6a9.scn
+Loading resource: res://Assets/used/npc/animated_characters/animations/run.fbx
+Loading resource: res://.godot/imported/run.fbx-88fb32864a950fa43d63668de1fbf353.scn
+Loading resource: res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx
+Loading resource: res://.godot/imported/astroHelmet.fbx-90f4be03cd5ffa9a83a493fddb48573e.scn
+Loading resource: res://Assets/used/npc/blaster_kit/models/blaster-a.glb
+Loading resource: res://.godot/imported/blaster-a.glb-8b404a3df95f5b9ce2e510ed4c6b724c.scn
+Loading resource: res://Assets/used/npc/blaster_kit/models/Textures/colormap.png
+Loading resource: res://.godot/imported/colormap.png-18d3f5c2e0b3e13707539369a7d0330e.ctex
+Loading resource: res://Assets/used/npc/blaster_kit/models/blaster-b.glb
+Loading resource: res://.godot/imported/blaster-b.glb-1f3a089db2b0c2cab587cf5e7b66402f.scn
+Loading resource: res://Assets/used/npc/animated_characters/skins/astroMaleB.png
+Loading resource: res://.godot/imported/astroMaleB.png-93783967f88abc187c2f78d09a9ee3bc.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _apply_unit_visual_material (res://scripts/terrain/terrain_map_3d_view.gd:14578)
+       [1] _create_unit_proxy (res://scripts/terrain/terrain_map_3d_view.gd:11922)
+       [2] _sync_unit_proxies (res://scripts/terrain/terrain_map_3d_view.gd:11227)
+       [3] set_unit_nodes (res://scripts/terrain/terrain_map_3d_view.gd:1576)
+       [4] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:997)
+Loading resource: res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx
+Loading resource: res://.godot/imported/militaryHelmet.fbx-cff9ef77e297858d2d775f5d1a01336c.scn
+Loading resource: res://Assets/used/npc/blaster_kit/models/blaster-f.glb
+Loading resource: res://.godot/imported/blaster-f.glb-3dc022d15d0ba53c852d63e29bc57e87.scn
+Loading resource: res://Assets/used/audio/kenney_all_in_one/movement/movement_step_neutral_01.ogg
+Loading resource: res://.godot/imported/movement_step_neutral_01.ogg-49266a05f9f91ec036ce9de8bad39501.oggvorbisstr
+Loading resource: res://Assets/used/audio/kenney_all_in_one/movement/movement_step_soft_sand_placeholder_01.ogg
+Loading resource: res://.godot/imported/movement_step_soft_sand_placeholder_01.ogg-37fe9356f242229fbf5a26c91f2cf8f9.oggvorbisstr
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+PASS: Normal mission owns TacticalController, Primary3DView and SimulationRoot
+PASS: Menu launch reaches the regular mission scene
+PASS: Handoff retains the original default mission
+PASS: Normal Homebase-to-Mission handoff passes
+PASS: Default mission enables the Frontier visual profile
+PASS: Frontier activation comes from normal map data without a test override
+PASS: Rebuilt default mission uses its saved, user-requested Hex topology
+PASS: Regular renderer remains a read-only state consumer
+PASS: Original default map JSON is available
+PASS: Default mission retains its authored Alpha insertion marker
+PASS: Normal mission exposes the authoritative terrain registry
+PASS: Authored Alpha insertion marker is on walkable terrain
+FRONTIER_STARTUP_STAGE mission_started
+MultiUmaBuffer 'RENDER_LIST_OPAQUE' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_ALPHA' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_SECONDARY' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+PASS: Capture target is new: 03_default_mission
+PASS: Native capture saved: 03_default_mission
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+FRONTIER_STARTUP_STAGE craft_arrived
+PASS: Normal Set LZ handler places the existing default-mission LZ
+PASS: Normal planning exposes the requested LZ
+PASS: Normal Drop request retains a playable embarked team
+FRONTIER_STARTUP_STAGE drop_requested
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading resource: res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb
+Loading resource: res://.godot/imported/cutlass_01.glb-53d8d3357d61ce3a0942000f6a11e5fc.scn
+Loading resource: res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ivory_basecolor.png
+Loading resource: res://.godot/imported/cutlass_01_Ivory_basecolor.png-f07ce3a6b3b8554fb31254c1597ff508.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13847)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:10970)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:10957)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:10948)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:10855)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:10033)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2014)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:14222)
+       [9] _update_primary_drop_sequence (res://scripts/tests/mission_tactical_sandbox_controller.gd:34700)
+       [10] _update_drop_sequence (res://scripts/tests/mission_tactical_sandbox_controller.gd:34680)
+       [11] _process (res://scripts/tests/mission_tactical_sandbox_controller.gd:799)
+Loading resource: res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_paint_roughness.png
+Loading resource: res://.godot/imported/cutlass_01_paint_roughness.png-839bee01ac7569bf5e399d208aa0a12d.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13847)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:10970)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:10957)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:10948)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:10855)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:10033)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2014)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:14222)
+       [9] _update_primary_drop_sequence (res://scripts/tests/mission_tactical_sandbox_controller.gd:34700)
+       [10] _update_drop_sequence (res://scripts/tests/mission_tactical_sandbox_controller.gd:34680)
+       [11] _process (res://scripts/tests/mission_tactical_sandbox_controller.gd:799)
+Loading resource: res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Petrol_basecolor.png
+Loading resource: res://.godot/imported/cutlass_01_Petrol_basecolor.png-e9de7b9ec682c924e8016f5718616d8a.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13847)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:10970)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:10957)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:10948)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:10855)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:10033)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2014)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:14222)
+       [9] _update_primary_drop_sequence (res://scripts/tests/mission_tactical_sandbox_controller.gd:34700)
+       [10] _update_drop_sequence (res://scripts/tests/mission_tactical_sandbox_controller.gd:34680)
+       [11] _process (res://scripts/tests/mission_tactical_sandbox_controller.gd:799)
+Loading resource: res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_PetrolLight_basecolor.png
+Loading resource: res://.godot/imported/cutlass_01_PetrolLight_basecolor.png-88db494a93378f5f900ef879092c7513.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13847)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:10970)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:10957)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:10948)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:10855)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:10033)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2014)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:14222)
+       [9] _update_primary_drop_sequence (res://scripts/tests/mission_tactical_sandbox_controller.gd:34700)
+       [10] _update_drop_sequence (res://scripts/tests/mission_tactical_sandbox_controller.gd:34680)
+       [11] _process (res://scripts/tests/mission_tactical_sandbox_controller.gd:799)
+Loading resource: res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01_Ochre_basecolor.png
+Loading resource: res://.godot/imported/cutlass_01_Ochre_basecolor.png-afbde6a24da7267c9aa399204b460cf3.ctex
+WARNING: Image format RGB8 not supported by hardware, converting to RGBA8.
+   at: _validate_texture_format (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2426)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:13847)
+       [1] _get_frontier_dropship_visual_entry (res://scripts/terrain/terrain_map_3d_view.gd:10970)
+       [2] _get_dropship_model_yaw (res://scripts/terrain/terrain_map_3d_view.gd:10957)
+       [3] _get_dropship_rotation_y_for_payload (res://scripts/terrain/terrain_map_3d_view.gd:10948)
+       [4] _add_dropship_proxy (res://scripts/terrain/terrain_map_3d_view.gd:10855)
+       [5] _rebuild_drop_visuals (res://scripts/terrain/terrain_map_3d_view.gd:10033)
+       [6] set_mission_drop_visual_state (res://scripts/terrain/terrain_map_3d_view.gd:2014)
+       [7] sync_mission_drop_visual_state (res://scripts/mission/mission_primary_view_bridge.gd:91)
+       [8] _refresh_world_overlays (res://scripts/tests/mission_tactical_sandbox_controller.gd:14222)
+       [9] _update_primary_drop_sequence (res://scripts/tests/mission_tactical_sandbox_controller.gd:34700)
+       [10] _update_drop_sequence (res://scripts/tests/mission_tactical_sandbox_controller.gd:34680)
+       [11] _process (res://scripts/tests/mission_tactical_sandbox_controller.gd:799)
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+FRONTIER_STARTUP_STAGE lz_approach
+PASS: Capture target is new: 04_lz_approach
+PASS: Native capture saved: 04_lz_approach
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading resource: res://Assets/used/audio/kenney_all_in_one/movement/movement_step_soft_sand_placeholder_02.ogg
+Loading resource: res://.godot/imported/movement_step_soft_sand_placeholder_02.ogg-e0bcb7795aedb3c672db70f74325caf8.oggvorbisstr
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+PASS: Normal drop deploys a playable payload without forced unloading
+PASS: Actual regular dropship instance uses the active Ref03 Cutlass bytes
+PASS: Deployed units use actual regular 3D model instances
+FRONTIER_STARTUP_STAGE deployed
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+PASS: Capture target is new: 05_deployed
+PASS: Native capture saved: 05_deployed
+PASS: Existing Move action creates the normal selected-team plan
+PASS: Existing GO action commits the selected-team plan
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+FRONTIER_STARTUP_STAGE go_movement
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+PASS: Capture target is new: 06_go_movement
+PASS: Native capture saved: 06_go_movement
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+PASS: Capture target is new: 07_outpost_overview
+PASS: Native capture saved: 07_outpost_overview
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+PASS: Capture target is new: 08_eastern_supply
+PASS: Native capture saved: 08_eastern_supply
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+Loading cache for shader SceneForwardClusteredShaderRD, variant 0
+Loading cache for shader SceneForwardClusteredShaderRD, variant 1
+Loading cache for shader SceneForwardClusteredShaderRD, variant 2
+Loading cache for shader SceneForwardClusteredShaderRD, variant 3
+Loading cache for shader SceneForwardClusteredShaderRD, variant 4
+Loading cache for shader SceneForwardClusteredShaderRD, variant 5
+Loading cache for shader SceneForwardClusteredShaderRD, variant 6
+Loading cache for shader SceneForwardClusteredShaderRD, variant 7
+PASS: Capture target is new: 09_expanded_map
+PASS: Native capture saved: 09_expanded_map
+PASS: Existing player profile, generator and unit identities remain unchanged
+FRONTIER_MAIN_STARTUP {"evidence_output":"res://docs/qa/gm01_frontier_20261102/frontier/1280x720_20261102T141144Z/startup.json","failed":0,"passed":51,"stages":8}
+XR: Clearing primary interface
+XR: Removed interface "Native mobile"
+XR: Removed interface "OpenXR"
+MultiUmaBuffer 'RENDER_LIST_OPAQUE' used a total of 1 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_MOTION' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_ALPHA' used a total of 1 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_SECONDARY' used a total of 1 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'CANVAS_INSTANCE_DATA' used a total of 2 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+Accessibility: window 0 adapter destroyed.

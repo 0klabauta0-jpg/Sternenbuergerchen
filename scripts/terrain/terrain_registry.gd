@@ -359,12 +359,12 @@ func get_walkable_cover_tiles_in_radius(world_center: Vector2, radius: float) ->
 	var radius_sq: float = radius * radius
 	var result: Array = []
 	for tile_data in _tiles.values():
+		if world_center.distance_squared_to(tile_data.world_position) > radius_sq:
+			continue
 		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
 		if not is_walkable(grid_position):
 			continue
 		if get_cover_at(grid_position) <= 0:
-			continue
-		if world_center.distance_squared_to(tile_data.world_position) > radius_sq:
 			continue
 		result.append(tile_data)
 	return result

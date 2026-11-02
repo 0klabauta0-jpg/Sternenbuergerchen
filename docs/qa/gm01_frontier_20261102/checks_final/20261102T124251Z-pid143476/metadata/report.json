@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_hex_closure.json",
+  "godot": "godot_console",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.064,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-02T12:42:51.023146+00:00",
+  "finished_at": "2026-11-02T12:43:06.290653+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\engine-check-gm01_rebuild.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\gm01_frontier_rebuild_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 10.103,
+      "name": "gm01_rebuild",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\check-gm01_rebuild.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\engine-check-gm01_rebuild.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\engine-check-hex_no_flash.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\gm01_frontier_hex_fow_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.97,
+      "name": "hex_no_flash",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\check-hex_no_flash.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\engine-check-hex_no_flash.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\engine-check-hex_movement.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\frontier_hex_movement_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.038,
+      "name": "hex_movement",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\check-hex_movement.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\engine-check-hex_movement.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\engine-check-hex_render.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\frontier_hex_render_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.332,
+      "name": "hex_render",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\check-hex_render.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\engine-check-hex_render.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\engine-check-hex_visibility.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\frontier_hex_visibility_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.748,
+      "name": "hex_visibility",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\check-hex_visibility.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\gm01_frontier_20261102\\checks_final\\20261102T124251Z-pid143476\\logs\\engine-check-hex_visibility.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 5,
+    "passed": 5,
+    "failed": 0
+  }
+}

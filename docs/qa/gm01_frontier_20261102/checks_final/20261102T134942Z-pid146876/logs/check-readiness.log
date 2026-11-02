@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_534 Pre-Mission Readiness Checklist ===
+PASS: TASK_534 task file exists
+PASS: TASK_534 task file marks implementation
+PASS: Implementation status tracks TASK_534
+PASS: Roadmap marks TASK_534 implemented
+PASS: Briefing contract documents readiness checklist
+PASS: Review workbench tracks TASK_534
+PASS: Readiness presenter exists
+PASS: Homebase exposes readiness snapshot
+PASS: Presenter snapshot remains read-only
+PASS: Empty payload blocks readiness
+PASS: Empty payload exposes multiple blockers
+PASS: Start item follows blocked guard
+ERROR: FAIL: Homebase renders readiness panel
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_534_pre_mission_readiness_checklist.gd:217)
+       [1] _test_homebase_renders_blocked_readiness (res://scripts/tests/task_534_pre_mission_readiness_checklist.gd:69)
+       [2] _build_homebase (res://scripts/tests/task_534_pre_mission_readiness_checklist.gd:167)
+PASS: Homebase readiness snapshot remains read-only
+PASS: Empty Homebase state is not start-ready
+PASS: Readiness panel renders all checklist items
+PASS: Rendered list explains blocked start
+PASS: Readiness snapshot mirrors the existing can-start guard
+PASS: Ready direct payload has no blocking readiness items
+PASS: Team item is ready
+PASS: Loadout recommendation apply is visible as ready
+PASS: Dropship item is ready
+PASS: Boarding item is ready
+PASS: Start item is ready
+PASS: Rendered readiness summary names start-ready state
+=== RESULTS: 24 passed, 1 failed ===
+TASK_534: FAILED

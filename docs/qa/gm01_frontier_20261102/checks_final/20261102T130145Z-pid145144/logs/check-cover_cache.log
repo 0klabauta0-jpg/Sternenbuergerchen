@@ -1,0 +1,68 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Fixture contains an actual LOS-blocked candidate
+PASS: Hex LOS and mixed cover: identical selected targets and unit order
+PASS: Hex LOS and mixed cover: identical claimed-slot/tie selection order
+PASS: Hex LOS and mixed cover: identical actual scorer results and first-read set
+PASS: Hex LOS and mixed cover: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":27,"case":"Hex LOS and mixed cover","legacy_calls":69,"selected_count":3}
+PASS: Real comparator repeats are removed without lowering candidate count
+PASS: Several occupied cover slots: identical selected targets and unit order
+PASS: Several occupied cover slots: identical claimed-slot/tie selection order
+PASS: Several occupied cover slots: identical actual scorer results and first-read set
+PASS: Several occupied cover slots: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":27,"case":"Several occupied cover slots","legacy_calls":69,"selected_count":3}
+PASS: Fixture contains an actual weapon-range rejection
+PASS: Per-unit changed weapon/range: identical selected targets and unit order
+PASS: Per-unit changed weapon/range: identical claimed-slot/tie selection order
+PASS: Per-unit changed weapon/range: identical actual scorer results and first-read set
+PASS: Per-unit changed weapon/range: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":27,"case":"Per-unit changed weapon/range","legacy_calls":75,"selected_count":3}
+PASS: Same invocation inputs after unit movement: identical selected targets and unit order
+PASS: Same invocation inputs after unit movement: identical claimed-slot/tie selection order
+PASS: Same invocation inputs after unit movement: identical actual scorer results and first-read set
+PASS: Same invocation inputs after unit movement: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":18,"case":"Same invocation inputs after unit movement","legacy_calls":52,"selected_count":2}
+PASS: Changed cover and height before next call: identical selected targets and unit order
+PASS: Changed cover and height before next call: identical claimed-slot/tie selection order
+PASS: Changed cover and height before next call: identical actual scorer results and first-read set
+PASS: Changed cover and height before next call: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":18,"case":"Changed cover and height before next call","legacy_calls":78,"selected_count":2}
+PASS: Fixture opens the same formerly blocked LOS
+PASS: Changed LOS before next call: identical selected targets and unit order
+PASS: Changed LOS before next call: identical claimed-slot/tie selection order
+PASS: Changed LOS before next call: identical actual scorer results and first-read set
+PASS: Changed LOS before next call: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":18,"case":"Changed LOS before next call","legacy_calls":64,"selected_count":2}
+PASS: Changed focus before next call: identical selected targets and unit order
+PASS: Changed focus before next call: identical claimed-slot/tie selection order
+PASS: Changed focus before next call: identical actual scorer results and first-read set
+PASS: Changed focus before next call: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":18,"case":"Changed focus before next call","legacy_calls":50,"selected_count":2}
+PASS: Fixture contains an exact real-score tie
+PASS: Exact ties and slot claiming: identical selected targets and unit order
+PASS: Exact ties and slot claiming: identical claimed-slot/tie selection order
+PASS: Exact ties and slot claiming: identical actual scorer results and first-read set
+PASS: Exact ties and slot claiming: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":6,"case":"Exact ties and slot claiming","legacy_calls":12,"selected_count":2}
+PASS: One already claimed candidate: identical selected targets and unit order
+PASS: One already claimed candidate: identical claimed-slot/tie selection order
+PASS: One already claimed candidate: identical actual scorer results and first-read set
+PASS: One already claimed candidate: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":0,"case":"One already claimed candidate","legacy_calls":0,"selected_count":0}
+PASS: Lazy memo adds no score/LOS call for an unavailable single slot
+PASS: Empty candidate set: identical selected targets and unit order
+PASS: Empty candidate set: identical claimed-slot/tie selection order
+PASS: Empty candidate set: identical actual scorer results and first-read set
+PASS: Empty candidate set: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":0,"case":"Empty candidate set","legacy_calls":0,"selected_count":0}
+PASS: Regular saved GM01 cover candidates: identical selected targets and unit order
+PASS: Regular saved GM01 cover candidates: identical claimed-slot/tie selection order
+PASS: Regular saved GM01 cover candidates: identical actual scorer results and first-read set
+PASS: Regular saved GM01 cover candidates: every requested unit/tile score computed at most once
+COVER_SCORE_CACHE_CASE {"cached_calls":14,"case":"Regular saved GM01 cover candidates","legacy_calls":72,"selected_count":2}
+PASS: Reference/cache checks never change the actual map
+COVER_SCORE_CACHE_SUMMARY [{"cached_calls":27,"case":"Hex LOS and mixed cover","legacy_calls":69,"selected_count":3},{"cached_calls":27,"case":"Several occupied cover slots","legacy_calls":69,"selected_count":3},{"cached_calls":27,"case":"Per-unit changed weapon/range","legacy_calls":75,"selected_count":3},{"cached_calls":18,"case":"Same invocation inputs after unit movement","legacy_calls":52,"selected_count":2},{"cached_calls":18,"case":"Changed cover and height before next call","legacy_calls":78,"selected_count":2},{"cached_calls":18,"case":"Changed LOS before next call","legacy_calls":64,"selected_count":2},{"cached_calls":18,"case":"Changed focus before next call","legacy_calls":50,"selected_count":2},{"cached_calls":6,"case":"Exact ties and slot claiming","legacy_calls":12,"selected_count":2},{"cached_calls":0,"case":"One already claimed candidate","legacy_calls":0,"selected_count":0},{"cached_calls":0,"case":"Empty candidate set","legacy_calls":0,"selected_count":0},{"cached_calls":14,"case":"Regular saved GM01 cover candidates","legacy_calls":72,"selected_count":2}]
+=== RESULTS: 51 passed, 0 failed ===
+GM01_FRONTIER_COVER_SCORE_CACHE_ALL_PASS

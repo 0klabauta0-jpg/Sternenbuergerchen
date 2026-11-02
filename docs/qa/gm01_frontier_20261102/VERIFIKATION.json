@@ -1,0 +1,184 @@
+{
+  "schema": "sternenbuergerchen.gm01_frontier_qa.v1",
+  "checked_at": "2026-11-02T14:32:58.316922+00:00",
+  "status": "PASS",
+  "map_sha256": "31daf2d4943ec4a2007fc4f5246249f309c52436a0675143184d060b6999c925",
+  "grid_size": [
+    48,
+    48
+  ],
+  "tile_count": 2304,
+  "engine_gates": [
+    {
+      "name": "gm01_rebuild",
+      "assertions": 77,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-gm01_rebuild.log"
+    },
+    {
+      "name": "gm01_editor_guard",
+      "assertions": 24,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-gm01_editor_guard.log"
+    },
+    {
+      "name": "default_graphics",
+      "assertions": 28,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-default_graphics.log"
+    },
+    {
+      "name": "gm01_enemies",
+      "assertions": 40,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-gm01_enemies.log"
+    },
+    {
+      "name": "gm01_objective",
+      "assertions": 26,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-gm01_objective.log"
+    },
+    {
+      "name": "hex_foundation",
+      "assertions": 41,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-hex_foundation.log"
+    },
+    {
+      "name": "hex_runtime_slice",
+      "assertions": 40,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-hex_runtime_slice.log"
+    },
+    {
+      "name": "fow_overlay",
+      "assertions": 34,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-fow_overlay.log"
+    },
+    {
+      "name": "hex_minimap",
+      "assertions": 13,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-hex_minimap.log"
+    },
+    {
+      "name": "hex_no_flash",
+      "assertions": 12,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-hex_no_flash.log"
+    },
+    {
+      "name": "hex_movement",
+      "assertions": 25,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-hex_movement.log"
+    },
+    {
+      "name": "hex_render",
+      "assertions": 33,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-hex_render.log"
+    },
+    {
+      "name": "hex_visibility",
+      "assertions": 76,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-hex_visibility.log"
+    },
+    {
+      "name": "cover_cache",
+      "assertions": 51,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-cover_cache.log"
+    },
+    {
+      "name": "tactics_guard",
+      "assertions": 6,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-tactics_guard.log"
+    },
+    {
+      "name": "cover_radius",
+      "assertions": 29,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T132220Z-pid143912/logs/check-cover_radius.log"
+    },
+    {
+      "name": "briefing_cache",
+      "assertions": 30,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T141628Z-pid142264/logs/check-briefing_cache.log"
+    },
+    {
+      "name": "briefing_panel",
+      "assertions": 32,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T140038Z-pid146512/logs/check-briefing_panel.log"
+    },
+    {
+      "name": "briefing_minimap",
+      "assertions": 30,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T140038Z-pid146512/logs/check-briefing_minimap.log"
+    },
+    {
+      "name": "loadout_bridge",
+      "assertions": 30,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T140038Z-pid146512/logs/check-loadout_bridge.log"
+    },
+    {
+      "name": "readiness",
+      "assertions": 30,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T140038Z-pid146512/logs/check-readiness.log"
+    },
+    {
+      "name": "homebase_handoff",
+      "assertions": 30,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T140038Z-pid146512/logs/check-homebase_handoff.log"
+    },
+    {
+      "name": "homebase_bootstrap",
+      "assertions": 103,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T140038Z-pid146512/logs/check-homebase_bootstrap.log"
+    },
+    {
+      "name": "homebase_actionable",
+      "assertions": 41,
+      "passed": true,
+      "log": "docs/qa/gm01_frontier_20261102/checks_final/20261102T140038Z-pid146512/logs/check-homebase_actionable.log"
+    }
+  ],
+  "engine_assertions": 881,
+  "normal_starts": [
+    {
+      "resolution": [
+        1920,
+        1080
+      ],
+      "assertions": 51,
+      "passed": true,
+      "report": "docs/qa/gm01_frontier_20261102/frontier/1920x1080_20261102T140614Z/startup.json",
+      "native_captures": 9
+    },
+    {
+      "resolution": [
+        1280,
+        720
+      ],
+      "assertions": 51,
+      "passed": true,
+      "report": "docs/qa/gm01_frontier_20261102/frontier/1280x720_20261102T141144Z/startup.json",
+      "native_captures": 9
+    }
+  ],
+  "normal_start_assertions": 102,
+  "html_qa": "docs/qa/gm01_frontier_20261102/html_export_qa.json",
+  "source_snapshot": "docs/qa/gm01_frontier_20261102/SOURCE_SNAPSHOT.json",
+  "scope": "bounded map/navigation/editor/normal-time Cutlass deployment and GO; no full campaign, balance, multiplayer, long-run performance or release acceptance"
+}

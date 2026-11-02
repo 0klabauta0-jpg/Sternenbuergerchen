@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "gm01_enemies",
+      "script": "res://scripts/tests/task_344_ground_mission_default_enemy_visuals.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    }
+  ]
+}

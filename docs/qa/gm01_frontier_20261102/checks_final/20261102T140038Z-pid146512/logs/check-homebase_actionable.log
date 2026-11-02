@@ -1,0 +1,61 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== BUGFIX Release Singleplayer Normal Click Homebase Guard ===
+[PASS] Bugfix task file exists
+[PASS] Task names normal-click guard
+[PASS] Implementation status tracks normal-click guard
+[PASS] Roadmap marks normal-click guard implemented
+[PASS] Homebase Direct contract documents normalstart guard
+[PASS] MetaLayer exposes normal-click guard snapshot
+[PASS] Homebase show path reapplies actionability guard
+[PASS] Actionability rejects stale release mission selection
+[PASS] Actionability rejects stale release drop source
+[PASS] Main menu exposes Singleplayer button
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _test_normal_singleplayer_click_homebase_guard (res://scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd:61)
+       [3] _wait_frames (res://scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd:136)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _test_normal_singleplayer_click_homebase_guard (res://scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd:61)
+       [3] _wait_frames (res://scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd:136)
+[PASS] Normal Singleplayer click opens MetaLayer scene
+[PASS] MetaLayer has normal-click guard callable
+[PASS] Snapshot schema is stable
+[PASS] Snapshot task id is stable
+[PASS] Normal-click Homebase guard passes
+[PASS] Normal-click guard has no failed checks
+[PASS] Snapshot is read-only
+[PASS] Snapshot does not set gameplay truth
+[PASS] Normal click remains on Homebase
+[PASS] Normal click does not show stale FOB Transfer
+[PASS] Normal click uses Homebase Direct drop source
+[PASS] Normal click shows a Flightdeck ship
+[PASS] Normal click has payload operators
+[PASS] Normal click has boarded payload
+[PASS] Normal click readiness is ready
+[PASS] Normal click snapshot names the current German start action
+[PASS] Normal click exposes the actual enabled and visible German start button
+[PASS] Normal click enables Start Mission
+[PASS] Normal click names actual Homebase Direct operators, fireteams and pilots in the current UI
+[PASS] Normal click transfer text names direct sortie
+[PASS] Normal click summary names the next start action
+[PASS] Normal click summary does not tell player to send team to FOB
+[PASS] Normal click has no STOP Team blocker
+[PASS] Normal click has no STOP Dropship blocker
+[PASS] Normal click has no STOP Pilot blocker
+[PASS] Normal click has no STOP Boarding blocker
+[PASS] Mission check passes
+[PASS] Drop-source check passes
+[PASS] Start button check passes
+[PASS] STOP blocker check passes
+[PASS] Homebase Direct copy check passes
+=== RESULTS: 41 passed, 0 failed ===
+BUGFIX_release_singleplayer_normal_click_homebase_guard: ALL PASSED

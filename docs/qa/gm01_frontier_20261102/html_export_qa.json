@@ -1,0 +1,34 @@
+{
+  "schema": "sternenbuergerchen.ui_native_html_offline_qa.v1",
+  "status": "PASS",
+  "tested_at": "2026-11-02T14:18:04.635Z",
+  "runtime": "v24.13.0",
+  "report": "docs/reports/STERNENBUERGERCHEN_GM01_FRONTIER_2026-11-02.html",
+  "report_sha256": "4656c3e168db3af26a494376dc0e98f8b9aa8e7caa68cbe1ecaea36996eb4867",
+  "scope": "Actual full inline JavaScript executed in Node VM with a minimal synthetic DOM and mocked Blob/URL/clipboard/download APIs. No browser layout, real filesystem download, browser clipboard or Godot acceptance.",
+  "browser_status": "NOT_RUN_OFFLINE_DOM_ONLY",
+  "exported_controls": 6,
+  "checks": [
+    {
+      "name": "Final inline JavaScript compiles",
+      "status": "PASS"
+    },
+    {
+      "name": "Unique IDs, template and local image references",
+      "status": "PASS"
+    },
+    {
+      "name": "Three tabs select exactly one panel",
+      "status": "PASS"
+    },
+    {
+      "name": "Export includes hidden-tab values and UTF-8 notes",
+      "status": "PASS"
+    },
+    {
+      "name": "Copy and unavailable-clipboard fallback",
+      "status": "PASS"
+    }
+  ],
+  "repro_command": "node docs/qa/gm01_frontier_20261102/html_qa.cjs"
+}

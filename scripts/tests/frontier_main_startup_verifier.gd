@@ -248,7 +248,7 @@ func _run() -> void:
 	var render := _visual_snapshot(view)
 	_check(bool(render.get("frontier_art_enabled",false)),"Default mission enables the Frontier visual profile")
 	_check(int(render.get("frontier_art_override",-2))==-1,"Frontier activation comes from normal map data without a test override")
-	_check(String(render.get("grid_topology",""))=="square8","Existing default mission retains its square topology")
+	_check(String(render.get("grid_topology",""))=="hex_axial_v1","Rebuilt default mission uses its saved, user-requested Hex topology")
 	_check(bool(render.get("read_only",false)) and not bool(render.get("ui_sets_gameplay_truth",true)),"Regular renderer remains a read-only state consumer")
 	var points := _authored_mission_points(String(bootstrap.get("selected_mission_map_path","")),mission)
 	if points.is_empty():

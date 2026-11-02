@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "briefing_cache",
+      "script": "res://scripts/tests/gm01_frontier_briefing_cache_verifier.gd",
+      "success_marker": "GM01_FRONTIER_BRIEFING_CACHE_ALL_PASS",
+      "timeout": 100
+    }
+  ]
+}

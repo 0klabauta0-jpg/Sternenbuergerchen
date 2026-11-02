@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "gm01_rebuild",
+      "script": "res://scripts/tests/gm01_frontier_rebuild_verifier.gd",
+      "success_marker": "GM01_FRONTIER_REBUILD_RESULT",
+      "timeout": 100
+    },
+    {
+      "name": "gm01_editor_guard",
+      "script": "res://scripts/tests/gm01_frontier_editor_guard_verifier.gd",
+      "success_marker": "GM01_FRONTIER_EDITOR_GUARD_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "default_graphics",
+      "script": "res://scripts/tests/frontier_start_graphics_verifier.gd",
+      "success_marker": "FRONTIER_START_GRAPHICS_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "gm01_enemies",
+      "script": "res://scripts/tests/task_344_ground_mission_default_enemy_visuals.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "gm01_objective",
+      "script": "res://scripts/tests/task_1179_ground_mission_objective_playthrough.gd",
+      "success_marker": "0 failed",
+      "timeout": 180
+    },
+    {
+      "name": "hex_foundation",
+      "script": "res://scripts/tests/frontier_hex_foundation_verifier.gd",
+      "success_marker": "FRONTIER_HEX_FOUNDATION_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "hex_runtime_slice",
+      "script": "res://scripts/tests/frontier_runtime_map_slice_verifier.gd",
+      "success_marker": "FRONTIER_RUNTIME_SLICE_RESULT",
+      "timeout": 100
+    },
+    {
+      "name": "fow_overlay",
+      "script": "res://scripts/tests/task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "hex_minimap",
+      "script": "res://scripts/tests/gm01_frontier_hex_minimap_verifier.gd",
+      "success_marker": "GM01_FRONTIER_HEX_MINIMAP_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "hex_no_flash",
+      "script": "res://scripts/tests/gm01_frontier_hex_fow_verifier.gd",
+      "success_marker": "GM01_HEX_FOW_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "hex_movement",
+      "script": "res://scripts/tests/frontier_hex_movement_verifier.gd",
+      "success_marker": "FRONTIER_HEX_MOVEMENT",
+      "timeout": 100
+    },
+    {
+      "name": "hex_render",
+      "script": "res://scripts/tests/frontier_hex_render_verifier.gd",
+      "success_marker": "FRONTIER_HEX_RENDER",
+      "timeout": 100
+    },
+    {
+      "name": "hex_visibility",
+      "script": "res://scripts/tests/frontier_hex_visibility_verifier.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "cover_cache",
+      "script": "res://scripts/tests/gm01_frontier_cover_score_cache_verifier.gd",
+      "success_marker": "GM01_FRONTIER_COVER_SCORE_CACHE_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "tactics_guard",
+      "script": "res://scripts/tests/task_1049_enemy_team_tactics_decision_revision_guard.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "cover_radius",
+      "script": "res://scripts/tests/gm01_frontier_cover_radius_verifier.gd",
+      "success_marker": "GM01_FRONTIER_COVER_RADIUS_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "briefing_cache",
+      "script": "res://scripts/tests/gm01_frontier_briefing_cache_verifier.gd",
+      "success_marker": "GM01_FRONTIER_BRIEFING_CACHE_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "briefing_panel",
+      "script": "res://scripts/tests/task_530_briefing_panel_renderer_mvp.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "briefing_minimap",
+      "script": "res://scripts/tests/task_531_briefing_minimap_visual_renderer.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "loadout_bridge",
+      "script": "res://scripts/tests/task_533_recommended_loadout_selection_bridge.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "readiness",
+      "script": "res://scripts/tests/task_534_pre_mission_readiness_checklist.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "homebase_handoff",
+      "script": "res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "homebase_bootstrap",
+      "script": "res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "homebase_actionable",
+      "script": "res://scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    }
+  ]
+}

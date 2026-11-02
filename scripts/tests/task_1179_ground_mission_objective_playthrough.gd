@@ -1,4 +1,6 @@
 extends SceneTree
+## Accelerated objective/navigation/debrief logic check with inherited deployment
+## shortcuts. Physical normal-time Cutlass insertion has its own startup proof.
 
 const META_LAYER_TEST_SCENE: PackedScene = preload("res://scenes/meta/meta_layer_test.tscn")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
@@ -6,11 +8,14 @@ const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const HPA_NAVIGATION_GRAPH_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_navigation_graph.gd")
 const HPA_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_pathfinder.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const GROUND_MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"
 const GROUND_MISSION_ID: String = "grid_sweep"
-const CENTRAL_ADVANCE_FROM_GRID: Vector2i = Vector2i(18, 20)
-const CENTRAL_ADVANCE_BRIDGE_GRID: Vector2i = Vector2i(19, 20)
-const CENTRAL_ADVANCE_TO_GRID: Vector2i = Vector2i(20, 20)
+# The migrated loading yard retains its physical x18 ->19 ->20 advance.
+# At axial row24 the shared Hex transform places that row at z20.7846.
+const CENTRAL_ADVANCE_FROM_GRID: Vector2i = Vector2i(6, 24)
+const CENTRAL_ADVANCE_BRIDGE_GRID: Vector2i = Vector2i(7, 24)
+const CENTRAL_ADVANCE_TO_GRID: Vector2i = Vector2i(8, 24)
 const SIMULATED_TICK_DELTA: float = 60.0
 const MAX_OBJECTIVE_TICKS: int = 384
 const MAX_DEBRIEF_FRAMES: int = 120
@@ -36,16 +41,21 @@ func _test_ground_map_connects_spawn_to_objective() -> void:
 	_assert(map_data != null and not bool(map_data.call("has_load_issue")), "Ground map loads without TerrainMapData issues")
 	if map_data == null:
 		return
+	_assert(String(map_data.call("get_grid_topology")) == HEX_GRID_SCRIPT.TOPOLOGY_ID, "Ground mission uses its explicitly migrated Hex topology")
 	var registry: Node = TERRAIN_REGISTRY_SCRIPT.new()
 	var tile_size: Dictionary = Dictionary(map_data.call("get_tile_size"))
 	registry.call(
 		"configure_iso_grid",
 		Vector2(map_data.call("get_grid_origin")),
 		float(tile_size.get("half_width", 64.0)),
-		float(tile_size.get("half_height", 32.0))
+		float(tile_size.get("half_height", 32.0)),
+		String(map_data.call("get_grid_topology"))
 	)
 	for tile_data in Array(map_data.call("get_tiles")):
 		registry.call("register_tile", tile_data)
+	_assert(HEX_GRID_SCRIPT.are_neighbors(CENTRAL_ADVANCE_FROM_GRID, CENTRAL_ADVANCE_BRIDGE_GRID) and HEX_GRID_SCRIPT.are_neighbors(CENTRAL_ADVANCE_BRIDGE_GRID, CENTRAL_ADVANCE_TO_GRID), "Loading-yard probe follows two real neighboring Hex edges")
+	var ramp_tile = registry.call("get_tile_at_grid", CENTRAL_ADVANCE_BRIDGE_GRID)
+	_assert(int(registry.call("get_height_at", CENTRAL_ADVANCE_FROM_GRID)) == 0 and int(registry.call("get_height_at", CENTRAL_ADVANCE_BRIDGE_GRID)) == 1 and int(registry.call("get_height_at", CENTRAL_ADVANCE_TO_GRID)) == 1 and ramp_tile != null and String(ramp_tile.edge_type) == "slope", "Physical loading-yard advance retains actual H0 ->H1 ramp ->H1 floor facts")
 	var spawn_position: Vector2 = Vector2(map_data.call("get_marker_position", "spawn_alpha", Vector2.ZERO))
 	var objective_position: Vector2 = Vector2(map_data.call("get_marker_position", "objective_point", Vector2.ZERO))
 	var authored_spawn_grid: Vector2i = Vector2i(registry.call("world_to_grid", spawn_position))
@@ -58,6 +68,7 @@ func _test_ground_map_connects_spawn_to_objective() -> void:
 		registry.free()
 		return
 	var pathfinder: RefCounted = TERRAIN_PATHFINDER_SCRIPT.new()
+	_assert(bool(pathfinder.call("can_traverse_step", CENTRAL_ADVANCE_FROM_GRID, CENTRAL_ADVANCE_BRIDGE_GRID, registry)) and bool(pathfinder.call("can_traverse_step", CENTRAL_ADVANCE_BRIDGE_GRID, CENTRAL_ADVANCE_TO_GRID, registry)), "Both preserved loading-yard ramp steps are legal through the runtime pathfinder")
 	var path: Array = Array(pathfinder.call("find_path", Vector2i(spawn_grid), Vector2i(objective_grid), registry))
 	_assert(not path.is_empty(), "Ground map has a traversable Alpha-to-Objective route")
 	var hpa_graph: RefCounted = HPA_NAVIGATION_GRAPH_SCRIPT.new()

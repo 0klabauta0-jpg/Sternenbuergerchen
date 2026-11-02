@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "gm01_rebuild",
+      "script": "res://scripts/tests/gm01_frontier_rebuild_verifier.gd",
+      "success_marker": "GM01_FRONTIER_REBUILD_RESULT",
+      "timeout": 100
+    },
+    {
+      "name": "hex_no_flash",
+      "script": "res://scripts/tests/gm01_frontier_hex_fow_verifier.gd",
+      "success_marker": "GM01_HEX_FOW_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "hex_movement",
+      "script": "res://scripts/tests/frontier_hex_movement_verifier.gd",
+      "success_marker": "FRONTIER_HEX_MOVEMENT",
+      "timeout": 100
+    },
+    {
+      "name": "hex_render",
+      "script": "res://scripts/tests/frontier_hex_render_verifier.gd",
+      "success_marker": "FRONTIER_HEX_RENDER",
+      "timeout": 100
+    },
+    {
+      "name": "hex_visibility",
+      "script": "res://scripts/tests/frontier_hex_visibility_verifier.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    }
+  ]
+}

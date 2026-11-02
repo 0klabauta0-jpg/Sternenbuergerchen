@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "source_and_asset_blobs": 68,
+  "accepted_native_png_blobs": 18,
+  "original_map_backup_byte_exact": true,
+  "source_and_image_hashes_match_git_index": true,
+  "raw_logs_preserve_original_eol": true
+}

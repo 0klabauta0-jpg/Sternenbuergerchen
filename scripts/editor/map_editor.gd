@@ -167,6 +167,9 @@ const EDITOR_UI_REFRESH_TOOL_STATE: int = 1 << 2
 const EDITOR_UI_REFRESH_HOVER: int = 1 << 3
 const EDITOR_UI_REFRESH_SCENARIO: int = 1 << 4
 const EDITOR_UI_REFRESH_PATROL_PREVIEW: int = 1 << 5
+const FIXED_AUTHORED_LAYOUT_ID: String = "gm01_frontier_outpost_v1"
+const FIXED_AUTHORED_SOLID_TYPE: String = "frontier_scene_solid"
+const FIXED_AUTHORED_LAYOUT_NOTICE: String = "Festes Außenpostenlayout: Gelände, Objekte, Marker und Patrouillen sind geschützt. Ansicht und Speichern bleiben möglich."
 
 @export var map_file_path: String = ""
 
@@ -653,6 +656,21 @@ func _erase_selected_tile_object() -> bool:
 	return true
 
 
+func _is_fixed_authored_layout() -> bool:
+	return _terrain_map_data != null and _terrain_map_data.has_method("get_authored_visual_layout_id") and String(_terrain_map_data.call("get_authored_visual_layout_id")) == FIXED_AUTHORED_LAYOUT_ID
+
+
+func _reject_fixed_authored_layout_edit() -> bool:
+	# This concrete multi-cell composition has no per-cell placement editor.
+	# Refuse edits instead of silently divorcing visible hulls from saved facts.
+	if not _is_fixed_authored_layout():
+		return false
+	if not _is_refreshing_property_controls and not _is_refreshing_marker_controls:
+		_set_marker_feedback(FIXED_AUTHORED_LAYOUT_NOTICE)
+		_queue_editor_ui_refresh(EDITOR_UI_REFRESH_PROPERTIES)
+	return true
+
+
 func _load_map(path: String) -> void:
 	_current_map_path = path
 	_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", path)
@@ -1032,6 +1050,8 @@ func _select_grid_area(start_grid_position: Vector2i, end_grid_position: Vector2
 
 
 func _apply_brush_at_world_position(world_position: Vector2) -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	var tile_data = _resolve_tile_at_world_position(world_position)
 	if tile_data == null:
 		return
@@ -1087,6 +1107,8 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 
 
 func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	var tile_data = _resolve_tile_at_world_position(world_position)
 	if tile_data == null:
 		return
@@ -1127,6 +1149,8 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 
 
 func _apply_eraser_at_world_position(world_position: Vector2) -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	var tile_data = _resolve_tile_at_world_position(world_position)
 	if tile_data == null:
 		return
@@ -1154,6 +1178,8 @@ func _apply_eraser_at_world_position(world_position: Vector2) -> void:
 
 
 func _erase_object_layer_from_tile(tile_data) -> bool:
+	if _reject_fixed_authored_layout_edit():
+		return false
 	if tile_data == null:
 		return false
 	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
@@ -1873,6 +1899,8 @@ func _append_network_path_grid(path: Array[Vector2i], grid_position: Vector2i) -
 
 
 func _apply_network_path(kind: String, path: Array[Vector2i]) -> bool:
+	if _reject_fixed_authored_layout_edit():
+		return false
 	var normalized_kind: String = kind.strip_edges().to_lower()
 	if path.is_empty() or not _network_tool_kind_is_valid(normalized_kind) or _terrain_map_data == null:
 		return false
@@ -1909,6 +1937,8 @@ func _apply_network_path(kind: String, path: Array[Vector2i]) -> bool:
 
 
 func _apply_network_piece_to_tile(tile_data, piece: Dictionary) -> bool:
+	if _reject_fixed_authored_layout_edit():
+		return false
 	if tile_data == null or piece.is_empty() or _tile_catalog == null:
 		return false
 	var type_id: String = String(piece.get("type_id", "")).strip_edges().to_lower()
@@ -3081,6 +3111,8 @@ func _on_adjacency_debug_overlay_toggled(pressed: bool) -> void:
 
 
 func _on_clear_patrol_pressed() -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	if _terrain_map_data == null or _patrol_spawn_id.is_empty():
 		return
 	_terrain_map_data.call("set_patrol_path", _resolve_patrol_edit_path_id(_patrol_spawn_id), [])
@@ -6233,6 +6265,8 @@ func _on_marker_list_item_activated(index: int) -> void:
 
 
 func _on_selected_marker_type_item_selected(index: int) -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	if _is_refreshing_marker_controls or _terrain_map_data == null or _selected_marker_id.is_empty():
 		return
 	var option_button := _get_selected_marker_type_option_button()
@@ -6257,6 +6291,8 @@ func _on_selected_marker_type_item_selected(index: int) -> void:
 
 
 func _on_marker_name_text_changed(new_text: String) -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	if _is_refreshing_marker_controls or _terrain_map_data == null or _selected_marker_id.is_empty():
 		return
 	_terrain_map_data.call("set_marker_display_name", _selected_marker_id, new_text)
@@ -6270,6 +6306,8 @@ func _on_marker_name_text_submitted(_new_text: String) -> void:
 
 
 func _on_marker_color_changed(marker_color: Color) -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	if _is_refreshing_marker_controls or _terrain_map_data == null or _selected_marker_id.is_empty():
 		return
 	_terrain_map_data.call("set_marker_color", _selected_marker_id, marker_color)
@@ -6280,6 +6318,8 @@ func _on_marker_color_changed(marker_color: Color) -> void:
 
 
 func _add_marker_of_selected_type() -> bool:
+	if _reject_fixed_authored_layout_edit():
+		return false
 	if _terrain_map_data == null:
 		return false
 	var add_type_option := _get_add_marker_type_option_button()
@@ -6308,6 +6348,8 @@ func _add_marker_of_selected_type() -> bool:
 
 
 func _delete_selected_marker() -> bool:
+	if _reject_fixed_authored_layout_edit():
+		return false
 	if _terrain_map_data == null or _selected_marker_id.is_empty() or not bool(_terrain_map_data.call("has_marker", _selected_marker_id)):
 		return false
 	_terrain_map_data.call("remove_marker", _selected_marker_id)
@@ -6387,6 +6429,8 @@ func _finish_marker_drag() -> bool:
 
 
 func _move_marker_to_world_position(marker_id: String, world_position: Vector2, is_drag: bool = false) -> bool:
+	if _reject_fixed_authored_layout_edit():
+		return false
 	if _terrain_map_data == null or marker_id.is_empty():
 		return false
 	var snapped_position = _snap_world_position_to_tile_center(world_position)
@@ -6625,6 +6669,7 @@ func _build_interaction_binding_focus_scroll_snapshot() -> Dictionary:
 
 
 func _set_property_controls_enabled(is_enabled: bool) -> void:
+	is_enabled = is_enabled and not _is_fixed_authored_layout()
 	_get_walkable_checkbox().disabled = not is_enabled
 	_get_blocks_los_checkbox().disabled = not is_enabled
 	_get_cover_spinbox().editable = is_enabled
@@ -6739,6 +6784,8 @@ func _normalize_object_rotation_degrees(value: float) -> float:
 
 
 func _rotate_selected_object(delta_degrees: float) -> bool:
+	if _reject_fixed_authored_layout_edit():
+		return false
 	var tile_data = _get_selected_tile()
 	if not _tile_has_rotatable_object(tile_data):
 		return false
@@ -6754,6 +6801,8 @@ func _rotate_selected_object(delta_degrees: float) -> bool:
 
 
 func set_selected_object_scale(value: float) -> bool:
+	if _reject_fixed_authored_layout_edit():
+		return false
 	var tile_data = _get_selected_tile()
 	if not _tile_has_scalable_object(tile_data):
 		return false
@@ -7248,6 +7297,8 @@ func _on_object_rotate_right_pressed() -> void:
 
 
 func _apply_property_controls_to_selected_tile() -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	if _is_refreshing_property_controls:
 		return
 
@@ -7303,6 +7354,8 @@ func _apply_property_controls_to_selected_tile() -> void:
 
 
 func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
+	if _reject_fixed_authored_layout_edit():
+		return false
 	if tile_data == null or patch.is_empty():
 		return false
 
@@ -7718,6 +7771,8 @@ func get_undo_debug_snapshot() -> Dictionary:
 
 
 func _undo_last_change() -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	if _undo_stack.is_empty() or _terrain_map_data == null:
 		return
 
@@ -7755,6 +7810,9 @@ func _refresh_top_bar() -> void:
 		var dirty_suffix: String = " *" if _dirty else ""
 		var scenario_suffix: String = " | Scenario *" if _scenario_dirty else ""
 		title_label.text = "Map Editor%s%s" % [dirty_suffix, scenario_suffix]
+		if _is_fixed_authored_layout():
+			title_label.text += " | Layout geschützt"
+		title_label.tooltip_text = FIXED_AUTHORED_LAYOUT_NOTICE if _is_fixed_authored_layout() else ""
 	if path_label != null:
 		var map_name: String = _get_current_map_name()
 		var path_text: String = _current_map_path if not _current_map_path.is_empty() else "(unsaved)"
@@ -8627,6 +8685,8 @@ func _find_patrol_waypoint_index_at(world_position: Vector2) -> int:
 
 
 func _add_patrol_waypoint(world_position: Vector2) -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	var snapped_position = _snap_world_position_to_tile_center(world_position)
 	if snapped_position == null:
 		return
@@ -8639,6 +8699,8 @@ func _add_patrol_waypoint(world_position: Vector2) -> void:
 
 
 func _move_patrol_waypoint(index: int, world_position: Vector2) -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	var snapped_position = _snap_world_position_to_tile_center(world_position)
 	if snapped_position == null:
 		return
@@ -8651,6 +8713,8 @@ func _move_patrol_waypoint(index: int, world_position: Vector2) -> void:
 
 
 func _remove_patrol_waypoint(index: int) -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("remove_waypoint", _terrain_map_data, _resolve_patrol_edit_path_id(_patrol_spawn_id), index)):
 		return
 	_mark_dirty(true)
@@ -8699,6 +8763,8 @@ func _on_mission_slot_spinbox_value_changed(value: float) -> void:
 
 
 func _on_marker_assign_button_pressed(marker_id: String) -> void:
+	if _reject_fixed_authored_layout_edit():
+		return
 	if _terrain_map_data == null:
 		return
 	var tile_data = _get_selected_tile()
@@ -8780,6 +8846,8 @@ func _on_tile_type_selected(index: int) -> void:
 
 func set_palette_type_for_authoring(type_id: String) -> bool:
 	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id == FIXED_AUTHORED_SOLID_TYPE:
+		return false
 	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(normalized_type_id):
 		return false
 	_selected_type_id = normalized_type_id
@@ -9252,6 +9320,8 @@ func _populate_tile_palette() -> void:
 	var types_by_group: Dictionary = {}
 	var all_types: Array = []
 	for tile_type in _tile_catalog.get_all_types():
+		if String(tile_type.get("type_id", "")) == FIXED_AUTHORED_SOLID_TYPE:
+			continue # A multi-cell layout footprint has no independent visual asset.
 		all_types.append(tile_type)
 		var palette_group: String = String(tile_type.get("palette_group", "default")).strip_edges().to_lower()
 		if palette_group.is_empty():

@@ -1,0 +1,86 @@
+{
+  "metric": "warm_headless_cpu_registry_query_batch",
+  "unit": "us",
+  "context": {
+    "engine": "4.6.2-stable (official)",
+    "platform": "Windows",
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+    "logical_processors": 16,
+    "renderer": "headless",
+    "map_sha256": "31daf2d4943ec4a2007fc4f5246249f309c52436a0675143184d060b6999c925",
+    "grid_topology": "hex_axial_v1",
+    "centers": [
+      {
+        "x": 303.0,
+        "y": 872.0
+      },
+      {
+        "x": 367.0,
+        "y": 936.0
+      },
+      {
+        "x": 431.0,
+        "y": 904.0
+      },
+      {
+        "x": 495.0,
+        "y": 968.0
+      },
+      {
+        "x": -159.0,
+        "y": 868.0
+      },
+      {
+        "x": 97.0,
+        "y": 764.0
+      },
+      {
+        "x": 161.0,
+        "y": 816.0
+      },
+      {
+        "x": 193.0,
+        "y": 816.0
+      }
+    ],
+    "radius_world": 220.0,
+    "queries_per_sample": 8,
+    "workload": "Same 8 query centers on authored GM01; alternating legacy/current batches after warmup; function CPU only, no FPS inference",
+    "raw_source": "cover_radius_query_pairs_20261102T132424-pid129076.json"
+  },
+  "before": {
+    "count": 32,
+    "mean": 21482.71875,
+    "median": 20828.5,
+    "p95": 26772,
+    "max": 28293
+  },
+  "after": {
+    "count": 32,
+    "mean": 2549.875,
+    "median": 2363.0,
+    "p95": 3895,
+    "max": 4186
+  },
+  "change": {
+    "mean": {
+      "absolute": -18932.84375,
+      "percent": -88.13057588439545
+    },
+    "median": {
+      "absolute": -18465.5,
+      "percent": -88.654967952565
+    },
+    "p95": {
+      "absolute": -22877,
+      "percent": -85.451217690124
+    },
+    "max": {
+      "absolute": -24107,
+      "percent": -85.20482098045453
+    }
+  },
+  "notes": [
+    "Descriptive comparison only; not a significance test or a whole-game FPS claim."
+  ]
+}

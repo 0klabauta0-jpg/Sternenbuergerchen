@@ -1,0 +1,66 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Regular GM01 loads as real saved TerrainMapData
+PASS: Original GM01 QA snapshot remains byte-identical
+PASS: Scenario remains byte-identical, including IDs/tactics/limits
+PASS: GM01 remains32x32 with its normal name
+PASS: Square8 topology and origin remain explicit
+PASS: Iso tile geometry remains64/32
+PASS: Saved map selects the Frontier art family
+PASS: Saved map selects the concrete versioned outpost layout
+PASS: Map enemy tactics and slot budget are preserved
+PASS: Five marker IDs and the existing patrol path ID are preserved
+PASS: Authored markerspawn_alpha is exactly on its legal new cell(6, 11)
+PASS: Authored markerobjective_point is exactly on its legal new cell(11, 12)
+PASS: Authored markerspawn_enemy_defense is exactly on its legal new cell(13, 13)
+PASS: Authored markerspawn_enemy_patrol is exactly on its legal new cell(17, 11)
+PASS: Authored markerspawn_bravo is exactly on its legal new cell(21, 12)
+PASS: Unchanged regular scenario validates against the rebuilt map: { "valid": true, "errors": [] }
+PASS: Scenario still dispatches to regular GM01
+PASS: Scenario retains two groups and eight original enemies
+PASS: 1200-second limit, eight enemy slots and96-unit objective radius remain
+PASS: All eight real friendly slot offsets have legal H0 floor, including the first three units
+PASS: All real enemy global slot offsets0..7 remain legal; group two does not reset the index
+PASS: Alpha LZ provides a normal legal three-cell initial move
+PASS: HPA builds from actual saved GM01 facts
+PASS: Patrol keeps four meaningful waypoints
+PASS: A* and HPA return legal adjacent steps(6, 11)→(11, 12)
+PASS: A* and HPA return legal adjacent steps(13, 13)→(11, 12)
+PASS: A* and HPA return legal adjacent steps(21, 12)→(11, 12)
+PASS: A* and HPA return legal adjacent steps(18, 20)→(20, 20)
+PASS: A* and HPA return legal adjacent steps(17, 11)→(20, 11)
+PASS: A* and HPA return legal adjacent steps(20, 11)→(20, 13)
+PASS: A* and HPA return legal adjacent steps(20, 13)→(17, 13)
+PASS: A* and HPA return legal adjacent steps(17, 13)→(17, 11)
+PASS: Existing1179 advance corridor remains a real H0→rampH1→yardH1 transition
+PASS: Three-cell clearance exists for a squad route(6, 11)→(11, 12)
+PASS: Three-cell clearance exists for a squad route(17, 11)→(21, 12)
+PASS: Cold visual composition does not mutate saved facts or Registry revision
+PASS: Cold visual composition does not write the map
+PASS: Exactly1024 unique saved cells replace the former station layout
+PASS: Every massive visible footprint matches saved walkability/LOS/object height/cover, with no phantom objects
+PASS: Concrete solid edges provide usable walkable adjacent cover
+PASS: Saved footprint type is a registered object layer entry
+PASS: Actual continuous ground and versioned layout are available to the normal view
+PASS: Composition includes no preview citizens or static preview dropship
+PASS: Every referenced model/atlas/license source has a valid real file SHA256
+PASS: Imported Frontier structure remains source-pinned: habitat_cutaway_01.glb
+PASS: Imported Frontier structure remains source-pinned: freihafen_hall_01.glb
+PASS: Imported Frontier structure remains source-pinned: utility_fuel_01.glb
+ERROR: FAIL: Regular GM01 exactly matches its deterministic offline authoring source
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/gm01_frontier_rebuild_verifier.gd:47)
+       [1] _run (res://scripts/tests/gm01_frontier_rebuild_verifier.gd:85)
+PASS: Offline authoring safety checks pass: []
+PASS: Normal TerrainMapData save writes an isolated user-data roundtrip
+PASS: Save/Load preserves every authored terrain fact, marker, patrol and tactic
+PASS: Save/Load preserves versioned layout ID and Square8
+PASS: Normal view installs the saved layout, owns every solid and defaults to organic ground
+PASS: Repeated render/configure reuses one stage without duplicate scenery
+PASS: Authored square grid remains explicitly available for diagnostics
+PASS: Normal view and debug-grid controls leave every gameplay fact unchanged
+PASS: Switching to a legacy map removes authored stage and object ownership
+PASS: Unknown layout IDs remain opaque saved data and do not instantiate a guessed scene
+GM01_FRONTIER_REBUILD_RESULT passed=57 failed=1 report=user://gm01_frontier_rebuild_verifier.json
