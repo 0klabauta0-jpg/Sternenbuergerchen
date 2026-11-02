@@ -111,6 +111,7 @@ func _test_effective_registry_pathfinder_and_los() -> void:
 	_assert(bool(registry.blocks_los_at_grid(Vector2i(1, 0))), "Closed runtime override blocks LOS again")
 	_assert(pathfinder.find_path(Vector2i(0, 0), Vector2i(2, 0), registry).is_empty(), "Closed runtime override closes path again")
 	_assert(not bool(los_system.has_line_of_sight_with_terrain(source_world, target_world, registry, 9999.0)), "Closed runtime override closes LOS again")
+	registry.free()
 
 
 func _build_door_line_registry() -> TerrainRegistry:

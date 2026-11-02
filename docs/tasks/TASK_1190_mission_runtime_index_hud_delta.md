@@ -12,7 +12,7 @@ ein Zustand eines Fireteams keine breiten, unveränderten Flächen aktualisiert.
 - `SimulationRoot` und die bestehenden Runtime-Komponenten bleiben die
   autoritativen Besitzer von Gameplay-State.
 - `MissionRuntimeIndex` ist ein abgeleiteter Lookup. Er mutiert keine Unit und
-  wird ausschließlich durch Root-Membership invalidiert.
+  wird durch Root-Membership oder Aenderungen der Unit-Lookup-Identitaet invalidiert.
 - `MissionHudReadModel` ist ein read-only Surface-Revision-Tracker. Er hält
   weder Command- noch Combat- noch Mission-Wahrheit vor.
 - Direkter Command-/Tile-Feedback bleibt ein synchroner UI-Leseweg.
@@ -30,6 +30,12 @@ ein Zustand eines Fireteams keine breiten, unveränderten Flächen aktualisiert.
 - Bestehende HUD- und Command-Matrix-Verifier bleiben grün.
 
 ## Verifikation
+
+Follow-up 2026-11-02: Der Review-Fix erweitert die Invalidierung um echte
+Unit-ID-, Team- und Fireteam-Aenderungen bestehender Nodes. Der Index beobachtet
+dafuer `identity_changed` und bleibt ein lazy aufgebauter, abgeleiteter Lookup;
+unveraenderte Abfragen bleiben scanfrei. Details und Live-Slot-Regression stehen
+in `REVIEW_2026_11_02_performance_architecture_fixes.md`.
 
 ```powershell
 godot_console.exe --headless --path . --script scripts/tests/task_1190_mission_runtime_index_hud_delta.gd

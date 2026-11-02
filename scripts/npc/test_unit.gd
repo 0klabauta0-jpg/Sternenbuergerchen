@@ -44,8 +44,14 @@ signal unit_command_assigned(command)
 signal damage_applied(amount, health_points, hit_context)
 signal healed_applied(amount, health_points, heal_context)
 signal vital_status_changed(vital_status)
+signal identity_changed()
 
-@export var unit_id: String = "unit_test_001"
+@export var unit_id: String = "unit_test_001":
+	set(value):
+		if unit_id == value:
+			return
+		unit_id = value
+		identity_changed.emit()
 @export var display_name: String = "Test Unit"
 @export var portrait_path: String = ""
 @export var callsign: String = ""
@@ -59,8 +65,19 @@ signal vital_status_changed(vital_status)
 @export var armor_id: String = "medium"
 @export var weapon_1_id: String = "rifle"
 @export var weapon_2_id: String = "rifle"
-@export var team_id: String = "team_test"
-@export var fireteam_id: String = ""
+@export var team_id: String = "team_test":
+	set(value):
+		if team_id == value:
+			return
+		team_id = value
+		identity_changed.emit()
+@export var fireteam_id: String = "":
+	set(value):
+		var normalized_id: String = _normalize_fireteam_id(value)
+		if fireteam_id == normalized_id:
+			return
+		fireteam_id = normalized_id
+		identity_changed.emit()
 @export var max_health_points: int = 100
 @export_range(0.0, 1.0, 0.01) var skill_accuracy: float = 0.5
 @export_range(0.0, 1.0, 0.01) var skill_speed: float = 0.5

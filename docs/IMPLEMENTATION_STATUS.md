@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### REVIEW 2026-11-02 - Performance und Architektur
+- Aktueller Task: `docs/tasks/REVIEW_2026_11_02_performance_architecture_fixes.md`.
+- P1 abgeschlossen: autoritative Bewegung stoppt kampfunfaehige Units samt
+  alten Respawn-Continuations; Full-/Dirty-HPA liest effektive Tuer-Begehbarkeit;
+  Missionsindex invalidiert auch bei ID-/Team-/Fireteamwechseln vorhandener Nodes.
+- Alle drei Regressionen zuerst rot, danach 20/20, 72/72 und 31/31 gruen;
+  unabhaengige Reviews ohne wichtige Befunde. Zehn betroffene Runtime-Skripte
+  mit 292 Assertions strikt geprueft. TASK_692 gibt nun seine Registry-Fixture frei.
+- P2 folgt im selben Task-Branch: Hex-Suchfanout, Fallback-Abschluss,
+  Dropship-Kartenwiederverwendung und transportuebergreifende Vital-Reihenfolge.
+- Keine Main-Integration, keine neue Release-/FPS-/GPU-Abnahme.
+
 ### ART 2026-11-01 Main-Adoption: Frontier und Astra Ref03
 - Nutzerbeauftragte Main-Übernahme: Code `177991ac4962c17be0d02ef909949826967c7f57` auf lokalem Main und `origin/main`. Fast-forward vom alten Main `633a0ea5`, einschließlich der bestehenden Foundation; keine selektive Grafikdateikopie auf den Aprilstand.
 - Sauberer nativer Außenpostenrender als normales Menübild; GM01 wählt Frontier über gespeicherte Daten ohne CLI-Flag. Alle übrigen GM01-Kartenbytes und das Szenario bleiben unverändert. GM01 bleibt Square8; die neue Hex-Werft ist separat verfügbar, keine vollständige Kampagnen-/Hexmigration.

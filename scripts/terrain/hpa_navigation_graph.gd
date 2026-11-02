@@ -52,7 +52,8 @@ func build_from_registry(registry, next_cluster_size: int = DEFAULT_CLUSTER_SIZE
 		tile_positions.append(grid_position)
 		cluster["tile_positions"] = tile_positions
 		_update_cluster_bounds(cluster, grid_position)
-		if bool(tile_data.walkable):
+		var walkable: bool = bool(registry.call("is_walkable", grid_position)) if registry.has_method("is_walkable") else bool(tile_data.walkable)
+		if walkable:
 			var walkable_tiles: Array = Array(cluster.get("walkable_tiles", []))
 			walkable_tiles.append(grid_position)
 			cluster["walkable_tiles"] = walkable_tiles
@@ -443,7 +444,8 @@ func _rebuild_clusters_from_registry(registry, rebuild_cluster_lookup: Dictionar
 			tile_positions.append(grid_position)
 			cluster["tile_positions"] = tile_positions
 			_update_cluster_bounds(cluster, grid_position)
-			if bool(tile_data.walkable):
+			var walkable: bool = bool(registry.call("is_walkable", grid_position)) if registry.has_method("is_walkable") else bool(tile_data.walkable)
+			if walkable:
 				var walkable_tiles: Array = Array(cluster.get("walkable_tiles", []))
 				walkable_tiles.append(grid_position)
 				cluster["walkable_tiles"] = walkable_tiles

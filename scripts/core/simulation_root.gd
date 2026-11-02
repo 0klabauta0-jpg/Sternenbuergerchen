@@ -1805,6 +1805,10 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot move command expects a Node2D-compatible unit.")
 		return
 
+	if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+		_record_discarded_move_command(cmd, "unit_not_fit", {"unit_id": unit_id})
+		return
+
 	if _is_stale_tokenized_move_command(cmd, unit):
 		_record_discarded_move_command(cmd, "stale_command_token", {"unit_id": unit_id})
 		return
@@ -2051,6 +2055,17 @@ func _is_stale_tokenized_move_command(cmd: Dictionary, unit) -> bool:
 		return false
 	var committed_token: String = String(_committed_command_token_by_unit_id.get(unit_id, "")).strip_edges()
 	return committed_token.is_empty() or committed_token != current_token
+
+
+func _discard_pending_move_commands_for_unit(unit_id: String) -> void:
+	for index in range(command_queue.size() - 1, -1, -1):
+		var pending_command: Dictionary = command_queue[index]
+		if String(pending_command.get("unit_id", "")).strip_edges() != unit_id:
+			continue
+		if _extract_command_type(pending_command) not in ["move_to_position", "engage_area"]:
+			continue
+		command_queue.remove_at(index)
+		_record_discarded_move_command(pending_command, "unit_not_fit", {"unit_id": unit_id})
 
 
 func _record_discarded_move_command(cmd: Dictionary, reason: String, details: Dictionary = {}) -> void:
@@ -3106,6 +3121,9 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		hit_context["flank_direction_label"] = String(effect.get("flank_direction_label", "")).strip_edges().to_lower()
 		hit_context["flank_morale_state"] = String(effect.get("flank_morale_state", "")).strip_edges().to_lower()
 	unit.call("apply_damage", resolved_damage, hit_context)
+	if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+		# Effects follow commands: cancel this tick's continuation before a heal/respawn can restore fitness.
+		_discard_pending_move_commands_for_unit(unit_id)
 	_emit_damage_effect_resolution(_build_damage_effect_resolution(
 		effect,
 		unit,

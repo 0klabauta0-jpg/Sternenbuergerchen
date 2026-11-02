@@ -4,7 +4,7 @@ extends Node
 ## Read-only membership lookup for direct mission-root unit children.
 ##
 ## The controller owns gameplay decisions. This helper only rebuilds its cached
-## lookup when the mission root reports a direct child membership change.
+## lookup when direct child membership or a unit's lookup identity changes.
 
 signal membership_revision_changed(revision: int)
 
@@ -17,6 +17,7 @@ var _friendly_units: Array = []
 var _enemy_units: Array = []
 var _units_by_id: Dictionary = {}
 var _units_by_fireteam: Dictionary = {}
+var _observed_units: Array[Node] = []
 
 
 func bind_mission_root(mission_root: Node, local_team_id: String) -> void:
@@ -27,7 +28,7 @@ func bind_mission_root(mission_root: Node, local_team_id: String) -> void:
 	_local_team_id = local_team_id.strip_edges()
 	if _mission_root != null:
 		_mission_root.child_entered_tree.connect(_on_mission_child_membership_changed)
-		_mission_root.child_exiting_tree.connect(_on_mission_child_membership_changed)
+		_mission_root.child_exiting_tree.connect(_on_mission_child_exiting)
 	_membership_dirty = true
 
 
@@ -81,16 +82,41 @@ func _exit_tree() -> void:
 
 
 func _disconnect_mission_root() -> void:
-	if _mission_root == null:
+	for unit in _observed_units.duplicate():
+		_unobserve_unit(unit)
+	if not is_instance_valid(_mission_root):
+		_mission_root = null
 		return
 	if _mission_root.child_entered_tree.is_connected(_on_mission_child_membership_changed):
 		_mission_root.child_entered_tree.disconnect(_on_mission_child_membership_changed)
-	if _mission_root.child_exiting_tree.is_connected(_on_mission_child_membership_changed):
-		_mission_root.child_exiting_tree.disconnect(_on_mission_child_membership_changed)
+	if _mission_root.child_exiting_tree.is_connected(_on_mission_child_exiting):
+		_mission_root.child_exiting_tree.disconnect(_on_mission_child_exiting)
 	_mission_root = null
 
 
 func _on_mission_child_membership_changed(_child: Node) -> void:
+	_membership_dirty = true
+
+
+func _on_mission_child_exiting(child: Node) -> void:
+	_unobserve_unit(child)
+	_membership_dirty = true
+
+
+func _observe_unit(unit: Node) -> void:
+	if not unit.has_signal("identity_changed") or _observed_units.has(unit):
+		return
+	unit.connect("identity_changed", _on_unit_identity_changed)
+	_observed_units.append(unit)
+
+
+func _unobserve_unit(unit: Node) -> void:
+	if is_instance_valid(unit) and unit.has_signal("identity_changed") and unit.is_connected("identity_changed", _on_unit_identity_changed):
+		unit.disconnect("identity_changed", _on_unit_identity_changed)
+	_observed_units.erase(unit)
+
+
+func _on_unit_identity_changed() -> void:
 	_membership_dirty = true
 
 
@@ -107,13 +133,14 @@ func _rebuild_membership() -> void:
 	_units_by_fireteam.clear()
 	_membership_dirty = false
 	_membership_scan_count += 1
-	if _mission_root == null:
+	if not is_instance_valid(_mission_root):
 		_membership_revision += 1
 		membership_revision_changed.emit(_membership_revision)
 		return
 	for child in _mission_root.get_children():
 		if not _is_indexable_unit(child):
 			continue
+		_observe_unit(child)
 		var unit_id: String = _get_unit_id(child)
 		if unit_id.is_empty():
 			continue

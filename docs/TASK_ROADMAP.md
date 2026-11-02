@@ -1,5 +1,14 @@
 # TASK_ROADMAP
 
+## Nutzerauftrag 2026-11-02 - Sieben Performance-/Architekturbefunde
+- P1-Block abgeschlossen und unabhaengig reviewed: Movement, Tuer-HPA und
+  Missionsindex; neue Regressionen 20/20, 72/72 und 31/31.
+- Danach P2: Hex-HPA-Sucharbeit, terminale Navigation-Fallbacks,
+  Dropship-HUD-Karten und Snapshot-/Reliable-Vital-Ordering.
+- Task: `docs/tasks/REVIEW_2026_11_02_performance_architecture_fixes.md`.
+- Dieser explizite Nutzerauftrag ist ein begrenzter Follow-up auf `7f594530f`;
+  bestehende Release-/Manuell-Gates werden nicht umgedeutet.
+
 ## Zweck
 Diese Roadmap definiert die Reihenfolge der Tasks fuer das Projekt.
 
