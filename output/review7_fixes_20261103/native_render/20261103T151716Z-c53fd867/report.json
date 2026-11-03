@@ -1,0 +1,53 @@
+{
+  "schema": "sternenbuergerchen.review7_native_render.v1",
+  "checks": [
+    {
+      "name": "review7_native_fow_moving_view",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c53fd8677f7043168b0013238888eadd",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c53fd8677f7043168b0013238888eadd\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review7_fixes_20261103\\native_render\\20261103T151716Z-c53fd867\\review7_native_fow_moving_view.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c53fd8677f7043168b0013238888eadd\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\c53fd8677f7043168b0013238888eadd\\project\\scripts\\tests\\review7_fow_moving_view_verifier.gd"
+      ],
+      "gpu_buffer_readback_verified": true,
+      "captures": [
+        "walking_128_budget2048.png",
+        "walking_128_budget512.png",
+        "walking_256_budget512.png"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  },
+  "protected_roster": {
+    "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+    "length": 221426,
+    "mtime_ns": 1793651922023643800
+  },
+  "all_user_dirs_unique": true,
+  "scope": "Real renderer and MultiMesh buffers; targeted fixed fixture, no FPS or whole-game acceptance."
+}

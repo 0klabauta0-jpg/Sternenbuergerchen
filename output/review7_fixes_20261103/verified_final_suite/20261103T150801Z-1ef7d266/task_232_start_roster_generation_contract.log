@@ -1,0 +1,328 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-659827cab5aa461f8e9f9219cdddc75e
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_232 Start Roster Generation Contract ===
+PASS: Roster generation contract doc exists
+PASS: Contract doc covers 24
+PASS: Contract doc covers 20
+PASS: Contract doc covers 30
+PASS: Contract doc covers Seed
+PASS: Contract doc covers leader
+PASS: Contract doc covers medic
+PASS: Contract doc covers pilot
+PASS: Contract doc covers heavy_support
+PASS: Contract doc covers scout_sniper
+PASS: Contract doc covers Multiplayer
+PASS: Contract doc covers player_profile_local
+PASS: Contract doc covers TASK_234
+PASS: Default seeded roster is valid
+PASS: Default roster size is 24
+PASS: Same seed produces reproducible roster
+PASS: Different seed changes generated roster identity
+PASS: Generator clamps small roster to minimum
+PASS: Generator clamps large roster to maximum
+PASS: First-start helper keeps existing valid roster
+PASS: First-start helper generates missing roster
+PASS: Role mix contains medic
+PASS: Role mix contains shooter
+PASS: Role mix contains leader
+PASS: Role mix contains engineer
+PASS: Role mix contains pilot
+PASS: Role mix contains heavy_support
+PASS: Role mix contains scout_sniper
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_01
+PASS: Generated unit id is unique: player_task232_profiles_01
+PASS: Generated callsign is unique: WICK
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_01/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_01/speed
+PASS: Generated skill is clamped: player_task232_profiles_01/leadership
+PASS: Generated skill is clamped: player_task232_profiles_01/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_02
+PASS: Generated unit id is unique: player_task232_profiles_02
+PASS: Generated callsign is unique: MOTH
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_02/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_02/speed
+PASS: Generated skill is clamped: player_task232_profiles_02/leadership
+PASS: Generated skill is clamped: player_task232_profiles_02/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_03
+PASS: Generated unit id is unique: player_task232_profiles_03
+PASS: Generated callsign is unique: RIFT
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_03/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_03/speed
+PASS: Generated skill is clamped: player_task232_profiles_03/leadership
+PASS: Generated skill is clamped: player_task232_profiles_03/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_04
+PASS: Generated unit id is unique: player_task232_profiles_04
+PASS: Generated callsign is unique: MICA
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_04/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_04/speed
+PASS: Generated skill is clamped: player_task232_profiles_04/leadership
+PASS: Generated skill is clamped: player_task232_profiles_04/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_05
+PASS: Generated unit id is unique: player_task232_profiles_05
+PASS: Generated callsign is unique: COIL
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_05/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_05/speed
+PASS: Generated skill is clamped: player_task232_profiles_05/leadership
+PASS: Generated skill is clamped: player_task232_profiles_05/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_06
+PASS: Generated unit id is unique: player_task232_profiles_06
+PASS: Generated callsign is unique: WAKE
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_06/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_06/speed
+PASS: Generated skill is clamped: player_task232_profiles_06/leadership
+PASS: Generated skill is clamped: player_task232_profiles_06/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_07
+PASS: Generated unit id is unique: player_task232_profiles_07
+PASS: Generated callsign is unique: MINT
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_07/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_07/speed
+PASS: Generated skill is clamped: player_task232_profiles_07/leadership
+PASS: Generated skill is clamped: player_task232_profiles_07/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_08
+PASS: Generated unit id is unique: player_task232_profiles_08
+PASS: Generated callsign is unique: ROOK
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_08/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_08/speed
+PASS: Generated skill is clamped: player_task232_profiles_08/leadership
+PASS: Generated skill is clamped: player_task232_profiles_08/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_09
+PASS: Generated unit id is unique: player_task232_profiles_09
+PASS: Generated callsign is unique: WAKE02
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_09/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_09/speed
+PASS: Generated skill is clamped: player_task232_profiles_09/leadership
+PASS: Generated skill is clamped: player_task232_profiles_09/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_10
+PASS: Generated unit id is unique: player_task232_profiles_10
+PASS: Generated callsign is unique: WAKE03
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_10/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_10/speed
+PASS: Generated skill is clamped: player_task232_profiles_10/leadership
+PASS: Generated skill is clamped: player_task232_profiles_10/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_11
+PASS: Generated unit id is unique: player_task232_profiles_11
+PASS: Generated callsign is unique: MOTH02
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_11/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_11/speed
+PASS: Generated skill is clamped: player_task232_profiles_11/leadership
+PASS: Generated skill is clamped: player_task232_profiles_11/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_12
+PASS: Generated unit id is unique: player_task232_profiles_12
+PASS: Generated callsign is unique: SPAR
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_12/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_12/speed
+PASS: Generated skill is clamped: player_task232_profiles_12/leadership
+PASS: Generated skill is clamped: player_task232_profiles_12/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_13
+PASS: Generated unit id is unique: player_task232_profiles_13
+PASS: Generated callsign is unique: MINT02
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_13/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_13/speed
+PASS: Generated skill is clamped: player_task232_profiles_13/leadership
+PASS: Generated skill is clamped: player_task232_profiles_13/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_14
+PASS: Generated unit id is unique: player_task232_profiles_14
+PASS: Generated callsign is unique: SPAR02
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_14/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_14/speed
+PASS: Generated skill is clamped: player_task232_profiles_14/leadership
+PASS: Generated skill is clamped: player_task232_profiles_14/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_15
+PASS: Generated unit id is unique: player_task232_profiles_15
+PASS: Generated callsign is unique: GLINT
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_15/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_15/speed
+PASS: Generated skill is clamped: player_task232_profiles_15/leadership
+PASS: Generated skill is clamped: player_task232_profiles_15/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_16
+PASS: Generated unit id is unique: player_task232_profiles_16
+PASS: Generated callsign is unique: QUILL
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_16/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_16/speed
+PASS: Generated skill is clamped: player_task232_profiles_16/leadership
+PASS: Generated skill is clamped: player_task232_profiles_16/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_17
+PASS: Generated unit id is unique: player_task232_profiles_17
+PASS: Generated callsign is unique: EMBER
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_17/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_17/speed
+PASS: Generated skill is clamped: player_task232_profiles_17/leadership
+PASS: Generated skill is clamped: player_task232_profiles_17/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_18
+PASS: Generated unit id is unique: player_task232_profiles_18
+PASS: Generated callsign is unique: CIPHER
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_18/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_18/speed
+PASS: Generated skill is clamped: player_task232_profiles_18/leadership
+PASS: Generated skill is clamped: player_task232_profiles_18/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_19
+PASS: Generated unit id is unique: player_task232_profiles_19
+PASS: Generated callsign is unique: QUILL02
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_19/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_19/speed
+PASS: Generated skill is clamped: player_task232_profiles_19/leadership
+PASS: Generated skill is clamped: player_task232_profiles_19/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_20
+PASS: Generated unit id is unique: player_task232_profiles_20
+PASS: Generated callsign is unique: CIPHER02
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_20/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_20/speed
+PASS: Generated skill is clamped: player_task232_profiles_20/leadership
+PASS: Generated skill is clamped: player_task232_profiles_20/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_21
+PASS: Generated unit id is unique: player_task232_profiles_21
+PASS: Generated callsign is unique: MASTIFF
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_21/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_21/speed
+PASS: Generated skill is clamped: player_task232_profiles_21/leadership
+PASS: Generated skill is clamped: player_task232_profiles_21/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_22
+PASS: Generated unit id is unique: player_task232_profiles_22
+PASS: Generated callsign is unique: WICK02
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_22/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_22/speed
+PASS: Generated skill is clamped: player_task232_profiles_22/leadership
+PASS: Generated skill is clamped: player_task232_profiles_22/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_23
+PASS: Generated unit id is unique: player_task232_profiles_23
+PASS: Generated callsign is unique: TORCH
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_23/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_23/speed
+PASS: Generated skill is clamped: player_task232_profiles_23/leadership
+PASS: Generated skill is clamped: player_task232_profiles_23/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Generated unit is a valid MetaUnitProfile: player_task232_profiles_24
+PASS: Generated unit id is unique: player_task232_profiles_24
+PASS: Generated callsign is unique: VANE
+PASS: Generated unit has display name
+PASS: Generated unit has callsign
+PASS: Generated skill is clamped: player_task232_profiles_24/accuracy
+PASS: Generated skill is clamped: player_task232_profiles_24/speed
+PASS: Generated skill is clamped: player_task232_profiles_24/leadership
+PASS: Generated skill is clamped: player_task232_profiles_24/toughness
+PASS: Generated profile starts with at most one rank badge
+PASS: Roster keeps visible weak spots instead of perfect balance
+PASS: Roster has visible strengths for player choices
+PASS: Roster validator accepts generated fireteams
+PASS: Fireteam suggestion has id
+PASS: Fireteam suggestion leader is a member
+PASS: Fireteam suggestion documents non-perfect policy
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_01
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_02
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_03
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_04
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_05
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_06
+PASS: Fireteam suggestion has id
+PASS: Fireteam suggestion leader is a member
+PASS: Fireteam suggestion documents non-perfect policy
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_07
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_08
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_09
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_10
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_11
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_12
+PASS: Fireteam suggestion has id
+PASS: Fireteam suggestion leader is a member
+PASS: Fireteam suggestion documents non-perfect policy
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_13
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_14
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_15
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_16
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_17
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_18
+PASS: Fireteam suggestion has id
+PASS: Fireteam suggestion leader is a member
+PASS: Fireteam suggestion documents non-perfect policy
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_19
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_20
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_21
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_22
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_23
+PASS: Fireteam suggestions do not duplicate unit player_task232_fireteams_24
+PASS: Fireteam suggestions cover every generated unit
+PASS: Roster multiplayer boundary is per player profile
+PASS: Roster snapshot policy avoids leaking private full roster
+PASS: Main menu creates first-start roster in memory
+PASS: Main menu first-start roster uses default size
+PASS: Main menu exposes New Team button
+PASS: New Team button starts as generate action
+PASS: New Team request requires confirmation when roster exists
+PASS: Main menu records pending roster reset confirmation
+PASS: Request alone does not replace existing roster
+PASS: Confirmed New Team generates a replacement roster
+PASS: Confirmation clears reset boundary
+PASS: Confirmed roster uses an explicit reset seed
+PASS: Roster generation from main menu does not create gameplay SimulationRoot
+=== RESULTS: 321 passed, 0 failed ===
+ALL TESTS PASSED

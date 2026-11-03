@@ -1,0 +1,517 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-6e7b53888ffa4e11aaab3be82a723075
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: square8 half H1 up cliff fixture agrees with authoritative traversal
+PASS: square8 half H1 up cliff executes a real authoritative tick
+PASS: square8 half H1 up cliff spacing does not invent commands or effects
+PASS: square8 half H1 up cliff rejects the half push across the forbidden edge
+PASS: square8 half H1 up cliff retains the legal opposite full fallback
+PASS: square8 half H1 up cliff resolves spacing without an illegal crossing
+PASS: square8 full H1 up cliff full correction spans two cells
+PASS: square8 full H1 up cliff fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: square8 full H1 up cliff executes a real authoritative tick
+PASS: square8 full H1 up cliff spacing does not invent commands or effects
+PASS: square8 full H1 up cliff absent negative terrain blocks alpha
+PASS: square8 full H1 up cliff rejects the forbidden full fallback
+PASS: square8 full H1 up cliff reports the unresolved blocked pair
+PASS: square8 half H1 up none fixture agrees with authoritative traversal
+PASS: square8 half H1 up none executes a real authoritative tick
+PASS: square8 half H1 up none spacing does not invent commands or effects
+PASS: square8 half H1 up none rejects the half push across the forbidden edge
+PASS: square8 half H1 up none retains the legal opposite full fallback
+PASS: square8 half H1 up none resolves spacing without an illegal crossing
+PASS: square8 full H1 up none full correction spans two cells
+PASS: square8 full H1 up none fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: square8 full H1 up none executes a real authoritative tick
+PASS: square8 full H1 up none spacing does not invent commands or effects
+PASS: square8 full H1 up none absent negative terrain blocks alpha
+PASS: square8 full H1 up none rejects the forbidden full fallback
+PASS: square8 full H1 up none reports the unresolved blocked pair
+PASS: square8 half H1 up slope fixture agrees with authoritative traversal
+PASS: square8 half H1 up slope executes a real authoritative tick
+PASS: square8 half H1 up slope spacing does not invent commands or effects
+PASS: square8 half H1 up slope preserves balanced legal half pushes
+PASS: square8 half H1 up slope crosses the permitted edge
+PASS: square8 half H1 up slope resolves spacing without an illegal crossing
+PASS: square8 full H1 up slope full correction spans two cells
+PASS: square8 full H1 up slope fixture edge agrees with authoritative traversal
+PASS: square8 full H1 up slope executes a real authoritative tick
+PASS: square8 full H1 up slope spacing does not invent commands or effects
+PASS: square8 full H1 up slope absent negative terrain blocks alpha
+PASS: square8 full H1 up slope retains the legal multi-cell full fallback
+PASS: square8 half H1 down cliff fixture agrees with authoritative traversal
+PASS: square8 half H1 down cliff executes a real authoritative tick
+PASS: square8 half H1 down cliff spacing does not invent commands or effects
+PASS: square8 half H1 down cliff rejects the half push across the forbidden edge
+PASS: square8 half H1 down cliff retains the legal opposite full fallback
+PASS: square8 half H1 down cliff resolves spacing without an illegal crossing
+PASS: square8 full H1 down cliff full correction spans two cells
+PASS: square8 full H1 down cliff fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: square8 full H1 down cliff executes a real authoritative tick
+PASS: square8 full H1 down cliff spacing does not invent commands or effects
+PASS: square8 full H1 down cliff absent negative terrain blocks alpha
+PASS: square8 full H1 down cliff rejects the forbidden full fallback
+PASS: square8 full H1 down cliff reports the unresolved blocked pair
+PASS: square8 half H1 down none fixture agrees with authoritative traversal
+PASS: square8 half H1 down none executes a real authoritative tick
+PASS: square8 half H1 down none spacing does not invent commands or effects
+PASS: square8 half H1 down none rejects the half push across the forbidden edge
+PASS: square8 half H1 down none retains the legal opposite full fallback
+PASS: square8 half H1 down none resolves spacing without an illegal crossing
+PASS: square8 full H1 down none full correction spans two cells
+PASS: square8 full H1 down none fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: square8 full H1 down none executes a real authoritative tick
+PASS: square8 full H1 down none spacing does not invent commands or effects
+PASS: square8 full H1 down none absent negative terrain blocks alpha
+PASS: square8 full H1 down none rejects the forbidden full fallback
+PASS: square8 full H1 down none reports the unresolved blocked pair
+PASS: square8 half H1 down slope fixture agrees with authoritative traversal
+PASS: square8 half H1 down slope executes a real authoritative tick
+PASS: square8 half H1 down slope spacing does not invent commands or effects
+PASS: square8 half H1 down slope preserves balanced legal half pushes
+PASS: square8 half H1 down slope crosses the permitted edge
+PASS: square8 half H1 down slope resolves spacing without an illegal crossing
+PASS: square8 full H1 down slope full correction spans two cells
+PASS: square8 full H1 down slope fixture edge agrees with authoritative traversal
+PASS: square8 full H1 down slope executes a real authoritative tick
+PASS: square8 full H1 down slope spacing does not invent commands or effects
+PASS: square8 full H1 down slope absent negative terrain blocks alpha
+PASS: square8 full H1 down slope retains the legal multi-cell full fallback
+PASS: square8 half H2 up cliff fixture agrees with authoritative traversal
+PASS: square8 half H2 up cliff executes a real authoritative tick
+PASS: square8 half H2 up cliff spacing does not invent commands or effects
+PASS: square8 half H2 up cliff rejects the half push across the forbidden edge
+PASS: square8 half H2 up cliff retains the legal opposite full fallback
+PASS: square8 half H2 up cliff resolves spacing without an illegal crossing
+PASS: square8 full H2 up cliff full correction spans two cells
+PASS: square8 full H2 up cliff fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: square8 full H2 up cliff executes a real authoritative tick
+PASS: square8 full H2 up cliff spacing does not invent commands or effects
+PASS: square8 full H2 up cliff absent negative terrain blocks alpha
+PASS: square8 full H2 up cliff rejects the forbidden full fallback
+PASS: square8 full H2 up cliff reports the unresolved blocked pair
+PASS: square8 half H2 up none fixture agrees with authoritative traversal
+PASS: square8 half H2 up none executes a real authoritative tick
+PASS: square8 half H2 up none spacing does not invent commands or effects
+PASS: square8 half H2 up none rejects the half push across the forbidden edge
+PASS: square8 half H2 up none retains the legal opposite full fallback
+PASS: square8 half H2 up none resolves spacing without an illegal crossing
+PASS: square8 full H2 up none full correction spans two cells
+PASS: square8 full H2 up none fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: square8 full H2 up none executes a real authoritative tick
+PASS: square8 full H2 up none spacing does not invent commands or effects
+PASS: square8 full H2 up none absent negative terrain blocks alpha
+PASS: square8 full H2 up none rejects the forbidden full fallback
+PASS: square8 full H2 up none reports the unresolved blocked pair
+PASS: square8 half H2 up slope fixture agrees with authoritative traversal
+PASS: square8 half H2 up slope executes a real authoritative tick
+PASS: square8 half H2 up slope spacing does not invent commands or effects
+PASS: square8 half H2 up slope preserves balanced legal half pushes
+PASS: square8 half H2 up slope crosses the permitted edge
+PASS: square8 half H2 up slope resolves spacing without an illegal crossing
+PASS: square8 full H2 up slope full correction spans two cells
+PASS: square8 full H2 up slope fixture edge agrees with authoritative traversal
+PASS: square8 full H2 up slope executes a real authoritative tick
+PASS: square8 full H2 up slope spacing does not invent commands or effects
+PASS: square8 full H2 up slope absent negative terrain blocks alpha
+PASS: square8 full H2 up slope retains the legal multi-cell full fallback
+PASS: square8 half H2 down cliff fixture agrees with authoritative traversal
+PASS: square8 half H2 down cliff executes a real authoritative tick
+PASS: square8 half H2 down cliff spacing does not invent commands or effects
+PASS: square8 half H2 down cliff rejects the half push across the forbidden edge
+PASS: square8 half H2 down cliff retains the legal opposite full fallback
+PASS: square8 half H2 down cliff resolves spacing without an illegal crossing
+PASS: square8 full H2 down cliff full correction spans two cells
+PASS: square8 full H2 down cliff fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: square8 full H2 down cliff executes a real authoritative tick
+PASS: square8 full H2 down cliff spacing does not invent commands or effects
+PASS: square8 full H2 down cliff absent negative terrain blocks alpha
+PASS: square8 full H2 down cliff rejects the forbidden full fallback
+PASS: square8 full H2 down cliff reports the unresolved blocked pair
+PASS: square8 half H2 down none fixture agrees with authoritative traversal
+PASS: square8 half H2 down none executes a real authoritative tick
+PASS: square8 half H2 down none spacing does not invent commands or effects
+PASS: square8 half H2 down none rejects the half push across the forbidden edge
+PASS: square8 half H2 down none retains the legal opposite full fallback
+PASS: square8 half H2 down none resolves spacing without an illegal crossing
+PASS: square8 full H2 down none full correction spans two cells
+PASS: square8 full H2 down none fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: square8 full H2 down none executes a real authoritative tick
+PASS: square8 full H2 down none spacing does not invent commands or effects
+PASS: square8 full H2 down none absent negative terrain blocks alpha
+PASS: square8 full H2 down none rejects the forbidden full fallback
+PASS: square8 full H2 down none reports the unresolved blocked pair
+PASS: square8 half H2 down slope fixture agrees with authoritative traversal
+PASS: square8 half H2 down slope executes a real authoritative tick
+PASS: square8 half H2 down slope spacing does not invent commands or effects
+PASS: square8 half H2 down slope preserves balanced legal half pushes
+PASS: square8 half H2 down slope crosses the permitted edge
+PASS: square8 half H2 down slope resolves spacing without an illegal crossing
+PASS: square8 full H2 down slope full correction spans two cells
+PASS: square8 full H2 down slope fixture edge agrees with authoritative traversal
+PASS: square8 full H2 down slope executes a real authoritative tick
+PASS: square8 full H2 down slope spacing does not invent commands or effects
+PASS: square8 full H2 down slope absent negative terrain blocks alpha
+PASS: square8 full H2 down slope retains the legal multi-cell full fallback
+PASS: square8 half H0 up none fixture agrees with authoritative traversal
+PASS: square8 half H0 up none executes a real authoritative tick
+PASS: square8 half H0 up none spacing does not invent commands or effects
+PASS: square8 half H0 up none preserves balanced legal half pushes
+PASS: square8 half H0 up none crosses the permitted edge
+PASS: square8 half H0 up none resolves spacing without an illegal crossing
+PASS: square8 full H0 up none full correction spans two cells
+PASS: square8 full H0 up none fixture edge agrees with authoritative traversal
+PASS: square8 full H0 up none executes a real authoritative tick
+PASS: square8 full H0 up none spacing does not invent commands or effects
+PASS: square8 full H0 up none absent negative terrain blocks alpha
+PASS: square8 full H0 up none retains the legal multi-cell full fallback
+PASS: square8 missing intermediate tile destination itself is walkable
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_intermediate_hole (res://scripts/tests/review7_spacing_verifier.gd:99)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:32)
+PASS: square8 missing intermediate tile executes a real authoritative tick
+PASS: square8 missing intermediate tile spacing does not invent commands or effects
+PASS: square8 missing intermediate tile cannot teleport to the disconnected walkable destination
+PASS: hex_axial_v1 half H1 up cliff fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H1 up cliff executes a real authoritative tick
+PASS: hex_axial_v1 half H1 up cliff spacing does not invent commands or effects
+PASS: hex_axial_v1 half H1 up cliff rejects the half push across the forbidden edge
+PASS: hex_axial_v1 half H1 up cliff retains the legal opposite full fallback
+PASS: hex_axial_v1 half H1 up cliff resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H1 up cliff full correction spans two cells
+PASS: hex_axial_v1 full H1 up cliff fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: hex_axial_v1 full H1 up cliff executes a real authoritative tick
+PASS: hex_axial_v1 full H1 up cliff spacing does not invent commands or effects
+PASS: hex_axial_v1 full H1 up cliff absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H1 up cliff rejects the forbidden full fallback
+PASS: hex_axial_v1 full H1 up cliff reports the unresolved blocked pair
+PASS: hex_axial_v1 half H1 up none fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H1 up none executes a real authoritative tick
+PASS: hex_axial_v1 half H1 up none spacing does not invent commands or effects
+PASS: hex_axial_v1 half H1 up none rejects the half push across the forbidden edge
+PASS: hex_axial_v1 half H1 up none retains the legal opposite full fallback
+PASS: hex_axial_v1 half H1 up none resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H1 up none full correction spans two cells
+PASS: hex_axial_v1 full H1 up none fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: hex_axial_v1 full H1 up none executes a real authoritative tick
+PASS: hex_axial_v1 full H1 up none spacing does not invent commands or effects
+PASS: hex_axial_v1 full H1 up none absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H1 up none rejects the forbidden full fallback
+PASS: hex_axial_v1 full H1 up none reports the unresolved blocked pair
+PASS: hex_axial_v1 half H1 up slope fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H1 up slope executes a real authoritative tick
+PASS: hex_axial_v1 half H1 up slope spacing does not invent commands or effects
+PASS: hex_axial_v1 half H1 up slope preserves balanced legal half pushes
+PASS: hex_axial_v1 half H1 up slope crosses the permitted edge
+PASS: hex_axial_v1 half H1 up slope resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H1 up slope full correction spans two cells
+PASS: hex_axial_v1 full H1 up slope fixture edge agrees with authoritative traversal
+PASS: hex_axial_v1 full H1 up slope executes a real authoritative tick
+PASS: hex_axial_v1 full H1 up slope spacing does not invent commands or effects
+PASS: hex_axial_v1 full H1 up slope absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H1 up slope retains the legal multi-cell full fallback
+PASS: hex_axial_v1 half H1 down cliff fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H1 down cliff executes a real authoritative tick
+PASS: hex_axial_v1 half H1 down cliff spacing does not invent commands or effects
+PASS: hex_axial_v1 half H1 down cliff rejects the half push across the forbidden edge
+PASS: hex_axial_v1 half H1 down cliff retains the legal opposite full fallback
+PASS: hex_axial_v1 half H1 down cliff resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H1 down cliff full correction spans two cells
+PASS: hex_axial_v1 full H1 down cliff fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: hex_axial_v1 full H1 down cliff executes a real authoritative tick
+PASS: hex_axial_v1 full H1 down cliff spacing does not invent commands or effects
+PASS: hex_axial_v1 full H1 down cliff absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H1 down cliff rejects the forbidden full fallback
+PASS: hex_axial_v1 full H1 down cliff reports the unresolved blocked pair
+PASS: hex_axial_v1 half H1 down none fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H1 down none executes a real authoritative tick
+PASS: hex_axial_v1 half H1 down none spacing does not invent commands or effects
+PASS: hex_axial_v1 half H1 down none rejects the half push across the forbidden edge
+PASS: hex_axial_v1 half H1 down none retains the legal opposite full fallback
+PASS: hex_axial_v1 half H1 down none resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H1 down none full correction spans two cells
+PASS: hex_axial_v1 full H1 down none fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: hex_axial_v1 full H1 down none executes a real authoritative tick
+PASS: hex_axial_v1 full H1 down none spacing does not invent commands or effects
+PASS: hex_axial_v1 full H1 down none absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H1 down none rejects the forbidden full fallback
+PASS: hex_axial_v1 full H1 down none reports the unresolved blocked pair
+PASS: hex_axial_v1 half H1 down slope fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H1 down slope executes a real authoritative tick
+PASS: hex_axial_v1 half H1 down slope spacing does not invent commands or effects
+PASS: hex_axial_v1 half H1 down slope preserves balanced legal half pushes
+PASS: hex_axial_v1 half H1 down slope crosses the permitted edge
+PASS: hex_axial_v1 half H1 down slope resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H1 down slope full correction spans two cells
+PASS: hex_axial_v1 full H1 down slope fixture edge agrees with authoritative traversal
+PASS: hex_axial_v1 full H1 down slope executes a real authoritative tick
+PASS: hex_axial_v1 full H1 down slope spacing does not invent commands or effects
+PASS: hex_axial_v1 full H1 down slope absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H1 down slope retains the legal multi-cell full fallback
+PASS: hex_axial_v1 half H2 up cliff fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H2 up cliff executes a real authoritative tick
+PASS: hex_axial_v1 half H2 up cliff spacing does not invent commands or effects
+PASS: hex_axial_v1 half H2 up cliff rejects the half push across the forbidden edge
+PASS: hex_axial_v1 half H2 up cliff retains the legal opposite full fallback
+PASS: hex_axial_v1 half H2 up cliff resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H2 up cliff full correction spans two cells
+PASS: hex_axial_v1 full H2 up cliff fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: hex_axial_v1 full H2 up cliff executes a real authoritative tick
+PASS: hex_axial_v1 full H2 up cliff spacing does not invent commands or effects
+PASS: hex_axial_v1 full H2 up cliff absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H2 up cliff rejects the forbidden full fallback
+PASS: hex_axial_v1 full H2 up cliff reports the unresolved blocked pair
+PASS: hex_axial_v1 half H2 up none fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H2 up none executes a real authoritative tick
+PASS: hex_axial_v1 half H2 up none spacing does not invent commands or effects
+PASS: hex_axial_v1 half H2 up none rejects the half push across the forbidden edge
+PASS: hex_axial_v1 half H2 up none retains the legal opposite full fallback
+PASS: hex_axial_v1 half H2 up none resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H2 up none full correction spans two cells
+PASS: hex_axial_v1 full H2 up none fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: hex_axial_v1 full H2 up none executes a real authoritative tick
+PASS: hex_axial_v1 full H2 up none spacing does not invent commands or effects
+PASS: hex_axial_v1 full H2 up none absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H2 up none rejects the forbidden full fallback
+PASS: hex_axial_v1 full H2 up none reports the unresolved blocked pair
+PASS: hex_axial_v1 half H2 up slope fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H2 up slope executes a real authoritative tick
+PASS: hex_axial_v1 half H2 up slope spacing does not invent commands or effects
+PASS: hex_axial_v1 half H2 up slope preserves balanced legal half pushes
+PASS: hex_axial_v1 half H2 up slope crosses the permitted edge
+PASS: hex_axial_v1 half H2 up slope resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H2 up slope full correction spans two cells
+PASS: hex_axial_v1 full H2 up slope fixture edge agrees with authoritative traversal
+PASS: hex_axial_v1 full H2 up slope executes a real authoritative tick
+PASS: hex_axial_v1 full H2 up slope spacing does not invent commands or effects
+PASS: hex_axial_v1 full H2 up slope absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H2 up slope retains the legal multi-cell full fallback
+PASS: hex_axial_v1 half H2 down cliff fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H2 down cliff executes a real authoritative tick
+PASS: hex_axial_v1 half H2 down cliff spacing does not invent commands or effects
+PASS: hex_axial_v1 half H2 down cliff rejects the half push across the forbidden edge
+PASS: hex_axial_v1 half H2 down cliff retains the legal opposite full fallback
+PASS: hex_axial_v1 half H2 down cliff resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H2 down cliff full correction spans two cells
+PASS: hex_axial_v1 full H2 down cliff fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: hex_axial_v1 full H2 down cliff executes a real authoritative tick
+PASS: hex_axial_v1 full H2 down cliff spacing does not invent commands or effects
+PASS: hex_axial_v1 full H2 down cliff absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H2 down cliff rejects the forbidden full fallback
+PASS: hex_axial_v1 full H2 down cliff reports the unresolved blocked pair
+PASS: hex_axial_v1 half H2 down none fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H2 down none executes a real authoritative tick
+PASS: hex_axial_v1 half H2 down none spacing does not invent commands or effects
+PASS: hex_axial_v1 half H2 down none rejects the half push across the forbidden edge
+PASS: hex_axial_v1 half H2 down none retains the legal opposite full fallback
+PASS: hex_axial_v1 half H2 down none resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H2 down none full correction spans two cells
+PASS: hex_axial_v1 full H2 down none fixture edge agrees with authoritative traversal
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_full_correction (res://scripts/tests/review7_spacing_verifier.gd:80)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:27)
+PASS: hex_axial_v1 full H2 down none executes a real authoritative tick
+PASS: hex_axial_v1 full H2 down none spacing does not invent commands or effects
+PASS: hex_axial_v1 full H2 down none absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H2 down none rejects the forbidden full fallback
+PASS: hex_axial_v1 full H2 down none reports the unresolved blocked pair
+PASS: hex_axial_v1 half H2 down slope fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H2 down slope executes a real authoritative tick
+PASS: hex_axial_v1 half H2 down slope spacing does not invent commands or effects
+PASS: hex_axial_v1 half H2 down slope preserves balanced legal half pushes
+PASS: hex_axial_v1 half H2 down slope crosses the permitted edge
+PASS: hex_axial_v1 half H2 down slope resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H2 down slope full correction spans two cells
+PASS: hex_axial_v1 full H2 down slope fixture edge agrees with authoritative traversal
+PASS: hex_axial_v1 full H2 down slope executes a real authoritative tick
+PASS: hex_axial_v1 full H2 down slope spacing does not invent commands or effects
+PASS: hex_axial_v1 full H2 down slope absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H2 down slope retains the legal multi-cell full fallback
+PASS: hex_axial_v1 half H0 up none fixture agrees with authoritative traversal
+PASS: hex_axial_v1 half H0 up none executes a real authoritative tick
+PASS: hex_axial_v1 half H0 up none spacing does not invent commands or effects
+PASS: hex_axial_v1 half H0 up none preserves balanced legal half pushes
+PASS: hex_axial_v1 half H0 up none crosses the permitted edge
+PASS: hex_axial_v1 half H0 up none resolves spacing without an illegal crossing
+PASS: hex_axial_v1 full H0 up none full correction spans two cells
+PASS: hex_axial_v1 full H0 up none fixture edge agrees with authoritative traversal
+PASS: hex_axial_v1 full H0 up none executes a real authoritative tick
+PASS: hex_axial_v1 full H0 up none spacing does not invent commands or effects
+PASS: hex_axial_v1 full H0 up none absent negative terrain blocks alpha
+PASS: hex_axial_v1 full H0 up none retains the legal multi-cell full fallback
+PASS: hex_axial_v1 missing intermediate tile destination itself is walkable
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_intermediate_hole (res://scripts/tests/review7_spacing_verifier.gd:99)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:32)
+PASS: hex_axial_v1 missing intermediate tile executes a real authoritative tick
+PASS: hex_axial_v1 missing intermediate tile spacing does not invent commands or effects
+PASS: hex_axial_v1 missing intermediate tile cannot teleport to the disconnected walkable destination
+PASS: square diagonal forbidden corner fixture agrees with pathfinder corner rule
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_square_diagonal (res://scripts/tests/review7_spacing_verifier.gd:113)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:33)
+PASS: square diagonal forbidden corner executes a real authoritative tick
+PASS: square diagonal forbidden corner spacing does not invent commands or effects
+PASS: square diagonal forbidden corner full push respects both intermediate diagonal steps
+PASS: square diagonal legal fixture agrees with pathfinder corner rule
+PASS: square diagonal legal executes a real authoritative tick
+PASS: square diagonal legal spacing does not invent commands or effects
+PASS: square diagonal legal full push respects both intermediate diagonal steps
+PASS: Offset fixture center-to-center path incorrectly misses the touched blocked tile
+PASS: Offset actual segment enters the blocked intermediate tile
+WARNING: SimulationRoot minimum spacing could not separate every active unit pair.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_unit_minimum_spacing (res://scripts/core/simulation_root.gd:2532)
+       [1] _physics_process (res://scripts/core/simulation_root.gd:1046)
+       [2] _tick (res://scripts/tests/review7_spacing_verifier.gd:192)
+       [3] _test_offset_square_segment (res://scripts/tests/review7_spacing_verifier.gd:135)
+       [4] _run (res://scripts/tests/review7_spacing_verifier.gd:35)
+PASS: offset square segment executes a real authoritative tick
+PASS: offset square segment spacing does not invent commands or effects
+PASS: Actual correction segment cannot cross a blocker omitted by the cell-center line
+PASS: terrainless executes a real authoritative tick
+PASS: terrainless spacing does not invent commands or effects
+PASS: Terrainless authority keeps the existing balanced spacing behavior
+REVIEW7_SPACING_RESULT passed=352 failed=0

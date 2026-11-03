@@ -1,0 +1,36 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+--- TASK_093 Verifier ---
+Test: TestUnit.get_discipline()
+  PASS: TestUnit has get_discipline()
+  PASS: get_discipline() returns 0.7
+Test: DISCIPLINE_BREAK_BASE_CHANCE exists
+  PASS: DISCIPLINE_BREAK_BASE_CHANCE constant exists
+  PASS: DISCIPLINE_BREAK_BASE_CHANCE is 0.08
+Test: DISCIPLINE_BREAK_COOLDOWN_TICKS exists
+  PASS: DISCIPLINE_BREAK_COOLDOWN_TICKS constant exists
+  PASS: DISCIPLINE_BREAK_COOLDOWN_TICKS is 10
+Test: DISCIPLINE_BREAK_EVENT_COLOR exists
+  PASS: DISCIPLINE_BREAK_EVENT_COLOR constant exists
+Test: discipline=1.0 never breaks
+  PASS: discipline=1.0 yields 0% break chance
+Test: discipline=0.0 has full base chance
+  PASS: discipline=0.0 yields 8% break chance
+Test: _check_discipline_break method exists
+  PASS: _check_discipline_break() exists
+Test: Cooldown prevents immediate re-break
+  PASS: Unit with cooldown cannot break hold-fire
+Test: _advance_discipline_cooldowns decrements
+  PASS: unit_a still in cooldown after 1 advance
+  PASS: unit_a cooldown decremented to 2
+  PASS: unit_b removed after cooldown reaches 1
+Test: fire_at_will units not subject to discipline break
+  PASS: fire_at_will path does not enter discipline break check
+Test: hold_fire + discipline=1.0 always blocks attack
+  PASS: discipline=1.0 never breaks hold-fire
+Test: Default discipline is 0.5
+  PASS: Default discipline is 0.5
+  PASS: get_discipline() returns default 0.5
+TASK_093 VERIFY: ALL 18 TESTS PASSED
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-58d5275940e44cc7baf59b47c2eaf816
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors

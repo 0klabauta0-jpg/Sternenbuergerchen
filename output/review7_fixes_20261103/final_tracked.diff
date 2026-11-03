@@ -1,0 +1,3213 @@
+diff --git a/docs/dev/multiplayer_editor_map_transfer_contract.md b/docs/dev/multiplayer_editor_map_transfer_contract.md
+index 84e41a7e6..f5036d83d 100644
+--- a/docs/dev/multiplayer_editor_map_transfer_contract.md
++++ b/docs/dev/multiplayer_editor_map_transfer_contract.md
+@@ -26,3 +26,14 @@ Download ist nie automatisch. Die Lobby zeigt Name, Hash/Groesse und Host-Hinwei
+ - Keine Ueberschreibung lokaler `res://maps/...`-Editor-Dateien.
+ - Keine Asset-Pack-Synchronisation in diesem V1.
+ - Ablehnung laesst die Session im Lobby-State und markiert `can_start_client = false`.
++
++## Runtime-Eingaenge und V1-Grenze
++- Eingehende Host-Manifeste werden vor Normalisierung lokal validiert. Ein
++  wiederholtes Angebot bewahrt die lokale Zustimmung oder Ablehnung; ein neues
++  Angebot braucht eine neue Pruefung. Alte Dialogaktionen geben kein neues Angebot frei.
++- Session-Snapshot und Missionsstart-RPC respektieren die lokale Kartenfreigabe.
++  Die Lobby zeigt den aktuellen Consentzustand und laedt vor Szenenstart den
++  bekannten lokalen Pfad oder den ausdruecklich akzeptierten Cachepfad.
++- Wie in TASK228 bleibt der Netzwerk-Payloadtransport ausserhalb V1. Der
++  Acceptbutton wartet auf Payload; `accept_pending_map_download(payload)` ist
++  die vorhandene explizite Annahmegrenze. Dieser Fix fuehrt keinen Download-RPC ein.
+diff --git a/docs/tasks/TASK_1189_fow_dirty_region_fanout.md b/docs/tasks/TASK_1189_fow_dirty_region_fanout.md
+index 9e3ae834d..2eceb4075 100644
+--- a/docs/tasks/TASK_1189_fow_dirty_region_fanout.md
++++ b/docs/tasks/TASK_1189_fow_dirty_region_fanout.md
+@@ -44,6 +44,18 @@ git diff --check
+ 
+ ## Umsetzung
+ 
++- REVIEW7-Nachtrag: Terrainjobs verwenden eine unveraenderliche Positionsstichprobe.
++  Gegnerbewegung ist kein Terraininput; laufende Observerbewegung wird nach
++  Jobabschluss beim naechsten 100-ms-Aufruf nachgezogen. Die publizierte Signatur
++  bezeichnet die berechnete Stichprobe, nicht eine inzwischen neuere Position.
++  Terrain, Modus, Viewerteam, aktive Observer und Sichtparameter invalidieren
++  vor dem naechsten Slice. Target-LOS bleibt davon unabhaengig getaktet aktuell.
++  Ein unveraenderter Terrainzustand behaelt auch im echten View seinen laufenden
++  Overlayaufbau; reine Targetupdates enumerieren die Karte nicht. Pending behaelt
++  die letzte vollstaendige Terrainrevision statt sie zu leeren. Fortlaufende
++  +1-Deltas aktualisieren auch einen noch laufenden Initialaufbau; die Safety-
++  Abdeckung bleibt bis zu dessen Abschluss. Revisionsluecken erfordern Fullbuild.
++
+ - Der Dirty-Pfad plant Candidate-Regionen nur noch konstant und durchlaeuft
+   Lookup sowie Sichtauswertung in getrennten, begrenzten Scheiben. Er sortiert
+   weder die gesamte Karte noch die gesammelten Kandidaten; die Reihenfolge ist
+diff --git a/scripts/multiplayer/multiplayer_session.gd b/scripts/multiplayer/multiplayer_session.gd
+index 577490a93..38ec0a829 100644
+--- a/scripts/multiplayer/multiplayer_session.gd
++++ b/scripts/multiplayer/multiplayer_session.gd
+@@ -67,6 +67,7 @@ var _reconnect_tokens_by_peer_id: Dictionary = {}
+ var _local_reconnect_token: String = ""
+ var _local_is_host: bool = false
+ var _host_map_manifest: Dictionary = {}
++var _has_received_host_map_manifest: bool = false
+ var _map_transfer_state: Dictionary = {
+ 	"state": "none",
+ 	"requires_consent": false,
+@@ -183,7 +184,6 @@ func complete_mission() -> void:
+ 	for peer_id in _peers_by_id.keys():
+ 		_set_peer_ready(int(peer_id), false)
+ 	_pending_rejoin_identities_by_token.clear()
+-	_reconnect_tokens_by_peer_id.clear()
+ 	_refresh_status_text()
+ 	_emit_snapshot()
+ 	_broadcast_snapshot()
+@@ -194,6 +194,14 @@ func can_start_mission() -> bool:
+ 		return false
+ 	if _peers_by_id.size() < max_players:
+ 		return false
++	if _team_play_mode == TEAM_PLAY_MODE_VERSUS:
++		var host_side: String = String(Dictionary(_peers_by_id.get(HOST_PEER_ID, {})).get("team_id", ""))
++		for peer_id_variant in _peers_by_id.keys():
++			var peer_data: Dictionary = Dictionary(_peers_by_id[peer_id_variant])
++			if int(peer_id_variant) == HOST_PEER_ID or String(peer_data.get("role_id", "")) == ROLE_SPECTATOR:
++				continue
++			if host_side.is_empty() or String(peer_data.get("team_id", "")) == host_side:
++				return false
+ 	return _are_all_connected_peers_ready()
+ 
+ 
+@@ -396,6 +404,8 @@ func set_peer_ready_for_test(peer_id: int, ready: bool) -> void:
+ 
+ 
+ func set_host_map_manifest(manifest: Dictionary) -> Dictionary:
++	if _has_received_host_map_manifest and not _is_authority_session():
++		return _map_transfer_state.duplicate(true)
+ 	var verification: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("verify_manifest", manifest))
+ 	if bool(verification.get("valid", false)):
+ 		_host_map_manifest = Dictionary(verification.get("manifest", {})).duplicate(true)
+@@ -418,6 +428,8 @@ func set_host_map_manifest(manifest: Dictionary) -> Dictionary:
+ 
+ 
+ func evaluate_client_map_manifest(manifest: Dictionary, local_map_paths: Array = []) -> Dictionary:
++	if _is_stale_client_map_manifest(manifest):
++		return {"accepted": false, "state": "stale_manifest", "can_start_client": false}
+ 	var result: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("check_local_map", manifest, local_map_paths))
+ 	_host_map_manifest = Dictionary(result.get("manifest", MAP_MANIFEST_SCRIPT.call("normalize_manifest", manifest))).duplicate(true)
+ 	_map_transfer_state = result.duplicate(true)
+@@ -427,6 +439,8 @@ func evaluate_client_map_manifest(manifest: Dictionary, local_map_paths: Array =
+ 
+ 
+ func accept_map_download(manifest: Dictionary, map_json_text: String, cache_root: String = MAP_MANIFEST_SCRIPT.DOWNLOAD_ROOT) -> Dictionary:
++	if _is_stale_client_map_manifest(manifest):
++		return {"accepted": false, "state": "stale_manifest", "can_start_client": false}
+ 	var result: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("accept_download", manifest, map_json_text, cache_root))
+ 	_map_transfer_state = result.duplicate(true)
+ 	if bool(result.get("accepted", false)):
+@@ -436,6 +450,8 @@ func accept_map_download(manifest: Dictionary, map_json_text: String, cache_root
+ 
+ 
+ func reject_map_download(manifest: Dictionary) -> Dictionary:
++	if _is_stale_client_map_manifest(manifest):
++		return {"accepted": false, "state": "stale_manifest", "can_start_client": false}
+ 	_map_transfer_state = Dictionary(MAP_MANIFEST_SCRIPT.call("reject_download", manifest))
+ 	_host_map_manifest = Dictionary(_map_transfer_state.get("manifest", {})).duplicate(true)
+ 	_emit_snapshot()
+@@ -516,6 +532,8 @@ func _receive_session_snapshot(snapshot: Dictionary) -> void:
+ func _receive_start_mission(assignments: Dictionary) -> void:
+ 	if _is_authority_session():
+ 		return
++	if not bool(_map_transfer_state.get("can_start_client", false)):
++		return
+ 
+ 	_mission_started = true
+ 	_connection_state = STATE_MISSION
+@@ -636,6 +654,7 @@ func _reset_session_state(emit_signal: bool = true) -> void:
+ 	_pending_rejoin_identities_by_token.clear()
+ 	_reconnect_tokens_by_peer_id.clear()
+ 	_host_map_manifest.clear()
++	_has_received_host_map_manifest = false
+ 	_clear_upnp_mapping()
+ 	_reset_upnp_mapping_snapshot()
+ 	_map_transfer_state = {
+@@ -712,12 +731,12 @@ func _restore_versus_fireteam_assignments() -> void:
+ 			peer_data["role_id"] = ROLE_HOST
+ 			peer_data["fireteam_ids"] = _normalize_fireteam_ids(host_fireteam_ids)
+ 		elif not active_client_assigned:
+-			peer_data["team_id"] = client_team_id
++			peer_data["team_id"] = _default_team_for_peer(false)
+ 			peer_data["role_id"] = _get_client_role_id()
+ 			peer_data["fireteam_ids"] = _normalize_fireteam_ids(client_fireteam_ids)
+ 			active_client_assigned = true
+ 		else:
+-			peer_data["team_id"] = client_team_id
++			peer_data["team_id"] = _default_team_for_peer(false)
+ 			peer_data["role_id"] = ROLE_SPECTATOR
+ 			peer_data["fireteam_ids"] = PackedStringArray()
+ 		_peers_by_id[peer_id] = peer_data
+@@ -811,8 +830,10 @@ func _broadcast_snapshot() -> void:
+ 
+ 
+ func _apply_authority_snapshot(snapshot: Dictionary) -> void:
++	if snapshot.has("map_manifest"):
++		_apply_incoming_host_map_manifest(snapshot["map_manifest"])
+ 	_last_status_text = String(snapshot.get("status_text", _last_status_text))
+-	_mission_started = bool(snapshot.get("mission_started", _mission_started))
++	_mission_started = bool(snapshot.get("mission_started", _mission_started)) and bool(_map_transfer_state.get("can_start_client", false))
+ 	var roster_snapshot: Dictionary = Dictionary(snapshot.get("roster", {}))
+ 	if roster_snapshot.has("roster_mode"):
+ 		roster_mode = String(MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("normalize_roster_mode", roster_snapshot.get("roster_mode", roster_mode)))
+@@ -832,6 +853,40 @@ func _apply_authority_snapshot(snapshot: Dictionary) -> void:
+ 		_peers_by_id[peer_id] = peer_data
+ 
+ 
++func _apply_incoming_host_map_manifest(value: Variant) -> void:
++	_has_received_host_map_manifest = true
++	if typeof(value) == TYPE_DICTIONARY and Dictionary(value).is_empty():
++		_host_map_manifest.clear()
++		_map_transfer_state = {"state": "none", "requires_consent": false, "can_start_client": true}
++		return
++	var manifest: Dictionary = Dictionary(value) if typeof(value) == TYPE_DICTIONARY else {}
++	# Validate the raw offer before normalization can remove unsafe path components.
++	var verification: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("verify_manifest", manifest))
++	if not bool(verification.get("valid", false)):
++		_host_map_manifest = Dictionary(verification.get("manifest", {})).duplicate(true)
++		_map_transfer_state = {"state": "invalid_manifest", "requires_consent": false, "can_start_client": false, "errors": PackedStringArray(verification.get("errors", PackedStringArray()))}
++		return
++	var normalized: Dictionary = Dictionary(verification.get("manifest", {}))
++	var previous_state: String = String(_map_transfer_state.get("state", ""))
++	if _host_map_manifest == normalized and previous_state in ["known", "accepted", "rejected", "missing", "hash_mismatch"]:
++		return
++	var local_map_paths: Array = [_selected_map_path]
++	for key in ["local_path", "cache_path"]:
++		var local_path: String = String(_map_transfer_state.get(key, ""))
++		if not local_path.is_empty() and not local_map_paths.has(local_path):
++			local_map_paths.append(local_path)
++	_host_map_manifest = normalized.duplicate(true)
++	_map_transfer_state = Dictionary(MAP_MANIFEST_SCRIPT.call("check_local_map", manifest, local_map_paths))
++	_map_transfer_state["can_start_client"] = String(_map_transfer_state.get("state", "")) == "known"
++
++
++func _is_stale_client_map_manifest(manifest: Dictionary) -> bool:
++	if not _has_received_host_map_manifest:
++		return false
++	var verification: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("verify_manifest", manifest))
++	return not bool(verification.get("valid", false)) or Dictionary(verification.get("manifest", {})) != _host_map_manifest
++
++
+ func _build_peer_snapshot_array() -> Array:
+ 	var result: Array = []
+ 	var peer_ids: Array = _peers_by_id.keys()
+@@ -950,7 +1005,7 @@ func _default_team_for_peer(is_host_peer: bool) -> String:
+ 		return _selected_team_slot if not _selected_team_slot.is_empty() else host_team_id
+ 	if _team_play_mode == TEAM_PLAY_MODE_COOP:
+ 		return _selected_team_slot if not _selected_team_slot.is_empty() else host_team_id
+-	return client_team_id
++	return "team_alpha" if _selected_team_slot == "team_bravo" else "team_bravo"
+ 
+ 
+ func _normalize_player_name(value: String) -> String:
+diff --git a/scripts/tactical/local_avoidance_resolver.gd b/scripts/tactical/local_avoidance_resolver.gd
+index bed92f9d4..24d1dc6c2 100644
+--- a/scripts/tactical/local_avoidance_resolver.gd
++++ b/scripts/tactical/local_avoidance_resolver.gd
+@@ -1,6 +1,8 @@
+ class_name LocalAvoidanceResolver
+ extends RefCounted
+ 
++const TERRAIN_PATHFINDER = preload("res://scripts/terrain/terrain_pathfinder.gd")
++
+ const DEFAULT_AGENT_RADIUS: float = 18.0
+ const DEFAULT_MINIMUM_SPACING: float = DEFAULT_AGENT_RADIUS * 2.0
+ const DEFAULT_NEIGHBOR_RADIUS: float = 56.0
+@@ -12,6 +14,7 @@ const SIDE_STEP_WEIGHT: float = 0.35
+ var cell_size: float = DEFAULT_CELL_SIZE
+ var _agents_by_id: Dictionary = {}
+ var _cell_agents: Dictionary = {}
++var _terrain_pathfinder = TERRAIN_PATHFINDER.new()
+ 
+ 
+ func clear() -> void:
+@@ -184,17 +187,17 @@ func resolve_minimum_spacing_positions(
+ 				var candidate_a: Vector2 = position_a + move_a
+ 				var candidate_b: Vector2 = position_b + move_b
+ 				var moved_pair: bool = false
+-				if _is_position_walkable(candidate_a, terrain_registry) and _is_position_walkable(candidate_b, terrain_registry):
++				if _is_spacing_transition_walkable(position_a, candidate_a, terrain_registry) and _is_spacing_transition_walkable(position_b, candidate_b, terrain_registry):
+ 					positions_by_unit_id[unit_id_a] = candidate_a
+ 					positions_by_unit_id[unit_id_b] = candidate_b
+ 					moved_pair = true
+ 				else:
+ 					var candidate_a_full: Vector2 = position_a - axis * overlap
+ 					var candidate_b_full: Vector2 = position_b + axis * overlap
+-					if _is_position_walkable(candidate_a_full, terrain_registry):
++					if _is_spacing_transition_walkable(position_a, candidate_a_full, terrain_registry):
+ 						positions_by_unit_id[unit_id_a] = candidate_a_full
+ 						moved_pair = true
+-					elif _is_position_walkable(candidate_b_full, terrain_registry):
++					elif _is_spacing_transition_walkable(position_b, candidate_b_full, terrain_registry):
+ 						positions_by_unit_id[unit_id_b] = candidate_b_full
+ 						moved_pair = true
+ 				if moved_pair:
+@@ -366,6 +369,57 @@ func _is_position_walkable(position: Vector2, terrain_registry) -> bool:
+ 	return bool(terrain_registry.call("is_walkable", terrain_registry.call("world_to_grid", position)))
+ 
+ 
++func _is_spacing_transition_walkable(from_position: Vector2, to_position: Vector2, terrain_registry) -> bool:
++	if not _is_position_walkable(to_position, terrain_registry):
++		return false
++	if terrain_registry == null or not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("is_walkable"):
++		return true
++	var previous_grid: Vector2i = terrain_registry.call("world_to_grid", from_position)
++	var destination_grid: Vector2i = terrain_registry.call("world_to_grid", to_position)
++	if previous_grid == destination_grid:
++		return true
++	if not terrain_registry.has_method("world_to_grid_float") or not terrain_registry.has_method("get_tile_at_grid"):
++		return false
++	var start: Vector2 = terrain_registry.call("world_to_grid_float", from_position)
++	var finish: Vector2 = terrain_registry.call("world_to_grid_float", to_position)
++	var start_axes: Array[float] = [start.x, start.y]
++	var finish_axes: Array[float] = [finish.x, finish.y]
++	var boundary_spacing: float = 1.0
++	var boundary_offset: float = 0.5
++	if terrain_registry.has_method("get_grid_topology") and terrain_registry.call("get_grid_topology") == "hex_axial_v1":
++		# Hex edges lie on half-integer lines in these three axial projections.
++		# Partition the ACTUAL segment, including endpoint offsets, rather than
++		# the line between cell centers, which can omit thin intervening cells.
++		start_axes = [start.x + 0.5 * start.y, 0.5 * (start.x - start.y), 0.5 * start.x + start.y]
++		finish_axes = [finish.x + 0.5 * finish.y, 0.5 * (finish.x - finish.y), 0.5 * finish.x + finish.y]
++		boundary_spacing = 0.5
++		boundary_offset = 0.0
++	var partitions: Array[float] = [0.0, 1.0]
++	for axis_index in range(start_axes.size()):
++		var from_axis: float = start_axes[axis_index]
++		var to_axis: float = finish_axes[axis_index]
++		if from_axis == to_axis:
++			continue
++		var first_boundary: int = floori((minf(from_axis, to_axis) - boundary_offset) / boundary_spacing) + 1
++		var boundary_end: int = ceili((maxf(from_axis, to_axis) - boundary_offset) / boundary_spacing)
++		for boundary_index in range(first_boundary, boundary_end):
++			var boundary: float = float(boundary_index) * boundary_spacing + boundary_offset
++			partitions.append((boundary - from_axis) / (to_axis - from_axis))
++	partitions.sort()
++	# Work is bounded by correction length, never by map size. Only the existing
++	# pathfinder decides walkability, height transitions and diagonal corners.
++	for index in range(1, partitions.size()):
++		if partitions[index] <= partitions[index - 1]:
++			continue
++		var fraction: float = (partitions[index - 1] + partitions[index]) * 0.5
++		var grid: Vector2i = terrain_registry.call("world_to_grid", from_position.lerp(to_position, fraction))
++		if grid != previous_grid:
++			if not _terrain_pathfinder.can_traverse_step(previous_grid, grid, terrain_registry):
++				return false
++			previous_grid = grid
++	return previous_grid == destination_grid or _terrain_pathfinder.can_traverse_step(previous_grid, destination_grid, terrain_registry)
++
++
+ func _calculate_minimum_distance_between_positions(positions_by_unit_id: Dictionary) -> float:
+ 	var unit_ids: Array = positions_by_unit_id.keys()
+ 	unit_ids.sort()
+diff --git a/scripts/terrain/terrain_map_3d_view.gd b/scripts/terrain/terrain_map_3d_view.gd
+index 6c54f7e6d..9243cca6b 100644
+--- a/scripts/terrain/terrain_map_3d_view.gd
++++ b/scripts/terrain/terrain_map_3d_view.gd
+@@ -1901,14 +1901,22 @@ func _set_contact_density_heatmap_enabled_internal(enabled: bool, force_rebuild:
+ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
+ 	var normalized_state: Dictionary = _normalize_fog_of_war_visual_state(fog_of_war_state)
+ 	var next_signature: String = _build_fog_of_war_visual_signature(normalized_state)
+-	if next_signature == _fog_of_war_state_signature:
++	var terrain_unchanged: bool = (
++		String(normalized_state.get("mode", "")) == String(_fog_of_war_state.get("mode", ""))
++		and String(normalized_state.get("team_id", "")) == String(_fog_of_war_state.get("team_id", ""))
++		and int(normalized_state.get("visibility_revision", 0)) == int(_fog_of_war_state.get("visibility_revision", 0))
++		and Dictionary(normalized_state.get("terrain_knowledge", {})) == Dictionary(_fog_of_war_state.get("terrain_knowledge", {}))
++	)
++	if next_signature == _fog_of_war_state_signature and terrain_unchanged:
+ 		return
+ 	var work_started_usec: int = Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
+ 	var can_apply_overlay_delta: bool = _can_apply_fow_overlay_delta(normalized_state)
+ 	var previous_dynamic_visibility_signature: String = _build_fow_dynamic_visibility_signature(_fog_of_war_state)
+ 	_fog_of_war_state_signature = next_signature
+ 	_apply_fog_of_war_visual_state(normalized_state)
+-	if not can_apply_overlay_delta or not _apply_fow_overlay_delta(normalized_state):
++	# Target/contact updates keep the same terrain revision and tile sets. They
++	# must retain even an in-flight overlay's mesh, cursor and safety cover.
++	if not terrain_unchanged and (not can_apply_overlay_delta or not _apply_fow_overlay_delta(normalized_state)):
+ 		_rebuild_fog_of_war_visuals()
+ 	_rebuild_contact_visuals()
+ 	_fow_contact_visibility_refresh_count += 1
+@@ -6007,6 +6015,9 @@ func _rebuild_fog_of_war_visuals() -> void:
+ 	for tile_id in _fow_overlay_render_tile_ids:
+ 		_fow_overlay_slot_by_tile_id[tile_id] = _fow_overlay_slot_by_tile_id.size()
+ 	_create_fow_overlay_multimesh()
++	# Slots already cover the complete rendered subset. Sequential deltas may
++	# update them during the bounded initial build; later slices read latest state.
++	_fow_overlay_visibility_revision = int(_fog_of_war_state.get("visibility_revision", 0))
+ 	_fow_overlay_pending_tile_ids = PackedStringArray(_fow_overlay_render_tile_ids)
+ 	_fow_overlay_pending_cursor = 0
+ 	_fow_overlay_full_rebuild_pending = not _fow_overlay_pending_tile_ids.is_empty()
+@@ -6105,10 +6116,10 @@ func _can_apply_fow_overlay_delta(next_fog_state: Dictionary) -> bool:
+ 		return false
+ 	if _fow_overlay_slot_by_tile_id.is_empty() or _fow_overlay_multimesh == null:
+ 		return false
+-	if _fow_overlay_full_rebuild_pending:
+-		return false
+ 	var next_revision: int = int(next_fog_state.get("visibility_revision", 0))
+-	return next_revision > _fow_overlay_visibility_revision and not Dictionary(next_fog_state.get("visibility_delta", {})).is_empty()
++	# A delta describes only the last transition. A skipped revision requires
++	# rebuilding from complete knowledge, including changes in the missing delta.
++	return next_revision == _fow_overlay_visibility_revision + 1 and not Dictionary(next_fog_state.get("visibility_delta", {})).is_empty()
+ 
+ 
+ func _apply_fow_overlay_delta(next_fog_state: Dictionary) -> bool:
+@@ -12282,7 +12293,12 @@ func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bo
+ 	if String(proxy.get_meta("unit_visual_animation_name", "")) != desired_animation:
+ 		proxy.set_meta("unit_visual_animation_name", desired_animation)
+ 		changed = true
++	var previous_animation_position: float = animation_player.current_animation_position
+ 	animation_player.advance(maxf(delta, 0.0))
++	# UPDATE_ONCE also needs a new frame when a stable clip advances its pose.
++	# Frozen/zero-delta or hidden animations must not cause recurring redraws.
++	if proxy.is_visible_in_tree() and not is_equal_approx(previous_animation_position, animation_player.current_animation_position):
++		changed = true
+ 	return changed
+ 
+ 
+diff --git a/scripts/tests/mission_tactical_sandbox_controller.gd b/scripts/tests/mission_tactical_sandbox_controller.gd
+index e21b50e85..1c1ae46bb 100644
+--- a/scripts/tests/mission_tactical_sandbox_controller.gd
++++ b/scripts/tests/mission_tactical_sandbox_controller.gd
+@@ -30419,8 +30419,9 @@ func _focus_connected_first_contact_world(contact_snapshot: Array) -> Dictionary
+ 		var position_variant: Variant = contact.get("approximate_position", contact.get("last_known_position", contact.get("position", null)))
+ 		if typeof(position_variant) != TYPE_VECTOR2:
+ 			continue
+-		var position: Vector2 = Vector2(position_variant)
+-		signature_tokens.append("%s:%d:%d" % [String(contact.get("target_id", contact.get("unit_id", ""))), roundi(position.x), roundi(position.y)])
++		# Positions belong to the frame bounds, not its one-shot identity.
++		# A normal moving-contact snapshot must preserve manual pan and zoom.
++		signature_tokens.append("%s:%s" % [fireteam_id, String(contact.get("target_id", contact.get("unit_id", "")))])
+ 	var signature: String = "|".join(signature_tokens)
+ 	if signature == _connected_first_contact_world_frame_signature:
+ 		return {"framed": false, "reason": "already_framed", "signature": signature}
+diff --git a/scripts/tests/mission_test_setup.gd b/scripts/tests/mission_test_setup.gd
+index e12e97b86..8e50e38a0 100644
+--- a/scripts/tests/mission_test_setup.gd
++++ b/scripts/tests/mission_test_setup.gd
+@@ -101,6 +101,7 @@ var _fog_unit_nodes: Array = []
+ var _fog_terrain_registry = null
+ var _fog_runtime_signature: String = ""
+ var _fog_requested_runtime_signature: String = ""
++var _fog_requested_static_signature: String = ""
+ var _fog_pending_visibility_started_msec: int = 0
+ var _fog_update_elapsed: float = 0.0
+ var _friendly_unit_slot_paths: Array[NodePath] = []
+@@ -1050,55 +1051,77 @@ func _sync_fog_of_war_visual_state(force: bool = false) -> void:
+ 	if mode == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF:
+ 		_fog_runtime_signature = "off"
+ 		_fog_requested_runtime_signature = ""
++		_fog_requested_static_signature = ""
+ 		_fog_pending_visibility_started_msec = 0
+ 		if view.has_method("set_fog_of_war_state"):
+ 			view.call("set_fog_of_war_state", {"mode": mode, "team_id": viewer_team_id})
+ 		return
+ 	var next_signature: String = _build_fog_runtime_signature(mode)
+-	if not force and next_signature == _fog_runtime_signature:
++	var next_static_signature: String = _build_fog_runtime_signature(mode, false)
++	# Dynamic targets sample current LOS independently of the terrain job, even
++	# while its bounded slices are still running.
++	_sync_fog_dynamic_target_visibility()
++	if not force and not _fog_requested_runtime_signature.is_empty() and next_static_signature == _fog_requested_static_signature:
++		# Keep the frozen positional sample until it completes. Latest positions
++		# are read for the next request; walking must not restart every slice.
++		if view.has_method("set_fog_of_war_state"):
++			var pending_snapshot: Dictionary = _fog_of_war_system.call("build_team_state_snapshot", viewer_team_id)
++			pending_snapshot["visibility_pending"] = true
++			view.call("set_fog_of_war_state", pending_snapshot)
+ 		return
+-	if not force and next_signature == _fog_requested_runtime_signature:
++	if not force and _fog_requested_runtime_signature.is_empty() and next_signature == _fog_runtime_signature:
++		# Targets do not contribute to terrain visibility. Refresh their LOS at the
++		# normal cadence without replacing terrain work or enumerating map tiles.
++		if view.has_method("set_fog_of_war_state"):
++			view.call("set_fog_of_war_state", _fog_of_war_system.call("build_team_state_snapshot", viewer_team_id))
+ 		return
++	# Returning to a committed observer state must replace a different pending
++	# job too; otherwise that obsolete job could later publish its away position.
++	var replace_with_committed_state: bool = not _fog_requested_runtime_signature.is_empty() and next_signature == _fog_runtime_signature
+ 	_fog_requested_runtime_signature = next_signature
++	_fog_requested_static_signature = next_static_signature
+ 	_fog_pending_visibility_started_msec = Time.get_ticks_msec()
+ 	_fog_of_war_system.call(
+ 		"request_tile_visibility_update_for_team",
+ 		viewer_team_id,
+-		_fog_observer_unit_nodes,
++		_get_active_fog_observers(),
+ 		_fog_terrain_registry,
+ 		_fog_of_war_los_system,
+ 		fog_of_war_sight_range_world,
+-		{"work_budget_tiles": fog_of_war_work_budget_tiles}
++		{"work_budget_tiles": fog_of_war_work_budget_tiles, "force_full": force or replace_with_committed_state}
+ 	)
+-	# The previous state may contain information the new observer position must no
+-	# longer expose.  Until the authoritative revision is complete, use the
+-	# conservative visual state: known terrain is dimmed and blackout terrain is
+-	# covered, while gameplay truth remains in FogOfWarSystem.
++	# Retain the last complete terrain sample until the next atomic publication
++	# (TASK1189). Clearing it here would restart the real overlay on every step.
++	# The initial sample has no known tiles and remains safely blacked out;
++	# dynamic targets already use current LOS independently of the terrain job.
+ 	if view.has_method("set_fog_of_war_state"):
+-		view.call("set_fog_of_war_state", {
+-			"mode": mode,
+-			"team_id": viewer_team_id,
+-			"terrain_knowledge": {"visible_tile_ids": PackedStringArray(), "explored_tile_ids": PackedStringArray()},
+-			"current_visibility": {"visible_target_ids": PackedStringArray(), "visible_event_ids": PackedStringArray()},
+-			"visibility_pending": true,
+-		})
++		var pending_snapshot: Dictionary = _fog_of_war_system.call("build_team_state_snapshot", viewer_team_id)
++		pending_snapshot["visibility_pending"] = true
++		view.call("set_fog_of_war_state", pending_snapshot)
+ 	_advance_fog_of_war_visibility_work()
+ 
+ 
+ func _advance_fog_of_war_visibility_work() -> void:
+ 	if _fog_of_war_system == null or _fog_requested_runtime_signature.is_empty():
+ 		return
++	# Terrain, mode, active observers and sight changes invalidate before commit.
++	# Motion retains the request's atomic sample and coalesces into the next job.
++	var mode: String = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", fog_of_war_mode))
++	if _build_fog_runtime_signature(mode, false) != _fog_requested_static_signature:
++		_sync_fog_of_war_visual_state(false)
++		return
+ 	var viewer_team_id: String = _get_fog_viewer_team_id()
+ 	var update: Dictionary = Dictionary(_fog_of_war_system.call("process_pending_tile_visibility_work", viewer_team_id, fog_of_war_work_budget_tiles))
+ 	if not bool(update.get("completed", false)):
+ 		return
+ 	_fog_runtime_signature = _fog_requested_runtime_signature
+ 	_fog_requested_runtime_signature = ""
++	_fog_requested_static_signature = ""
+ 	_fog_pending_visibility_started_msec = 0
+ 	_sync_fog_dynamic_target_visibility()
+ 	var view = _terrain_3d_view
+ 	if view != null and is_instance_valid(view) and view.has_method("set_fog_of_war_state"):
+-		view.call("set_fog_of_war_state", _fog_of_war_system.call("build_team_visual_state_snapshot", viewer_team_id, _fog_terrain_registry))
++		view.call("set_fog_of_war_state", _fog_of_war_system.call("build_team_state_snapshot", viewer_team_id))
+ 
+ 
+ func _sync_fog_dynamic_target_visibility() -> void:
+@@ -1161,23 +1184,27 @@ func _get_effective_fog_sight_range_world(observer: Node) -> float:
+ 	return fog_of_war_sight_range_world * maxf(sight_range_factor, 0.0)
+ 
+ 
+-func _build_fog_runtime_signature(mode: String) -> String:
++func _build_fog_runtime_signature(mode: String, include_positions: bool = true) -> String:
+ 	var parts: PackedStringArray = PackedStringArray()
+ 	parts.append(mode)
+ 	parts.append(_get_fog_viewer_team_id())
++	parts.append("base_sight:%s" % str(fog_of_war_sight_range_world))
+ 	if _fog_terrain_registry != null and _fog_terrain_registry.has_method("get_revision"):
+ 		parts.append("terrain_revision:%d" % int(_fog_terrain_registry.call("get_revision")))
+-	for unit in _fog_unit_nodes:
++	# Only observer inputs affect terrain LOS. Enemy motion is handled by the
++	# separate dynamic-target refresh and cannot restart an unfinished full scan.
++	for unit in _get_active_fog_observers():
+ 		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
+ 			continue
+ 		var visible_text: String = "1" if not (unit is CanvasItem) or (unit as CanvasItem).visible else "0"
+-		var grid_text: String = _get_fog_grid_signature((unit as Node2D).global_position)
+-		var sight_text: String = "%.3f" % _get_fog_unit_sight_range_factor(unit)
++		var position: Vector2 = (unit as Node2D).global_position
++		var position_text: String = "%s,%s" % [str(position.x), str(position.y)] if include_positions else ""
++		var sight_text: String = str(_get_fog_unit_sight_range_factor(unit))
+ 		parts.append("%s:%s:%s:%s:%s" % [
+ 			String(unit.call("get_unit_id")).strip_edges(),
+ 			String(unit.call("get_team_id")).strip_edges(),
+ 			visible_text,
+-			grid_text,
++			position_text,
+ 			sight_text,
+ 		])
+ 	parts.sort()
+diff --git a/scripts/tests/review2_20261102_p2_spacing_verifier.gd b/scripts/tests/review2_20261102_p2_spacing_verifier.gd
+index ed813662a..51e254e2e 100644
+--- a/scripts/tests/review2_20261102_p2_spacing_verifier.gd
++++ b/scripts/tests/review2_20261102_p2_spacing_verifier.gd
+@@ -100,8 +100,12 @@ func _test_overlap_and_negative_cells_are_order_independent() -> void:
+ func _test_terrain_one_sided_and_blocked_fallbacks() -> void:
+ 	var terrain = TERRAIN.new()
+ 	terrain.configure_iso_grid(Vector2.ZERO, 1.0, 1.0)
+-	for grid in [Vector2i.ZERO, Vector2i(5, -5), Vector2i(18, -18)]:
+-		terrain.register_tile(TILE.new({"tile_id": str(grid), "grid_position": grid, "world_position": terrain.grid_to_world(grid), "walkable": true}))
++	# The positive fallback needs a connected corridor, including both sides
++	# of every square diagonal. Isolated destination tiles imply teleportation.
++	for x in range(19):
++		for y in range(maxi(-18, -x - 1), mini(0, -x + 1) + 1):
++			var grid := Vector2i(x, y)
++			terrain.register_tile(TILE.new({"tile_id": str(grid), "grid_position": grid, "world_position": terrain.grid_to_world(grid), "walkable": true}))
+ 	var units: Array = [_unit("alpha", Vector2.ZERO), _unit("bravo", Vector2(10.0, 0.0))]
+ 	for unit in units:
+ 		root.add_child(unit)
+diff --git a/scripts/tests/review46_20261103_unit_badge_verifier.gd b/scripts/tests/review46_20261103_unit_badge_verifier.gd
+index d27193021..b8e78e656 100644
+--- a/scripts/tests/review46_20261103_unit_badge_verifier.gd
++++ b/scripts/tests/review46_20261103_unit_badge_verifier.gd
+@@ -202,6 +202,15 @@ func _make_view(fixture: Node, unit: Node) -> CountingView:
+ 	view.set_process(false)
+ 	view.call("configure_from_map", MAP.create_empty("review46_badge", Vector2i(4, 4), Vector2.ZERO, 64.0, 32.0, 3))
+ 	view.call("set_unit_nodes", [unit])
++	# This verifier isolates badge redraws from unrelated live idle animation.
++	# Freeze the actual player through its normal API; positive-delta process
++	# frames, cache/fast-path assertions and all visible badge checks stay real.
++	# review7_animation_verifier covers the required live-animation redraws.
++	var runtime: Dictionary = Dictionary(Dictionary(view.get("_unit_proxy_runtime_by_id")).get(String(unit.call("get_unit_id")), {}))
++	var animation_player: AnimationPlayer = runtime.get("animation_player", null) as AnimationPlayer
++	_check(animation_player != null, "Badge-only redraw fixture has a real AnimationPlayer")
++	if animation_player != null:
++		animation_player.speed_scale = 0.0
+ 	_step(view)
+ 	return view
+ 
+diff --git a/scripts/tests/review7_20261103_checks.json b/scripts/tests/review7_20261103_checks.json
+new file mode 100644
+index 000000000..7cf47a100
+--- /dev/null
++++ b/scripts/tests/review7_20261103_checks.json
+@@ -0,0 +1,626 @@
++{
++  "version": 1,
++  "checks": [
++    {
++      "name": "review_p1_movement",
++      "script": "res://scripts/tests/review_20261102_p1_movement_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 45
++    },
++    {
++      "name": "review_p1_navigation",
++      "script": "res://scripts/tests/review_20261102_p1_navigation_verifier.gd",
++      "success_marker": "REVIEW_20261102_P1_NAVIGATION_RESULT",
++      "timeout": 45
++    },
++    {
++      "name": "review_p1_runtime_index",
++      "script": "res://scripts/tests/review_20261102_p1_runtime_index_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 60
++    },
++    {
++      "name": "review_p2_hex_budget",
++      "script": "res://scripts/tests/review_20261102_p2_hex_budget_verifier.gd",
++      "success_marker": "REVIEW_20261102_P2_HEX_RESULT",
++      "timeout": 45
++    },
++    {
++      "name": "review_p2_fallback",
++      "script": "res://scripts/tests/review_20261102_p2_fallback_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 45
++    },
++    {
++      "name": "review_p2_dropship_hud",
++      "script": "res://scripts/tests/review_20261102_p2_dropship_hud_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 90
++    },
++    {
++      "name": "review_p2_vital_order",
++      "script": "res://scripts/tests/review_20261102_p2_vital_order_verifier.gd",
++      "success_marker": "REVIEW_20261102_P2_VITAL_ORDER_RESULT",
++      "timeout": 45
++    },
++    {
++      "name": "combat_authority162",
++      "script": "res://scripts/tests/task_162_combat_authority_contract_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 60
++    },
++    {
++      "name": "network_authority166",
++      "script": "res://scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd",
++      "success_marker": "ALL TESTS PASSED",
++      "timeout": 45
++    },
++    {
++      "name": "snapshot168",
++      "script": "res://scripts/tests/task_168_multiplayer_snapshot_contract_verifier.gd",
++      "success_marker": "ALL TESTS PASSED",
++      "timeout": 45
++    },
++    {
++      "name": "command_authority1186",
++      "script": "res://scripts/tests/task_1186_simulation_root_command_authority.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 45
++    },
++    {
++      "name": "movement_lifecycle501",
++      "script": "res://scripts/tests/task_501_integrated_movement_command_lifecycle_hardening.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 45
++    },
++    {
++      "name": "navigation125",
++      "script": "res://scripts/tests/task_125_verifier.gd",
++      "success_marker": "ALL TESTS PASSED",
++      "timeout": 45
++    },
++    {
++      "name": "navigation127",
++      "script": "res://scripts/tests/task_127_verifier.gd",
++      "success_marker": "ALL TESTS PASSED",
++      "timeout": 45
++    },
++    {
++      "name": "requeue1199",
++      "script": "res://scripts/tests/task_1199_dominant_simulation_slice.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 45
++    },
++    {
++      "name": "path_recompute_under_fire",
++      "script": "res://scripts/tests/path_recompute_under_fire_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 45
++    },
++    {
++      "name": "avoidance475",
++      "script": "res://scripts/tests/task_475_fireteam_pathfinding_avoidance_stability_pass.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 45
++    },
++    {
++      "name": "mission_index1190",
++      "script": "res://scripts/tests/task_1190_mission_runtime_index_hud_delta.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 60
++    },
++    {
++      "name": "hud_light1152",
++      "script": "res://scripts/tests/task_1152_mission_hud_heavy_refresh_budget_pass.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 60
++    },
++    {
++      "name": "command_readability1157",
++      "script": "res://scripts/tests/task_1157_command_matrix_1280_readability.gd",
++      "success_marker": "TASK_1157 PASS",
++      "timeout": 60
++    },
++    {
++      "name": "incremental_hpa412",
++      "script": "res://scripts/tests/task_412_large_map_streaming_incremental_hpa.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 120
++    },
++    {
++      "name": "doors692",
++      "script": "res://scripts/tests/task_692_door_runtime_collision_los_contract.gd",
++      "success_marker": "TASK_692: ALL PASSED",
++      "timeout": 45
++    },
++    {
++      "name": "hex_foundation",
++      "script": "res://scripts/tests/frontier_hex_foundation_verifier.gd",
++      "success_marker": "FRONTIER_HEX_FOUNDATION_ALL_PASS",
++      "timeout": 45
++    },
++    {
++      "name": "hex_movement",
++      "script": "res://scripts/tests/frontier_hex_movement_verifier.gd",
++      "args": [
++        "--evidence-output=res://output/review_fixes_20261102/hex_movement.json"
++      ],
++      "success_marker": "FRONTIER_HEX_MOVEMENT",
++      "timeout": 45
++    },
++    {
++      "name": "two_peer_transport1083",
++      "script": "res://scripts/tests/task_1083_two_instance_roe_ownership_playtest.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 90
++    },
++    {
++      "name": "snapshot_payload221",
++      "script": "res://scripts/tests/task_221_multiplayer_snapshot_serialization_performance_pass.gd",
++      "success_marker": "ALL TESTS PASSED",
++      "timeout": 60
++    },
++    {
++      "name": "interaction_payload1099",
++      "script": "res://scripts/tests/task_1099_connected_interaction_snapshot_payload_budget.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 60
++    },
++    {
++      "name": "interaction_jitter1100",
++      "script": "res://scripts/tests/task_1100_connected_interaction_snapshot_loss_jitter_resilience.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 90
++    },
++    {
++      "name": "dropship_pending1114",
++      "script": "res://scripts/tests/task_1114_connected_dropship_pending_card_visual_polish.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 60
++    },
++    {
++      "name": "dropship_truth503",
++      "script": "res://scripts/tests/task_503_mission_dropship_fireteam_hud_truth.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 60
++    },
++    {
++      "name": "dropship_ux397",
++      "script": "res://scripts/tests/task_397_mission_dropship_ux_hotfix.gd",
++      "success_marker": "TASK_397: ALL PASSED",
++      "timeout": 60
++    },
++    {
++      "name": "dropship_multi_cards",
++      "script": "res://scripts/tests/bugfix_mission_multi_dropship_cards.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 60
++    },
++    {
++      "name": "review2_20261102_isolation_canary_verifier",
++      "script": "res://scripts/tests/review2_20261102_isolation_canary_verifier.gd",
++      "success_marker": "REVIEW2_ISOLATION_CANARY_PASS",
++      "timeout": 180
++    },
++    {
++      "name": "review2_20261102_p1_hidden_mission_verifier",
++      "script": "res://scripts/tests/review2_20261102_p1_hidden_mission_verifier.gd",
++      "success_marker": "RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "review2_20261102_p2_height_lookup_verifier",
++      "script": "res://scripts/tests/review2_20261102_p2_height_lookup_verifier.gd",
++      "success_marker": "RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "review2_20261102_p2_editor_picking_verifier",
++      "script": "res://scripts/tests/review2_20261102_p2_editor_picking_verifier.gd",
++      "success_marker": "RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "review2_20261102_p2_spacing_verifier",
++      "script": "res://scripts/tests/review2_20261102_p2_spacing_verifier.gd",
++      "success_marker": "RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "review2_20261102_p2_contact_observers_verifier",
++      "script": "res://scripts/tests/review2_20261102_p2_contact_observers_verifier.gd",
++      "success_marker": "RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "review2_20261102_p2_contact_relays_verifier",
++      "script": "res://scripts/tests/review2_20261102_p2_contact_relays_verifier.gd",
++      "success_marker": "RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "review2_20261102_p2_chunk_jitter_verifier",
++      "script": "res://scripts/tests/review2_20261102_p2_chunk_jitter_verifier.gd",
++      "success_marker": "REVIEW2_CHUNK_JITTER_RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "task_096_recovery_verifier",
++      "script": "res://scripts/tests/task_096_recovery_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "bugfix_release_singleplayer_normal_click_homebase_guard",
++      "script": "res://scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_1185_tactical_input_ownership",
++      "script": "res://scripts/tests/task_1185_tactical_input_ownership.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "frontier_hex_render_verifier",
++      "script": "res://scripts/tests/frontier_hex_render_verifier.gd",
++      "success_marker": "FRONTIER_HEX_RENDER",
++      "timeout": 180
++    },
++    {
++      "name": "task_292_editor_hill_cliff_grid_depth_repair",
++      "script": "res://scripts/tests/task_292_editor_hill_cliff_grid_depth_repair.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_295_map_editor_paint_toolbar_tools_polish",
++      "script": "res://scripts/tests/task_295_map_editor_paint_toolbar_tools_polish.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_229_map_editor_usability_authoring_pass",
++      "script": "res://scripts/tests/task_229_map_editor_usability_authoring_pass.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "editor_height_edge_surface_anchor_verifier",
++      "script": "res://scripts/tests/editor_height_edge_surface_anchor_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_183_editor_hill_authoring_verifier",
++      "script": "res://scripts/tests/task_183_editor_hill_authoring_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_163_map_editor_module_split_verifier",
++      "script": "res://scripts/tests/task_163_map_editor_module_split_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_112_verifier",
++      "script": "res://scripts/tests/task_112_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_187_npc_minimum_spacing_and_multiplayer_authority",
++      "script": "res://scripts/tests/task_187_npc_minimum_spacing_and_multiplayer_authority.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_130_verifier",
++      "script": "res://scripts/tests/task_130_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_510_contact_report_upgrade",
++      "script": "res://scripts/tests/task_510_contact_report_upgrade.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_218_simulation_combat_ai_tick_budget_pass",
++      "script": "res://scripts/tests/task_218_simulation_combat_ai_tick_budget_pass.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "cycle_fireteam_authority",
++      "script": "res://scripts/tests/review_cycles_20261103_fireteam_authority_verifier.gd",
++      "success_marker": "REVIEW_CYCLES_FIRETEAM_AUTHORITY_RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "cycle_cooldown",
++      "script": "res://scripts/tests/review_cycles_20261103_cooldown_cadence_verifier.gd",
++      "success_marker": "REVIEW_CYCLES_COOLDOWN_RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "cycle_area_selection",
++      "script": "res://scripts/tests/review_cycles_20261103_area_selection_verifier.gd",
++      "success_marker": "REVIEW_CYCLES_AREA_SELECTION_RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "cycle_heatmap_lifecycle",
++      "script": "res://scripts/tests/review_cycles_20261103_heatmap_lifecycle_verifier.gd",
++      "success_marker": "REVIEW_CYCLES_HEATMAP_LIFECYCLE_RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "medic_support",
++      "script": "res://scripts/tests/medic_support_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "discipline093",
++      "script": "res://scripts/tests/task_093_verifier.gd",
++      "success_marker": "TESTS PASSED",
++      "timeout": 180
++    },
++    {
++      "name": "misidentification094",
++      "script": "res://scripts/tests/task_094_verifier.gd",
++      "success_marker": "TESTS PASSED",
++      "timeout": 180
++    },
++    {
++      "name": "density377",
++      "script": "res://scripts/tests/task_377_contact_density_heat_map_layer.gd",
++      "success_marker": "ALL TESTS PASSED",
++      "timeout": 180
++    },
++    {
++      "name": "discipline_bridge570",
++      "script": "res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "responder118",
++      "script": "res://scripts/tests/task_118_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "cycle_density_fow_refresh",
++      "script": "res://scripts/tests/review_cycles_20261103_density_fow_refresh_verifier.gd",
++      "success_marker": "REVIEW_CYCLES_DENSITY_FOW_REFRESH_RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "fow_dirty1189",
++      "script": "res://scripts/tests/task_1189_fow_dirty_region_fanout.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "fow_runtime224",
++      "script": "res://scripts/tests/task_224_fog_of_war_tile_visibility_height_cover_runtime.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "fow_overlay225",
++      "script": "res://scripts/tests/task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "review46_20261103_effective_roster_skills_verifier",
++      "script": "res://scripts/tests/review46_20261103_effective_roster_skills_verifier.gd",
++      "success_marker": "REVIEW46_EFFECTIVE_ROSTER_SKILLS_RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "review46_20261103_roster_reset_verifier",
++      "script": "res://scripts/tests/review46_20261103_roster_reset_verifier.gd",
++      "success_marker": "REVIEW46_ROSTER_RESET_RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "review46_20261103_hpa_cache_verifier",
++      "script": "res://scripts/tests/review46_20261103_hpa_cache_verifier.gd",
++      "success_marker": "REVIEW46_HPA_CACHE_RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "review46_20261103_unit_badge_verifier",
++      "script": "res://scripts/tests/review46_20261103_unit_badge_verifier.gd",
++      "success_marker": "REVIEW46_UNIT_BADGE_RESULT",
++      "timeout": 180
++    },
++    {
++      "name": "task_232_start_roster_generation_contract",
++      "script": "res://scripts/tests/task_232_start_roster_generation_contract.gd",
++      "success_marker": "ALL TESTS PASSED",
++      "timeout": 180
++    },
++    {
++      "name": "task_234_persistent_player_roster_save_and_reset",
++      "script": "res://scripts/tests/task_234_persistent_player_roster_save_and_reset.gd",
++      "success_marker": "ALL TESTS PASSED",
++      "timeout": 180
++    },
++    {
++      "name": "task_299_team_identity_name_generation_userology",
++      "script": "res://scripts/tests/task_299_team_identity_name_generation_userology.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_259_character_card_roster_switching_playability",
++      "script": "res://scripts/tests/task_259_character_card_roster_switching_playability.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_363_homebase_roster_card_pool_incremental_refresh",
++      "script": "res://scripts/tests/task_363_homebase_roster_card_pool_incremental_refresh.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "bugfix_player_roster_corrupt_save_quiet_recovery",
++      "script": "res://scripts/tests/bugfix_player_roster_corrupt_save_quiet_recovery.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_409_terrain_registry_lookup_hpa_audit",
++      "script": "res://scripts/tests/task_409_terrain_registry_lookup_hpa_audit.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_410_hpa_profile_visibility_and_registry_revision",
++      "script": "res://scripts/tests/task_410_hpa_profile_visibility_and_registry_revision.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_1188_unit_proxy_dirty_sync",
++      "script": "res://scripts/tests/task_1188_unit_proxy_dirty_sync.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_839_release_firefight_world_label_declutter",
++      "script": "res://scripts/tests/task_839_release_firefight_world_label_declutter.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_842_release_firefight_insertion_residue_declutter",
++      "script": "res://scripts/tests/task_842_release_firefight_insertion_residue_declutter.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_459_fireteam_engage_orientation_enemy_proxy_fix",
++      "script": "res://scripts/tests/task_459_fireteam_engage_orientation_enemy_proxy_fix.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 180
++    },
++    {
++      "name": "task_228_multiplayer_editor_map_manifest_download_consent",
++      "script": "res://scripts/tests/task_228_multiplayer_editor_map_manifest_download_consent.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 90
++    },
++    {
++      "name": "task_227_main_menu_multiplayer_host_join_lobby_flow",
++      "script": "res://scripts/tests/task_227_main_menu_multiplayer_host_join_lobby_flow.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 90
++    },
++    {
++      "name": "task_1101_connected_interaction_reconnect_state_recovery",
++      "script": "res://scripts/tests/task_1101_connected_interaction_reconnect_state_recovery.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 90
++    },
++    {
++      "name": "task_1122_connected_mission_world_camera_exposure_contact_cluster_readability",
++      "script": "res://scripts/tests/task_1122_connected_mission_world_camera_exposure_contact_cluster_readability.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 90
++    },
++    {
++      "name": "task_1125_connected_first_contact_local_team_contact_cluster_readability",
++      "script": "res://scripts/tests/task_1125_connected_first_contact_local_team_contact_cluster_readability.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 90
++    },
++    {
++      "name": "bugfix_multiplayer_lobby_setup_and_asset_catalog_followup",
++      "script": "res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 90
++    },
++    {
++      "name": "task_184_gameplay_hill_semantics_verifier",
++      "script": "res://scripts/tests/task_184_gameplay_hill_semantics_verifier.gd",
++      "success_marker": "=== RESULTS:",
++      "timeout": 90
++    },
++    {
++      "name": "review7_spacing",
++      "script": "res://scripts/tests/review7_spacing_verifier.gd",
++      "success_marker": "REVIEW7_SPACING_RESULT",
++      "timeout": 90
++    },
++    {
++      "name": "review7_fow",
++      "script": "res://scripts/tests/review7_fow_verifier.gd",
++      "success_marker": "REVIEW7_FOW_RESULT",
++      "timeout": 90
++    },
++    {
++      "name": "review7_fow_view",
++      "script": "res://scripts/tests/review7_fow_view_verifier.gd",
++      "success_marker": "REVIEW7_FOW_VIEW_RESULT",
++      "timeout": 90
++    },
++    {
++      "name": "review7_fow_motion",
++      "script": "res://scripts/tests/review7_fow_motion_verifier.gd",
++      "success_marker": "REVIEW7_FOW_MOTION_RESULT",
++      "timeout": 90
++    },
++    {
++      "name": "review7_camera",
++      "script": "res://scripts/tests/review7_camera_verifier.gd",
++      "success_marker": "REVIEW7_CAMERA_RESULT",
++      "timeout": 90
++    },
++    {
++      "name": "review7_animation",
++      "script": "res://scripts/tests/review7_animation_verifier.gd",
++      "success_marker": "REVIEW7_ANIMATION_RESULT",
++      "timeout": 90
++    },
++    {
++      "name": "review7_lobby_map_consent",
++      "script": "res://scripts/tests/review7_lobby_map_consent_verifier.gd",
++      "success_marker": "REVIEW7_LOBBY_MAP_ALL_PASSED",
++      "timeout": 90
++    },
++    {
++      "name": "review7_session_map_start_consent",
++      "script": "res://scripts/tests/review7_session_map_start_consent_verifier.gd",
++      "success_marker": "REVIEW7_SESSION_MAP_ALL_PASSED",
++      "timeout": 90
++    },
++    {
++      "name": "review7_session_versus_assignment",
++      "script": "res://scripts/tests/review7_session_versus_assignment_verifier.gd",
++      "success_marker": "REVIEW7_SESSION_VERSUS_ALL_PASSED",
++      "timeout": 90
++    },
++    {
++      "name": "review7_session_rejoin_after_completion",
++      "script": "res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd",
++      "success_marker": "REVIEW7_SESSION_REJOIN_ALL_PASSED",
++      "timeout": 90
++    },
++    {
++      "name": "review7_fow_moving_view",
++      "script": "res://scripts/tests/review7_fow_moving_view_verifier.gd",
++      "success_marker": "REVIEW7_FOW_MOVING_VIEW_RESULT",
++      "timeout": 90
++    }
++  ]
++}
+diff --git a/scripts/tests/review7_animation_verifier.gd b/scripts/tests/review7_animation_verifier.gd
+new file mode 100644
+index 000000000..06830fae3
+--- /dev/null
++++ b/scripts/tests/review7_animation_verifier.gd
+@@ -0,0 +1,170 @@
++extends SceneTree
++
++const GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
++const MAP = preload("res://scripts/terrain/terrain_map_data.gd")
++const UNIT = preload("res://scripts/npc/test_unit.gd")
++
++# Observe the real request and preserve its actual SubViewport side effect.
++class CountingView:
++	extends "res://scripts/terrain/terrain_map_3d_view.gd"
++	var redraw_calls: int = 0
++	func _request_viewport_redraw(continuous: bool = false, duration_msec: int = CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC) -> void:
++		redraw_calls += 1
++		super._request_viewport_redraw(continuous, duration_msec)
++
++
++var _passed: int = 0
++var _failed: int = 0
++
++
++func _init() -> void:
++	if not GUARD.require_isolated_user_data():
++		return
++	call_deferred("_run")
++
++
++func _run() -> void:
++	var fixture := Node.new()
++	root.add_child(fixture)
++	var unit: Node2D = UNIT.new()
++	unit.set("unit_id", "review7_live_animation")
++	unit.set("team_id", "team_alpha")
++	unit.set("fireteam_id", "blue")
++	unit.set("weapon_1_id", "rifle")
++	unit.set("weapon_2_id", "rifle")
++	fixture.add_child(unit)
++	unit.set_process(false)
++	unit.set_physics_process(false)
++	unit.position = Vector2(0.0, 64.0)
++	_set_posture(unit, "tactical")
++	var view := CountingView.new()
++	fixture.add_child(view)
++	view.set_process(false)
++	view.call("configure_from_map", MAP.create_empty("review7_animation", Vector2i(4, 4), Vector2.ZERO, 64.0, 32.0, 3))
++	view.call("set_unit_nodes", [unit])
++	await _settle(view)
++	# Let the real bootstrap redraw deadline expire. Never patch a viewport
++	# mode, cached signature or dirty flag to manufacture UPDATE_ONCE coverage.
++	await create_timer(1.35).timeout
++	view.call("_process", 1.0 / 60.0)
++	await process_frame
++	await process_frame
++	var cases: Array = []
++	for posture in ["tactical", "crouch"]:
++		_set_posture(unit, posture)
++		await _settle(view)
++		var facts: Dictionary = await _observe(view, unit, 1.0 / 60.0, 36)
++		facts["posture"] = posture
++		cases.append(facts)
++		_check(bool(facts.get("fixture_ok", false)), "%s uses the real visible animated model, player and skeleton" % posture)
++		_check(String(facts.get("animation_name", "")) == ("idle" if posture == "tactical" else "crouchIdle"), "%s exercises the expected stable idle clip" % posture)
++		_check(int(facts.get("time_changed_frames", 0)) > 0 and int(facts.get("bone_changed_frames", 0)) > 0, "%s positive-delta frames advance actual animation time and bone poses" % posture)
++		_check(int(facts.get("pose_changed_without_redraw_frames", -1)) == 0, "%s every observed bone-pose change requests a real viewport redraw" % posture)
++		_check(int(facts.get("redraw_calls", 0)) > 0 and bool(facts.get("all_redraws_use_update_once", false)), "%s stable clip redraws through UPDATE_ONCE after bootstrap" % posture)
++	var runtime: Dictionary = Dictionary(Dictionary(view.get("_unit_proxy_runtime_by_id")).get(String(unit.call("get_unit_id")), {}))
++	var player: AnimationPlayer = runtime.get("animation_player", null) as AnimationPlayer
++	if player != null:
++		player.speed_scale = 0.0
++		await _settle(view)
++		var frozen: Dictionary = await _observe(view, unit, 1.0 / 60.0, 12)
++		_check(int(frozen.get("time_changed_frames", -1)) == 0 and int(frozen.get("bone_changed_frames", -1)) == 0, "Frozen real animation leaves time and bone poses unchanged")
++		_check(int(frozen.get("redraw_calls", -1)) == 0, "Frozen animation does not request recurring redraws")
++		player.speed_scale = 1.0
++		await _settle(view)
++		var zero_delta: Dictionary = await _observe(view, unit, 0.0, 12)
++		_check(int(zero_delta.get("time_changed_frames", -1)) == 0 and int(zero_delta.get("redraw_calls", -1)) == 0, "Zero-delta settled frames neither advance animation nor request redraws")
++		unit.visible = false
++		await _settle(view)
++		var hidden: Dictionary = await _observe(view, unit, 1.0 / 60.0, 12)
++		_check(not bool(hidden.get("proxy_visible", true)), "Ordinary runtime unit visibility hides the real proxy")
++		_check(int(hidden.get("redraw_calls", -1)) == 0, "Hidden animation does not request recurring viewport redraws")
++		unit.visible = true
++		await _settle(view)
++		var revealed: Dictionary = await _observe(view, unit, 1.0 / 60.0, 12)
++		_check(bool(revealed.get("proxy_visible", false)) and int(revealed.get("bone_changed_frames", 0)) > 0 and int(revealed.get("pose_changed_without_redraw_frames", -1)) == 0, "Revealing the same animated proxy restores pose redraws")
++	else:
++		_check(false, "Frozen/hidden controls require the real AnimationPlayer")
++	view.call("set_unit_nodes", [])
++	await _settle(view)
++	var redraw_before_static: int = view.redraw_calls
++	for _frame in range(12):
++		view.call("_process", 1.0 / 60.0)
++		await process_frame
++	_check(view.redraw_calls == redraw_before_static, "Static terrain with no animated units does not request recurring redraws")
++	print("REVIEW7_ANIMATION_FACTS ", JSON.stringify({"cases": cases, "real_assets": true, "headless_is_not_pixel_capture": true}))
++	fixture.free()
++	await process_frame
++	print("REVIEW7_ANIMATION_RESULT passed=%d failed=%d" % [_passed, _failed])
++	quit(0 if _failed == 0 else 1)
++
++
++func _observe(view: CountingView, unit: Node2D, delta: float, frames: int) -> Dictionary:
++	var unit_id: String = String(unit.call("get_unit_id"))
++	var proxy: Node3D = Dictionary(view.get("_unit_proxies_by_id")).get(unit_id, null) as Node3D
++	var runtime: Dictionary = Dictionary(Dictionary(view.get("_unit_proxy_runtime_by_id")).get(unit_id, {}))
++	var player: AnimationPlayer = runtime.get("animation_player", null) as AnimationPlayer
++	var skeleton: Skeleton3D = runtime.get("skeleton", null) as Skeleton3D
++	if proxy == null or player == null or skeleton == null:
++		return {"fixture_ok": false}
++	var previous_time: float = player.current_animation_position
++	var previous_pose: Array = _bone_poses(skeleton)
++	var before_redraw: int = view.redraw_calls
++	var time_changed_frames: int = 0
++	var bone_changed_frames: int = 0
++	var pose_changed_without_redraw_frames: int = 0
++	var all_redraws_use_update_once: bool = true
++	var viewport: SubViewport = view.get("_subviewport") as SubViewport
++	for _frame in range(frames):
++		var redraw_before_frame: int = view.redraw_calls
++		view.call("_process", delta)
++		var current_pose: Array = _bone_poses(skeleton)
++		var pose_changed: bool = false
++		for index in range(current_pose.size()):
++			if not Transform3D(current_pose[index]).is_equal_approx(Transform3D(previous_pose[index])):
++				pose_changed = true
++				break
++		if pose_changed:
++			bone_changed_frames += 1
++			if view.redraw_calls == redraw_before_frame:
++				pose_changed_without_redraw_frames += 1
++		if not is_equal_approx(player.current_animation_position, previous_time):
++			time_changed_frames += 1
++		if view.redraw_calls > redraw_before_frame and viewport.render_target_update_mode != SubViewport.UPDATE_ONCE:
++			all_redraws_use_update_once = false
++		previous_time = player.current_animation_position
++		previous_pose = current_pose
++		await process_frame
++	return {
++		"fixture_ok": proxy.visible and bool(proxy.get_meta("uses_animated_character_model", false)) and skeleton.get_bone_count() > 0,
++		"proxy_visible": proxy.visible, "animation_name": String(player.current_animation),
++		"time_changed_frames": time_changed_frames, "bone_changed_frames": bone_changed_frames,
++		"pose_changed_without_redraw_frames": pose_changed_without_redraw_frames,
++		"redraw_calls": view.redraw_calls - before_redraw,
++		"all_redraws_use_update_once": all_redraws_use_update_once,
++	}
++
++
++func _settle(view: CountingView) -> void:
++	for _frame in range(12):
++		view.call("_process", 1.0 / 60.0)
++		await process_frame
++
++
++func _bone_poses(skeleton: Skeleton3D) -> Array:
++	var poses: Array = []
++	for index in range(skeleton.get_bone_count()):
++		poses.append(skeleton.get_bone_pose(index))
++	return poses
++
++
++func _set_posture(unit: Node, posture: String) -> void:
++	unit.call("set_runtime_status", "idle", "", 0, "fire_at_will", "", 1.0, 0.0, 0.0, -1, null, posture, "lowered", "", 1.0, 0.0)
++
++
++func _check(ok: bool, label: String) -> void:
++	if ok:
++		_passed += 1
++		print("PASS: ", label)
++	else:
++		_failed += 1
++		print("FAIL: ", label)
+diff --git a/scripts/tests/review7_camera_verifier.gd b/scripts/tests/review7_camera_verifier.gd
+new file mode 100644
+index 000000000..2fbfef276
+--- /dev/null
++++ b/scripts/tests/review7_camera_verifier.gd
+@@ -0,0 +1,171 @@
++extends SceneTree
++
++const GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
++const MISSION_SCENE = preload("res://scenes/tests/mission_reactivity_test.tscn")
++
++var _passed: int = 0
++var _failed: int = 0
++
++
++func _init() -> void:
++	if not GUARD.require_isolated_user_data():
++		return
++	call_deferred("_run")
++
++
++func _run() -> void:
++	root.size = Vector2i(1920, 1080)
++	var server_peer := ENetMultiplayerPeer.new()
++	var port_used: int = -1
++	for port in range(19880, 19900):
++		if server_peer.create_server(port, 2) == OK:
++			port_used = port
++			break
++	_check(port_used >= 0, "Local ENet camera fixture can listen")
++	if port_used < 0:
++		_finish()
++		return
++	var server_api: MultiplayerAPI = MultiplayerAPI.create_default_interface()
++	var client_api: MultiplayerAPI = MultiplayerAPI.create_default_interface()
++	var server_root := Node.new()
++	server_root.name = "Review7CameraServer"
++	root.add_child(server_root)
++	set_multiplayer(server_api, server_root.get_path())
++	server_api.multiplayer_peer = server_peer
++	var client_root := Node.new()
++	client_root.name = "Review7CameraClient"
++	root.add_child(client_root)
++	set_multiplayer(client_api, client_root.get_path())
++	var client_peer := ENetMultiplayerPeer.new()
++	var connect_error: Error = client_peer.create_client("127.0.0.1", port_used)
++	_check(connect_error == OK, "Local ENet camera client can connect")
++	if connect_error != OK:
++		server_peer.close()
++		server_root.free()
++		client_root.free()
++		_finish()
++		return
++	client_api.multiplayer_peer = client_peer
++	for _frame in range(240):
++		server_api.poll()
++		client_api.poll()
++		await process_frame
++		if client_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED and server_api.get_peers().size() == 1:
++			break
++	_check(client_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED and not client_api.is_server(), "Camera regression runs in a real connected client subtree")
++	if client_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
++		var mission: Node = await _make_client_mission(client_root, server_api, client_api)
++		_test_same_contact_and_new_focus(mission)
++		mission.free()
++		await process_frame
++		# The real next-mission lifecycle creates a fresh controller. It must
++		# still frame the same identity, without resetting private camera caches.
++		var next_mission: Node = await _make_client_mission(client_root, server_api, client_api)
++		var next_controller: Node = next_mission.get_node("TacticalController")
++		var next_view: Node = next_mission.get_node("Primary3DView")
++		_check(String(next_controller.get("_connected_first_contact_world_frame_signature")).is_empty(), "A fresh mission starts with no first-contact frame")
++		next_controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
++		_pan_and_zoom(next_view)
++		var before_first: Dictionary = _camera_state(next_view)
++		next_controller.call("_on_multiplayer_authority_snapshot_applied", _snapshot(20000, "enemy_delta", Vector2(228.0, 130.0)))
++		_check(not _same_camera(before_first, _camera_state(next_view)), "A new mission can frame the same contact identity again")
++		_check(not String(next_controller.get("_connected_first_contact_world_frame_signature")).is_empty(), "New-mission framing records its own one-shot context")
++		next_mission.free()
++	client_peer.close()
++	server_peer.close()
++	client_root.free()
++	server_root.free()
++	await process_frame
++	_finish()
++
++
++func _make_client_mission(client_root: Node, server_api: MultiplayerAPI, client_api: MultiplayerAPI) -> Node:
++	var mission: Node = MISSION_SCENE.instantiate()
++	# Match lobby launch ordering: authority is configured BEFORE _ready.
++	mission.get_node("SimulationRoot").set("is_server_authoritative", true)
++	client_root.add_child(mission)
++	for _frame in range(12):
++		server_api.poll()
++		client_api.poll()
++		await process_frame
++	# Freeze unrelated fixture work, retaining the real snapshot consumer,
++	# CombatLoopDriver, contact cache, primary bridge and camera implementation.
++	mission.process_mode = Node.PROCESS_MODE_DISABLED
++	return mission
++
++
++func _test_same_contact_and_new_focus(mission: Node) -> void:
++	var controller: Node = mission.get_node("TacticalController")
++	var view: Node = mission.get_node("Primary3DView")
++	var driver: Node = mission.get_node("CombatLoopDriver")
++	_check(bool(controller.call("_is_connected_network_snapshot_client")) and not bool(driver.get("_runs_local_authority")), "Fixture consumes remote snapshots instead of running local combat authority")
++	_check(Array(controller.call("_get_fireteam_units", "blue", true)).size() > 0 and Array(controller.call("_get_fireteam_units", "gold", true)).size() > 0, "Real mission supplies members for both focus contexts")
++	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
++	_pan_and_zoom(view)
++	var before_first: Dictionary = _camera_state(view)
++	controller.call("_on_multiplayer_authority_snapshot_applied", _snapshot(10000, "enemy_delta", Vector2(228.0, 130.0)))
++	_check(Array(controller.call("get_contact_snapshot")).size() == 1, "Normal authority snapshot consumer publishes the first contact")
++	_check(not _same_camera(before_first, _camera_state(view)), "First connected contact frames local members and target")
++	var first_signature: String = String(controller.get("_connected_first_contact_world_frame_signature"))
++	_check(not first_signature.is_empty(), "Successful first frame records its context")
++	_pan_and_zoom(view)
++	var manual: Dictionary = _camera_state(view)
++	controller.call("_on_multiplayer_authority_snapshot_applied", _snapshot(10001, "enemy_delta", Vector2(228.0, 130.0)))
++	_check(_same_camera(manual, _camera_state(view)), "Unchanged same-ID contact preserves manual pan and zoom")
++	controller.call("_on_multiplayer_authority_snapshot_applied", _snapshot(10002, "enemy_delta", Vector2(292.0, 130.0)))
++	_check(_same_camera(manual, _camera_state(view)), "Moving same-ID contact preserves manual pan and zoom through normal snapshot refresh")
++	var moved_contacts: Array = Array(controller.call("get_contact_snapshot"))
++	_check(not moved_contacts.is_empty() and Vector2(Dictionary(moved_contacts[0]).get("approximate_position", Vector2.ZERO)).is_equal_approx(Vector2(292.0, 130.0)), "Moving-contact snapshot is still consumed for current contact visuals")
++	_check(String(controller.get("_connected_first_contact_world_frame_signature")) == first_signature, "Position changes retain the original first-contact context")
++	controller.call("_on_multiplayer_authority_snapshot_applied", _snapshot(10003, "enemy_echo", Vector2(180.0, 195.0)))
++	_check(not _same_camera(manual, _camera_state(view)), "A different target identity can receive a new initial frame")
++	_check(String(controller.get("_connected_first_contact_world_frame_signature")) != first_signature, "New target records a distinct first-contact context")
++	controller.call("_on_multiplayer_authority_snapshot_applied", _snapshot(10004, "enemy_echo", Vector2(180.0, 195.0), "gold"))
++	_pan_and_zoom(view)
++	var before_selection: Dictionary = _camera_state(view)
++	controller.call("_set_selected_fireteams", PackedStringArray(["gold"]), false)
++	_check(not _same_camera(before_selection, _camera_state(view)), "Changing the selected local fireteam still permits initial contact framing")
++	_pan_and_zoom(view)
++	var gold_manual: Dictionary = _camera_state(view)
++	controller.call("_on_multiplayer_authority_snapshot_applied", _snapshot(10005, "enemy_echo", Vector2(240.0, 195.0), "gold"))
++	_check(_same_camera(gold_manual, _camera_state(view)), "Moving same-ID GOLD contact also preserves manual camera")
++
++
++func _snapshot(tick: int, target_id: String, position: Vector2, fireteam_id: String = "blue") -> Dictionary:
++	return {
++		"tick": tick,
++		"contacts": [{
++			"fireteam_id": fireteam_id, "unit_id": target_id, "target_id": target_id,
++			"team_id": "team_bravo", "last_known_position": position,
++			"approximate_position": position, "detection_state": "confirmed",
++			"report_state": "current", "confidence": 1.0,
++		}],
++		"fire_events": [], "tactical_rules": [], "dropship": {}, "mission_interactions": {},
++	}
++
++
++func _pan_and_zoom(view: Node) -> void:
++	view.call("pan_camera", Vector2(1.0, 0.0), 0.75)
++	view.call("zoom_camera", 2.0)
++
++
++func _camera_state(view: Node) -> Dictionary:
++	return {"focus": Vector2(view.call("get_camera_focus_grid_position")), "size": float(view.call("get_camera_size"))}
++
++
++func _same_camera(first: Dictionary, second: Dictionary) -> bool:
++	return Vector2(first["focus"]).is_equal_approx(Vector2(second["focus"])) and is_equal_approx(float(first["size"]), float(second["size"]))
++
++
++func _check(ok: bool, label: String) -> void:
++	if ok:
++		_passed += 1
++		print("PASS: ", label)
++	else:
++		_failed += 1
++		print("FAIL: ", label)
++
++
++func _finish() -> void:
++	print("REVIEW7_CAMERA_RESULT passed=%d failed=%d" % [_passed, _failed])
++	quit(0 if _failed == 0 else 1)
+diff --git a/scripts/tests/review7_fow_motion_verifier.gd b/scripts/tests/review7_fow_motion_verifier.gd
+new file mode 100644
+index 000000000..17eb99449
+--- /dev/null
++++ b/scripts/tests/review7_fow_motion_verifier.gd
+@@ -0,0 +1,88 @@
++extends "res://scripts/tests/review7_fow_verifier.gd"
++
++# Reuse the guarded real MissionTestSetup/FogOfWarSystem fixture. Only the
++# workload differs: an observer keeps walking while bounded jobs finish.
++func _run() -> void:
++	for side in [32, 128, 256]:
++		var stationary: Dictionary = _continuous_case(side, false)
++		var walking: Dictionary = _continuous_case(side, true)
++		_check(int(walking.first_commit) == int(stationary.first_commit), "%d continuous observer motion preserves initial scan completion frame" % side)
++	print("REVIEW7_FOW_MOTION_RESULT %d passed, %d failed" % [passed, failed])
++	quit(1 if failed else 0)
++
++
++func _continuous_case(side: int, walking: bool) -> Dictionary:
++	var f: Dictionary = _fixture(side)
++	var setup = f.setup
++	var origin: Vector2 = f.observer.position
++	var label: String = "%d %s" % [side, "walking" if walking else "stationary"]
++	setup.call("_sync_fog_of_war_visual_state", true)
++	var initial_sample_signature: String = String(setup.get("_fog_requested_runtime_signature"))
++	var first_commit: int = -1
++	var first_commit_sample_matches: bool = false
++	var first_commit_enumerations: int = -1
++	var conservative_while_pending: bool = _pending_is_atomic(f)
++	var dynamic_samples_correct: bool = true
++	var final_revision_while_walking: int = 0
++	var frames: int = ceili(float(side * side) / 512.0) + 90
++	for frame in range(frames):
++		if walking:
++			f.observer.position += Vector2(80.0 / 60.0, 0.0)
++		# Two genuine target visibility changes occur before the 128/256 full
++		# scan can complete. They must use the regular 100-ms dynamic cadence.
++		if frame < 2 or (frame >= 11 and frame < 31):
++			f.enemies[0].position = f.observer.position + Vector2(20.0, 0.0)
++		else:
++			f.enemies[0].position = f.observer.position + Vector2(1000.0, 0.0)
++		setup.call("_process", 1.0 / 60.0)
++		if frame in [8, 20, 40]:
++			var should_be_visible: bool = frame == 20
++			dynamic_samples_correct = dynamic_samples_correct and f.fog.is_visible("team_alpha", "enemy_0") == should_be_visible
++		var revision: int = int(f.fog.build_team_state_snapshot("team_alpha").get("visibility_revision", 0))
++		if first_commit == -1 and revision > 0:
++			first_commit = frame
++			# A finished request may be sampled in the past; it must keep that
++			# precise identity instead of claiming it used the latest position.
++			first_commit_sample_matches = String(setup.get("_fog_runtime_signature")) == initial_sample_signature
++			first_commit_sample_matches = first_commit_sample_matches and _visible_tiles(f.fog) == _oracle_at(f, origin)
++			first_commit_enumerations = int(f.registry.enumerations)
++		conservative_while_pending = conservative_while_pending and _pending_is_atomic(f)
++		final_revision_while_walking = revision
++	_check(first_commit >= 0, label + " initial scan completes while the workload is still running")
++	_check(first_commit_sample_matches, label + " first atomic result retains its frozen request sample and matches the full oracle")
++	_check(conservative_while_pending, label + " pending terrain retains only the last complete published sample")
++	_check(dynamic_samples_correct, label + " targets enter and leave visibility at the normal cadence even during pending terrain work")
++	if walking:
++		_check(final_revision_while_walking > 1, label + " coalesced motion produces follow-up revisions without stopping")
++	else:
++		_check(final_revision_while_walking == 1, label + " stationary observer creates only its initial terrain revision")
++	var settled: bool = false
++	for _frame in range(120):
++		setup.call("_process", 1.0 / 60.0)
++		var current_signature: String = setup.call("_build_fog_runtime_signature", "unexplored_blackout")
++		if String(setup.get("_fog_requested_runtime_signature")).is_empty() and String(setup.get("_fog_runtime_signature")) == current_signature:
++			settled = true
++			break
++	_check(settled, label + " stopping coalesces the latest position within bounded normal frames")
++	_check(first_commit_enumerations >= 0 and int(f.registry.enumerations) == first_commit_enumerations, label + " follow-up motion and target refreshes never enumerate the full map again")
++	_check(_visible_tiles(f.fog) == _oracle_at(f, f.observer.position), label + " final committed terrain exactly matches the latest-position full oracle")
++	print("REVIEW7_FOW_MOTION_WORKLOAD ", JSON.stringify({"side": side, "walking": walking, "frames": frames, "first_commit": first_commit, "revisions_before_stop": final_revision_while_walking, "enumerations": f.registry.enumerations}))
++	f.holder.free()
++	return {"first_commit": first_commit}
++
++
++func _pending_is_atomic(f: Dictionary) -> bool:
++	if String(f.setup.get("_fog_requested_runtime_signature")).is_empty():
++		return true
++	var committed: Dictionary = f.fog.build_team_state_snapshot("team_alpha")
++	return bool(f.sink.last_state.get("visibility_pending", false)) and Dictionary(f.sink.last_state.get("terrain_knowledge", {})) == Dictionary(committed.get("terrain_knowledge", {})) and int(f.sink.last_state.get("visibility_revision", -1)) == int(committed.get("visibility_revision", 0))
++
++
++func _oracle_at(f: Dictionary, position: Vector2) -> PackedStringArray:
++	var observer = _unit(f.holder, "oracle_observer", "team_alpha", position)
++	var oracle = FOW.new()
++	oracle.set_mode_for_team("team_alpha", "unexplored_blackout")
++	oracle.update_tile_visibility_for_team("team_alpha", [observer], f.registry, LOS.new(), 160.0)
++	var visible: PackedStringArray = _visible_tiles(oracle)
++	observer.free()
++	return visible
+diff --git a/scripts/tests/review7_fow_moving_view_verifier.gd b/scripts/tests/review7_fow_moving_view_verifier.gd
+new file mode 100644
+index 000000000..0f955ab08
+--- /dev/null
++++ b/scripts/tests/review7_fow_moving_view_verifier.gd
+@@ -0,0 +1,235 @@
++extends "res://scripts/tests/review7_fow_verifier.gd"
++
++const REAL_VIEW = preload("res://scripts/terrain/terrain_map_3d_view.gd")
++const MAP_DATA = preload("res://scripts/terrain/terrain_map_data.gd")
++
++var _gpu_readback_available: bool = false
++
++
++func _run() -> void:
++	await _characterize_multimesh_readback()
++	if OS.get_environment("SB_REVIEW7_REQUIRE_GPU_READBACK") == "1":
++		_check(_gpu_readback_available, "Required native renderer supports actual MultiMesh color and transform readback")
++	await _moving_real_view_case(128, 512)
++	await _moving_real_view_case(256, 512)
++	# A supported larger terrain slice publishes the first revision while the
++	# actual streamed overlay is still being built. Deltas must retain its work.
++	await _moving_real_view_case(128, 2048)
++	await _skipped_revision_rebuild_case()
++	print("REVIEW7_FOW_MOVING_VIEW_RESULT %d passed, %d failed" % [passed, failed])
++	quit(1 if failed else 0)
++
++
++func _moving_real_view_case(side: int, work_budget: int) -> void:
++	var f: Dictionary = _fixture(side)
++	var view: Node = REAL_VIEW.new()
++	f.holder.add_child(view)
++	view.set_process(false)
++	var map_data = MAP_DATA.create_empty("review7_walking_real_view_%d" % side, Vector2i(side, side), Vector2.ZERO, 64.0, 32.0, 3)
++	view.call("configure_from_map", map_data)
++	view.call("set_unit_nodes", Array(f.setup.get("_fog_unit_nodes")))
++	f.setup.set("_terrain_3d_view", view)
++	f.setup.fog_of_war_work_budget_tiles = work_budget
++	# Finish ordinary deferred layout/streaming setup before measuring one fixed
++	# map/camera context. Neither camera nor render caches are patched here.
++	await process_frame
++	await process_frame
++	var label: String = "%d real moving view budget%d" % [side, work_budget]
++	var rendered_tile_ids: PackedStringArray = PackedStringArray(view.get("_fow_overlay_render_tile_ids"))
++	_check(bool(view.get("_visual_streaming_active")) and rendered_tile_ids.size() > 512 and rendered_tile_ids.size() < side * side, label + " uses the normal streamed map subset larger than one overlay slice")
++	var full_rebuilds_before: int = int(view.get("_fow_overlay_full_rebuild_count"))
++	f.setup.call("_sync_fog_of_war_visual_state", true)
++	var initial_mesh_id: int = _mesh_id(view)
++	_check(initial_mesh_id != 0 and bool(view.get("_fow_overlay_full_rebuild_pending")), label + " starts one actual FoW MultiMesh behind its initial safety cover")
++	var mesh_stable: bool = true
++	var first_commit: int = -1
++	var first_commit_during_overlay: bool = false
++	var first_visible_overlay: int = -1
++	var max_terrain_revision: int = 0
++	var frames: int = ceili(float(side * side) / float(work_budget)) + 100
++	for frame in range(frames):
++		f.observer.position += Vector2(80.0 / 60.0, 0.0)
++		# Execute both normal consumers in normal frame order. The terrain job
++		# keeps walking throughout; rendering is never replaced with VisualSink.
++		f.setup.call("_process", 1.0 / 60.0)
++		var terrain_revision: int = int(f.fog.build_team_state_snapshot("team_alpha").get("visibility_revision", 0))
++		if first_commit == -1 and terrain_revision > 0:
++			first_commit = frame
++			first_commit_during_overlay = bool(view.get("_fow_overlay_full_rebuild_pending"))
++		view.call("_process", 1.0 / 60.0)
++		mesh_stable = mesh_stable and _mesh_id(view) == initial_mesh_id
++		max_terrain_revision = maxi(max_terrain_revision, terrain_revision)
++		if first_visible_overlay == -1 and terrain_revision > 0 and not bool(view.get("_fow_overlay_full_rebuild_pending")) and _safety_id(view) == 0 and int(view.get("_fow_overlay_visibility_revision")) == terrain_revision and int(view.get("_fow_visible_tile_count")) > 0:
++			first_visible_overlay = frame
++		await process_frame
++	_check(first_commit >= 0 and max_terrain_revision > 1, label + " publishes initial and follow-up terrain revisions without stopping the observer")
++	_check(first_visible_overlay >= 0, label + " completes a real visible revision and removes the safety blackout while the observer is still walking")
++	_check(mesh_stable, label + " retains the exact MultiMesh instance throughout one map/mode/team/terrain context")
++	_check(int(view.get("_fow_overlay_full_rebuild_count")) == full_rebuilds_before + 1, label + " performs exactly one full overlay build despite ongoing terrain revisions")
++	if work_budget == 2048:
++		_check(first_commit_during_overlay, label + " exercises a sequential terrain delta before the initial overlay finishes")
++	# Stop by ceasing normal runtime movement, then let both real consumers
++	# settle naturally. No force refresh, dirty mutation or direct tile setter.
++	var settled: bool = false
++	for _frame in range(180):
++		f.setup.call("_process", 1.0 / 60.0)
++		view.call("_process", 1.0 / 60.0)
++		var latest_signature: String = f.setup.call("_build_fog_runtime_signature", "unexplored_blackout")
++		if String(f.setup.get("_fog_requested_runtime_signature")).is_empty() and String(f.setup.get("_fog_runtime_signature")) == latest_signature and not bool(view.get("_fow_overlay_full_rebuild_pending")):
++			settled = true
++			break
++		await process_frame
++	_check(settled and _safety_id(view) == 0, label + " settles the latest stopped position without a remaining safety blackout")
++	_check(_mesh_id(view) == initial_mesh_id and int(view.get("_fow_overlay_full_rebuild_count")) == full_rebuilds_before + 1, label + " settling also retains the original completed overlay")
++	var state: Dictionary = Dictionary(f.fog.build_team_state_snapshot("team_alpha"))
++	_check(int(view.get("_fow_overlay_visibility_revision")) == int(state.get("visibility_revision", 0)), label + " renders the final committed terrain revision")
++	_check(_rendered_tile_states_match(view, state), label + " every rendered tile state and supported overlay readback match final authoritative FoW knowledge")
++	var capture: Dictionary = await _capture_native_view(view, "walking_%d_budget%d" % [side, work_budget])
++	print("REVIEW7_FOW_MOVING_VIEW_WORKLOAD ", JSON.stringify({"side": side, "work_budget": work_budget, "walking_frames": frames, "rendered_tiles": rendered_tile_ids.size(), "first_terrain_commit_frame": first_commit, "first_visible_overlay_frame": first_visible_overlay, "first_commit_during_overlay": first_commit_during_overlay, "revisions_while_walking": max_terrain_revision, "full_overlay_builds": int(view.get("_fow_overlay_full_rebuild_count")) - full_rebuilds_before, "mesh_stable": mesh_stable, "gpu_readback_available": _gpu_readback_available, "capture": capture, "headless_is_not_pixel_capture": true}))
++	f.holder.free()
++	await process_frame
++
++
++func _skipped_revision_rebuild_case() -> void:
++	var f: Dictionary = _fixture(32)
++	var view: Node = REAL_VIEW.new()
++	f.holder.add_child(view)
++	view.set_process(false)
++	view.call("configure_from_map", MAP_DATA.create_empty("review7_skipped_fow_view", Vector2i(32, 32), Vector2.ZERO, 64.0, 32.0, 3))
++	f.setup.set("_terrain_3d_view", view)
++	f.setup.call("_sync_fog_of_war_visual_state", true)
++	_drain(f)
++	for _frame in range(8):
++		view.call("_process", 1.0 / 60.0)
++		await process_frame
++	var before_mesh: int = _mesh_id(view)
++	var before_revision: int = int(view.get("_fow_overlay_visibility_revision"))
++	var before_delta_applies: int = int(view.get("_fow_overlay_delta_apply_count"))
++	_check(before_mesh != 0 and before_revision == 1 and not bool(view.get("_fow_overlay_full_rebuild_pending")), "Skipped-revision fixture starts from a complete real revision-one overlay")
++	# Produce two genuine authoritative updates. The first removes origin-side
++	# visibility; the second's last-only delta cannot describe that first loss.
++	# Deliberately deliver only the second publication to the view boundary.
++	f.observer.position += Vector2(192.0, 0.0)
++	f.fog.update_tile_visibility_for_team("team_alpha", [f.observer], f.registry, LOS.new(), 160.0)
++	f.observer.position += Vector2(192.0, 0.0)
++	f.fog.update_tile_visibility_for_team("team_alpha", [f.observer], f.registry, LOS.new(), 160.0)
++	var latest_state: Dictionary = Dictionary(f.fog.build_team_state_snapshot("team_alpha"))
++	_check(int(latest_state.get("visibility_revision", 0)) == before_revision + 2, "Two real FoW updates create an intentionally skipped visual revision")
++	view.call("set_fog_of_war_state", latest_state)
++	_check(_mesh_id(view) != before_mesh and bool(view.get("_fow_overlay_full_rebuild_pending")), "A revision gap replaces the old terrain mesh through a full overlay rebuild")
++	_check(int(view.get("_fow_overlay_delta_apply_count")) == before_delta_applies, "A revision gap never applies the incomplete last-only visibility delta")
++	for _frame in range(8):
++		view.call("_process", 1.0 / 60.0)
++		await process_frame
++	_check(not bool(view.get("_fow_overlay_full_rebuild_pending")) and _safety_id(view) == 0, "Revision-gap full rebuild finishes and removes its safety blackout")
++	_check(_rendered_tile_states_match(view, latest_state), "Revision-gap rebuild renders all latest visible/explored tiles including the skipped delta's changes")
++	var oracle = FOW.new()
++	oracle.set_mode_for_team("team_alpha", "unexplored_blackout")
++	oracle.update_tile_visibility_for_team("team_alpha", [f.observer], f.registry, LOS.new(), 160.0)
++	_check(_visible_tiles(f.fog) == _visible_tiles(oracle), "Revision-gap final visibility equals an independent current-position full oracle")
++	f.holder.free()
++	await process_frame
++
++
++func _mesh_id(view: Node) -> int:
++	var mesh: Node = view.get("_fow_overlay_multimesh_instance") as Node
++	return mesh.get_instance_id() if mesh != null and is_instance_valid(mesh) else 0
++
++
++func _safety_id(view: Node) -> int:
++	var safety: Node = view.get("_fow_overlay_safety_cover") as Node
++	return safety.get_instance_id() if safety != null and is_instance_valid(safety) else 0
++
++
++func _rendered_tile_states_match(view: Node, state: Dictionary) -> bool:
++	var knowledge: Dictionary = Dictionary(state.get("terrain_knowledge", {}))
++	var visible: PackedStringArray = PackedStringArray(knowledge.get("visible_tile_ids", []))
++	var explored: PackedStringArray = PackedStringArray(knowledge.get("explored_tile_ids", []))
++	var tile_states: Dictionary = Dictionary(view.get("_fow_overlay_tile_states_by_id"))
++	var rendered_tile_ids: PackedStringArray = PackedStringArray(view.get("_fow_overlay_render_tile_ids"))
++	var slots: Dictionary = Dictionary(view.get("_fow_overlay_slot_by_tile_id"))
++	var mesh: MultiMesh = view.get("_fow_overlay_multimesh") as MultiMesh
++	if rendered_tile_ids.is_empty() or tile_states.size() != rendered_tile_ids.size() or slots.size() != rendered_tile_ids.size() or mesh == null:
++		print("REVIEW7_FOW_VIEW_TILE_MISMATCH ", JSON.stringify({"reason": "incomplete_overlay_state", "rendered_tiles": rendered_tile_ids.size(), "tile_states": tile_states.size(), "mesh_present": mesh != null, "renderer": _renderer_facts()}))
++		return false
++	var seen_slots: Dictionary = {}
++	for tile_id in rendered_tile_ids:
++		var expected: String = "visible" if visible.has(tile_id) else ("explored" if explored.has(tile_id) else "unknown")
++		if String(tile_states.get(tile_id, "")) != expected:
++			_report_first_tile_mismatch(tile_id, expected, String(tile_states.get(tile_id, "")), mesh, int(slots.get(tile_id, -1)), "tile_state")
++			return false
++		if not slots.has(tile_id):
++			_report_first_tile_mismatch(tile_id, expected, String(tile_states.get(tile_id, "")), mesh, -1, "missing_slot")
++			return false
++		var slot: int = int(slots[tile_id])
++		if slot < 0 or slot >= mesh.instance_count or seen_slots.has(slot):
++			_report_first_tile_mismatch(tile_id, expected, String(tile_states.get(tile_id, "")), mesh, -1, "invalid_or_duplicate_slot")
++			return false
++		seen_slots[slot] = true
++		# Dummy RenderingServer cannot round-trip even a standalone MultiMesh.
++		# CPU tile-state and exact one-to-one slot coverage remain mandatory;
++		# the same gate requires these buffer checks on a capable native backend.
++		if not _gpu_readback_available:
++			continue
++		var color: Color = mesh.get_instance_color(int(slots[tile_id]))
++		if expected == "visible" and not is_zero_approx(color.a):
++			_report_first_tile_mismatch(tile_id, expected, String(tile_states.get(tile_id, "")), mesh, int(slots[tile_id]), "visible_alpha")
++			return false
++		if expected != "visible" and color.a <= 0.0:
++			_report_first_tile_mismatch(tile_id, expected, String(tile_states.get(tile_id, "")), mesh, int(slots[tile_id]), "covered_alpha")
++			return false
++	return true
++
++
++func _report_first_tile_mismatch(tile_id: String, expected: String, actual: String, mesh: MultiMesh, slot: int, reason: String) -> void:
++	var facts: Dictionary = {"reason": reason, "tile_id": tile_id, "slot": slot, "expected_state": expected, "actual_state": actual, "renderer": _renderer_facts()}
++	if slot >= 0:
++		var color: Color = mesh.get_instance_color(slot)
++		var transform: Transform3D = mesh.get_instance_transform(slot)
++		facts["readback_color"] = [color.r, color.g, color.b, color.a]
++		facts["readback_transform_origin"] = [transform.origin.x, transform.origin.y, transform.origin.z]
++	print("REVIEW7_FOW_VIEW_TILE_MISMATCH ", JSON.stringify(facts))
++
++
++func _characterize_multimesh_readback() -> void:
++	# Characterize the current backend independently of FoW and the view. Keep
++	# the product-state and alpha assertions above intact until this is known.
++	var mesh := MultiMesh.new()
++	mesh.transform_format = MultiMesh.TRANSFORM_3D
++	mesh.use_colors = true
++	mesh.mesh = BoxMesh.new()
++	mesh.instance_count = 1
++	var expected_color := Color(0.25, 0.5, 0.75, 0.0)
++	var expected_transform := Transform3D(Basis(), Vector3(5.0, 7.0, 11.0))
++	mesh.set_instance_color(0, expected_color)
++	mesh.set_instance_transform(0, expected_transform)
++	await process_frame
++	var actual_color: Color = mesh.get_instance_color(0)
++	var actual_transform: Transform3D = mesh.get_instance_transform(0)
++	_gpu_readback_available = actual_color.is_equal_approx(expected_color) and actual_transform.is_equal_approx(expected_transform)
++	print("REVIEW7_MULTIMESH_READBACK_CHARACTERIZATION ", JSON.stringify({"renderer": _renderer_facts(), "expected_color": [expected_color.r, expected_color.g, expected_color.b, expected_color.a], "actual_color": [actual_color.r, actual_color.g, actual_color.b, actual_color.a], "color_roundtrip_matches": actual_color.is_equal_approx(expected_color), "expected_transform_origin": [5.0, 7.0, 11.0], "actual_transform_origin": [actual_transform.origin.x, actual_transform.origin.y, actual_transform.origin.z], "transform_roundtrip_matches": actual_transform.is_equal_approx(expected_transform), "gpu_readback_available": _gpu_readback_available, "gpu_readback_required": OS.get_environment("SB_REVIEW7_REQUIRE_GPU_READBACK") == "1"}))
++
++
++func _capture_native_view(view: Node, file_name: String) -> Dictionary:
++	if DisplayServer.get_name().to_lower() == "headless":
++		return {"captured": false, "reason": "headless_has_no_pixel_capture"}
++	var viewport: SubViewport = view.get("_subviewport") as SubViewport
++	if viewport == null:
++		return {"captured": false, "reason": "subviewport_missing"}
++	view.call("_process", 1.0 / 60.0)
++	await process_frame
++	await RenderingServer.frame_post_draw
++	var captured_image: Image = viewport.get_texture().get_image()
++	if captured_image == null or captured_image.is_empty():
++		return {"captured": false, "reason": "empty_viewport_image"}
++	var output_directory: String = "user://review7_rendered"
++	var directory_error: Error = DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output_directory))
++	if directory_error != OK:
++		return {"captured": false, "reason": "capture_directory_failed", "error": directory_error}
++	var output_path: String = "%s/%s.png" % [output_directory, file_name]
++	var save_error: Error = captured_image.save_png(output_path)
++	return {"captured": save_error == OK, "path": output_path, "absolute_path": ProjectSettings.globalize_path(output_path), "size": [captured_image.get_width(), captured_image.get_height()], "error": save_error}
++
++
++func _renderer_facts() -> Dictionary:
++	return {"display": DisplayServer.get_name(), "method": RenderingServer.get_current_rendering_method(), "driver": RenderingServer.get_current_rendering_driver_name(), "adapter": RenderingServer.get_video_adapter_name()}
+diff --git a/scripts/tests/review7_fow_verifier.gd b/scripts/tests/review7_fow_verifier.gd
+new file mode 100644
+index 000000000..c115c52d4
+--- /dev/null
++++ b/scripts/tests/review7_fow_verifier.gd
+@@ -0,0 +1,237 @@
++extends SceneTree
++
++const GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
++const SETUP = preload("res://scripts/tests/mission_test_setup.gd")
++const FOW = preload("res://scripts/core/fog_of_war_system.gd")
++const LOS = preload("res://scripts/core/los_system.gd")
++const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
++const UNIT = preload("res://scripts/npc/test_unit.gd")
++
++# Only observe resource enumeration and the visual boundary; calculations remain real.
++class CountingRegistry:
++	extends "res://scripts/terrain/terrain_registry.gd"
++	var enumerations: int = 0
++	func get_sorted_tiles() -> Array:
++		enumerations += 1
++		return super.get_sorted_tiles()
++	func get_all_tiles() -> Array:
++		enumerations += 1
++		return super.get_all_tiles()
++
++class VisualSink extends Node:
++	var last_state: Dictionary = {}
++	func set_fog_of_war_state(state: Dictionary) -> void:
++		last_state = state.duplicate(true)
++
++var passed: int = 0
++var failed: int = 0
++
++func _init() -> void:
++	if not GUARD.require_isolated_user_data(): return
++	call_deferred("_run")
++
++func _run() -> void:
++	for side in [128, 256]:
++		var control := _large_case(side, false)
++		var moving := _large_case(side, true)
++		_check(int(moving.first_commit) == int(control.first_commit), "%d enemy movement retains initial scan progress" % side)
++	_test_dynamic_targets_and_invalidation()
++	_test_pending_inputs_change_before_normal_process()
++	print("REVIEW7_FOW_RESULT %d passed, %d failed" % [passed, failed])
++	quit(1 if failed else 0)
++
++func _fixture(side: int) -> Dictionary:
++	var holder := Node.new()
++	root.add_child(holder)
++	var registry := CountingRegistry.new()
++	holder.add_child(registry)
++	registry.configure_iso_grid(Vector2.ZERO, 64.0, 32.0)
++	for x in range(side):
++		for y in range(side):
++			registry.register_tile(TILE.new({"tile_id": "tile_%d_%d" % [x, y], "type_id": "ground_flat", "grid_position": Vector2i(x,y), "world_position": registry.grid_to_world(Vector2i(x,y)), "walkable": true}))
++	var center := Vector2i(side / 2, side / 2)
++	var observer = _unit(holder, "observer", "team_alpha", registry.grid_to_world(center))
++	var enemies: Array = []
++	var units: Array = [observer]
++	for i in range(4):
++		var enemy = _unit(holder, "enemy_%d" % i, "team_bravo", observer.position + Vector2(80.0 + 16.0 * i, 0.0))
++		enemies.append(enemy)
++		units.append(enemy)
++	var sink := VisualSink.new()
++	holder.add_child(sink)
++	var fog = FOW.new()
++	var setup = SETUP.new()
++	setup.set("_is_initialized", true)
++	setup.set("_fog_of_war_system", fog)
++	setup.set("_fog_of_war_los_system", LOS.new())
++	setup.set("_fog_terrain_registry", registry)
++	setup.set("_fog_unit_nodes", units)
++	setup.set("_fog_observer_unit_nodes", [observer])
++	setup.set("_terrain_3d_view", sink)
++	setup.fog_of_war_mode = "unexplored_blackout"
++	setup.fog_of_war_sight_range_world = 160.0
++	holder.add_child(setup)
++	setup.set_process(false)
++	return {"holder":holder, "registry":registry, "observer":observer, "enemies":enemies, "sink":sink, "fog":fog, "setup":setup}
++
++func _large_case(side: int, moving: bool) -> Dictionary:
++	var f := _fixture(side)
++	var setup = f.setup
++	# Match the reviewed workload's default sight and 512 tiles per slice.
++	setup.fog_of_war_sight_range_world = 640.0
++	setup.call("_sync_fog_of_war_visual_state", true)
++	var first_commit := -1
++	var safely_pending := true
++	for frame in range(240):
++		if moving:
++			for enemy in f.enemies:
++				enemy.position += Vector2(80.0 / 60.0, 0.0)
++		setup.call("_process", 1.0 / 60.0)
++		var revision := int(f.fog.build_team_state_snapshot("team_alpha").get("visibility_revision", 0))
++		if first_commit == -1 and revision > 0: first_commit = frame
++		if first_commit == -1:
++			safely_pending = safely_pending and bool(f.sink.last_state.get("visibility_pending", false))
++	_check(safely_pending, "Incomplete initial scan remains conservatively pending")
++	_check(first_commit >= 0, "%d scan publishes within 240 frames (moving=%s)" % [side, moving])
++	_check(int(f.fog.build_team_state_snapshot("team_alpha").get("visibility_revision", 0)) == 1, "Target motion creates no terrain revisions")
++	_check(not bool(f.sink.last_state.get("visibility_pending", false)), "Completed scan clears pending visual")
++	# A stationary observer's tile result is independent of target positions.
++	var oracle = FOW.new()
++	oracle.set_mode_for_team("team_alpha", "unexplored_blackout")
++	oracle.update_tile_visibility_for_team("team_alpha", [f.observer], f.registry, LOS.new(), 640.0)
++	_check(_visible_tiles(f.fog) == _visible_tiles(oracle), "Terrain result equals independent full-scan oracle")
++	print("REVIEW7_FOW_WORKLOAD ", JSON.stringify({"side":side,"moving":moving,"frames":240,"first_commit":first_commit,"enumerations":f.registry.enumerations}))
++	f.holder.free()
++	return {"first_commit":first_commit}
++
++func _test_dynamic_targets_and_invalidation() -> void:
++	var f := _fixture(32)
++	var setup = f.setup
++	setup.call("_sync_fog_of_war_visual_state", true)
++	_drain(f)
++	_check(f.fog.is_visible("team_alpha", "enemy_0"), "Nearby enemy initially visible")
++	var before_revision := int(f.fog.build_team_state_snapshot("team_alpha").visibility_revision)
++	var before_enumerations: int = f.registry.enumerations
++	f.enemies[0].position = f.observer.position + Vector2(500.0, 0.0)
++	for i in range(8): setup.call("_process", 1.0 / 60.0)
++	_check(not f.fog.is_visible("team_alpha", "enemy_0"), "Target moving out of LOS/range is hidden at normal cadence")
++	_check(not PackedStringArray(Dictionary(f.sink.last_state.get("current_visibility", {})).get("visible_target_ids", [])).has("enemy_0"), "Visual consumer receives target removal")
++	f.enemies[0].position = f.observer.position + Vector2(20.0, 0.0)
++	for i in range(8): setup.call("_process", 1.0 / 60.0)
++	_check(f.fog.is_visible("team_alpha", "enemy_0"), "Target returning to range becomes visible")
++	_check(int(f.fog.build_team_state_snapshot("team_alpha").visibility_revision) == before_revision, "Target-only refresh does not publish new terrain revision")
++	_check(f.registry.enumerations == before_enumerations, "Target-only refresh never enumerates terrain")
++	# An observer moving away and back while work is pending must not publish the away state.
++	var origin: Vector2 = f.observer.position
++	f.observer.position += Vector2(128.0, 0.0)
++	setup.fog_of_war_work_budget_tiles = 16
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_check(not String(setup.get("_fog_requested_runtime_signature")).is_empty(), "Observer movement creates pending work")
++	f.observer.position = origin
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_settle_latest(f)
++	var oracle = FOW.new()
++	oracle.set_mode_for_team("team_alpha", "unexplored_blackout")
++	oracle.update_tile_visibility_for_team("team_alpha", [f.observer], f.registry, LOS.new(), 160.0)
++	_check(_visible_tiles(f.fog) == _visible_tiles(oracle), "Returning observer does not publish obsolete pending position")
++	var sig: String = setup.call("_build_fog_runtime_signature", "unexplored_blackout")
++	setup.fog_of_war_sight_range_world = 80.0
++	_check(String(setup.call("_build_fog_runtime_signature", "unexplored_blackout")) != sig, "Base sight range invalidates terrain work")
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_drain(f)
++	oracle.update_tile_visibility_for_team("team_alpha", [f.observer], f.registry, LOS.new(), 80.0)
++	_check(_visible_tiles(f.fog) == _visible_tiles(oracle), "Changed sight matches full-scan oracle")
++	sig = setup.call("_build_fog_runtime_signature", "unexplored_blackout")
++	f.observer.get_vital_status().state = "down"
++	_check(String(setup.call("_build_fog_runtime_signature", "unexplored_blackout")) != sig, "Downed observer changes terrain visibility input")
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_drain(f)
++	_check(_visible_tiles(f.fog).is_empty(), "Downed observer reveals no terrain")
++	f.observer.get_vital_status().state = "fit"
++	f.observer.visible = false
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_drain(f)
++	_check(_visible_tiles(f.fog).is_empty(), "Hidden observer reveals no terrain")
++	f.observer.visible = true
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_drain(f)
++	_check(not _visible_tiles(f.fog).is_empty(), "Observer reactivation restores visibility")
++	sig = setup.call("_build_fog_runtime_signature", "unexplored_blackout")
++	var tile = f.registry.get_tile_at_grid(Vector2i(17, 16))
++	tile.blocks_los = true
++	tile.object_height = 3
++	f.registry.register_tile(tile)
++	_check(String(setup.call("_build_fog_runtime_signature", "unexplored_blackout")) != sig, "Terrain revision invalidates visibility input")
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_drain(f)
++	oracle.update_tile_visibility_for_team("team_alpha", [f.observer], f.registry, LOS.new(), 80.0)
++	_check(_visible_tiles(f.fog) == _visible_tiles(oracle), "Terrain change matches LOS oracle")
++	setup.set_fog_of_war_mode("off")
++	_check(String(f.sink.last_state.get("mode", "")) == "off", "Mode off publishes immediately")
++	setup.set_fog_of_war_mode("unexplored_blackout")
++	_drain(f)
++	_check(_visible_tiles(f.fog) == _visible_tiles(oracle), "Mode reenable restores correct terrain")
++	f.holder.free()
++
++func _test_pending_inputs_change_before_normal_process() -> void:
++	for change in ["down", "position", "subtile_position", "sight", "terrain"]:
++		var f := _fixture(32)
++		var setup = f.setup
++		setup.call("_sync_fog_of_war_visual_state", true)
++		var requested_sample: String = setup.get("_fog_requested_runtime_signature")
++		_check(int(f.fog.build_team_state_snapshot("team_alpha").visibility_revision) == 0, "%s fixture begins with half a full scan pending" % change)
++		match change:
++			"down": f.observer.get_vital_status().state = "down"
++			"position": f.observer.position += Vector2(128.0, 0.0)
++			"subtile_position": f.observer.position += Vector2(8.0, 0.0)
++			"sight": setup.fog_of_war_sight_range_world = 80.0
++			"terrain":
++				var tile = f.registry.get_tile_at_grid(Vector2i(17, 16))
++				tile.blocks_los = true
++				tile.object_height = 3
++				f.registry.register_tile(tile)
++		# Normal frame, before the 100-ms refresh is due. Do not invoke _sync manually.
++		setup.call("_process", 1.0 / 60.0)
++		if change in ["position", "subtile_position"]:
++			_check(String(setup.get("_fog_runtime_signature")) == requested_sample, "%s completed atomic sample retains its original request identity" % change)
++			_check(String(setup.get("_fog_runtime_signature")) != String(setup.call("_build_fog_runtime_signature", "unexplored_blackout")), "%s sampled result never claims the newer observer position" % change)
++		else:
++			_check(int(f.fog.build_team_state_snapshot("team_alpha").visibility_revision) == 0, "%s hard input change cannot publish the obsolete pending scan" % change)
++			_check(bool(f.sink.last_state.get("visibility_pending", false)), "%s visual stays conservative until replacement completes" % change)
++		_settle_latest(f)
++		var oracle = FOW.new()
++		oracle.set_mode_for_team("team_alpha", "unexplored_blackout")
++		oracle.update_tile_visibility_for_team("team_alpha", [f.observer], f.registry, LOS.new(), setup.fog_of_war_sight_range_world)
++		_check(_visible_tiles(f.fog) == _visible_tiles(oracle), "%s replacement matches current-input oracle" % change)
++		f.holder.free()
++
++func _settle_latest(f: Dictionary) -> void:
++	for i in range(2048):
++		f.setup.call("_process", 1.0 / 60.0)
++		if String(f.setup.get("_fog_requested_runtime_signature")).is_empty() and String(f.setup.get("_fog_runtime_signature")) == String(f.setup.call("_build_fog_runtime_signature", "unexplored_blackout")):
++			return
++	_check(false, "Latest observer sample finishes within bounded normal frames")
++
++func _drain(f: Dictionary) -> void:
++	for i in range(2048):
++		if String(f.setup.get("_fog_requested_runtime_signature")).is_empty(): return
++		f.setup.call("_advance_fog_of_war_visibility_work")
++	_check(false, "Pending work finishes within bounded slices")
++
++func _visible_tiles(fog) -> PackedStringArray:
++	return PackedStringArray(Dictionary(fog.build_team_state_snapshot("team_alpha").get("terrain_knowledge", {})).get("visible_tile_ids", []))
++
++func _unit(holder: Node, id: String, team: String, position: Vector2):
++	var unit = UNIT.new()
++	unit.unit_id = id
++	unit.team_id = team
++	holder.add_child(unit)
++	unit.set_process(false)
++	unit.position = position
++	return unit
++
++func _check(condition: bool, message: String) -> void:
++	if condition: passed += 1
++	else:
++		failed += 1
++		print("FAIL: ", message)
+diff --git a/scripts/tests/review7_fow_view_verifier.gd b/scripts/tests/review7_fow_view_verifier.gd
+new file mode 100644
+index 000000000..689e1ef26
+--- /dev/null
++++ b/scripts/tests/review7_fow_view_verifier.gd
+@@ -0,0 +1,155 @@
++extends SceneTree
++
++const GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
++const SETUP = preload("res://scripts/tests/mission_test_setup.gd")
++const VIEW = preload("res://scripts/terrain/terrain_map_3d_view.gd")
++const MAP = preload("res://scripts/terrain/terrain_map_data.gd")
++const REGISTRY = preload("res://scripts/terrain/terrain_registry.gd")
++const FOW = preload("res://scripts/core/fog_of_war_system.gd")
++const LOS = preload("res://scripts/core/los_system.gd")
++const UNIT = preload("res://scripts/npc/test_unit.gd")
++
++var _passed: int = 0
++var _failed: int = 0
++
++
++func _init() -> void:
++	if not GUARD.require_isolated_user_data():
++		return
++	call_deferred("_run")
++
++
++func _run() -> void:
++	var holder := Node.new()
++	root.add_child(holder)
++	var map_data = MAP.create_empty("review7_real_fow_view", Vector2i(32, 32), Vector2.ZERO, 64.0, 32.0, 3)
++	var registry: Node = REGISTRY.new()
++	holder.add_child(registry)
++	registry.call("configure_iso_grid", Vector2.ZERO, 64.0, 32.0)
++	for tile in map_data.get_tiles():
++		registry.call("register_tile", tile)
++	var observer: Node2D = _unit(holder, "review7_observer", "team_alpha", Vector2(registry.call("grid_to_world", Vector2i(16, 16))))
++	var target: Node2D = _unit(holder, "review7_target", "team_bravo", observer.position + Vector2(20.0, 0.0))
++	var view: Node = VIEW.new()
++	holder.add_child(view)
++	view.set_process(false)
++	view.call("configure_from_map", map_data)
++	view.call("set_unit_nodes", [observer, target])
++	var fog = FOW.new()
++	var setup: Node = SETUP.new()
++	setup.set("_is_initialized", true)
++	setup.set("_fog_of_war_system", fog)
++	setup.set("_fog_of_war_los_system", LOS.new())
++	setup.set("_fog_terrain_registry", registry)
++	setup.set("_fog_unit_nodes", [observer, target])
++	setup.set("_fog_observer_unit_nodes", [observer])
++	setup.set("_terrain_3d_view", view)
++	setup.set("fog_of_war_mode", "unexplored_blackout")
++	setup.set("fog_of_war_sight_range_world", 160.0)
++	holder.add_child(setup)
++	setup.set_process(false)
++	setup.call("_sync_fog_of_war_visual_state", true)
++	for _slice in range(8):
++		if String(setup.get("_fog_requested_runtime_signature")).is_empty():
++			break
++		setup.call("_advance_fog_of_war_visibility_work")
++	_check(String(setup.get("_fog_requested_runtime_signature")).is_empty(), "Real mission setup completes its terrain visibility job")
++	_check(int(fog.build_team_state_snapshot("team_alpha").get("visibility_revision", 0)) == 1, "Initial real FoW publication has one committed terrain revision")
++	var proxy: Node3D = Dictionary(view.get("_unit_proxies_by_id")).get("review7_target", null) as Node3D
++	_check(proxy != null and proxy.visible, "Real view initially displays the in-range enemy proxy")
++	# Render one normal 512-tile slice. The 1024-tile overlay must still be
++	# in flight when the next target-only update reaches the real consumer.
++	view.call("_process", 1.0 / 60.0)
++	var pending_before: Dictionary = _overlay_state(view)
++	_check(bool(pending_before["pending"]) and int(pending_before["cursor"]) > 0 and int(pending_before["mesh_id"]) != 0, "Fixture observes a real partially built FoW MultiMesh")
++	target.position = observer.position + Vector2(500.0, 0.0)
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_check(not fog.is_visible("team_alpha", "review7_target") and proxy != null and not proxy.visible, "Target-only update hides the actual out-of-range proxy while overlay is pending")
++	_assert_overlay_retained(pending_before, _overlay_state(view), "Pending overlay target removal")
++	target.position = observer.position + Vector2(30.0, 0.0)
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_check(fog.is_visible("team_alpha", "review7_target") and proxy != null and proxy.visible, "Target-only update reveals the same real proxy while overlay is pending")
++	_assert_overlay_retained(pending_before, _overlay_state(view), "Pending overlay target return")
++	_drain_overlay(view)
++	var completed_before: Dictionary = _overlay_state(view)
++	_check(not bool(completed_before["pending"]) and int(completed_before["full_rebuilds"]) == 1, "Initial overlay finishes exactly once despite dynamic target updates")
++	_check(int(completed_before["safety_id"]) == 0, "Completed real overlay removes its safety blackout")
++	target.position = observer.position + Vector2(500.0, 0.0)
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_check(proxy != null and not proxy.visible, "Completed overlay still hides the out-of-range target immediately")
++	_assert_overlay_retained(completed_before, _overlay_state(view), "Completed overlay target removal")
++	target.position = observer.position + Vector2(40.0, 0.0)
++	setup.call("_sync_fog_of_war_visual_state", false)
++	_check(proxy != null and proxy.visible, "Completed overlay still reveals the returning target immediately")
++	_assert_overlay_retained(completed_before, _overlay_state(view), "Completed overlay target return")
++	for _frame in range(4):
++		view.call("_process", 1.0 / 60.0)
++	_check(int(view.get("_fow_overlay_full_rebuild_count")) == 1, "Target-only updates do not schedule a delayed extra terrain rebuild")
++	_check(int(fog.build_team_state_snapshot("team_alpha").get("visibility_revision", 0)) == 1, "Target-only consumer updates leave the terrain revision unchanged")
++	# The optimization must retain the ordinary invalidation boundaries.
++	var mesh_before_mode: int = int(_overlay_state(view)["mesh_id"])
++	setup.call("set_fog_of_war_mode", "known_terrain")
++	for _slice in range(8):
++		if String(setup.get("_fog_requested_runtime_signature")).is_empty():
++			break
++		setup.call("_advance_fog_of_war_visibility_work")
++	_check(int(_overlay_state(view)["mesh_id"]) != mesh_before_mode, "A real FoW mode change still invalidates terrain visuals")
++	_drain_overlay(view)
++	var mesh_before_team: int = int(_overlay_state(view)["mesh_id"])
++	fog.set_mode_for_team("team_bravo", "known_terrain")
++	view.call("set_fog_of_war_state", fog.build_team_state_snapshot("team_bravo"))
++	_check(int(_overlay_state(view)["mesh_id"]) != mesh_before_team, "A viewer-team change still invalidates terrain visuals")
++	print("REVIEW7_FOW_VIEW_FACTS ", JSON.stringify({"pending_before": pending_before, "completed_before": completed_before, "final_overlay": _overlay_state(view), "real_view": true, "headless_is_not_pixel_capture": true}))
++	holder.free()
++	await process_frame
++	print("REVIEW7_FOW_VIEW_RESULT passed=%d failed=%d" % [_passed, _failed])
++	quit(0 if _failed == 0 else 1)
++
++
++func _overlay_state(view: Node) -> Dictionary:
++	var mesh: Node = view.get("_fow_overlay_multimesh_instance") as Node
++	var safety: Node = view.get("_fow_overlay_safety_cover") as Node
++	return {
++		"mesh_id": mesh.get_instance_id() if mesh != null and is_instance_valid(mesh) else 0,
++		"safety_id": safety.get_instance_id() if safety != null and is_instance_valid(safety) else 0,
++		"pending": bool(view.get("_fow_overlay_full_rebuild_pending")),
++		"cursor": int(view.get("_fow_overlay_pending_cursor")),
++		"full_rebuilds": int(view.get("_fow_overlay_full_rebuild_count")),
++	}
++
++
++func _assert_overlay_retained(before: Dictionary, after: Dictionary, label: String) -> void:
++	_check(int(after["mesh_id"]) == int(before["mesh_id"]), label + " retains the exact terrain MultiMesh instance")
++	_check(int(after["cursor"]) == int(before["cursor"]) and bool(after["pending"]) == bool(before["pending"]), label + " retains exact cursor and pending state")
++	_check(int(after["safety_id"]) == int(before["safety_id"]), label + " retains the existing safety-cover lifecycle")
++	_check(int(after["full_rebuilds"]) == int(before["full_rebuilds"]), label + " retains the full-rebuild count")
++
++
++func _drain_overlay(view: Node) -> void:
++	for _frame in range(16):
++		if not bool(view.get("_fow_overlay_full_rebuild_pending")):
++			return
++		view.call("_process", 1.0 / 60.0)
++	_check(false, "Real overlay finishes within the bounded frame count")
++
++
++func _unit(holder: Node, id: String, team: String, position: Vector2) -> Node2D:
++	var unit: Node2D = UNIT.new()
++	unit.set("unit_id", id)
++	unit.set("team_id", team)
++	unit.set("weapon_1_id", "rifle")
++	unit.set("weapon_2_id", "rifle")
++	holder.add_child(unit)
++	unit.set_process(false)
++	unit.set_physics_process(false)
++	unit.position = position
++	return unit
++
++
++func _check(ok: bool, label: String) -> void:
++	if ok:
++		_passed += 1
++		print("PASS: ", label)
++	else:
++		_failed += 1
++		print("FAIL: ", label)
+diff --git a/scripts/tests/review7_lobby_map_consent_verifier.gd b/scripts/tests/review7_lobby_map_consent_verifier.gd
+new file mode 100644
+index 000000000..f60b6004b
+--- /dev/null
++++ b/scripts/tests/review7_lobby_map_consent_verifier.gd
+@@ -0,0 +1,199 @@
++extends SceneTree
++
++const ISOLATION_GUARD: GDScript = preload("res://scripts/tests/review2_isolated_user_guard.gd")
++const LOBBY_SCENE: PackedScene = preload("res://scenes/ui/multiplayer_lobby.tscn")
++const MAP_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
++const TERRAIN_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
++const FIRST_PATH: String = "user://review7_lobby_first_map.json"
++const SECOND_PATH: String = "user://review7_lobby_second_map.json"
++const PORT_START: int = 19810
++const PORT_END: int = 19820
++
++var _passed: int = 0
++var _failed: int = 0
++
++
++func _init() -> void:
++	if not ISOLATION_GUARD.require_isolated_user_data():
++		return
++	call_deferred("_run_tests")
++
++
++func _run_tests() -> void:
++	_write_map(FIRST_PATH, "review7_lobby_first_map")
++	_write_map(SECOND_PATH, "review7_lobby_second_map")
++	var first_manifest: Dictionary = Dictionary(MAP_SCRIPT.call("build_manifest_for_map", FIRST_PATH))
++	var second_manifest: Dictionary = Dictionary(MAP_SCRIPT.call("build_manifest_for_map", SECOND_PATH))
++	var fixture: Dictionary = await _create_lobby_pair(first_manifest)
++	_assert(bool(fixture.get("connected", false)), "Real product lobbies connect over ENet for map consent")
++	if not bool(fixture.get("connected", false)):
++		_finish()
++		return
++	var host: Node = fixture["host"]
++	var client: Node = fixture["client"]
++	var host_session: Node = host.get_node("MultiplayerSession")
++	var client_session: Node = client.get_node("MultiplayerSession")
++	var host_api: MultiplayerAPI = fixture["host_api"]
++	var client_api: MultiplayerAPI = fixture["client_api"]
++	var first_ui: Dictionary = Dictionary(client.call("get_lobby_ui_snapshot"))
++	_assert(bool(first_ui.get("map_consent_visible", false)) and String(first_ui.get("map_consent_text", "")).contains("review7_lobby_first_map"), "Incoming host snapshot opens a consent prompt naming the current offered map")
++	_assert(not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path("user://downloaded_maps")), "Receiving an unknown map manifest never downloads or writes a cache")
++	_assert(bool(first_ui.get("ready_disabled", false)), "Unknown map keeps client Ready disabled until explicit consent")
++	var reject_button: Button = client.get_node("Panel/Margin/VBox/MapConsentPanel/Margin/VBox/MapConsentRow/MapRejectButton")
++	reject_button.pressed.emit()
++	await _poll_pair(host_api, client_api, 10)
++	var rejected_ui: Dictionary = Dictionary(client.call("get_lobby_ui_snapshot"))
++	_assert(String(Dictionary(rejected_ui.get("map_consent_state", {})).get("state", "")) == "rejected" and not bool(rejected_ui.get("map_consent_visible", true)), "Real Reject button rejects the network offer and closes the prompt")
++	_assert(not bool(client.call("has_active_mission")) and not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path("user://downloaded_maps")), "Rejected network offer creates neither mission nor downloaded files")
++	host_session.call("set_local_ready", false)
++	await _poll_pair(host_api, client_api, 10)
++	_assert(not bool(Dictionary(client.call("get_lobby_ui_snapshot")).get("map_consent_visible", true)), "Repeated snapshot does not reopen a rejected current offer")
++	host_session.call("set_lobby_player_setup", {"map_path": SECOND_PATH})
++	host_session.call("set_host_map_manifest", second_manifest)
++	host_session.call("set_local_ready", false)
++	await _poll_pair(host_api, client_api, 25)
++	var replacement_ui: Dictionary = Dictionary(client.call("get_lobby_ui_snapshot"))
++	_assert(bool(replacement_ui.get("map_consent_visible", false)) and String(replacement_ui.get("map_consent_text", "")).contains("review7_lobby_second_map"), "Replacement host offer opens a fresh prompt for B after rejecting A")
++	var accept_button: Button = client.get_node("Panel/Margin/VBox/MapConsentPanel/Margin/VBox/MapConsentRow/MapAcceptButton")
++	accept_button.pressed.emit()
++	await _poll_pair(host_api, client_api, 10)
++	_assert(not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path("user://downloaded_maps")), "V1 Accept button waits for an explicit payload and never downloads automatically")
++	# TASK228 explicitly leaves network payload transport outside V1; use its existing payload API.
++	client.call("accept_pending_map_download", FileAccess.get_file_as_string(SECOND_PATH))
++	var accepted_snapshot: Dictionary = Dictionary(client_session.call("get_session_snapshot"))
++	var transfer: Dictionary = Dictionary(accepted_snapshot.get("map_transfer", {}))
++	var cache_path: String = String(transfer.get("cache_path", ""))
++	var accepted: bool = String(transfer.get("state", "")) == "accepted" and bool(transfer.get("can_start_client", false))
++	_assert(accepted, "Existing explicit payload API accepts the current network offer after consent")
++	_assert(cache_path.begins_with("user://downloaded_maps/") and FileAccess.file_exists(cache_path), "Consented network map is cached only under the client download root")
++	if not cache_path.is_empty() and FileAccess.file_exists(cache_path):
++		_assert(FileAccess.get_file_as_string(cache_path).sha256_text() == String(second_manifest.get("map_hash", "")), "Received map cache contains exactly the current host B payload")
++	_assert(not bool(Dictionary(client.call("get_lobby_ui_snapshot")).get("map_consent_visible", true)), "Successful explicit acceptance closes the current network prompt")
++	if accepted:
++		_assert(bool(host.call("set_ready", true)) and bool(client.call("set_ready", true)), "Both peers can Ready normally after map acceptance")
++		await _poll_pair(host_api, client_api, 20)
++		_assert(bool(host.call("start_mission")), "Host starts the consented map through normal product Start")
++		await _poll_pair(host_api, client_api, 25)
++		_assert(bool(host.call("has_active_mission")) and bool(client.call("has_active_mission")), "Consented host and client instantiate their real mission scenes")
++		_assert_loaded_map(host, SECOND_PATH, "Host")
++		_assert_loaded_map(client, cache_path, "Client")
++	await _cleanup_pair(fixture)
++	await _test_known_map_mission(first_manifest)
++	_finish()
++
++
++func _test_known_map_mission(manifest: Dictionary) -> void:
++	var fixture: Dictionary = await _create_lobby_pair(manifest, true)
++	_assert(bool(fixture.get("connected", false)), "Known-map product lobbies connect over ENet without a download")
++	if not bool(fixture.get("connected", false)):
++		return
++	var host: Node = fixture["host"]
++	var client: Node = fixture["client"]
++	var host_api: MultiplayerAPI = fixture["host_api"]
++	var client_api: MultiplayerAPI = fixture["client_api"]
++	_assert(not bool(Dictionary(client.call("get_lobby_ui_snapshot")).get("map_consent_visible", true)), "Known matching local map needs no consent prompt")
++	_assert(bool(host.call("set_ready", true)) and bool(client.call("set_ready", true)), "Known-map peers submit normal Ready commands")
++	await _poll_pair(host_api, client_api, 20)
++	_assert(bool(host.call("start_mission")), "Known-map host starts normally")
++	await _poll_pair(host_api, client_api, 25)
++	_assert_loaded_map(host, FIRST_PATH, "Known Host", "review7_lobby_first_map")
++	_assert_loaded_map(client, FIRST_PATH, "Known Client", "review7_lobby_first_map")
++	await _cleanup_pair(fixture)
++
++
++func _assert_loaded_map(lobby: Node, expected_path: String, label: String, expected_name: String = "review7_lobby_second_map") -> void:
++	var mission: Node = lobby.get("_active_mission")
++	if mission == null:
++		_assert(false, "%s mission loads the current consented 3x3 map" % label)
++		return
++	var setup: Node = mission.get_node("MissionSetup")
++	_assert(String(setup.get("map_file_path")) == expected_path, "%s MissionSetup uses its host-selected or locally verified map path" % label)
++	var data = setup.get("_loaded_terrain_map_data")
++	_assert(data != null and Vector2i(data.call("get_grid_size")) == Vector2i(3, 3) and String(data.call("get_map_name")) == expected_name, "%s actually loaded current offered terrain instead of the default map" % label)
++	_assert(int(mission.get_node("TerrainRegistry").call("get_tile_count")) == 9, "%s runtime terrain registry contains exactly the nine consented map cells" % label)
++
++
++func _write_map(path: String, map_name: String) -> void:
++	var data = TERRAIN_SCRIPT.call("create_empty", map_name, Vector2i(3, 3), Vector2.ZERO, 64.0, 32.0, 3)
++	_assert(data.call("save_to_file", path) == OK, "3x3 map fixture saves under isolated user data")
++
++
++func _create_lobby_pair(manifest: Dictionary, client_knows_map: bool = false) -> Dictionary:
++	for port in range(PORT_START, PORT_END + 1):
++		var host_api: MultiplayerAPI = MultiplayerAPI.create_default_interface()
++		var client_api: MultiplayerAPI = MultiplayerAPI.create_default_interface()
++		var host_root := Node.new()
++		var client_root := Node.new()
++		host_root.name = "Review7MapHost"
++		client_root.name = "Review7MapClient"
++		root.add_child(host_root)
++		root.add_child(client_root)
++		set_multiplayer(host_api, host_root.get_path())
++		set_multiplayer(client_api, client_root.get_path())
++		var host: Node = LOBBY_SCENE.instantiate()
++		var client: Node = LOBBY_SCENE.instantiate()
++		host.name = "Lobby"
++		client.name = "Lobby"
++		host_root.add_child(host)
++		client_root.add_child(client)
++		await process_frame
++		var fixture: Dictionary = {"host_api": host_api, "client_api": client_api, "host_root": host_root, "client_root": client_root, "host": host, "client": client, "port": port}
++		if not bool(host.call("host_game", port)):
++			await _cleanup_pair(fixture)
++			continue
++		var host_session: Node = host.get_node("MultiplayerSession")
++		host_session.call("set_lobby_player_setup", {"map_path": FIRST_PATH})
++		host_session.call("set_host_map_manifest", manifest)
++		if not bool(client.call("join_game", "127.0.0.1", port)):
++			await _cleanup_pair(fixture)
++			continue
++		if client_knows_map:
++			client.get_node("MultiplayerSession").call("set_lobby_player_setup", {"map_path": FIRST_PATH})
++		for _index in range(180):
++			await _poll_pair(host_api, client_api, 1)
++			var client_snapshot: Dictionary = Dictionary(client.call("get_session_snapshot"))
++			var expected_state: String = "known" if client_knows_map else "missing"
++			if int(Dictionary(host.call("get_session_snapshot")).get("connected_count", 0)) == 2 and String(Dictionary(client_snapshot.get("map_transfer", {})).get("state", "")) == expected_state:
++				fixture["connected"] = true
++				return fixture
++		await _cleanup_pair(fixture)
++	return {"connected": false}
++
++
++func _poll_pair(host_api: MultiplayerAPI, client_api: MultiplayerAPI, frames: int) -> void:
++	for _index in range(frames):
++		host_api.poll()
++		client_api.poll()
++		await create_timer(0.01).timeout
++
++
++func _cleanup_pair(fixture: Dictionary) -> void:
++	var host: Node = fixture.get("host", null)
++	var client: Node = fixture.get("client", null)
++	if host != null:
++		host.call("disconnect_game")
++	if client != null:
++		client.call("disconnect_game")
++	var host_root: Node = fixture.get("host_root", null)
++	var client_root: Node = fixture.get("client_root", null)
++	if host_root != null:
++		host_root.queue_free()
++	if client_root != null:
++		client_root.queue_free()
++	await process_frame
++
++
++func _finish() -> void:
++	print("=== REVIEW7 LOBBY MAP RESULTS: %d passed, %d failed ===" % [_passed, _failed])
++	if _failed == 0:
++		print("REVIEW7_LOBBY_MAP_ALL_PASSED")
++	quit(1 if _failed > 0 else 0)
++
++
++func _assert(condition: bool, message: String) -> void:
++	if condition:
++		_passed += 1
++		print("PASS: %s" % message)
++	else:
++		_failed += 1
++		push_error("FAIL: %s" % message)
+diff --git a/scripts/tests/review7_session_map_start_consent_verifier.gd b/scripts/tests/review7_session_map_start_consent_verifier.gd
+new file mode 100644
+index 000000000..fa5a4d7c2
+--- /dev/null
++++ b/scripts/tests/review7_session_map_start_consent_verifier.gd
+@@ -0,0 +1,196 @@
++extends SceneTree
++
++const ISOLATION_GUARD: GDScript = preload("res://scripts/tests/review2_isolated_user_guard.gd")
++const SESSION_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_session.gd")
++const MAP_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
++const TERRAIN_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
++const MAP_PATH: String = "user://review7_session_map.json"
++const CACHE_ROOT: String = "user://review7_session_downloads"
++const ASSIGNMENTS: Dictionary = {"peer_teams": {1: "team_alpha", 2: "team_bravo"}, "peer_roles": {1: "host", 2: "commander"}, "peer_fireteams": {1: ["blue", "gold"], 2: ["red"]}}
++
++var _passed: int = 0
++var _failed: int = 0
++
++
++func _init() -> void:
++	if not ISOLATION_GUARD.require_isolated_user_data():
++		return
++	call_deferred("_run_tests")
++
++
++func _run_tests() -> void:
++	var map_data = TERRAIN_SCRIPT.call("create_empty", "review7_session_map", Vector2i(3, 3), Vector2.ZERO, 64.0, 32.0, 3)
++	_assert(map_data.call("save_to_file", MAP_PATH) == OK, "Map fixture saves only in isolated user data")
++	var map_text: String = FileAccess.get_file_as_string(MAP_PATH)
++	var manifest: Dictionary = Dictionary(MAP_SCRIPT.call("build_manifest_for_map", MAP_PATH))
++	_assert(bool(manifest.get("valid", false)), "Map fixture has a valid manifest")
++	await _test_empty_compatibility()
++	await _test_missing_and_rejected(manifest)
++	await _test_invalid_manifest(manifest)
++	await _test_accepted_and_replacement(manifest, map_text)
++	await _test_stale_offer_actions(manifest, map_text)
++	await _test_local_host_setter_cannot_replace_offer(manifest)
++	await _test_known_map(manifest)
++	print("=== REVIEW7 SESSION MAP RESULTS: %d passed, %d failed ===" % [_passed, _failed])
++	if _failed == 0:
++		print("REVIEW7_SESSION_MAP_ALL_PASSED")
++	quit(1 if _failed > 0 else 0)
++
++
++func _test_empty_compatibility() -> void:
++	var client: Node = _make_client()
++	var starts: Array = _capture_starts(client)
++	client.call("_receive_session_snapshot", _snapshot({}))
++	client.call("_receive_start_mission", ASSIGNMENTS)
++	_assert(starts.size() == 1 and _mission_started(client), "Sessions without editor-map manifests retain mission start compatibility")
++	client.queue_free()
++	await process_frame
++
++
++func _test_missing_and_rejected(manifest: Dictionary) -> void:
++	var client: Node = _make_client()
++	var starts: Array = _capture_starts(client)
++	client.call("_receive_session_snapshot", _snapshot(manifest))
++	_assert(_transfer_state(client) == "missing", "Incoming host manifest is checked against local maps")
++	_assert(not _can_start_client(client), "Missing map requires local consent even if host publishes an allowed transfer state")
++	client.call("_receive_start_mission", ASSIGNMENTS)
++	_assert(starts.is_empty() and not _mission_started(client), "Missing map blocks the incoming mission-start RPC")
++	client.call("reject_map_download", manifest)
++	client.call("_receive_session_snapshot", _snapshot(manifest, true))
++	_assert(_transfer_state(client) == "rejected" and not _can_start_client(client), "Repeated host manifest preserves the client's rejection")
++	_assert(not _mission_started(client), "Host mission snapshot cannot bypass client rejection")
++	client.call("_receive_start_mission", ASSIGNMENTS)
++	_assert(starts.is_empty() and not _mission_started(client), "Rejected download leaves client in lobby without start events")
++	_assert(String(Dictionary(client.call("get_session_snapshot")).get("connection_state", "")) == "joined", "Blocked mission remains a joined lobby session")
++	client.queue_free()
++	await process_frame
++
++
++func _test_invalid_manifest(manifest: Dictionary) -> void:
++	for invalid in [manifest.merged({"map_id": "../review7_session_map"}, true), manifest.merged({"map_hash": "wrong"}, true), {"map_manifest_is_malformed": true}]:
++		var client: Node = _make_client()
++		var starts: Array = _capture_starts(client)
++		client.call("_receive_session_snapshot", _snapshot(invalid, true))
++		_assert(_transfer_state(client) == "invalid_manifest" and not _can_start_client(client), "Malformed or unsafe inbound manifest is rejected before normalization")
++		client.call("_receive_start_mission", ASSIGNMENTS)
++		_assert(starts.is_empty() and not _mission_started(client), "Invalid manifest never starts a client mission")
++		client.queue_free()
++		await process_frame
++
++
++func _test_accepted_and_replacement(manifest: Dictionary, map_text: String) -> void:
++	var client: Node = _make_client()
++	var starts: Array = _capture_starts(client)
++	client.call("_receive_session_snapshot", _snapshot(manifest))
++	var accepted: Dictionary = Dictionary(client.call("accept_map_download", manifest, map_text, CACHE_ROOT))
++	_assert(bool(accepted.get("accepted", false)) and FileAccess.file_exists(String(accepted.get("cache_path", ""))), "Explicit download acceptance validates and caches the map")
++	client.call("_receive_session_snapshot", _snapshot(manifest))
++	_assert(_transfer_state(client) == "accepted" and _can_start_client(client), "Duplicate incoming manifest retains accepted consent")
++	client.call("_receive_start_mission", ASSIGNMENTS)
++	_assert(starts.size() == 1 and _mission_started(client), "Accepted map allows the mission-start RPC")
++	client.call("complete_mission")
++	var replacement: Dictionary = manifest.merged({"map_hash": "b".repeat(64)}, true)
++	client.call("_receive_session_snapshot", _snapshot(replacement, true))
++	_assert(not _can_start_client(client), "Host replacement hash invalidates approval for the previous map")
++	_assert(String(Dictionary(Dictionary(client.call("get_session_snapshot")).get("map_manifest", {})).get("map_hash", "")) == "b".repeat(64), "Client records the replacement manifest as the active offer")
++	client.call("_receive_start_mission", ASSIGNMENTS)
++	_assert(starts.size() == 1 and not _mission_started(client), "Previous acceptance cannot start a replaced map")
++	client.call("reject_map_download", replacement)
++	client.call("_receive_session_snapshot", _snapshot(replacement))
++	_assert(_transfer_state(client) == "rejected", "Duplicate replacement manifest preserves its rejection")
++	client.queue_free()
++	await process_frame
++
++
++func _test_known_map(manifest: Dictionary) -> void:
++	var client: Node = _make_client()
++	var starts: Array = _capture_starts(client)
++	client.call("set_lobby_player_setup", {"map_path": MAP_PATH})
++	client.call("_receive_session_snapshot", _snapshot(manifest))
++	_assert(_transfer_state(client) == "known" and _can_start_client(client), "Incoming manifest recognizes the client's selected local map with matching hash")
++	client.call("_receive_session_snapshot", _snapshot(manifest))
++	_assert(_transfer_state(client) == "known" and _can_start_client(client), "Duplicate known manifest stays ready without a new prompt")
++	client.call("_receive_start_mission", ASSIGNMENTS)
++	_assert(starts.size() == 1 and _mission_started(client), "Known map starts without download consent")
++	client.call("complete_mission")
++	var replacement: Dictionary = manifest.merged({"map_hash": "c".repeat(64)}, true)
++	client.call("_receive_session_snapshot", _snapshot(replacement))
++	_assert(_transfer_state(client) == "hash_mismatch" and not _can_start_client(client), "Same local map ID with changed host content requires fresh consent")
++	client.queue_free()
++	await process_frame
++
++
++func _test_stale_offer_actions(manifest: Dictionary, map_text: String) -> void:
++	var client: Node = _make_client()
++	var starts: Array = _capture_starts(client)
++	client.call("_receive_session_snapshot", _snapshot(manifest))
++	client.call("accept_map_download", manifest, map_text, CACHE_ROOT)
++	var replacement: Dictionary = manifest.merged({"map_hash": "d".repeat(64)}, true)
++	client.call("_receive_session_snapshot", _snapshot(replacement))
++	var stale_cache_root: String = "user://review7_stale_downloads"
++	var stale_result: Dictionary = Dictionary(client.call("accept_map_download", manifest, map_text, stale_cache_root))
++	_assert(not bool(stale_result.get("accepted", true)), "Delayed acceptance for old offer A is refused after host selects B")
++	_assert(not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path(stale_cache_root)), "Stale acceptance does not create a download directory or write the old payload")
++	_assert(String(Dictionary(Dictionary(client.call("get_session_snapshot")).get("map_manifest", {})).get("map_hash", "")) == "d".repeat(64) and not _can_start_client(client), "Stale acceptance cannot replace active B or authorize its mission")
++	client.call("reject_map_download", manifest)
++	_assert(String(Dictionary(Dictionary(client.call("get_session_snapshot")).get("map_manifest", {})).get("map_hash", "")) == "d".repeat(64) and _transfer_state(client) == "hash_mismatch", "Delayed rejection for A leaves B's pending mismatch state unchanged")
++	client.call("reject_map_download", replacement)
++	client.call("evaluate_client_map_manifest", manifest, [MAP_PATH])
++	_assert(String(Dictionary(Dictionary(client.call("get_session_snapshot")).get("map_manifest", {})).get("map_hash", "")) == "d".repeat(64) and _transfer_state(client) == "rejected" and not _can_start_client(client), "Delayed local evaluation of known A cannot replace or reset rejected B")
++	client.call("_receive_start_mission", ASSIGNMENTS)
++	_assert(starts.is_empty() and not _mission_started(client), "Stale local actions never authorize a mission for the current host offer")
++	client.queue_free()
++	await process_frame
++
++
++func _test_local_host_setter_cannot_replace_offer(manifest: Dictionary) -> void:
++	var client: Node = _make_client()
++	var starts: Array = _capture_starts(client)
++	var replacement: Dictionary = manifest.merged({"map_hash": "e".repeat(64)}, true)
++	client.call("_receive_session_snapshot", _snapshot(replacement))
++	client.call("set_host_map_manifest", manifest)
++	_assert(String(Dictionary(Dictionary(client.call("get_session_snapshot")).get("map_manifest", {})).get("map_hash", "")) == "e".repeat(64) and not _can_start_client(client), "Client setup host-setter cannot overwrite the authoritative offer with a local map")
++	client.call("set_host_map_manifest", replacement)
++	_assert(not _can_start_client(client), "Client host-setter cannot authorize the current unknown host map without consent")
++	client.call("_receive_start_mission", ASSIGNMENTS)
++	_assert(starts.is_empty() and not _mission_started(client), "Local setup host-setter cannot bypass client mission consent")
++	client.queue_free()
++	await process_frame
++
++
++func _make_client() -> Node:
++	var client: Node = SESSION_SCRIPT.new()
++	root.add_child(client)
++	client.call("configure_client_state_for_test", [1, 2])
++	return client
++
++
++func _capture_starts(client: Node) -> Array:
++	var starts: Array = []
++	client.connect("mission_start_requested", func(assignments: Dictionary) -> void: starts.append(assignments.duplicate(true)))
++	return starts
++
++
++func _snapshot(manifest: Dictionary, running: bool = false) -> Dictionary:
++	return {"mission_started": running, "map_manifest": manifest, "map_transfer": {"can_start_client": true, "state": "host_manifest_ready"}, "assignments": ASSIGNMENTS, "peers": [{"peer_id": 1, "is_host": true, "team_id": "team_alpha", "fireteam_ids": ["blue", "gold"]}, {"peer_id": 2, "is_host": false, "team_id": "team_bravo", "fireteam_ids": ["red"]}]}
++
++
++func _transfer_state(client: Node) -> String:
++	return String(Dictionary(Dictionary(client.call("get_session_snapshot")).get("map_transfer", {})).get("state", ""))
++
++
++func _can_start_client(client: Node) -> bool:
++	return bool(Dictionary(Dictionary(client.call("get_session_snapshot")).get("map_transfer", {})).get("can_start_client", false))
++
++
++func _mission_started(client: Node) -> bool:
++	return bool(Dictionary(client.call("get_session_snapshot")).get("mission_started", false))
++
++
++func _assert(condition: bool, message: String) -> void:
++	if condition:
++		_passed += 1
++		print("PASS: %s" % message)
++	else:
++		_failed += 1
++		push_error("FAIL: %s" % message)
+diff --git a/scripts/tests/review7_session_rejoin_after_completion_verifier.gd b/scripts/tests/review7_session_rejoin_after_completion_verifier.gd
+new file mode 100644
+index 000000000..f955efd5c
+--- /dev/null
++++ b/scripts/tests/review7_session_rejoin_after_completion_verifier.gd
+@@ -0,0 +1,161 @@
++extends SceneTree
++
++const ISOLATION_GUARD: GDScript = preload("res://scripts/tests/review2_isolated_user_guard.gd")
++const SESSION_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_session.gd")
++const PORT_START: int = 19780
++const PORT_END: int = 19790
++
++var _passed: int = 0
++var _failed: int = 0
++
++
++func _init() -> void:
++	if not ISOLATION_GUARD.require_isolated_user_data():
++		return
++	call_deferred("_run_tests")
++
++
++func _run_tests() -> void:
++	await _run_case(false)
++	await _run_case(true)
++	print("=== REVIEW7 SESSION REJOIN RESULTS: %d passed, %d failed ===" % [_passed, _failed])
++	if _failed == 0:
++		print("REVIEW7_SESSION_REJOIN_ALL_PASSED")
++	quit(1 if _failed > 0 else 0)
++
++
++func _run_case(after_completion: bool) -> void:
++	var label: String = "second mission" if after_completion else "first mission control"
++	var fixture: Dictionary = await _create_pair(after_completion)
++	_assert(bool(fixture.get("connected", false)), "%s: host/client complete real ENet setup" % label)
++	if not bool(fixture.get("connected", false)):
++		return
++	var host: Node = fixture["host"]
++	var client: Node = fixture["client"]
++	var host_api: MultiplayerAPI = fixture["host_api"]
++	var client_api: MultiplayerAPI = fixture["client_api"]
++	var initial_peer_id: int = client_api.get_unique_id()
++	var reconnect_token: String = String(client.get("_local_reconnect_token"))
++	var starts: Array = []
++	var blocks: Dictionary = {}
++	client.connect("mission_start_requested", func(assignments: Dictionary) -> void: starts.append(assignments.duplicate(true)))
++	host.connect("mission_rejoin_peer_block_changed", func(peer_id: int, blocked: bool) -> void: blocks[peer_id] = blocked)
++	_assert(not JSON.stringify(host.call("get_session_snapshot")).contains(reconnect_token), "%s: reconnect secret stays out of public session snapshots" % label)
++	await _ready_and_start(fixture, label + " initial start")
++	if after_completion:
++		# Normal lifecycle: no manual token rebinding or setup RPC is injected between missions.
++		host.call("complete_mission")
++		await _poll_pair(host_api, client_api, 25)
++		var completed_host: Dictionary = Dictionary(host.call("get_session_snapshot"))
++		var completed_client: Dictionary = Dictionary(client.call("get_session_snapshot"))
++		_assert(not bool(completed_host.get("mission_started", true)) and not bool(completed_client.get("mission_started", true)), "Completion returns both connected peers to lobby")
++		_assert(int(completed_host.get("connected_count", 0)) == 2 and int(completed_host.get("ready_count", -1)) == 0, "Completion keeps both connections and resets Ready")
++		_assert(Dictionary(host.get("_reconnect_tokens_by_peer_id")).has(initial_peer_id), "Completion retains the connected client's authenticated rejoin identity")
++		_assert(Dictionary(host.get("_pending_rejoin_identities_by_token")).is_empty(), "Completion leaves no stale disconnected mission identities")
++		await _ready_and_start(fixture, label + " next start")
++		_assert(starts.size() == 2, "Second mission begins through normal Ready and host Start")
++	var starts_before_rejoin: int = starts.size()
++	var old_assignment: Dictionary = Dictionary(host.call("build_session_assignments"))
++	var old_team: String = String(Dictionary(old_assignment.get("peer_teams", {})).get(initial_peer_id, ""))
++	var old_fireteams: PackedStringArray = PackedStringArray(Dictionary(old_assignment.get("peer_fireteams", {})).get(initial_peer_id, []))
++	client.call("disconnect_session")
++	await _poll_pair(host_api, client_api, 30)
++	_assert(bool(Dictionary(host.call("get_session_snapshot")).get("mission_started", false)), "%s: host mission survives client disconnect" % label)
++	_assert(Dictionary(host.get("_pending_rejoin_identities_by_token")).size() == 1, "%s: disconnect reserves the authenticated mission identity" % label)
++	_assert(bool(client.call("join_session", "127.0.0.1", int(fixture["port"]))), "%s: client starts a real ENet rejoin" % label)
++	await _poll_pair(host_api, client_api, 100)
++	var new_peer_id: int = client_api.get_unique_id() if client_api.multiplayer_peer != null else 0
++	_assert(new_peer_id > 1 and new_peer_id != initial_peer_id, "%s: rejoin uses a new ENet peer ID" % label)
++	_assert(starts.size() == starts_before_rejoin + 1 and bool(Dictionary(client.call("get_session_snapshot")).get("mission_started", false)), "%s: authenticated rejoin receives a mission handoff" % label)
++	var new_assignment: Dictionary = Dictionary(host.call("build_session_assignments"))
++	var new_teams: Dictionary = Dictionary(new_assignment.get("peer_teams", {}))
++	_assert(not new_teams.has(initial_peer_id) and String(new_teams.get(new_peer_id, "")) == old_team, "%s: new peer inherits the old authorized team without leaving an old peer assignment" % label)
++	_assert(PackedStringArray(Dictionary(new_assignment.get("peer_fireteams", {})).get(new_peer_id, [])) == old_fireteams, "%s: new peer inherits the authorized Fireteams" % label)
++	_assert(Dictionary(host.get("_pending_rejoin_identities_by_token")).is_empty(), "%s: authenticated handoff consumes the reserved identity" % label)
++	if new_peer_id > 1 and client_api.multiplayer_peer != null and bool(Dictionary(client.call("get_session_snapshot")).get("mission_started", false)):
++		_assert(bool(blocks.get(new_peer_id, false)), "%s: rejoin remains snapshot-blocked until mission runtime ACK" % label)
++		client.rpc_id(1, "notify_mission_runtime_ready")
++		await _poll_pair(host_api, client_api, 20)
++		_assert(not bool(blocks.get(new_peer_id, true)), "%s: reliable runtime-ready ACK releases only the authenticated peer" % label)
++	# Leave a pending mission identity, then test the explicit whole-session boundary.
++	client.call("disconnect_session")
++	await _poll_pair(host_api, client_api, 25)
++	host.call("disconnect_session")
++	_assert(Dictionary(host.get("_pending_rejoin_identities_by_token")).is_empty() and Dictionary(host.get("_reconnect_tokens_by_peer_id")).is_empty(), "%s: explicit session reset clears bound and pending reconnect credentials" % label)
++	_assert(int(Dictionary(host.call("get_session_snapshot")).get("connected_count", -1)) == 0 and not bool(Dictionary(host.call("get_session_snapshot")).get("mission_started", true)), "%s: session reset leaves no connected peer or active mission" % label)
++	await _cleanup_pair(fixture)
++
++
++func _ready_and_start(fixture: Dictionary, label: String) -> void:
++	var host: Node = fixture["host"]
++	var client: Node = fixture["client"]
++	var host_api: MultiplayerAPI = fixture["host_api"]
++	var client_api: MultiplayerAPI = fixture["client_api"]
++	_assert(bool(host.call("set_local_ready", true)) and bool(client.call("set_local_ready", true)), "%s: both peers submit normal Ready commands" % label)
++	await _poll_pair(host_api, client_api, 25)
++	_assert(bool(host.call("can_start_mission")) and bool(host.call("request_start_mission")), "%s: ready host starts mission" % label)
++	await _poll_pair(host_api, client_api, 25)
++	_assert(bool(Dictionary(client.call("get_session_snapshot")).get("mission_started", false)), "%s: client receives normal mission start" % label)
++
++
++func _create_pair(second_case: bool) -> Dictionary:
++	for port in range(PORT_START, PORT_END + 1):
++		var host_api: MultiplayerAPI = MultiplayerAPI.create_default_interface()
++		var client_api: MultiplayerAPI = MultiplayerAPI.create_default_interface()
++		var host_root := Node.new()
++		var client_root := Node.new()
++		host_root.name = "Review7HostSecond" if second_case else "Review7HostFirst"
++		client_root.name = "Review7ClientSecond" if second_case else "Review7ClientFirst"
++		root.add_child(host_root)
++		root.add_child(client_root)
++		set_multiplayer(host_api, host_root.get_path())
++		set_multiplayer(client_api, client_root.get_path())
++		var host: Node = SESSION_SCRIPT.new()
++		var client: Node = SESSION_SCRIPT.new()
++		host.name = "Session"
++		client.name = "Session"
++		host_root.add_child(host)
++		client_root.add_child(client)
++		var fixture: Dictionary = {"host_api": host_api, "client_api": client_api, "host_root": host_root, "client_root": client_root, "host": host, "client": client, "port": port}
++		if not bool(host.call("start_host", port)) or not bool(client.call("join_session", "127.0.0.1", port)):
++			await _cleanup_pair(fixture)
++			continue
++		for _index in range(180):
++			await _poll_pair(host_api, client_api, 1)
++			if int(Dictionary(host.call("get_session_snapshot")).get("connected_count", 0)) == 2 and not Dictionary(host.get("_reconnect_tokens_by_peer_id")).is_empty():
++				fixture["connected"] = true
++				return fixture
++		await _cleanup_pair(fixture)
++	return {"connected": false}
++
++
++func _poll_pair(host_api: MultiplayerAPI, client_api: MultiplayerAPI, frames: int) -> void:
++	for _index in range(frames):
++		host_api.poll()
++		client_api.poll()
++		await create_timer(0.01).timeout
++
++
++func _cleanup_pair(fixture: Dictionary) -> void:
++	var host: Node = fixture.get("host", null)
++	var client: Node = fixture.get("client", null)
++	if client != null:
++		client.call("disconnect_session")
++	if host != null:
++		host.call("disconnect_session")
++	var host_root: Node = fixture.get("host_root", null)
++	var client_root: Node = fixture.get("client_root", null)
++	if host_root != null:
++		host_root.queue_free()
++	if client_root != null:
++		client_root.queue_free()
++	await process_frame
++
++
++func _assert(condition: bool, message: String) -> void:
++	if condition:
++		_passed += 1
++		print("PASS: %s" % message)
++	else:
++		_failed += 1
++		push_error("FAIL: %s" % message)
+diff --git a/scripts/tests/review7_session_versus_assignment_verifier.gd b/scripts/tests/review7_session_versus_assignment_verifier.gd
+new file mode 100644
+index 000000000..f84b07337
+--- /dev/null
++++ b/scripts/tests/review7_session_versus_assignment_verifier.gd
+@@ -0,0 +1,92 @@
++extends SceneTree
++
++const ISOLATION_GUARD: GDScript = preload("res://scripts/tests/review2_isolated_user_guard.gd")
++const SESSION_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_session.gd")
++
++var _passed: int = 0
++var _failed: int = 0
++
++
++func _init() -> void:
++	if not ISOLATION_GUARD.require_isolated_user_data():
++		return
++	call_deferred("_run_tests")
++
++
++func _run_tests() -> void:
++	for case in [{"host": "team_alpha", "client": "team_bravo"}, {"host": "team_bravo", "client": "team_alpha"}]:
++		await _test_versus(case)
++		await _test_coop(String(case["host"]))
++	await _test_same_side_rejected()
++	print("=== REVIEW7 SESSION VERSUS RESULTS: %d passed, %d failed ===" % [_passed, _failed])
++	if _failed == 0:
++		print("REVIEW7_SESSION_VERSUS_ALL_PASSED")
++	quit(1 if _failed > 0 else 0)
++
++
++func _test_versus(case: Dictionary) -> void:
++	var host: Node = _make_host()
++	host.call("set_lobby_player_setup", {"team_play_mode": "versus", "team_slot": case["host"]})
++	var assignments: Dictionary = Dictionary(host.call("build_session_assignments"))
++	_assert(String(Dictionary(assignments.get("peer_teams", {})).get(1, "")) == String(case["host"]), "Versus preserves the selected host side %s" % case["host"])
++	_assert(String(Dictionary(assignments.get("peer_teams", {})).get(2, "")) == String(case["client"]), "Versus assigns the client opposite host side %s" % case["host"])
++	_assert(PackedStringArray(Dictionary(assignments.get("peer_fireteams", {})).get(1, [])) == PackedStringArray(["blue", "gold"]), "Versus preserves host Fireteam control")
++	_assert(PackedStringArray(Dictionary(assignments.get("peer_fireteams", {})).get(2, [])) == PackedStringArray(["red"]), "Versus preserves client Fireteam control")
++	host.call("set_peer_ready_for_test", 1, true)
++	host.call("set_peer_ready_for_test", 2, true)
++	_assert(bool(host.call("can_start_mission")), "Opposite ready sides allow versus mission start")
++	host.queue_free()
++	await process_frame
++
++
++func _test_coop(side: String) -> void:
++	var host: Node = _make_host()
++	host.call("set_lobby_player_setup", {"team_play_mode": "coop", "team_slot": side})
++	var assignments: Dictionary = Dictionary(host.call("build_session_assignments"))
++	var teams: Dictionary = Dictionary(assignments.get("peer_teams", {}))
++	_assert(String(teams.get(1, "")) == side and String(teams.get(2, "")) == side, "Coop keeps both peers on selected side %s" % side)
++	var fireteams: Dictionary = Dictionary(assignments.get("peer_fireteams", {}))
++	_assert(PackedStringArray(fireteams.get(1, [])) == PackedStringArray(["blue"]) and PackedStringArray(fireteams.get(2, [])) == PackedStringArray(["gold"]), "Coop keeps split non-overlapping Fireteams")
++	host.call("set_peer_ready_for_test", 1, true)
++	host.call("set_peer_ready_for_test", 2, true)
++	_assert(bool(host.call("can_start_mission")), "Ready same-side coop session remains startable")
++	host.call("set_lobby_player_setup", {"team_play_mode": "versus", "team_slot": side})
++	teams = Dictionary(Dictionary(host.call("build_session_assignments")).get("peer_teams", {}))
++	_assert(String(teams.get(1, "")) == side and String(teams.get(2, "")) != side, "Switching coop back to versus restores opposite client side")
++	host.queue_free()
++	await process_frame
++
++
++func _test_same_side_rejected() -> void:
++	var host: Node = _make_host()
++	host.call("set_lobby_player_setup", {"team_play_mode": "versus", "team_slot": "team_alpha"})
++	host.call("set_peer_ready_for_test", 1, true)
++	host.call("set_peer_ready_for_test", 2, true)
++	# Corrupt only the assignment boundary to exercise the start guard independently of rebalance.
++	var peers: Dictionary = Dictionary(host.get("_peers_by_id")).duplicate(true)
++	var peer_data: Dictionary = Dictionary(peers[2]).duplicate(true)
++	peer_data["team_id"] = "team_alpha"
++	peers[2] = peer_data
++	host.set("_peers_by_id", peers)
++	var starts: Array = []
++	host.connect("mission_start_requested", func(assignments: Dictionary) -> void: starts.append(assignments))
++	_assert(not bool(host.call("can_start_mission")), "Versus start guard rejects equal active peer sides")
++	_assert(not bool(host.call("request_start_mission")) and starts.is_empty(), "Invalid same-side versus cannot emit a mission-start request")
++	host.queue_free()
++	await process_frame
++
++
++func _make_host() -> Node:
++	var host: Node = SESSION_SCRIPT.new()
++	root.add_child(host)
++	host.call("configure_host_state_for_test", [2])
++	return host
++
++
++func _assert(condition: bool, message: String) -> void:
++	if condition:
++		_passed += 1
++		print("PASS: %s" % message)
++	else:
++		_failed += 1
++		push_error("FAIL: %s" % message)
+diff --git a/scripts/tests/review7_spacing_verifier.gd b/scripts/tests/review7_spacing_verifier.gd
+new file mode 100644
+index 000000000..4b284d5b4
+--- /dev/null
++++ b/scripts/tests/review7_spacing_verifier.gd
+@@ -0,0 +1,203 @@
++extends SceneTree
++
++const GUARD = preload("res://scripts/tests/review2_isolated_user_guard.gd")
++const SIMULATION = preload("res://scripts/core/simulation_root.gd")
++const UNIT_REGISTRY = preload("res://scripts/registries/unit_registry.gd")
++const TERRAIN = preload("res://scripts/terrain/terrain_registry.gd")
++const TILE = preload("res://scripts/terrain/terrain_tile_data.gd")
++const UNIT = preload("res://scripts/npc/test_unit.gd")
++const PATHFINDER = preload("res://scripts/terrain/terrain_pathfinder.gd")
++
++var _passed: int = 0
++var _failed: int = 0
++
++
++func _init() -> void:
++	if not GUARD.require_isolated_user_data():
++		return
++	call_deferred("_run")
++
++
++func _run() -> void:
++	for topology in ["square8", "hex_axial_v1"]:
++		for height in [1, 2]:
++			for descending in [false, true]:
++				for edge in ["cliff", "none"]:
++					_test_half_correction(String(topology), height, descending, String(edge), false)
++					_test_full_correction(String(topology), height, descending, String(edge), false)
++				_test_half_correction(String(topology), height, descending, "slope", true)
++				_test_full_correction(String(topology), height, descending, "slope", true)
++		_test_half_correction(String(topology), 0, false, "none", true)
++		_test_full_correction(String(topology), 0, false, "none", true)
++		_test_intermediate_hole(String(topology))
++	_test_square_diagonal(false)
++	_test_square_diagonal(true)
++	_test_offset_square_segment()
++	_test_terrainless()
++	print("REVIEW7_SPACING_RESULT passed=%d failed=%d" % [_passed, _failed])
++	quit(0 if _failed == 0 else 1)
++
++
++func _test_half_correction(topology: String, height: int, descending: bool, edge: String, legal: bool) -> void:
++	var context: Dictionary = _context(topology, 64.0, 32.0)
++	var terrain: Node = context["terrain"]
++	_tile(terrain, Vector2i.ZERO, height if descending else 0, edge if descending else "none")
++	_tile(terrain, Vector2i.RIGHT, 0 if descending else height, "none" if descending else edge)
++	var direction: Vector2 = Vector2(terrain.grid_to_world(Vector2i.RIGHT)).normalized()
++	var boundary: float = Vector2(terrain.grid_to_world(Vector2i.RIGHT)).length() * 0.5
++	var before_a: Vector2 = direction * (boundary - 3.0)
++	var before_b: Vector2 = direction * (boundary - 1.0)
++	_add_units(context, before_a, before_b)
++	var label: String = "%s half H%d %s %s" % [topology, height, "down" if descending else "up", edge]
++	_assert(PATHFINDER.new().can_traverse_step(Vector2i.ZERO, Vector2i.RIGHT, terrain) == legal, label + " fixture agrees with authoritative traversal")
++	_tick(context, label)
++	var alpha: Node2D = context["alpha"]
++	var bravo: Node2D = context["bravo"]
++	if legal:
++		_assert(alpha.position.is_equal_approx(before_a - direction * 17.0) and bravo.position.is_equal_approx(before_b + direction * 17.0), label + " preserves balanced legal half pushes")
++		_assert(terrain.world_to_grid(bravo.position) == Vector2i.RIGHT, label + " crosses the permitted edge")
++	else:
++		_assert(bravo.position.is_equal_approx(before_b), label + " rejects the half push across the forbidden edge")
++		_assert(alpha.position.is_equal_approx(before_a - direction * 34.0), label + " retains the legal opposite full fallback")
++	_assert(is_equal_approx(alpha.position.distance_to(bravo.position), 36.0), label + " resolves spacing without an illegal crossing")
++	context["scene"].free()
++
++
++func _test_full_correction(topology: String, height: int, descending: bool, edge: String, legal: bool) -> void:
++	# The negative side is absent; both half pushes cannot be committed. The
++	# positive full push crosses TWO transitions, including the tested edge.
++	var context: Dictionary = _context(topology, 16.0, 8.0)
++	var terrain: Node = context["terrain"]
++	for grid in [Vector2i.ZERO, Vector2i.RIGHT, Vector2i(2, 0)]:
++		var source: bool = grid != Vector2i(2, 0)
++		_tile(terrain, grid, (height if source else 0) if descending else (0 if source else height), (edge if source else "none") if descending else ("none" if source else edge))
++	var direction: Vector2 = Vector2(terrain.grid_to_world(Vector2i.RIGHT)).normalized()
++	var before_b: Vector2 = direction * 2.0
++	_add_units(context, Vector2.ZERO, before_b)
++	var label: String = "%s full H%d %s %s" % [topology, height, "down" if descending else "up", edge]
++	_assert(terrain.world_to_grid(direction * 36.0) == Vector2i(2, 0), label + " full correction spans two cells")
++	_assert(PATHFINDER.new().can_traverse_step(Vector2i.RIGHT, Vector2i(2, 0), terrain) == legal, label + " fixture edge agrees with authoritative traversal")
++	_tick(context, label)
++	_assert(context["alpha"].position.is_equal_approx(Vector2.ZERO), label + " absent negative terrain blocks alpha")
++	if legal:
++		_assert(context["bravo"].position.is_equal_approx(direction * 36.0), label + " retains the legal multi-cell full fallback")
++	else:
++		_assert(context["bravo"].position.is_equal_approx(before_b), label + " rejects the forbidden full fallback")
++		_assert(int(context["simulation"].get_unit_minimum_spacing_debug_snapshot().get("blocked_pair_count", 0)) == 1, label + " reports the unresolved blocked pair")
++	context["scene"].free()
++
++
++func _test_intermediate_hole(topology: String) -> void:
++	var context: Dictionary = _context(topology, 16.0, 8.0)
++	var terrain: Node = context["terrain"]
++	_tile(terrain, Vector2i.ZERO)
++	_tile(terrain, Vector2i(2, 0))
++	var direction: Vector2 = Vector2(terrain.grid_to_world(Vector2i.RIGHT)).normalized()
++	_add_units(context, Vector2.ZERO, direction * 2.0)
++	var label: String = topology + " missing intermediate tile"
++	_assert(terrain.is_walkable(terrain.world_to_grid(direction * 36.0)), label + " destination itself is walkable")
++	_tick(context, label)
++	_assert(context["alpha"].position == Vector2.ZERO and context["bravo"].position.is_equal_approx(direction * 2.0), label + " cannot teleport to the disconnected walkable destination")
++	context["scene"].free()
++
++
++func _test_square_diagonal(legal: bool) -> void:
++	var context: Dictionary = _context("square8", 16.0, 8.0)
++	var terrain: Node = context["terrain"]
++	for x in range(3):
++		for y in range(3):
++			_tile(terrain, Vector2i(x, y), 0, "none", legal or x == y)
++	_add_units(context, Vector2.ZERO, Vector2(0.0, 2.0))
++	var label: String = "square diagonal " + ("legal" if legal else "forbidden corner")
++	_assert(PATHFINDER.new().can_traverse_step(Vector2i.ZERO, Vector2i.ONE, terrain) == legal, label + " fixture agrees with pathfinder corner rule")
++	_tick(context, label)
++	_assert(context["bravo"].position.is_equal_approx(Vector2(0.0, 36.0) if legal else Vector2(0.0, 2.0)), label + " full push respects both intermediate diagonal steps")
++	context["scene"].free()
++
++
++func _test_offset_square_segment() -> void:
++	var context: Dictionary = _context("square8", 8.0, 4.0)
++	var terrain: Node = context["terrain"]
++	for x in range(4):
++		for y in range(-1, 2):
++			_tile(terrain, Vector2i(x, y), 0, "none", Vector2i(x, y) != Vector2i(3, 0))
++	var start: Vector2 = _world_at(terrain, Vector2(0.49, -0.49))
++	var finish: Vector2 = _world_at(terrain, Vector2(3.49, 0.51))
++	var direction: Vector2 = (finish - start).normalized()
++	_add_units(context, start - direction * 2.0, start)
++	context["simulation"].unit_minimum_spacing_distance = start.distance_to(finish) + 2.0
++	var center_line: Array = terrain.get_grid_line(terrain.world_to_grid(start), terrain.world_to_grid(finish))
++	var center_line_legal: bool = true
++	for index in range(1, center_line.size()):
++		center_line_legal = center_line_legal and PATHFINDER.new().can_traverse_step(center_line[index - 1], center_line[index], terrain)
++	_assert(center_line_legal, "Offset fixture center-to-center path incorrectly misses the touched blocked tile")
++	_assert(terrain.world_to_grid(start.lerp(finish, 0.9)) == Vector2i(3, 0), "Offset actual segment enters the blocked intermediate tile")
++	_tick(context, "offset square segment")
++	_assert(context["bravo"].position.is_equal_approx(start), "Actual correction segment cannot cross a blocker omitted by the cell-center line")
++	context["scene"].free()
++
++
++func _test_terrainless() -> void:
++	var context: Dictionary = _context("square8", 64.0, 32.0, false)
++	_add_units(context, Vector2.ZERO, Vector2(2.0, 0.0))
++	_tick(context, "terrainless")
++	_assert(context["alpha"].position.is_equal_approx(Vector2(-17.0, 0.0)) and context["bravo"].position.is_equal_approx(Vector2(19.0, 0.0)), "Terrainless authority keeps the existing balanced spacing behavior")
++	context["scene"].free()
++
++
++func _context(topology: String, half_width: float, half_height: float, with_terrain: bool = true) -> Dictionary:
++	var scene := Node.new()
++	root.add_child(scene)
++	var registry = UNIT_REGISTRY.new()
++	registry.name = "UnitRegistry"
++	scene.add_child(registry)
++	var terrain = TERRAIN.new()
++	terrain.name = "TerrainRegistry"
++	terrain.configure_iso_grid(Vector2.ZERO, half_width, half_height, topology)
++	scene.add_child(terrain)
++	var simulation = SIMULATION.new()
++	simulation.name = "SimulationRoot"
++	simulation.unit_registry_path = NodePath("../UnitRegistry")
++	simulation.terrain_registry_path = NodePath("../TerrainRegistry") if with_terrain else NodePath()
++	simulation.unit_minimum_spacing_debug_enabled = true
++	simulation.unit_minimum_spacing_solver_iterations = 1
++	scene.add_child(simulation)
++	simulation.set_physics_process(false)
++	return {"scene": scene, "registry": registry, "terrain": terrain, "simulation": simulation}
++
++
++func _tile(terrain: Node, grid: Vector2i, height: int = 0, edge: String = "none", walkable: bool = true) -> void:
++	terrain.register_tile(TILE.new({"tile_id": str(grid), "grid_position": grid, "world_position": terrain.grid_to_world(grid), "height_level": height, "edge_type": edge, "walkable": walkable, "surface_type": "ground"}))
++
++
++func _add_units(context: Dictionary, position_a: Vector2, position_b: Vector2) -> void:
++	for id in ["alpha", "bravo"]:
++		var unit = UNIT.new()
++		unit.unit_id = id
++		unit.team_id = "team_alpha"
++		unit.fireteam_id = "blue"
++		unit.position = position_a if id == "alpha" else position_b
++		context["scene"].add_child(unit)
++		context["registry"].register_unit(id, unit)
++		context[id] = unit
++
++
++func _world_at(terrain: Node, grid: Vector2) -> Vector2:
++	var origin: Vector2 = terrain.grid_to_world(Vector2i.ZERO)
++	return origin + (Vector2(terrain.grid_to_world(Vector2i.RIGHT)) - origin) * grid.x + (Vector2(terrain.grid_to_world(Vector2i.DOWN)) - origin) * grid.y
++
++
++func _tick(context: Dictionary, label: String) -> void:
++	var simulation: Node = context["simulation"]
++	simulation.call("_physics_process", 1.0 / 60.0)
++	_assert(simulation.get_tick() == 1, label + " executes a real authoritative tick")
++	_assert(simulation.command_queue.is_empty() and simulation.effects_queue.is_empty(), label + " spacing does not invent commands or effects")
++
++
++func _assert(condition: bool, message: String) -> void:
++	if condition:
++		_passed += 1
++		print("PASS: " + message)
++	else:
++		_failed += 1
++		print("FAIL: " + message)
+diff --git a/scripts/ui/multiplayer_lobby_screen.gd b/scripts/ui/multiplayer_lobby_screen.gd
+index 8b67b809b..9b80e3e06 100644
+--- a/scripts/ui/multiplayer_lobby_screen.gd
++++ b/scripts/ui/multiplayer_lobby_screen.gd
+@@ -1212,6 +1212,15 @@ func _launch_mission(assignments: Dictionary) -> void:
+ 	_release_active_mission()
+ 	_ensure_mission_host()
+ 	var mission_instance: Node = MISSION_SCENE.instantiate()
++	var session_snapshot: Dictionary = get_session_snapshot()
++	var map_path: String = ""
++	if bool(session_snapshot.get("is_host", false)):
++		map_path = String(Dictionary(session_snapshot.get("lobby_setup", {})).get("map_path", ""))
++	else:
++		var map_transfer: Dictionary = Dictionary(session_snapshot.get("map_transfer", {}))
++		map_path = String(map_transfer.get("local_path", map_transfer.get("cache_path", "")))
++	if not map_path.is_empty():
++		mission_instance.get_node("MissionSetup").set("map_file_path", map_path)
+ 	_apply_session_assignments_to_simulation_root(mission_instance.get_node_or_null("SimulationRoot"), assignments)
+ 	var startup_combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
+ 	if startup_combat_driver != null and startup_combat_driver.has_method("set_combat_startup_grace_ticks"):
+@@ -1316,6 +1325,11 @@ func _apply_session_snapshot(snapshot: Dictionary) -> void:
+ 	_status_label.text = String(snapshot.get("status_text", "Ready. Host or join a local session."))
+ 	if snapshot.has("map_transfer"):
+ 		_map_consent_state = Dictionary(snapshot.get("map_transfer", _map_consent_state)).duplicate(true)
++		_pending_map_manifest = Dictionary(snapshot.get("map_manifest", {})).duplicate(true)
++		if bool(_map_consent_state.get("requires_consent", false)) and not bool(_map_consent_state.get("can_start_client", false)):
++			_show_map_consent_prompt(_pending_map_manifest)
++		else:
++			_hide_map_consent_prompt()
+ 	_apply_roster_mode_snapshot(Dictionary(snapshot.get("roster", {})))
+ 	_role_readability_snapshot = _build_lobby_role_readability_snapshot(snapshot)
+ 	_peer_label.text = String(_role_readability_snapshot.get("peer_text", "EINSATZROLLEN\n-"))
+@@ -1337,7 +1351,7 @@ func _refresh_lobby_controls(snapshot: Dictionary) -> void:
+ 	_host_button.disabled = has_active_peer or bool(snapshot.get("mission_started", false))
+ 	_join_button.disabled = has_active_peer or bool(snapshot.get("mission_started", false))
+ 	_ready_button.visible = has_active_peer or can_toggle_ready
+-	_ready_button.disabled = not can_toggle_ready
++	_ready_button.disabled = not can_toggle_ready or not bool(_map_consent_state.get("can_start_client", false))
+ 	_ready_button.text = "Unready" if local_ready else "Ready"
+ 	_start_button.visible = is_host
+ 	_start_button.disabled = not can_start

@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-54e6632e4342473caab5fd515ccf2f29
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Local ENet camera fixture can listen
+PASS: Local ENet camera client can connect
+PASS: Camera regression runs in a real connected client subtree
+PASS: Fixture consumes remote snapshots instead of running local combat authority
+PASS: Real mission supplies members for both focus contexts
+PASS: Normal authority snapshot consumer publishes the first contact
+PASS: First connected contact frames local members and target
+PASS: Successful first frame records its context
+PASS: Unchanged same-ID contact preserves manual pan and zoom
+FAIL: Moving same-ID contact preserves manual pan and zoom through normal snapshot refresh
+PASS: Moving-contact snapshot is still consumed for current contact visuals
+FAIL: Position changes retain the original first-contact context
+PASS: A different target identity can receive a new initial frame
+PASS: New target records a distinct first-contact context
+PASS: Changing the selected local fireteam still permits initial contact framing
+FAIL: Moving same-ID GOLD contact also preserves manual camera
+PASS: A fresh mission starts with no first-contact frame
+PASS: A new mission can frame the same contact identity again
+PASS: New-mission framing records its own one-shot context
+REVIEW7_CAMERA_RESULT passed=16 failed=3

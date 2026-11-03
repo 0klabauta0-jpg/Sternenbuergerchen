@@ -1,0 +1,22 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-1092b8303ea945ef81e8b58f21a1e1fa
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: 128 real moving view budget512 retains the exact MultiMesh instance throughout one map/mode/team/terrain context
+FAIL: 128 real moving view budget512 settling also retains the original completed overlay
+FAIL: 128 real moving view budget512 every rendered tile state and overlay alpha match final authoritative FoW knowledge
+REVIEW7_FOW_MOVING_VIEW_WORKLOAD {"first_commit_during_overlay":false,"first_terrain_commit_frame":30,"first_visible_overlay_frame":30,"full_overlay_builds":2,"headless_is_not_pixel_capture":true,"mesh_stable":false,"rendered_tiles":5184,"revisions_while_walking":15,"side":128,"walking_frames":132,"work_budget":512}
+FAIL: 256 real moving view budget512 retains the exact MultiMesh instance throughout one map/mode/team/terrain context
+FAIL: 256 real moving view budget512 settling also retains the original completed overlay
+FAIL: 256 real moving view budget512 every rendered tile state and overlay alpha match final authoritative FoW knowledge
+REVIEW7_FOW_MOVING_VIEW_WORKLOAD {"first_commit_during_overlay":false,"first_terrain_commit_frame":126,"first_visible_overlay_frame":126,"full_overlay_builds":2,"headless_is_not_pixel_capture":true,"mesh_stable":false,"rendered_tiles":5184,"revisions_while_walking":15,"side":256,"walking_frames":228,"work_budget":512}
+FAIL: 128 real moving view budget2048 completes a real visible revision and removes the safety blackout while the observer is still walking
+FAIL: 128 real moving view budget2048 retains the exact MultiMesh instance throughout one map/mode/team/terrain context
+FAIL: 128 real moving view budget2048 performs exactly one full overlay build despite ongoing terrain revisions
+FAIL: 128 real moving view budget2048 settling also retains the original completed overlay
+FAIL: 128 real moving view budget2048 every rendered tile state and overlay alpha match final authoritative FoW knowledge
+REVIEW7_FOW_MOVING_VIEW_WORKLOAD {"first_commit_during_overlay":true,"first_terrain_commit_frame":6,"first_visible_overlay_frame":-1,"full_overlay_builds":1,"headless_is_not_pixel_capture":true,"mesh_stable":false,"rendered_tiles":5184,"revisions_while_walking":16,"side":128,"walking_frames":108,"work_budget":2048}
+FAIL: A revision gap replaces the old terrain mesh through a full overlay rebuild
+FAIL: A revision gap never applies the incomplete last-only visibility delta
+FAIL: Revision-gap rebuild renders all latest visible/explored tiles including the skipped delta's changes
+REVIEW7_FOW_MOVING_VIEW_RESULT 24 passed, 14 failed

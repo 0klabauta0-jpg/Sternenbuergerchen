@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-7f4a12e6418a42f5b5a0ca722684e59e
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_184 Gameplay Hill Semantics Verifier ===
+PASS: Slope allows height transition up
+PASS: Slope allows height transition down
+PASS: Slope path costs more than flat ground
+PASS: Sand slope costs more than ground slope
+PASS: Sand height tile keeps slower surface speed
+PASS: Cliff blocks height transition
+PASS: Blocked cliff step reports infinite path cost
+PASS: Edge none does not become a free height transition
+PASS: HPA graph builds for hill blockade map
+PASS: A* finds route around cliff blockade
+PASS: HPA finds route around cliff blockade
+PASS: A* route uses only legal hill steps
+PASS: HPA route uses only legal hill steps
+PASS: A* does not step through direct cliff transition
+PASS: HPA does not step through direct cliff transition
+PASS: A* reports no path across isolated cliff height transition
+PASS: HPA reports no path across isolated cliff height transition
+PASS: Diagonal step cannot cut a cliff-blocked orthogonal corner
+PASS: A* routes around cliff corner instead of direct diagonal
+PASS: Diagonal step cannot cut a wall-blocked orthogonal corner
+PASS: A* routes around wall corner instead of direct diagonal
+PASS: Wall on H=2 blocks LOS with height_level plus object_height
+PASS: Higher units can see over lower object blockers
+PASS: Combat height bonus reads terrain height, not object height
+PASS: Combat height penalty mirrors terrain height difference
+PASS: Combat cover reads tile cover from TerrainRegistry
+PASS: LOS fallback without TerrainRegistry stays distance-based
+PASS: Combat height fallback without TerrainRegistry is neutral
+PASS: Combat cover fallback without TerrainRegistry is neutral
+PASS: Movement fallback without TerrainRegistry still advances directly
+=== RESULTS: 30 passed, 0 failed ===
+ALL TESTS PASSED

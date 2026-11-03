@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "task_1122_connected_mission_world_camera_exposure_contact_cluster_readability",
+      "script": "res://scripts/tests/task_1122_connected_mission_world_camera_exposure_contact_cluster_readability.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "bugfix_multiplayer_lobby_setup_and_asset_catalog_followup",
+      "script": "res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    }
+  ]
+}

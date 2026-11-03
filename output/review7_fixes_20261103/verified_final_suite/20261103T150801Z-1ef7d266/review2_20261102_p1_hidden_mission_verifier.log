@@ -1,0 +1,68 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-c4c8bc2db1814b609912155ca2286adf
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Review 2 P1 hidden active mission lifecycle ===
+PASS: Normal Singleplayer button is actionable
+PASS: Normal Singleplayer opens the real meta flow
+PASS: Normal Start Mission button is actionable
+PASS: Normal Start Mission creates an active mission
+PASS: The normal mission is live rather than preview
+PASS: LOS action has a real keyboard binding
+PASS: Visible mission consumes the real LOS hotkey
+PASS: Visible mission advances before navigation
+PASS: Diagnostic units use legal indexed mission terrain
+PASS: Visible mission navigation opens homebase
+PASS: Navigation shows homebase
+PASS: Meta navigation does not pause the SceneTree
+PASS: Hidden mission's 2D world is not visible
+PASS: Hidden tactical controls stay hidden
+PASS: Hidden mission's separate 3D CanvasLayer is hidden
+PASS: Hidden tactical runtime remains active
+PASS: Hidden tactical commands do not receive input
+PASS: Hidden mission camera does not poll gameplay input
+PASS: LOS action has a real keyboard binding
+PASS: Hidden mission ignores a real tactical hotkey
+PASS: homebase: a real respawn is pending
+PASS: homebase: hidden SimulationRoot physics ticks advance
+PASS: homebase: hidden CombatLoopDriver follows authoritative ticks
+PASS: homebase: a queued authoritative move executes while hidden
+PASS: homebase: a queued authoritative damage effect executes while hidden
+PASS: homebase: real respawn countdown advances while hidden
+PASS: homebase: monotonic timer and simulation both advance
+PASS: Meta Mission button returns from homebase
+PASS: Returning retains the same mission instance
+PASS: Returning retains the original monotonic mission timer
+PASS: Returning restores mission world and tactical UI
+PASS: Returning restores tactical and camera input
+PASS: Returning restores the 3D presentation
+PASS: Visible mission navigation opens fob
+PASS: Navigation shows fob
+PASS: Meta navigation does not pause the SceneTree
+PASS: Hidden mission's 2D world is not visible
+PASS: Hidden tactical controls stay hidden
+PASS: Hidden mission's separate 3D CanvasLayer is hidden
+PASS: Hidden tactical runtime remains active
+PASS: Hidden tactical commands do not receive input
+PASS: Hidden mission camera does not poll gameplay input
+PASS: LOS action has a real keyboard binding
+PASS: Hidden mission ignores a real tactical hotkey
+PASS: fob: a real respawn is pending
+PASS: fob: hidden SimulationRoot physics ticks advance
+PASS: fob: hidden CombatLoopDriver follows authoritative ticks
+PASS: fob: a queued authoritative move executes while hidden
+PASS: fob: a queued authoritative damage effect executes while hidden
+PASS: fob: real respawn countdown advances while hidden
+PASS: fob: monotonic timer and simulation both advance
+PASS: Meta Mission button returns from fob
+PASS: Returning retains the same mission instance
+PASS: Returning retains the original monotonic mission timer
+PASS: Returning restores mission world and tactical UI
+PASS: Returning restores tactical and camera input
+PASS: Returning restores the 3D presentation
+PASS: Explicit preview retains preview mode
+PASS: Preview simulation stays disabled even when host is visible
+PASS: Preview combat and respawn stay disabled
+REVIEW2_HIDDEN_MISSION_SAMPLES=[{"after":{"combat_tick":45,"remaining_seconds":1198.608,"simulation_can_process":true,"tick":45,"view":"mission"},"before":{"combat_tick":26,"remaining_seconds":1198.932,"simulation_can_process":true,"tick":26,"view":"mission"},"phase":"visible"},{"after":{"combat_tick":102,"remaining_seconds":1191.174,"simulation_can_process":true,"tick":102,"view":"homebase"},"before":{"combat_tick":67,"remaining_seconds":1191.696,"simulation_can_process":true,"tick":67,"view":"homebase"},"health_after":94,"health_before":100,"move_distance":11.4566659927368,"phase":"homebase","respawn_after":29.4166666666667,"respawn_before":30.0},{"after":{"combat_tick":187,"remaining_seconds":1187.706,"simulation_can_process":true,"tick":187,"view":"fob"},"before":{"combat_tick":143,"remaining_seconds":1189.406,"simulation_can_process":true,"tick":143,"view":"fob"},"health_after":88,"health_before":94,"move_distance":14.4026803970337,"phase":"fob","respawn_after":28.0000000000001,"respawn_before":28.7333333333334}]
+=== RESULTS: 60 passed, 0 failed ===
+REVIEW2_P1_HIDDEN_MISSION: ALL PASSED

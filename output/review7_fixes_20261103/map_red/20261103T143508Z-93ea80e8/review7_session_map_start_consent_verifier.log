@@ -1,0 +1,132 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-17b0d0c7a2f54ccb9a62d4d814f05c13
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Map fixture saves only in isolated user data
+PASS: Map fixture has a valid manifest
+PASS: Sessions without editor-map manifests retain mission start compatibility
+ERROR: FAIL: Incoming host manifest is checked against local maps
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_missing_and_rejected (res://scripts/tests/review7_session_map_start_consent_verifier.gd:52)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:28)
+       [3] _test_empty_compatibility (res://scripts/tests/review7_session_map_start_consent_verifier.gd:45)
+ERROR: FAIL: Missing map requires local consent even if host publishes an allowed transfer state
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_missing_and_rejected (res://scripts/tests/review7_session_map_start_consent_verifier.gd:53)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:28)
+       [3] _test_empty_compatibility (res://scripts/tests/review7_session_map_start_consent_verifier.gd:45)
+ERROR: FAIL: Missing map blocks the incoming mission-start RPC
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_missing_and_rejected (res://scripts/tests/review7_session_map_start_consent_verifier.gd:55)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:28)
+       [3] _test_empty_compatibility (res://scripts/tests/review7_session_map_start_consent_verifier.gd:45)
+PASS: Repeated host manifest preserves the client's rejection
+ERROR: FAIL: Host mission snapshot cannot bypass client rejection
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_missing_and_rejected (res://scripts/tests/review7_session_map_start_consent_verifier.gd:59)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:28)
+       [3] _test_empty_compatibility (res://scripts/tests/review7_session_map_start_consent_verifier.gd:45)
+ERROR: FAIL: Rejected download leaves client in lobby without start events
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_missing_and_rejected (res://scripts/tests/review7_session_map_start_consent_verifier.gd:61)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:28)
+       [3] _test_empty_compatibility (res://scripts/tests/review7_session_map_start_consent_verifier.gd:45)
+ERROR: FAIL: Blocked mission remains a joined lobby session
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_missing_and_rejected (res://scripts/tests/review7_session_map_start_consent_verifier.gd:62)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:28)
+       [3] _test_empty_compatibility (res://scripts/tests/review7_session_map_start_consent_verifier.gd:45)
+ERROR: FAIL: Malformed or unsafe inbound manifest is rejected before normalization
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_invalid_manifest (res://scripts/tests/review7_session_map_start_consent_verifier.gd:72)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:29)
+       [3] _test_missing_and_rejected (res://scripts/tests/review7_session_map_start_consent_verifier.gd:64)
+ERROR: FAIL: Invalid manifest never starts a client mission
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_invalid_manifest (res://scripts/tests/review7_session_map_start_consent_verifier.gd:74)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:29)
+       [3] _test_missing_and_rejected (res://scripts/tests/review7_session_map_start_consent_verifier.gd:64)
+ERROR: FAIL: Malformed or unsafe inbound manifest is rejected before normalization
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_invalid_manifest (res://scripts/tests/review7_session_map_start_consent_verifier.gd:72)
+ERROR: FAIL: Invalid manifest never starts a client mission
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_invalid_manifest (res://scripts/tests/review7_session_map_start_consent_verifier.gd:74)
+ERROR: FAIL: Malformed or unsafe inbound manifest is rejected before normalization
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_invalid_manifest (res://scripts/tests/review7_session_map_start_consent_verifier.gd:72)
+ERROR: FAIL: Invalid manifest never starts a client mission
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_invalid_manifest (res://scripts/tests/review7_session_map_start_consent_verifier.gd:74)
+PASS: Explicit download acceptance validates and caches the map
+PASS: Duplicate incoming manifest retains accepted consent
+PASS: Accepted map allows the mission-start RPC
+ERROR: FAIL: Host replacement hash invalidates approval for the previous map
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_accepted_and_replacement (res://scripts/tests/review7_session_map_start_consent_verifier.gd:92)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:30)
+       [3] _test_invalid_manifest (res://scripts/tests/review7_session_map_start_consent_verifier.gd:76)
+ERROR: FAIL: Client records the replacement manifest as the active offer
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_accepted_and_replacement (res://scripts/tests/review7_session_map_start_consent_verifier.gd:93)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:30)
+       [3] _test_invalid_manifest (res://scripts/tests/review7_session_map_start_consent_verifier.gd:76)
+ERROR: FAIL: Previous acceptance cannot start a replaced map
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_accepted_and_replacement (res://scripts/tests/review7_session_map_start_consent_verifier.gd:95)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:30)
+       [3] _test_invalid_manifest (res://scripts/tests/review7_session_map_start_consent_verifier.gd:76)
+PASS: Duplicate replacement manifest preserves its rejection
+ERROR: FAIL: Incoming manifest recognizes the client's selected local map with matching hash
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_known_map (res://scripts/tests/review7_session_map_start_consent_verifier.gd:108)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:31)
+       [3] _test_accepted_and_replacement (res://scripts/tests/review7_session_map_start_consent_verifier.gd:100)
+ERROR: FAIL: Duplicate known manifest stays ready without a new prompt
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_known_map (res://scripts/tests/review7_session_map_start_consent_verifier.gd:110)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:31)
+       [3] _test_accepted_and_replacement (res://scripts/tests/review7_session_map_start_consent_verifier.gd:100)
+PASS: Known map starts without download consent
+ERROR: FAIL: Same local map ID with changed host content requires fresh consent
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_map_start_consent_verifier.gd:156)
+       [1] _test_known_map (res://scripts/tests/review7_session_map_start_consent_verifier.gd:116)
+       [2] _run_tests (res://scripts/tests/review7_session_map_start_consent_verifier.gd:31)
+       [3] _test_accepted_and_replacement (res://scripts/tests/review7_session_map_start_consent_verifier.gd:100)
+=== REVIEW7 SESSION MAP RESULTS: 9 passed, 18 failed ===

@@ -1,0 +1,97 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-ba4c12caa2cc415292b9e19e1ed7304d
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: 3x3 map fixture saves under isolated user data
+PASS: 3x3 map fixture saves under isolated user data
+PASS: Real product lobbies connect over ENet for map consent
+ERROR: FAIL: Incoming host snapshot opens a consent prompt naming the current offered map
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _run_tests (res://scripts/tests/review7_lobby_map_consent_verifier.gd:39)
+       [2] _create_lobby_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:158)
+       [3] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+PASS: Receiving an unknown map manifest never downloads or writes a cache
+ERROR: FAIL: Unknown map keeps client Ready disabled until explicit consent
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _run_tests (res://scripts/tests/review7_lobby_map_consent_verifier.gd:41)
+       [2] _create_lobby_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:158)
+       [3] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+ERROR: FAIL: Real Reject button rejects the network offer and closes the prompt
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _run_tests (res://scripts/tests/review7_lobby_map_consent_verifier.gd:46)
+       [2] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+PASS: Rejected network offer creates neither mission nor downloaded files
+PASS: Repeated snapshot does not reopen a rejected current offer
+ERROR: FAIL: Replacement host offer opens a fresh prompt for B after rejecting A
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _run_tests (res://scripts/tests/review7_lobby_map_consent_verifier.gd:56)
+       [2] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+PASS: V1 Accept button waits for an explicit payload and never downloads automatically
+ERROR: FAIL: Existing explicit payload API accepts the current network offer after consent
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _run_tests (res://scripts/tests/review7_lobby_map_consent_verifier.gd:67)
+       [2] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+ERROR: FAIL: Consented network map is cached only under the client download root
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _run_tests (res://scripts/tests/review7_lobby_map_consent_verifier.gd:68)
+       [2] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+PASS: Successful explicit acceptance closes the current network prompt
+PASS: Known-map product lobbies connect over ENet without a download
+PASS: Known matching local map needs no consent prompt
+PASS: Known-map peers submit normal Ready commands
+PASS: Known-map host starts normally
+ERROR: FAIL: Known Host MissionSetup uses its host-selected or locally verified map path
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _assert_loaded_map (res://scripts/tests/review7_lobby_map_consent_verifier.gd:110)
+       [2] _test_known_map_mission (res://scripts/tests/review7_lobby_map_consent_verifier.gd:99)
+       [3] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+ERROR: FAIL: Known Host actually loaded current offered terrain instead of the default map
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _assert_loaded_map (res://scripts/tests/review7_lobby_map_consent_verifier.gd:112)
+       [2] _test_known_map_mission (res://scripts/tests/review7_lobby_map_consent_verifier.gd:99)
+       [3] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+ERROR: FAIL: Known Host runtime terrain registry contains exactly the nine consented map cells
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _assert_loaded_map (res://scripts/tests/review7_lobby_map_consent_verifier.gd:113)
+       [2] _test_known_map_mission (res://scripts/tests/review7_lobby_map_consent_verifier.gd:99)
+       [3] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+ERROR: FAIL: Known Client MissionSetup uses its host-selected or locally verified map path
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _assert_loaded_map (res://scripts/tests/review7_lobby_map_consent_verifier.gd:110)
+       [2] _test_known_map_mission (res://scripts/tests/review7_lobby_map_consent_verifier.gd:100)
+       [3] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+ERROR: FAIL: Known Client actually loaded current offered terrain instead of the default map
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _assert_loaded_map (res://scripts/tests/review7_lobby_map_consent_verifier.gd:112)
+       [2] _test_known_map_mission (res://scripts/tests/review7_lobby_map_consent_verifier.gd:100)
+       [3] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+ERROR: FAIL: Known Client runtime terrain registry contains exactly the nine consented map cells
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_lobby_map_consent_verifier.gd:199)
+       [1] _assert_loaded_map (res://scripts/tests/review7_lobby_map_consent_verifier.gd:113)
+       [2] _test_known_map_mission (res://scripts/tests/review7_lobby_map_consent_verifier.gd:100)
+       [3] _poll_pair (res://scripts/tests/review7_lobby_map_consent_verifier.gd:167)
+=== REVIEW7 LOBBY MAP RESULTS: 12 passed, 12 failed ===

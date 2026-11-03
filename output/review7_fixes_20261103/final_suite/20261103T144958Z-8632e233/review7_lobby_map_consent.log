@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-71df52c947c547a1ac805245d1b74b17
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: 3x3 map fixture saves under isolated user data
+PASS: 3x3 map fixture saves under isolated user data
+PASS: Real product lobbies connect over ENet for map consent
+PASS: Incoming host snapshot opens a consent prompt naming the current offered map
+PASS: Receiving an unknown map manifest never downloads or writes a cache
+PASS: Unknown map keeps client Ready disabled until explicit consent
+PASS: Real Reject button rejects the network offer and closes the prompt
+PASS: Rejected network offer creates neither mission nor downloaded files
+PASS: Repeated snapshot does not reopen a rejected current offer
+PASS: Replacement host offer opens a fresh prompt for B after rejecting A
+PASS: V1 Accept button waits for an explicit payload and never downloads automatically
+PASS: Existing explicit payload API accepts the current network offer after consent
+PASS: Consented network map is cached only under the client download root
+PASS: Received map cache contains exactly the current host B payload
+PASS: Successful explicit acceptance closes the current network prompt
+PASS: Both peers can Ready normally after map acceptance
+PASS: Host starts the consented map through normal product Start
+PASS: Consented host and client instantiate their real mission scenes
+PASS: Host MissionSetup uses its host-selected or locally verified map path
+PASS: Host actually loaded current offered terrain instead of the default map
+PASS: Host runtime terrain registry contains exactly the nine consented map cells
+PASS: Client MissionSetup uses its host-selected or locally verified map path
+PASS: Client actually loaded current offered terrain instead of the default map
+PASS: Client runtime terrain registry contains exactly the nine consented map cells
+PASS: Known-map product lobbies connect over ENet without a download
+PASS: Known matching local map needs no consent prompt
+PASS: Known-map peers submit normal Ready commands
+PASS: Known-map host starts normally
+PASS: Known Host MissionSetup uses its host-selected or locally verified map path
+PASS: Known Host actually loaded current offered terrain instead of the default map
+PASS: Known Host runtime terrain registry contains exactly the nine consented map cells
+PASS: Known Client MissionSetup uses its host-selected or locally verified map path
+PASS: Known Client actually loaded current offered terrain instead of the default map
+PASS: Known Client runtime terrain registry contains exactly the nine consented map cells
+=== REVIEW7 LOBBY MAP RESULTS: 34 passed, 0 failed ===
+REVIEW7_LOBBY_MAP_ALL_PASSED

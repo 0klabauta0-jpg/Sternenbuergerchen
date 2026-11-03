@@ -1,0 +1,86 @@
+{
+  "schema": "sternenbuergerchen.review2_isolated_checks.v1",
+  "checks": [
+    {
+      "name": "task_1122_connected_mission_world_camera_exposure_contact_cluster_readability",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "error_count": 2,
+      "errors": [
+        "ERROR:",
+        "ERROR:"
+      ],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-02c5207afc6a4d54a27be98f97c25d17",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review7_original_main_f9dd0f2a7b45453ab9281bf787d78774\\.godot\\review2_isolation\\02c5207afc6a4d54a27be98f97c25d17\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review7_fixes_20261103\\original_main_adjacent\\20261103T144556Z-6de2b0d7\\task_1122_connected_mission_world_camera_exposure_contact_cluster_readability.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review7_original_main_f9dd0f2a7b45453ab9281bf787d78774\\.godot\\review2_isolation\\02c5207afc6a4d54a27be98f97c25d17\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review7_original_main_f9dd0f2a7b45453ab9281bf787d78774\\.godot\\review2_isolation\\02c5207afc6a4d54a27be98f97c25d17\\project\\scripts\\tests\\task_1122_connected_mission_world_camera_exposure_contact_cluster_readability.gd"
+      ]
+    },
+    {
+      "name": "bugfix_multiplayer_lobby_setup_and_asset_catalog_followup",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "error_count": 3,
+      "errors": [
+        "ERROR:",
+        "ERROR:",
+        "ERROR:"
+      ],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c526cff85fc946209ca8062553d80406",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review7_original_main_f9dd0f2a7b45453ab9281bf787d78774\\.godot\\review2_isolation\\c526cff85fc946209ca8062553d80406\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review7_fixes_20261103\\original_main_adjacent\\20261103T144556Z-6de2b0d7\\bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review7_original_main_f9dd0f2a7b45453ab9281bf787d78774\\.godot\\review2_isolation\\c526cff85fc946209ca8062553d80406\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review7_original_main_f9dd0f2a7b45453ab9281bf787d78774\\.godot\\review2_isolation\\c526cff85fc946209ca8062553d80406\\project\\scripts\\tests\\bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 2,
+    "passed": 0,
+    "failed": 2
+  },
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+    "length": 221426,
+    "mtime_ns": 1793651922023643800
+  },
+  "all_user_dirs_unique": true
+}

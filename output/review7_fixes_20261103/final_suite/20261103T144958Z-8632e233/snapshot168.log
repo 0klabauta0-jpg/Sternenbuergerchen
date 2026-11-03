@@ -1,0 +1,27 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-2b98ff8500f94f96b1d0c5bf24768919
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_168 Multiplayer Snapshot Contract Verifier ===
+PASS: Snapshot carries schema version
+PASS: State snapshot declares unordered unreliable chunk transfer
+PASS: Snapshot carries the authoritative tick
+PASS: Snapshot includes unit state
+PASS: Snapshot includes unit team identity
+PASS: Snapshot includes vital state entries
+PASS: Snapshot includes objective state
+PASS: Snapshot includes dropship display state
+PASS: Snapshot includes contact display entries
+PASS: Snapshot includes mission result state
+PASS: Client accepts a newer snapshot
+PASS: Client applies snapshot through render interpolation
+PASS: Client rejects an older snapshot
+PASS: Out-of-order rejection reason is explicit
+PASS: Debug tracks the latest applied tick
+PASS: Debug counts out-of-order snapshots
+PASS: Apply result reports missing units
+PASS: Debug accumulates missing-unit count
+PASS: Applying a snapshot never enqueues authoritative commands
+PASS: Applying a snapshot never enqueues authoritative effects
+=== RESULTS: 20 passed, 0 failed ===
+ALL TESTS PASSED

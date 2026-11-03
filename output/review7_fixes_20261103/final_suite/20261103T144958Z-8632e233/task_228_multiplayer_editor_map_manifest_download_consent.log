@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-bb4007443d9746f1847d11902ec895cc
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_228 Multiplayer Editor Map Manifest Download Consent ===
+PASS: Fixture map saves: user://task_228_host_map.json
+PASS: Host can build a valid editor-map manifest
+PASS: Manifest carries safe map id
+PASS: Manifest carries SHA-256 map hash
+PASS: Manifest carries map payload size
+PASS: Known map with matching hash needs no prompt
+PASS: Unknown map requires consent
+PASS: Fixture map saves: user://task_228_host_map_different.json
+PASS: Same map id with different hash requires consent
+PASS: Path traversal map id is rejected
+PASS: Hash mismatch payload is rejected before cache write
+PASS: Multiplayer lobby scene loads for map consent
+PASS: Lobby detects unknown host map
+PASS: Unknown map shows download consent prompt
+PASS: Consent prompt names the offered map
+PASS: Reject keeps client from starting with unknown map
+PASS: Reject hides consent prompt without accepting
+PASS: Accept validates and caches the host map
+PASS: Accepted map is written under safe user cache root
+PASS: Cached map hash matches host manifest
+PASS: Accepted map hides consent prompt
+PASS: Session marks unknown map as consent-gated
+PASS: Session snapshot carries manifest metadata
+PASS: Session snapshot does not carry full map payload
+PASS: Session records accepted map transfer state
+PASS: Map transfer contract doc covers manifest and consent
+PASS: Map transfer contract doc covers safe cache and traversal boundary
+=== RESULTS: 27 passed, 0 failed ===
+ALL TESTS PASSED

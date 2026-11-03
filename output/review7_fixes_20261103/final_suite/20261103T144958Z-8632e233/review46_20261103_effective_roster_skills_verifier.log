@@ -1,0 +1,47 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-5f119db4eec443dea265fec970e50f45
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+REVIEW46_HAND_DERIVED_TOUGHNESS value=0.20999999999999999 base=0.36 modifier=-0.15
+PASS: Real builder applies reckless toughness modifier after the pilot's base skill
+PASS: Trait-adjusted pilot toughness is inside the runtime domain and below the base-generation floor
+PASS: Existing UnitSkills accepts the actual trait-adjusted effective values
+PASS: Roster validator accepts the real builder's valid trait-adjusted effective toughness
+REVIEW46_GENERATED_LOW_EFFECTIVE_SKILL seed=review46_success_replacement unit=player_review46_success_r_05 key=toughness value=0.21404585003852847 traits=["calm", "reckless"]
+REVIEW46_GENERATED_VALIDATION seed=review46_success_replacement errors=[]
+PASS: Real generated roster validates without replacing its seed: review46_success_replacement
+PASS: Fresh validation accepts the generated effective skills: review46_success_replacement
+PASS: Store persists the generated roster with its original trait-adjusted skills: review46_success_replacement
+PASS: Store reloads the generated roster with its original effective skills: review46_success_replacement
+PASS: Roundtrip preserves the original failing generator seed: review46_success_replacement
+PASS: Roundtrip preserves every effective skill rather than clamping valid low traits: review46_success_replacement
+REVIEW46_GENERATED_LOW_EFFECTIVE_SKILL seed=review46_missing_created unit=player_review46_missing_c_05 key=toughness value=0.21250940620899203 traits=["calm", "reckless"]
+REVIEW46_GENERATED_VALIDATION seed=review46_missing_created errors=[]
+PASS: Real generated roster validates without replacing its seed: review46_missing_created
+PASS: Fresh validation accepts the generated effective skills: review46_missing_created
+PASS: Store persists the generated roster with its original trait-adjusted skills: review46_missing_created
+PASS: Store reloads the generated roster with its original effective skills: review46_missing_created
+PASS: Roundtrip preserves the original failing generator seed: review46_missing_created
+PASS: Roundtrip preserves every effective skill rather than clamping valid low traits: review46_missing_created
+REVIEW46_GENERATED_LOW_EFFECTIVE_SKILL seed=review46_menu_original unit=player_review46_menu_orig_05 key=toughness value=0.21114355832338336 traits=["calm", "reckless"]
+REVIEW46_GENERATED_VALIDATION seed=review46_menu_original errors=[]
+PASS: Real generated roster validates without replacing its seed: review46_menu_original
+PASS: Fresh validation accepts the generated effective skills: review46_menu_original
+PASS: Store persists the generated roster with its original trait-adjusted skills: review46_menu_original
+PASS: Store reloads the generated roster with its original effective skills: review46_menu_original
+PASS: Roundtrip preserves the original failing generator seed: review46_menu_original
+PASS: Roundtrip preserves every effective skill rather than clamping valid low traits: review46_menu_original
+REVIEW46_GENERATED_VALIDATION seed=review46_menu_original_reset_01 errors=[]
+PASS: Real generated roster validates without replacing its seed: review46_menu_original_reset_01
+PASS: Fresh validation accepts the generated effective skills: review46_menu_original_reset_01
+PASS: Store persists the generated roster with its original trait-adjusted skills: review46_menu_original_reset_01
+PASS: Store reloads the generated roster with its original effective skills: review46_menu_original_reset_01
+PASS: Roundtrip preserves the original failing generator seed: review46_menu_original_reset_01
+PASS: Roundtrip preserves every effective skill rather than clamping valid low traits: review46_menu_original_reset_01
+PASS: Roster still rejects effective skill outside runtime domain: -0.01
+PASS: Invalid effective accuracy retains its exact range diagnostic: -0.01
+PASS: Roster still rejects effective skill outside runtime domain: 1.01
+PASS: Invalid effective accuracy retains its exact range diagnostic: 1.01
+PASS: Roster still rejects a missing required effective skill
+PASS: Missing effective accuracy retains its exact diagnostic
+REVIEW46_EFFECTIVE_ROSTER_SKILLS_RESULT passed=34 failed=0

@@ -1,0 +1,75 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-0b09afdfc4c3487fa5c604b6a97be585
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: first mission control: host/client complete real ENet setup
+PASS: first mission control: reconnect secret stays out of public session snapshots
+PASS: first mission control initial start: both peers submit normal Ready commands
+PASS: first mission control initial start: ready host starts mission
+PASS: first mission control initial start: client receives normal mission start
+PASS: first mission control: host mission survives client disconnect
+PASS: first mission control: disconnect reserves the authenticated mission identity
+PASS: first mission control: client starts a real ENet rejoin
+PASS: first mission control: rejoin uses a new ENet peer ID
+PASS: first mission control: authenticated rejoin receives a mission handoff
+PASS: first mission control: new peer inherits the old authorized team without leaving an old peer assignment
+PASS: first mission control: new peer inherits the authorized Fireteams
+PASS: first mission control: authenticated handoff consumes the reserved identity
+PASS: first mission control: rejoin remains snapshot-blocked until mission runtime ACK
+PASS: first mission control: reliable runtime-ready ACK releases only the authenticated peer
+PASS: first mission control: explicit session reset clears bound and pending reconnect credentials
+PASS: first mission control: session reset leaves no connected peer or active mission
+PASS: second mission: host/client complete real ENet setup
+PASS: second mission: reconnect secret stays out of public session snapshots
+PASS: second mission initial start: both peers submit normal Ready commands
+PASS: second mission initial start: ready host starts mission
+PASS: second mission initial start: client receives normal mission start
+PASS: Completion returns both connected peers to lobby
+PASS: Completion keeps both connections and resets Ready
+ERROR: FAIL: Completion retains the connected client's authenticated rejoin identity
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:161)
+       [1] _run_case (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:53)
+       [2] _poll_pair (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:136)
+PASS: Completion leaves no stale disconnected mission identities
+PASS: second mission next start: both peers submit normal Ready commands
+PASS: second mission next start: ready host starts mission
+PASS: second mission next start: client receives normal mission start
+PASS: Second mission begins through normal Ready and host Start
+PASS: second mission: host mission survives client disconnect
+ERROR: FAIL: second mission: disconnect reserves the authenticated mission identity
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:161)
+       [1] _run_case (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:64)
+       [2] _poll_pair (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:136)
+PASS: second mission: client starts a real ENet rejoin
+ERROR: FAIL: second mission: rejoin uses a new ENet peer ID
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:161)
+       [1] _run_case (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:68)
+       [2] _poll_pair (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:136)
+ERROR: FAIL: second mission: authenticated rejoin receives a mission handoff
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:161)
+       [1] _run_case (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:69)
+       [2] _poll_pair (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:136)
+ERROR: FAIL: second mission: new peer inherits the old authorized team without leaving an old peer assignment
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:161)
+       [1] _run_case (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:72)
+       [2] _poll_pair (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:136)
+ERROR: FAIL: second mission: new peer inherits the authorized Fireteams
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:161)
+       [1] _run_case (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:73)
+       [2] _poll_pair (res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd:136)
+PASS: second mission: authenticated handoff consumes the reserved identity
+PASS: second mission: explicit session reset clears bound and pending reconnect credentials
+PASS: second mission: session reset leaves no connected peer or active mission
+=== REVIEW7 SESSION REJOIN RESULTS: 34 passed, 6 failed ===

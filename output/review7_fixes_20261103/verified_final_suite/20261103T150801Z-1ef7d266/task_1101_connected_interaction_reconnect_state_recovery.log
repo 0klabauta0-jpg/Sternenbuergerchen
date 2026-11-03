@@ -1,0 +1,52 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-4e9910afe9814a8bbb671248c50b13ce
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1101 Connected Interaction Reconnect State Recovery ===
+PASS: Lobby host and client connect over ENet
+PASS: Reconnect secret value is absent from public host/client session snapshots
+PASS: Reconnect secret field is absent from public host/client session snapshots
+PASS: Host enables private player-roster ownership for reconnect coverage
+PASS: Host marks ready
+PASS: Client sends ready
+PASS: Host starts the connected mission
+PASS: Product lobby launches host and client mission instances
+PASS: Host loads Station Route gates
+PASS: Initial client loads Station Route gates
+PASS: Client receives pre-disconnect Computer completion
+PASS: Host mission instance survives client disconnect
+PASS: Host session remains in mission state after client disconnect
+PASS: Host completes Cargo while client is disconnected
+PASS: Client starts a malformed-token rejoin probe
+PASS: Malformed reconnect token receives no mission handoff
+PASS: Malformed reconnect token receives no host assignment slot
+PASS: Client starts a wrong-token rejoin probe
+PASS: Wrong reconnect token receives no mission handoff
+PASS: Wrong reconnect token receives no host assignment slot
+PASS: Rejected peers leave no blocked snapshot recipients
+PASS: Disconnected client starts rejoin
+PASS: Rejoined client receives a new ENet peer ID
+PASS: Rejoined client automatically relaunches the active mission
+PASS: Rejoined client session mirrors active mission state
+PASS: Rejoined mission exposes runtime and SimulationRoot
+PASS: Rejoined client loads Station Route gates
+PASS: Rejoin full snapshot restores Computer completion
+PASS: Rejoin full snapshot restores Cargo completion completed while offline
+PASS: Reconnect state recovery creates no client commands or effects
+PASS: Mission-ready ACK unblocks the authenticated snapshot recipient
+PASS: Disconnected peer assignment is removed
+PASS: Rejoined peer receives current Fireteam assignment
+PASS: Disconnected peer roster assignment is removed
+PASS: Rejoined private roster ownership follows the new peer ID
+PASS: Rejoined public roster reference follows the new peer ID
+PASS: Rejoined client setup refresh reaches active host SimulationRoot assignment
+PASS: Disconnected peer role is removed from active host SimulationRoot
+PASS: Rejoined client setup refresh reaches active client SimulationRoot assignment
+PASS: Disconnected peer role is removed from active client SimulationRoot
+PASS: Client setup RPC cannot rewrite live mission team authority
+PASS: Spoofed setup cannot rewrite rejoined client authority mirror
+PASS: Spoofed setup cannot rewrite host session assignment truth
+PASS: Completed product mission releases host and client mission instances
+PASS: Completed product mission returns both sessions to lobby state
+PASS: Completed product mission restores both lobby panels
+=== RESULTS: 46 passed, 0 failed ===

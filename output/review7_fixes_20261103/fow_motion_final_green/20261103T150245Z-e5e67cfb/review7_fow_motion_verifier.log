@@ -1,0 +1,11 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-a32ca84afadb4a36b3d1f52445653ce2
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":3,"first_commit":0,"frames":92,"revisions_before_stop":1,"side":32,"walking":false}
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":3,"first_commit":0,"frames":92,"revisions_before_stop":14,"side":32,"walking":true}
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":3,"first_commit":30,"frames":122,"revisions_before_stop":1,"side":128,"walking":false}
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":3,"first_commit":30,"frames":122,"revisions_before_stop":14,"side":128,"walking":true}
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":3,"first_commit":126,"frames":218,"revisions_before_stop":1,"side":256,"walking":false}
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":3,"first_commit":126,"frames":218,"revisions_before_stop":14,"side":256,"walking":true}
+REVIEW7_FOW_MOTION_RESULT 51 passed, 0 failed

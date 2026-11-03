@@ -1,0 +1,26 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-4fb34bfabf754770b1b0f2b1defa4425
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: New snapshot applies down state
+PASS: Late reliable vital update cannot resurrect snapshot state
+PASS: Unversioned reliable data cannot replace ordered vital state
+PASS: Duplicate vital tick does not apply a conflicting payload
+PASS: Strictly newer reliable respawn is accepted
+PASS: Vital ordering is per unit rather than global snapshot tick
+PASS: Snapshot may advance non-vital state behind a newer reliable vital tick
+PASS: Older snapshot cannot replace a newer reliable vital update
+PASS: Older vital data does not block valid snapshot movement
+PASS: Newer reliable respawn supersedes down state
+PASS: Position-only snapshot preserves vitals
+PASS: Position-only snapshot does not consume a unit vital tick
+PASS: Legacy snapshot vitals use their enclosing authoritative tick
+PASS: Legacy snapshot tick also guards the reliable path
+PASS: Remote vital application creates no gameplay commands or effects
+PASS: Unit snapshot carries authoritative vital tick through normalization
+PASS: Snapshot vital entries carry the same tick
+PASS: Reliable delta carries the matching authoritative tick
+PASS: Unchanged vitals do not emit a reliable delta every tick
+PASS: Changed vitals emit a new authoritative tick
+PASS: Repeated build without state change remains deduplicated
+REVIEW_20261102_P2_VITAL_ORDER_RESULT passed=21 failed=0

@@ -1,5 +1,20 @@
 # IMPLEMENTATION_STATUS
 
+### REVIEW7, 2026-11-03 - Sieben weitere Performance-/Architekturbefunde
+- Basis Main `668423dcf`, Task `docs/tasks/REVIEW7_2026_11_03_performance_architecture_fixes.md`.
+- Alle sieben P2 behoben: legale Spacing-Segmente; Kartenfreigabe am echten
+  Empfangs-/Lobbyeingang; Versus-Gegenseite; Rejoin auch in Mission zwei;
+  begrenzte FoW-Jobs und stabiler echter Overlay; einmaliges Kontaktframing;
+  Redraw laufender sichtbarer Animationen. Unabhaengig APPROVED.
+- 11 neue Regressionen vorher RED, final 699/699. Gemeinsame Matrix 103 Gates:
+  100 PASS /3588 Assertions; TASK839 29/2, TASK1122 9/2 und Lobby-/Assetfollowup
+  35/3 identisch auf Original-Main. Keine All-green-/Release-Abnahme.
+- Nativer D3D12-/Forward+-Verifier 39/39 mit erzwungenem GPU-Pufferruecklesen
+  und drei echten PNGs. TASK1188 28 Units/60s p99 3918us <8000us; kein FPS-Beleg.
+- 259 isolierte Laeufe, Originalroster inklusive Schreibzeit unveraendert;
+  114 Quell-/Test-/Harnessfingerprints. Evidenz `output/review7_fixes_20261103/`.
+- Task-Branch auf Main-Basis; keine Main-Integration in diesem Auftrag.
+
 ### REVIEW-ZYKLEN 4-6, 2026-11-03 - Drei weitere Performance-/Architekturrunden
 - Basis Main `21bacf0f2`, Task
   `docs/tasks/REVIEW_CYCLES_4_6_2026_11_03_performance_architecture.md`.

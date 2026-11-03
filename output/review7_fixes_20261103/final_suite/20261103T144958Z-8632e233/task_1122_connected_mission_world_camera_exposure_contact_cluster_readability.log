@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-7e2b0dfadfd94a2b9c69fecb629e5eb0
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1122 Connected Mission World Camera Exposure Contact Cluster Readability ===
+PASS: Product mission exposes Primary3DView
+PASS: Primary3D environment enables explicit tonemapping
+ERROR: FAIL: Primary3D environment uses Filmic tonemapping
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1122_connected_mission_world_camera_exposure_contact_cluster_readability.gd:74)
+       [1] _run (res://scripts/tests/task_1122_connected_mission_world_camera_exposure_contact_cluster_readability.gd:26)
+ERROR: FAIL: Primary3D brightness preserves bright asset detail
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1122_connected_mission_world_camera_exposure_contact_cluster_readability.gd:74)
+       [1] _run (res://scripts/tests/task_1122_connected_mission_world_camera_exposure_contact_cluster_readability.gd:27)
+PASS: Primary3D exposes bounds-based tactical framing
+PASS: First Contact framing uses a closer bounded camera size
+PASS: Controller exposes read-only local Fire visual selection
+PASS: Connected GOLD world keeps only its newest Fire event
+PASS: Offline and spectator-style world paths retain bounded global events
+PASS: Contact dedupe follows a continuous sliding chain across fixed bucket boundaries
+PASS: Controller owns a one-shot connected Contact framing hook
+=== RESULTS: 9 passed, 2 failed ===

@@ -1,0 +1,26 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-2d2e24abac6b4de58012c50d6862cb7c
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_363 Homebase Roster Card Pool Incremental Refresh ===
+  PASS: Roster pool creates cards for the large roster
+  PASS: Initial roster render creates each visible card once
+  PASS: Selecting one unit removes only that card from the roster pool
+  PASS: Selection change does not recreate remaining roster cards
+  PASS: Selection change reuses remaining roster cards
+  PASS: Selection change retires the moved roster card
+  PASS: Unchanged roster card keeps its node instance
+  PASS: Staged pool creates the newly selected card
+  PASS: Adding another selected unit still reuses visible roster cards
+  PASS: Staged pool reuses existing staged card and creates only the new one
+  PASS: Initial roster card shows original profile name
+  PASS: Profile refresh reuses roster nodes
+  PASS: Profile refresh keeps the same card node
+  PASS: Reused card refreshes display name
+  PASS: Reused card refreshes rank badge row
+  PASS: Staged pool creates selected team cards
+  PASS: Staged pool reuses kept selected cards and retires removed cards
+  PASS: Existing staged card keeps node instance
+  PASS: Reused staged card keeps double-click character popup signal
+=== RESULTS: 19 passed, 0 failed ===
+TASK_363: ALL PASSED

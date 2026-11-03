@@ -1,0 +1,48 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-5379a5094b7049fea9858539bc047ea6
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Frontier Hex Foundation Verifier ===
+PASS: Exactly six axial neighbor directions
+PASS: Neighbor (1, 0) has unit physical length and hex distance
+PASS: Neighbor (1, -1) has unit physical length and hex distance
+PASS: Neighbor (0, -1) has unit physical length and hex distance
+PASS: Neighbor (-1, 0) has unit physical length and hex distance
+PASS: Neighbor (-1, 1) has unit physical length and hex distance
+PASS: Neighbor (0, 1) has unit physical length and hex distance
+PASS: Directions are unique and square-only diagonal is not a hex neighbor
+PASS: Plane/axial roundtrip including negative coordinates (0, 0)
+PASS: Plane/axial roundtrip including negative coordinates (-4, 2)
+PASS: Plane/axial roundtrip including negative coordinates (5, -3)
+PASS: Plane/axial roundtrip including negative coordinates (-8, -8)
+PASS: Cube rounding chooses closest physical center near a three-cell boundary
+PASS: All six shared-edge boundaries pick the nearest center on either side
+PASS: Pointy hex has six corners at radius 1/sqrt(3)
+PASS: Hex line is reversible and has distance+1 centers
+PASS: Every consecutive hex-line cell shares an edge
+PASS: New hex map owns topology
+PASS: Registry exposes same topology
+PASS: Registry projected world/axial roundtrip includes negative coordinates and nonzero origin
+PASS: Actual A* has six equal-cost ground edges without square diagonal premium
+PASS: All six projected neighbor movements share the same physical metric
+PASS: Square (1,1) diagonal requires two actual hex edges
+PASS: Legal axial (1,-1) edge does not inherit square corner-cut blocking
+PASS: A* routes around a blocked hex with legal six-neighbor edges
+PASS: Hex cliff blocks height transition
+PASS: Hex ramp allows height transition with one height premium and no square diagonal premium
+PASS: Blocked hex remains blocked even when slope
+PASS: HPA builds hex cluster graph
+PASS: HPA path crosses clusters using valid hex edges
+PASS: HPA and A* agree on open straight hex-route cost
+PASS: Incremental HPA routes around changed blocked hex without square-only edges
+PASS: Registry exposes topology-aware hex line
+PASS: Hex map save succeeds
+PASS: Hex topology and all projected positions survive save/load
+PASS: Dirty HPA rebuild discovers a new axial diagonal portal between previously disconnected clusters
+PASS: Existing create_empty callers remain square8
+PASS: Legacy isometric positions unchanged
+PASS: Both legacy baseline paths and diagonal cost remain unchanged
+PASS: Unmodified old map without topology loads as square8
+PASS: Legacy movement metric remains projected world distance
+=== RESULTS: 41 passed, 0 failed ===
+FRONTIER_HEX_FOUNDATION_ALL_PASS

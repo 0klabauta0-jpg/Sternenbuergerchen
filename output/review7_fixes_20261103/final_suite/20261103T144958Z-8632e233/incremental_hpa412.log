@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-cb6af037c4314b1799b25e14c3669a00
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_412 Large Map Streaming and Incremental HPA ===
+PASS: Large 128x128 map enables visual streaming
+PASS: Streaming snapshot keeps the logical total tile count
+PASS: Streaming renders fewer tiles than the full map
+PASS: Streaming reports skipped off-window tiles
+PASS: Streaming reports active visual chunks
+PASS: Rendered streaming tiles stay in MultiMesh ground batches
+PASS: Streaming fixture has no missing map asset mappings
+PASS: Streaming render stays under the broad headless profile budget
+PASS: Cross-chunk camera focus queues a visual streaming refresh
+PASS: Camera focus changes the active visual chunk window
+PASS: Moved streaming window still avoids full-map rendering
+PASS: HPA full graph builds before incremental test
+PASS: HPA dirty cluster rebuild succeeds
+PASS: HPA dirty rebuild stats mark incremental mode
+PASS: HPA dirty rebuild identifies one dirty cluster
+PASS: HPA dirty rebuild touches neighbors without rebuilding every cluster
+PASS: Dirty blocked grid is removed from HPA components
+PASS: HPA dirty rebuild reindexes portals
+PASS: SimulationRoot builds the first HPA graph
+PASS: SimulationRoot clears registry dirty grids after the full HPA build
+PASS: SimulationRoot reuses the existing HPA graph for dirty-cluster rebuilds
+PASS: SimulationRoot counts the incremental HPA rebuild
+PASS: SimulationRoot exposes incremental HPA rebuild stats
+PASS: SimulationRoot marks the runtime HPA rebuild mode
+PASS: SimulationRoot clears registry dirty grids after incremental HPA rebuild
+PASS: Unchanged registry keeps using the same HPA graph
+PASS: Unchanged registry still records HPA cache hits
+=== RESULTS: 27 passed, 0 failed ===
+ALL TESTS PASSED

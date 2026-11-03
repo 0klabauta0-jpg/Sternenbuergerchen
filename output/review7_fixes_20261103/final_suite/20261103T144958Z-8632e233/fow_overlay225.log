@@ -1,0 +1,41 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-47606ddcf7f242d0ba5ba634fedd3232
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_225 Fog of War 2.5D Visual Overlay and Contacts ===
+PASS: FoW off mode is exposed in the 2.5D snapshot
+PASS: FoW off mode creates no overlay
+PASS: FoW off mode treats every fixture tile as visible
+PASS: Known terrain mode reaches the 2.5D snapshot
+PASS: Known terrain tracks the current visible tile count
+PASS: Known terrain dims unseen known tiles instead of blacking them out
+PASS: Known terrain mode has no unknown blackout tiles
+PASS: Known terrain keeps surface and height readability counters
+PASS: Visible enemy security sector remains rendered
+PASS: Hidden enemy security sector is not exposed
+PASS: Visible muzzle event remains rendered
+PASS: Hidden muzzle event is filtered
+PASS: Visible comic bubble remains rendered
+PASS: Hidden comic bubble is filtered
+PASS: FoW adds a separate last-known contact marker
+PASS: FoW counts last-known contact markers separately
+PASS: FoW counts hidden dynamic markers without exposing their current state
+PASS: FoW overlay does not rebuild when state is unchanged
+PASS: Blackout mode reaches the 2.5D snapshot
+PASS: Blackout keeps current sight normal
+PASS: Blackout keeps explored memory dimmed
+PASS: Blackout marks never-seen tiles unknown
+PASS: FoW overlay reserves one batched slot per fixture tile
+PASS: FoW overlay applies blackout and explored states through instance colors
+PASS: Unknown blackout instances are really black
+PASS: FoW delta changes do not rebuild the full overlay
+PASS: FoW delta updates one batched overlay in place
+PASS: Moved sight leaves previous tiles as explored memory
+PASS: Enemy sector appears when its tile becomes visible
+PASS: 2.5D FoW view exposes no gameplay mutation API
+PASS: FoW system visual snapshot counts fixture tiles
+PASS: FoW system visual snapshot counts visible tiles
+PASS: FoW system visual snapshot counts explored tiles
+PASS: FoW system visual snapshot counts unknown tiles
+=== RESULTS: 34 passed, 0 failed ===
+ALL TESTS PASSED

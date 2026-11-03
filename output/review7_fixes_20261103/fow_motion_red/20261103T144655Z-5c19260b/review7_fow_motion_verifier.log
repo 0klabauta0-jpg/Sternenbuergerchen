@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-33d2bb0529794eb59e1350ba6a2be5ee
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":4,"first_commit":0,"frames":92,"revisions_before_stop":1,"side":32,"walking":false}
+FAIL: 32 walking initial scan completes while the workload is still running
+FAIL: 32 walking first atomic result retains its frozen request sample and matches the full oracle
+FAIL: 32 walking targets enter and leave visibility at the normal cadence even during pending terrain work
+FAIL: 32 walking coalesced motion produces follow-up revisions without stopping
+FAIL: 32 walking follow-up motion and target refreshes never enumerate the full map again
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":95,"first_commit":-1,"frames":92,"revisions_before_stop":0,"side":32,"walking":true}
+FAIL: 32 continuous observer motion preserves initial scan completion frame
+FAIL: 128 stationary targets enter and leave visibility at the normal cadence even during pending terrain work
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":4,"first_commit":30,"frames":122,"revisions_before_stop":1,"side":128,"walking":false}
+FAIL: 128 walking initial scan completes while the workload is still running
+FAIL: 128 walking first atomic result retains its frozen request sample and matches the full oracle
+FAIL: 128 walking targets enter and leave visibility at the normal cadence even during pending terrain work
+FAIL: 128 walking coalesced motion produces follow-up revisions without stopping
+FAIL: 128 walking follow-up motion and target refreshes never enumerate the full map again
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":125,"first_commit":-1,"frames":122,"revisions_before_stop":0,"side":128,"walking":true}
+FAIL: 128 continuous observer motion preserves initial scan completion frame
+FAIL: 256 stationary targets enter and leave visibility at the normal cadence even during pending terrain work
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":4,"first_commit":126,"frames":218,"revisions_before_stop":1,"side":256,"walking":false}
+FAIL: 256 walking initial scan completes while the workload is still running
+FAIL: 256 walking first atomic result retains its frozen request sample and matches the full oracle
+FAIL: 256 walking targets enter and leave visibility at the normal cadence even during pending terrain work
+FAIL: 256 walking coalesced motion produces follow-up revisions without stopping
+FAIL: 256 walking stopping coalesces the latest position within bounded normal frames
+FAIL: 256 walking follow-up motion and target refreshes never enumerate the full map again
+FAIL: 256 walking final committed terrain exactly matches the latest-position full oracle
+REVIEW7_FOW_MOTION_WORKLOAD {"enumerations":220,"first_commit":-1,"frames":218,"revisions_before_stop":0,"side":256,"walking":true}
+FAIL: 256 continuous observer motion preserves initial scan completion frame
+REVIEW7_FOW_MOTION_RESULT 29 passed, 22 failed

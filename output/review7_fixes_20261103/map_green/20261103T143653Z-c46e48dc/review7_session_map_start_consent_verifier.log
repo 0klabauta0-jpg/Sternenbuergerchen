@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-d16eb90c58d547818917fda4dd5147b6
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Map fixture saves only in isolated user data
+PASS: Map fixture has a valid manifest
+PASS: Sessions without editor-map manifests retain mission start compatibility
+PASS: Incoming host manifest is checked against local maps
+PASS: Missing map requires local consent even if host publishes an allowed transfer state
+PASS: Missing map blocks the incoming mission-start RPC
+PASS: Repeated host manifest preserves the client's rejection
+PASS: Host mission snapshot cannot bypass client rejection
+PASS: Rejected download leaves client in lobby without start events
+PASS: Blocked mission remains a joined lobby session
+PASS: Malformed or unsafe inbound manifest is rejected before normalization
+PASS: Invalid manifest never starts a client mission
+PASS: Malformed or unsafe inbound manifest is rejected before normalization
+PASS: Invalid manifest never starts a client mission
+PASS: Malformed or unsafe inbound manifest is rejected before normalization
+PASS: Invalid manifest never starts a client mission
+PASS: Explicit download acceptance validates and caches the map
+PASS: Duplicate incoming manifest retains accepted consent
+PASS: Accepted map allows the mission-start RPC
+PASS: Host replacement hash invalidates approval for the previous map
+PASS: Client records the replacement manifest as the active offer
+PASS: Previous acceptance cannot start a replaced map
+PASS: Duplicate replacement manifest preserves its rejection
+PASS: Incoming manifest recognizes the client's selected local map with matching hash
+PASS: Duplicate known manifest stays ready without a new prompt
+PASS: Known map starts without download consent
+PASS: Same local map ID with changed host content requires fresh consent
+=== REVIEW7 SESSION MAP RESULTS: 27 passed, 0 failed ===
+REVIEW7_SESSION_MAP_ALL_PASSED

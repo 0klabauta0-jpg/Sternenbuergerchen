@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-646c49892bb94bf3a87494eaf015479d
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+CHUNK_DELIVERY chunks=3 control_applied=64 delayed_applied=60 complete_delayed_ticks=60
+PASS: Fixture uses real compressed packetized 64-unit snapshots
+PASS: Complete immediate delivery applies every control snapshot
+PASS: All 60 fully delivered delayed snapshots converge with four ticks of chunk jitter
+PASS: Latest reversed chunks converge after skipped intermediate snapshots
+PASS: Latest completion removes obsolete partial snapshots
+PASS: Reassembly remains a command/effect-free viewer path
+PASS: Duplicate chunk cannot complete or apply a snapshot twice
+PASS: Stale partial chunk never creates a new buffer
+PASS: Decoded snapshot tick must agree with chunk header
+PASS: Inconsistent complete payload is counted explicitly
+PASS: Stale and inconsistent packets create no gameplay work
+PASS: Unfinished snapshot storm has a bounded pending count
+PASS: Expired incomplete buffers retire even without a newer applied tick
+PASS: Incomplete storm never applies partial state
+REVIEW2_CHUNK_JITTER_RESULT passed=14 failed=0

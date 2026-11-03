@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-be87c856f2e1407aa3122ac899b9a928
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_127 HPA Pathfinder Integration Verifier ===
+PASS: Same-cluster path uses local path status
+PASS: Same-cluster HPA path preserves start and target
+PASS: Multi-cluster path uses HPA status
+PASS: Multi-cluster HPA path preserves start and target
+PASS: Multi-cluster HPA path uses traversable grid steps
+PASS: Repeated HPA query reuses portal adjacency
+PASS: Graph rebuild invalidates cached portal adjacency
+PASS: Disconnected HPA components fail before a global fallback search
+PASS: Disconnected HPA query returns no direct path
+PASS: SimulationRoot builds a multi-cluster HPA-compatible world path
+PASS: SimulationRoot executes the HPA path to the target
+PASS: SimulationRoot simplifies straight HPA path segments
+PASS: SimulationRoot uses a local HPA fallback for unreachable components
+=== RESULTS: 13 passed, 0 failed ===
+ALL TESTS PASSED

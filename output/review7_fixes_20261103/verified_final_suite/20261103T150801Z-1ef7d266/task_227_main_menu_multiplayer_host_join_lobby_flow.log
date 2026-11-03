@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-ef5b706378d646219caf7ccd47534fd0
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_227 Main Menu Multiplayer Host Join Lobby Flow ===
+PASS: Main menu scene loads
+PASS: Main menu Multiplayer route points to the product lobby
+PASS: Main menu route snapshot marks Multiplayer as lobby flow
+PASS: Multiplayer button carries lobby route metadata
+PASS: Multiplayer lobby scene exists
+PASS: Multiplayer lobby scene loads as PackedScene
+PASS: Multiplayer lobby scene loads
+PASS: Lobby owns a MultiplayerSession node
+PASS: Lobby exposes Host controls
+PASS: Lobby exposes Join controls
+PASS: Lobby exposes Back control
+PASS: Lobby starts idle without active peer
+PASS: Lobby opening does not create gameplay simulation state
+PASS: Test host state marks lobby as host
+PASS: Host sees Start control
+PASS: Start stays disabled until all peers are ready
+PASS: Host cannot start before ready state
+PASS: Rejected start does not emit mission request
+PASS: Host Start enables once all connected peers are ready
+PASS: Host starts mission through MultiplayerSession
+PASS: Lobby records a single session mission-start request
+PASS: Mission start assignments include both peers
+PASS: Client test state is not host
+PASS: Client does not see host-only Start control
+PASS: Client cannot start mission
+PASS: Disconnect returns lobby to idle state
+PASS: Disconnect status is visible in UI
+=== RESULTS: 27 passed, 0 failed ===
+ALL TESTS PASSED

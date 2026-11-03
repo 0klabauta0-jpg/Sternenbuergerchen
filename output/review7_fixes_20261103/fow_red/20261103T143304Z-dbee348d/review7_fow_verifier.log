@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-0ac0cf6340db45f6a403dba21c7c75ee
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+REVIEW7_FOW_WORKLOAD {"enumerations":3,"first_commit":30,"frames":240,"moving":false,"side":128}
+REVIEW7_FOW_WORKLOAD {"enumerations":13,"first_commit":30,"frames":240,"moving":true,"side":128}
+REVIEW7_FOW_WORKLOAD {"enumerations":3,"first_commit":126,"frames":240,"moving":false,"side":256}
+FAIL: 256 scan publishes within 240 frames (moving=true)
+FAIL: Target motion creates no terrain revisions
+FAIL: Completed scan clears pending visual
+FAIL: Terrain result equals independent full-scan oracle
+REVIEW7_FOW_WORKLOAD {"enumerations":12,"first_commit":-1,"frames":240,"moving":true,"side":256}
+FAIL: 256 enemy movement retains initial scan progress
+FAIL: Target-only refresh never enumerates terrain
+FAIL: Returning observer does not publish obsolete pending position
+FAIL: Base sight range invalidates terrain work
+FAIL: Downed observer changes terrain visibility input
+FAIL: Downed observer reveals no terrain
+REVIEW7_FOW_RESULT 452 passed, 10 failed

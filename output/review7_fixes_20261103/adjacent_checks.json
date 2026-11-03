@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "avoidance475",
+      "script": "res://scripts/tests/task_475_fireteam_pathfinding_avoidance_stability_pass.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 45
+    },
+    {
+      "name": "task_187_npc_minimum_spacing_and_multiplayer_authority",
+      "script": "res://scripts/tests/task_187_npc_minimum_spacing_and_multiplayer_authority.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_density_fow_refresh",
+      "script": "res://scripts/tests/review_cycles_20261103_density_fow_refresh_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_DENSITY_FOW_REFRESH_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "fow_dirty1189",
+      "script": "res://scripts/tests/task_1189_fow_dirty_region_fanout.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "fow_runtime224",
+      "script": "res://scripts/tests/task_224_fog_of_war_tile_visibility_height_cover_runtime.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "fow_overlay225",
+      "script": "res://scripts/tests/task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_228_multiplayer_editor_map_manifest_download_consent",
+      "script": "res://scripts/tests/task_228_multiplayer_editor_map_manifest_download_consent.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "task_227_main_menu_multiplayer_host_join_lobby_flow",
+      "script": "res://scripts/tests/task_227_main_menu_multiplayer_host_join_lobby_flow.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "task_1101_connected_interaction_reconnect_state_recovery",
+      "script": "res://scripts/tests/task_1101_connected_interaction_reconnect_state_recovery.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "task_1122_connected_mission_world_camera_exposure_contact_cluster_readability",
+      "script": "res://scripts/tests/task_1122_connected_mission_world_camera_exposure_contact_cluster_readability.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "task_1125_connected_first_contact_local_team_contact_cluster_readability",
+      "script": "res://scripts/tests/task_1125_connected_first_contact_local_team_contact_cluster_readability.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "bugfix_multiplayer_lobby_setup_and_asset_catalog_followup",
+      "script": "res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "task_184_gameplay_hill_semantics_verifier",
+      "script": "res://scripts/tests/task_184_gameplay_hill_semantics_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    }
+  ]
+}

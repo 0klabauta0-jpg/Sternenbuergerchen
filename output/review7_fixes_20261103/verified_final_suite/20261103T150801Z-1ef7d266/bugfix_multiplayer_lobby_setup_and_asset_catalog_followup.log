@@ -1,0 +1,59 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-3462267a1d10463faede28af542bd90f
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== BUGFIX Multiplayer Lobby Setup and Asset Catalog Followup ===
+[PASS] Multiplayer lobby scene loads
+ERROR: [FAIL] Multiplayer defaults to each player's local roster
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd:148)
+       [1] _test_lobby_exposes_player_roster_map_team_and_direct_ip_hint (res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd:34)
+       [2] _wait_frames (res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd:139)
+ERROR: [FAIL] Session assignment default uses player rosters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd:148)
+       [1] _test_lobby_exposes_player_roster_map_team_and_direct_ip_hint (res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd:37)
+       [2] _wait_frames (res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd:139)
+[PASS] Lobby setup stores player name
+[PASS] Lobby setup stores selected team side
+[PASS] Lobby setup stores team mode
+[PASS] Lobby setup stores selected map
+[PASS] Lobby setup stores direct internet mode
+[PASS] Direct IP hint explains UDP port forwarding
+[PASS] Lobby setup exposes UPnP internet mode
+[PASS] UPnP hint explains automatic router port mapping
+[PASS] Session snapshot receives lobby setup
+[PASS] Peer list shows configured player name
+[PASS] Assignments expose team mode
+[PASS] Terrain tile catalog loads
+[PASS] Modular wall is sorted into Waende
+[PASS] Station-set wall is sorted into Waende
+[PASS] Space Kit crater is sorted into Crater
+[PASS] Space Kit meteor is sorted into Felsen
+[PASS] Station set floor is sorted into Space Station
+[PASS] Station set floor paints as terrain
+[PASS] Station set floor is a visual surface variant
+[PASS] Modular raised floor paints as terrain instead of a raised object
+[PASS] Modular raised floor is a visual surface variant
+[PASS] Station floor can be painted
+[PASS] Nature ground can be painted
+[PASS] Station-set floor can be painted
+[PASS] Station-set corner floor can be painted
+[PASS] Station-set detail floor can be painted
+[PASS] Modular raised floor can be painted
+[PASS] Nature and station floors do not stack raised detail surfaces
+[PASS] Station floor top is not above gameplay floor
+[PASS] Nature ground top is not above gameplay floor
+[PASS] Station-set floor top is not above gameplay floor
+[PASS] Station-set corner floor top is not above gameplay floor
+[PASS] Station-set detail floor top is not above gameplay floor
+[PASS] Modular raised floor top is not above gameplay floor
+ERROR: [FAIL] Modular raised floor uses the modular floor footprint scale
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd:148)
+       [1] _test_station_and_nature_floors_render_as_flush_ground_surfaces (res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd:114)
+       [2] _wait_frames (res://scripts/tests/bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd:139)
+=== RESULTS: 35 passed, 3 failed ===

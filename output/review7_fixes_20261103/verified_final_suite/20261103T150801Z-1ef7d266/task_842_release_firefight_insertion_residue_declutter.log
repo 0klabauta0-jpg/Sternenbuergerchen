@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-e31819e5810d4f24b6736f2afce4bc5b
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_842 Release Firefight Insertion Residue Declutter ===
+[PASS] TASK_842 task file exists
+[PASS] Task names insertion residue declutter
+[PASS] Implementation status tracks TASK_842
+[PASS] Roadmap marks TASK_842 implemented
+[PASS] Roadmap keeps TASK_843 follow-up
+[PASS] Contract documents TASK_842
+[PASS] TerrainMap3DView declares TASK_842 style id
+[PASS] TerrainMap3DView requires explicit insertion-residue flag
+[PASS] TerrainMap3DView suppresses non-cargo LZ labels
+[PASS] TerrainMap3DView suppresses non-cargo approach vectors
+[PASS] Default drop visuals are not in insertion-residue declutter
+[PASS] Default drop visuals keep LZ label
+[PASS] Default drop visuals keep approach line
+[PASS] Default drop visuals keep wide approach arrow
+[PASS] Default drop visuals keep LZ marker
+[PASS] Default drop visuals suppress no insertion residue
+[PASS] Firefight mode activates insertion-residue declutter
+[PASS] Snapshot reports TASK_842 style id
+[PASS] Firefight mode hides non-cargo LZ label
+[PASS] Firefight mode hides non-cargo approach line
+[PASS] Firefight mode hides non-cargo approach arrow
+[PASS] Snapshot counts suppressed LZ label
+[PASS] Snapshot counts suppressed approach line
+[PASS] Snapshot counts insertion residue suppression
+[PASS] Firefight mode preserves LZ marker
+[PASS] Firefight mode preserves Dropship visual
+[PASS] Firefight insertion-residue snapshot stays read-only
+[PASS] Cargo test runs in firefight insertion-residue declutter
+[PASS] Cargo approach line survives declutter
+[PASS] Cargo status label survives declutter
+[PASS] Cargo LZ label survives declutter
+[PASS] Cargo visual is not counted as insertion residue
+[PASS] Cargo declutter snapshot stays read-only
+=== RESULTS: 33 passed, 0 failed ===
+TASK_842_release_firefight_insertion_residue_declutter: ALL PASSED
