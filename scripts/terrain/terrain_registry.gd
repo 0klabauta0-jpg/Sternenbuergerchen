@@ -210,6 +210,10 @@ func get_all_tiles() -> Array:
 	return _tiles.values()
 
 
+func get_tile_count() -> int:
+	return _tiles.size()
+
+
 func get_sorted_tiles() -> Array:
 	if _sorted_tiles_cache_dirty:
 		_sorted_tiles_cache = _tiles.values()

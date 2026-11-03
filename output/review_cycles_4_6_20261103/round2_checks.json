@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "review_p1_navigation",
+      "script": "res://scripts/tests/review_20261102_p1_navigation_verifier.gd",
+      "success_marker": "REVIEW_20261102_P1_NAVIGATION_RESULT",
+      "timeout": 45
+    },
+    {
+      "name": "review_p2_hex_budget",
+      "script": "res://scripts/tests/review_20261102_p2_hex_budget_verifier.gd",
+      "success_marker": "REVIEW_20261102_P2_HEX_RESULT",
+      "timeout": 45
+    },
+    {
+      "name": "incremental_hpa412",
+      "script": "res://scripts/tests/task_412_large_map_streaming_incremental_hpa.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 120
+    },
+    {
+      "name": "doors692",
+      "script": "res://scripts/tests/task_692_door_runtime_collision_los_contract.gd",
+      "success_marker": "TASK_692: ALL PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "hex_foundation",
+      "script": "res://scripts/tests/frontier_hex_foundation_verifier.gd",
+      "success_marker": "FRONTIER_HEX_FOUNDATION_ALL_PASS",
+      "timeout": 45
+    },
+    {
+      "name": "hex_movement",
+      "script": "res://scripts/tests/frontier_hex_movement_verifier.gd",
+      "args": [
+        "--evidence-output=res://output/review_fixes_20261102/hex_movement.json"
+      ],
+      "success_marker": "FRONTIER_HEX_MOVEMENT",
+      "timeout": 45
+    },
+    {
+      "name": "review46_20261103_hpa_cache_verifier",
+      "script": "res://scripts/tests/review46_20261103_hpa_cache_verifier.gd",
+      "success_marker": "REVIEW46_HPA_CACHE_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "task_409_terrain_registry_lookup_hpa_audit",
+      "script": "res://scripts/tests/task_409_terrain_registry_lookup_hpa_audit.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_410_hpa_profile_visibility_and_registry_revision",
+      "script": "res://scripts/tests/task_410_hpa_profile_visibility_and_registry_revision.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    }
+  ]
+}

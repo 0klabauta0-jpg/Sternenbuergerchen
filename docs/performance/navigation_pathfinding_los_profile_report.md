@@ -45,6 +45,15 @@ Seit TASK_412 trackt `TerrainRegistry` Dirty-Grids, und `SimulationRoot` kann be
 
 Der Map-Editor besitzt aktuell keinen eigenen HPA-Full-Rebuild-Pfad. Editor-Painting veraendert Terrain-/Visualdaten; HPA-Build-Kosten werden deshalb im Runtime- und Benchmark-Pfad gemessen, nicht in einem Editor-HPA-Loop.
 
+### Review 2026-11-03: HPA-Cachepruefung ohne Tileliste
+`TerrainRegistry.get_tile_count()` liest die Anzahl direkt aus dem Registry-Index.
+`SimulationRoot` verwendet sie vor dem HPA-Cachevergleich, statt fuer jeden Hit
+eine komplette `get_all_tiles()`-Liste anzulegen. Identity, Anzahl, Revision und
+Dirty-Cluster-Invalidierung bleiben gleich. Aeltere Registry-Adapter ohne diesen
+optionalen Getter behalten den bisherigen Enumeration-Fallback. Der Verifier
+`review46_20261103_hpa_cache_verifier.gd` misst die entfallenen Materialisierungen
+und prueft echte Pfade sowie Tuer-, Mapwechsel-, Leer- und Legacy-Grenzen.
+
 ## LOS und Cover
 `TerrainPathfinder` zaehlt ueber optionale `options["diagnostics"]`:
 

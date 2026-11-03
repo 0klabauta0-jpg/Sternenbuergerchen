@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-35430148c4054ddb8c205a7a28c9cb3d
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_410 HPA Profile Visibility and Registry Revision ===
+PASS: SimulationRoot builds an HPA graph for runtime terrain
+PASS: Navigation snapshot exposes that an HPA graph exists
+PASS: Navigation snapshot counts the first HPA build
+PASS: Navigation snapshot starts with no HPA cache hits
+PASS: Navigation snapshot exposes HPA tile count
+PASS: Navigation snapshot exposes the registry revision used for HPA
+PASS: Unchanged registry reuses the cached HPA graph
+PASS: Unchanged registry does not rebuild HPA
+PASS: Unchanged registry increments HPA cache hit diagnostics
+PASS: Same-size registry changes update the cached HPA graph via dirty-cluster rebuild
+PASS: Registry revision change triggers a second HPA build
+PASS: Same-size HPA rebuild keeps the same tile count
+PASS: HPA build stats record the invalidating registry revision
+PASS: Same-size HPA rebuild uses incremental dirty-cluster stats
+PASS: Explicit in-place tile change notification invalidates HPA
+PASS: Navigation benchmark summary marks HPA build stats as present
+PASS: Open 64x64 benchmark reports 4096 HPA build tiles
+PASS: Open 64x64 benchmark reports 64 HPA clusters
+PASS: Chokepoint 64x64 benchmark reports 4096 HPA build tiles
+PASS: Chokepoint 64x64 benchmark reports 64 HPA clusters
+PASS: Large-map HPA build stats include timings
+PASS: MapEditor source is available for HPA audit
+PASS: MapEditor does not own an HPA full-rebuild path
+PASS: Navigation performance report documents HPA build diagnostics
+PASS: Navigation performance report documents runtime HPA cache diagnostics
+PASS: Navigation performance report documents expected 64x64 HPA build shape
+=== RESULTS: 26 passed, 0 failed ===
+ALL TESTS PASSED

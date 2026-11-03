@@ -92,3 +92,13 @@ Erst realen normalen Sync-Pfad reproduzieren, dann kleinen Cachefix festlegen.
 - Produktdateien: start_roster_generator.gd, player_roster_store.gd,
   main_menu_screen.gd; owning Contracts character_roster_generation und
   player_roster_save. Alle Laeufe isoliert, Originalroster unveraendert.
+
+## Ergebnis Runde 2
+- Auf dem nach Runde 1 korrigierten Stand RED 35/3, danach GREEN 38/0.
+- Acht Cache-Requests auf 128x128/256x256: 8 Tilelisten mit 131072/524288
+  Referenzen -> 0 Listen/0 materialisierte Referenzen. Identischer echter
+  17-Zellen-Pfad und Graph; Full-/Dirty-Rebuild- und Legacy-Verhalten erhalten.
+- Neun gezielte Navigation-/Hex-/Tuer-/Registry-Gates strikt gruen.
+  Unabhaengiger Actual-Diff-/Evidence-Nachreview APPROVED.
+- Vier Getterzeilen und eine Consumerzeile, keine neue Cache-Wahrheit und
+  keine FPS-/GPU-Aussage. Nutzerdaten weiter isoliert/Roster unveraendert.

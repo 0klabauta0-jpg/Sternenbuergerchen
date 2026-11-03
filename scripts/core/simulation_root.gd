@@ -2918,7 +2918,7 @@ func _find_navigation_grid_path(from_grid: Vector2i, to_grid: Vector2i, terrain_
 func _ensure_hpa_navigation_graph(terrain_registry):
 	if terrain_registry == null or not terrain_registry.has_method("get_all_tiles"):
 		return null
-	var tile_count: int = Array(terrain_registry.call("get_all_tiles")).size()
+	var tile_count: int = int(terrain_registry.call("get_tile_count")) if terrain_registry.has_method("get_tile_count") else Array(terrain_registry.call("get_all_tiles")).size()
 	var registry_revision: int = _get_terrain_registry_revision(terrain_registry)
 	if (
 		_hpa_navigation_graph != null

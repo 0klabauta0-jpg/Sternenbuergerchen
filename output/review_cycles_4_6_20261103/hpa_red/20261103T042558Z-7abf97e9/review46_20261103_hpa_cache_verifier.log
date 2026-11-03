@@ -1,0 +1,54 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-ccdbd8e598b94feeb48917039e1447f8
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: 128 dense registry builds a real HPA graph
+PASS: 128 warm HPA returns the exact 17-cell corridor
+PASS: 128 repeated requests retain graph identity without rebuilding
+PASS: 128 explicit lookups and real path queries hit the existing graph eight times
+PASS: 128 repeated real HPA queries preserve every path cell
+ERROR: FAIL: 128 warm cache requests do not enumerate the map, got 8 calls / 131072 materialized tiles
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review46_20261103_hpa_cache_verifier.gd:169)
+       [1] _test_cache_work_is_independent_of_map_area (res://scripts/tests/review46_20261103_hpa_cache_verifier.gd:69)
+       [2] _run (res://scripts/tests/review46_20261103_hpa_cache_verifier.gd:34)
+HPA_CACHE_OPERATIONS {"cache_requests":8,"get_all_tiles_calls":8,"materialized_tiles":131072,"path_cells":17,"side":128,"tiles":16384}
+PASS: 256 dense registry builds a real HPA graph
+PASS: 256 warm HPA returns the exact 17-cell corridor
+PASS: 256 repeated requests retain graph identity without rebuilding
+PASS: 256 explicit lookups and real path queries hit the existing graph eight times
+PASS: 256 repeated real HPA queries preserve every path cell
+ERROR: FAIL: 256 warm cache requests do not enumerate the map, got 8 calls / 524288 materialized tiles
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review46_20261103_hpa_cache_verifier.gd:169)
+       [1] _test_cache_work_is_independent_of_map_area (res://scripts/tests/review46_20261103_hpa_cache_verifier.gd:69)
+       [2] _run (res://scripts/tests/review46_20261103_hpa_cache_verifier.gd:34)
+HPA_CACHE_OPERATIONS {"cache_requests":8,"get_all_tiles_calls":8,"materialized_tiles":524288,"path_cells":17,"side":256,"tiles":65536}
+PASS: Initial corridor crosses the future runtime door
+PASS: Same-sized runtime revision closes the actual HPA route
+PASS: Door closure rebuilds exactly once
+PASS: Door revision preserves the dirty-cluster rebuild path
+PASS: Dirty rebuild retains graph identity
+PASS: Unchanged closed route stays closed without another rebuild
+ERROR: FAIL: Post-revision cache hit does not enumerate unchanged tiles
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review46_20261103_hpa_cache_verifier.gd:169)
+       [1] _test_dirty_revision_rebuilds_once (res://scripts/tests/review46_20261103_hpa_cache_verifier.gd:93)
+       [2] _run (res://scripts/tests/review46_20261103_hpa_cache_verifier.gd:35)
+PASS: Clearing the override restores the exact current corridor
+PASS: Door reopening rebuilds exactly once
+PASS: Map-swap fixture has equal revisions and tile counts
+PASS: Equal-sized replacement registry gets its own graph
+PASS: Replacement graph uses the replacement map's blocker
+PASS: Registry replacement causes exactly one full build
+PASS: Map identity replacement preserves full-build selection
+PASS: Cleared registry releases the old graph and reports no graph
+PASS: Empty map cannot reuse the previous corridor
+PASS: One-cell map recovers after empty-map invalidation
+PASS: One-cell map rejects a destination outside registered bounds
+PASS: Replacing a tile at unchanged count still invalidates its walkability
+PASS: Null registry remains a supported no-graph boundary
+REVIEW46_HPA_CACHE_RESULT passed=29 failed=3

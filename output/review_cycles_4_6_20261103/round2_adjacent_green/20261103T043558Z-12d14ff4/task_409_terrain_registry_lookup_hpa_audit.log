@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-8bf6e82cfea742daa2d725cca82d9820
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_409 TerrainRegistry Lookup and HPA Audit Verifier ===
+PASS: Tile-ID lookup resolves indexed tile IDs with query whitespace
+PASS: Tile-ID lookup drops stale index entries after in-place tile ID changes
+PASS: Tile-ID lookup refreshes from the live registry after in-place tile ID changes
+PASS: Re-registering a grid removes the replaced tile ID from lookup
+PASS: Re-registering a grid indexes the replacement tile
+PASS: Re-registering one grid keeps unrelated tile IDs indexed
+PASS: Nearest walkable tie-breaks by grid coordinate without sorting caller-visible data
+PASS: Nearest walkable reads current walkability after in-place tile updates
+PASS: Nearest walkable reports null when no current walkable tile remains
+PASS: Sorted tile cache orders by grid X then Y
+PASS: Sorted tile cache is not mutated by caller array changes
+PASS: Sorted tile cache invalidates after registering a new tile
+PASS: HPA graph builds and marks the last build as successful
+PASS: HPA build stats report all 64x64 terrain tiles
+PASS: HPA build stats report 64 clusters for 64x64 terrain with 8x8 clusters
+PASS: HPA build stats report one open component per cluster on open 64x64 terrain
+PASS: HPA build stats report generated portals
+PASS: HPA build stats include non-negative elapsed time
+=== RESULTS: 18 passed, 0 failed ===
+ALL TESTS PASSED
