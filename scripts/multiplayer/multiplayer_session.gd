@@ -67,6 +67,7 @@ var _reconnect_tokens_by_peer_id: Dictionary = {}
 var _local_reconnect_token: String = ""
 var _local_is_host: bool = false
 var _host_map_manifest: Dictionary = {}
+var _has_received_host_map_manifest: bool = false
 var _map_transfer_state: Dictionary = {
 	"state": "none",
 	"requires_consent": false,
@@ -183,7 +184,6 @@ func complete_mission() -> void:
 	for peer_id in _peers_by_id.keys():
 		_set_peer_ready(int(peer_id), false)
 	_pending_rejoin_identities_by_token.clear()
-	_reconnect_tokens_by_peer_id.clear()
 	_refresh_status_text()
 	_emit_snapshot()
 	_broadcast_snapshot()
@@ -194,6 +194,14 @@ func can_start_mission() -> bool:
 		return false
 	if _peers_by_id.size() < max_players:
 		return false
+	if _team_play_mode == TEAM_PLAY_MODE_VERSUS:
+		var host_side: String = String(Dictionary(_peers_by_id.get(HOST_PEER_ID, {})).get("team_id", ""))
+		for peer_id_variant in _peers_by_id.keys():
+			var peer_data: Dictionary = Dictionary(_peers_by_id[peer_id_variant])
+			if int(peer_id_variant) == HOST_PEER_ID or String(peer_data.get("role_id", "")) == ROLE_SPECTATOR:
+				continue
+			if host_side.is_empty() or String(peer_data.get("team_id", "")) == host_side:
+				return false
 	return _are_all_connected_peers_ready()
 
 
@@ -396,6 +404,8 @@ func set_peer_ready_for_test(peer_id: int, ready: bool) -> void:
 
 
 func set_host_map_manifest(manifest: Dictionary) -> Dictionary:
+	if _has_received_host_map_manifest and not _is_authority_session():
+		return _map_transfer_state.duplicate(true)
 	var verification: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("verify_manifest", manifest))
 	if bool(verification.get("valid", false)):
 		_host_map_manifest = Dictionary(verification.get("manifest", {})).duplicate(true)
@@ -418,6 +428,8 @@ func set_host_map_manifest(manifest: Dictionary) -> Dictionary:
 
 
 func evaluate_client_map_manifest(manifest: Dictionary, local_map_paths: Array = []) -> Dictionary:
+	if _is_stale_client_map_manifest(manifest):
+		return {"accepted": false, "state": "stale_manifest", "can_start_client": false}
 	var result: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("check_local_map", manifest, local_map_paths))
 	_host_map_manifest = Dictionary(result.get("manifest", MAP_MANIFEST_SCRIPT.call("normalize_manifest", manifest))).duplicate(true)
 	_map_transfer_state = result.duplicate(true)
@@ -427,6 +439,8 @@ func evaluate_client_map_manifest(manifest: Dictionary, local_map_paths: Array =
 
 
 func accept_map_download(manifest: Dictionary, map_json_text: String, cache_root: String = MAP_MANIFEST_SCRIPT.DOWNLOAD_ROOT) -> Dictionary:
+	if _is_stale_client_map_manifest(manifest):
+		return {"accepted": false, "state": "stale_manifest", "can_start_client": false}
 	var result: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("accept_download", manifest, map_json_text, cache_root))
 	_map_transfer_state = result.duplicate(true)
 	if bool(result.get("accepted", false)):
@@ -436,6 +450,8 @@ func accept_map_download(manifest: Dictionary, map_json_text: String, cache_root
 
 
 func reject_map_download(manifest: Dictionary) -> Dictionary:
+	if _is_stale_client_map_manifest(manifest):
+		return {"accepted": false, "state": "stale_manifest", "can_start_client": false}
 	_map_transfer_state = Dictionary(MAP_MANIFEST_SCRIPT.call("reject_download", manifest))
 	_host_map_manifest = Dictionary(_map_transfer_state.get("manifest", {})).duplicate(true)
 	_emit_snapshot()
@@ -515,6 +531,8 @@ func _receive_session_snapshot(snapshot: Dictionary) -> void:
 @rpc("authority", "reliable")
 func _receive_start_mission(assignments: Dictionary) -> void:
 	if _is_authority_session():
+		return
+	if not bool(_map_transfer_state.get("can_start_client", false)):
 		return
 
 	_mission_started = true
@@ -636,6 +654,7 @@ func _reset_session_state(emit_signal: bool = true) -> void:
 	_pending_rejoin_identities_by_token.clear()
 	_reconnect_tokens_by_peer_id.clear()
 	_host_map_manifest.clear()
+	_has_received_host_map_manifest = false
 	_clear_upnp_mapping()
 	_reset_upnp_mapping_snapshot()
 	_map_transfer_state = {
@@ -712,12 +731,12 @@ func _restore_versus_fireteam_assignments() -> void:
 			peer_data["role_id"] = ROLE_HOST
 			peer_data["fireteam_ids"] = _normalize_fireteam_ids(host_fireteam_ids)
 		elif not active_client_assigned:
-			peer_data["team_id"] = client_team_id
+			peer_data["team_id"] = _default_team_for_peer(false)
 			peer_data["role_id"] = _get_client_role_id()
 			peer_data["fireteam_ids"] = _normalize_fireteam_ids(client_fireteam_ids)
 			active_client_assigned = true
 		else:
-			peer_data["team_id"] = client_team_id
+			peer_data["team_id"] = _default_team_for_peer(false)
 			peer_data["role_id"] = ROLE_SPECTATOR
 			peer_data["fireteam_ids"] = PackedStringArray()
 		_peers_by_id[peer_id] = peer_data
@@ -811,8 +830,10 @@ func _broadcast_snapshot() -> void:
 
 
 func _apply_authority_snapshot(snapshot: Dictionary) -> void:
+	if snapshot.has("map_manifest"):
+		_apply_incoming_host_map_manifest(snapshot["map_manifest"])
 	_last_status_text = String(snapshot.get("status_text", _last_status_text))
-	_mission_started = bool(snapshot.get("mission_started", _mission_started))
+	_mission_started = bool(snapshot.get("mission_started", _mission_started)) and bool(_map_transfer_state.get("can_start_client", false))
 	var roster_snapshot: Dictionary = Dictionary(snapshot.get("roster", {}))
 	if roster_snapshot.has("roster_mode"):
 		roster_mode = String(MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("normalize_roster_mode", roster_snapshot.get("roster_mode", roster_mode)))
@@ -830,6 +851,40 @@ func _apply_authority_snapshot(snapshot: Dictionary) -> void:
 		peer_data["fireteam_ids"] = _normalize_fireteam_ids(peer_data.get("fireteam_ids", PackedStringArray()))
 		peer_data = _apply_peer_roster_identity(peer_id, peer_data, bool(peer_data.get("is_host", peer_id == HOST_PEER_ID)))
 		_peers_by_id[peer_id] = peer_data
+
+
+func _apply_incoming_host_map_manifest(value: Variant) -> void:
+	_has_received_host_map_manifest = true
+	if typeof(value) == TYPE_DICTIONARY and Dictionary(value).is_empty():
+		_host_map_manifest.clear()
+		_map_transfer_state = {"state": "none", "requires_consent": false, "can_start_client": true}
+		return
+	var manifest: Dictionary = Dictionary(value) if typeof(value) == TYPE_DICTIONARY else {}
+	# Validate the raw offer before normalization can remove unsafe path components.
+	var verification: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("verify_manifest", manifest))
+	if not bool(verification.get("valid", false)):
+		_host_map_manifest = Dictionary(verification.get("manifest", {})).duplicate(true)
+		_map_transfer_state = {"state": "invalid_manifest", "requires_consent": false, "can_start_client": false, "errors": PackedStringArray(verification.get("errors", PackedStringArray()))}
+		return
+	var normalized: Dictionary = Dictionary(verification.get("manifest", {}))
+	var previous_state: String = String(_map_transfer_state.get("state", ""))
+	if _host_map_manifest == normalized and previous_state in ["known", "accepted", "rejected", "missing", "hash_mismatch"]:
+		return
+	var local_map_paths: Array = [_selected_map_path]
+	for key in ["local_path", "cache_path"]:
+		var local_path: String = String(_map_transfer_state.get(key, ""))
+		if not local_path.is_empty() and not local_map_paths.has(local_path):
+			local_map_paths.append(local_path)
+	_host_map_manifest = normalized.duplicate(true)
+	_map_transfer_state = Dictionary(MAP_MANIFEST_SCRIPT.call("check_local_map", manifest, local_map_paths))
+	_map_transfer_state["can_start_client"] = String(_map_transfer_state.get("state", "")) == "known"
+
+
+func _is_stale_client_map_manifest(manifest: Dictionary) -> bool:
+	if not _has_received_host_map_manifest:
+		return false
+	var verification: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("verify_manifest", manifest))
+	return not bool(verification.get("valid", false)) or Dictionary(verification.get("manifest", {})) != _host_map_manifest
 
 
 func _build_peer_snapshot_array() -> Array:
@@ -950,7 +1005,7 @@ func _default_team_for_peer(is_host_peer: bool) -> String:
 		return _selected_team_slot if not _selected_team_slot.is_empty() else host_team_id
 	if _team_play_mode == TEAM_PLAY_MODE_COOP:
 		return _selected_team_slot if not _selected_team_slot.is_empty() else host_team_id
-	return client_team_id
+	return "team_alpha" if _selected_team_slot == "team_bravo" else "team_bravo"
 
 
 func _normalize_player_name(value: String) -> String:

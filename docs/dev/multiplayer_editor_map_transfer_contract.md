@@ -26,3 +26,14 @@ Download ist nie automatisch. Die Lobby zeigt Name, Hash/Groesse und Host-Hinwei
 - Keine Ueberschreibung lokaler `res://maps/...`-Editor-Dateien.
 - Keine Asset-Pack-Synchronisation in diesem V1.
 - Ablehnung laesst die Session im Lobby-State und markiert `can_start_client = false`.
+
+## Runtime-Eingaenge und V1-Grenze
+- Eingehende Host-Manifeste werden vor Normalisierung lokal validiert. Ein
+  wiederholtes Angebot bewahrt die lokale Zustimmung oder Ablehnung; ein neues
+  Angebot braucht eine neue Pruefung. Alte Dialogaktionen geben kein neues Angebot frei.
+- Session-Snapshot und Missionsstart-RPC respektieren die lokale Kartenfreigabe.
+  Die Lobby zeigt den aktuellen Consentzustand und laedt vor Szenenstart den
+  bekannten lokalen Pfad oder den ausdruecklich akzeptierten Cachepfad.
+- Wie in TASK228 bleibt der Netzwerk-Payloadtransport ausserhalb V1. Der
+  Acceptbutton wartet auf Payload; `accept_pending_map_download(payload)` ist
+  die vorhandene explizite Annahmegrenze. Dieser Fix fuehrt keinen Download-RPC ein.

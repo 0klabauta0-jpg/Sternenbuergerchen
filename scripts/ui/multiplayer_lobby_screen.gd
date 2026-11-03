@@ -1212,6 +1212,15 @@ func _launch_mission(assignments: Dictionary) -> void:
 	_release_active_mission()
 	_ensure_mission_host()
 	var mission_instance: Node = MISSION_SCENE.instantiate()
+	var session_snapshot: Dictionary = get_session_snapshot()
+	var map_path: String = ""
+	if bool(session_snapshot.get("is_host", false)):
+		map_path = String(Dictionary(session_snapshot.get("lobby_setup", {})).get("map_path", ""))
+	else:
+		var map_transfer: Dictionary = Dictionary(session_snapshot.get("map_transfer", {}))
+		map_path = String(map_transfer.get("local_path", map_transfer.get("cache_path", "")))
+	if not map_path.is_empty():
+		mission_instance.get_node("MissionSetup").set("map_file_path", map_path)
 	_apply_session_assignments_to_simulation_root(mission_instance.get_node_or_null("SimulationRoot"), assignments)
 	var startup_combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
 	if startup_combat_driver != null and startup_combat_driver.has_method("set_combat_startup_grace_ticks"):
@@ -1316,6 +1325,11 @@ func _apply_session_snapshot(snapshot: Dictionary) -> void:
 	_status_label.text = String(snapshot.get("status_text", "Ready. Host or join a local session."))
 	if snapshot.has("map_transfer"):
 		_map_consent_state = Dictionary(snapshot.get("map_transfer", _map_consent_state)).duplicate(true)
+		_pending_map_manifest = Dictionary(snapshot.get("map_manifest", {})).duplicate(true)
+		if bool(_map_consent_state.get("requires_consent", false)) and not bool(_map_consent_state.get("can_start_client", false)):
+			_show_map_consent_prompt(_pending_map_manifest)
+		else:
+			_hide_map_consent_prompt()
 	_apply_roster_mode_snapshot(Dictionary(snapshot.get("roster", {})))
 	_role_readability_snapshot = _build_lobby_role_readability_snapshot(snapshot)
 	_peer_label.text = String(_role_readability_snapshot.get("peer_text", "EINSATZROLLEN\n-"))
@@ -1337,7 +1351,7 @@ func _refresh_lobby_controls(snapshot: Dictionary) -> void:
 	_host_button.disabled = has_active_peer or bool(snapshot.get("mission_started", false))
 	_join_button.disabled = has_active_peer or bool(snapshot.get("mission_started", false))
 	_ready_button.visible = has_active_peer or can_toggle_ready
-	_ready_button.disabled = not can_toggle_ready
+	_ready_button.disabled = not can_toggle_ready or not bool(_map_consent_state.get("can_start_client", false))
 	_ready_button.text = "Unready" if local_ready else "Ready"
 	_start_button.visible = is_host
 	_start_button.disabled = not can_start
