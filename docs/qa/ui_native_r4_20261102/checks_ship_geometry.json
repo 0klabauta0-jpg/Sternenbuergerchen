@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "preparation_r2",
+      "script": "res://scripts/tests/ui_native_r2_preparation_verifier.gd",
+      "success_marker": "PASS: native R2 preparation layout and callbacks",
+      "timeout": 100
+    },
+    {
+      "name": "preparation_r3",
+      "script": "res://scripts/tests/ui_native_r3_preparation_verifier.gd",
+      "success_marker": "PASS: native R3 preparation density and state feedback",
+      "timeout": 100
+    },
+    {
+      "name": "cutlass_ui",
+      "script": "res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd",
+      "success_marker": "PASS: native R4 Cutlass identity",
+      "timeout": 100
+    },
+    {
+      "name": "shipcard386",
+      "script": "res://scripts/tests/task_386_homebase_flightdeck_member_portraits.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    }
+  ]
+}

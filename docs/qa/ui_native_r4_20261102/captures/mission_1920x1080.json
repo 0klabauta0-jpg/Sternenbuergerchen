@@ -1,0 +1,49 @@
+{
+	"display_driver": "Windows",
+	"fixture_data": true,
+	"fixture_variant": "standard",
+	"image": "res://docs/qa/ui_native_r4_20261102/captures/mission_1920x1080.png",
+	"image_size": [
+		1920,
+		1080
+	],
+	"logical_size": [
+		1920,
+		1080
+	],
+	"note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+	"renderer": "gl_compatibility",
+	"requested_window_size": [
+		1920,
+		1080
+	],
+	"save_error": 0,
+	"scaled_capture": false,
+	"source_capture": true,
+	"synthetic_image_fallback": false,
+	"ui_metrics": {
+		"objective": {
+			"rect": [
+				1184.0,
+				24.0,
+				352.0,
+				72.0
+			],
+			"visible": true
+		},
+		"transport": {
+			"rect": [
+				1552.0,
+				24.0,
+				352.0,
+				72.0
+			],
+			"visible": true
+		}
+	},
+	"view": "mission",
+	"viewport_size": [
+		1920.0,
+		1080.0
+	]
+}

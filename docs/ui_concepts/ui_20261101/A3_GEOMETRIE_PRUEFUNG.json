@@ -1,0 +1,23 @@
+{
+  "scope": "Approximate raster-color geometry only, not native Control dimensions",
+  "image_size": [
+    1672,
+    941
+  ],
+  "slate_full_width_rows_above_93pct": [
+    824,
+    940
+  ],
+  "bottom_row_slate_fraction": 1.0,
+  "selected_button_cyan_frame_bbox_threshold": [
+    24,
+    837,
+    89,
+    893
+  ],
+  "selected_button_raster_width_height": [
+    65,
+    56
+  ],
+  "native_requirement": "Equal Control width and height, 56-64px design target at1920x1080; not proven by bitmap"
+}

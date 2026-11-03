@@ -1,0 +1,30 @@
+{
+  "user_data_namespace": "SternenBuergerchen_Mission_A5_Edge_Rendered_FoW_QA",
+  "isolated_user_data": true,
+  "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "test_project_sha256": "22a04a4ec57ac59c5768c55b420f030a9d1cd27d0475eac7c61ac391e5a1a90b",
+  "project_restored_byte_exact": true,
+  "editor_plugins_temporarily_disabled": false,
+  "gdextensions_disabled": false,
+  "command": [
+    "godot_console",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+    "--rendering-method",
+    "forward_plus",
+    "--rendering-driver",
+    "vulkan",
+    "--audio-driver",
+    "Dummy",
+    "--script",
+    "res://scripts/tests/gm01_frontier_hex_fow_verifier.gd",
+    "--",
+    "--require-rendered-slots"
+  ],
+  "exit_code": 0,
+  "errors": [],
+  "passed": true,
+  "renderer": "vulkan",
+  "headless": false,
+  "scope": "Standalone visual-state fixture: real GPU transforms/alpha for every one of9408 slots during continual full snapshots, mode/team changes; no actors or gameplay proof."
+}

@@ -1,0 +1,20 @@
+{
+  "recorded_at": "2026-11-02T08:29:54.888708+00:00",
+  "base_sha": "b1342b939",
+  "scope": "Final R3 source after native readout, overlay, chip and ancestor-geometry regressions; source frozen for final captures and handoff.",
+  "sha256": {
+    "project.godot": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+    "scripts/meta/debrief_screen.gd": "d10b87bc335d48b7ae4178c7ec8d7b209e23a42a71ee95c7b06ff8632ecaee16",
+    "scripts/meta/drop_light_layout_contract.gd": "a2104681c969708da9cc7c7ac561dacdfe2b7cdf39ad0358d81680b6af9c8a31",
+    "scripts/meta/fob_screen.gd": "c026e825667f09a383e3a5d4dd4973ef2ab7e99e72d2ab9efb2aba8169fcc41b",
+    "scripts/meta/homebase_screen.gd": "23d60357fbe0f790ce29e5018050cedd667ad90e50a8e48ef43a7bf544ba40f9",
+    "scripts/tests/mission_tactical_sandbox_controller.gd": "94a248be0c737a51f3a2c7da5fcb0a6f3578f24053fcba17cd4f1e51d2c47463",
+    "scripts/tests/ui_native_capture.gd": "b772fa7c968447524d5b7028ed2bbd16a1ed11a2515b6dc9023a17d3b2d0e523",
+    "scripts/tests/ui_native_r2_debrief_shell_verifier.gd": "cf1ccb4146db3740b89dec18e916b2debbbed8149cf45b2740a5551422c1a8d7",
+    "scripts/tests/ui_native_r2_preparation_verifier.gd": "c7e957cdabdafbd9f478d363b9ecf9a754cca6ba02af913b87e4229266156125",
+    "scripts/tests/ui_native_r3_debrief_verifier.gd": "e88a13bab07449e886c1bd1deb3be59e6885c53cb9d00ed7b7ba5439988d8a05",
+    "scripts/tests/ui_native_r3_mission_readout_verifier.gd": "3ea6693a2ae5380e039f1e5e4a43bd9f6892d4b7a67a088ad9045d1f839c22f2",
+    "scripts/tests/ui_native_r3_preparation_verifier.gd": "8b3659a37d7ca2520a3c0632eb6c597cc04b6808feb054f1c793b0baf90cfd55",
+    "scripts/ui/mission_a5_hud_layout.gd": "2696b73cd37410fcbaad9be81cbefadc8eb7a8cd414ecf379122d4c24779a947"
+  }
+}

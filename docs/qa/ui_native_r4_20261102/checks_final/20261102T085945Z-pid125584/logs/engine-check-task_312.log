@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "stylebox" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/mission_tactical_sandbox_controller.gd:5369)
+ERROR: Failed to load script "res://scripts/tests/mission_tactical_sandbox_controller.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_312 Dropship Command Matrix LZ Go Layout ===
+  PASS: Dropship Go belongs to Command Matrix #16
+  PASS: GO is assigned to command matrix button 16.15
+ERROR: FAIL: Native plan execution preserves its existing hierarchy path
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_312_dropship_command_matrix_lz_go_layout.gd:57)
+       [1] _test_native_plan_execution_position (res://scripts/tests/task_312_dropship_command_matrix_lz_go_layout.gd:40)
+  PASS: Go disabled explains missing LZ
+  PASS: Go enables when LZ/pilot/team are ready
+  PASS: Large old window-17 Go slot is retired
+  PASS: Approach style remains near Go flow
+=== RESULTS: 6 passed, 1 failed ===

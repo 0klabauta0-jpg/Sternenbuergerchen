@@ -43,8 +43,8 @@ func _test_embarked_fireteam_stays_out_of_left_ground_hud() -> void:
 	_assert(not displayable_fireteams.has("blue"), "Embarked FT1 is not displayable as a ground fireteam")
 	_assert(not mini_card_ids.has("blue"), "Left FireteamMiniPanel hides embarked FT1")
 	_assert(mini_card_ids.has("gold"), "Left FireteamMiniPanel still shows ground FT2")
-	_assert(_selected_fireteam_panel_shows_embarked_hint(scene), "Selected embarked FT1 shows only the Dropship hint in #17")
-	_assert(_count_selected_member_cards(scene) == 0, "Selected embarked FT1 does not render member cards as ground operators")
+	_assert(_selected_fireteam_panel_shows_embarked_hint(scene), "Selected embarked FT1 shows the visible A5 Dropship hint")
+	_assert(_count_selected_member_cards(scene) == 0 and _count_selected_member_cards(scene, true) == blue_unit_ids.size(), "Selected embarked FT1 has only read-only roster cards and no ground operators")
 
 	scene.queue_free()
 	await _wait_frames(2)
@@ -157,24 +157,22 @@ func _get_mini_card_fireteam_ids(scene: Node) -> Array:
 
 
 func _selected_fireteam_panel_shows_embarked_hint(scene: Node) -> bool:
-	var card_row := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsRow") as HBoxContainer
-	if card_row == null:
-		return false
-	for child in card_row.get_children():
-		var label := child as Label
-		if label != null and label.text.find("Fireteam im Dropship") >= 0:
-			return true
-	return false
+	var summary := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/A5TeamSummary") as Label
+	return summary != null and summary.is_visible_in_tree() and summary.text == "Fireteam im Dropship"
 
 
-func _count_selected_member_cards(scene: Node) -> int:
+func _count_selected_member_cards(scene: Node, embarked: bool = false) -> int:
 	var card_row := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsRow") as HBoxContainer
 	if card_row == null:
 		return 0
 	var count: int = 0
 	for child in card_row.get_children():
-		if child is Label:
+		if not child is Control or child is Label or bool(child.get_meta("mission_selected_fireteam_member_in_drop_transit", false)) != embarked:
 			continue
+		if embarked:
+			var card_state: Dictionary = child.call("get_card_userology_snapshot")
+			if not bool(child.get("_is_disabled")) or bool(card_state.get("drag_enabled", true)):
+				return -1
 		count += 1
 	return count
 

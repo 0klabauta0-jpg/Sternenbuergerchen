@@ -1,0 +1,80 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Project normal entry is MainMenu
+PASS: Normal main menu scene loads
+PASS: MainMenu displays a background texture
+PASS: MainMenu background comes from the existing catalog
+PASS: Normal MainMenu catalog selects the Frontier start image
+FRONTIER_STARTUP_STAGE main_menu
+PASS: Capture target is new: 01_main_menu
+PASS: Native capture saved: 01_main_menu
+PASS: Real Singleplayer button is actionable
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:202)
+       [3] _capture (res://scripts/tests/gm01_frontier_normal_capture.gd:30)
+       [4] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:202)
+       [3] _capture (res://scripts/tests/gm01_frontier_normal_capture.gd:30)
+       [4] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+PASS: Normal Singleplayer opens visible Homebase
+PASS: Original normal grid_sweep mission remains selected
+PASS: Normal Homebase bootstrap provides a playable team
+PASS: Normal Homebase has a craft and pilot
+PASS: Normal Homebase payload is ready without fixture mutation
+FRONTIER_STARTUP_STAGE homebase
+PASS: Capture target is new: 02_homebase
+PASS: Native capture saved: 02_homebase
+PASS: Normal Homebase launch command is accepted
+PASS: Normal mission owns TacticalController, Primary3DView and SimulationRoot
+PASS: Menu launch reaches the regular mission scene
+PASS: Handoff retains the original default mission
+PASS: Normal Homebase-to-Mission handoff passes
+PASS: Default mission enables the Frontier visual profile
+PASS: Frontier activation comes from normal map data without a test override
+PASS: Rebuilt default mission uses its saved, user-requested Hex topology
+PASS: Regular renderer remains a read-only state consumer
+PASS: Original default map JSON is available
+PASS: Default mission retains its authored Alpha insertion marker
+PASS: Normal mission exposes the authoritative terrain registry
+PASS: Authored Alpha insertion marker is on walkable terrain
+FRONTIER_STARTUP_STAGE mission_started
+PASS: Capture target is new: 03_default_mission
+PASS: Native capture saved: 03_default_mission
+FRONTIER_STARTUP_STAGE craft_arrived
+PASS: Normal Set LZ handler places the existing default-mission LZ
+PASS: Normal planning exposes the requested LZ
+PASS: Normal Drop request retains a playable embarked team
+FRONTIER_STARTUP_STAGE drop_requested
+FRONTIER_STARTUP_STAGE lz_approach
+PASS: Capture target is new: 04_lz_approach
+PASS: Native capture saved: 04_lz_approach
+PASS: Normal drop deploys a playable payload without forced unloading
+PASS: Actual regular dropship instance uses the active Ref03 Cutlass bytes
+PASS: Deployed units use actual regular 3D model instances
+FRONTIER_STARTUP_STAGE deployed
+PASS: Capture target is new: 05_deployed
+PASS: Native capture saved: 05_deployed
+PASS: Existing Move action creates the normal selected-team plan
+PASS: Existing GO action commits the selected-team plan
+FRONTIER_STARTUP_STAGE go_movement
+PASS: Capture target is new: 06_go_movement
+PASS: Native capture saved: 06_go_movement
+PASS: Capture target is new: 07_outpost_overview
+PASS: Native capture saved: 07_outpost_overview
+PASS: Capture target is new: 08_eastern_supply
+PASS: Native capture saved: 08_eastern_supply
+PASS: Capture target is new: 09_expanded_map
+PASS: Native capture saved: 09_expanded_map
+PASS: Existing player profile, generator and unit identities remain unchanged
+FRONTIER_MAIN_STARTUP {"evidence_output":"res://docs/qa/gm01_frontier_20261102/frontier/1920x1080_20261102T140614Z/startup.json","failed":0,"passed":51,"stages":8}

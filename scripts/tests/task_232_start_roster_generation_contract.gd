@@ -80,7 +80,7 @@ func _test_profile_validity_roles_skills_and_badges() -> void:
 		var skill_values: Dictionary = Dictionary(unit.get("skill_values", {}))
 		for skill_key in ["accuracy", "speed", "leadership", "toughness"]:
 			var value: float = float(skill_values.get(skill_key, -1.0))
-			_assert(value >= START_ROSTER_GENERATOR_SCRIPT.MIN_SKILL_VALUE and value <= 1.0, "Generated skill is clamped: %s/%s" % [unit_id, skill_key])
+			_assert(is_finite(value) and value >= 0.0 and value <= 1.0, "Generated effective skill follows the trait/profile 0..1 contract: %s/%s" % [unit_id, skill_key])
 			if value < 0.45:
 				weak_gap_count += 1
 			if value > 0.70:
@@ -113,6 +113,9 @@ func _test_fireteam_suggestions_and_multiplayer_boundary() -> void:
 
 func _test_main_menu_first_start_and_new_team_boundary() -> void:
 	var main_menu := MAIN_MENU_SCENE.instantiate()
+	main_menu.set("_start_roster_profile_id", "task_232_menu")
+	main_menu.set("_start_roster_save_path", "user://ui_native_r2_verifier/task232/roster.json")
+	main_menu.set("_settings_config_path", "user://ui_native_r2_verifier/task232/settings.cfg")
 	root.add_child(main_menu)
 	await _wait_frames(3)
 	main_menu.call("set_start_roster_seed_for_tests", "task232_menu", 24)

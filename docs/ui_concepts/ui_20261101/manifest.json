@@ -1,0 +1,710 @@
+{
+  "schema": "sternenbuergerchen.ui_concept_manifest.v1",
+  "date": "2026-11-01",
+  "base_ref": "integration/core-foundation",
+  "base_sha": "3cae5a216",
+  "branch": "task/ui-entwuerfe-20261101",
+  "status": "concept_package_no_runtime_changes",
+  "generator": "built-in image_gen.imagegen",
+  "authorship": "Prompts and design intent authored by Codex; internal generator reasoning not observable",
+  "prompt_file": "docs/ui_concepts/ui_20261101/prompts.json",
+  "prompt_file_sha256": "acdd46bda589a102da135790213f50aee061b717cb7461d7215b21c573b7e0a3",
+  "review": "docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html",
+  "handoff": "docs/ui_concepts/ui_20261101/UEBERGABE.md",
+  "qa": "docs/ui_concepts/ui_20261101/PRUEFUNG.md",
+  "browser_qa": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL",
+  "references": [
+    {
+      "copied_from": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/references/current/03_taktische_rostwelt_gesamtkarte.png",
+      "path": "docs/reports/assets/ui-2026-11-01/references/taktische_rostwelt.png",
+      "sha256": "239d14bc82eda18af0005eacbe053880595f502a55b6f57c10004c02cb83bc3e",
+      "status": "current_user_assigned_visual_reference",
+      "role": "visual_style_only_not_runtime_evidence"
+    },
+    {
+      "copied_from": "C:/Users/bjoer/.codex/worktrees/grafikreferenzen-20261101/SternenBuergerchen/docs/reports/assets/grafik-2026-11-01/03_aussenposten_stilstudie.png",
+      "path": "docs/reports/assets/ui-2026-11-01/references/aussenposten_stilstudie.png",
+      "sha256": "f5397f4cebe2c7ed2ac1250d2694518be2ed0ca909daeae1c4ce8839cda0ccdd",
+      "status": "prior_world_style_reference",
+      "role": "visual_style_only_not_runtime_evidence"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "mockup_a_kommandodeck",
+      "kind": "mockup",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a_kommandodeck.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-a1a97bf8-781c-448b-9721-105a0e9e1c9e.png",
+      "sha256": "61a7f597b8440b51e7501fe14edb849f9fb76dde1bbf25add58c2b8a231efbca",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2934875,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB"
+    },
+    {
+      "id": "mockup_b_feldtablet",
+      "kind": "mockup",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_b_feldtablet.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-74460aaf-5443-4a1b-b352-2f1ca46952d9.png",
+      "sha256": "3045df81a7693677b36712856321c5385f8f19d0c11e71fb0b41ee10e10307e0",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2946671,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB"
+    },
+    {
+      "id": "mockup_c_einsatztafel",
+      "kind": "mockup",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_c_einsatztafel.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-b4d1eba2-18c0-46b8-a811-7ff7b5110a39.png",
+      "sha256": "49009116a2cb1d99255e4491eaf559e806a9bc1465fc401fcb2ee71923a07b09",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2100799,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB"
+    },
+    {
+      "id": "icon_move",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_move.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-5e67a35e-2dfd-46cb-9050-6a1a0b752bd9.png",
+      "sha256": "a35eb96198ec52d895bf25a89a080a37887f23895af808a0e6a038a7ec4e3242",
+      "byte_identical_to_generator_original": true,
+      "bytes": 445873,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        104,
+        189,
+        1171,
+        1108
+      ],
+      "fully_transparent_percent": 83.25
+    },
+    {
+      "id": "icon_defend",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_defend.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-d5159042-2433-4f40-8506-8e0a55d5f3c7.png",
+      "sha256": "8c7b8a538858e896ee4374206821fe858dd051c243f444e3d45bdd6898996bc6",
+      "byte_identical_to_generator_original": true,
+      "bytes": 824418,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        219,
+        153,
+        1035,
+        1100
+      ],
+      "fully_transparent_percent": 62.14
+    },
+    {
+      "id": "icon_flank",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_flank.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-229d8ac3-d534-4c61-8739-d930ade03907.png",
+      "sha256": "7aa3a0de3b2c86802bdce6462f539d2e358157e401b8b1f9278a6864e097faf1",
+      "byte_identical_to_generator_original": true,
+      "bytes": 564431,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        219,
+        143,
+        1080,
+        1118
+      ],
+      "fully_transparent_percent": 73.33
+    },
+    {
+      "id": "icon_take",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_take.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-3d96009b-b318-463e-a6ff-53ddc2e43f20.png",
+      "sha256": "bcfc1c2d79437461deb1f687f8e906f19f92558f2844bac04328c136a25c9903",
+      "byte_identical_to_generator_original": true,
+      "bytes": 716494,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        178,
+        84,
+        1059,
+        1206
+      ],
+      "fully_transparent_percent": 69.23
+    },
+    {
+      "id": "icon_dropship",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_dropship.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-64bea0c7-ce48-4028-9e04-b23d8a06ecd8.png",
+      "sha256": "599bc5472a61e18b1cc922a0ebcf4ae7c0f0fa47a57f3e611c211c9f57e16bd9",
+      "byte_identical_to_generator_original": true,
+      "bytes": 958825,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        34,
+        236,
+        1220,
+        1018
+      ],
+      "fully_transparent_percent": 62.36
+    },
+    {
+      "id": "icon_loadout",
+      "kind": "icon",
+      "status": "candidate_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_loadout.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-63114808-3599-4827-88a1-ec879e64ceda.png",
+      "sha256": "e4d0d0e38ac4ea6264d353e8fd9807c68bbc61a7a333c645f7656605cdc0763f",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1046538,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        137,
+        137,
+        1117,
+        1092
+      ],
+      "fully_transparent_percent": 52.94
+    },
+    {
+      "id": "mockup_a2_kommandodeck_kompakt",
+      "kind": "mockup",
+      "status": "revision2_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a2_kommandodeck_kompakt.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-f72d2583-e689-4502-a6b8-1dfb11fff49e.png",
+      "sha256": "1bf349ba5b6dc67dd06eff16684f37cde2ef946c77655e1384debb3f17cea8b8",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2791573,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a2_compact"
+    },
+    {
+      "id": "icon_flank_v2",
+      "kind": "icon",
+      "status": "revision2_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_flank_v2.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-41a44300-61dd-49af-af5b-4d6ad0cf9dbf.png",
+      "sha256": "b122fdbdd638b8c154e09696bc8e1770e268f553cdcbf6d66155c6e43fe037a2",
+      "byte_identical_to_generator_original": true,
+      "bytes": 596527,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "revision": "a2_compact",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        61,
+        244,
+        1194,
+        1051
+      ],
+      "fully_transparent_percent": 72.56
+    },
+    {
+      "id": "icon_dropship_v2",
+      "kind": "icon",
+      "status": "revision2_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/icon_dropship_v2.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-e76c889f-c277-487c-b2b3-e19099453d99.png",
+      "sha256": "83f37066358f654c64b942bc22316685cb23c5d8a08fcc19306b612806733fd1",
+      "byte_identical_to_generator_original": true,
+      "bytes": 807865,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "revision": "a2_compact",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "visible_bbox_alpha_gt16": [
+        88,
+        156,
+        1166,
+        1084
+      ],
+      "fully_transparent_percent": 67.35
+    },
+    {
+      "id": "mockup_a3_randband_versuch1",
+      "kind": "mockup",
+      "status": "prior_attempt_protocol_inside_band_retained",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a3_randband_versuch1.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-f21edc73-fb04-4cd5-865f-59f5dca89a04.png",
+      "sha256": "dc8c9716bcf80074958d1559e475dff746ea6d414fc92fac80edce6f2ba611ea",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2562963,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a3_edge_square"
+    },
+    {
+      "id": "mockup_a3_randband_quadratisch",
+      "kind": "mockup",
+      "status": "revision3_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a3_randband_quadratisch.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-c743de91-08ae-4df0-8dc2-7a20f5f8be9a.png",
+      "sha256": "b12a784f26f4ca698180a1fd81f42d95719b0f1cc8d1212ec99a9d0c02c20ff6",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2513517,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a3_edge_square"
+    },
+    {
+      "id": "mockup_a4_band_versuch1",
+      "kind": "mockup",
+      "status": "prior_attempt_oversized_action_tiles_retained",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a4_band_versuch1.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-960fee2b-ac8a-4423-bb29-a65f65eca833.png",
+      "sha256": "ff2ce595256c5b6ee31530ddcd0b4c564c4a5363d00fafefba75907f60e8a0ec",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2520823,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a4_compact_blocks"
+    },
+    {
+      "id": "mockup_a4_band_bloecke_kompakt",
+      "kind": "mockup",
+      "status": "revision4_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a4_band_bloecke_kompakt.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-1a4858e2-cee0-4460-9b5b-092d39236f11.png",
+      "sha256": "c8c4c0ff925c7f5e209e197768438361b2710d81b43e435658e688b119d012d7",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2515024,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a4_compact_blocks"
+    },
+    {
+      "id": "mockup_a5_mission_zweireihig_versuch1",
+      "kind": "mockup",
+      "category": "mission",
+      "status": "prior_attempt_retained",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig_versuch1.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-598e9c20-dd3b-4d56-8c56-15dee3a539a3.png",
+      "sha256": "6a42b37fe95be821c0afb1768c74e47b321fcacfe41777754227db23623d3b14",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2512524,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_hauptmenue",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_hauptmenue.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-6c820737-a59b-485f-8047-bb31003b7f2a.png",
+      "sha256": "90cfb1d8d2acb78d9b325226977e8379361d00ccb21703489bdc738d3a551b09",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2108832,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_heimatbasis",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_heimatbasis.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-5298d5c0-4ddb-4f34-bdb1-7d94d34611d3.png",
+      "sha256": "2037cc5c58a8cf463040235d332c64c5522242a5a944c928e9040613bb495e92",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1963380,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_fob_loadout_versuch1",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "prior_attempt_retained",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_fob_loadout_versuch1.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-27ccb8db-6a34-4c6c-a69c-3c03aba07e3f.png",
+      "sha256": "bd456d608ca60b7a2ae52137a359aa10e12fc0497afae921b90b2ead713f9a22",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1959056,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "board_charakterkarten_versuch1",
+      "kind": "mockup",
+      "category": "cards",
+      "status": "prior_attempt_retained",
+      "path": "docs/reports/assets/ui-2026-11-01/board_charakterkarten_versuch1.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-f2a0cf1a-3dbb-4a85-ab4f-5252338e6f64.png",
+      "sha256": "379b92ea93fe78781c0c1606665e0e321eb016edc3ea6fcbfccdf59272e7cf8b",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1936254,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "board_detailkarten",
+      "kind": "mockup",
+      "category": "cards",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/board_detailkarten.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-42948ce0-606b-4ca9-924d-669dace22117.png",
+      "sha256": "e9cd37213917a41bb1deddefd7b4e365a29a4dc28a26bd890f951ab55fcec8b8",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1940945,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_debrief_versuch1",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "prior_attempt_retained",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_debrief_versuch1.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-bd66eda6-6e7d-4d0e-b3e6-461179dcb231.png",
+      "sha256": "c11b9634cb4bb4ad3219b58b91b8e943a87a45966a16c8c52ae028ded83f4119",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2115908,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_lobby_versuch1",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "prior_attempt_retained",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_lobby_versuch1.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-8ae3f024-1ea0-4831-a622-79d4cd34358f.png",
+      "sha256": "175670dfa41256296f5af7dd548eec51e86b885d351b557492fc3d2d8ca97e87",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1959854,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_einstellungen_hilfe",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_einstellungen_hilfe.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-fb2a9b40-3624-4ac7-8874-d6fb7876cab1.png",
+      "sha256": "cfbf569c2d66569bede8e0c3548942a6f5d9ddcd0b3b092cb59eaca72581ad3a",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1841928,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_editor",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_editor.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-97c892df-c52f-4a04-8694-6a030be3717e.png",
+      "sha256": "1039090f95a1c4dc24d3c3194d8f3471f6a6dafc4c776bdd9d3e6e5fed92b25d",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2431123,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_teameditor",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_teameditor.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-04490f01-78a0-4ce7-ae14-df09adb63926.png",
+      "sha256": "03c5dcea32978ab9d6542d5ad72d59691e0a1f9a769b2280931887020a78720e",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1865321,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_fob_loadout",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_fob_loadout.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-d43de1bf-167f-4e9a-bccc-84271df887b7.png",
+      "sha256": "ff97752096c4af99b2fc97beefd5337e396451c9d3c16d926467d3157b95cc1a",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2002569,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_lobby",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_lobby.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-1bb7e55b-ff1f-485c-9e05-82b5b3c37ffd.png",
+      "sha256": "7cd54bed31ee2111fb2fbade5f827be0c65babeadb497b55030174a6d1b6ce97",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1945673,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "menu_debrief",
+      "kind": "mockup",
+      "category": "menu",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/menu_debrief.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-f038339f-b05e-43fb-8568-2c774d10688a.png",
+      "sha256": "3d7600ded373bde99da4b6598211a45524d42e2b5a7daa85d58e6e46042f0c82",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2049277,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "board_charakterkarten",
+      "kind": "mockup",
+      "category": "cards",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/board_charakterkarten.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-95890d52-529e-49c3-8a0f-bb2e90ce15d7.png",
+      "sha256": "f73450b2a01d714bfe759d7f31df8c29a82230ef21b132b67bfde0fd3e90c5e0",
+      "byte_identical_to_generator_original": true,
+      "bytes": 1968478,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    },
+    {
+      "id": "mockup_a5_mission_zweireihig",
+      "kind": "mockup",
+      "category": "mission",
+      "status": "revision5_candidate_not_user_approved_not_integrated",
+      "path": "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png",
+      "generator_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-4c857867-425e-4351-9eee-2f4d2a16cce3.png",
+      "sha256": "fc9edb8b1d28921653ba5b438e7be8da4db3e0b32b8c751e9b18c4ef94918149",
+      "byte_identical_to_generator_original": true,
+      "bytes": 2558195,
+      "width": 1672,
+      "height": 941,
+      "mode": "RGB",
+      "revision": "a5_two_rows_all_menus"
+    }
+  ],
+  "current_revision": "a5_two_rows_all_menus",
+  "revision_base_sha": "478bceac3",
+  "revision2_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision2.json",
+  "revision2_prompt_file_sha256": "c7ef1a7c96569d7d3dee3b6125e16d1fc5f66e378e6a214b88cb72eb2246cbeb",
+  "review_selection": {
+    "archived_path": "docs/ui_concepts/ui_20261101/review_export_20261101_154755.json",
+    "sha256": "02dcedb8e801704f48288b1ca0f7a8a04791b7d22ee77de44513b4940683c366",
+    "recovered_from": "C:\\Users\\bjoer\\Downloads\\sternenbuergerchen_ui_20261101_2026-11-01T14-47-55-564Z_01.json",
+    "exported_at": "2026-11-01T14:47:55.564Z",
+    "mission_preference": "a",
+    "staging_verdict": "continue",
+    "original_icon_verdicts": {
+      "move": "continue",
+      "defend": "continue",
+      "flank": "unclear",
+      "take": "continue",
+      "dropship": "unclear",
+      "loadout": "continue"
+    },
+    "checks": {
+      "hierarchy": false,
+      "legibility": false,
+      "icon_small": false,
+      "world_style": false,
+      "handoff": false
+    },
+    "scope": "original concept directions only; revision2 assets remain unreviewed"
+  },
+  "review_assets": {
+    "mission_proposal": "mockup_a5_mission_zweireihig.png",
+    "prior_mission": "mockup_a4_band_bloecke_kompakt.png",
+    "staging": "mockup_c_einsatztafel.png",
+    "icons": [
+      "icon_move.png",
+      "icon_defend.png",
+      "icon_flank_v2.png",
+      "icon_take.png",
+      "icon_dropship_v2.png",
+      "icon_loadout.png"
+    ],
+    "mission_history": [
+      "mockup_a4_band_bloecke_kompakt.png",
+      "mockup_a4_band_versuch1.png",
+      "mockup_a3_randband_quadratisch.png",
+      "mockup_a3_randband_versuch1.png",
+      "mockup_a2_kommandodeck_kompakt.png",
+      "mockup_a_kommandodeck.png"
+    ],
+    "menu_boards": {
+      "hauptmenue": "menu_hauptmenue.png",
+      "heimatbasis": "menu_heimatbasis.png",
+      "fob_loadout": "menu_fob_loadout.png",
+      "charakterkarten": "board_charakterkarten.png",
+      "detailkarten": "board_detailkarten.png",
+      "debrief": "menu_debrief.png",
+      "lobby": "menu_lobby.png",
+      "einstellungen_hilfe": "menu_einstellungen_hilfe.png",
+      "editor": "menu_editor.png",
+      "teameditor": "menu_teameditor.png"
+    },
+    "menu_board_default_verdict": "open"
+  },
+  "browser_agent_qa": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL",
+  "user_export_evidence": "Original real JSON recovered in Downloads; proves one user export, not all browser interactions",
+  "revision3_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision3.json",
+  "revision3_prompt_file_sha256": "5629dc813578391cb4599d5f3d2156a56c61ad6bcac16bab591c89c723a88f80",
+  "revision3_correction_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision3_korrektur.json",
+  "revision3_correction_prompt_file_sha256": "9bc202819a74154d8c3305d2640508291f9cea7a554c196b9f7929d25df1e6e9",
+  "revision3_feedback": {
+    "source": "current user chat message",
+    "requests": [
+      "bottom-left and bottom edge flush band",
+      "compact square command buttons",
+      "team cards above strip",
+      "execute immediately after flank as chosen layout",
+      "protocol above strip",
+      "compact upper-right dropship and LZ",
+      "keep objective upper-right-center"
+    ],
+    "scope": "visual concept revision; no runtime implementation"
+  },
+  "revision3_iteration": {
+    "first_attempt": "mockup_a3_randband_versuch1.png",
+    "finding": "protocol embedded in strip despite requested position",
+    "targeted_correction": "protocol moved above strip and padding reduced"
+  },
+  "revision4_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision4.json",
+  "revision4_prompt_file_sha256": "9fd681ecd98e85eb8dd7959efe2fe3d0c69a4dfee42d7490c6294479cd2a0d65",
+  "revision4_correction_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision4_korrektur.json",
+  "revision4_correction_prompt_file_sha256": "ed465e720884bae8ed3416af4f1b6cd32dd42e59c58c42f121c43fa01df5ab97",
+  "revision4_feedback": {
+    "source": "current user chat message",
+    "requests": [
+      "tighter compact action buttons with text inside",
+      "space for possible future second row",
+      "target/order between actions and team block",
+      "stance and fire rule directly under Alpha header, shifted left"
+    ],
+    "scope": "visual concept; no additional active commands or runtime change"
+  },
+  "revision4_iteration": {
+    "first_attempt": "mockup_a4_band_versuch1.png",
+    "finding": "right block order and inside captions but oversized action tiles",
+    "targeted_correction": "smaller action cluster and following blocks pulled left"
+  },
+  "revision5_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision5.json",
+  "revision5_prompt_file_sha256": "0c65e25edcacad42dfe3140e4f49b7127b7b8b5e49d14192287e13d95aa30f98",
+  "revision5_correction_prompt_file": "docs/ui_concepts/ui_20261101/prompts_revision5_korrektur.json",
+  "revision5_correction_prompt_file_sha256": "78b5fbaea3f52caa3e361428bb42f6d06218b71cce5c24f0de40390352815ebe",
+  "menu_card_guide": "docs/ui_concepts/ui_20261101/MENUES_UND_KARTEN.md",
+  "revision5_visual_qa": "docs/ui_concepts/ui_20261101/BILDPRUEFUNG_REVISION5.md",
+  "revision5_feedback": {
+    "source": "current user chat messages",
+    "requests": [
+      "smaller compact square buttons with two real rows",
+      "further existing menus, detail cards and compact character cards in same style",
+      "use image AI and explain authored intent and visible output in HTML"
+    ],
+    "scope": "concept candidates only; no runtime changes or new abilities"
+  },
+  "revision5_iteration": {
+    "initial_calls": 11,
+    "targeted_corrections": 5,
+    "retained_attempts": [
+      "menu_fob_loadout_versuch1.png",
+      "menu_lobby_versuch1.png",
+      "menu_debrief_versuch1.png",
+      "board_charakterkarten_versuch1.png",
+      "mockup_a5_mission_zweireihig_versuch1.png"
+    ],
+    "remaining_deviations_documented": true,
+    "a5_final_finding": "Action cluster slightly narrower and following blocks pulled left; exact square geometry and deletion of faint empty-slot outline not fully achieved; native layout remains open"
+  }
+}

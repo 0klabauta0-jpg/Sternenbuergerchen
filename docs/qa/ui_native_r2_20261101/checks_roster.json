@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "roster_save",
+      "script": "res://scripts/tests/ui_r2_roster_save_workflow_verifier.gd",
+      "success_marker": "PASS: R2 roster save workflow",
+      "timeout": 100
+    },
+    {
+      "name": "task232",
+      "script": "res://scripts/tests/task_232_start_roster_generation_contract.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 100
+    },
+    {
+      "name": "task234",
+      "script": "res://scripts/tests/task_234_persistent_player_roster_save_and_reset.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 100
+    }
+  ]
+}

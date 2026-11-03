@@ -1,0 +1,10 @@
+{
+  "scope": "Post-capture input-only correction; normal-route PNGs predate this call-order move. No geometry, text, assets, gameplay or renderer changes. Current headless and rendered GUI group verification is separate.",
+  "normal_capture_manifest": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/capture_results.json",
+  "before_source": "docs/qa/mission_a5_kartenrand_20261102/before/controller_before_tooltip.gd.txt",
+  "before_sha256": "43fc11daa4b28048d5d95ff9251ff510231edb457042504a61029cc1e9784d3c",
+  "current_source": "scripts/tests/mission_tactical_sandbox_controller.gd",
+  "current_sha256": "aca669d0674e1d18657aae29ec9421f8b7db88ddeb8b6efaeb0ff8d090300595",
+  "verified_exactly_one_call_relocated": true,
+  "change": "Apply details label tooltip MOUSE_FILTER_PASS after legacy recursive IGNORE; preserve original button restoration."
+}

@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "hex_fow",
+      "script": "res://scripts/tests/gm01_frontier_hex_fow_verifier.gd",
+      "success_marker": "GM01_HEX_FOW_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "hex_rebuild",
+      "script": "res://scripts/tests/gm01_frontier_rebuild_verifier.gd",
+      "success_marker": "GM01_FRONTIER_REBUILD_RESULT",
+      "timeout": 100
+    },
+    {
+      "name": "ui_a5",
+      "script": "res://scripts/tests/ui_a5_native_hud_verifier.gd",
+      "success_marker": "PASS: native A5 HUD",
+      "timeout": 100
+    },
+    {
+      "name": "shell_layouts",
+      "script": "res://scripts/tests/ui_native_shell_layout_verifier.gd",
+      "success_marker": "PASS: native shell layout",
+      "timeout": 100
+    },
+    {
+      "name": "r2_preparation",
+      "script": "res://scripts/tests/ui_native_r2_preparation_verifier.gd",
+      "success_marker": "PASS: native R2 preparation layout and callbacks",
+      "timeout": 100
+    },
+    {
+      "name": "r2_mission_feedback",
+      "script": "res://scripts/tests/ui_mission_r2_verifier.gd",
+      "success_marker": "PASS: native mission R2",
+      "timeout": 100
+    },
+    {
+      "name": "r3_readout",
+      "script": "res://scripts/tests/ui_native_r3_mission_readout_verifier.gd",
+      "success_marker": "PASS: native mission R3 readout",
+      "timeout": 100
+    },
+    {
+      "name": "r4_cutlass",
+      "script": "res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd",
+      "success_marker": "PASS: native R4 Cutlass identity",
+      "timeout": 100
+    }
+  ]
+}

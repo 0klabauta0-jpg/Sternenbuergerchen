@@ -4169,6 +4169,8 @@ func _angle_within_sector(target_angle: float, center_angle: float, arc_width: f
 
 
 func _update_enemy_team_tactics_state() -> void:
+	var profile_enabled: bool = combat_tick_budget_debug_enabled
+	var phase_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var grouped_units: Dictionary = {}
 	var tactics_by_group: Dictionary = {}
 	for enemy in _get_active_enemy_units():
@@ -4186,7 +4188,12 @@ func _update_enemy_team_tactics_state() -> void:
 		var units: Array = Array(grouped_units.get(group_id, []))
 		units.append(enemy)
 		grouped_units[group_id] = units
+	if profile_enabled:
+		_record_combat_hotspot("tactics_group_units", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	var input_signature: String = _build_enemy_team_tactics_input_signature(grouped_units, tactics_by_group)
+	if profile_enabled:
+		_record_combat_hotspot("tactics_signature", Time.get_ticks_usec() - phase_started_usec)
 	if _enemy_team_tactics_input_signature_initialized and input_signature == _enemy_team_tactics_input_signature:
 		_enemy_team_tactics_skip_count += 1
 		return
@@ -4252,7 +4259,12 @@ func get_enemy_team_tactics_runtime_guard_snapshot() -> Dictionary:
 
 
 func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Dictionary) -> Dictionary:
+	var profile_enabled: bool = combat_tick_budget_debug_enabled
+	var phase_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var fit_units: Array = _sort_enemy_units_by_id(_filter_fit_node2d_units(units))
+	if profile_enabled:
+		_record_combat_hotspot("tactics_state_fit_sort", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	if fit_units.is_empty():
 		return {}
 	var profile_id: String = String(tactics.get("profile_id", ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.DEFAULT_PROFILE_ID)).strip_edges().to_lower()
@@ -4261,14 +4273,26 @@ func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Di
 	var advance_style: String = String(ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_advance_style", tactics.get("advance_style", profile.get("advance_style", "hold")), String(profile.get("advance_style", "hold"))))
 	var cover_behavior: String = String(tactics.get("cover_behavior", profile.get("cover_behavior", ""))).strip_edges().to_lower()
 	var posture_config: Dictionary = _build_enemy_posture_config(tactics, profile)
+	if profile_enabled:
+		_record_combat_hotspot("tactics_state_config", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	var anchor_position: Vector2 = _resolve_enemy_security_anchor(fit_units)
 	var focus_position: Vector2 = _resolve_enemy_security_focus_position(fit_units, anchor_position)
 	var advance_direction: Vector2 = (focus_position - anchor_position).normalized() if not focus_position.is_equal_approx(anchor_position) else Vector2.RIGHT
+	if profile_enabled:
+		_record_combat_hotspot("tactics_state_anchor_focus", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	var unit_ids: PackedStringArray = _extract_unit_ids_from_units(fit_units)
 	var role_by_unit_id: Dictionary = _build_enemy_team_roles(fit_units)
 	var moving_unit_ids: PackedStringArray = _resolve_enemy_moving_unit_ids(advance_style, unit_ids)
 	var covering_unit_ids: PackedStringArray = _subtract_unit_ids(unit_ids, moving_unit_ids)
+	if profile_enabled:
+		_record_combat_hotspot("tactics_state_roles", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	var target_positions_by_unit_id: Dictionary = _build_enemy_tactics_target_positions(fit_units, unit_ids, moving_unit_ids, advance_style, cover_behavior, anchor_position, focus_position, advance_direction)
+	if profile_enabled:
+		_record_combat_hotspot("tactics_state_targets", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	var movement_posture_by_unit_id: Dictionary = {}
 	var weapon_posture_by_unit_id: Dictionary = {}
 	var posture_policy_by_unit_id: Dictionary = {}
@@ -4284,6 +4308,9 @@ func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Di
 		weapon_posture_by_unit_id[posture_unit_id] = String(posture.get("weapon_posture", ENEMY_WEAPON_READY))
 		posture_policy_by_unit_id[posture_unit_id] = String(posture.get("posture_policy_id", posture_config.get("movement_posture_policy", "")))
 		move_speed_factor_by_unit_id[posture_unit_id] = float(posture.get("move_speed_factor", _get_enemy_tactics_speed_factor(advance_style)))
+	if profile_enabled:
+		_record_combat_hotspot("tactics_state_posture", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	for unit in fit_units:
 		if unit is Node and unit.has_method("get_unit_id"):
 			var unit_id: String = String(unit.call("get_unit_id"))
@@ -4296,6 +4323,9 @@ func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Di
 			(unit as Node).set_meta("enemy_posture_policy_id", String(posture_policy_by_unit_id.get(unit_id, "")))
 			if not visual_archetype_id.is_empty():
 				(unit as Node).set_meta("enemy_visual_archetype_id", visual_archetype_id)
+	if profile_enabled:
+		_record_combat_hotspot("tactics_state_meta", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	var state: Dictionary = {
 		"security_group_id": group_id,
 		"team_id": String(tactics.get("team_id", _get_enemy_team_id())),
@@ -4328,6 +4358,8 @@ func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Di
 	for unit in fit_units:
 		if unit is Node:
 			(unit as Node).set_meta("enemy_tactic_label", String(state.get("tactic_label", "")))
+	if profile_enabled:
+		_record_combat_hotspot("tactics_state_assemble", Time.get_ticks_usec() - phase_started_usec)
 	return state
 
 
@@ -4432,24 +4464,37 @@ func _build_enemy_tactics_target_positions(
 	focus_position: Vector2,
 	advance_direction: Vector2
 ) -> Dictionary:
+	var profile_enabled: bool = combat_tick_budget_debug_enabled
+	var phase_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var target_positions: Dictionary = {}
 	var claimed_targets: Array = []
 	if _enemy_cover_behavior_uses_slots(cover_behavior):
 		target_positions = _build_enemy_cover_slot_targets(units, focus_position, claimed_targets)
+	if profile_enabled:
+		_record_combat_hotspot("tactics_targets_cover_select", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	if advance_style == "hold":
 		return target_positions
 	var step_distance: float = _get_enemy_tactics_step_distance(advance_style)
 	var movement_anchor: Vector2 = anchor_position + advance_direction * step_distance
 	var spaced_targets: Dictionary = Dictionary(LOCAL_AVOIDANCE_RESOLVER_SCRIPT.call("build_spaced_line_targets", moving_unit_ids, movement_anchor, advance_direction, LOCAL_AVOIDANCE_RESOLVER_SCRIPT.DEFAULT_MINIMUM_SPACING))
+	if profile_enabled:
+		_record_combat_hotspot("tactics_targets_spacing", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	for unit_id in moving_unit_ids:
 		var target_position: Vector2 = Vector2(target_positions.get(String(unit_id), spaced_targets.get(String(unit_id), movement_anchor)))
 		target_positions[String(unit_id)] = _resolve_enemy_walkable_tactic_target(target_position)
+	if profile_enabled:
+		_record_combat_hotspot("tactics_targets_resolve_walkable", Time.get_ticks_usec() - phase_started_usec)
+		phase_started_usec = Time.get_ticks_usec()
 	for unit_id in unit_ids:
 		if target_positions.has(String(unit_id)):
 			continue
 		var unit = _find_unit_by_id(units, String(unit_id))
 		if unit is Node2D:
 			target_positions[String(unit_id)] = (unit as Node2D).global_position
+	if profile_enabled:
+		_record_combat_hotspot("tactics_targets_fill", Time.get_ticks_usec() - phase_started_usec)
 	return target_positions
 
 
@@ -4458,6 +4503,7 @@ func _enemy_cover_behavior_uses_slots(cover_behavior: String) -> bool:
 
 
 func _build_enemy_cover_slot_targets(units: Array, focus_position: Vector2, claimed_targets: Array) -> Dictionary:
+	var profile_enabled: bool = combat_tick_budget_debug_enabled
 	var target_positions: Dictionary = {}
 	var terrain_registry = _get_terrain_registry()
 	if terrain_registry == null or not terrain_registry.has_method("get_walkable_cover_tiles_in_radius"):
@@ -4468,21 +4514,40 @@ func _build_enemy_cover_slot_targets(units: Array, focus_position: Vector2, clai
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
 		if unit_id.is_empty():
 			continue
+		var phase_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 		var candidates: Array = Array(terrain_registry.call("get_walkable_cover_tiles_in_radius", (unit as Node2D).global_position, ENEMY_TACTICS_COVER_SEARCH_RADIUS))
+		if profile_enabled:
+			_record_combat_hotspot("tactics_cover_query", Time.get_ticks_usec() - phase_started_usec)
+			phase_started_usec = Time.get_ticks_usec()
+		# Inputs stay fixed during this synchronous selection. Reuse the exact
+		# score on repeated sort/threshold reads; retain first-read order and ties.
+		var score_by_tile: Dictionary = {}
+		var score_for_tile := func(tile) -> float:
+			if not score_by_tile.has(tile):
+				var score_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+				score_by_tile[tile] = _score_enemy_cover_tile(unit, tile, focus_position)
+				if profile_enabled:
+					_record_combat_hotspot("tactics_cover_score", Time.get_ticks_usec() - score_started_usec)
+			return float(score_by_tile[tile])
 		candidates.sort_custom(func(a, b) -> bool:
-			return _score_enemy_cover_tile(unit, a, focus_position) > _score_enemy_cover_tile(unit, b, focus_position)
+			return float(score_for_tile.call(a)) > float(score_for_tile.call(b))
 		)
+		if profile_enabled:
+			_record_combat_hotspot("tactics_cover_sort", Time.get_ticks_usec() - phase_started_usec)
+			phase_started_usec = Time.get_ticks_usec()
 		for tile in candidates:
 			if tile == null or typeof(tile.world_position) != TYPE_VECTOR2:
 				continue
 			var candidate_position: Vector2 = Vector2(tile.world_position)
 			if not _is_enemy_tactic_slot_available(candidate_position, claimed_targets):
 				continue
-			if _score_enemy_cover_tile(unit, tile, focus_position) <= -999.0:
+			if float(score_for_tile.call(tile)) <= -999.0:
 				continue
 			target_positions[unit_id] = candidate_position
 			claimed_targets.append(candidate_position)
 			break
+		if profile_enabled:
+			_record_combat_hotspot("tactics_cover_claim_select", Time.get_ticks_usec() - phase_started_usec)
 	return target_positions
 
 

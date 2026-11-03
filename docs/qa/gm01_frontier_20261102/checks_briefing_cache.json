@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "briefing_cache",
+      "script": "res://scripts/tests/gm01_frontier_briefing_cache_verifier.gd",
+      "success_marker": "GM01_FRONTIER_BRIEFING_CACHE_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "briefing_panel",
+      "script": "res://scripts/tests/task_530_briefing_panel_renderer_mvp.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "briefing_minimap",
+      "script": "res://scripts/tests/task_531_briefing_minimap_visual_renderer.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "loadout_bridge",
+      "script": "res://scripts/tests/task_533_recommended_loadout_selection_bridge.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "readiness",
+      "script": "res://scripts/tests/task_534_pre_mission_readiness_checklist.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "homebase_handoff",
+      "script": "res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "homebase_bootstrap",
+      "script": "res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "homebase_actionable",
+      "script": "res://scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    }
+  ]
+}

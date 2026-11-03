@@ -1,0 +1,214 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Project normal entry is MainMenu
+PASS: Normal main menu scene loads
+PASS: MainMenu displays a background texture
+PASS: MainMenu background comes from the existing catalog
+PASS: Normal MainMenu catalog selects the Frontier start image
+FRONTIER_STARTUP_STAGE main_menu
+PASS: Capture target is new: 01_main_menu
+PASS: Native capture saved: 01_main_menu
+PASS: Real Singleplayer button is actionable
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:202)
+       [3] _capture (res://scripts/tests/ui_native_r4_frontier_capture.gd:12)
+       [4] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:202)
+       [3] _capture (res://scripts/tests/ui_native_r4_frontier_capture.gd:12)
+       [4] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+PASS: Normal Singleplayer opens visible Homebase
+PASS: Original normal grid_sweep mission remains selected
+PASS: Normal Homebase bootstrap provides a playable team
+PASS: Normal Homebase has a craft and pilot
+PASS: Normal Homebase payload is ready without fixture mutation
+FRONTIER_STARTUP_STAGE homebase
+PASS: Capture target is new: 02_homebase
+PASS: Native capture saved: 02_homebase
+PASS: Normal Homebase launch command is accepted
+SCRIPT ERROR: Cannot call method 'get_visible_rect' on a null value.
+   at: configure (res://scripts/ui/mission_a5_hud_layout.gd:32)
+   GDScript backtrace (most recent call first):
+       [0] configure (res://scripts/ui/mission_a5_hud_layout.gd:32)
+       [1] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14990)
+       [2] _apply_command_matrix_1280_readability (res://scripts/tests/mission_tactical_sandbox_controller.gd:15336)
+       [3] _refresh_dynamic_button_styles (res://scripts/tests/mission_tactical_sandbox_controller.gd:17188)
+       [4] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4184)
+       [5] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4051)
+       [6] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18609)
+       [7] _select_fireteam_by_name (res://scripts/tests/mission_tactical_sandbox_controller.gd:3548)
+       [8] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1256)
+       [9] _configure_mission_instance (res://scripts/meta/meta_layer_flow.gd:4029)
+       [10] _start_mission (res://scripts/meta/meta_layer_flow.gd:3962)
+       [11] _start_or_update_active_mission (res://scripts/meta/meta_layer_flow.gd:3979)
+       [12] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3742)
+       [13] request_mission_start (res://scripts/meta/homebase_screen.gd:1873)
+       [14] _run (res://scripts/tests/frontier_main_startup_verifier.gd:224)
+       [15] _capture (res://scripts/tests/ui_native_r4_frontier_capture.gd:12)
+       [16] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+SCRIPT ERROR: Cannot call method 'get_visible_rect' on a null value.
+   at: configure (res://scripts/ui/mission_a5_hud_layout.gd:32)
+   GDScript backtrace (most recent call first):
+       [0] configure (res://scripts/ui/mission_a5_hud_layout.gd:32)
+       [1] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14990)
+       [2] _apply_command_matrix_1280_readability (res://scripts/tests/mission_tactical_sandbox_controller.gd:15336)
+       [3] _apply_drop_light_hud_button_labels (res://scripts/tests/mission_tactical_sandbox_controller.gd:15250)
+       [4] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4185)
+       [5] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4051)
+       [6] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18609)
+       [7] _select_fireteam_by_name (res://scripts/tests/mission_tactical_sandbox_controller.gd:3548)
+       [8] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1256)
+       [9] _configure_mission_instance (res://scripts/meta/meta_layer_flow.gd:4029)
+       [10] _start_mission (res://scripts/meta/meta_layer_flow.gd:3962)
+       [11] _start_or_update_active_mission (res://scripts/meta/meta_layer_flow.gd:3979)
+       [12] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3742)
+       [13] request_mission_start (res://scripts/meta/homebase_screen.gd:1873)
+       [14] _run (res://scripts/tests/frontier_main_startup_verifier.gd:224)
+       [15] _capture (res://scripts/tests/ui_native_r4_frontier_capture.gd:12)
+       [16] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+SCRIPT ERROR: Cannot call method 'get_visible_rect' on a null value.
+   at: TacticalInputController._enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14974)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14974)
+       [1] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4187)
+       [2] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4051)
+       [3] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18609)
+       [4] _select_fireteam_by_name (res://scripts/tests/mission_tactical_sandbox_controller.gd:3548)
+       [5] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1256)
+       [6] _configure_mission_instance (res://scripts/meta/meta_layer_flow.gd:4029)
+       [7] _start_mission (res://scripts/meta/meta_layer_flow.gd:3962)
+       [8] _start_or_update_active_mission (res://scripts/meta/meta_layer_flow.gd:3979)
+       [9] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3742)
+       [10] request_mission_start (res://scripts/meta/homebase_screen.gd:1873)
+       [11] _run (res://scripts/tests/frontier_main_startup_verifier.gd:224)
+       [12] _capture (res://scripts/tests/ui_native_r4_frontier_capture.gd:12)
+       [13] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+SCRIPT ERROR: Cannot call method 'get_visible_rect' on a null value.
+   at: TacticalInputController._enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14974)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14974)
+       [1] _apply_compact_mission_control_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:16690)
+       [2] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4150)
+       [3] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18609)
+       [4] _select_fireteam_by_name (res://scripts/tests/mission_tactical_sandbox_controller.gd:3548)
+       [5] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1256)
+       [6] _configure_mission_instance (res://scripts/meta/meta_layer_flow.gd:4029)
+       [7] _start_mission (res://scripts/meta/meta_layer_flow.gd:3962)
+       [8] _start_or_update_active_mission (res://scripts/meta/meta_layer_flow.gd:3979)
+       [9] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3742)
+       [10] request_mission_start (res://scripts/meta/homebase_screen.gd:1873)
+       [11] _run (res://scripts/tests/frontier_main_startup_verifier.gd:224)
+       [12] _capture (res://scripts/tests/ui_native_r4_frontier_capture.gd:12)
+       [13] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+SCRIPT ERROR: Cannot call method 'get_visible_rect' on a null value.
+   at: configure (res://scripts/ui/mission_a5_hud_layout.gd:32)
+   GDScript backtrace (most recent call first):
+       [0] configure (res://scripts/ui/mission_a5_hud_layout.gd:32)
+       [1] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14990)
+       [2] _apply_command_matrix_1280_readability (res://scripts/tests/mission_tactical_sandbox_controller.gd:15306)
+       [3] _refresh_dynamic_button_styles (res://scripts/tests/mission_tactical_sandbox_controller.gd:17188)
+       [4] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4184)
+       [5] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4051)
+       [6] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1310)
+       [7] _configure_mission_instance (res://scripts/meta/meta_layer_flow.gd:4029)
+       [8] _start_mission (res://scripts/meta/meta_layer_flow.gd:3962)
+       [9] _start_or_update_active_mission (res://scripts/meta/meta_layer_flow.gd:3979)
+       [10] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3742)
+       [11] request_mission_start (res://scripts/meta/homebase_screen.gd:1873)
+       [12] _run (res://scripts/tests/frontier_main_startup_verifier.gd:224)
+       [13] _capture (res://scripts/tests/ui_native_r4_frontier_capture.gd:12)
+       [14] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+SCRIPT ERROR: Cannot call method 'get_visible_rect' on a null value.
+   at: configure (res://scripts/ui/mission_a5_hud_layout.gd:32)
+   GDScript backtrace (most recent call first):
+       [0] configure (res://scripts/ui/mission_a5_hud_layout.gd:32)
+       [1] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14990)
+       [2] _apply_command_matrix_1280_readability (res://scripts/tests/mission_tactical_sandbox_controller.gd:15306)
+       [3] _apply_drop_light_hud_button_labels (res://scripts/tests/mission_tactical_sandbox_controller.gd:15250)
+       [4] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4185)
+       [5] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4051)
+       [6] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1310)
+       [7] _configure_mission_instance (res://scripts/meta/meta_layer_flow.gd:4029)
+       [8] _start_mission (res://scripts/meta/meta_layer_flow.gd:3962)
+       [9] _start_or_update_active_mission (res://scripts/meta/meta_layer_flow.gd:3979)
+       [10] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3742)
+       [11] request_mission_start (res://scripts/meta/homebase_screen.gd:1873)
+       [12] _run (res://scripts/tests/frontier_main_startup_verifier.gd:224)
+       [13] _capture (res://scripts/tests/ui_native_r4_frontier_capture.gd:12)
+       [14] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+SCRIPT ERROR: Cannot call method 'get_visible_rect' on a null value.
+   at: TacticalInputController._enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14974)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14974)
+       [1] _refresh_runtime_mission_hud_surfaces (res://scripts/tests/mission_tactical_sandbox_controller.gd:4187)
+       [2] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4051)
+       [3] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1310)
+       [4] _configure_mission_instance (res://scripts/meta/meta_layer_flow.gd:4029)
+       [5] _start_mission (res://scripts/meta/meta_layer_flow.gd:3962)
+       [6] _start_or_update_active_mission (res://scripts/meta/meta_layer_flow.gd:3979)
+       [7] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3742)
+       [8] request_mission_start (res://scripts/meta/homebase_screen.gd:1873)
+       [9] _run (res://scripts/tests/frontier_main_startup_verifier.gd:224)
+       [10] _capture (res://scripts/tests/ui_native_r4_frontier_capture.gd:12)
+       [11] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+SCRIPT ERROR: Cannot call method 'get_visible_rect' on a null value.
+   at: TacticalInputController._enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14974)
+   GDScript backtrace (most recent call first):
+       [0] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14974)
+       [1] _apply_compact_mission_control_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:16561)
+       [2] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4150)
+       [3] set_planning_state (res://scripts/tests/mission_tactical_sandbox_controller.gd:1310)
+       [4] _configure_mission_instance (res://scripts/meta/meta_layer_flow.gd:4029)
+       [5] _start_mission (res://scripts/meta/meta_layer_flow.gd:3962)
+       [6] _start_or_update_active_mission (res://scripts/meta/meta_layer_flow.gd:3979)
+       [7] _on_homebase_mission_start_requested (res://scripts/meta/meta_layer_flow.gd:3742)
+       [8] request_mission_start (res://scripts/meta/homebase_screen.gd:1873)
+       [9] _run (res://scripts/tests/frontier_main_startup_verifier.gd:224)
+       [10] _capture (res://scripts/tests/ui_native_r4_frontier_capture.gd:12)
+       [11] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+PASS: Normal mission owns TacticalController, Primary3DView and SimulationRoot
+PASS: Menu launch reaches the regular mission scene
+PASS: Handoff retains the original default mission
+PASS: Normal Homebase-to-Mission handoff passes
+PASS: Default mission enables the Frontier visual profile
+PASS: Frontier activation comes from normal map data without a test override
+PASS: Existing default mission retains its square topology
+PASS: Regular renderer remains a read-only state consumer
+PASS: Original default map JSON is available
+PASS: Default mission retains its authored Alpha insertion marker
+PASS: Normal mission exposes the authoritative terrain registry
+PASS: Authored Alpha insertion marker is on walkable terrain
+FRONTIER_STARTUP_STAGE mission_started
+PASS: Capture target is new: 03_default_mission
+PASS: Native capture saved: 03_default_mission
+FRONTIER_STARTUP_STAGE craft_arrived
+PASS: Normal Set LZ handler places the existing default-mission LZ
+PASS: Normal planning exposes the requested LZ
+PASS: Normal Drop request retains a playable embarked team
+FRONTIER_STARTUP_STAGE drop_requested
+FRONTIER_STARTUP_STAGE lz_approach
+PASS: Capture target is new: 04_lz_approach
+PASS: Native capture saved: 04_lz_approach
+PASS: Normal drop deploys a playable payload without forced unloading
+PASS: Actual regular dropship instance uses the active Ref03 Cutlass bytes
+PASS: Deployed units use actual regular 3D model instances
+FRONTIER_STARTUP_STAGE deployed
+PASS: Capture target is new: 05_deployed
+PASS: Native capture saved: 05_deployed
+PASS: Existing Move action creates the normal selected-team plan
+PASS: Existing GO action commits the selected-team plan
+FRONTIER_STARTUP_STAGE go_movement
+PASS: Capture target is new: 06_go_movement
+PASS: Native capture saved: 06_go_movement
+PASS: Existing player profile, generator and unit identities remain unchanged
+FRONTIER_MAIN_STARTUP {"evidence_output":"res://docs/qa/ui_native_r4_20261102/frontier/1920x1080_20261102T092443Z/startup.json","failed":0,"passed":45,"stages":8}

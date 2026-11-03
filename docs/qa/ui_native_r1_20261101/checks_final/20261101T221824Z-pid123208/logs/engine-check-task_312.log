@@ -1,0 +1,16 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_312 Dropship Command Matrix LZ Go Layout ===
+  PASS: Dropship Go belongs to Command Matrix #16
+  PASS: GO is assigned to command matrix button 16.15
+ERROR: FAIL: Plan is assigned to command matrix button 16.20
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_312_dropship_command_matrix_lz_go_layout.gd:35)
+       [1] _run_tests (res://scripts/tests/task_312_dropship_command_matrix_lz_go_layout.gd:20)
+  PASS: Go disabled explains missing LZ
+  PASS: Go enables when LZ/pilot/team are ready
+  PASS: Large old window-17 Go slot is retired
+  PASS: Approach style remains near Go flow
+=== RESULTS: 6 passed, 1 failed ===

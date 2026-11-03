@@ -1,0 +1,36 @@
+{
+  "user_data_namespace": "SternenBuergerchen_Mission_A5_Edge_Rendered_Groups_QA",
+  "isolated_user_data": true,
+  "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "test_project_sha256": "514fc9e79f8dafd928ffa389d12d0e1efd2b088a704594ee410fbc5616cf9484",
+  "project_restored_byte_exact": true,
+  "editor_plugins_temporarily_disabled": false,
+  "gdextensions_disabled": false,
+  "command": [
+    "godot_console",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+    "--rendering-method",
+    "forward_plus",
+    "--rendering-driver",
+    "vulkan",
+    "--audio-driver",
+    "Dummy",
+    "--script",
+    "res://scripts/tests/ui_a5_reference_groups_verifier.gd",
+    "--",
+    "--require-rendered-ui"
+  ],
+  "exit_code": 0,
+  "errors": [],
+  "passed": true,
+  "renderer": "vulkan",
+  "headless": false,
+  "source_sha256": {
+    "scripts/tests/mission_tactical_sandbox_controller.gd": "aca669d0674e1d18657aae29ec9421f8b7db88ddeb8b6efaeb0ff8d090300595",
+    "scripts/ui/mission_a5_dropship_presenter.gd": "55de32d9da1645eb179146f31b10b09e9dd3de36f3167aee10403f4c8cb93a1c",
+    "scripts/tests/ui_a5_reference_groups_verifier.gd": "75a29c554cf474a9284e5ea6587b7b9a28118f755fd9122f1087ff117bf87210"
+  },
+  "sources_unchanged": true,
+  "scope": "Native GUI fixtures: card/details geometry, real callbacks, focus, scroll, tooltip hit filters. Public UI hydration is separate from normal-start actor/transport evidence; no OS pointer-hover proof."
+}

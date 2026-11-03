@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_533 Recommended Loadout Selection Bridge ===
+PASS: TASK_533 task file exists
+PASS: TASK_533 task file marks implementation
+PASS: Implementation status tracks TASK_533
+PASS: Roadmap marks TASK_533 implemented
+PASS: Briefing contract documents selection bridge
+PASS: Review workbench tracks TASK_533
+PASS: Briefing presenter exposes recommendation IDs
+PASS: Homebase exposes confirmed apply bridge
+PASS: Briefing panel snapshot remains read-only
+PASS: Snapshot exposes two recommendation cards
+PASS: Recommendation card has stable ID
+PASS: Recommendation exposes primary weapon
+PASS: Recommendation exposes secondary weapon
+PASS: Recommendation keeps support weapon IDs
+PASS: Patch preview uses existing member loadout keys
+PASS: Pure briefing snapshot still exposes no mutating command keys
+PASS: Homebase renders two selectable recommendation buttons
+PASS: Alpha starts without recommended sniper primary
+PASS: Selecting recommendation stores bridge selection
+PASS: Bridge is ready when selected units exist
+PASS: Selecting recommendation does not apply it
+PASS: Selection alone does not mutate member loadout
+PASS: Confirmed apply succeeds for staged fireteam operators
+PASS: Confirmed apply increments apply count
+PASS: Confirmed apply reports affected operators
+PASS: Confirmed apply preserves recommendation armor
+PASS: Confirmed apply writes primary weapon
+PASS: Confirmed apply writes secondary weapon
+PASS: Panel snapshot exposes apply feedback
+PASS: Homebase briefing snapshot remains read-only display state
+=== RESULTS: 30 passed, 0 failed ===
+TASK_533: ALL PASSED

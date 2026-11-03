@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Shared native API: get_theme
+PASS: Shared native API: apply_screen
+PASS: Shared native API: style_action_tile
+PASS: Screen receives cached shared theme
+PASS: Theme is reused rather than rebuilt
+PASS: Dropdown text stays readable on dark surface
+PASS: Input text stays readable on dark surface
+PASS: Popup inherits readable text
+PASS: Action tile has visible keyboard focus style
+PASS: Styling preserves control semantics
+PASS: Primary and selected action states have distinct styling
+PASS: Disabled action styling exists
+RESULTS: 12 passed, 0 failed
+PASS: native UI design system

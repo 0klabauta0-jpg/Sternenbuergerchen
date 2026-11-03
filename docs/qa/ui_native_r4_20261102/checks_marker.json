@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "left1165",
+      "script": "res://scripts/tests/task_1165_left_tactical_stack_1280_detail_polish.gd",
+      "success_marker": "TASK_1165 PASS (40 checks)",
+      "timeout": 100
+    }
+  ]
+}

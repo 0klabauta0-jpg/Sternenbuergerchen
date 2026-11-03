@@ -1,0 +1,41 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_164 UI Theme Component Verifier ===
+PASS: Theme exposes distinct status colors
+PASS: Tooltip/Icon helper exposes a small curated asset manifest
+PASS: Curated Kenney UI asset paths exist in the repo
+PASS: Tooltip/Icon helper loads a curated Kenney icon
+PASS: StatusBadge displays snapshot text as a compact badge
+PASS: TacticalCard tracks only local display selection
+PASS: UnitRosterRow renders unit snapshot fields without owning gameplay state
+PASS: CommandButton keeps command identity as display metadata
+PASS: ProgressLine displays bounded progress data
+PASS: Mission test scene exposes the tactical controller
+ERROR: FAIL: Selected Fireteam status slice uses TacticalCard
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_164_ui_theme_component_verifier.gd:132)
+       [1] _test_selected_fireteam_slice_uses_component_basis (res://scripts/tests/task_164_ui_theme_component_verifier.gd:116)
+ERROR: FAIL: Selected Fireteam status slice uses StatusBadge
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_164_ui_theme_component_verifier.gd:132)
+       [1] _test_selected_fireteam_slice_uses_component_basis (res://scripts/tests/task_164_ui_theme_component_verifier.gd:117)
+ERROR: FAIL: Selected Fireteam status slice uses ProgressLine
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_164_ui_theme_component_verifier.gd:132)
+       [1] _test_selected_fireteam_slice_uses_component_basis (res://scripts/tests/task_164_ui_theme_component_verifier.gd:118)
+ERROR: FAIL: Selected Fireteam status slice uses CommandButton
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_164_ui_theme_component_verifier.gd:132)
+       [1] _test_selected_fireteam_slice_uses_component_basis (res://scripts/tests/task_164_ui_theme_component_verifier.gd:119)
+ERROR: FAIL: Selected Fireteam status slice keeps the old readable status summary
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_164_ui_theme_component_verifier.gd:132)
+       [1] _test_selected_fireteam_slice_uses_component_basis (res://scripts/tests/task_164_ui_theme_component_verifier.gd:120)
+=== RESULTS: 10 passed, 5 failed ===
+FAIL

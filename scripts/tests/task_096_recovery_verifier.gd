@@ -80,6 +80,7 @@ func _test_fob_transit_card_is_disabled_and_shows_progress() -> void:
 func _test_character_sheet_layout_uses_german_sections_and_core_bars() -> void:
 	var screen: Control = FOB_TEST_SCENE.instantiate()
 	root.add_child(screen)
+	screen.show()
 	await process_frame
 
 	screen.call("set_available_units", UNIT_ROSTER_PRESETS_SCRIPT.call("get_homebase_roster"))
@@ -109,7 +110,7 @@ func _test_character_sheet_layout_uses_german_sections_and_core_bars() -> void:
 			core_bar_count += 1
 
 	_assert(overlay != null and overlay.visible, "FOB character overlay opens as a visible sheet")
-	_assert(overlay_header != null and overlay_header.text == UI_BLOCK_LABELS_SCRIPT.CHARACTER_OVERLAY, "Character overlay uses the shared #20 block label")
+	_assert(overlay_header != null and overlay_header.is_visible_in_tree() and overlay_header.text == "Charakterbogen", "FOB character overlay shows its localized A5 heading")
 	_assert(values_section_headers == [
 		"KERNWERTE (0,00 - 1,00):",
 		"KOMMUNIKATION:",
@@ -154,8 +155,10 @@ func _test_transport_craft_cards_do_not_expose_tracked_button() -> void:
 	var button_texts: Array = _collect_button_texts(craft_card)
 
 	_assert(craft_card != null, "FOB can still build a shared dropship card for verification")
-	_assert(button_texts.has("Board"), "Dropship card keeps the boarding action")
-	_assert(button_texts.has("Send"), "Dropship card keeps the mission-send action")
+	var board := craft_card.get_node_or_null("MarginContainer/VBox/HeaderRow/PrimaryActionButton") as Button if craft_card != null else null
+	var release := craft_card.get_node_or_null("MarginContainer/VBox/HeaderRow/SecondaryActionButton") as Button if craft_card != null else null
+	_assert(board != null and board.text == "Einschiffen" and board.pressed.is_connected(Callable(screen, "_on_transport_craft_boarding_requested").bind("dropship_test")), "Dropship card keeps its localized boarding action")
+	_assert(release != null and release.text == "Freigeben" and release.pressed.is_connected(Callable(screen, "_on_transport_craft_mission_stage_requested").bind("dropship_test")), "Dropship card keeps its localized mission staging action")
 	_assert(not _array_contains_case_insensitive(button_texts, "tracked"), "Dropship card no longer exposes a legacy tracked button")
 
 	if craft_card != null:

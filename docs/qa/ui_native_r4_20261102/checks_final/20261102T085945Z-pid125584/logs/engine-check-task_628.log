@@ -1,0 +1,127 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "stylebox" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/mission_tactical_sandbox_controller.gd:5369)
+ERROR: Failed to load script "res://scripts/tests/mission_tactical_sandbox_controller.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_628 Mission HUD Legacy Contract Refresh ===
+PASS: TASK_628 task file exists
+PASS: TASK_628 task names legacy contract refresh
+PASS: Implementation status tracks TASK_628
+PASS: Roadmap marks TASK_628 implemented
+PASS: Mission command feedback contract documents TASK_628
+PASS: Rolling report tracks TASK_628
+PASS: Rolling report retains a non-stale task-progress record
+PASS: Status handbook retains a non-stale current-task record
+PASS: Mission scene exposes command grid
+ERROR: FAIL: #16 uses the native A5 layout while preserving existing controls
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:69)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleHoldButton exists
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:74)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleHoldButton is reachable in the selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:75)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleHoldButton is marked as fire-rule control
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:76)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleHoldButton keeps compact fire-rule label
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:77)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleReturnButton exists
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:74)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleReturnButton is reachable in the selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:75)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleReturnButton is marked as fire-rule control
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:76)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleReturnButton keeps compact fire-rule label
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:77)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleFreeButton exists
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:74)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleFreeButton is reachable in the selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:75)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleFreeButton is marked as fire-rule control
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:76)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleFreeButton keeps compact fire-rule label
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:77)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleSuppressButton exists
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:74)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleSuppressButton is reachable in the selected-team parameters
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:75)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleSuppressButton is marked as fire-rule control
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:76)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+ERROR: FAIL: FireRuleSuppressButton keeps compact fire-rule label
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:171)
+       [1] _test_command_matrix_fire_rule_slots (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:77)
+       [2] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+PASS: Mission test scene exposes controller and setup
+SCRIPT ERROR: Invalid call. Nonexistent function '_get_available_fireteam_ids (via call)' in base 'Node'.
+   at: _test_inbound_selected_fireteam_cards_remain_visible (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:97)
+   GDScript backtrace (most recent call first):
+       [0] _test_inbound_selected_fireteam_cards_remain_visible (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:97)
+       [1] _wait_frames (res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd:162)
+=== RESULTS: 10 passed, 17 failed ===
+TASK_628: FAILED

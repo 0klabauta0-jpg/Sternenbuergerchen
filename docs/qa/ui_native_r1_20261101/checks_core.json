@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "theme",
+      "script": "res://scripts/tests/ui_native_design_system_verifier.gd",
+      "success_marker": "PASS: native UI design system",
+      "timeout": 90
+    },
+    {
+      "name": "theme_components",
+      "script": "res://scripts/tests/task_164_ui_theme_component_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 90
+    },
+    {
+      "name": "compact_card",
+      "script": "res://scripts/tests/task_361_npc_compact_card_readonly_profile_reference_contract.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 90
+    },
+    {
+      "name": "character_sheet",
+      "script": "res://scripts/tests/task_235_character_sheet_roster_gameplay_expansion.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 90
+    },
+    {
+      "name": "lobby",
+      "script": "res://scripts/tests/task_227_main_menu_multiplayer_host_join_lobby_flow.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 90
+    },
+    {
+      "name": "shell",
+      "script": "res://scripts/tests/task_300_app_shell_return_to_main_menu_navigation.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 90
+    }
+  ]
+}

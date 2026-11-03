@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const SETTINGS_SCREEN_SCRIPT: GDScript = preload("res://scripts/ui/settings_screen.gd")
@@ -267,6 +269,8 @@ func _build_overlay() -> void:
 		return
 	_overlay_root = Control.new()
 	_overlay_root.name = "GlobalEscapeOverlay"
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(_overlay_root)
+	_overlay_root.set_meta("native_ui_screen_family", "escape_settings")
 	_overlay_root.visible = false
 	_overlay_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_overlay_root.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -311,14 +315,14 @@ func _build_menu_panel() -> PanelContainer:
 
 	var title := Label.new()
 	title.name = "TitleLabel"
-	title.text = "Pause"
+	title.text = "Spielmenü"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 24)
 	vbox.add_child(title)
 
 	_status_label = Label.new()
 	_status_label.name = "StatusLabel"
-	_status_label.text = "Escape Menu"
+	_status_label.text = "Escape · Einsätze laufen weiter"
 	_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status_label.add_theme_font_size_override("font_size", 12)
 	vbox.add_child(_status_label)
@@ -428,7 +432,7 @@ func _show_menu_panel() -> void:
 	_menu_panel.visible = true
 	_settings_panel.visible = false
 	_refresh_action_buttons()
-	_set_status("Escape Menu")
+	_set_status("Escape · Einsätze laufen weiter")
 
 
 func _ensure_overlay() -> void:

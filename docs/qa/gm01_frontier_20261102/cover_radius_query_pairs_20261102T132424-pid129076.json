@@ -1,0 +1,433 @@
+{
+	"benchmark": {
+		"after": "Current TerrainRegistry; distance rejection before walkability and cover lookups.",
+		"after_summary_usec": {
+			"max": 4186,
+			"mean": 2549.875,
+			"median": 2363.0,
+			"min": 2166,
+			"p95": 3895
+		},
+		"before": "Exact pre-change filter order in LegacyRegistry subclass; same internal lookup methods.",
+		"before_summary_usec": {
+			"max": 28293,
+			"mean": 21482.71875,
+			"median": 20828.5,
+			"min": 19487,
+			"p95": 26772
+		},
+		"centers": [
+			{
+				"x": 303.0,
+				"y": 872.0
+			},
+			{
+				"x": 367.0,
+				"y": 936.0
+			},
+			{
+				"x": 431.0,
+				"y": 904.0
+			},
+			{
+				"x": 495.0,
+				"y": 968.0
+			},
+			{
+				"x": -159.0,
+				"y": 868.0
+			},
+			{
+				"x": 97.0,
+				"y": 764.0
+			},
+			{
+				"x": 161.0,
+				"y": 816.0
+			},
+			{
+				"x": 193.0,
+				"y": 816.0
+			}
+		],
+		"grid_topology": "hex_axial_v1",
+		"map_path": "res://maps/Ground_Mission01_32x32.json",
+		"map_sha256": "31daf2d4943ec4a2007fc4f5246249f309c52436a0675143184d060b6999c925",
+		"metric": "warm_headless_cpu_registry_query_batch",
+		"radius_world": 220.0,
+		"raw_pairs": [
+			{
+				"after_usec": 2229,
+				"before_usec": 19783,
+				"first": "before",
+				"pair": 0,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2241,
+				"before_usec": 19487,
+				"first": "after",
+				"pair": 1,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2291,
+				"before_usec": 21850,
+				"first": "before",
+				"pair": 2,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2225,
+				"before_usec": 20508,
+				"first": "after",
+				"pair": 3,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2263,
+				"before_usec": 20269,
+				"first": "before",
+				"pair": 4,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2258,
+				"before_usec": 23340,
+				"first": "after",
+				"pair": 5,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2512,
+				"before_usec": 21124,
+				"first": "before",
+				"pair": 6,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2370,
+				"before_usec": 21654,
+				"first": "after",
+				"pair": 7,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2298,
+				"before_usec": 20574,
+				"first": "before",
+				"pair": 8,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2215,
+				"before_usec": 19659,
+				"first": "after",
+				"pair": 9,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2464,
+				"before_usec": 20831,
+				"first": "before",
+				"pair": 10,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2285,
+				"before_usec": 20155,
+				"first": "after",
+				"pair": 11,
+				"result_count": 61
+			},
+			{
+				"after_usec": 3811,
+				"before_usec": 26772,
+				"first": "before",
+				"pair": 12,
+				"result_count": 61
+			},
+			{
+				"after_usec": 3461,
+				"before_usec": 23976,
+				"first": "after",
+				"pair": 13,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2645,
+				"before_usec": 24514,
+				"first": "before",
+				"pair": 14,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2303,
+				"before_usec": 20745,
+				"first": "after",
+				"pair": 15,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2476,
+				"before_usec": 20674,
+				"first": "before",
+				"pair": 16,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2377,
+				"before_usec": 20945,
+				"first": "after",
+				"pair": 17,
+				"result_count": 61
+			},
+			{
+				"after_usec": 3895,
+				"before_usec": 28293,
+				"first": "before",
+				"pair": 18,
+				"result_count": 61
+			},
+			{
+				"after_usec": 4186,
+				"before_usec": 20940,
+				"first": "after",
+				"pair": 19,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2339,
+				"before_usec": 19756,
+				"first": "before",
+				"pair": 20,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2166,
+				"before_usec": 21609,
+				"first": "after",
+				"pair": 21,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2671,
+				"before_usec": 20909,
+				"first": "before",
+				"pair": 22,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2410,
+				"before_usec": 22504,
+				"first": "after",
+				"pair": 23,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2332,
+				"before_usec": 20447,
+				"first": "before",
+				"pair": 24,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2786,
+				"before_usec": 23257,
+				"first": "after",
+				"pair": 25,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2356,
+				"before_usec": 21306,
+				"first": "before",
+				"pair": 26,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2217,
+				"before_usec": 19801,
+				"first": "after",
+				"pair": 27,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2249,
+				"before_usec": 19963,
+				"first": "before",
+				"pair": 28,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2379,
+				"before_usec": 20542,
+				"first": "after",
+				"pair": 29,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2393,
+				"before_usec": 20826,
+				"first": "before",
+				"pair": 30,
+				"result_count": 61
+			},
+			{
+				"after_usec": 2493,
+				"before_usec": 20434,
+				"first": "after",
+				"pair": 31,
+				"result_count": 61
+			}
+		],
+		"sample_pairs": 32,
+		"scope": "Radius filtering only; excludes AI scoring, candidate sorting, physics, rendering and normal-game FPS.",
+		"tile_count": 2304,
+		"unit": "microseconds_per_eight_queries",
+		"warmup_pairs": 6
+	},
+	"checks": [
+		{
+			"label": "square8 sparse/custom/negative grid: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "square8: inclusive exact radius boundary retains unsorted insertion order",
+			"ok": true
+		},
+		{
+			"label": "square8: negative radius preserves the existing radius-squared semantics",
+			"ok": true
+		},
+		{
+			"label": "square8: zero radius includes exactly coincident eligible cells",
+			"ok": true
+		},
+		{
+			"label": "square8 runtime walkability/cover overrides: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "square8: effective runtime values still determine eligibility",
+			"ok": true
+		},
+		{
+			"label": "square8 cleared overrides: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "square8 replace/register: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "square8: replacement preserves key position and registration appends",
+			"ok": true
+		},
+		{
+			"label": "square8 remove through clear/reregister: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "square8 origin/scale/topology reconfiguration: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "square8 empty after clear: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1 sparse/custom/negative grid: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1: inclusive exact radius boundary retains unsorted insertion order",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1: negative radius preserves the existing radius-squared semantics",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1: zero radius includes exactly coincident eligible cells",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1 runtime walkability/cover overrides: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1: effective runtime values still determine eligibility",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1 cleared overrides: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1 replace/register: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1: replacement preserves key position and registration appends",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1 remove through clear/reregister: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1 origin/scale/topology reconfiguration: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "hex_axial_v1 empty after clear: same tile objects and insertion order for all 28 queries",
+			"ok": true
+		},
+		{
+			"label": "Benchmark source is the actual 2304-cell saved Hex GM01",
+			"ok": true
+		},
+		{
+			"label": "Both benchmark variants use the exact same eight real enemy spawn centers",
+			"ok": true
+		},
+		{
+			"label": "actual saved map: same tile objects and insertion order for all 48 queries",
+			"ok": true
+		},
+		{
+			"label": "At least twenty alternating warm paired raw samples retain identical result counts",
+			"ok": true
+		},
+		{
+			"label": "Equivalence queries and benchmark mutate neither Registry revisions nor saved map",
+			"ok": true
+		}
+	],
+	"command_line": [
+		"--script",
+		"C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\gm01_frontier_cover_radius_verifier.gd"
+	],
+	"cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+	"display": "headless",
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"failed": 0,
+	"logical_processors": 16,
+	"passed": 29,
+	"platform": "Windows",
+	"registry_sha256": "ce6e6824c98f45e45a86011af14efbc6110b80b2158f7541f67f066cc7b703b2",
+	"schema": "gm01.cover_radius_query_pairs.v1",
+	"utc": "2026-11-02T13:24:24",
+	"verifier_sha256": "9d82e3137cb057d0e7e68bc2b69911bd7a8f3455d96a1098a3e76aacfa3bfdba"
+}

@@ -1,0 +1,279 @@
+[
+  {
+    "user_data_namespace": "SternenBuergerchen_Mission_A5_Edge_Normal_QA",
+    "isolated_user_data": true,
+    "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+    "test_project_sha256": "ef85c4c0403e5a30c91a8c7368185f99e0f404e0e17e424e94399365ec6264c9",
+    "project_restored_byte_exact": true,
+    "editor_plugins_temporarily_disabled": false,
+    "gdextensions_disabled": false,
+    "edge_walk_probe": {
+      "after_plane_positions": {
+        "player_sternenbuergerchen_01": "(-0.066513, 10.86908)",
+        "player_sternenbuergerchen_02": "(0.815395, 10.38433)",
+        "player_sternenbuergerchen_03": "(-1.206108, 10.65913)"
+      },
+      "after_world_positions": {
+        "player_sternenbuergerchen_01": "(-699.8777, 345.682)",
+        "player_sternenbuergerchen_02": "(-612.4122, 358.3914)",
+        "player_sternenbuergerchen_03": "(-759.375, 302.4966)"
+      },
+      "before_plane_positions": {
+        "player_sternenbuergerchen_01": "(5.069108, 10.05658)",
+        "player_sternenbuergerchen_02": "(6.353567, 8.57986)",
+        "player_sternenbuergerchen_03": "(4.488209, 9.515266)"
+      },
+      "before_world_positions": {
+        "player_sternenbuergerchen_01": "(-319.198, 484.0219)",
+        "player_sternenbuergerchen_02": "(-142.4828, 477.8697)",
+        "player_sternenbuergerchen_03": "(-321.7317, 448.1112)"
+      },
+      "elapsed_wall_msec": 39839,
+      "maximum_observation_wall_seconds": 60.0,
+      "no_private_actor_or_timer_writes": true,
+      "old_western_boundary_plane_x": 0.0,
+      "original_deployed_ids": [
+        "player_sternenbuergerchen_01",
+        "player_sternenbuergerchen_02",
+        "player_sternenbuergerchen_03"
+      ],
+      "passed": true,
+      "requested": true,
+      "resolution": "(1920, 1080)",
+      "scope": "Additional physical movement after the original normal start; 1280 defaults to HUD-only normal route.",
+      "simulation_tick_after": 3293,
+      "simulation_tick_before": 2205,
+      "success_rule": "All original deployed IDs remain observed; at least two positions west of x=-0.05; one within2 plane units of saved target; fixed criterion with no missing-ID relaxation, bounded by60 wall seconds.",
+      "target_grid": "(-8, 12)",
+      "target_plane": "(-2.0, 10.3923)",
+      "target_world": "(-793.1075, 268.5537)",
+      "walkable_target": true
+    },
+    "transport_details_capture": {
+      "input_path": "existing DetailsButton.pressed",
+      "opened": true,
+      "paused": false
+    },
+    "character_details_capture": {
+      "input_path": "existing portrait gui_input double_click signal",
+      "opened": true,
+      "paused": false,
+      "unit_id": "player_sternenbuergerchen_01"
+    },
+    "view": "mission",
+    "variant": "a5_map_edge",
+    "fixture": false,
+    "source_capture": true,
+    "synthetic_image_fallback": false,
+    "scaled_capture": false,
+    "logical_size": [
+      1920,
+      1080
+    ],
+    "image_size": [
+      1920,
+      1080
+    ],
+    "renderer": {
+      "display": "Windows",
+      "driver": "vulkan",
+      "method": "forward_plus"
+    },
+    "profile": {
+      "authored_ground_cell_count": 9408,
+      "authored_ground_plane_bounds": {
+        "max_x": 72.0,
+        "max_z": 62.9311790466309,
+        "min_x": -24.5,
+        "min_z": -22.2279853820801
+      },
+      "authored_ground_vertex_count": 65856,
+      "authored_visual_assets": [
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+          "sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+        },
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+          "sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+        },
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+          "sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+          "sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+          "sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/License.txt",
+          "sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+          "sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+          "sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+        }
+      ],
+      "authored_visual_layout_active": true,
+      "authored_visual_layout_id": "gm01_frontier_outpost_v1",
+      "authored_visual_owned_tile_count": 1046,
+      "dropship_model_visible": false,
+      "dropship_visual_count": 0,
+      "fog_of_war_mode": "known_terrain",
+      "fow_known_dim_tile_count": 512,
+      "fow_overlay_tile_count": 512,
+      "fow_unknown_tile_count": 0,
+      "frontier_art_enabled": true,
+      "frontier_art_override": -1,
+      "frontier_art_profile_id": "frontier_illustrated_v1",
+      "grid_topology": "hex_axial_v1",
+      "ground_matches_saved_hex_coverage": true,
+      "hex_grid_edge_style": "warm_dual_contrast",
+      "hex_grid_visible": true,
+      "hex_grid_width_world": 0.048,
+      "missing_asset_mapping_count": 0,
+      "missing_dropship_model_count": 0,
+      "read_only": true,
+      "tile_count": 9408,
+      "tile_grid_line_count": 28645,
+      "ui_sets_gameplay_truth": false,
+      "unit_model_count": 11
+    },
+    "image_sha256": "c25d13cdfb5b880971f838e56afc3f0e99843b88d0d32f757f1d622d032cf76a",
+    "source_image": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/06_go_movement.png",
+    "source_report": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup.json",
+    "normal_start_checks": 84,
+    "normal_start_failures": 0,
+    "exit_code": 0,
+    "error_count": 0,
+    "scope": "Real menu -> Homebase -> saved GM01 -> timed transport -> LZ -> deployment -> Move/GO; existing native GUI callbacks open/close transport and original-unit character details. No campaign, combat, release or performance acceptance."
+  },
+  {
+    "user_data_namespace": "SternenBuergerchen_Mission_A5_Edge_Normal_QA",
+    "isolated_user_data": true,
+    "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+    "test_project_sha256": "ef85c4c0403e5a30c91a8c7368185f99e0f404e0e17e424e94399365ec6264c9",
+    "project_restored_byte_exact": true,
+    "editor_plugins_temporarily_disabled": false,
+    "gdextensions_disabled": false,
+    "edge_walk_probe": {
+      "requested": false,
+      "resolution": "(1280, 720)",
+      "scope": "Additional physical movement after the original normal start; 1280 defaults to HUD-only normal route."
+    },
+    "transport_details_capture": {
+      "input_path": "existing DetailsButton.pressed",
+      "opened": true,
+      "paused": false
+    },
+    "character_details_capture": {
+      "input_path": "existing portrait gui_input double_click signal",
+      "opened": true,
+      "paused": false,
+      "unit_id": "player_sternenbuergerchen_01"
+    },
+    "view": "mission",
+    "variant": "a5_map_edge",
+    "fixture": false,
+    "source_capture": true,
+    "synthetic_image_fallback": false,
+    "scaled_capture": false,
+    "logical_size": [
+      1280,
+      720
+    ],
+    "image_size": [
+      1280,
+      720
+    ],
+    "renderer": {
+      "display": "Windows",
+      "driver": "vulkan",
+      "method": "forward_plus"
+    },
+    "profile": {
+      "authored_ground_cell_count": 9408,
+      "authored_ground_plane_bounds": {
+        "max_x": 72.0,
+        "max_z": 62.9311790466309,
+        "min_x": -24.5,
+        "min_z": -22.2279853820801
+      },
+      "authored_ground_vertex_count": 65856,
+      "authored_visual_assets": [
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+          "sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+        },
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+          "sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+        },
+        {
+          "path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+          "sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+          "sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+          "sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/License.txt",
+          "sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+          "sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+        },
+        {
+          "path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+          "sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+        }
+      ],
+      "authored_visual_layout_active": true,
+      "authored_visual_layout_id": "gm01_frontier_outpost_v1",
+      "authored_visual_owned_tile_count": 1046,
+      "dropship_model_visible": false,
+      "dropship_visual_count": 0,
+      "fog_of_war_mode": "known_terrain",
+      "fow_known_dim_tile_count": 512,
+      "fow_overlay_tile_count": 512,
+      "fow_unknown_tile_count": 0,
+      "frontier_art_enabled": true,
+      "frontier_art_override": -1,
+      "frontier_art_profile_id": "frontier_illustrated_v1",
+      "grid_topology": "hex_axial_v1",
+      "ground_matches_saved_hex_coverage": true,
+      "hex_grid_edge_style": "warm_dual_contrast",
+      "hex_grid_visible": true,
+      "hex_grid_width_world": 0.048,
+      "missing_asset_mapping_count": 0,
+      "missing_dropship_model_count": 0,
+      "read_only": true,
+      "tile_count": 9408,
+      "tile_grid_line_count": 28645,
+      "ui_sets_gameplay_truth": false,
+      "unit_model_count": 11
+    },
+    "image_sha256": "79b52f165da78dfce503947298d0262f065fdffcfcac59b0bf437a161ec09a7d",
+    "source_image": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup_captures/06_go_movement.png",
+    "source_report": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1280x720/startup.json",
+    "normal_start_checks": 71,
+    "normal_start_failures": 0,
+    "exit_code": 0,
+    "error_count": 0,
+    "scope": "Real menu -> Homebase -> saved GM01 -> timed transport -> LZ -> deployment -> Move/GO; existing native GUI callbacks open/close transport and original-unit character details. No campaign, combat, release or performance acceptance."
+  }
+]

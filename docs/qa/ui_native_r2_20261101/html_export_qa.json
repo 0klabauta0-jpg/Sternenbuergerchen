@@ -1,0 +1,56 @@
+{
+  "schema": "sternenbuergerchen.ui_native_html_offline_qa.v1",
+  "status": "PASS",
+  "tested_at": "2026-11-01T23:36:37.176Z",
+  "runtime": "v24.13.0",
+  "report": "docs/reports/STERNENBUERGERCHEN_UI_NATIVE_R2_2026-11-02.html",
+  "report_sha256": "a7cca37df162f2ce9706c1645ba85ee8fa4309b97e24cb80dc3b53438d8d329b",
+  "scope": "Actual full inline JavaScript executed in Node VM with a minimal synthetic DOM and mocked Blob/URL/clipboard/download APIs. No browser layout, real filesystem download, browser clipboard or Godot acceptance.",
+  "browser_status": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL",
+  "screens": 17,
+  "exported_controls": 58,
+  "hidden_records_exported": 17,
+  "checks": [
+    {
+      "name": "Final inline JavaScript compiles",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual generated report contains 17 unique capture panels and open defaults",
+      "status": "PASS"
+    },
+    {
+      "name": "All 17 capture switches preserve one visible panel, ARIA and roving tabindex",
+      "status": "PASS"
+    },
+    {
+      "name": "Tab keyboard navigation and modal image/alt/title/focus use actual listeners",
+      "status": "PASS"
+    },
+    {
+      "name": "Default JSON has contract schema, 17 open records, zero accepted checks and fixture scope",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual JSON exports every hidden status/Unicode note/asset plus free notes and active tab",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual export button generates distinct safe filenames and serializes JSON",
+      "status": "PASS"
+    },
+    {
+      "name": "Copy listener serializes state; unavailable clipboard selects JSON fallback",
+      "status": "PASS"
+    },
+    {
+      "name": "Native, prior and concept images are labelled separately and all local image paths exist",
+      "status": "PASS"
+    },
+    {
+      "name": "Source has no external dependency or network request and records template origin",
+      "status": "PASS"
+    }
+  ],
+  "repro_command": "node docs/qa/ui_native_r2_20261101/html_qa.cjs"
+}

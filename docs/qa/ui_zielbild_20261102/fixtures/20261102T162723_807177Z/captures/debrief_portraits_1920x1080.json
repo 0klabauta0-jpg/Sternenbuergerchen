@@ -1,0 +1,72 @@
+{
+	"display_driver": "Windows",
+	"fixture_data": true,
+	"fixture_summary": {
+		"award_applied": false,
+		"has_aar": false,
+		"person_count": 3
+	},
+	"fixture_variant": "portraits",
+	"image": "res://docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/debrief_portraits_1920x1080.png",
+	"image_size": [
+		1920,
+		1080
+	],
+	"logical_size": [
+		1920,
+		1080
+	],
+	"note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+	"renderer": "gl_compatibility",
+	"requested_window_size": [
+		1920,
+		1080
+	],
+	"save_error": 0,
+	"scaled_capture": false,
+	"source_capture": true,
+	"synthetic_image_fallback": false,
+	"ui_metrics": {
+		"return_card": {
+			"rect": [
+				364.0,
+				723.0,
+				1192.0,
+				106.0
+			],
+			"visible": true
+		},
+		"return_row": {
+			"rect": [
+				372.0,
+				783.0,
+				1176.0,
+				40.0
+			],
+			"visible": true
+		},
+		"return_slot": {
+			"rect": [
+				372.0,
+				783.0,
+				1176.0,
+				40.0
+			],
+			"visible": true
+		},
+		"window": {
+			"rect": [
+				340.0,
+				227.0,
+				1240.0,
+				626.0
+			],
+			"visible": true
+		}
+	},
+	"view": "debrief",
+	"viewport_size": [
+		1920.0,
+		1080.0
+	]
+}

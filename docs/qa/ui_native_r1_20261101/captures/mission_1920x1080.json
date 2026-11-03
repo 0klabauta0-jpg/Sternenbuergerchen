@@ -1,0 +1,23 @@
+{
+	"display_driver": "Windows",
+	"fixture_data": true,
+	"image": "res://docs/qa/ui_native_r1_20261101/captures/mission_1920x1080.png",
+	"image_size": [
+		1920,
+		1080
+	],
+	"note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+	"renderer": "gl_compatibility",
+	"requested_window_size": [
+		1920,
+		1080
+	],
+	"save_error": 0,
+	"source_capture": true,
+	"synthetic_image_fallback": false,
+	"view": "mission",
+	"viewport_size": [
+		1920.0,
+		1080.0
+	]
+}

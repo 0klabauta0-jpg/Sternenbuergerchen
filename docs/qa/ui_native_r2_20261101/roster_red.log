@@ -1,0 +1,58 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: Real generated roster validates: native_shell_1280_720_3799609
+PASS: Reproduction retains effective trait values below the base-roll floor
+FAIL: Actual Store saves the unmodified generated roster
+FAIL: Actual Store reloads generated roster
+PASS: Generation remains deterministic and unmodified
+FAIL: Real generated roster validates: ui_native_shell_fixture
+PASS: Reproduction retains effective trait values below the base-roll floor
+FAIL: Actual Store saves the unmodified generated roster
+FAIL: Actual Store reloads generated roster
+PASS: Generation remains deterministic and unmodified
+FAIL: accuracy effective 0.0 is valid
+FAIL: accuracy effective 0.1 is valid
+PASS: accuracy effective 1.0 is valid
+PASS: accuracy invalid/nonfinite -0.01 is rejected
+PASS: accuracy invalid/nonfinite 1.01 is rejected
+FAIL: accuracy invalid/nonfinite nan is rejected
+PASS: accuracy invalid/nonfinite inf is rejected
+FAIL: speed effective 0.0 is valid
+FAIL: speed effective 0.1 is valid
+PASS: speed effective 1.0 is valid
+PASS: speed invalid/nonfinite -0.01 is rejected
+PASS: speed invalid/nonfinite 1.01 is rejected
+FAIL: speed invalid/nonfinite nan is rejected
+PASS: speed invalid/nonfinite inf is rejected
+FAIL: leadership effective 0.0 is valid
+FAIL: leadership effective 0.1 is valid
+PASS: leadership effective 1.0 is valid
+PASS: leadership invalid/nonfinite -0.01 is rejected
+PASS: leadership invalid/nonfinite 1.01 is rejected
+FAIL: leadership invalid/nonfinite nan is rejected
+PASS: leadership invalid/nonfinite inf is rejected
+FAIL: toughness effective 0.0 is valid
+FAIL: toughness effective 0.1 is valid
+PASS: toughness effective 1.0 is valid
+PASS: toughness invalid/nonfinite -0.01 is rejected
+PASS: toughness invalid/nonfinite 1.01 is rejected
+FAIL: toughness invalid/nonfinite nan is rejected
+PASS: toughness invalid/nonfinite inf is rejected
+FAIL: awareness effective 0.0 is valid
+FAIL: awareness effective 0.1 is valid
+PASS: awareness effective 1.0 is valid
+PASS: awareness invalid/nonfinite -0.01 is rejected
+PASS: awareness invalid/nonfinite 1.01 is rejected
+FAIL: awareness invalid/nonfinite nan is rejected
+PASS: awareness invalid/nonfinite inf is rejected
+FAIL: discipline effective 0.0 is valid
+FAIL: discipline effective 0.1 is valid
+PASS: discipline effective 1.0 is valid
+PASS: discipline invalid/nonfinite -0.01 is rejected
+PASS: discipline invalid/nonfinite 1.01 is rejected
+FAIL: discipline invalid/nonfinite nan is rejected
+PASS: discipline invalid/nonfinite inf is rejected
+PASS: Missing required skill remains invalid
+PASS: Validation never mutates source profiles
+RESULTS: 30 passed, 24 failed

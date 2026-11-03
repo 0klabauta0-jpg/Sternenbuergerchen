@@ -1,0 +1,440 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+R3 DEBRIEF (1920, 1080) empty:  panel=[P: (520.0, 420.0), S: (880.0, 240.0)]
+PASS: (1920, 1080) empty: actual result window stays in the logical viewport
+PASS: (1920, 1080) empty: result window is centered
+PASS: (1920, 1080) empty: empty report is at most 980x380
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Skill Preview:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Skill Awards:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Winner team_
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Character updates:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Personnel updates:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token FTL feedback:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token COND 
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Air asset:
+PASS: (1920, 1080) empty: no missing awards are fabricated
+PASS: (1920, 1080) empty: ReturnToFOBButton remains reachable
+PASS: (1920, 1080) empty: ReturnToHomebaseButton remains reachable
+PASS: (1920, 1080) empty: presentation preserves the supplied result exactly
+PASS: (1920, 1080) empty: original-report action is explicitly reachable
+PASS: (1920, 1080) empty: details establish an input-blocking native overlay
+PASS: (1920, 1080) empty: read-only original report retains every raw field
+PASS: (1920, 1080) empty: opening details does not pause simulation
+PASS: (1920, 1080) empty: real Tab moves from original text to the modal close action
+PASS: (1920, 1080) empty: real Tab wraps inside the original-report controls
+PASS: (1920, 1080) empty: real Shift-Tab wraps inside the original-report controls
+PASS: (1920, 1080) empty: reverse traversal returns to the original text
+PASS: (1920, 1080) empty: Enter in read-only text does not route behind the modal or modify the report
+PASS: (1920, 1080) empty: Enter on modal close dismisses details without invoking a return action
+PASS: (1920, 1080) empty: details prevent a click through to the return action
+PASS: (1920, 1080) empty: screen hide closes details rather than leaving a detached popup
+PASS: (1920, 1080) empty: original return callback closes details and emits once
+PASS: (1920, 1080) empty: idle frames do not poll the layout
+R3 DEBRIEF (1920, 1080) sparse:  panel=[P: (340.0, 228.0), S: (1240.0, 624.0)]
+PASS: (1920, 1080) sparse: actual result window stays in the logical viewport
+PASS: (1920, 1080) sparse: result window is centered
+PASS: (1920, 1080) sparse: sparse report has a bounded content-sized window
+PASS: (1920, 1080) sparse: sparse window uses at most 55 percent of Full HD
+PASS: (1920, 1080) sparse: AARCard does not stretch absent or brief data
+PASS: (1920, 1080) sparse: EventsCard does not stretch absent or brief data
+PASS: (1920, 1080) sparse: FeedbackCard does not stretch absent or brief data
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Skill Preview:
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Skill Awards:
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Winner team_
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Character updates:
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Personnel updates:
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token FTL feedback:
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token COND 
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Air asset:
+PASS: (1920, 1080) sparse: preview and confirmation are explicitly distinguished
+PASS: (1920, 1080) sparse: no missing awards are fabricated
+PASS: (1920, 1080) sparse: ReturnToFOBButton remains reachable
+PASS: (1920, 1080) sparse: ReturnToHomebaseButton remains reachable
+PASS: (1920, 1080) sparse: presentation preserves the supplied result exactly
+PASS: (1920, 1080) sparse: original-report action is explicitly reachable
+PASS: (1920, 1080) sparse: details establish an input-blocking native overlay
+PASS: (1920, 1080) sparse: read-only original report retains every raw field
+PASS: (1920, 1080) sparse: opening details does not pause simulation
+PASS: (1920, 1080) sparse: real Tab moves from original text to the modal close action
+PASS: (1920, 1080) sparse: real Tab wraps inside the original-report controls
+PASS: (1920, 1080) sparse: real Shift-Tab wraps inside the original-report controls
+PASS: (1920, 1080) sparse: reverse traversal returns to the original text
+PASS: (1920, 1080) sparse: Enter in read-only text does not route behind the modal or modify the report
+PASS: (1920, 1080) sparse: Enter on modal close dismisses details without invoking a return action
+PASS: (1920, 1080) sparse: details prevent a click through to the return action
+PASS: (1920, 1080) sparse: screen hide closes details rather than leaving a detached popup
+PASS: (1920, 1080) sparse: original return callback closes details and emits once
+PASS: (1920, 1080) sparse: idle frames do not poll the layout
+R3 DEBRIEF (1920, 1080) rich:  panel=[P: (240.0, 211.0), S: (1440.0, 657.0)]
+PASS: (1920, 1080) rich: actual result window stays in the logical viewport
+PASS: (1920, 1080) rich: result window is centered
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Skill Preview:
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Skill Awards:
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Winner team_
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Character updates:
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Personnel updates:
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token FTL feedback:
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token COND 
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Air asset:
+PASS: (1920, 1080) rich: preview and confirmation are explicitly distinguished
+R3 AAR VALUE (1920, 1080) rich:  shots available=68.00 required=31.00 text=Schüsse 12
+ERROR: FAIL: (1920, 1080) rich: shots keeps its complete value before any ellipsis within actual content width
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:170)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1920, 1080) rich: shots retains the existing readable type size and line height
+ERROR: FAIL: (1920, 1080) rich: shots exposes full metric/value context through an enabled tooltip
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:172)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+R3 AAR VALUE (1920, 1080) rich:  hits available=68.00 required=25.00 text=Treffer 7
+ERROR: FAIL: (1920, 1080) rich: hits keeps its complete value before any ellipsis within actual content width
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:170)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1920, 1080) rich: hits retains the existing readable type size and line height
+ERROR: FAIL: (1920, 1080) rich: hits exposes full metric/value context through an enabled tooltip
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:172)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+R3 AAR VALUE (1920, 1080) rich:  ff available=68.00 required=35.00 text=Eigenbeschuss 1/2
+ERROR: FAIL: (1920, 1080) rich: ff keeps its complete value before any ellipsis within actual content width
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:170)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1920, 1080) rich: ff retains the existing readable type size and line height
+ERROR: FAIL: (1920, 1080) rich: ff exposes full metric/value context through an enabled tooltip
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:172)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+R3 AAR VALUE (1920, 1080) rich:  sup available=68.00 required=25.00 text=Unterdrückung 3
+ERROR: FAIL: (1920, 1080) rich: sup keeps its complete value before any ellipsis within actual content width
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:170)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1920, 1080) rich: sup retains the existing readable type size and line height
+ERROR: FAIL: (1920, 1080) rich: sup exposes full metric/value context through an enabled tooltip
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:172)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+R3 AAR VALUE (1920, 1080) rich:  extracted available=68.00 required=25.00 text=Geborgen 2
+ERROR: FAIL: (1920, 1080) rich: extracted keeps its complete value before any ellipsis within actual content width
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:170)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1920, 1080) rich: extracted retains the existing readable type size and line height
+ERROR: FAIL: (1920, 1080) rich: extracted exposes full metric/value context through an enabled tooltip
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:172)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1920, 1080) rich: many real people have a native scroll
+PASS: (1920, 1080) rich: all supplied AAR rows have a native scroll
+PASS: (1920, 1080) rich: all twenty-four supplied AAR records remain present
+PASS: (1920, 1080) rich: rich AAR can actually scroll to later records
+PASS: (1920, 1080) rich: ReturnToFOBButton remains reachable
+PASS: (1920, 1080) rich: ReturnToHomebaseButton remains reachable
+PASS: (1920, 1080) rich: presentation preserves the supplied result exactly
+PASS: (1920, 1080) rich: original-report action is explicitly reachable
+PASS: (1920, 1080) rich: details establish an input-blocking native overlay
+PASS: (1920, 1080) rich: read-only original report retains every raw field
+PASS: (1920, 1080) rich: opening details does not pause simulation
+PASS: (1920, 1080) rich: real Tab moves from original text to the modal close action
+PASS: (1920, 1080) rich: real Tab wraps inside the original-report controls
+PASS: (1920, 1080) rich: real Shift-Tab wraps inside the original-report controls
+PASS: (1920, 1080) rich: reverse traversal returns to the original text
+PASS: (1920, 1080) rich: Enter in read-only text does not route behind the modal or modify the report
+PASS: (1920, 1080) rich: Enter on modal close dismisses details without invoking a return action
+PASS: (1920, 1080) rich: details prevent a click through to the return action
+PASS: (1920, 1080) rich: screen hide closes details rather than leaving a detached popup
+PASS: (1920, 1080) rich: original return callback closes details and emits once
+PASS: (1920, 1080) rich: idle frames do not poll the layout
+R3 DEBRIEF (1920, 1080) partial:  panel=[P: (340.0, 314.0), S: (1240.0, 452.0)]
+PASS: (1920, 1080) partial: actual result window stays in the logical viewport
+PASS: (1920, 1080) partial: result window is centered
+PASS: (1920, 1080) partial: sparse report has a bounded content-sized window
+PASS: (1920, 1080) partial: sparse window uses at most 55 percent of Full HD
+PASS: (1920, 1080) partial: AARCard does not stretch absent or brief data
+PASS: (1920, 1080) partial: EventsCard does not stretch absent or brief data
+PASS: (1920, 1080) partial: FeedbackCard does not stretch absent or brief data
+PASS: (1920, 1080) partial: primary UI avoids diagnostic token Skill Preview:
+PASS: (1920, 1080) partial: primary UI avoids diagnostic token Skill Awards:
+PASS: (1920, 1080) partial: primary UI avoids diagnostic token Winner team_
+PASS: (1920, 1080) partial: primary UI avoids diagnostic token Character updates:
+PASS: (1920, 1080) partial: primary UI avoids diagnostic token Personnel updates:
+PASS: (1920, 1080) partial: primary UI avoids diagnostic token FTL feedback:
+PASS: (1920, 1080) partial: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1920, 1080) partial: primary UI avoids diagnostic token COND 
+PASS: (1920, 1080) partial: primary UI avoids diagnostic token Air asset:
+PASS: (1920, 1080) partial: preview and confirmation are explicitly distinguished
+PASS: (1920, 1080) partial: no missing awards are fabricated
+PASS: (1920, 1080) partial: missing outcome fields never become zero duration or a false objective state
+PASS: (1920, 1080) partial: incomplete report and unapplied award are not presented as confirmed
+PASS: (1920, 1080) partial: ReturnToFOBButton remains reachable
+PASS: (1920, 1080) partial: ReturnToHomebaseButton remains reachable
+PASS: (1920, 1080) partial: presentation preserves the supplied result exactly
+PASS: (1920, 1080) partial: original-report action is explicitly reachable
+PASS: (1920, 1080) partial: details establish an input-blocking native overlay
+PASS: (1920, 1080) partial: read-only original report retains every raw field
+PASS: (1920, 1080) partial: opening details does not pause simulation
+PASS: (1920, 1080) partial: real Tab moves from original text to the modal close action
+PASS: (1920, 1080) partial: real Tab wraps inside the original-report controls
+PASS: (1920, 1080) partial: real Shift-Tab wraps inside the original-report controls
+PASS: (1920, 1080) partial: reverse traversal returns to the original text
+PASS: (1920, 1080) partial: Enter in read-only text does not route behind the modal or modify the report
+PASS: (1920, 1080) partial: Enter on modal close dismisses details without invoking a return action
+PASS: (1920, 1080) partial: details prevent a click through to the return action
+PASS: (1920, 1080) partial: screen hide closes details rather than leaving a detached popup
+PASS: (1920, 1080) partial: original return callback closes details and emits once
+PASS: (1920, 1080) partial: idle frames do not poll the layout
+R3 DEBRIEF (1280, 720) empty:  panel=[P: (200.0, 240.0), S: (880.0, 240.0)]
+PASS: (1280, 720) empty: actual result window stays in the logical viewport
+PASS: (1280, 720) empty: result window is centered
+PASS: (1280, 720) empty: empty report is at most 980x380
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Skill Preview:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Skill Awards:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Winner team_
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Character updates:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Personnel updates:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token FTL feedback:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1280, 720) empty: primary UI avoids diagnostic token COND 
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Air asset:
+PASS: (1280, 720) empty: no missing awards are fabricated
+PASS: (1280, 720) empty: ReturnToFOBButton remains reachable
+PASS: (1280, 720) empty: ReturnToHomebaseButton remains reachable
+PASS: (1280, 720) empty: presentation preserves the supplied result exactly
+PASS: (1280, 720) empty: original-report action is explicitly reachable
+PASS: (1280, 720) empty: details establish an input-blocking native overlay
+PASS: (1280, 720) empty: read-only original report retains every raw field
+PASS: (1280, 720) empty: opening details does not pause simulation
+PASS: (1280, 720) empty: real Tab moves from original text to the modal close action
+PASS: (1280, 720) empty: real Tab wraps inside the original-report controls
+PASS: (1280, 720) empty: real Shift-Tab wraps inside the original-report controls
+PASS: (1280, 720) empty: reverse traversal returns to the original text
+PASS: (1280, 720) empty: Enter in read-only text does not route behind the modal or modify the report
+PASS: (1280, 720) empty: Enter on modal close dismisses details without invoking a return action
+PASS: (1280, 720) empty: details prevent a click through to the return action
+PASS: (1280, 720) empty: screen hide closes details rather than leaving a detached popup
+PASS: (1280, 720) empty: original return callback closes details and emits once
+PASS: (1280, 720) empty: idle frames do not poll the layout
+R3 DEBRIEF (1280, 720) sparse:  panel=[P: (24.0, 48.0), S: (1232.0, 624.0)]
+PASS: (1280, 720) sparse: actual result window stays in the logical viewport
+PASS: (1280, 720) sparse: result window is centered
+PASS: (1280, 720) sparse: sparse report has a bounded content-sized window
+PASS: (1280, 720) sparse: AARCard does not stretch absent or brief data
+PASS: (1280, 720) sparse: EventsCard does not stretch absent or brief data
+PASS: (1280, 720) sparse: FeedbackCard does not stretch absent or brief data
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Skill Preview:
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Skill Awards:
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Winner team_
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Character updates:
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Personnel updates:
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token FTL feedback:
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token COND 
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Air asset:
+PASS: (1280, 720) sparse: preview and confirmation are explicitly distinguished
+PASS: (1280, 720) sparse: no missing awards are fabricated
+PASS: (1280, 720) sparse: ReturnToFOBButton remains reachable
+PASS: (1280, 720) sparse: ReturnToHomebaseButton remains reachable
+PASS: (1280, 720) sparse: presentation preserves the supplied result exactly
+PASS: (1280, 720) sparse: original-report action is explicitly reachable
+PASS: (1280, 720) sparse: details establish an input-blocking native overlay
+PASS: (1280, 720) sparse: read-only original report retains every raw field
+PASS: (1280, 720) sparse: opening details does not pause simulation
+PASS: (1280, 720) sparse: real Tab moves from original text to the modal close action
+PASS: (1280, 720) sparse: real Tab wraps inside the original-report controls
+PASS: (1280, 720) sparse: real Shift-Tab wraps inside the original-report controls
+PASS: (1280, 720) sparse: reverse traversal returns to the original text
+PASS: (1280, 720) sparse: Enter in read-only text does not route behind the modal or modify the report
+PASS: (1280, 720) sparse: Enter on modal close dismisses details without invoking a return action
+PASS: (1280, 720) sparse: details prevent a click through to the return action
+PASS: (1280, 720) sparse: screen hide closes details rather than leaving a detached popup
+PASS: (1280, 720) sparse: original return callback closes details and emits once
+PASS: (1280, 720) sparse: idle frames do not poll the layout
+R3 DEBRIEF (1280, 720) rich:  panel=[P: (24.0, 31.0), S: (1232.0, 657.0)]
+PASS: (1280, 720) rich: actual result window stays in the logical viewport
+PASS: (1280, 720) rich: result window is centered
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Skill Preview:
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Skill Awards:
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Winner team_
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Character updates:
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Personnel updates:
+PASS: (1280, 720) rich: primary UI avoids diagnostic token FTL feedback:
+PASS: (1280, 720) rich: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1280, 720) rich: primary UI avoids diagnostic token COND 
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Air asset:
+PASS: (1280, 720) rich: preview and confirmation are explicitly distinguished
+R3 AAR VALUE (1280, 720) rich:  shots available=53.00 required=31.00 text=Schüsse 12
+ERROR: FAIL: (1280, 720) rich: shots keeps its complete value before any ellipsis within actual content width
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:170)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1280, 720) rich: shots retains the existing readable type size and line height
+ERROR: FAIL: (1280, 720) rich: shots exposes full metric/value context through an enabled tooltip
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:172)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+R3 AAR VALUE (1280, 720) rich:  hits available=54.00 required=25.00 text=Treffer 7
+ERROR: FAIL: (1280, 720) rich: hits keeps its complete value before any ellipsis within actual content width
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:170)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1280, 720) rich: hits retains the existing readable type size and line height
+ERROR: FAIL: (1280, 720) rich: hits exposes full metric/value context through an enabled tooltip
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:172)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+R3 AAR VALUE (1280, 720) rich:  ff available=54.00 required=35.00 text=Eigenbeschuss 1/2
+ERROR: FAIL: (1280, 720) rich: ff keeps its complete value before any ellipsis within actual content width
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:170)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1280, 720) rich: ff retains the existing readable type size and line height
+ERROR: FAIL: (1280, 720) rich: ff exposes full metric/value context through an enabled tooltip
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:172)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+R3 AAR VALUE (1280, 720) rich:  sup available=54.00 required=25.00 text=Unterdrückung 3
+ERROR: FAIL: (1280, 720) rich: sup keeps its complete value before any ellipsis within actual content width
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:170)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1280, 720) rich: sup retains the existing readable type size and line height
+ERROR: FAIL: (1280, 720) rich: sup exposes full metric/value context through an enabled tooltip
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:172)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+R3 AAR VALUE (1280, 720) rich:  extracted available=54.00 required=25.00 text=Geborgen 2
+ERROR: FAIL: (1280, 720) rich: extracted keeps its complete value before any ellipsis within actual content width
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:170)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1280, 720) rich: extracted retains the existing readable type size and line height
+ERROR: FAIL: (1280, 720) rich: extracted exposes full metric/value context through an enabled tooltip
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:217)
+       [1] _check_aar_chip_values (res://scripts/tests/ui_native_r3_debrief_verifier.gd:172)
+       [2] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:58)
+       [3] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:195)
+PASS: (1280, 720) rich: many real people have a native scroll
+PASS: (1280, 720) rich: all supplied AAR rows have a native scroll
+PASS: (1280, 720) rich: all twenty-four supplied AAR records remain present
+PASS: (1280, 720) rich: rich AAR can actually scroll to later records
+PASS: (1280, 720) rich: ReturnToFOBButton remains reachable
+PASS: (1280, 720) rich: ReturnToHomebaseButton remains reachable
+PASS: (1280, 720) rich: presentation preserves the supplied result exactly
+PASS: (1280, 720) rich: original-report action is explicitly reachable
+PASS: (1280, 720) rich: details establish an input-blocking native overlay
+PASS: (1280, 720) rich: read-only original report retains every raw field
+PASS: (1280, 720) rich: opening details does not pause simulation
+PASS: (1280, 720) rich: real Tab moves from original text to the modal close action
+PASS: (1280, 720) rich: real Tab wraps inside the original-report controls
+PASS: (1280, 720) rich: real Shift-Tab wraps inside the original-report controls
+PASS: (1280, 720) rich: reverse traversal returns to the original text
+PASS: (1280, 720) rich: Enter in read-only text does not route behind the modal or modify the report
+PASS: (1280, 720) rich: Enter on modal close dismisses details without invoking a return action
+PASS: (1280, 720) rich: details prevent a click through to the return action
+PASS: (1280, 720) rich: screen hide closes details rather than leaving a detached popup
+PASS: (1280, 720) rich: original return callback closes details and emits once
+PASS: (1280, 720) rich: idle frames do not poll the layout
+R3 DEBRIEF (1280, 720) partial:  panel=[P: (24.0, 134.0), S: (1232.0, 452.0)]
+PASS: (1280, 720) partial: actual result window stays in the logical viewport
+PASS: (1280, 720) partial: result window is centered
+PASS: (1280, 720) partial: sparse report has a bounded content-sized window
+PASS: (1280, 720) partial: AARCard does not stretch absent or brief data
+PASS: (1280, 720) partial: EventsCard does not stretch absent or brief data
+PASS: (1280, 720) partial: FeedbackCard does not stretch absent or brief data
+PASS: (1280, 720) partial: primary UI avoids diagnostic token Skill Preview:
+PASS: (1280, 720) partial: primary UI avoids diagnostic token Skill Awards:
+PASS: (1280, 720) partial: primary UI avoids diagnostic token Winner team_
+PASS: (1280, 720) partial: primary UI avoids diagnostic token Character updates:
+PASS: (1280, 720) partial: primary UI avoids diagnostic token Personnel updates:
+PASS: (1280, 720) partial: primary UI avoids diagnostic token FTL feedback:
+PASS: (1280, 720) partial: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1280, 720) partial: primary UI avoids diagnostic token COND 
+PASS: (1280, 720) partial: primary UI avoids diagnostic token Air asset:
+PASS: (1280, 720) partial: preview and confirmation are explicitly distinguished
+PASS: (1280, 720) partial: no missing awards are fabricated
+PASS: (1280, 720) partial: missing outcome fields never become zero duration or a false objective state
+PASS: (1280, 720) partial: incomplete report and unapplied award are not presented as confirmed
+PASS: (1280, 720) partial: ReturnToFOBButton remains reachable
+PASS: (1280, 720) partial: ReturnToHomebaseButton remains reachable
+PASS: (1280, 720) partial: presentation preserves the supplied result exactly
+PASS: (1280, 720) partial: original-report action is explicitly reachable
+PASS: (1280, 720) partial: details establish an input-blocking native overlay
+PASS: (1280, 720) partial: read-only original report retains every raw field
+PASS: (1280, 720) partial: opening details does not pause simulation
+PASS: (1280, 720) partial: real Tab moves from original text to the modal close action
+PASS: (1280, 720) partial: real Tab wraps inside the original-report controls
+PASS: (1280, 720) partial: real Shift-Tab wraps inside the original-report controls
+PASS: (1280, 720) partial: reverse traversal returns to the original text
+PASS: (1280, 720) partial: Enter in read-only text does not route behind the modal or modify the report
+PASS: (1280, 720) partial: Enter on modal close dismisses details without invoking a return action
+PASS: (1280, 720) partial: details prevent a click through to the return action
+PASS: (1280, 720) partial: screen hide closes details rather than leaving a detached popup
+PASS: (1280, 720) partial: original return callback closes details and emits once
+PASS: (1280, 720) partial: idle frames do not poll the layout
+RESULTS: 278 passed, 20 failed

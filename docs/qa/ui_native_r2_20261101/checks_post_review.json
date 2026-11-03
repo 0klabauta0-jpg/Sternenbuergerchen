@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "task_227",
+      "script": "res://scripts/tests/task_227_main_menu_multiplayer_host_join_lobby_flow.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_300",
+      "script": "res://scripts/tests/task_300_app_shell_return_to_main_menu_navigation.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task588",
+      "script": "res://scripts/tests/task_588_debrief_aar_data_bridge.gd",
+      "success_marker": "TASK_588: ALL PASSED",
+      "timeout": 100
+    },
+    {
+      "name": "task593",
+      "script": "res://scripts/tests/task_593_skill_progress_award_contract.gd",
+      "success_marker": "TASK_593: ALL PASSED",
+      "timeout": 100
+    },
+    {
+      "name": "lobby_r2",
+      "script": "res://scripts/tests/ui_native_r2_lobby_actions_verifier.gd",
+      "success_marker": "PASS: native R2 lobby actions",
+      "timeout": 100
+    },
+    {
+      "name": "task1106",
+      "script": "res://scripts/tests/task_1106_coop_lobby_layout_hardening.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task228",
+      "script": "res://scripts/tests/task_228_multiplayer_editor_map_manifest_download_consent.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 100
+    }
+  ]
+}

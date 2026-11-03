@@ -1,0 +1,93 @@
+[
+  {
+    "view": "mission",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "mission",
+    "size": "1280x720",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "main_menu",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "settings",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "settings",
+    "size": "1280x720",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "teameditor",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "lobby",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "characters",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "homebase",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "fob",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "debrief",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "editor",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  },
+  {
+    "view": "escape",
+    "size": "1920x1080",
+    "status": "PASS",
+    "exit_code": 0,
+    "errors": []
+  }
+]

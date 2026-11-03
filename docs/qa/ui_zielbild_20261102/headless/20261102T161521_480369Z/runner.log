@@ -1,0 +1,9 @@
+  hex_fow: PASS
+  hex_rebuild: PASS
+  ui_a5: PASS
+  shell_layouts: PASS
+  r2_preparation: PASS
+  r2_mission_feedback: PASS
+  r3_readout: PASS
+  r4_cutlass: PASS
+8/8 checks passed; report: C:\Users\bjoer\.codex\worktrees\ui-entwuerfe-20261101\SternenBuergerchen\docs\qa\ui_zielbild_20261102\headless\20261102T161521_480369Z\checks\20261102T161521Z-pid142392\metadata\report.json

@@ -73,6 +73,8 @@ func _test_normal_singleplayer_click_homebase_guard() -> void:
 		return
 
 	var snapshot: Dictionary = Dictionary(scene.call("get_release_singleplayer_normal_click_homebase_guard_snapshot"))
+	var homebase := scene.get_node_or_null("HomebaseScreen") as Control
+	var start_button: Button = homebase.get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button if homebase != null else null
 	_assert(String(snapshot.get("schema", "")) == "sternenbuergerchen.release_singleplayer_normal_click_homebase_guard.v1", "Snapshot schema is stable")
 	_assert(String(snapshot.get("task_id", "")) == "BUGFIX_release_singleplayer_normal_click_homebase_guard", "Snapshot task id is stable")
 	_assert(String(snapshot.get("status", "")) == "pass", "Normal-click Homebase guard passes")
@@ -86,9 +88,11 @@ func _test_normal_singleplayer_click_homebase_guard() -> void:
 	_assert(int(snapshot.get("payload_operator_count", 0)) >= 2, "Normal click has payload operators")
 	_assert(int(snapshot.get("boarded_operator_count", 0)) >= int(snapshot.get("payload_operator_count", 0)), "Normal click has boarded payload")
 	_assert(String(snapshot.get("readiness_overall_state", "")) == "ready", "Normal click readiness is ready")
-	_assert(String(snapshot.get("start_button_text", "")) == "Start Mission", "Normal click shows Start Mission")
+	_assert(String(snapshot.get("start_button_text", "")) == "Einsatz starten", "Normal click snapshot names the current German start action")
+	_assert(start_button != null and start_button.text == "Einsatz starten" and not start_button.disabled and start_button.is_visible_in_tree(), "Normal click exposes the actual enabled and visible German start button")
 	_assert(not bool(snapshot.get("start_button_disabled", true)), "Normal click enables Start Mission")
-	_assert(String(snapshot.get("mission_team_limit_text", "")).begins_with("Mission payload:"), "Normal click names Homebase Direct payload instead of misleading mission slots")
+	var payload_text := String(snapshot.get("mission_team_limit_text", ""))
+	_assert(payload_text.begins_with("Einsatz:") and payload_text.contains("Kräfte") and payload_text.contains("Trupps") and payload_text.contains("Piloten"), "Normal click names actual Homebase Direct operators, fireteams and pilots in the current UI")
 	_assert(String(snapshot.get("mission_transfer_text", "")).contains("Direct sortie"), "Normal click transfer text names direct sortie")
 	_assert(String(snapshot.get("mission_summary_text", "")).contains("Start Mission"), "Normal click summary names the next start action")
 	_assert(not String(snapshot.get("mission_summary_text", "")).contains("send the team to FOB"), "Normal click summary does not tell player to send team to FOB")

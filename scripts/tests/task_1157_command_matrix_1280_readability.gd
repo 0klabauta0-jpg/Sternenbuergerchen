@@ -1,6 +1,7 @@
 extends SceneTree
 
 const DRILL_SCENE := preload("res://scenes/tests/fireteam_command_drill_map.tscn")
+const A5_THEME := preload("res://scripts/ui/tactical_ui_theme.gd")
 const GRID_PATH := "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"
 
 var _checks := 0
@@ -19,13 +20,13 @@ func _initialize() -> void:
 	_check(grid != null and grid.columns == 5, "Command matrix keeps five stable columns")
 	_check(grid != null and grid.get_child_count() >= 20, "Command matrix keeps all command slots")
 
-	var primary_labels := {"MoveButton": "BW", "TakeButton": "NM", "HoldButton": "HL", "FlankButton": "FL", "TargetButton": "ZL"}
+	var primary_labels := {"MoveButton": "Bewegen", "TakeButton": "Nehmen", "HoldButton": "Halten", "FlankButton": "Flanke", "TargetButton": "Ziel"}
 	for button_name in primary_labels:
 		var button := scene.get_node_or_null("%s/%s" % [GRID_PATH, button_name]) as Button
 		var font_size := button.get_theme_font_size("font_size") if button != null else -1
 		_check(button != null and font_size >= 12, "%s is readable at 1280 (font=%d)" % [button_name, font_size])
 		_check(button != null and button.icon != null, "%s keeps its tactical icon" % button_name)
-		_check(button != null and button.text == String(primary_labels[button_name]), "%s keeps its German player-language code" % button_name)
+		_check(button != null and button.text == String(primary_labels[button_name]), "%s uses its full German A5 command label" % button_name)
 		var normal_style := button.get_theme_stylebox("normal") if button != null else null
 		_check(normal_style != null and normal_style.content_margin_left <= 4.0 and normal_style.content_margin_right <= 4.0, "%s reserves enough width for icon and code" % button_name)
 
@@ -36,7 +37,14 @@ func _initialize() -> void:
 
 	var go_button := scene.get_node_or_null("%s/GoCommandMatrixButton" % GRID_PATH) as Button
 	var go_font_size := go_button.get_theme_font_size("font_size") if go_button != null else -1
-	_check(go_button != null and go_font_size >= 13, "GO keeps the strongest readable label (font=%d)" % go_font_size)
+	var go_style := go_button.get_theme_stylebox("normal") as StyleBoxFlat if go_button != null else null
+	var go_fits := false
+	if go_style != null:
+		var font := go_button.get_theme_font("font")
+		var usable := go_button.size - go_style.get_minimum_size()
+		var longest := maxf(font.get_string_size("Plan", HORIZONTAL_ALIGNMENT_LEFT, -1, go_font_size).x, font.get_string_size("ausführen", HORIZONTAL_ALIGNMENT_LEFT, -1, go_font_size).x)
+		go_fits = longest <= usable.x and 2.0 * font.get_height(go_font_size) <= usable.y
+	_check(go_button != null and go_button.is_visible_in_tree() and go_font_size >= 12 and go_button.text == "Plan\nausführen" and go_fits and go_style.bg_color.is_equal_approx(A5_THEME.COLOR_ACCENT), "The full two-line GO label fits its accented A5 tile (font=%d)" % go_font_size)
 
 	var marker_count := 0
 	var visible_marker_count := 0

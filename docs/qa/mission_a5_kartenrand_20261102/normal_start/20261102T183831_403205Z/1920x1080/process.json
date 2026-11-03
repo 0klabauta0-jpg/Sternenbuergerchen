@@ -1,0 +1,33 @@
+{
+  "user_data_namespace": "SternenBuergerchen_Mission_A5_Edge_Normal_QA",
+  "isolated_user_data": true,
+  "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "test_project_sha256": "ef85c4c0403e5a30c91a8c7368185f99e0f404e0e17e424e94399365ec6264c9",
+  "project_restored_byte_exact": true,
+  "editor_plugins_temporarily_disabled": false,
+  "gdextensions_disabled": false,
+  "command": [
+    "godot_console",
+    "--verbose",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+    "--rendering-method",
+    "forward_plus",
+    "--rendering-driver",
+    "vulkan",
+    "--audio-driver",
+    "Dummy",
+    "--script",
+    "res://scripts/tests/mission_a5_kartenrand_capture.gd",
+    "--",
+    "--ui-size=1920x1080",
+    "--startup-timeout-seconds=150",
+    "--evidence-output=res://docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T183831_403205Z/1920x1080/startup.json",
+    "--edge-walk=auto"
+  ],
+  "logical_size": "1920x1080",
+  "driver": "vulkan",
+  "exit_code": 1,
+  "error_count": 0,
+  "error_lines": []
+}

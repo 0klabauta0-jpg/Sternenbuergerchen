@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "task_181",
+      "script": "res://scripts/tests/task_181_drop_light_fixed_window_audit_verifier.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "preparation_r2",
+      "script": "res://scripts/tests/ui_native_r2_preparation_verifier.gd",
+      "success_marker": "PASS: native R2 preparation layout and callbacks",
+      "timeout": 100
+    },
+    {
+      "name": "lobby_r2",
+      "script": "res://scripts/tests/ui_native_r2_lobby_actions_verifier.gd",
+      "success_marker": "PASS: native R2 lobby actions",
+      "timeout": 100
+    }
+  ]
+}

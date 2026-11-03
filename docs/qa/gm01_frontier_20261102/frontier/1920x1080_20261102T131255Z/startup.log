@@ -1,0 +1,66 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Project normal entry is MainMenu
+PASS: Normal main menu scene loads
+PASS: MainMenu displays a background texture
+PASS: MainMenu background comes from the existing catalog
+PASS: Normal MainMenu catalog selects the Frontier start image
+FRONTIER_STARTUP_STAGE main_menu
+PASS: Capture target is new: 01_main_menu
+PASS: Native capture saved: 01_main_menu
+PASS: Real Singleplayer button is actionable
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:202)
+       [3] _capture (res://scripts/tests/gm01_frontier_normal_capture.gd:30)
+       [4] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3900)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3706)
+       [2] _run (res://scripts/tests/frontier_main_startup_verifier.gd:202)
+       [3] _capture (res://scripts/tests/gm01_frontier_normal_capture.gd:30)
+       [4] _capture (res://scripts/tests/frontier_main_startup_verifier.gd:81)
+PASS: Normal Singleplayer opens visible Homebase
+PASS: Original normal grid_sweep mission remains selected
+PASS: Normal Homebase bootstrap provides a playable team
+PASS: Normal Homebase has a craft and pilot
+PASS: Normal Homebase payload is ready without fixture mutation
+FRONTIER_STARTUP_STAGE homebase
+PASS: Capture target is new: 02_homebase
+PASS: Native capture saved: 02_homebase
+PASS: Normal Homebase launch command is accepted
+PASS: Normal mission owns TacticalController, Primary3DView and SimulationRoot
+PASS: Menu launch reaches the regular mission scene
+PASS: Handoff retains the original default mission
+PASS: Normal Homebase-to-Mission handoff passes
+PASS: Default mission enables the Frontier visual profile
+PASS: Frontier activation comes from normal map data without a test override
+PASS: Rebuilt default mission uses its saved, user-requested Hex topology
+PASS: Regular renderer remains a read-only state consumer
+PASS: Original default map JSON is available
+PASS: Default mission retains its authored Alpha insertion marker
+PASS: Normal mission exposes the authoritative terrain registry
+PASS: Authored Alpha insertion marker is on walkable terrain
+FRONTIER_STARTUP_STAGE mission_started
+PASS: Capture target is new: 03_default_mission
+PASS: Native capture saved: 03_default_mission
+PASS: Existing player profile, generator and unit identities remain unchanged
+ERROR: Lambda capture at index 0 was freed. Passed "null" instead.
+   at: call (modules/gdscript/gdscript_lambda_callable.cpp:242)
+   GDScript backtrace (most recent call first):
+       [0] _wait_until (res://scripts/tests/frontier_main_startup_verifier.gd:57)
+FRONTIER_MAIN_STARTUP {"evidence_output":"res://docs/qa/gm01_frontier_20261102/frontier/1920x1080_20261102T131255Z/startup.json","failed":0,"passed":31,"stages":3}
+ERROR: 1 RID allocations of type 'N10RendererRD14TextureStorage7TextureE' were leaked at exit.
+WARNING: 2 RIDs of type "Texture" were leaked.
+   at: finalize (servers/rendering/rendering_device.cpp:7505)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2641)
+ERROR: 3 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

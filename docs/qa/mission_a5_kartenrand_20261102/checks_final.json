@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "checks": [
+    {"name": "map_compat_cover", "script": "res://scripts/tests/gm01_frontier_cover_radius_verifier.gd", "success_marker": "GM01_FRONTIER_COVER_RADIUS_ALL_PASS", "timeout": 150},
+    {"name": "map_compat_start", "script": "res://scripts/tests/frontier_start_graphics_verifier.gd", "success_marker": "FRONTIER_START_GRAPHICS_ALL_PASS", "timeout": 150},
+    {"name": "stable_astar_frontier", "script": "res://scripts/tests/gm01_stable_astar_frontier_verifier.gd", "success_marker": "GM01_STABLE_ASTAR_FRONTIER_ALL_PASS", "timeout": 150},
+    {"name": "hex_hpa_pruning", "script": "res://scripts/tests/gm01_hex_hpa_pruning_verifier.gd", "success_marker": "GM01_HEX_HPA_PRUNING_ALL_PASS", "timeout": 150},
+    {"name": "map_edge", "script": "res://scripts/tests/gm01_frontier_map_edge_verifier.gd", "success_marker": "GM01_FRONTIER_MAP_EDGE_ALL_PASS", "timeout": 150},
+    {"name": "hex_rebuild", "script": "res://scripts/tests/gm01_frontier_rebuild_verifier.gd", "success_marker": "GM01_FRONTIER_REBUILD_RESULT", "timeout": 150},
+    {"name": "hex_fow", "script": "res://scripts/tests/gm01_frontier_hex_fow_verifier.gd", "success_marker": "GM01_HEX_FOW_ALL_PASS", "timeout": 150},
+    {"name": "hex_minimap", "script": "res://scripts/tests/gm01_frontier_hex_minimap_verifier.gd", "success_marker": "GM01_FRONTIER_HEX_MINIMAP_ALL_PASS", "timeout": 150},
+    {"name": "ui_a5", "script": "res://scripts/tests/ui_a5_native_hud_verifier.gd", "success_marker": "PASS: native A5 HUD", "timeout": 100},
+    {"name": "ui_reference_groups", "script": "res://scripts/tests/ui_a5_reference_groups_verifier.gd", "success_marker": "A5_REFERENCE_GROUPS_ALL_PASS", "timeout": 100},
+    {"name": "r2_mission_feedback", "script": "res://scripts/tests/ui_mission_r2_verifier.gd", "success_marker": "PASS: native mission R2", "timeout": 100},
+    {"name": "r3_readout", "script": "res://scripts/tests/ui_native_r3_mission_readout_verifier.gd", "success_marker": "PASS: native mission R3 readout", "timeout": 100},
+    {"name": "cutlass_identity", "script": "res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd", "success_marker": "PASS: native R4 Cutlass identity", "timeout": 100}
+  ]
+}

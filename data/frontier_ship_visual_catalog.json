@@ -3,7 +3,10 @@
   "catalog_id": "frontier_ships_astra_ref03_v1",
   "visual_only": true,
   "source_manifest": "res://art/frontier_illustrated_20261101/ships/pass05_astra_ultra/refinement_03/manifest.json",
-  "roles": {"dropship": "cutlass_01", "fighter_reference": "buccaneer_01"},
+  "roles": {
+    "dropship": "cutlass_01",
+    "fighter_reference": "buccaneer_01"
+  },
   "ships": {
     "cutlass_01": {
       "asset_id": "cutlass_01",
@@ -15,13 +18,24 @@
       "root_rotation_y_degrees": 0.0,
       "forward_axis": "+Z",
       "ground_pivot_y": 0.0,
-      "bounds_min": [-6.0391693115234375, 0.0, -8.0],
-      "bounds_size": [12.078338623046875, 5.7466325759887695, 16.0],
+      "bounds_min": [
+        -6.0391693115234375,
+        0.0,
+        -8.0
+      ],
+      "bounds_size": [
+        12.078338623046875,
+        5.7466325759887695,
+        16.0
+      ],
       "triangles": 22496,
       "materials": 8,
       "triangle_budget": 25000,
       "canonical_star_citizen_dimensions": false,
-      "geometry_status": "user-directed four-engine stylized reconstruction"
+      "geometry_status": "user-directed four-engine stylized reconstruction",
+      "ui_preview_path": "res://Assets/curated/ui_native_r4/cutlass_ref03_preview.png",
+      "ui_preview_model_sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+      "ui_preview_metadata_path": "res://Assets/curated/ui_native_r4/cutlass_ref03_preview.json"
     },
     "buccaneer_01": {
       "asset_id": "buccaneer_01",
@@ -33,8 +47,16 @@
       "root_rotation_y_degrees": 0.0,
       "forward_axis": "+Z",
       "ground_pivot_y": 0.0,
-      "bounds_min": [-5.878890514373779, 0.0, -5.499998569488525],
-      "bounds_size": [11.757781028747559, 4.119763374328613, 10.999998569488525],
+      "bounds_min": [
+        -5.878890514373779,
+        0.0,
+        -5.499998569488525
+      ],
+      "bounds_size": [
+        11.757781028747559,
+        4.119763374328613,
+        10.999998569488525
+      ],
       "triangles": 19672,
       "materials": 8,
       "triangle_budget": 25000,

@@ -1,0 +1,75 @@
+[
+  {
+    "view": "mission",
+    "exit_code": 0,
+    "status": "PASS",
+    "elapsed": 11.5,
+    "errors": []
+  },
+  {
+    "view": "homebase",
+    "exit_code": 0,
+    "status": "PASS",
+    "elapsed": 15.53,
+    "errors": []
+  },
+  {
+    "view": "fob",
+    "exit_code": 0,
+    "status": "PASS",
+    "elapsed": 15.6,
+    "errors": []
+  },
+  {
+    "view": "lobby",
+    "exit_code": 0,
+    "status": "PASS",
+    "elapsed": 7.77,
+    "errors": []
+  },
+  {
+    "view": "settings",
+    "exit_code": 0,
+    "status": "PASS",
+    "elapsed": 4.5,
+    "errors": []
+  },
+  {
+    "view": "characters",
+    "exit_code": 0,
+    "status": "FAIL",
+    "elapsed": 2.65,
+    "errors": [
+      "SCRIPT ERROR: Invalid call. Nonexistent function 'has_method' in base 'Dictionary'.",
+      "SCRIPT ERROR: Invalid call. Nonexistent function 'has_method' in base 'Dictionary'."
+    ]
+  },
+  {
+    "view": "teameditor",
+    "exit_code": 0,
+    "status": "PASS",
+    "elapsed": 5.73,
+    "errors": []
+  },
+  {
+    "view": "debrief",
+    "exit_code": 0,
+    "status": "PASS",
+    "elapsed": 2.0,
+    "errors": []
+  },
+  {
+    "view": "editor",
+    "exit_code": 0,
+    "status": "PASS",
+    "elapsed": 7.43,
+    "errors": []
+  },
+  {
+    "view": "escape",
+    "exit_code": 0,
+    "status": "PASS",
+    "elapsed": 4.3,
+    "errors": []
+  }
+]

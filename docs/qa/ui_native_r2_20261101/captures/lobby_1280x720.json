@@ -1,0 +1,28 @@
+{
+	"display_driver": "Windows",
+	"fixture_data": true,
+	"image": "res://docs/qa/ui_native_r2_20261101/captures/lobby_1280x720.png",
+	"image_size": [
+		1280,
+		720
+	],
+	"logical_size": [
+		1280,
+		720
+	],
+	"note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+	"renderer": "gl_compatibility",
+	"requested_window_size": [
+		1280,
+		720
+	],
+	"save_error": 0,
+	"scaled_capture": false,
+	"source_capture": true,
+	"synthetic_image_fallback": false,
+	"view": "lobby",
+	"viewport_size": [
+		1280.0,
+		720.0
+	]
+}

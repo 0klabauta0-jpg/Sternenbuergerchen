@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "theme",
+      "script": "res://scripts/tests/ui_native_design_system_verifier.gd",
+      "success_marker": "PASS: native UI design system",
+      "timeout": 100
+    },
+    {
+      "name": "native_a5",
+      "script": "res://scripts/tests/ui_a5_native_hud_verifier.gd",
+      "success_marker": "PASS: native A5 HUD",
+      "timeout": 100
+    },
+    {
+      "name": "native_shell",
+      "script": "res://scripts/tests/ui_native_shell_layout_verifier.gd",
+      "success_marker": "PASS: native shell layout",
+      "timeout": 100
+    },
+    {
+      "name": "task_361",
+      "script": "res://scripts/tests/task_361_npc_compact_card_readonly_profile_reference_contract.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_226",
+      "script": "res://scripts/tests/task_226_main_menu_settings_shell_display_audio_input_gameplay.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_227",
+      "script": "res://scripts/tests/task_227_main_menu_multiplayer_host_join_lobby_flow.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_300",
+      "script": "res://scripts/tests/task_300_app_shell_return_to_main_menu_navigation.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_275",
+      "script": "res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_628",
+      "script": "res://scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_181",
+      "script": "res://scripts/tests/task_181_drop_light_fixed_window_audit_verifier.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_312",
+      "script": "res://scripts/tests/task_312_dropship_command_matrix_lz_go_layout.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_315",
+      "script": "res://scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_406",
+      "script": "res://scripts/tests/task_406_mission_lz_click_input_guard.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_571",
+      "script": "res://scripts/tests/task_571_fire_rule_controls_readability_polish.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_1043",
+      "script": "res://scripts/tests/task_1043_mission_hud_hotpath_event_log_guard.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "task_1044",
+      "script": "res://scripts/tests/task_1044_mission_hud_runtime_surface_guard.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    }
+  ]
+}

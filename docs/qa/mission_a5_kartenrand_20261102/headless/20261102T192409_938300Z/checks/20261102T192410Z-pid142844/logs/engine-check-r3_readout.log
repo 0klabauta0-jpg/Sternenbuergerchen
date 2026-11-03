@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+A5_R3_STAGE projection
+A5_R3_STAGE scene1920
+A5_R3_STAGE create (1920, 1080)
+A5_R3_STAGE detached_hydrated (1920, 1080)
+A5_R3_STAGE ready (1920, 1080)
+A5_R3_STAGE open_details (1920, 1080)
+A5_R3_TIME details_closed (1920, 1080) 7487
+A5_R3_TIME refreshed (1920, 1080) 7537
+A5_R3_TIME stance1 (1920, 1080) 8081
+A5_R3_TIME go (1920, 1080) 8719
+A5_R3_TIME stance2 (1920, 1080) 12739
+A5_R3_TIME completed_return (1920, 1080) 12743
+A5_R3_TIME freed (1920, 1080) 12829
+A5_R3_STAGE create (1280, 720)
+A5_R3_STAGE detached_hydrated (1280, 720)
+A5_R3_STAGE ready (1280, 720)
+A5_R3_STAGE open_details (1280, 720)
+A5_R3_TIME details_closed (1280, 720) 15341
+A5_R3_TIME refreshed (1280, 720) 15398
+A5_R3_TIME stance1 (1280, 720) 15945
+A5_R3_TIME go (1280, 720) 16686
+A5_R3_TIME stance2 (1280, 720) 20965
+A5_R3_TIME completed_return (1280, 720) 20968
+A5_R3_TIME freed (1280, 720) 21061
+Mission R3 readout: 116 checks, 0 failures
+PASS: native mission R3 readout

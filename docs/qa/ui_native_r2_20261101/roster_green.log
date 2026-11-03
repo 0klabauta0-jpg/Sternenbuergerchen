@@ -1,0 +1,109 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Real generated roster validates: native_shell_1280_720_3799609
+PASS: Reproduction retains effective trait values below the base-roll floor
+PASS: Actual Store saves the unmodified generated roster
+PASS: Actual Store reloads generated roster
+PASS: Roundtrip retains all people
+PASS: JSON roundtrip retains every effective skill within float precision, person 0
+PASS: JSON roundtrip retains every effective skill within float precision, person 1
+PASS: JSON roundtrip retains every effective skill within float precision, person 2
+PASS: JSON roundtrip retains every effective skill within float precision, person 3
+PASS: JSON roundtrip retains every effective skill within float precision, person 4
+PASS: JSON roundtrip retains every effective skill within float precision, person 5
+PASS: JSON roundtrip retains every effective skill within float precision, person 6
+PASS: JSON roundtrip retains every effective skill within float precision, person 7
+PASS: JSON roundtrip retains every effective skill within float precision, person 8
+PASS: JSON roundtrip retains every effective skill within float precision, person 9
+PASS: JSON roundtrip retains every effective skill within float precision, person 10
+PASS: JSON roundtrip retains every effective skill within float precision, person 11
+PASS: JSON roundtrip retains every effective skill within float precision, person 12
+PASS: JSON roundtrip retains every effective skill within float precision, person 13
+PASS: JSON roundtrip retains every effective skill within float precision, person 14
+PASS: JSON roundtrip retains every effective skill within float precision, person 15
+PASS: JSON roundtrip retains every effective skill within float precision, person 16
+PASS: JSON roundtrip retains every effective skill within float precision, person 17
+PASS: JSON roundtrip retains every effective skill within float precision, person 18
+PASS: JSON roundtrip retains every effective skill within float precision, person 19
+PASS: JSON roundtrip retains every effective skill within float precision, person 20
+PASS: JSON roundtrip retains every effective skill within float precision, person 21
+PASS: JSON roundtrip retains every effective skill within float precision, person 22
+PASS: JSON roundtrip retains every effective skill within float precision, person 23
+PASS: Generation remains deterministic and unmodified
+PASS: Real generated roster validates: ui_native_shell_fixture
+PASS: Reproduction retains effective trait values below the base-roll floor
+PASS: Actual Store saves the unmodified generated roster
+PASS: Actual Store reloads generated roster
+PASS: Roundtrip retains all people
+PASS: JSON roundtrip retains every effective skill within float precision, person 0
+PASS: JSON roundtrip retains every effective skill within float precision, person 1
+PASS: JSON roundtrip retains every effective skill within float precision, person 2
+PASS: JSON roundtrip retains every effective skill within float precision, person 3
+PASS: JSON roundtrip retains every effective skill within float precision, person 4
+PASS: JSON roundtrip retains every effective skill within float precision, person 5
+PASS: JSON roundtrip retains every effective skill within float precision, person 6
+PASS: JSON roundtrip retains every effective skill within float precision, person 7
+PASS: JSON roundtrip retains every effective skill within float precision, person 8
+PASS: JSON roundtrip retains every effective skill within float precision, person 9
+PASS: JSON roundtrip retains every effective skill within float precision, person 10
+PASS: JSON roundtrip retains every effective skill within float precision, person 11
+PASS: JSON roundtrip retains every effective skill within float precision, person 12
+PASS: JSON roundtrip retains every effective skill within float precision, person 13
+PASS: JSON roundtrip retains every effective skill within float precision, person 14
+PASS: JSON roundtrip retains every effective skill within float precision, person 15
+PASS: JSON roundtrip retains every effective skill within float precision, person 16
+PASS: JSON roundtrip retains every effective skill within float precision, person 17
+PASS: JSON roundtrip retains every effective skill within float precision, person 18
+PASS: JSON roundtrip retains every effective skill within float precision, person 19
+PASS: JSON roundtrip retains every effective skill within float precision, person 20
+PASS: JSON roundtrip retains every effective skill within float precision, person 21
+PASS: JSON roundtrip retains every effective skill within float precision, person 22
+PASS: JSON roundtrip retains every effective skill within float precision, person 23
+PASS: Generation remains deterministic and unmodified
+PASS: accuracy effective 0.0 is valid
+PASS: accuracy effective 0.1 is valid
+PASS: accuracy effective 1.0 is valid
+PASS: accuracy invalid/nonfinite -0.01 is rejected
+PASS: accuracy invalid/nonfinite 1.01 is rejected
+PASS: accuracy invalid/nonfinite nan is rejected
+PASS: accuracy invalid/nonfinite inf is rejected
+PASS: speed effective 0.0 is valid
+PASS: speed effective 0.1 is valid
+PASS: speed effective 1.0 is valid
+PASS: speed invalid/nonfinite -0.01 is rejected
+PASS: speed invalid/nonfinite 1.01 is rejected
+PASS: speed invalid/nonfinite nan is rejected
+PASS: speed invalid/nonfinite inf is rejected
+PASS: leadership effective 0.0 is valid
+PASS: leadership effective 0.1 is valid
+PASS: leadership effective 1.0 is valid
+PASS: leadership invalid/nonfinite -0.01 is rejected
+PASS: leadership invalid/nonfinite 1.01 is rejected
+PASS: leadership invalid/nonfinite nan is rejected
+PASS: leadership invalid/nonfinite inf is rejected
+PASS: toughness effective 0.0 is valid
+PASS: toughness effective 0.1 is valid
+PASS: toughness effective 1.0 is valid
+PASS: toughness invalid/nonfinite -0.01 is rejected
+PASS: toughness invalid/nonfinite 1.01 is rejected
+PASS: toughness invalid/nonfinite nan is rejected
+PASS: toughness invalid/nonfinite inf is rejected
+PASS: awareness effective 0.0 is valid
+PASS: awareness effective 0.1 is valid
+PASS: awareness effective 1.0 is valid
+PASS: awareness invalid/nonfinite -0.01 is rejected
+PASS: awareness invalid/nonfinite 1.01 is rejected
+PASS: awareness invalid/nonfinite nan is rejected
+PASS: awareness invalid/nonfinite inf is rejected
+PASS: discipline effective 0.0 is valid
+PASS: discipline effective 0.1 is valid
+PASS: discipline effective 1.0 is valid
+PASS: discipline invalid/nonfinite -0.01 is rejected
+PASS: discipline invalid/nonfinite 1.01 is rejected
+PASS: discipline invalid/nonfinite nan is rejected
+PASS: discipline invalid/nonfinite inf is rejected
+PASS: Missing required skill remains invalid
+PASS: Validation never mutates source profiles
+RESULTS: 104 passed, 0 failed
+PASS: R2 roster save workflow

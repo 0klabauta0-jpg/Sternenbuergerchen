@@ -1,0 +1,27 @@
+{
+  "recorded_at": "2026-11-01T23:34:52.937452+00:00",
+  "scope": "Final R2 source pinned before focused last checks. Core run followed by lobby/consent checks, then FOB focus-context and moved help-label regression checks. LF normalization only outside behavioral changes.",
+  "sha256": {
+    "project.godot": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+    "scripts/meta/debrief_screen.gd": "8b7810e0da204503c1775c85288791cc534d0903ed7cdcb71aa76dccbea8d91a",
+    "scripts/meta/drop_light_layout_contract.gd": "3a2d601ec951b2510da414babd36f734976b80c5913039524d2928bc2123b048",
+    "scripts/meta/fob_screen.gd": "9836e1cd4fee5c1d9914ce634196f7235acaeb8b2fd8ae7fd7b6bb9d50854659",
+    "scripts/meta/homebase_screen.gd": "e4bf950b14f2bd5a0ddd2071fccd38534b1abd5fcef81b8864043b76eab7917b",
+    "scripts/meta/start_roster_generator.gd": "374d7be7320cab7c291059ac2156bc9815ef8557a561e3e567f72b78f1d3f3fd",
+    "scripts/tests/mission_tactical_sandbox_controller.gd": "8f21f73d96312f2c42c8d6319a06b79c8a3d963d63a8842b06f2a01cc6ff18dd",
+    "scripts/tests/task_1106_coop_lobby_layout_hardening.gd": "5ea5bb64114f9f49c5367a4cf651c33fc4e87a442976abaeb54ea2b482cc78cd",
+    "scripts/tests/task_181_drop_light_fixed_window_audit_verifier.gd": "d5bbe59998f9b8e86d3c3d6b308ce56ec3fef7e9eae3087ae6d12adb66533e14",
+    "scripts/tests/task_232_start_roster_generation_contract.gd": "e8bf22e03d854fc9d2715b7dfebb6ed4d3cca0545ce8100eb725fa5e9e402b9b",
+    "scripts/tests/task_234_persistent_player_roster_save_and_reset.gd": "d32a79ec873500461f55d18c72efe4cb95ea54cf706f936491566b7e1316cbd6",
+    "scripts/tests/ui_a5_native_hud_verifier.gd": "5f45ed640444c9cb6b91dff0ea7a79c0d9250f086f6392de7a2337e4dfc74ef1",
+    "scripts/tests/ui_mission_r2_verifier.gd": "6c58357364d60361414e634c878b827c3611f53b39bd77ad718ac5e1726a3adb",
+    "scripts/tests/ui_native_capture.gd": "0a505753fa07027be36030d8f25bfa1694f4bd200b810e133f91096d2bb08919",
+    "scripts/tests/ui_native_r2_debrief_shell_verifier.gd": "c2743bb83365809f2b53edd930b88b3c928a8d4c6df4b84ba11b3d7f79874453",
+    "scripts/tests/ui_native_r2_lobby_actions_verifier.gd": "895eb47d98da76339f7189204e654716c8e98d94d234fdbe51978470e2a3c882",
+    "scripts/tests/ui_native_r2_preparation_verifier.gd": "1239912eeb26708a856ef8ee442e7349b5ce430fa675796230b2fc2818888815",
+    "scripts/tests/ui_r2_roster_save_workflow_verifier.gd": "edb228d3f576604344b133e08e6a3df8acc10bdaf063bd922b41abfb5cf029ba",
+    "scripts/ui/main_menu_screen.gd": "fb1f6b5884128d61698301b6bd13c671c7785bdbd5348a53d880b29407cc41a4",
+    "scripts/ui/mission_a5_hud_layout.gd": "e082f772e99aa669612b73aa268ba018ba21f06b5f5193219c574e042dc4ef7b",
+    "scripts/ui/multiplayer_lobby_screen.gd": "935386b52f51f83626bb9f07b6291e06cee82b2da5188fcaf011fb9b28900e9c"
+  }
+}

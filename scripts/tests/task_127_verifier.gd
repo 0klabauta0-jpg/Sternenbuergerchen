@@ -64,9 +64,10 @@ func _test_portal_adjacency_cache_invalidates_on_graph_rebuild() -> void:
 	graph.call("build_from_registry", registry, 2)
 	var pathfinder = HPA_PATHFINDER_SCRIPT.new()
 	pathfinder.call("find_path_with_status", Vector2i(0, 0), Vector2i(5, 1), registry, graph)
-	pathfinder.call("find_path_with_status", Vector2i(0, 0), Vector2i(5, 1), registry, graph)
+	# A distinct request misses the exact-result cache and reaches adjacency.
+	pathfinder.call("find_path_with_status", Vector2i(0, 1), Vector2i(5, 1), registry, graph)
 	var cached: Dictionary = Dictionary(pathfinder.call("get_portal_adjacency_cache_snapshot"))
-	_assert(int(cached.get("build_count", 0)) == 1 and int(cached.get("hit_count", 0)) >= 1, "Repeated HPA query reuses portal adjacency")
+	_assert(int(cached.get("build_count", 0)) == 1 and int(cached.get("hit_count", 0)) >= 1, "Distinct cross-component HPA query reuses portal adjacency")
 	graph.call("build_from_registry", registry, 2)
 	pathfinder.call("find_path_with_status", Vector2i(0, 0), Vector2i(5, 1), registry, graph)
 	var rebuilt: Dictionary = Dictionary(pathfinder.call("get_portal_adjacency_cache_snapshot"))

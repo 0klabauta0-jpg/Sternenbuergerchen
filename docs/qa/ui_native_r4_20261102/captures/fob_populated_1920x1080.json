@@ -1,0 +1,67 @@
+{
+	"display_driver": "Windows",
+	"fixture_data": true,
+	"fixture_variant": "populated",
+	"image": "res://docs/qa/ui_native_r4_20261102/captures/fob_populated_1920x1080.png",
+	"image_size": [
+		1920,
+		1080
+	],
+	"logical_size": [
+		1920,
+		1080
+	],
+	"note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+	"renderer": "gl_compatibility",
+	"requested_window_size": [
+		1920,
+		1080
+	],
+	"save_error": 0,
+	"scaled_capture": false,
+	"source_capture": true,
+	"synthetic_image_fallback": false,
+	"ui_metrics": {
+		"boarding": {
+			"rect": [
+				1056.0,
+				520.0,
+				848.0,
+				104.0
+			],
+			"visible": true
+		},
+		"flightdeck": {
+			"rect": [
+				1056.0,
+				88.0,
+				848.0,
+				424.0
+			],
+			"visible": true
+		},
+		"loadout": {
+			"rect": [
+				368.0,
+				248.0,
+				672.0,
+				816.0
+			],
+			"visible": true
+		},
+		"teams": {
+			"rect": [
+				368.0,
+				88.0,
+				672.0,
+				144.0
+			],
+			"visible": true
+		}
+	},
+	"view": "fob",
+	"viewport_size": [
+		1920.0,
+		1080.0
+	]
+}

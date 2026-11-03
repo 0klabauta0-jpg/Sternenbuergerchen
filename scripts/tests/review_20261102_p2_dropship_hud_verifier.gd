@@ -46,9 +46,13 @@ func _run() -> void:
 	mission.process_mode = Node.PROCESS_MODE_DISABLED
 	var card := _card("alpha", ["unit_alpha", "unit_bravo", "unit_charlie"])
 	_apply_cards(controller, [card])
-	var panel: Control = mission.get_node("TacticalUI/MissionDropshipPanel")
+	var compact: Control = mission.get_node("TacticalUI/MissionDropshipPanel/CompactCard")
+	var details_button: Button = compact.get_node("Contents/Header/DetailsButton")
+	details_button.pressed.emit()
+	var panel: Control = mission.get_node("TacticalUI/A5DropshipDetailsPopup/Contents/Scroll/A5DropshipFullPanel")
+	var compact_status: Label = compact.get_node("Contents/Header/Identity/A5TransportState")
 	var first: Control = _find_card(panel, "alpha")
-	_assert(first != null and _find_meta(first, "mission_dropship_passenger_unit_id", "unit_alpha") != null and _find_meta(first, "mission_dropship_passenger_unit_id", "unit_bravo") != null and _find_meta(first, "mission_dropship_passenger_unit_id", "unit_charlie") != null, "Real waiting card renders all three passengers")
+	_assert(panel.is_visible_in_tree() and first != null and _find_meta(first, "mission_dropship_passenger_unit_id", "unit_alpha") != null and _find_meta(first, "mission_dropship_passenger_unit_id", "unit_bravo") != null and _find_meta(first, "mission_dropship_passenger_unit_id", "unit_charlie") != null, "Opening real transport details renders all three waiting passengers")
 	var first_ids: Array = _subtree_ids(first)
 	var scan_before: int = int(controller.get_mission_runtime_index_diagnostics().membership_scan_count)
 	for _refresh in range(6):
@@ -65,7 +69,7 @@ func _run() -> void:
 	_apply_cards(controller, [card])
 	var transit: Control = _find_card(panel, "alpha")
 	_assert(transit.get_instance_id() == unchanged_ids[0], "Transit changes retain the keyed craft card")
-	_assert(transit.modulate.a < 0.9 and bool(transit.get_meta("mission_dropship_card_inaccessible")), "Transit updates visible dimming and accessibility")
+	_assert(compact_status.text.begins_with("Im Anflug") and bool(transit.get_meta("mission_dropship_card_inaccessible")), "Transit updates the visible A5 status and details accessibility")
 	_assert(_command(transit, "set_lz").disabled and _command(transit, "drop").disabled, "Transit locks existing action buttons")
 	var transit_ids: Array = _subtree_ids(transit)
 	card["progress"] = 47.0
@@ -84,7 +88,7 @@ func _run() -> void:
 	_apply_cards(controller, [card])
 	var waiting: Control = _find_card(panel, "alpha")
 	_assert(not _command(waiting, "set_lz").disabled and not _command(waiting, "drop").disabled, "Waiting with LZ unlocks existing LZ and Drop actions")
-	_assert(waiting.modulate.a >= 0.99, "Waiting restores full card visibility")
+	_assert(waiting.modulate.a >= 0.99 and compact_status.text == "Bereit", "Waiting presents full-contrast details and the ready status")
 	var pilot: Node = waiting.get_node(CARD_BODY + "ContentRow/InfoVBox/PilotCardHost/PilotCard")
 	var pilot_id: int = pilot.get_instance_id()
 	var pilot_unit: Node = mission.get_node("UnitDelta")

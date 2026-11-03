@@ -1,0 +1,30 @@
+{
+  "user_data_namespace": "SternenBuergerchen_Mission_A5_Edge_Authoring_QA",
+  "isolated_user_data": true,
+  "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "test_project_sha256": "fae3d6476a5a0bfa9cb80f15b73eb70cfaa7163359691bbeb4c35420b251df04",
+  "project_restored_byte_exact": true,
+  "editor_plugins_temporarily_disabled": false,
+  "gdextensions_disabled": false,
+  "passed": true,
+  "exit_code": 0,
+  "error_count": 0,
+  "command": [
+    "godot_console",
+    "--headless",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+    "--script",
+    "res://scripts/tools/build_gm01_frontier.gd"
+  ],
+  "map_sha256": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4",
+  "grid_size": {
+    "x": 96,
+    "y": 98
+  },
+  "tile_count": 9408,
+  "solid_cells": 1046,
+  "walkable_cover_cells": 560,
+  "scenario_byte_exact": true,
+  "scenario_sha256": "792bff6b6dfa6fabf739a737e4e45d34c8e3729a4fdc7d6b62a74a374a27b45f"
+}

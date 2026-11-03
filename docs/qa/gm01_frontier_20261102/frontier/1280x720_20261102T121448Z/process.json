@@ -1,0 +1,27 @@
+{
+  "exit_code": 0,
+  "error_count": 0,
+  "logical_size": "1280x720",
+  "driver": "vulkan",
+  "command": [
+    "godot_console",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+    "--rendering-method",
+    "forward_plus",
+    "--rendering-driver",
+    "vulkan",
+    "--audio-driver",
+    "Dummy",
+    "--script",
+    "res://scripts/tests/gm01_frontier_normal_capture.gd",
+    "--",
+    "--ui-size=1280x720",
+    "--startup-timeout-seconds=150",
+    "--evidence-output=res://docs/qa/gm01_frontier_20261102/frontier/1280x720_20261102T121448Z/startup.json"
+  ],
+  "isolated_user_data": true,
+  "project_restored_byte_exact": true,
+  "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "test_project_sha256": "4f301576526eadbf84e158efcb2053acdffe033b78056db5886d4a45a4054a9a"
+}

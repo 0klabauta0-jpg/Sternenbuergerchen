@@ -1,0 +1,15 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_386 Homebase Flightdeck Member Portraits Verifier ===
+  PASS: Dropship renders the Flightdeck fireteam card
+  PASS: Payload card keeps one mini portrait per operator
+  PASS: Payload card no longer uses a separate portrait strip above the names
+  PASS: Alpha row shows the portrait directly left of the name
+  PASS: Bravo row shows the portrait directly left of the name
+=== RESULTS: 5 passed, 0 failed ===
+TASK_386: ALL PASSED

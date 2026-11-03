@@ -1,0 +1,77 @@
+{
+  "schema": "sternenbuergerchen.ui_prompts.revision5_correction.v1",
+  "date": "2026-11-01",
+  "tool": "built-in image_gen.imagegen",
+  "reason": "Correct visible owner/state/text contradictions found by actual image QA; originals retained",
+  "items": [
+    {
+      "id": "menu_fob_loadout_korr",
+      "file": "menu_fob_loadout.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/generated_images/01a19786-4aaf-7e82-a801-2bcb6244233e/exec-27ccb8db-6a34-4c6c-a69c-3c03aba07e3f.png"
+      ],
+      "prompt": "Use-case: precise-object-edit / ui-mockup. Edit the provided FOB interface image ONLY to correct these short text/icon inconsistencies. Preserve every panel, portrait, building, ship, composition, size and overall style. Required1: respawn card currently says 'Respawnanker: FOB' but subtitle wrongly says Heimatbasis. Keep heading 'Respawnanker: FOB' and REPLACE subtitle exactly 'Rückkehr zum gewählten FOB-Anker.' No remaining Heimatbasis in that card. Required2: roster heading counter should say '6 vor Ort' instead of '6 verfügbar'; four assigned operators and two remaining can coexist, no change to list/ALPHA4of4. Required3: Mara is selected Leader/FTL; use 'FTL · Teamleitung' in her roster/detail roleline and 'Teamleitung' under her ALPHA name, replacing Aufklärung. Replace the two-line description 'Erkundet, markiert Ziele und sichert die Stellung.' by 'Führt das Fireteam und koordiniert den Auftrag.' This avoids promising an unimplemented Recon action. Required4: for 'Waffe2 · Medictool', replace only its repeated rifle pictogram with a simple clearly medical handheld-tool pictogram in the same tiny white silhouette style. Keep text Medictool and editable dropdown. Waffe1 Rifle pictogram unchanged. No other text/values/statechanges: preparation remains highlighted, Boarding starten remains primary, Pilot zugewiesen and weight62percent remain illustrative. Do not redesign or add functionality. Preserve image frame and German legibility.",
+      "input_snapshot": {
+        "retained_path": "docs/reports/assets/ui-2026-11-01/menu_fob_loadout_versuch1.png",
+        "sha256": "bd456d608ca60b7a2ae52137a359aa10e12fc0497afae921b90b2ead713f9a22",
+        "note": "Exact call refs retained above; corrected canonical output is separate from this input snapshot"
+      }
+    },
+    {
+      "id": "r5_lobby_korr",
+      "file": "menu_lobby.png",
+      "original": "menu_lobby_versuch1.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/ui-entwuerfe-20261101/SternenBuergerchen/docs/reports/assets/ui-2026-11-01/menu_lobby.png"
+      ],
+      "prompt": "Edit this exact lobby screenshot, preserving alllayout/portraits/map/panels. Correct ONLY these texts/states, no worldredesign. Jona/player2 rowcurrently says Bereit even though startbutton says readiness1/2: change Jona state to 'Nicht bereit' with amber indicator. Mara Host remains Bereit; bottomstart remainsdisabled and 'Warte auf Bereitschaft (1/2)'. Hostisalreadyconnected: change big 'Spiel hosten' button into subdued disabled 'Host läuft'. Remove '(empfohlen)' from UPnP label; it must say simply 'UPnP verwenden', with no recommendationorchangedtogglevalue. Replace 'Zwei Teams, bis zu4Spieler' by 'Spieler und zugeordnete Teams' (no invented maximum). Mapdescription must not promise economy/resources: replace paragraph with 'Canyon mit Deckungen und offenen Wegen. Karte vor dem Einsatz gemeinsam bestätigen.' Preserve Host/Beitreten tabs, side/mode controls, mapaccept/reject, disconnect/back. All textGerman readable, exactsame1672x941 framing.",
+      "input_snapshot": {
+        "retained_path": "docs/reports/assets/ui-2026-11-01/menu_lobby_versuch1.png",
+        "sha256": "175670dfa41256296f5af7dd548eec51e86b885d351b557492fc3d2d8ca97e87",
+        "note": "Exact call refs retained above; corrected canonical output is separate from this input snapshot"
+      }
+    },
+    {
+      "id": "r5_debrief_korr",
+      "file": "menu_debrief.png",
+      "original": "menu_debrief_versuch1.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/ui-entwuerfe-20261101/SternenBuergerchen/docs/reports/assets/ui-2026-11-01/menu_debrief.png"
+      ],
+      "prompt": "Edit only contradictory narrative/statecopy in this exact debriefscreen; preserve layout, portraits, values and illustration. Under Teamrückkehr replace 'Alle Einsatzkräfte zurück in der FOB.' with 'Rückkehrübersicht des Einsatzteams.'. Airtransportcard keeps 'Rückkehr bestätigt' but subtitle becomes 'Team zur FOB zurückgekehrt. Status bestätigt.'; remove onboard/inbound wording. AAR Relaisgesichert paragraph must NOT claim an unsupported engineer reactivation action; replace with 'Auftrag bestätigt. Relaisbereich unter eigener Kontrolle.'. Event 'Sektor stabil' paragraph becomes 'Keine weiteren Kontakte gemeldet. Rückkehr abgeschlossen.'. XPpreview explanation becomes 'Vorschau: Entwicklung laut Einsatzbericht.' instead of promising deferred application at homebase. Other rows, HPvalues, +120EP, buttons ZurFOB/Heimatbasis remain illustrative and unchanged. Do not add invented stats or timingrules. Same crispGerman, panelstyle and frame.",
+      "input_snapshot": {
+        "retained_path": "docs/reports/assets/ui-2026-11-01/menu_debrief_versuch1.png",
+        "sha256": "c11b9634cb4bb4ad3219b58b91b8e943a87a45966a16c8c52ae028ded83f4119",
+        "note": "Exact call refs retained above; corrected canonical output is separate from this input snapshot"
+      }
+    },
+    {
+      "id": "r5_charakter_korr",
+      "file": "board_charakterkarten.png",
+      "original": "board_charakterkarten_versuch1.png",
+      "refs": [
+        "C:/Users/bjoer/.codex/worktrees/ui-entwuerfe-20261101/SternenBuergerchen/docs/reports/assets/ui-2026-11-01/board_charakterkarten.png"
+      ],
+      "prompt": "Correct a few semantic labels in this exact read-only characterboard, no redesign. Mara isLeader/FTL, so replace 'FTL · Aufklärung' with 'FTL · Teamleitung', and specializationvalue 'Aufklärung (FTL)' with 'Teamleitung (FTL)'. The info row currently 'Heimatbasis ALPHA' must instead read 'Fireteam ALPHA'; Alpha is a fireteam not a base. Remove yellowstarbadges from Jona and Kira compactcards so they do not falsely imply leadership; keep selected yellowoutline on Kira and leaderstarONLY by Mara's Leader heading. Nils Unterwegs badge should be neutralcyan notcriticalred, keep progressbar. Keep all8skillbars and7/10etc samplevalues; add small readable line near Fähigkeiten 'Anzeigebeispiel: 0–10' to make scaleexplicit. Preserve readonly 'Ansicht', noeditablecontrols. All other portraits/panels/labels/layout/frame unchanged. No additionalcharacterabilities or numbers.",
+      "input_snapshot": {
+        "retained_path": "docs/reports/assets/ui-2026-11-01/board_charakterkarten_versuch1.png",
+        "sha256": "379b92ea93fe78781c0c1606665e0e321eb016edc3ea6fcbfccdf59272e7cf8b",
+        "note": "Exact call refs retained above; corrected canonical output is separate from this input snapshot"
+      }
+    },
+    {
+      "id": "r5_a5_korr",
+      "file": "mockup_a5_mission_zweireihig.png",
+      "original": "mockup_a5_mission_zweireihig_versuch1.png",
+      "refs": [
+        "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-598e9c20-dd3b-4d56-8c56-15dee3a539a3.png"
+      ],
+      "prompt": "Use-case: precise-object-edit / ui-mockup. Make a VERY LOCAL correction of the bottom-left command buttons in this exact screenshot. All world, people, buildings, left teamcards, log, upper objective and dropship unchanged. The existing A5 grid has two rows but its buttons are too WIDE/RECTANGULAR (about70wide x54high). User explicitly wants SMALL COMPACT SQUARES. Redraw all NINE button bodies as precisely52wide x52high, only4pixels horizontal and vertical gap; five columns in x12..288, two rows y824..932. Total width of whole buttoncluster at most280pixels, versus current400. Put each tiny icon and SHORT GERMAN CAPTION inside the square, break long labels naturally across2lines: 'Vertei-/digen' avoid hyphen by use 'Vertei'/'digen' only if necessary but prefer 'Verteidigen' in condensed legible type; Flankieren can fit condensed. Toprow Bewegen, Nehmen, Verteidigen, Flankieren, Plan ausführen. Bottomrow Ziel, Leeren, Löschen, Ordnen. DELETE fifth empty bottom outline completely: plain stripbackground there, no ghostbutton. Keep text inside each button. Keep CYAN filled Plan ausführen and selected Bewegen outline. After the now-smaller grid, PULL TARGET/ORDER block LEFT so separator x305, targetblock x322..525. Pull ALPHAblock left to x555..900 with same header ALPHA4/4 FTL Mara Bereit, Haltungbelow, firebelow. Do not stretch buttons or add external labels. Grid TWO ACTUAL ROWS remains fully inside strip, bottom/left flushstrip height unchanged. All non-bottom areas MUST stay exactly same composition. No new actions or statuses, no title. This correction is solely for smaller genuinely square buttongeometry and removing the empty outlined slot.",
+      "input_snapshot": {
+        "retained_path": "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig_versuch1.png",
+        "sha256": "6a42b37fe95be821c0afb1768c74e47b321fcacfe41777754227db23623d3b14",
+        "note": "Exact call refs retained above; corrected canonical output is separate from this input snapshot"
+      }
+    }
+  ]
+}

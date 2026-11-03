@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_361 NPCCompactCard Readonly Profile Reference Contract ===
+  PASS: Default setup still copies incoming profile
+  PASS: Copy-mode card ignores later original-profile mutation
+  PASS: get_profile returns an external copy in copy mode
+  PASS: Readonly setup stores the display reference
+  PASS: Readonly contract keeps get_profile copy-safe
+  PASS: Readonly setup records secondary-text override
+  PASS: Readonly reference getter returns the original profile object
+  PASS: Readonly setup does not mutate source secondary text
+  PASS: Readonly card renders secondary-text override without profile mutation
+  PASS: Mutating external get_profile result cannot mutate card reference
+  PASS: Click signal carries unit id
+  PASS: Click signal carries source context
+  PASS: Click signal carries a profile copy
+  PASS: Mutating click payload cannot mutate readonly source profile
+  PASS: Double-click signal carries unit id for character sheet
+  PASS: Double-click signal carries source context
+  PASS: Mutating double-click payload cannot mutate readonly source profile
+  PASS: Drag payload keeps compact-card drag type
+  PASS: Drag payload carries unit id
+  PASS: Drag payload carries source context
+  PASS: Drag payload does not expose a mutable profile object
+  PASS: Homebase roster cards render
+  PASS: Homebase staged cards render
+  PASS: Homebase #10 fireteam member cards render
+  PASS: Homebase retired #13 loadout no longer renders hidden member cards
+  PASS: Homebase Flightdeck pilot card renders
+  PASS: Homebase display card contexts opt into readonly references
+  PASS: FOB available operator cards render
+  PASS: FOB fireteam member cards render
+  PASS: FOB available and fireteam cards opt into readonly references
+  PASS: FOB loadout member cards render
+  PASS: FOB loadout cards opt into readonly references
+=== RESULTS: 32 passed, 0 failed ===
+TASK_361: ALL PASSED

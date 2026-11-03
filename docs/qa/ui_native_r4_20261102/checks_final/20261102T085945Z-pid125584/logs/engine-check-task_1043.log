@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "stylebox" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/mission_tactical_sandbox_controller.gd:5369)
+ERROR: Failed to load script "res://scripts/tests/mission_tactical_sandbox_controller.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1043 Mission HUD Hotpath Event Log Guard ===
+PASS: Controller exposes a narrow live event-log feedback snapshot
+PASS: Recurring event-log refresh uses the narrow live snapshot
+PASS: Recurring event-log refresh does not build the full command-feedback snapshot
+PASS: Mission fixture exposes controller and tactical event-log panel
+ERROR: FAIL: Mission controller exposes the live event-log snapshot at runtime
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1043_mission_hud_hotpath_event_log_guard.gd:106)
+       [1] _test_live_snapshot_keeps_event_log_read_only_and_renderable (res://scripts/tests/task_1043_mission_hud_hotpath_event_log_guard.gd:42)
+       [2] _wait_frames (res://scripts/tests/task_1043_mission_hud_hotpath_event_log_guard.gd:97)
+=== RESULTS: 4 passed, 1 failed ===

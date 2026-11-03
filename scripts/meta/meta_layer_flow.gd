@@ -162,6 +162,9 @@ var _mission_planning_state: Dictionary = DEFAULT_MISSION_PLANNING_STATE.duplica
 var _active_mission_started_at_msec: int = 0
 var _active_mission_time_limit_seconds: float = 0.0
 var _last_meta_timer_text: String = ""
+var _transport_refresh_timing_debug_enabled: bool = false
+var _transport_refresh_timing_debug_snapshot: Dictionary = {}
+var _transport_refresh_timing_debug_invocation_count: int = 0
 var _release_start_mission_deeplink_requested: bool = false
 var _release_start_mission_deeplink_applied: bool = false
 var _release_start_mission_deeplink_status: String = "idle"
@@ -256,6 +259,17 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_refresh_meta_mission_timer_labels()
+
+
+func set_transport_refresh_timing_debug_enabled(enabled: bool) -> void:
+	_transport_refresh_timing_debug_enabled = enabled
+	if not enabled:
+		_transport_refresh_timing_debug_snapshot.clear()
+		_transport_refresh_timing_debug_invocation_count = 0
+
+
+func get_transport_refresh_timing_debug_snapshot() -> Dictionary:
+	return _transport_refresh_timing_debug_snapshot.duplicate(true)
 
 
 func get_selected_unit_ids() -> PackedStringArray:
@@ -4142,6 +4156,7 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 			{
 				"unit_id": resolved_unit_id,
 				"display_name": String(unit.get("display_name")),
+				"portrait_path": _resolve_unit_portrait_path(resolved_unit_id),
 				"fireteam_id": String(unit.get("fireteam_id")),
 				"vital_state": vital_state,
 				"health_points": health_points,
@@ -4340,6 +4355,10 @@ func _release_preview_mission() -> void:
 
 
 func _on_homebase_transport_timer_timeout() -> void:
+	var profile_enabled: bool = _transport_refresh_timing_debug_enabled
+	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var scope_started_usec: int = refresh_started_usec
+	var refresh_scopes_usec: Dictionary = {}
 	var completed_team_transfers: Array = []
 	var active_team_transfers: Array = []
 	for entry_variant in _pending_homebase_team_transfers:
@@ -4399,14 +4418,42 @@ func _on_homebase_transport_timer_timeout() -> void:
 		_complete_mission_craft_transfer(Dictionary(entry_variant))
 		fob_changed = true
 
+	if profile_enabled:
+		refresh_scopes_usec["transfer_advance_and_completions_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_fob_screen()
+	if profile_enabled:
+		refresh_scopes_usec["refresh_fob_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	if _is_homebase_direct_mission_drop_source():
 		_sync_homebase_direct_mission_drop_transport_fields()
 	else:
 		_sync_mission_drop_transport_fields_from_fob()
+	if profile_enabled:
+		refresh_scopes_usec["sync_transport_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_homebase_screen()
+	if profile_enabled:
+		refresh_scopes_usec["refresh_homebase_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_map_screen()
+	if profile_enabled:
+		refresh_scopes_usec["refresh_map_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_ensure_transport_timer_state()
+	if profile_enabled:
+		refresh_scopes_usec["ensure_timer_state_usec"] = Time.get_ticks_usec() - scope_started_usec
+		_transport_refresh_timing_debug_invocation_count += 1
+		var total_usec: int = Time.get_ticks_usec() - refresh_started_usec
+		var named_refresh_usec: int = int(refresh_scopes_usec["refresh_fob_usec"]) + int(refresh_scopes_usec["sync_transport_usec"]) + int(refresh_scopes_usec["refresh_homebase_usec"]) + int(refresh_scopes_usec["refresh_map_usec"])
+		refresh_scopes_usec["other_usec"] = maxi(total_usec - named_refresh_usec, 0)
+		_transport_refresh_timing_debug_snapshot = {
+			"enabled": true, "read_only": true, "derived_only": true,
+			"ui_sets_gameplay_truth": false, "snapshot_serialized": false,
+			"total_usec": total_usec, "scopes_usec": refresh_scopes_usec,
+			"invocation_count": _transport_refresh_timing_debug_invocation_count,
+			"completed_at_msec": Time.get_ticks_msec(),
+		}
 
 
 func _advance_air_asset_recoveries(delta_seconds: float) -> bool:
@@ -5549,7 +5596,7 @@ func get_release_singleplayer_normal_click_homebase_guard_snapshot() -> Dictiona
 		),
 		_build_release_normal_click_guard_check(
 			"start_mission_enabled",
-			String(startflow.get("start_button_text", "")) == "Start Mission" and not bool(startflow.get("start_button_disabled", true)),
+			String(startflow.get("start_button_text", "")) == "Einsatz starten" and not bool(startflow.get("start_button_disabled", true)),
 			"The visible Start Mission button should be enabled."
 		),
 		_build_release_normal_click_guard_check(
@@ -5559,7 +5606,7 @@ func get_release_singleplayer_normal_click_homebase_guard_snapshot() -> Dictiona
 		),
 		_build_release_normal_click_guard_check(
 			"homebase_direct_copy_clear",
-			mission_team_limit_text.begins_with("Mission payload:") and mission_transfer_text.find("Direct sortie") >= 0 and mission_summary_text.find("Start Mission") >= 0 and combined_mission_copy.find("send the team to FOB") < 0 and combined_mission_copy.find("FOB Transfer") < 0,
+			mission_team_limit_text.begins_with("Einsatz:") and mission_transfer_text.find("Direct sortie") >= 0 and mission_summary_text.find("Start Mission") >= 0 and combined_mission_copy.find("send the team to FOB") < 0 and combined_mission_copy.find("FOB Transfer") < 0,
 			"The visible Homebase Direct copy should not look like the stale FOB transfer workflow."
 		),
 	]

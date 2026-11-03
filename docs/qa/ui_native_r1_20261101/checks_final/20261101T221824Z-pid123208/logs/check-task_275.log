@@ -1,0 +1,354 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_275 Command Button Hierarchy Arrangement Overhaul ===
+PASS: Mission command hierarchy contract file exists
+PASS: Group order contains goal
+PASS: Group order contains rule
+PASS: Group order contains plan
+PASS: Group order contains air_lz
+PASS: Group order contains breakout
+PASS: Catalog contains action move
+PASS: Catalog contains action take
+PASS: Catalog contains action defend
+PASS: Catalog contains action engage
+PASS: Catalog contains action secure
+PASS: Catalog contains action recon
+PASS: Catalog contains action withdraw
+PASS: Catalog contains action delete_order
+PASS: Catalog contains action tempo
+PASS: Catalog contains action fire_rule
+PASS: Catalog contains action contact_response
+PASS: Catalog contains action cover_priority
+PASS: Catalog contains action security_mode
+PASS: Catalog contains action role_suggestion
+PASS: Catalog contains action swap_roles
+PASS: Catalog contains action preview_plan
+PASS: Catalog contains action sort_fireteam
+PASS: Catalog contains action go_plan
+PASS: Catalog contains action set_lz
+PASS: Catalog contains action call_dropship
+PASS: Catalog contains action lz_secure
+PASS: Catalog contains action evac_recover
+PASS: Catalog contains action confirm
+PASS: Catalog contains action override
+PASS: Catalog contains action abort
+PASS: Catalog contains action regroup
+PASS: Contract snapshot is visual-only
+PASS: Contract snapshot does not set gameplay truth
+PASS: Rule actions live in #17
+PASS: Set LZ is grouped as Air/LZ
+PASS: Sort lives in #16 for the fixed HUD command matrix
+PASS: GO lives in #16 for the fixed HUD command matrix
+PASS: Breakout actions are reserved for TASK_276
+PASS: Command hierarchy dev doc exists
+PASS: Dev doc contains #16
+PASS: Dev doc contains #17
+PASS: Dev doc contains #18
+PASS: Dev doc contains goal
+PASS: Dev doc contains rule
+PASS: Dev doc contains plan
+PASS: Dev doc contains air_lz
+PASS: Dev doc contains breakout
+PASS: Dev doc contains visual_only
+PASS: Dev doc contains ui_sets_gameplay_truth = false
+PASS: Dev doc contains Vorher Matrix
+PASS: Dev doc contains Nachher Gruppen
+PASS: Dev doc contains Disabled Reasons
+PASS: Dev doc contains Offene UX-Fragen
+PASS: Help catalog contains mission.command.group.goal
+PASS: Help catalog contains mission.command.group.rule
+PASS: Help catalog contains mission.command.group.plan
+PASS: Help catalog contains mission.command.group.air_lz
+PASS: Help catalog contains mission.command.group.breakout
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_primary_action (res://scripts/ui/mission_a5_hud_layout.gd:210)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:82)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _apply_command_matrix_1280_readability (res://scripts/tests/mission_tactical_sandbox_controller.gd:15208)
+       [5] _refresh_dynamic_button_styles (res://scripts/tests/mission_tactical_sandbox_controller.gd:17060)
+       [6] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17115)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:726)
+       [8] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [9] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_primary_action (res://scripts/ui/mission_a5_hud_layout.gd:210)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:82)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _apply_command_matrix_1280_readability (res://scripts/tests/mission_tactical_sandbox_controller.gd:15208)
+       [5] _refresh_dynamic_button_styles (res://scripts/tests/mission_tactical_sandbox_controller.gd:17060)
+       [6] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17115)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:726)
+       [8] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [9] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_primary_action (res://scripts/ui/mission_a5_hud_layout.gd:210)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:82)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _apply_command_matrix_1280_readability (res://scripts/tests/mission_tactical_sandbox_controller.gd:15208)
+       [5] _refresh_dynamic_button_styles (res://scripts/tests/mission_tactical_sandbox_controller.gd:17060)
+       [6] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17115)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:726)
+       [8] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [9] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_primary_action (res://scripts/ui/mission_a5_hud_layout.gd:210)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:82)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _apply_command_matrix_1280_readability (res://scripts/tests/mission_tactical_sandbox_controller.gd:15208)
+       [5] _refresh_dynamic_button_styles (res://scripts/tests/mission_tactical_sandbox_controller.gd:17060)
+       [6] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17115)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:726)
+       [8] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [9] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_primary_action (res://scripts/ui/mission_a5_hud_layout.gd:210)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:82)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _apply_command_matrix_1280_readability (res://scripts/tests/mission_tactical_sandbox_controller.gd:15208)
+       [5] _refresh_dynamic_button_styles (res://scripts/tests/mission_tactical_sandbox_controller.gd:17060)
+       [6] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17115)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:726)
+       [8] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [9] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_primary_action (res://scripts/ui/mission_a5_hud_layout.gd:210)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:82)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _apply_command_matrix_1280_readability (res://scripts/tests/mission_tactical_sandbox_controller.gd:15208)
+       [5] _refresh_dynamic_button_styles (res://scripts/tests/mission_tactical_sandbox_controller.gd:17060)
+       [6] _apply_hud_skin (res://scripts/tests/mission_tactical_sandbox_controller.gd:17115)
+       [7] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:726)
+       [8] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [9] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_primary_action (res://scripts/ui/mission_a5_hud_layout.gd:210)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:82)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14952)
+       [5] _apply_compact_mission_control_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:16562)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4141)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18481)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18304)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:773)
+       [10] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [11] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_primary_action (res://scripts/ui/mission_a5_hud_layout.gd:210)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:82)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14952)
+       [5] _apply_compact_mission_control_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:16562)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4141)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18481)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18304)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:773)
+       [10] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [11] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_fire_rule (res://scripts/ui/mission_a5_hud_layout.gd:236)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:88)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14952)
+       [5] _apply_compact_mission_control_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:16562)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4141)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18481)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18304)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:773)
+       [10] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [11] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_fire_rule (res://scripts/ui/mission_a5_hud_layout.gd:236)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:88)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14952)
+       [5] _apply_compact_mission_control_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:16562)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4141)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18481)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18304)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:773)
+       [10] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [11] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_fire_rule (res://scripts/ui/mission_a5_hud_layout.gd:236)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:88)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14952)
+       [5] _apply_compact_mission_control_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:16562)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4141)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18481)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18304)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:773)
+       [10] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [11] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_fire_rule (res://scripts/ui/mission_a5_hud_layout.gd:236)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:88)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14952)
+       [5] _apply_compact_mission_control_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:16562)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4141)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18481)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18304)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:773)
+       [10] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [11] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _present_primary_action (res://scripts/ui/mission_a5_hud_layout.gd:210)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:82)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14952)
+       [5] _apply_compact_mission_control_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:16562)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4141)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18481)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18304)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:773)
+       [10] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [11] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+ERROR: The object does not have any 'meta' values with the key 'native_a5_normal_style'.
+   at: get_meta (core/object/object.cpp:1155)
+   GDScript backtrace (most recent call first):
+       [0] _button_style_dirty (res://scripts/ui/mission_a5_hud_layout.gd:192)
+       [1] _place_context_tool (res://scripts/ui/mission_a5_hud_layout.gd:398)
+       [2] configure (res://scripts/ui/mission_a5_hud_layout.gd:102)
+       [3] _apply_native_a5_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14956)
+       [4] _enforce_drop_light_fixed_hud_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:14952)
+       [5] _apply_compact_mission_control_layout (res://scripts/tests/mission_tactical_sandbox_controller.gd:16562)
+       [6] _update_ui (res://scripts/tests/mission_tactical_sandbox_controller.gd:4141)
+       [7] _set_selected_fireteams (res://scripts/tests/mission_tactical_sandbox_controller.gd:18481)
+       [8] _ensure_default_fireteam_selection (res://scripts/tests/mission_tactical_sandbox_controller.gd:18304)
+       [9] _ready (res://scripts/tests/mission_tactical_sandbox_controller.gd:773)
+       [10] _test_mission_scene_hierarchy (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:128)
+       [11] _run_tests (res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd:25)
+PASS: Controller exposes command hierarchy snapshot
+PASS: Mission hierarchy snapshot is visual-only
+PASS: Mission hierarchy does not claim gameplay truth
+PASS: Mission snapshot contains group goal
+PASS: Mission snapshot contains group rule
+PASS: Mission snapshot contains group plan
+PASS: Mission snapshot contains group air_lz
+PASS: Mission snapshot contains group breakout
+PASS: Goal group is assigned to #16
+PASS: Rule group is assigned to #17
+PASS: Air/LZ group is assigned to #18
+PASS: Move action is a goal command
+PASS: Drop action is an Air/LZ command
+PASS: Breakout confirm is visibly disabled for later task
+PASS: move button exists
+PASS: move carries action metadata
+PASS: move carries group metadata
+PASS: move carries panel metadata
+PASS: move carries group help metadata
+PASS: move exposes hierarchy tooltip/disabled reason channel
+PASS: move keeps pressed signal connection
+PASS: take button exists
+PASS: take carries action metadata
+PASS: take carries group metadata
+PASS: take carries panel metadata
+PASS: take carries group help metadata
+PASS: take exposes hierarchy tooltip/disabled reason channel
+PASS: take keeps pressed signal connection
+PASS: defend button exists
+PASS: defend carries action metadata
+PASS: defend carries group metadata
+PASS: defend carries panel metadata
+PASS: defend carries group help metadata
+PASS: defend exposes hierarchy tooltip/disabled reason channel
+PASS: defend keeps pressed signal connection
+PASS: engage button exists
+PASS: engage carries action metadata
+PASS: engage carries group metadata
+PASS: engage carries panel metadata
+PASS: engage carries group help metadata
+PASS: engage exposes hierarchy tooltip/disabled reason channel
+PASS: engage keeps pressed signal connection
+PASS: delete_order button exists
+PASS: delete_order carries action metadata
+PASS: delete_order carries group metadata
+PASS: delete_order carries panel metadata
+PASS: delete_order carries group help metadata
+PASS: delete_order exposes hierarchy tooltip/disabled reason channel
+PASS: delete_order keeps pressed signal connection
+PASS: sort_fireteam button exists
+PASS: sort_fireteam carries action metadata
+PASS: sort_fireteam carries group metadata
+PASS: sort_fireteam carries panel metadata
+PASS: sort_fireteam carries group help metadata
+PASS: sort_fireteam exposes hierarchy tooltip/disabled reason channel
+PASS: sort_fireteam keeps pressed signal connection
+PASS: set_lz button exists
+PASS: set_lz carries action metadata
+PASS: set_lz carries group metadata
+PASS: set_lz carries panel metadata
+PASS: set_lz carries group help metadata
+PASS: set_lz exposes hierarchy tooltip/disabled reason channel
+PASS: set_lz keeps pressed signal connection
+PASS: call_dropship button exists
+PASS: call_dropship carries action metadata
+PASS: call_dropship carries group metadata
+PASS: call_dropship carries panel metadata
+PASS: call_dropship carries group help metadata
+PASS: call_dropship exposes hierarchy tooltip/disabled reason channel
+PASS: call_dropship keeps pressed signal connection
+PASS: approach_nw button exists
+PASS: approach_nw carries action metadata
+PASS: approach_nw carries group metadata
+PASS: approach_nw carries panel metadata
+PASS: approach_nw carries group help metadata
+PASS: approach_nw exposes hierarchy tooltip/disabled reason channel
+PASS: approach_nw keeps pressed signal connection
+PASS: #16 preserves five columns for the native two-row action layout
+PASS: #16 command grid order includes Move/Take plus Delete/Sort
+PASS: #16 retains existing contextual controls and callback paths
+PASS: #16 applies the native A5 presentation
+PASS: Sort remains a real action in the second row
+PASS: Single-fireteam context is distinguishable
+PASS: Multi-fireteam context is distinguishable
+PASS: No-selection Move disabled reason is visible
+PASS: Command feedback snapshot includes hierarchy
+PASS: Command button snapshot keeps hierarchy compatibility anchor
+PASS: Task file marks TASK_275 implemented
+PASS: Task checklist is complete
+PASS: Implementation status mentions TASK_275 implemented
+PASS: Roadmap mentions TASK_275 implemented
+=== RESULTS: 150 passed, 0 failed ===
+ALL TESTS PASSED

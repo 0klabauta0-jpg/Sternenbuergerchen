@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review.json",
+  "godot": "godot_console",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.052,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\version.log",
+    "passed": true
+  },
+  "filter": null,
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-01T23:30:19.895370+00:00",
+  "finished_at": "2026-11-01T23:30:54.004605+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task_227.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_227_main_menu_multiplayer_host_join_lobby_flow.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 8.053,
+      "name": "task_227",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\check-task_227.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task_227.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task_300.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_300_app_shell_return_to_main_menu_navigation.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 0.55,
+      "name": "task_300",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\check-task_300.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task_300.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task588.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_588_debrief_aar_data_bridge.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 9.803,
+      "name": "task588",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\check-task588.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task588.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task593.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_593_skill_progress_award_contract.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 1.198,
+      "name": "task593",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\check-task593.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task593.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-lobby_r2.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\ui_native_r2_lobby_actions_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 4.809,
+      "name": "lobby_r2",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\check-lobby_r2.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-lobby_r2.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task1106.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_1106_coop_lobby_layout_hardening.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 4.713,
+      "name": "task1106",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\check-task1106.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task1106.log",
+      "passed": true,
+      "reasons": []
+    },
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task228.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\task_228_multiplayer_editor_map_manifest_download_consent.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 4.901,
+      "name": "task228",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\check-task228.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\ui_native_r2_20261101\\checks_post_review\\20261101T233019Z-pid122024\\logs\\engine-check-task228.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 7,
+    "passed": 7,
+    "failed": 0
+  }
+}

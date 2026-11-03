@@ -1,0 +1,22 @@
+{
+  "user_data_namespace": "SternenBuergerchen_Mission_A5_Edge_Profile_QA",
+  "isolated_user_data": true,
+  "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "test_project_sha256": "f7580de26065fabe8fff1a44ed4cfeb33831651595ec297c3e692e95793e35a2",
+  "project_restored_byte_exact": true,
+  "editor_plugins_temporarily_disabled": false,
+  "gdextensions_disabled": false,
+  "command": [
+    "godot_console",
+    "--headless",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+    "--script",
+    "res://scripts/tests/ui_native_r3_mission_readout_verifier.gd",
+    "--",
+    "--a5-r3-readout-only"
+  ],
+  "exit_code": 0,
+  "errors": [],
+  "scope": "Read-only primary label diagnosis at both sizes"
+}

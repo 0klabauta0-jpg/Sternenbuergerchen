@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "driver" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/mission_tactical_sandbox_controller.gd:15036)
+ERROR: Failed to load script "res://scripts/tests/mission_tactical_sandbox_controller.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1044 Mission HUD Runtime Surface Guard ===
+PASS: Controller exposes a read-only mission HUD surface guard snapshot
+PASS: Selected member cards use a runtime-state signature
+PASS: Fireteam mini cards use a runtime-state signature
+PASS: Command matrix polish uses a visual-state signature
+PASS: Mission fixture exposes controller and card surfaces
+ERROR: FAIL: Runtime controller exposes guard diagnostics
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_1044_mission_hud_runtime_surface_guard.gd:98)
+       [1] _test_identical_refreshes_reuse_runtime_surface_nodes (res://scripts/tests/task_1044_mission_hud_runtime_surface_guard.gd:45)
+       [2] _wait_frames (res://scripts/tests/task_1044_mission_hud_runtime_surface_guard.gd:89)
+=== RESULTS: 5 passed, 1 failed ===

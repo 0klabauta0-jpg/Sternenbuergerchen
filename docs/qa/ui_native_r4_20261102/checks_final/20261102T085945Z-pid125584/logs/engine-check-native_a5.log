@@ -1,0 +1,337 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "stylebox" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/mission_tactical_sandbox_controller.gd:5369)
+ERROR: Failed to load script "res://scripts/tests/mission_tactical_sandbox_controller.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Native A5 Mission HUD ===
+SCRIPT ERROR: Invalid call. Nonexistent function '_apply_command_button_markers (via call)' in base 'Node'.
+   at: _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+   GDScript backtrace (most recent call first):
+       [0] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+SCRIPT ERROR: Invalid call. Nonexistent function '_apply_command_button_markers (via call)' in base 'Node'.
+   at: _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+   GDScript backtrace (most recent call first):
+       [0] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: band is flush with lower-left viewport edge
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: band leaves the map the main surface
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: target/order has a separate native middle panel
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: MoveButton has a real 64x64 action body (actual=(103.0, 31.0), minimum=(103.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: MoveButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: TakeButton has a real 64x64 action body (actual=(103.0, 31.0), minimum=(99.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: TakeButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: TakeButton follows its row without overlap
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: HoldButton has a real 64x64 action body (actual=(84.0, 31.0), minimum=(84.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: HoldButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: FlankButton has a real 64x64 action body (actual=(83.0, 31.0), minimum=(83.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: FlankButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: GoCommandMatrixButton preserves its original NodePath
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: TargetButton has a real 64x64 action body (actual=(84.0, 31.0), minimum=(36.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: TargetButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: ClearTargetButton has a real 64x64 action body (actual=(83.0, 31.0), minimum=(62.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: ClearTargetButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: DeleteOrderButton preserves its original NodePath
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: SortCommandMatrixButton preserves its original NodePath
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: actions occupy two actual rows
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: event log occupies the right side above the band
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: mission controls stay in the upper-right group
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: FireRuleHoldButton stays reachable through the four-rule selector
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: FireRuleReturnButton stays reachable through the four-rule selector
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: FireRuleFreeButton stays reachable through the four-rule selector
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: FireRuleSuppressButton stays reachable through the four-rule selector
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: character overlay has absolute drawing priority above actual mini cards (0)
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: team heading and stance have separate readable lines
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: existing tactical feedback remains reachable through explicit details
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: DoorBreachButton remains available as an existing contextual tool
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: WaypointEraseButton remains available as an existing contextual tool
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1920x1080: rectangle-write instrumentation records the initial real placement
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: band is flush with lower-left viewport edge
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: band leaves the map the main surface
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: target/order has a separate native middle panel
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: MoveButton has a real 64x64 action body (actual=(103.0, 31.0), minimum=(103.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: MoveButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: TakeButton has a real 64x64 action body (actual=(103.0, 31.0), minimum=(99.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: TakeButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: TakeButton follows its row without overlap
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: HoldButton has a real 64x64 action body (actual=(84.0, 31.0), minimum=(84.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: HoldButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: FlankButton has a real 64x64 action body (actual=(83.0, 31.0), minimum=(83.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: FlankButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: GoCommandMatrixButton preserves its original NodePath
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: TargetButton has a real 64x64 action body (actual=(84.0, 31.0), minimum=(36.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: TargetButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: ClearTargetButton has a real 64x64 action body (actual=(83.0, 31.0), minimum=(62.0, 31.0))
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: ClearTargetButton retains an explanation or disabled reason
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: DeleteOrderButton preserves its original NodePath
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: SortCommandMatrixButton preserves its original NodePath
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: actions occupy two actual rows
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: event log occupies the right side above the band
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: mission controls stay in the upper-right group
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: FireRuleHoldButton stays reachable through the four-rule selector
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: FireRuleReturnButton stays reachable through the four-rule selector
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: FireRuleFreeButton stays reachable through the four-rule selector
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: FireRuleSuppressButton stays reachable through the four-rule selector
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: character overlay has absolute drawing priority above actual mini cards (0)
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: team heading and stance have separate readable lines
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: existing tactical feedback remains reachable through explicit details
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: DoorBreachButton remains available as an existing contextual tool
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: WaypointEraseButton remains available as an existing contextual tool
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+ERROR: 1280x720: rectangle-write instrumentation records the initial real placement
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:142)
+Native A5: 174 checks, 64 failures

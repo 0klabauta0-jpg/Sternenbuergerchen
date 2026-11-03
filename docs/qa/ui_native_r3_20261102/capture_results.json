@@ -1,0 +1,978 @@
+[
+  {
+    "view": "fob",
+    "variant": "standard",
+    "file": "fob_1920x1080",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.693,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_variant": "standard",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/fob_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "boarding": {
+          "rect": [
+            1056.0,
+            272.0,
+            848.0,
+            72.0
+          ],
+          "visible": true
+        },
+        "flightdeck": {
+          "rect": [
+            1056.0,
+            88.0,
+            848.0,
+            176.0
+          ],
+          "visible": true
+        },
+        "loadout": {
+          "rect": [
+            368.0,
+            248.0,
+            672.0,
+            816.0
+          ],
+          "visible": true
+        },
+        "teams": {
+          "rect": [
+            368.0,
+            88.0,
+            672.0,
+            144.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "fob",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "0d5b63ce55c10d449ef5d5849229dd50827be45989e313411bf37907772f9382"
+  },
+  {
+    "view": "homebase",
+    "variant": "standard",
+    "file": "homebase_1920x1080",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 12.279,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_variant": "standard",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/homebase_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "briefing": {
+          "rect": [
+            16.0,
+            64.0,
+            1888.0,
+            112.0
+          ],
+          "visible": true
+        },
+        "flightdeck": {
+          "rect": [
+            1032.0,
+            192.0,
+            872.0,
+            416.0
+          ],
+          "visible": true
+        },
+        "teams": {
+          "rect": [
+            496.0,
+            192.0,
+            520.0,
+            128.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "homebase",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "083ec7dc855526572a77d8756e81c50cb2201edfee5d520b60c519d0f70f4173"
+  },
+  {
+    "view": "fob",
+    "variant": "standard",
+    "file": "fob_1280x720",
+    "size": "1280x720",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 3.357,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_variant": "standard",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/fob_1280x720.png",
+      "image_size": [
+        1280,
+        720
+      ],
+      "logical_size": [
+        1280,
+        720
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1280,
+        720
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "boarding": {
+          "rect": [
+            704.0,
+            272.0,
+            560.0,
+            72.0
+          ],
+          "visible": true
+        },
+        "flightdeck": {
+          "rect": [
+            704.0,
+            88.0,
+            560.0,
+            176.0
+          ],
+          "visible": true
+        },
+        "loadout": {
+          "rect": [
+            248.0,
+            248.0,
+            440.0,
+            456.0
+          ],
+          "visible": true
+        },
+        "teams": {
+          "rect": [
+            248.0,
+            88.0,
+            440.0,
+            144.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "fob",
+      "viewport_size": [
+        1280.0,
+        720.0
+      ]
+    },
+    "image_sha256": "48bb3d9db6aaac412395554f3b87c60801edc5e3047bae9c073766baea692213"
+  },
+  {
+    "view": "homebase",
+    "variant": "standard",
+    "file": "homebase_1280x720",
+    "size": "1280x720",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 14.126,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_variant": "standard",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/homebase_1280x720.png",
+      "image_size": [
+        1280,
+        720
+      ],
+      "logical_size": [
+        1280,
+        720
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1280,
+        720
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "briefing": {
+          "rect": [
+            16.0,
+            64.0,
+            1248.0,
+            112.0
+          ],
+          "visible": true
+        },
+        "flightdeck": {
+          "rect": [
+            696.0,
+            192.0,
+            568.0,
+            416.0
+          ],
+          "visible": true
+        },
+        "teams": {
+          "rect": [
+            336.0,
+            192.0,
+            344.0,
+            128.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "homebase",
+      "viewport_size": [
+        1280.0,
+        720.0
+      ]
+    },
+    "image_sha256": "4a31b5e41472f0ed6662b822d36ca49f3e115d93405e54eaf9446ed02a6bd169"
+  },
+  {
+    "view": "fob",
+    "variant": "populated",
+    "file": "fob_populated_1920x1080",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 3.263,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_variant": "populated",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/fob_populated_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "boarding": {
+          "rect": [
+            1056.0,
+            520.0,
+            848.0,
+            104.0
+          ],
+          "visible": true
+        },
+        "flightdeck": {
+          "rect": [
+            1056.0,
+            88.0,
+            848.0,
+            424.0
+          ],
+          "visible": true
+        },
+        "loadout": {
+          "rect": [
+            368.0,
+            248.0,
+            672.0,
+            816.0
+          ],
+          "visible": true
+        },
+        "teams": {
+          "rect": [
+            368.0,
+            88.0,
+            672.0,
+            144.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "fob",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "1d01b0f38fb7c564a095b3d0717d353b18da380700e2f523c61fbdb7dc76f165"
+  },
+  {
+    "view": "homebase",
+    "variant": "teams",
+    "file": "homebase_teams_1920x1080",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 4.211,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_variant": "teams",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/homebase_teams_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "briefing": {
+          "rect": [
+            16.0,
+            64.0,
+            1888.0,
+            112.0
+          ],
+          "visible": true
+        },
+        "flightdeck": {
+          "rect": [
+            1032.0,
+            192.0,
+            872.0,
+            184.0
+          ],
+          "visible": true
+        },
+        "teams": {
+          "rect": [
+            496.0,
+            192.0,
+            520.0,
+            470.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "homebase",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "8bebb8e0d10b5ba20767d9acc83aebcd72fcd7e65b994b5ccdae3c71c631909a"
+  },
+  {
+    "view": "mission",
+    "variant": "standard",
+    "file": "mission_1920x1080",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 8.139,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_variant": "standard",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/mission_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "objective": {
+          "rect": [
+            1184.0,
+            24.0,
+            352.0,
+            72.0
+          ],
+          "visible": true
+        },
+        "transport": {
+          "rect": [
+            1552.0,
+            24.0,
+            352.0,
+            72.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "mission",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "c5b0cc92dd72a3f96e712e9156d0f26f0427d94ab8adb683ee490b50b7a41beb"
+  },
+  {
+    "view": "mission",
+    "variant": "standard",
+    "file": "mission_1280x720",
+    "size": "1280x720",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 8.268,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_variant": "standard",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/mission_1280x720.png",
+      "image_size": [
+        1280,
+        720
+      ],
+      "logical_size": [
+        1280,
+        720
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1280,
+        720
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "objective": {
+          "rect": [
+            544.0,
+            24.0,
+            352.0,
+            72.0
+          ],
+          "visible": true
+        },
+        "transport": {
+          "rect": [
+            912.0,
+            24.0,
+            352.0,
+            72.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "mission",
+      "viewport_size": [
+        1280.0,
+        720.0
+      ]
+    },
+    "image_sha256": "ee28b6831728059d6ac1f8eb44c46bf66150be67cafd8718fb6b34dbd393d572"
+  },
+  {
+    "view": "debrief",
+    "variant": "standard",
+    "file": "debrief_1920x1080",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.295,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_summary": {
+        "award_applied": false,
+        "has_aar": false,
+        "person_count": 3
+      },
+      "fixture_variant": "standard",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/debrief_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "return_card": {
+          "rect": [
+            364.0,
+            719.0,
+            1192.0,
+            109.0
+          ],
+          "visible": true
+        },
+        "return_row": {
+          "rect": [
+            372.0,
+            782.0,
+            1176.0,
+            40.0
+          ],
+          "visible": true
+        },
+        "return_slot": {
+          "rect": [
+            372.0,
+            782.0,
+            1176.0,
+            40.0
+          ],
+          "visible": true
+        },
+        "window": {
+          "rect": [
+            340.0,
+            228.0,
+            1240.0,
+            624.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "debrief",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "2f220daa5a69dcde30ad339e93682e4ffe8694d1452141c432011dac88921f7c"
+  },
+  {
+    "view": "debrief",
+    "variant": "standard",
+    "file": "debrief_1280x720",
+    "size": "1280x720",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.229,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_summary": {
+        "award_applied": false,
+        "has_aar": false,
+        "person_count": 3
+      },
+      "fixture_variant": "standard",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/debrief_1280x720.png",
+      "image_size": [
+        1280,
+        720
+      ],
+      "logical_size": [
+        1280,
+        720
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1280,
+        720
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "return_card": {
+          "rect": [
+            48.0,
+            539.0,
+            1184.0,
+            109.0
+          ],
+          "visible": true
+        },
+        "return_row": {
+          "rect": [
+            56.0,
+            602.0,
+            1168.0,
+            40.0
+          ],
+          "visible": true
+        },
+        "return_slot": {
+          "rect": [
+            56.0,
+            602.0,
+            1168.0,
+            40.0
+          ],
+          "visible": true
+        },
+        "window": {
+          "rect": [
+            24.0,
+            48.0,
+            1232.0,
+            624.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "debrief",
+      "viewport_size": [
+        1280.0,
+        720.0
+      ]
+    },
+    "image_sha256": "504ede11a3f32bea81a30f476e5b5069e85a5e10e47867297e3591123dd14ccb"
+  },
+  {
+    "view": "debrief",
+    "variant": "empty",
+    "file": "debrief_empty_1920x1080",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.712,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_summary": {
+        "award_applied": false,
+        "has_aar": false,
+        "person_count": 0
+      },
+      "fixture_variant": "empty",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/debrief_empty_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "return_card": {
+          "rect": [
+            544.0,
+            526.0,
+            832.0,
+            109.0
+          ],
+          "visible": true
+        },
+        "return_row": {
+          "rect": [
+            552.0,
+            589.0,
+            816.0,
+            40.0
+          ],
+          "visible": true
+        },
+        "return_slot": {
+          "rect": [
+            552.0,
+            589.0,
+            816.0,
+            40.0
+          ],
+          "visible": true
+        },
+        "window": {
+          "rect": [
+            520.0,
+            420.0,
+            880.0,
+            240.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "debrief",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "d2a4ba0998b1874c4c2a47f21ea3e461214ef2ef785a494e1328a81add034d86"
+  },
+  {
+    "view": "debrief",
+    "variant": "rich",
+    "file": "debrief_rich_1920x1080",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.608,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_summary": {
+        "award_applied": true,
+        "has_aar": true,
+        "person_count": 12
+      },
+      "fixture_variant": "rich",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/debrief_rich_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "return_card": {
+          "rect": [
+            264.0,
+            735.0,
+            1392.0,
+            109.0
+          ],
+          "visible": true
+        },
+        "return_row": {
+          "rect": [
+            272.0,
+            798.0,
+            1376.0,
+            40.0
+          ],
+          "visible": true
+        },
+        "return_slot": {
+          "rect": [
+            272.0,
+            798.0,
+            1376.0,
+            40.0
+          ],
+          "visible": true
+        },
+        "window": {
+          "rect": [
+            240.0,
+            211.0,
+            1440.0,
+            657.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "debrief",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "d924218bd02fa12919ed4af3c01e9a5f2625437347d38e573950ec20ddf18255"
+  },
+  {
+    "view": "debrief",
+    "variant": "partial",
+    "file": "debrief_partial_1920x1080",
+    "size": "1920x1080",
+    "passed": true,
+    "exit_code": 0,
+    "error_count": 0,
+    "duration_seconds": 2.426,
+    "evidence": {
+      "display_driver": "Windows",
+      "fixture_data": true,
+      "fixture_summary": {
+        "award_applied": false,
+        "has_aar": false,
+        "person_count": 0
+      },
+      "fixture_variant": "partial",
+      "image": "res://docs/qa/ui_native_r3_20261102/captures/debrief_partial_1920x1080.png",
+      "image_size": [
+        1920,
+        1080
+      ],
+      "logical_size": [
+        1920,
+        1080
+      ],
+      "note": "Real native controls/source scene; test fixture and example data, no human usability acceptance.",
+      "renderer": "gl_compatibility",
+      "requested_window_size": [
+        1920,
+        1080
+      ],
+      "save_error": 0,
+      "scaled_capture": false,
+      "source_capture": true,
+      "synthetic_image_fallback": false,
+      "ui_metrics": {
+        "return_card": {
+          "rect": [
+            364.0,
+            724.0,
+            1192.0,
+            109.0
+          ],
+          "visible": true
+        },
+        "return_row": {
+          "rect": [
+            372.0,
+            787.0,
+            1176.0,
+            40.0
+          ],
+          "visible": true
+        },
+        "return_slot": {
+          "rect": [
+            372.0,
+            787.0,
+            1176.0,
+            40.0
+          ],
+          "visible": true
+        },
+        "window": {
+          "rect": [
+            340.0,
+            223.0,
+            1240.0,
+            634.0
+          ],
+          "visible": true
+        }
+      },
+      "view": "debrief",
+      "viewport_size": [
+        1920.0,
+        1080.0
+      ]
+    },
+    "image_sha256": "194ef08d6bb3505cbf044d6f24a25b84352a19aa11101beb5253a49f8c1f217b"
+  }
+]

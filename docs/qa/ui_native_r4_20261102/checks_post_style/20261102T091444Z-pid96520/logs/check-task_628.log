@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_628 Mission HUD Legacy Contract Refresh ===
+PASS: TASK_628 task file exists
+PASS: TASK_628 task names legacy contract refresh
+PASS: Implementation status tracks TASK_628
+PASS: Roadmap marks TASK_628 implemented
+PASS: Mission command feedback contract documents TASK_628
+PASS: Rolling report tracks TASK_628
+PASS: Rolling report retains a non-stale task-progress record
+PASS: Status handbook retains a non-stale current-task record
+PASS: Mission scene exposes command grid
+PASS: #16 uses the native A5 layout while preserving existing controls
+PASS: FireRuleHoldButton exists
+PASS: FireRuleHoldButton is reachable in the selected-team parameters
+PASS: FireRuleHoldButton is marked as fire-rule control
+PASS: FireRuleHoldButton keeps compact fire-rule label
+PASS: FireRuleReturnButton exists
+PASS: FireRuleReturnButton is reachable in the selected-team parameters
+PASS: FireRuleReturnButton is marked as fire-rule control
+PASS: FireRuleReturnButton keeps compact fire-rule label
+PASS: FireRuleFreeButton exists
+PASS: FireRuleFreeButton is reachable in the selected-team parameters
+PASS: FireRuleFreeButton is marked as fire-rule control
+PASS: FireRuleFreeButton keeps compact fire-rule label
+PASS: FireRuleSuppressButton exists
+PASS: FireRuleSuppressButton is reachable in the selected-team parameters
+PASS: FireRuleSuppressButton is marked as fire-rule control
+PASS: FireRuleSuppressButton keeps compact fire-rule label
+PASS: Mission test scene exposes controller and setup
+PASS: Mission fixture exposes at least one fireteam
+PASS: Inbound fixture uses actual members from the existing fireteam
+PASS: #17 member-card lane is sourced from the selected inbound fireteam
+PASS: #17 shows inbound fireteam member cards
+PASS: Inbound member cards render as disabled/read-only
+=== RESULTS: 32 passed, 0 failed ===
+TASK_628: ALL PASSED

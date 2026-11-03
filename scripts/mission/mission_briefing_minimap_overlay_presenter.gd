@@ -5,6 +5,7 @@ const TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
 const VERTICAL_SLICE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_vertical_slice_contract.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
+const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 
 
 func build_snapshot_from_files(scenario_path: String, map_path: String = "", play_mode: String = TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_MULTIPLAYER_PVP) -> Dictionary:
@@ -135,19 +136,25 @@ func _build_map_bounds(terrain_map_data) -> Dictionary:
 	if terrain_map_data == null or not terrain_map_data.has_method("get_grid_size"):
 		return {"min": _serialize_vector2(Vector2.ZERO), "max": _serialize_vector2(Vector2.ONE)}
 	var grid_size: Vector2i = terrain_map_data.call("get_grid_size")
-	var corners: Array[Vector2] = [
-		_grid_to_world(terrain_map_data, Vector2i(0, 0)),
-		_grid_to_world(terrain_map_data, Vector2i(maxi(grid_size.x - 1, 0), 0)),
-		_grid_to_world(terrain_map_data, Vector2i(0, maxi(grid_size.y - 1, 0))),
-		_grid_to_world(terrain_map_data, Vector2i(maxi(grid_size.x - 1, 0), maxi(grid_size.y - 1, 0))),
-	]
-	var min_position: Vector2 = corners[0]
-	var max_position: Vector2 = corners[0]
-	for corner in corners:
-		min_position.x = minf(min_position.x, corner.x)
-		min_position.y = minf(min_position.y, corner.y)
-		max_position.x = maxf(max_position.x, corner.x)
-		max_position.y = maxf(max_position.y, corner.y)
+	# Saved cells own map shape. Odd-row rectangles contain negative axial q;
+	# four (0..size-1) q/r corners describe a different physical parallelogram.
+	var positions: Array[Vector2] = []
+	if terrain_map_data.has_method("get_tiles"):
+		for tile in terrain_map_data.call("get_tiles"):
+			if tile != null and typeof(tile.world_position) == TYPE_VECTOR2:
+				positions.append(Vector2(tile.world_position))
+	if positions.is_empty():
+		positions = [
+			_grid_to_world(terrain_map_data, Vector2i.ZERO),
+			_grid_to_world(terrain_map_data, Vector2i(maxi(grid_size.x - 1, 0), 0)),
+			_grid_to_world(terrain_map_data, Vector2i(0, maxi(grid_size.y - 1, 0))),
+			_grid_to_world(terrain_map_data, Vector2i(maxi(grid_size.x - 1, 0), maxi(grid_size.y - 1, 0))),
+		]
+	var min_position: Vector2 = positions[0]
+	var max_position: Vector2 = positions[0]
+	for position in positions:
+		min_position = min_position.min(position)
+		max_position = max_position.max(position)
 	return {
 		"min": _serialize_vector2(min_position),
 		"max": _serialize_vector2(max_position),
@@ -158,9 +165,12 @@ func _build_map_bounds(terrain_map_data) -> Dictionary:
 func _grid_to_world(terrain_map_data, grid_position: Vector2i) -> Vector2:
 	var tile_size: Dictionary = Dictionary(terrain_map_data.call("get_tile_size"))
 	var origin: Vector2 = terrain_map_data.call("get_grid_origin")
+	var plane := Vector2(grid_position)
+	if terrain_map_data.has_method("get_grid_topology") and String(terrain_map_data.call("get_grid_topology")) == HEX_GRID_SCRIPT.TOPOLOGY_ID:
+		plane = HEX_GRID_SCRIPT.axial_to_plane(plane)
 	return Vector2(
-		origin.x + (float(grid_position.x - grid_position.y) * float(tile_size.get("half_width", 64.0))),
-		origin.y + (float(grid_position.x + grid_position.y) * float(tile_size.get("half_height", 32.0)))
+		origin.x + ((plane.x - plane.y) * float(tile_size.get("half_width", 64.0))),
+		origin.y + ((plane.x + plane.y) * float(tile_size.get("half_height", 32.0)))
 	)
 
 

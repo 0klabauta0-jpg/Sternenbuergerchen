@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "scope": "Selected frozen source, original target images and native evidence match staged Git blob bytes; no repinning or engine execution.",
+  "checked_files": 106,
+  "failures": [],
+  "snapshot_sha256": "eb46da8f8559ae76fc286ddff7d729a8c0402d7d74f8a9f7aefd3ce6afb2b865"
+}

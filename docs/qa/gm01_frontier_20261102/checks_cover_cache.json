@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "gm01_enemies",
+      "script": "res://scripts/tests/task_344_ground_mission_default_enemy_visuals.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    },
+    {
+      "name": "gm01_objective",
+      "script": "res://scripts/tests/task_1179_ground_mission_objective_playthrough.gd",
+      "success_marker": "0 failed",
+      "timeout": 180
+    },
+    {
+      "name": "cover_cache",
+      "script": "res://scripts/tests/gm01_frontier_cover_score_cache_verifier.gd",
+      "success_marker": "GM01_FRONTIER_COVER_SCORE_CACHE_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "tactics_guard",
+      "script": "res://scripts/tests/task_1049_enemy_team_tactics_decision_revision_guard.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    }
+  ]
+}

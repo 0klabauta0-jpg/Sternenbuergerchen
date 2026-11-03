@@ -1,0 +1,72 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+SCRIPT ERROR: Parse Error: Cannot infer the type of "stylebox" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/mission_tactical_sandbox_controller.gd:5369)
+ERROR: Failed to load script "res://scripts/tests/mission_tactical_sandbox_controller.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_181 Drop Light Fixed Window Audit Verifier ===
+  RECT MISMATCH MissionPanel actual pos=(0.0, 0.0) size=(1920.0, 74.0) expected pos=(0, 0) size=(1920, 72)
+  FAIL: FOB topbar uses actual fixed position and size
+  PASS: FOB unassigned_pool uses actual fixed position and size
+  PASS: FOB fireteams uses actual fixed position and size
+  PASS: FOB loadout uses actual fixed position and size
+  PASS: FOB flightdeck uses actual fixed position and size
+  PASS: FOB boarding_status uses actual fixed position and size
+  PASS: FOB actions uses actual fixed position and size
+  PASS: FOB NPC pool scroll stays inside the fixed #09 window
+  PASS: FOB Fireteam scroll stays inside the fixed #10 window
+  PASS: FOB full staging scroll stays inside the bounded #13 window
+  PASS: FOB per-member loadout retains native vertical scrolling
+  PASS: FOB Flightdeck ship list stays inside the fixed #14 window
+  PASS: FOB bottom action grid exists for fake-action audit
+  PASS: FOB UnboardButton is visible only as a disabled template action
+  PASS: FOB HoldButton is visible only as a disabled template action
+  PASS: FOB CargoButton is visible only as a disabled template action
+  PASS: FOB MedbayLaterButton is visible only as a disabled template action
+  PASS: FOB BoardButton keeps an existing callback path
+  PASS: FOB SendButton keeps an existing callback path
+  PASS: Homebase topbar uses actual fixed position and size
+  PASS: Homebase mission_brief uses actual fixed position and size
+  PASS: Homebase roster uses actual fixed position and size
+  PASS: Homebase fireteams uses actual fixed position and size
+  PASS: Homebase flightdeck uses actual fixed position and size
+  PASS: Homebase character_popup uses actual fixed position and size
+  PASS: Homebase roster scroll stays inside the fixed #02 window
+  PASS: Homebase fireteam scroll stays inside the active fixed window
+  PASS: Homebase flightdeck shipcards stay inside the fixed #05 window
+  PASS: Homebase retired transfer window stays disabled
+  PASS: Homebase retired character-sheet window stays disabled
+  PASS: Homebase character popup starts closed
+  PASS: Homebase card-open request shows the actual character popup and scroll
+  PASS: Homebase visible character scroll stays inside the current popup
+  PASS: Homebase character popup closes through its existing callback
+  RECT MISMATCH MissionIdentityPanel actual pos=(1556.0, 16.0) size=(348.0, 76.0) expected pos=(1184, 24) size=(352, 72)
+  FAIL: Mission HUD mission_identity uses actual fixed position and size
+  RECT MISMATCH TopNavPanel actual pos=(768.0, 24.0) size=(384.0, 56.0) expected pos=(16, 16) size=(384, 56)
+  FAIL: Mission HUD top_nav uses actual fixed position and size
+  RECT MISMATCH FireteamMiniPanel actual pos=(24.0, 128.0) size=(240.0, 312.0) expected pos=(32, 112) size=(240, 304)
+  FAIL: Mission HUD fireteam_mini uses actual fixed position and size
+  RECT MISMATCH CommandPanel actual pos=(14.0, 826.0) size=(304.0, 248.0) expected pos=(0, 920) size=(360, 160)
+  FAIL: Mission HUD command_matrix uses actual fixed position and size
+  RECT MISMATCH FireteamPanel actual pos=(324.0, 826.0) size=(1272.0, 248.0) expected pos=(624, 920) size=(512, 160)
+  FAIL: Mission HUD selected_fireteam uses actual fixed position and size
+  RECT MISMATCH StrategicPanel actual pos=(1602.0, 826.0) size=(304.0, 248.0) expected pos=(1552, 24) size=(352, 72)
+  FAIL: Mission HUD mission_control uses actual fixed position and size
+  PASS: Mission command scroll stays inside the fixed #16 window
+  PASS: Mission fireteam status scroll stays inside the fixed #17 window
+  FAIL: Mission member cards remain above the compact A5 band
+  PASS: Mission control scroll stays inside the fixed #18 window
+  FAIL: Mission HUD keeps disabled phase-template controls hidden
+  PASS: res://scripts/meta/fob_screen.gd does not introduce UI-owned SimulationRoot truth
+  PASS: res://scripts/meta/homebase_screen.gd does not introduce UI-owned SimulationRoot truth
+  PASS: res://scripts/terrain/terrain_map_3d_view.gd remains outside the drop_light fixed-window audit patch
+  PASS: res://scripts/core/simulation_root.gd remains outside the drop_light fixed-window audit patch
+  PASS: res://scripts/terrain/terrain_pathfinder.gd remains outside the drop_light fixed-window audit patch
+  PASS: res://scripts/terrain/hpa_pathfinder.gd remains outside the drop_light fixed-window audit patch
+=== RESULTS: 42 passed, 9 failed ===
+TASK_181: FAILED

@@ -1,0 +1,145 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Old HPA source remains byte-identical to the measured baseline
+PASS: Pinned old implementation compiles after removing only its global class_name
+PASS: Old TerrainPathfinder source remains byte-identical and independently pinned
+PASS: Old HPA uses a separately compiled old TerrainPathfinder, not the new heap
+PASS: Ordinary paths use the real minimum surface cost
+PASS: Cover bonuses use the lower clamped cover-aware floor
+PASS: Finite cover weight gives the tighter surface-minus-maximum-bonus floor
+PASS: Finite negative custom penalties remain valid under the existing clamps
+PASS: Nonfinite custom costs keep the complete old evaluation path
+PASS: Nonfinite custom exposure disables the lower bound
+PASS: Equality is evaluated by the unchanged original tie rule
+PASS: Near equality stays on the original path despite summation rounding
+PASS: A strictly losing finite candidate is rejected before A*
+PASS: Actual saved 9408-cell GM01 is the comparison fixture
+PASS: Actual GM01 builds the same full HPA graph
+PASS: gm01 measured GO pair: exact status
+PASS: gm01 measured GO pair: exact ordered path array including all tie choices
+PASS: gm01 measured GO pair: query leaves terrain authority unchanged
+PASS: gm01 measured GO pair: diagnostic counter equals actual local A* calls
+PASS: gm01 measured GO pair: no extra A* evaluation
+PASS: gm01 measured GO pair: measured query actually avoids losing candidates
+HPA_PRUNING_QUERY {"case":"gm01 measured GO pair","debug":{"derived_only":true,"local_astar_evaluation_count":86,"lower_bound_pruned_count":24,"minimum_local_step_cost":0.7,"portal_candidate_count":92},"new_astar":86,"new_usec":209580,"old_astar":110,"old_usec":197940,"path_size":11,"status":"hpa"}
+PASS: gm01 new western cells: exact status
+PASS: gm01 new western cells: exact ordered path array including all tie choices
+PASS: gm01 new western cells: query leaves terrain authority unchanged
+PASS: gm01 new western cells: diagnostic counter equals actual local A* calls
+PASS: gm01 new western cells: no extra A* evaluation
+PASS: gm01 new western cells: measured query actually avoids losing candidates
+HPA_PRUNING_QUERY {"case":"gm01 new western cells","debug":{"derived_only":true,"local_astar_evaluation_count":72,"lower_bound_pruned_count":35,"minimum_local_step_cost":0.7,"portal_candidate_count":95},"new_astar":72,"new_usec":305484,"old_astar":107,"old_usec":329935,"path_size":10,"status":"hpa"}
+PASS: gm01 weighted GO pair: exact status
+PASS: gm01 weighted GO pair: exact ordered path array including all tie choices
+PASS: gm01 weighted GO pair: query leaves terrain authority unchanged
+PASS: gm01 weighted GO pair: diagnostic counter equals actual local A* calls
+PASS: gm01 weighted GO pair: no extra A* evaluation
+PASS: gm01 weighted GO pair: measured query actually avoids losing candidates
+HPA_PRUNING_QUERY {"case":"gm01 weighted GO pair","debug":{"derived_only":true,"local_astar_evaluation_count":86,"lower_bound_pruned_count":24,"minimum_local_step_cost":0.45,"portal_candidate_count":92},"new_astar":86,"new_usec":601295,"old_astar":110,"old_usec":554726,"path_size":11,"status":"hpa"}
+PASS: gm01 production movement options: exact status
+PASS: gm01 production movement options: exact ordered path array including all tie choices
+PASS: gm01 production movement options: query leaves terrain authority unchanged
+PASS: gm01 production movement options: diagnostic counter equals actual local A* calls
+PASS: gm01 production movement options: no extra A* evaluation
+PASS: gm01 production movement options: measured query actually avoids losing candidates
+HPA_PRUNING_QUERY {"case":"gm01 production movement options","debug":{"derived_only":true,"local_astar_evaluation_count":69,"lower_bound_pruned_count":14,"minimum_local_step_cost":0.1225,"portal_candidate_count":66},"new_astar":69,"new_usec":1222099,"old_astar":83,"old_usec":1068474,"path_size":11,"status":"hpa"}
+PASS: Exact real-map comparisons never rewrite the saved map
+PASS: Small negative-coordinate fixture builds
+PASS: negative hex (-4, -3) to (4, 3): exact status
+PASS: negative hex (-4, -3) to (4, 3): exact ordered path array including all tie choices
+PASS: negative hex (-4, -3) to (4, 3): query leaves terrain authority unchanged
+PASS: negative hex (-4, -3) to (4, 3): diagnostic counter equals actual local A* calls
+PASS: negative hex (-4, -3) to (4, 3): no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"negative hex (-4, -3) to (4, 3)","debug":{"derived_only":true,"local_astar_evaluation_count":63,"lower_bound_pruned_count":150,"minimum_local_step_cost":0.7,"portal_candidate_count":202},"new_astar":63,"new_usec":33196,"old_astar":214,"old_usec":46006,"path_size":15,"status":"hpa"}
+PASS: negative hex (4, 3) to (-4, -3): exact status
+PASS: negative hex (4, 3) to (-4, -3): exact ordered path array including all tie choices
+PASS: negative hex (4, 3) to (-4, -3): query leaves terrain authority unchanged
+PASS: negative hex (4, 3) to (-4, -3): diagnostic counter equals actual local A* calls
+PASS: negative hex (4, 3) to (-4, -3): no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"negative hex (4, 3) to (-4, -3)","debug":{"derived_only":true,"local_astar_evaluation_count":77,"lower_bound_pruned_count":121,"minimum_local_step_cost":0.7,"portal_candidate_count":186},"new_astar":77,"new_usec":32137,"old_astar":198,"old_usec":41175,"path_size":15,"status":"hpa"}
+PASS: negative hex (-2, 1) to (2, -1): exact status
+PASS: negative hex (-2, 1) to (2, -1): exact ordered path array including all tie choices
+PASS: negative hex (-2, 1) to (2, -1): query leaves terrain authority unchanged
+PASS: negative hex (-2, 1) to (2, -1): diagnostic counter equals actual local A* calls
+PASS: negative hex (-2, 1) to (2, -1): no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"negative hex (-2, 1) to (2, -1)","debug":{"derived_only":true,"local_astar_evaluation_count":28,"lower_bound_pruned_count":21,"minimum_local_step_cost":0.7,"portal_candidate_count":44},"new_astar":28,"new_usec":6644,"old_astar":52,"old_usec":11454,"path_size":5,"status":"hpa"}
+PASS: negative hex (-1, -1) to (-1, -1): exact status
+PASS: negative hex (-1, -1) to (-1, -1): exact ordered path array including all tie choices
+PASS: negative hex (-1, -1) to (-1, -1): query leaves terrain authority unchanged
+PASS: negative hex (-1, -1) to (-1, -1): diagnostic counter equals actual local A* calls
+PASS: negative hex (-1, -1) to (-1, -1): no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"negative hex (-1, -1) to (-1, -1)","debug":{"derived_only":true,"local_astar_evaluation_count":1,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":0},"new_astar":1,"new_usec":10,"old_astar":1,"old_usec":15,"path_size":1,"status":"same_component"}
+PASS: all weighted penalties and signed lane: exact status
+PASS: all weighted penalties and signed lane: exact ordered path array including all tie choices
+PASS: all weighted penalties and signed lane: query leaves terrain authority unchanged
+PASS: all weighted penalties and signed lane: diagnostic counter equals actual local A* calls
+PASS: all weighted penalties and signed lane: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"all weighted penalties and signed lane","debug":{"derived_only":true,"local_astar_evaluation_count":91,"lower_bound_pruned_count":109,"minimum_local_step_cost":0.05,"portal_candidate_count":186},"new_astar":91,"new_usec":554619,"old_astar":200,"old_usec":669112,"path_size":12,"status":"hpa"}
+PASS: negative custom weights: exact status
+PASS: negative custom weights: exact ordered path array including all tie choices
+PASS: negative custom weights: query leaves terrain authority unchanged
+PASS: negative custom weights: diagnostic counter equals actual local A* calls
+PASS: negative custom weights: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"negative custom weights","debug":{"derived_only":true,"local_astar_evaluation_count":63,"lower_bound_pruned_count":111,"minimum_local_step_cost":0.7,"portal_candidate_count":163},"new_astar":63,"new_usec":61929,"old_astar":176,"old_usec":101699,"path_size":11,"status":"hpa"}
+PASS: cover bonus clamps below surface floor: exact status
+PASS: cover bonus clamps below surface floor: exact ordered path array including all tie choices
+PASS: cover bonus clamps below surface floor: query leaves terrain authority unchanged
+PASS: cover bonus clamps below surface floor: diagnostic counter equals actual local A* calls
+PASS: cover bonus clamps below surface floor: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"cover bonus clamps below surface floor","debug":{"derived_only":true,"local_astar_evaluation_count":78,"lower_bound_pruned_count":59,"minimum_local_step_cost":0.05,"portal_candidate_count":124},"new_astar":78,"new_usec":142214,"old_astar":137,"old_usec":173651,"path_size":11,"status":"hpa"}
+PASS: missing destination: exact status
+PASS: missing destination: exact ordered path array including all tie choices
+PASS: missing destination: query leaves terrain authority unchanged
+PASS: missing destination: diagnostic counter equals actual local A* calls
+PASS: missing destination: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"missing destination","debug":{"derived_only":true,"local_astar_evaluation_count":0,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":0},"new_astar":0,"new_usec":5,"old_astar":0,"old_usec":10,"path_size":0,"status":"no_component"}
+PASS: Blocked barrier rebuilds dirty clusters on the same graph
+PASS: blocked disconnected graph: exact status
+PASS: blocked disconnected graph: exact ordered path array including all tie choices
+PASS: blocked disconnected graph: query leaves terrain authority unchanged
+PASS: blocked disconnected graph: diagnostic counter equals actual local A* calls
+PASS: blocked disconnected graph: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"blocked disconnected graph","debug":{"derived_only":true,"local_astar_evaluation_count":26,"lower_bound_pruned_count":56,"minimum_local_step_cost":0.7,"portal_candidate_count":82},"new_astar":26,"new_usec":7822,"old_astar":82,"old_usec":10580,"path_size":0,"status":"no_abstract_route"}
+PASS: blocked source: exact status
+PASS: blocked source: exact ordered path array including all tie choices
+PASS: blocked source: query leaves terrain authority unchanged
+PASS: blocked source: diagnostic counter equals actual local A* calls
+PASS: blocked source: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"blocked source","debug":{"derived_only":true,"local_astar_evaluation_count":0,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":0},"new_astar":0,"new_usec":5,"old_astar":0,"old_usec":8,"path_size":0,"status":"no_component"}
+PASS: Minimum-surface-cost fixture builds
+PASS: road summation and equal routes: exact status
+PASS: road summation and equal routes: exact ordered path array including all tie choices
+PASS: road summation and equal routes: query leaves terrain authority unchanged
+PASS: road summation and equal routes: diagnostic counter equals actual local A* calls
+PASS: road summation and equal routes: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"road summation and equal routes","debug":{"derived_only":true,"local_astar_evaluation_count":53,"lower_bound_pruned_count":129,"minimum_local_step_cost":0.7,"portal_candidate_count":175},"new_astar":53,"new_usec":16693,"old_astar":187,"old_usec":33380,"path_size":15,"status":"hpa"}
+PASS: equal-cost closer-entry tie improves: exact status
+PASS: equal-cost closer-entry tie improves: exact ordered path array including all tie choices
+PASS: equal-cost closer-entry tie improves: query leaves terrain authority unchanged
+PASS: equal-cost closer-entry tie improves: diagnostic counter equals actual local A* calls
+PASS: equal-cost closer-entry tie improves: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"equal-cost closer-entry tie improves","debug":{"derived_only":true,"local_astar_evaluation_count":6,"lower_bound_pruned_count":0,"minimum_local_step_cost":0.7,"portal_candidate_count":2},"new_astar":6,"new_usec":1803,"old_astar":6,"old_usec":1201,"path_size":4,"status":"hpa"}
+PASS: Tie fixture actually selects the later, closer entry
+PASS: equal-cost farther-entry tie rejected: exact status
+PASS: equal-cost farther-entry tie rejected: exact ordered path array including all tie choices
+PASS: equal-cost farther-entry tie rejected: query leaves terrain authority unchanged
+PASS: equal-cost farther-entry tie rejected: diagnostic counter equals actual local A* calls
+PASS: equal-cost farther-entry tie rejected: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"equal-cost farther-entry tie rejected","debug":{"derived_only":true,"local_astar_evaluation_count":6,"lower_bound_pruned_count":0,"minimum_local_step_cost":0.7,"portal_candidate_count":2},"new_astar":6,"new_usec":832,"old_astar":6,"old_usec":796,"path_size":4,"status":"hpa"}
+PASS: Legacy square fixture builds
+PASS: legacy square unchanged: exact status
+PASS: legacy square unchanged: exact ordered path array including all tie choices
+PASS: legacy square unchanged: query leaves terrain authority unchanged
+PASS: legacy square unchanged: diagnostic counter equals actual local A* calls
+PASS: legacy square unchanged: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"legacy square unchanged","debug":{"derived_only":true,"local_astar_evaluation_count":4,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":66},"new_astar":4,"new_usec":2960,"old_astar":4,"old_usec":2635,"path_size":11,"status":"hpa"}
+PASS: legacy weighted unchanged: exact status
+PASS: legacy weighted unchanged: exact ordered path array including all tie choices
+PASS: legacy weighted unchanged: query leaves terrain authority unchanged
+PASS: legacy weighted unchanged: diagnostic counter equals actual local A* calls
+PASS: legacy weighted unchanged: no extra A* evaluation
+HPA_PRUNING_QUERY {"case":"legacy weighted unchanged","debug":{"derived_only":true,"local_astar_evaluation_count":4,"lower_bound_pruned_count":0,"minimum_local_step_cost":-1.0,"portal_candidate_count":66},"new_astar":4,"new_usec":2589,"old_astar":4,"old_usec":2711,"path_size":12,"status":"hpa"}
+PASS: Exact comparisons include real pruning and fewer local A* evaluations
+HPA_PRUNING_TOTALS {"checks":121,"failed":0,"new_astar":813,"old_astar":1677,"pruned":853}
+GM01_HEX_HPA_PRUNING_ALL_PASS

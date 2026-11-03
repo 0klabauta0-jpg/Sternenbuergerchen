@@ -39,7 +39,12 @@ func _run_tests() -> void:
 	_assert(bool(first_ui.get("map_consent_visible", false)) and String(first_ui.get("map_consent_text", "")).contains("review7_lobby_first_map"), "Incoming host snapshot opens a consent prompt naming the current offered map")
 	_assert(not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path("user://downloaded_maps")), "Receiving an unknown map manifest never downloads or writes a cache")
 	_assert(bool(first_ui.get("ready_disabled", false)), "Unknown map keeps client Ready disabled until explicit consent")
-	var reject_button: Button = client.get_node("Panel/Margin/VBox/MapConsentPanel/Margin/VBox/MapConsentRow/MapRejectButton")
+	var reject_button := client.find_child("MapRejectButton", true, false) as Button
+	_assert(reject_button != null and reject_button.is_visible_in_tree(), "A5 lobby exposes the active map Reject button")
+	if reject_button == null:
+		await _cleanup_pair(fixture)
+		_finish()
+		return
 	reject_button.pressed.emit()
 	await _poll_pair(host_api, client_api, 10)
 	var rejected_ui: Dictionary = Dictionary(client.call("get_lobby_ui_snapshot"))
@@ -54,7 +59,12 @@ func _run_tests() -> void:
 	await _poll_pair(host_api, client_api, 25)
 	var replacement_ui: Dictionary = Dictionary(client.call("get_lobby_ui_snapshot"))
 	_assert(bool(replacement_ui.get("map_consent_visible", false)) and String(replacement_ui.get("map_consent_text", "")).contains("review7_lobby_second_map"), "Replacement host offer opens a fresh prompt for B after rejecting A")
-	var accept_button: Button = client.get_node("Panel/Margin/VBox/MapConsentPanel/Margin/VBox/MapConsentRow/MapAcceptButton")
+	var accept_button := client.find_child("MapAcceptButton", true, false) as Button
+	_assert(accept_button != null and accept_button.is_visible_in_tree(), "A5 lobby exposes the active map Accept button")
+	if accept_button == null:
+		await _cleanup_pair(fixture)
+		_finish()
+		return
 	accept_button.pressed.emit()
 	await _poll_pair(host_api, client_api, 10)
 	_assert(not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path("user://downloaded_maps")), "V1 Accept button waits for an explicit payload and never downloads automatically")

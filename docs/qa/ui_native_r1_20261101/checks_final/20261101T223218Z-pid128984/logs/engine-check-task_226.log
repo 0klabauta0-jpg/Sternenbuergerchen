@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_226 Main Menu Settings Shell Display Audio Input Gameplay ===
+PASS: Game settings contract saves display, audio and gameplay values
+PASS: Resolution preset roundtrips
+PASS: Window mode roundtrips
+PASS: VSync flag roundtrips
+PASS: Master volume roundtrips
+PASS: Music volume roundtrips
+PASS: SFX volume roundtrips
+PASS: FoW mode roundtrips through central settings contract
+PASS: Display snapshot exposes window-mode choices
+PASS: Audio snapshot exposes music volume
+PASS: Input snapshot exposes core action list
+PASS: Gameplay snapshot carries FoW mode
+PASS: Main menu scene loads for settings verifier
+PASS: Settings panel opens from main menu
+PASS: Settings UI exposes Display section
+PASS: Settings UI exposes Audio section
+PASS: Settings UI exposes Input section
+PASS: Settings UI exposes Gameplay section
+PASS: Settings UI exposes Apply, Reset and Cancel controls
+PASS: Settings UI includes comic bubble mode section
+PASS: Settings UI includes FoW mode section
+PASS: Apply saves draft settings
+PASS: Applied window mode is persisted
+PASS: Applied FoW mode is persisted
+PASS: Applied comic bubble mode is persisted
+PASS: Reset Defaults can be applied
+PASS: Reset restores default FoW mode
+PASS: Reset restores default comic bubble mode
+PASS: Cancel closes settings panel
+PASS: Cancel does not persist draft gameplay settings
+PASS: Opening settings does not create gameplay simulation state
+=== RESULTS: 31 passed, 0 failed ===
+ALL TESTS PASSED

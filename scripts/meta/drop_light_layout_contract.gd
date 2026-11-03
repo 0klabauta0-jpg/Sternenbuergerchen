@@ -78,17 +78,25 @@ static func get_homebase_layout() -> Dictionary:
 	}
 
 
-static func get_mission_hud_layout() -> Dictionary:
+static func get_mission_hud_layout(viewport_size: Vector2i = TARGET_VIEWPORT) -> Dictionary:
+	var band_top := viewport_size.y - 128
+	var mini_height := mini(288, maxi(160, band_top - 128))
+	# Portrait team cards and the protocol are anchored close to the lower band;
+	# the independent compact Cutlass card occupies the upper-right corner.
 	return {
-		"viewport": Rect2i(Vector2i.ZERO, TARGET_VIEWPORT),
-		"mission_identity": Rect2i(24, 24, 360, 80),
-		"top_nav": Rect2i(768, 24, 384, 56),
-		"fireteam_mini": Rect2i(32, 128, 240, 304),
-		"event_log": Rect2i(32, 456, 240, 184),
-		"bottom_dock": Rect2i(0, 800, 1920, 280),
-		"command_matrix": Rect2i(24, 808, 304, 248),
-		"selected_fireteam": Rect2i(344, 808, 1192, 248),
-		"mission_control": Rect2i(1552, 808, 344, 248),
+		"viewport": Rect2i(Vector2i.ZERO, viewport_size),
+		"mission_identity": Rect2i(viewport_size.x - 656, 16, 352, 72),
+		"top_nav": Rect2i(16, 16, 384, 56),
+		"fireteam_mini": Rect2i(16, band_top - mini_height - 16, 272, mini_height),
+		"event_log": Rect2i(viewport_size.x - 336, band_top - 128, 320, 120),
+		"bottom_dock": Rect2i(0, band_top, viewport_size.x, 128),
+		"command_matrix": Rect2i(0, band_top, 296, 128),
+		"target_order": Rect2i(304, band_top, 248, 128),
+		"selected_fireteam": Rect2i(560, band_top, mini(392, viewport_size.x - 568), 128),
+		"selected_members": Rect2i(304, band_top - 112, viewport_size.x - 320, 104),
+		# R3: ordinary transport/time needs two readable lines, not a diagnostic
+		# scroll window. The original raw messages remain in explicit details.
+		"mission_control": Rect2i(viewport_size.x - 288, 16, 272, 156),
 	}
 
 

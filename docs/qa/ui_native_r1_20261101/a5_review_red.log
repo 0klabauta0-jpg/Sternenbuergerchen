@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Native A5 Mission HUD ===
+ERROR: 1920x1080: character overlay has absolute drawing priority above actual mini cards (42)
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:154)
+ERROR: 1920x1080: unchanged light refreshes skip A5 geometry configuration
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:154)
+ERROR: 1280x720: character overlay has absolute drawing priority above actual mini cards (42)
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:154)
+ERROR: 1280x720: unchanged light refreshes skip A5 geometry configuration
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_a5_native_hud_verifier.gd:23)
+       [1] _check_mission (res://scripts/tests/ui_a5_native_hud_verifier.gd:154)
+Native A5: 346 checks, 4 failures

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "native_a5",
+      "script": "res://scripts/tests/ui_a5_native_hud_verifier.gd",
+      "success_marker": "PASS: native A5 HUD",
+      "timeout": 100
+    },
+    {
+      "name": "task_275",
+      "script": "res://scripts/tests/task_275_command_button_hierarchy_arrangement_overhaul.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    }
+  ]
+}

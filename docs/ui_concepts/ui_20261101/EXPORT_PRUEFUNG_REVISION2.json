@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "scope": "Actual revision2 export and A/A2 swap functions offline in Node VM; synthetic UI fields, no browser interaction",
+  "checks": [
+    "A and C source preferences retained",
+    "four unchanged icon verdicts retained",
+    "two new variants remain open",
+    "original unclear verdict provenance retained",
+    "asset versions exported",
+    "unchecked review gates stay unchecked",
+    "A2 and A1 preview/zoom targets swap together",
+    "safe unique filenames"
+  ],
+  "source_export": "docs/ui_concepts/ui_20261101/review_export_20261101_154755.json",
+  "browser_agent_qa": "NOT_RUN_POLICY_BLOCKED_FILE_PROTOCOL",
+  "user_download_evidence": "Original real export recovered in Downloads"
+}

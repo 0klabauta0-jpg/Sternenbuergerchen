@@ -1,6 +1,8 @@
 class_name CharacterSheetView
 extends RefCounted
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
@@ -38,6 +40,8 @@ const SECTION_HELP_IDS: Dictionary = {
 static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> void:
 	if host == null:
 		return
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(host)
+	host.set_meta("native_ui_screen_family", "character_sheet")
 	_clear_container(host)
 	host.add_theme_constant_override("separation", 0)
 

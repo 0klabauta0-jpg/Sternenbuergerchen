@@ -195,12 +195,25 @@ func _test_mission_and_debrief_character_access(context: Dictionary) -> void:
 	var debrief: Node = HARNESS_SCRIPT.instantiate_scene(DEBRIEF_SCENE_PATH, root)
 	_assert(debrief != null, "Debrief scene instantiates for character progression access")
 	if debrief != null:
+		(debrief as Control).show()
 		var mission_result: Dictionary = _build_mission_result(context)
 		debrief.call("set_mission_result", mission_result)
 		await _wait_frames(2)
-		var labels: PackedStringArray = _collect_label_texts(debrief)
-		_assert(_labels_contain(labels, "Character updates:"), "Debrief exposes character progression updates")
-		_assert(_labels_contain(labels, String(PackedStringArray(context.get("selected_unit_ids", PackedStringArray()))[0])), "Debrief character update keeps selected unit ID visible")
+		var events_label := debrief.get_node_or_null("Panel/Margin/VBox/CharacterEventsLabel") as Label
+		var event_summary_visible := events_label != null and events_label.is_visible_in_tree() and events_label.text.begins_with("1 Personenmeldungen")
+		var people := debrief.find_child("DebriefPeopleList", true, false) as VBoxContainer
+		var person := people.get_child(0) as Control if people != null and people.get_child_count() > 0 else null
+		var identity := person.get_node_or_null("Contents/IdentityRow/IdentityLabel") as Label if person != null else null
+		var selected_unit_id := String(mission_result["selected_unit_ids"][0])
+		var selected_display_name := String(mission_result["team_states"][0]["display_name"])
+		_assert(identity != null and identity.is_visible_in_tree() and identity.text == selected_display_name and String(person.get_meta("debrief_member_id", "")) == selected_unit_id, "Debrief person card keeps the selected roster identity and displays its player name")
+		var original_button := debrief.find_child("DebriefDetailsButton", true, false) as Button
+		if original_button != null and original_button.is_visible_in_tree():
+			original_button.pressed.emit()
+		await _wait_frames(2)
+		var original := debrief.find_child("DebriefOriginalText", true, false) as TextEdit
+		var report: Variant = JSON.parse_string(original.text) if original != null else null
+		_assert(event_summary_visible and original != null and original.is_visible_in_tree() and not original.editable and report is Dictionary and report.get("character_events", []) == mission_result["character_events"], "Debrief shows the event count and preserves the selected operator's progression event in the read-only original report")
 		debrief.queue_free()
 		await process_frame
 

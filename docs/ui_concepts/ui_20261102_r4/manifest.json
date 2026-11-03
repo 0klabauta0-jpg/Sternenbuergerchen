@@ -1,0 +1,34 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "scope": "Proposals only; existing portrait/ship/data identity preserved",
+  "images": [
+    {
+      "id": "fob",
+      "source_path": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-ca567a72-f1ce-4c6c-9d0e-0ba6692eb5e4.png",
+      "file": "bridge_fob.png",
+      "tool": "built-in image_gen.imagegen",
+      "sha256": "abb05466320c0e9e6a464a94a97f6d73163e1543ab5d78c2830d276b1446608f"
+    },
+    {
+      "id": "homebase",
+      "source_path": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-d675e8ea-8ec3-4d6f-8ff5-c68ca6ee7a06.png",
+      "file": "bridge_homebase.png",
+      "tool": "built-in image_gen.imagegen",
+      "sha256": "fa905a7be9de1dddd81381c6ff89d288eb4f4530e614b7e079446951cc376329"
+    },
+    {
+      "id": "debrief",
+      "source_path": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-a32af107-7b15-437c-a668-7b62c0df0a77.png",
+      "file": "bridge_debrief.png",
+      "tool": "built-in image_gen.imagegen",
+      "sha256": "762d312176c078382b19f4cb7e867368f36c643f5de891950e14c6ee518d160a"
+    },
+    {
+      "id": "mission",
+      "source_path": "C:\\Users\\bjoer\\.codex\\generated_images\\01a19786-4aaf-7e82-a801-2bcb6244233e\\exec-adc17fde-5613-430c-adb0-793411dc26f6.png",
+      "file": "bridge_mission.png",
+      "tool": "built-in image_gen.imagegen",
+      "sha256": "306a9e668b08e1876adfd6dd11becf9f8ae9e5118c797e592c09b0c4a57bc1a5"
+    }
+  ]
+}

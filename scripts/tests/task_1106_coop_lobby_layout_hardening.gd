@@ -22,12 +22,12 @@ func _run() -> void:
 	lobby_viewport.add_child(lobby)
 	await _wait_frames(3)
 	var panel := lobby.get_node("Panel") as Control
-	var scroll := lobby.get_node("Panel/Margin") as ScrollContainer
-	var peer_label := lobby.get_node("Panel/Margin/VBox/PeerLabel") as Label
-	var assignment_label := lobby.get_node("Panel/Margin/VBox/AssignmentLabel") as Label
+	var scroll := lobby.get_node("Panel/Margin/VBox/LobbyBodyScroll") as ScrollContainer
+	var peer_label := scroll.get_node("Content/PeerLabel") as Label
+	var assignment_label := scroll.get_node("Content/AssignmentLabel") as Label
 	_assert(_rect_inside(panel.get_global_rect(), TARGET_VIEWPORT), "Idle lobby panel stays inside 1280x720")
 	_assert(_near_vec(panel.size, TARGET_PANEL_SIZE), "Idle lobby panel keeps 720x560 size")
-	_assert(_near_vec(scroll.size, TARGET_PANEL_SIZE), "Idle scroll viewport follows fixed panel size")
+	_assert(panel.get_global_rect().encloses(scroll.get_global_rect()) and scroll.size.y < TARGET_PANEL_SIZE.y, "Idle setup scroll stays inside the fixed panel and leaves room for actions")
 
 	lobby.call("_apply_session_snapshot", _build_three_peer_snapshot())
 	await _wait_frames(3)
@@ -37,7 +37,7 @@ func _run() -> void:
 	])
 	_assert(_rect_inside(panel.get_global_rect(), TARGET_VIEWPORT), "Three-peer lobby panel stays inside 1280x720")
 	_assert(_near_vec(panel.size, TARGET_PANEL_SIZE), "Three-peer content cannot enlarge the fixed panel")
-	_assert(_near_vec(scroll.size, TARGET_PANEL_SIZE), "Three-peer scroll viewport stays clipped to panel")
+	_assert(panel.get_global_rect().encloses(scroll.get_global_rect()) and scroll.size.y < TARGET_PANEL_SIZE.y, "Three-peer setup scroll stays clipped to panel with fixed actions outside it")
 	_assert(scroll.vertical_scroll_mode == ScrollContainer.SCROLL_MODE_AUTO, "Lobby keeps automatic vertical scrolling")
 	_assert(scroll.get_v_scroll_bar().visible, "Long three-peer lobby content exposes vertical scrolling")
 	_assert(peer_label.size.x <= scroll.size.x + 0.5 and assignment_label.size.x <= scroll.size.x + 0.5, "Role labels cannot force horizontal panel growth")

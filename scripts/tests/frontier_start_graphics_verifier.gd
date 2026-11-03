@@ -10,8 +10,7 @@ const GM01 := "res://maps/Ground_Mission01_32x32.json"
 const SCENARIO := "res://data/mission_scenarios/ground_mission01_default.json"
 const IMAGE := "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png"
 const PROFILE := "frontier_illustrated_v1"
-const THEME_LINE := "\t\"terrain_visual_theme_id\": \"frontier_illustrated_v1\",\n"
-const ORIGINAL_MAP_SHA := "a3e9422be4518ebfc33048318bfb111985eba987cf5f7c5c3c73e80928272c4c"
+const LAYOUT_ID := "gm01_frontier_outpost_v1"
 const ORIGINAL_SCENARIO_SHA := "792bff6b6dfa6fabf739a737e4e45d34c8e3729a4fdc7d6b62a74a374a27b45f"
 var passed := 0
 var failed := 0
@@ -50,18 +49,21 @@ func run() -> void:
 	check(payload is Dictionary, "default map remains a valid JSON dictionary")
 	if payload is Dictionary:
 		check(String(payload.get("terrain_visual_theme_id", "")) == PROFILE, "GM01 explicitly selects the Frontier visual profile")
-		check(raw.count(THEME_LINE) == 1 and raw.replace(THEME_LINE, "").sha256_text() == ORIGINAL_MAP_SHA, "only the one visual-theme line changed: all other GM01 bytes remain identical")
-		check(not payload.has("grid_topology"), "legacy default topology remains implicit square8")
+		# The user explicitly commissioned a real GM01 rebuild. The old one-line
+		# byte gate described the superseded profile-only change, not this task.
+		check(String(payload.get("authored_visual_layout_id", "")) == LAYOUT_ID, "saved GM01 selects the real authored Outpost composition")
+		check(String(payload.get("grid_topology", "square8")) == "hex_axial_v1", "rebuilt default uses true Hex topology")
 	check(FileAccess.get_sha256(SCENARIO) == ORIGINAL_SCENARIO_SHA, "scenario, enemy groups, objectives and patrol rules remain byte-identical")
 	var data = MAP.load_from_file(GM01)
-	check(data.get_grid_topology() == "square8", "normal MapData loader retains square8")
-	check(data.get_grid_size() == Vector2i(32, 32) and data.get_tiles().size() == 1024, "default GM01 retains all 1024 authored cells")
+	check(data.get_grid_topology() == "hex_axial_v1", "normal MapData loader selects true Hex")
+	check(data.get_grid_size() == Vector2i(96, 98) and data.get_tiles().size() == 9408, "default GM01 covers the displayed ground up to its edge with 9408 real Hex cells")
 	var view = VIEW.new()
 	root.add_child(view)
 	view.configure_from_map(data)
 	var snapshot: Dictionary = view.get_render_snapshot()
 	check(bool(snapshot.get("frontier_art_enabled", false)) and String(snapshot.get("frontier_art_profile_id", "")) == PROFILE, "actual normal map/view path activates Frontier without a test flag")
 	check(int(snapshot.get("frontier_art_override", -2)) == -1, "profile activation comes from saved map data, not an explicit preview override")
+	check(bool(snapshot.get("authored_visual_layout_active", false)) and String(snapshot.get("authored_visual_layout_id", "")) == LAYOUT_ID, "normal renderer installs the saved Outpost, without the isolated art-preview scene")
 	view.queue_free()
 	await process_frame
 	await process_frame

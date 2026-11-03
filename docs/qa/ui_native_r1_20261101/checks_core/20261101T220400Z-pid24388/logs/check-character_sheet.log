@@ -1,0 +1,44 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_235 Character Sheet Roster Gameplay Expansion ===
+PASS: MetaUnitProfile stores availability status
+PASS: MetaUnitProfile stores recovery state
+PASS: MetaUnitProfile stores relationship links
+PASS: MetaUnitProfile stores fireteam history
+PASS: MetaUnitProfile stores mission history
+PASS: MetaUnitProfile stores progression
+PASS: MetaUnitProfile roundtrips portrait id
+PASS: MetaUnitProfile roundtrips traits
+PASS: Sheet formatter emits role_loadout_rows
+PASS: Sheet formatter emits status_rows
+PASS: Sheet formatter emits relationship_rows
+PASS: Sheet formatter emits progress_rows
+PASS: Sheet status rows include recovery
+PASS: Sheet relationship rows include teamfit summary
+PASS: Sheet progress rows include XP
+PASS: Missing relationship data falls back cleanly
+PASS: Missing mission history falls back cleanly
+PASS: Character sheet renders section ROLLE / LOADOUT:
+PASS: Character sheet renders section STATUS / RECOVERY:
+PASS: Character sheet renders section TEAMFIT:
+PASS: Character sheet renders section PROGRESS:
+PASS: Character sheet renders section KERNWERTE
+PASS: Character sheet portrait fallback/load remains stable
+PASS: Character sheet renders gameplay status and relationship text
+PASS: Homebase roster renders 30 scanable compact cards
+PASS: Compact roster card keeps bounded height
+PASS: Roster compact card combines status and location
+ERROR: FAIL: Homebase character sheet uses expanded gameplay sections
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_235_character_sheet_roster_gameplay_expansion.gd:198)
+       [1] _test_homebase_roster_scanability_with_30_profiles (res://scripts/tests/task_235_character_sheet_roster_gameplay_expansion.gd:101)
+PASS: Homebase renders profile portraits from shared payload
+PASS: FOB accepts the same profile payload without conversion
+=== RESULTS: 29 passed, 1 failed ===
+FAIL

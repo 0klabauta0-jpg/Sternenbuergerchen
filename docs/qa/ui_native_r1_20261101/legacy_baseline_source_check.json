@@ -1,0 +1,30 @@
+{
+  "scope": "Source comparison only, not an execution of the baseline checkout",
+  "legacy_failures": [
+    "TASK164 requires retired FireteamStatusPanel which baseline deliberately returns null",
+    "TASK235 inspects retired InfoPanel instead of current CharacterSheetPopup"
+  ],
+  "evidence": [
+    {
+      "file": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "function": "_ensure_fireteam_status_panel",
+      "unchanged_since_135466b5c": true,
+      "baseline_source_sha256": "26c675634206d5c72382efd7e26e5d3b1e06fcf9f2a538f92590481735d0bbab",
+      "source_excerpt": "func _ensure_fireteam_status_panel() -> Control:\n\tvar existing_panel := get_node_or_null(\"%s/FireteamStatusPanel\" % FIRETEAM_INFO_VBOX_PATH) as PanelContainer\n\tif existing_panel != null:\n\t\texisting_panel.get_parent().remove_child(existing_panel)\n\t\texisting_panel.queue_free()\n\treturn null\n\n"
+    },
+    {
+      "file": "scripts/meta/homebase_screen.gd",
+      "function": "_get_character_sheet_content_host",
+      "unchanged_since_135466b5c": true,
+      "baseline_source_sha256": "0aea985d88683918731a057dd0f4af6ed1ced32fba4edc7a3f6d8cfe85bcb188",
+      "source_excerpt": "func _get_character_sheet_content_host() -> VBoxContainer:\n\tvar popup_host := get_node_or_null(\"CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll/GeneratedSheetContent\") as VBoxContainer\n\tif popup_host != null:\n\t\treturn popup_host\n\treturn get_node_or_null(\"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/GeneratedSheetContent\") as VBoxContainer\n\n"
+    },
+    {
+      "file": "scripts/meta/homebase_screen.gd",
+      "function": "_update_character_sheet",
+      "unchanged_since_135466b5c": true,
+      "baseline_source_sha256": "af40511a0224bbfd31eb453f8bd317af3481852b7e860a8232cfe7ea59730b63",
+      "source_excerpt": "func _update_character_sheet() -> void:\n\tvar content_host := _get_character_sheet_content_host()\n\tif content_host == null:\n\t\treturn\n\tvar profile = _profiles_by_id.get(_focused_unit_id, null)\n\tvar post_mission_delta: Dictionary = _get_post_mission_skill_delta_for_unit(_focused_unit_id)\n\tCHARACTER_SHEET_VIEW_SCRIPT.render(\n\t\tcontent_host,\n\t\tprofile,\n\t\t{\n\t\t\t\"status_text\": _build_sheet_status_text(_focused_unit_id),\n\t\t\t\"fireteam_text\": _build_homebase_fireteam_text(_focused_unit_id),\n\t\t\t\"post_mission_skill_delta\": post_mission_delta,\n\t\t\t\"post_mission_skill_delta_text\": _format_post_mission_skill_delta_text(post_mission_delta),\n\t\t\t\"editable_metrics\": false,\n\t\t\t\"two_column_layout\": true,\n\t\t\t\"show_"
+    }
+  ]
+}

@@ -1,6 +1,9 @@
 class_name HomebaseTestScreen
 extends Control
 
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
+
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
@@ -120,6 +123,8 @@ var _roster_card_pool = HOMEBASE_CARD_POOL_SCRIPT.new()
 var _staged_card_pool = HOMEBASE_CARD_POOL_SCRIPT.new()
 var _team_feedback_text: String = ""
 var _character_sheet_open: bool = false
+var _r2_briefing_details_open: bool = false
+var _r3_geometry_signature: String = ""
 var _aircraft_feedback_text: String = ""
 var _mission_catalog: Array = []
 var _selected_mission_id: String = "fob_transfer"
@@ -133,6 +138,8 @@ var _mission_slot_usage_override: int = -1
 var _mission_pilot_count_override: int = -1
 var _mission_briefing_panel_presenter = MISSION_BRIEFING_PANEL_PRESENTER_SCRIPT.new()
 var _mission_briefing_panel_snapshot: Dictionary = {}
+var _mission_briefing_source_signature: String = ""
+var _mission_briefing_rendered_panel: WeakRef
 var _pre_mission_readiness_presenter = PRE_MISSION_READINESS_PRESENTER_SCRIPT.new()
 var _pre_mission_readiness_snapshot: Dictionary = {}
 var _aircraft_manager = AIRCRAFT_MANAGER_SCRIPT.new()
@@ -144,6 +151,10 @@ var _post_mission_skill_delta_by_unit_id: Dictionary = {}
 
 
 func _ready() -> void:
+	TACTICAL_UI_THEME_SCRIPT.apply_screen(self)
+	set_meta("native_ui_screen_family", "homebase")
+	if not get_viewport().size_changed.is_connected(_on_r3_viewport_changed):
+		get_viewport().size_changed.connect(_on_r3_viewport_changed)
 	set_process(true)
 	META_UI_SKIN_SCRIPT.apply_homebase(self)
 	_apply_drop_light_fixed_layout()
@@ -313,14 +324,18 @@ func set_personnel_events(personnel_events: Array) -> void:
 			continue
 		_personnel_events.append(Dictionary(event_variant).duplicate(true))
 	if is_inside_tree():
+		_restore_r3_briefing_source_visibility()
 		_update_personnel_notifications()
+		_apply_r2_briefing_visibility(true)
 
 
 func set_last_mission_result_summary(mission_result: Dictionary) -> void:
 	_last_mission_result_summary = mission_result.duplicate(true)
 	if is_inside_tree():
+		_restore_r3_briefing_source_visibility()
 		_update_post_debrief_homebase_summary()
 		_update_next_sortie_readiness_summary()
+		_apply_r2_briefing_visibility(true)
 
 
 func set_post_mission_skill_delta_summary(summary: Dictionary) -> void:
@@ -1337,7 +1352,7 @@ func get_release_candidate_first_mission_cta_visual_smoke_snapshot() -> Dictiona
 	_append_visual_audit_check(
 		checks,
 		"start_button_actionable",
-		String(polish.get("start_button_text", "")).strip_edges() == "Start Mission" \
+		String(polish.get("start_button_text", "")).strip_edges() == "Einsatz starten" \
 			and not bool(polish.get("start_button_disabled", true)),
 		"critical",
 		"The visible Start Mission button should be enabled for the release start path."
@@ -1931,8 +1946,7 @@ func _apply_help_id(node: Node, help_id: String) -> void:
 
 
 func _apply_drop_light_fixed_layout() -> void:
-	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
-	custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
+	custom_minimum_size = Vector2.ZERO
 	set_meta("drop_light_fixed_fullhd_layout", true)
 	set_meta("drop_light_screen", DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SCREEN_HOMEBASE"))
 	_character_sheet_open = false
@@ -1945,16 +1959,212 @@ func _apply_drop_light_fixed_layout() -> void:
 
 
 func _enforce_drop_light_fixed_layout() -> void:
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout")
-	_apply_fixed_window_contract("DropLightTopbar", layout.get("topbar"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/MissionPanel", layout.get("mission_brief"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/RosterPanel", layout.get("roster"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel", layout.get("fireteams"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/AircraftPanel", layout.get("flightdeck"))
+	var layout := get_native_r2_layout_snapshot()
+	_r3_geometry_signature = _r3_homebase_geometry_signature()
+	_apply_fixed_window_contract("Panel", layout.viewport)
+	_apply_fixed_window_contract("DropLightTopbar", layout.topbar)
+	_ensure_r2_briefing_scroll()
+	_ensure_r2_briefing_toggle()
+	_apply_r2_briefing_visibility()
+	_apply_fixed_window_contract("Panel/Margin/VBox/MissionPanel", layout.mission_brief)
+	for entry in [
+		["Panel/Margin/VBox/ContentRow/RosterPanel", "roster"],
+		["Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel", "fireteams"],
+		["Panel/Margin/VBox/ContentRow/AircraftPanel", "flightdeck"],
+	]:
+		var panel := get_node_or_null(entry[0]) as Control
+		if panel != null:
+			panel.visible = not _r2_briefing_details_open
+		_apply_fixed_window_contract(entry[0], layout[entry[1]])
 	_retire_homebase_loadout_panel()
 	_disable_legacy_homebase_window("Panel/Margin/VBox/ContentRow/TeamPanel", "homebase_legacy_transfer_window_disabled")
 	_disable_legacy_homebase_window("Panel/Margin/VBox/ContentRow/InfoPanel", "homebase_legacy_character_sheet_window_disabled")
 	_apply_character_popup_rect()
+	_apply_r4_preparation_visuals(layout)
+
+
+func _apply_r4_preparation_visuals(layout: Dictionary) -> void:
+	# Presentation follows the existing occupancy-driven rectangles. The image
+	# occupies only free space below the real transport work area.
+	for entry in [
+		["Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel", 20, ""],
+		["Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterHeaderLabel", 20, ""],
+		["Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel", 20, ""],
+		["Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftHeaderLabel", 20, "dropship"],
+	]:
+		META_UI_SKIN_SCRIPT.style_preparation_heading(get_node_or_null(entry[0]) as Label, entry[1], entry[2])
+	var title := get_node_or_null("DropLightTopbar/Margin/Row/TitleLabel") as Label
+	if title != null:
+		TACTICAL_UI_THEME_SCRIPT.style_screen_heading(title, 26)
+	var deck: Rect2i = layout.flightdeck
+	var viewport: Rect2i = layout.viewport
+	var stage_top := deck.end.y + 12
+	META_UI_SKIN_SCRIPT.update_frontier_stage(self, Rect2i(deck.position.x, stage_top, deck.size.x, maxi(0, viewport.size.y - stage_top - 16)), not _r2_briefing_details_open)
+
+
+func get_native_r2_layout_snapshot() -> Dictionary:
+	var viewport_size := Vector2i(get_viewport_rect().size)
+	var usable_width := viewport_size.x - 64
+	var roster_width := int(round(float(usable_width) * 0.25 / 8.0)) * 8
+	var team_width := int(round(float(usable_width) * 0.28 / 8.0)) * 8
+	var work_top := 192
+	var work_height := maxi(200, viewport_size.y - work_top - 16)
+	var counts := _r3_homebase_content_counts()
+	var team_height := mini(work_height, 128 if counts.teams == 0 else 152 + counts.teams * 72 + counts.members * 82)
+	var ship_rows := int(ceil(float(counts.craft) / float(_r3_ship_columns())))
+	var transport_height := mini(work_height, 184 if counts.craft == 0 else 88 + ship_rows * 176 + counts.payload_teams * 80 + counts.payload_members * 24)
+	return {
+		"viewport": Rect2i(Vector2i.ZERO, viewport_size),
+		"topbar": Rect2i(0, 0, viewport_size.x, 56),
+		"mission_brief": Rect2i(16, 64, viewport_size.x - 32, viewport_size.y - 80 if _r2_briefing_details_open else 112),
+		"roster": Rect2i(16, work_top, roster_width, work_height),
+		"fireteams": Rect2i(32 + roster_width, work_top, team_width, team_height),
+		"flightdeck": Rect2i(48 + roster_width + team_width, work_top, usable_width - roster_width - team_width, transport_height),
+		"character_popup": Rect2i(viewport_size.x - mini(808, viewport_size.x - 32) - 16, 32, mini(808, viewport_size.x - 32), mini(840, viewport_size.y - 64)),
+		"briefing_details_open": _r2_briefing_details_open,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _r3_homebase_content_counts() -> Dictionary:
+	var result := {"teams": 0, "members": 0, "craft": 0, "payload_teams": 0, "payload_members": 0}
+	for definition: Dictionary in _fireteam_definitions:
+		var fireteam_id := String(definition.get("id", ""))
+		if _is_homebase_fireteam_in_flightdeck_payload(fireteam_id):
+			continue
+		result.teams += 1
+		result.members += _get_member_unit_ids_for_fireteam(fireteam_id).size()
+	var craft_definitions := _get_visible_homebase_aircraft_definitions()
+	result.craft = craft_definitions.size()
+	for craft: Dictionary in craft_definitions:
+		var payload_ids := _get_homebase_direct_payload_fireteam_ids_for_craft(String(craft.get("craft_id", "")))
+		result.payload_teams += payload_ids.size()
+		result.payload_members += _build_unit_ids_for_fireteams(payload_ids).size()
+	return result
+
+
+func _r3_ship_columns() -> int:
+	var usable_width := int(get_viewport_rect().size.x) - 64
+	var roster_width := int(round(float(usable_width) * 0.25 / 8.0)) * 8
+	var team_width := int(round(float(usable_width) * 0.28 / 8.0)) * 8
+	return 2 if usable_width - roster_width - team_width >= int(HOMEBASE_SHIPCARD_COMPACT_WIDTH * 2 + 40) else 1
+
+
+func _r3_homebase_geometry_signature() -> String:
+	return "%s|%s|%s" % [get_viewport_rect().size, _r3_homebase_content_counts(), _r2_briefing_details_open]
+
+
+func _queue_r3_homebase_geometry_if_changed() -> void:
+	if _r3_geometry_signature != _r3_homebase_geometry_signature():
+		call_deferred("_enforce_drop_light_fixed_layout")
+
+
+func _on_r3_viewport_changed() -> void:
+	if is_node_ready():
+		_update_aircraft_panel()
+	_enforce_drop_light_fixed_layout()
+
+
+func _ensure_r2_briefing_scroll() -> void:
+	var panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as PanelContainer
+	if panel == null:
+		return
+	var old_margin := panel.get_node_or_null("MissionMargin") as MarginContainer
+	if old_margin == null:
+		return
+	# Keep every existing briefing NodePath and callback. Only its presentation
+	# wrapper changes so long recommendations cannot enlarge the bounded frame.
+	var content := old_margin.get_node("MissionVBox") as VBoxContainer
+	old_margin.remove_child(content)
+	panel.remove_child(old_margin)
+	old_margin.queue_free()
+	var scroll := ScrollContainer.new()
+	scroll.name = "MissionMargin"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.add_child(scroll)
+	scroll.add_child(content)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 4)
+
+
+func _ensure_r2_briefing_toggle() -> void:
+	var header := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow") as HBoxContainer
+	if header == null:
+		return
+	var button := header.get_node_or_null("R2BriefingDetailsButton") as Button
+	if button == null:
+		button = Button.new()
+		button.name = "R2BriefingDetailsButton"
+		button.custom_minimum_size = Vector2(144, 30)
+		button.pressed.connect(_on_r2_briefing_details_pressed)
+		header.add_child(button)
+	button.text = "Zur Vorbereitung" if _r2_briefing_details_open else "Briefingdetails"
+	button.tooltip_text = "Vollständiges Briefing, Empfehlungen und Bereitschaft anzeigen."
+	META_UI_SKIN_SCRIPT.style_secondary_button(button)
+
+
+func _on_r2_briefing_details_pressed() -> void:
+	_r2_briefing_details_open = not _r2_briefing_details_open
+	_update_mission_info()
+	var scroll := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin") as ScrollContainer
+	if scroll != null:
+		scroll.scroll_vertical = 0
+	_enforce_drop_light_fixed_layout()
+
+
+func _apply_r2_briefing_visibility(capture_source_visibility: bool = false) -> void:
+	var vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
+	if vbox == null:
+		return
+	# Preserve the source updater's intended visibility while folding the whole
+	# detail body. This avoids showing a clipped strip of its first large frame.
+	var summary := vbox.get_node_or_null("R2PreparationStatus") as Label
+	if summary == null:
+		summary = Label.new()
+		summary.name = "R2PreparationStatus"
+		summary.clip_text = true
+		summary.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		summary.add_theme_font_size_override("font_size", 12)
+		vbox.add_child(summary)
+		vbox.move_child(summary, 3)
+	summary.text = String(_pre_mission_readiness_snapshot.get("summary_text", ""))
+	summary.tooltip_text = summary.text
+	for child in vbox.get_children():
+		if not child is Control or child.name in ["HeaderRow", "MissionHeaderLabel", "MissionInfoRow", "R2PreparationStatus"]:
+			continue
+		var control := child as Control
+		if capture_source_visibility or not control.has_meta("r3_detail_source_visible"):
+			control.set_meta("r3_detail_source_visible", control.visible)
+		control.visible = _r2_briefing_details_open and bool(control.get_meta("r3_detail_source_visible", false))
+	for label_name in ["MissionHeaderLabel", "MissionSummaryLabel"]:
+		var label := vbox.get_node_or_null(label_name) as Label
+		if label != null:
+			label.clip_text = true
+			label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			label.max_lines_visible = -1 if _r2_briefing_details_open else 1
+			label.tooltip_text = label.text
+	var info_row := vbox.get_node_or_null("MissionInfoRow")
+	if info_row != null:
+		for child in info_row.get_children():
+			if child is Label:
+				(child as Label).clip_text = true
+				(child as Label).text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+				(child as Label).tooltip_text = (child as Label).text
+		var technical_transfer := info_row.get_node_or_null("MissionTransferLabel") as Control
+		if technical_transfer != null:
+			technical_transfer.visible = _r2_briefing_details_open
+
+
+func _restore_r3_briefing_source_visibility() -> void:
+	var vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox")
+	if vbox == null:
+		return
+	for child in vbox.get_children():
+		if child is Control and child.has_meta("r3_detail_source_visible"):
+			(child as Control).visible = bool(child.get_meta("r3_detail_source_visible"))
 
 
 func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
@@ -1964,10 +2174,17 @@ func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
 	if control == null:
 		return
 	var rect: Rect2i = rect_variant
+	var target := Rect2(Vector2(rect.position), Vector2(rect.size))
+	if control.get_global_rect().is_equal_approx(target) and control.custom_minimum_size == Vector2(rect.size):
+		return
 	control.set_as_top_level(true)
+	control.anchor_left = 0.0
+	control.anchor_top = 0.0
+	control.anchor_right = 0.0
+	control.anchor_bottom = 0.0
+	control.custom_minimum_size = Vector2(float(rect.size.x), float(rect.size.y))
 	control.position = Vector2(float(rect.position.x), float(rect.position.y))
 	control.size = Vector2(float(rect.size.x), float(rect.size.y))
-	control.custom_minimum_size = Vector2(float(rect.size.x), float(rect.size.y))
 	control.set_deferred("position", Vector2(float(rect.position.x), float(rect.position.y)))
 	control.set_deferred("size", Vector2(float(rect.size.x), float(rect.size.y)))
 	control.set_meta("drop_light_rect", rect)
@@ -2006,7 +2223,7 @@ func _ensure_homebase_roster_sort_controls() -> void:
 
 		var label := Label.new()
 		label.name = "RosterSortLabel"
-		label.text = "Sort"
+		label.text = "Sortieren"
 		label.custom_minimum_size = Vector2(32.0, 0.0)
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		label.add_theme_font_size_override("font_size", 9)
@@ -2168,6 +2385,7 @@ func _create_homebase_fireteam_panel() -> PanelContainer:
 	var summary_label := Label.new()
 	summary_label.name = "FireteamSummaryLabel"
 	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary_label.max_lines_visible = 3
 	META_UI_SKIN_SCRIPT.style_body_label(summary_label, 9)
 	vbox.add_child(summary_label)
 
@@ -2486,17 +2704,8 @@ func _apply_character_popup_rect() -> void:
 	var popup := get_node_or_null("CharacterSheetPopup") as Control
 	if popup == null:
 		return
-	popup.set_as_top_level(true)
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout")
-	var rect_variant: Variant = layout.get("character_popup")
-	if typeof(rect_variant) != TYPE_RECT2I:
-		return
-	var rect: Rect2i = rect_variant
-	popup.position = Vector2(float(rect.position.x), float(rect.position.y))
-	popup.size = Vector2(float(rect.size.x), float(rect.size.y))
-	popup.custom_minimum_size = Vector2(float(rect.size.x), float(rect.size.y))
-	popup.set_deferred("position", popup.position)
-	popup.set_deferred("size", popup.size)
+	var rect: Rect2i = get_native_r2_layout_snapshot().character_popup
+	_apply_fixed_window_contract("CharacterSheetPopup", rect)
 	popup.set_meta("homebase_character_popup_rect", rect)
 
 
@@ -2544,12 +2753,12 @@ func _ensure_drop_light_topbar() -> void:
 
 	var title_label := Label.new()
 	title_label.name = "TitleLabel"
-	title_label.text = "Homebase"
+	title_label.text = "Heimatbasis"
 	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	META_UI_SKIN_SCRIPT.style_header_label(title_label, 14)
 	row.add_child(title_label)
 
-	for badge_text in ["Roster", "#10 Fireteams", "#13 Loadout", "Flightdeck"]:
+	for badge_text in ["Personal", "Trupps", "Ausrüstung", "Transport"]:
 		var badge := Label.new()
 		badge.text = badge_text
 		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -2595,13 +2804,13 @@ func _ensure_drop_light_flightdeck_stage() -> void:
 
 func _apply_block_labels() -> void:
 	var label_text_by_path: Dictionary = {
-		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_MISSION_BRIEF,
-		"Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_AVAILABLE_OPERATORS,
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel": "Einsatzvorbereitung",
+		"Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterHeaderLabel": "Personalreserve",
 		"Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamHeaderRow/TeamHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_TRANSFER_TEAM,
 		"Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_INBOUND_TO_FOB,
-		"Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_FIRETEAMS,
+		"Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel": "Trupps",
 		"Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow/LoadoutHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_LOADOUT,
-		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_FLIGHT_DECK,
+		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftHeaderLabel": "Transport",
 		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_DECK_ACTIVITY,
 		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/InfoHeaderRow/InfoHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_CHARACTER_SHEET,
 		"CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupHeaderRow/PopupHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_CHARACTER_POPUP,
@@ -2610,6 +2819,9 @@ func _apply_block_labels() -> void:
 		var label := get_node_or_null(String(path_variant)) as Label
 		if label != null:
 			label.text = String(label_text_by_path[path_variant])
+	var nav := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton") as Button
+	if nav != null:
+		nav.text = "Heimatbasis"
 
 
 func _apply_homebase_compact_panel_policy() -> void:
@@ -2901,6 +3113,9 @@ func _configure_roster_pool_card(card, spec: Dictionary) -> void:
 	var unit_id: String = String(spec.get("unit_id", "")).strip_edges()
 	var profile = spec.get("profile", null)
 	var is_in_transit: bool = bool(spec.get("is_in_transit", false))
+	# The pooled card may have the old 316px minimum from a previous setup.
+	# Let the existing compact layout fill the actual roster viewport instead.
+	card.custom_minimum_size = Vector2(0.0, HOMEBASE_OPERATOR_CARD_SIZE.y)
 	card.setup_from_profile(
 		profile,
 		{
@@ -2913,8 +3128,7 @@ func _configure_roster_pool_card(card, spec: Dictionary) -> void:
 			"compact_mode": true,
 			"show_progress": is_in_transit,
 			"progress_value": float(spec.get("progress_value", 0.0)),
-			"fixed_size": true,
-			"fixed_card_size": HOMEBASE_OPERATOR_CARD_SIZE,
+			"fixed_size": false,
 		}
 	)
 	if not card.card_pressed.is_connected(_on_compact_card_pressed):
@@ -2978,7 +3192,7 @@ func _render_homebase_fireteams() -> void:
 		summary_label.text = _build_homebase_fireteam_summary_text()
 
 	if _fireteam_definitions.is_empty():
-		fireteam_list.add_child(_build_empty_state_label("No fireteams available."))
+		fireteam_list.add_child(_build_empty_state_label("Noch kein Trupp. Mit + einen Trupp anlegen."))
 		return
 
 	var rendered_fireteam_count := 0
@@ -2998,7 +3212,7 @@ func _render_homebase_fireteams() -> void:
 		rendered_fireteam_count += 1
 		_render_homebase_fireteam_members(fireteam_card.get_member_host(), fireteam_id, String(definition.get("lead_unit_id", "")).strip_edges())
 	if rendered_fireteam_count == 0:
-		fireteam_list.add_child(_build_empty_state_label("All fireteam cards are currently on the Flightdeck payload."))
+		fireteam_list.add_child(_build_empty_state_label("Alle Trupps sind im Transport. Dort bleiben sie auswählbar."))
 
 
 func _create_homebase_fireteam_card(fireteam_id: String, source_context: String = "fireteam_list") -> FOBFireteamCard:
@@ -3623,6 +3837,7 @@ func _update_team_summary() -> void:
 
 
 func _update_mission_info() -> void:
+	_restore_r3_briefing_source_visibility()
 	var mission_selector: OptionButton = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/MissionSelector")
 	var start_mission_button: Button = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton")
 	var mission_name_label: Label = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionNameLabel")
@@ -3653,6 +3868,8 @@ func _update_mission_info() -> void:
 	META_UI_SKIN_SCRIPT.style_transfer_button(start_mission_button, can_start_mission)
 	mission_name_label.text = _selected_mission_name
 	mission_team_limit_label.text = _build_mission_slot_status_text(mission_slot_usage, pilot_count, direct_payload_operator_count, direct_payload_fireteam_count)
+	mission_team_limit_label.tooltip_text = mission_team_limit_label.text
+	mission_team_limit_label.text = "Einsatz: %d Kräfte · %d Trupps · %d Piloten" % [direct_payload_operator_count, direct_payload_fireteam_count, pilot_count] if _should_use_homebase_direct_mission_copy() else "Auswahl: %d/%d · Piloten: %d" % [staged_count, team_capacity, pilot_count]
 	mission_team_limit_label.set_meta("mission_slot_usage_count", mission_slot_usage)
 	mission_team_limit_label.set_meta("mission_operator_count", staged_count)
 	mission_team_limit_label.set_meta("mission_pilot_count", pilot_count)
@@ -3681,6 +3898,11 @@ func _update_mission_info() -> void:
 	_update_pre_mission_readiness_panel()
 	_update_next_sortie_readiness_summary()
 	_apply_post_debrief_density_findings()
+	var preparation_status := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/R2PreparationStatus") as Label
+	if preparation_status != null:
+		preparation_status.text = String(_pre_mission_readiness_snapshot.get("summary_text", ""))
+		preparation_status.tooltip_text = preparation_status.text
+	_apply_r2_briefing_visibility(true)
 
 
 func _update_personnel_notifications() -> void:
@@ -4606,17 +4828,21 @@ func _is_station_scenario_last_result() -> bool:
 func _update_mission_briefing_panel() -> void:
 	_selected_mission_scenario_path = _resolve_selected_mission_scenario_path()
 	var panel := _ensure_mission_briefing_panel()
-	if _selected_mission_scenario_path.strip_edges().is_empty():
-		_mission_briefing_panel_snapshot = Dictionary(_mission_briefing_panel_presenter.call("build_snapshot_from_files", "", _selected_mission_map_path, "multiplayer_pvp"))
-		panel.visible = false
-		return
-	_mission_briefing_panel_snapshot = Dictionary(_mission_briefing_panel_presenter.call(
-		"build_snapshot_from_files",
-		_selected_mission_scenario_path,
-		_selected_mission_map_path,
-		"multiplayer_pvp"
-	))
+	var source_signature := _build_mission_briefing_source_signature(
+		_selected_mission_scenario_path, _selected_mission_map_path, "multiplayer_pvp")
+	var source_changed := source_signature != _mission_briefing_source_signature or _mission_briefing_panel_snapshot.is_empty()
+	if source_changed:
+		_mission_briefing_panel_snapshot = Dictionary(_mission_briefing_panel_presenter.call(
+			"build_snapshot_from_files", _selected_mission_scenario_path,
+			_selected_mission_map_path, "multiplayer_pvp"))
+		_mission_briefing_source_signature = source_signature
 	panel.visible = bool(_mission_briefing_panel_snapshot.get("configured", false))
+	if not source_changed and _mission_briefing_rendered_panel != null and _mission_briefing_rendered_panel.get_ref() == panel:
+		# Only the file-derived presentation is reused. Roster/transport/loadout
+		# DTOs, readiness and start permission still refresh through their owners.
+		_update_mission_briefing_loadout_bridge_controls()
+		return
+	_mission_briefing_rendered_panel = weakref(panel)
 	_set_mission_briefing_label("BriefingTitleLabel", String(_mission_briefing_panel_snapshot.get("title", "Mission Briefing")).strip_edges())
 	_set_mission_briefing_label("BriefingSummaryLabel", String(_mission_briefing_panel_snapshot.get("summary", "")).strip_edges())
 	_set_mission_briefing_label("BriefingStatusLabel", String(_mission_briefing_panel_snapshot.get("panel_status_text", "")).strip_edges())
@@ -4628,6 +4854,44 @@ func _update_mission_briefing_panel() -> void:
 	_set_mission_briefing_minimap_visual(Dictionary(_mission_briefing_panel_snapshot.get("minimap_visual_snapshot", {})))
 	_set_mission_briefing_loadout_cards(Array(_mission_briefing_panel_snapshot.get("loadout_card_entries", [])))
 	panel.set_meta("mission_briefing_snapshot", _mission_briefing_panel_snapshot.duplicate(true))
+
+
+func _mission_briefing_catalog_source_paths() -> PackedStringArray:
+	# MapData normalization reads this external catalog. Marker/tactics/weapon
+	# definitions used by these presenters are already-loaded script constants.
+	return PackedStringArray(["res://data/terrain_tile_catalog.json"])
+
+
+func _build_mission_briefing_source_signature(scenario_path: String, map_path: String, play_mode: String) -> String:
+	var scenario_source := scenario_path.strip_edges()
+	var selected_map_source := map_path.strip_edges()
+	var scenario: Dictionary = {}
+	if not scenario_source.is_empty() and FileAccess.file_exists(scenario_source):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(scenario_source))
+		if parsed is Dictionary:
+			scenario = parsed
+	# Match PanelPresenter's actual source resolution when no explicit map wins.
+	var resolved_map_source := selected_map_source
+	if resolved_map_source.is_empty():
+		resolved_map_source = String(scenario.get("map_file_path", "")).strip_edges()
+	var briefing_variant: Variant = scenario.get("briefing", scenario.get("mission_briefing", {}))
+	var briefing: Dictionary = briefing_variant if briefing_variant is Dictionary else {}
+	var background_source := String(briefing.get("background_image_path", "")).strip_edges()
+	var sources: Array = []
+	for path in [scenario_source, resolved_map_source, background_source]:
+		sources.append(_mission_briefing_source_file_identity(path))
+	for path in _mission_briefing_catalog_source_paths():
+		sources.append(_mission_briefing_source_file_identity(path))
+	return JSON.stringify({"scenario": scenario_source, "selected_map": selected_map_source,
+		"resolved_map": resolved_map_source, "play_mode": play_mode, "sources": sources}).sha256_text()
+
+
+func _mission_briefing_source_file_identity(path: String) -> Dictionary:
+	var normalized := path.strip_edges()
+	var exists := not normalized.is_empty() and FileAccess.file_exists(normalized)
+	return {"path": normalized, "exists": exists,
+		"sha256": FileAccess.get_sha256(normalized) if exists else "",
+		"resource_exists": not normalized.is_empty() and ResourceLoader.exists(normalized)}
 
 
 func _update_pre_mission_readiness_panel() -> void:
@@ -5210,7 +5474,7 @@ func _sync_start_button_with_readiness_snapshot() -> void:
 	var overall_state: String = String(_pre_mission_readiness_snapshot.get("overall_state", "")).strip_edges()
 	var summary_text: String = String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges()
 	if overall_state == "ready":
-		start_button.text = "Start Mission"
+		start_button.text = "Einsatz starten"
 	elif overall_state == "warn":
 		start_button.text = "Start pruefen"
 	else:
@@ -5435,6 +5699,7 @@ func _update_team_transfer_list() -> void:
 
 
 func _update_aircraft_panel() -> void:
+	_queue_r3_homebase_geometry_if_changed()
 	var selector: OptionButton = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftSelectorRow/AircraftSelector")
 	var add_aircraft_button: Button = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftSelectorRow/AddAircraftButton")
 	var remove_aircraft_button: Button = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftSelectorRow/RemoveAircraftButton")
@@ -5462,8 +5727,8 @@ func _update_aircraft_panel() -> void:
 	if selected_craft.is_empty():
 		selector.disabled = selector.item_count == 0
 		remove_aircraft_button.disabled = true
-		status_label.text = "Flight deck empty. Select a ship above and press + to add a shipcard."
-		shipcards_list.add_child(_build_empty_state_label("Flight deck starts empty. Select a craft type above and press + to add it here."))
+		status_label.text = "Noch kein Transport. Schiffstyp wählen und mit + hinzufügen."
+		shipcards_list.add_child(_build_empty_state_label("Trupps und Pilot anschließend auf die Schiffskarte ziehen."))
 		transfers_list.add_child(_build_empty_state_label("No loading or ship flights queued."))
 		return
 
@@ -5475,6 +5740,11 @@ func _update_aircraft_panel() -> void:
 	var craft_busy: bool = _has_active_pilot_transfer_for_craft(selected_craft_id) or craft_in_transit
 	var cargo_loading: bool = _has_active_cargo_load_for_craft(selected_craft_id)
 	status_label.text = _build_aircraft_status_text(selected_craft, craft_name, assigned_pilot_id, craft_busy, cargo_loading)
+	status_label.tooltip_text = status_label.text
+	status_label.text = "%s · %s" % [craft_name, "unterwegs" if craft_in_transit else "Pilot: %s" % _build_display_name(assigned_pilot_id) if not assigned_pilot_id.is_empty() else "Pilot fehlt"]
+	if not _aircraft_feedback_text.is_empty():
+		status_label.text = _aircraft_feedback_text
+	status_label.max_lines_visible = 2
 
 	_render_homebase_shipcards(shipcards_list, visible_aircraft_definitions)
 
@@ -5497,13 +5767,14 @@ func _render_homebase_shipcards(shipcards_list: VBoxContainer, visible_aircraft_
 	if shipcards_list == null:
 		return
 	shipcards_list.add_theme_constant_override("separation", 6)
-	shipcards_list.set_meta("homebase_shipcards_two_column_layout", true)
+	var column_count := _r3_ship_columns()
+	shipcards_list.set_meta("homebase_shipcards_two_column_layout", column_count == 2)
 	shipcards_list.set_meta("homebase_shipcard_compact_width", HOMEBASE_SHIPCARD_COMPACT_WIDTH)
 	var row: HBoxContainer = null
 	for craft_index in range(visible_aircraft_definitions.size()):
-		if craft_index % 2 == 0:
+		if craft_index % column_count == 0:
 			row = HBoxContainer.new()
-			row.name = "ShipCardRow_%d" % int(craft_index / 2)
+			row.name = "ShipCardRow_%d" % int(craft_index / column_count)
 			row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_theme_constant_override("separation", 6)
 			row.set_meta("homebase_shipcard_row", true)
@@ -6948,7 +7219,7 @@ func _build_homebase_fireteam_summary_text() -> String:
 	for fireteam_id in _selected_fireteam_ids:
 		if not _normalize_fireteam_id(String(fireteam_id)).is_empty():
 			assigned_count += 1
-	return "%d staged | %d assigned | Drop operators onto cards, then drop fireteams to Loadout or Flightdeck." % [_selected_unit_ids.size(), assigned_count]
+	return "Ausgewählt: %d · Truppzuordnung: %d\nKräfte auf Truppkarten ziehen; Trupps anschließend zum Transport." % [_selected_unit_ids.size(), assigned_count]
 
 
 func _get_homebase_direct_payload_fireteam_ids() -> PackedStringArray:
@@ -7894,7 +8165,7 @@ func _build_transfer_entry_card(title: String, detail: String, entry: Dictionary
 
 func _build_shipcard(craft_def: Dictionary) -> Control:
 	var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
-	var craft_name: String = String(craft_def.get("display_name", craft_id)).strip_edges()
+	var craft_name: String = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_display_name(craft_def)
 	var assigned_pilot_id: String = _get_assigned_pilot_id(craft_id)
 	var craft_in_transit: bool = _is_craft_in_transit(craft_id)
 	var craft_busy: bool = _has_active_pilot_transfer_for_craft(craft_id) or craft_in_transit
@@ -7954,17 +8225,26 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var ship_texture := TextureRect.new()
 	ship_texture.name = "ShipTexture"
-	ship_texture.texture = _get_aircraft_texture(craft_def)
 	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ship_texture.custom_minimum_size = HOMEBASE_SHIPCARD_IMAGE_SIZE
-	ship_texture.size = HOMEBASE_SHIPCARD_IMAGE_SIZE
-	ship_texture.position = HOMEBASE_SHIPCARD_IMAGE_OFFSET
+	var selected_texture: Texture2D = _get_aircraft_texture(craft_def)
+	var model_preview: Texture2D = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_preview_texture(craft_def)
+	var is_model_preview: bool = model_preview != null and selected_texture == model_preview
+	# Choose the model's uncropped geometry before the first size write. Setting
+	# the old Speeder minimum first would clamp this detached Control to 128x84.
+	var image_size: Vector2 = HOMEBASE_SHIPCARD_BUTTON_SIZE if is_model_preview else HOMEBASE_SHIPCARD_IMAGE_SIZE
+	ship_texture.custom_minimum_size = image_size
+	ship_texture.texture = selected_texture
+	ship_texture.size = image_size
+	ship_texture.position = Vector2.ZERO if is_model_preview else HOMEBASE_SHIPCARD_IMAGE_OFFSET
+	if is_model_preview:
+		ship_texture.set_meta("frontier_model_preview", true)
+		ship_texture.set_meta("frontier_visual_asset_id", String(FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_identity(craft_def).get("asset_id", "")))
 	ship_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ship_texture.set_meta("homebase_shipcard_visual_anchor", "left_top")
-	ship_texture.set_meta("homebase_shipcard_visual_offset", HOMEBASE_SHIPCARD_IMAGE_OFFSET)
-	ship_texture.set_meta("homebase_shipcard_visual_enlarged", true)
-	ship_texture.set_meta("homebase_shipcard_visual_crop_compensates_transparency", true)
+	ship_texture.set_meta("homebase_shipcard_visual_offset", ship_texture.position)
+	ship_texture.set_meta("homebase_shipcard_visual_enlarged", ship_texture.size.x > HOMEBASE_SHIPCARD_BUTTON_SIZE.x)
+	ship_texture.set_meta("homebase_shipcard_visual_crop_compensates_transparency", not bool(ship_texture.get_meta("frontier_model_preview", false)))
 	if ship_texture.texture != null:
 		ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.46 if craft_in_transit or air_asset_unavailable else 1.0)
 	else:
@@ -8055,12 +8335,12 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var dispatch_target: String = _get_homebase_dispatch_target(craft_id)
 	var mission_toggle := CheckBox.new()
 	mission_toggle.name = "ShipDestinationToggle"
-	mission_toggle.text = "Mission"
+	mission_toggle.text = "Einsatz"
 	mission_toggle.button_pressed = dispatch_target == HOMEBASE_DISPATCH_TARGET_MISSION
 	mission_toggle.disabled = craft_in_transit or air_asset_unavailable
 	mission_toggle.custom_minimum_size = Vector2(64.0, 20.0)
 	mission_toggle.add_theme_font_size_override("font_size", 8)
-	mission_toggle.tooltip_text = "Checked: direct mission payload. Off: FOB transfer target."
+	mission_toggle.tooltip_text = "An: direkt zum Einsatz. Aus: Transfer zur FOB."
 	mission_toggle.set_meta("homebase_shipcard_dispatch_toggle", true)
 	mission_toggle.set_meta("craft_id", craft_id)
 	mission_toggle.set_meta("dispatch_target", dispatch_target)
@@ -8069,7 +8349,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var send_button := Button.new()
 	send_button.name = "ShipSendButton"
-	send_button.text = "Send"
+	send_button.text = "Starten"
 	send_button.custom_minimum_size = Vector2(48.0, 20.0)
 	send_button.add_theme_font_size_override("font_size", 8)
 	send_button.disabled = air_asset_unavailable or craft_in_transit or not _can_dispatch_shipcard(craft_def, craft_id, assigned_pilot_id)
@@ -8116,12 +8396,12 @@ func _build_homebase_shipcard_payload_summary(craft_id: String, craft_in_transit
 		return "%s: ETA %s" % [_build_shipcard_transfer_label(craft_def), _build_transfer_eta_text(_find_transfer_entry_for_craft(normalized_craft_id))]
 	var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids_for_craft(normalized_craft_id)
 	if payload_fireteam_ids.is_empty():
-		return "Payload: empty"
+		return "Keine Einsatzkräfte zugewiesen"
 	var total_count: int = _build_unit_ids_for_fireteams(payload_fireteam_ids).size()
 	var boarded_count: int = _get_homebase_direct_boarded_operator_count_for_craft(normalized_craft_id)
 	if _are_homebase_payload_fireteams_boarded(payload_fireteam_ids):
-		return "Payload: %d/%d NPC boarded" % [boarded_count, total_count]
-	return "Boarding: %d/%d NPC" % [boarded_count, total_count]
+		return "Einsatzkräfte: %d/%d an Bord" % [boarded_count, total_count]
+	return "Einschiffen: %d/%d Kräfte" % [boarded_count, total_count]
 
 
 func _configure_homebase_shipcard_fireteam_drop_target(control: Control, craft_id: String, enabled: bool) -> void:
@@ -8366,24 +8646,17 @@ func _build_empty_state_label(text: String) -> Label:
 
 
 func _build_shipcard_stylebox(is_selected: bool, craft_busy: bool, craft_in_transit: bool = false) -> StyleBoxFlat:
-	var stylebox := StyleBoxFlat.new()
-	stylebox.bg_color = Color(0.12, 0.14, 0.17, 0.72) if craft_in_transit else Color(0.12, 0.14, 0.17, 1.0)
+	var border: Color = TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER
 	if is_selected:
-		stylebox.border_color = Color(0.40, 0.92, 0.56, 1.0)
+		border = TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED
 	elif craft_in_transit:
-		stylebox.border_color = Color(0.56, 0.58, 0.62, 0.82)
-	else:
-		stylebox.border_color = Color(0.55, 0.46, 0.22, 1.0) if craft_busy else Color(0.31, 0.36, 0.42, 1.0)
-	var border_width: int = 2 if is_selected else 1
-	stylebox.border_width_left = border_width
-	stylebox.border_width_top = border_width
-	stylebox.border_width_right = border_width
-	stylebox.border_width_bottom = border_width
-	stylebox.corner_radius_top_left = 8
-	stylebox.corner_radius_top_right = 8
-	stylebox.corner_radius_bottom_left = 8
-	stylebox.corner_radius_bottom_right = 8
-	return stylebox
+		border = TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT
+	elif craft_busy:
+		border = TACTICAL_UI_THEME_SCRIPT.COLOR_WARNING
+	return TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
+		TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_SELECTED if is_selected else TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL,
+		border, 6, 2 if is_selected else 1, Vector4.ZERO
+	)
 
 
 func _build_shipcard_cargo_status_text(craft_def: Dictionary, craft_id: String) -> String:
@@ -8466,7 +8739,7 @@ func _populate_aircraft_selector(selector: OptionButton) -> void:
 	for craft_option_variant in _build_default_aircraft_definitions():
 		var craft_option: Dictionary = Dictionary(craft_option_variant)
 		var craft_type: String = String(craft_option.get("craft_type", "dropship")).strip_edges()
-		selector.add_item(String(craft_option.get("display_name", craft_type)).strip_edges())
+		selector.add_item(FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_display_name(craft_option))
 		selector.set_item_metadata(selector.item_count - 1, craft_type)
 		if craft_type == selected_type:
 			selected_index = selector.item_count - 1
@@ -8493,6 +8766,9 @@ func _build_craft_display_name(craft_id: String) -> String:
 
 
 func _get_aircraft_texture(craft_def: Dictionary) -> Texture2D:
+	var preview: Texture2D = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_preview_texture(craft_def)
+	if preview != null:
+		return preview
 	var direct_texture = craft_def.get("texture", null)
 	if direct_texture is Texture2D:
 		return direct_texture as Texture2D

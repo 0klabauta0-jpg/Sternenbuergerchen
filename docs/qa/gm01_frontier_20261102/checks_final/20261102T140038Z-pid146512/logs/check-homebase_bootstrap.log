@@ -1,0 +1,113 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== BUGFIX Singleplayer Release Homebase Start Bootstrap ===
+[PASS] Bugfix task file exists
+[PASS] Meta layer exposes HomebaseScreen
+[PASS] Meta layer exposes bootstrap snapshot
+[PASS] Singleplayer bootstrap is enabled
+[PASS] Singleplayer bootstrap seeds Homebase payload
+[PASS] Bootstrap selects a playable fireteam
+[PASS] Bootstrap preserves one Fireteam id per selected operator
+[PASS] Bootstrap creates or reuses a Dropship
+[PASS] Bootstrap assigns a pilot
+[PASS] Bootstrap craft starts at Homebase
+[PASS] Homebase readiness is ready on first Singleplayer screen
+[PASS] Homebase can request mission start for bootstrap Dropship
+[PASS] Bootstrap launch passes Homebase-to-Mission handoff
+[PASS] Bootstrap launch has no critical handoff failures
+[PASS] Bootstrap launch keeps the small playable default mission
+[PASS] Bootstrap launch records Homebase Direct as mission drop source
+[PASS] Main menu exposes Singleplayer button
+[PASS] Singleplayer button routes to MetaLayer scene
+[PASS] Menu-launched MetaLayer exposes HomebaseScreen
+[PASS] Menu-launched MetaLayer exposes bootstrap snapshot
+[PASS] Menu-launched bootstrap is enabled
+[PASS] Menu-launched bootstrap seeds payload
+[PASS] Menu-launched post-show guard runs after Homebase becomes visible
+[PASS] Menu-launched post-show guard leaves Homebase actionable
+[PASS] Menu-launched Homebase keeps the small direct-sortie mission
+[PASS] Menu-launched bootstrap selects operators
+[PASS] Menu-launched Homebase has payload Fireteam
+[PASS] Menu-launched Homebase payload has operators
+[PASS] Menu-launched payload starts boarded
+[PASS] Menu-launched Homebase readiness is ready
+[PASS] Menu-launched visible readiness no longer shows STOP Team
+[PASS] Menu-launched visible readiness no longer shows STOP Dropship
+[PASS] Menu-launched visible readiness no longer shows STOP Pilot
+[PASS] Menu-launched visible readiness no longer shows STOP Boarding
+[PASS] Menu-launched actual German start button is visible and actionable
+[PASS] Menu-launched visible start button is enabled
+[PASS] Menu-launched visible Flightdeck has a shipcard
+[PASS] Menu-launched Flightdeck does not render the empty blocker
+[PASS] Menu-launched Homebase can request mission start
+[PASS] Visible dead-end repair exposes HomebaseScreen
+[PASS] Meta layer exposes visible Homebase actionability guard
+[PASS] Visible dead-end fixture starts with empty payload
+[PASS] Visible dead-end fixture starts blocked
+[PASS] Visible Homebase dead-end guard records repair
+[PASS] Visible Homebase dead-end repair mode is named
+[PASS] Visible dead-end repair creates a Dropship
+[PASS] Visible dead-end repair assigns a pilot
+[PASS] Visible dead-end repair shows a Flightdeck shipcard
+[PASS] Visible dead-end repair restores payload operators
+[PASS] Visible dead-end repair boards payload
+[PASS] Visible dead-end repair makes readiness ready
+[PASS] Visible dead-end repair restores the actual German start action
+[PASS] Visible dead-end repair enables Start Mission
+[PASS] Visible dead-end repair can request mission start
+[PASS] FOB-transfer selection repair exposes HomebaseScreen
+[PASS] Meta layer exposes visible Homebase actionability guard for selection repair
+[PASS] FOB-transfer selection fixture starts on the old blocked workflow
+[PASS] Visible Homebase guard restores the small direct-sortie mission
+[PASS] Visible Homebase guard records mission-selection repair
+[PASS] Mission-selection repair leaves readiness ready
+[PASS] Mission-selection repair keeps the actual German start action
+[PASS] Mission-selection repair keeps Start Mission enabled
+[PASS] Post-show dead-end repair exposes HomebaseScreen
+[PASS] Meta layer exposes Homebase show route for regression
+[PASS] Post-show guard records that it ran
+[PASS] Post-show guard records actionable Homebase after repair
+[PASS] Homebase show path is repaired either immediately or by post-show guard
+[PASS] Post-show repair creates a Dropship
+[PASS] Post-show repair shows a Flightdeck shipcard
+[PASS] Post-show repair restores payload operators
+[PASS] Post-show repair boards payload
+[PASS] Post-show repair makes readiness ready
+[PASS] Post-show repair restores the actual German start action
+[PASS] Post-show repair enables Start Mission
+[PASS] Post-show repair can request mission start
+[PASS] Partial saved state exposes HomebaseScreen
+[PASS] Partial saved state exposes bootstrap snapshot
+[PASS] Partial saved state keeps bootstrap enabled
+[PASS] Partial saved state repairs missing roster floor
+[PASS] Partial saved state assigns a repaired pilot
+[PASS] Partial saved state has a pilot candidate after repair
+[PASS] Partial saved state seeds payload
+[PASS] Partial saved state exposes pilot id
+[PASS] Partial saved state craft is parked at Homebase
+[PASS] Partial saved state seeds actual staged Fireteam id
+[PASS] Partial saved state has payload operators
+[PASS] Partial saved state starts boarded
+[PASS] Partial saved state readiness is ready
+[PASS] Partial saved state keeps the actual German start action
+[PASS] Partial saved state start button is enabled
+[PASS] Partial saved state visible Flightdeck has a shipcard
+[PASS] Partial saved state Flightdeck does not render empty blocker
+[PASS] Partial saved state can request mission start
+[PASS] Stale payload seed exposes HomebaseScreen
+[PASS] Stale payload seed exposes bootstrap snapshot
+[PASS] Stale payload seed has bootstrap craft
+[PASS] Stale payload seed records visible fireteam fallback
+[PASS] Stale payload seed restores a visible payload Fireteam
+[PASS] Stale payload seed restores payload operators
+[PASS] Stale payload seed boards restored payload
+[PASS] Stale payload seed readiness becomes ready
+[PASS] Stale payload seed keeps the actual German start action visible
+[PASS] Stale payload seed enables Start Mission
+=== RESULTS: 103 passed, 0 failed ===
+BUGFIX_singleplayer_release_homebase_start_bootstrap: ALL PASSED

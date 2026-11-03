@@ -1,0 +1,32 @@
+{
+  "user_data_namespace": "SternenBuergerchen_UI_Zielbild_Normal_QA",
+  "isolated_user_data": true,
+  "original_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "test_project_sha256": "69133a38b01dd12366c41e570baf94216f67505825df2238c0d5083c2be153c3",
+  "project_restored_byte_exact": true,
+  "editor_plugins_temporarily_disabled": false,
+  "gdextensions_disabled": false,
+  "command": [
+    "godot_console",
+    "--verbose",
+    "--path",
+    "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+    "--rendering-method",
+    "forward_plus",
+    "--rendering-driver",
+    "vulkan",
+    "--audio-driver",
+    "Dummy",
+    "--script",
+    "res://scripts/tests/ui_zielbild_normal_capture.gd",
+    "--",
+    "--ui-size=1280x720",
+    "--startup-timeout-seconds=150",
+    "--evidence-output=res://docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup.json"
+  ],
+  "logical_size": "1280x720",
+  "driver": "vulkan",
+  "exit_code": 0,
+  "error_count": 0,
+  "error_lines": []
+}

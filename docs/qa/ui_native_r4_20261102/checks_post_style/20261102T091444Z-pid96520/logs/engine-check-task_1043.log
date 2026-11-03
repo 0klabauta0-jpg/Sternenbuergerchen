@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1043 Mission HUD Hotpath Event Log Guard ===
+PASS: Controller exposes a narrow live event-log feedback snapshot
+PASS: Recurring event-log refresh uses the narrow live snapshot
+PASS: Recurring event-log refresh does not build the full command-feedback snapshot
+PASS: Mission fixture exposes controller and tactical event-log panel
+PASS: Mission controller exposes the live event-log snapshot at runtime
+PASS: Live snapshot keeps selected-fireteam filtering data
+PASS: Live snapshot keeps display event entries
+PASS: Live snapshot keeps existing firefight event-log display data
+PASS: Live snapshot excludes unrelated integrated-playtest report payload
+PASS: Live snapshot is read-only
+PASS: Live snapshot does not own gameplay truth
+PASS: Live snapshot creates no commands
+PASS: Panel renders entries from the live snapshot
+PASS: Panel keeps the recorded tactical event in the live snapshot path
+=== RESULTS: 14 passed, 0 failed ===

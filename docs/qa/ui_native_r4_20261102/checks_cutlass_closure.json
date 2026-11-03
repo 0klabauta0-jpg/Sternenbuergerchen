@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "cutlass_ui",
+      "script": "res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd",
+      "success_marker": "PASS: native R4 Cutlass identity",
+      "timeout": 100
+    },
+    {
+      "name": "connected1114",
+      "script": "res://scripts/tests/task_1114_connected_dropship_pending_card_visual_polish.gd",
+      "success_marker": "0 failed",
+      "timeout": 100
+    }
+  ]
+}

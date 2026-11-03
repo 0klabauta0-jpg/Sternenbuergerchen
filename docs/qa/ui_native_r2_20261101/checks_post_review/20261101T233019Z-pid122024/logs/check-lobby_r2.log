@@ -1,0 +1,47 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: (1920, 1080) idle HostJoinGrid/HostButton is visible within every clipping ancestor
+PASS: (1920, 1080) idle HostJoinGrid/HostPortSpinBox is visible within every clipping ancestor
+PASS: (1920, 1080) idle HostJoinGrid/JoinButton is visible within every clipping ancestor
+PASS: (1920, 1080) idle HostJoinGrid/JoinAddressLineEdit is visible within every clipping ancestor
+PASS: (1920, 1080) idle HostJoinGrid/JoinPortSpinBox is visible within every clipping ancestor
+PASS: (1920, 1080) idle SessionRow/BackButton is visible within every clipping ancestor
+PASS: (1920, 1080) setup has a separate native scroll body
+PASS: (1920, 1080) original not-ready start gate is retained
+PASS: (1920, 1080) existing ReadyButton remains reachable with its callback
+PASS: (1920, 1080) existing StartMissionButton remains reachable with its callback
+PASS: (1920, 1080) existing DisconnectButton remains reachable with its callback
+PASS: (1920, 1080) existing BackButton remains reachable with its callback
+PASS: (1920, 1080) long setup exposes actual scrolling
+PASS: (1920, 1080) setup can actually scroll
+PASS: (1920, 1080) scrolling leaves connection/session actions fixed
+PASS: (1920, 1080) host start remains reachable after setup scrolling
+PASS: (1920, 1080) actual session supplies both side badges
+PASS: (1920, 1080) complete side badge is not horizontally clipped
+PASS: (1920, 1080) complete side badge is not horizontally clipped
+PASS: (1920, 1080) existing ready consensus enables host start
+PASS: (1920, 1080) client cannot expose or trigger host-only start
+PASS: (1280, 720) idle HostJoinGrid/HostButton is visible within every clipping ancestor
+PASS: (1280, 720) idle HostJoinGrid/HostPortSpinBox is visible within every clipping ancestor
+PASS: (1280, 720) idle HostJoinGrid/JoinButton is visible within every clipping ancestor
+PASS: (1280, 720) idle HostJoinGrid/JoinAddressLineEdit is visible within every clipping ancestor
+PASS: (1280, 720) idle HostJoinGrid/JoinPortSpinBox is visible within every clipping ancestor
+PASS: (1280, 720) idle SessionRow/BackButton is visible within every clipping ancestor
+PASS: (1280, 720) setup has a separate native scroll body
+PASS: (1280, 720) original not-ready start gate is retained
+PASS: (1280, 720) existing ReadyButton remains reachable with its callback
+PASS: (1280, 720) existing StartMissionButton remains reachable with its callback
+PASS: (1280, 720) existing DisconnectButton remains reachable with its callback
+PASS: (1280, 720) existing BackButton remains reachable with its callback
+PASS: (1280, 720) long setup exposes actual scrolling
+PASS: (1280, 720) setup can actually scroll
+PASS: (1280, 720) scrolling leaves connection/session actions fixed
+PASS: (1280, 720) host start remains reachable after setup scrolling
+PASS: (1280, 720) actual session supplies both side badges
+PASS: (1280, 720) complete side badge is not horizontally clipped
+PASS: (1280, 720) complete side badge is not horizontally clipped
+PASS: (1280, 720) existing ready consensus enables host start
+PASS: (1280, 720) client cannot expose or trigger host-only start
+RESULTS: 42 passed, 0 failed
+PASS: native R2 lobby actions

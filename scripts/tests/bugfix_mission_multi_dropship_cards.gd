@@ -1,6 +1,7 @@
 extends SceneTree
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
+const A5_THEME = preload("res://scripts/ui/tactical_ui_theme.gd")
 
 var _passed: int = 0
 var _failed: int = 0
@@ -69,8 +70,12 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 	controller.call("set_planning_state", planning_state)
 	await _wait_frames(4)
 
-	var panel := scene.get_node_or_null("TacticalUI/MissionDropshipPanel") as Control
-	_assert(panel != null and panel.visible, "Mission dropship panel is visible for mission_drop_cards")
+	var compact := scene.get_node("TacticalUI/MissionDropshipPanel/CompactCard") as Control
+	var details_button := compact.get_node("Contents/Header/DetailsButton") as Button
+	details_button.pressed.emit()
+	await _wait_frames(4)
+	var panel := scene.get_node_or_null("TacticalUI/A5DropshipDetailsPopup/Contents/Scroll/A5DropshipFullPanel") as Control
+	_assert(compact.is_visible_in_tree() and panel != null and panel.is_visible_in_tree(), "Mission dropship HUD opens the transport details for mission_drop_cards")
 	_assert(panel != null and panel.get_child_count() == 2, "Two mission dropships render as two detailed passenger cards")
 	var primary_view := scene.get_node_or_null("Primary3DView")
 	if primary_view != null and primary_view.has_method("get_render_snapshot"):
@@ -83,14 +88,15 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 		_assert(String(second_card.get_meta("mission_dropship_craft_id", "")) == "dropship_2", "Second card keeps Dropship 2 identity")
 		_assert(second_card.global_position.y > first_card.global_position.y, "Dropship cards are stacked vertically")
 		_assert(panel.size.y >= 216.0, "Panel reserves vertical space for both cards")
-		_assert(first_card.modulate.a < 1.0, "Inbound Dropship 1 remains visually in transit")
+		var compact_status := compact.get_node("Contents/Header/Identity/A5TransportState") as Label
+		_assert(compact_status.text.begins_with("Im Anflug") and bool(first_card.get_meta("mission_dropship_card_inaccessible", false)), "Inbound Dropship 1 shows A5 transit feedback and locks detail commands")
 		_assert(second_card.modulate.a >= 0.99, "Waiting Dropship 2 card stays fully commandable while its model remains offscreen")
 		var first_progress := first_card.get_node_or_null("MarginContainer/VBox/ProgressBar") as ProgressBar
 		_assert(first_progress != null and first_progress.visible and absf(first_progress.value - 35.0) <= 0.1, "Inbound mission dropship card shows transfer progress while the ship itself is still off-map")
 		var first_passenger_host := first_card.get_node_or_null("MarginContainer/VBox/ExtraContentHost") as VBoxContainer
 		var second_passenger_host := second_card.get_node_or_null("MarginContainer/VBox/ExtraContentHost") as VBoxContainer
-		_assert(first_passenger_host != null and first_passenger_host.get_child_count() > 0, "Mission Dropship 1 card embeds its passenger overview on the mission map")
-		_assert(second_passenger_host != null and second_passenger_host.get_child_count() > 0, "Mission Dropship 2 card embeds its passenger overview on the mission map")
+		_assert(first_passenger_host != null and first_passenger_host.get_child_count() > 0, "Mission Dropship 1 card embeds its passenger overview in transport details")
+		_assert(second_passenger_host != null and second_passenger_host.get_child_count() > 0, "Mission Dropship 2 card embeds its passenger overview in transport details")
 
 		var click := InputEventMouseButton.new()
 		click.button_index = MOUSE_BUTTON_LEFT
@@ -109,7 +115,7 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 		_assert(Array(controller.call("get_selected_fireteam_ids")).is_empty(), "Selecting a dropship card does not silently select its fireteam into #17")
 		_assert(bool(refreshed_second_card.get_meta("mission_dropship_selected", false)), "Selected mission dropship card is marked in the #19 panel")
 		var selected_stylebox := refreshed_second_card.get_theme_stylebox("panel") as StyleBoxFlat
-		_assert(selected_stylebox != null and selected_stylebox.border_color.g > selected_stylebox.border_color.r and selected_stylebox.border_width_left >= 2, "Selected mission dropship card uses a clear green outline")
+		_assert(selected_stylebox != null and selected_stylebox.border_color.is_equal_approx(A5_THEME.COLOR_BORDER_SELECTED) and selected_stylebox.border_width_left >= 1, "Selected mission dropship card uses the A5 selected outline")
 		var return_button := refreshed_second_card.get_node_or_null("MarginContainer/VBox/HeaderRow/PrimaryActionButton") as Button
 		_assert(return_button != null and return_button.visible and not return_button.disabled and return_button.text == "FOB", "Waiting mission dropship card exposes a direct Return-to-FOB button")
 		if return_button != null:
@@ -129,8 +135,8 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 		var planned_second_card: Dictionary = _find_card(planned_cards, "dropship_2")
 		_assert(bool(planned_second_card.get("has_lz_position", false)) and Vector2(planned_second_card.get("lz_position", Vector2.ZERO)).is_equal_approx(Vector2(640.0, 320.0)), "Dropship 2 stores its own LZ")
 		_assert(String(planned_second_card.get("approach_angle", "")) == "SE", "Dropship 2 stores its own approach")
-		var summary_panel := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/MissionCraftSummary") as Control
-		_assert(summary_panel != null and summary_panel.visible and String(summary_panel.get_meta("mission_drop_craft_id", "")) == "dropship_2", "Mission Control shows the selected dropship summary next to Drop")
+		var compact_heading := compact.get_node("Contents/Header/Identity/A5TransportHeading") as Label
+		_assert(compact.is_visible_in_tree() and String(compact.get_meta("mission_dropship_craft_id", "")) == "dropship_2" and compact_heading.text == "Cutlass 2", "A5 Mission Control shows the selected dropship identity beside its actions")
 		var refreshed_first_card := panel.get_child(0) as Control
 		refreshed_first_card.emit_signal("gui_input", click)
 		await _wait_frames(4)

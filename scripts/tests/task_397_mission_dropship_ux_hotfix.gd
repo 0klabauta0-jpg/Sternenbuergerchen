@@ -38,9 +38,13 @@ func _test_shipcard_approach_grid_and_visible_vector() -> void:
 	controller.call("_refresh_world_overlays")
 	controller.call("_update_ui")
 	await _wait_frames(6)
-	var alpha_grid := _find_approach_grid(scene, "dropship_alpha")
-	_assert(alpha_grid != null and alpha_grid.columns == 2, "Dropship card approach buttons are arranged as a 2x2 grid")
-	_assert(_approach_grid_has_compact_buttons(alpha_grid), "Approach buttons are compact enough for the shipcard")
+	var details := scene.get_node("TacticalUI/MissionDropshipPanel/CompactCard/Contents/Header/DetailsButton") as Button
+	details.pressed.emit()
+	await _wait_frames(4)
+	var popup := scene.get_node("TacticalUI/A5DropshipDetailsPopup") as PopupPanel
+	var alpha_grid := _find_approach_grid(popup, "dropship_alpha")
+	_assert(popup.visible and alpha_grid != null and alpha_grid.is_visible_in_tree() and alpha_grid.columns == 2, "Dropship details expose the approach buttons in a visible 2x2 grid")
+	_assert(_approach_grid_has_compact_buttons(alpha_grid), "Four readable approach buttons fit the transport details grid")
 	var render_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	_assert(int(render_snapshot.get("dropship_approach_line_count", 0)) >= 2 and int(render_snapshot.get("dropship_approach_arrow_count", 0)) >= 2, "Primary3DView renders visible green approach vectors for both planned dropships")
 	_assert(float(render_snapshot.get("dropship_approach_line_width_factor", 0.0)) >= 0.32, "Approach vector strip is wide enough to read as a clear flight lane")
@@ -167,7 +171,7 @@ func _approach_grid_has_compact_buttons(grid: GridContainer) -> bool:
 		var button := child as Button
 		if button == null or not bool(button.get_meta("mission_dropship_card_command_button", false)):
 			return false
-		if button.custom_minimum_size.x > 25.0 or button.custom_minimum_size.y > 16.0:
+		if button.size.x < 28.0 or button.size.y < 28.0 or not grid.get_global_rect().encloses(button.get_global_rect()):
 			return false
 	return true
 

@@ -1,0 +1,16 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1106 Coop Lobby Layout Hardening ===
+PASS: Idle lobby panel stays inside 1280x720
+PASS: Idle lobby panel keeps 720x560 size
+PASS: Idle setup scroll stays inside the fixed panel and leaves room for actions
+DIAG panel=[P: (280.0, 80.0), S: (720.0, 560.0)] min=(0.0, 0.0) scroll=(688.0, 270.0) scroll_min=(463.0, 96.0) vscroll=true peer_min=(1.0, 81.0) assignment_min=(1.0, 37.0)
+PASS: Three-peer lobby panel stays inside 1280x720
+PASS: Three-peer content cannot enlarge the fixed panel
+PASS: Three-peer setup scroll stays clipped to panel with fixed actions outside it
+PASS: Lobby keeps automatic vertical scrolling
+PASS: Long three-peer lobby content exposes vertical scrolling
+PASS: Role labels cannot force horizontal panel growth
+PASS: Layout hardening preserves spectator readability
+=== RESULTS: 10 passed, 0 failed ===

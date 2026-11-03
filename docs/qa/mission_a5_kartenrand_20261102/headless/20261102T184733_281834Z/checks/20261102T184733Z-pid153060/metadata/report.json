@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "run_dir": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T184733_281834Z\\checks\\20261102T184733Z-pid153060",
+  "project": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+  "manifest": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\checks_final.json",
+  "godot": "godot_console",
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_probe": {
+    "argv": [
+      "godot_console",
+      "--version"
+    ],
+    "exit_code": 0,
+    "timed_out": false,
+    "elapsed": 0.053,
+    "version": "4.6.2.stable.official.71f334935",
+    "errors": [],
+    "error_count": 0,
+    "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T184733_281834Z\\checks\\20261102T184733Z-pid153060\\logs\\version.log",
+    "passed": true
+  },
+  "filter": "hex_hpa_pruning",
+  "default_timeout": 60.0,
+  "skip_import": true,
+  "started_at": "2026-11-02T18:47:33.358945+00:00",
+  "finished_at": "2026-11-02T18:47:42.308866+00:00",
+  "import": null,
+  "checks": [
+    {
+      "argv": [
+        "godot_console",
+        "--headless",
+        "--path",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen",
+        "--log-file",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T184733_281834Z\\checks\\20261102T184733Z-pid153060\\logs\\engine-check-hex_hpa_pruning.log",
+        "--script",
+        "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\scripts\\tests\\gm01_hex_hpa_pruning_verifier.gd"
+      ],
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed": 8.891,
+      "name": "hex_hpa_pruning",
+      "marker_found": true,
+      "errors": [],
+      "error_count": 0,
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T184733_281834Z\\checks\\20261102T184733Z-pid153060\\logs\\check-hex_hpa_pruning.log",
+      "godot_log": "C:\\Users\\bjoer\\.codex\\worktrees\\ui-entwuerfe-20261101\\SternenBuergerchen\\docs\\qa\\mission_a5_kartenrand_20261102\\headless\\20261102T184733_281834Z\\checks\\20261102T184733Z-pid153060\\logs\\engine-check-hex_hpa_pruning.log",
+      "passed": true,
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

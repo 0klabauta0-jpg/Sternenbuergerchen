@@ -1,0 +1,54 @@
+{
+  "schema": "sternenbuergerchen.ui_native_html_offline_qa.v1",
+  "status": "PASS",
+  "tested_at": "2026-11-02T16:33:13.241Z",
+  "runtime": "v24.13.0",
+  "report": "docs/reports/STERNENBUERGERCHEN_UI_ZIELBILD_2026-11-02.html",
+  "report_sha256": "00d0bc406fd0a0ce3b82272a204833a3dad632fb98fe6400c7136ac41c7f5eee",
+  "scope": "Actual full inline JavaScript executed in Node VM with a minimal synthetic DOM and mocked Blob/URL/clipboard/download APIs. No browser layout, real filesystem download, browser clipboard or Godot acceptance.",
+  "browser_status": "NOT_RUN_OFFLINE_DOM_ONLY",
+  "exported_controls": 19,
+  "checks": [
+    {
+      "name": "Final inline JavaScript compiles",
+      "status": "PASS"
+    },
+    {
+      "name": "Unique IDs, eight three-way comparisons and local unchanged image references",
+      "status": "PASS"
+    },
+    {
+      "name": "Style judgement and manual checks start open",
+      "status": "PASS"
+    },
+    {
+      "name": "Three tabs select exactly one panel",
+      "status": "PASS"
+    },
+    {
+      "name": "Export includes hidden-screen notes, review state and UTF-8",
+      "status": "PASS"
+    },
+    {
+      "name": "Original, historical and fresh native evidence hashes match actual PNGs",
+      "status": "PASS"
+    },
+    {
+      "name": "Download fallback has unique safe filenames and actual JSON",
+      "status": "PASS"
+    },
+    {
+      "name": "Copy and unavailable-clipboard fallback",
+      "status": "PASS"
+    },
+    {
+      "name": "Import changes review controls only and reexports notes",
+      "status": "PASS"
+    },
+    {
+      "name": "Open scope and mask distinction remain explicit",
+      "status": "PASS"
+    }
+  ],
+  "repro_command": "node docs/qa/ui_zielbild_20261102/html_qa.cjs"
+}

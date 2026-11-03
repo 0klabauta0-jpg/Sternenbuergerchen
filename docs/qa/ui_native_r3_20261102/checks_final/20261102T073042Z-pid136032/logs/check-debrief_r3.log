@@ -1,0 +1,232 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+R3 DEBRIEF (1920, 1080) empty:  panel=[P: (520.0, 419.0), S: (880.0, 241.0)]
+PASS: (1920, 1080) empty: actual result window stays in the logical viewport
+PASS: (1920, 1080) empty: result window is centered
+PASS: (1920, 1080) empty: empty report is at most 980x380
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Skill Preview:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Skill Awards:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Winner team_
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Character updates:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Personnel updates:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token FTL feedback:
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token COND 
+PASS: (1920, 1080) empty: primary UI avoids diagnostic token Air asset:
+PASS: (1920, 1080) empty: no missing awards are fabricated
+PASS: (1920, 1080) empty: ReturnToFOBButton remains reachable
+PASS: (1920, 1080) empty: ReturnToHomebaseButton remains reachable
+PASS: (1920, 1080) empty: presentation preserves the supplied result exactly
+PASS: (1920, 1080) empty: original-report action is explicitly reachable
+PASS: (1920, 1080) empty: details establish an input-blocking native overlay
+PASS: (1920, 1080) empty: read-only original report retains every raw field
+PASS: (1920, 1080) empty: opening details does not pause simulation
+ERROR: FAIL: (1920, 1080) empty: details prevent a click through to the return action
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:93)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) empty: screen hide closes details rather than leaving a detached popup
+ERROR: FAIL: (1920, 1080) empty: original return callback closes details and emits once
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:101)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) empty: idle frames do not poll the layout
+R3 DEBRIEF (1920, 1080) sparse:  panel=[P: (340.0, 226.0), S: (1240.0, 628.0)]
+PASS: (1920, 1080) sparse: actual result window stays in the logical viewport
+PASS: (1920, 1080) sparse: result window is centered
+PASS: (1920, 1080) sparse: sparse report has a bounded content-sized window
+PASS: (1920, 1080) sparse: sparse window uses at most 55 percent of Full HD
+PASS: (1920, 1080) sparse: AARCard does not stretch absent or brief data
+PASS: (1920, 1080) sparse: EventsCard does not stretch absent or brief data
+PASS: (1920, 1080) sparse: FeedbackCard does not stretch absent or brief data
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Skill Preview:
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Skill Awards:
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Winner team_
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Character updates:
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Personnel updates:
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token FTL feedback:
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token COND 
+PASS: (1920, 1080) sparse: primary UI avoids diagnostic token Air asset:
+PASS: (1920, 1080) sparse: preview and confirmation are explicitly distinguished
+PASS: (1920, 1080) sparse: no missing awards are fabricated
+PASS: (1920, 1080) sparse: ReturnToFOBButton remains reachable
+PASS: (1920, 1080) sparse: ReturnToHomebaseButton remains reachable
+PASS: (1920, 1080) sparse: presentation preserves the supplied result exactly
+PASS: (1920, 1080) sparse: original-report action is explicitly reachable
+PASS: (1920, 1080) sparse: details establish an input-blocking native overlay
+PASS: (1920, 1080) sparse: read-only original report retains every raw field
+PASS: (1920, 1080) sparse: opening details does not pause simulation
+ERROR: FAIL: (1920, 1080) sparse: details prevent a click through to the return action
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:93)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) sparse: screen hide closes details rather than leaving a detached popup
+ERROR: FAIL: (1920, 1080) sparse: original return callback closes details and emits once
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:101)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) sparse: idle frames do not poll the layout
+R3 DEBRIEF (1920, 1080) rich:  panel=[P: (240.0, 209.0), S: (1440.0, 661.0)]
+PASS: (1920, 1080) rich: actual result window stays in the logical viewport
+PASS: (1920, 1080) rich: result window is centered
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Skill Preview:
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Skill Awards:
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Winner team_
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Character updates:
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Personnel updates:
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token FTL feedback:
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token COND 
+PASS: (1920, 1080) rich: primary UI avoids diagnostic token Air asset:
+PASS: (1920, 1080) rich: preview and confirmation are explicitly distinguished
+PASS: (1920, 1080) rich: many real people have a native scroll
+PASS: (1920, 1080) rich: all supplied AAR rows have a native scroll
+PASS: (1920, 1080) rich: rich AAR can actually scroll to later records
+PASS: (1920, 1080) rich: ReturnToFOBButton remains reachable
+PASS: (1920, 1080) rich: ReturnToHomebaseButton remains reachable
+PASS: (1920, 1080) rich: presentation preserves the supplied result exactly
+PASS: (1920, 1080) rich: original-report action is explicitly reachable
+PASS: (1920, 1080) rich: details establish an input-blocking native overlay
+PASS: (1920, 1080) rich: read-only original report retains every raw field
+PASS: (1920, 1080) rich: opening details does not pause simulation
+ERROR: FAIL: (1920, 1080) rich: details prevent a click through to the return action
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:93)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) rich: screen hide closes details rather than leaving a detached popup
+ERROR: FAIL: (1920, 1080) rich: original return callback closes details and emits once
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:101)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1920, 1080) rich: idle frames do not poll the layout
+R3 DEBRIEF (1280, 720) empty:  panel=[P: (200.0, 239.0), S: (880.0, 241.0)]
+PASS: (1280, 720) empty: actual result window stays in the logical viewport
+PASS: (1280, 720) empty: result window is centered
+PASS: (1280, 720) empty: empty report is at most 980x380
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Skill Preview:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Skill Awards:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Winner team_
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Character updates:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Personnel updates:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token FTL feedback:
+PASS: (1280, 720) empty: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1280, 720) empty: primary UI avoids diagnostic token COND 
+PASS: (1280, 720) empty: primary UI avoids diagnostic token Air asset:
+PASS: (1280, 720) empty: no missing awards are fabricated
+PASS: (1280, 720) empty: ReturnToFOBButton remains reachable
+PASS: (1280, 720) empty: ReturnToHomebaseButton remains reachable
+PASS: (1280, 720) empty: presentation preserves the supplied result exactly
+PASS: (1280, 720) empty: original-report action is explicitly reachable
+PASS: (1280, 720) empty: details establish an input-blocking native overlay
+PASS: (1280, 720) empty: read-only original report retains every raw field
+PASS: (1280, 720) empty: opening details does not pause simulation
+ERROR: FAIL: (1280, 720) empty: details prevent a click through to the return action
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:93)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) empty: screen hide closes details rather than leaving a detached popup
+ERROR: FAIL: (1280, 720) empty: original return callback closes details and emits once
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:101)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) empty: idle frames do not poll the layout
+R3 DEBRIEF (1280, 720) sparse:  panel=[P: (24.0, 46.0), S: (1232.0, 628.0)]
+PASS: (1280, 720) sparse: actual result window stays in the logical viewport
+PASS: (1280, 720) sparse: result window is centered
+ERROR: FAIL: (1280, 720) sparse: sparse report has a bounded content-sized window
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:44)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) sparse: AARCard does not stretch absent or brief data
+PASS: (1280, 720) sparse: EventsCard does not stretch absent or brief data
+PASS: (1280, 720) sparse: FeedbackCard does not stretch absent or brief data
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Skill Preview:
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Skill Awards:
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Winner team_
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Character updates:
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Personnel updates:
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token FTL feedback:
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token COND 
+PASS: (1280, 720) sparse: primary UI avoids diagnostic token Air asset:
+PASS: (1280, 720) sparse: preview and confirmation are explicitly distinguished
+PASS: (1280, 720) sparse: no missing awards are fabricated
+PASS: (1280, 720) sparse: ReturnToFOBButton remains reachable
+PASS: (1280, 720) sparse: ReturnToHomebaseButton remains reachable
+PASS: (1280, 720) sparse: presentation preserves the supplied result exactly
+PASS: (1280, 720) sparse: original-report action is explicitly reachable
+PASS: (1280, 720) sparse: details establish an input-blocking native overlay
+PASS: (1280, 720) sparse: read-only original report retains every raw field
+PASS: (1280, 720) sparse: opening details does not pause simulation
+ERROR: FAIL: (1280, 720) sparse: details prevent a click through to the return action
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:93)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) sparse: screen hide closes details rather than leaving a detached popup
+ERROR: FAIL: (1280, 720) sparse: original return callback closes details and emits once
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:101)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) sparse: idle frames do not poll the layout
+R3 DEBRIEF (1280, 720) rich:  panel=[P: (24.0, 29.0), S: (1232.0, 661.0)]
+PASS: (1280, 720) rich: actual result window stays in the logical viewport
+PASS: (1280, 720) rich: result window is centered
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Skill Preview:
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Skill Awards:
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Winner team_
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Character updates:
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Personnel updates:
+PASS: (1280, 720) rich: primary UI avoids diagnostic token FTL feedback:
+PASS: (1280, 720) rich: primary UI avoids diagnostic token WIN TEAM_
+PASS: (1280, 720) rich: primary UI avoids diagnostic token COND 
+PASS: (1280, 720) rich: primary UI avoids diagnostic token Air asset:
+PASS: (1280, 720) rich: preview and confirmation are explicitly distinguished
+PASS: (1280, 720) rich: many real people have a native scroll
+PASS: (1280, 720) rich: all supplied AAR rows have a native scroll
+PASS: (1280, 720) rich: rich AAR can actually scroll to later records
+PASS: (1280, 720) rich: ReturnToFOBButton remains reachable
+PASS: (1280, 720) rich: ReturnToHomebaseButton remains reachable
+PASS: (1280, 720) rich: presentation preserves the supplied result exactly
+PASS: (1280, 720) rich: original-report action is explicitly reachable
+PASS: (1280, 720) rich: details establish an input-blocking native overlay
+PASS: (1280, 720) rich: read-only original report retains every raw field
+PASS: (1280, 720) rich: opening details does not pause simulation
+ERROR: FAIL: (1280, 720) rich: details prevent a click through to the return action
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:93)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) rich: screen hide closes details rather than leaving a detached popup
+ERROR: FAIL: (1280, 720) rich: original return callback closes details and emits once
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/ui_native_r3_debrief_verifier.gd:160)
+       [1] _test_report (res://scripts/tests/ui_native_r3_debrief_verifier.gd:101)
+       [2] _wait (res://scripts/tests/ui_native_r3_debrief_verifier.gd:151)
+PASS: (1280, 720) rich: idle frames do not poll the layout
+RESULTS: 144 passed, 13 failed

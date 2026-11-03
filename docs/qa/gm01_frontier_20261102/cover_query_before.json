@@ -1,0 +1,85 @@
+{
+  "metric": "warm_headless_cpu_registry_query_batch",
+  "unit": "us",
+  "context": {
+    "engine": "4.6.2-stable (official)",
+    "platform": "Windows",
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+    "logical_processors": 16,
+    "renderer": "headless",
+    "map_sha256": "31daf2d4943ec4a2007fc4f5246249f309c52436a0675143184d060b6999c925",
+    "grid_topology": "hex_axial_v1",
+    "centers": [
+      {
+        "x": 303.0,
+        "y": 872.0
+      },
+      {
+        "x": 367.0,
+        "y": 936.0
+      },
+      {
+        "x": 431.0,
+        "y": 904.0
+      },
+      {
+        "x": 495.0,
+        "y": 968.0
+      },
+      {
+        "x": -159.0,
+        "y": 868.0
+      },
+      {
+        "x": 97.0,
+        "y": 764.0
+      },
+      {
+        "x": 161.0,
+        "y": 816.0
+      },
+      {
+        "x": 193.0,
+        "y": 816.0
+      }
+    ],
+    "radius_world": 220.0,
+    "queries_per_sample": 8,
+    "workload": "Same 8 query centers on authored GM01; alternating legacy/current batches after warmup; function CPU only, no FPS inference",
+    "raw_source": "cover_radius_query_pairs_20261102T132424-pid129076.json"
+  },
+  "samples": [
+    19783,
+    19487,
+    21850,
+    20508,
+    20269,
+    23340,
+    21124,
+    21654,
+    20574,
+    19659,
+    20831,
+    20155,
+    26772,
+    23976,
+    24514,
+    20745,
+    20674,
+    20945,
+    28293,
+    20940,
+    19756,
+    21609,
+    20909,
+    22504,
+    20447,
+    23257,
+    21306,
+    19801,
+    19963,
+    20542,
+    20826,
+    20434
+  ]
+}

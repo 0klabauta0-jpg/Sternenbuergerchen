@@ -1,0 +1,5430 @@
+{
+	"captures": [
+		{
+			"error": 0,
+			"height": 1080,
+			"id": "01_main_menu",
+			"path": "res://docs/qa/gm01_frontier_20261102/frontier/1920x1080_20261102T130510Z/startup_captures/01_main_menu.png",
+			"scene": "res://scenes/ui/main_menu.tscn",
+			"sha256": "c4752fd2041806e52a45ba5cbbc2465c69f3297836e88fb6075d5d30dca7cf84",
+			"width": 1920
+		},
+		{
+			"error": 0,
+			"height": 1080,
+			"id": "02_homebase",
+			"path": "res://docs/qa/gm01_frontier_20261102/frontier/1920x1080_20261102T130510Z/startup_captures/02_homebase.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "8658a50ed2dc61336b0e206b9d32e31c5956162008112dde35260817f68ce26a",
+			"width": 1920
+		},
+		{
+			"camera_projection": 1,
+			"camera_size": 34.0,
+			"camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (36.96496, 34.02369, 38.08996)]",
+			"error": 0,
+			"height": 1080,
+			"id": "03_default_mission",
+			"path": "res://docs/qa/gm01_frontier_20261102/frontier/1920x1080_20261102T130510Z/startup_captures/03_default_mission.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "40581ef38d9b3c21d5bf6719da448a8819788edc7d4d5529f332a53a5d0ed592",
+			"width": 1920
+		}
+	],
+	"checks": [
+		{
+			"label": "Project normal entry is MainMenu",
+			"passed": true
+		},
+		{
+			"label": "Normal main menu scene loads",
+			"passed": true
+		},
+		{
+			"label": "MainMenu displays a background texture",
+			"passed": true
+		},
+		{
+			"label": "MainMenu background comes from the existing catalog",
+			"passed": true
+		},
+		{
+			"label": "Normal MainMenu catalog selects the Frontier start image",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 01_main_menu",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 01_main_menu",
+			"passed": true
+		},
+		{
+			"label": "Real Singleplayer button is actionable",
+			"passed": true
+		},
+		{
+			"label": "Normal Singleplayer opens visible Homebase",
+			"passed": true
+		},
+		{
+			"label": "Original normal grid_sweep mission remains selected",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase bootstrap provides a playable team",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase has a craft and pilot",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase payload is ready without fixture mutation",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 02_homebase",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 02_homebase",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase launch command is accepted",
+			"passed": true
+		},
+		{
+			"label": "Normal mission owns TacticalController, Primary3DView and SimulationRoot",
+			"passed": true
+		},
+		{
+			"label": "Menu launch reaches the regular mission scene",
+			"passed": true
+		},
+		{
+			"label": "Handoff retains the original default mission",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase-to-Mission handoff passes",
+			"passed": true
+		},
+		{
+			"label": "Default mission enables the Frontier visual profile",
+			"passed": true
+		},
+		{
+			"label": "Frontier activation comes from normal map data without a test override",
+			"passed": true
+		},
+		{
+			"label": "Rebuilt default mission uses its saved, user-requested Hex topology",
+			"passed": true
+		},
+		{
+			"label": "Regular renderer remains a read-only state consumer",
+			"passed": true
+		},
+		{
+			"label": "Original default map JSON is available",
+			"passed": true
+		},
+		{
+			"label": "Default mission retains its authored Alpha insertion marker",
+			"passed": true
+		},
+		{
+			"label": "Normal mission exposes the authoritative terrain registry",
+			"passed": true
+		},
+		{
+			"label": "Authored Alpha insertion marker is on walkable terrain",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 03_default_mission",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 03_default_mission",
+			"passed": true
+		},
+		{
+			"label": "Timed out waiting for normal 18-second craft arrival",
+			"passed": false
+		},
+		{
+			"label": "Existing player profile, generator and unit identities remain unchanged",
+			"passed": true
+		}
+	],
+	"elapsed_msec": 71596,
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"facts": {
+		"default_map": {
+			"gameplay_without_theme_sha256": "5731678c9c41d85ae741ad921535ca7f504ee085bd2d965f769b13bc149a9612",
+			"lz_grid": "(0, 13)",
+			"lz_marker": "spawn_alpha",
+			"lz_world": "(-305.0, 568.0)",
+			"path": "res://maps/Ground_Mission01_32x32.json",
+			"sha256": "31daf2d4943ec4a2007fc4f5246249f309c52436a0675143184d060b6999c925"
+		},
+		"forced_arrival": false,
+		"forced_unloading": false,
+		"hex_debug_flags_change_gameplay": false,
+		"hex_diagnostic_observation_only": true,
+		"hex_existing_debug_flags_enabled": true,
+		"hex_hardware_context": {
+			"content_scale_mode": 1,
+			"content_scale_size": "(1920, 1080)",
+			"display": "Windows",
+			"godot": {
+				"build": "official",
+				"hash": "71f334935c000924d403448e698df4441130df18",
+				"hex": 263682,
+				"major": 4,
+				"minor": 6,
+				"patch": 2,
+				"status": "stable",
+				"string": "4.6.2-stable (official)",
+				"timestamp": 0
+			},
+			"godot_arguments": [
+				"--script",
+				"res://scripts/tests/gm01_frontier_hex_start_diagnostic.gd"
+			],
+			"logical_root_size": "(1920, 1080)",
+			"os": "Windows",
+			"os_version": "10.0.19045",
+			"processor_count": 16,
+			"processor_name": "AMD Ryzen 7 7800X3D 8-Core Processor",
+			"render_driver": "vulkan",
+			"render_method": "forward_plus",
+			"requested_ui_size": "1920x1080",
+			"video_adapter": "NVIDIA GeForce RTX 4070 Ti SUPER"
+		},
+		"hex_runtime_final": {
+			"elapsed_msec": 71585,
+			"engine_fps": 1.0,
+			"flow_process_mode": 0,
+			"mission_process_mode": 0,
+			"pending_mission_transfers": [
+				{
+					"duration_seconds": 18.0,
+					"elapsed_seconds": 15.0,
+					"payload_source": "homebase_direct",
+					"phase": "to_mission"
+				}
+			],
+			"physics_frames": 947,
+			"physics_process_seconds": 0.039384,
+			"planning": {
+				"mission_drop_eta_seconds": 3,
+				"mission_drop_progress": 83.3333333333333,
+				"mission_drop_source": "homebase_direct",
+				"mission_drop_state": "to_mission"
+			},
+			"process_frames": 225,
+			"process_seconds": 0.048116,
+			"simulation_last_tick_delta": 0.0166666666666667,
+			"simulation_tick": 903,
+			"time_scale": 1.0,
+			"timings": {
+				"combat": {
+					"active_enemy_unit_count": 8,
+					"command_queue_after_tick": 4,
+					"effect_queue_after_tick": 0,
+					"enabled": true,
+					"enemy_unit_count": 8,
+					"friendly_unit_count": 0,
+					"scopes_usec": {
+						"bleedout_queue_usec": 22,
+						"combat_fire_decision_usec": 709,
+						"combat_resolution_usec": 73,
+						"combat_visual_refresh_usec": 2,
+						"contact_tracking_usec": 25,
+						"cooldowns_usec": 7,
+						"detection_timers_usec": 1,
+						"enemy_advance_usec": 359,
+						"enemy_security_usec": 442,
+						"enemy_team_tactics_usec": 38089,
+						"fire_find_contact_pair_usec": 257,
+						"fire_no_contact_diagnostic_usec": 448,
+						"flank_vulnerability_usec": 1,
+						"friendly_standard_behavior_usec": 9,
+						"leadership_usec": 1,
+						"medic_support_usec": 457,
+						"multiplayer_snapshot_context_usec": 655,
+						"overwatch_security_usec": 230,
+						"status_update_usec": 102
+					},
+					"state": "active",
+					"tick": 903,
+					"total_tick_usec": 41219
+				},
+				"combat_hotspots": {
+					"counts": {
+						"candidate_filter": 2392
+					},
+					"enabled": true,
+					"usec": {
+						"candidate_filter": 7238
+					},
+					"visibility_cache": {
+						"counts": {
+
+						},
+						"enabled": true,
+						"usec": {
+
+						}
+					}
+				},
+				"controller": {
+					"enabled": true,
+					"included_ui_refresh": false,
+					"scopes_usec": {
+						"execution_updates_usec": 205,
+						"feedback_and_security_usec": 6,
+						"hud_heavy_usec": 0,
+						"hud_light_usec": 6,
+						"ui_refresh_usec": 0
+					},
+					"total_usec": 216
+				},
+				"controller_surfaces": {
+					"enabled": true,
+					"scopes_usec": {
+						"craft_controls_usec": 48845,
+						"fireteam_cards_usec": 576,
+						"primary_status_usec": 5634,
+						"visibility_usec": 0,
+						"world_overlays_usec": 2232
+					},
+					"total_usec": 57293
+				},
+				"controller_ui": {
+					"enabled": true,
+					"scopes_usec": {
+						"mission_panels_usec": 29520,
+						"panel_dropship_usec": 20922,
+						"panel_event_log_usec": 2701,
+						"panel_fireteam_phase_usec": 3289,
+						"panel_identity_usec": 2156,
+						"panel_nav_identity_usec": 2608,
+						"panel_nav_timer_usec": 17,
+						"panel_team_chip_usec": 435,
+						"primary_block_labels_usec": 75,
+						"primary_command_decision_usec": 34,
+						"primary_command_door_usec": 659,
+						"primary_command_feedback_usec": 791,
+						"primary_command_route_usec": 0,
+						"primary_command_target_waypoint_usec": 98,
+						"primary_fireteam_status_usec": 266,
+						"primary_fireteam_tooltips_usec": 1047,
+						"primary_hotkey_usec": 7,
+						"primary_labels_usec": 4694,
+						"runtime_surfaces_usec": 58580,
+						"secondary_buttons_layout_usec": 918,
+						"secondary_decision_contract_usec": 1015,
+						"secondary_density_contract_usec": 566,
+						"secondary_frontier_contract_usec": 807,
+						"secondary_labels_usec": 36486,
+						"secondary_phase_labels_usec": 12,
+						"secondary_preview_contract_usec": 933,
+						"secondary_release_sync_usec": 443,
+						"secondary_strategic_text_usec": 29490,
+						"secondary_tooltip_usec": 2302,
+						"shared_station_route_snapshot_usec": 2508
+					},
+					"total_usec": 129562
+				},
+				"simulation": {
+					"command_count": 0,
+					"command_queue_after_tick": 4,
+					"command_type_count": {
+
+					},
+					"command_type_usec": {
+
+					},
+					"effect_count": 0,
+					"effect_queue_after_tick": 0,
+					"enabled": true,
+					"navigation": {
+						"budget_enabled": true,
+						"delayed_this_tick": 0,
+						"enabled": false,
+						"fallback_queries_this_tick": 0,
+						"hpa_navigation": {
+							"build_count": 1,
+							"cache_hit_count": 299,
+							"cluster_size": 8,
+							"has_graph": true,
+							"last_build_stats": {
+								"built": true,
+								"cluster_count": 42,
+								"cluster_size": 8,
+								"component_count": 57,
+								"elapsed_usec": 66066,
+								"incremental": false,
+								"portal_count": 591,
+								"registry_revision": 2306,
+								"runtime_build_count": 1,
+								"runtime_rebuild_mode": "full",
+								"tile_count": 2304
+							},
+							"registry_revision": 2306,
+							"tile_count": 2304
+						},
+						"last_delay_reason": "",
+						"last_path_metrics": {
+
+						},
+						"max_new_path_queries_per_tick": 4,
+						"most_expensive_query": {
+
+						},
+						"new_path_queries_this_tick": 0,
+						"path_queries_this_tick": 0,
+						"pending_query_count": 0,
+						"tick": 903,
+						"unreachable_queries_this_tick": 0
+					},
+					"scopes_usec": {
+						"command_apply_usec": 0,
+						"command_ordering_usec": 2,
+						"command_queue_usec": 3,
+						"effect_queue_usec": 1,
+						"local_avoidance_prepare_usec": 1,
+						"objective_capture_usec": 28,
+						"snapshot_broadcast_usec": 0,
+						"tick_signal_emit_usec": 41508,
+						"unit_minimum_spacing_usec": 152
+					},
+					"tick": 903,
+					"total_tick_usec": 41702
+				},
+				"view": {
+					"conditional_scopes_usec": {
+						"fow_work_usec": 10812
+					},
+					"counters": {
+						"fow_work_invocation_count": 7
+					},
+					"enabled": true,
+					"scopes_usec": {
+						"dynamic_order_visuals_usec": 2,
+						"resize_subviewport_usec": 11,
+						"unit_proxy_sync_usec": 5175
+					},
+					"total_usec": 5193
+				}
+			},
+			"transport_timer": {
+				"can_process": true,
+				"is_stopped": false,
+				"paused": false,
+				"process_callback": 1,
+				"process_mode": 0,
+				"time_left": 0.958867333333335,
+				"wait_time": 1.0
+			},
+			"tree_paused": false,
+			"wall_msec": 73346
+		},
+		"hex_runtime_profile_sample_peaks": {
+			"combat": {
+				"samples": 23,
+				"scopes_usec_max": {
+					"bleedout_queue_usec": 39,
+					"combat_fire_decision_usec": 980,
+					"combat_resolution_usec": 90,
+					"combat_visual_refresh_usec": 2,
+					"contact_tracking_usec": 31,
+					"cooldowns_usec": 8,
+					"detection_timers_usec": 4,
+					"enemy_advance_usec": 462,
+					"enemy_security_usec": 668,
+					"enemy_team_tactics_usec": 40384,
+					"fire_find_contact_pair_usec": 385,
+					"fire_no_contact_diagnostic_usec": 590,
+					"flank_vulnerability_usec": 3,
+					"friendly_standard_behavior_usec": 10,
+					"leadership_usec": 3,
+					"medic_support_usec": 482,
+					"multiplayer_snapshot_context_usec": 726,
+					"overwatch_security_usec": 343,
+					"status_update_usec": 109
+				},
+				"total_usec_max": 44344
+			},
+			"controller": {
+				"samples": 23,
+				"scopes_usec_max": {
+					"execution_updates_usec": 307,
+					"feedback_and_security_usec": 180,
+					"hud_heavy_usec": 75537,
+					"hud_light_usec": 180,
+					"ui_refresh_usec": 75537
+				},
+				"total_usec_max": 75766
+			},
+			"controller_surfaces": {
+				"samples": 23,
+				"scopes_usec_max": {
+					"craft_controls_usec": 48845,
+					"fireteam_cards_usec": 29136,
+					"primary_status_usec": 5634,
+					"visibility_usec": 1,
+					"world_overlays_usec": 2744
+				},
+				"total_usec_max": 57293
+			},
+			"controller_ui": {
+				"samples": 23,
+				"scopes_usec_max": {
+					"mission_panels_usec": 38656,
+					"panel_dropship_usec": 29181,
+					"panel_event_log_usec": 3129,
+					"panel_fireteam_phase_usec": 3697,
+					"panel_identity_usec": 2392,
+					"panel_nav_identity_usec": 2906,
+					"panel_nav_timer_usec": 62,
+					"panel_team_chip_usec": 669,
+					"primary_block_labels_usec": 128,
+					"primary_command_decision_usec": 50,
+					"primary_command_door_usec": 919,
+					"primary_command_feedback_usec": 1043,
+					"primary_command_route_usec": 1,
+					"primary_command_target_waypoint_usec": 98,
+					"primary_fireteam_status_usec": 437,
+					"primary_fireteam_tooltips_usec": 1365,
+					"primary_hotkey_usec": 11,
+					"primary_labels_usec": 5463,
+					"runtime_surfaces_usec": 58580,
+					"secondary_buttons_layout_usec": 933,
+					"secondary_decision_contract_usec": 1015,
+					"secondary_density_contract_usec": 570,
+					"secondary_frontier_contract_usec": 807,
+					"secondary_labels_usec": 36486,
+					"secondary_phase_labels_usec": 15,
+					"secondary_preview_contract_usec": 933,
+					"secondary_release_sync_usec": 506,
+					"secondary_strategic_text_usec": 29490,
+					"secondary_tooltip_usec": 2304,
+					"shared_station_route_snapshot_usec": 2709
+				},
+				"total_usec_max": 129562
+			},
+			"simulation": {
+				"samples": 23,
+				"scopes_usec_max": {
+					"command_apply_usec": 2288,
+					"command_ordering_usec": 39,
+					"command_queue_usec": 2329,
+					"effect_queue_usec": 4,
+					"local_avoidance_prepare_usec": 2,
+					"objective_capture_usec": 34,
+					"snapshot_broadcast_usec": 3,
+					"tick_signal_emit_usec": 44654,
+					"unit_minimum_spacing_usec": 206
+				},
+				"total_usec_max": 44850
+			},
+			"view": {
+				"samples": 23,
+				"scopes_usec_max": {
+					"dynamic_order_visuals_usec": 3,
+					"resize_subviewport_usec": 15,
+					"unit_proxy_sync_usec": 5392
+				},
+				"total_usec_max": 10044
+			}
+		},
+		"hex_runtime_samples": [
+			{
+				"elapsed_msec": 2488,
+				"engine_fps": 1.0,
+				"physics_frames": 8,
+				"physics_process_seconds": 0.0,
+				"process_frames": 0,
+				"process_seconds": 0.0,
+				"time_scale": 1.0,
+				"tree_paused": false,
+				"wall_msec": 4249
+			},
+			{
+				"elapsed_msec": 8629,
+				"engine_fps": 1.0,
+				"physics_frames": 26,
+				"physics_process_seconds": 0.000011,
+				"process_frames": 13,
+				"process_seconds": 0.008112,
+				"time_scale": 1.0,
+				"tree_paused": false,
+				"wall_msec": 10390
+			},
+			{
+				"elapsed_msec": 18000,
+				"engine_fps": 12.0,
+				"flow_process_mode": 0,
+				"pending_mission_transfers": [],
+				"physics_frames": 34,
+				"physics_process_seconds": 0.000029,
+				"process_frames": 14,
+				"process_seconds": 9.370646,
+				"time_scale": 1.0,
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": true,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.0,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 19761
+			},
+			{
+				"elapsed_msec": 22400,
+				"engine_fps": 1.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 0.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 52,
+				"physics_process_seconds": 0.000062,
+				"planning": {
+					"mission_drop_eta_seconds": 18,
+					"mission_drop_progress": 0.0,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 30,
+				"process_seconds": 0.012739,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 8,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+
+					},
+					"combat_hotspots": {
+						"counts": {
+
+						},
+						"enabled": true,
+						"usec": {
+
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+
+					},
+					"controller_surfaces": {
+
+					},
+					"controller_ui": {
+
+					},
+					"simulation": {
+						"navigation": {
+							"hpa_navigation": {
+								"last_build_stats": {
+
+								}
+							},
+							"last_path_metrics": {
+
+							},
+							"most_expensive_query": {
+
+							}
+						}
+					},
+					"view": {
+
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 1.0,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 24161
+			},
+			{
+				"elapsed_msec": 23470,
+				"engine_fps": 4.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 0.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 100,
+				"physics_process_seconds": 0.043953,
+				"planning": {
+					"mission_drop_eta_seconds": 18,
+					"mission_drop_progress": 0.0,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 36,
+				"process_seconds": 0.049858,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 56,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 20,
+							"contact_tracking_usec": 18,
+							"detection_timers_usec": 1,
+							"leadership_usec": 1
+						},
+						"state": "decision_cadence_skip",
+						"tick": 56,
+						"total_tick_usec": 52
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 128
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 411
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 233,
+							"feedback_and_security_usec": 6,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 6,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 243
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 24,
+							"fireteam_cards_usec": 29136,
+							"primary_status_usec": 4895,
+							"visibility_usec": 0,
+							"world_overlays_usec": 2744
+						},
+						"total_usec": 36804
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 25023,
+							"panel_dropship_usec": 17914,
+							"panel_event_log_usec": 2582,
+							"panel_fireteam_phase_usec": 2633,
+							"panel_identity_usec": 1564,
+							"panel_nav_identity_usec": 1894,
+							"panel_nav_timer_usec": 13,
+							"panel_team_chip_usec": 317,
+							"primary_block_labels_usec": 127,
+							"primary_command_decision_usec": 37,
+							"primary_command_door_usec": 731,
+							"primary_command_feedback_usec": 852,
+							"primary_command_route_usec": 0,
+							"primary_command_target_waypoint_usec": 84,
+							"primary_fireteam_status_usec": 404,
+							"primary_fireteam_tooltips_usec": 1161,
+							"primary_hotkey_usec": 8,
+							"primary_labels_usec": 4481,
+							"runtime_surfaces_usec": 0,
+							"secondary_labels_usec": 0,
+							"shared_station_route_snapshot_usec": 1929
+						},
+						"total_usec": 29867
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 17,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 56,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 2,
+							"command_queue_usec": 3,
+							"effect_queue_usec": 1,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 15,
+							"snapshot_broadcast_usec": 0,
+							"tick_signal_emit_usec": 237,
+							"unit_minimum_spacing_usec": 87
+						},
+						"tick": 56,
+						"total_tick_usec": 350
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11979
+						},
+						"counters": {
+							"fow_work_invocation_count": 1
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 13,
+							"unit_proxy_sync_usec": 3899
+						},
+						"total_usec": 7666
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.203610666666666,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 25231
+			},
+			{
+				"elapsed_msec": 26023,
+				"engine_fps": 4.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 1.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 116,
+				"physics_process_seconds": 0.043953,
+				"planning": {
+					"mission_drop_eta_seconds": 17,
+					"mission_drop_progress": 5.55555555555556,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 38,
+				"process_seconds": 0.049858,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 72,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 4,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 13,
+							"combat_fire_decision_usec": 654,
+							"combat_resolution_usec": 69,
+							"combat_visual_refresh_usec": 1,
+							"contact_tracking_usec": 17,
+							"cooldowns_usec": 6,
+							"detection_timers_usec": 1,
+							"enemy_advance_usec": 320,
+							"enemy_security_usec": 447,
+							"enemy_team_tactics_usec": 33501,
+							"fire_find_contact_pair_usec": 238,
+							"fire_no_contact_diagnostic_usec": 411,
+							"flank_vulnerability_usec": 2,
+							"friendly_standard_behavior_usec": 8,
+							"leadership_usec": 1,
+							"medic_support_usec": 420,
+							"multiplayer_snapshot_context_usec": 627,
+							"overwatch_security_usec": 245,
+							"status_update_usec": 92
+						},
+						"state": "active",
+						"tick": 72,
+						"total_tick_usec": 36450
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 176
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 558
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 219,
+							"feedback_and_security_usec": 6,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 6,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 229
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 35837,
+							"fireteam_cards_usec": 366,
+							"primary_status_usec": 3220,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1514
+						},
+						"total_usec": 40942
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 26983,
+							"panel_dropship_usec": 19650,
+							"panel_event_log_usec": 2418,
+							"panel_fireteam_phase_usec": 2541,
+							"panel_identity_usec": 1960,
+							"panel_nav_identity_usec": 2374,
+							"panel_nav_timer_usec": 18,
+							"panel_team_chip_usec": 396,
+							"primary_block_labels_usec": 80,
+							"primary_command_decision_usec": 36,
+							"primary_command_door_usec": 681,
+							"primary_command_feedback_usec": 793,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 75,
+							"primary_fireteam_status_usec": 328,
+							"primary_fireteam_tooltips_usec": 1023,
+							"primary_hotkey_usec": 6,
+							"primary_labels_usec": 4361,
+							"runtime_surfaces_usec": 42213,
+							"secondary_buttons_layout_usec": 846,
+							"secondary_decision_contract_usec": 766,
+							"secondary_density_contract_usec": 524,
+							"secondary_frontier_contract_usec": 703,
+							"secondary_labels_usec": 28815,
+							"secondary_phase_labels_usec": 15,
+							"secondary_preview_contract_usec": 741,
+							"secondary_release_sync_usec": 399,
+							"secondary_strategic_text_usec": 22710,
+							"secondary_tooltip_usec": 2111,
+							"shared_station_route_snapshot_usec": 2131
+						},
+						"total_usec": 102616
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 4,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 22,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 72,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 2,
+							"command_queue_usec": 3,
+							"effect_queue_usec": 1,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 21,
+							"snapshot_broadcast_usec": 0,
+							"tick_signal_emit_usec": 36643,
+							"unit_minimum_spacing_usec": 143
+						},
+						"tick": 72,
+						"total_tick_usec": 36822
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11979
+						},
+						"counters": {
+							"fow_work_invocation_count": 1
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 12,
+							"unit_proxy_sync_usec": 4161
+						},
+						"total_usec": 8984
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.929582333333333,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 27784
+			},
+			{
+				"elapsed_msec": 27167,
+				"engine_fps": 1.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 1.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 155,
+				"physics_process_seconds": 0.044139,
+				"planning": {
+					"mission_drop_eta_seconds": 17,
+					"mission_drop_progress": 5.55555555555556,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 43,
+				"process_seconds": 0.054779,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 111,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 4,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 12,
+							"combat_fire_decision_usec": 639,
+							"combat_resolution_usec": 62,
+							"combat_visual_refresh_usec": 1,
+							"contact_tracking_usec": 15,
+							"cooldowns_usec": 5,
+							"detection_timers_usec": 1,
+							"enemy_advance_usec": 291,
+							"enemy_security_usec": 362,
+							"enemy_team_tactics_usec": 27376,
+							"fire_find_contact_pair_usec": 247,
+							"fire_no_contact_diagnostic_usec": 388,
+							"flank_vulnerability_usec": 1,
+							"friendly_standard_behavior_usec": 5,
+							"leadership_usec": 1,
+							"medic_support_usec": 272,
+							"multiplayer_snapshot_context_usec": 649,
+							"overwatch_security_usec": 211,
+							"status_update_usec": 86
+						},
+						"state": "active",
+						"tick": 111,
+						"total_tick_usec": 30012
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 280
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 903
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": true,
+						"scopes_usec": {
+							"execution_updates_usec": 179,
+							"feedback_and_security_usec": 98,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 98,
+							"ui_refresh_usec": 32347
+						},
+						"total_usec": 32628
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 30,
+							"fireteam_cards_usec": 214,
+							"primary_status_usec": 4866,
+							"visibility_usec": 1,
+							"world_overlays_usec": 1897
+						},
+						"total_usec": 7012
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 27753,
+							"panel_dropship_usec": 19635,
+							"panel_event_log_usec": 2183,
+							"panel_fireteam_phase_usec": 3393,
+							"panel_identity_usec": 2109,
+							"panel_nav_identity_usec": 2542,
+							"panel_nav_timer_usec": 16,
+							"panel_team_chip_usec": 417,
+							"primary_block_labels_usec": 74,
+							"primary_command_decision_usec": 41,
+							"primary_command_door_usec": 637,
+							"primary_command_feedback_usec": 744,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 65,
+							"primary_fireteam_status_usec": 427,
+							"primary_fireteam_tooltips_usec": 1365,
+							"primary_hotkey_usec": 11,
+							"primary_labels_usec": 4325,
+							"runtime_surfaces_usec": 0,
+							"secondary_labels_usec": 0,
+							"shared_station_route_snapshot_usec": 1704
+						},
+						"total_usec": 32332
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 4,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 35,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 111,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 2,
+							"command_queue_usec": 2,
+							"effect_queue_usec": 1,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 15,
+							"snapshot_broadcast_usec": 0,
+							"tick_signal_emit_usec": 30189,
+							"unit_minimum_spacing_usec": 89
+						},
+						"tick": 111,
+						"total_tick_usec": 30303
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11979
+						},
+						"counters": {
+							"fow_work_invocation_count": 1
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 3,
+							"resize_subviewport_usec": 7,
+							"unit_proxy_sync_usec": 3884
+						},
+						"total_usec": 3899
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.275534000000001,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 28928
+			},
+			{
+				"elapsed_msec": 29636,
+				"engine_fps": 6.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 2.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 175,
+				"physics_process_seconds": 0.0426,
+				"planning": {
+					"mission_drop_eta_seconds": 16,
+					"mission_drop_progress": 11.1111111111111,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 46,
+				"process_seconds": 2.213794,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 131,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 11,
+							"contact_tracking_usec": 15,
+							"detection_timers_usec": 1,
+							"leadership_usec": 0
+						},
+						"state": "decision_cadence_skip",
+						"tick": 131,
+						"total_tick_usec": 39
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 328
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 1024
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 149,
+							"feedback_and_security_usec": 5,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 5,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 157
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 38824,
+							"fireteam_cards_usec": 263,
+							"primary_status_usec": 4280,
+							"visibility_usec": 0,
+							"world_overlays_usec": 2052
+						},
+						"total_usec": 45421
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 23863,
+							"panel_dropship_usec": 17523,
+							"panel_event_log_usec": 1590,
+							"panel_fireteam_phase_usec": 2057,
+							"panel_identity_usec": 2053,
+							"panel_nav_identity_usec": 2693,
+							"panel_nav_timer_usec": 20,
+							"panel_team_chip_usec": 620,
+							"primary_block_labels_usec": 59,
+							"primary_command_decision_usec": 50,
+							"primary_command_door_usec": 541,
+							"primary_command_feedback_usec": 682,
+							"primary_command_route_usec": 0,
+							"primary_command_target_waypoint_usec": 91,
+							"primary_fireteam_status_usec": 281,
+							"primary_fireteam_tooltips_usec": 1004,
+							"primary_hotkey_usec": 8,
+							"primary_labels_usec": 3748,
+							"runtime_surfaces_usec": 46155,
+							"secondary_buttons_layout_usec": 594,
+							"secondary_decision_contract_usec": 443,
+							"secondary_density_contract_usec": 266,
+							"secondary_frontier_contract_usec": 373,
+							"secondary_labels_usec": 25913,
+							"secondary_phase_labels_usec": 12,
+							"secondary_preview_contract_usec": 443,
+							"secondary_release_sync_usec": 235,
+							"secondary_strategic_text_usec": 22205,
+							"secondary_tooltip_usec": 1342,
+							"shared_station_route_snapshot_usec": 1714
+						},
+						"total_usec": 99839
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 42,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 131,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 2,
+							"command_queue_usec": 4,
+							"effect_queue_usec": 1,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 15,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 195,
+							"unit_minimum_spacing_usec": 88
+						},
+						"tick": 131,
+						"total_tick_usec": 308
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11979
+						},
+						"counters": {
+							"fow_work_invocation_count": 1
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 1,
+							"resize_subviewport_usec": 9,
+							"unit_proxy_sync_usec": 2705
+						},
+						"total_usec": 2721
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.956679333333333,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 31397
+			},
+			{
+				"elapsed_msec": 32897,
+				"engine_fps": 6.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 3.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 234,
+				"physics_process_seconds": 0.040565,
+				"planning": {
+					"mission_drop_eta_seconds": 15,
+					"mission_drop_progress": 16.6666666666667,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 54,
+				"process_seconds": 0.050947,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 190,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 21,
+							"contact_tracking_usec": 29,
+							"detection_timers_usec": 2,
+							"leadership_usec": 1
+						},
+						"state": "decision_cadence_skip",
+						"tick": 190,
+						"total_tick_usec": 70
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 488
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 1503
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 193,
+							"feedback_and_security_usec": 6,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 6,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 204
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 36003,
+							"fireteam_cards_usec": 457,
+							"primary_status_usec": 4235,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1812
+						},
+						"total_usec": 42510
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 24351,
+							"panel_dropship_usec": 17544,
+							"panel_event_log_usec": 1600,
+							"panel_fireteam_phase_usec": 2847,
+							"panel_identity_usec": 1930,
+							"panel_nav_identity_usec": 2360,
+							"panel_nav_timer_usec": 14,
+							"panel_team_chip_usec": 416,
+							"primary_block_labels_usec": 76,
+							"primary_command_decision_usec": 31,
+							"primary_command_door_usec": 701,
+							"primary_command_feedback_usec": 802,
+							"primary_command_route_usec": 0,
+							"primary_command_target_waypoint_usec": 70,
+							"primary_fireteam_status_usec": 331,
+							"primary_fireteam_tooltips_usec": 965,
+							"primary_hotkey_usec": 5,
+							"primary_labels_usec": 4408,
+							"runtime_surfaces_usec": 43583,
+							"secondary_buttons_layout_usec": 600,
+							"secondary_decision_contract_usec": 776,
+							"secondary_density_contract_usec": 515,
+							"secondary_frontier_contract_usec": 403,
+							"secondary_labels_usec": 27307,
+							"secondary_phase_labels_usec": 10,
+							"secondary_preview_contract_usec": 704,
+							"secondary_release_sync_usec": 408,
+							"secondary_strategic_text_usec": 22372,
+							"secondary_tooltip_usec": 1519,
+							"shared_station_route_snapshot_usec": 2229
+						},
+						"total_usec": 99840
+					},
+					"simulation": {
+						"command_count": 4,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+							"hold_position": 3,
+							"move_to_position": 1
+						},
+						"command_type_usec": {
+							"hold_position": 613,
+							"move_to_position": 1233
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 62,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 1,
+							"path_queries_this_tick": 1,
+							"pending_query_count": 0,
+							"tick": 190,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 1864,
+							"command_ordering_usec": 11,
+							"command_queue_usec": 1878,
+							"effect_queue_usec": 3,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 27,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 358,
+							"unit_minimum_spacing_usec": 146
+						},
+						"tick": 190,
+						"total_tick_usec": 2422
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11979
+						},
+						"counters": {
+							"fow_work_invocation_count": 1
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 10,
+							"unit_proxy_sync_usec": 4115
+						},
+						"total_usec": 4132
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.966297333333333,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 34658
+			},
+			{
+				"elapsed_msec": 36157,
+				"engine_fps": 5.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 4.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 294,
+				"physics_process_seconds": 0.039571,
+				"planning": {
+					"mission_drop_eta_seconds": 14,
+					"mission_drop_progress": 22.2222222222222,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 65,
+				"process_seconds": 0.049748,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 250,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 15,
+							"contact_tracking_usec": 25,
+							"detection_timers_usec": 2,
+							"leadership_usec": 2
+						},
+						"state": "decision_cadence_skip",
+						"tick": 250,
+						"total_tick_usec": 57
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 648
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 1934
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": true,
+						"scopes_usec": {
+							"execution_updates_usec": 204,
+							"feedback_and_security_usec": 5,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 5,
+							"ui_refresh_usec": 29704
+						},
+						"total_usec": 29916
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 41783,
+							"fireteam_cards_usec": 406,
+							"primary_status_usec": 4298,
+							"visibility_usec": 0,
+							"world_overlays_usec": 2037
+						},
+						"total_usec": 48528
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 26757,
+							"panel_dropship_usec": 18949,
+							"panel_event_log_usec": 2327,
+							"panel_fireteam_phase_usec": 3139,
+							"panel_identity_usec": 1983,
+							"panel_nav_identity_usec": 2342,
+							"panel_nav_timer_usec": 20,
+							"panel_team_chip_usec": 339,
+							"primary_block_labels_usec": 66,
+							"primary_command_decision_usec": 34,
+							"primary_command_door_usec": 613,
+							"primary_command_feedback_usec": 710,
+							"primary_command_route_usec": 0,
+							"primary_command_target_waypoint_usec": 63,
+							"primary_fireteam_status_usec": 239,
+							"primary_fireteam_tooltips_usec": 1017,
+							"primary_hotkey_usec": 4,
+							"primary_labels_usec": 3963,
+							"runtime_surfaces_usec": 49727,
+							"secondary_buttons_layout_usec": 933,
+							"secondary_decision_contract_usec": 754,
+							"secondary_density_contract_usec": 513,
+							"secondary_frontier_contract_usec": 651,
+							"secondary_labels_usec": 31802,
+							"secondary_phase_labels_usec": 13,
+							"secondary_preview_contract_usec": 706,
+							"secondary_release_sync_usec": 396,
+							"secondary_strategic_text_usec": 25551,
+							"secondary_tooltip_usec": 2285,
+							"shared_station_route_snapshot_usec": 1927
+						},
+						"total_usec": 112496
+					},
+					"simulation": {
+						"command_count": 4,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+							"hold_position": 3,
+							"move_to_position": 1
+						},
+						"command_type_usec": {
+							"hold_position": 396,
+							"move_to_position": 1404
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 82,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 1,
+							"path_queries_this_tick": 1,
+							"pending_query_count": 0,
+							"tick": 250,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 1815,
+							"command_ordering_usec": 13,
+							"command_queue_usec": 1832,
+							"effect_queue_usec": 4,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 20,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 266,
+							"unit_minimum_spacing_usec": 100
+						},
+						"tick": 250,
+						"total_tick_usec": 2232
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11979
+						},
+						"counters": {
+							"fow_work_invocation_count": 1
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 8,
+							"unit_proxy_sync_usec": 4109
+						},
+						"total_usec": 4127
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.967201,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 37918
+			},
+			{
+				"elapsed_msec": 38784,
+				"engine_fps": 2.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 5.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 354,
+				"physics_process_seconds": 0.037347,
+				"planning": {
+					"mission_drop_eta_seconds": 13,
+					"mission_drop_progress": 27.7777777777778,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 74,
+				"process_seconds": 0.041343,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 310,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 14,
+							"contact_tracking_usec": 22,
+							"detection_timers_usec": 2,
+							"leadership_usec": 1
+						},
+						"state": "decision_cadence_skip",
+						"tick": 310,
+						"total_tick_usec": 53
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 808
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 2386
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 147,
+							"feedback_and_security_usec": 5,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 5,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 155
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 31571,
+							"fireteam_cards_usec": 415,
+							"primary_status_usec": 3456,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1251
+						},
+						"total_usec": 36697
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 19685,
+							"panel_dropship_usec": 14781,
+							"panel_event_log_usec": 1581,
+							"panel_fireteam_phase_usec": 1601,
+							"panel_identity_usec": 1421,
+							"panel_nav_identity_usec": 1722,
+							"panel_nav_timer_usec": 11,
+							"panel_team_chip_usec": 290,
+							"primary_block_labels_usec": 58,
+							"primary_command_decision_usec": 27,
+							"primary_command_door_usec": 502,
+							"primary_command_feedback_usec": 586,
+							"primary_command_route_usec": 0,
+							"primary_command_target_waypoint_usec": 57,
+							"primary_fireteam_status_usec": 232,
+							"primary_fireteam_tooltips_usec": 677,
+							"primary_hotkey_usec": 5,
+							"primary_labels_usec": 3093,
+							"runtime_surfaces_usec": 37825,
+							"secondary_buttons_layout_usec": 586,
+							"secondary_decision_contract_usec": 498,
+							"secondary_density_contract_usec": 328,
+							"secondary_frontier_contract_usec": 371,
+							"secondary_labels_usec": 21502,
+							"secondary_phase_labels_usec": 9,
+							"secondary_preview_contract_usec": 502,
+							"secondary_release_sync_usec": 239,
+							"secondary_strategic_text_usec": 17670,
+							"secondary_tooltip_usec": 1299,
+							"shared_station_route_snapshot_usec": 1535
+						},
+						"total_usec": 82270
+					},
+					"simulation": {
+						"command_count": 4,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+							"hold_position": 3,
+							"move_to_position": 1
+						},
+						"command_type_usec": {
+							"hold_position": 352,
+							"move_to_position": 1230
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 102,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 1,
+							"path_queries_this_tick": 1,
+							"pending_query_count": 0,
+							"tick": 310,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 1595,
+							"command_ordering_usec": 13,
+							"command_queue_usec": 1611,
+							"effect_queue_usec": 3,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 19,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 250,
+							"unit_minimum_spacing_usec": 99
+						},
+						"tick": 310,
+						"total_tick_usec": 1990
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11979
+						},
+						"counters": {
+							"fow_work_invocation_count": 1
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 3,
+							"resize_subviewport_usec": 15,
+							"unit_proxy_sync_usec": 3037
+						},
+						"total_usec": 3059
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.973413666666667,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 40545
+			},
+			{
+				"elapsed_msec": 41682,
+				"engine_fps": 8.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 6.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 413,
+				"physics_process_seconds": 0.037502,
+				"planning": {
+					"mission_drop_eta_seconds": 12,
+					"mission_drop_progress": 33.3333333333333,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 102,
+				"process_seconds": 0.030462,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 369,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 4,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 11,
+							"combat_fire_decision_usec": 422,
+							"combat_resolution_usec": 53,
+							"combat_visual_refresh_usec": 2,
+							"contact_tracking_usec": 13,
+							"cooldowns_usec": 5,
+							"detection_timers_usec": 1,
+							"enemy_advance_usec": 199,
+							"enemy_security_usec": 369,
+							"enemy_team_tactics_usec": 26841,
+							"fire_find_contact_pair_usec": 159,
+							"fire_no_contact_diagnostic_usec": 260,
+							"flank_vulnerability_usec": 1,
+							"friendly_standard_behavior_usec": 5,
+							"leadership_usec": 0,
+							"medic_support_usec": 260,
+							"multiplayer_snapshot_context_usec": 395,
+							"overwatch_security_usec": 167,
+							"status_update_usec": 54
+						},
+						"state": "active",
+						"tick": 369,
+						"total_tick_usec": 28815
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 968
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 2759
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 139,
+							"feedback_and_security_usec": 3,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 3,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 144
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 27821,
+							"fireteam_cards_usec": 357,
+							"primary_status_usec": 3473,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1218
+						},
+						"total_usec": 32874
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 21114,
+							"panel_dropship_usec": 15255,
+							"panel_event_log_usec": 1623,
+							"panel_fireteam_phase_usec": 2173,
+							"panel_identity_usec": 1662,
+							"panel_nav_identity_usec": 2063,
+							"panel_nav_timer_usec": 13,
+							"panel_team_chip_usec": 388,
+							"primary_block_labels_usec": 61,
+							"primary_command_decision_usec": 27,
+							"primary_command_door_usec": 583,
+							"primary_command_feedback_usec": 681,
+							"primary_command_route_usec": 0,
+							"primary_command_target_waypoint_usec": 71,
+							"primary_fireteam_status_usec": 244,
+							"primary_fireteam_tooltips_usec": 694,
+							"primary_hotkey_usec": 5,
+							"primary_labels_usec": 3409,
+							"runtime_surfaces_usec": 33707,
+							"secondary_buttons_layout_usec": 631,
+							"secondary_decision_contract_usec": 547,
+							"secondary_density_contract_usec": 452,
+							"secondary_frontier_contract_usec": 487,
+							"secondary_labels_usec": 27642,
+							"secondary_phase_labels_usec": 11,
+							"secondary_preview_contract_usec": 543,
+							"secondary_release_sync_usec": 266,
+							"secondary_strategic_text_usec": 23280,
+							"secondary_tooltip_usec": 1425,
+							"shared_station_route_snapshot_usec": 1724
+						},
+						"total_usec": 86046
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 4,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 121,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 369,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 1,
+							"command_queue_usec": 1,
+							"effect_queue_usec": 0,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 12,
+							"snapshot_broadcast_usec": 0,
+							"tick_signal_emit_usec": 28974,
+							"unit_minimum_spacing_usec": 78
+						},
+						"tick": 369,
+						"total_tick_usec": 29072
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 13070
+						},
+						"counters": {
+							"fow_work_invocation_count": 3
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 1,
+							"resize_subviewport_usec": 6,
+							"unit_proxy_sync_usec": 2682
+						},
+						"total_usec": 2693
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.992200666666668,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 43443
+			},
+			{
+				"elapsed_msec": 42707,
+				"engine_fps": 6.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 6.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 466,
+				"physics_process_seconds": 0.059955,
+				"planning": {
+					"mission_drop_eta_seconds": 12,
+					"mission_drop_progress": 33.3333333333333,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 109,
+				"process_seconds": 0.062327,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 422,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 15,
+							"contact_tracking_usec": 22,
+							"detection_timers_usec": 1,
+							"leadership_usec": 1
+						},
+						"state": "decision_cadence_skip",
+						"tick": 422,
+						"total_tick_usec": 55
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 1104
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 3267
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 211,
+							"feedback_and_security_usec": 138,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 138,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 353
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 27821,
+							"fireteam_cards_usec": 357,
+							"primary_status_usec": 3473,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1218
+						},
+						"total_usec": 32874
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 38656,
+							"panel_dropship_usec": 29181,
+							"panel_event_log_usec": 3129,
+							"panel_fireteam_phase_usec": 3440,
+							"panel_identity_usec": 2392,
+							"panel_nav_identity_usec": 2906,
+							"panel_nav_timer_usec": 24,
+							"panel_team_chip_usec": 490,
+							"primary_block_labels_usec": 105,
+							"primary_command_decision_usec": 48,
+							"primary_command_door_usec": 919,
+							"primary_command_feedback_usec": 1043,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 75,
+							"primary_fireteam_status_usec": 345,
+							"primary_fireteam_tooltips_usec": 1250,
+							"primary_hotkey_usec": 11,
+							"primary_labels_usec": 5463,
+							"runtime_surfaces_usec": 0,
+							"secondary_labels_usec": 0,
+							"shared_station_route_snapshot_usec": 2709
+						},
+						"total_usec": 44552
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 139,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 422,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 2,
+							"command_queue_usec": 5,
+							"effect_queue_usec": 2,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 28,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 319,
+							"unit_minimum_spacing_usec": 150
+						},
+						"tick": 422,
+						"total_tick_usec": 514
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 13070
+						},
+						"counters": {
+							"fow_work_invocation_count": 3
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 3,
+							"resize_subviewport_usec": 11,
+							"unit_proxy_sync_usec": 4413
+						},
+						"total_usec": 4433
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.0936156666666667,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 44468
+			},
+			{
+				"elapsed_msec": 44930,
+				"engine_fps": 6.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 7.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 474,
+				"physics_process_seconds": 0.059955,
+				"planning": {
+					"mission_drop_eta_seconds": 11,
+					"mission_drop_progress": 38.8888888888889,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 110,
+				"process_seconds": 0.062327,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 430,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 29,
+							"contact_tracking_usec": 21,
+							"detection_timers_usec": 2,
+							"leadership_usec": 1
+						},
+						"state": "decision_cadence_skip",
+						"tick": 430,
+						"total_tick_usec": 66
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 1128
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 3318
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": true,
+						"scopes_usec": {
+							"execution_updates_usec": 237,
+							"feedback_and_security_usec": 6,
+							"hud_heavy_usec": 46550,
+							"hud_light_usec": 6,
+							"ui_refresh_usec": 46550
+						},
+						"total_usec": 46799
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 37317,
+							"fireteam_cards_usec": 256,
+							"primary_status_usec": 3334,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1312
+						},
+						"total_usec": 42223
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 19331,
+							"panel_dropship_usec": 13758,
+							"panel_event_log_usec": 1759,
+							"panel_fireteam_phase_usec": 1796,
+							"panel_identity_usec": 1717,
+							"panel_nav_identity_usec": 2018,
+							"panel_nav_timer_usec": 20,
+							"panel_team_chip_usec": 281,
+							"primary_block_labels_usec": 55,
+							"primary_command_decision_usec": 26,
+							"primary_command_door_usec": 507,
+							"primary_command_feedback_usec": 589,
+							"primary_command_route_usec": 0,
+							"primary_command_target_waypoint_usec": 56,
+							"primary_fireteam_status_usec": 228,
+							"primary_fireteam_tooltips_usec": 686,
+							"primary_hotkey_usec": 4,
+							"primary_labels_usec": 3604,
+							"runtime_surfaces_usec": 42947,
+							"secondary_buttons_layout_usec": 630,
+							"secondary_decision_contract_usec": 673,
+							"secondary_density_contract_usec": 551,
+							"secondary_frontier_contract_usec": 354,
+							"secondary_labels_usec": 22640,
+							"secondary_phase_labels_usec": 11,
+							"secondary_preview_contract_usec": 428,
+							"secondary_release_sync_usec": 412,
+							"secondary_strategic_text_usec": 18352,
+							"secondary_tooltip_usec": 1229,
+							"shared_station_route_snapshot_usec": 2042
+						},
+						"total_usec": 88684
+					},
+					"simulation": {
+						"command_count": 4,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+							"hold_position": 3,
+							"move_to_position": 1
+						},
+						"command_type_usec": {
+							"hold_position": 338,
+							"move_to_position": 805
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 142,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 1,
+							"path_queries_this_tick": 1,
+							"pending_query_count": 0,
+							"tick": 430,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 1151,
+							"command_ordering_usec": 14,
+							"command_queue_usec": 1167,
+							"effect_queue_usec": 2,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 16,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 334,
+							"unit_minimum_spacing_usec": 92
+						},
+						"tick": 430,
+						"total_tick_usec": 1618
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 13070
+						},
+						"counters": {
+							"fow_work_invocation_count": 3
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 10,
+							"unit_proxy_sync_usec": 4866
+						},
+						"total_usec": 4885
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.963922666666667,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 46691
+			},
+			{
+				"elapsed_msec": 48339,
+				"engine_fps": 8.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 8.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 534,
+				"physics_process_seconds": 0.037309,
+				"planning": {
+					"mission_drop_eta_seconds": 10,
+					"mission_drop_progress": 44.4444444444444,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 141,
+				"process_seconds": 0.032502,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 490,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 14,
+							"contact_tracking_usec": 22,
+							"detection_timers_usec": 2,
+							"leadership_usec": 1
+						},
+						"state": "decision_cadence_skip",
+						"tick": 490,
+						"total_tick_usec": 54
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 1288
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 3692
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 191,
+							"feedback_and_security_usec": 151,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 151,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 346
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 47178,
+							"fireteam_cards_usec": 434,
+							"primary_status_usec": 4992,
+							"visibility_usec": 1,
+							"world_overlays_usec": 1996
+						},
+						"total_usec": 54607
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 27815,
+							"panel_dropship_usec": 19866,
+							"panel_event_log_usec": 2451,
+							"panel_fireteam_phase_usec": 2872,
+							"panel_identity_usec": 2215,
+							"panel_nav_identity_usec": 2626,
+							"panel_nav_timer_usec": 12,
+							"panel_team_chip_usec": 399,
+							"primary_block_labels_usec": 82,
+							"primary_command_decision_usec": 35,
+							"primary_command_door_usec": 735,
+							"primary_command_feedback_usec": 867,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 96,
+							"primary_fireteam_status_usec": 319,
+							"primary_fireteam_tooltips_usec": 1182,
+							"primary_hotkey_usec": 6,
+							"primary_labels_usec": 4736,
+							"runtime_surfaces_usec": 55452,
+							"secondary_buttons_layout_usec": 742,
+							"secondary_decision_contract_usec": 789,
+							"secondary_density_contract_usec": 471,
+							"secondary_frontier_contract_usec": 672,
+							"secondary_labels_usec": 33080,
+							"secondary_phase_labels_usec": 11,
+							"secondary_preview_contract_usec": 716,
+							"secondary_release_sync_usec": 425,
+							"secondary_strategic_text_usec": 27313,
+							"secondary_tooltip_usec": 1941,
+							"shared_station_route_snapshot_usec": 2280
+						},
+						"total_usec": 121266
+					},
+					"simulation": {
+						"command_count": 4,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+							"hold_position": 3,
+							"move_to_position": 1
+						},
+						"command_type_usec": {
+							"hold_position": 686,
+							"move_to_position": 1579
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 162,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 1,
+							"path_queries_this_tick": 1,
+							"pending_query_count": 0,
+							"tick": 490,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 2288,
+							"command_ordering_usec": 39,
+							"command_queue_usec": 2329,
+							"effect_queue_usec": 3,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 24,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 253,
+							"unit_minimum_spacing_usec": 206
+						},
+						"tick": 490,
+						"total_tick_usec": 2829
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 13070
+						},
+						"counters": {
+							"fow_work_invocation_count": 3
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 8,
+							"unit_proxy_sync_usec": 4207
+						},
+						"total_usec": 4223
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.962105666666667,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 50100
+			},
+			{
+				"elapsed_msec": 49446,
+				"engine_fps": 1.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 8.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 588,
+				"physics_process_seconds": 0.045376,
+				"planning": {
+					"mission_drop_eta_seconds": 10,
+					"mission_drop_progress": 44.4444444444444,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 148,
+				"process_seconds": 0.011333,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 544,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 25,
+							"contact_tracking_usec": 30,
+							"detection_timers_usec": 1,
+							"leadership_usec": 2
+						},
+						"state": "decision_cadence_skip",
+						"tick": 544,
+						"total_tick_usec": 79
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 1432
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 4210
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": true,
+						"scopes_usec": {
+							"execution_updates_usec": 225,
+							"feedback_and_security_usec": 7,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 7,
+							"ui_refresh_usec": 35269
+						},
+						"total_usec": 35505
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 22,
+							"fireteam_cards_usec": 212,
+							"primary_status_usec": 5017,
+							"visibility_usec": 0,
+							"world_overlays_usec": 2042
+						},
+						"total_usec": 7299
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 29564,
+							"panel_dropship_usec": 21075,
+							"panel_event_log_usec": 2788,
+							"panel_fireteam_phase_usec": 3117,
+							"panel_identity_usec": 2086,
+							"panel_nav_identity_usec": 2584,
+							"panel_nav_timer_usec": 21,
+							"panel_team_chip_usec": 477,
+							"primary_block_labels_usec": 102,
+							"primary_command_decision_usec": 49,
+							"primary_command_door_usec": 877,
+							"primary_command_feedback_usec": 1017,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 90,
+							"primary_fireteam_status_usec": 437,
+							"primary_fireteam_tooltips_usec": 1282,
+							"primary_hotkey_usec": 10,
+							"primary_labels_usec": 5305,
+							"runtime_surfaces_usec": 0,
+							"secondary_labels_usec": 0,
+							"shared_station_route_snapshot_usec": 2457
+						},
+						"total_usec": 35247
+					},
+					"simulation": {
+						"command_count": 4,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+							"hold_position": 3,
+							"move_to_position": 1
+						},
+						"command_type_usec": {
+							"hold_position": 408,
+							"move_to_position": 1617
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 180,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 1,
+							"path_queries_this_tick": 1,
+							"pending_query_count": 0,
+							"tick": 544,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 2041,
+							"command_ordering_usec": 17,
+							"command_queue_usec": 2061,
+							"effect_queue_usec": 2,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 16,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 314,
+							"unit_minimum_spacing_usec": 90
+						},
+						"tick": 544,
+						"total_tick_usec": 2490
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 13070
+						},
+						"counters": {
+							"fow_work_invocation_count": 3
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 9,
+							"unit_proxy_sync_usec": 4866
+						},
+						"total_usec": 4893
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.0657153333333338,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 51207
+			},
+			{
+				"elapsed_msec": 52111,
+				"engine_fps": 6.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 9.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 596,
+				"physics_process_seconds": 0.049964,
+				"planning": {
+					"mission_drop_eta_seconds": 9,
+					"mission_drop_progress": 50.0,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 149,
+				"process_seconds": 2.527703,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 552,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 4,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 21,
+							"combat_fire_decision_usec": 609,
+							"combat_resolution_usec": 68,
+							"combat_visual_refresh_usec": 1,
+							"contact_tracking_usec": 25,
+							"cooldowns_usec": 7,
+							"detection_timers_usec": 1,
+							"enemy_advance_usec": 329,
+							"enemy_security_usec": 557,
+							"enemy_team_tactics_usec": 39376,
+							"fire_find_contact_pair_usec": 157,
+							"fire_no_contact_diagnostic_usec": 447,
+							"flank_vulnerability_usec": 2,
+							"friendly_standard_behavior_usec": 6,
+							"leadership_usec": 1,
+							"medic_support_usec": 410,
+							"multiplayer_snapshot_context_usec": 607,
+							"overwatch_security_usec": 230,
+							"status_update_usec": 79
+						},
+						"state": "active",
+						"tick": 552,
+						"total_tick_usec": 42356
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 1456
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 4277
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 157,
+							"feedback_and_security_usec": 88,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 88,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 247
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 46928,
+							"fireteam_cards_usec": 478,
+							"primary_status_usec": 4710,
+							"visibility_usec": 0,
+							"world_overlays_usec": 2192
+						},
+						"total_usec": 54313
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 23716,
+							"panel_dropship_usec": 17580,
+							"panel_event_log_usec": 2050,
+							"panel_fireteam_phase_usec": 2188,
+							"panel_identity_usec": 1559,
+							"panel_nav_identity_usec": 1898,
+							"panel_nav_timer_usec": 12,
+							"panel_team_chip_usec": 327,
+							"primary_block_labels_usec": 79,
+							"primary_command_decision_usec": 33,
+							"primary_command_door_usec": 708,
+							"primary_command_feedback_usec": 822,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 80,
+							"primary_fireteam_status_usec": 349,
+							"primary_fireteam_tooltips_usec": 1115,
+							"primary_hotkey_usec": 6,
+							"primary_labels_usec": 4770,
+							"runtime_surfaces_usec": 55615,
+							"secondary_buttons_layout_usec": 847,
+							"secondary_decision_contract_usec": 814,
+							"secondary_density_contract_usec": 512,
+							"secondary_frontier_contract_usec": 746,
+							"secondary_labels_usec": 34313,
+							"secondary_phase_labels_usec": 13,
+							"secondary_preview_contract_usec": 760,
+							"secondary_release_sync_usec": 405,
+							"secondary_strategic_text_usec": 27997,
+							"secondary_tooltip_usec": 2219,
+							"shared_station_route_snapshot_usec": 2399
+						},
+						"total_usec": 118701
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 4,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 182,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 552,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 2,
+							"command_queue_usec": 3,
+							"effect_queue_usec": 1,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 23,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 42634,
+							"unit_minimum_spacing_usec": 141
+						},
+						"tick": 552,
+						"total_tick_usec": 42811
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 13070
+						},
+						"counters": {
+							"fow_work_invocation_count": 3
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 3,
+							"resize_subviewport_usec": 9,
+							"unit_proxy_sync_usec": 4358
+						},
+						"total_usec": 4374
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.932382,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 53872
+			},
+			{
+				"elapsed_msec": 53117,
+				"engine_fps": 2.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 9.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 652,
+				"physics_process_seconds": 0.045091,
+				"planning": {
+					"mission_drop_eta_seconds": 9,
+					"mission_drop_progress": 50.0,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 156,
+				"process_seconds": 0.092003,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 608,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 20,
+							"contact_tracking_usec": 23,
+							"detection_timers_usec": 2,
+							"leadership_usec": 1
+						},
+						"state": "decision_cadence_skip",
+						"tick": 608,
+						"total_tick_usec": 60
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 1600
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 4771
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 171,
+							"feedback_and_security_usec": 5,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 5,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 179
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 29,
+							"fireteam_cards_usec": 227,
+							"primary_status_usec": 5167,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1950
+						},
+						"total_usec": 7379
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 29803,
+							"panel_dropship_usec": 20588,
+							"panel_event_log_usec": 2909,
+							"panel_fireteam_phase_usec": 3697,
+							"panel_identity_usec": 2162,
+							"panel_nav_identity_usec": 2609,
+							"panel_nav_timer_usec": 17,
+							"panel_team_chip_usec": 430,
+							"primary_block_labels_usec": 128,
+							"primary_command_decision_usec": 47,
+							"primary_command_door_usec": 887,
+							"primary_command_feedback_usec": 1029,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 94,
+							"primary_fireteam_status_usec": 350,
+							"primary_fireteam_tooltips_usec": 1066,
+							"primary_hotkey_usec": 9,
+							"primary_labels_usec": 4753,
+							"runtime_surfaces_usec": 0,
+							"secondary_labels_usec": 0,
+							"shared_station_route_snapshot_usec": 2171
+						},
+						"total_usec": 34902
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 201,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 608,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 2,
+							"command_queue_usec": 4,
+							"effect_queue_usec": 1,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 26,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 323,
+							"unit_minimum_spacing_usec": 162
+						},
+						"tick": 608,
+						"total_tick_usec": 522
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11666
+						},
+						"counters": {
+							"fow_work_invocation_count": 5
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 3,
+							"resize_subviewport_usec": 10,
+							"unit_proxy_sync_usec": 3934
+						},
+						"total_usec": 3952
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.00250700000000029,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 54878
+			},
+			{
+				"elapsed_msec": 55523,
+				"engine_fps": 2.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 10.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 660,
+				"physics_process_seconds": 0.045091,
+				"planning": {
+					"mission_drop_eta_seconds": 8,
+					"mission_drop_progress": 55.5555555555556,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 157,
+				"process_seconds": 0.092003,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 616,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 17,
+							"contact_tracking_usec": 29,
+							"detection_timers_usec": 4,
+							"leadership_usec": 3
+						},
+						"state": "decision_cadence_skip",
+						"tick": 616,
+						"total_tick_usec": 69
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 1624
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 4828
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": true,
+						"scopes_usec": {
+							"execution_updates_usec": 212,
+							"feedback_and_security_usec": 180,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 180,
+							"ui_refresh_usec": 34394
+						},
+						"total_usec": 34791
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 27699,
+							"fireteam_cards_usec": 268,
+							"primary_status_usec": 3257,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1179
+						},
+						"total_usec": 32408
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 18757,
+							"panel_dropship_usec": 13578,
+							"panel_event_log_usec": 1646,
+							"panel_fireteam_phase_usec": 1699,
+							"panel_identity_usec": 1489,
+							"panel_nav_identity_usec": 1834,
+							"panel_nav_timer_usec": 11,
+							"panel_team_chip_usec": 334,
+							"primary_block_labels_usec": 57,
+							"primary_command_decision_usec": 26,
+							"primary_command_door_usec": 495,
+							"primary_command_feedback_usec": 579,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 57,
+							"primary_fireteam_status_usec": 298,
+							"primary_fireteam_tooltips_usec": 688,
+							"primary_hotkey_usec": 5,
+							"primary_labels_usec": 3300,
+							"runtime_surfaces_usec": 33145,
+							"secondary_buttons_layout_usec": 483,
+							"secondary_decision_contract_usec": 509,
+							"secondary_density_contract_usec": 285,
+							"secondary_frontier_contract_usec": 420,
+							"secondary_labels_usec": 23365,
+							"secondary_phase_labels_usec": 8,
+							"secondary_preview_contract_usec": 482,
+							"secondary_release_sync_usec": 257,
+							"secondary_strategic_text_usec": 19549,
+							"secondary_tooltip_usec": 1372,
+							"shared_station_route_snapshot_usec": 1673
+						},
+						"total_usec": 78733
+					},
+					"simulation": {
+						"command_count": 4,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+							"hold_position": 3,
+							"move_to_position": 1
+						},
+						"command_type_usec": {
+							"hold_position": 475,
+							"move_to_position": 939
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 204,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 1,
+							"path_queries_this_tick": 1,
+							"pending_query_count": 0,
+							"tick": 616,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 1432,
+							"command_ordering_usec": 19,
+							"command_queue_usec": 1453,
+							"effect_queue_usec": 3,
+							"local_avoidance_prepare_usec": 2,
+							"objective_capture_usec": 29,
+							"snapshot_broadcast_usec": 3,
+							"tick_signal_emit_usec": 302,
+							"unit_minimum_spacing_usec": 111
+						},
+						"tick": 616,
+						"total_tick_usec": 1913
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11666
+						},
+						"counters": {
+							"fow_work_invocation_count": 5
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 3,
+							"resize_subviewport_usec": 10,
+							"unit_proxy_sync_usec": 5392
+						},
+						"total_usec": 5410
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.860840333333334,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 57284
+			},
+			{
+				"elapsed_msec": 58034,
+				"engine_fps": 6.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 11.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 713,
+				"physics_process_seconds": 0.045463,
+				"planning": {
+					"mission_drop_eta_seconds": 7,
+					"mission_drop_progress": 61.1111111111111,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 173,
+				"process_seconds": 2.310698,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 669,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 4,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 20,
+							"combat_fire_decision_usec": 778,
+							"combat_resolution_usec": 71,
+							"combat_visual_refresh_usec": 1,
+							"contact_tracking_usec": 22,
+							"cooldowns_usec": 6,
+							"detection_timers_usec": 2,
+							"enemy_advance_usec": 329,
+							"enemy_security_usec": 545,
+							"enemy_team_tactics_usec": 25153,
+							"fire_find_contact_pair_usec": 298,
+							"fire_no_contact_diagnostic_usec": 474,
+							"flank_vulnerability_usec": 2,
+							"friendly_standard_behavior_usec": 9,
+							"leadership_usec": 1,
+							"medic_support_usec": 419,
+							"multiplayer_snapshot_context_usec": 583,
+							"overwatch_security_usec": 255,
+							"status_update_usec": 82
+						},
+						"state": "active",
+						"tick": 669,
+						"total_tick_usec": 28303
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 1768
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 5215
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 163,
+							"feedback_and_security_usec": 5,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 5,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 172
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 30216,
+							"fireteam_cards_usec": 279,
+							"primary_status_usec": 4980,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1534
+						},
+						"total_usec": 37013
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 22206,
+							"panel_dropship_usec": 16691,
+							"panel_event_log_usec": 1922,
+							"panel_fireteam_phase_usec": 1812,
+							"panel_identity_usec": 1494,
+							"panel_nav_identity_usec": 1781,
+							"panel_nav_timer_usec": 10,
+							"panel_team_chip_usec": 277,
+							"primary_block_labels_usec": 64,
+							"primary_command_decision_usec": 26,
+							"primary_command_door_usec": 652,
+							"primary_command_feedback_usec": 730,
+							"primary_command_route_usec": 0,
+							"primary_command_target_waypoint_usec": 52,
+							"primary_fireteam_status_usec": 273,
+							"primary_fireteam_tooltips_usec": 701,
+							"primary_hotkey_usec": 4,
+							"primary_labels_usec": 3550,
+							"runtime_surfaces_usec": 38205,
+							"secondary_buttons_layout_usec": 765,
+							"secondary_decision_contract_usec": 805,
+							"secondary_density_contract_usec": 374,
+							"secondary_frontier_contract_usec": 438,
+							"secondary_labels_usec": 32559,
+							"secondary_phase_labels_usec": 10,
+							"secondary_preview_contract_usec": 691,
+							"secondary_release_sync_usec": 276,
+							"secondary_strategic_text_usec": 27282,
+							"secondary_tooltip_usec": 1918,
+							"shared_station_route_snapshot_usec": 1778
+						},
+						"total_usec": 96764
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 4,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 221,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 669,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 1,
+							"command_queue_usec": 2,
+							"effect_queue_usec": 1,
+							"local_avoidance_prepare_usec": 0,
+							"objective_capture_usec": 20,
+							"snapshot_broadcast_usec": 0,
+							"tick_signal_emit_usec": 28547,
+							"unit_minimum_spacing_usec": 99
+						},
+						"tick": 669,
+						"total_tick_usec": 28675
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11666
+						},
+						"counters": {
+							"fow_work_invocation_count": 5
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 8,
+							"unit_proxy_sync_usec": 3449
+						},
+						"total_usec": 3464
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.987728,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 59795
+			},
+			{
+				"elapsed_msec": 61183,
+				"engine_fps": 4.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 12.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 772,
+				"physics_process_seconds": 0.03404,
+				"planning": {
+					"mission_drop_eta_seconds": 6,
+					"mission_drop_progress": 66.6666666666667,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 202,
+				"process_seconds": 0.032913,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 728,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 23,
+							"contact_tracking_usec": 26,
+							"detection_timers_usec": 1,
+							"leadership_usec": 1
+						},
+						"state": "decision_cadence_skip",
+						"tick": 728,
+						"total_tick_usec": 69
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 1920
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 5639
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 216,
+							"feedback_and_security_usec": 126,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 126,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 349
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 39925,
+							"fireteam_cards_usec": 255,
+							"primary_status_usec": 4606,
+							"visibility_usec": 1,
+							"world_overlays_usec": 2305
+						},
+						"total_usec": 47096
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 27461,
+							"panel_dropship_usec": 19525,
+							"panel_event_log_usec": 2314,
+							"panel_fireteam_phase_usec": 3026,
+							"panel_identity_usec": 1906,
+							"panel_nav_identity_usec": 2596,
+							"panel_nav_timer_usec": 21,
+							"panel_team_chip_usec": 669,
+							"primary_block_labels_usec": 77,
+							"primary_command_decision_usec": 37,
+							"primary_command_door_usec": 661,
+							"primary_command_feedback_usec": 779,
+							"primary_command_route_usec": 0,
+							"primary_command_target_waypoint_usec": 81,
+							"primary_fireteam_status_usec": 389,
+							"primary_fireteam_tooltips_usec": 822,
+							"primary_hotkey_usec": 7,
+							"primary_labels_usec": 4510,
+							"runtime_surfaces_usec": 48212,
+							"secondary_buttons_layout_usec": 839,
+							"secondary_decision_contract_usec": 539,
+							"secondary_density_contract_usec": 322,
+							"secondary_frontier_contract_usec": 405,
+							"secondary_labels_usec": 30950,
+							"secondary_phase_labels_usec": 13,
+							"secondary_preview_contract_usec": 490,
+							"secondary_release_sync_usec": 413,
+							"secondary_strategic_text_usec": 25625,
+							"secondary_tooltip_usec": 2304,
+							"shared_station_route_snapshot_usec": 2436
+						},
+						"total_usec": 111379
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 241,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 728,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 2,
+							"command_queue_usec": 4,
+							"effect_queue_usec": 1,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 25,
+							"snapshot_broadcast_usec": 0,
+							"tick_signal_emit_usec": 354,
+							"unit_minimum_spacing_usec": 141
+						},
+						"tick": 728,
+						"total_tick_usec": 532
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 11666
+						},
+						"counters": {
+							"fow_work_invocation_count": 5
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 9,
+							"unit_proxy_sync_usec": 3587
+						},
+						"total_usec": 3603
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.995325333333333,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 62944
+			},
+			{
+				"elapsed_msec": 62186,
+				"engine_fps": 2.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 12.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 828,
+				"physics_process_seconds": 0.044372,
+				"planning": {
+					"mission_drop_eta_seconds": 6,
+					"mission_drop_progress": 66.6666666666667,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 209,
+				"process_seconds": 0.041774,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 784,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 15,
+							"contact_tracking_usec": 23,
+							"detection_timers_usec": 2,
+							"leadership_usec": 1
+						},
+						"state": "decision_cadence_skip",
+						"tick": 784,
+						"total_tick_usec": 55
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 2072
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 6149
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 307,
+							"feedback_and_security_usec": 6,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 6,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 317
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 27,
+							"fireteam_cards_usec": 222,
+							"primary_status_usec": 4566,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1941
+						},
+						"total_usec": 6763
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 26095,
+							"panel_dropship_usec": 18055,
+							"panel_event_log_usec": 2217,
+							"panel_fireteam_phase_usec": 3221,
+							"panel_identity_usec": 2130,
+							"panel_nav_identity_usec": 2602,
+							"panel_nav_timer_usec": 15,
+							"panel_team_chip_usec": 457,
+							"primary_block_labels_usec": 75,
+							"primary_command_decision_usec": 46,
+							"primary_command_door_usec": 837,
+							"primary_command_feedback_usec": 966,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 82,
+							"primary_fireteam_status_usec": 337,
+							"primary_fireteam_tooltips_usec": 1292,
+							"primary_hotkey_usec": 9,
+							"primary_labels_usec": 5233,
+							"runtime_surfaces_usec": 8022,
+							"secondary_buttons_layout_usec": 595,
+							"secondary_decision_contract_usec": 0,
+							"secondary_density_contract_usec": 0,
+							"secondary_frontier_contract_usec": 0,
+							"secondary_labels_usec": 1112,
+							"secondary_phase_labels_usec": 11,
+							"secondary_preview_contract_usec": 0,
+							"secondary_release_sync_usec": 506,
+							"secondary_strategic_text_usec": 0,
+							"secondary_tooltip_usec": 0,
+							"shared_station_route_snapshot_usec": 2554
+						},
+						"total_usec": 40509
+					},
+					"simulation": {
+						"command_count": 4,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+							"hold_position": 3,
+							"move_to_position": 1
+						},
+						"command_type_usec": {
+							"hold_position": 544,
+							"move_to_position": 764
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 260,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 1,
+							"path_queries_this_tick": 1,
+							"pending_query_count": 0,
+							"tick": 784,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 1327,
+							"command_ordering_usec": 18,
+							"command_queue_usec": 1348,
+							"effect_queue_usec": 3,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 18,
+							"snapshot_broadcast_usec": 2,
+							"tick_signal_emit_usec": 262,
+							"unit_minimum_spacing_usec": 95
+						},
+						"tick": 784,
+						"total_tick_usec": 1736
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 10812
+						},
+						"counters": {
+							"fow_work_invocation_count": 7
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 12,
+							"unit_proxy_sync_usec": 4846
+						},
+						"total_usec": 10044
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.058867333333335,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 63947
+			},
+			{
+				"elapsed_msec": 64792,
+				"engine_fps": 2.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 13.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 836,
+				"physics_process_seconds": 0.044372,
+				"planning": {
+					"mission_drop_eta_seconds": 5,
+					"mission_drop_progress": 72.2222222222222,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 210,
+				"process_seconds": 0.041774,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 792,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 4,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 21,
+							"combat_fire_decision_usec": 980,
+							"combat_resolution_usec": 90,
+							"combat_visual_refresh_usec": 2,
+							"contact_tracking_usec": 22,
+							"cooldowns_usec": 8,
+							"detection_timers_usec": 1,
+							"enemy_advance_usec": 462,
+							"enemy_security_usec": 668,
+							"enemy_team_tactics_usec": 40384,
+							"fire_find_contact_pair_usec": 385,
+							"fire_no_contact_diagnostic_usec": 590,
+							"flank_vulnerability_usec": 3,
+							"friendly_standard_behavior_usec": 10,
+							"leadership_usec": 1,
+							"medic_support_usec": 482,
+							"multiplayer_snapshot_context_usec": 726,
+							"overwatch_security_usec": 343,
+							"status_update_usec": 109
+						},
+						"state": "active",
+						"tick": 792,
+						"total_tick_usec": 44344
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 2096
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 6254
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 200,
+							"feedback_and_security_usec": 103,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 103,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 305
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 44606,
+							"fireteam_cards_usec": 385,
+							"primary_status_usec": 4423,
+							"visibility_usec": 0,
+							"world_overlays_usec": 1753
+						},
+						"total_usec": 51170
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 29631,
+							"panel_dropship_usec": 21473,
+							"panel_event_log_usec": 2769,
+							"panel_fireteam_phase_usec": 2870,
+							"panel_identity_usec": 2206,
+							"panel_nav_identity_usec": 2519,
+							"panel_nav_timer_usec": 15,
+							"panel_team_chip_usec": 298,
+							"primary_block_labels_usec": 110,
+							"primary_command_decision_usec": 37,
+							"primary_command_door_usec": 740,
+							"primary_command_feedback_usec": 869,
+							"primary_command_route_usec": 0,
+							"primary_command_target_waypoint_usec": 92,
+							"primary_fireteam_status_usec": 377,
+							"primary_fireteam_tooltips_usec": 1015,
+							"primary_hotkey_usec": 11,
+							"primary_labels_usec": 4621,
+							"runtime_surfaces_usec": 52223,
+							"secondary_buttons_layout_usec": 840,
+							"secondary_decision_contract_usec": 789,
+							"secondary_density_contract_usec": 496,
+							"secondary_frontier_contract_usec": 520,
+							"secondary_labels_usec": 30683,
+							"secondary_phase_labels_usec": 11,
+							"secondary_preview_contract_usec": 763,
+							"secondary_release_sync_usec": 419,
+							"secondary_strategic_text_usec": 24977,
+							"secondary_tooltip_usec": 1868,
+							"shared_station_route_snapshot_usec": 2239
+						},
+						"total_usec": 117342
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 4,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 262,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 792,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 1,
+							"command_queue_usec": 3,
+							"effect_queue_usec": 1,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 25,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 44654,
+							"unit_minimum_spacing_usec": 157
+						},
+						"tick": 792,
+						"total_tick_usec": 44850
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 10812
+						},
+						"counters": {
+							"fow_work_invocation_count": 7
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 13,
+							"unit_proxy_sync_usec": 4226
+						},
+						"total_usec": 8847
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.940667333333333,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 66553
+			},
+			{
+				"elapsed_msec": 65801,
+				"engine_fps": 5.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 13.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 891,
+				"physics_process_seconds": 0.044415,
+				"planning": {
+					"mission_drop_eta_seconds": 5,
+					"mission_drop_progress": 72.2222222222222,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 218,
+				"process_seconds": 0.042456,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 847,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 23,
+							"contact_tracking_usec": 31,
+							"detection_timers_usec": 3,
+							"leadership_usec": 2
+						},
+						"state": "decision_cadence_skip",
+						"tick": 847,
+						"total_tick_usec": 79
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 2240
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 6740
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": true,
+						"scopes_usec": {
+							"execution_updates_usec": 219,
+							"feedback_and_security_usec": 6,
+							"hud_heavy_usec": 75537,
+							"hud_light_usec": 6,
+							"ui_refresh_usec": 75537
+						},
+						"total_usec": 75766
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 31,
+							"fireteam_cards_usec": 247,
+							"primary_status_usec": 4874,
+							"visibility_usec": 0,
+							"world_overlays_usec": 2034
+						},
+						"total_usec": 7191
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 28670,
+							"panel_dropship_usec": 20576,
+							"panel_event_log_usec": 2961,
+							"panel_fireteam_phase_usec": 2609,
+							"panel_identity_usec": 2216,
+							"panel_nav_identity_usec": 2524,
+							"panel_nav_timer_usec": 14,
+							"panel_team_chip_usec": 294,
+							"primary_block_labels_usec": 95,
+							"primary_command_decision_usec": 42,
+							"primary_command_door_usec": 849,
+							"primary_command_feedback_usec": 964,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 72,
+							"primary_fireteam_status_usec": 263,
+							"primary_fireteam_tooltips_usec": 929,
+							"primary_hotkey_usec": 7,
+							"primary_labels_usec": 4632,
+							"runtime_surfaces_usec": 8454,
+							"secondary_buttons_layout_usec": 732,
+							"secondary_decision_contract_usec": 830,
+							"secondary_density_contract_usec": 570,
+							"secondary_frontier_contract_usec": 677,
+							"secondary_labels_usec": 33553,
+							"secondary_phase_labels_usec": 14,
+							"secondary_preview_contract_usec": 771,
+							"secondary_release_sync_usec": 413,
+							"secondary_strategic_text_usec": 27784,
+							"secondary_tooltip_usec": 1762,
+							"shared_station_route_snapshot_usec": 2374
+						},
+						"total_usec": 75520
+					},
+					"simulation": {
+						"command_count": 4,
+						"command_queue_after_tick": 0,
+						"command_type_count": {
+							"hold_position": 3,
+							"move_to_position": 1
+						},
+						"command_type_usec": {
+							"hold_position": 353,
+							"move_to_position": 577
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 281,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 1,
+							"path_queries_this_tick": 1,
+							"pending_query_count": 0,
+							"tick": 847,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 944,
+							"command_ordering_usec": 14,
+							"command_queue_usec": 960,
+							"effect_queue_usec": 2,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 34,
+							"snapshot_broadcast_usec": 1,
+							"tick_signal_emit_usec": 390,
+							"unit_minimum_spacing_usec": 129
+						},
+						"tick": 847,
+						"total_tick_usec": 1525
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 10812
+						},
+						"counters": {
+							"fow_work_invocation_count": 7
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 2,
+							"resize_subviewport_usec": 9,
+							"unit_proxy_sync_usec": 4490
+						},
+						"total_usec": 4507
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.0189823333333332,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 67562
+			},
+			{
+				"elapsed_msec": 68326,
+				"engine_fps": 5.0,
+				"flow_process_mode": 0,
+				"mission_process_mode": 0,
+				"pending_mission_transfers": [
+					{
+						"duration_seconds": 18.0,
+						"elapsed_seconds": 14.0,
+						"payload_source": "homebase_direct",
+						"phase": "to_mission"
+					}
+				],
+				"physics_frames": 899,
+				"physics_process_seconds": 0.044415,
+				"planning": {
+					"mission_drop_eta_seconds": 4,
+					"mission_drop_progress": 77.7777777777778,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission"
+				},
+				"process_frames": 219,
+				"process_seconds": 0.042456,
+				"simulation_last_tick_delta": 0.0166666666666667,
+				"simulation_tick": 855,
+				"time_scale": 1.0,
+				"timings": {
+					"combat": {
+						"active_enemy_unit_count": 8,
+						"command_queue_after_tick": 4,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"enemy_unit_count": 8,
+						"friendly_unit_count": 0,
+						"scopes_usec": {
+							"bleedout_queue_usec": 39,
+							"combat_fire_decision_usec": 439,
+							"combat_resolution_usec": 76,
+							"combat_visual_refresh_usec": 2,
+							"contact_tracking_usec": 28,
+							"cooldowns_usec": 6,
+							"detection_timers_usec": 1,
+							"enemy_advance_usec": 348,
+							"enemy_security_usec": 604,
+							"enemy_team_tactics_usec": 34519,
+							"fire_find_contact_pair_usec": 165,
+							"fire_no_contact_diagnostic_usec": 272,
+							"flank_vulnerability_usec": 2,
+							"friendly_standard_behavior_usec": 7,
+							"leadership_usec": 1,
+							"medic_support_usec": 256,
+							"multiplayer_snapshot_context_usec": 392,
+							"overwatch_security_usec": 237,
+							"status_update_usec": 73
+						},
+						"state": "active",
+						"tick": 855,
+						"total_tick_usec": 37058
+					},
+					"combat_hotspots": {
+						"counts": {
+							"candidate_filter": 2264
+						},
+						"enabled": true,
+						"usec": {
+							"candidate_filter": 6811
+						},
+						"visibility_cache": {
+							"counts": {
+
+							},
+							"enabled": true,
+							"usec": {
+
+							}
+						}
+					},
+					"controller": {
+						"enabled": true,
+						"included_ui_refresh": false,
+						"scopes_usec": {
+							"execution_updates_usec": 190,
+							"feedback_and_security_usec": 135,
+							"hud_heavy_usec": 0,
+							"hud_light_usec": 135,
+							"ui_refresh_usec": 0
+						},
+						"total_usec": 329
+					},
+					"controller_surfaces": {
+						"enabled": true,
+						"scopes_usec": {
+							"craft_controls_usec": 46598,
+							"fireteam_cards_usec": 285,
+							"primary_status_usec": 4410,
+							"visibility_usec": 0,
+							"world_overlays_usec": 2119
+						},
+						"total_usec": 53417
+					},
+					"controller_ui": {
+						"enabled": true,
+						"scopes_usec": {
+							"mission_panels_usec": 29725,
+							"panel_dropship_usec": 21565,
+							"panel_event_log_usec": 3010,
+							"panel_fireteam_phase_usec": 2422,
+							"panel_identity_usec": 2234,
+							"panel_nav_identity_usec": 2728,
+							"panel_nav_timer_usec": 62,
+							"panel_team_chip_usec": 432,
+							"primary_block_labels_usec": 82,
+							"primary_command_decision_usec": 36,
+							"primary_command_door_usec": 551,
+							"primary_command_feedback_usec": 664,
+							"primary_command_route_usec": 1,
+							"primary_command_target_waypoint_usec": 76,
+							"primary_fireteam_status_usec": 358,
+							"primary_fireteam_tooltips_usec": 923,
+							"primary_hotkey_usec": 6,
+							"primary_labels_usec": 4426,
+							"runtime_surfaces_usec": 54215,
+							"secondary_buttons_layout_usec": 594,
+							"secondary_decision_contract_usec": 843,
+							"secondary_density_contract_usec": 504,
+							"secondary_frontier_contract_usec": 666,
+							"secondary_labels_usec": 29103,
+							"secondary_phase_labels_usec": 7,
+							"secondary_preview_contract_usec": 785,
+							"secondary_release_sync_usec": 246,
+							"secondary_strategic_text_usec": 23648,
+							"secondary_tooltip_usec": 1810,
+							"shared_station_route_snapshot_usec": 2393
+						},
+						"total_usec": 117715
+					},
+					"simulation": {
+						"command_count": 0,
+						"command_queue_after_tick": 4,
+						"command_type_count": {
+
+						},
+						"command_type_usec": {
+
+						},
+						"effect_count": 0,
+						"effect_queue_after_tick": 0,
+						"enabled": true,
+						"navigation": {
+							"budget_enabled": true,
+							"delayed_this_tick": 0,
+							"enabled": false,
+							"fallback_queries_this_tick": 0,
+							"hpa_navigation": {
+								"build_count": 1,
+								"cache_hit_count": 283,
+								"cluster_size": 8,
+								"has_graph": true,
+								"last_build_stats": {
+									"built": true,
+									"cluster_count": 42,
+									"cluster_size": 8,
+									"component_count": 57,
+									"elapsed_usec": 66066,
+									"incremental": false,
+									"portal_count": 591,
+									"registry_revision": 2306,
+									"runtime_build_count": 1,
+									"runtime_rebuild_mode": "full",
+									"tile_count": 2304
+								},
+								"registry_revision": 2306,
+								"tile_count": 2304
+							},
+							"last_delay_reason": "",
+							"last_path_metrics": {
+
+							},
+							"max_new_path_queries_per_tick": 4,
+							"most_expensive_query": {
+
+							},
+							"new_path_queries_this_tick": 0,
+							"path_queries_this_tick": 0,
+							"pending_query_count": 0,
+							"tick": 855,
+							"unreachable_queries_this_tick": 0
+						},
+						"scopes_usec": {
+							"command_apply_usec": 0,
+							"command_ordering_usec": 1,
+							"command_queue_usec": 2,
+							"effect_queue_usec": 1,
+							"local_avoidance_prepare_usec": 1,
+							"objective_capture_usec": 14,
+							"snapshot_broadcast_usec": 0,
+							"tick_signal_emit_usec": 37237,
+							"unit_minimum_spacing_usec": 83
+						},
+						"tick": 855,
+						"total_tick_usec": 37344
+					},
+					"view": {
+						"conditional_scopes_usec": {
+							"fow_work_usec": 10812
+						},
+						"counters": {
+							"fow_work_invocation_count": 7
+						},
+						"enabled": true,
+						"scopes_usec": {
+							"dynamic_order_visuals_usec": 3,
+							"resize_subviewport_usec": 11,
+							"unit_proxy_sync_usec": 4454
+						},
+						"total_usec": 4474
+					}
+				},
+				"transport_timer": {
+					"can_process": true,
+					"is_stopped": false,
+					"paused": false,
+					"process_callback": 1,
+					"process_mode": 0,
+					"time_left": 0.878668666666667,
+					"wait_time": 1.0
+				},
+				"tree_paused": false,
+				"wall_msec": 70087
+			}
+		],
+		"hex_visual_snapshot_timing": {
+			"calls": 2,
+			"last_usec": 5935,
+			"max_usec": 7197,
+			"total_usec": 13132
+		},
+		"isolated_user_data": true,
+		"player_roster_after_sha256": "064c607a402f7887df16ade137b3ab54d9cfb92db71f1309dd0a06118d857061",
+		"player_roster_before_sha256": "700cb02b86ca49577e8d63b4d814669a4f1344c1103c5ca78f166e32ea8a12ef",
+		"player_roster_created_by_normal_start": false,
+		"player_roster_existed_before": true,
+		"player_roster_identity_after_sha256": "a20257b0ce5c8b58b1df416ba9ed112d9c6ab51d2133fe5a47adf08876ce6273",
+		"player_roster_identity_before_sha256": "a20257b0ce5c8b58b1df416ba9ed112d9c6ab51d2133fe5a47adf08876ce6273",
+		"private_simulation_state_writes": false,
+		"profile_reset": false,
+		"sources_sha256": {
+			"res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+			"res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+			"res://project.godot": "4f301576526eadbf84e158efcb2053acdffe033b78056db5886d4a45a4054a9a",
+			"res://scenes/meta/meta_layer_test.tscn": "e8e0f22fa3292ded594daebe72498dbf062ca76213335753283a1b7b74d29051",
+			"res://scenes/tests/mission_reactivity_test.tscn": "e3d5e05923b8042cdaad829eff049447bb6560351a0129c916a8a00dd168a8ce",
+			"res://scenes/ui/main_menu.tscn": "148ac78102575a8691cab391dcc38e3257f0d52869e1cdf4e74f7f0dd3ad5b4b",
+			"res://scripts/meta/meta_layer_flow.gd": "245d66ac8aace8d865d0ee1d779e8466fea3852a002d3239fcffe8952c609b1b",
+			"res://scripts/terrain/terrain_map_3d_view.gd": "133c5321cb0b95bcd7a26d71b9d6cc2523cdf93b78e697fe94a44253ee9b4d6b",
+			"res://scripts/tests/frontier_main_startup_verifier.gd": "22f1893838414963d2d5bbf70df524c2f9bc1815a69aa9ce924a847dfb0b2a3b",
+			"res://scripts/tests/mission_test_setup.gd": "e7564b350e4fda6775423bdf7836ed633f0a7103e89b4ed64b013784400b1222",
+			"res://scripts/ui/main_menu_screen.gd": "fb1f6b5884128d61698301b6bd13c671c7785bdbd5348a53d880b29407cc41a4"
+		},
+		"synthetic_fixture": false,
+		"time_acceleration": false,
+		"ui_test_user_data_dir": "C:/Users/bjoer/AppData/Roaming/SternenBuergerchen_GM01_Frontier_QA"
+	},
+	"failed": 1,
+	"passed": 31,
+	"renderer": {
+		"display": "Windows",
+		"driver": "vulkan",
+		"method": "forward_plus"
+	},
+	"schema": "sternenbuergerchen.frontier_main_startup.v1",
+	"scope": "Actual normal scene/UI-command route with real timer-driven transport/deployment. Bounded smoke, no complete campaign/combat/performance/art acceptance.",
+	"stages": [
+		{
+			"details": {
+				"background_path": "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png",
+				"background_sha256": "35c52473d92cbec346577a7be269553f8270d586f69f241067952a3be49bcea6",
+				"scene": "res://scenes/ui/main_menu.tscn"
+			},
+			"elapsed_msec": 2511,
+			"id": "main_menu"
+		},
+		{
+			"details": {
+				"craft_id": "dropship_1",
+				"craft_location": "homebase",
+				"payload_seeded": true,
+				"selected_mission_id": "grid_sweep",
+				"selected_mission_map_path": "res://maps/Ground_Mission01_32x32.json",
+				"visible_homebase_post_show_guard_after_actionable": true
+			},
+			"elapsed_msec": 18119,
+			"id": "homebase"
+		},
+		{
+			"details": {
+				"planning": {
+					"deployed_unit_ids": [],
+					"deployed_unit_positions": {
+
+					},
+					"drop_ship_requested": false,
+					"drop_ship_staged": true,
+					"embarked_unit_ids": [
+						"player_sternenbuergerchen_01",
+						"player_sternenbuergerchen_02",
+						"player_sternenbuergerchen_03"
+					],
+					"has_lz_position": false,
+					"lz_position": "(0.0, 0.0)",
+					"mission_drop_craft_id": "dropship_1",
+					"mission_drop_eta_seconds": 18,
+					"mission_drop_progress": 0.0,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission",
+					"selected_fireteams": [
+						"ft1"
+					]
+				},
+				"render": {
+					"authored_visual_assets": [
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+							"sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+						},
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+							"sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+						},
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+							"sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+							"sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+							"sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/License.txt",
+							"sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+							"sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+							"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+						}
+					],
+					"authored_visual_layout_active": true,
+					"authored_visual_layout_id": "gm01_frontier_outpost_v1",
+					"authored_visual_owned_tile_count": 817,
+					"dropship_model_visible": false,
+					"dropship_visual_count": 0,
+					"frontier_art_enabled": true,
+					"frontier_art_override": -1,
+					"frontier_art_profile_id": "frontier_illustrated_v1",
+					"grid_topology": "hex_axial_v1",
+					"missing_asset_mapping_count": 0,
+					"missing_dropship_model_count": 0,
+					"read_only": true,
+					"tile_count": 2304,
+					"ui_sets_gameplay_truth": false,
+					"unit_model_count": 11
+				},
+				"scene": "res://scenes/tests/mission_reactivity_test.tscn"
+			},
+			"elapsed_msec": 22646,
+			"id": "mission_started"
+		}
+	]
+}

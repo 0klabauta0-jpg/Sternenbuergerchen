@@ -1,0 +1,245 @@
+{
+  "scope": "PNG metadata, alpha and byte-identical preservation; no image transformations",
+  "artifacts": [
+    {
+      "file": "mockup_a_kommandodeck.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "initial"
+    },
+    {
+      "file": "mockup_b_feldtablet.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "initial"
+    },
+    {
+      "file": "mockup_c_einsatztafel.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "initial"
+    },
+    {
+      "file": "icon_move.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
+    },
+    {
+      "file": "icon_defend.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
+    },
+    {
+      "file": "icon_flank.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
+    },
+    {
+      "file": "icon_take.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
+    },
+    {
+      "file": "icon_dropship.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
+    },
+    {
+      "file": "icon_loadout.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "initial"
+    },
+    {
+      "file": "mockup_a2_kommandodeck_kompakt.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a2_compact"
+    },
+    {
+      "file": "icon_flank_v2.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "a2_compact"
+    },
+    {
+      "file": "icon_dropship_v2.png",
+      "file_copy": "PASS",
+      "real_alpha": "PASS",
+      "small_size_visual_acceptance": "OPEN",
+      "revision": "a2_compact"
+    },
+    {
+      "file": "mockup_a3_randband_versuch1.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a3_edge_square"
+    },
+    {
+      "file": "mockup_a3_randband_quadratisch.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a3_edge_square"
+    },
+    {
+      "file": "mockup_a4_band_versuch1.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a4_compact_blocks"
+    },
+    {
+      "file": "mockup_a4_band_bloecke_kompakt.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a4_compact_blocks"
+    },
+    {
+      "file": "mockup_a5_mission_zweireihig_versuch1.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": true
+    },
+    {
+      "file": "menu_hauptmenue.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    },
+    {
+      "file": "menu_heimatbasis.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    },
+    {
+      "file": "menu_fob_loadout_versuch1.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": true
+    },
+    {
+      "file": "board_charakterkarten_versuch1.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": true
+    },
+    {
+      "file": "board_detailkarten.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    },
+    {
+      "file": "menu_debrief_versuch1.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": true
+    },
+    {
+      "file": "menu_lobby_versuch1.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": true
+    },
+    {
+      "file": "menu_einstellungen_hilfe.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    },
+    {
+      "file": "menu_editor.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    },
+    {
+      "file": "menu_teameditor.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    },
+    {
+      "file": "menu_fob_loadout.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    },
+    {
+      "file": "menu_lobby.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    },
+    {
+      "file": "menu_debrief.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    },
+    {
+      "file": "board_charakterkarten.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    },
+    {
+      "file": "mockup_a5_mission_zweireihig.png",
+      "file_copy": "PASS",
+      "real_alpha": "not_required",
+      "small_size_visual_acceptance": "not_applicable",
+      "revision": "a5_two_rows_all_menus",
+      "retained_attempt": false
+    }
+  ]
+}
