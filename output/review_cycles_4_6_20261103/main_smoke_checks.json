@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "review2_20261102_isolation_canary_verifier",
+      "script": "res://scripts/tests/review2_20261102_isolation_canary_verifier.gd",
+      "success_marker": "REVIEW2_ISOLATION_CANARY_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "review46_20261103_effective_roster_skills_verifier",
+      "script": "res://scripts/tests/review46_20261103_effective_roster_skills_verifier.gd",
+      "success_marker": "REVIEW46_EFFECTIVE_ROSTER_SKILLS_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "review46_20261103_roster_reset_verifier",
+      "script": "res://scripts/tests/review46_20261103_roster_reset_verifier.gd",
+      "success_marker": "REVIEW46_ROSTER_RESET_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "review46_20261103_hpa_cache_verifier",
+      "script": "res://scripts/tests/review46_20261103_hpa_cache_verifier.gd",
+      "success_marker": "REVIEW46_HPA_CACHE_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "review46_20261103_unit_badge_verifier",
+      "script": "res://scripts/tests/review46_20261103_unit_badge_verifier.gd",
+      "success_marker": "REVIEW46_UNIT_BADGE_RESULT",
+      "timeout": 180
+    }
+  ]
+}

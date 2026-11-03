@@ -1,5 +1,16 @@
 # TASK_ROADMAP
 
+## Nutzerauftrag 2026-11-03 - Drei weitere Review-/Fixzyklen (4-6)
+- Drei Runden, vier bestaetigte Fixes mit neuen Regressionen 173/173; getrennte
+  Commits und unabhaengige Nachreviews APPROVED. Basis Main `21bacf0f2`.
+- Gemeinsamer Sourcecommit `48f96221b`: 84/85 Gates gruen (2747 Assertions).
+  Ein identischer Original-Main-Altfehler TASK839 bleibt mit 29/2 ausgewiesen.
+- Isolierte Nutzerdaten, Originalroster inklusive Schreibzeit unveraendert.
+  HPA-Cache ohne Vollenumeration; zusaetzliche Badge-Pruefung kostet im
+  28-Unit-/60s-Paar mehr CPU, bleibt unter bestehendem Budget. Keine FPS-Abnahme.
+- Task `docs/tasks/REVIEW_CYCLES_4_6_2026_11_03_performance_architecture.md`,
+  Evidence `output/review_cycles_4_6_20261103/verification_summary.json`.
+
 ## Nutzerauftrag 2026-11-03 - Drei autonome Review-/Fixzyklen
 - Drei aufeinanderfolgende Runden abgeschlossen: fuenf bestaetigte Performance-/
   Architekturprobleme behoben, neue Regressionen 101/101, unabhaengig APPROVED.

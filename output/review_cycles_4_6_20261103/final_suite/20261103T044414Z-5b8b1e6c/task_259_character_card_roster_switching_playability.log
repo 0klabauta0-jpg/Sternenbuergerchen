@@ -1,0 +1,62 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-42c83627ec3943ad9e5a957325d6984a
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_259 Character Card Roster Switching Playability ===
+  PASS: Task roster is generated and saved for switching smoke
+  PASS: Task roster has enough operators for card and switching coverage
+  PASS: Homebase instantiates for character roster switching
+  PASS: Homebase roster card exists for an unstaged operator
+  PASS: Homebase roster card exposes an open-character signal
+  PASS: Homebase character sheet follows the roster card selection
+  PASS: Homebase roster card sheet shows roster location
+  PASS: Homebase runtime character sheet is read-only
+  PASS: Homebase pool-to-team transfer adds the operator once
+  PASS: Homebase roster plus transfer list keep every operator represented once
+  PASS: Homebase transfer-team card exists after staging
+  PASS: Homebase transfer-team card opens the same character sheet
+  PASS: Homebase staged card sheet shows transfer-window location
+  PASS: Duplicate Homebase transfer attempt does not duplicate a unit
+  PASS: Duplicate Homebase transfer attempt leaves clear feedback
+  PASS: Homebase team-to-pool removal returns the operator without loss
+  PASS: Returned operator is reachable from the roster again
+  PASS: FOB instantiates for character roster switching
+  PASS: FOB fireteam member card exists
+  PASS: FOB fireteam member card opens character overlay
+  PASS: FOB character overlay becomes visible
+  PASS: FOB overlay follows the selected fireteam member
+  PASS: FOB overlay shows initial fireteam assignment
+  PASS: FOB runtime character overlay is read-only
+  PASS: FOB fireteam-to-fireteam reassignment updates the selected slot
+  PASS: FOB reassignment keeps selected unit IDs unique and complete
+  PASS: FOB remove-to-pool path clears fireteam assignment without dropping the unit
+  PASS: FOB clear assignment keeps selected unit IDs unique and complete
+  PASS: FOB pool-to-fireteam assignment restores the operator into another fireteam
+  PASS: Invalid FOB reassignment is blocked without changing assignments
+  PASS: FOB loadout slot card exists for staged fireteam member
+  PASS: FOB loadout slot card opens character overlay
+  PASS: FOB loadout card overlay keeps character sheet sections visible
+  PASS: FOB loadout card overlay stays synchronized with reassigned fireteam
+  PASS: Mission scene instantiates for selected-fireteam character access
+  PASS: Mission selected-fireteam card row exposes operator cards
+  PASS: Mission selected-fireteam card opens character overlay
+  PASS: Mission character overlay becomes visible
+  PASS: Mission character overlay follows selected fireteam card identity
+  PASS: Mission runtime character overlay is read-only
+  PASS: Mission runtime character overlay hides dev stat sliders
+  PASS: Debrief scene instantiates for character progression access
+  PASS: Debrief exposes character progression updates
+  PASS: Debrief character update keeps selected unit ID visible
+  PASS: Roster with fireteam assignments saves
+  PASS: Roster with fireteam assignments loads
+  PASS: Save/load preserves expected fireteam assignments
+  PASS: Save/load does not lose roster units
+  PASS: Mission progression keeps roster unit set intact
+  PASS: Character card roster switching report exists
+  PASS: Character roster switching report covers Summary
+  PASS: Character roster switching report covers Covered Screens
+  PASS: Character roster switching report covers Automated Findings
+  PASS: Character roster switching report covers Manual Remainder
+  PASS: Character roster switching report covers State Integrity
+=== RESULTS: 55 passed, 0 failed ===
+ALL TESTS PASSED

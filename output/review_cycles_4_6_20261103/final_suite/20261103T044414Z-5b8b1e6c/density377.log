@@ -1,0 +1,30 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-82e246e278604aba8c367f2db8aed2d3
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_377 Contact Density Heat Map Layer ===
+PASS: Overlay aggregates contacts into two heat clusters
+PASS: Heat cells are returned in snapshot
+PASS: Each cluster contains two contacts
+PASS: Overlay snapshot is visual-only and non-authoritative
+PASS: FoW density filter keeps visible current and recorded last-known contacts
+PASS: FoW density filter counts hidden contacts
+PASS: FoW density source list includes visible and last-known IDs
+PASS: FoW density source list does not expose hidden enemy IDs
+PASS: Primary view toggles contact density heatmap on
+PASS: Primary view reports two heat cells
+PASS: Primary view heatmap uses four allowed source contacts
+PASS: Heatmap aggregation does not rebuild again inside the update interval
+PASS: Heatmap reports interval-skipped updates
+PASS: Primary view toggles contact density heatmap off
+PASS: Disabled heatmap exposes zero heat cells
+PASS: Heatmap counts the hidden FoW contact
+PASS: Heatmap uses two visible contacts plus one last-known contact
+PASS: Heatmap source IDs include visible and last-known contacts
+PASS: Heatmap does not reveal hidden enemy IDs
+PASS: TASK_377 task file exists
+PASS: TASK_377 is marked implemented
+PASS: Implementation status mentions TASK_377
+PASS: Roadmap mentions TASK_377
+=== RESULTS: 23 passed, 0 failed ===
+ALL TESTS PASSED

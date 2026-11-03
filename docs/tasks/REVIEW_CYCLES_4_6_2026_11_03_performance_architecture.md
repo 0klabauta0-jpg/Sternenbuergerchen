@@ -23,13 +23,13 @@ Vorhandene ungetrackte Arbeiten bleiben unangetastet.
 - Weitere owning Contracts werden pro bestaetigtem Befund ergaenzt.
 
 ## Akzeptanzkriterien
-- [ ] Drei Review-/Fix-/Nachreview-Runden abgeschlossen.
-- [ ] Neue Regressionen vor jedem Produktfix korrekt RED, danach GREEN.
-- [ ] Performanceaussagen durch gleiche Workloads/Operationen belegt.
-- [ ] Alle Godot-Laeufe ausschliesslich sequenziell ueber
+- [x] Drei Review-/Fix-/Nachreview-Runden abgeschlossen.
+- [x] Neue Regressionen vor jedem Produktfix korrekt RED, danach GREEN.
+- [x] Performanceaussagen durch gleiche Workloads/Operationen belegt.
+- [x] Alle Godot-Laeufe ausschliesslich sequenziell ueber
   scripts/tests/run_review2_isolated.py mit frischen Nutzerdaten und Pfadguard.
-- [ ] Originalroster SHA256, Laenge und Schreibzeit vor/nach jedem Lauf gleich.
-- [ ] Abschlussmatrix ohne neue Regressionen und unabhaengiges Gesamt-Nachreview;
+- [x] Originalroster SHA256, Laenge und Schreibzeit vor/nach jedem Lauf gleich.
+- [x] Abschlussmatrix ohne neue Regressionen und unabhaengiges Gesamt-Nachreview;
   etwaige Altfehler separat am Original-Main nachweisen und offen ausweisen.
 - [ ] Nur Taskdateien committed, Main konfliktfrei integriert und Push verifiziert.
 
@@ -127,3 +127,17 @@ ohne schwere Aim-/Vitalarbeit bei reinen Badge-Aenderungen auszufuehren.
 - Erstes Badge-Fixture nutzte `idle`, das bei `assigned` zu anderer Postur
   normalisierte. Feste erkannte `crouch`-/`lowered`-Postur isoliert reine
   Statuswechsel; keine Anzeige-/Operations-Erwartung abgeschwaecht.
+
+## Gemeinsame Abschlussmatrix
+Auf Sourcecommit `48f96221b807fb2971207f3ec9133b91a0f785a2` in einem
+sequenziellen Lauf 85 Gates: 84 PASS mit 2747/2747 Assertions, ein original
+bestaetigter TASK839-Baselinefehler 29/2. Gesamt 2776 PASS/2 FAIL-Assertions,
+alle vier neuen Verifier 173/173. Kein unbekannter neuer Fehler. TASK839 bleibt
+in der Matrix; Tests unveraendert. Bekannten TASK348 nicht erneut geprueft.
+TASK1188 im Gesamtlauf p99 4346 us (<8000), 8696 Frames/60004 ms, 31/31.
+95 Source-/Test-/Harness-/Projektfingerprints stimmen mit Testcommit und
+Arbeitsbytes ueberein. 129 protokollierte Laeufe mit frischen eindeutigen
+Userdata-Verzeichnissen, Originalroster SHA/Laenge/Schreibzeit gleich.
+Nach diesem Stand nur Doku/Evidence. Gesamtindex und Rohreport:
+`output/review_cycles_4_6_20261103/verification_summary.json`,
+`final_suite/20261103T044414Z-5b8b1e6c/report.json`.

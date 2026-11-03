@@ -1,0 +1,39 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+--- TASK_094 Verifier ---
+Test: TestUnit.get_recognition()
+  PASS: TestUnit has get_recognition()
+  PASS: get_recognition() returns 0.8
+Test: MISIDENTIFICATION_BASE_CHANCE exists
+  PASS: MISIDENTIFICATION_BASE_CHANCE constant exists
+  PASS: MISIDENTIFICATION_BASE_CHANCE is 0.03
+Test: MISIDENTIFICATION_COOLDOWN_TICKS exists
+  PASS: MISIDENTIFICATION_COOLDOWN_TICKS constant exists
+  PASS: MISIDENTIFICATION_COOLDOWN_TICKS is 15
+Test: MISIDENTIFICATION_EVENT_COLOR exists
+  PASS: MISIDENTIFICATION_EVENT_COLOR constant exists
+Test: recognition=1.0 never misidentifies
+  PASS: recognition=1.0 yields 0% misidentification chance
+Test: recognition=0.0 has full base chance
+  PASS: recognition=0.0 yields 3% misidentification chance
+Test: _check_misidentification method exists
+  PASS: _check_misidentification() exists
+Test: Cooldown prevents immediate re-misidentification
+  PASS: Unit with cooldown cannot misidentify
+Test: _advance_misidentification_cooldowns decrements
+  PASS: unit_a still in cooldown after 1 advance
+  PASS: unit_a cooldown decremented to 2
+  PASS: unit_b removed after cooldown reaches 1
+Test: Enemies never misidentify
+  PASS: Enemy unit cannot misidentify
+Test: Misidentification returns empty when no other friendlies
+  PASS: No misidentification without other friendlies available
+Test: Default recognition is 0.5
+  PASS: Default recognition is 0.5
+  PASS: get_recognition() returns default 0.5
+Test: get_misidentification_cooldown() accessor works
+  PASS: get_misidentification_cooldown() exists
+  PASS: Initial cooldown dictionary is empty
+TASK_094 VERIFY: ALL 20 TESTS PASSED
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-00e6b6f95a534ff5894230630924c6b1
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors

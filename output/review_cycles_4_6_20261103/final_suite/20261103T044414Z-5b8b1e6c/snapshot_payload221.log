@@ -1,0 +1,71 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-d04a0db4661445b3a4dfd515e5f8969d
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_221 Multiplayer Snapshot Serialization Performance Pass ===
+PASS: Harness defines small, medium and large snapshot scenarios
+PASS: Summary marks build/apply timing coverage
+PASS: Summary marks payload size metrics
+PASS: Summary marks deterministic canonical payload
+PASS: Summary marks side-effect-free client apply
+PASS: Summary marks ID-only asset/VFX/bubble payloads
+PASS: small_8_units applies every increasing snapshot
+PASS: small_8_units build p99 stays under broad start budget
+PASS: small_8_units apply p99 stays under broad start budget
+PASS: small_8_units JSON estimate stays under broad start budget
+PASS: small_8_units unit count is measured
+PASS: small_8_units carries fire event VFX IDs
+PASS: small_8_units carries feedback bubble IDs
+PASS: small_8_units carries enemy tactics display state
+PASS: small_8_units carries objective state
+PASS: small_8_units payload has no raw text/path/asset offenders
+PASS: small_8_units documents ID-only asset policy
+PASS: small_8_units client apply enqueues no commands
+PASS: small_8_units client apply enqueues no effects
+PASS: medium_32_units applies every increasing snapshot
+PASS: medium_32_units build p99 stays under broad start budget
+PASS: medium_32_units apply p99 stays under broad start budget
+PASS: medium_32_units JSON estimate stays under broad start budget
+PASS: medium_32_units unit count is measured
+PASS: medium_32_units carries fire event VFX IDs
+PASS: medium_32_units carries feedback bubble IDs
+PASS: medium_32_units carries enemy tactics display state
+PASS: medium_32_units carries objective state
+PASS: medium_32_units payload has no raw text/path/asset offenders
+PASS: medium_32_units documents ID-only asset policy
+PASS: medium_32_units client apply enqueues no commands
+PASS: medium_32_units client apply enqueues no effects
+PASS: large_96_units applies every increasing snapshot
+PASS: large_96_units build p99 stays under broad start budget
+PASS: large_96_units apply p99 stays under broad start budget
+PASS: large_96_units JSON estimate stays under broad start budget
+PASS: large_96_units unit count is measured
+PASS: large_96_units carries fire event VFX IDs
+PASS: large_96_units carries feedback bubble IDs
+PASS: large_96_units carries enemy tactics display state
+PASS: large_96_units carries objective state
+PASS: large_96_units payload has no raw text/path/asset offenders
+PASS: large_96_units documents ID-only asset policy
+PASS: large_96_units client apply enqueues no commands
+PASS: large_96_units client apply enqueues no effects
+PASS: Contract normalizes snapshots deterministically independent of input order
+PASS: Unit snapshots are sorted by unit_id
+PASS: Fire event snapshots are sorted by tick/sequence/event_id
+PASS: Determinism probe includes feedback bubbles
+PASS: Determinism probe strips raw text/path asset payloads
+PASS: Frequency plan keeps unit positions in every snapshot
+PASS: Frequency plan marks fire events as event/delta candidates
+PASS: Frequency plan marks feedback bubbles as event/delta candidates
+PASS: Frequency plan keeps muzzle visuals as IDs
+PASS: Frequency plan keeps bubbles as IDs
+PASS: Frequency plan documents no-command viewer boundary
+PASS: Multiplayer snapshot performance report exists
+PASS: Report documents 'TASK_221'
+PASS: Report documents 'Build'
+PASS: Report documents 'Apply'
+PASS: Report documents 'JSON'
+PASS: Report documents 'ID-only'
+PASS: Report documents 'Network-Profiler'
+TASK_221 harness summary: {"all_payloads_id_only":true,"all_scenarios_side_effect_free":true,"deterministic_canonical_payload":true,"has_build_apply_timing":true,"has_size_metrics":true,"scenario_count":3}
+=== RESULTS: 63 passed, 0 failed ===
+ALL TESTS PASSED

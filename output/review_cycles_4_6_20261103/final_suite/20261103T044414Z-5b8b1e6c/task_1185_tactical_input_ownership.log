@@ -1,0 +1,123 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-040ce1763eda4eb09ff994de06f3d7d8
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1185 Tactical Input Ownership ===
+  PASS: tactical_camera_pan_up is registered in the InputMap
+  PASS: tactical_camera_pan_up has at least one default binding
+  PASS: tactical_camera_pan_down is registered in the InputMap
+  PASS: tactical_camera_pan_down has at least one default binding
+  PASS: tactical_camera_pan_left is registered in the InputMap
+  PASS: tactical_camera_pan_left has at least one default binding
+  PASS: tactical_camera_pan_right is registered in the InputMap
+  PASS: tactical_camera_pan_right has at least one default binding
+  PASS: tactical_camera_rotate_left is registered in the InputMap
+  PASS: tactical_camera_rotate_left has at least one default binding
+  PASS: tactical_camera_rotate_right is registered in the InputMap
+  PASS: tactical_camera_rotate_right has at least one default binding
+  PASS: tactical_camera_rotate_drag is registered in the InputMap
+  PASS: tactical_camera_rotate_drag has at least one default binding
+  PASS: tactical_camera_zoom_in is registered in the InputMap
+  PASS: tactical_camera_zoom_in has at least one default binding
+  PASS: tactical_camera_zoom_out is registered in the InputMap
+  PASS: tactical_camera_zoom_out has at least one default binding
+  PASS: tactical_select is registered in the InputMap
+  PASS: tactical_select has at least one default binding
+  PASS: tactical_select_additive is registered in the InputMap
+  PASS: tactical_select_additive has at least one default binding
+  PASS: tactical_order is registered in the InputMap
+  PASS: tactical_order has at least one default binding
+  PASS: tactical_order_append is registered in the InputMap
+  PASS: tactical_order_append has at least one default binding
+  PASS: tactical_cycle_fireteam_next is registered in the InputMap
+  PASS: tactical_cycle_fireteam_next has at least one default binding
+  PASS: tactical_cycle_fireteam_previous is registered in the InputMap
+  PASS: tactical_cycle_fireteam_previous has at least one default binding
+  PASS: tactical_execute_orders is registered in the InputMap
+  PASS: tactical_execute_orders has at least one default binding
+  PASS: tactical_delete_order is registered in the InputMap
+  PASS: tactical_delete_order has at least one default binding
+  PASS: tactical_issue_move is registered in the InputMap
+  PASS: tactical_issue_move has at least one default binding
+  PASS: tactical_issue_defend is registered in the InputMap
+  PASS: tactical_issue_defend has at least one default binding
+  PASS: tactical_issue_flank is registered in the InputMap
+  PASS: tactical_issue_flank has at least one default binding
+  PASS: tactical_issue_take is registered in the InputMap
+  PASS: tactical_issue_take has at least one default binding
+  PASS: tactical_issue_breach is registered in the InputMap
+  PASS: tactical_issue_breach has at least one default binding
+  PASS: tactical_toggle_fire_sector is registered in the InputMap
+  PASS: tactical_toggle_fire_sector has at least one default binding
+  PASS: tactical_toggle_los is registered in the InputMap
+  PASS: tactical_toggle_los has at least one default binding
+  PASS: tactical_sort_fireteam is registered in the InputMap
+  PASS: tactical_sort_fireteam has at least one default binding
+  PASS: tactical_phase_previous is registered in the InputMap
+  PASS: tactical_phase_previous has at least one default binding
+  PASS: tactical_phase_next is registered in the InputMap
+  PASS: tactical_phase_next has at least one default binding
+  PASS: show_npc_thoughts is registered in the InputMap
+  PASS: show_npc_thoughts has at least one default binding
+  PASS: Q belongs to camera rotation
+  PASS: Q does not cycle fireteams
+  PASS: E belongs to camera rotation
+  PASS: E does not execute orders
+  PASS: T sorts the focused fireteam
+  PASS: T does not show NPC thoughts
+  PASS: V holds NPC thoughts
+  PASS: V does not sort fireteams
+  PASS: G executes planned orders
+  PASS: G does not change the selected fireteam
+  PASS: Tab selects the next fireteam outside UI focus
+  PASS: Shift+Tab selects the previous fireteam outside UI focus
+  PASS: Enter never maps to GO
+  PASS: Right mouse button belongs to tactical orders
+  PASS: Right mouse button never rotates the camera
+  PASS: Middle mouse drag belongs to camera rotation
+  PASS: Middle mouse drag never starts an order
+  PASS: Camera polling uses InputMap actions instead of direct keys
+  PASS: Camera never claims the tactical right mouse button
+  PASS: Camera owns only the dedicated middle-drag rotate action
+  PASS: Tactical controller has no direct physical-keycode owner
+  PASS: tactical_execute_orders is consumed through the tactical owner
+  PASS: tactical_cycle_fireteam_next is consumed through the tactical owner
+  PASS: tactical_cycle_fireteam_previous is consumed through the tactical owner
+  PASS: tactical_sort_fireteam is consumed through the tactical owner
+  PASS: tactical_order is consumed through the tactical owner
+  PASS: tactical_order_append is consumed through the tactical owner
+  PASS: Q is not a fireteam-cycle alias
+  PASS: E is not a GO alias
+  PASS: Settings mark tactical actions as rebindable
+  PASS: Settings expose tactical_camera_pan_up
+  PASS: Settings expose tactical_camera_pan_down
+  PASS: Settings expose tactical_camera_pan_left
+  PASS: Settings expose tactical_camera_pan_right
+  PASS: Settings expose tactical_camera_rotate_left
+  PASS: Settings expose tactical_camera_rotate_right
+  PASS: Settings expose tactical_camera_rotate_drag
+  PASS: Settings expose tactical_camera_zoom_in
+  PASS: Settings expose tactical_camera_zoom_out
+  PASS: Settings expose tactical_select
+  PASS: Settings expose tactical_select_additive
+  PASS: Settings expose tactical_order
+  PASS: Settings expose tactical_order_append
+  PASS: Settings expose tactical_cycle_fireteam_next
+  PASS: Settings expose tactical_cycle_fireteam_previous
+  PASS: Settings expose tactical_execute_orders
+  PASS: Settings expose tactical_delete_order
+  PASS: Settings expose tactical_issue_move
+  PASS: Settings expose tactical_issue_defend
+  PASS: Settings expose tactical_issue_flank
+  PASS: Settings expose tactical_issue_take
+  PASS: Settings expose tactical_issue_breach
+  PASS: Settings expose tactical_toggle_fire_sector
+  PASS: Settings expose tactical_toggle_los
+  PASS: Settings expose tactical_sort_fireteam
+  PASS: Settings expose tactical_phase_previous
+  PASS: Settings expose tactical_phase_next
+  PASS: Settings expose show_npc_thoughts
+  PASS: Thought-hold fallback uses V
+  PASS: Thought-hold fallback no longer restores T
+=== RESULTS: 116 passed, 0 failed ===
+ALL TESTS PASSED

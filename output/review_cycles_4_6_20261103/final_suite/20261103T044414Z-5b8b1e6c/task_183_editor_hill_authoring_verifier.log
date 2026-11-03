@@ -1,0 +1,75 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-229e2f1249784c2ba6a8478abaaab65c
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_183 Editor Hill Authoring Verifier ===
+  PASS: Height tool raises H=0 to H=1
+  PASS: Height tool applies selected slope edge above H=0
+  PASS: Height tool can raise H=0 with explicit edge none
+  PASS: Height tool preserves selected edge none above H=0
+  PASS: Height tool can set H=2
+  PASS: Height tool applies selected cliff edge at H=2
+  PASS: Height tool lowers H=1 to H=0
+  PASS: Height tool forces edge none at H=0
+  PASS: Height tool clamps raise at H=2
+  PASS: Height tool clamps lower at H=0
+  PASS: Terrain tile catalog loads
+  PASS: wall_straight_se is a hill-preserving palette type
+  PASS: Catalog applies wall_straight_se
+  PASS: wall_straight_se preserves height_level
+  PASS: wall_straight_se preserves surface_type
+  PASS: wall_straight_se preserves edge_type
+  PASS: wall_straight_se remains the visual/catalog type_id
+  PASS: rock_large is a hill-preserving palette type
+  PASS: Catalog applies rock_large
+  PASS: rock_large preserves height_level
+  PASS: rock_large preserves surface_type
+  PASS: rock_large preserves edge_type
+  PASS: rock_large remains the visual/catalog type_id
+  PASS: cliff_straight_se is a hill-preserving palette type
+  PASS: Catalog applies cliff_straight_se
+  PASS: cliff_straight_se preserves height_level
+  PASS: cliff_straight_se preserves surface_type
+  PASS: cliff_straight_se preserves edge_type
+  PASS: cliff_straight_se remains the visual/catalog type_id
+  PASS: slope_se is a hill-preserving palette type
+  PASS: Catalog applies slope_se
+  PASS: slope_se preserves height_level
+  PASS: slope_se preserves surface_type
+  PASS: slope_se preserves edge_type
+  PASS: slope_se remains the visual/catalog type_id
+  PASS: Catalog applies wall on hill
+  PASS: Wall on hill sets walkable=false
+  PASS: Wall on hill sets blocks_los=true
+  PASS: Wall on hill sets object_height=2
+  PASS: Catalog applies object-layer generator on hill
+  PASS: Object-layer placement keeps terrain type_id
+  PASS: Object-layer placement stores object_type_id
+  PASS: Object-layer placement preserves height_level
+  PASS: Object-layer placement preserves surface_type
+  PASS: Object-layer placement preserves edge_type
+  PASS: Roundtrip catalog and map instantiate
+  PASS: Roundtrip map applies wall on hill
+  PASS: Roundtrip map applies rock on hill
+  PASS: Hill authoring map saves
+  PASS: Hill authoring map reloads
+  PASS: Sandhang survives Save/Load
+  PASS: Sand cliff survives Save/Load
+  PASS: Plateau interior survives Save/Load
+  PASS: Wall on hill survives Save/Load
+  PASS: Rock on hill survives Save/Load
+  PASS: Map editor scene instantiates
+  PASS: Editor exposes editable TerrainMapData tile
+  PASS: Editor surface patch changes a wall-on-hill surface
+  PASS: Editor surface patch preserves wall type_id
+  PASS: Editor surface patch preserves height_level
+  PASS: Editor surface patch preserves edge_type
+  PASS: Editor surface patch preserves object fields
+  PASS: Editor surface patch changes an object-layer tile surface
+  PASS: Editor surface patch preserves object_type_id
+  PASS: Editor surface patch clears stale base type_id so surface remains visible
+  PASS: Editor surface patch preserves object-layer hill fields
+  PASS: Editor refresh keeps Primary3DView rendering terrain data
+  PASS: Editor authoring scene does not create SimulationRoot gameplay state
+=== RESULTS: 68 passed, 0 failed ===
+TASK_183: ALL PASSED
