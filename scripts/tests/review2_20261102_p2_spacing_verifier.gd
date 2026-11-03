@@ -100,8 +100,12 @@ func _test_overlap_and_negative_cells_are_order_independent() -> void:
 func _test_terrain_one_sided_and_blocked_fallbacks() -> void:
 	var terrain = TERRAIN.new()
 	terrain.configure_iso_grid(Vector2.ZERO, 1.0, 1.0)
-	for grid in [Vector2i.ZERO, Vector2i(5, -5), Vector2i(18, -18)]:
-		terrain.register_tile(TILE.new({"tile_id": str(grid), "grid_position": grid, "world_position": terrain.grid_to_world(grid), "walkable": true}))
+	# The positive fallback needs a connected corridor, including both sides
+	# of every square diagonal. Isolated destination tiles imply teleportation.
+	for x in range(19):
+		for y in range(maxi(-18, -x - 1), mini(0, -x + 1) + 1):
+			var grid := Vector2i(x, y)
+			terrain.register_tile(TILE.new({"tile_id": str(grid), "grid_position": grid, "world_position": terrain.grid_to_world(grid), "walkable": true}))
 	var units: Array = [_unit("alpha", Vector2.ZERO), _unit("bravo", Vector2(10.0, 0.0))]
 	for unit in units:
 		root.add_child(unit)

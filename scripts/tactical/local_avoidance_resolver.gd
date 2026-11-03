@@ -1,6 +1,8 @@
 class_name LocalAvoidanceResolver
 extends RefCounted
 
+const TERRAIN_PATHFINDER = preload("res://scripts/terrain/terrain_pathfinder.gd")
+
 const DEFAULT_AGENT_RADIUS: float = 18.0
 const DEFAULT_MINIMUM_SPACING: float = DEFAULT_AGENT_RADIUS * 2.0
 const DEFAULT_NEIGHBOR_RADIUS: float = 56.0
@@ -12,6 +14,7 @@ const SIDE_STEP_WEIGHT: float = 0.35
 var cell_size: float = DEFAULT_CELL_SIZE
 var _agents_by_id: Dictionary = {}
 var _cell_agents: Dictionary = {}
+var _terrain_pathfinder = TERRAIN_PATHFINDER.new()
 
 
 func clear() -> void:
@@ -184,17 +187,17 @@ func resolve_minimum_spacing_positions(
 				var candidate_a: Vector2 = position_a + move_a
 				var candidate_b: Vector2 = position_b + move_b
 				var moved_pair: bool = false
-				if _is_position_walkable(candidate_a, terrain_registry) and _is_position_walkable(candidate_b, terrain_registry):
+				if _is_spacing_transition_walkable(position_a, candidate_a, terrain_registry) and _is_spacing_transition_walkable(position_b, candidate_b, terrain_registry):
 					positions_by_unit_id[unit_id_a] = candidate_a
 					positions_by_unit_id[unit_id_b] = candidate_b
 					moved_pair = true
 				else:
 					var candidate_a_full: Vector2 = position_a - axis * overlap
 					var candidate_b_full: Vector2 = position_b + axis * overlap
-					if _is_position_walkable(candidate_a_full, terrain_registry):
+					if _is_spacing_transition_walkable(position_a, candidate_a_full, terrain_registry):
 						positions_by_unit_id[unit_id_a] = candidate_a_full
 						moved_pair = true
-					elif _is_position_walkable(candidate_b_full, terrain_registry):
+					elif _is_spacing_transition_walkable(position_b, candidate_b_full, terrain_registry):
 						positions_by_unit_id[unit_id_b] = candidate_b_full
 						moved_pair = true
 				if moved_pair:
@@ -364,6 +367,57 @@ func _is_position_walkable(position: Vector2, terrain_registry) -> bool:
 	if not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("is_walkable"):
 		return true
 	return bool(terrain_registry.call("is_walkable", terrain_registry.call("world_to_grid", position)))
+
+
+func _is_spacing_transition_walkable(from_position: Vector2, to_position: Vector2, terrain_registry) -> bool:
+	if not _is_position_walkable(to_position, terrain_registry):
+		return false
+	if terrain_registry == null or not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("is_walkable"):
+		return true
+	var previous_grid: Vector2i = terrain_registry.call("world_to_grid", from_position)
+	var destination_grid: Vector2i = terrain_registry.call("world_to_grid", to_position)
+	if previous_grid == destination_grid:
+		return true
+	if not terrain_registry.has_method("world_to_grid_float") or not terrain_registry.has_method("get_tile_at_grid"):
+		return false
+	var start: Vector2 = terrain_registry.call("world_to_grid_float", from_position)
+	var finish: Vector2 = terrain_registry.call("world_to_grid_float", to_position)
+	var start_axes: Array[float] = [start.x, start.y]
+	var finish_axes: Array[float] = [finish.x, finish.y]
+	var boundary_spacing: float = 1.0
+	var boundary_offset: float = 0.5
+	if terrain_registry.has_method("get_grid_topology") and terrain_registry.call("get_grid_topology") == "hex_axial_v1":
+		# Hex edges lie on half-integer lines in these three axial projections.
+		# Partition the ACTUAL segment, including endpoint offsets, rather than
+		# the line between cell centers, which can omit thin intervening cells.
+		start_axes = [start.x + 0.5 * start.y, 0.5 * (start.x - start.y), 0.5 * start.x + start.y]
+		finish_axes = [finish.x + 0.5 * finish.y, 0.5 * (finish.x - finish.y), 0.5 * finish.x + finish.y]
+		boundary_spacing = 0.5
+		boundary_offset = 0.0
+	var partitions: Array[float] = [0.0, 1.0]
+	for axis_index in range(start_axes.size()):
+		var from_axis: float = start_axes[axis_index]
+		var to_axis: float = finish_axes[axis_index]
+		if from_axis == to_axis:
+			continue
+		var first_boundary: int = floori((minf(from_axis, to_axis) - boundary_offset) / boundary_spacing) + 1
+		var boundary_end: int = ceili((maxf(from_axis, to_axis) - boundary_offset) / boundary_spacing)
+		for boundary_index in range(first_boundary, boundary_end):
+			var boundary: float = float(boundary_index) * boundary_spacing + boundary_offset
+			partitions.append((boundary - from_axis) / (to_axis - from_axis))
+	partitions.sort()
+	# Work is bounded by correction length, never by map size. Only the existing
+	# pathfinder decides walkability, height transitions and diagonal corners.
+	for index in range(1, partitions.size()):
+		if partitions[index] <= partitions[index - 1]:
+			continue
+		var fraction: float = (partitions[index - 1] + partitions[index]) * 0.5
+		var grid: Vector2i = terrain_registry.call("world_to_grid", from_position.lerp(to_position, fraction))
+		if grid != previous_grid:
+			if not _terrain_pathfinder.can_traverse_step(previous_grid, grid, terrain_registry):
+				return false
+			previous_grid = grid
+	return previous_grid == destination_grid or _terrain_pathfinder.can_traverse_step(previous_grid, destination_grid, terrain_registry)
 
 
 func _calculate_minimum_distance_between_positions(positions_by_unit_id: Dictionary) -> float:
