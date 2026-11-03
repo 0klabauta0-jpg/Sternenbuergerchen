@@ -622,7 +622,8 @@ static func _validate_unit_skills(unit: Dictionary, unit_id: String, errors: Pac
 			errors.append("skill_missing:%s:%s" % [unit_id, key])
 			continue
 		var value: float = float(skill_values.get(key, -1.0))
-		if value < MIN_SKILL_VALUE or value > 1.0:
+		# Serialized values already include traits; MIN_SKILL_VALUE bounds bases.
+		if value < 0.0 or value > 1.0:
 			errors.append("skill_out_of_range:%s:%s" % [unit_id, key])
 
 

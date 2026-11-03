@@ -25,6 +25,14 @@ Jeder Eintrag ist als `MetaUnitProfile` nutzbar und enthaelt:
 - Traits aus dem bestehenden Trait-System
 - maximal drei ableitbare Rank-Badges aus TASK_207
 
+### Basiswerte und effektive Skills
+Die Generierungsgrenzen `MIN_SKILL_VALUE`/`MAX_SKILL_VALUE` gelten fuer die
+zufaellig erzeugten Basiswerte vor Traits. Gespeicherte `skill_values` enthalten
+bereits Trait-/Profile-Math-Ergebnisse und verwenden den bestehenden
+Runtime-Skillbereich 0.0 bis 1.0 (TASK_046). Beispielsweise ergibt Pilot-Toughness
+0.36 mit `reckless` (-0.15) gueltige 0.21. Validierung und Save/Load erhalten
+diese effektiven Werte; sie werden nicht an die Basisgrenzen angehoben.
+
 ## Rollenmix
 Der Generator muss diese Startkategorien abdecken:
 - `leader`
