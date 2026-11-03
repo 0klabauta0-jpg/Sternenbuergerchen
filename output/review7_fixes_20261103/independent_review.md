@@ -76,3 +76,12 @@ Der Summaryhelfer prueft Manifestnamen und Reihenfolge, alle Isolationsflags,
 eindeutige Userpfade, Rosterwerte und einen nativen Wiederholungsstart erst nach
 Abschluss der finalen Matrix. Endzaehlen und finale Belege werden im Index
 `verification_summary.json` festgehalten.
+
+Finaler Belegaudit APPROVED: 103 Gates /100 PASS /drei identische Altfehler;
+11 neue Regressionen 699/0, gruene Gates 3588 Assertions. Alle 259 isolierten
+Userpfade eindeutig, 114 Rohfingerprints gleich. Nativer Folgelauf begann
+13,697 Sekunden nach Matrixabschluss: 39/0, echtes Pufferruecklesen und drei
+gueltige 1920x1080-PNGs mit passenden Hashes. README, Task und Status geben
+die begrenzte Abnahme wieder. Das unveraenderte Unified-Diff-Artefakt enthaelt
+formatbedingt Kontextspaces vor Originaltabs; nur fuer dieses Artefakt ist
+der Git-Whitespacecheck lokal deaktiviert.
