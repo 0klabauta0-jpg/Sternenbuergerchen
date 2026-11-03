@@ -1,0 +1,50 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-a87de465468f43baaa69e28bfde8627f
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_839 Release Firefight World Label Declutter ===
+[PASS] TASK_839 task file exists
+[PASS] Task names world-label declutter
+[PASS] Implementation status tracks TASK_839
+[PASS] Roadmap marks TASK_839 implemented
+[PASS] Contract documents TASK_839
+[PASS] TerrainMap3DView declares density mode
+[PASS] TerrainMap3DView suppresses redundant world bubbles
+[PASS] TerrainMap3DView suppresses redundant fire labels
+[PASS] TacticalController exposes TASK_839 snapshot
+[PASS] MetaLayer exposes TASK_839 snapshot
+[PASS] Primary3D reports declutter density mode
+[PASS] Primary3D reports declutter active
+[PASS] Primary3D reports TASK_839 style id
+[PASS] Primary3D suppresses redundant fire/world labels
+[PASS] Primary3D preserves critical rendered label path
+[PASS] World bubble is suppressed while HUD bubble remains
+[PASS] Normal HIT label is suppressed
+[PASS] Friendly-fire status label is not suppressed
+[PASS] Primary3D declutter snapshot stays read-only
+[PASS] MetaLayer scene instantiates
+[PASS] MetaLayer exposes first GO/firefight deep-link hook
+[PASS] MetaLayer exposes TASK_839 callable
+TASK_839 snapshot issues: [{ "id": "source_findings_polish_passes", "severity": "critical", "message": "TASK_839 builds on a passing TASK_838 real-window findings polish snapshot." }, { "id": "declutter_gate_passes", "severity": "critical", "message": "Primary3D should reduce redundant world labels during the release firefight readout." }]
+TASK_839 tactical failed checks: ["source_findings_polish_passes"]
+[PASS] Meta TASK_839 schema is stable
+[PASS] Meta TASK_839 id is stable
+ERROR: [FAIL] Meta TASK_839 gate passes
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_839_release_firefight_world_label_declutter.gd:225)
+       [1] _test_release_firefight_declutter_snapshot (res://scripts/tests/task_839_release_firefight_world_label_declutter.gd:118)
+       [2] _wait_frames (res://scripts/tests/task_839_release_firefight_world_label_declutter.gd:210)
+ERROR: [FAIL] Tactical TASK_839 gate passes
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_839_release_firefight_world_label_declutter.gd:225)
+       [1] _test_release_firefight_declutter_snapshot (res://scripts/tests/task_839_release_firefight_world_label_declutter.gd:119)
+       [2] _wait_frames (res://scripts/tests/task_839_release_firefight_world_label_declutter.gd:210)
+[PASS] Tactical snapshot reports TASK_839 style id
+[PASS] Tactical snapshot reports declutter density mode
+[PASS] Tactical snapshot records suppressed labels
+[PASS] Meta TASK_839 snapshot is read-only
+[PASS] Tactical TASK_839 snapshot is read-only
+=== RESULTS: 29 passed, 2 failed ===
+TASK_839_release_firefight_world_label_declutter: FAILED

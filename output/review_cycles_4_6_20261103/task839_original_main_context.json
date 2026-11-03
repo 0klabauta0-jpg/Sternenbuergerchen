@@ -1,0 +1,31 @@
+{
+  "base_commit": "21bacf0f2f3268cf058f1c5e52381fce4e4b1792",
+  "files": {
+    "scripts/meta/start_roster_generator.gd": {
+      "fixed_sha256": "dfbe300b24b07171cf883de6e60416eb7a2fc0db6f91b2bdf154dc05fbb9639f",
+      "baseline_sha256": "abf6141bb3bded79362368f87be10b7d09c808a3843bb34f78108175b71a306f"
+    },
+    "scripts/meta/player_roster_store.gd": {
+      "fixed_sha256": "d232a234d1b11c818e1726481326913a8e3d8d074e0561498ac287357a767bce",
+      "baseline_sha256": "68045a2a6e9cbe496cbe0991cfd2937e101341f59777ccf9fb21e0d83dc25555"
+    },
+    "scripts/ui/main_menu_screen.gd": {
+      "fixed_sha256": "bae44a67b593c6c908052ccf9d228014635ffed18ad3cbfba53652223958c150",
+      "baseline_sha256": "77211508aab83e7bc7ef66ffcf65bed33de11bc13b43c1b1eb173ed6d7c3694c"
+    },
+    "scripts/core/simulation_root.gd": {
+      "fixed_sha256": "7ca67c068f88c4ca7ddc6fb49baeb6d75a49f1fee174e472dc9c3056034cbd02",
+      "baseline_sha256": "e4e74077b8ca4e061dd11c32dd99f722d3051ad5d9533bfac0d904cd2b5d7aa8"
+    },
+    "scripts/terrain/terrain_registry.gd": {
+      "fixed_sha256": "d00e7d84c363cd9585cebf37c851d1d11e31359671fab2ac9685e6cccd9bb428",
+      "baseline_sha256": "5499fc7b48554cbabae1834d018983b059932c73ef1a26f189ebe68e11efee64"
+    },
+    "scripts/terrain/terrain_map_3d_view.gd": {
+      "fixed_sha256": "3317825479d1fb4e3b0856de961399df7414ab3454e25f01d83ae632f2463f5a",
+      "baseline_sha256": "a42a3714c5632537e892539c26bfe76fe1cab48520144dba0a8d2577172db97f"
+    }
+  },
+  "runner_exit_code": 1,
+  "fixed_source_restored": true
+}

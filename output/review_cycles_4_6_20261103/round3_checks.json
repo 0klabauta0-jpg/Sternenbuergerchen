@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "review46_20261103_unit_badge_verifier",
+      "script": "res://scripts/tests/review46_20261103_unit_badge_verifier.gd",
+      "success_marker": "REVIEW46_UNIT_BADGE_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "task_1188_unit_proxy_dirty_sync",
+      "script": "res://scripts/tests/task_1188_unit_proxy_dirty_sync.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_839_release_firefight_world_label_declutter",
+      "script": "res://scripts/tests/task_839_release_firefight_world_label_declutter.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_842_release_firefight_insertion_residue_declutter",
+      "script": "res://scripts/tests/task_842_release_firefight_insertion_residue_declutter.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_459_fireteam_engage_orientation_enemy_proxy_fix",
+      "script": "res://scripts/tests/task_459_fireteam_engage_orientation_enemy_proxy_fix.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    }
+  ]
+}

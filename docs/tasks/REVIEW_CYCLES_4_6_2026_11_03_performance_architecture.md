@@ -29,7 +29,8 @@ Vorhandene ungetrackte Arbeiten bleiben unangetastet.
 - [ ] Alle Godot-Laeufe ausschliesslich sequenziell ueber
   scripts/tests/run_review2_isolated.py mit frischen Nutzerdaten und Pfadguard.
 - [ ] Originalroster SHA256, Laenge und Schreibzeit vor/nach jedem Lauf gleich.
-- [ ] Abschlussmatrix und unabhaengiges Gesamt-Nachreview bestanden.
+- [ ] Abschlussmatrix ohne neue Regressionen und unabhaengiges Gesamt-Nachreview;
+  etwaige Altfehler separat am Original-Main nachweisen und offen ausweisen.
 - [ ] Nur Taskdateien committed, Main konfliktfrei integriert und Push verifiziert.
 
 ## Betroffene Dateien
@@ -75,8 +76,9 @@ unveraenderter Identity-/Count-/Revision-Invalidierung, Legacy-Fallback erhalten
 Owning Report: docs/performance/navigation_pathfinding_los_profile_report.md.
 
 ### Runde 3: Status-Badge-Invalidierung
-Review untersucht fehlende Badge-Inputs im gecachten Unit-Visual-Payload.
-Erst realen normalen Sync-Pfad reproduzieren, dann kleinen Cachefix festlegen.
+Unvollstaendiger Waffen-/Vital-Payload unterdrueckt eigenstaendige Badge-Updates.
+Eigene abgeleitete Signatur erfasst Text/Farbe/Stil, Declutter und Sichtbarkeit,
+ohne schwere Aim-/Vitalarbeit bei reinen Badge-Aenderungen auszufuehren.
 
 ## Ergebnis Runde 1
 - Effektiv-Skill-Domain RED 15/13 -> GREEN 34/0; identische Seeds und Werte
@@ -102,3 +104,26 @@ Erst realen normalen Sync-Pfad reproduzieren, dann kleinen Cachefix festlegen.
   Unabhaengiger Actual-Diff-/Evidence-Nachreview APPROVED.
 - Vier Getterzeilen und eine Consumerzeile, keine neue Cache-Wahrheit und
   keine FPS-/GPU-Aussage. Nutzerdaten weiter isoliert/Roster unveraendert.
+
+## Ergebnis Runde 3
+- Nach Runde 2 erneut korrekt RED 25/11 -> GREEN 36/0: normale Frame-Updates
+  fuer Kontakt/Command/Status, Overwatch-Farbe, echten Respawn-Timer, Declutter
+  und Wiederanzeigen; bestehende Proxy-/Labelidentitaet und explizites Redraw.
+- Eigenstaendige Badge-Signatur aus aktuellen Anzeigeausgaben, rein lesend;
+  schwere Aim-/Vital-Signatur bleibt getrennt. Unabhaengige Slice- und
+  Gesamt-Code-Nachreviews APPROVED.
+- Fuenf gezielte Gates: neue Regression, TASK1188, TASK842 und TASK459 gruen.
+  TASK839 29/2: vorgelagertes TASK838-Gesamtgate source_findings_polish_passes.
+  Exakt Original-Main-Bytes aller sechs geaenderten Produktdateien temporaer
+  eingesetzt: identisches 29/2 und identische Fehlerlabels. Danach alle sechs
+  Fixbytes per finally/SHA wiederhergestellt. Keine Assertions geaendert.
+  Ursache unterhalb von TASK838 ist damit nicht geklaert; keine Verknuepfung
+  zum bereits bekannten TASK348 behaupten. In der gemeinsamen 85er-Matrix
+  bleibt der Altfehler enthalten und wird explizit ausgewiesen.
+- TASK1188, derselbe 28-Unit-/60s-Headless-Workload: p99 3370 -> 4904 us,
+  jeweils 8696 Frames und 31/31 Assertions; beide unter 8000 us. Das einzelne
+  Paar zeigt Mehraufwand, keine Beschleunigung oder gesicherte Kausal-/Streuung.
+  Keine native Bild-, FPS- oder GPU-Abnahme.
+- Erstes Badge-Fixture nutzte `idle`, das bei `assigned` zu anderer Postur
+  normalisierte. Feste erkannte `crouch`-/`lowered`-Postur isoliert reine
+  Statuswechsel; keine Anzeige-/Operations-Erwartung abgeschwaecht.

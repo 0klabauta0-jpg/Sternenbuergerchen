@@ -20,6 +20,14 @@ eine reine Leseschicht und erzeugt keine Gameplay-Wahrheit.
 
 ## Architekturgrenzen
 
+### Review 2026-11-03: unabhaengige Badge-Revision
+Badge-Text, Farbe, Stil, Declutter-Unterdrueckung und Proxy-Sichtbarkeit werden
+unabhaengig vom Waffen-/Vital-Payload gecacht. Kontakt, Runtime-Command/Status,
+Overwatch-Shot-Readiness und Respawnsekunden muessen im normalen naechsten
+Visual-Sync den vorhandenen Badge aktualisieren und ein Viewport-Redraw anfordern.
+Reine Badge-Revisionen loesen weder Aim-/Skeleton-/Vitalarbeit noch Modell- oder
+Label-Neubauten aus. Verifier: `review46_20261103_unit_badge_verifier.gd`.
+
 - `TerrainMap3DView` liest Unit-, Runtime-, FOW- und Order-Payloads. Es
   mutiert keine Commands, Units, Combat- oder Missionszustand.
 - Der Runtime-Cache gehoert nur zur Visualinstanz und wird beim Proxy-Abbau

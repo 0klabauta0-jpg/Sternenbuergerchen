@@ -11301,8 +11301,12 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				changed = true
 			if _update_unit_vital_visual(proxy, unit, proxy_runtime.get("model_root", null) as Node3D):
 				changed = true
+		var badge_signature: String = _build_unit_status_badge_signature(proxy, unit)
+		if String(proxy.get_meta("unit_status_badge_signature", "")) != badge_signature:
+			proxy.set_meta("unit_status_badge_signature", badge_signature)
 			if _update_unit_status_badge(proxy, unit, proxy_runtime.get("status_badge", null) as Label3D, unit_id):
 				unit_status_badge_count += 1
+			changed = true
 		else:
 			var cached_badge: Label3D = proxy_runtime.get("status_badge", null) as Label3D
 			if cached_badge != null and is_instance_valid(cached_badge) and cached_badge.visible:
@@ -11633,6 +11637,17 @@ func _find_unit_model_root(node: Node) -> Node3D:
 		if found != null:
 			return found
 	return null
+
+
+func _build_unit_status_badge_signature(proxy: Node3D, unit: Node) -> String:
+	var badge_text: String = _get_unit_status_badge_text(unit)
+	return "%s|%s|%s|%s|%s" % [
+		badge_text,
+		_get_unit_status_badge_color(unit).to_html(true),
+		_get_unit_status_badge_style(unit, badge_text),
+		str(_should_suppress_release_firefight_unit_badge(badge_text)),
+		str(proxy.visible),
+	]
 
 
 func _update_unit_status_badge(proxy: Node3D, unit: Node, cached_label: Label3D = null, unit_id: String = "") -> bool:
