@@ -1,0 +1,12 @@
+{
+  "schema": "sternenbuergerchen.review_cycles_main_smoke.v1",
+  "verified_utc": "2026-11-03T00:02:35.922411+00:00",
+  "checked_branch": "main",
+  "checked_commit": "1aefa11375e4d475e21df3c8194d5848c2d5c963",
+  "source_tested_in_full_matrix": "75f2e6ef399c5b27f92202650aea7ede0cdf45a3",
+  "source_fingerprints_match": true,
+  "strict_gates": 6,
+  "numeric_assertions": 101,
+  "report": "output/review_cycles_20261103/main_smoke/20261103T000056Z-7126adfa/report.json",
+  "roster_unchanged": true
+}

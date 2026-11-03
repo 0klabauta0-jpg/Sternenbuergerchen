@@ -52,7 +52,7 @@ bleibt bis zu einem passenden bestaetigten Fix separat sichtbar.
 - [x] Runde 2: erneuter Review des neuen Stands, Fixes und Regressionen.
 - [x] Runde 3: erneuter Review, Fixes und gezielte Regressionen.
 - [x] Unabhaengiger Abschlussreview und gemeinsame Abschlussmatrix.
-- [ ] Geprueften Stand nach Main uebernehmen, isolierter Smoke, Commit/Push pruefen.
+- [x] Geprueften Stand nach Main uebernehmen, isolierter Smoke, Commit/Push pruefen.
 
 ## Bestaetigte Ursachen / Testziele
 ### Runde 1 - Fireteam-Autoritaet
@@ -150,3 +150,12 @@ Nachreview der TASK570-Fixture APPROVED, keine wichtigen offenen Befunde.
 Index: `output/review_cycles_20261103/verification_summary.json`.
 Rohreport: `output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/report.json`.
 Nach diesem Teststand werden ausschliesslich Dokumentation und Evidence ergaenzt.
+
+## Main-Abschluss
+Konfliktfreier Fast-forward von `8eaeadd27e` nach dem gruenen Gesamtlauf. Auf
+Main `1aefa11375e4d475e21df3c8194d5848c2d5c963` die fuenf neuen Regressionen
+plus Canary erneut isoliert bestanden: 6/6 Gates und 101 Assertions. Alle 14
+Quell-/Harness-/Projektfingerprints identisch mit dem 69-Gate-Stand. Insgesamt
+194 protokollierte isolierte Checklaeufe; Rosterbytes, Laenge und Schreibzeit
+weiter unveraendert. Abschliessende Aenderungen bleiben Doku/Evidence; Taskbranch
+und Main normal pushen und lokale/Remote-IDs vergleichen.

@@ -649,7 +649,7 @@
   "isolation": {
     "all_recorded_checks_verified": true,
     "all_recorded_user_dirs_unique": true,
-    "recorded_check_runs": 188,
+    "recorded_check_runs": 194,
     "source_project_unchanged": true
   },
   "initial_final_suite": {
@@ -695,27 +695,18 @@
     "round3_heatmap_fow": "APPROVED",
     "whole_diff": "APPROVED, no important findings",
     "task570_fixture_followup": "APPROVED,54/54 original and fixed source verified",
-    "final_evidence": "APPROVED;69 distinct gates,1990/0 assertions,14 fingerprints and188 isolated check runs independently verified. Operation keys corrected and rechecked."
+    "final_evidence": "APPROVED;69 distinct gates,1990/0 assertions,14 fingerprints and188 isolated check runs independently verified. Operation keys corrected and rechecked.",
+    "main_smoke_evidence": "APPROVED;6 strict gates/101 assertions,14 matching fingerprints and194 unique guarded user directories independently verified; roster unchanged."
   },
   "main_integration": {
-    "status": "Awaiting verified fast-forward and isolated post-merge smoke",
+    "status": "Fast-forward integrated with identical verified code and passing isolated post-merge smoke",
     "old_main": "8eaeadd27e92d68539550058a4795c3ba626dcdc",
-    "expected_source_sha256": {
-      "project.godot": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
-      "scripts/multiplayer/multiplayer_command_contract.gd": "6e61a6bbcf8e26d5f8e6ba3426196b45a47b97da936ef385d829795f21da8e63",
-      "scripts/terrain/terrain_map_3d_view.gd": "a42a3714c5632537e892539c26bfe76fe1cab48520144dba0a8d2577172db97f",
-      "scripts/tests/mission_combat_loop_driver.gd": "2ccc3c109cd2ff78a991a30f84ed920af5fc89c0eefa12ad02a544d391a48b17",
-      "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
-      "scripts/tests/review_cycles_20261103_area_selection_verifier.gd": "a0bf7f65da6b1070a65fd946dfa5ec50aed9599e9ceac87ef9bc50a889219d3c",
-      "scripts/tests/review_cycles_20261103_checks.json": "5a55daa40927427746b05461e1392b1424b6c5738915e0dd8bc8b1f160b4ef5a",
-      "scripts/tests/review_cycles_20261103_cooldown_cadence_verifier.gd": "54ef29070a7f6e10263075f74d20d50b2b6d74f3fb7ccca95e493bfbf7c84086",
-      "scripts/tests/review_cycles_20261103_density_fow_refresh_verifier.gd": "c316e7d1b11da020f4673e276e7a646325a5ebaee924e8072730ecf88213578d",
-      "scripts/tests/review_cycles_20261103_fireteam_authority_verifier.gd": "2d209c0e5499f0feaec70570e58f07788de7071255e4a929deded5f36c4a2112",
-      "scripts/tests/review_cycles_20261103_heatmap_lifecycle_verifier.gd": "2f5582e5fa8863b6437b87fdf5d66c49efd42ae529a3d586b58fee1f28c735c3",
-      "scripts/tests/run_review2_isolated.py": "0c7d37139826583ca304535dbcc75cc281ac99b1bb3ee71847e30f81eab24f2f",
-      "scripts/tests/task_377_contact_density_heat_map_layer.gd": "f62502c9fa511bb191353dc469476bf0d748930555ca29767c27d022042f4e68",
-      "scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd": "c77bd7fa189ff5c6a023b7a3273900bba3faabc3c85e1028f515de0e5149dc14"
-    }
+    "checked_main_commit": "1aefa11375e4d475e21df3c8194d5848c2d5c963",
+    "post_merge_smoke_report": "output/review_cycles_20261103/main_smoke/20261103T000056Z-7126adfa/report.json",
+    "post_merge_smoke_gates": 6,
+    "post_merge_smoke_numeric_assertions": 101,
+    "source_fingerprints_match": true,
+    "final_documentation_only_commit_may_follow": true
   },
   "limits": [
     "Scoped headless state/operation regression evidence; no native FPS/GPU or general release acceptance.",
@@ -744,6 +735,14 @@
       "summary": {
         "selected": 1,
         "passed": 1,
+        "failed": 0
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/main_smoke/20261103T000056Z-7126adfa/report.json",
+      "summary": {
+        "selected": 6,
+        "passed": 6,
         "failed": 0
       }
     },

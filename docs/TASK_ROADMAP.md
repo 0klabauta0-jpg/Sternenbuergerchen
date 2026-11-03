@@ -6,8 +6,8 @@
 - Gemeinsamer Lauf `75f2e6ef3`: 69/69 strenge Gates, 1990/1990 Assertions.
   Tests isoliert, Originalroster einschliesslich Schreibzeit unveraendert.
 - Task `docs/tasks/REVIEW_CYCLES_2026_11_03_performance_architecture.md`, Index
-  `output/review_cycles_20261103/verification_summary.json`. Geprueften Stand
-  wie zuvor per Fast-forward nach Main uebernehmen und dort isoliert nachpruefen.
+  `output/review_cycles_20261103/verification_summary.json`. Main per Fast-forward
+  uebernommen; dort Smoke 6/6 Gates / 101 Assertions bei identischen Quellhashes.
 - Keine allgemeine Release-/FPS-Abnahme; bestehende Release-Gates behalten ihren
   getrennten Status. Urspruengliche Fehl-/Baselineberichte bleiben erhalten.
 

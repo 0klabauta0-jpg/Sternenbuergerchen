@@ -20,8 +20,9 @@
 - Alle Tests mit frischen Nutzerdaten und synchronem Pfadguard; Originalroster
   in Bytes, Laenge und Schreibzeit unveraendert. 14 Quell-/Harness-/Projekt-
   fingerprints fixiert; keine native FPS-/GPU-/Release-Abnahme.
-- Gepruefte Uebernahme nach Main per Fast-forward und anschliessender isolierter
-  Regression-Smoke sind Abschluss des wiederholten bisherigen Arbeitsablaufs.
+- Main per Fast-forward uebernommen. Auf `1aefa1137` bestaetigt ein weiterer
+  isolierter Smoke 6/6 Gates / 101 Assertions; alle 14 Quellfingerprints stimmen
+  mit dem vollstaendig geprueften Stand ueberein. Danach nur Doku/Evidence ergaenzt.
 - Ergebnisindex `output/review_cycles_20261103/verification_summary.json`,
   Manifest `scripts/tests/review_cycles_20261103_checks.json`.
 

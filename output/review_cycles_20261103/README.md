@@ -28,9 +28,14 @@ Rohreport: `final_verified_suite/20261102T235303Z-b661a934/report.json`.
 Maschinenlesbarer Gesamtindex: `verification_summary.json`; Sourcefingerprints
 und Testcommit: `final_source_snapshot.json`.
 
-Die anschliessende Main-Uebernahme verwendet denselben geprueften Code per
-Fast-forward; auf Main werden die fuenf neuen Regressionen und der Canary erneut
-isoliert ausgefuehrt. Nach den Tests nur Doku-/Evidence-Commits.
+Main ist per Fast-forward uebernommen. Auf `1aefa1137` bestehen die fuenf neuen
+Regressionen und der Canary erneut isoliert: **6/6 Gates, 101 Assertions**.
+Alle 14 Sourcefingerprints sind identisch mit dem 69-Gate-Stand; insgesamt 194
+Checklaeufe mit frischen eindeutigen Nutzerdaten und unveraendertem Roster.
+Dieser wiederholte Smoke erhoeht die Zahl unterschiedlicher Gates nicht.
+Nachweise: `main_smoke_context.json` und
+`main_smoke/20261103T000056Z-7126adfa/report.json`. Nach den Tests nur
+Doku-/Evidence-Commits.
 
 ## Messung und Grenzen
 
