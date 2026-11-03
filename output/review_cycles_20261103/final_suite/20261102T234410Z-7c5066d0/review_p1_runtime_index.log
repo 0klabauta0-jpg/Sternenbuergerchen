@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-f76f43f635444694ab040d240cae0ad7
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Review 2026-11-02 P1 runtime index ===
+PASS: Initial identity resolves the real runtime unit
+PASS: Identity config makes the new ID resolve on the same node
+PASS: Identity config removes the old ID lookup
+PASS: ID mutation invalidates one lazy rebuild
+PASS: Team config removes the node from friendlies
+PASS: Team config places the node in enemies
+PASS: Enemy assignment leaves no stale friendly Fireteam entry
+PASS: Fireteam setter removes the old Fireteam entry
+PASS: Fireteam setter exposes the normalized new Fireteam
+PASS: Identity config also invalidates Fireteam assignment
+PASS: Exported identity property changes refresh ID lookup
+PASS: Unused slots leave both active team lookups
+PASS: An empty unit identity is excluded
+PASS: An existing empty-ID slot is observed when its identity becomes valid
+PASS: Restored slot retains the current Fireteam assignment
+PASS: Unchanged identity, display-only edits and repeated lookups remain scan-free
+PASS: Membership fixture indexes the first root
+PASS: Removing the slot discards its cached identity
+PASS: Detached unit changes do not invalidate the previous mission
+PASS: Rebinding observes the slot under its new root
+PASS: Root rebinding disconnects identity watchers from the old mission
+PASS: Rebinding back reads the current assignment
+PASS: Freed slots are removed without invalid object reads
+PASS: Real MetaLayerFlow initializes MissionSetup
+PASS: Live mission starts with three Blue members
+PASS: Late payload reuses the same active mission and root membership
+PASS: Late payload reuses all six existing runtime slot nodes
+PASS: MetaLayerFlow delivers the six-unit selection to live MissionSetup
+LIVE_SELECTION root_children=45 friendly=6 blue=3 gold=3
+PASS: Live index immediately includes newly activated existing slots
+PASS: Live index immediately exposes the three new Gold members
+PASS: Live controller lookups remain scan-free after selection settles
+=== RESULTS: 31 passed, 0 failed ===

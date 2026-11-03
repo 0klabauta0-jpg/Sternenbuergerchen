@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "review2_20261102_isolation_canary_verifier",
+      "script": "res://scripts/tests/review2_20261102_isolation_canary_verifier.gd",
+      "success_marker": "REVIEW2_ISOLATION_CANARY_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_fireteam_authority",
+      "script": "res://scripts/tests/review_cycles_20261103_fireteam_authority_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_FIRETEAM_AUTHORITY_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_cooldown",
+      "script": "res://scripts/tests/review_cycles_20261103_cooldown_cadence_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_COOLDOWN_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_area_selection",
+      "script": "res://scripts/tests/review_cycles_20261103_area_selection_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_AREA_SELECTION_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_heatmap_lifecycle",
+      "script": "res://scripts/tests/review_cycles_20261103_heatmap_lifecycle_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_HEATMAP_LIFECYCLE_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "cycle_density_fow_refresh",
+      "script": "res://scripts/tests/review_cycles_20261103_density_fow_refresh_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_DENSITY_FOW_REFRESH_RESULT",
+      "timeout": 180
+    }
+  ]
+}

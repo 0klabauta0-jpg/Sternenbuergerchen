@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-4fb5c527351d4f6483716bf865e9371f
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_501 Integrated Movement Command Lifecycle Hardening ===
+PASS: Unregistered move command is drained and not requeued
+PASS: Unregistered move command increments the unit_not_registered discard count
+PASS: Discard snapshot identifies the missing unit
+PASS: Discard snapshot documents that the stale command will not requeue
+PASS: Stale tokenized move command does not move the unit
+PASS: Stale tokenized move command is drained and not requeued
+PASS: Stale tokenized move command increments the stale discard count
+PASS: Discard snapshot keeps the rejected command token
+PASS: Valid move command still reaches the target
+PASS: Valid move command does not touch discard diagnostics
+=== RESULTS: 10 passed, 0 failed ===
+TASK_501: ALL PASSED

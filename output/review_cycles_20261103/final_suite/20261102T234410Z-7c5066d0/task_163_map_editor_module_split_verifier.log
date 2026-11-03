@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-715b70f3b6b4487e8398e8701142ee8d
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_163 Map Editor Module Split Verifier ===
+PASS: Primary view adapter reuses an existing Primary3DView
+PASS: Primary view adapter hides legacy 2D map surfaces
+PASS: Primary view adapter forwards map render refresh
+PASS: Primary view adapter forwards selection fallback
+PASS: Primary view adapter owns 2.5D picking fallback
+PASS: Height tool builds raise patch with selected edge
+PASS: Height tool clears edge when lowered to ground
+PASS: Height tool builds set-height patch
+PASS: Patrol tool adds waypoint
+PASS: Patrol tool moves waypoint
+PASS: Patrol tool finds nearest waypoint
+PASS: Patrol tool removes waypoint
+PASS: Patrol tool keeps TerrainMapData patrol path contract
+PASS: Marker tool finds marker by world position
+PASS: Marker tool rejects occupied marker tile
+PASS: Marker tool accepts free marker tile
+PASS: Marker tool finds first free marker tile
+=== RESULTS: 17 passed, 0 failed ===
+ALL TESTS PASSED

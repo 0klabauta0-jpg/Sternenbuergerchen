@@ -1,0 +1,48 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-ce4b09362a8942c490e0859dda932ac9
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Review 2026-11-02 P2 fallback completion ===
+PASS: avoidance=false stationary=true reaches the hand-checked reachable fallback
+PASS: avoidance=false stationary=true never enters the separating blocker
+PASS: avoidance=false stationary=true drains its command at fallback arrival
+PASS: avoidance=false stationary=true uses one failed primary query and one fallback query
+PASS: avoidance=false stationary=true has no idle replans after terminal arrival
+PASS: avoidance=false stationary=false reaches the hand-checked reachable fallback
+PASS: avoidance=false stationary=false never enters the separating blocker
+PASS: avoidance=false stationary=false drains its command at fallback arrival
+PASS: avoidance=false stationary=false uses one failed primary query and one fallback query
+PASS: avoidance=false stationary=false has no idle replans after terminal arrival
+PASS: avoidance=false reaches the stable walkable replacement of a blocked target
+PASS: avoidance=false completes the blocked-target route without an extra path query
+PASS: avoidance=false blocked-target completion stays idle
+PASS: avoidance=false ordinary movement starts and remains pending
+PASS: avoidance=false ongoing movement reuses its full cached path
+PASS: avoidance=false ordinary movement reaches the original target and drains
+PASS: avoidance=false cached ordinary route needs no additional query
+PASS: avoidance=false terrain-change fixture is still approaching its fallback
+PASS: avoidance=false actual terrain revision replans a still-pending fallback
+PASS: avoidance=false opened terrain lets the pending order reach its original target
+PASS: avoidance=false replacement route is cached and completion stays idle
+PASS: avoidance=true stationary=true reaches the hand-checked reachable fallback
+PASS: avoidance=true stationary=true never enters the separating blocker
+PASS: avoidance=true stationary=true drains its command at fallback arrival
+PASS: avoidance=true stationary=true uses one failed primary query and one fallback query
+PASS: avoidance=true stationary=true has no idle replans after terminal arrival
+PASS: avoidance=true stationary=false reaches the hand-checked reachable fallback
+PASS: avoidance=true stationary=false never enters the separating blocker
+PASS: avoidance=true stationary=false drains its command at fallback arrival
+PASS: avoidance=true stationary=false uses one failed primary query and one fallback query
+PASS: avoidance=true stationary=false has no idle replans after terminal arrival
+PASS: avoidance=true reaches the stable walkable replacement of a blocked target
+PASS: avoidance=true completes the blocked-target route without an extra path query
+PASS: avoidance=true blocked-target completion stays idle
+PASS: avoidance=true ordinary movement starts and remains pending
+PASS: avoidance=true ongoing movement reuses its full cached path
+PASS: avoidance=true ordinary movement reaches the original target and drains
+PASS: avoidance=true cached ordinary route needs no additional query
+PASS: avoidance=true terrain-change fixture is still approaching its fallback
+PASS: avoidance=true actual terrain revision replans a still-pending fallback
+PASS: avoidance=true opened terrain lets the pending order reach its original target
+PASS: avoidance=true replacement route is cached and completion stays idle
+=== RESULTS: 42 passed, 0 failed ===

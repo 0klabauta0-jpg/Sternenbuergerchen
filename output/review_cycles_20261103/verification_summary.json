@@ -1,0 +1,911 @@
+{
+  "schema": "sternenbuergerchen.performance_architecture_cycles.v1",
+  "verified_utc": "2026-11-02T23:58:43.214243+00:00",
+  "base_main": "8eaeadd27e92d68539550058a4795c3ba626dcdc",
+  "tested_commit": "75f2e6ef399c5b27f92202650aea7ede0cdf45a3",
+  "tested_branch": "task/performance-architecture-cycles-20261103",
+  "engine": "Godot 4.6.2.stable.official.71f334935, headless",
+  "result": {
+    "completed_review_fix_rounds": 3,
+    "fixed_findings": 5,
+    "distinct_gates": 69,
+    "strict_passed_gates": 69,
+    "numeric_assertions_passed": 1990,
+    "numeric_assertions_failed": 0,
+    "new_regression_gates": 5,
+    "new_regression_assertions": 101,
+    "canary_gate_without_numeric_assertions": 1,
+    "single_sequential_all_green_run": true
+  },
+  "final_report": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/report.json",
+  "checks": [
+    {
+      "name": "review_p1_movement",
+      "passed": 20,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review_p1_movement.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review_p1_navigation",
+      "passed": 72,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review_p1_navigation.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review_p1_runtime_index",
+      "passed": 31,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review_p1_runtime_index.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review_p2_hex_budget",
+      "passed": 26,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review_p2_hex_budget.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review_p2_fallback",
+      "passed": 42,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review_p2_fallback.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review_p2_dropship_hud",
+      "passed": 27,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review_p2_dropship_hud.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review_p2_vital_order",
+      "passed": 21,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review_p2_vital_order.log",
+      "strict_pass": true
+    },
+    {
+      "name": "combat_authority162",
+      "passed": 23,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/combat_authority162.log",
+      "strict_pass": true
+    },
+    {
+      "name": "network_authority166",
+      "passed": 15,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/network_authority166.log",
+      "strict_pass": true
+    },
+    {
+      "name": "snapshot168",
+      "passed": 20,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/snapshot168.log",
+      "strict_pass": true
+    },
+    {
+      "name": "command_authority1186",
+      "passed": 8,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/command_authority1186.log",
+      "strict_pass": true
+    },
+    {
+      "name": "movement_lifecycle501",
+      "passed": 10,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/movement_lifecycle501.log",
+      "strict_pass": true
+    },
+    {
+      "name": "navigation125",
+      "passed": 64,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/navigation125.log",
+      "strict_pass": true
+    },
+    {
+      "name": "navigation127",
+      "passed": 13,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/navigation127.log",
+      "strict_pass": true
+    },
+    {
+      "name": "requeue1199",
+      "passed": 18,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/requeue1199.log",
+      "strict_pass": true
+    },
+    {
+      "name": "path_recompute_under_fire",
+      "passed": 4,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/path_recompute_under_fire.log",
+      "strict_pass": true
+    },
+    {
+      "name": "avoidance475",
+      "passed": 17,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/avoidance475.log",
+      "strict_pass": true
+    },
+    {
+      "name": "mission_index1190",
+      "passed": 16,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/mission_index1190.log",
+      "strict_pass": true
+    },
+    {
+      "name": "hud_light1152",
+      "passed": 18,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/hud_light1152.log",
+      "strict_pass": true
+    },
+    {
+      "name": "command_readability1157",
+      "passed": 35,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/command_readability1157.log",
+      "strict_pass": true
+    },
+    {
+      "name": "incremental_hpa412",
+      "passed": 27,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/incremental_hpa412.log",
+      "strict_pass": true
+    },
+    {
+      "name": "doors692",
+      "passed": 34,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/doors692.log",
+      "strict_pass": true
+    },
+    {
+      "name": "hex_foundation",
+      "passed": 41,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/hex_foundation.log",
+      "strict_pass": true
+    },
+    {
+      "name": "hex_movement",
+      "passed": 25,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/hex_movement.log",
+      "strict_pass": true
+    },
+    {
+      "name": "two_peer_transport1083",
+      "passed": 24,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/two_peer_transport1083.log",
+      "strict_pass": true
+    },
+    {
+      "name": "snapshot_payload221",
+      "passed": 63,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/snapshot_payload221.log",
+      "strict_pass": true
+    },
+    {
+      "name": "interaction_payload1099",
+      "passed": 38,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/interaction_payload1099.log",
+      "strict_pass": true
+    },
+    {
+      "name": "interaction_jitter1100",
+      "passed": 31,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/interaction_jitter1100.log",
+      "strict_pass": true
+    },
+    {
+      "name": "dropship_pending1114",
+      "passed": 13,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/dropship_pending1114.log",
+      "strict_pass": true
+    },
+    {
+      "name": "dropship_truth503",
+      "passed": 10,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/dropship_truth503.log",
+      "strict_pass": true
+    },
+    {
+      "name": "dropship_ux397",
+      "passed": 12,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/dropship_ux397.log",
+      "strict_pass": true
+    },
+    {
+      "name": "dropship_multi_cards",
+      "passed": 61,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/dropship_multi_cards.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review2_20261102_isolation_canary_verifier",
+      "passed": 0,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review2_20261102_isolation_canary_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review2_20261102_p1_hidden_mission_verifier",
+      "passed": 60,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review2_20261102_p1_hidden_mission_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review2_20261102_p2_height_lookup_verifier",
+      "passed": 9,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review2_20261102_p2_height_lookup_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review2_20261102_p2_editor_picking_verifier",
+      "passed": 50,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review2_20261102_p2_editor_picking_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review2_20261102_p2_spacing_verifier",
+      "passed": 19,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review2_20261102_p2_spacing_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review2_20261102_p2_contact_observers_verifier",
+      "passed": 22,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review2_20261102_p2_contact_observers_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review2_20261102_p2_contact_relays_verifier",
+      "passed": 28,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review2_20261102_p2_contact_relays_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "review2_20261102_p2_chunk_jitter_verifier",
+      "passed": 14,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/review2_20261102_p2_chunk_jitter_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_096_recovery_verifier",
+      "passed": 19,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_096_recovery_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "bugfix_release_singleplayer_normal_click_homebase_guard",
+      "passed": 40,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/bugfix_release_singleplayer_normal_click_homebase_guard.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_1185_tactical_input_ownership",
+      "passed": 116,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_1185_tactical_input_ownership.log",
+      "strict_pass": true
+    },
+    {
+      "name": "frontier_hex_render_verifier",
+      "passed": 33,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/frontier_hex_render_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_292_editor_hill_cliff_grid_depth_repair",
+      "passed": 17,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_292_editor_hill_cliff_grid_depth_repair.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_295_map_editor_paint_toolbar_tools_polish",
+      "passed": 34,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_295_map_editor_paint_toolbar_tools_polish.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_229_map_editor_usability_authoring_pass",
+      "passed": 57,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_229_map_editor_usability_authoring_pass.log",
+      "strict_pass": true
+    },
+    {
+      "name": "editor_height_edge_surface_anchor_verifier",
+      "passed": 25,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/editor_height_edge_surface_anchor_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_183_editor_hill_authoring_verifier",
+      "passed": 68,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_183_editor_hill_authoring_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_163_map_editor_module_split_verifier",
+      "passed": 17,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_163_map_editor_module_split_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_112_verifier",
+      "passed": 14,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_112_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_187_npc_minimum_spacing_and_multiplayer_authority",
+      "passed": 16,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_187_npc_minimum_spacing_and_multiplayer_authority.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_130_verifier",
+      "passed": 9,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_130_verifier.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_510_contact_report_upgrade",
+      "passed": 23,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_510_contact_report_upgrade.log",
+      "strict_pass": true
+    },
+    {
+      "name": "task_218_simulation_combat_ai_tick_budget_pass",
+      "passed": 81,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/task_218_simulation_combat_ai_tick_budget_pass.log",
+      "strict_pass": true
+    },
+    {
+      "name": "cycle_fireteam_authority",
+      "passed": 22,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/cycle_fireteam_authority.log",
+      "strict_pass": true
+    },
+    {
+      "name": "cycle_cooldown",
+      "passed": 19,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/cycle_cooldown.log",
+      "strict_pass": true
+    },
+    {
+      "name": "cycle_area_selection",
+      "passed": 18,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/cycle_area_selection.log",
+      "strict_pass": true
+    },
+    {
+      "name": "cycle_heatmap_lifecycle",
+      "passed": 22,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/cycle_heatmap_lifecycle.log",
+      "strict_pass": true
+    },
+    {
+      "name": "medic_support",
+      "passed": 30,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/medic_support.log",
+      "strict_pass": true
+    },
+    {
+      "name": "discipline093",
+      "passed": 18,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/discipline093.log",
+      "strict_pass": true
+    },
+    {
+      "name": "misidentification094",
+      "passed": 20,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/misidentification094.log",
+      "strict_pass": true
+    },
+    {
+      "name": "density377",
+      "passed": 23,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/density377.log",
+      "strict_pass": true
+    },
+    {
+      "name": "discipline_bridge570",
+      "passed": 54,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/discipline_bridge570.log",
+      "strict_pass": true
+    },
+    {
+      "name": "responder118",
+      "passed": 10,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/responder118.log",
+      "strict_pass": true
+    },
+    {
+      "name": "cycle_density_fow_refresh",
+      "passed": 20,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/cycle_density_fow_refresh.log",
+      "strict_pass": true
+    },
+    {
+      "name": "fow_dirty1189",
+      "passed": 25,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/fow_dirty1189.log",
+      "strict_pass": true
+    },
+    {
+      "name": "fow_runtime224",
+      "passed": 25,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/fow_runtime224.log",
+      "strict_pass": true
+    },
+    {
+      "name": "fow_overlay225",
+      "passed": 34,
+      "failed": 0,
+      "log": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/fow_overlay225.log",
+      "strict_pass": true
+    }
+  ],
+  "source_sha256": {
+    "project.godot": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+    "scripts/multiplayer/multiplayer_command_contract.gd": "6e61a6bbcf8e26d5f8e6ba3426196b45a47b97da936ef385d829795f21da8e63",
+    "scripts/terrain/terrain_map_3d_view.gd": "a42a3714c5632537e892539c26bfe76fe1cab48520144dba0a8d2577172db97f",
+    "scripts/tests/mission_combat_loop_driver.gd": "2ccc3c109cd2ff78a991a30f84ed920af5fc89c0eefa12ad02a544d391a48b17",
+    "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+    "scripts/tests/review_cycles_20261103_area_selection_verifier.gd": "a0bf7f65da6b1070a65fd946dfa5ec50aed9599e9ceac87ef9bc50a889219d3c",
+    "scripts/tests/review_cycles_20261103_checks.json": "5a55daa40927427746b05461e1392b1424b6c5738915e0dd8bc8b1f160b4ef5a",
+    "scripts/tests/review_cycles_20261103_cooldown_cadence_verifier.gd": "54ef29070a7f6e10263075f74d20d50b2b6d74f3fb7ccca95e493bfbf7c84086",
+    "scripts/tests/review_cycles_20261103_density_fow_refresh_verifier.gd": "c316e7d1b11da020f4673e276e7a646325a5ebaee924e8072730ecf88213578d",
+    "scripts/tests/review_cycles_20261103_fireteam_authority_verifier.gd": "2d209c0e5499f0feaec70570e58f07788de7071255e4a929deded5f36c4a2112",
+    "scripts/tests/review_cycles_20261103_heatmap_lifecycle_verifier.gd": "2f5582e5fa8863b6437b87fdf5d66c49efd42ae529a3d586b58fee1f28c735c3",
+    "scripts/tests/run_review2_isolated.py": "0c7d37139826583ca304535dbcc75cc281ac99b1bb3ee71847e30f81eab24f2f",
+    "scripts/tests/task_377_contact_density_heat_map_layer.gd": "f62502c9fa511bb191353dc469476bf0d748930555ca29767c27d022042f4e68",
+    "scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd": "c77bd7fa189ff5c6a023b7a3273900bba3faabc3c85e1028f515de0e5149dc14"
+  },
+  "source_fingerprints_verified_against_tested_commit_and_current_files": true,
+  "rounds": [
+    {
+      "round": 1,
+      "code_commit": "191e384fece0da582b7ad4a07b2ca5354c7bc7a3",
+      "finding": "P1: supplied Fireteam hint could override known Unit ownership",
+      "correct_red": [
+        13,
+        9
+      ],
+      "green": [
+        22,
+        0
+      ],
+      "effective_scoped_gates": 7,
+      "scoped_assertions": 151,
+      "review": "APPROVED"
+    },
+    {
+      "round": 2,
+      "code_commit": "e780098891d7a7c615a8a2e978cd741c09853824",
+      "finding": "P2: decision throttle tripled three simulation-time cooldowns",
+      "correct_red": [
+        9,
+        10
+      ],
+      "green": [
+        19,
+        0
+      ],
+      "scoped_gates": 6,
+      "scoped_assertions": 191,
+      "review": "APPROVED"
+    },
+    {
+      "round": 3,
+      "code_commit": "50495b491edc8b0f660cdb2b44e602d68be22104",
+      "findings": [
+        "P2: small area selection scanned every map tile",
+        "P2: map rebuild removed cached heatmap meshes",
+        "P2: contact refresh could reveal stale forbidden FoW density inside throttle interval"
+      ],
+      "correct_reds": {
+        "area": [
+          16,
+          2
+        ],
+        "heatmap_lifecycle": [
+          14,
+          8
+        ],
+        "fow_refresh": [
+          18,
+          2
+        ]
+      },
+      "greens": {
+        "area": [
+          18,
+          0
+        ],
+        "heatmap_lifecycle": [
+          22,
+          0
+        ],
+        "fow_refresh": [
+          20,
+          0
+        ]
+      },
+      "scoped_gates": 12,
+      "scoped_assertions": 301,
+      "review": "APPROVED"
+    }
+  ],
+  "operations": {
+    "area_rect": {
+      "map_sides": [
+        128,
+        256
+      ],
+      "projected_centers_before": [
+        16384,
+        65536
+      ],
+      "projected_centers_after": [
+        25,
+        25
+      ],
+      "tile_world_reads_before": [
+        32769,
+        131073
+      ],
+      "tile_world_reads_after": [
+        51,
+        51
+      ],
+      "exact_selection_preserved": true
+    },
+    "cooldowns": {
+      "before_simulation_ticks": {
+        "discipline": 30,
+        "misidentification": 45,
+        "medic": 36
+      },
+      "after_simulation_ticks": {
+        "discipline": 10,
+        "misidentification": 15,
+        "medic": 12
+      },
+      "decision_interval_ticks": 3
+    }
+  },
+  "protected_roster": {
+    "before": {
+      "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+      "length": 221426,
+      "mtime_ns": 1793651922023643800
+    },
+    "after": {
+      "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+      "length": 221426,
+      "mtime_ns": 1793651922023643800
+    },
+    "bytes_length_mtime_unchanged": true,
+    "private_safety_copy": "Outside repository; never restored or committed"
+  },
+  "isolation": {
+    "all_recorded_checks_verified": true,
+    "all_recorded_user_dirs_unique": true,
+    "recorded_check_runs": 188,
+    "source_project_unchanged": true
+  },
+  "initial_final_suite": {
+    "report": "output/review_cycles_20261103/final_suite/20261102T234410Z-7c5066d0/report.json",
+    "strict_gates": [
+      68,
+      69
+    ],
+    "numeric_passed": 1966,
+    "numeric_failed": 4,
+    "source_snapshot": "output/review_cycles_20261103/first_suite_source_snapshot.json"
+  },
+  "fixture_corrections": [
+    {
+      "test": "new authority verifier",
+      "detail": "Enable real server-authoritative mode rather than local bypass; corrected old-source RED13/9 and fixed GREEN22/0 retained."
+    },
+    {
+      "test": "new cooldown verifier",
+      "detail": "Typed NodePath arrays corrected before the valid RED; failed own test processes terminated and evidence retained."
+    },
+    {
+      "test": "new heatmap lifecycle verifier",
+      "detail": "Use legitimate first-nonempty FoW contact setup; no assumption of synchronous aggregation after a FoW delta."
+    },
+    {
+      "test": "new density FoW refresh verifier",
+      "detail": "Use production monotonic wall clock for the interval; first SceneTreeTimer fixture could expire before equivalent wall time."
+    },
+    {
+      "test": "TASK377",
+      "detail": "Old fixture20/3 identical on original View. Drive regular contact refresh after public interval; all23 assertions retained and pass original View."
+    },
+    {
+      "test": "TASK570",
+      "detail": "Old fixture30/4 identical on original source. Real SimulationRoot/Registry/Unit now tests all former conditional expectations plus before-tick authority and movement;54/54 on fixed and original source. No product fix for this fixture."
+    }
+  ],
+  "independent_reviews": {
+    "round1": "APPROVED",
+    "round2_actual_diff": "APPROVED",
+    "round3_area": "APPROVED",
+    "round3_heatmap_fow": "APPROVED",
+    "whole_diff": "APPROVED, no important findings",
+    "task570_fixture_followup": "APPROVED,54/54 original and fixed source verified",
+    "final_evidence": "APPROVED;69 distinct gates,1990/0 assertions,14 fingerprints and188 isolated check runs independently verified. Operation keys corrected and rechecked."
+  },
+  "main_integration": {
+    "status": "Awaiting verified fast-forward and isolated post-merge smoke",
+    "old_main": "8eaeadd27e92d68539550058a4795c3ba626dcdc",
+    "expected_source_sha256": {
+      "project.godot": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+      "scripts/multiplayer/multiplayer_command_contract.gd": "6e61a6bbcf8e26d5f8e6ba3426196b45a47b97da936ef385d829795f21da8e63",
+      "scripts/terrain/terrain_map_3d_view.gd": "a42a3714c5632537e892539c26bfe76fe1cab48520144dba0a8d2577172db97f",
+      "scripts/tests/mission_combat_loop_driver.gd": "2ccc3c109cd2ff78a991a30f84ed920af5fc89c0eefa12ad02a544d391a48b17",
+      "scripts/tests/review2_isolated_user_guard.gd": "126f3f21c53bfce350afeb3023c948da010194b7bcd324c1657217553002a513",
+      "scripts/tests/review_cycles_20261103_area_selection_verifier.gd": "a0bf7f65da6b1070a65fd946dfa5ec50aed9599e9ceac87ef9bc50a889219d3c",
+      "scripts/tests/review_cycles_20261103_checks.json": "5a55daa40927427746b05461e1392b1424b6c5738915e0dd8bc8b1f160b4ef5a",
+      "scripts/tests/review_cycles_20261103_cooldown_cadence_verifier.gd": "54ef29070a7f6e10263075f74d20d50b2b6d74f3fb7ccca95e493bfbf7c84086",
+      "scripts/tests/review_cycles_20261103_density_fow_refresh_verifier.gd": "c316e7d1b11da020f4673e276e7a646325a5ebaee924e8072730ecf88213578d",
+      "scripts/tests/review_cycles_20261103_fireteam_authority_verifier.gd": "2d209c0e5499f0feaec70570e58f07788de7071255e4a929deded5f36c4a2112",
+      "scripts/tests/review_cycles_20261103_heatmap_lifecycle_verifier.gd": "2f5582e5fa8863b6437b87fdf5d66c49efd42ae529a3d586b58fee1f28c735c3",
+      "scripts/tests/run_review2_isolated.py": "0c7d37139826583ca304535dbcc75cc281ac99b1bb3ee71847e30f81eab24f2f",
+      "scripts/tests/task_377_contact_density_heat_map_layer.gd": "f62502c9fa511bb191353dc469476bf0d748930555ca29767c27d022042f4e68",
+      "scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd": "c77bd7fa189ff5c6a023b7a3273900bba3faabc3c85e1028f515de0e5149dc14"
+    }
+  },
+  "limits": [
+    "Scoped headless state/operation regression evidence; no native FPS/GPU or general release acceptance.",
+    "TASK348 has a separately documented pre-existing14/17 baseline; not reinterpreted as a green project-wide release gate.",
+    "Chunk-streaming full rebuild remains a broader profiling candidate; no unmeasured renderer rewrite in these rounds."
+  ],
+  "raw_reports": [
+    {
+      "report": "output/review_cycles_20261103/final_suite/20261102T234410Z-7c5066d0/report.json",
+      "summary": {
+        "selected": 69,
+        "passed": 68,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/report.json",
+      "summary": {
+        "selected": 69,
+        "passed": 69,
+        "failed": 0
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/isolation/20261102T232343Z-7e0fa6bc/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round1/green/20261102T232739Z-99ecaf05/report.json",
+      "summary": {
+        "selected": 7,
+        "passed": 6,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round1/green_authority_fixture/20261102T232856Z-5376b3bd/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round1/red/20261102T232504Z-a6a71552/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round1/red_authority_fixture/20261102T232848Z-6c30a904/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round1/red_extended/20261102T232638Z-d241c161/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round2/green/20261102T233109Z-659056ad/report.json",
+      "summary": {
+        "selected": 6,
+        "passed": 6,
+        "failed": 0
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round2/red/20261102T232418Z-42a18c51/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round2/red_fixture_corrected/20261102T232515Z-8654c464/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round3/area_red/20261102T232553Z-2527e780/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round3/density377_baseline/20261102T233655Z-1509d5db/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round3/density377_fixture_baseline/20261102T233944Z-fdc9fb3f/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round3/final_green/20261102T234205Z-5903064c/report.json",
+      "summary": {
+        "selected": 12,
+        "passed": 12,
+        "failed": 0
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round3/fow_refresh_red/20261102T234014Z-669b1174/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round3/fow_refresh_red_wallclock/20261102T234118Z-8b43e88e/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round3/green/20261102T233547Z-a589e6d6/report.json",
+      "summary": {
+        "selected": 8,
+        "passed": 7,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round3/heatmap_red/20261102T232632Z-8dd4efe7/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/round3/heatmap_red_fixture_corrected/20261102T232858Z-6c7934bb/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/task570_baseline/20261102T235002Z-aa17bc1e/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/task570_corrected_fixture_baseline/20261102T235204Z-d6c61641/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    },
+    {
+      "report": "output/review_cycles_20261103/task570_fixture_green/20261102T235143Z-05a78619/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    }
+  ]
+}

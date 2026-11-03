@@ -1,5 +1,30 @@
 # IMPLEMENTATION_STATUS
 
+### REVIEW-ZYKLEN 2026-11-03 - Drei autonome Performance-/Architekturrunden
+- Basis aktueller Main `8eaeadd27e`; Task
+  `docs/tasks/REVIEW_CYCLES_2026_11_03_performance_architecture.md`.
+- Drei Review-/Fix-/Retest-Runden, fuenf bestaetigte Befunde behoben: P1
+  Fireteam-Rechte an bekannte Runtime-Unit binden; P2 Cooldowns pro Simulationstick;
+  begrenzte Area-Rect-Auswahl; Heatmap nach Map-Rebuild herstellen; alte FoW-
+  Density-Zellen innerhalb des Updateintervalls nicht vorzeitig sichtbar machen.
+- Fuenf neue Regressionen zuerst korrekt RED, danach 22/22, 19/19, 18/18,
+  22/22 und 20/20. Gemeinsamer frischer Lauf auf `75f2e6ef3`: 69/69 strenge
+  Gates und 1990/1990 numerische Assertions in einem sequenziellen Lauf gruen.
+- Area-Preview bei 128x128/256x256: 16384/65536 -> je 25 Projektionen,
+  32769/131073 -> je 51 Tile-Lesungen bei gleicher Auswahl/Quellreihenfolge.
+  Decision-Kadenz bleibt drei Ticks; Cooldowns wieder 10/15/12 statt 30/45/36.
+- Unabhaengige Slice-/Gesamt- und Fixture-Nachreviews APPROVED. TASK377 und
+  TASK570 besitzen veraltete Fixtures: Originalfehler reproduziert, nur echten
+  Refresh-/Authority-Pfad nachgebildet, alle Erwartungen erhalten/verstaerkt;
+  korrigierte Fixtures bestehen auch auf Originalsource. Rohhistorik erhalten.
+- Alle Tests mit frischen Nutzerdaten und synchronem Pfadguard; Originalroster
+  in Bytes, Laenge und Schreibzeit unveraendert. 14 Quell-/Harness-/Projekt-
+  fingerprints fixiert; keine native FPS-/GPU-/Release-Abnahme.
+- Gepruefte Uebernahme nach Main per Fast-forward und anschliessender isolierter
+  Regression-Smoke sind Abschluss des wiederholten bisherigen Arbeitsablaufs.
+- Ergebnisindex `output/review_cycles_20261103/verification_summary.json`,
+  Manifest `scripts/tests/review_cycles_20261103_checks.json`.
+
 ### REVIEW 2, 2026-11-02 - Sieben weitere Performance-/Architekturbefunde
 - Task `docs/tasks/REVIEW2_2026_11_02_performance_architecture_fixes.md`, Basis
   integrierter Main `a7e883f1f`. Separat beauftragte Main-Uebernahme per

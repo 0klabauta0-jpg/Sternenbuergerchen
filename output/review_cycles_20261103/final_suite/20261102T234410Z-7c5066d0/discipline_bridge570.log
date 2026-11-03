@@ -1,0 +1,61 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-4d19e677c194403d879b987f006fa186
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_570 Hold Fire Discipline Mission Bridge ===
+[PASS] TASK_570 task file exists
+[PASS] TASK_570 task file names the bridge
+[PASS] Implementation status tracks TASK_570
+[PASS] Roadmap marks TASK_570 implemented
+[PASS] Roadmap names TASK_571 follow-up
+[PASS] HTML report tracks TASK_570
+[PASS] HTML report names TASK_571 follow-up
+[PASS] Mission command feedback contract documents TASK_570
+[PASS] UnitCommand carries fire_rule
+[PASS] FireteamMovementController resolves fire_rule
+[PASS] Combat resolver accepts return-fire context
+[PASS] Mission controller exposes fire-rule setter
+[PASS] Combat driver owns return-fire window
+[PASS] hold blocks voluntary fire
+[PASS] return blocks without incoming-fire context
+[PASS] return fires when incoming-fire window is active
+[PASS] free keeps unit fire-ready
+[PASS] suppress keeps unit fire-ready for the MVP bridge
+[PASS] movement execution starts for fire rule hold
+ERROR: [FAIL] unit receives command for fire rule hold
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:239)
+       [1] _test_movement_fire_rule_bridge (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:159)
+       [2] _run_tests (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:88)
+[PASS] SimulationRoot receives command for fire rule hold
+[PASS] queued command dict carries fire rule hold
+[PASS] movement execution starts for fire rule return
+ERROR: [FAIL] unit receives command for fire rule return
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:239)
+       [1] _test_movement_fire_rule_bridge (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:159)
+       [2] _run_tests (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:88)
+[PASS] SimulationRoot receives command for fire rule return
+[PASS] queued command dict carries fire rule return
+[PASS] movement execution starts for fire rule free
+ERROR: [FAIL] unit receives command for fire rule free
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:239)
+       [1] _test_movement_fire_rule_bridge (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:159)
+       [2] _run_tests (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:88)
+[PASS] SimulationRoot receives command for fire rule free
+[PASS] queued command dict carries fire rule free
+[PASS] movement execution starts for fire rule suppress
+ERROR: [FAIL] unit receives command for fire rule suppress
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:239)
+       [1] _test_movement_fire_rule_bridge (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:159)
+       [2] _run_tests (res://scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd:88)
+[PASS] SimulationRoot receives command for fire rule suppress
+[PASS] queued command dict carries fire rule suppress
+=== RESULTS: 30 passed, 4 failed ===
+TASK_570: FAILED

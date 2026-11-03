@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-76cc2e8a4cd54df0aa8bf1fbe8b5af2e
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_166 Multiplayer Authority Command Contract Verifier ===
+PASS: Allowed move command is enqueued on the authority
+PASS: Accepted command increments the network accept counter
+PASS: Allowed move command does not create a rejection
+WARNING: SimulationRoot rejected a network command: peer_team_mismatch.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] request_command (res://scripts/core/simulation_root.gd:755)
+       [1] _test_foreign_team_command_is_rejected (res://scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd:58)
+       [2] _run_tests (res://scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd:18)
+PASS: Foreign-team move is not enqueued
+PASS: Foreign-team move increments the rejection counter
+PASS: Foreign-team move records a peer-team mismatch
+WARNING: SimulationRoot rejected a network command: state_mutation_key:damage.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] request_command (res://scripts/core/simulation_root.gd:755)
+       [1] _test_state_mutation_command_is_rejected (res://scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd:82)
+       [2] _run_tests (res://scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd:19)
+PASS: State-mutation payload is not enqueued
+PASS: State-mutation payload records the forbidden key
+PASS: Assigned fireteam peer may command its fireteam
+PASS: Fireteam peer cannot command another fireteam
+PASS: Foreign fireteam rejection is explicit
+PASS: Engage area order is whitelisted
+PASS: Take area order is rejected by the multiplayer contract
+PASS: Ad-hoc hold order is whitelisted
+PASS: Scenario/editor LZ payload is rejected
+=== RESULTS: 15 passed, 0 failed ===
+ALL TESTS PASSED

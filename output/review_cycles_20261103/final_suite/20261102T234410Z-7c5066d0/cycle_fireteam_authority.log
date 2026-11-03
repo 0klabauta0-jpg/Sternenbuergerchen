@@ -1,0 +1,27 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-2ab2af6da05444e682b8907d2ddd7ea0
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Known foreign Unit cannot borrow the caller's assigned fireteam hint
+PASS: Real authority submission rejects forged Unit ownership
+PASS: Rejected forged command never enters the authority queue
+PASS: Processing the real queue cannot move the foreign Unit
+PASS: Forged command cannot commit foreign Unit runtime state
+PASS: Truthful foreign fireteam hint is also rejected
+PASS: Omitting the hint cannot bypass known foreign ownership
+PASS: Known Unit's Fireteam cannot be relabelled even between two assigned groups
+PASS: Authority submission rejects a contradictory known Unit hint
+PASS: Contradictory known Unit hint is never enqueued
+PASS: Contradictory known Unit hint cannot change the Unit through queue processing
+PASS: Assigned Unit remains commandable with hint=true
+PASS: Valid assigned Unit command is enqueued once with hint=true
+PASS: Valid assigned Unit moves through the real queue with hint=true
+PASS: Assigned command leaves foreign Unit unchanged with hint=true
+PASS: Assigned Unit remains commandable with hint=false
+PASS: Valid assigned Unit command is enqueued once with hint=false
+PASS: Valid assigned Unit moves through the real queue with hint=false
+PASS: Assigned command leaves foreign Unit unchanged with hint=false
+PASS: Commander keeps authority over its own team's other Fireteam
+PASS: Legitimate commander command still executes
+PASS: Legacy Unit without authoritative Fireteam metadata may use its explicit assigned hint
+REVIEW_CYCLES_FIRETEAM_AUTHORITY_RESULT passed=22 failed=0

@@ -1,0 +1,26 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-5c4d7ad0ea1f44868bca47258f2f4f76
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_096 Recovery Verifier ===
+  PASS: Mission HUD shows the shared #15 live tactical label
+  PASS: Mission HUD shows the shared #16 command label
+  PASS: Mission HUD shows the shared #17 selected-fireteam label
+  PASS: Mission HUD shows the shared #18 mission-control label
+  PASS: Mission command panel keeps #16 command-only and no longer shows old team-selection buttons
+  PASS: FOB renders a compact operator card for an inbound transit unit
+  PASS: Inbound FOB transit card shows its progress bar and progress value
+  PASS: Inbound FOB transit card shows ETA and progress text
+  PASS: Inbound FOB transit card is visibly disabled while the operator is still in transit
+  PASS: FOB character overlay opens as a visible sheet
+  PASS: Character overlay uses the shared #20 block label
+  PASS: Character sheet values column keeps the current section order
+  PASS: Character sheet context column keeps the current section order
+  PASS: Character sheet core-values block keeps the expected stat order
+  PASS: Character sheet renders one progress bar for each core value
+  PASS: FOB can still build a shared dropship card for verification
+  PASS: Dropship card keeps the boarding action
+  PASS: Dropship card keeps the mission-send action
+  PASS: Dropship card no longer exposes a legacy tracked button
+=== RESULTS: 19 passed, 0 failed ===
+ALL TESTS PASSED

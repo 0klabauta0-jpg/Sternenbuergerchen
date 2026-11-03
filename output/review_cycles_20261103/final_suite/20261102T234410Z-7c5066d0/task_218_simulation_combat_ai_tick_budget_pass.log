@@ -1,0 +1,89 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-260151c24a3347fbaeb6302062335bae
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_218 Simulation Combat AI Tick Budget Pass ===
+PASS: Harness defines three simulation scale scenarios
+PASS: Summary includes small mission baseline
+PASS: Summary includes two-fireteam enemy-team baseline
+PASS: Summary includes large medic/overwatch/tactics baseline
+PASS: Summary marks SimulationRoot tick percentiles
+PASS: Summary marks CombatLoop tick percentiles
+PASS: Summary marks runtime scope coverage
+PASS: Summary marks combat scope coverage
+PASS: Summary marks hotpath audit coverage
+PASS: Small scenario has four friendly units
+PASS: Medium scenario has two fireteams
+PASS: Large scenario has sixteen friendly units
+PASS: Large scenario has twelve enemy units
+PASS: Large scenario includes medic/downed pressure
+PASS: small_mission SimulationRoot tick stats expose Median/P95/P99
+PASS: small_mission CombatLoop tick stats expose Median/P95/P99
+PASS: small_mission SimulationRoot p99 stays under broad start budget
+PASS: small_mission CombatLoop p99 stays under broad start budget
+PASS: two_fireteams_enemy_team SimulationRoot tick stats expose Median/P95/P99
+PASS: two_fireteams_enemy_team CombatLoop tick stats expose Median/P95/P99
+PASS: two_fireteams_enemy_team SimulationRoot p99 stays under broad start budget
+PASS: two_fireteams_enemy_team CombatLoop p99 stays under broad start budget
+PASS: four_fireteams_multi_enemy_medic_overwatch SimulationRoot tick stats expose Median/P95/P99
+PASS: four_fireteams_multi_enemy_medic_overwatch CombatLoop tick stats expose Median/P95/P99
+PASS: four_fireteams_multi_enemy_medic_overwatch SimulationRoot p99 stays under broad start budget
+PASS: four_fireteams_multi_enemy_medic_overwatch CombatLoop p99 stays under broad start budget
+PASS: small_mission SimulationRoot scope command_queue_usec has stats
+PASS: small_mission SimulationRoot scope effect_queue_usec has stats
+PASS: small_mission SimulationRoot scope unit_minimum_spacing_usec has stats
+PASS: small_mission SimulationRoot scope tick_signal_emit_usec has stats
+PASS: small_mission CombatLoop scope contact_tracking_usec has stats
+PASS: small_mission CombatLoop scope enemy_security_usec has stats
+PASS: small_mission CombatLoop scope enemy_team_tactics_usec has stats
+PASS: small_mission CombatLoop scope medic_support_usec has stats
+PASS: small_mission CombatLoop scope enemy_advance_usec has stats
+PASS: small_mission CombatLoop scope overwatch_security_usec has stats
+PASS: small_mission CombatLoop scope combat_fire_decision_usec has stats
+PASS: two_fireteams_enemy_team SimulationRoot scope command_queue_usec has stats
+PASS: two_fireteams_enemy_team SimulationRoot scope effect_queue_usec has stats
+PASS: two_fireteams_enemy_team SimulationRoot scope unit_minimum_spacing_usec has stats
+PASS: two_fireteams_enemy_team SimulationRoot scope tick_signal_emit_usec has stats
+PASS: two_fireteams_enemy_team CombatLoop scope contact_tracking_usec has stats
+PASS: two_fireteams_enemy_team CombatLoop scope enemy_security_usec has stats
+PASS: two_fireteams_enemy_team CombatLoop scope enemy_team_tactics_usec has stats
+PASS: two_fireteams_enemy_team CombatLoop scope medic_support_usec has stats
+PASS: two_fireteams_enemy_team CombatLoop scope enemy_advance_usec has stats
+PASS: two_fireteams_enemy_team CombatLoop scope overwatch_security_usec has stats
+PASS: two_fireteams_enemy_team CombatLoop scope combat_fire_decision_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch SimulationRoot scope command_queue_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch SimulationRoot scope effect_queue_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch SimulationRoot scope unit_minimum_spacing_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch SimulationRoot scope tick_signal_emit_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch CombatLoop scope contact_tracking_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch CombatLoop scope enemy_security_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch CombatLoop scope enemy_team_tactics_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch CombatLoop scope medic_support_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch CombatLoop scope enemy_advance_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch CombatLoop scope overwatch_security_usec has stats
+PASS: four_fireteams_multi_enemy_medic_overwatch CombatLoop scope combat_fire_decision_usec has stats
+PASS: small_mission hotpath audit keeps SimulationRoot as authority
+PASS: small_mission hotpath audit keeps viewer paths read-only
+PASS: small_mission hotpath audit documents direct NodePath/registry lookup policy
+PASS: small_mission SimulationRoot reports registered units
+PASS: small_mission CombatLoop reports bounded active enemy count
+PASS: small_mission command queue remains bounded after tick
+PASS: two_fireteams_enemy_team hotpath audit keeps SimulationRoot as authority
+PASS: two_fireteams_enemy_team hotpath audit keeps viewer paths read-only
+PASS: two_fireteams_enemy_team hotpath audit documents direct NodePath/registry lookup policy
+PASS: two_fireteams_enemy_team SimulationRoot reports registered units
+PASS: two_fireteams_enemy_team CombatLoop reports bounded active enemy count
+PASS: two_fireteams_enemy_team command queue remains bounded after tick
+PASS: four_fireteams_multi_enemy_medic_overwatch hotpath audit keeps SimulationRoot as authority
+PASS: four_fireteams_multi_enemy_medic_overwatch hotpath audit keeps viewer paths read-only
+PASS: four_fireteams_multi_enemy_medic_overwatch hotpath audit documents direct NodePath/registry lookup policy
+PASS: four_fireteams_multi_enemy_medic_overwatch SimulationRoot reports registered units
+PASS: four_fireteams_multi_enemy_medic_overwatch CombatLoop reports bounded active enemy count
+PASS: four_fireteams_multi_enemy_medic_overwatch command queue remains bounded after tick
+PASS: Simulation combat AI tick profile report exists
+PASS: Report documents TASK_218 SimulationRoot and CombatLoop scope
+PASS: Report documents percentile fields
+PASS: Report documents Medic, Overwatch and Enemy-Taktik scopes
+TASK_218 harness summary: {"has_combat_scopes":true,"has_combat_tick_percentiles":true,"has_hotpath_audit":true,"has_large_medic_overwatch":true,"has_runtime_scopes":true,"has_simulation_tick_percentiles":true,"has_small_mission":true,"has_two_fireteams":true,"scenario_count":3}
+=== RESULTS: 81 passed, 0 failed ===
+ALL TESTS PASSED

@@ -1,0 +1,64 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-4909874af7f7483b8b8771860bb53cfb
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_229 Map Editor Usability Authoring Pass ===
+PASS: Map editor scene instantiates
+PASS: Editor can switch to height authoring tool
+PASS: Editor can select a grid for authoring
+PASS: Usability snapshot exposes active tool
+PASS: Usability snapshot exposes brush radius
+PASS: Usability snapshot exposes selected tile
+PASS: Palette snapshot keeps selected tile type visible
+PASS: Tile palette shows exactly one selected item
+PASS: Usability snapshot exposes height edge mode
+PASS: Editor shows compact authoring status in property panel
+PASS: Valid authoring map fixture saves
+PASS: Valid authoring scenario fixture saves
+PASS: Valid editor authoring fixture has no validation errors
+PASS: Validation reports authored markers
+PASS: Validation reports patrol waypoints
+PASS: Validation reports FoW-relevant LOS blockers
+PASS: Editor can prepare multiplayer map manifest preview
+PASS: Manifest preview exposes map hash
+PASS: Usability snapshot reports live-test readiness
+PASS: Editor can create live-test scene from current scenario
+PASS: Valid authoring map fixture saves
+PASS: Valid authoring scenario fixture saves
+PASS: Invalid scenario fields produce authoring validation errors
+PASS: Validation names missing objective marker
+PASS: Validation names missing enemy groups
+PASS: Editor fixture exists for selection and ground brush regression
+PASS: Regression fixture has editable rock tile
+PASS: Ground brush does not delete rock cover object
+PASS: Ground brush preserves object gameplay fields
+PASS: Ground brush updates the floor surface under the object
+PASS: Brush paint keeps the touched tile selected
+PASS: Brush-selected tile remains visible in the 3D selection overlay
+PASS: Editor can switch to brush before selection
+PASS: Brush tool is reported as active
+PASS: Editor can switch to selection tool
+PASS: Selection tool selects a tile through the click path helper
+PASS: Selection tool is reported as active
+PASS: Selection click updates selected_grid_position
+PASS: Selection overlay renders one selected tile
+PASS: Editor keeps grid lines rendered
+PASS: Palette visibly selects a default tile type
+PASS: Default tile type lives in the visible palette group
+PASS: Objective Use Tile requires an explicitly selected tile
+PASS: Enemy spawn Use Tile requires an explicitly selected tile
+PASS: Marker Use Tile requires an explicitly selected tile
+PASS: Tile command fixture can select a tile
+PASS: Objective Use Tile writes the selected tile position
+PASS: Editor exposes TerrainMapData for authoring roundtrip
+PASS: Roundtrip fixture can edit a hill tile
+PASS: Editor-authored map saves for roundtrip
+PASS: Roundtrip preserves height
+PASS: Roundtrip preserves edge
+PASS: Roundtrip preserves object/catalog type
+PASS: Action contract documents current undo scope
+PASS: Action contract documents transactional undo
+PASS: Action contract documents multi-step undo depth
+PASS: Action contract documents tile patch fields
+=== RESULTS: 57 passed, 0 failed ===
+ALL TESTS PASSED

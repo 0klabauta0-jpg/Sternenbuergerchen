@@ -51,7 +51,8 @@ bleibt bis zu einem passenden bestaetigten Fix separat sichtbar.
 - [x] Runde 1: Review, bestaetigte Befunde, Fixes und Regressionen.
 - [x] Runde 2: erneuter Review des neuen Stands, Fixes und Regressionen.
 - [x] Runde 3: erneuter Review, Fixes und gezielte Regressionen.
-- [ ] Unabhaengiger Abschlussreview, gezielte Commits und Task-Push.
+- [x] Unabhaengiger Abschlussreview und gemeinsame Abschlussmatrix.
+- [ ] Geprueften Stand nach Main uebernehmen, isolierter Smoke, Commit/Push pruefen.
 
 ## Bestaetigte Ursachen / Testziele
 ### Runde 1 - Fireteam-Autoritaet
@@ -136,3 +137,16 @@ prueft vor dem Tick fehlende Mutation und danach alle alten Rule-/Status-/Queue-
 Erwartungen sowie echte Bewegung. 54/54 sowohl auf Fix-Stand als auch Original-
 Source; unabhaengiger Testdiff-/Evidence-Nachreview APPROVED. Produktionscode
 dafuer unveraendert; gemeinsame Matrix wird auf dem finalen Stand wiederholt.
+
+## Gemeinsame Abschlussverifikation
+Frischer vollstaendiger Lauf auf `75f2e6ef399c5b27f92202650aea7ede0cdf45a3`:
+69/69 strenge Gates, 1990/1990 numerische Assertions, ohne Retries. Fuenf neue
+Regressionsgates umfassen 101 Assertions; der Canary hat keine numerische Summe.
+Alle 14 aufgezeichneten Source-/Harness-/Projektfingerprints stimmen mit dem
+getesteten Commit und den Arbeitsdateien ueberein. Originalroster weiterhin
+SHA256/221426 Bytes/Schreibzeit identisch. Unabhaengige Gesamt-Review und
+Nachreview der TASK570-Fixture APPROVED, keine wichtigen offenen Befunde.
+
+Index: `output/review_cycles_20261103/verification_summary.json`.
+Rohreport: `output/review_cycles_20261103/final_verified_suite/20261102T235303Z-b661a934/report.json`.
+Nach diesem Teststand werden ausschliesslich Dokumentation und Evidence ergaenzt.

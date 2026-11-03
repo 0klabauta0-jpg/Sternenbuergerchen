@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-a93ddfafbe7349b1a805548bbd9505b0
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_187 NPC Minimum Spacing and Multiplayer Authority ===
+PASS: Spawn cluster is separated by the authoritative SimulationRoot spacing pass
+PASS: Spawn separation keeps units on walkable terrain
+PASS: Spawn separation resolves without blocked-pair fallback
+PASS: Dropship deploy registers the inserted friendly as runtime-active
+PASS: Dropship deploy does not stack the inserted friendly on the existing unit
+PASS: Dropship deploy separation keeps units walkable
+PASS: Enemy wave registers exactly the active wave units
+PASS: Enemy wave cluster is separated by the authoritative spacing pass
+PASS: Enemy wave separation keeps enemies on walkable terrain
+PASS: Crossing friendly units keep minimum distance during movement
+PASS: Movement pass still uses LocalAvoidance neighbor diagnostics
+PASS: Friendly/enemy contact stop and downed units do not stack
+PASS: Minimum-spacing contract documents downed units as space-occupying
+PASS: Respawn position is separated before the authority tick ends
+PASS: Respawn separation keeps units on walkable terrain
+PASS: Multiplayer snapshot contains already-separated authoritative positions
+=== RESULTS: 16 passed, 0 failed ===
+ALL TESTS PASSED

@@ -1,0 +1,28 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-c429f2c42d334475bcebf035436aa6dd
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Review 2 P2 contact observer aggregation ===
+PASS: 1 real driver observers retain a confirmed contact after stable LOS
+PASS: 1 observers retain the confirmed rifle hit chance of 0.45
+PASS: 1 observers count one LOS tick per simulation tick
+PASS: 2 real driver observers retain a confirmed contact after stable LOS
+PASS: 2 observers retain the confirmed rifle hit chance of 0.45
+PASS: 2 observers count one LOS tick per simulation tick
+PASS: 4 real driver observers retain a confirmed contact after stable LOS
+PASS: 4 observers retain the confirmed rifle hit chance of 0.45
+PASS: 4 observers count one LOS tick per simulation tick
+PASS: Multiple observations cannot confirm on the first LOS tick
+PASS: Any complete observer confirms stable LOS regardless of incomplete-observer order
+PASS: Aggregation retains the strongest confidence hint
+PASS: Observer aggregation applies LOS progression once in a tick
+PASS: Multiple observations cannot confirm on the first LOS tick
+PASS: Any complete observer confirms stable LOS regardless of incomplete-observer order
+PASS: Aggregation retains the strongest confidence hint
+PASS: Observer aggregation applies LOS progression once in a tick
+PASS: A repeated same-tick incomplete update cannot reset confirmed LOS
+PASS: Repeated update in the same tick does not increment or reset LOS duration
+PASS: A genuinely missing LOS tick still marks the contact lost
+PASS: Reacquisition after a gap restarts at spotted despite multiple observers
+PASS: The next consecutive complete LOS tick confirms the reacquired contact
+=== RESULTS: 22 passed, 0 failed ===

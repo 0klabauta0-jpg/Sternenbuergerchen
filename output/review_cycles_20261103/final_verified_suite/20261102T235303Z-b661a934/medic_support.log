@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-19f377b3d6ec49778cfa804ec5d40ef3
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Medic Support Verifier ===
+  PASS: Heal effect resolves before bleedout and revives the target
+  PASS: Heal effect restores positive health after revive
+  PASS: FOB loadout dropdown offers medictool
+  PASS: FOB loadout dropdown labels medictool visibly
+  PASS: FOB loadout dropdown can preselect medictool
+  PASS: Combat medic without medictool does not enqueue heal support
+  PASS: Combat medic without medictool does not auto-run as healer
+  PASS: Medic heal reaches a target on an adjacent tile
+  PASS: Medic heal does not reach a target two tiles away
+  PASS: Medic starts moving when the target is beyond one tile
+  PASS: Medic move target resolves to a walkable neighbor tile
+  PASS: Combat loop enqueues one medic heal effect for a nearby downed ally
+  PASS: Queued support effect uses heal type
+  PASS: Medic targets the downed ally
+  PASS: Queued support effect records healer unit id
+  PASS: Queued support effect records healer team id
+  PASS: Queued support effect records medictool as required support resource
+  PASS: Medic does not heal an adjacent enemy-team target
+  PASS: Medic does not move toward an enemy-team target as support
+  PASS: Medictool counts as equipped loadout item in a weapon slot
+  PASS: Medictool in primary slot still leaves rifle as active combat weapon
+  PASS: Out-of-range downed ally does not receive an instant heal effect
+  PASS: Medic enqueues a move command toward an out-of-range downed ally
+  PASS: Medic move command uses move_to_position
+  PASS: Medic move command is addressed to the medic
+  PASS: Medic move command closes distance to the patient
+  PASS: Medic support picks one wounded ally when multiple are in range
+  PASS: Medic prioritizes the most wounded fit ally in range
+  PASS: Medic cooldown is set after support action
+  PASS: Medic cooldown blocks immediate repeated support
+=== RESULTS: 30 passed, 0 failed ===
+ALL TESTS PASSED

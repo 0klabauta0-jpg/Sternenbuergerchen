@@ -1,0 +1,67 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-3ba7481baae54427938399832beeefea
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Mission Multi Dropship Cards Bugfix ===
+  PASS: Mission scene exposes the tactical controller
+  PASS: Mission dropship panel is visible for mission_drop_cards
+  PASS: Two mission dropships render as two detailed passenger cards
+  PASS: Mission map keeps transfer and waiting dropships offscreen until a real drop run is active
+  PASS: First card keeps Dropship 1 identity
+  PASS: Second card keeps Dropship 2 identity
+  PASS: Dropship cards are stacked vertically
+  PASS: Panel reserves vertical space for both cards
+  PASS: Inbound Dropship 1 remains visually in transit
+  PASS: Waiting Dropship 2 card stays fully commandable while its model remains offscreen
+  PASS: Inbound mission dropship card shows transfer progress while the ship itself is still off-map
+  PASS: Mission Dropship 1 card embeds its passenger overview on the mission map
+  PASS: Mission Dropship 2 card embeds its passenger overview on the mission map
+  PASS: Clicking the right-side Dropship 2 card selects it for Mission Control
+  PASS: Selected Dropship 2 carries its waiting state into Mission Control
+  PASS: Selected Dropship 2 carries its own boarded payload
+  PASS: Selecting a dropship card does not silently select its fireteam into #17
+  PASS: Selected mission dropship card is marked in the #19 panel
+  PASS: Selected mission dropship card uses a clear green outline
+  PASS: Waiting mission dropship card exposes a direct Return-to-FOB button
+  PASS: Return-to-FOB button marks the selected dropship as RTB
+  PASS: Manual RTB keeps the selected dropship payload until it reaches FOB
+  PASS: Selecting Dropship 2 does not inherit Dropship 1 LZ
+  PASS: Dropship 2 stores its own LZ
+  PASS: Dropship 2 stores its own approach
+  PASS: Mission Control shows the selected dropship summary next to Drop
+  PASS: Reselecting Dropship 1 restores its own LZ
+  PASS: Reselecting Dropship 1 restores its own approach
+  PASS: Planning state preserves both mission dropship cards
+  PASS: Mission scene exposes tactical controller for inbound selection handoff
+  PASS: First dropship starts an active inbound drop run
+  PASS: First dropship is inbound before selecting the second craft
+  PASS: Dropship 1 snapshots LZ1 into its active drop sequence
+  PASS: Dropship 1 snapshots the fireteam identity from its own payload
+  PASS: Dropship 2 can be selected while Dropship 1 is inbound
+  PASS: Mission Control switches to Dropship 2 during Dropship 1 inbound
+  PASS: Dropship 1 keeps owning the live inbound sequence after selection changes
+  PASS: Dropship 2 keeps its own LZ while Dropship 1 is inbound
+  PASS: Changing Dropship 2 to LZ2 does not retarget the active Dropship 1 sequence
+  PASS: Dropship 1 card keeps LZ1 after Dropship 2 is replanned
+  PASS: Dropship 2 replaces its old LZ with the newly placed LZ2
+  PASS: Planned LZ labels are numbered and named after their owning dropship
+  PASS: Dropship cards keep their own boarded fireteam identity while selection changes
+  PASS: Dropship 1 keeps flying as a craft-bound parallel sequence while Dropship 2 starts
+  PASS: Dropship 2 starts its own live inbound sequence instead of waiting in a queue
+  PASS: Both dropships can be inbound at the same time
+  PASS: Drop button no longer reports a fake single-air-lane block
+  PASS: Both craft-bound drops deploy their own payload units
+  PASS: Dropship 1 deploys its own payload instead of consuming Dropship 2's queued payload
+  PASS: Dropship 2 deploys its own payload instead of reusing Dropship 1's payload
+  PASS: Dropship 1 completes its drop at LZ1 even after Dropship 2 planned LZ2
+  PASS: Dropship 2 completes its own drop at LZ2
+  PASS: Dropship 1 stores the deployed FT1 position from LZ1, not the later selected LZ2
+  PASS: Dropship 2 stores the deployed FT2 position from LZ2
+  PASS: Mission scene exposes tactical controller for sequential dropship drop
+  PASS: First waiting dropship can start its drop sequence
+  PASS: First dropship reaches outbound return after deploying its team
+  PASS: Selecting Dropship 2 hands off the outbound first craft instead of keeping the global drop slot blocked
+  PASS: First dropship keeps flying its RTB leg as a craft-bound parallel sequence after handoff
+  PASS: Second waiting dropship can start its own drop after the first one is returning
+  PASS: Second dropship owns the next inbound sequence
+=== RESULTS: 61 passed, 0 failed ===

@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-fb6ba99c934b4e6290c3ce54453f34a0
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+HEIGHT_IDLE_OPERATIONS {"side":128,"tile_grid_reads":0,"tiles":16384,"units":12,"visual_tiles":1024}
+PASS: 128 map uses a partial visual set
+PASS: 128 map's 12 idle units use at most constant work, got 0 tile checks
+HEIGHT_IDLE_OPERATIONS {"side":256,"tile_grid_reads":0,"tiles":65536,"units":12,"visual_tiles":1024}
+PASS: 256 map uses a partial visual set
+PASS: 256 map's 12 idle units use at most constant work, got 0 tile checks
+PASS: Configured map supplies its H1 surface
+PASS: In-place height edit is visible without a copied height cache
+PASS: Map replacement discards tiles absent from the new map
+PASS: Map replacement supplies new tile heights
+PASS: Clearing the map discards its height index
+REVIEW2_P2_HEIGHT_LOOKUP_RESULT {"failed":0,"passed":9}
+REVIEW2_P2_HEIGHT_LOOKUP_PASSED
