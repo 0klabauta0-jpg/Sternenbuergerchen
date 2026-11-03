@@ -133,8 +133,24 @@ static func load_roster(profile_id: String = DEFAULT_PROFILE_ID, save_path: Stri
 
 static func reset_roster(seed: String, roster_size: int, profile_id: String = DEFAULT_PROFILE_ID, save_path: String = "", archive_existing: bool = true) -> Dictionary:
 	var archive_result: Dictionary = {}
-	if archive_existing:
+	if archive_existing and FileAccess.file_exists(_resolve_save_path(profile_id, save_path)):
 		archive_result = archive_existing_roster(profile_id, save_path)
+		if not bool(archive_result.get("ok", false)):
+			var retained: Dictionary = load_roster(profile_id, save_path)
+			var retained_roster: Dictionary = Dictionary(retained.get("roster", {})).duplicate(true)
+			return {
+				"ok": false,
+				"created": false,
+				"loaded": bool(retained.get("ok", false)),
+				"reason": "active_archive_failed",
+				"path": _resolve_save_path(profile_id, save_path),
+				"profile_id": _sanitize_profile_id(profile_id),
+				"roster": retained_roster,
+				"summary": START_ROSTER_GENERATOR_SCRIPT.call("build_summary_snapshot", retained_roster),
+				"archive_path": String(archive_result.get("archive_path", "")),
+				"archive_ok": false,
+				"diagnostics": _merge_diagnostics(archive_result, retained),
+			}
 	var generated: Dictionary = Dictionary(START_ROSTER_GENERATOR_SCRIPT.call("generate_start_roster", seed, roster_size, profile_id))
 	var save_result: Dictionary = save_roster(generated, profile_id, save_path)
 	return {

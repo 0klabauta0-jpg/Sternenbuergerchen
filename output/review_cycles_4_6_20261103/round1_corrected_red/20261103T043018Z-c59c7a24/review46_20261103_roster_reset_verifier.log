@@ -1,0 +1,60 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-6caec1c3cf55493599587e46107a5b37
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+REVIEW46_ROSTER_FIXTURE_DIAGNOSTICS {"case":"initial_review46_blocked","diagnostics":[],"ok":true}
+PASS: Initial real roster is persisted at explicit test path: user://review46_roster_reset_867513/blocked/roster_v1.json
+PASS: Owned fixture parent directory is available
+PASS: Owned archive blocker file can be created
+REVIEW46_ROSTER_FIXTURE_DIAGNOSTICS {"case":"blocked_reset","diagnostics":["archive_write_failed:user://review46_roster_reset_867513/blocked/archive/roster_v1_1793680219.json"],"ok":true}
+FAIL: Required archive failure rejects the reset
+FAIL: Rejected archive reset does not report a new roster
+PASS: Reset reports the failed archive
+PASS: Reset preserves the real owned archive-path failure diagnostic
+FAIL: Failed archive leaves every original active-save byte unchanged
+PASS: Original roster remains loadable after failed reset
+FAIL: Failed reset retains the original persisted roster identity
+FAIL: Failed reset returns the retained original roster to its consumer
+PASS: Failed reset leaves the archive blocker unchanged
+REVIEW46_ROSTER_FIXTURE_DIAGNOSTICS {"case":"initial_review46_success","diagnostics":[],"ok":true}
+PASS: Initial real roster is persisted at explicit test path: user://review46_roster_reset_867513/success/roster_v1.json
+REVIEW46_ROSTER_FIXTURE_DIAGNOSTICS {"case":"successful_reset","diagnostics":[],"ok":true}
+PASS: Reset succeeds when its required archive can be written
+PASS: Successful reset reports its new roster
+PASS: Successful reset reports its completed archive
+PASS: Successful reset exposes an existing archive
+PASS: Required archive preserves the complete original save bytes
+PASS: Archived original roster remains loadable with its original identity
+PASS: Successful reset persists the requested replacement roster
+PASS: Missing-roster fixture starts without an active save
+REVIEW46_ROSTER_FIXTURE_DIAGNOSTICS {"case":"missing_reset","diagnostics":["archive_source_missing:user://review46_roster_reset_867513/missing/roster_v1.json"],"ok":true}
+PASS: First roster creation succeeds without a previous save to archive
+PASS: First reset roster is valid and persisted at the explicit fixture path
+REVIEW46_ROSTER_FIXTURE_DIAGNOSTICS {"case":"initial_review46_no_archive","diagnostics":[],"ok":true}
+PASS: Initial real roster is persisted at explicit test path: user://review46_roster_reset_867513/no_archive/roster_v1.json
+PASS: Owned fixture parent directory is available
+PASS: Owned archive blocker file can be created
+REVIEW46_ROSTER_FIXTURE_DIAGNOSTICS {"case":"no_archive_reset","diagnostics":[],"ok":true}
+PASS: Explicit archive opt-out remains compatible even when archive directory is blocked
+PASS: Explicit archive opt-out still persists its requested replacement
+PASS: Archive opt-out never touches the unused archive path
+REVIEW46_ROSTER_FIXTURE_DIAGNOSTICS {"case":"initial_review46_menu","diagnostics":[],"ok":true}
+PASS: Initial real roster is persisted at explicit test path: user://review46_roster_reset_867513/menu/roster_v1.json
+PASS: Real menu loads the explicit fixture roster before reset
+PASS: Real menu requires confirmation before replacing its loaded roster
+PASS: Owned fixture parent directory is available
+PASS: Owned archive blocker file can be created
+FAIL: Real menu receives the required archive failure
+FAIL: Real menu does not report a new team after archive failure
+FAIL: Real menu keeps displaying the loaded team's original identity after archive failure
+FAIL: Failed menu reset returns its unchanged displayed roster
+FAIL: Failed menu reset retains its loaded-roster status
+FAIL: Failed menu reset does not mark the existing roster as newly created
+FAIL: Menu exposes the failed reset in its normal status snapshot
+FAIL: Confirmed menu reset with failed archive preserves every active-save byte
+PASS: Only the test-owned menu archive blocker can be removed for the retry
+PASS: Real menu successfully resets after its archive obstruction is removed
+FAIL: Failed menu reset does not consume a successful reset generation
+PASS: Successful menu retry creates its required archive
+FAIL: Menu retry archives the original team rather than a failed replacement
+REVIEW46_ROSTER_RESET_RESULT passed=32 failed=15

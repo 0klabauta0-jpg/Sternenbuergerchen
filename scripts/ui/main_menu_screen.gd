@@ -621,14 +621,24 @@ func request_new_start_roster() -> Dictionary:
 
 
 func confirm_new_start_roster() -> Dictionary:
-	_start_roster_generation_index += 1
-	var next_seed: String = "%s_reset_%02d" % [_start_roster_seed, _start_roster_generation_index]
+	var next_generation_index: int = _start_roster_generation_index + 1
+	var next_seed: String = "%s_reset_%02d" % [_start_roster_seed, next_generation_index]
 	var reset_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("reset_roster", next_seed, _start_roster_size, _start_roster_profile_id, _start_roster_save_path, true))
+	_last_start_roster_store_result = reset_result.duplicate(true)
+	if not bool(reset_result.get("ok", false)):
+		_status_label.text = "Roster save failed"
+		return {
+			"created": false,
+			"reason": String(reset_result.get("reason", "roster_reset_failed")),
+			"roster": _start_roster.duplicate(true),
+			"summary": START_ROSTER_GENERATOR_SCRIPT.call("build_summary_snapshot", _start_roster),
+			"store": reset_result,
+		}
+	_start_roster_generation_index = next_generation_index
 	_start_roster = Dictionary(reset_result.get("roster", {})).duplicate(true)
 	_normalize_start_team_editor(true)
 	_last_start_roster_created = true
 	_last_start_roster_loaded_from_save = false
-	_last_start_roster_store_result = reset_result.duplicate(true)
 	_start_roster_reset_confirmation_pending = false
 	_refresh_start_roster_button()
 	_refresh_team_name_controls()
@@ -3559,8 +3569,9 @@ func _on_editor_pressed() -> void:
 func _on_new_roster_pressed() -> void:
 	_play_ui_sfx("confirm" if _start_roster_reset_confirmation_pending else "click", "new_roster")
 	if _start_roster_reset_confirmation_pending:
-		confirm_new_start_roster()
-		open_team_editor(_start_roster_save_path)
+		var result: Dictionary = confirm_new_start_roster()
+		if bool(result.get("created", false)):
+			open_team_editor(_start_roster_save_path)
 	else:
 		var result: Dictionary = Dictionary(request_new_start_roster())
 		if bool(result.get("created", false)):

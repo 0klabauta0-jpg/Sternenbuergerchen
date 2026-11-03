@@ -1,0 +1,172 @@
+{
+  "schema": "sternenbuergerchen.review2_isolated_checks.v1",
+  "checks": [
+    {
+      "name": "task_234_persistent_player_roster_save_and_reset",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4bd3e2f8ef8c46d89fbc5211c7335339",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4bd3e2f8ef8c46d89fbc5211c7335339\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_cycles_4_6_20261103\\round1_baseline\\20261103T042522Z-2c42ff33\\task_234_persistent_player_roster_save_and_reset.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4bd3e2f8ef8c46d89fbc5211c7335339\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\4bd3e2f8ef8c46d89fbc5211c7335339\\project\\scripts\\tests\\task_234_persistent_player_roster_save_and_reset.gd"
+      ]
+    },
+    {
+      "name": "task_299_team_identity_name_generation_userology",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-090dda95cb79456399349457d39ae875",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\090dda95cb79456399349457d39ae875\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_cycles_4_6_20261103\\round1_baseline\\20261103T042522Z-2c42ff33\\task_299_team_identity_name_generation_userology.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\090dda95cb79456399349457d39ae875\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\090dda95cb79456399349457d39ae875\\project\\scripts\\tests\\task_299_team_identity_name_generation_userology.gd"
+      ]
+    },
+    {
+      "name": "task_259_character_card_roster_switching_playability",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-655dd20ea96a479dade88bc409ec3209",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\655dd20ea96a479dade88bc409ec3209\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_cycles_4_6_20261103\\round1_baseline\\20261103T042522Z-2c42ff33\\task_259_character_card_roster_switching_playability.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\655dd20ea96a479dade88bc409ec3209\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\655dd20ea96a479dade88bc409ec3209\\project\\scripts\\tests\\task_259_character_card_roster_switching_playability.gd"
+      ]
+    },
+    {
+      "name": "task_363_homebase_roster_card_pool_incremental_refresh",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-b46daf5d9fef4db89eb9640cd2ab0208",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b46daf5d9fef4db89eb9640cd2ab0208\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_cycles_4_6_20261103\\round1_baseline\\20261103T042522Z-2c42ff33\\task_363_homebase_roster_card_pool_incremental_refresh.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b46daf5d9fef4db89eb9640cd2ab0208\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b46daf5d9fef4db89eb9640cd2ab0208\\project\\scripts\\tests\\task_363_homebase_roster_card_pool_incremental_refresh.gd"
+      ]
+    },
+    {
+      "name": "bugfix_player_roster_corrupt_save_quiet_recovery",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-792371cef56a4734bcd6f4b020a75117",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\792371cef56a4734bcd6f4b020a75117\\project",
+      "roster_before": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "roster_after": {
+        "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+        "length": 221426,
+        "mtime_ns": 1793651922023643800
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\output\\review_cycles_4_6_20261103\\round1_baseline\\20261103T042522Z-2c42ff33\\bugfix_player_roster_corrupt_save_quiet_recovery.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\792371cef56a4734bcd6f4b020a75117\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\792371cef56a4734bcd6f4b020a75117\\project\\scripts\\tests\\bugfix_player_roster_corrupt_save_quiet_recovery.gd"
+      ]
+    }
+  ],
+  "summary": {
+    "selected": 5,
+    "passed": 5,
+    "failed": 0
+  },
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "d0fa4b03ff72d7cf427fd65bf6c54d4ebfc327e9f37055d657501362d189edcb",
+    "length": 221426,
+    "mtime_ns": 1793651922023643800
+  },
+  "all_user_dirs_unique": true
+}

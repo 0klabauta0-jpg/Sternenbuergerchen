@@ -48,4 +48,47 @@ Keine unbestaetigten Review-Ideen implementieren. Native Langzeitperformance
 und bereits bekannte Altfehler bleiben getrennt ausgewiesen.
 
 ## Runden / Befunde / Ergebnisse
-Review gestartet; noch keine neuen Befunde bestaetigt.
+### Runde 1: P1 Reset ohne erfolgreiches Pflichtarchiv
+`PlayerRosterStore.reset_roster()` ignoriert einen Fehler beim Archivieren und
+ueberschreibt danach den aktiven Save. Der reale MainMenu-Consumer ersetzt auch
+bei fehlgeschlagenem Reset sein In-Memory-Team und verbraucht den Resetindex.
+Contract: docs/dev/player_roster_save_contract.md. Ziel: bei bestehendem Save
+und erforderlichem fehlgeschlagenem Archiv kein Generieren/Speichern, Original
+zurueckgeben, Anzeige/Index erhalten; erfolgreicher Reset, erster Save und
+expliziter Archivverzicht bleiben kompatibel. Regression nutzt nur eigene
+user://-Pfade und echten Store sowie MainMenu; RED vor Produktfix gespeichert.
+
+#### Zusaetzlicher P2-Befund aus dem Repro
+Mehrere unveraenderte Seeds erzeugen legitime effektive Pilot-Toughness unter
+0.22: Basis 0.46, Jitter bis -0.10, Trait `reckless` -0.15 ergibt bis 0.21.
+Der Validator wendet faelschlich die untere Basis-Generierungsgrenze auf bereits
+trait-adjustierte Werte an und lehnt somit echte erzeugte Teams beim Speichern
+ab. Eigener Repro vor Fix; den bestehenden 0..1-Skillvertrag validieren, weder
+Basiswerte noch Traits oder effektive Werte veraendern. Contract:
+docs/dev/character_roster_generation_contract.md.
+
+### Runde 2: HPA-Cache-Hotpath
+Vor jedem Cache-Hit materialisiert SimulationRoot alle Terrain-Tiles nur fuer
+deren Anzahl. Preliminary RED 29/3: acht Hits materialisieren 131072/524288
+Tile-Referenzen auf 128x128/256x256. Ziel: konstante Registry-Zaehlerabfrage bei
+unveraenderter Identity-/Count-/Revision-Invalidierung, Legacy-Fallback erhalten.
+Owning Report: docs/performance/navigation_pathfinding_los_profile_report.md.
+
+### Runde 3: Status-Badge-Invalidierung
+Review untersucht fehlende Badge-Inputs im gecachten Unit-Visual-Payload.
+Erst realen normalen Sync-Pfad reproduzieren, dann kleinen Cachefix festlegen.
+
+## Ergebnis Runde 1
+- Effektiv-Skill-Domain RED 15/13 -> GREEN 34/0; identische Seeds und Werte
+  behalten. Bestehender TASK232 ebenfalls gruen.
+- Archivfehler nach Domainfix korrekt RED 32/15 -> Helper-GREEN 47/0.
+  Unabhaengiger Nachreview fand auch den echten Button-Consumer: RED 58/5.
+  Callback oeffnet Editor nur nach Erfolg; finaler Verifier 65/65, unabhaengig
+  APPROVED. Fuenf angrenzende Store-/Roster-/UI-Gates ebenfalls gruen.
+- Zunaechst falsche Archiv-Diagnoseannahme an Windows angepasst (Directory-
+  oder Writefehler desselben Blockerpfads). Kein Seed ausgetauscht. Finale
+  Button-Retry-Fixture liest tatsaechliche Archiveintraege, da ein erfolgreicher
+  Editor-Save regulaer die Last-Store-Metadaten ersetzt. Rohhistorie erhalten.
+- Produktdateien: start_roster_generator.gd, player_roster_store.gd,
+  main_menu_screen.gd; owning Contracts character_roster_generation und
+  player_roster_save. Alle Laeufe isoliert, Originalroster unveraendert.

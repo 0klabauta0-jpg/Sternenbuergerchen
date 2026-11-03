@@ -34,6 +34,19 @@ Unit-Felder bleiben als `MetaUnitProfile`-Dictionary erhalten, inklusive:
 ## Reset
 `reset_roster()` erzeugt nur nach expliziter Bestaetigung ein neues Team. Vorhandene Saves werden unter `user://profiles/<profile>/archive/` archiviert, bevor der neue Save geschrieben wird.
 
+Scheitert das angeforderte Archiv eines vorhandenen Saves, bricht der Reset vor
+Generation und Schreiben mit `ok = false`, `created = false` und
+`reason = active_archive_failed` ab. Die aktiven Savebytes bleiben unveraendert;
+der Store liefert das weiterhin lesbare alte Roster samt Diagnose zurueck.
+Ohne vorherigen Save ist kein Archiv erforderlich. Ein explizites
+`archive_existing = false` behaelt sein bisheriges Verhalten.
+
+Das Hauptmenue uebernimmt ein Reset-Roster erst nach erfolgreichem Store-Ergebnis.
+Bei Fehler bleiben sichtbares Team, Loaded-/Created-Status und Editorzustand
+erhalten; die fehlgeschlagene Operation wird angezeigt. Erst ein erfolgreicher
+Reset verbraucht eine neue Resetgeneration. Eine ausstehende Bestaetigung bleibt
+fuer einen erneuten Versuch verfuegbar.
+
 ## Multiplayer-Grenze
 - Singleplayer/Homebase nutzt das lokale Profil.
 - Host kann das eigene Profil oder ein explizites Szenario-Roster nutzen.

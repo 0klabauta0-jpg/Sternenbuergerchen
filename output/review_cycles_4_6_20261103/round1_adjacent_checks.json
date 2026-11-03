@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "task_234_persistent_player_roster_save_and_reset",
+      "script": "res://scripts/tests/task_234_persistent_player_roster_save_and_reset.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_299_team_identity_name_generation_userology",
+      "script": "res://scripts/tests/task_299_team_identity_name_generation_userology.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_259_character_card_roster_switching_playability",
+      "script": "res://scripts/tests/task_259_character_card_roster_switching_playability.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_363_homebase_roster_card_pool_incremental_refresh",
+      "script": "res://scripts/tests/task_363_homebase_roster_card_pool_incremental_refresh.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "bugfix_player_roster_corrupt_save_quiet_recovery",
+      "script": "res://scripts/tests/bugfix_player_roster_corrupt_save_quiet_recovery.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    }
+  ]
+}

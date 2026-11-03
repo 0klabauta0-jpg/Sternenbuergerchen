@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-792371cef56a4734bcd6f4b020a75117
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== BUGFIX Player Roster Corrupt Save Quiet Recovery ===
+PASS: Bugfix task file exists
+PASS: Bugfix task names corrupt save recovery
+PASS: Roster store reports parse failures as diagnostics
+PASS: Roster store reports empty files as diagnostics
+PASS: Roster store uses non-throwing JSON parser object
+PASS: Empty roster save is rejected
+PASS: Empty roster save is reported as existing
+PASS: Empty roster save reports load_empty
+PASS: Corrupt roster save is rejected
+PASS: Corrupt roster save reports load_parse_failed
+PASS: ensure_roster regenerates after corrupt save
+PASS: ensure_roster marks regenerated roster as created
+PASS: Regenerated roster contains units
+PASS: Roster entry list survives corrupt active save
+PASS: Roster entry list contains corrupt active save
+PASS: Corrupt active save entry is marked invalid
+PASS: Corrupt active save entry gets readable fallback name
+PASS: Corrupt active save entry exposes parse diagnostic
+=== RESULTS: 18 passed, 0 failed ===
+BUGFIX_PLAYER_ROSTER_CORRUPT_SAVE_QUIET_RECOVERY: ALL PASSED
