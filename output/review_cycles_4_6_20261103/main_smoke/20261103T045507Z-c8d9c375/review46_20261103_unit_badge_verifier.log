@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-3f4e2ae06a944fb6a84b665be4146da6
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Public set_unit_nodes builds an actual proxy and Label3D badge
+PASS: Initial live unit has a visible IDLE badge
+PASS: Fixture starts with an explicit posture recognized by runtime normalization
+PASS: Unchanged process frames retain the expensive visual fast path
+PASS: Unchanged stationary payload does not request additional viewport redraws
+PASS: Contact-only runtime change updates the actual visible badge in the next frame
+PASS: Contact-only change updates badge color
+PASS: Contact-only badge revision requests a viewport redraw
+PASS: Clearing contact restores the actual IDLE badge
+PASS: Contact badge changes do not rerun skeleton or vital work
+PASS: Public runtime setter accepts a source-command-only update
+PASS: Source-command-only runtime update reaches the actual badge
+PASS: Source-command-only badge revision requests a viewport redraw
+PASS: Public runtime setter accepts a status-only update
+PASS: Status-only runtime update reaches the actual badge
+PASS: Status-only test preserves actual normalized movement and weapon postures
+REVIEW46_BADGE_POSTURE_JSON={"assigned":{"active_command_type":"","aim_readiness_percent":0.0,"attack_bonus":0.0,"cover_score":0.0,"fire_status":"fire_at_will","fireteam_id":"blue","move_speed_factor":1.0,"movement_posture":"crouch","posture_policy_id":"","priority":0,"sight_range_factor":1.0,"source_command_type":"","status":"assigned","team_id":"team_alpha","unit_id":"badge_live","weapon_posture":"lowered"},"assigned_helper_counts":"(1, 1)","initial":{"active_command_type":"","aim_readiness_percent":0.0,"attack_bonus":0.0,"cover_score":0.0,"fire_status":"fire_at_will","fireteam_id":"blue","move_speed_factor":1.0,"movement_posture":"crouch","posture_policy_id":"","priority":0,"sight_range_factor":1.0,"source_command_type":"","status":"idle","team_id":"team_alpha","unit_id":"badge_live","weapon_posture":"lowered"},"initial_helper_counts":"(1, 1)"}
+PASS: Status/source changes with unchanged posture retain the expensive fast path
+PASS: Overwatch state displays a visible DEF badge
+PASS: Shot-readiness-only change refreshes the actual DEF badge color
+PASS: Shot-readiness badge color does not rerun skeleton or vital work
+PASS: Public world-label declutter hides the existing routine badge
+PASS: Leaving declutter restores the same existing badge
+PASS: Declutter revisions do not rerun skeleton or vital work
+PASS: Runtime unit visibility hides the actual proxy
+PASS: Revealing an unchanged wounded unit restores the actual badge after its hidden update
+PASS: Badge-only and visibility changes preserve proxy and Label3D identity
+PASS: Settled visible badge changes leave later frames on the expensive fast path
+PASS: Real respawn fixture registers the actual runtime unit
+PASS: Real RespawnManager enters the ordinary rover countdown
+PASS: Runtime unit reads the real initial 30-second respawn timer
+PASS: Initial real respawn timer has a visible actual badge
+PASS: Ordinary RespawnManager physics advances its own timer to 29 display seconds
+PASS: Timer-only physics change updates the actual visible badge in the next frame
+PASS: Timer-only badge revision requests a viewport redraw
+PASS: Timer-only badge refresh does not rerun skeleton or vital work
+PASS: Countdown retains existing proxy and badge nodes
+REVIEW46_UNIT_BADGE_RESULT passed=36 failed=0

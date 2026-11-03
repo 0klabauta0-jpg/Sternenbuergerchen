@@ -10,6 +10,8 @@
   28-Unit-/60s-Paar mehr CPU, bleibt unter bestehendem Budget. Keine FPS-Abnahme.
 - Task `docs/tasks/REVIEW_CYCLES_4_6_2026_11_03_performance_architecture.md`,
   Evidence `output/review_cycles_4_6_20261103/verification_summary.json`.
+- Main per Fast-forward uebernommen/gepusht; dort `7210f6752` zusaetzlich
+  Smoke 5/5 Gates / 173 Assertions, danach nur Doku-/Evidence-Nachtrag.
 
 ## Nutzerauftrag 2026-11-03 - Drei autonome Review-/Fixzyklen
 - Drei aufeinanderfolgende Runden abgeschlossen: fuenf bestaetigte Performance-/

@@ -31,7 +31,7 @@ Vorhandene ungetrackte Arbeiten bleiben unangetastet.
 - [x] Originalroster SHA256, Laenge und Schreibzeit vor/nach jedem Lauf gleich.
 - [x] Abschlussmatrix ohne neue Regressionen und unabhaengiges Gesamt-Nachreview;
   etwaige Altfehler separat am Original-Main nachweisen und offen ausweisen.
-- [ ] Nur Taskdateien committed, Main konfliktfrei integriert und Push verifiziert.
+- [x] Nur Taskdateien committed, Main konfliktfrei integriert und Push verifiziert.
 
 ## Betroffene Dateien
 Diese Taskdatei; Befund-spezifische Produkt-/Regressiondateien folgen nach Review.
@@ -141,3 +141,13 @@ Userdata-Verzeichnissen, Originalroster SHA/Laenge/Schreibzeit gleich.
 Nach diesem Stand nur Doku/Evidence. Gesamtindex und Rohreport:
 `output/review_cycles_4_6_20261103/verification_summary.json`,
 `final_suite/20261103T044414Z-5b8b1e6c/report.json`.
+
+## Main-Abschluss
+Main konfliktfrei per Fast-forward uebernommen. Auf `7210f6752` zusaetzlich
+vier neue Verifier und Canary isoliert: 5/5 Gates / 173 Assertions gruen,
+alle 95 Quellfingerprints identisch mit dem gemeinsamen Sourcecommit.
+Main und Task-Branch nach erfolgreichem Smoke normal gepusht und beide
+Remote-IDs `7210f6752` abgeglichen. Anschliessend nur Doku-/Evidence-Nachtrag,
+keine Produkt-/Testaenderung. Insgesamt 134 getrennte Isolationslaeufe,
+Originalroster SHA256/Laenge/Schreibzeit unveraendert. Abschlussreport:
+`output/review_cycles_4_6_20261103/main_smoke/20261103T045507Z-c8d9c375/report.json`.

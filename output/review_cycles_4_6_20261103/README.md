@@ -79,6 +79,13 @@ python output/review_cycles_4_6_20261103/summarize_evidence.py
 
 ## Main-Abschluss
 
-Main-Fast-forward, anschliessender isolierter Smoke und Push folgen nach der
-abschliessenden Evidence-Gegenpruefung. Der bekannte TASK839-Altfehler wird
-ausdruecklich mitgegeben.
+Main per Fast-forward uebernommen; auf `7210f6752` die vier neuen Regressionen
+und Canary erneut isoliert bestanden: **5/5 Gates, 173/173 Assertions**.
+Alle 95 Fingerprints stimmen mit dem gemeinsamen Sourcecommit ueberein.
+Main und Task-Branch erfolgreich gepusht und Remote-IDs fuer `7210f6752`
+abgeglichen. Danach nur dieser Doku-/Evidence-Nachtrag mit unveraendertem Code.
+Insgesamt **134 Checklaeufe mit 134 frischen eindeutigen Userdata-Verzeichnissen**;
+Originalroster weiterhin in Bytes, Laenge und Schreibzeit gleich.
+Smoke: `main_smoke/20261103T045507Z-c8d9c375/report.json`, Kontext
+`main_smoke_context.json`. Der bekannte TASK839-Altfehler bleibt ausdruecklich
+mitgegeben; Main-Smoke ist keine erneute gesamte Matrix.

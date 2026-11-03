@@ -158,7 +158,7 @@
     "length": 221426,
     "mtime_ns": 1793651922023643800
   },
-  "isolated_check_runs": 129,
+  "isolated_check_runs": 134,
   "all_user_dirs_unique": true,
   "history": [
     {
@@ -213,6 +213,12 @@
       "report": "output/review_cycles_4_6_20261103/isolation_canary/20261103T042336Z-513990ae/report.json",
       "selected": 1,
       "passed": 1,
+      "failed": 0
+    },
+    {
+      "report": "output/review_cycles_4_6_20261103/main_smoke/20261103T045507Z-c8d9c375/report.json",
+      "selected": 5,
+      "passed": 5,
       "failed": 0
     },
     {
@@ -1334,5 +1340,21 @@
         "failed": 0
       }
     }
-  ]
+  ],
+  "main_smoke": {
+    "report": "output/review_cycles_4_6_20261103/main_smoke/20261103T045507Z-c8d9c375/report.json",
+    "gates": {
+      "selected": 5,
+      "passed": 5,
+      "failed": 0
+    },
+    "assertions": 173,
+    "context": {
+      "tested_main_commit": "7210f675246b9dba405f08410db22f0d60585ac6",
+      "branch": "main",
+      "full_suite_source_commit": "48f96221b807fb2971207f3ec9133b91a0f785a2",
+      "source_hash_count": 95,
+      "all_source_bytes_identical": true
+    }
+  }
 }

@@ -77,6 +77,17 @@ def main():
                                                    'limitation': 'One pair; measured overhead, no native FPS or isolated causal estimate.'},
                'protected_roster': state, 'isolated_check_runs': len(all_cases), 'all_user_dirs_unique': True,
                'history': history, 'checks': checks}
+    smoke_reports = list((OUT / 'main_smoke').glob('*/report.json'))
+    if smoke_reports:
+        smoke_path, = smoke_reports
+        smoke = json.loads(smoke_path.read_text())
+        assert smoke['summary'] == {'selected': 5, 'passed': 5, 'failed': 0}
+        smoke_counts = [assertion_counts(c) for c in smoke['checks']]
+        assert sum(c['passed'] for c in smoke_counts) == 173
+        assert sum(c['failed'] for c in smoke_counts) == 0
+        summary['main_smoke'] = {'report': str(smoke_path.relative_to(ROOT)).replace('\\', '/'),
+                                 'gates': smoke['summary'], 'assertions': 173,
+                                 'context': json.loads((OUT / 'main_smoke_context.json').read_text())}
     (OUT / 'verification_summary.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')
     print(json.dumps({'gates': report['summary'], 'assertions': total, 'new_assertions': 173,
                       'isolated_check_runs': len(all_cases), 'source_hashes': len(snapshot['files_sha256'])}))

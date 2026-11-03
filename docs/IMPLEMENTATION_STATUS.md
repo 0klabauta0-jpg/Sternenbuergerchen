@@ -15,6 +15,9 @@
 - Unabhaengige Code-Nachreviews APPROVED. Alle Laeufe isoliert, Originalroster
   unveraendert; 95 Quellfingerprints. Index
   `output/review_cycles_4_6_20261103/verification_summary.json`.
+- Main per Fast-forward uebernommen und gepusht; auf `7210f6752` isolierter
+  Smoke 5/5 Gates / 173 Assertions bei identischen 95 Fingerprints. Danach nur
+  Doku/Evidence. Insgesamt 134 eindeutige Isolationslaeufe, Originalroster gleich.
 
 ### REVIEW-ZYKLEN 2026-11-03 - Drei autonome Performance-/Architekturrunden
 - Basis aktueller Main `8eaeadd27e`; Task
