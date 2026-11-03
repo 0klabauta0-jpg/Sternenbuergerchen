@@ -44,6 +44,18 @@ git diff --check
 
 ## Umsetzung
 
+- REVIEW7-Nachtrag: Terrainjobs verwenden eine unveraenderliche Positionsstichprobe.
+  Gegnerbewegung ist kein Terraininput; laufende Observerbewegung wird nach
+  Jobabschluss beim naechsten 100-ms-Aufruf nachgezogen. Die publizierte Signatur
+  bezeichnet die berechnete Stichprobe, nicht eine inzwischen neuere Position.
+  Terrain, Modus, Viewerteam, aktive Observer und Sichtparameter invalidieren
+  vor dem naechsten Slice. Target-LOS bleibt davon unabhaengig getaktet aktuell.
+  Ein unveraenderter Terrainzustand behaelt auch im echten View seinen laufenden
+  Overlayaufbau; reine Targetupdates enumerieren die Karte nicht. Pending behaelt
+  die letzte vollstaendige Terrainrevision statt sie zu leeren. Fortlaufende
+  +1-Deltas aktualisieren auch einen noch laufenden Initialaufbau; die Safety-
+  Abdeckung bleibt bis zu dessen Abschluss. Revisionsluecken erfordern Fullbuild.
+
 - Der Dirty-Pfad plant Candidate-Regionen nur noch konstant und durchlaeuft
   Lookup sowie Sichtauswertung in getrennten, begrenzten Scheiben. Er sortiert
   weder die gesamte Karte noch die gesammelten Kandidaten; die Reihenfolge ist

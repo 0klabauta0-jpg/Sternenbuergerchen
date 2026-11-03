@@ -101,6 +101,7 @@ var _fog_unit_nodes: Array = []
 var _fog_terrain_registry = null
 var _fog_runtime_signature: String = ""
 var _fog_requested_runtime_signature: String = ""
+var _fog_requested_static_signature: String = ""
 var _fog_pending_visibility_started_msec: int = 0
 var _fog_update_elapsed: float = 0.0
 var _friendly_unit_slot_paths: Array[NodePath] = []
@@ -1050,43 +1051,64 @@ func _sync_fog_of_war_visual_state(force: bool = false) -> void:
 	if mode == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF:
 		_fog_runtime_signature = "off"
 		_fog_requested_runtime_signature = ""
+		_fog_requested_static_signature = ""
 		_fog_pending_visibility_started_msec = 0
 		if view.has_method("set_fog_of_war_state"):
 			view.call("set_fog_of_war_state", {"mode": mode, "team_id": viewer_team_id})
 		return
 	var next_signature: String = _build_fog_runtime_signature(mode)
-	if not force and next_signature == _fog_runtime_signature:
+	var next_static_signature: String = _build_fog_runtime_signature(mode, false)
+	# Dynamic targets sample current LOS independently of the terrain job, even
+	# while its bounded slices are still running.
+	_sync_fog_dynamic_target_visibility()
+	if not force and not _fog_requested_runtime_signature.is_empty() and next_static_signature == _fog_requested_static_signature:
+		# Keep the frozen positional sample until it completes. Latest positions
+		# are read for the next request; walking must not restart every slice.
+		if view.has_method("set_fog_of_war_state"):
+			var pending_snapshot: Dictionary = _fog_of_war_system.call("build_team_state_snapshot", viewer_team_id)
+			pending_snapshot["visibility_pending"] = true
+			view.call("set_fog_of_war_state", pending_snapshot)
 		return
-	if not force and next_signature == _fog_requested_runtime_signature:
+	if not force and _fog_requested_runtime_signature.is_empty() and next_signature == _fog_runtime_signature:
+		# Targets do not contribute to terrain visibility. Refresh their LOS at the
+		# normal cadence without replacing terrain work or enumerating map tiles.
+		if view.has_method("set_fog_of_war_state"):
+			view.call("set_fog_of_war_state", _fog_of_war_system.call("build_team_state_snapshot", viewer_team_id))
 		return
+	# Returning to a committed observer state must replace a different pending
+	# job too; otherwise that obsolete job could later publish its away position.
+	var replace_with_committed_state: bool = not _fog_requested_runtime_signature.is_empty() and next_signature == _fog_runtime_signature
 	_fog_requested_runtime_signature = next_signature
+	_fog_requested_static_signature = next_static_signature
 	_fog_pending_visibility_started_msec = Time.get_ticks_msec()
 	_fog_of_war_system.call(
 		"request_tile_visibility_update_for_team",
 		viewer_team_id,
-		_fog_observer_unit_nodes,
+		_get_active_fog_observers(),
 		_fog_terrain_registry,
 		_fog_of_war_los_system,
 		fog_of_war_sight_range_world,
-		{"work_budget_tiles": fog_of_war_work_budget_tiles}
+		{"work_budget_tiles": fog_of_war_work_budget_tiles, "force_full": force or replace_with_committed_state}
 	)
-	# The previous state may contain information the new observer position must no
-	# longer expose.  Until the authoritative revision is complete, use the
-	# conservative visual state: known terrain is dimmed and blackout terrain is
-	# covered, while gameplay truth remains in FogOfWarSystem.
+	# Retain the last complete terrain sample until the next atomic publication
+	# (TASK1189). Clearing it here would restart the real overlay on every step.
+	# The initial sample has no known tiles and remains safely blacked out;
+	# dynamic targets already use current LOS independently of the terrain job.
 	if view.has_method("set_fog_of_war_state"):
-		view.call("set_fog_of_war_state", {
-			"mode": mode,
-			"team_id": viewer_team_id,
-			"terrain_knowledge": {"visible_tile_ids": PackedStringArray(), "explored_tile_ids": PackedStringArray()},
-			"current_visibility": {"visible_target_ids": PackedStringArray(), "visible_event_ids": PackedStringArray()},
-			"visibility_pending": true,
-		})
+		var pending_snapshot: Dictionary = _fog_of_war_system.call("build_team_state_snapshot", viewer_team_id)
+		pending_snapshot["visibility_pending"] = true
+		view.call("set_fog_of_war_state", pending_snapshot)
 	_advance_fog_of_war_visibility_work()
 
 
 func _advance_fog_of_war_visibility_work() -> void:
 	if _fog_of_war_system == null or _fog_requested_runtime_signature.is_empty():
+		return
+	# Terrain, mode, active observers and sight changes invalidate before commit.
+	# Motion retains the request's atomic sample and coalesces into the next job.
+	var mode: String = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", fog_of_war_mode))
+	if _build_fog_runtime_signature(mode, false) != _fog_requested_static_signature:
+		_sync_fog_of_war_visual_state(false)
 		return
 	var viewer_team_id: String = _get_fog_viewer_team_id()
 	var update: Dictionary = Dictionary(_fog_of_war_system.call("process_pending_tile_visibility_work", viewer_team_id, fog_of_war_work_budget_tiles))
@@ -1094,11 +1116,12 @@ func _advance_fog_of_war_visibility_work() -> void:
 		return
 	_fog_runtime_signature = _fog_requested_runtime_signature
 	_fog_requested_runtime_signature = ""
+	_fog_requested_static_signature = ""
 	_fog_pending_visibility_started_msec = 0
 	_sync_fog_dynamic_target_visibility()
 	var view = _terrain_3d_view
 	if view != null and is_instance_valid(view) and view.has_method("set_fog_of_war_state"):
-		view.call("set_fog_of_war_state", _fog_of_war_system.call("build_team_visual_state_snapshot", viewer_team_id, _fog_terrain_registry))
+		view.call("set_fog_of_war_state", _fog_of_war_system.call("build_team_state_snapshot", viewer_team_id))
 
 
 func _sync_fog_dynamic_target_visibility() -> void:
@@ -1161,23 +1184,27 @@ func _get_effective_fog_sight_range_world(observer: Node) -> float:
 	return fog_of_war_sight_range_world * maxf(sight_range_factor, 0.0)
 
 
-func _build_fog_runtime_signature(mode: String) -> String:
+func _build_fog_runtime_signature(mode: String, include_positions: bool = true) -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	parts.append(mode)
 	parts.append(_get_fog_viewer_team_id())
+	parts.append("base_sight:%s" % str(fog_of_war_sight_range_world))
 	if _fog_terrain_registry != null and _fog_terrain_registry.has_method("get_revision"):
 		parts.append("terrain_revision:%d" % int(_fog_terrain_registry.call("get_revision")))
-	for unit in _fog_unit_nodes:
+	# Only observer inputs affect terrain LOS. Enemy motion is handled by the
+	# separate dynamic-target refresh and cannot restart an unfinished full scan.
+	for unit in _get_active_fog_observers():
 		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
 			continue
 		var visible_text: String = "1" if not (unit is CanvasItem) or (unit as CanvasItem).visible else "0"
-		var grid_text: String = _get_fog_grid_signature((unit as Node2D).global_position)
-		var sight_text: String = "%.3f" % _get_fog_unit_sight_range_factor(unit)
+		var position: Vector2 = (unit as Node2D).global_position
+		var position_text: String = "%s,%s" % [str(position.x), str(position.y)] if include_positions else ""
+		var sight_text: String = str(_get_fog_unit_sight_range_factor(unit))
 		parts.append("%s:%s:%s:%s:%s" % [
 			String(unit.call("get_unit_id")).strip_edges(),
 			String(unit.call("get_team_id")).strip_edges(),
 			visible_text,
-			grid_text,
+			position_text,
 			sight_text,
 		])
 	parts.sort()

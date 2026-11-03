@@ -1901,14 +1901,22 @@ func _set_contact_density_heatmap_enabled_internal(enabled: bool, force_rebuild:
 func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	var normalized_state: Dictionary = _normalize_fog_of_war_visual_state(fog_of_war_state)
 	var next_signature: String = _build_fog_of_war_visual_signature(normalized_state)
-	if next_signature == _fog_of_war_state_signature:
+	var terrain_unchanged: bool = (
+		String(normalized_state.get("mode", "")) == String(_fog_of_war_state.get("mode", ""))
+		and String(normalized_state.get("team_id", "")) == String(_fog_of_war_state.get("team_id", ""))
+		and int(normalized_state.get("visibility_revision", 0)) == int(_fog_of_war_state.get("visibility_revision", 0))
+		and Dictionary(normalized_state.get("terrain_knowledge", {})) == Dictionary(_fog_of_war_state.get("terrain_knowledge", {}))
+	)
+	if next_signature == _fog_of_war_state_signature and terrain_unchanged:
 		return
 	var work_started_usec: int = Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
 	var can_apply_overlay_delta: bool = _can_apply_fow_overlay_delta(normalized_state)
 	var previous_dynamic_visibility_signature: String = _build_fow_dynamic_visibility_signature(_fog_of_war_state)
 	_fog_of_war_state_signature = next_signature
 	_apply_fog_of_war_visual_state(normalized_state)
-	if not can_apply_overlay_delta or not _apply_fow_overlay_delta(normalized_state):
+	# Target/contact updates keep the same terrain revision and tile sets. They
+	# must retain even an in-flight overlay's mesh, cursor and safety cover.
+	if not terrain_unchanged and (not can_apply_overlay_delta or not _apply_fow_overlay_delta(normalized_state)):
 		_rebuild_fog_of_war_visuals()
 	_rebuild_contact_visuals()
 	_fow_contact_visibility_refresh_count += 1
@@ -6007,6 +6015,9 @@ func _rebuild_fog_of_war_visuals() -> void:
 	for tile_id in _fow_overlay_render_tile_ids:
 		_fow_overlay_slot_by_tile_id[tile_id] = _fow_overlay_slot_by_tile_id.size()
 	_create_fow_overlay_multimesh()
+	# Slots already cover the complete rendered subset. Sequential deltas may
+	# update them during the bounded initial build; later slices read latest state.
+	_fow_overlay_visibility_revision = int(_fog_of_war_state.get("visibility_revision", 0))
 	_fow_overlay_pending_tile_ids = PackedStringArray(_fow_overlay_render_tile_ids)
 	_fow_overlay_pending_cursor = 0
 	_fow_overlay_full_rebuild_pending = not _fow_overlay_pending_tile_ids.is_empty()
@@ -6105,10 +6116,10 @@ func _can_apply_fow_overlay_delta(next_fog_state: Dictionary) -> bool:
 		return false
 	if _fow_overlay_slot_by_tile_id.is_empty() or _fow_overlay_multimesh == null:
 		return false
-	if _fow_overlay_full_rebuild_pending:
-		return false
 	var next_revision: int = int(next_fog_state.get("visibility_revision", 0))
-	return next_revision > _fow_overlay_visibility_revision and not Dictionary(next_fog_state.get("visibility_delta", {})).is_empty()
+	# A delta describes only the last transition. A skipped revision requires
+	# rebuilding from complete knowledge, including changes in the missing delta.
+	return next_revision == _fow_overlay_visibility_revision + 1 and not Dictionary(next_fog_state.get("visibility_delta", {})).is_empty()
 
 
 func _apply_fow_overlay_delta(next_fog_state: Dictionary) -> bool:
@@ -12282,7 +12293,12 @@ func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bo
 	if String(proxy.get_meta("unit_visual_animation_name", "")) != desired_animation:
 		proxy.set_meta("unit_visual_animation_name", desired_animation)
 		changed = true
+	var previous_animation_position: float = animation_player.current_animation_position
 	animation_player.advance(maxf(delta, 0.0))
+	# UPDATE_ONCE also needs a new frame when a stable clip advances its pose.
+	# Frozen/zero-delta or hidden animations must not cause recurring redraws.
+	if proxy.is_visible_in_tree() and not is_equal_approx(previous_animation_position, animation_player.current_animation_position):
+		changed = true
 	return changed
 
 

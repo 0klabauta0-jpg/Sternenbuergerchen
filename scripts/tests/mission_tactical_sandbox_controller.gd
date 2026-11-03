@@ -30419,8 +30419,9 @@ func _focus_connected_first_contact_world(contact_snapshot: Array) -> Dictionary
 		var position_variant: Variant = contact.get("approximate_position", contact.get("last_known_position", contact.get("position", null)))
 		if typeof(position_variant) != TYPE_VECTOR2:
 			continue
-		var position: Vector2 = Vector2(position_variant)
-		signature_tokens.append("%s:%d:%d" % [String(contact.get("target_id", contact.get("unit_id", ""))), roundi(position.x), roundi(position.y)])
+		# Positions belong to the frame bounds, not its one-shot identity.
+		# A normal moving-contact snapshot must preserve manual pan and zoom.
+		signature_tokens.append("%s:%s" % [fireteam_id, String(contact.get("target_id", contact.get("unit_id", "")))])
 	var signature: String = "|".join(signature_tokens)
 	if signature == _connected_first_contact_world_frame_signature:
 		return {"framed": false, "reason": "already_framed", "signature": signature}

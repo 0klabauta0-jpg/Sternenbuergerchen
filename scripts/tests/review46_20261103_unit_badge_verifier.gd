@@ -202,6 +202,15 @@ func _make_view(fixture: Node, unit: Node) -> CountingView:
 	view.set_process(false)
 	view.call("configure_from_map", MAP.create_empty("review46_badge", Vector2i(4, 4), Vector2.ZERO, 64.0, 32.0, 3))
 	view.call("set_unit_nodes", [unit])
+	# This verifier isolates badge redraws from unrelated live idle animation.
+	# Freeze the actual player through its normal API; positive-delta process
+	# frames, cache/fast-path assertions and all visible badge checks stay real.
+	# review7_animation_verifier covers the required live-animation redraws.
+	var runtime: Dictionary = Dictionary(Dictionary(view.get("_unit_proxy_runtime_by_id")).get(String(unit.call("get_unit_id")), {}))
+	var animation_player: AnimationPlayer = runtime.get("animation_player", null) as AnimationPlayer
+	_check(animation_player != null, "Badge-only redraw fixture has a real AnimationPlayer")
+	if animation_player != null:
+		animation_player.speed_scale = 0.0
 	_step(view)
 	return view
 
