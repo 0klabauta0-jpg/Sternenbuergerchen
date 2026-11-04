@@ -5727,9 +5727,16 @@ func _update_aircraft_panel() -> void:
 	if selected_craft.is_empty():
 		selector.disabled = selector.item_count == 0
 		remove_aircraft_button.disabled = true
-		status_label.text = "Noch kein Transport. Schiffstyp wählen und mit + hinzufügen."
-		shipcards_list.add_child(_build_empty_state_label("Trupps und Pilot anschließend auf die Schiffskarte ziehen."))
-		transfers_list.add_child(_build_empty_state_label("No loading or ship flights queued."))
+		var payload_craft := _get_aircraft_definition_by_id(_get_homebase_direct_payload_craft_id())
+		if bool(payload_craft.get("mission_transit_to_homebase", false)):
+			var craft_name: String = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_display_name(payload_craft)
+			status_label.text = "%s · Rückflug (%d s)" % [craft_name, int(payload_craft.get("transfer_eta_seconds", 0))]
+			shipcards_list.add_child(_build_empty_state_label("Der Transport ist nach seiner Rückkehr wieder verfügbar."))
+		else:
+			status_label.text = "Noch kein Transport. Schiffstyp wählen und mit + hinzufügen."
+			shipcards_list.add_child(_build_empty_state_label("Trupps und Pilot anschließend auf die Schiffskarte ziehen."))
+			transfers_list.add_child(_build_empty_state_label("No loading or ship flights queued."))
+		status_label.tooltip_text = status_label.text
 		return
 
 	selector.disabled = selector.item_count == 0

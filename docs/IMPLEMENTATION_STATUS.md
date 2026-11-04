@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### A5 – Zweiter Einsatz nach Debrief, 2026-11-04
+- Der Einzelspieler-Metaübergang verwirft den taktischen Plan der
+  abgeschlossenen Mission. Der zweite Einsatz erhält einen neuen Plan
+  und den aktuellen Trupp aus der Heimatbasis.
+- Die Rückfluganzeige und Startfreigabe folgen dem laufenden Transfer.
+  Reparatur, Roster und Debrief behalten ihre Zuständigkeiten.
+- Akzeptanz und isolierte Prüfschritte in
+  docs/tasks/BUGFIX_2026_11_04_a5_second_sortie.md.
+
 ### Drei ältere Gates auf Main, 2026-11-04
 - TASK839 bewertet weiterhin das Weltlabel-Declutter und verlangt das
   aktuelle TASK838-Event-Log-Gate. Die historische HUD-Geometrie steht
