@@ -56,3 +56,19 @@ Das Framing darf manuelles Panning nicht wiederholt ueberschreiben. Tonemapping 
 - Die Display-Dedupe folgt nun einer kontinuierlichen Fuenf-Sekunden-Kette ueber feste Zeitgrenzen hinweg. Rohhistorie und Event-IDs bleiben vollstaendig.
 - TASK_1122 11/11, TASK_1120 11/11, TASK_1121 8/8, TASK_293 17/17, TASK_1117 15/15, TASK_1119 23/23 headless und 24/24 je Real Window, TASK_1104 31/31, TASK_222 82/82.
 - Sichtbare Folgearbeit: Fireteam-Proxies stehen am Kontakt noch zu stark in einer vertikalen Reihe; ein isolierter Assetblock ausserhalb des Kartenverbands konkurriert mit dem Fokus.
+
+## Nachpruefung nach Frontier- und A5-Integration
+
+Die historischen Filmic- und Helligkeits-Assertions gelten fuer Karten ohne
+visuelles Theme. Die produktive Standardmission GM01 waehlt inzwischen per
+Kartendaten das Profil `frontier_illustrated_v1` mit ACES und neutraler
+Brightness (1,0). Der Verifier prueft dieses Profil auf der echten Standardmission
+und prueft Filmic sowie die begrenzte Helligkeitskorrektur auf einer separaten
+kleinen Karte ohne Theme ueber dieselbe View-Klasse. Kamera-, Fire- und
+Dedupe-Assertions gelten weiter fuer die Standardmission.
+
+Der Nachpruefungsumfang betrifft den TASK_1122-Verifier und seine Dokumentation.
+Die lokalen Assertions lesen das konfigurierte Environment ueber den
+Render-Snapshot und werden mit isoliertem Godot-Nutzerpfad, Pfadguard und
+frischer Roster-Baseline ausgefuehrt. Sie pruefen Profilwahl und Parameter;
+die optische Wirkung bleibt durch native Sichtnachweise belegt.

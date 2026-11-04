@@ -1,5 +1,15 @@
 # IMPLEMENTATION_STATUS
 
+### Drei ältere Gates auf Main, 2026-11-04
+- TASK839 bewertet weiterhin das Weltlabel-Declutter und verlangt das
+  aktuelle TASK838-Event-Log-Gate. Die historische HUD-Geometrie steht
+  im Diagnosepfad. TASK1122 deckt Frontier-ACES und generisches Filmic
+  ab. TASK326 prüft Host-Roster, lokale Opt-in-Roster und den Bodenmaßstab.
+- Review 7 103/103, A5 13/13, gezielte und benachbarte Gates 11/11.
+  Alle 127 erfolgreichen Läufe mit eigenem Profil und Pfadguard.
+  Original-Roster unverändert. Details in
+  `docs/tasks/LEGACY_GATES_2026_11_04.md`.
+
 ### A5-Integration auf Review 7, 2026-11-03
 - A5 `854a19e3b` mit Review 7 `bc6deb3a7` zusammengeführt. A5-HUD, GM01
   mit 9408 spielbaren Hexfeldern und A5-Navigation auf dem Review-7-Stand.

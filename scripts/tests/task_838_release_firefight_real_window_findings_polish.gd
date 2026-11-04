@@ -8,6 +8,8 @@ const META_LAYER_SCRIPT_PATH := "res://scripts/meta/meta_layer_flow.gd"
 const CONTROLLER_SCRIPT_PATH := "res://scripts/tests/mission_tactical_sandbox_controller.gd"
 const FIRST_GO_FIREFIGHT_ARG := "--release-singleplayer-first-go-firefight"
 const STYLE_ID := "task_838_release_firefight_event_log_findings_v1"
+const SYNC_STYLE_ID := "task_883_release_first_exchange_real_window_hud_source_sync_v1"
+const SYNC_SOURCE := "release_first_exchange_real_window_hud_source_sync"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -76,8 +78,9 @@ func _test_firefight_event_log_findings_polish() -> void:
 	_assert(String(snapshot.get("source_task_id", "")) == "TASK_837", "Snapshot builds on TASK_837")
 	_assert(String(snapshot.get("status", "")) == "pass", "Meta TASK_838 gate passes")
 	_assert(String(tactical.get("gate", "")) == "pass", "Tactical TASK_838 gate passes")
-	_assert(String(tactical.get("style_id", "")) == STYLE_ID, "Tactical snapshot exposes TASK_838 style id")
-	_assert(String(display.get("style_id", "")) == STYLE_ID, "Event-log display carries TASK_838 style id")
+	var display_style := String(display.get("style_id", ""))
+	_assert(String(tactical.get("style_id", "")) == display_style, "Tactical snapshot reports the live event-log style")
+	_assert(display_style in [STYLE_ID, SYNC_STYLE_ID], "Event-log display carries the Firefight or first-exchange sync style")
 	_assert(int(display.get("display_count", 0)) >= 1, "Event-log display has at least one row")
 	_assert(int(panel.get("rendered_entry_count", 0)) >= 1, "Event-log panel renders at least one row")
 	_assert(int(tactical.get("event_log_display_count", 0)) >= 1, "Tactical event-log display count is non-empty")
@@ -87,9 +90,23 @@ func _test_firefight_event_log_findings_polish() -> void:
 	if bool(display.get("fallback_active", false)):
 		var fallback: Dictionary = Dictionary(display.get("fallback_entry", {}))
 		var fallback_source: String = String(fallback.get("source", ""))
-		_assert(fallback_source == "release_firefight_event_log_fallback" or fallback_source == "release_fire_exchange_visibility_persistence", "Fallback source is an explicit read-only Firefight presenter")
+		var known_source := fallback_source == SYNC_SOURCE if display_style == SYNC_STYLE_ID else fallback_source in ["release_firefight_event_log_fallback", "release_fire_exchange_visibility_persistence"]
+		_assert(known_source, "Fallback source agrees with the live read-only Firefight projection")
 		_assert(bool(fallback.get("visual_only", false)), "Fallback is visual-only")
 		_assert(not String(fallback.get("short_text", "")).strip_edges().is_empty(), "Fallback has visible short text")
+
+	var mission := scene.get("_active_mission") as Node
+	var controller := mission.get_node_or_null("TacticalController") if mission != null else null
+	_assert(controller != null, "The active mission exposes the fallback builder")
+	if controller != null:
+		var source: Dictionary = tactical.get("source", {})
+		var decision_line := String(source.get("decision_line", ""))
+		var raw_events: Array = controller.call("get_tactical_event_log_snapshot")
+		var empty_log: Dictionary = controller.call("_build_release_firefight_event_log_display_snapshot", [], {"active": true, "decision_line": decision_line}, {})
+		var empty_fallback: Dictionary = empty_log.get("fallback_entry", {})
+		_assert(not decision_line.is_empty() and String(empty_log.get("style_id", "")) == STYLE_ID and int(empty_log.get("raw_count", -1)) == 0 and int(empty_log.get("display_count", 0)) == 1 and bool(empty_log.get("fallback_active", false)), "An empty raw log with the live Firefight decision gets one fallback row")
+		_assert(String(empty_fallback.get("source", "")) == "release_firefight_event_log_fallback" and bool(empty_fallback.get("visual_only", false)) and bool(empty_fallback.get("read_only", false)) and not bool(empty_fallback.get("creates_fire_event", true)), "The original empty-log fallback remains display-only")
+		_assert(Array(controller.call("get_tactical_event_log_snapshot")) == raw_events, "Building the fallback does not write a tactical event")
 
 	scene.queue_free()
 	await _wait_frames(2)

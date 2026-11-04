@@ -2117,10 +2117,10 @@ func get_release_firefight_real_window_findings_polish_snapshot(real_window_revi
 	var checks: Array = []
 	_append_handoff_check(
 		checks,
-		"source_command_matrix_passes",
-		String(source.get("status", "")) == "pass",
+		"firefight_mission_visible",
+		active_mission != null and _is_mission_host_visible_for_current_view(),
 		"critical",
-		"TASK_838 builds on a passing TASK_836 command-matrix snapshot."
+		"TASK_838 observes the active First-GO Firefight mission."
 	)
 	_append_handoff_check(
 		checks,

@@ -537,10 +537,13 @@ sichtbare Zeile ist dieselbe kompakte `NEXT ... | WHY ...`-Entscheidung.
 wie `FIRED` und `HIT` duerfen zwischen Surfaces abweichen; sie sind keine
 zweite UI- oder Gameplay-Wahrheit.
 
-Der TASK_838-Event-Log-Fallback bleibt rein visuell. Seine einzige erlaubte
-Quelle ist entweder `release_firefight_event_log_fallback` oder der neuere
-`release_fire_exchange_visibility_persistence`-Presenter. Beide erzeugen
-keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit.
+Der TASK_838-Event-Log-Fallback bleibt rein visuell. Er kommt aus
+`release_firefight_event_log_fallback`, `release_fire_exchange_visibility_persistence`
+oder bei aktivem TASK_883 aus `release_first_exchange_real_window_hud_source_sync`.
+Die Diagnose prüft den tatsächlich an das Panel gelieferten Snapshot und die
+gerenderte Zeile. Die historische TASK_836-Stilprüfung bleibt als Quelle
+erhalten. TASK_838 bewertet den aktiven Firefight-Kontext und das sichtbare Log.
+Keiner der Presenter erzeugt Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit.
 
 ## Release-First-Exchange-Recapture-Acceptance
 TASK_848 paketiert den frischen echten Release-Fenster-Recapture nach TASK_847. Der Acceptance-Snapshot darf den TASK_845-Recapture, Screenshotpfade, Git-/Branch-Kontext, erwartete TASK_847-Visibility-Style-ID und manuelle Review-Checks zusammenfassen. Er darf keine UI-, Command-, Combat-, Damage-, Contact-, Movement-, Multiplayer- oder Gameplay-Wahrheit erzeugen und keinen Pixelentscheid als bestanden behaupten.

@@ -4165,12 +4165,13 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		_record_mission_ui_refresh_timing_snapshot(refresh_started_usec, scopes_usec)
 
 
-func _refresh_tactical_event_log_panel() -> void:
+func _refresh_tactical_event_log_panel() -> Dictionary:
 	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
 	if panel == null or not panel.has_method("set_feedback_snapshot"):
-		return
+		return {}
 	var feedback_snapshot: Dictionary = get_live_tactical_event_log_feedback_snapshot()
 	panel.call("set_feedback_snapshot", feedback_snapshot)
+	return feedback_snapshot
 
 
 func _refresh_runtime_mission_hud_surfaces(force_refresh: bool = true) -> void:
@@ -22392,9 +22393,8 @@ func get_release_firefight_command_matrix_visual_polish_snapshot() -> Dictionary
 func get_release_firefight_real_window_findings_polish_snapshot() -> Dictionary:
 	_update_ui()
 	var source_snapshot: Dictionary = get_release_firefight_command_matrix_visual_polish_snapshot()
-	var command_feedback: Dictionary = get_command_feedback_snapshot()
-	_refresh_tactical_event_log_panel()
-	var event_log_display: Dictionary = Dictionary(command_feedback.get("release_firefight_event_log_display", {})).duplicate(true)
+	var live_feedback: Dictionary = _refresh_tactical_event_log_panel()
+	var event_log_display: Dictionary = Dictionary(live_feedback.get("release_firefight_event_log_display", {}))
 	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
 	var panel_snapshot: Dictionary = {}
 	var rendered_entries: Array = []
@@ -22402,21 +22402,40 @@ func get_release_firefight_real_window_findings_polish_snapshot() -> Dictionary:
 		panel_snapshot = Dictionary(panel.call("get_panel_snapshot")).duplicate(true)
 	if panel != null and panel.has_method("get_rendered_event_entries"):
 		rendered_entries = Array(panel.call("get_rendered_event_entries"))
+	var fallback_entry: Dictionary = event_log_display.get("fallback_entry", {})
+	var fallback_id := String(fallback_entry.get("event_id", ""))
+	var fallback_active := bool(event_log_display.get("fallback_active", false))
+	var style_id := String(event_log_display.get("style_id", ""))
+	var source_synced := style_id == RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID
+	var fallback_source := String(fallback_entry.get("source", ""))
+	var fallback_source_valid := fallback_source == "release_first_exchange_real_window_hud_source_sync" if source_synced else fallback_source in ["release_firefight_event_log_fallback", "release_fire_exchange_visibility_persistence"]
+	var decision_line := String(source_snapshot.get("decision_line", "")).strip_edges()
 	var checks: Array = [
 		_build_mission_first_move_readability_check(
-			"source_command_matrix_passes",
-			String(source_snapshot.get("gate", "")) == "pass",
-			"Event-Log findings polish builds on a green TASK_836 command-matrix snapshot."
+			"firefight_context_present",
+			bool(source_snapshot.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true))
+				and not decision_line.is_empty(),
+			"Event-log findings use the active read-only Firefight decision."
+		),
+		_build_mission_first_move_readability_check(
+			"event_log_display_style_recognized",
+			style_id == RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID or source_synced,
+			"The panel uses the Firefight projection or its first-exchange source sync."
 		),
 		_build_mission_first_move_readability_check(
 			"event_log_display_has_status",
-			int(event_log_display.get("display_count", 0)) >= 1,
+			panel != null and panel.is_visible_in_tree()
+				and int(event_log_display.get("display_count", 0)) >= 1
+				and not rendered_entries.is_empty(),
 			"First Firefight exposes at least one event-log row or read-only fallback row."
 		),
 		_build_mission_first_move_readability_check(
-			"empty_no_events_hidden_when_fallback_active",
-			not bool(event_log_display.get("fallback_active", false)) or int(panel_snapshot.get("rendered_entry_count", 0)) >= 1,
-			"The panel renders the fallback instead of collapsing into NO EVENTS."
+			"active_fallback_is_rendered",
+			not fallback_active or (not fallback_id.is_empty() and rendered_entries.any(
+				func(entry: Dictionary) -> bool: return String(entry.get("event_id", "")) == fallback_id
+			)),
+			"The panel renders the active fallback row."
 		),
 		_build_mission_first_move_readability_check(
 			"fallback_is_read_only",
@@ -22427,6 +22446,17 @@ func get_release_firefight_real_window_findings_polish_snapshot() -> Dictionary:
 				and not bool(event_log_display.get("creates_damage_event", true))
 				and not bool(event_log_display.get("sets_multiplayer_truth", true)),
 			"The fallback reads existing decision/combat snapshots only."
+		),
+		_build_mission_first_move_readability_check(
+			"active_fallback_is_visual_only",
+			not fallback_active or (fallback_source_valid
+				and bool(fallback_entry.get("visual_only", false))
+				and bool(fallback_entry.get("read_only", false))
+				and not bool(fallback_entry.get("ui_sets_gameplay_truth", true))
+				and not bool(fallback_entry.get("creates_command", true))
+				and not bool(fallback_entry.get("creates_fire_event", true))
+				and not bool(fallback_entry.get("creates_damage_event", true))),
+			"The active fallback is a recognized display-only Firefight row."
 		),
 	]
 	var failed_checks: Array = []

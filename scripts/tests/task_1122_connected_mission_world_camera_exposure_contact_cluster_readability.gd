@@ -1,6 +1,8 @@
 extends SceneTree
 
 const MISSION_SCENE := preload("res://scenes/tests/mission_reactivity_test.tscn")
+const TERRAIN_MAP_DATA := preload("res://scripts/terrain/terrain_map_data.gd")
+const TERRAIN_MAP_3D_VIEW := preload("res://scripts/terrain/terrain_map_3d_view.gd")
 
 var _passed := 0
 var _failed := 0
@@ -22,9 +24,10 @@ func _run() -> void:
 	if view != null:
 		var before: Dictionary = Dictionary(view.call("get_render_snapshot"))
 		var light: Dictionary = Dictionary(before.get("editor_light", {}))
+		_assert(bool(before.get("frontier_art_enabled", false)) and String(before.get("frontier_art_profile_id", "")) == "frontier_illustrated_v1", "Default GM01 selects the Frontier visual profile")
 		_assert(bool(light.get("tonemap_enabled", false)), "Primary3D environment enables explicit tonemapping")
-		_assert(String(light.get("tonemap_mode", "")) == "filmic", "Primary3D environment uses Filmic tonemapping")
-		_assert(float(light.get("adjustment_brightness", 1.0)) < 1.0 and float(light.get("adjustment_brightness", 0.0)) >= 0.65, "Primary3D brightness preserves bright asset detail")
+		_assert(String(light.get("tonemap_mode", "")) == "aces", "Default Frontier mission uses ACES tonemapping")
+		_assert(is_equal_approx(float(light.get("adjustment_brightness", 0.0)), 1.0), "Default Frontier mission keeps neutral brightness")
 		_assert(view.has_method("frame_world_positions"), "Primary3D exposes bounds-based tactical framing")
 		if view.has_method("frame_world_positions"):
 			var framed: Dictionary = Dictionary(view.call("frame_world_positions", [Vector2(120.0, 230.0), Vector2(228.0, 230.0)], 6.0, 18.0, 28.0))
@@ -53,8 +56,22 @@ func _run() -> void:
 
 	mission.queue_free()
 	await process_frame
+	_check_unthemed_map_lighting()
+	await process_frame
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
+
+
+func _check_unthemed_map_lighting() -> void:
+	var view := TERRAIN_MAP_3D_VIEW.new()
+	root.add_child(view)
+	view.configure_from_map(TERRAIN_MAP_DATA.create_empty("task_1122_unthemed", Vector2i(4, 4), Vector2.ZERO))
+	var snapshot: Dictionary = view.get_render_snapshot()
+	var light: Dictionary = Dictionary(snapshot.get("editor_light", {}))
+	_assert(not bool(snapshot.get("frontier_art_enabled", true)) and bool(light.get("tonemap_enabled", false)) and String(light.get("tonemap_mode", "")) == "filmic", "Unthemed map retains explicit Filmic tonemapping")
+	var brightness: float = float(light.get("adjustment_brightness", 0.0))
+	_assert(brightness >= 0.65 and brightness < 1.0, "Unthemed map retains bounded brightness correction")
+	view.queue_free()
 
 
 func _fire_event(event_id: String, fireteam_id: String, created_msec: int) -> Dictionary:

@@ -34,6 +34,9 @@ Die Runtime- und HUD-Snapshots tragen die relevante Entscheidungslage, aber das 
 - Der echte `TacticalEventLog` bleibt unveraendert; der Fallback lebt nur im read-only Command-Feedback-Snapshot.
 - Snapshot meldet `ui_sets_gameplay_truth=false`, `creates_command=false`, `creates_fire_event=false`, `creates_damage_event=false`.
 - Panel-Render-Signatur bleibt stabil und baut nicht pro Frame durch wechselnde IDs/Zeitstempel neu.
+- Der Snapshot prüft die aktuelle Panel-Projektion einschließlich des
+  TASK_883-Fallbacks. Das historische TASK_836-Layout bleibt als Diagnose
+  verfügbar. Die Sichtbarkeit der aktuellen Log-Zeile entscheidet das Gate.
 
 ## Betroffene Dateien
 

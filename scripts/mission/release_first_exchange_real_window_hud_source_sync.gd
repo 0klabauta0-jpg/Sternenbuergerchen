@@ -173,6 +173,7 @@ static func _build_contact_fire_event_entry(source_snapshot: Dictionary, primary
 		"style_id": STYLE_ID,
 		"task_id": TASK_ID,
 		"source_status_task_id": SOURCE_STATUS_TASK_ID,
+		"visual_only": true,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,
