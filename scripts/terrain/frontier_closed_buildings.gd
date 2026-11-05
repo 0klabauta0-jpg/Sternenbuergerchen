@@ -47,28 +47,45 @@ func _build_habitat(size: Vector2,height: float) -> void:
 
 func _build_hall(size: Vector2,height: float) -> void:
 	var half := size.x*0.5
-	var bay_top := height*0.94
 	var office_top := height*0.79
-	# Actual asymmetric hull: high warehouse bay and lower attached office.
+	var eave := height*0.82
+	var ridge := height+0.125
+	var roof_left := -half-0.015
+	var roof_right := size.x*0.285+0.015
+	var roof_center := (roof_left+roof_right)*0.5
+	var ridge_half := size.x*0.09
+	# A5's broad sloping teal roof is the primary mass, above the same bay and
+	# lower office. The hull fills its gable; this is not a detached roof prop.
 	var profile := PackedVector2Array([
 		Vector2(-half,0.025),Vector2(half,0.025),
 		Vector2(half,office_top-0.07),Vector2(half-0.08,office_top),
-		Vector2(size.x*0.285,office_top),Vector2(size.x*0.285,bay_top-0.08),
-		Vector2(size.x*0.235,bay_top),Vector2(-half+0.11,bay_top),Vector2(-half,bay_top-0.12)])
+		Vector2(size.x*0.285,office_top),Vector2(size.x*0.285,eave-0.035),
+		Vector2(roof_center+ridge_half,ridge-0.075),
+		Vector2(roof_center-ridge_half,ridge-0.075),Vector2(-half,eave-0.035)])
 	_profile_prism("ExteriorShell",profile,-size.y*0.5+0.025,size.y*0.5-0.025,"c8c2a8")
-	_chamfered("IndustrialBayRoof",Vector2(size.x*0.735,size.y+0.06),bay_top-0.018,0.105,0.11,"5b7272",0.07,Vector2(-size.x*0.116,0.0))
+	var roof_profile := _hall_roof_section(roof_left,roof_right,eave,ridge,ridge_half,eave-0.055)
+	_profile_prism("IndustrialBayRoof",roof_profile,-size.y*0.5-0.025,size.y*0.5+0.025,"d8ceb5")
+	# Inset the painted sheet on all four sides so the cream construction is
+	# visible at the eaves and gables. Its small lift avoids coplanar surfaces.
+	var slope_run := roof_center-ridge_half-roof_left
+	var sheet_eave := eave+(ridge-eave)*0.10/slope_run+0.014
+	var sheet_profile := _hall_roof_section(roof_left+0.10,roof_right-0.10,sheet_eave,ridge+0.014,ridge_half,eave+0.005)
+	_profile_prism("HallTealRoofSheet",sheet_profile,-size.y*0.5+0.085,size.y*0.5-0.085,"376b75")
+	var rib_eave := eave+(ridge-eave)*0.018/slope_run+0.030
+	var rib_profile := _hall_roof_section(roof_left+0.018,roof_right-0.018,rib_eave,ridge+0.030,ridge_half,eave)
+	for z in [-size.y*0.34,0.0,size.y*0.34]:
+		_profile_prism("HallRoofCrossRib",rib_profile,z-0.0375,z+0.0375,"c5c3ab")
+	_beveled_box("HallRoofRidgeCap",Vector3(size.x*0.16,0.05,size.y+0.035),Vector3(roof_center,ridge+0.035,0.0),"d8ceb5",0.014)
 	_chamfered("OfficeRoofShoulder",Vector2(size.x*0.235,size.y+0.015),office_top-0.025,0.10,0.075,"ddd2b7",0.04,Vector2(size.x*0.375,0.0))
 	_chamfered("OfficeRoofField",Vector2(size.x*0.18,size.y*0.77),office_top+0.06,0.02,0.045,"6d817b",0.0,Vector2(size.x*0.375,-0.01))
-	var monitor_bottom := bay_top+0.07
-	_chamfered("HallRoofMonitorBase",Vector2(size.x*0.22,size.y*0.67),monitor_bottom,0.105,0.055,"384f53",0.02,Vector2(-size.x*0.08,-size.y*0.04))
-	_chamfered("HallRoofMonitorCap",Vector2(size.x*0.24,size.y*0.69),monitor_bottom+0.10,0.065,0.06,"b5b7a2",0.045,Vector2(-size.x*0.08,-size.y*0.04))
-	_beveled_box("MonitorClerestory",Vector3(size.x*0.17,0.034,0.040),Vector3(-size.x*0.08,monitor_bottom+0.075,size.y*0.295),"be8b4b",0.006).material_override = _emissive("b99058",0.20)
-	_chamfered("HallExhaustManifold",Vector2(size.x*0.25,size.y*0.19),bay_top+0.082,0.11,0.045,"8b978b",0.025,Vector2(-size.x*0.31,-size.y*0.29))
-	for index in range(4):
-		_box("HallExhaustLouver",Vector3(size.x*0.19,0.014,0.028),Vector3(-size.x*0.31,bay_top+0.198,-size.y*0.29-0.105+index*0.07),"3d5658")
-	for z in [-size.y*0.33,size.y*0.33]:
-		_beveled_box("HallRoofCrossRib",Vector3(size.x*0.72,0.042,0.105),Vector3(-size.x*0.116,bay_top+0.098,z),"839087",0.012)
 	_beveled_box("OfficeHVAC",Vector3(size.x*0.15,0.105,size.y*0.19),Vector3(size.x*0.375,office_top+0.125,-size.y*0.26),"9ca58f",0.023)
+	set_meta("geometry_revision","review8_a5_sloped_hall")
+
+func _hall_roof_section(left: float,right: float,eave: float,ridge: float,ridge_half: float,bottom: float) -> PackedVector2Array:
+	var center := (left+right)*0.5
+	return PackedVector2Array([
+		Vector2(left,bottom),Vector2(right,bottom),Vector2(right,eave),
+		Vector2(center+ridge_half,ridge),Vector2(center-ridge_half,ridge),Vector2(left,eave)])
 
 func _add_front(size: Vector2,height: float,hall: bool) -> void:
 	var front := size.y*0.5
