@@ -22,6 +22,7 @@ const IDENTITY := "../TacticalUI/MissionIdentityPanel"
 const IDENTITY_SOURCES := IDENTITY + "/MissionIdentityMargin/MissionIdentityVBox/"
 const STRATEGIC := BASE + "StrategicPanel"
 const STRATEGIC_SOURCES := STRATEGIC + "/StrategicMargin/StrategicScroll/StrategicVBox/"
+const EVACUATION_SOURCE := STRATEGIC_SOURCES + "StrategicActionRow/MissionEvacuationButton"
 
 
 static func configure(controller: Node, state: Dictionary = {}) -> void:
@@ -552,7 +553,7 @@ static func _layout_player_readouts(controller: Node, viewport_size: Vector2i) -
 				details = Button.new()
 				details.name = "A5ReadoutDetailsButton"
 				details.text = "Details"
-				details.tooltip_text = "Vollständige Einsatz-, Transport- und Befehlsmeldungen anzeigen"
+				details.tooltip_text = "Vollständige Einsatz-, Transport- und Befehlsmeldungen sowie Evakuieren anzeigen"
 				details.pressed.connect(Callable(controller, "_open_native_team_details"))
 				panel.add_child(details)
 				THEME.style_command_button(details)
@@ -594,7 +595,7 @@ static func _ensure_team_controls(controller: Node, team: PanelContainer, layer:
 		var button := Button.new()
 		button.name = "A5DetailsButton"
 		button.text = "Details"
-		button.tooltip_text = "Teamzustand, Befehlsdetails und Tastenkürzel anzeigen"
+		button.tooltip_text = "Teamzustand, Befehlsdetails, Evakuieren und Tastenkürzel anzeigen"
 		button.pressed.connect(Callable(controller, "_open_native_team_details"))
 		team.add_child(button)
 		THEME.style_command_button(button)
@@ -640,6 +641,15 @@ static func _ensure_team_controls(controller: Node, team: PanelContainer, layer:
 		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		THEME.style_label(text, false, 14)
 		scroll.add_child(text)
+		var evacuation := Button.new()
+		evacuation.name = "A5EvacuationButton"
+		evacuation.text = "Evakuieren · Einsatz abbrechen"
+		evacuation.disabled = true
+		evacuation.custom_minimum_size.y = 32
+		evacuation.set_meta("ui_sets_gameplay_truth", false)
+		evacuation.pressed.connect(_request_existing_evacuation.bind(controller))
+		box.add_child(evacuation)
+		THEME.style_command_button(evacuation)
 
 
 static func _refresh_fire_rule_selector(controller: Node, state: Dictionary) -> void:
@@ -687,6 +697,7 @@ static func _refresh_details_text(controller: Node) -> void:
 	var popup := controller.get_node_or_null("../TacticalUI/A5TeamDetailsPopup") as PopupPanel
 	if popup == null or not popup.visible:
 		return
+	_refresh_evacuation_action(controller, popup)
 	var parts: PackedStringArray = []
 	for path in [IDENTITY_SOURCES + "MissionIdentityHeaderLabel", IDENTITY_SOURCES + "MissionIdentityBodyLabel", STRATEGIC_SOURCES + "StrategicHeaderLabel", STRATEGIC_SOURCES + "MissionTeamChipLabel", STRATEGIC_SOURCES + "StrategicStatusLabel", BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel", INFO + "/CommandFeedbackLabel", INFO + "/HotkeyLegendLabel"]:
 		var source := controller.get_node_or_null(path) as Label
@@ -700,6 +711,30 @@ static func _refresh_details_text(controller: Node) -> void:
 			if not source.tooltip_text.is_empty() and source.tooltip_text != source.text and source.tooltip_text != full:
 				parts.append(source.tooltip_text)
 	_set_text(popup.get_node("Margin/Box/Scroll/Text") as Label, "\n\n".join(parts))
+
+
+static func _refresh_evacuation_action(controller: Node, popup: PopupPanel) -> void:
+	# The ordinary craft-controls cache does not track moving ground teams.
+	# Ask the existing UI owner to refresh its gate while details are visible;
+	# eligibility and the eventual result remain in their original owners.
+	controller.call("_refresh_mission_evacuation_button")
+	var source := controller.get_node_or_null(EVACUATION_SOURCE) as Button
+	var action := popup.get_node("Margin/Box/A5EvacuationButton") as Button
+	action.disabled = source == null or source.disabled or not source.visible
+	action.tooltip_text = source.tooltip_text if source != null else "Evakuierung für diesen Einsatz nicht verfügbar."
+
+
+static func _request_existing_evacuation(controller: Node) -> void:
+	var popup := controller.get_node_or_null("../TacticalUI/A5TeamDetailsPopup") as PopupPanel
+	if popup == null or not popup.visible:
+		return
+	_refresh_evacuation_action(controller, popup)
+	var action := popup.get_node("Margin/Box/A5EvacuationButton") as Button
+	if not action.is_visible_in_tree() or action.disabled:
+		return
+	var source := controller.get_node_or_null(EVACUATION_SOURCE) as Button
+	if source != null:
+		source.pressed.emit()
 
 
 static func _ensure_target_panel(layer: CanvasLayer) -> PanelContainer:

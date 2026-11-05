@@ -696,23 +696,25 @@ func _apply_player_readout_texts() -> void:
 	(vbox.get_node("TitleLabel") as Label).hide()
 	var has_report := not _mission_result.is_empty()
 	var result_code := String(_mission_result.get("result", ""))
-	var ended := result_code in ["victory", "success", "defeat", "failure", "draw", "ended"] or String(_mission_result.get("mission_outcome", "")) in ["completed", "ended", "success", "failure"]
-	_native_review_heading.text = "Bericht noch nicht verfügbar" if not has_report else ("Einsatz abgeschlossen" if ended else "Bericht unvollständig")
+	var aborted := result_code == "aborted"
+	var ended := result_code in ["victory", "success", "defeat", "failure", "draw", "ended", "aborted"] or String(_mission_result.get("mission_outcome", "")) in ["completed", "ended", "success", "failure", "aborted"]
+	_native_review_heading.text = "Bericht noch nicht verfügbar" if not has_report else ("Einsatz abgebrochen" if aborted else ("Einsatz abgeschlossen" if ended else "Bericht unvollständig"))
 	var successful := result_code in ["victory", "success"]
 	var failed := result_code in ["defeat", "failure"]
 	_native_review_outcome_symbol.text = "✓" if successful else ("×" if failed else ("—" if ended else "?"))
-	_native_review_outcome_symbol.tooltip_text = "Erfolg" if successful else ("Niederlage" if failed else ("Einsatz beendet" if ended else "Ergebnis noch offen"))
+	_native_review_outcome_symbol.tooltip_text = "Erfolg" if successful else ("Niederlage" if failed else ("Einsatz abgebrochen" if aborted else ("Einsatz beendet" if ended else "Ergebnis noch offen")))
 	_native_review_outcome_symbol.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_DANGER if failed else TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT)
 	(vbox.get_node("ResultLabel") as Label).text = "Noch kein Einsatzbericht übergeben." if not has_report else "Ergebnis und Folgen des abgeschlossenen Einsatzes."
 	(vbox.get_node("SummaryStrip") as Control).visible = has_report
-	var result_names := {"victory": "Erfolg", "success": "Erfolg", "defeat": "Niederlage", "failure": "Niederlage", "draw": "Unentschieden", "ended": "Beendet"}
+	var result_names := {"victory": "Erfolg", "success": "Erfolg", "defeat": "Niederlage", "failure": "Niederlage", "draw": "Unentschieden", "ended": "Beendet", "aborted": "Abgebrochen"}
 	var winner := String(_mission_result.get("winning_team_id", ""))
 	var side: String = {"team_alpha": "Alpha", "team_bravo": "Bravo"}.get(winner, "nicht angegeben")
 	var objective := "nicht angegeben"
 	if _mission_result.has("objective_captured") and typeof(_mission_result.objective_captured) == TYPE_BOOL:
 		objective = "gesichert" if _mission_result.objective_captured else "nicht gesichert"
 	var condition_code := String(_mission_result.get("win_condition_type", ""))
-	var condition := "nicht angegeben" if condition_code.is_empty() else ("Ziel sichern" if condition_code == "objective_capture" else "siehe Originalbericht")
+	var condition_names := {"objective_capture": "Ziel sichern", "evacuation": "Evakuierung"}
+	var condition: String = condition_names.get(condition_code, "nicht angegeben" if condition_code.is_empty() else "siehe Originalbericht")
 	var duration_text := "unbekannt"
 	if _mission_result.has("duration_seconds") and typeof(_mission_result.duration_seconds) in [TYPE_FLOAT, TYPE_INT] and is_finite(float(_mission_result.duration_seconds)) and float(_mission_result.duration_seconds) >= 0.0:
 		duration_text = _format_debrief_seconds(float(_mission_result.duration_seconds))
