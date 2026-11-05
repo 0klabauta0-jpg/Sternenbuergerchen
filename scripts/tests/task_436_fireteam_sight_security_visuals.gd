@@ -4,6 +4,7 @@ const DRILL_SCENE: PackedScene = preload("res://scenes/tests/fireteam_command_dr
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
+const FIRETEAM_BEHAVIOR_PROFILE_SCRIPT: GDScript = preload("res://scripts/command/fireteam_behavior_profile.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 
@@ -106,6 +107,8 @@ func _test_security_assignments_split_front_and_flanks() -> void:
 	))
 	var omni_assignments: Array = Array(omni_state.get("member_assignments", []))
 	_assert(_assignment_roles_include(omni_assignments, ["north", "east", "south", "west"]), "360 defense uses cardinal coverage roles")
+	for unit in units:
+		unit.free()
 
 
 func _test_terrain_sightline_bubble_and_muzzle_visuals() -> void:
@@ -219,27 +222,33 @@ func _test_drill_scene_enemy_spacing_and_security_card() -> void:
 	var security_controller = controller.get("_fireteam_security_controller")
 	_assert(units.size() == 4 and leader != null and security_controller != null, "Security card test has four friendly members and controller")
 	if units.size() == 4 and leader != null and security_controller != null:
-		security_controller.call(
-			"update_fireteam_state",
-			"drill",
-			units,
-			leader,
-			{"metadata": {"origin_command_type": "defend", "security_mode_override": "directional", "security_direction_angle": 0.0}},
-			{},
-			{},
-			{},
-			[],
-			{"command_type": "defend", "security_mode": "directional", "security_direction_angle": 0.0}
-		)
-		controller.call("_apply_fireteam_security_facing_from_state", Dictionary(security_controller.call("get_fireteam_state", "drill")))
+		# Drive the existing parent profile/security boundary. Direct mutation of
+		# its child resolver bypasses the HUD runtime signature and is not a
+		# supported production state transition.
+		var profile = FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.from_dict({
+			"fireteam_id": "drill",
+			"metadata": {"origin_command_type": "defend", "security_mode_override": "directional", "security_direction_angle": 0.0},
+		})
+		controller.call("_set_active_behavior_profile", "drill", profile)
+		controller.call("refresh_fireteam_security_state")
 		controller.call("_refresh_fireteam_mini_cards")
 		var card: Control = _find_fireteam_mini_card(scene, "drill")
 		var coverage_bar: Control = null
 		if card != null:
 			coverage_bar = card.find_child("MiniSecurityCoverageBar", true, false) as Control
 		var coverage_snapshot: Dictionary = Dictionary(coverage_bar.get_meta("mission_fireteam_mini_security_coverage_snapshot", {})) if coverage_bar != null else {}
-		_assert(coverage_bar != null and coverage_bar.visible, "Fireteam mini-card shows the security coverage bar")
+		_assert(card != null and bool(card.get_meta("native_a5_portrait_team_card", false)), "Drill fireteam uses the current A5 portrait card")
+		_assert(coverage_bar != null and not coverage_bar.visible, "A5 keeps legacy security diagnostics off the compact portrait surface")
 		_assert(String(coverage_snapshot.get("coverage_shape", "")) == "front_both_flanks", "Mini-card coverage bar reports front plus both flanks")
+		_assert(int(coverage_snapshot.get("member_count", 0)) == 4 and bool(coverage_snapshot.get("active", false)), "Hidden coverage diagnostic retains all four active security members")
+		if card != null:
+			var portrait_strip := card.get_node_or_null("Margin/VBox/FireteamMemberPortraitStrip") as Control
+			var primary_status := card.get_node_or_null("Margin/VBox/StageLabel") as Label
+			_assert(portrait_strip != null and portrait_strip.visible and portrait_strip.get_child_count() == 4, "A5 shows all four original member portraits")
+			_assert(primary_status != null and primary_status.visible and not primary_status.text.strip_edges().is_empty(), "A5 keeps one readable primary team status")
+		var security_before: Dictionary = Dictionary(controller.call("get_fireteam_security_state", "drill"))
+		controller.call("_refresh_fireteam_mini_cards")
+		_assert(Dictionary(controller.call("get_fireteam_security_state", "drill")) == security_before, "Repeated card presentation does not mutate runtime security assignments")
 		for unit in units:
 			_assert(unit is Node and (unit as Node).has_meta("security_facing_angle"), "Security assignments write visible facing meta to %s" % String(unit.call("get_unit_id")))
 	scene.queue_free()

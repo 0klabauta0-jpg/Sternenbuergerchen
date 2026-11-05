@@ -1,5 +1,29 @@
 # IMPLEMENTATION_STATUS
 
+### Fortsetzung - Befehlsfeedback, Blickrichtung und Alt-Gates, 2026-11-05
+- Move-/GO-UI-Arbeit auf sofortiges Feedback plus gebuendelte bestehende
+  350-ms-Kadenz umgestellt; Interleaving mit Transportvollpass abgesichert.
+  Simulation, Commandqueue, Planfolge und AutoDEF bleiben synchron.
+- Gemeinsame Facingquelle fuer Modelle, Orientation und Dirtysignatur;
+  autoritativer Pfadwinkel bleibt bei mehreren Syncs desselben Ticks stabil.
+- FoW-Admission pro Aircraft/LZ/Approach/Cargolabel mit begrenzter
+  Invalidation; eigene Planung auf bekanntem Terrain vor erstem Drop erhalten.
+  Gemischter Dropcontainer darf zulaessige Kinder nicht pauschal verstecken.
+- Alte A5-Kartengroesse korrigiert (11 Pixel Clipping); ganze Gesichter auch
+  bei Einpersonenteams. Historische Overwatch-/Flankregeln bleiben aus.
+- Alle sieben Alt-Gates einzeln geklaert; Schlussmatrix 26/27 plus alleiniger
+  TASK344-Extentorakel-Nachlauf 40/40 ergibt 27 finale fokussierte Gates.
+  Native Facing/Portrait je 135/135 und Air 155/155 bei 2560x1440 Vollbild.
+- Normaler 90-s-1x-Pfad 61/61, alle sieben Move+GO-Paare angenommen.
+  Erste drei synchrone Aufrufpaare im Mittel 229.111 -> 84.299 ms (-63.2%).
+  Gesamtfluessigkeit NICHT freigegeben: im gemeinsamen 0-38-s-Fenster
+  Median/P95 final 29.730/77.072 statt 26.777/68.007 ms; ein 288.544-ms-HUD-
+  Ausreisser bleibt. Unterschiedliche Startpositionen/lesender Motiontrace
+  begrenzen einen kausalen Framezeitvergleich.
+- Task `docs/tasks/CONTINUE_2026_11_05_command_hitches_and_legacy.md`,
+  Bericht `docs/qa/continue_20261105/README.md`, unabhaengiges Nachreview
+  APPROVED scoped. Integration/Main-Smoke werden separat quittiert.
+
 ### Vollbild-Spielpass - Basis, Taktik, Grafik und Multiplayer, 2026-11-05
 - Regelmaessigen versteckten Homebase-Rebuild durch Dirty-/Transportdeltas
   ersetzt; Deckungssuche raeumlich indiziert, Securitydarstellung gebuendelt.

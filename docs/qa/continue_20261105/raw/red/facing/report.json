@@ -1,0 +1,51 @@
+{
+  "schema": "sternenbuergerchen.playtest_20261105.v1",
+  "checks": [
+    {
+      "name": "bugfix_mission_fire_sector_overlay",
+      "passed": false,
+      "exit_code": 1,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fb5b568f1a6248358671e02a805378e5",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\fb5b568f1a6248358671e02a805378e5\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\continue_20261105\\facing_logic_red\\20261105T141316Z-41665bde\\bugfix_mission_fire_sector_overlay.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\fb5b568f1a6248358671e02a805378e5\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\fb5b568f1a6248358671e02a805378e5\\project\\scripts\\tests\\bugfix_mission_fire_sector_overlay.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      }
+    }
+  ],
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "summary": {
+    "selected": 1,
+    "passed": 0,
+    "failed": 1
+  }
+}

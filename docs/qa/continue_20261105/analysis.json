@@ -1,0 +1,291 @@
+{
+  "schema": "sternenbuergerchen.continue_performance_analysis.v1",
+  "kind": "derived analysis, not original evidence",
+  "comparison_boundary": "Compare the first 0-38s window separately. Full90 versus full38 percentiles are not a causal before/after comparison. One native run per condition; no general FPS/release/WAN acceptance.",
+  "runs": {
+    "baseline_38": {
+      "reported_summary": {
+        "duration_usec": 38007269,
+        "frames": 1251,
+        "frametime_usec": {
+          "count": 1251,
+          "max": 309861,
+          "mean": 30381.4604316547,
+          "p50": 26777,
+          "p90": 49981,
+          "p95": 68007,
+          "p99": 152063
+        },
+        "hitch_counts": {
+          "over_100ms": 28,
+          "over_250ms": 3,
+          "over_33ms": 473,
+          "over_50ms": 125
+        },
+        "simulation_seconds_per_wall_second": 0.987530394076284,
+        "simulation_ticks": 2252
+      },
+      "scope": {
+        "forced_arrival": false,
+        "forced_unloading": false,
+        "gpu_frame_time": "unavailable",
+        "private_simulation_state_writes": false,
+        "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+        "synthetic_fixture": false,
+        "time_acceleration": false,
+        "warmup_seconds": 3
+      },
+      "first_38_seconds": {
+        "cutoff_usec": 38000000,
+        "frame_selection": "0 <= frame.elapsed_usec <= 38000000; frame end timestamps",
+        "percentile_method": "nearest rank, ceil(N*p)-1 after sorting",
+        "frames": 1250,
+        "first_frame_end_usec": 38024,
+        "last_frame_end_usec": 37984144,
+        "mean_frame_usec": 30387.3152,
+        "p50_usec": 26777,
+        "p95_usec": 68007,
+        "p99_usec": 152063,
+        "max_usec": 309861,
+        "over_100ms": 28,
+        "over_250ms": 3,
+        "physics_tick_delta": 2250,
+        "simulation_seconds_per_effective_wall_second": 0.9872540500057077,
+        "registered_units": [
+          11
+        ],
+        "navigation_pending_max": 0
+      },
+      "actions": [
+        {
+          "elapsed_usec": 12016540,
+          "move_usec": 111658,
+          "go_usec": 103692,
+          "pair_usec": 215350,
+          "move_accepted": true,
+          "go_accepted": true
+        },
+        {
+          "elapsed_usec": 24013087,
+          "move_usec": 110519,
+          "go_usec": 104772,
+          "pair_usec": 215291,
+          "move_accepted": true,
+          "go_accepted": true
+        },
+        {
+          "elapsed_usec": 36012056,
+          "move_usec": 145066,
+          "go_usec": 111626,
+          "pair_usec": 256692,
+          "move_accepted": true,
+          "go_accepted": true
+        }
+      ],
+      "pair_usec_range": [
+        215291,
+        256692
+      ]
+    },
+    "intermediate_38": {
+      "reported_summary": {
+        "duration_usec": 38013206,
+        "frames": 1309,
+        "frametime_usec": {
+          "count": 1309,
+          "max": 237052,
+          "mean": 29039.8250572956,
+          "p50": 25630,
+          "p90": 49934,
+          "p95": 64147,
+          "p99": 138222
+        },
+        "hitch_counts": {
+          "over_100ms": 33,
+          "over_250ms": 0,
+          "over_33ms": 444,
+          "over_50ms": 130
+        },
+        "simulation_seconds_per_wall_second": 0.993514376731778,
+        "simulation_ticks": 2266
+      },
+      "scope": {
+        "forced_arrival": false,
+        "forced_unloading": false,
+        "gpu_frame_time": "unavailable",
+        "private_simulation_state_writes": false,
+        "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+        "synthetic_fixture": false,
+        "time_acceleration": false,
+        "warmup_seconds": 3
+      },
+      "first_38_seconds": {
+        "cutoff_usec": 38000000,
+        "frame_selection": "0 <= frame.elapsed_usec <= 38000000; frame end timestamps",
+        "percentile_method": "nearest rank, ceil(N*p)-1 after sorting",
+        "frames": 1308,
+        "first_frame_end_usec": 43502,
+        "last_frame_end_usec": 37976654,
+        "mean_frame_usec": 29034.13914373089,
+        "p50_usec": 25607,
+        "p95_usec": 64147,
+        "p99_usec": 138222,
+        "max_usec": 237052,
+        "over_100ms": 33,
+        "over_250ms": 0,
+        "physics_tick_delta": 2263,
+        "simulation_seconds_per_effective_wall_second": 0.9931540221175532,
+        "registered_units": [
+          11
+        ],
+        "navigation_pending_max": 0
+      },
+      "actions": [
+        {
+          "elapsed_usec": 12008317,
+          "move_usec": 36118,
+          "go_usec": 40317,
+          "pair_usec": 76435,
+          "move_accepted": true,
+          "go_accepted": true
+        },
+        {
+          "elapsed_usec": 24012778,
+          "move_usec": 34368,
+          "go_usec": 38963,
+          "pair_usec": 73331,
+          "move_accepted": true,
+          "go_accepted": true
+        },
+        {
+          "elapsed_usec": 36003696,
+          "move_usec": 32695,
+          "go_usec": 44100,
+          "pair_usec": 76795,
+          "move_accepted": true,
+          "go_accepted": true
+        }
+      ],
+      "pair_usec_range": [
+        73331,
+        76795
+      ]
+    },
+    "final_90": {
+      "reported_summary": {
+        "duration_usec": 90013966,
+        "frames": 3551,
+        "frametime_usec": {
+          "count": 3551,
+          "max": 288544,
+          "mean": 25345.5133765137,
+          "p50": 19915,
+          "p90": 47507,
+          "p95": 63280,
+          "p99": 125908
+        },
+        "hitch_counts": {
+          "over_100ms": 62,
+          "over_250ms": 1,
+          "over_33ms": 1044,
+          "over_50ms": 311
+        },
+        "simulation_seconds_per_wall_second": 0.993734683349026,
+        "simulation_ticks": 5367
+      },
+      "scope": {
+        "forced_arrival": false,
+        "forced_unloading": false,
+        "gpu_frame_time": "unavailable",
+        "private_simulation_state_writes": false,
+        "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+        "synthetic_fixture": false,
+        "time_acceleration": false,
+        "warmup_seconds": 3
+      },
+      "first_38_seconds": {
+        "cutoff_usec": 38000000,
+        "frame_selection": "0 <= frame.elapsed_usec <= 38000000; frame end timestamps",
+        "percentile_method": "nearest rank, ceil(N*p)-1 after sorting",
+        "frames": 1137,
+        "first_frame_end_usec": 18924,
+        "last_frame_end_usec": 37983797,
+        "mean_frame_usec": 33407.03342128408,
+        "p50_usec": 29730,
+        "p95_usec": 77072,
+        "p99_usec": 140957,
+        "max_usec": 288544,
+        "over_100ms": 34,
+        "over_250ms": 1,
+        "physics_tick_delta": 2266,
+        "simulation_seconds_per_effective_wall_second": 0.9942836064195126,
+        "registered_units": [
+          11
+        ],
+        "navigation_pending_max": 0
+      },
+      "actions": [
+        {
+          "elapsed_usec": 12027068,
+          "move_usec": 35462,
+          "go_usec": 40574,
+          "pair_usec": 76036,
+          "move_accepted": true,
+          "go_accepted": true
+        },
+        {
+          "elapsed_usec": 24012178,
+          "move_usec": 34800,
+          "go_usec": 39782,
+          "pair_usec": 74582,
+          "move_accepted": true,
+          "go_accepted": true
+        },
+        {
+          "elapsed_usec": 36005660,
+          "move_usec": 41570,
+          "go_usec": 60710,
+          "pair_usec": 102280,
+          "move_accepted": true,
+          "go_accepted": true
+        },
+        {
+          "elapsed_usec": 48001236,
+          "move_usec": 32058,
+          "go_usec": 71678,
+          "pair_usec": 103736,
+          "move_accepted": true,
+          "go_accepted": true
+        },
+        {
+          "elapsed_usec": 60001380,
+          "move_usec": 32321,
+          "go_usec": 43006,
+          "pair_usec": 75327,
+          "move_accepted": true,
+          "go_accepted": true
+        },
+        {
+          "elapsed_usec": 72006537,
+          "move_usec": 31368,
+          "go_usec": 70623,
+          "pair_usec": 101991,
+          "move_accepted": true,
+          "go_accepted": true
+        },
+        {
+          "elapsed_usec": 84011744,
+          "move_usec": 32871,
+          "go_usec": 45207,
+          "pair_usec": 78078,
+          "move_accepted": true,
+          "go_accepted": true
+        }
+      ],
+      "pair_usec_range": [
+        74582,
+        103736
+      ]
+    }
+  }
+}

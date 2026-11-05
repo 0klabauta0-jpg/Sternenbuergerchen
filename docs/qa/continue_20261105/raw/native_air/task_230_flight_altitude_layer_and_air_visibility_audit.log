@@ -1,0 +1,170 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-6ff32d2682b5422b884d99345c8e1403
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_230 Flight Altitude Layer and Air Visibility Audit ===
+PASS: Flight altitude layer contract doc exists
+PASS: Contract doc covers mission_air
+PASS: Contract doc covers height_level
+PASS: Contract doc covers FoW
+PASS: Contract doc covers Multiplayer
+PASS: Contract doc covers Editor
+PASS: Dropship visual is visible on hill fixture
+PASS: Dropship uses explicit mission_air layer
+PASS: Dropship is above terrain surface
+PASS: Dropship surface reference follows hill height
+PASS: Dropship air Y is above surface Y
+PASS: Dropship keeps minimum air clearance
+PASS: Visible LZ still renders as terrain marker
+PASS: Friendly dropship remains visible under FoW
+PASS: Hidden LZ marker does not reveal unknown terrain
+PASS: Air layer records blocked unknown-terrain reveal
+PASS: Enemy air/contact visual is hidden by FoW
+PASS: Visible LZ marker returns when its tile is FoW-visible
+PASS: Enemy air/contact visual appears when FoW contact rule allows it
+PASS: Visible contact keeps authored position
+PASS: Unrelated tile visibility preserves actual drop nodes without a rebuild
+PASS: Unrelated tile visibility retains the bounded drop-rebuild skip
+PASS: Losing current tile visibility removes the previously constructed LZ despite explored memory
+PASS: Tile visibility loss preserves the independent friendly aircraft
+PASS: A pure FoW visibility regain reconstructs the LZ without resending flight state
+PASS: Blackout admits the own aircraft body while filtering the foreign aircraft at the same hidden position
+PASS: A pure FoW gain creates the newly visible foreign aircraft body
+PASS: A pure FoW loss removes the foreign aircraft while preserving the own aircraft
+PASS: own_parent_initial: actual own aircraft stays visible in the mixed drop tree
+PASS: own_parent_initial: actual foreign aircraft on a visible tile stays visible in the mixed drop tree
+PASS: own_parent_initial: actual own known-terrain planned LZ stays visible
+PASS: own_parent_initial: actual foreign cargo aircraft follows its own tile visibility
+PASS: own_parent_initial: actual foreign airborne cargo label follows its aircraft admission
+PASS: own_parent_initial: actual foreign surface cargo label follows its surface admission
+PASS: own_parent_initial: cargo without LZ follows its actual ship anchor, independently from the visible target
+PASS: unrelated_tile_delta: actual own aircraft stays visible in the mixed drop tree
+PASS: unrelated_tile_delta: actual foreign aircraft on a visible tile stays visible in the mixed drop tree
+PASS: unrelated_tile_delta: actual own known-terrain planned LZ stays visible
+PASS: unrelated_tile_delta: actual foreign cargo aircraft follows its own tile visibility
+PASS: unrelated_tile_delta: actual foreign airborne cargo label follows its aircraft admission
+PASS: unrelated_tile_delta: actual foreign surface cargo label follows its surface admission
+PASS: unrelated_tile_delta: cargo without LZ follows its actual ship anchor, independently from the visible target
+PASS: foreign_parent_payload: actual own aircraft stays visible in the mixed drop tree
+PASS: foreign_parent_payload: actual foreign aircraft on a visible tile stays visible in the mixed drop tree
+PASS: foreign_parent_payload: actual own known-terrain planned LZ stays visible
+PASS: foreign_parent_payload: actual foreign cargo aircraft follows its own tile visibility
+PASS: foreign_parent_payload: actual foreign airborne cargo label follows its aircraft admission
+PASS: foreign_parent_payload: actual foreign surface cargo label follows its surface admission
+PASS: foreign_parent_payload: cargo without LZ follows its actual ship anchor, independently from the visible target
+PASS: foreign_parent_visibility_gain: actual own aircraft stays visible in the mixed drop tree
+PASS: foreign_parent_visibility_gain: actual foreign aircraft on a visible tile stays visible in the mixed drop tree
+PASS: foreign_parent_visibility_gain: actual own known-terrain planned LZ stays visible
+PASS: foreign_parent_visibility_gain: actual foreign cargo aircraft follows its own tile visibility
+PASS: foreign_parent_visibility_gain: actual foreign airborne cargo label follows its aircraft admission
+PASS: foreign_parent_visibility_gain: actual foreign surface cargo label follows its surface admission
+PASS: foreign_parent_visibility_gain: cargo without LZ follows its actual ship anchor, independently from the visible target
+PASS: foreign_parent_visibility_loss: actual own aircraft stays visible in the mixed drop tree
+PASS: foreign_parent_visibility_loss: actual foreign aircraft on a visible tile stays visible in the mixed drop tree
+PASS: foreign_parent_visibility_loss: actual own known-terrain planned LZ stays visible
+PASS: foreign_parent_visibility_loss: actual foreign cargo aircraft follows its own tile visibility
+PASS: foreign_parent_visibility_loss: actual foreign airborne cargo label follows its aircraft admission
+PASS: foreign_parent_visibility_loss: actual foreign surface cargo label follows its surface admission
+PASS: foreign_parent_visibility_loss: cargo without LZ follows its actual ship anchor, independently from the visible target
+PASS: neutral_parent_payload: actual own aircraft stays visible in the mixed drop tree
+PASS: neutral_parent_payload: actual foreign aircraft on a visible tile stays visible in the mixed drop tree
+PASS: neutral_parent_payload: actual own known-terrain planned LZ stays visible
+PASS: neutral_parent_payload: actual foreign cargo aircraft follows its own tile visibility
+PASS: neutral_parent_payload: actual foreign airborne cargo label follows its aircraft admission
+PASS: neutral_parent_payload: actual foreign surface cargo label follows its surface admission
+PASS: neutral_parent_payload: cargo without LZ follows its actual ship anchor, independently from the visible target
+PASS: restored_own_parent_payload: actual own aircraft stays visible in the mixed drop tree
+PASS: restored_own_parent_payload: actual foreign aircraft on a visible tile stays visible in the mixed drop tree
+PASS: restored_own_parent_payload: actual own known-terrain planned LZ stays visible
+PASS: restored_own_parent_payload: actual foreign cargo aircraft follows its own tile visibility
+PASS: restored_own_parent_payload: actual foreign airborne cargo label follows its aircraft admission
+PASS: restored_own_parent_payload: actual foreign surface cargo label follows its surface admission
+PASS: restored_own_parent_payload: cargo without LZ follows its actual ship anchor, independently from the visible target
+PASS: blackout_unknown: primary terrain LZ follows mode, owner and current tile visibility
+PASS: blackout_unknown: requested and mixed-owner craft LZs use their own surface visibility gate
+PASS: blackout_unknown: resolved landing position shares the primary surface visibility gate
+PASS: blackout_unknown: mixed-owner approach lines follow each craft's target visibility
+PASS: blackout_unknown: aircraft proxy construction stays separate from surface-marker admission
+PASS: blackout_unknown: visual filtering does not mutate FoW knowledge or source flight payload
+PASS: Air/FoW fixture captures require a native renderer
+PASS: Air fixture uses actual active-display fullscreen
+PASS: Native fixture capture directory is available
+PASS: Native air/FoW fixture PNG saved: blackout_unknown
+TASK230_NATIVE_FIXTURE_CAPTURE C:/dev/SternenBuergerchen/output/continue_20261105/native_air/20261105T144221Z-729690d1/captures/task230_blackout_unknown.png
+PASS: blackout_explored: primary terrain LZ follows mode, owner and current tile visibility
+PASS: blackout_explored: requested and mixed-owner craft LZs use their own surface visibility gate
+PASS: blackout_explored: resolved landing position shares the primary surface visibility gate
+PASS: blackout_explored: mixed-owner approach lines follow each craft's target visibility
+PASS: blackout_explored: aircraft proxy construction stays separate from surface-marker admission
+PASS: blackout_explored: visual filtering does not mutate FoW knowledge or source flight payload
+PASS: Air/FoW fixture captures require a native renderer
+PASS: Air fixture uses actual active-display fullscreen
+PASS: Native fixture capture directory is available
+PASS: Native air/FoW fixture PNG saved: blackout_explored
+TASK230_NATIVE_FIXTURE_CAPTURE C:/dev/SternenBuergerchen/output/continue_20261105/native_air/20261105T144221Z-729690d1/captures/task230_blackout_explored.png
+PASS: known_own_plan: primary terrain LZ follows mode, owner and current tile visibility
+PASS: known_own_plan: requested and mixed-owner craft LZs use their own surface visibility gate
+PASS: known_own_plan: resolved landing position shares the primary surface visibility gate
+PASS: known_own_plan: mixed-owner approach lines follow each craft's target visibility
+PASS: known_own_plan: aircraft proxy construction stays separate from surface-marker admission
+PASS: known_own_plan: visual filtering does not mutate FoW knowledge or source flight payload
+PASS: Air/FoW fixture captures require a native renderer
+PASS: Air fixture uses actual active-display fullscreen
+PASS: Native fixture capture directory is available
+PASS: Native air/FoW fixture PNG saved: known_own_plan
+TASK230_NATIVE_FIXTURE_CAPTURE C:/dev/SternenBuergerchen/output/continue_20261105/native_air/20261105T144221Z-729690d1/captures/task230_known_own_plan.png
+PASS: known_foreign_plan: primary terrain LZ follows mode, owner and current tile visibility
+PASS: known_foreign_plan: requested and mixed-owner craft LZs use their own surface visibility gate
+PASS: known_foreign_plan: resolved landing position shares the primary surface visibility gate
+PASS: known_foreign_plan: mixed-owner approach lines follow each craft's target visibility
+PASS: known_foreign_plan: aircraft proxy construction stays separate from surface-marker admission
+PASS: known_foreign_plan: visual filtering does not mutate FoW knowledge or source flight payload
+PASS: Air/FoW fixture captures require a native renderer
+PASS: Air fixture uses actual active-display fullscreen
+PASS: Native fixture capture directory is available
+PASS: Native air/FoW fixture PNG saved: known_foreign_plan
+TASK230_NATIVE_FIXTURE_CAPTURE C:/dev/SternenBuergerchen/output/continue_20261105/native_air/20261105T144221Z-729690d1/captures/task230_known_foreign_plan.png
+PASS: known_neutral_plan: primary terrain LZ follows mode, owner and current tile visibility
+PASS: known_neutral_plan: requested and mixed-owner craft LZs use their own surface visibility gate
+PASS: known_neutral_plan: resolved landing position shares the primary surface visibility gate
+PASS: known_neutral_plan: mixed-owner approach lines follow each craft's target visibility
+PASS: known_neutral_plan: aircraft proxy construction stays separate from surface-marker admission
+PASS: known_neutral_plan: visual filtering does not mutate FoW knowledge or source flight payload
+PASS: Air/FoW fixture captures require a native renderer
+PASS: Air fixture uses actual active-display fullscreen
+PASS: Native fixture capture directory is available
+PASS: Native air/FoW fixture PNG saved: known_neutral_plan
+TASK230_NATIVE_FIXTURE_CAPTURE C:/dev/SternenBuergerchen/output/continue_20261105/native_air/20261105T144221Z-729690d1/captures/task230_known_neutral_plan.png
+PASS: blackout_visible: primary terrain LZ follows mode, owner and current tile visibility
+PASS: blackout_visible: requested and mixed-owner craft LZs use their own surface visibility gate
+PASS: blackout_visible: resolved landing position shares the primary surface visibility gate
+PASS: blackout_visible: mixed-owner approach lines follow each craft's target visibility
+PASS: blackout_visible: aircraft proxy construction stays separate from surface-marker admission
+PASS: blackout_visible: visual filtering does not mutate FoW knowledge or source flight payload
+PASS: Air/FoW fixture captures require a native renderer
+PASS: Air fixture uses actual active-display fullscreen
+PASS: Native fixture capture directory is available
+PASS: Native air/FoW fixture PNG saved: blackout_visible
+TASK230_NATIVE_FIXTURE_CAPTURE C:/dev/SternenBuergerchen/output/continue_20261105/native_air/20261105T144221Z-729690d1/captures/task230_blackout_visible.png
+PASS: off: primary terrain LZ follows mode, owner and current tile visibility
+PASS: off: requested and mixed-owner craft LZs use their own surface visibility gate
+PASS: off: resolved landing position shares the primary surface visibility gate
+PASS: off: mixed-owner approach lines follow each craft's target visibility
+PASS: off: aircraft proxy construction stays separate from surface-marker admission
+PASS: off: visual filtering does not mutate FoW knowledge or source flight payload
+PASS: Air/FoW fixture captures require a native renderer
+PASS: Air fixture uses actual active-display fullscreen
+PASS: Native fixture capture directory is available
+PASS: Native air/FoW fixture PNG saved: off
+TASK230_NATIVE_FIXTURE_CAPTURE C:/dev/SternenBuergerchen/output/continue_20261105/native_air/20261105T144221Z-729690d1/captures/task230_off.png
+PASS: Air/FoW surface filtering leaves terrain heights, objects, walkability and LOS unchanged
+PASS: Snapshot carries air layer
+PASS: Snapshot carries flight altitude clearance
+PASS: Snapshot forces terrain-height-independent display flag
+PASS: Snapshot forbids unknown-terrain reveal flag
+PASS: Client accepts air-layer dropship snapshot
+PASS: Client stores dropship air state read-only
+PASS: Applying air-layer snapshot does not enqueue commands
+=== RESULTS: 155 passed, 0 failed ===
+ALL TESTS PASSED

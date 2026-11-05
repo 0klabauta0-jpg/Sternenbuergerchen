@@ -69,13 +69,13 @@ func _test_contact_halt_rejects_stale_stage_requeue() -> void:
 	controller.set("_order_plans_by_key", {plan_key: plan})
 	_assert(bool(controller.call("_activate_next_waypoint_for_plan", plan, FIRETEAM_ID, 0)), "Engage starts as live waypoint execution")
 
-	var stage_command = attacker.call("get_current_unit_command")
-	_assert(stage_command != null and stage_command.has_method("to_dict"), "Initial Engage assigns a tokenized stage command")
-	if stage_command == null or not stage_command.has_method("to_dict"):
+	# Activation enqueues commands; SimulationRoot owns their later physics commit.
+	var stale_stage_command: Dictionary = _find_queued_stage_command(simulation_root, String(attacker.call("get_unit_id")))
+	_assert(not stale_stage_command.is_empty(), "Initial Engage enqueues a tokenized stage command for authoritative processing")
+	if stale_stage_command.is_empty():
 		scene.queue_free()
 		await _wait_frames(2)
 		return
-	var stale_stage_command: Dictionary = Dictionary(stage_command.call("to_dict")).duplicate(true)
 	stale_stage_command["requeue_until_target"] = true
 	var stage_token: String = String(stale_stage_command.get("command_token", "")).strip_edges()
 	_assert(not stage_token.is_empty() and not stage_token.contains("contact_halt"), "Stage command has a normal movement token")
@@ -98,7 +98,13 @@ func _test_contact_halt_rejects_stale_stage_requeue() -> void:
 		contact_context
 	))
 	_assert(bool(halt_result.get("contact_halt", false)), "Contact context forces Engage contact halt")
+	await _wait_physics_process_pairs(2)
 	var halt_command = attacker.call("get_current_unit_command")
+	_assert(halt_command != null, "SimulationRoot commits the queued contact halt on a physics tick")
+	if halt_command == null:
+		scene.queue_free()
+		await _wait_frames(2)
+		return
 	var halt_token: String = String(halt_command.get("command_token")) if halt_command != null and halt_command.has_method("get") else ""
 	_assert(String(halt_command.get("command_type")) == UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION, "Contact halt switches attacker to hold")
 	_assert(halt_token.contains("contact_halt") and halt_token != stage_token, "Contact halt uses a distinct token from the old movement stage")
@@ -112,6 +118,16 @@ func _test_contact_halt_rejects_stale_stage_requeue() -> void:
 
 	scene.queue_free()
 	await _wait_frames(2)
+
+
+func _find_queued_stage_command(simulation_root: Node, unit_id: String) -> Dictionary:
+	var commands: Array = Array(simulation_root.get("command_queue"))
+	for index in range(commands.size() - 1, -1, -1):
+		var command: Dictionary = Dictionary(commands[index])
+		var token: String = String(command.get("command_token", "")).strip_edges()
+		if String(command.get("unit_id", "")) == unit_id and String(command.get("source_command_type", "")) == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_ENGAGE and not token.is_empty() and not token.contains("contact_halt"):
+			return command.duplicate(true)
+	return {}
 
 
 func _test_live_engage_drill_can_emit_fire_event() -> void:

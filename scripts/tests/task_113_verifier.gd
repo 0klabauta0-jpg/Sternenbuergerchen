@@ -169,6 +169,8 @@ func _test_scene_proxies_active_flank_state_to_tactical_controller() -> void:
 	var scene = await _load_scene()
 	var tactical_controller = scene.get_node("TacticalController")
 	var combat_driver = scene.get_node("CombatLoopDriver")
+	_assert(not bool(combat_driver.get("flank_vulnerability_enabled")), "Mission baseline keeps flank vulnerability disabled as required by TASK472")
+	_assert(Array(tactical_controller.call("get_flank_vulnerability_snapshot")).is_empty(), "Disabled mission baseline exposes no flank vulnerability snapshot")
 	var started: bool = tactical_controller.call("advance_to_next_phase")
 	for _index in range(6):
 		await process_frame
@@ -205,6 +207,9 @@ func _test_scene_proxies_active_flank_state_to_tactical_controller() -> void:
 		forced_directional_state["member_assignments"] = assignments
 		var attacker_position: Vector2 = anchor_position + Vector2.RIGHT.rotated(direction_angle + PI) * 120.0
 		(enemies[0] as Node2D).global_position = attacker_position
+		_assert(Dictionary(combat_driver.call("resolve_flank_attack_with_state", selected_fireteam_id, enemies[0], friendlies[0], forced_directional_state)).is_empty(), "Disabled scene baseline does not resolve a synthetic rear flank")
+		# This explicit integration fixture does not enable flank gameplay in any scene.
+		combat_driver.set("flank_vulnerability_enabled", true)
 		result = Dictionary(combat_driver.call("resolve_flank_attack_with_state", selected_fireteam_id, enemies[0], friendlies[0], forced_directional_state))
 	var tactical_snapshot: Array = Array(tactical_controller.call("get_flank_vulnerability_snapshot"))
 	var combat_snapshot: Array = Array(combat_driver.call("get_flank_vulnerability_snapshot"))
@@ -216,6 +221,8 @@ func _test_scene_proxies_active_flank_state_to_tactical_controller() -> void:
 	_assert(JSON.stringify(tactical_snapshot) == JSON.stringify(combat_snapshot), "Tactical controller flank snapshot matches the combat-loop source")
 	_assert(String(proxied_state.get("direction_label", "")) == "rear", "Tactical controller proxies the relative flank direction into the mission status layer")
 	_assert(String(proxied_state.get("morale_state", "")) == "shaken", "Tactical controller proxies the follow-up morale state into the mission status layer")
+	combat_driver.set("flank_vulnerability_enabled", false)
+	_assert(Array(tactical_controller.call("get_flank_vulnerability_snapshot")).is_empty() and Dictionary(tactical_controller.call("get_fireteam_flank_vulnerability_state", selected_fireteam_id)).is_empty(), "Disabling the fixture hides active flank snapshots again")
 	scene.queue_free()
 	await process_frame
 

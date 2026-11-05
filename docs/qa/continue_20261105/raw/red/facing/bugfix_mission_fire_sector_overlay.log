@@ -1,0 +1,91 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-fb5b568f1a6248358671e02a805378e5
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Bugfix Mission Fire Sector Overlay ===
+PASS: Mission scene exposes controller and Primary3DView
+PASS: Friendly fire sector overlay defaults to explicit off-state
+PASS: No friendly fire range visuals are drawn while the overlay is off
+PASS: Primary 3D view renders selected-unit markers at proxy positions
+PASS: Primary 3D mission suppresses legacy 2D selection rings
+PASS: Friendly fire sector overlay can be toggled on
+PASS: Friendly fire overlay defaults to a cheap LOS line visualization
+PASS: Selected fireteam exposes fire sector visuals when enabled
+PASS: LOS line mode avoids reachable-tile marker floods
+PASS: Friendly fire overlay performs one bounded facing LOS check per shown unit
+PASS: Friendly fire overlay keeps LOS line sampling to one line per unit
+PASS: Friendly range readout is represented as a single sight line
+PASS: Friendly range entry records that the visualization is not a tile-sector fill
+PASS: Fire sector uses a narrow arc below ninety degrees
+PASS: Friendly sector entries include a short facing tip for direction readability
+PASS: Friendly sight sector follows the rendered NPC proxy rotation instead of drifting to the left
+FAIL: Friendly sight line stays bound to explicit facing instead of drifting to target metadata
+PASS: Friendly fire sector visuals clear again after toggling off
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim": Vector2(1, 0),
+"case": "hold_explicit_before_raw_target",
+"expected": Vector2(-1, 0),
+"orientation": Vector2(-1, -8.742278e-08),
+"proxy": Vector2(1, 1.6858738e-07),
+"synthetic_fixture_only": true,
+"unit_id": "facing_priority_alpha"
+}
+FAIL: hold_explicit_before_raw_target: aim follows current runtime priority
+FAIL: hold_explicit_before_raw_target: rendered proxy follows the same priority
+PASS: hold_explicit_before_raw_target: orientation follows the same live priority
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim": Vector2(1, 0),
+"case": "active_security_before_static_facing_and_raw_target",
+"expected": Vector2(0, 1),
+"orientation": Vector2(-4.371139e-08, 1),
+"proxy": Vector2(1, 1.6858738e-07),
+"synthetic_fixture_only": true,
+"unit_id": "facing_priority_alpha"
+}
+FAIL: active_security_before_static_facing_and_raw_target: aim follows current runtime priority
+FAIL: active_security_before_static_facing_and_raw_target: rendered proxy follows the same priority
+PASS: active_security_before_static_facing_and_raw_target: orientation follows the same live priority
+PASS: Priority regression moves through real SimulationRoot command commits
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim": Vector2(1, 0),
+"case": "active_move_before_security",
+"expected": Vector2(1, 0),
+"orientation": Vector2(-4.371139e-08, 1),
+"proxy": Vector2(1, 1.6858738e-07),
+"synthetic_fixture_only": true,
+"unit_id": "facing_priority_alpha"
+}
+PASS: active_move_before_security: aim follows current runtime priority
+PASS: active_move_before_security: rendered proxy follows the same priority
+FAIL: active_move_before_security: orientation follows the same live priority
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim": Vector2(-0.0081830155, -0.99996656),
+"case": "confirmed_contact_before_move_and_security",
+"expected": Vector2(0, -1),
+"orientation": Vector2(-4.371139e-08, 1),
+"proxy": Vector2(-0.008178981, -0.99996656),
+"synthetic_fixture_only": true,
+"unit_id": "facing_priority_alpha"
+}
+PASS: confirmed_contact_before_move_and_security: aim follows current runtime priority
+PASS: confirmed_contact_before_move_and_security: rendered proxy follows the same priority
+FAIL: confirmed_contact_before_move_and_security: orientation follows the same live priority
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim": Vector2(-0.0081830155, 0.99996656),
+"case": "fire_event_before_contact_move_and_security",
+"expected": Vector2(0, 1),
+"orientation": Vector2(-4.371139e-08, 1),
+"proxy": Vector2(-0.008179655, 0.99996656),
+"synthetic_fixture_only": true,
+"unit_id": "facing_priority_alpha"
+}
+PASS: fire_event_before_contact_move_and_security: aim follows current runtime priority
+PASS: fire_event_before_contact_move_and_security: rendered proxy follows the same priority
+PASS: fire_event_before_contact_move_and_security: orientation follows the same live priority
+PASS: Mission scene exposes controller for direct-mode UI checks
+PASS: #17 hides the parked legacy phase panel in direct order mode
+PASS: #17 no longer creates the old Ready/Plan/SUPP status panel
+PASS: GO in #16 is disabled when no selected fireteam order can execute
+PASS: Plan in #16 is no longer a visible return-to-plan action
+=== RESULTS: 32 passed, 7 failed ===
+FAIL

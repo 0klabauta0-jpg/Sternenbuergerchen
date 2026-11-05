@@ -1,0 +1,55 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-e3c61dbc6b5c4ec1b721d1b168069d9f
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_403 Runtime Animation Combat Cases ===
+  PASS: UnitCommand accepts crouch walk movement posture
+  PASS: UnitCommand normalizes crouch-walk
+  PASS: UnitRuntimeStatus accepts crouch run movement posture
+  PASS: UnitRuntimeStatus normalizes crouch-run
+  PASS: Mapping still exposes the 17 imported raw NPC clips
+  PASS: Mapping still exposes six imported combat animation cases
+  PASS: Runtime TerrainMap3DView creates a UnitProxy for the test unit
+  PASS: Runtime UnitProxy owns the existing UnitVisualAnimationPlayer
+  PASS: Runtime AnimationPlayer owns raw imported clip attack
+  PASS: Runtime AnimationPlayer owns raw imported clip crouch
+  PASS: Runtime AnimationPlayer owns raw imported clip crouchIdle
+  PASS: Runtime AnimationPlayer owns raw imported clip crouchWalk
+  PASS: Runtime AnimationPlayer owns raw imported clip death
+  PASS: Runtime AnimationPlayer owns raw imported clip idle
+  PASS: Runtime AnimationPlayer owns raw imported clip interactGround
+  PASS: Runtime AnimationPlayer owns raw imported clip interactStanding
+  PASS: Runtime AnimationPlayer owns raw imported clip jump
+  PASS: Runtime AnimationPlayer owns raw imported clip kick
+  PASS: Runtime AnimationPlayer owns raw imported clip punch
+  PASS: Runtime AnimationPlayer owns raw imported clip racingIdle
+  PASS: Runtime AnimationPlayer owns raw imported clip racingLeft
+  PASS: Runtime AnimationPlayer owns raw imported clip racingRight
+  PASS: Runtime AnimationPlayer owns raw imported clip run
+  PASS: Runtime AnimationPlayer owns raw imported clip shoot
+  PASS: Runtime AnimationPlayer owns raw imported clip walk
+  PASS: Runtime AnimationPlayer owns combat case standShoot
+  PASS: Runtime AnimationPlayer owns combat case walkShoot
+  PASS: Runtime AnimationPlayer owns combat case runShoot
+  PASS: Runtime AnimationPlayer owns combat case crouchShoot
+  PASS: Runtime AnimationPlayer owns combat case crouchWalkShoot
+  PASS: Runtime AnimationPlayer owns combat case crouchRunShoot
+  PASS: Runtime walkShoot bakes imported shoot upper-body tracks
+  PASS: Runtime runShoot bakes imported shoot upper-body tracks
+  PASS: Runtime crouchShoot bakes imported shoot upper-body tracks
+  PASS: Stationary aimed unit holds the imported shoot stance without requiring a fire event
+  PASS: Stationary aimed unit keeps the imported shoot upper-body pose active
+  PASS: Held aim pose comes from runtime posture, not a fake fire event
+  PASS: Runtime snapshot reports imported raw animation coverage
+  PASS: Runtime snapshot reports imported combat case coverage
+  PASS: Runtime snapshot reports shoot pose track overrides
+  PASS: Moving engage+aimed unit selects walkShoot
+  PASS: Moving travel+aimed unit selects runShoot
+  PASS: Crouch+aimed unit selects crouchShoot
+  PASS: Crouch walk+aimed unit selects crouchWalkShoot
+  PASS: Crouch run+aimed unit selects crouchRunShoot
+  PASS: Task document records runtime animation integration scope
+  PASS: Implementation status documents TASK_403
+  PASS: Facing visual contract mentions runtime combat animation cases
+=== RESULTS: 48 passed, 0 failed ===
+ALL TESTS PASSED

@@ -1,0 +1,51 @@
+{
+  "schema": "sternenbuergerchen.playtest_20261105.v1",
+  "checks": [
+    {
+      "name": "continue_20261105_command_hud_batch_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6c44b1d5fc2e4f3db67e2eb0ba2b88b9",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6c44b1d5fc2e4f3db67e2eb0ba2b88b9\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\continue_20261105\\batch_interleave_green\\20261105T143242Z-24bba994\\continue_20261105_command_hud_batch_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6c44b1d5fc2e4f3db67e2eb0ba2b88b9\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6c44b1d5fc2e4f3db67e2eb0ba2b88b9\\project\\scripts\\tests\\continue_20261105_command_hud_batch_verifier.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      }
+    }
+  ],
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

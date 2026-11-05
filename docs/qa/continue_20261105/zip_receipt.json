@@ -1,0 +1,10 @@
+{
+  "schema": "sternenbuergerchen.continue_zip_receipt.v1",
+  "path": "continue_20261105.zip",
+  "bytes": 10163278,
+  "sha256": "8710067ef8a44bb1fdc1723a4d850a2ebd67b2791b5477b22e6fcb00bda0ae50",
+  "members": 119,
+  "uncompressed_bytes": 109699148,
+  "payload_status": "FROZEN pre-Main work evidence; current integration status in separate main_receipt.json",
+  "main_receipt": "Separate mutable main_receipt.json excluded from immutable SHA256SUMS; no ZIP rebuild for Main."
+}

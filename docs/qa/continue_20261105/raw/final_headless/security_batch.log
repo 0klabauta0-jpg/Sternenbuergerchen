@@ -1,0 +1,30 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-f20d80db476b4cb79f642f5e780cedf3
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Combat has a state-only security entry with bounded presentation
+PASS: Combat refresh 0 immediately updates authoritative security anchor
+PASS: Combat refresh 0 immediately applies the matching unit facing
+PASS: Combat refresh 1 immediately updates authoritative security anchor
+PASS: Combat refresh 1 immediately applies the matching unit facing
+PASS: Combat refresh 2 immediately updates authoritative security anchor
+PASS: Combat refresh 2 immediately applies the matching unit facing
+PASS: Combat refresh 3 immediately updates authoritative security anchor
+PASS: Combat refresh 3 immediately applies the matching unit facing
+PASS: Combat refresh 4 immediately updates authoritative security anchor
+PASS: Combat refresh 4 immediately applies the matching unit facing
+PASS: Combat refresh 5 immediately updates authoritative security anchor
+PASS: Combat refresh 5 immediately applies the matching unit facing
+PASS: Combat refresh 6 immediately updates authoritative security anchor
+PASS: Combat refresh 6 immediately applies the matching unit facing
+PASS: Combat refresh 7 immediately updates authoritative security anchor
+PASS: Combat refresh 7 immediately applies the matching unit facing
+PASS: All eight combat refreshes keep badges and security revisions current
+PASS: Eight combat ticks do not rebuild world/HUD presentation eight times
+PASS: Existing process/manual refresh flushes accumulated security presentation once
+PASS: Manual command security refresh remains immediate
+PASS: Inactive fireteam clears authoritative security during the combat update
+PASS: Inactive fireteam removes unit facing immediately
+PASS: Pending removal presentation flushes once even if subsequent state is unchanged
+=== RESULTS: 24 passed, 0 failed ===
+PLAYTEST_SECURITY_VISUAL_BATCH_ALL_PASS

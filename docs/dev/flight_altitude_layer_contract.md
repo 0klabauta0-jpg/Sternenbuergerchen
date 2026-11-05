@@ -27,7 +27,17 @@
 
 ## FoW
 - Friendly Air kann fuer das eigene Team sichtbar bleiben.
-- LZ-/Approach-Surface-Marker werden bei aktivem FoW nur gezeichnet, wenn das betroffene Tile sichtbar ist.
+- Bei `unexplored_blackout` werden LZ-/Approach-Surface-Marker nur gezeichnet,
+  wenn das betroffene Tile aktuell sichtbar ist. Bereits erkundet allein reicht
+  nicht; ein eigenes Flugobjekt erteilt keine Terrain-/Markerfreigabe.
+- Bei `known_terrain` bleibt selbst gesetzte eigene LZ-/Approach-Planungsabsicht
+  auch ohne aktuelle Bodensicht sichtbar. Das Terrain ist in diesem Modus
+  vollstaendig bekannt. Dieser bereits spaeter etablierte Erststartpfad aus
+  `mission_command_feedback_contract.md` (Insertion/First Order, TASK_539)
+  muss vor dem ersten Absetzen ohne Bodenobserver bedienbar bleiben.
+  Fremde und neutrale Marker brauchen weiterhin aktuelle Tilesicht. Bei
+  mehreren Craft-Eintraegen wird deren eigener `team_id` ausgewertet, nicht
+  der Besitzer des gesamten Anzeigepayloads. `off` behaelt sichtbare Marker.
 - Enemy-/Air-Contacts folgen der bestehenden Contact-/FoW-Regel und erscheinen nur bei sichtbarem Target, sichtbarer Position oder erlaubtem Last-Known-Kontakt.
 - Air-Visuals duerfen unbekanntes Terrain nicht freilegen.
 

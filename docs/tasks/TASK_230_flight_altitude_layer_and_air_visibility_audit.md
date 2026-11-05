@@ -5,6 +5,13 @@ Die Flieger-/Dropship-Hoehenschicht soll einmal gezielt geprueft werden: Darstel
 
 ## Status: IMPLEMENTIERT
 
+Fortsetzungsstand 05.11.2026: Der Flugvertrag unterscheidet nun explizit
+Blackout-Tilesicht von eigener Planungsabsicht auf vollstaendig bekanntem
+Terrain. Letztere bleibt gemaess dem spaeteren TASK_539-Erststartvertrag auch
+vor dem ersten Bodenobserver sichtbar. Fremde/neutrale Eintraege erhalten
+keine eigene Planungsfreigabe. Einordnung und gezielte Matrix:
+`../qa/continue_20261105_air_hud_audit.md`.
+
 ## Voraussetzung
 - TASK_096 - Meta MissionMap Dropship und CharacterSheet Recovery
 - TASK_160 - Tactical Mission Playability Smoke

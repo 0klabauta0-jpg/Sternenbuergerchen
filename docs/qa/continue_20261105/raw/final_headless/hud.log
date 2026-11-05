@@ -1,0 +1,236 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-f735fd7da8354d0e85239bf0c6308349
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: (1280, 720): selected-team parameters are on the left above the action band
+PASS: (1280, 720): portrait stack precedes team parameters without overlap
+PASS: (1280, 720): actual selected-team panel occupies its native left slot
+PASS: (1280, 720): actual card stack and parameter controls remain separate
+PASS: (1280, 720): many teams have an actual bounded scroll owner
+PASS: (1280, 720): MoveButton is a readable square at this display height
+PASS: (1280, 720): MoveButton retains its owner callback and complete input rectangle
+PASS: (1280, 720): TakeButton is a readable square at this display height
+PASS: (1280, 720): TakeButton retains its owner callback and complete input rectangle
+PASS: (1280, 720): HoldButton is a readable square at this display height
+PASS: (1280, 720): HoldButton retains its owner callback and complete input rectangle
+PASS: (1280, 720): FlankButton is a readable square at this display height
+PASS: (1280, 720): FlankButton retains its owner callback and complete input rectangle
+PASS: (1280, 720): GoCommandMatrixButton is a readable square at this display height
+PASS: (1280, 720): GoCommandMatrixButton retains its owner callback and complete input rectangle
+PASS: (1280, 720): TargetButton is a readable square at this display height
+PASS: (1280, 720): TargetButton retains its owner callback and complete input rectangle
+PASS: (1280, 720): ClearTargetButton is a readable square at this display height
+PASS: (1280, 720): ClearTargetButton retains its owner callback and complete input rectangle
+PASS: (1280, 720): DeleteOrderButton is a readable square at this display height
+PASS: (1280, 720): DeleteOrderButton retains its owner callback and complete input rectangle
+PASS: (1280, 720): SortCommandMatrixButton is a readable square at this display height
+PASS: (1280, 720): SortCommandMatrixButton retains its owner callback and complete input rectangle
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): action rectangles remain distinct
+PASS: (1280, 720): target/order remains beside the two action rows
+PASS: (1280, 720): real fixture supplies actual fireteam cards
+PASS: (1280, 720): team card has the new readable width
+PASS: (1280, 720): actual member portraits retain large readable faces
+PASS: (1280, 720): original portrait callback opens that actual member's character details
+PASS: (1280, 720): team card has the new readable width
+PASS: (1280, 720): actual member portraits retain large readable faces
+PASS: (1280, 720): original portrait callback opens that actual member's character details
+PASS: (1280, 720): selected original team has a clear yellow outline
+PASS: (1280, 720): actual legacy tooltip writer preserves the hidden A5 detail source
+PASS: (1280, 720): actual owner refresh cannot restore overlapping cyan legacy text
+PASS: (1280, 720): team details retain the complete refreshed legacy source
+PASS: (1280, 720): transport card fits the upper-right viewport
+PASS: (1280, 720): Ref03 preview has a larger readable image slot
+PASS: (1280, 720): transport details keep their existing callback
+PASS: (1280, 720): presentation preserves transport owner payload
+PASS: (1280, 720): direct Homebase route hides only the FOB presentation and preserves its callback
+PASS: (1280, 720): explicit legacy FOB route retains navigation
+PASS: (1920, 1080): selected-team parameters are on the left above the action band
+PASS: (1920, 1080): portrait stack precedes team parameters without overlap
+PASS: (1920, 1080): actual selected-team panel occupies its native left slot
+PASS: (1920, 1080): actual card stack and parameter controls remain separate
+PASS: (1920, 1080): many teams have an actual bounded scroll owner
+PASS: (1920, 1080): MoveButton is a readable square at this display height
+PASS: (1920, 1080): MoveButton retains its owner callback and complete input rectangle
+PASS: (1920, 1080): TakeButton is a readable square at this display height
+PASS: (1920, 1080): TakeButton retains its owner callback and complete input rectangle
+PASS: (1920, 1080): HoldButton is a readable square at this display height
+PASS: (1920, 1080): HoldButton retains its owner callback and complete input rectangle
+PASS: (1920, 1080): FlankButton is a readable square at this display height
+PASS: (1920, 1080): FlankButton retains its owner callback and complete input rectangle
+PASS: (1920, 1080): GoCommandMatrixButton is a readable square at this display height
+PASS: (1920, 1080): GoCommandMatrixButton retains its owner callback and complete input rectangle
+PASS: (1920, 1080): TargetButton is a readable square at this display height
+PASS: (1920, 1080): TargetButton retains its owner callback and complete input rectangle
+PASS: (1920, 1080): ClearTargetButton is a readable square at this display height
+PASS: (1920, 1080): ClearTargetButton retains its owner callback and complete input rectangle
+PASS: (1920, 1080): DeleteOrderButton is a readable square at this display height
+PASS: (1920, 1080): DeleteOrderButton retains its owner callback and complete input rectangle
+PASS: (1920, 1080): SortCommandMatrixButton is a readable square at this display height
+PASS: (1920, 1080): SortCommandMatrixButton retains its owner callback and complete input rectangle
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): action rectangles remain distinct
+PASS: (1920, 1080): target/order remains beside the two action rows
+PASS: (1920, 1080): real fixture supplies actual fireteam cards
+PASS: (1920, 1080): team card has the new readable width
+PASS: (1920, 1080): actual member portraits retain large readable faces
+PASS: (1920, 1080): original portrait callback opens that actual member's character details
+PASS: (1920, 1080): team card has the new readable width
+PASS: (1920, 1080): actual member portraits retain large readable faces
+PASS: (1920, 1080): original portrait callback opens that actual member's character details
+PASS: (1920, 1080): selected original team has a clear yellow outline
+PASS: (1920, 1080): actual legacy tooltip writer preserves the hidden A5 detail source
+PASS: (1920, 1080): actual owner refresh cannot restore overlapping cyan legacy text
+PASS: (1920, 1080): team details retain the complete refreshed legacy source
+PASS: (1920, 1080): transport card fits the upper-right viewport
+PASS: (1920, 1080): Ref03 preview has a larger readable image slot
+PASS: (1920, 1080): transport details keep their existing callback
+PASS: (1920, 1080): presentation preserves transport owner payload
+PASS: (1920, 1080): direct Homebase route hides only the FOB presentation and preserves its callback
+PASS: (1920, 1080): explicit legacy FOB route retains navigation
+PASS: (3440, 1440): selected-team parameters are on the left above the action band
+PASS: (3440, 1440): portrait stack precedes team parameters without overlap
+PASS: (3440, 1440): actual selected-team panel occupies its native left slot
+PASS: (3440, 1440): actual card stack and parameter controls remain separate
+PASS: (3440, 1440): many teams have an actual bounded scroll owner
+PASS: (3440, 1440): MoveButton is a readable square at this display height
+PASS: (3440, 1440): MoveButton retains its owner callback and complete input rectangle
+PASS: (3440, 1440): TakeButton is a readable square at this display height
+PASS: (3440, 1440): TakeButton retains its owner callback and complete input rectangle
+PASS: (3440, 1440): HoldButton is a readable square at this display height
+PASS: (3440, 1440): HoldButton retains its owner callback and complete input rectangle
+PASS: (3440, 1440): FlankButton is a readable square at this display height
+PASS: (3440, 1440): FlankButton retains its owner callback and complete input rectangle
+PASS: (3440, 1440): GoCommandMatrixButton is a readable square at this display height
+PASS: (3440, 1440): GoCommandMatrixButton retains its owner callback and complete input rectangle
+PASS: (3440, 1440): TargetButton is a readable square at this display height
+PASS: (3440, 1440): TargetButton retains its owner callback and complete input rectangle
+PASS: (3440, 1440): ClearTargetButton is a readable square at this display height
+PASS: (3440, 1440): ClearTargetButton retains its owner callback and complete input rectangle
+PASS: (3440, 1440): DeleteOrderButton is a readable square at this display height
+PASS: (3440, 1440): DeleteOrderButton retains its owner callback and complete input rectangle
+PASS: (3440, 1440): SortCommandMatrixButton is a readable square at this display height
+PASS: (3440, 1440): SortCommandMatrixButton retains its owner callback and complete input rectangle
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): action rectangles remain distinct
+PASS: (3440, 1440): target/order remains beside the two action rows
+PASS: (3440, 1440): real fixture supplies actual fireteam cards
+PASS: (3440, 1440): team card has the new readable width
+PASS: (3440, 1440): actual member portraits retain large readable faces
+PASS: (3440, 1440): original portrait callback opens that actual member's character details
+PASS: (3440, 1440): team card has the new readable width
+PASS: (3440, 1440): actual member portraits retain large readable faces
+PASS: (3440, 1440): original portrait callback opens that actual member's character details
+PASS: (3440, 1440): selected original team has a clear yellow outline
+PASS: (3440, 1440): actual legacy tooltip writer preserves the hidden A5 detail source
+PASS: (3440, 1440): actual owner refresh cannot restore overlapping cyan legacy text
+PASS: (3440, 1440): team details retain the complete refreshed legacy source
+PASS: (3440, 1440): transport card fits the upper-right viewport
+PASS: (3440, 1440): Ref03 preview has a larger readable image slot
+PASS: (3440, 1440): transport details keep their existing callback
+PASS: (3440, 1440): presentation preserves transport owner payload
+PASS: (3440, 1440): direct Homebase route hides only the FOB presentation and preserves its callback
+PASS: (3440, 1440): explicit legacy FOB route retains navigation
+MISSION_HUD_GROUPS: 231 passed, 0 failed

@@ -44,8 +44,9 @@ func _test_security_controller_assigns_360_sectors_for_high_leadership() -> void
 	var state: Dictionary = controller.update_fireteam_state("blue", [leader, wing_a, wing_b], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [])
 	_assert(String(state.get("security_mode", "")) == "360", "High-leadership hold fireteams default to 360 security")
 	_assert(Array(state.get("member_assignments", [])).size() == 3, "360 security builds one sector assignment per fit member")
-	_assert(bool(state.get("overwatch_ready", false)), "Holding fireteams become overwatch-ready when no movement is active")
-	_assert(PackedStringArray(state.get("overwatch_unit_ids", PackedStringArray())).size() == 3, "Security snapshot exposes overwatch unit ids for HUD badges")
+	_assert(bool(state.get("defense_ready", false)), "Holding fireteams become defense-ready when no movement is active")
+	_assert(not bool(state.get("overwatch_ready", true)), "Current defense baseline keeps automatic overwatch disabled")
+	_assert(PackedStringArray(state.get("overwatch_unit_ids", PackedStringArray())).is_empty(), "Current defense snapshot exposes no automatic overwatch unit ids")
 	_cleanup_units([leader, wing_a, wing_b])
 
 
@@ -59,9 +60,17 @@ func _test_security_controller_prefers_directional_with_low_leadership_and_aggre
 	_assert(String(state.get("security_mode", "")) == "directional", "Low leadership or aggressive threat focus selects directional security")
 	_assert(assignments.size() == 2, "Directional security still assigns all fit members")
 	if assignments.size() == 2:
-		var first_angle: float = float(Dictionary(assignments[0]).get("center_angle", 0.0))
-		var second_angle: float = float(Dictionary(assignments[1]).get("center_angle", 99.0))
-		_assert(absf(first_angle - second_angle) < 0.001, "Directional security points all assignments at the same main threat direction")
+		var first: Dictionary = Dictionary(assignments[0])
+		var second: Dictionary = Dictionary(assignments[1])
+		var direction_angle: float = float(state.get("direction_angle", 0.0))
+		var first_offset: float = wrapf(float(first.get("base_angle", 0.0)) - direction_angle, -PI, PI)
+		var second_offset: float = wrapf(float(second.get("base_angle", 0.0)) - direction_angle, -PI, PI)
+		_assert(String(first.get("coverage_role", "")) == "front_left" and String(second.get("coverage_role", "")) == "front_right" and first_offset < 0.0 and second_offset > 0.0, "Directional security distributes the front pair across the threat sector")
+		for assignment_variant in assignments:
+			var assignment: Dictionary = Dictionary(assignment_variant)
+			var scan_offset: float = float(assignment.get("scan_offset_angle", INF))
+			var expected_angle: float = wrapf(float(assignment.get("base_angle", 0.0)) + scan_offset, -PI, PI)
+			_assert(absf(scan_offset) <= FIRETEAM_SECURITY_CONTROLLER_SCRIPT.DEFENSE_SCAN_HALF_ANGLE and is_equal_approx(float(assignment.get("center_angle", INF)), expected_angle), "Member scan stays bounded around its assigned base direction")
 	_cleanup_units([leader, wing, enemy])
 
 
@@ -109,8 +118,16 @@ func _test_overwatch_triggers_on_enemy_movement_inside_watched_sector() -> void:
 	var friendly_by_fireteam: Dictionary = {"blue": [leader, wing]}
 	overwatch_controller.update(simulation, [security_state], friendly_by_fireteam, [enemy], null, 180.0, 1)
 	enemy.global_position = Vector2(88.0, 0.0)
+	var baseline_shots: Array = overwatch_controller.update(simulation, [security_state], friendly_by_fireteam, [enemy], null, 180.0, 2)
+	_assert(baseline_shots.is_empty() and simulation.effects.is_empty(), "Current defense snapshots do not trigger legacy overwatch damage")
+	# Explicit synthetic compatibility opt-in; the current gameplay baseline stays off.
+	security_state["overwatch_ready"] = true
+	overwatch_controller.reset_all()
+	enemy.global_position = Vector2(72.0, 0.0)
+	overwatch_controller.update(simulation, [security_state], friendly_by_fireteam, [enemy], null, 180.0, 1)
+	enemy.global_position = Vector2(88.0, 0.0)
 	var shots: Array = overwatch_controller.update(simulation, [security_state], friendly_by_fireteam, [enemy], null, 180.0, 2)
-	_assert(shots.size() == 1, "Enemy movement into a watched sector triggers an overwatch shot")
+	_assert(shots.size() == 1, "Explicit legacy overwatch opt-in triggers a shot on enemy movement into a watched sector")
 	if shots.size() == 1:
 		var attacker_id: String = String(Dictionary(shots[0]).get("attacker_unit_id", ""))
 		var ready_snapshot: Dictionary = Dictionary(overwatch_controller.call("get_member_ready_snapshot", 2))
@@ -131,6 +148,8 @@ func _test_overwatch_prefilters_enemies_outside_contact_range() -> void:
 	var wing = _make_unit("ovw_far_wing", "blue", false, Vector2(-14.0, 8.0), 0.46, 0.68, 0.3, [])
 	var enemy = _make_enemy("enemy_far_runner", Vector2(260.0, 0.0))
 	var security_state: Dictionary = security_controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy])
+	# Keep the range prefilter test meaningful despite automatic overwatch being off.
+	security_state["overwatch_ready"] = true
 	var friendly_by_fireteam: Dictionary = {"blue": [leader, wing]}
 	overwatch_controller.update(simulation, [security_state], friendly_by_fireteam, [enemy], null, 180.0, 1)
 	enemy.global_position = Vector2(276.0, 0.0)
@@ -146,6 +165,8 @@ func _test_overwatch_stays_disabled_under_suppression_or_movement() -> void:
 	var wing = _make_unit("block_wing", "blue", false, Vector2(10.0, 12.0), 0.4, 0.55, 0.3, [])
 	var suppressed_state: Dictionary = security_controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {"is_suppressed": true}, {}, [])
 	var moving_state: Dictionary = security_controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {"effective_style": "rush"}, {}, {}, [])
+	_assert(not bool(suppressed_state.get("defense_ready", true)), "Suppression disables defense readiness")
+	_assert(not bool(moving_state.get("defense_ready", true)), "Active movement disables defense readiness")
 	_assert(not bool(suppressed_state.get("overwatch_ready", true)), "Suppression disables overwatch readiness")
 	_assert(not bool(moving_state.get("overwatch_ready", true)), "Active movement disables overwatch readiness")
 	_cleanup_units([leader, wing])
@@ -161,22 +182,27 @@ func _test_scene_exposes_security_snapshot_for_holding_fireteams() -> void:
 	var snapshot: Array = Array(controller.call("get_fireteam_security_snapshot"))
 	_assert(started, "Scene phase start succeeds for security integration")
 	_assert(snapshot.size() >= 1, "Mission tactical controller exposes active security states")
-	var has_overwatch_ready: bool = false
-	var has_overwatch_unit_ids: bool = false
+	var has_defense_ready: bool = false
+	var has_member_assignments: bool = false
+	var automatic_overwatch_disabled: bool = not snapshot.is_empty()
 	for state_variant in snapshot:
 		var state: Dictionary = Dictionary(state_variant)
-		if bool(state.get("overwatch_ready", false)):
-			has_overwatch_ready = true
-			has_overwatch_unit_ids = not PackedStringArray(state.get("overwatch_unit_ids", PackedStringArray())).is_empty()
-			break
-	_assert(has_overwatch_ready, "At least one holding fireteam becomes overwatch-ready in the mission scene")
-	_assert(has_overwatch_unit_ids, "Mission security snapshot carries overwatch-ready unit ids")
-	var unit_meta_marked: bool = false
-	for child in scene.get_children():
-		if child is Node and bool((child as Node).get_meta("overwatch_ready", false)):
-			unit_meta_marked = true
-			break
-	_assert(unit_meta_marked, "Mission controller syncs overwatch state onto unit HUD metadata")
+		if bool(state.get("defense_ready", false)):
+			has_defense_ready = true
+			has_member_assignments = has_member_assignments or not Array(state.get("member_assignments", [])).is_empty()
+		automatic_overwatch_disabled = automatic_overwatch_disabled and not bool(state.get("overwatch_ready", true)) and PackedStringArray(state.get("overwatch_unit_ids", PackedStringArray())).is_empty()
+	_assert(has_defense_ready, "At least one holding fireteam becomes defense-ready in the mission scene")
+	_assert(has_member_assignments, "Mission defense snapshot carries assigned member sectors")
+	_assert(automatic_overwatch_disabled, "Mission snapshots preserve the disabled automatic overwatch baseline")
+	var security_meta_marked: bool = false
+	var unit_overwatch_disabled: bool = true
+	for unit in Array(controller.call("_get_all_friendly_units", true)):
+		if not (unit is Node):
+			continue
+		security_meta_marked = security_meta_marked or bool((unit as Node).get_meta("security_facing_active", false))
+		unit_overwatch_disabled = unit_overwatch_disabled and not bool((unit as Node).get_meta("overwatch_ready", false))
+	_assert(security_meta_marked, "Mission controller syncs security facing onto unit metadata")
+	_assert(unit_overwatch_disabled, "Mission unit HUD metadata keeps automatic overwatch disabled")
 	scene.queue_free()
 	await process_frame
 

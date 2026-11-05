@@ -1,0 +1,8 @@
+{
+  "schema": "sternenbuergerchen.continue_main_receipt.v1",
+  "status": "PENDING",
+  "main_commit": null,
+  "main_smoke": null,
+  "owner": "Root",
+  "note": "Separate post-integration receipt. May be updated without rebuilding the frozen pre-integration QA ZIP."
+}

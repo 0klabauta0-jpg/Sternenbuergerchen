@@ -6,7 +6,7 @@ Dieser Contract verankert den bestehenden Weg fuer Unit-Facing, Sichtlinie, Waff
 ## Wahrheit
 - Gameplay- und Runtime-Facing liegt auf der Unit als `facing_angle`, `map_facing_angle` oder bei Gegnern zusaetzlich `enemy_facing_angle`.
 - `UnitRuntimeStatus` und `UnitCommand` tragen `movement_posture`, `weapon_posture` und `target_position`, aber keine eigene 3D-Modellrotation.
-- Combat-Fire-Events duerfen Angreifer-Facing setzen, bleiben aber Runtime-/VFX-Payloads und ersetzen nicht die Unit als sichtbare Live-Quelle.
+- Combat-Facing wird ueber die bestehenden Effects in `SimulationRoot` committed. Fire-Events bleiben Runtime-/VFX-Payloads; die Anzeige liest sie zusammen mit aktuellem Unit-/Contact-State, ohne selbst Gameplay-Facing zu schreiben.
 
 ## Controller- und Plan-Pfad
 - `MissionTacticalSandboxController` baut Fireteam-Orientation-Payloads aus Movement, Security, Unit-Facing oder geplantem Target.
@@ -14,7 +14,10 @@ Dieser Contract verankert den bestehenden Weg fuer Unit-Facing, Sichtlinie, Waff
 - UI-Karten und Panels duerfen selektieren, Befehle ausloesen und Payloads spiegeln, aber keine eigene Modell-/Sichtlinienrotation speichern.
 
 ## Primary3DView-Pfad
-- `TerrainMap3DView` liest Unit-Nodes live aus `_unit_nodes` und bevorzugt explizites Unit-Facing vor Movement, Fire-Event und Target-Fallbacks.
+- `TerrainMap3DView` liest Unit-Nodes live aus `_unit_nodes`. Fuer Modell, Waffenpose, Sichtlinie und Fireteam-Orientation gilt derselbe Quellenrang nach `fireteam_behavior_modes_contract.md` TASK_459/461/464: aktives Fire-Event, bestaetigter/spotted Kontakt, aktuelle Bewegung beziehungsweise aktives Commandziel, aktiver Securityscan, statisches Unit-Facing, danach blosse Target-/Proxy-Fallbacks.
+- Ein von der letzten Runtime-Aktion uebriges `target_position` ist allein kein aktiver Bewegungsauftrag. Der Vorrang vor Security-/Unit-Facing gilt fuer das vorhandene aktive `UnitCommand` mit `move_to_position` oder `engage_area`, die `SimulationRoot` tatsaechlich als Bewegung verarbeitet. Die abstrakten Legacytypen `retreat`/`seek_cover` werden im Root nicht direkt ausgefuehrt und erzeugen allein keinen aktiven Movementvorrang. Ein `hold_position` behaelt ohne Fire-Event/Kontakt die Security-/Facing-Richtung. Tatsaechliche Positionsaenderung bleibt auch ohne Commandziel als aktuelle Bewegung erkennbar.
+- Bei einem aktiven committed Bewegungscommand ist `facing_angle` der von `SimulationRoot` geschriebene tatsaechliche Pfad-/Avoidancewinkel. Mehrere Visualsyncs innerhalb desselben Simulationsticks duerfen nach Verbrauch des Positionsdeltas nicht zum entfernten Endziel zurueckdrehen. Der View liest dieses Facing ohne den Securityscan-Override; fehlt es, bleibt das aktive Commandziel der Fallback.
+- Fireteam-Orientation und deren Dirtysignatur lesen dieselbe aktuelle Aim-Richtung wie die Unit-Proxies. Eine alte statische Anchor-/Facing-Richtung darf einen aktuellen Schuss, Kontakt oder Move nicht widersprechend ueberschreiben. Bei einem Team aus mehreren Mitgliedern bleibt der bestehende erste sichtbare Richtungsanker erhalten; es wird kein neuer Gameplay-Teamwinkel berechnet.
 - Unit-Proxies nutzen `_get_unit_world_direction_yaw()` fuer die importierte Character-Forward-Achse. Die allgemeine `_get_world_direction_yaw()` bleibt fuer Nicht-Unit-Pfade wie Dropships reserviert.
 - `_get_world_direction_from_proxy_yaw()` ist der inverse Unit-Proxy-Pfad und darf nicht wieder auf die alte allgemeine World-Yaw-Annahme zurueckfallen.
 - Fireteam-Orientation und Fire-Sector-/Weapon-Linie nutzen die vorhandenen Primary3DView-Snapshots und lesen bei gueltigem Anchor aktuelle Unit-Position/Facing live.
@@ -37,3 +40,4 @@ Dieser Contract verankert den bestehenden Weg fuer Unit-Facing, Sichtlinie, Waff
 - `task_402_npc_animation_showcase_map.gd` prueft alle 17 importierten Rohclips und die sechs datenverankerten Combat-Cases aus importierten Basisclips plus fallweise importierten `shoot`-Posespuren.
 - `task_403_runtime_animation_combat_cases.gd` prueft, dass dieselben Rohclips und Combat-Cases im Spiel-Visualpfad der Unit-Proxies verfuegbar sind und aus `movement_posture`/`weapon_posture` ausgewaehlt werden.
 - `task_364_mission_fireteam_orientation_indicators.gd`, `bugfix_mission_fire_sector_overlay.gd`, `task_371_fire_sector_security_arc_overlay_toggle.gd` und `task_372_mission_los_debug_overlay_toggle.gd` sichern die bestehenden Overlay-Pfade.
+- `bugfix_mission_fire_sector_overlay.gd` trennt Hold mit abweichenden Target-Metadaten, aktiven Scan, ueber `SimulationRoot` committed Move, bestaetigten Kontakt und Fire-Event. Die synthetischen Kontakt-/Event-Fixtures sind Datenflussregressionen; physisches Schiessen wird separat im nativen normalen Missionspfad belegt.

@@ -164,10 +164,12 @@ func _profile_normal_movement(view: Node) -> void:
 			var move_started_usec := Time.get_ticks_usec()
 			var accepted := bool(controller.call("issue_right_click_command_for_test", target, "move", false))
 			var move_usec := Time.get_ticks_usec() - move_started_usec
+			var move_ui := _snapshot(controller, "get_mission_ui_refresh_timing_debug_snapshot")
+			var move_surfaces := _snapshot(controller, "get_mission_runtime_surface_timing_debug_snapshot")
 			var go_started_usec := Time.get_ticks_usec()
 			var executed := bool(controller.call("execute_selected_fireteam_orders")) if accepted else false
 			var go_usec := Time.get_ticks_usec() - go_started_usec
-			actions.append({"elapsed_usec": now_usec - start_usec, "target": str(target), "move_accepted": accepted, "go_accepted": executed, "move_usec": move_usec, "go_usec": go_usec, "meta_presentation": _snapshot(current_scene, "get_meta_presentation_debug_snapshot")})
+			actions.append({"elapsed_usec": now_usec - start_usec, "target": str(target), "move_accepted": accepted, "go_accepted": executed, "move_usec": move_usec, "go_usec": go_usec, "move_ui": move_ui, "move_surfaces": move_surfaces, "go_ui": _snapshot(controller, "get_mission_ui_refresh_timing_debug_snapshot"), "go_surfaces": _snapshot(controller, "get_mission_runtime_surface_timing_debug_snapshot"), "meta_presentation": _snapshot(current_scene, "get_meta_presentation_debug_snapshot")})
 			destination_index += 1
 			next_command_usec += 12000000
 		if now_usec >= next_progress_usec:

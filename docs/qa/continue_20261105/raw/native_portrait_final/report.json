@@ -1,0 +1,57 @@
+{
+  "schema": "sternenbuergerchen.continue_20261105.v1",
+  "checks": [
+    {
+      "name": "task_401_facing_sightline_debug_map",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6ff8aed7f4b74ced97e40027f9d19185",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6ff8aed7f4b74ced97e40027f9d19185\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\continue_20261105\\native_portrait_final\\20261105T144652Z-3e167e13\\task_401_facing_sightline_debug_map.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6ff8aed7f4b74ced97e40027f9d19185\\project",
+        "--fullscreen",
+        "--rendering-method",
+        "forward_plus",
+        "--rendering-driver",
+        "vulkan",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\6ff8aed7f4b74ced97e40027f9d19185\\project\\scripts\\tests\\task_401_facing_sightline_debug_map.gd",
+        "--",
+        "--facing-capture-dir=C:/dev/SternenBuergerchen/output/continue_20261105/native_portrait_final/20261105T144652Z-3e167e13/captures"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      }
+    }
+  ],
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

@@ -43,9 +43,9 @@ func _test_ground_map_and_scenario_authoring() -> void:
 	_assert(map_data != null, "Ground mission map loads")
 	if map_data == null:
 		return
-	# The explicit Frontier rebuild expands the regular map; enemy identities,
-	# groups, tactics and normal setup checks below remain the original gates.
-	_assert(Vector2i(map_data.call("get_grid_size")) == Vector2i(48, 48), "Ground mission uses the user-requested 48x48 Hex Frontier extent")
+	# A5's gm01_frontier_map_contract expands real playable cells to the visible
+	# ground edge. Enemy identities/groups/tactics below retain their own gates.
+	_assert(Vector2i(map_data.call("get_grid_size")) == Vector2i(96, 98), "Ground mission uses the authored A5 96x98 Hex Frontier extent")
 	for marker_id in ["spawn_alpha", "spawn_bravo", "spawn_enemy_patrol", "spawn_enemy_defense", "objective_point"]:
 		_assert(bool(map_data.call("has_marker", marker_id)), "Ground map has marker: %s" % marker_id)
 	_assert(Array(map_data.call("get_patrol_path", "ground_patrol_route")).size() == 4, "Ground map carries a four-point patrol route")

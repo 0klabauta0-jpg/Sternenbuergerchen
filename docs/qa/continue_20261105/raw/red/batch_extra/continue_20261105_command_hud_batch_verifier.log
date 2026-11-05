@@ -1,0 +1,96 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-bd4f68c427ad4c4790b511849d3821d9
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Continue 20261105 Command HUD Batch ===
+PASS: Real mission fixture exposes command, simulation and A5 presentation owners
+PASS: Real mission fixture has a normally initialized selected fireteam
+PASS: Fixture uses the existing authorized live-command path
+PASS: GO is disabled before a plan is created
+PASS: Public Move accepts a real pending waypoint
+PASS: Move publishes its pending plan immediately
+PASS: Move publishes planning-state feedback synchronously
+ERROR: FAIL: Move immediately enables GO according to the existing owner policy
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:66)
+ERROR: FAIL: Compact A5 immediately shows planned order and actionable GO feedback
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:67)
+ERROR: FAIL: Move invokes no heavy runtime HUD surfaces synchronously
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:68)
+ERROR: FAIL: Move leaves one command HUD refresh pending
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:69)
+PASS: Public GO accepts the pending Move in the same frame
+PASS: GO immediately activates the actual plan and waypoint
+PASS: GO immediately enqueues real tokenized Move commands in SimulationRoot
+PASS: Move and GO publish the latest plan within the same input frame
+PASS: GO immediately preserves the existing active-order Continue policy
+PASS: Compact A5 immediately shows the latest executing state after GO
+ERROR: FAIL: Move plus GO coalesces without synchronous heavy surface traversal
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:78)
+ERROR: FAIL: The same-frame Move plus GO burst remains pending for one full refresh
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:79)
+PASS: Real SimulationRoot physics commits the public GO commands
+ERROR: FAIL: One actual owner process step flushes the coalesced HUD work exactly once
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:90)
+ERROR: FAIL: The pending flush forces both craft and fireteam surface groups
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:91)
+PASS: The coalesced full refresh clears pending
+PASS: The delayed full refresh retains the latest GO state
+ERROR: FAIL: The flushed team status and member cards read the currently committed Move state
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:95)
+PASS: Quiescent light process steps schedule no repeated command full refresh
+PASS: The ordinary periodic heavy pass uses its unchanged-state guard instead of forcing a rebuild
+PASS: Quiescent periodic work does not restore command pending state
+ERROR: FAIL: Separate details case starts with a new pending command refresh
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _test_details_are_current (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:119)
+       [2] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:105)
+PASS: The original Details callback opens the actual team popup
+ERROR: FAIL: Opening details flushes pending full sources once before display
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _test_details_are_current (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:126)
+       [2] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:105)
+PASS: Newly opened details contain the complete current feedback and team status sources
+PASS: Opening current details creates or changes no gameplay plan or command
+PASS: Public Take changes planning while details remain open
+PASS: The open-details action retains a real pending Take waypoint
+ERROR: FAIL: Open details preserve command batching for subsequent input
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:201)
+       [1] _test_details_are_current (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:133)
+       [2] _run (res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd:105)
+PASS: Already open details immediately replace stale command text with the latest Take feedback
+COMMAND_HUD_BATCH_FACTS {"actor_writes":false,"after_commands":{"command_matrix_apply_count":4,"command_matrix_skip_count":3,"craft_controls_apply_count":6,"craft_controls_skip_count":1,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":7,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":5,"mini_cards_skip_count":2,"read_only":true,"selected_cards_apply_count":3,"selected_cards_skip_count":4,"sets_multiplayer_truth":false,"strategic_status_apply_count":6,"strategic_status_skip_count":1,"ui_sets_gameplay_truth":false},"before":{"command_matrix_apply_count":3,"command_matrix_skip_count":2,"craft_controls_apply_count":4,"craft_controls_skip_count":1,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":5,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":4,"mini_cards_skip_count":1,"read_only":true,"selected_cards_apply_count":3,"selected_cards_skip_count":2,"sets_multiplayer_truth":false,"strategic_status_apply_count":4,"strategic_status_skip_count":1,"ui_sets_gameplay_truth":false},"before_flush":{"command_matrix_apply_count":4,"command_matrix_skip_count":3,"craft_controls_apply_count":6,"craft_controls_skip_count":1,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":7,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":5,"mini_cards_skip_count":2,"read_only":true,"selected_cards_apply_count":3,"selected_cards_skip_count":4,"sets_multiplayer_truth":false,"strategic_status_apply_count":6,"strategic_status_skip_count":1,"ui_sets_gameplay_truth":false},"cadence_seconds":0.35,"flushed":{"command_matrix_apply_count":4,"command_matrix_skip_count":3,"craft_controls_apply_count":6,"craft_controls_skip_count":1,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":7,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":5,"mini_cards_skip_count":2,"read_only":true,"selected_cards_apply_count":3,"selected_cards_skip_count":4,"sets_multiplayer_truth":false,"strategic_status_apply_count":6,"strategic_status_skip_count":1,"ui_sets_gameplay_truth":false},"periodic":{"command_matrix_apply_count":4,"command_matrix_skip_count":4,"craft_controls_apply_count":6,"craft_controls_skip_count":2,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":8,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":6,"mini_cards_skip_count":2,"read_only":true,"selected_cards_apply_count":4,"selected_cards_skip_count":4,"sets_multiplayer_truth":false,"strategic_status_apply_count":6,"strategic_status_skip_count":2,"ui_sets_gameplay_truth":false},"quiet":{"command_matrix_apply_count":4,"command_matrix_skip_count":3,"craft_controls_apply_count":6,"craft_controls_skip_count":1,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":7,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":5,"mini_cards_skip_count":2,"read_only":true,"selected_cards_apply_count":3,"selected_cards_skip_count":4,"sets_multiplayer_truth":false,"strategic_status_apply_count":6,"strategic_status_skip_count":1,"ui_sets_gameplay_truth":false},"synthetic_owner_process":true}
+=== RESULTS: 25 passed, 12 failed ===
+COMMAND_HUD_BATCH_FAILED

@@ -1,5 +1,13 @@
 # TASK_436 - Fireteam Sight Security Visuals
 
+Fortsetzungsstand 05.11.2026: Die spaetere A5-Truppkarte aus
+`UI_2026_11_02_a5_kartenrand.md` und `ui_native_design_contract.md` ersetzt
+die sichtbaren Diagnosezeilen durch Portraits und einen primaeren Zustand.
+Die Security-Coverage bleibt als lesender, ausgeblendeter Diagnose-Snapshot
+erhalten. Der Verifier prueft diesen aktuellen Darstellungsvertrag und den
+Parent-Profil-/Securityrefresh statt eines direkten Resolvereingriffs.
+Einordnung: `../qa/continue_20261105_air_hud_audit.md`.
+
 ## Ziel / Problem
 
 - Der manuelle Fireteam-Playtest zeigt mehrere sichtbare Baseline-Luecken: zu lange/unklare Sicht- und Feuerlinien, Defense-Facing wirkt gebuendelt, FTL-Bubbles lesen sich zu mittig, Muzzle Flash ist zu dezent, Gegner wirken ueberlagert und Busch-Cover sitzt falsch als Bodenvariante.

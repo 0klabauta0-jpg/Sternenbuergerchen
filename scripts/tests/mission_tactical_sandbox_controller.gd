@@ -609,6 +609,7 @@ var _meta_transfer_routes: Array = []
 var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
 var _runtime_hud_heavy_refresh_time_remaining: float = 0.0
+var _runtime_hud_command_refresh_pending: bool = false
 var _fireteam_security_refresh_time_remaining: float = 0.0
 var _fireteam_security_visuals_pending: bool = false
 var _mission_visible_frame_timing_debug_enabled: bool = false
@@ -835,10 +836,11 @@ func _process(delta: float) -> void:
 			_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, false)
 		return
 	_card_refresh_time_remaining = CARD_REFRESH_INTERVAL_SECONDS
-	var heavy_refresh_due: bool = _runtime_hud_heavy_refresh_time_remaining <= 0.0
+	var command_refresh_due: bool = _runtime_hud_command_refresh_pending
+	var heavy_refresh_due: bool = command_refresh_due or _runtime_hud_heavy_refresh_time_remaining <= 0.0
 	if heavy_refresh_due:
 		_runtime_hud_heavy_refresh_time_remaining = RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS
-	_update_ui(heavy_refresh_due, false)
+	_update_ui(heavy_refresh_due, command_refresh_due)
 	if profile_enabled:
 		scopes_usec["ui_refresh_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scopes_usec["hud_heavy_usec"] = scopes_usec["ui_refresh_usec"] if heavy_refresh_due else 0
@@ -1630,7 +1632,7 @@ func execute_selected_fireteam_orders() -> bool:
 	_record_fireteamleader_feedback_for_fireteam_ids(already_active_fireteams, "go", "running", "already_active")
 	_refresh_button_state()
 	_refresh_order_visuals()
-	_update_ui()
+	_refresh_order_command_feedback()
 	_emit_planning_state_changed()
 	return true
 
@@ -4046,7 +4048,22 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 			rule_selector.get_popup().hide()
 
 
+func _refresh_order_command_feedback() -> void:
+	# Orders have already been committed/published by the caller. Show the
+	# current command immediately; merge derived full HUD work into its existing
+	# 350-ms cadence, including Move then GO in the same input frame.
+	_runtime_hud_command_refresh_pending = true
+	_refresh_button_state()
+	_update_ui(false, false)
+	_apply_native_a5_hud_layout()
+
+
 func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool = true) -> void:
+	if include_heavy_surfaces:
+		# A transport/security refresh may arrive before the command cadence.
+		# It must consume the pending force request rather than silently drop it.
+		force_heavy_surfaces = force_heavy_surfaces or _runtime_hud_command_refresh_pending
+		_runtime_hud_command_refresh_pending = false
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
@@ -4306,12 +4323,30 @@ func _refresh_runtime_mission_hud_surfaces(force_refresh: bool = true) -> void:
 	if force_refresh or craft_controls_signature != _last_periodic_craft_controls_signature:
 		_last_periodic_craft_controls_signature = craft_controls_signature
 		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "craft_controls")
+		var craft_summary_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 		_refresh_mission_control_craft_summary()
+		if profile_enabled:
+			scopes_usec["craft_summary_usec"] = Time.get_ticks_usec() - craft_summary_started_usec
+		var craft_evacuation_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 		_refresh_mission_evacuation_button()
+		if profile_enabled:
+			scopes_usec["craft_evacuation_usec"] = Time.get_ticks_usec() - craft_evacuation_started_usec
+		var craft_button_styles_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 		_refresh_dynamic_button_styles()
+		if profile_enabled:
+			scopes_usec["craft_button_styles_usec"] = Time.get_ticks_usec() - craft_button_styles_started_usec
+		var craft_button_labels_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 		_apply_drop_light_hud_button_labels()
+		if profile_enabled:
+			scopes_usec["craft_button_labels_usec"] = Time.get_ticks_usec() - craft_button_labels_started_usec
+		var craft_hierarchy_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 		_apply_command_hierarchy_metadata()
+		if profile_enabled:
+			scopes_usec["craft_hierarchy_usec"] = Time.get_ticks_usec() - craft_hierarchy_started_usec
+		var craft_layout_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 		_enforce_drop_light_fixed_hud_layout()
+		if profile_enabled:
+			scopes_usec["craft_layout_usec"] = Time.get_ticks_usec() - craft_layout_started_usec
 	else:
 		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "craft_controls")
 	if profile_enabled:
@@ -5031,6 +5066,14 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	if details_label != null:
 		details_label.tooltip_text = card.tooltip_text
 	_resize_native_a5_fireteam_card(card)
+	# Compact styling can lower the native minimum while an old larger size
+	# survives. End-aligned lists must fit the actual cards to the same minimum
+	# used for their positions and scroll range.
+	if not card.size.is_equal_approx(card.get_combined_minimum_size()):
+		card.reset_size()
+		var card_container := card.get_parent() as Container
+		if card_container != null:
+			card_container.queue_sort()
 	if selected and not bool(card.get_meta("native_a5_selected_scroll_seen", false)):
 		call_deferred("_ensure_native_a5_selected_card_visible", weakref(card), fireteam_id)
 	card.set_meta("native_a5_selected_scroll_seen", selected)
@@ -5945,7 +5988,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		portrait.mouse_filter = Control.MOUSE_FILTER_STOP
 		portrait.custom_minimum_size = Vector2(portrait_edge, metrics.portrait_height)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		strip.add_child(portrait)
 	for index in range(resolved_units.size()):
 		var unit := resolved_units[index] as Node
@@ -15608,6 +15651,8 @@ func _on_native_fire_rule_selected(index: int) -> void:
 
 
 func _open_native_team_details() -> void:
+	if _runtime_hud_command_refresh_pending:
+		_update_ui()
 	var popup := get_node_or_null("../TacticalUI/A5TeamDetailsPopup") as PopupPanel
 	if popup != null:
 		var viewport_size := Vector2i(get_viewport().get_visible_rect().size)
@@ -34163,7 +34208,7 @@ func _update_active_phase_execution(delta: float) -> void:
 		if phase_controller != null and phase_controller.has_method("get_active_phase_name"):
 			_last_command_text = "%s COMPLETE" % String(phase_controller.call("get_active_phase_name"))
 	_refresh_order_visuals()
-	_update_ui()
+	_refresh_order_command_feedback()
 	_emit_planning_state_changed()
 
 
@@ -34770,7 +34815,7 @@ func _set_waypoint_command_for_targets(waypoint_targets: Array, command_type: St
 		return false
 	_refresh_order_visuals()
 	_last_command_text = "WAYPOINT %s%s" % [command_type.to_upper(), " APPEND" if _waypoint_menu_append_mode else ""]
-	_update_ui()
+	_refresh_order_command_feedback()
 	_emit_planning_state_changed()
 	return true
 

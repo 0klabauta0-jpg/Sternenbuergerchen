@@ -1,0 +1,57 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-8f8b06a037ac489cb84ad2adcd0f85fd
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: 3x3 map fixture saves under isolated user data
+PASS: 3x3 map fixture saves under isolated user data
+PASS: Real product lobbies connect over ENet for map consent
+PASS: Incoming host snapshot opens a consent prompt naming the current offered map
+PASS: Receiving an unknown map manifest never downloads or writes a cache
+PASS: Unknown map keeps client Ready disabled until explicit consent
+PASS: A5 lobby exposes the active map Reject button
+PASS: Real Reject button rejects the network offer and closes the prompt
+PASS: Rejected network offer creates neither mission nor downloaded files
+PASS: Repeated snapshot does not reopen a rejected current offer
+PASS: Replacement host offer opens a fresh prompt for B after rejecting A
+PASS: A5 lobby exposes the active map Accept button
+PASS: V1 Accept button waits for an explicit payload and never downloads automatically
+PASS: Existing explicit payload API accepts the current network offer after consent
+PASS: Consented network map is cached only under the client download root
+PASS: Received map cache contains exactly the current host B payload
+PASS: Successful explicit acceptance closes the current network prompt
+PASS: Both peers can Ready normally after map acceptance
+PASS: Host starts the consented map through normal product Start
+PASS: Consented host and client instantiate their real mission scenes
+PASS: Host MissionSetup uses its host-selected or locally verified map path
+PASS: Host actually loaded current offered terrain instead of the default map
+PASS: Host runtime terrain registry contains exactly the nine consented map cells
+PASS: Client MissionSetup uses its host-selected or locally verified map path
+PASS: Client actually loaded current offered terrain instead of the default map
+PASS: Client runtime terrain registry contains exactly the nine consented map cells
+PASS: host has a live-owner deferred HUD focus boundary
+PASS: host empty HUD does not invent a selected card
+PASS: client has a live-owner deferred HUD focus boundary
+PASS: client empty HUD does not invent a selected card
+PASS: Actual mission fixture supplies a selectable real fireteam
+PASS: Lifecycle branch uses the actual owner-created selected MiniCard
+PASS: Real selected MiniCard is rejected by its former ancestor after reparent
+PASS: Deferred focus neither reparents nor mutates the actual selected widget
+PASS: Restored actual selected MiniCard is focused through its current scroll owner
+PASS: Selected card occupies the visible scroll rectangle after actual layout
+PASS: Expired prior widget reference resolves the current real card by fireteam identity
+PASS: Known-map product lobbies connect over ENet without a download
+PASS: Known matching local map needs no consent prompt
+PASS: Known-map peers submit normal Ready commands
+PASS: Known-map host starts normally
+PASS: Known Host MissionSetup uses its host-selected or locally verified map path
+PASS: Known Host actually loaded current offered terrain instead of the default map
+PASS: Known Host runtime terrain registry contains exactly the nine consented map cells
+PASS: Known Client MissionSetup uses its host-selected or locally verified map path
+PASS: Known Client actually loaded current offered terrain instead of the default map
+PASS: Known Client runtime terrain registry contains exactly the nine consented map cells
+PASS: host has a live-owner deferred HUD focus boundary
+PASS: host empty HUD does not invent a selected card
+PASS: client has a live-owner deferred HUD focus boundary
+PASS: client empty HUD does not invent a selected card
+=== REVIEW7 LOBBY MAP RESULTS: 51 passed, 0 failed ===
+REVIEW7_LOBBY_MAP_ALL_PASSED

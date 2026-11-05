@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-5565b8db2bef4533a16ae8062e44ef0f
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1083 Two-Instance ROE Ownership Playtest ===
+PASS: Local ENet pair connects for the ROE playtest
+PASS: Both network mission instances expose SimulationRoot and controller
+PASS: Client Fire-Rule setter sends the assigned Fireteam request
+PASS: Client does not mutate ROE before host commit
+PASS: Real client RPC reaches host validation and command processing
+TASK_1083 transport: raw=16048 wire=2509 chunks=3 pack=173us reassembly=2517us
+PASS: Host tick commits the requested ROE revision
+PASS: Client mirrors the committed host ROE
+PASS: Client mirrors the host ROE revision
+PASS: Client snapshot apply creates no gameplay command
+PASS: Host keeps each unreliable snapshot chunk below the transport payload budget
+PASS: Large mission snapshot is packetized instead of sent as one oversized unreliable RPC
+PASS: Client reassembles and applies the packetized host snapshot
+PASS: Client packetized snapshot path reports no reassembly failure
+PASS: Snapshot transport compresses the full mission state before chunking
+PASS: Snapshot compression and packetization stay below the broad 50 ms hotpath guard
+PASS: Snapshot reassembly and decode stay below the broad 50 ms client guard
+PASS: Client receives compact host acceptance feedback
+PASS: Client can send a request that still needs host ownership validation
+WARNING: SimulationRoot rejected a network command: fireteam_not_assigned_to_peer.
+   at: push_warning (core/variant/variant_utility.cpp:1034)
+   GDScript backtrace (most recent call first):
+       [0] request_command (res://scripts/core/simulation_root.gd:755)
+       [1] _poll_pair (res://scripts/tests/task_1083_two_instance_roe_ownership_playtest.gd:189)
+       [2] _test_real_rpc_roe_commit_replication_and_reject_feedback (res://scripts/tests/task_1083_two_instance_roe_ownership_playtest.gd:99)
+       [3] _poll_pair (res://scripts/tests/task_1083_two_instance_roe_ownership_playtest.gd:191)
+PASS: Wrong-Fireteam request returns the host rejection to the client
+PASS: Client controller exposes compact ROE ownership feedback
+PASS: Rejected request creates no host ROE state
+PASS: Client reassembles deliberately reversed snapshot chunks
+PASS: Unordered chunk delivery completes without transport failure
+PASS: Completed unordered tick leaves no pending chunk buffer
+=== RESULTS: 24 passed, 0 failed ===

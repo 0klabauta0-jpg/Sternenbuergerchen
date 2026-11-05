@@ -1,0 +1,16 @@
+{
+	"capture": "03_move_64",
+	"display_server": "Windows",
+	"image_size": "2560x1440",
+	"normal_mission_physical_fire_proof": false,
+	"png_sha256": "4788f32f55772dd1866040bf106ddf55fc7684e42cc43a8f34c5fff1dbadc049",
+	"scene": "res://scenes/tests/facing_sightline_debug_map.tscn",
+	"screen_index": 0,
+	"screen_size": "(2560, 1440)",
+	"source": "synthetic_fixture",
+	"test_sha256": "023604fb4d6d7fc2d11b68eb94727b011d2eb81d65ea1d984f436b5de7b1218b",
+	"view_sha256": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+	"viewport_size": "(2560.0, 1440.0)",
+	"window_mode": 3,
+	"window_size": "(2560, 1440)"
+}

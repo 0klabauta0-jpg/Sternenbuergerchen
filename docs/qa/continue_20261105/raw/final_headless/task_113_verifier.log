@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-39bec79a3aa14bc3b4f9ae1d4c265055
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_113 Flank Vulnerability Verifier ===
+  PASS: Directional security marks rear-angle attacks as flank hits
+  PASS: Flank hits grant the configured hit chance bonus
+  PASS: Flank hits grant the configured damage multiplier
+  PASS: Flank hits override target cover down to zero
+  PASS: Rear-angle flank hits expose the relative attack direction for follow-up systems
+  PASS: Rear-angle flank hits immediately escalate the defending fireteam into a shaken morale state
+  PASS: 360 security prevents flank vulnerability entirely
+  PASS: Off-axis flank hits keep their relative left/right direction instead of collapsing everything into rear
+  PASS: A single side flank first creates a lighter alerted morale memory
+  PASS: Repeated flank pressure escalates the morale state to shaken
+  PASS: Crossing into the shaken state is exposed as an explicit transition for UI/debug follow-up
+  PASS: Resolver stores an active vulnerability window after a flank hit
+  PASS: Flank vulnerability can expire while the follow-up morale pressure remains briefly active
+  PASS: Directional morale pressure also expires cleanly after its longer follow-up window
+  PASS: SimulationRoot applies flank cover override through the authoritative damage path
+  PASS: Flank hits are annotated in the damage hit context for downstream systems
+  PASS: SimulationRoot preserves flank direction labels in the authoritative hit context
+  PASS: SimulationRoot preserves flank morale state in the authoritative hit context
+  PASS: Mission baseline keeps flank vulnerability disabled as required by TASK472
+  PASS: Disabled mission baseline exposes no flank vulnerability snapshot
+  PASS: Disabled scene baseline does not resolve a synthetic rear flank
+  PASS: Mission scene starts successfully for flank integration
+  PASS: Mission scene exposes active security state for flank integration
+  PASS: Combat loop can trigger flank vulnerability from a rear directional attack in scene context
+  PASS: Tactical controller proxies active flank vulnerability snapshots
+  PASS: Tactical controller flank snapshot matches the combat-loop source
+  PASS: Tactical controller proxies the relative flank direction into the mission status layer
+  PASS: Tactical controller proxies the follow-up morale state into the mission status layer
+  PASS: Disabling the fixture hides active flank snapshots again
+  PASS: EventRouter exposes a flank_vulnerability_triggered signal contract
+=== RESULTS: 30 passed, 0 failed ===
+ALL TESTS PASSED

@@ -1,0 +1,32 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-7f13e2f788c747d5967c383a26f7a041
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_479 Fireteam Runtime Hotpath Guards ===
+PASS: Drill scene exposes CombatLoop for hotpath audit
+PASS: Hotpath audit keeps SimulationRoot as authority
+PASS: Hotpath audit documents combat-candidate filter
+PASS: Hotpath audit rejects per-unit Area2D AI
+PASS: Hotpath audit keeps existing navigation authority
+PASS: Hotpath audit sees registered active friendlies
+PASS: Hotpath audit sees registered active enemies
+PASS: Hotpath audit sees fit friendly combat candidates
+PASS: Hotpath audit sees fit enemy combat candidates
+PASS: Hotpath audit exposes potential combat pair count
+PASS: Registry filter test has CombatLoop and UnitRegistry
+PASS: Presence audit starts with four active friendlies
+PASS: Unregistered friendly is no longer active in CombatLoop
+PASS: Unregistered friendly appears as inactive slot in Presence audit
+PASS: Unregistered friendly is not a combat candidate
+PASS: Down-filter test has CombatLoop and UnitRegistry
+PASS: Presence audit starts with four active enemies
+PASS: Enemy test unit can receive damage
+PASS: Downed enemy remains an active registered runtime enemy
+PASS: Downed enemy is removed from combat candidates
+PASS: Contact tracking scan count is bounded by combat candidate pairs
+PASS: TASK_479 task file exists
+PASS: Implementation status documents TASK_479
+PASS: Roadmap lists TASK_479
+PASS: Behavior contract documents TASK_479
+=== RESULTS: 25 passed, 0 failed ===
+ALL TESTS PASSED

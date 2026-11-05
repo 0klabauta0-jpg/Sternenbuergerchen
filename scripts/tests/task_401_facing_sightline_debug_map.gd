@@ -11,6 +11,7 @@ const MINI_CARDS_PATH: String = "TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBo
 
 var _passed: int = 0
 var _failed: int = 0
+var _facing_capture_dir: String = ""
 
 
 func _init() -> void:
@@ -53,7 +54,7 @@ func _test_map_and_scenario_authoring() -> void:
 
 
 func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
-	root.size = Vector2i(1920, 1080)
+	_configure_facing_capture_viewport()
 	var scene := DEBUG_SCENE.instantiate()
 	root.add_child(scene)
 	await _wait_frames(28)
@@ -80,6 +81,7 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	_assert((unit_alpha as Node2D).global_position.distance_to((unit_bravo as Node2D).global_position) >= 200.0, "Fixture NPCs stand far enough apart for manual sightline checks")
 
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	await _capture_facing_fixture("01_authored_stand")
 	_assert(int(snapshot.get("tile_count", 0)) == 144, "Primary3DView renders the 12x12 map tiles")
 	_assert(int(snapshot.get("compass_marker_count", 0)) == 4, "Primary3DView renders all four compass markers without clicks")
 	_assert(_compass_label_text(primary_view, "corner_north") == "Nord", "North compass label renders as Nord")
@@ -101,7 +103,21 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var event_log_panel := scene.get_node_or_null("TacticalUI/TacticalEventLogPanel") as Control
 	var look_mini_card := scene.get_node_or_null("%s/FireteamMiniCard_Look" % MINI_CARDS_PATH) as Control
 	_assert(look_mini_card != null and look_mini_card.mouse_filter == Control.MOUSE_FILTER_STOP, "Lower Fireteam mini card keeps a direct click target")
-	_assert(mini_panel != null and event_log_panel != null and mini_panel.z_index > event_log_panel.z_index, "Fireteam mini cards stay above the read-only event-log window")
+	if mini_panel != null and event_log_panel != null and bool(mini_panel.get_meta("native_a5_layout", false)):
+		var mini_scroll := scene.get_node_or_null("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll") as ScrollContainer
+		if mini_scroll != null and look_mini_card != null:
+			mini_scroll.ensure_control_visible(look_mini_card)
+			await _wait_frames(3)
+			_print_card_scroll_geometry(mini_scroll, look_mini_card, "after_initial_ensure")
+			mini_scroll.ensure_control_visible(look_mini_card)
+			await _wait_frames(3)
+			_print_card_scroll_geometry(mini_scroll, look_mini_card, "after_settled_ensure")
+		_assert(mini_panel.is_visible_in_tree() and event_log_panel.is_visible_in_tree() and not mini_panel.get_global_rect().intersects(event_log_panel.get_global_rect()), "A5 fireteam cards and right-side event log occupy separate visible rectangles")
+		_assert(look_mini_card != null and _is_control_input_rect_reachable(look_mini_card) and not look_mini_card.get_global_rect().intersects(event_log_panel.get_global_rect()), "A5 lower fireteam card retains its complete reachable click surface beside the event log")
+		var aim_mini_card := scene.get_node_or_null("%s/FireteamMiniCard_Aim" % MINI_CARDS_PATH) as Control
+		_assert(aim_mini_card != null and look_mini_card != null and not aim_mini_card.get_global_rect().intersects(look_mini_card.get_global_rect()), "A5 neighboring team cards keep separate click surfaces after selection refresh")
+	else:
+		_assert(mini_panel != null and event_log_panel != null and mini_panel.z_index > event_log_panel.z_index, "Legacy overlapping fireteam mini cards stay above the read-only event-log window")
 	if look_mini_card != null:
 		var card_click := InputEventMouseButton.new()
 		card_click.button_index = MOUSE_BUTTON_LEFT
@@ -152,6 +168,7 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	_assert(_is_head_sight_anchor(String(aim_fire_entry.get("line_origin_anchor", ""))), "Sight/fire line starts at the head sight anchor")
 	_assert(int(aim_fire_entry.get("range_tiles", 0)) == int(aim_fire_entry.get("weapon_range_tiles", -1)), "Sight/fire line uses the weapon tile range instead of an arbitrary length")
 	var weapon_direction: Vector2 = (Vector2(aim_fire_entry.get("tip_position", Vector2.ZERO)) - Vector2(aim_fire_entry.get("origin_position", Vector2.ZERO))).normalized()
+	_print_facing_sample(primary_view, snapshot, unit_alpha as Node2D, "unit_alpha", -1)
 	_assert(weapon_direction.dot(Vector2.UP) > 0.90, "Weapon/shot line follows the north-facing sightline instead of the authored target")
 	_assert(bool(alpha_proxy.get("unit_aim_pose_weapon_node_available", false)), "North aimed NPC exposes an attached weapon visual")
 	_assert(bool(alpha_proxy.get("unit_aim_pose_yaw_active", false)), "North aimed NPC applies the existing aim direction to the weapon pose")
@@ -265,6 +282,8 @@ func _assert_moving_units_keep_model_forward_on_live_lines(simulation_root: Node
 			var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 			_assert_moving_unit_forward_sample(primary_view, snapshot, unit_alpha, "unit_alpha", frame_index)
 			_assert_moving_unit_forward_sample(primary_view, snapshot, unit_bravo, "unit_bravo", frame_index)
+			if frame_index in [4, 64]:
+				await _capture_facing_fixture("02_move_04" if frame_index == 4 else "03_move_64")
 
 
 func _assert_camera_rotation_keeps_imported_aim_pose(primary_view: Node, unit_id: String) -> void:
@@ -297,11 +316,11 @@ func _enqueue_debug_move_command(simulation_root: Node, unit: Node2D, target_pos
 	command.weapon_posture = "aimed"
 	command.posture_policy_id = "debug_aimed"
 	command.phase = 1
-	unit.call("assign_unit_command", command)
 	simulation_root.call("enqueue_command", command.to_dict())
 
 
 func _assert_moving_unit_forward_sample(primary_view: Node, snapshot: Dictionary, unit: Node2D, unit_id: String, frame_index: int) -> void:
+	_print_facing_sample(primary_view, snapshot, unit, unit_id, frame_index)
 	var proxy := _find_proxy_node_by_unit_id(primary_view, unit_id) as Node3D
 	var model_forward: Vector2 = _get_unit_model_forward_xz(proxy)
 	var fireteam_id: String = String(unit.call("get_fireteam_id"))
@@ -309,6 +328,10 @@ func _assert_moving_unit_forward_sample(primary_view: Node, snapshot: Dictionary
 	var heading_direction: Vector2 = Vector2(orientation.get("heading_direction", Vector2.ZERO))
 	var expected_forward: Vector2 = _world_direction_to_3d_xz(primary_view, unit.global_position, heading_direction)
 	var forward_dot: float = model_forward.dot(expected_forward) if model_forward.length_squared() > 0.0001 and expected_forward.length_squared() > 0.0001 else -1.0
+	var proxy_yaw_before_repeat: float = proxy.rotation_degrees.y if proxy != null else 0.0
+	primary_view.call("_sync_unit_proxies", false, 0.0)
+	primary_view.call("_sync_unit_proxies", false, 0.0)
+	_assert(proxy != null and absf(wrapf(proxy.rotation_degrees.y - proxy_yaw_before_repeat, -180.0, 180.0)) < 0.01, "%s repeated same-tick visual sync keeps committed movement heading at frame %d" % [unit_id, frame_index])
 	_assert(
 		forward_dot > 0.92,
 		"%s moving model forward follows live Facing/Sichtlinie at frame %d (dot %.3f)" % [unit_id, frame_index, forward_dot]
@@ -322,6 +345,115 @@ func _assert_moving_unit_forward_sample(primary_view: Node, snapshot: Dictionary
 			"%s moving weapon/shot line follows the same live heading at frame %d" % [unit_id, frame_index]
 		)
 		_assert_aim_pose_uses_imported_shoot_grip(proxy, "%s moving aimed pose keeps the imported shoot grip at frame %d" % [unit_id, frame_index])
+
+
+func _print_facing_sample(primary_view: Node, snapshot: Dictionary, unit: Node2D, unit_id: String, frame_index: int) -> void:
+	var proxy := _find_proxy_node_by_unit_id(primary_view, unit_id) as Node3D
+	var orientation: Dictionary = _find_entry(Array(snapshot.get("fireteam_orientation_entries", [])), "fireteam_id", String(unit.call("get_fireteam_id")))
+	var aim_entry: Dictionary = _find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", unit_id)
+	var current_command = unit.call("get_current_unit_command") if unit.has_method("get_current_unit_command") else null
+	print("CONTINUE_FACING_DIAGNOSTIC_SAMPLE ", var_to_str({
+		"unit_id": unit_id,
+		"frame": frame_index,
+		"world_position": unit.global_position,
+		"facing_angle": unit.get_meta("facing_angle") if unit.has_meta("facing_angle") else null,
+		"security_facing_active": unit.get_meta("security_facing_active", false),
+		"security_facing_angle": unit.get_meta("security_facing_angle") if unit.has_meta("security_facing_angle") else null,
+		"runtime_target": unit.call("get_target_position") if unit.has_method("get_target_position") else null,
+		"command_type": String(current_command.get("command_type")) if current_command != null else "",
+		"proxy_yaw": proxy.rotation_degrees.y if proxy != null else 0.0,
+		"proxy_world_direction": primary_view.call("_get_world_direction_from_proxy_yaw", unit.global_position, proxy.rotation_degrees.y) if proxy != null else Vector2.ZERO,
+		"resolved_live_aim_direction": primary_view.call("_resolve_unit_aim_direction", unit, unit.global_position),
+		"hips_forward_xz": _get_unit_model_forward_xz(proxy),
+		"orientation_direction": orientation.get("heading_direction", Vector2.ZERO),
+		"orientation_source": orientation.get("heading_source", ""),
+		"aim_direction": (Vector2(aim_entry.get("tip_position", Vector2.ZERO)) - Vector2(aim_entry.get("origin_position", Vector2.ZERO))).normalized(),
+		"diagnostic_fixture_only": true,
+	}))
+
+
+func _is_control_input_rect_reachable(control: Control) -> bool:
+	if control == null or not control.is_visible_in_tree():
+		return false
+	var rect: Rect2 = control.get_global_rect()
+	if rect.size.x <= 0.0 or rect.size.y <= 0.0 or not control.get_viewport_rect().encloses(rect):
+		print("CONTINUE_FACING_CARD_GEOMETRY ", var_to_str({"card": rect, "viewport": control.get_viewport_rect(), "reason": "viewport"}))
+		return false
+	var ancestor: Node = control.get_parent()
+	while ancestor != null:
+		if ancestor is Control and (ancestor as Control).clip_contents and not (ancestor as Control).get_global_rect().encloses(rect):
+			print("CONTINUE_FACING_CARD_GEOMETRY ", var_to_str({"card": rect, "ancestor": String(ancestor.get_path()), "clip": (ancestor as Control).get_global_rect(), "reason": "clipping_ancestor"}))
+			return false
+		ancestor = ancestor.get_parent()
+	return true
+
+
+func _print_card_scroll_geometry(scroll: ScrollContainer, card: Control, phase: String) -> void:
+	var vertical: VScrollBar = scroll.get_v_scroll_bar()
+	var horizontal: HScrollBar = scroll.get_h_scroll_bar()
+	var host := card.get_parent() as Control
+	var child_geometry: Array = []
+	if host != null:
+		for child in host.get_children():
+			if child is Control:
+				child_geometry.append({"name": String(child.name), "rect": child.get_global_rect(), "minimum": child.get_minimum_size(), "combined_minimum": child.get_combined_minimum_size(), "custom_minimum": child.custom_minimum_size, "scale": child.scale, "size_flags_vertical": child.size_flags_vertical})
+	print("CONTINUE_FACING_CARD_SCROLL_GEOMETRY ", var_to_str({
+		"phase": phase, "card": card.get_global_rect(), "scroll": scroll.get_global_rect(),
+		"host": host.get_global_rect() if host != null else Rect2(),
+		"scroll_vertical": scroll.scroll_vertical,
+		"vertical_page": vertical.page, "vertical_max": vertical.max_value,
+		"vertical_visible": vertical.visible, "horizontal_visible": horizontal.visible,
+		"horizontal_mode": scroll.horizontal_scroll_mode,
+		"children": child_geometry,
+		"card_selected": card.get_meta("mission_fireteam_mini_card_selected", false),
+		"selected_scroll_seen": card.get_meta("native_a5_selected_scroll_seen", false),
+	}))
+
+
+func _configure_facing_capture_viewport() -> void:
+	for argument in OS.get_cmdline_user_args():
+		if String(argument).begins_with("--facing-capture-dir="):
+			_facing_capture_dir = String(argument).trim_prefix("--facing-capture-dir=").strip_edges()
+	if _facing_capture_dir.is_empty() or DisplayServer.get_name() == "headless":
+		root.size = Vector2i(1920, 1080)
+		_facing_capture_dir = ""
+		return
+	_facing_capture_dir = ProjectSettings.globalize_path(_facing_capture_dir)
+	_assert(DirAccess.make_dir_recursive_absolute(_facing_capture_dir) == OK, "Native diagnostic capture directory is available")
+	var screen_size: Vector2i = DisplayServer.screen_get_size(DisplayServer.window_get_current_screen())
+	root.mode = Window.MODE_FULLSCREEN
+	root.content_scale_size = screen_size
+	root.size = screen_size
+
+
+func _capture_facing_fixture(label: String) -> void:
+	if _facing_capture_dir.is_empty():
+		return
+	await RenderingServer.frame_post_draw
+	var frame_image: Image = root.get_texture().get_image()
+	var path: String = _facing_capture_dir.path_join(label + ".png")
+	var saved: Error = ERR_ALREADY_EXISTS if FileAccess.file_exists(path) else frame_image.save_png(path)
+	_assert(saved == OK, "Native authored facing-fixture frame saved: " + label)
+	var screen: int = DisplayServer.window_get_current_screen()
+	var facts: Dictionary = {
+		"source": "synthetic_fixture", "scene": "res://scenes/tests/facing_sightline_debug_map.tscn",
+		"normal_mission_physical_fire_proof": false, "capture": label,
+		"display_server": DisplayServer.get_name(), "screen_index": screen,
+		"screen_size": str(DisplayServer.screen_get_size(screen)),
+		"window_mode": root.mode, "window_size": str(root.size),
+		"viewport_size": str(root.get_visible_rect().size),
+		"image_size": "%dx%d" % [frame_image.get_width(), frame_image.get_height()],
+		"test_sha256": FileAccess.get_sha256("res://scripts/tests/task_401_facing_sightline_debug_map.gd"),
+		"view_sha256": FileAccess.get_sha256("res://scripts/terrain/terrain_map_3d_view.gd"),
+		"png_sha256": FileAccess.get_sha256(path) if saved == OK else "",
+	}
+	var facts_path: String = _facing_capture_dir.path_join(label + ".json")
+	var facts_file: FileAccess = FileAccess.open(facts_path, FileAccess.WRITE)
+	_assert(facts_file != null, "Native facing-fixture display facts can be recorded")
+	if facts_file != null:
+		facts_file.store_buffer(JSON.stringify(facts, "\t").to_utf8_buffer())
+		facts_file.close()
+	_assert(root.mode in [Window.MODE_FULLSCREEN, Window.MODE_EXCLUSIVE_FULLSCREEN], "Native facing-fixture capture remains fullscreen")
 
 
 func _assert_unit_model_forward_matches_runtime_facing(primary_view: Node, unit: Node2D, unit_id: String) -> void:

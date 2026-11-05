@@ -1,6 +1,12 @@
 extends SceneTree
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
+const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
+const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
+const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
+const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
+const SIMULATION_ROOT_SCRIPT: GDScript = preload("res://scripts/core/simulation_root.gd")
+const UNIT_REGISTRY_SCRIPT: GDScript = preload("res://scripts/registries/unit_registry.gd")
 const FIRETEAM_INFO_VBOX_PATH: String = "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox"
 const GO_BUTTON_PATH: String = "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton"
 
@@ -15,6 +21,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== Bugfix Mission Fire Sector Overlay ===")
 	await _test_fire_sector_overlay_is_explicit_and_sector_based()
+	await _test_live_facing_priority_is_shared_by_visuals()
 	await _test_direct_mode_hides_legacy_phase_controls()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
@@ -89,6 +96,115 @@ func _test_fire_sector_overlay_is_explicit_and_sector_based() -> void:
 	_assert(int(disabled_again_snapshot.get("friendly_aim_visual_count", -1)) == 0, "Friendly fire sector visuals clear again after toggling off")
 	scene.queue_free()
 	await _wait_frames(2)
+
+
+func _test_live_facing_priority_is_shared_by_visuals() -> void:
+	# Controlled regression fixture. Synthetic contacts/events are diagnostics,
+	# never evidence of a physical shot in the normal mission.
+	var fixture := Node.new()
+	root.add_child(fixture)
+	var registry = UNIT_REGISTRY_SCRIPT.new()
+	registry.name = "UnitRegistry"
+	fixture.add_child(registry)
+	var simulation = SIMULATION_ROOT_SCRIPT.new()
+	simulation.name = "SimulationRoot"
+	simulation.unit_registry_path = NodePath("../UnitRegistry")
+	fixture.add_child(simulation)
+	var unit = TEST_UNIT_SCRIPT.new()
+	unit.unit_id = "facing_priority_alpha"
+	unit.team_id = "team_alpha"
+	unit.fireteam_id = "priority"
+	unit.weapon_1_id = "rifle"
+	unit.position = Vector2(128.0, 128.0)
+	fixture.add_child(unit)
+	registry.call("register_unit", unit.unit_id, unit)
+	var view = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
+	fixture.add_child(view)
+	view.call("configure_from_map", TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "facing_priority", Vector2i(12, 12), Vector2.ZERO, 64.0, 32.0, 2))
+	view.call("set_unit_nodes", [unit])
+	view.call("set_order_visual_payload", _priority_visual_payload(unit))
+	simulation.call("enqueue_command", {
+		"command_type": UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION,
+		"unit_id": unit.unit_id, "team_id": unit.team_id,
+		"target_position": unit.position, "facing_angle": PI,
+		"movement_posture": "engage", "weapon_posture": "aimed",
+	})
+	await physics_frame
+	await _wait_frames(3)
+	unit.call("set_target_position", unit.position + Vector2(160.0, 0.0))
+	await _assert_priority_sample(view, unit, Vector2.LEFT, "hold_explicit_before_raw_target")
+	unit.set_meta("security_facing_active", true)
+	unit.set_meta("security_facing_angle", PI * 0.5)
+	await _assert_priority_sample(view, unit, Vector2.DOWN, "active_security_before_static_facing_and_raw_target")
+	var before_move: Vector2 = unit.position
+	simulation.call("enqueue_command", {
+		"command_type": UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION,
+		"unit_id": unit.unit_id, "team_id": unit.team_id,
+		"target_position": before_move + Vector2(160.0, 0.0),
+		"movement_posture": "engage", "weapon_posture": "aimed",
+		"source_command_type": "facing_priority_regression",
+	})
+	for _index in range(3):
+		await physics_frame
+	_assert(unit.position.x > before_move.x, "Priority regression moves through real SimulationRoot command commits")
+	await _assert_priority_sample(view, unit, Vector2.RIGHT, "active_move_before_security")
+	view.call("set_contact_entries", [{
+		"fireteam_id": unit.fireteam_id, "unit_id": "priority_enemy",
+		"team_id": "team_bravo", "detection_state": "confirmed",
+		"last_known_position": unit.position + Vector2(0.0, -160.0),
+	}], PackedStringArray([unit.fireteam_id]))
+	await _assert_priority_sample(view, unit, Vector2.UP, "confirmed_contact_before_move_and_security")
+	var fire_payload: Dictionary = _priority_visual_payload(unit)
+	fire_payload["fire_event_dicts"] = [{
+		"event_id": "priority_synthetic_fire", "event_type": "weapon_fire",
+		"attacker_unit_id": unit.unit_id, "attacker_team_id": unit.team_id,
+		"attacker_fireteam_id": unit.fireteam_id,
+		"attacker_position": unit.position, "target_unit_id": "priority_enemy",
+		"target_position": unit.position + Vector2(0.0, 160.0), "weapon_id": "rifle",
+	}]
+	view.call("set_order_visual_payload", fire_payload)
+	await _assert_priority_sample(view, unit, Vector2.DOWN, "fire_event_before_contact_move_and_security")
+	fixture.queue_free()
+	await _wait_frames(2)
+
+
+func _priority_visual_payload(unit: Node2D) -> Dictionary:
+	return {
+		"selected_fireteam_ids": PackedStringArray([String(unit.get("fireteam_id"))]),
+		"fire_sector_overlay_enabled": true,
+		"fireteam_anchors": [{
+			"fireteam_id": String(unit.get("fireteam_id")),
+			"position": unit.global_position, "heading_direction": Vector2.LEFT,
+		}],
+	}
+
+
+func _assert_priority_sample(view: Node, unit: Node2D, expected: Vector2, label: String) -> void:
+	# Published dynamic overlays intentionally refresh at 150 ms. Headless
+	# renderframes alone do not advance that real-time budget reliably.
+	await create_timer(0.18).timeout
+	await _wait_frames(3)
+	view.call("_sync_unit_proxies", false, 0.0)
+	var direction: Vector2 = Vector2(view.call("_resolve_unit_aim_direction", unit, unit.global_position)).normalized()
+	var orientation: Dictionary = Dictionary(view.call("_resolve_live_fireteam_orientation_state", String(unit.get("fireteam_id"))))
+	var heading: Vector2 = Vector2(orientation.get("heading_direction", Vector2.ZERO)).normalized()
+	var snapshot: Dictionary = Dictionary(view.call("get_render_snapshot"))
+	var rendered_orientation: Dictionary = _first_dictionary(Array(snapshot.get("fireteam_orientation_entries", [])))
+	var rendered_heading: Vector2 = Vector2(rendered_orientation.get("heading_direction", Vector2.ZERO)).normalized()
+	var sight_entry: Dictionary = _first_dictionary(Array(snapshot.get("friendly_aim_entries", [])))
+	var sight_direction: Vector2 = (Vector2(sight_entry.get("tip_position", Vector2.ZERO)) - Vector2(sight_entry.get("origin_position", Vector2.ZERO))).normalized()
+	var state: Dictionary = Dictionary(Dictionary(snapshot.get("unit_proxy_state_by_id", {})).get(String(unit.get("unit_id")), {}))
+	var proxy_direction: Vector2 = Vector2(view.call("_get_world_direction_from_proxy_yaw", unit.global_position, float(state.get("rotation_y_degrees", 0.0)))).normalized()
+	print("CONTINUE_FACING_DIAGNOSTIC_SAMPLE ", var_to_str({
+		"case": label, "unit_id": unit.get("unit_id"),
+		"aim": direction, "orientation": heading, "rendered_orientation": rendered_heading, "sightline": sight_direction, "proxy": proxy_direction,
+		"expected": expected, "synthetic_fixture_only": true,
+	}))
+	_assert(direction.dot(expected) > 0.98, "%s: aim follows current runtime priority" % label)
+	_assert(proxy_direction.dot(expected) > 0.98, "%s: rendered proxy follows the same priority" % label)
+	_assert(heading.dot(expected) > 0.98, "%s: orientation follows the same live priority" % label)
+	_assert(rendered_heading.dot(expected) > 0.98, "%s: published orientation refreshes to the same priority" % label)
+	_assert(sight_direction.dot(expected) > 0.98, "%s: published sightline refreshes to the same priority" % label)
 
 
 func _test_direct_mode_hides_legacy_phase_controls() -> void:

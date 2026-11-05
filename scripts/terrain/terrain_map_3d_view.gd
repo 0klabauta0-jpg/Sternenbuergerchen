@@ -1855,9 +1855,7 @@ func _build_order_dynamic_visual_signature() -> String:
 		if orientation_fireteam_ids.has(fireteam_id):
 			orientation_position_sums[fireteam_id] = Vector2(orientation_position_sums.get(fireteam_id, Vector2.ZERO)) + unit_position
 			if not orientation_directions.has(fireteam_id):
-				var facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
-				if facing_direction.length_squared() <= 0.0001:
-					facing_direction = _resolve_unit_motion_or_target_direction(proxy, unit, unit_position)
+				var facing_direction: Vector2 = _resolve_unit_aim_direction(unit, unit_position)
 				if facing_direction.length_squared() > 0.0001:
 					orientation_directions[fireteam_id] = facing_direction.normalized()
 			orientation_counts[fireteam_id] = int(orientation_counts.get(fireteam_id, 0)) + 1
@@ -2004,6 +2002,7 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	var can_apply_overlay_delta: bool = _can_apply_fow_overlay_delta(normalized_state)
 	var same_overlay: bool = same_context and _fow_overlay_multimesh != null and not _fow_overlay_slot_by_tile_id.is_empty()
 	var previous_dynamic_visibility_signature: String = _build_fow_dynamic_visibility_signature(_fog_of_war_state)
+	var previous_drop_admission_signature: String = _build_drop_fow_admission_signature()
 	_fog_of_war_state_signature = next_signature
 	_apply_fog_of_war_visual_state(normalized_state)
 	# Contact-only updates keep the existing terrain slots and pending cursor.
@@ -2024,7 +2023,10 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	else:
 		_fow_order_rebuild_skip_count += 1
 	_fow_density_rebuild_skip_count += 1
-	_fow_drop_rebuild_skip_count += 1
+	if previous_drop_admission_signature != _build_drop_fow_admission_signature():
+		_rebuild_drop_visuals()
+	else:
+		_fow_drop_rebuild_skip_count += 1
 	_suppress_contact_density_for_fow_delta()
 	_refresh_drop_visual_visibility_for_fow_delta()
 	_refresh_unit_proxy_fow_visibility()
@@ -6213,14 +6215,40 @@ func _suppress_contact_density_for_fow_delta() -> void:
 	_contact_density_root.visible = not _is_fog_of_war_visual_filter_active()
 
 
+func _build_drop_fow_admission_signature() -> String:
+	# Only existing craft/intent positions matter. A distant tile or contact
+	# delta must not recreate ships and markers; an admitted/removed position
+	# must rebuild because a previously filtered mesh may not exist at all.
+	if _drop_payload.is_empty():
+		return ""
+	var payloads: Array = [_drop_payload]
+	payloads.append_array(Array(_drop_payload.get("dropship_visuals", [])))
+	var parts: PackedStringArray = PackedStringArray()
+	for payload_variant in payloads:
+		if typeof(payload_variant) != TYPE_DICTIONARY:
+			continue
+		var payload: Dictionary = Dictionary(payload_variant)
+		for key in ["lz_position", "requested_lz_position", "target_lz_position", "resolved_lz_position", "actual_landing_position", "approach_vector_target_position", "dropship_target_position"]:
+			var position_variant: Variant = payload.get(key, null)
+			if typeof(position_variant) == TYPE_VECTOR2:
+				parts.append(str(_air_layer_allows_surface_marker(Vector2(position_variant), payload)))
+		var aircraft_position: Variant = payload.get("dropship_position", null)
+		if bool(payload.get("dropship_visible", false)) and typeof(aircraft_position) == TYPE_VECTOR2:
+			parts.append(str(_air_layer_allows_air_visual_for_payload(payload, Vector2(aircraft_position))))
+		elif bool(payload.get("cargo_visual", false)) and typeof(payload.get("lz_position", null)) != TYPE_VECTOR2 and typeof(aircraft_position) == TYPE_VECTOR2:
+			# A surface cargo status without an explicit LZ anchors at its ship
+			# position, which can differ from the requested approach target.
+			parts.append(str(_air_layer_allows_surface_marker(Vector2(aircraft_position), payload)))
+	return "|".join(parts)
+
+
 func _refresh_drop_visual_visibility_for_fow_delta() -> void:
 	if _drop_root == null or not is_instance_valid(_drop_root):
 		return
-	if not _is_fog_of_war_visual_filter_active():
-		_drop_root.visible = true
-		return
-	var payload_team_id: String = String(_drop_payload.get("team_id", "")).strip_edges()
-	_drop_root.visible = not _fog_of_war_team_id.is_empty() and payload_team_id == _fog_of_war_team_id
+	# Each aircraft, intent marker and cargo label already has its own owner /
+	# anchor admission. A mixed payload's parent owner cannot hide admitted
+	# children or stand in for filtering the disallowed children individually.
+	_drop_root.visible = true
 
 
 func _rebuild_fog_of_war_visuals() -> void:
@@ -7634,16 +7662,11 @@ func _resolve_live_fireteam_orientation_state(fireteam_id: String) -> Dictionary
 		visible_unit_count += 1
 		if direction.length_squared() > 0.0001:
 			continue
-		var explicit_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
-		if explicit_direction.length_squared() > 0.0001:
-			direction = explicit_direction.normalized()
-			heading_source = "unit_facing_live"
-			continue
-		var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
-		var motion_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, unit_position)
-		if motion_direction.length_squared() > 0.0001:
-			direction = motion_direction.normalized()
-			heading_source = "unit_motion_live"
+		var visual_direction: Vector2 = _resolve_unit_aim_direction(unit, unit_position)
+		if visual_direction.length_squared() > 0.0001:
+			direction = visual_direction.normalized()
+			var explicit_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
+			heading_source = "unit_facing_live" if explicit_direction.length_squared() > 0.0001 and direction.dot(explicit_direction.normalized()) > 0.9999 else "unit_visual_facing_live"
 	if visible_unit_count <= 0:
 		return {}
 	var result: Dictionary = {
@@ -8649,6 +8672,16 @@ func _resolve_unit_motion_or_target_direction(proxy: Node3D, unit: Node, current
 			var previous_world_position: Vector2 = Vector2(previous_position)
 			if previous_world_position.distance_squared_to(current_world_position) > 0.25:
 				return (current_world_position - previous_world_position).normalized()
+	# A held/old runtime target is not an active movement order. Only the
+	# committed UnitCommand may give its target priority over security/facing.
+	var current_command = unit.call("get_current_unit_command") if unit != null and unit.has_method("get_current_unit_command") else null
+	if current_command == null or not ["move_to_position", "engage_area"].has(String(current_command.get("command_type"))):
+		return Vector2.ZERO
+	# SimulationRoot commits the actual path/avoidance heading on every move.
+	# Repeated visual syncs in one tick have no new position delta; they must
+	# retain that heading rather than turning back toward the final path goal.
+	if unit.has_meta("facing_angle"):
+		return Vector2.RIGHT.rotated(float(unit.get_meta("facing_angle", 0.0))).normalized()
 	var target_position_variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position_variant) == TYPE_VECTOR2:
 		var target_position: Vector2 = Vector2(target_position_variant)
@@ -10256,7 +10289,7 @@ func _rebuild_drop_visuals() -> void:
 		var show_entry_lz_marker: bool = bool(entry.get("show_lz_marker", bool(entry.get("has_lz_position", false))))
 		if show_entry_lz_marker and bool(entry.get("has_lz_position", false)) and typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
 			var entry_lz_position: Vector2 = Vector2(entry.get("lz_position", Vector2.ZERO))
-			if _air_layer_allows_surface_marker(entry_lz_position):
+			if _air_layer_allows_surface_marker(entry_lz_position, entry):
 				var lz_color := Color(0.42, 0.72, 1.0, 0.46)
 				if is_cargo_visual:
 					lz_color = Color(1.0, 0.72, 0.28, 0.58)
@@ -10302,10 +10335,17 @@ func _add_cargo_touchdown_status_label(entry: Dictionary, visual_id: String, shi
 		return
 	var label_position: Vector3
 	if bool(entry.get("dropship_visible", false)):
+		if not _air_layer_allows_air_visual_for_payload(entry, ship_position):
+			return
 		label_position = _world_to_air_layer_3d_position_for_payload(entry, ship_position, 0.92)
 	elif typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
-		label_position = _world_to_surface_3d_position(Vector2(entry.get("lz_position", Vector2.ZERO)), 0.84)
+		var lz_position: Vector2 = Vector2(entry.get("lz_position", Vector2.ZERO))
+		if not _air_layer_allows_surface_marker(lz_position, entry):
+			return
+		label_position = _world_to_surface_3d_position(lz_position, 0.84)
 	else:
+		if not _air_layer_allows_surface_marker(ship_position, entry):
+			return
 		label_position = _world_to_surface_3d_position(ship_position, 0.84)
 	var label := _add_label3d(
 		_drop_root,
@@ -10334,12 +10374,16 @@ func _build_cargo_touchdown_status_text(entry: Dictionary) -> String:
 	return "%s | %s" % [display_name, cargo_state]
 
 
-func _air_layer_allows_surface_marker(world_position: Vector2) -> bool:
+func _air_layer_allows_surface_marker(world_position: Vector2, marker_payload: Dictionary = {}) -> bool:
 	if not _is_fog_of_war_visual_filter_active():
 		return true
-	var team_id: String = String(_drop_payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges()
-	if _fog_of_war_team_id.is_empty() or team_id.is_empty() or team_id == _fog_of_war_team_id:
-		return true
+	# Own planned intent stays readable on fully known terrain before the first
+	# ground observer deploys. Blackout never inherits the friendly-air exemption.
+	if _fog_of_war_mode == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_KNOWN_TERRAIN:
+		var source_payload: Dictionary = _drop_payload if marker_payload.is_empty() else marker_payload
+		var team_id: String = String(source_payload.get("team_id", "")).strip_edges()
+		if not team_id.is_empty() and team_id == _fog_of_war_team_id:
+			return true
 	return _fow_is_world_position_currently_visible(world_position)
 
 
@@ -10448,7 +10492,7 @@ func _add_dropship_approach_line(entry: Dictionary, visual_id: String, ship_posi
 	var line_origin: Vector2 = _get_dropship_approach_vector_origin(entry, ship_position)
 	if line_origin.distance_squared_to(target_position) <= 4.0:
 		return
-	if not _air_layer_allows_surface_marker(target_position):
+	if not _air_layer_allows_surface_marker(target_position, entry):
 		return
 	var line := _add_dropship_approach_vector3d(
 		_drop_root,

@@ -1,5 +1,15 @@
 # TASK_ROADMAP
 
+## Fortsetzung 2026-11-05 - Befehlsruckler und historische Gates
+- Synchrone Move-/GO-Kosten reduziert, HUD-Interleaving, konsistente
+  Blickrichtung, FoW-/Cargo-/Drop-Visibility und vollstaendige Karten korrigiert.
+- Sieben alte Gates nach aktuellen Vertraegen geprueft; 27 fokussierte Gates
+  final gruen (26/27 Matrix plus sachlich korrigierter TASK344-Nachlauf).
+- Normale 90 s bei 1x und native Vollbildfixtures bestanden. Allgemeine
+  Framezeitverbesserung nicht belegt; verbleibender HUDhitch offen dokumentiert.
+- Aufgabe `docs/tasks/CONTINUE_2026_11_05_command_hitches_and_legacy.md`,
+  QA `docs/qa/continue_20261105/README.md`; Mainreceipt folgt separat.
+
 ## Nutzerauftrag 2026-11-05 - Vollbild-Spielpass und neue Basis-UX
 - Basis/Loadout/Fireteam-/Dropship-UI referenzgefuehrt ueberarbeitet,
   begehbare Basis und zusammenhaengende Vierer-Portraits integriert.

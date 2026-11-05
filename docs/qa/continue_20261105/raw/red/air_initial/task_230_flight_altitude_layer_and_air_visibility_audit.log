@@ -1,0 +1,135 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-c6f9855ac12d4d06b2554eaf95de0fe0
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_230 Flight Altitude Layer and Air Visibility Audit ===
+PASS: Flight altitude layer contract doc exists
+PASS: Contract doc covers mission_air
+PASS: Contract doc covers height_level
+PASS: Contract doc covers FoW
+PASS: Contract doc covers Multiplayer
+PASS: Contract doc covers Editor
+PASS: Dropship visual is visible on hill fixture
+PASS: Dropship uses explicit mission_air layer
+PASS: Dropship is above terrain surface
+PASS: Dropship surface reference follows hill height
+PASS: Dropship air Y is above surface Y
+PASS: Dropship keeps minimum air clearance
+PASS: Visible LZ still renders as terrain marker
+PASS: Friendly dropship remains visible under FoW
+ERROR: FAIL: Hidden LZ marker does not reveal unknown terrain
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_fow_hides_air_surface_markers_without_hiding_friendly_air (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:121)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+ERROR: FAIL: Air layer records blocked unknown-terrain reveal
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_fow_hides_air_surface_markers_without_hiding_friendly_air (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:122)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+PASS: Enemy air/contact visual is hidden by FoW
+PASS: Visible LZ marker returns when its tile is FoW-visible
+PASS: Enemy air/contact visual appears when FoW contact rule allows it
+PASS: Visible contact keeps authored position
+ERROR: FAIL: blackout_unknown: primary terrain LZ follows current tile visibility
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:220)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+ERROR: FAIL: blackout_unknown: requested and per-craft LZs share the surface visibility gate
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:221)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+ERROR: FAIL: blackout_unknown: resolved landing position shares the surface visibility gate
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:222)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+ERROR: FAIL: blackout_unknown: both craft approach lines follow target tile visibility
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:223)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+PASS: blackout_unknown: aircraft at the visible origin remain visible independently of hidden LZs
+PASS: blackout_unknown: visual filtering does not mutate FoW knowledge or source flight payload
+ERROR: FAIL: blackout_explored: primary terrain LZ follows current tile visibility
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:220)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+ERROR: FAIL: blackout_explored: requested and per-craft LZs share the surface visibility gate
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:221)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+ERROR: FAIL: blackout_explored: resolved landing position shares the surface visibility gate
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:222)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+ERROR: FAIL: blackout_explored: both craft approach lines follow target tile visibility
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:223)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+PASS: blackout_explored: aircraft at the visible origin remain visible independently of hidden LZs
+PASS: blackout_explored: visual filtering does not mutate FoW knowledge or source flight payload
+ERROR: FAIL: known_not_currently_visible: primary terrain LZ follows current tile visibility
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:220)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+ERROR: FAIL: known_not_currently_visible: requested and per-craft LZs share the surface visibility gate
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:221)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+ERROR: FAIL: known_not_currently_visible: resolved landing position shares the surface visibility gate
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:222)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+ERROR: FAIL: known_not_currently_visible: both craft approach lines follow target tile visibility
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:331)
+       [1] _test_surface_marker_modes_are_read_only (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:223)
+       [2] _wait_frames (res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd:322)
+PASS: known_not_currently_visible: aircraft at the visible origin remain visible independently of hidden LZs
+PASS: known_not_currently_visible: visual filtering does not mutate FoW knowledge or source flight payload
+PASS: blackout_visible: primary terrain LZ follows current tile visibility
+PASS: blackout_visible: requested and per-craft LZs share the surface visibility gate
+PASS: blackout_visible: resolved landing position shares the surface visibility gate
+PASS: blackout_visible: both craft approach lines follow target tile visibility
+PASS: blackout_visible: aircraft at the visible origin remain visible independently of hidden LZs
+PASS: blackout_visible: visual filtering does not mutate FoW knowledge or source flight payload
+PASS: off: primary terrain LZ follows current tile visibility
+PASS: off: requested and per-craft LZs share the surface visibility gate
+PASS: off: resolved landing position shares the surface visibility gate
+PASS: off: both craft approach lines follow target tile visibility
+PASS: off: aircraft at the visible origin remain visible independently of hidden LZs
+PASS: off: visual filtering does not mutate FoW knowledge or source flight payload
+PASS: Air/FoW surface filtering leaves terrain heights, objects, walkability and LOS unchanged
+PASS: Snapshot carries air layer
+PASS: Snapshot carries flight altitude clearance
+PASS: Snapshot forces terrain-height-independent display flag
+PASS: Snapshot forbids unknown-terrain reveal flag
+PASS: Client accepts air-layer dropship snapshot
+PASS: Client stores dropship air state read-only
+PASS: Applying air-layer snapshot does not enqueue commands
+=== RESULTS: 44 passed, 14 failed ===
+FAIL
