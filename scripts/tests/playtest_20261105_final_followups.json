@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "disconnect_restart_red",
+      "script": "res://scripts/tests/playtest_20261105_multiplayer_disconnect_owner_verifier.gd",
+      "success_marker": "MULTIPLAYER_DISCONNECT_OWNER:",
+      "timeout": 90
+    },
+    {
+      "name": "homebase_narrow_green",
+      "script": "res://scripts/tests/playtest_20261105_homebase_operations_verifier.gd",
+      "success_marker": "HOMEBASE_OPERATIONS_VERIFY_PASS",
+      "timeout": 180
+    }
+  ]
+}

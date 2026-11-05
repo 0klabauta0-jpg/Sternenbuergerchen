@@ -8,7 +8,11 @@ Editor-Maps werden im Multiplayer nur vor der Mission abgeglichen. Die laufenden
 - `map_name`: sichtbarer Name fuer den Consent-Prompt.
 - `format_version`: aktuell `1`.
 - `map_hash`: SHA-256 des JSON-Texts.
-- `map_size_bytes`: Payload-Groesse, V1 maximal 1 MiB.
+- `map_size_bytes`: Payload-Groesse, maximal 4 MiB seit dem Spielpass vom
+  05.11.2026. Die aktive 9408-Zellen-GM01 ist 2.425.578 Bytes gross und muss
+  als bekannte lokale Standardkarte angeboten werden koennen. Manifest und
+  Payload verwenden dieselbe begrenzte Obergrenze; Consent, Hash-/Groessen-
+  und Strukturpruefung bleiben unveraendert.
 - Optional: `scenario_file_path`, `scenario_hash`, `scenario_size_bytes`.
 
 ## Client-Check

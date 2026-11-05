@@ -11,3 +11,10 @@ docs/reports/STERNENBUERGERCHEN_GRAFIK_PASS06_2026-11-01.html -text whitespace=b
 
 # Byte-preserved P07 handoff before adoption of Ref03 and the main default.
 docs/reports/STERNENBUERGERCHEN_GRAFIK_PASS07_2026-11-01.html -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# Reviewed portrait resources/receipts and raw playtest evidence are byte-hashed.
+# Preserve their exact bytes across Windows and fresh Git checkouts.
+Assets/curated/portraits/frontier_20261105/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+art/portraits_20261105/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+art/menu_restore_20261105/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/qa/playtest_20261105/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "security_batch",
+      "script": "res://scripts/tests/playtest_20261105_security_visual_batch_verifier.gd",
+      "success_marker": "PLAYTEST_SECURITY_VISUAL_BATCH_ALL_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "task_111_verifier",
+      "script": "res://scripts/tests/task_111_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_112_verifier",
+      "script": "res://scripts/tests/task_112_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_113_verifier",
+      "script": "res://scripts/tests/task_113_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_436_fireteam_sight_security_visuals",
+      "script": "res://scripts/tests/task_436_fireteam_sight_security_visuals.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "bugfix_mission_fire_sector_overlay",
+      "script": "res://scripts/tests/bugfix_mission_fire_sector_overlay.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_479_fireteam_runtime_hotpath_guards",
+      "script": "res://scripts/tests/task_479_fireteam_runtime_hotpath_guards.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_230_flight_altitude_layer_and_air_visibility_audit",
+      "script": "res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_471_fireteam_weapon_fire_vfx_hit_feedback_perf",
+      "script": "res://scripts/tests/task_471_fireteam_weapon_fire_vfx_hit_feedback_perf.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_474_fireteam_down_vfx_performance_stabilization",
+      "script": "res://scripts/tests/task_474_fireteam_down_vfx_performance_stabilization.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_401_facing_sightline_debug_map",
+      "script": "res://scripts/tests/task_401_facing_sightline_debug_map.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_403_runtime_animation_combat_cases",
+      "script": "res://scripts/tests/task_403_runtime_animation_combat_cases.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "hex_render",
+      "script": "res://scripts/tests/frontier_hex_render_verifier.gd",
+      "success_marker": "FRONTIER_HEX_RENDER",
+      "timeout": 180
+    },
+    {
+      "name": "npc_feedback",
+      "script": "res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd",
+      "success_marker": "NPC COMBAT FEEDBACK:",
+      "timeout": 180
+    },
+    {
+      "name": "flight_grid",
+      "script": "res://scripts/tests/playtest_20261105_flight_grid_verifier.gd",
+      "success_marker": "PLAYTEST_FLIGHT_GRID:",
+      "timeout": 180
+    }
+  ]
+}

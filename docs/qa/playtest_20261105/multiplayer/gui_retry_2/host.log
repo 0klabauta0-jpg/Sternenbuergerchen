@@ -1,0 +1,13 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-20261105T082910Z-5362c154-host
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+[DBG][@282][#1][_][netfox::NetworkTimeSynchronizer] Requested initial timestamp @ 1793867369.2710s raw time
+[DBG][@282][#1][_][netfox::NetworkTime] Peer #1987512209 is now on time!
+[DBG][@282][#1][_][netfox::NetworkTickrateHandshake] Received tickrate 30 from peer 1987512209
+[DBG][@282][#1][_][netfox::NetworkTime] Game stalled for 4.0110s, assuming it was a pause
+[DBG][@944][#1][_][netfox::NetworkTime] Game stalled for 2.3520s, assuming it was a pause
+[DBG][@1151][#1][_][netfox::NetworkTime] Game stalled for 2.4910s, assuming it was a pause
+[DBG][@1272][#1][_][netfox::NetworkTime] Game stalled for 1.6960s, assuming it was a pause
+[DBG][@1392][#1][_][netfox::NetworkTime] Game stalled for 1.0240s, assuming it was a pause

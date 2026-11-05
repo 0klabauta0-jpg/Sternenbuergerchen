@@ -58,25 +58,7 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 	var team_panel := controller.get_node_or_null(BASE + "FireteamPanel") as PanelContainer
 	if team_panel != null:
 		_ensure_team_controls(controller, team_panel, layer)
-		THEME.style_section_heading(_ensure_label(team_panel, "A5TeamIdentity", 16), 16)
-		(team_panel.get_node("A5TeamIdentity") as Label).max_lines_visible = 1
-		_place(team_panel.get_node("A5TeamIdentity") as Control, Rect2(team.position + Vector2i(8, 4), Vector2i(team.size.x - 176, 22)))
-		var summary := _ensure_label(team_panel, "A5TeamSummary", 12)
-		summary.max_lines_visible = 1
-		_place(summary, Rect2(team.position + Vector2i(8, 28), Vector2i(team.size.x - 16, 18)))
-		var fire_heading := _ensure_label(team_panel, "A5FireRuleHeading", 12)
-		fire_heading.text = "Feuerregel"
-		fire_heading.autowrap_mode = TextServer.AUTOWRAP_OFF
-		fire_heading.max_lines_visible = 1
-		fire_heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		fire_heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-		fire_heading.clip_text = true
-		fire_heading.visible = true
-		_place(fire_heading, Rect2(team.position + Vector2i(8, 94), Vector2i(88, 28)))
-		fire_heading.z_index = 12
-		_place(team_panel.get_node("A5FireRuleSelector") as Control, Rect2(team.position + Vector2i(104, 94), Vector2i(team.size.x - 112, 28)))
-		_place(team_panel.get_node("A5DetailsButton") as Control, Rect2(team.position + Vector2i(team.size.x - 160, 6), Vector2i(76, 26)))
-		_style_dock_module(team_panel, true)
+		_layout_selected_team_controls(controller, team_panel, Rect2(team), layout)
 	var command_panel := controller.get_node_or_null(BASE + "CommandPanel") as PanelContainer
 	if command_panel != null:
 		_style_dock_module(command_panel, false)
@@ -89,7 +71,7 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 		if band_panel == null:
 			band_panel = Panel.new()
 			band_panel.name = "A5InstrumentSurface"
-			band_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			band_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 			band_panel.focus_mode = Control.FOCUS_NONE
 			band_panel.theme = THEME.get_theme()
 			var style: StyleBoxFlat = THEME.build_flat_stylebox(THEME.COLOR_PANEL, THEME.COLOR_ACCENT.darkened(0.55), 0, 1, Vector4.ZERO).duplicate()
@@ -98,6 +80,7 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 			style.border_width_bottom = 0
 			band_panel.add_theme_stylebox_override("panel", style)
 			band_root.add_child(band_panel)
+			band_root.move_child(band_panel, 0)
 		_place(band_panel, Rect2(band))
 		band_panel.z_as_relative = false
 		band_panel.z_index = 0
@@ -124,9 +107,13 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 		if FIRST.has(name) or SECOND.has(name):
 			var row := 0 if FIRST.has(name) else 1
 			var column := FIRST.find(name) if row == 0 else SECOND.find(name)
+			button.set_meta("native_a5_action_font", int(layout.body_font_size) - 2)
+			button.set_meta("native_a5_action_edge", int(layout.action_edge))
 			_present_primary_action(button, state)
 			button.visible = true
-			_place(button, Rect2(Vector2(band.position + Vector2i(8 + column * 58, 8 + row * 58)), Vector2(52, 52)))
+			var action_edge: int = int(layout.action_edge)
+			var step: int = action_edge + int(layout.action_gap)
+			_place(button, Rect2(Vector2(band.position + Vector2i(int(layout.action_inset) + column * step, int(layout.action_inset) + row * (action_edge + int(layout.action_inset)))), Vector2(action_edge, action_edge)))
 			button.set_meta("native_a5_primary_action", true)
 		elif RULES.has(name):
 			var index := RULES.find(name)
@@ -141,21 +128,21 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 	for index in range(context_buttons.size()):
 		var button := context_buttons[index]
 		_present_context_button(button)
-		_place(button, Rect2(304 + index * 128, band.position.y - 44, 120, 36))
+		_place(button, Rect2(maxf(float(layout.target_order.position.x), float(team.end.x + 12)) + index * 128, band.position.y - 44, 120, 36))
 	_place_context_tool(controller, "DoorBreachButton", _context_tool_rect(layout, 0), true)
 	_place_context_tool(controller, "WaypointEraseButton", _context_tool_rect(layout, 1), false)
 	var all_button := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton") as Button
 	if all_button != null:
-		_place(all_button, Rect2(Vector2(team.position + Vector2i(team.size.x - 76, 6)), Vector2(64, 26)))
+		_place(all_button, Rect2(Vector2(team.position + Vector2i(team.size.x - 64, 8)), Vector2(52, 32)))
 	var stance_panel := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
 	if stance_panel != null:
 		stance_panel.clip_contents = false
-		_place(stance_panel, Rect2(Vector2(team.position + Vector2i(8, 48)), Vector2(team.size.x - 16, 44)))
+		_place(stance_panel, Rect2(Vector2(team.position) + Vector2(8, team.size.y * 0.40), Vector2(team.size.x - 16, team.size.y * 0.28)))
 		_refresh_stance_buttons(stance_panel)
 	var info_scroll := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll") as ScrollContainer
 	if info_scroll != null:
 		info_scroll.clip_contents = true
-		_place(info_scroll, Rect2(Vector2(team.position + Vector2i(8, 28)), Vector2(team.size.x - 16, 96)))
+		_place(info_scroll, Rect2(Vector2(team.position + Vector2i(8, 40)), Vector2(team.size.x - 16, team.size.y - 48)))
 		# Legacy status strings remain readable in the existing scroll and tooltip,
 		# but their old 640px/large-label minimum may not spill over the header.
 		for label_name in ["CommandFeedbackLabel", "HotkeyLegendLabel"]:
@@ -197,6 +184,14 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 			mini_cards.size_flags_vertical = Control.SIZE_EXPAND_FILL
 			mini_cards.alignment = BoxContainer.ALIGNMENT_END
 			mini_cards.add_theme_constant_override("separation", 8)
+			for card in mini_cards.get_children():
+				if card is Control and controller.has_method("_resize_native_a5_fireteam_card"):
+					controller.call("_resize_native_a5_fireteam_card", card)
+		var mini_scroll := mini.get_node_or_null("MiniMargin/MiniVBox/MiniCardsScroll") as ScrollContainer
+		if mini_scroll != null:
+			mini_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+			mini_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+			mini_scroll.clip_contents = true
 		if mini is PanelContainer:
 			(mini as PanelContainer).add_theme_stylebox_override("panel", THEME.build_flat_stylebox(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0))
 	var log_panel := controller.get_node_or_null("../TacticalUI/TacticalEventLogPanel") as Control
@@ -206,6 +201,9 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 		_place(log_panel, log_rect)
 		log_panel.set_meta("native_a5_layout", true)
 		log_panel.clip_contents = true
+		log_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_style_protocol(controller, layout)
+	_refresh_navigation(controller, layout)
 	var strategic := controller.get_node_or_null(BASE + "StrategicPanel") as Control
 	if strategic != null:
 		_layout_player_readouts(controller, viewport_size)
@@ -220,7 +218,7 @@ static func _geometry_signature(controller: Node, grid: GridContainer, viewport_
 			context.append("%s:%s" % [child.name, child.text])
 	var craft := controller.get_node_or_null("../TacticalUI/MissionDropshipPanel") as Control
 	var transport := str(craft.get_global_rect()) if craft != null and craft.visible else "hidden"
-	return "r3_readout1|%s|%d|%s|%s" % [viewport_size, grid.get_child_count(), "|".join(context), transport]
+	return "playtest_a5_readable_left_v1|%s|%d|%s|%s" % [viewport_size, grid.get_child_count(), "|".join(context), transport]
 
 
 static func _is_active_context_button(button: Button) -> bool:
@@ -243,6 +241,8 @@ static func _refresh_presentation(controller: Node, grid: GridContainer, state: 
 		elif _is_active_context_button(button):
 			_present_context_button(button)
 	var layout: Dictionary = LAYOUT.get_mission_hud_layout(Vector2i(controller.get_viewport().get_visible_rect().size))
+	_refresh_navigation(controller, layout)
+	_style_protocol(controller, layout)
 	_place_context_tool(controller, "DoorBreachButton", _context_tool_rect(layout, 0), true)
 	_place_context_tool(controller, "WaypointEraseButton", _context_tool_rect(layout, 1), false)
 	var stance := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
@@ -287,13 +287,14 @@ static func _present_primary_action(button: Button, state: Dictionary) -> void:
 		selected = bool(state.get("delete_active", false))
 	elif name == "SortCommandMatrixButton":
 		selected = bool(state.get("sort_active", false))
-	if _button_style_dirty(button, selected, 12):
+	var font_size: int = int(button.get_meta("native_a5_action_font", 12))
+	if _button_style_dirty(button, selected, font_size):
 		THEME.style_action_tile(button, selected, name == "GoCommandMatrixButton")
 		if name == "GoCommandMatrixButton":
 			_style_execute_tile(button)
 		button.self_modulate = Color.WHITE
 		button.add_theme_font_override("font", THEME.get_heading_font())
-		button.add_theme_font_size_override("font_size", 12)
+		button.add_theme_font_size_override("font_size", font_size)
 		_remember_button_style(button, selected)
 	if button.text != LABELS[name]:
 		button.text = LABELS[name]
@@ -304,8 +305,9 @@ static func _present_primary_action(button: Button, state: Dictionary) -> void:
 	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 	button.expand_icon = true
-	if button.get_theme_constant("icon_max_width") != 24:
-		button.add_theme_constant_override("icon_max_width", 24)
+	var icon_width: int = maxi(24, roundi(float(button.get_meta("native_a5_action_edge", 52)) * 0.43))
+	if button.get_theme_constant("icon_max_width") != icon_width:
+		button.add_theme_constant_override("icon_max_width", icon_width)
 	button.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	button.clip_text = false
 
@@ -343,21 +345,25 @@ static func _refresh_stance_buttons(stance: Control) -> void:
 		for side in ["margin_top", "margin_bottom"]:
 			if margin.get_theme_constant(side) != 0:
 				margin.add_theme_constant_override(side, 0)
+		margin.add_theme_constant_override("margin_left", 4)
+		margin.add_theme_constant_override("margin_right", 4)
 	var summary := stance.get_node_or_null("MarginContainer/VBoxContainer/SummaryLabel") as Label
 	if summary != null:
 		summary.visible = false
 		stance.tooltip_text = summary.tooltip_text
 	var labels := {"Cautious": "Vorsichtig", "Normal": "Normal", "Aggressive": "Offensiv"}
+	var height: int = int(stance.get_viewport().get_visible_rect().size.y)
+	var font_size: int = 16 if height >= 1260 else (14 if height >= 900 else 13)
 	for name in ["Cautious", "Normal", "Aggressive"]:
 		var button := stance.get_node_or_null("MarginContainer/VBoxContainer/HBoxContainer/%sButton" % name) as Button
 		if button != null:
 			if button.text != labels[name]:
 				button.text = labels[name]
 			button.set_meta("mission_selected_fireteam_stance_player_label", button.text)
-			if button.get_theme_font_size("font_size") != 13:
-				button.add_theme_font_size_override("font_size", 13)
-			if button.custom_minimum_size != Vector2(88, 28):
-				button.custom_minimum_size = Vector2(88, 28)
+			if button.get_theme_font_size("font_size") != font_size:
+				button.add_theme_font_size_override("font_size", font_size)
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			button.custom_minimum_size = Vector2(0, 40 if height >= 1260 else (34 if height >= 900 else 28))
 
 
 static func refresh(controller: Node, view_model: Dictionary) -> void:
@@ -525,6 +531,7 @@ static func refresh_selected_stance(controller: Node) -> void:
 
 static func _layout_player_readouts(controller: Node, viewport_size: Vector2i) -> void:
 	var layout: Dictionary = LAYOUT.get_mission_hud_layout(viewport_size)
+	var font_size: int = int(layout.body_font_size)
 	for spec in [[IDENTITY, Rect2(layout.mission_identity), "A5MissionHeading", "A5MissionState"], [STRATEGIC, Rect2(layout.mission_control), "A5TransportHeading", "A5TransportState"]]:
 		var panel := controller.get_node_or_null(String(spec[0])) as Control
 		if panel == null:
@@ -532,14 +539,14 @@ static func _layout_player_readouts(controller: Node, viewport_size: Vector2i) -
 		var rect: Rect2 = spec[1]
 		_place(panel, rect)
 		panel.clip_contents = false
-		var heading := _ensure_label(panel, String(spec[2]), 17)
-		THEME.style_section_heading(heading, 17)
-		var body := _ensure_label(panel, String(spec[3]), 14)
+		var heading := _ensure_label(panel, String(spec[2]), font_size + 2)
+		THEME.style_section_heading(heading, font_size + 2)
+		var body := _ensure_label(panel, String(spec[3]), font_size)
 		for label in [heading, body]:
 			label.clip_text = true
 			label.max_lines_visible = 2
-		_place(heading, Rect2(rect.position + Vector2(44, 6), Vector2(rect.size.x - 140, 22)))
-		_place(body, Rect2(rect.position + Vector2(44, 30), Vector2(rect.size.x - 54, 36)))
+		_place(heading, Rect2(rect.position + Vector2(52, 6), Vector2(rect.size.x - 148, font_size + 10)))
+		_place(body, Rect2(rect.position + Vector2(52, font_size + 18), Vector2(rect.size.x - 62, rect.size.y - font_size - 26)))
 		var icon_id := "dropship" if String(spec[0]) == STRATEGIC else "target"
 		var icon := _ensure_readout_icon(panel, icon_id)
 		_place(icon, Rect2(rect.position + Vector2(10, 20), Vector2(26, 30)))
@@ -557,7 +564,7 @@ static func _layout_player_readouts(controller: Node, viewport_size: Vector2i) -
 				details.pressed.connect(Callable(controller, "_open_native_team_details"))
 				panel.add_child(details)
 				THEME.style_command_button(details)
-				details.add_theme_font_size_override("font_size", 13)
+				details.add_theme_font_size_override("font_size", font_size - 1)
 			_place(details, Rect2(rect.position + Vector2(rect.size.x - 86, 4), Vector2(76, 24)))
 	_hide_raw_readouts(controller)
 
@@ -573,6 +580,90 @@ static func _hide_raw_readouts(controller: Node) -> void:
 		var label := controller.get_node_or_null(path) as Label
 		if label != null and label.visible:
 			label.visible = false
+		if label != null:
+			label.set_meta("native_a5_source_readout_hidden", true)
+
+
+static func _layout_selected_team_controls(controller: Node, team: PanelContainer, rect: Rect2, metrics: Dictionary) -> void:
+	var font_size: int = int(metrics.body_font_size)
+	var identity := _ensure_label(team, "A5TeamIdentity", font_size + 2)
+	THEME.style_section_heading(identity, font_size + 2)
+	identity.max_lines_visible = 1
+	identity.add_theme_color_override("font_color", THEME.COLOR_BORDER_SELECTED)
+	_place(identity, Rect2(rect.position + Vector2(10, 8), Vector2(rect.size.x - 164, 30)))
+	var summary := _ensure_label(team, "A5TeamSummary", font_size - 1)
+	summary.max_lines_visible = 1
+	_place(summary, Rect2(rect.position + Vector2(10, rect.size.y * 0.23), Vector2(rect.size.x - 20, rect.size.y * 0.15)))
+	var fire_heading := _ensure_label(team, "A5FireRuleHeading", font_size - 1)
+	fire_heading.text = "Feuerregel"
+	fire_heading.max_lines_visible = 1
+	fire_heading.clip_text = true
+	fire_heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	fire_heading.visible = true
+	var row_y: float = rect.size.y * 0.76
+	var row_height: float = rect.size.y * 0.19
+	_place(fire_heading, Rect2(rect.position + Vector2(10, row_y), Vector2(88, row_height)))
+	fire_heading.z_index = 12
+	var selector := team.get_node("A5FireRuleSelector") as OptionButton
+	selector.add_theme_font_size_override("font_size", font_size)
+	_place(selector, Rect2(rect.position + Vector2(100, row_y), Vector2(rect.size.x - 110, row_height)))
+	var details := team.get_node("A5DetailsButton") as Button
+	details.add_theme_font_size_override("font_size", font_size - 1)
+	_place(details, Rect2(rect.position + Vector2(rect.size.x - 144, 8), Vector2(76, 32)))
+	var all := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton") as Button
+	if all != null:
+		all.add_theme_font_size_override("font_size", font_size - 1)
+	team.mouse_filter = Control.MOUSE_FILTER_STOP
+	THEME.style_card(team, true)
+	team.set_meta("native_a5_parameter_group_left", true)
+
+
+static func _refresh_navigation(controller: Node, metrics: Dictionary) -> void:
+	var panel := controller.get_node_or_null("../TacticalUI/TopNavPanel") as Control
+	if panel == null:
+		return
+	var route: String = String(controller.call("_get_mission_drop_payload_source_for_craft")) if controller.has_method("_get_mission_drop_payload_source_for_craft") else ""
+	var font_size: int = int(metrics.body_font_size)
+	var row := panel.get_node_or_null("NavMargin/NavRow") as HBoxContainer
+	if row == null:
+		return
+	for name in ["HomebaseNavButton", "FOBNavButton", "MissionNavButton"]:
+		var button := row.get_node_or_null(NodePath(name)) as Button
+		if button == null:
+			continue
+		if name == "FOBNavButton":
+			button.visible = route != "homebase_direct"
+			button.set_meta("native_a5_route_presentation_only", true)
+		button.add_theme_font_size_override("font_size", font_size)
+		button.custom_minimum_size = Vector2(100 if font_size < 18 else 128, 36 if font_size < 18 else 44)
+	var timer := row.get_node_or_null("MissionTimerLabel") as Label
+	if timer != null:
+		timer.add_theme_font_size_override("font_size", font_size)
+		timer.custom_minimum_size.x = 62 if font_size < 18 else 80
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.clip_contents = false
+
+
+static func _style_protocol(controller: Node, metrics: Dictionary) -> void:
+	var panel := controller.get_node_or_null("../TacticalUI/TacticalEventLogPanel") as Control
+	if panel == null:
+		return
+	var font_size: int = int(metrics.body_font_size)
+	for name in ["EventLogHeaderLabel", "EventLogCountLabel", "EventLogSelectedFilterButton"]:
+		var control := panel.get_node_or_null("EventLogMargin/EventLogVBox/EventLogHeader/" + name) as Control
+		if control != null and control.get_theme_font_size("font_size") != font_size - 1:
+			control.add_theme_font_size_override("font_size", font_size - 1)
+	var entries := panel.get_node_or_null("EventLogMargin/EventLogVBox/EventLogScroll/EventLogEntries")
+	if entries == null:
+		return
+	for row in entries.get_children():
+		for name in ["EventTextLabel", "TimeLabel"]:
+			var label := row.get_node_or_null(NodePath(name)) as Label
+			if label != null:
+				if label.get_theme_font_size("font_size") != font_size - 1:
+					label.add_theme_font_size_override("font_size", font_size - 1)
+				if name == "TimeLabel":
+					label.custom_minimum_size.x = 56 if font_size >= 16 else 46
 
 
 static func _ensure_team_controls(controller: Node, team: PanelContainer, layer: CanvasLayer) -> void:
@@ -764,12 +855,14 @@ static func _layout_target_labels(panel: PanelContainer, rect: Rect2) -> void:
 	var contents := panel.get_node("Contents") as Control
 	contents.clip_contents = false
 	contents.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var slots := {"Heading": Rect2(8, 4, 232, 22), "Target": Rect2(8, 28, 232, 22), "Order": Rect2(8, 52, 232, 30), "Feedback": Rect2(8, 84, 232, 20)}
+	var body_font: int = 18 if rect.size.y >= 185 else (16 if rect.size.y >= 150 else 14)
+	var slots := {"Heading": Rect2(12, 6, rect.size.x - 24, rect.size.y * 0.19), "Target": Rect2(12, rect.size.y * 0.23, rect.size.x - 24, rect.size.y * 0.20), "Order": Rect2(12, rect.size.y * 0.46, rect.size.x - 24, rect.size.y * 0.22), "Feedback": Rect2(12, rect.size.y * 0.72, rect.size.x - 24, rect.size.y * 0.23)}
 	for name in slots:
 		var label := contents.get_node(NodePath(name)) as Label
 		var slot: Rect2 = slots[name]
 		_place(label, Rect2(rect.position + slot.position, slot.size))
 		label.max_lines_visible = 1 if name in ["Heading", "Feedback"] else 2
+		THEME.style_label(label, false, body_font + (2 if name == "Heading" else 0))
 		label.clip_text = true
 
 
@@ -819,6 +912,7 @@ static func _layout_team_readouts(controller: Node, _rect: Rect2) -> void:
 		if label == null:
 			continue
 		label.visible = false
+		label.set_meta("native_a5_source_readout_hidden", true)
 		if not label.has_meta("native_a5_layout"):
 			label.set_meta("native_a5_layout", true)
 

@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "description": "Targeted current local multiplayer preflight; existing scripts only, Root runs serially in fresh isolated user data.",
+  "checks": [
+    {
+      "name": "lobby_map_consent",
+      "script": "res://scripts/tests/review7_lobby_map_consent_verifier.gd",
+      "success_marker": "REVIEW7_LOBBY_MAP_ALL_PASSED",
+      "timeout": 90
+    },
+    {
+      "name": "hud_multiplayer_lifecycle",
+      "script": "res://scripts/tests/playtest_20261105_multiplayer_hud_lifecycle_verifier.gd",
+      "success_marker": "REVIEW7_LOBBY_MAP_ALL_PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "map_transfer_neighbor",
+      "script": "res://scripts/tests/task_228_multiplayer_editor_map_manifest_download_consent.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 150
+    }
+  ]
+}

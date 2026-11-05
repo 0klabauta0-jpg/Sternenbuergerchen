@@ -610,11 +610,15 @@ var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
 var _runtime_hud_heavy_refresh_time_remaining: float = 0.0
 var _fireteam_security_refresh_time_remaining: float = 0.0
+var _fireteam_security_visuals_pending: bool = false
 var _mission_visible_frame_timing_debug_enabled: bool = false
 var _mission_visible_frame_timing_debug_snapshot: Dictionary = {}
 var _mission_ui_refresh_timing_debug_snapshot: Dictionary = {}
 var _mission_ui_refresh_timing_debug_invocation_count: int = 0
 var _mission_runtime_surface_timing_debug_snapshot: Dictionary = {}
+var _fireteam_security_refresh_timing_debug_snapshot: Dictionary = {}
+var _fireteam_security_refresh_timing_totals: Dictionary = {}
+var _fireteam_security_refresh_timing_count: int = 0
 var _lz_drop_timing_debug_enabled: bool = false
 var _lz_drop_timing_debug_snapshot: Dictionary = {}
 var _drop_sequence_phase: String = ""
@@ -1311,6 +1315,77 @@ func set_planning_state(planning_state: Dictionary) -> void:
 	_apply_drop_presence_state_to_units()
 	_update_ui()
 	_maybe_bootstrap_live_drop()
+
+
+func apply_meta_transport_planning_delta(delta: Dictionary) -> bool:
+	# Meta transport owns these fields. Reject other planning changes BEFORE
+	# touching state so order/phase/loadout updates retain the full existing path.
+	var transport_keys: Array = [
+		"drop_ship_staged", "mission_drop_source", "mission_drop_craft_id",
+		"mission_drop_display_name", "mission_drop_title_text", "mission_drop_texture_path",
+		"mission_drop_state", "mission_drop_pilot_text", "mission_drop_status_line",
+		"mission_drop_progress", "mission_drop_eta_seconds", "mission_drop_pilot_unit_id",
+		"mission_drop_pilot_display_name", "mission_drop_pilot_portrait_path",
+		"mission_drop_passenger_count", "mission_drop_return_requested",
+		"mission_drop_cards", "meta_transfer_routes", "embarked_unit_ids", "drop_queued_fireteam_ids",
+	]
+	for key in delta:
+		if not transport_keys.has(String(key)):
+			return false
+	if delta.is_empty():
+		return true
+	var previous_state: String = _mission_drop_state
+	var previous_craft: String = _mission_drop_craft_id
+	if delta.has("drop_ship_staged"):
+		_drop_ship_staged = bool(delta["drop_ship_staged"])
+	if delta.has("mission_drop_source"):
+		_mission_drop_source = String(delta["mission_drop_source"]).strip_edges().to_lower()
+	if delta.has("mission_drop_craft_id"):
+		_mission_drop_craft_id = String(delta["mission_drop_craft_id"]).strip_edges()
+	if delta.has("mission_drop_display_name"):
+		_mission_drop_display_name = String(delta["mission_drop_display_name"]).strip_edges()
+	if delta.has("mission_drop_title_text"):
+		_mission_drop_title_text = String(delta["mission_drop_title_text"]).strip_edges()
+	if delta.has("mission_drop_texture_path"):
+		_mission_drop_texture_path = String(delta["mission_drop_texture_path"]).strip_edges()
+	if delta.has("mission_drop_state"):
+		_mission_drop_state = String(delta["mission_drop_state"]).strip_edges().to_lower()
+	if delta.has("mission_drop_pilot_text"):
+		_mission_drop_pilot_text = String(delta["mission_drop_pilot_text"]).strip_edges()
+	if delta.has("mission_drop_status_line"):
+		_mission_drop_status_line = String(delta["mission_drop_status_line"]).strip_edges()
+	if delta.has("mission_drop_progress"):
+		_mission_drop_progress = clampf(float(delta["mission_drop_progress"]), 0.0, 100.0)
+	if delta.has("mission_drop_eta_seconds"):
+		_mission_drop_eta_seconds = maxi(int(delta["mission_drop_eta_seconds"]), 0)
+	if delta.has("mission_drop_pilot_unit_id"):
+		_mission_drop_pilot_unit_id = String(delta["mission_drop_pilot_unit_id"]).strip_edges()
+	if delta.has("mission_drop_pilot_display_name"):
+		_mission_drop_pilot_display_name = String(delta["mission_drop_pilot_display_name"]).strip_edges()
+	if delta.has("mission_drop_pilot_portrait_path"):
+		_mission_drop_pilot_portrait_path = String(delta["mission_drop_pilot_portrait_path"]).strip_edges()
+	if delta.has("mission_drop_passenger_count"):
+		_mission_drop_passenger_count = maxi(int(delta["mission_drop_passenger_count"]), 0)
+	if delta.has("mission_drop_return_requested"):
+		_mission_drop_return_requested = bool(delta["mission_drop_return_requested"])
+	if delta.has("embarked_unit_ids"):
+		_embarked_unit_ids = _build_drop_unit_state_dict(Array(delta["embarked_unit_ids"]))
+	if delta.has("mission_drop_cards"):
+		_mission_drop_cards = _sanitize_mission_dropship_cards(Array(delta["mission_drop_cards"]))
+		var selected_card: Dictionary = _find_raw_mission_dropship_card_entry(_mission_drop_craft_id)
+		if not selected_card.is_empty():
+			_apply_mission_dropship_card_selection(selected_card)
+	if delta.has("meta_transfer_routes"):
+		_meta_transfer_routes = _sanitize_meta_transfer_routes(Array(delta["meta_transfer_routes"]))
+	_sync_selected_mission_dropship_payload_presence_from_card()
+	# No phase loading, execution clearing, actor visibility/position writes,
+	# planning emit or full HUD rebuild. These are existing transport consumers.
+	_refresh_mission_dropship_panel()
+	_refresh_world_overlays()
+	if previous_state != _mission_drop_state or previous_craft != _mission_drop_craft_id:
+		_refresh_button_state()
+		_maybe_bootstrap_live_drop()
+	return true
 
 
 func _should_preserve_live_execution_during_planning_sync(planning_state: Dictionary) -> bool:
@@ -3122,10 +3197,19 @@ func get_fireteam_security_snapshot() -> Array:
 	return Array(_fireteam_security_controller.call("get_state_snapshot")).duplicate(true)
 
 
-func refresh_fireteam_security_state() -> bool:
+func refresh_fireteam_security_state_for_combat() -> bool:
+	# Combat consumes fresh state/facing on every decision tick. The existing
+	# 0.20-second process refresh consumes its accumulated presentation changes.
+	return refresh_fireteam_security_state(false)
+
+
+func refresh_fireteam_security_state(refresh_visuals: bool = true) -> bool:
 	_ensure_fireteam_security_controller()
 	if _fireteam_security_controller == null:
 		return false
+	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
+	var started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var scopes_usec: Dictionary = {}
 	var security_changed: bool = false
 	for fireteam_id_variant in _get_available_fireteam_ids():
 		var fireteam_id: String = String(fireteam_id_variant)
@@ -3152,12 +3236,49 @@ func refresh_fireteam_security_state() -> bool:
 		if previous_state != next_state:
 			security_changed = true
 			_record_fireteam_security_revision(fireteam_id)
+	if profile_enabled:
+		scopes_usec["state_and_facing_usec"] = Time.get_ticks_usec() - started_usec
+	var scope_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	_sync_unit_overwatch_badges()
-	if not security_changed:
-		return false
+	if profile_enabled:
+		scopes_usec["badges_usec"] = Time.get_ticks_usec() - scope_started_usec
+	if security_changed:
+		_fireteam_security_visuals_pending = true
+	if not refresh_visuals or not _fireteam_security_visuals_pending:
+		if profile_enabled:
+			_record_fireteam_security_refresh_timing(started_usec, scopes_usec, security_changed)
+		return security_changed
+	_fireteam_security_visuals_pending = false
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_order_visuals()
+	if profile_enabled:
+		scopes_usec["order_visuals_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_fireteam_status_panel()
-	return true
+	if profile_enabled:
+		scopes_usec["status_panel_usec"] = Time.get_ticks_usec() - scope_started_usec
+		_record_fireteam_security_refresh_timing(started_usec, scopes_usec, security_changed)
+	return security_changed
+
+
+func _record_fireteam_security_refresh_timing(started_usec: int, scopes_usec: Dictionary, changed: bool) -> void:
+	_fireteam_security_refresh_timing_count += 1
+	for key in scopes_usec:
+		_fireteam_security_refresh_timing_totals[key] = int(_fireteam_security_refresh_timing_totals.get(key, 0)) + int(scopes_usec[key])
+	_fireteam_security_refresh_timing_debug_snapshot = {
+		"total_usec": Time.get_ticks_usec() - started_usec,
+		"scopes_usec": scopes_usec.duplicate(),
+		"total_calls": _fireteam_security_refresh_timing_count,
+		"totals_usec": _fireteam_security_refresh_timing_totals.duplicate(),
+		"state_changed": changed,
+		"read_only": true,
+		"sets_gameplay_truth": false,
+	}
+
+
+func get_fireteam_security_refresh_timing_debug_snapshot() -> Dictionary:
+	return _fireteam_security_refresh_timing_debug_snapshot.duplicate(true)
 
 
 func get_current_fireteam_lead_unit(fireteam_id: String):
@@ -4847,14 +4968,16 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	var header := card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
 	if box == null or header == null:
 		return
-	card.custom_minimum_size = Vector2(256, 128)
+	var metrics: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get_mission_hud_layout(Vector2i(get_viewport().get_visible_rect().size))
+	card.custom_minimum_size = Vector2(metrics.card_width, int(metrics.portrait_height) + int(metrics.body_font_size) * 3 + 32)
+	card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	card.set_meta("native_a5_portrait_team_card", true)
 	card.add_theme_stylebox_override("panel", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
 		TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_SELECTED if selected else TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL,
-		TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected else TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER, 2, 1))
+		TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected else TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER, 6, 4 if selected else 1))
 	var margin := card.get_node("Margin") as MarginContainer
 	for side in ["margin_left", "margin_right"]:
-		margin.add_theme_constant_override(side, 8)
+		margin.add_theme_constant_override(side, 10)
 	for side in ["margin_top", "margin_bottom"]:
 		margin.add_theme_constant_override(side, 5)
 	box.add_theme_constant_override("separation", 4)
@@ -4863,11 +4986,12 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 			(child as Control).visible = child.name in ["HeaderRow", "FireteamMemberPortraitStrip", "StageLabel"]
 	for child in header.get_children():
 		if child is Control:
-			(child as Control).visible = child.name in ["TitleEdit", "A5MemberCount"]
+			(child as Control).visible = child.name in ["TitleEdit", "A5MemberCount", "A5SelectionMarker"]
 	var title := header.get_node("TitleEdit") as LineEdit
 	title.custom_minimum_size = Vector2(0, 24)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.add_theme_font_size_override("font_size", 19)
+	title.add_theme_font_size_override("font_size", int(metrics.heading_font_size))
+	title.add_theme_color_override("font_uneditable_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
 	title.add_theme_stylebox_override("normal", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0))
 	title.add_theme_stylebox_override("read_only", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0))
 	var count := header.get_node_or_null("A5MemberCount") as Label
@@ -4879,7 +5003,18 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	var total := _get_fireteam_units(fireteam_id, true).size()
 	count.text = "%d/%d" % [units.size(), maxi(total, units.size())]
 	count.visible = true
-	TACTICAL_UI_THEME_SCRIPT.style_label(count, false, 16)
+	TACTICAL_UI_THEME_SCRIPT.style_label(count, false, int(metrics.body_font_size) + 2)
+	var selected_marker := header.get_node_or_null("A5SelectionMarker") as Label
+	if selected_marker == null:
+		selected_marker = Label.new()
+		selected_marker.name = "A5SelectionMarker"
+		selected_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		header.add_child(selected_marker)
+		header.move_child(selected_marker, 0)
+	selected_marker.text = "◆"
+	selected_marker.visible = selected
+	selected_marker.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED)
+	selected_marker.add_theme_font_size_override("font_size", int(metrics.body_font_size))
 	var snapshot: Dictionary = card.get_meta("mission_fireteam_status_card_snapshot", {})
 	var status := card.get_node("Margin/VBox/StageLabel") as Label
 	status.text = _native_a5_team_status(snapshot, inactive)
@@ -4887,7 +5022,7 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	status.max_lines_visible = 1
 	status.clip_text = true
 	status.autowrap_mode = TextServer.AUTOWRAP_OFF
-	TACTICAL_UI_THEME_SCRIPT.style_label(status, false, 13)
+	TACTICAL_UI_THEME_SCRIPT.style_label(status, false, int(metrics.body_font_size))
 	status.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_WARNING if int(snapshot.get("contact_count", 0)) > 0 else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
 	var legacy_tooltip := card.tooltip_text
 	card.tooltip_text = "%s\n%s\n\n%s\n%s\nPortrait doppelklicken: Charakter ansehen" % [
@@ -4895,6 +5030,67 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	var details_label := card.get_node_or_null("Margin/VBox/MemberLabel") as Label
 	if details_label != null:
 		details_label.tooltip_text = card.tooltip_text
+	_resize_native_a5_fireteam_card(card)
+	if selected and not bool(card.get_meta("native_a5_selected_scroll_seen", false)):
+		call_deferred("_ensure_native_a5_selected_card_visible", weakref(card), fireteam_id)
+	card.set_meta("native_a5_selected_scroll_seen", selected)
+
+
+func _ensure_native_a5_selected_card_visible(card_reference: WeakRef, fireteam_id: String) -> bool:
+	# Re-resolve the live presentation owner after container layout. Multiplayer
+	# activation can replace/reparent cards between scheduling and execution.
+	if not is_inside_tree() or not _selected_fireteam_ids.has(fireteam_id):
+		return false
+	var scroll := get_node_or_null("../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll") as ScrollContainer
+	if not is_instance_valid(scroll) or not scroll.is_inside_tree():
+		return false
+	var card: Control = card_reference.get_ref() as Control if card_reference != null else null
+	if not is_instance_valid(card) or not card.is_inside_tree() or not scroll.is_ancestor_of(card):
+		card = null
+		var host := scroll.get_node_or_null("MiniCardsVBox")
+		if host != null:
+			for candidate in host.get_children():
+				if candidate is Control and String(candidate.get_meta("fireteam_id", "")) == fireteam_id:
+					card = candidate as Control
+					break
+	if not is_instance_valid(card) or not card.is_inside_tree() or not scroll.is_ancestor_of(card):
+		return false
+	if not card.is_visible_in_tree():
+		return false
+	scroll.ensure_control_visible(card)
+	return true
+
+
+func _resize_native_a5_fireteam_card(card: Control) -> void:
+	# Geometry-only projection on viewport/card changes; no roster or order writes.
+	var metrics: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get_mission_hud_layout(Vector2i(get_viewport().get_visible_rect().size))
+	var strip := card.get_node_or_null("Margin/VBox/FireteamMemberPortraitStrip") as HBoxContainer
+	var count: int = strip.get_child_count() if strip != null else 0
+	var signature: String = "%s:%d" % [get_viewport().get_visible_rect().size, count]
+	if String(card.get_meta("native_a5_readable_geometry", "")) == signature:
+		return
+	card.set_meta("native_a5_readable_geometry", signature)
+	card.custom_minimum_size = Vector2(metrics.card_width, int(metrics.portrait_height) + int(metrics.body_font_size) * 3 + 32)
+	card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	var margin := card.get_node_or_null("Margin") as MarginContainer
+	if margin != null:
+		margin.add_theme_constant_override("margin_left", 10)
+		margin.add_theme_constant_override("margin_right", 10)
+	var title := card.get_node_or_null("Margin/VBox/HeaderRow/TitleEdit") as LineEdit
+	if title != null:
+		title.add_theme_font_size_override("font_size", int(metrics.heading_font_size))
+	var occupancy := card.get_node_or_null("Margin/VBox/HeaderRow/A5MemberCount") as Label
+	if occupancy != null:
+		occupancy.add_theme_font_size_override("font_size", int(metrics.body_font_size) + 2)
+	var status := card.get_node_or_null("Margin/VBox/StageLabel") as Label
+	if status != null:
+		status.add_theme_font_size_override("font_size", int(metrics.body_font_size))
+	if strip != null:
+		var edge: float = floorf((float(metrics.card_width) - 20.0 - float(maxi(0, count - 1)) * 4.0) / maxf(1.0, float(count)))
+		strip.custom_minimum_size.y = float(metrics.portrait_height)
+		for portrait in strip.get_children():
+			if portrait is TextureRect:
+				portrait.custom_minimum_size = Vector2(edge, metrics.portrait_height)
 
 
 func _native_a5_team_status(snapshot: Dictionary, inactive: bool) -> String:
@@ -5199,6 +5395,9 @@ func set_mission_visible_frame_timing_debug_enabled(enabled: bool) -> void:
 		_mission_ui_refresh_timing_debug_snapshot.clear()
 		_mission_ui_refresh_timing_debug_invocation_count = 0
 		_mission_runtime_surface_timing_debug_snapshot.clear()
+		_fireteam_security_refresh_timing_debug_snapshot.clear()
+		_fireteam_security_refresh_timing_totals.clear()
+		_fireteam_security_refresh_timing_count = 0
 
 
 func get_mission_visible_frame_timing_debug_snapshot() -> Dictionary:
@@ -5730,10 +5929,11 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		strip.visible = not resolved_units.is_empty()
 		return
 	strip.visible = not resolved_units.is_empty()
-	var portrait_edge := minf(58.0, floorf((244.0 - maxf(0.0, float(resolved_units.size() - 1)) * 4.0) / maxf(1.0, float(resolved_units.size()))))
+	var metrics: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get_mission_hud_layout(Vector2i(get_viewport().get_visible_rect().size))
+	var portrait_edge := floorf((float(metrics.card_width) - 20.0 - maxf(0.0, float(resolved_units.size() - 1)) * 4.0) / maxf(1.0, float(resolved_units.size())))
 	portrait_edge = maxf(18.0, portrait_edge)
 	strip.add_theme_constant_override("separation", 4)
-	strip.custom_minimum_size = Vector2(0.0, 70.0)
+	strip.custom_minimum_size = Vector2(0.0, metrics.portrait_height)
 	strip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	while strip.get_child_count() > resolved_units.size():
 		var stale_child := strip.get_child(strip.get_child_count() - 1)
@@ -5743,7 +5943,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		var portrait := TextureRect.new()
 		portrait.name = "MemberPortrait%02d" % (strip.get_child_count() + 1)
 		portrait.mouse_filter = Control.MOUSE_FILTER_STOP
-		portrait.custom_minimum_size = Vector2(portrait_edge, 70.0)
+		portrait.custom_minimum_size = Vector2(portrait_edge, metrics.portrait_height)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		strip.add_child(portrait)
@@ -5752,7 +5952,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		var portrait_rect := strip.get_child(index) as TextureRect
 		if unit == null or portrait_rect == null:
 			continue
-		portrait_rect.custom_minimum_size = Vector2(portrait_edge, 70.0)
+		portrait_rect.custom_minimum_size = Vector2(portrait_edge, metrics.portrait_height)
 		var profile_variant: Variant = _build_profile_from_unit(unit)
 		var profile: Dictionary = Dictionary(profile_variant) if typeof(profile_variant) == TYPE_DICTIONARY else {}
 		var portrait_id: String = String(profile.get("portrait_id", "")).strip_edges()
@@ -10672,7 +10872,9 @@ func _build_mission_combat_hud_detail_tooltip_text() -> String:
 func _apply_combat_hud_detail_tooltip_label_contract(label: Label) -> void:
 	if label == null:
 		return
-	label.visible = true
+	# A5 owns whether this updated source is presented directly or in Details.
+	# A later combat-tooltip refresh must preserve that explicit sink role.
+	label.visible = not bool(label.get_meta("native_a5_source_readout_hidden", false))
 	label.mouse_filter = Control.MOUSE_FILTER_STOP
 	label.mouse_default_cursor_shape = Control.CURSOR_HELP
 	label.clip_text = true

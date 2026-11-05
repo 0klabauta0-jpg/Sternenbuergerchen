@@ -1,0 +1,47 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-4558fd7069534b21a28b15aff6e959da
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: No-state legacy explicit clearance is preserved
+ERROR: FAIL: Inbound has clearly separated cruise altitude
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:62)
+       [1] _run (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:25)
+ERROR: FAIL: Actual LZ distance produces monotone descent
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:62)
+       [1] _run (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:26)
+ERROR: FAIL: Final approach converges onto touchdown
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:62)
+       [1] _run (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:27)
+ERROR: FAIL: Real landed phase reaches surface contact
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:62)
+       [1] _run (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:30)
+ERROR: FAIL: Real unloading phase reaches surface contact
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:62)
+       [1] _run (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:30)
+ERROR: FAIL: Real complete phase reaches surface contact
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:62)
+       [1] _run (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:30)
+ERROR: FAIL: Outbound rises with actual distance from LZ
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:62)
+       [1] _run (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:35)
+PASS: Visual height leaves input payload and route unchanged
+ERROR: FAIL: Hex path exposes dedicated antialiased material
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:62)
+       [1] _run (res://scripts/tests/playtest_20261105_flight_grid_verifier.gd:38)
+PLAYTEST_FLIGHT_GRID: 2 passed, 8 failed

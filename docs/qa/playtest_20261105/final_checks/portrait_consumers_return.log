@@ -1,0 +1,13 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-f6810c592865466583370fca885d7af5
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Meta transport resolves saved portrait identity to the new portrait
+PASS: Unknown unit does not acquire a fabricated transport identity
+PASS: Legacy FOB tools resolve old saved paths through the same portrait catalog
+PASS: Empty portrait keeps the existing absent-value behavior
+PASS: Normal debrief offers a usable Homebase return
+PASS: Normal debrief omits the deferred FOB staging stop
+PASS: Real primary button emits the existing Homebase callback once
+PASS: Legacy FOB callback remains available for compatibility tools
+PORTRAIT_CONSUMERS_RETURN: 8 passed, 0 failed

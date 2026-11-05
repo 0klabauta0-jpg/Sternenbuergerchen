@@ -11,6 +11,8 @@ const CONTACT_DENSITY_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical
 const TERRAIN_TRUTH_AUDIT_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_truth_audit.gd")
 const FRONTIER_ART_PROFILE_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_art_profile.gd")
 const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
+const MISSION_FLIGHT_VISUAL_SCRIPT: GDScript = preload("res://scripts/terrain/mission_flight_visual.gd")
+const HEX_GRID_COVERAGE_SHADER: Shader = preload("res://shaders/terrain/hex_grid_coverage.gdshader")
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const HEX_GROUND_BATCH_SCRIPT: GDScript = preload("res://scripts/terrain/hex_ground_batch.gd")
 const FRONTIER_GM01_LAYOUT_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_gm01_layout.gd")
@@ -1256,6 +1258,7 @@ func _process(delta: float) -> void:
 	_refresh_dynamic_order_visuals_if_needed()
 	if profile_enabled:
 		scopes_usec["dynamic_order_visuals_usec"] = Time.get_ticks_usec() - scope_started_usec
+	_update_air_visual_animation(delta)
 	if _subviewport != null and _subviewport.render_target_update_mode == SubViewport.UPDATE_ALWAYS and Time.get_ticks_msec() > _continuous_redraw_until_msec:
 		_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	if profile_enabled:
@@ -3356,6 +3359,8 @@ func get_render_snapshot() -> Dictionary:
 		"dropship_approach_line_count": _dropship_approach_lines_by_id.size(),
 		"dropship_approach_arrow_count": _dropship_approach_arrow_count,
 		"flight_altitude_layer": String(_drop_payload.get("air_layer", AIR_LAYER_ID)),
+		"air_visual_motion": _get_air_visual_motion_snapshot(),
+		"hex_grid_coverage": _get_hex_grid_coverage_snapshot(),
 		"air_visual_count": _air_visual_count,
 		"fow_hidden_air_visual_count": _fow_hidden_air_visual_count,
 		"air_unknown_terrain_reveal_block_count": _air_unknown_terrain_reveal_block_count,
@@ -3394,6 +3399,7 @@ func get_render_snapshot() -> Dictionary:
 
 func _build_editor_visual_recovery_snapshot() -> Dictionary:
 	var grid_material := _get_tile_grid_material_for_snapshot()
+	var hex_grid_coverage: bool = bool(_get_hex_grid_coverage_snapshot().get("active", false))
 	return {
 		"height_step": _get_3d_height_step(),
 		"ground_thickness": _get_3d_ground_thickness(),
@@ -3401,8 +3407,8 @@ func _build_editor_visual_recovery_snapshot() -> Dictionary:
 		"grid_line_width_factor": TILE_GRID_LINE_WIDTH_FACTOR,
 		"grid_line_shadow_width_factor": TILE_GRID_LINE_SHADOW_WIDTH_FACTOR,
 		"grid_line_surface_y_offset": TILE_GRID_LINE_SURFACE_Y_OFFSET,
-		"grid_depth_tested": grid_material != null and not grid_material.no_depth_test,
-		"grid_depth_draw_mode": int(grid_material.depth_draw_mode) if grid_material != null else -1,
+		"grid_depth_tested": (grid_material != null and not grid_material.no_depth_test) or hex_grid_coverage,
+		"grid_depth_draw_mode": int(grid_material.depth_draw_mode) if grid_material != null else (BaseMaterial3D.DEPTH_DRAW_DISABLED if hex_grid_coverage else -1),
 		"selection_fill_color": TILE_SELECTION_FILL_COLOR.to_html(true),
 		"selection_border_color": TILE_SELECTION_BORDER_COLOR.to_html(true),
 		"selection_surface_y_offset": TILE_SELECTION_SURFACE_Y_OFFSET,
@@ -4705,16 +4711,11 @@ func _add_hex_grid_lines(tiles: Array) -> void:
 	if not _hex_grid_visible:
 		return
 	var authored := is_instance_valid(_authored_visual_layout_root)
-	var material := _make_unshaded_material(Color(0.34, 0.24, 0.16, 0.38), true)
-	if authored:
-		material = _make_unshaded_material(Color(0.23, 0.14, 0.07, 0.55), true)
+	var material := _make_hex_grid_material(authored)
 	var mesh := ImmediateMesh.new()
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
-	# A warm light core gives the edge contrast on dark service paths as well as
-	# noisy sand. Build once with the map; no camera/per-frame topology rebuild.
-	var highlight := ImmediateMesh.new()
-	if authored:
-		highlight.surface_begin(Mesh.PRIMITIVE_TRIANGLES, _make_unshaded_material(Color(0.93, 0.70, 0.40, 0.48), true))
+	# One depth-tested coverage pass replaces two aliased subpixel cores.
+	# Topology stays fixed; the shader handles actual projected pixel coverage.
 	var edges: Dictionary = {}
 	var corners: PackedVector2Array = HEX_GRID_SCRIPT.corners(Vector2.ZERO, _get_3d_cell_size() / sqrt(3.0))
 	for tile in tiles:
@@ -4725,20 +4726,55 @@ func _add_hex_grid_lines(tiles: Array) -> void:
 		for index in range(6):
 			var a := center + Vector3(corners[index].x, 0.0, corners[index].y)
 			var b := center + Vector3(corners[(index + 1) % 6].x, 0.0, corners[(index + 1) % 6].y)
-			if _add_unique_grid_line_quad(mesh, edges, a, b, 0.048 if authored else 0.010) and authored:
-				_add_grid_line_quad(highlight, a + Vector3(0, 0.001, 0), b + Vector3(0, 0.001, 0), 0.016)
+			var edge_key: String = _get_grid_edge_key(a, b)
+			if not edges.has(edge_key):
+				edges[edge_key] = true
+				_add_hex_grid_coverage_quad(mesh, a, b, 0.04)
 	mesh.surface_end()
-	if authored:
-		highlight.surface_end()
-		var highlights := MeshInstance3D.new()
-		highlights.name = "TileGridHighlightLines3D"
-		highlights.mesh = highlight
-		_map_root.add_child(highlights)
 	var lines := MeshInstance3D.new()
 	lines.name = "TileGridLines3D"
 	lines.mesh = mesh
+	lines.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_map_root.add_child(lines)
 	_tile_grid_line_count = edges.size()
+
+
+func _make_hex_grid_material(authored: bool) -> ShaderMaterial:
+	var key: String = "hex_grid_coverage_authored" if authored else "hex_grid_coverage_plain"
+	if _material_cache.has(key):
+		return _material_cache[key] as ShaderMaterial
+	var material := ShaderMaterial.new()
+	material.shader = HEX_GRID_COVERAGE_SHADER
+	material.set_shader_parameter("line_color", Color(0.23, 0.14, 0.07, 0.27) if authored else Color(0.34, 0.24, 0.16, 0.20))
+	material.set_shader_parameter("world_line_width", 0.04)
+	material.set_shader_parameter("cell_size", _get_3d_cell_size())
+	_material_cache[key] = material
+	return material
+
+
+func _get_hex_grid_coverage_snapshot() -> Dictionary:
+	var lines: MeshInstance3D = _map_root.get_node_or_null("TileGridLines3D") as MeshInstance3D if _map_root != null else null
+	var material: ShaderMaterial = lines.mesh.surface_get_material(0) as ShaderMaterial if lines != null and lines.mesh != null and lines.mesh.get_surface_count() > 0 else null
+	return {
+		"active": material != null and material.shader == HEX_GRID_COVERAGE_SHADER,
+		"pixel_coverage_antialiasing": true,
+		"distance_contrast_fade": true,
+		"minimum_pixel_width": 1.3,
+		"depth_tested": true,
+		"camera_topology_rebuild": false,
+	}
+
+
+func _add_hex_grid_coverage_quad(mesh: ImmediateMesh, start_point: Vector3, end_point: Vector3, line_width: float) -> void:
+	var direction: Vector3 = (end_point - start_point).normalized()
+	var side := Vector3(-direction.z, 0.0, direction.x)
+	var offset: Vector3 = side * line_width * 0.5
+	var vertices: Array[Vector3] = [start_point + offset, end_point + offset, end_point - offset, start_point + offset, end_point - offset, start_point - offset]
+	var uvs: Array[Vector2] = [Vector2(1, 0), Vector2(1, 1), Vector2(0, 1), Vector2(1, 0), Vector2(0, 1), Vector2(0, 0)]
+	for index in range(vertices.size()):
+		mesh.surface_set_normal(side)
+		mesh.surface_set_uv(uvs[index])
+		mesh.surface_add_vertex(vertices[index])
 
 
 func _add_unique_grid_line_quad(mesh: ImmediateMesh, rendered_edges: Dictionary, start_point: Vector3, end_point: Vector3, line_width: float) -> bool:
@@ -6892,6 +6928,7 @@ func _update_drop_visual_motion() -> void:
 			node.position = _world_to_air_layer_3d_position_for_payload(entry, world_position, extra_y_offset)
 			if String(node.get_meta("dropship_visual_mode", "")).strip_edges() != "texture":
 				node.rotation_degrees.y = _get_dropship_rotation_y_for_payload(entry, world_position)
+			_update_dropship_flight_visual(node, entry, world_position)
 		_update_dropship_approach_line(entry, visual_id, world_position)
 
 
@@ -8876,6 +8913,13 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var muzzle_texture_card_visible: bool = muzzle_texture_available and WEAPON_FIRE_MUZZLE_TEXTURE_CARDS_ENABLED
 	if muzzle_texture_card_visible:
 		_add_texture_card(_order_root, texture, _world_to_surface_3d_position(muzzle_position, 0.92), "WeaponFireMuzzle_%s" % _sanitize_node_name(event_id), pixel_size, Vector2.ZERO, Color(1.0, 0.95, 0.62, 0.92))
+	# Extra source feedback requires source visibility. A visible target alone
+	# can retain the existing shot lane without revealing an unknown shooter.
+	var readable_source_allowed: bool = not _is_fog_of_war_visual_filter_active() or (not _fog_of_war_team_id.is_empty() and String(fire_event.get("attacker_team_id", "")) == _fog_of_war_team_id) or _fow_is_target_currently_visible(String(fire_event.get("attacker_unit_id", ""))) or _fow_is_world_position_currently_visible(attacker_position) or _fow_is_event_currently_visible(event_id)
+	var readable_pulse: Node3D = null
+	if readable_source_allowed:
+		var pulse_script: GDScript = preload("res://scripts/terrain/weapon_fire_feedback_pulse.gd")
+		readable_pulse = pulse_script.call("add_for_event", self, _order_root, event_id, texture, _world_to_surface_3d_position(muzzle_position, 0.92), _world_to_surface_3d_position(attacker_position, 1.22)) as Node3D
 	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.84), _world_to_surface_3d_position(muzzle_tip_position, 0.84), WEAPON_FIRE_MUZZLE_FLASH_COLOR, "WeaponFireMuzzleFlash_%s" % _sanitize_node_name(event_id), muzzle_flash_width)
 	var muzzle_perp: Vector2 = Vector2(-normalized_direction.y, normalized_direction.x)
 	var muzzle_cross_a: Vector2 = muzzle_position - muzzle_perp * WEAPON_FIRE_MUZZLE_FLARE_CROSS_WORLD
@@ -9211,6 +9255,9 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"muzzle_texture_missing": not muzzle_texture_available,
 		"muzzle_texture_card_visible": muzzle_texture_card_visible,
 		"muzzle_texture_card_suppressed": muzzle_texture_available and not muzzle_texture_card_visible,
+		"readable_source_feedback_allowed": readable_source_allowed,
+		"readable_pulse_created": readable_pulse != null,
+		"readable_pulse_event_id": event_id if readable_pulse != null else "",
 		"muzzle_bloom_visible": true,
 		"muzzle_tip_visible": true,
 		"muzzle_flare_cross_visible": true,
@@ -10319,9 +10366,60 @@ func _world_to_air_layer_3d_position(world_position: Vector2, extra_y_offset: fl
 
 func _world_to_air_layer_3d_position_for_payload(payload: Dictionary, world_position: Vector2, extra_y_offset: float = 0.0) -> Vector3:
 	_dropship_surface_y = _get_world_surface_y(world_position)
-	_dropship_air_clearance = maxf(float(payload.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE)) + extra_y_offset, AIR_LAYER_MIN_CLEARANCE)
+	var legacy_clearance: float = maxf(float(payload.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE)), AIR_LAYER_MIN_CLEARANCE)
+	var phase: String = String(payload.get("state", "")).strip_edges().to_lower()
+	var lz_variant: Variant = payload.get("resolved_lz_position", payload.get("actual_landing_position", payload.get("lz_position", null)))
+	if typeof(lz_variant) != TYPE_VECTOR2 and phase == "inbound":
+		lz_variant = payload.get("dropship_target_position", null)
+	var distance_from_lz: float = -1.0
+	if typeof(lz_variant) == TYPE_VECTOR2:
+		var ship_plane: Vector3 = _world_to_3d_position(world_position, 0.0)
+		var lz_plane: Vector3 = _world_to_3d_position(Vector2(lz_variant), 0.0)
+		distance_from_lz = ship_plane.distance_to(lz_plane)
+	var visual_clearance: float = MISSION_FLIGHT_VISUAL_SCRIPT.clearance_for_phase(phase, distance_from_lz, legacy_clearance)
+	var minimum: float = 0.0 if MISSION_FLIGHT_VISUAL_SCRIPT.AIR_PHASES.has(phase) or MISSION_FLIGHT_VISUAL_SCRIPT.GROUND_PHASES.has(phase) else AIR_LAYER_MIN_CLEARANCE
+	_dropship_air_clearance = maxf(visual_clearance + extra_y_offset, minimum)
 	_dropship_air_y = _dropship_surface_y + _dropship_air_clearance
 	return _world_to_3d_position(world_position, _dropship_air_y)
+
+
+func _update_dropship_flight_visual(node: Node3D, payload: Dictionary, world_position: Vector2) -> void:
+	var phase: String = String(payload.get("state", "")).strip_edges().to_lower()
+	node.set_meta("flight_visual_phase", phase)
+	node.set_meta("flight_visual_clearance", node.position.y - _get_world_surface_y(world_position))
+	var helper := node.get_node_or_null("ReadOnlyFlightVisual")
+	if helper != null:
+		helper.call("set_flight_phase", phase)
+
+
+func _update_air_visual_animation(delta: float) -> void:
+	var changed: bool = false
+	for node_variant in _dropship_visual_nodes_by_id.values():
+		var node := node_variant as Node3D
+		if not is_instance_valid(node):
+			continue
+		var helper := node.get_node_or_null("ReadOnlyFlightVisual")
+		if helper != null:
+			changed = bool(helper.call("advance_visual", delta)) or changed
+	if changed:
+		_request_viewport_redraw()
+
+
+func _get_air_visual_motion_snapshot() -> Dictionary:
+	var entries: Array = []
+	for visual_id in _dropship_visual_nodes_by_id:
+		var node := _dropship_visual_nodes_by_id[visual_id] as Node3D
+		if not is_instance_valid(node):
+			continue
+		var helper := node.get_node_or_null("ReadOnlyFlightVisual")
+		entries.append({
+			"craft_id": String(visual_id),
+			"phase": String(node.get_meta("flight_visual_phase", "")),
+			"clearance": float(node.get_meta("flight_visual_clearance", 0.0)),
+			"position_3d": node.position,
+			"exhaust": Dictionary(helper.call("get_visual_snapshot")) if helper != null else {},
+		})
+	return {"entries": entries, "read_only": true, "sets_gameplay_truth": false}
 
 
 func _get_dropship_visual_id(entry: Dictionary, index: int) -> String:
@@ -11088,6 +11186,12 @@ func _add_dropship_proxy(world_position: Vector2, visual_payload: Dictionary = {
 			craft_root.rotation_degrees.y = _dropship_rotation_y
 			craft_root.scale = Vector3.ONE * (float(frontier_entry.get("scale",0.22)) if not frontier_entry.is_empty() else (_get_asset_model_scale("fahrzeug_speeder_b_se") if _has_model_mapping_for_type("fahrzeug_speeder_b_se") else DROPSHIP_MODEL_SCALE))
 			craft_root.add_child(model_instance)
+			if String(frontier_entry.get("asset_id", "")) == "cutlass_01" and String(frontier_entry.get("revision", "")) == "astra_refinement_03":
+				var flight_visual: Node3D = MISSION_FLIGHT_VISUAL_SCRIPT.new()
+				flight_visual.name = "ReadOnlyFlightVisual"
+				craft_root.add_child(flight_visual)
+				flight_visual.configure_cutlass_ref03()
+			_update_dropship_flight_visual(craft_root, payload, world_position)
 			_drop_root.add_child(craft_root)
 			_dropship_model_visible = true
 			_air_visual_count += 1
@@ -11117,6 +11221,7 @@ func _add_dropship_proxy(world_position: Vector2, visual_payload: Dictionary = {
 		sprite.set_meta("terrain_height_independent", true)
 		sprite.set_meta("dropship_visual_mode", "texture")
 		sprite.set_meta("dropship_extra_y_offset", 0.0)
+		_update_dropship_flight_visual(sprite, payload, world_position)
 		_dropship_texture_visible = true
 		_air_visual_count += 1
 		return sprite
@@ -11145,6 +11250,7 @@ func _add_dropship_proxy(world_position: Vector2, visual_payload: Dictionary = {
 	wing.material_override = _make_material(Color(0.72, 0.76, 0.78, 0.88))
 	wing.position = Vector3(0.0, -0.04, 0.0)
 	proxy_root.add_child(wing)
+	_update_dropship_flight_visual(proxy_root, payload, world_position)
 	return proxy_root
 
 
@@ -11868,6 +11974,13 @@ func _update_unit_vital_visual(proxy: Node3D, unit: Node, cached_model_root: Nod
 	changed = _set_proxy_bool_meta(proxy, "unit_down_pose_active", down_pose_active) or changed
 	changed = _set_proxy_string_meta(proxy, "unit_last_damage_event_id", String(last_damage_context.get("fire_event_id", last_damage_context.get("event_id", ""))).strip_edges()) or changed
 	var model_root: Node3D = cached_model_root if cached_model_root != null and is_instance_valid(cached_model_root) else _find_unit_model_root(proxy)
+	var readability_core: Node3D = proxy.get_node_or_null("UnitBodyReadabilityCore") as Node3D
+	if readability_core != null:
+		var core_visible: bool = not down_pose_active or model_root == null
+		if readability_core.visible != core_visible:
+			readability_core.visible = core_visible
+			changed = true
+		changed = _set_proxy_bool_meta(proxy, "unit_body_readability_core_visible", core_visible) or changed
 	changed = _set_proxy_bool_meta(proxy, "unit_vital_visual_target_node_available", model_root != null) or changed
 	if model_root == null:
 		return changed
@@ -11881,17 +11994,30 @@ func _update_unit_vital_visual(proxy: Node3D, unit: Node, cached_model_root: Nod
 	var desired_position: Vector3 = base_position
 	if vital_state == "down":
 		desired_rotation = base_rotation + UNIT_DOWN_POSE_ROTATION_DEGREES
-		desired_position = base_position + Vector3(0.0, -0.16, 0.0)
 	elif vital_state == "bleedout" or vital_state == "respawning":
 		desired_rotation = base_rotation + UNIT_BLEEDOUT_POSE_ROTATION_DEGREES
-		desired_position = base_position + Vector3(0.0, -0.20, 0.0)
 	if model_root.rotation_degrees.distance_squared_to(desired_rotation) > 0.0001:
 		model_root.rotation_degrees = desired_rotation
 		changed = true
+	if down_pose_active:
+		desired_position = _get_grounded_unit_pose_position(model_root, base_position)
 	if model_root.position.distance_squared_to(desired_position) > 0.000001:
 		model_root.position = desired_position
 		changed = true
 	return changed
+
+
+func _get_grounded_unit_pose_position(model_root: Node3D, base_position: Vector3) -> Vector3:
+	# Evaluate the existing figure and attachments after the pose rotation.
+	# Only changed visual payloads inspect this figure's bounded model subtree.
+	var bounds: Dictionary = {"valid": false, "min": Vector3.ZERO, "max": Vector3.ZERO}
+	var posed_transform: Transform3D = model_root.transform
+	posed_transform.origin = base_position
+	for child in model_root.get_children():
+		_accumulate_local_visual_bounds(child, posed_transform, bounds)
+	if not bool(bounds.get("valid", false)):
+		return base_position
+	return base_position + Vector3(0.0, 0.018 - Vector3(bounds.get("min", Vector3.ZERO)).y, 0.0)
 
 
 func _find_unit_model_root(node: Node) -> Node3D:
@@ -11909,12 +12035,14 @@ func _find_unit_model_root(node: Node) -> Node3D:
 
 func _build_unit_status_badge_signature(proxy: Node3D, unit: Node) -> String:
 	var badge_text: String = _get_unit_status_badge_text(unit)
-	return "%s|%s|%s|%s|%s" % [
+	return "%s|%s|%s|%s|%s|%.3f|%d" % [
 		badge_text,
 		_get_unit_status_badge_color(unit).to_html(true),
 		_get_unit_status_badge_style(unit, badge_text),
 		str(_should_suppress_release_firefight_unit_badge(badge_text)),
 		str(proxy.visible),
+		_camera_size,
+		_subviewport.size.y if _subviewport != null else 720,
 	]
 
 
@@ -11922,12 +12050,15 @@ func _update_unit_status_badge(proxy: Node3D, unit: Node, cached_label: Label3D 
 	if proxy == null:
 		return false
 	var label: Label3D = cached_label if cached_label != null and is_instance_valid(cached_label) else null
+	var icon: Sprite3D = proxy.get_node_or_null("UnitStateIcon") as Sprite3D
 	var badge_text: String = _get_unit_status_badge_text(unit)
 	var suppressed_by_declutter: bool = _should_suppress_release_firefight_unit_badge(badge_text)
 	proxy.set_meta("unit_status_badge_suppressed_by_declutter", suppressed_by_declutter)
 	if badge_text.is_empty() or not proxy.visible or suppressed_by_declutter:
 		if label != null:
 			label.visible = false
+		if icon != null:
+			icon.visible = false
 		if suppressed_by_declutter:
 			proxy.set_meta("unit_status_badge_text", badge_text)
 			proxy.set_meta("unit_status_badge_style", "suppressed_release_firefight_declutter")
@@ -11943,6 +12074,27 @@ func _update_unit_status_badge(proxy: Node3D, unit: Node, cached_label: Label3D 
 		label.modulate = _get_unit_status_badge_color(unit)
 		label.visible = true
 	var badge_color: Color = _get_unit_status_badge_color(unit)
+	var icons_script: GDScript = preload("res://scripts/terrain/unit_feedback_icons.gd")
+	var icon_id: String = String(icons_script.call("icon_id_for_badge", badge_text))
+	var icon_texture: Texture2D = icons_script.call("get_icon", icon_id) as Texture2D
+	if icon_texture != null:
+		if icon == null:
+			icon = Sprite3D.new()
+			icon.name = "UnitStateIcon"
+			icon.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			icon.shaded = false
+			icon.no_depth_test = true
+			proxy.add_child(icon)
+		icon.texture = icon_texture
+		var world_per_pixel: float = _camera_size / maxf(float(_subviewport.size.y) if _subviewport != null else 720.0, 1.0)
+		icon.pixel_size = clampf(world_per_pixel * 18.0, 0.25, 0.90) / 64.0
+		icon.position = Vector3(0.0, 1.30, 0.0)
+		icon.modulate = badge_color
+		icon.visible = true
+		icon.set_meta("status_text", badge_text)
+	elif icon != null:
+		icon.visible = false
+	proxy.set_meta("unit_status_icon_id", icon_id)
 	proxy.set_meta("unit_status_badge_text", badge_text)
 	proxy.set_meta("unit_status_badge_color_hex", badge_color.to_html(true))
 	proxy.set_meta("unit_status_badge_style", _get_unit_status_badge_style(unit, badge_text))

@@ -1,0 +1,52 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-98ede9cf2dca47ac9f5449645bbabb7a
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+[PASS] Actual runtime enemy receives a 3D proxy
+[PASS] Actual animated character model is present before damage
+ERROR: [FAIL] Owner wound state displays a visible shape icon
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:138)
+       [1] _test_original_model_lies_above_ground_and_recovers (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:47)
+       [2] _frames (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:129)
+[PASS] Down retains the identical visible original model
+[PASS] Down retains the identical weapon attachment
+[PASS] Down visibly lays the existing model horizontally
+ERROR: [FAIL] Down hides the upright visual capsule beside the original figure
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:138)
+       [1] _test_original_model_lies_above_ground_and_recovers (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:55)
+       [2] _frames (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:129)
+ERROR: [FAIL] Down model bounds stay above the proxy ground plane
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:138)
+       [1] _test_original_model_lies_above_ground_and_recovers (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:57)
+       [2] _frames (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:129)
+ERROR: [FAIL] Down owner state displays a visible critical icon
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:138)
+       [1] _test_original_model_lies_above_ground_and_recovers (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:59)
+       [2] _frames (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:129)
+[PASS] Bleedout keeps the same original lying model
+ERROR: [FAIL] Respawn countdown preserves lying identity without the capsule
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:138)
+       [1] _test_original_model_lies_above_ground_and_recovers (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:67)
+       [2] _frames (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:129)
+[PASS] Actual respawn restores the same model and its original transform
+[PASS] Actual respawn restores the normal readable body policy
+[PASS] No event produces no firing impulse
+ERROR: [FAIL] A real event creates a visible muzzle impulse
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:138)
+       [1] _test_event_impulse_expires_and_does_not_replay (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:90)
+       [2] _frames (res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd:129)
+[PASS] Flash and shot symbol expire without another gameplay event
+[PASS] Rebuilding another order does not replay an old shot
+=== NPC COMBAT FEEDBACK: 11 passed, 6 failed ===

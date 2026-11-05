@@ -1,0 +1,879 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-ffb0eb8e97014c2b9ac3d7b13389e29a
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PORTRAIT_ATLAS_VERIFY_BEGIN
+PASS: Exactly all 42 existing identities remain
+PASS: Active catalog validates
+PASS: All 42 portraits are loadable
+PASS: All 42 candidates remain
+PASS: Minimum start-roster candidate pool remains
+PASS: Every old portrait path has one alias
+PASS: Existing ID retained: char_portrait_001
+PASS: Tags unchanged: char_portrait_001
+PASS: Candidate flag unchanged: char_portrait_001
+PASS: Legacy source remains on disk: char_portrait_001
+PASS: ID resolves current atlas over saved old path: char_portrait_001
+PASS: ID-less old path resolves same identity: char_portrait_001
+PASS: Unknown ID retains known path identity: char_portrait_001
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_001
+PASS: Existing ID retained: char_portrait_002
+PASS: Tags unchanged: char_portrait_002
+PASS: Candidate flag unchanged: char_portrait_002
+PASS: Legacy source remains on disk: char_portrait_002
+PASS: ID resolves current atlas over saved old path: char_portrait_002
+PASS: ID-less old path resolves same identity: char_portrait_002
+PASS: Unknown ID retains known path identity: char_portrait_002
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_002
+PASS: Existing ID retained: char_portrait_003
+PASS: Tags unchanged: char_portrait_003
+PASS: Candidate flag unchanged: char_portrait_003
+PASS: Legacy source remains on disk: char_portrait_003
+PASS: ID resolves current atlas over saved old path: char_portrait_003
+PASS: ID-less old path resolves same identity: char_portrait_003
+PASS: Unknown ID retains known path identity: char_portrait_003
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_003
+PASS: Existing ID retained: char_portrait_004
+PASS: Tags unchanged: char_portrait_004
+PASS: Candidate flag unchanged: char_portrait_004
+PASS: Legacy source remains on disk: char_portrait_004
+PASS: ID resolves current atlas over saved old path: char_portrait_004
+PASS: ID-less old path resolves same identity: char_portrait_004
+PASS: Unknown ID retains known path identity: char_portrait_004
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_004
+PASS: Existing ID retained: char_portrait_005
+PASS: Tags unchanged: char_portrait_005
+PASS: Candidate flag unchanged: char_portrait_005
+PASS: Legacy source remains on disk: char_portrait_005
+PASS: ID resolves current atlas over saved old path: char_portrait_005
+PASS: ID-less old path resolves same identity: char_portrait_005
+PASS: Unknown ID retains known path identity: char_portrait_005
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_005
+PASS: Existing ID retained: char_portrait_006
+PASS: Tags unchanged: char_portrait_006
+PASS: Candidate flag unchanged: char_portrait_006
+PASS: Legacy source remains on disk: char_portrait_006
+PASS: ID resolves current atlas over saved old path: char_portrait_006
+PASS: ID-less old path resolves same identity: char_portrait_006
+PASS: Unknown ID retains known path identity: char_portrait_006
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_006
+PASS: Existing ID retained: char_portrait_007
+PASS: Tags unchanged: char_portrait_007
+PASS: Candidate flag unchanged: char_portrait_007
+PASS: Legacy source remains on disk: char_portrait_007
+PASS: ID resolves current atlas over saved old path: char_portrait_007
+PASS: ID-less old path resolves same identity: char_portrait_007
+PASS: Unknown ID retains known path identity: char_portrait_007
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_007
+PASS: Existing ID retained: char_portrait_008
+PASS: Tags unchanged: char_portrait_008
+PASS: Candidate flag unchanged: char_portrait_008
+PASS: Legacy source remains on disk: char_portrait_008
+PASS: ID resolves current atlas over saved old path: char_portrait_008
+PASS: ID-less old path resolves same identity: char_portrait_008
+PASS: Unknown ID retains known path identity: char_portrait_008
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_008
+PASS: Existing ID retained: char_portrait_009
+PASS: Tags unchanged: char_portrait_009
+PASS: Candidate flag unchanged: char_portrait_009
+PASS: Legacy source remains on disk: char_portrait_009
+PASS: ID resolves current atlas over saved old path: char_portrait_009
+PASS: ID-less old path resolves same identity: char_portrait_009
+PASS: Unknown ID retains known path identity: char_portrait_009
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_009
+PASS: Existing ID retained: char_portrait_010
+PASS: Tags unchanged: char_portrait_010
+PASS: Candidate flag unchanged: char_portrait_010
+PASS: Legacy source remains on disk: char_portrait_010
+PASS: ID resolves current atlas over saved old path: char_portrait_010
+PASS: ID-less old path resolves same identity: char_portrait_010
+PASS: Unknown ID retains known path identity: char_portrait_010
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_010
+PASS: Existing ID retained: char_portrait_011
+PASS: Tags unchanged: char_portrait_011
+PASS: Candidate flag unchanged: char_portrait_011
+PASS: Legacy source remains on disk: char_portrait_011
+PASS: ID resolves current atlas over saved old path: char_portrait_011
+PASS: ID-less old path resolves same identity: char_portrait_011
+PASS: Unknown ID retains known path identity: char_portrait_011
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_011
+PASS: Existing ID retained: char_portrait_012
+PASS: Tags unchanged: char_portrait_012
+PASS: Candidate flag unchanged: char_portrait_012
+PASS: Legacy source remains on disk: char_portrait_012
+PASS: ID resolves current atlas over saved old path: char_portrait_012
+PASS: ID-less old path resolves same identity: char_portrait_012
+PASS: Unknown ID retains known path identity: char_portrait_012
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_012
+PASS: Existing ID retained: char_portrait_013
+PASS: Tags unchanged: char_portrait_013
+PASS: Candidate flag unchanged: char_portrait_013
+PASS: Legacy source remains on disk: char_portrait_013
+PASS: ID resolves current atlas over saved old path: char_portrait_013
+PASS: ID-less old path resolves same identity: char_portrait_013
+PASS: Unknown ID retains known path identity: char_portrait_013
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_013
+PASS: Existing ID retained: char_portrait_014
+PASS: Tags unchanged: char_portrait_014
+PASS: Candidate flag unchanged: char_portrait_014
+PASS: Legacy source remains on disk: char_portrait_014
+PASS: ID resolves current atlas over saved old path: char_portrait_014
+PASS: ID-less old path resolves same identity: char_portrait_014
+PASS: Unknown ID retains known path identity: char_portrait_014
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_014
+PASS: Existing ID retained: char_portrait_015
+PASS: Tags unchanged: char_portrait_015
+PASS: Candidate flag unchanged: char_portrait_015
+PASS: Legacy source remains on disk: char_portrait_015
+PASS: ID resolves current atlas over saved old path: char_portrait_015
+PASS: ID-less old path resolves same identity: char_portrait_015
+PASS: Unknown ID retains known path identity: char_portrait_015
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_015
+PASS: Existing ID retained: char_portrait_016
+PASS: Tags unchanged: char_portrait_016
+PASS: Candidate flag unchanged: char_portrait_016
+PASS: Legacy source remains on disk: char_portrait_016
+PASS: ID resolves current atlas over saved old path: char_portrait_016
+PASS: ID-less old path resolves same identity: char_portrait_016
+PASS: Unknown ID retains known path identity: char_portrait_016
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_016
+PASS: Existing ID retained: char_portrait_017
+PASS: Tags unchanged: char_portrait_017
+PASS: Candidate flag unchanged: char_portrait_017
+PASS: Legacy source remains on disk: char_portrait_017
+PASS: ID resolves current atlas over saved old path: char_portrait_017
+PASS: ID-less old path resolves same identity: char_portrait_017
+PASS: Unknown ID retains known path identity: char_portrait_017
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_017
+PASS: Existing ID retained: char_portrait_018
+PASS: Tags unchanged: char_portrait_018
+PASS: Candidate flag unchanged: char_portrait_018
+PASS: Legacy source remains on disk: char_portrait_018
+PASS: ID resolves current atlas over saved old path: char_portrait_018
+PASS: ID-less old path resolves same identity: char_portrait_018
+PASS: Unknown ID retains known path identity: char_portrait_018
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_018
+PASS: Existing ID retained: char_portrait_019
+PASS: Tags unchanged: char_portrait_019
+PASS: Candidate flag unchanged: char_portrait_019
+PASS: Legacy source remains on disk: char_portrait_019
+PASS: ID resolves current atlas over saved old path: char_portrait_019
+PASS: ID-less old path resolves same identity: char_portrait_019
+PASS: Unknown ID retains known path identity: char_portrait_019
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_019
+PASS: Existing ID retained: char_portrait_020
+PASS: Tags unchanged: char_portrait_020
+PASS: Candidate flag unchanged: char_portrait_020
+PASS: Legacy source remains on disk: char_portrait_020
+PASS: ID resolves current atlas over saved old path: char_portrait_020
+PASS: ID-less old path resolves same identity: char_portrait_020
+PASS: Unknown ID retains known path identity: char_portrait_020
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_020
+PASS: Existing ID retained: char_portrait_021
+PASS: Tags unchanged: char_portrait_021
+PASS: Candidate flag unchanged: char_portrait_021
+PASS: Legacy source remains on disk: char_portrait_021
+PASS: ID resolves current atlas over saved old path: char_portrait_021
+PASS: ID-less old path resolves same identity: char_portrait_021
+PASS: Unknown ID retains known path identity: char_portrait_021
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_021
+PASS: Existing ID retained: char_portrait_022
+PASS: Tags unchanged: char_portrait_022
+PASS: Candidate flag unchanged: char_portrait_022
+PASS: Legacy source remains on disk: char_portrait_022
+PASS: ID resolves current atlas over saved old path: char_portrait_022
+PASS: ID-less old path resolves same identity: char_portrait_022
+PASS: Unknown ID retains known path identity: char_portrait_022
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_022
+PASS: Existing ID retained: char_portrait_023
+PASS: Tags unchanged: char_portrait_023
+PASS: Candidate flag unchanged: char_portrait_023
+PASS: Legacy source remains on disk: char_portrait_023
+PASS: ID resolves current atlas over saved old path: char_portrait_023
+PASS: ID-less old path resolves same identity: char_portrait_023
+PASS: Unknown ID retains known path identity: char_portrait_023
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_023
+PASS: Existing ID retained: char_portrait_024
+PASS: Tags unchanged: char_portrait_024
+PASS: Candidate flag unchanged: char_portrait_024
+PASS: Legacy source remains on disk: char_portrait_024
+PASS: ID resolves current atlas over saved old path: char_portrait_024
+PASS: ID-less old path resolves same identity: char_portrait_024
+PASS: Unknown ID retains known path identity: char_portrait_024
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_024
+PASS: Existing ID retained: char_portrait_025
+PASS: Tags unchanged: char_portrait_025
+PASS: Candidate flag unchanged: char_portrait_025
+PASS: Legacy source remains on disk: char_portrait_025
+PASS: ID resolves current atlas over saved old path: char_portrait_025
+PASS: ID-less old path resolves same identity: char_portrait_025
+PASS: Unknown ID retains known path identity: char_portrait_025
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_025
+PASS: Existing ID retained: char_portrait_026
+PASS: Tags unchanged: char_portrait_026
+PASS: Candidate flag unchanged: char_portrait_026
+PASS: Legacy source remains on disk: char_portrait_026
+PASS: ID resolves current atlas over saved old path: char_portrait_026
+PASS: ID-less old path resolves same identity: char_portrait_026
+PASS: Unknown ID retains known path identity: char_portrait_026
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_026
+PASS: Existing ID retained: char_portrait_027
+PASS: Tags unchanged: char_portrait_027
+PASS: Candidate flag unchanged: char_portrait_027
+PASS: Legacy source remains on disk: char_portrait_027
+PASS: ID resolves current atlas over saved old path: char_portrait_027
+PASS: ID-less old path resolves same identity: char_portrait_027
+PASS: Unknown ID retains known path identity: char_portrait_027
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_027
+PASS: Existing ID retained: char_portrait_028
+PASS: Tags unchanged: char_portrait_028
+PASS: Candidate flag unchanged: char_portrait_028
+PASS: Legacy source remains on disk: char_portrait_028
+PASS: ID resolves current atlas over saved old path: char_portrait_028
+PASS: ID-less old path resolves same identity: char_portrait_028
+PASS: Unknown ID retains known path identity: char_portrait_028
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_028
+PASS: Existing ID retained: char_portrait_029
+PASS: Tags unchanged: char_portrait_029
+PASS: Candidate flag unchanged: char_portrait_029
+PASS: Legacy source remains on disk: char_portrait_029
+PASS: ID resolves current atlas over saved old path: char_portrait_029
+PASS: ID-less old path resolves same identity: char_portrait_029
+PASS: Unknown ID retains known path identity: char_portrait_029
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_029
+PASS: Existing ID retained: char_portrait_030
+PASS: Tags unchanged: char_portrait_030
+PASS: Candidate flag unchanged: char_portrait_030
+PASS: Legacy source remains on disk: char_portrait_030
+PASS: ID resolves current atlas over saved old path: char_portrait_030
+PASS: ID-less old path resolves same identity: char_portrait_030
+PASS: Unknown ID retains known path identity: char_portrait_030
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_030
+PASS: Existing ID retained: char_portrait_031
+PASS: Tags unchanged: char_portrait_031
+PASS: Candidate flag unchanged: char_portrait_031
+PASS: Legacy source remains on disk: char_portrait_031
+PASS: ID resolves current atlas over saved old path: char_portrait_031
+PASS: ID-less old path resolves same identity: char_portrait_031
+PASS: Unknown ID retains known path identity: char_portrait_031
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_031
+PASS: Existing ID retained: char_portrait_032
+PASS: Tags unchanged: char_portrait_032
+PASS: Candidate flag unchanged: char_portrait_032
+PASS: Legacy source remains on disk: char_portrait_032
+PASS: ID resolves current atlas over saved old path: char_portrait_032
+PASS: ID-less old path resolves same identity: char_portrait_032
+PASS: Unknown ID retains known path identity: char_portrait_032
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_032
+PASS: Existing ID retained: char_portrait_033
+PASS: Tags unchanged: char_portrait_033
+PASS: Candidate flag unchanged: char_portrait_033
+PASS: Legacy source remains on disk: char_portrait_033
+PASS: ID resolves current atlas over saved old path: char_portrait_033
+PASS: ID-less old path resolves same identity: char_portrait_033
+PASS: Unknown ID retains known path identity: char_portrait_033
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_033
+PASS: Existing ID retained: char_portrait_034
+PASS: Tags unchanged: char_portrait_034
+PASS: Candidate flag unchanged: char_portrait_034
+PASS: Legacy source remains on disk: char_portrait_034
+PASS: ID resolves current atlas over saved old path: char_portrait_034
+PASS: ID-less old path resolves same identity: char_portrait_034
+PASS: Unknown ID retains known path identity: char_portrait_034
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_034
+PASS: Existing ID retained: char_portrait_035
+PASS: Tags unchanged: char_portrait_035
+PASS: Candidate flag unchanged: char_portrait_035
+PASS: Legacy source remains on disk: char_portrait_035
+PASS: ID resolves current atlas over saved old path: char_portrait_035
+PASS: ID-less old path resolves same identity: char_portrait_035
+PASS: Unknown ID retains known path identity: char_portrait_035
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_035
+PASS: Existing ID retained: char_portrait_036
+PASS: Tags unchanged: char_portrait_036
+PASS: Candidate flag unchanged: char_portrait_036
+PASS: Legacy source remains on disk: char_portrait_036
+PASS: ID resolves current atlas over saved old path: char_portrait_036
+PASS: ID-less old path resolves same identity: char_portrait_036
+PASS: Unknown ID retains known path identity: char_portrait_036
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_036
+PASS: Existing ID retained: char_portrait_037
+PASS: Tags unchanged: char_portrait_037
+PASS: Candidate flag unchanged: char_portrait_037
+PASS: Legacy source remains on disk: char_portrait_037
+PASS: ID resolves current atlas over saved old path: char_portrait_037
+PASS: ID-less old path resolves same identity: char_portrait_037
+PASS: Unknown ID retains known path identity: char_portrait_037
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_037
+PASS: Existing ID retained: char_portrait_038
+PASS: Tags unchanged: char_portrait_038
+PASS: Candidate flag unchanged: char_portrait_038
+PASS: Legacy source remains on disk: char_portrait_038
+PASS: ID resolves current atlas over saved old path: char_portrait_038
+PASS: ID-less old path resolves same identity: char_portrait_038
+PASS: Unknown ID retains known path identity: char_portrait_038
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_038
+PASS: Existing ID retained: char_portrait_039
+PASS: Tags unchanged: char_portrait_039
+PASS: Candidate flag unchanged: char_portrait_039
+PASS: Legacy source remains on disk: char_portrait_039
+PASS: ID resolves current atlas over saved old path: char_portrait_039
+PASS: ID-less old path resolves same identity: char_portrait_039
+PASS: Unknown ID retains known path identity: char_portrait_039
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_039
+PASS: Existing ID retained: char_portrait_040
+PASS: Tags unchanged: char_portrait_040
+PASS: Candidate flag unchanged: char_portrait_040
+PASS: Legacy source remains on disk: char_portrait_040
+PASS: ID resolves current atlas over saved old path: char_portrait_040
+PASS: ID-less old path resolves same identity: char_portrait_040
+PASS: Unknown ID retains known path identity: char_portrait_040
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_040
+PASS: Existing ID retained: char_portrait_041
+PASS: Tags unchanged: char_portrait_041
+PASS: Candidate flag unchanged: char_portrait_041
+PASS: Legacy source remains on disk: char_portrait_041
+PASS: ID resolves current atlas over saved old path: char_portrait_041
+PASS: ID-less old path resolves same identity: char_portrait_041
+PASS: Unknown ID retains known path identity: char_portrait_041
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_041
+PASS: Existing ID retained: char_portrait_042
+PASS: Tags unchanged: char_portrait_042
+PASS: Candidate flag unchanged: char_portrait_042
+PASS: Legacy source remains on disk: char_portrait_042
+PASS: ID resolves current atlas over saved old path: char_portrait_042
+PASS: ID-less old path resolves same identity: char_portrait_042
+PASS: Unknown ID retains known path identity: char_portrait_042
+PASS: Actual catalog texture is an AtlasTexture: char_portrait_042
+PASS: Manifest retains 44 faces on eleven source sheets
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_001.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_002.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_003.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_004.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_005.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_006.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_007.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_008.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_009.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_010.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_011.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_012.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_013.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_014.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_015.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_016.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_017.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_018.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_019.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_020.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_021.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_022.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_023.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_024.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_025.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_026.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_027.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_028.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_029.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_030.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_031.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_032.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_033.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_034.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_035.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_036.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_037.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_038.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_039.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_040.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_041.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_042.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Manifest face uses existing catalog identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/reserve_043.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Reserve does not add a roster identity
+PASS: AtlasTexture loads: res://Assets/curated/portraits/frontier_20261105/portraits/reserve_044.tres
+PASS: Region has four components
+PASS: Loaded region matches provenance
+PASS: Individual texture has exact 627x627 size
+PASS: Atlas filtering clips to own region
+PASS: Source atlas exists
+PASS: Atlas points to project PNG
+PASS: Loaded original atlas stays 1254x1254
+PASS: Atlas resource source hash matches manifest
+PASS: No assigned or reserve face repeats an atlas region
+PASS: Reserve does not add a roster identity
+PASS: Exactly 42 assigned and two reserve regions
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Actual PNG matches reviewed source hash
+PASS: Actual source PNG imports as Texture2D
+PASS: Exact prompt receipt is retained
+PASS: Known ID takes priority over conflicting valid path
+PASS: Explicit current resource path stays usable
+PASS: Missing identity retains existing fallback
+PASS: Caller mutation cannot corrupt cached ID map
+PASS: Caller mutation cannot corrupt cached entries
+PASS: Custom test catalog writes in isolated user data
+PASS: Custom catalog initially reads its own resource
+PASS: Custom test catalog update writes
+PASS: Custom catalog rereads changes without cache reset
+PASS: Custom fixture cleaned up
+PASS: Explicit cache reset rereads shipped catalog
+=== RESULTS: 872 passed, 0 failed ===
+PORTRAIT_ATLAS_VERIFY_PASS

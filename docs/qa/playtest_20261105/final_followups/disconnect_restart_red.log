@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-89dbbb4cbbd749d4a81eaf34fb17d23b
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Actual root session creates an ENet host
+PASS: NetworkEvents starts actual root Netfox ticking
+PASS: Root session and Netfox really own the same MultiplayerAPI
+PASS: Independent subtree really uses a different MultiplayerAPI with a peer
+PASS: Foreign session disconnect preserves the root Netfox clock
+PASS: Public start_host replaces an already active real host in the same frame
+ERROR: FAIL: Host-to-host same-frame replacement restarts its owned Netfox clock
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_multiplayer_disconnect_owner_verifier.gd:85)
+       [1] _run (res://scripts/tests/playtest_20261105_multiplayer_disconnect_owner_verifier.gd:53)
+ERROR: FAIL: Host-to-host replacement emits actual new Netfox ticks
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_multiplayer_disconnect_owner_verifier.gd:85)
+       [1] _run (res://scripts/tests/playtest_20261105_multiplayer_disconnect_owner_verifier.gd:54)
+PASS: Public disconnect and start_host succeed in the same frame
+ERROR: FAIL: Same-frame public disconnect-to-host restarts its owned clock
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_multiplayer_disconnect_owner_verifier.gd:85)
+       [1] _run (res://scripts/tests/playtest_20261105_multiplayer_disconnect_owner_verifier.gd:59)
+ERROR: FAIL: Same-frame disconnect-to-host emits actual new Netfox ticks
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261105_multiplayer_disconnect_owner_verifier.gd:85)
+       [1] _run (res://scripts/tests/playtest_20261105_multiplayer_disconnect_owner_verifier.gd:60)
+PASS: Own public disconnect stops the Netfox tick clock immediately
+PASS: Own public disconnect leaves the synchronizer stopped
+PASS: Public disconnect preserves the complete existing session reset
+PASS: No Netfox ticks after more than two real sync intervals
+PASS: Repeated public disconnect is idempotently stopped
+MULTIPLAYER_DISCONNECT_OWNER: 12 passed, 4 failed

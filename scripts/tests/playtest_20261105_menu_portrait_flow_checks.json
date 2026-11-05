@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "checks": [
+    {"name":"menu_original","script":"res://scripts/tests/playtest_20261105_menu_restore_verifier.gd","success_marker":"PLAYTEST_MENU_RESTORE_ALL_PASS","timeout":150},
+    {"name":"start_graphics","script":"res://scripts/tests/frontier_start_graphics_verifier.gd","success_marker":"FRONTIER_START_GRAPHICS_ALL_PASS","timeout":150}
+  ]
+}

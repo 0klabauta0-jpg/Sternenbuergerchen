@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "visual_logical_1280",
+      "script": "res://scripts/tests/playtest_20261105_fullscreen_visual_capture.gd",
+      "success_marker": "FRONTIER_MAIN_STARTUP",
+      "timeout": 330,
+      "args": [
+        "--evidence-output={RUN}/visual_1280.json",
+        "--startup-timeout-seconds=280",
+        "--ui-size=1280x720",
+        "--shot-wait-seconds=0"
+      ]
+    },
+    {
+      "name": "visual_logical_1920",
+      "script": "res://scripts/tests/playtest_20261105_fullscreen_visual_capture.gd",
+      "success_marker": "FRONTIER_MAIN_STARTUP",
+      "timeout": 330,
+      "args": [
+        "--evidence-output={RUN}/visual_1920.json",
+        "--startup-timeout-seconds=280",
+        "--ui-size=1920x1080",
+        "--shot-wait-seconds=0"
+      ]
+    }
+  ]
+}

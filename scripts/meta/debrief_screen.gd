@@ -48,6 +48,10 @@ func _ready() -> void:
 	_apply_background_texture()
 	var to_fob_button: Button = get_node("Panel/Margin/VBox/ButtonRow/ReturnToFOBButton")
 	var to_homebase_button: Button = get_node("Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton")
+	# Normal play returns to the explorable Homebase. Keep the legacy signal and
+	# callback for existing saves/tools without presenting a second staging stop.
+	to_fob_button.hide()
+	to_fob_button.focus_mode = Control.FOCUS_NONE
 	if not to_fob_button.pressed.is_connected(_on_return_to_fob_pressed):
 		to_fob_button.pressed.connect(_on_return_to_fob_pressed)
 	if not to_homebase_button.pressed.is_connected(_on_return_to_homebase_pressed):

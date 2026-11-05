@@ -7,8 +7,18 @@ const CHARACTER_SHEET_TARGET_SIZE := Vector2(96.0, 120.0)
 const ROSTER_THUMBNAIL_SIZE := Vector2(64.0, 64.0)
 const COMPACT_THUMBNAIL_SIZE := Vector2(38.0, 38.0)
 
+static var _default_catalog_cache: Dictionary = {}
+
+
+static func clear_cache_for_tests() -> void:
+	_default_catalog_cache.clear()
+
 
 static func load_catalog(catalog_path: String = CATALOG_PATH) -> Dictionary:
+	# The shipped catalog is immutable for a process. Custom fixture paths always
+	# read fresh; callers cannot mutate the shared snapshot through returned data.
+	if catalog_path == CATALOG_PATH and not _default_catalog_cache.is_empty():
+		return _default_catalog_cache.duplicate(true)
 	var catalog: Dictionary = _load_json(catalog_path)
 	var result: Dictionary = {
 		"schema_version": int(catalog.get("schema_version", 0)),
@@ -19,6 +29,7 @@ static func load_catalog(catalog_path: String = CATALOG_PATH) -> Dictionary:
 		"fallback_portrait_id": String(catalog.get("fallback_portrait_id", "")),
 		"entries": [],
 		"entries_by_id": {},
+		"entries_by_legacy_path": {},
 		"candidate_count": 0,
 		"loadable_count": 0,
 		"large_source_count": 0,
@@ -30,6 +41,7 @@ static func load_catalog(catalog_path: String = CATALOG_PATH) -> Dictionary:
 
 	var entries: Array = []
 	var entries_by_id: Dictionary = {}
+	var entries_by_legacy_path: Dictionary = {}
 	var seen_paths: Dictionary = {}
 	for entry_variant in Array(catalog.get("entries", [])):
 		if typeof(entry_variant) != TYPE_DICTIONARY:
@@ -62,9 +74,17 @@ static func load_catalog(catalog_path: String = CATALOG_PATH) -> Dictionary:
 			result["large_source_count"] = int(result.get("large_source_count", 0)) + 1
 		entries.append(entry)
 		entries_by_id[id] = entry
+		for legacy_path in PackedStringArray(entry.get("legacy_paths", PackedStringArray())):
+			if entries_by_legacy_path.has(legacy_path):
+				_append_diagnostic(result, "duplicate_portrait_legacy_path:%s" % legacy_path)
+				continue
+			entries_by_legacy_path[legacy_path] = entry
 	entries.sort_custom(func(a, b): return String(Dictionary(a).get("id", "")) < String(Dictionary(b).get("id", "")))
 	result["entries"] = entries
 	result["entries_by_id"] = entries_by_id
+	result["entries_by_legacy_path"] = entries_by_legacy_path
+	if catalog_path == CATALOG_PATH:
+		_default_catalog_cache = result.duplicate(true)
 	return result
 
 
@@ -132,12 +152,16 @@ static func build_deterministic_assignment(seed: String, count: int, role_catego
 
 
 static func resolve_path(portrait_id: String = "", portrait_path: String = "", catalog_path: String = CATALOG_PATH) -> String:
-	var loaded: Dictionary = load_catalog(catalog_path)
+	# Resolution only reads the snapshot; avoid copying all 42 entries per face.
+	var loaded: Dictionary = _default_catalog_cache if catalog_path == CATALOG_PATH and not _default_catalog_cache.is_empty() else load_catalog(catalog_path)
 	var entries_by_id: Dictionary = Dictionary(loaded.get("entries_by_id", {}))
 	var normalized_id: String = portrait_id.strip_edges()
 	if not normalized_id.is_empty() and entries_by_id.has(normalized_id):
 		return String(Dictionary(entries_by_id.get(normalized_id, {})).get("path", ""))
 	var normalized_path: String = portrait_path.strip_edges()
+	var entries_by_legacy_path: Dictionary = Dictionary(loaded.get("entries_by_legacy_path", {}))
+	if entries_by_legacy_path.has(normalized_path):
+		return String(Dictionary(entries_by_legacy_path.get(normalized_path, {})).get("path", ""))
 	if normalized_path.begins_with("res://") and ResourceLoader.exists(normalized_path):
 		return normalized_path
 	var fallback_id: String = String(loaded.get("fallback_portrait_id", "")).strip_edges()
@@ -186,6 +210,12 @@ static func _normalize_entry(source_entry: Dictionary) -> Dictionary:
 	entry["candidate"] = bool(entry.get("candidate", true))
 	entry["duplicate_group"] = String(entry.get("duplicate_group", "")).strip_edges()
 	entry["tags"] = _coerce_string_array(entry.get("tags", []))
+	var legacy_paths: PackedStringArray = PackedStringArray()
+	for legacy_path_variant in Array(entry.get("legacy_paths", [])):
+		var legacy_path: String = String(legacy_path_variant).strip_edges()
+		if legacy_path.begins_with("res://") and not legacy_paths.has(legacy_path):
+			legacy_paths.append(legacy_path)
+	entry["legacy_paths"] = legacy_paths
 	entry["diagnostics"] = Array(entry.get("diagnostics", [])).duplicate(true)
 	return entry
 

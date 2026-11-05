@@ -1,0 +1,17 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-5ae5c0aa20fd4ec2a52c76f32a69112c
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+HOMEBASE_OPERATIONS_VERIFY_BEGIN
+ERROR: FAIL: Homebase exposes read-only operations snapshot
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/playtest_20261105_homebase_operations_verifier.gd:97)
+       [1] _run (res://scripts/tests/playtest_20261105_homebase_operations_verifier.gd:19)
+ERROR: FAIL: Homebase exposes whitelisted operation bridge
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/playtest_20261105_homebase_operations_verifier.gd:97)
+       [1] _run (res://scripts/tests/playtest_20261105_homebase_operations_verifier.gd:20)
+=== RESULTS: 0 passed, 2 failed ===
+HOMEBASE_OPERATIONS_VERIFY_FAIL

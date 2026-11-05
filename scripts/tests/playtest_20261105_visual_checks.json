@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "npc_feedback",
+      "script": "res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd",
+      "success_marker": "NPC COMBAT FEEDBACK:",
+      "timeout": 120
+    },
+    {
+      "name": "flight_grid",
+      "script": "res://scripts/tests/playtest_20261105_flight_grid_verifier.gd",
+      "success_marker": "PLAYTEST_FLIGHT_GRID:",
+      "timeout": 120
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-5d9577497e6a4e40aacbe838f53b8cde
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+ERROR: FAIL: Real current default GM01 produces a valid multiplayer manifest
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://scripts/tests/playtest_20261105_multiplayer_gm01_manifest_verifier.gd:31)
+       [1] run (res://scripts/tests/playtest_20261105_multiplayer_gm01_manifest_verifier.gd:10)
+PASS: Manifest retains the exact real map size
+PASS: Manifest retains the exact real map SHA-256
+ERROR: FAIL: Matching installed GM01 is recognized without a download
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://scripts/tests/playtest_20261105_multiplayer_gm01_manifest_verifier.gd:31)
+       [1] run (res://scripts/tests/playtest_20261105_multiplayer_gm01_manifest_verifier.gd:14)
+PASS: Above the bounded maximum remains rejected
+ERROR: FAIL: Changed same-ID map still requires explicit consent
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://scripts/tests/playtest_20261105_multiplayer_gm01_manifest_verifier.gd:31)
+       [1] run (res://scripts/tests/playtest_20261105_multiplayer_gm01_manifest_verifier.gd:21)
+PASS: Manifest checks never write a downloaded map
+GM01_MULTIPLAYER_MANIFEST: 4 passed, 3 failed

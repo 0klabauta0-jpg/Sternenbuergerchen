@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "checks": [
+    {"name":"cover_radius_neighbor","script":"res://scripts/tests/gm01_frontier_cover_radius_verifier.gd","success_marker":"GM01_FRONTIER_COVER_RADIUS_ALL_PASS","timeout":150},
+    {"name":"cover_cache_neighbor","script":"res://scripts/tests/gm01_frontier_cover_score_cache_verifier.gd","success_marker":"GM01_FRONTIER_COVER_SCORE_CACHE_ALL_PASS","timeout":150},
+    {"name":"terrain_registry_neighbor","script":"res://scripts/tests/task_409_terrain_registry_lookup_hpa_audit.gd","success_marker":"ALL TESTS PASSED","timeout":150},
+    {"name":"security_red","script":"res://scripts/tests/playtest_20261105_security_visual_batch_verifier.gd","success_marker":"PLAYTEST_SECURITY_VISUAL_BATCH_ALL_PASS","timeout":150},
+    {"name":"hud_red","script":"res://scripts/tests/playtest_20261105_mission_hud_groups_verifier.gd","success_marker":"MISSION_HUD_GROUPS:","timeout":150}
+  ]
+}

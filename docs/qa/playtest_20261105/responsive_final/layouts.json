@@ -1,0 +1,332 @@
+{
+	"captures": [
+		{
+			"error": 0,
+			"height": 720,
+			"id": "homebase_1280",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/homebase_native_responsive_retry/20261105T091339Z-dfaaea72/layouts_captures/homebase_1280.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "56cd3be06339c4b5cb3c72a692f14e6e10694338aa26c00264a2eab5d4184c79",
+			"width": 1280
+		},
+		{
+			"error": 0,
+			"height": 720,
+			"id": "flight_1280",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/homebase_native_responsive_retry/20261105T091339Z-dfaaea72/layouts_captures/flight_1280.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "1659ee38b4e8e99e6cc000c044c957cedc720b213f344fb9e95af3f641bc3682",
+			"width": 1280
+		},
+		{
+			"error": 0,
+			"height": 900,
+			"id": "homebase_1600",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/homebase_native_responsive_retry/20261105T091339Z-dfaaea72/layouts_captures/homebase_1600.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "5a8c6f7dbf31aa4583d155b0108ced62c047001e320d8f0ea46e6da4973b4668",
+			"width": 1600
+		},
+		{
+			"error": 0,
+			"height": 1080,
+			"id": "homebase_1920",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/homebase_native_responsive_retry/20261105T091339Z-dfaaea72/layouts_captures/homebase_1920.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "d75b83c79f858006cfdcfeae8b6421d58626d38ed0337a778d5be5c1c7a8f82d",
+			"width": 1920
+		}
+	],
+	"checks": [
+		{
+			"label": "Homebase layouts use a native display",
+			"passed": true
+		},
+		{
+			"label": "Normal Singleplayer opens the actual Operations UI",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: homebase_1280",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: homebase_1280",
+			"passed": true
+		},
+		{
+			"label": "1280: appropriate preparation column count",
+			"passed": true
+		},
+		{
+			"label": "1280: actual display remains fullscreen",
+			"passed": true
+		},
+		{
+			"label": "1280: normal navigation exposes Flight and launch controls",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: flight_1280",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: flight_1280",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: homebase_1600",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: homebase_1600",
+			"passed": true
+		},
+		{
+			"label": "1600: appropriate preparation column count",
+			"passed": true
+		},
+		{
+			"label": "1600: actual display remains fullscreen",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: homebase_1920",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: homebase_1920",
+			"passed": true
+		},
+		{
+			"label": "1920: appropriate preparation column count",
+			"passed": true
+		},
+		{
+			"label": "1920: actual display remains fullscreen",
+			"passed": true
+		},
+		{
+			"label": "Layout and navigation preserve roster, team and mission data",
+			"passed": true
+		},
+		{
+			"label": "Existing player profile, generator and unit identities remain unchanged",
+			"passed": true
+		}
+	],
+	"elapsed_msec": 9326,
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"facts": {
+		"forced_arrival": false,
+		"forced_unloading": false,
+		"isolated_user_data": true,
+		"player_roster_after_sha256": "2f6566dd29e079de4e9d999f71b4ddde71ccf7b2be0f8c95b36b2cb461d137b9",
+		"player_roster_before_sha256": "",
+		"player_roster_created_by_normal_start": true,
+		"player_roster_existed_before": false,
+		"player_roster_identity_after_sha256": "a20257b0ce5c8b58b1df416ba9ed112d9c6ab51d2133fe5a47adf08876ce6273",
+		"player_roster_identity_before_sha256": "a20257b0ce5c8b58b1df416ba9ed112d9c6ab51d2133fe5a47adf08876ce6273",
+		"private_simulation_state_writes": false,
+		"profile_reset": false,
+		"responsive_native_layouts": [
+			{
+				"layout": {
+					"base": {
+						"active": false,
+						"ephemeral_commander": true,
+						"initialized": false,
+						"map_path": "res://maps/homebase_frontier_exploration.json",
+						"movement_owner": "SimulationRoot",
+						"owns_inventory": false,
+						"owns_roster": false,
+						"owns_transport": false,
+						"read_only": true,
+						"tree_paused": false
+					},
+					"base_active": false,
+					"cached_row_count": 24,
+					"columns": {
+						"equipment": {
+							"rect": "[P: (866.52, 84.0), S: (397.48, 584.0)]",
+							"visible": true
+						},
+						"flight": {
+							"rect": "[P: (1452.02, 84.0), S: (451.98, 944.0)]",
+							"visible": false
+						},
+						"roster": {
+							"rect": "[P: (194.0, 84.0), S: (334.72, 584.0)]",
+							"visible": true
+						},
+						"squad": {
+							"rect": "[P: (540.72, 84.0), S: (313.8, 584.0)]",
+							"visible": true
+						}
+					},
+					"focused_portrait_rect": "[P: (886.52, 144.0), S: (176.0, 176.0)]",
+					"focused_portrait_stretch_mode": 5,
+					"loadout_selector_count": 3,
+					"mission_navigation_rect": "[P: (16.0, 312.0), S: (166.0, 66.0)]",
+					"mission_navigation_visible": true,
+					"mode": "squad",
+					"poll_seconds": 0.25,
+					"presenter": "homebase_operations_20261105",
+					"refresh_count": 12,
+					"roster_minimum_assign_width": 40.0,
+					"roster_minimum_name_width": 116.0,
+					"roster_minimum_portrait_width": 96.0,
+					"roster_minimum_row_width": 286.0,
+					"roster_role_status_single_line": true,
+					"row_create_count": 24,
+					"ship_preview_path": "res://Assets/curated/ui_native_r4/cutlass_ref03_preview.png",
+					"team_slot_count": 4,
+					"visible": true,
+					"workspace_size": "(1070.0, 584.0)"
+				},
+				"logical": "(1280, 720)",
+				"mode": 3,
+				"physical": "(2560, 1440)"
+			},
+			{
+				"layout": {
+					"base": {
+						"active": false,
+						"ephemeral_commander": true,
+						"initialized": false,
+						"map_path": "res://maps/homebase_frontier_exploration.json",
+						"movement_owner": "SimulationRoot",
+						"owns_inventory": false,
+						"owns_roster": false,
+						"owns_transport": false,
+						"read_only": true,
+						"tree_paused": false
+					},
+					"base_active": false,
+					"cached_row_count": 24,
+					"columns": {
+						"equipment": {
+							"rect": "[P: (854.38, 84.0), S: (352.04, 764.0)]",
+							"visible": true
+						},
+						"flight": {
+							"rect": "[P: (1218.42, 84.0), S: (365.58, 764.0)]",
+							"visible": true
+						},
+						"roster": {
+							"rect": "[P: (194.0, 84.0), S: (324.96, 764.0)]",
+							"visible": true
+						},
+						"squad": {
+							"rect": "[P: (530.96, 84.0), S: (311.42, 764.0)]",
+							"visible": true
+						}
+					},
+					"focused_portrait_rect": "[P: (874.38, 144.0), S: (176.0, 176.0)]",
+					"focused_portrait_stretch_mode": 5,
+					"loadout_selector_count": 3,
+					"mission_navigation_rect": "[P: (16.0, 312.0), S: (166.0, 66.0)]",
+					"mission_navigation_visible": true,
+					"mode": "squad",
+					"poll_seconds": 0.25,
+					"presenter": "homebase_operations_20261105",
+					"refresh_count": 17,
+					"roster_minimum_assign_width": 40.0,
+					"roster_minimum_name_width": 106.0,
+					"roster_minimum_portrait_width": 96.0,
+					"roster_minimum_row_width": 276.0,
+					"roster_role_status_single_line": true,
+					"row_create_count": 24,
+					"ship_preview_path": "res://Assets/curated/ui_native_r4/cutlass_ref03_preview.png",
+					"team_slot_count": 4,
+					"visible": true,
+					"workspace_size": "(1390.0, 764.0)"
+				},
+				"logical": "(1600, 900)",
+				"mode": 3,
+				"physical": "(2560, 1440)"
+			},
+			{
+				"layout": {
+					"base": {
+						"active": false,
+						"ephemeral_commander": true,
+						"initialized": false,
+						"map_path": "res://maps/homebase_frontier_exploration.json",
+						"movement_owner": "SimulationRoot",
+						"owns_inventory": false,
+						"owns_roster": false,
+						"owns_transport": false,
+						"read_only": true,
+						"tree_paused": false
+					},
+					"base_active": false,
+					"cached_row_count": 24,
+					"columns": {
+						"equipment": {
+							"rect": "[P: (1004.78, 84.0), S: (435.24, 850.0)]",
+							"visible": true
+						},
+						"flight": {
+							"rect": "[P: (1452.02, 84.0), S: (451.98, 944.0)]",
+							"visible": true
+						},
+						"roster": {
+							"rect": "[P: (194.0, 84.0), S: (401.76, 944.0)]",
+							"visible": true
+						},
+						"squad": {
+							"rect": "[P: (607.76, 84.0), S: (385.02, 850.0)]",
+							"visible": true
+						}
+					},
+					"focused_portrait_rect": "[P: (1024.78, 144.0), S: (176.0, 176.0)]",
+					"focused_portrait_stretch_mode": 5,
+					"loadout_selector_count": 3,
+					"mission_navigation_rect": "[P: (16.0, 312.0), S: (166.0, 66.0)]",
+					"mission_navigation_visible": true,
+					"mode": "squad",
+					"poll_seconds": 0.25,
+					"presenter": "homebase_operations_20261105",
+					"refresh_count": 17,
+					"roster_minimum_assign_width": 40.0,
+					"roster_minimum_name_width": 183.0,
+					"roster_minimum_portrait_width": 96.0,
+					"roster_minimum_row_width": 353.0,
+					"roster_role_status_single_line": true,
+					"row_create_count": 24,
+					"ship_preview_path": "res://Assets/curated/ui_native_r4/cutlass_ref03_preview.png",
+					"team_slot_count": 4,
+					"visible": true,
+					"workspace_size": "(1710.0, 944.0)"
+				},
+				"logical": "(1920, 1080)",
+				"mode": 3,
+				"physical": "(2560, 1440)"
+			}
+		],
+		"synthetic_fixture": false,
+		"time_acceleration": false,
+		"ui_test_user_data_dir": "C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2-03f3467102004a26b68b5bb6eb4894b9/SternenBuergerchen_UI_Zielbild_Normal_QA"
+	},
+	"failed": 0,
+	"passed": 19,
+	"renderer": {
+		"display": "Windows",
+		"driver": "vulkan",
+		"method": "forward_plus"
+	},
+	"schema": "sternenbuergerchen.frontier_main_startup.v1",
+	"scope": "Actual normal scene/UI-command route with real timer-driven transport/deployment. Bounded smoke, no complete campaign/combat/performance/art acceptance.",
+	"stages": []
+}

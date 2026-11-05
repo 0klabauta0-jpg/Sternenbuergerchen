@@ -5335,7 +5335,10 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 	if tactical_controller == null or not tactical_controller.has_method("refresh_fireteam_security_state") or not tactical_controller.has_method("get_fireteam_security_snapshot"):
 		_overwatch_controller.call("reset_all")
 		return []
-	tactical_controller.call("refresh_fireteam_security_state")
+	if tactical_controller.has_method("refresh_fireteam_security_state_for_combat"):
+		tactical_controller.call("refresh_fireteam_security_state_for_combat")
+	else:
+		tactical_controller.call("refresh_fireteam_security_state")
 	var friendly_units_by_fireteam: Dictionary = {}
 	for friendly in _get_friendly_combat_units():
 		if friendly == null or not friendly.has_method("get_fireteam_id"):

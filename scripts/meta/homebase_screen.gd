@@ -3,6 +3,8 @@ extends Control
 
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
+const OPERATIONS_PRESENTER_SCRIPT: GDScript = preload("res://scripts/meta/homebase_operations_presenter.gd")
+const PORTRAIT_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
@@ -148,6 +150,9 @@ var _personnel_events: Array = []
 var _last_mission_result_summary: Dictionary = {}
 var _post_mission_skill_delta_summary: Dictionary = {}
 var _post_mission_skill_delta_by_unit_id: Dictionary = {}
+var _operations_mode: String = "squad"
+var _operations_presenter: Control
+var _operations_return_button: Button
 
 
 func _ready() -> void:
@@ -209,6 +214,8 @@ func _ready() -> void:
 
 	_rebuild_profiles()
 	_rebuild_ui()
+	_ensure_operations_presenter()
+	_sync_operations_visibility()
 
 
 func _process(delta: float) -> void:
@@ -1917,6 +1924,9 @@ func _rebuild_ui() -> void:
 	_apply_mission_brief_contrast_policy()
 	_apply_contextual_help_ids()
 	call_deferred("_enforce_drop_light_fixed_layout")
+	if _operations_presenter != null:
+		_operations_presenter.call("refresh")
+		_sync_operations_visibility()
 
 
 func _apply_contextual_help_ids() -> void:
@@ -1981,6 +1991,7 @@ func _enforce_drop_light_fixed_layout() -> void:
 	_disable_legacy_homebase_window("Panel/Margin/VBox/ContentRow/InfoPanel", "homebase_legacy_character_sheet_window_disabled")
 	_apply_character_popup_rect()
 	_apply_r4_preparation_visuals(layout)
+	_sync_operations_visibility()
 
 
 func _apply_r4_preparation_visuals(layout: Dictionary) -> void:
@@ -6768,6 +6779,21 @@ func _assign_unit_to_fireteam(unit_id: String, fireteam_id: String) -> void:
 		return
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
 	if unit_index < _selected_fireteam_ids.size():
+		var previous_team_id: String = _normalize_fireteam_id(String(_selected_fireteam_ids[unit_index]))
+		if not previous_team_id.is_empty() and previous_team_id != normalized_fireteam_id:
+			# Empty-team fallback reads this existing owner field. Remove the old
+			# membership before sanitizing, including the last member's departure.
+			for definition_index in range(_fireteam_definitions.size()):
+				var definition: Dictionary = Dictionary(_fireteam_definitions[definition_index])
+				if _normalize_fireteam_id(String(definition.get("id", ""))) != previous_team_id:
+					continue
+				var previous_members: PackedStringArray = PackedStringArray(Array(definition.get("member_unit_ids", [])))
+				var member_index: int = previous_members.find(normalized_unit_id)
+				if member_index >= 0:
+					previous_members.remove_at(member_index)
+				definition["member_unit_ids"] = previous_members
+				_fireteam_definitions[definition_index] = definition
+				break
 		_selected_fireteam_ids[unit_index] = normalized_fireteam_id
 	_sanitize_homebase_direct_staging_state()
 
@@ -7218,7 +7244,7 @@ func _get_profile_portrait_path(unit_id: String) -> String:
 	var profile = _profiles_by_id.get(unit_id, null)
 	if profile == null:
 		return ""
-	return String(profile.portrait_path)
+	return PORTRAIT_CATALOG_SCRIPT.resolve_path(String(profile.portrait_id), String(profile.portrait_path))
 
 
 func _build_homebase_fireteam_summary_text() -> String:
@@ -7378,6 +7404,9 @@ func _refresh_homebase_direct_boarding_ui() -> void:
 	_homebase_direct_boarding_refresh_deferred_for_drag = false
 	_homebase_direct_boarding_force_refresh = false
 	_update_mission_info()
+	if _operations_presenter != null and _operations_mode != "legacy":
+		_operations_presenter.call("refresh")
+		return
 	_update_aircraft_panel()
 	_update_homebase_flightdeck_staging_panel()
 
@@ -8920,11 +8949,292 @@ func _get_team_capacity() -> int:
 
 
 func _load_portrait_texture(portrait_path: String) -> Texture2D:
-	if portrait_path.is_empty():
-		return null
+	return PORTRAIT_CATALOG_SCRIPT.load_texture("", portrait_path) if not portrait_path.is_empty() else null
 
-	var resource: Resource = load(portrait_path)
-	return resource as Texture2D
+
+func _ensure_operations_presenter() -> void:
+	if _operations_presenter != null:
+		return
+	_operations_presenter = OPERATIONS_PRESENTER_SCRIPT.new()
+	_operations_presenter.name = "OperationsRoot"
+	add_child(_operations_presenter)
+	_operations_presenter.call("configure", self)
+	var popup := get_node_or_null("CharacterSheetPopup") as Control
+	if popup != null:
+		popup.z_index = 100
+	_operations_return_button = Button.new()
+	_operations_return_button.name = "OperationsReturnButton"
+	_operations_return_button.text = "‹ Zur Truppansicht"
+	_operations_return_button.position = Vector2(18, 14)
+	_operations_return_button.custom_minimum_size = Vector2(208, 44)
+	_operations_return_button.add_theme_font_size_override("font_size", 18)
+	_operations_return_button.z_index = 200
+	add_child(_operations_return_button)
+	_operations_return_button.pressed.connect(func(): request_operation("navigate", {"mode": "squad"}))
+	visibility_changed.connect(_sync_operations_visibility)
+
+
+func _sync_operations_visibility() -> void:
+	if _operations_presenter == null:
+		return
+	var legacy: bool = _operations_mode == "legacy"
+	var panel := get_node_or_null("Panel") as Control
+	if panel != null:
+		panel.visible = legacy
+	var old_header := get_node_or_null("DropLightTopbar") as Control
+	if old_header != null:
+		old_header.visible = legacy
+	_operations_presenter.visible = not legacy
+	if _operations_return_button != null:
+		_operations_return_button.visible = legacy
+
+
+func _operations_payload_craft_for_team(fireteam_id: String) -> String:
+	if fireteam_id.is_empty():
+		return ""
+	for craft_id_variant in _get_homebase_direct_payload_craft_keys():
+		var craft_id: String = String(craft_id_variant)
+		if _get_homebase_direct_payload_fireteam_ids_for_craft_raw(craft_id).has(fireteam_id):
+			return craft_id
+	return ""
+
+
+func _operations_craft_busy(craft_id: String) -> bool:
+	if craft_id.is_empty():
+		return true
+	return _is_craft_in_transit(craft_id) or _has_active_pilot_transfer_for_craft(craft_id) or _has_active_cargo_load_for_craft(craft_id) or _get_aircraft_location(craft_id) != "homebase"
+
+
+func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
+	var id: String = String(unit_data.get("unit_id", "")).strip_edges()
+	var profile = _profiles_by_id.get(id, null)
+	var fireteam_id: String = _get_fireteam_id_for_unit(id)
+	var payload_craft: String = _operations_payload_craft_for_team(fireteam_id)
+	var pilot_craft: String = _find_assigned_craft_for_unit(id)
+	var in_transit: bool = not _find_transfer_entry_for_unit(id).is_empty()
+	var busy: bool = in_transit or not pilot_craft.is_empty() or not payload_craft.is_empty()
+	var role_id: String = String(unit_data.get("roster_role_category", unit_data.get("role_id", "")))
+	var role_names: Dictionary = {"leader": "Truppführung", "medic": "Sanität", "engineer": "Technik", "pilot": "Pilot", "shooter": "Schütze", "heavy_support": "Unterstützung", "scout_sniper": "Aufklärung"}
+	var role: String = String(role_names.get(role_id, String(profile.role_name) if profile != null else String(unit_data.get("role_name", "Operator"))))
+	var status: String = "Bereit"
+	if in_transit:
+		status = "Unterwegs"
+	elif not payload_craft.is_empty():
+		status = "An Bord" if _are_homebase_payload_fireteams_boarded(PackedStringArray([fireteam_id])) else "Boarding"
+	elif not pilot_craft.is_empty():
+		status = "Pilot zugewiesen"
+	elif not fireteam_id.is_empty():
+		status = "Im Trupp · %s" % _get_fireteam_label(fireteam_id)
+	var focused_members: PackedStringArray = _get_member_unit_ids_for_fireteam(_focused_fireteam_id)
+	var target_busy: bool = not _operations_payload_craft_for_team(_focused_fireteam_id).is_empty()
+	var capacity_available: bool = _selected_unit_ids.has(id) or _selected_unit_ids.size() < _get_team_capacity()
+	return {"id": id, "name": _build_display_name(id), "role": role, "status": status,
+		"portrait_id": String(profile.portrait_id) if profile != null else String(unit_data.get("portrait_id", "")),
+		"portrait_path": String(profile.portrait_path) if profile != null else String(unit_data.get("portrait_path", "")),
+		"fireteam_id": fireteam_id, "busy": busy, "in_transit": in_transit,
+		"can_assign": not busy and not target_busy and fireteam_id != _focused_fireteam_id and focused_members.size() < 4 and capacity_available,
+		"can_remove": not busy and not fireteam_id.is_empty(),
+		"can_edit": not busy and not fireteam_id.is_empty(), "loadout": _get_member_loadout(id)}
+
+
+func get_operations_snapshot() -> Dictionary:
+	# Read-only projection: never sanitize, seed, advance timers or change owners.
+	var roster: Array = []
+	var by_id: Dictionary = {}
+	for unit_variant in _available_units:
+		var unit: Dictionary = _operations_unit_entry(Dictionary(unit_variant))
+		roster.append(unit)
+		by_id[String(unit.get("id", ""))] = unit
+	var fireteams: Array = []
+	var focused_team: Dictionary = {}
+	for definition_variant in _fireteam_definitions:
+		var definition: Dictionary = Dictionary(definition_variant)
+		var id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+		var members: Array = []
+		for unit_id in _get_member_unit_ids_for_fireteam(id):
+			if by_id.has(String(unit_id)):
+				members.append(Dictionary(by_id[String(unit_id)]).duplicate(true))
+		var team: Dictionary = {"id": id, "label": _get_fireteam_label(id), "members": members,
+			"busy": not _operations_payload_craft_for_team(id).is_empty(), "lead_unit_id": String(definition.get("lead_unit_id", ""))}
+		fireteams.append(team)
+		if id == _focused_fireteam_id:
+			focused_team = team
+	var crafts: Array = []
+	var selected_craft: Dictionary = {}
+	for craft_variant in _aircraft_manager.get_aircraft_definitions():
+		var definition: Dictionary = Dictionary(craft_variant)
+		var id: String = String(definition.get("craft_id", ""))
+		var pilot_id: String = _get_assigned_pilot_id(id)
+		var busy: bool = _operations_craft_busy(id)
+		var payload_teams: PackedStringArray = _get_homebase_direct_payload_fireteam_ids_for_craft_raw(id)
+		var payload_ids: PackedStringArray = _build_unit_ids_for_fireteams(payload_teams)
+		var gate: Dictionary = _build_homebase_direct_staging_craft_gate_for_craft(id)
+		var boarded: bool = not payload_teams.is_empty() and _are_homebase_payload_fireteams_boarded(payload_teams)
+		var can_start: bool = not busy and not pilot_id.is_empty() and _can_send_craft(definition, id) and _has_homebase_direct_launch_payload_for_craft(id)
+		var pilots: Array = [{"id": "", "label": "Pilot auswählen"}]
+		for unit_variant in roster:
+			var unit: Dictionary = Dictionary(unit_variant)
+			if String(unit.id) == pilot_id or (not bool(unit.busy) and String(unit.fireteam_id).is_empty() and not _selected_unit_ids.has(String(unit.id))):
+				pilots.append({"id": String(unit.id), "label": String(unit.name)})
+		var progress: float = _get_homebase_direct_boarding_progress_ratio_for_craft(id) * 100.0
+		var status: String = "Bereit" if can_start else "Vorbereitung"
+		var next_step: String = "Boarding starten"
+		if busy:
+			status = "Unterwegs" if _is_craft_in_transit(id) else "Im Einsatz"
+			var transfer: Dictionary = _find_transfer_entry_for_craft(id)
+			progress = _build_transfer_progress_value(transfer) if not transfer.is_empty() else 0.0
+			next_step = "Rückkehr abwarten"
+		elif pilot_id.is_empty():
+			status = "Pilot fehlt"
+			next_step = "Pilot auswählen"
+		elif not payload_teams.is_empty() and not boarded:
+			status = "Boarding läuft"
+			next_step = "Boarding abwarten"
+		elif can_start:
+			next_step = "Einsatz starten"
+		var craft: Dictionary = {"id": id, "name": String(definition.get("display_name", "Dropship")),
+			"texture_path": String(definition.get("texture_path", "")), "pilot_id": pilot_id,
+			"pilot_name": _build_display_name(pilot_id) if not pilot_id.is_empty() else "", "pilot_options": pilots,
+			"busy": busy, "status": status, "progress": progress, "next_step": next_step,
+			"has_payload": not payload_teams.is_empty(), "payload_fireteam_ids": Array(payload_teams),
+			"passenger_count": payload_ids.size(), "can_start": can_start,
+			"can_board": not busy and bool(gate.get("can_stage", false)) and not Array(focused_team.get("members", [])).is_empty() and not bool(focused_team.get("busy", false)),
+			"can_unboard": not busy and payload_teams.has(_focused_fireteam_id)}
+		var preview: Texture2D = _get_aircraft_texture(definition)
+		craft["texture_path"] = preview.resource_path if preview != null else ""
+		craft["name"] = FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_display_name(definition)
+		crafts.append(craft)
+		if id == _get_selected_aircraft_id():
+			selected_craft = craft
+	if selected_craft.is_empty() and not crafts.is_empty():
+		selected_craft = Dictionary(crafts[0])
+	var missions: Array = []
+	for mission_variant in _mission_catalog:
+		var mission: Dictionary = Dictionary(mission_variant)
+		missions.append({"id": String(mission.get("id", mission.get("mission_id", ""))), "label": String(mission.get("display_name", mission.get("mission_name", mission.get("name", "Einsatz"))))})
+	return {"mode": _operations_mode, "roster": roster, "fireteams": fireteams,
+		"focused_fireteam_id": _focused_fireteam_id, "focused_fireteam": focused_team,
+		"focused_unit": Dictionary(by_id.get(_focused_unit_id, {})).duplicate(true),
+		"crafts": crafts, "selected_craft": selected_craft, "missions": missions,
+		"mission_id": _selected_mission_id, "mission_name": _selected_mission_name,
+		"loadout_options": {"armor": LOADOUT_CONTRACT_SCRIPT.get_compact_armor_options(), "weapon_1": LOADOUT_CONTRACT_SCRIPT.get_homebase_primary_weapon_options(), "weapon_2": LOADOUT_CONTRACT_SCRIPT.get_homebase_secondary_weapon_options()},
+		"presentation": _operations_presenter.call("get_presentation_snapshot") if _operations_presenter != null else {}}
+
+
+func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	var unit_id: String = String(payload.get("unit_id", _focused_unit_id)).strip_edges()
+	var team_id: String = _normalize_fireteam_id(String(payload.get("fireteam_id", _focused_fireteam_id)))
+	var craft_id: String = String(payload.get("craft_id", _get_selected_aircraft_id())).strip_edges()
+	match operation:
+		"navigate":
+			var mode: String = String(payload.get("mode", "squad"))
+			if not ["base", "personnel", "squad", "mission"].has(mode):
+				return _operations_rejected("invalid_mode", "Ansicht nicht verfügbar")
+			_operations_mode = mode
+			_sync_operations_visibility()
+		"legacy":
+			_operations_mode = "legacy"
+			_rebuild_ui()
+			_sync_operations_visibility()
+		"focus_unit", "details":
+			if not _profiles_by_id.has(unit_id):
+				return _operations_rejected("unknown_unit", "Person nicht verfügbar")
+			if operation == "details":
+				_on_compact_card_open_requested(unit_id, _profiles_by_id[unit_id], "operations")
+			else:
+				_on_compact_card_pressed(unit_id, _profiles_by_id[unit_id], "operations")
+		"focus_fireteam":
+			if _get_fireteam_definition(team_id).is_empty():
+				return _operations_rejected("unknown_team", "Trupp nicht verfügbar")
+			_on_homebase_fireteam_card_pressed(team_id)
+		"add_fireteam":
+			_on_homebase_add_fireteam_pressed()
+		"assign", "remove", "loadout":
+			if not _profiles_by_id.has(unit_id):
+				return _operations_rejected("unknown_unit", "Person nicht verfügbar")
+			var unit: Dictionary = _operations_unit_entry(_get_available_unit_data(unit_id))
+			if bool(unit.get("busy", true)):
+				return _operations_rejected("unit_busy", "Kraft ist an Bord, zugewiesen oder unterwegs")
+			_focused_unit_id = unit_id
+			if operation == "assign":
+				if _get_fireteam_definition(team_id).is_empty() or not _operations_payload_craft_for_team(team_id).is_empty():
+					return _operations_rejected("team_busy", "Trupp ist nicht für die Vorbereitung verfügbar")
+				if _get_member_unit_ids_for_fireteam(team_id).size() >= 4 and String(unit.get("fireteam_id", "")) != team_id:
+					return _operations_rejected("team_full", "Vier Truppplätze sind belegt")
+				_on_homebase_fireteam_card_pressed(team_id)
+				_on_homebase_assign_focused_unit_pressed()
+				if _get_fireteam_id_for_unit(unit_id) != team_id:
+					return _operations_rejected("assignment_blocked", "Kein freier Einsatzplatz")
+			elif operation == "remove":
+				if String(unit.get("fireteam_id", "")).is_empty():
+					return _operations_rejected("not_assigned", "Person ist keinem Trupp zugewiesen")
+				_on_homebase_clear_focused_unit_pressed()
+				_on_remove_button_pressed(unit_id)
+			else:
+				if not bool(unit.get("can_edit", false)):
+					return _operations_rejected("not_assigned", "Person zuerst einem Trupp zuweisen")
+				var key: String = String(payload.get("key", ""))
+				var value: String = String(payload.get("value", ""))
+				var options: Dictionary = {"armor": LOADOUT_CONTRACT_SCRIPT.get_compact_armor_options(), "weapon_1": LOADOUT_CONTRACT_SCRIPT.get_homebase_primary_weapon_options(), "weapon_2": LOADOUT_CONTRACT_SCRIPT.get_homebase_secondary_weapon_options()}
+				var allowed: bool = false
+				for option_variant in Array(options.get(key, [])):
+					if String(Dictionary(option_variant).get("id", "")) == value:
+						allowed = true
+				if not allowed:
+					return _operations_rejected("invalid_equipment", "Ausrüstung nicht verfügbar")
+				_set_homebase_member_loadout_value(unit_id, key, value)
+				_emit_homebase_fireteam_context_changed()
+		"craft":
+			if _get_aircraft_definition_by_id(craft_id).is_empty():
+				return _operations_rejected("unknown_craft", "Schiff nicht verfügbar")
+			_on_shipcard_select_requested(craft_id)
+		"pilot", "board", "unboard", "start":
+			if _get_aircraft_definition_by_id(craft_id).is_empty() or _operations_craft_busy(craft_id):
+				return _operations_rejected("craft_busy", "Schiff ist nicht an der Heimatbasis verfügbar")
+			if operation == "pilot":
+				if unit_id.is_empty():
+					_on_clear_pilot_button_pressed(craft_id)
+				elif not _profiles_by_id.has(unit_id) or _selected_unit_ids.has(unit_id) or not _find_transfer_entry_for_unit(unit_id).is_empty():
+					return _operations_rejected("pilot_busy", "Pilot ist nicht verfügbar")
+				else:
+					var previous: String = _find_assigned_craft_for_unit(unit_id)
+					if not previous.is_empty() and previous != craft_id and _operations_craft_busy(previous):
+						return _operations_rejected("pilot_busy", "Pilot ist unterwegs")
+					_on_aircraft_pilot_drop_panel_unit_dropped(unit_id, craft_id)
+			elif operation == "board":
+				if _get_fireteam_definition(team_id).is_empty() or _get_member_unit_ids_for_fireteam(team_id).is_empty() or not _operations_payload_craft_for_team(team_id).is_empty() or not bool(_build_homebase_direct_staging_craft_gate_for_craft(craft_id).get("can_stage", false)):
+					return _operations_rejected("boarding_blocked", "Trupp und Pilot für Boarding vorbereiten")
+				_on_shipcard_dispatch_target_toggled(true, craft_id)
+				_on_homebase_shipcard_fireteam_dropped(team_id, craft_id)
+			elif operation == "unboard":
+				if not _get_homebase_direct_payload_fireteam_ids_for_craft_raw(craft_id).has(team_id):
+					return _operations_rejected("not_embarked", "Dieser Trupp ist nicht im Schiff")
+				_on_homebase_dropship_fireteam_remove_pressed(team_id, craft_id)
+			else:
+				if _get_assigned_pilot_id(craft_id).is_empty() or not _has_homebase_direct_launch_payload_for_craft(craft_id) or not _can_send_craft(_get_aircraft_definition_by_id(craft_id), craft_id):
+					return _operations_rejected("launch_blocked", "Pilot, Trupp und Boarding prüfen")
+				_on_shipcard_dispatch_target_toggled(true, craft_id)
+				_on_send_pilot_button_pressed(craft_id)
+		"mission":
+			var mission_id: String = String(payload.get("mission_id", ""))
+			var found: bool = false
+			for mission_variant in _mission_catalog:
+				var mission: Dictionary = Dictionary(mission_variant)
+				if String(mission.get("id", mission.get("mission_id", ""))) == mission_id:
+					found = true
+			if not found:
+				return _operations_rejected("unknown_mission", "Einsatz nicht verfügbar")
+			mission_selection_changed.emit(mission_id)
+		_:
+			return _operations_rejected("unknown_operation", "Aktion nicht verfügbar")
+	if _operations_presenter != null:
+		_operations_presenter.call("refresh")
+	_sync_operations_visibility()
+	return {"ok": true, "operation": operation, "message": ""}
+
+
+func _operations_rejected(reason: String, message: String) -> Dictionary:
+	return {"ok": false, "reason": reason, "message": message}
 
 
 func _get_team_drop_panel():

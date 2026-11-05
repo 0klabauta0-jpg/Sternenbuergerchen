@@ -112,6 +112,7 @@ func start_host(port: int = DEFAULT_PORT) -> bool:
 	_prepare_host_network_mode(port)
 	_configure_host_state()
 	_broadcast_snapshot()
+	_ensure_owned_host_network_time(weakref(peer), weakref(multiplayer))
 	return true
 
 
@@ -672,7 +673,39 @@ func _clear_multiplayer_peer() -> void:
 	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
 	if peer == null:
 		return
+	_stop_owned_network_time()
 	multiplayer.multiplayer_peer = null
+
+
+func _stop_owned_network_time() -> void:
+	# A local client close need not emit server_disconnected, which Netfox's
+	# automatic client-stop hook normally observes. Stop its public owner API
+	# while the peer is still valid, so the pending sync loop drains quietly.
+	var network_time := get_node_or_null("/root/NetworkTime")
+	if network_time == null or network_time.multiplayer != multiplayer:
+		return
+	network_time.call("stop")
+
+
+func _ensure_owned_host_network_time(peer_reference: WeakRef, api_reference: WeakRef) -> void:
+	# NetworkEvents observes server-state edges, so a same-frame host replacement
+	# can hide the stop/start edge. Let its normal start run before repairing it.
+	var tree: SceneTree = get_tree()
+	await tree.process_frame
+	await tree.process_frame
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
+	var api: MultiplayerAPI = api_reference.get_ref() as MultiplayerAPI
+	var peer: MultiplayerPeer = peer_reference.get_ref() as MultiplayerPeer
+	if api == null or api != multiplayer or peer == null or api.multiplayer_peer != peer:
+		return
+	if peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED or not _is_authority_session():
+		return
+	var network_time := get_node_or_null("/root/NetworkTime")
+	if network_time == null or network_time.multiplayer != api:
+		return
+	if not bool(network_time.call("is_initial_sync_done")):
+		network_time.call("start")
 
 
 func _upsert_peer(peer_id: int, is_host_peer: bool) -> void:

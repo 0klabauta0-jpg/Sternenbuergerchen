@@ -1,0 +1,1092 @@
+{
+  "schema": "sternenbuergerchen.final_motion_90.analysis.v1",
+  "source_files": {
+    "final_motion.json": {
+      "path": "output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_motion.json",
+      "sha256": "a7b9c778ab04603b30c4cd03832e93c39768ee1802114546bbe2bf36409e806d"
+    },
+    "final_performance.json": {
+      "path": "output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_performance.json",
+      "sha256": "073cefab57c1c868c05bdde45661359f1b9db8f395ef4e173c78737cb8dc4a09"
+    },
+    "final.json": {
+      "path": "output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final.json",
+      "sha256": "5023d98da2574e9eb8034a949fcd3df95122692b375cc79832ce0dc71392290e"
+    }
+  },
+  "normal_route": {
+    "passed": 61,
+    "failed": 0,
+    "scope": "Actual normal scene/UI-command route with real timer-driven transport/deployment. Bounded smoke, no complete campaign/combat/performance/art acceptance.",
+    "measured_scope": {
+      "forced_arrival": false,
+      "forced_unloading": false,
+      "gpu_frame_time": "unavailable",
+      "private_simulation_state_writes": false,
+      "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+      "synthetic_fixture": false,
+      "time_acceleration": false,
+      "warmup_seconds": 3
+    }
+  },
+  "comparison_boundary": "Current physical display and renderbuffer 2560x1440. Prior 3440x1440 captures remain historical evidence; no direct ultrawide before/after performance pair or general FPS acceptance.",
+  "display": {
+    "all_samples_match": true,
+    "sample_count": 10,
+    "sample": {
+      "content_scale_size": "(2560, 1440)",
+      "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+      "display": "Windows",
+      "display_server_window_mode": 3,
+      "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+      "max_physics_steps_per_frame": 8,
+      "physics_ticks_per_second": 60,
+      "renderer": "forward_plus",
+      "rendering_driver": "vulkan",
+      "root_size": "(2560, 1440)",
+      "screen_index": 0,
+      "screen_refresh_rate": 74.9680023193359,
+      "screen_size": "(2560, 1440)",
+      "screen_usable_rect": "[P: (0, 0), S: (2560, 1410)]",
+      "time_scale": 1.0,
+      "viewport_size": "(2560.0, 1440.0)",
+      "vsync_mode": 1,
+      "window_has_focus": true,
+      "window_mode": 3,
+      "window_size": "(2560, 1440)"
+    },
+    "engine": {
+      "build": "official",
+      "hash": "71f334935c000924d403448e698df4441130df18",
+      "hex": 263682,
+      "major": 4,
+      "minor": 6,
+      "patch": 2,
+      "status": "stable",
+      "string": "4.6.2-stable (official)",
+      "timestamp": 0
+    }
+  },
+  "performance": {
+    "duration_usec": 90036748,
+    "frames": 3869,
+    "frametime_usec": {
+      "count": 3869,
+      "max": 391848,
+      "mean": 23268.1964331869,
+      "p50": 17308,
+      "p90": 43021,
+      "p95": 54207,
+      "p99": 111590
+    },
+    "hitch_counts": {
+      "over_100ms": 56,
+      "over_250ms": 7,
+      "over_33ms": 981,
+      "over_50ms": 236
+    },
+    "probe_usec": {
+      "count": 3869,
+      "max": 327,
+      "mean": 67.157146549496,
+      "p50": 64,
+      "p90": 82,
+      "p95": 90,
+      "p99": 112
+    },
+    "simulation_seconds_per_wall_second": 0.98422775849997,
+    "simulation_ticks": 5317
+  },
+  "motion": {
+    "raw_sample_count": 340,
+    "profile_sample_count": 329,
+    "warmup_sample_count": 11,
+    "sample_policy": "at most one read per process frame, at least 250000 real microseconds between samples",
+    "first_sample_sec": 0.071209,
+    "last_sample_sec": 89.849676,
+    "actual_sample_interval_usec": {
+      "count": 328,
+      "mean": 273714.83841463417,
+      "max": 561230,
+      "p50": 264347,
+      "p90": 292720,
+      "p95": 314675,
+      "p99": 503305
+    },
+    "all_11_registered_actors_present_and_fit_at_each_profile_sample": true,
+    "friendly_ids": [
+      "player_sternenbuergerchen_01",
+      "player_sternenbuergerchen_02",
+      "player_sternenbuergerchen_03"
+    ],
+    "units": {
+      "player_sternenbuergerchen_01": {
+        "present_and_fit_in_all_profile_samples": true,
+        "last_position_change_sec": 89.849676,
+        "final_stationary_tail_sec": 0.0,
+        "last_position": {
+          "x": -239.793746948242,
+          "y": 595.161865234375
+        },
+        "last_command": {
+          "command_type": "move_to_position",
+          "source_task_type": null,
+          "command_token": "ft1_8:1:move:0:r0:player_sternenbuergerchen_01",
+          "target_position": "(-324.7183, 692.033)"
+        },
+        "windows": {
+          "0_30": {
+            "sample_count": 109,
+            "first_sample_sec": 0.071209,
+            "last_sample_sec": 29.774353,
+            "net_projected_world_distance": 84.77047696036982,
+            "sampled_projected_world_path": 532.3018404743136,
+            "changed_segments": 108
+          },
+          "30_60": {
+            "sample_count": 111,
+            "first_sample_sec": 30.032384,
+            "last_sample_sec": 59.765048,
+            "net_projected_world_distance": 102.23663071099207,
+            "sampled_projected_world_path": 595.6435119119851,
+            "changed_segments": 91
+          },
+          "60_90": {
+            "sample_count": 109,
+            "first_sample_sec": 60.268353,
+            "last_sample_sec": 89.849676,
+            "net_projected_world_distance": 132.0796386264466,
+            "sampled_projected_world_path": 632.6225930559066,
+            "changed_segments": 93
+          },
+          "35_90": {
+            "sample_count": 201,
+            "first_sample_sec": 35.122718,
+            "last_sample_sec": 89.849676,
+            "net_projected_world_distance": 131.90777081934795,
+            "sampled_projected_world_path": 1125.5326231873526,
+            "changed_segments": 167
+          },
+          "80_90": {
+            "sample_count": 37,
+            "first_sample_sec": 80.198776,
+            "last_sample_sec": 89.849676,
+            "net_projected_world_distance": 91.72468284240529,
+            "sampled_projected_world_path": 189.0399679209862,
+            "changed_segments": 29
+          }
+        },
+        "final_distance_to_current_target_projected_world": 128.82622583084836
+      },
+      "player_sternenbuergerchen_02": {
+        "present_and_fit_in_all_profile_samples": true,
+        "last_position_change_sec": 89.849676,
+        "final_stationary_tail_sec": 0.0,
+        "last_position": {
+          "x": -348.921630859375,
+          "y": 521.69677734375
+        },
+        "last_command": {
+          "command_type": "move_to_position",
+          "source_task_type": null,
+          "command_token": "ft1_8:1:move:0:r0:player_sternenbuergerchen_02",
+          "target_position": "(-350.7476, 570.0392)"
+        },
+        "windows": {
+          "0_30": {
+            "sample_count": 109,
+            "first_sample_sec": 0.071209,
+            "last_sample_sec": 29.774353,
+            "net_projected_world_distance": 26.12501671883507,
+            "sampled_projected_world_path": 569.3778486225058,
+            "changed_segments": 65
+          },
+          "30_60": {
+            "sample_count": 111,
+            "first_sample_sec": 30.032384,
+            "last_sample_sec": 59.765048,
+            "net_projected_world_distance": 23.90788850718687,
+            "sampled_projected_world_path": 513.7324378136602,
+            "changed_segments": 58
+          },
+          "60_90": {
+            "sample_count": 109,
+            "first_sample_sec": 60.268353,
+            "last_sample_sec": 89.849676,
+            "net_projected_world_distance": 186.2384667996928,
+            "sampled_projected_world_path": 685.2670575921691,
+            "changed_segments": 75
+          },
+          "35_90": {
+            "sample_count": 201,
+            "first_sample_sec": 35.122718,
+            "last_sample_sec": 89.849676,
+            "net_projected_world_distance": 186.2384667996928,
+            "sampled_projected_world_path": 1175.0916068985814,
+            "changed_segments": 129
+          },
+          "80_90": {
+            "sample_count": 37,
+            "first_sample_sec": 80.198776,
+            "last_sample_sec": 89.849676,
+            "net_projected_world_distance": 186.2384667996928,
+            "sampled_projected_world_path": 195.94836707492138,
+            "changed_segments": 21
+          }
+        },
+        "final_distance_to_current_target_projected_world": 48.376895224663116
+      },
+      "player_sternenbuergerchen_03": {
+        "present_and_fit_in_all_profile_samples": true,
+        "last_position_change_sec": 87.724222,
+        "final_stationary_tail_sec": 2.125454,
+        "last_position": {
+          "x": -265.759796142578,
+          "y": 540.610107421875
+        },
+        "last_command": {
+          "command_type": "move_to_position",
+          "source_task_type": null,
+          "command_token": "ft1_8:1:move:0:r0:player_sternenbuergerchen_03",
+          "target_position": "(-265.7598, 540.6101)"
+        },
+        "windows": {
+          "0_30": {
+            "sample_count": 109,
+            "first_sample_sec": 0.071209,
+            "last_sample_sec": 29.774353,
+            "net_projected_world_distance": 1.3323911281405205,
+            "sampled_projected_world_path": 257.3155375976327,
+            "changed_segments": 68
+          },
+          "30_60": {
+            "sample_count": 111,
+            "first_sample_sec": 30.032384,
+            "last_sample_sec": 59.765048,
+            "net_projected_world_distance": 2.3024268622440403,
+            "sampled_projected_world_path": 214.60900846804253,
+            "changed_segments": 26
+          },
+          "60_90": {
+            "sample_count": 109,
+            "first_sample_sec": 60.268353,
+            "last_sample_sec": 89.849676,
+            "net_projected_world_distance": 99.96161206082749,
+            "sampled_projected_world_path": 326.45732962683167,
+            "changed_segments": 39
+          },
+          "35_90": {
+            "sample_count": 201,
+            "first_sample_sec": 35.122718,
+            "last_sample_sec": 89.849676,
+            "net_projected_world_distance": 97.80430031585963,
+            "sampled_projected_world_path": 541.0663380948741,
+            "changed_segments": 65
+          },
+          "80_90": {
+            "sample_count": 37,
+            "first_sample_sec": 80.198776,
+            "last_sample_sec": 89.849676,
+            "net_projected_world_distance": 99.95553601032407,
+            "sampled_projected_world_path": 108.07543452725504,
+            "changed_segments": 13
+          }
+        },
+        "final_distance_to_current_target_projected_world": 8.364444569912953e-06
+      }
+    },
+    "actor_writes": false,
+    "order_writes": false,
+    "time_or_budget_changes": false,
+    "probe_usec": {
+      "count": 329,
+      "mean": 702.1306990881459,
+      "max": 1209,
+      "p50": 699,
+      "p90": 758,
+      "p95": 818,
+      "p99": 1186
+    },
+    "all_probe_usec": {
+      "count": 340,
+      "mean": 704.1117647058824,
+      "max": 1209,
+      "p50": 700,
+      "p90": 766,
+      "p95": 850,
+      "p99": 1186
+    },
+    "group_continues_into_final_sample": true,
+    "third_unit_target_arrival_explains_stationary_tail": true
+  },
+  "orders": {
+    "action_count": 7,
+    "all_move_go_accepted": true,
+    "actions": [
+      {
+        "elapsed_usec": 12034645,
+        "go_accepted": true,
+        "go_usec": 100429,
+        "meta_presentation": {
+          "full_plan_apply_count": 0,
+          "homebase_dirty": true,
+          "read_only": true,
+          "snapshot_serialized": false,
+          "transport_delta_apply_count": 32,
+          "ui_sets_gameplay_truth": false,
+          "unchanged_plan_skip_count": 20
+        },
+        "move_accepted": true,
+        "move_usec": 112062,
+        "target": "(-305.0, 568.0)"
+      },
+      {
+        "elapsed_usec": 24065232,
+        "go_accepted": true,
+        "go_usec": 104299,
+        "meta_presentation": {
+          "full_plan_apply_count": 0,
+          "homebase_dirty": true,
+          "read_only": true,
+          "snapshot_serialized": false,
+          "transport_delta_apply_count": 36,
+          "ui_sets_gameplay_truth": false,
+          "unchanged_plan_skip_count": 24
+        },
+        "move_accepted": true,
+        "move_usec": 111801,
+        "target": "(-234.2563, 437.1281)"
+      },
+      {
+        "elapsed_usec": 36002925,
+        "go_accepted": true,
+        "go_usec": 112459,
+        "meta_presentation": {
+          "full_plan_apply_count": 0,
+          "homebase_dirty": true,
+          "read_only": true,
+          "snapshot_serialized": false,
+          "transport_delta_apply_count": 36,
+          "ui_sets_gameplay_truth": false,
+          "unchanged_plan_skip_count": 28
+        },
+        "move_accepted": true,
+        "move_usec": 148031,
+        "target": "(-305.0, 568.0)"
+      },
+      {
+        "elapsed_usec": 48001342,
+        "go_accepted": true,
+        "go_usec": 152197,
+        "meta_presentation": {
+          "full_plan_apply_count": 0,
+          "homebase_dirty": true,
+          "read_only": true,
+          "snapshot_serialized": false,
+          "transport_delta_apply_count": 36,
+          "ui_sets_gameplay_truth": false,
+          "unchanged_plan_skip_count": 31
+        },
+        "move_accepted": true,
+        "move_usec": 146528,
+        "target": "(-234.2563, 437.1281)"
+      },
+      {
+        "elapsed_usec": 60000134,
+        "go_accepted": true,
+        "go_usec": 115789,
+        "meta_presentation": {
+          "full_plan_apply_count": 0,
+          "homebase_dirty": true,
+          "read_only": true,
+          "snapshot_serialized": false,
+          "transport_delta_apply_count": 36,
+          "ui_sets_gameplay_truth": false,
+          "unchanged_plan_skip_count": 34
+        },
+        "move_accepted": true,
+        "move_usec": 149995,
+        "target": "(-305.0, 568.0)"
+      },
+      {
+        "elapsed_usec": 72003183,
+        "go_accepted": true,
+        "go_usec": 162852,
+        "meta_presentation": {
+          "full_plan_apply_count": 0,
+          "homebase_dirty": true,
+          "read_only": true,
+          "snapshot_serialized": false,
+          "transport_delta_apply_count": 36,
+          "ui_sets_gameplay_truth": false,
+          "unchanged_plan_skip_count": 37
+        },
+        "move_accepted": true,
+        "move_usec": 168225,
+        "target": "(-234.2563, 437.1281)"
+      },
+      {
+        "elapsed_usec": 84003046,
+        "go_accepted": true,
+        "go_usec": 113819,
+        "meta_presentation": {
+          "full_plan_apply_count": 0,
+          "homebase_dirty": true,
+          "read_only": true,
+          "snapshot_serialized": false,
+          "transport_delta_apply_count": 36,
+          "ui_sets_gameplay_truth": false,
+          "unchanged_plan_skip_count": 40
+        },
+        "move_accepted": true,
+        "move_usec": 148215,
+        "target": "(-305.0, 568.0)"
+      }
+    ],
+    "pending_waypoints": {
+      "count": 329,
+      "mean": 0.0060790273556231,
+      "max": 1,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "active_waypoints": {
+      "count": 329,
+      "mean": 0.8936170212765957,
+      "max": 1,
+      "p50": 1,
+      "p90": 1,
+      "p95": 1,
+      "p99": 1
+    },
+    "pending_waypoints_last": 0,
+    "active_waypoints_last": 1
+  },
+  "backlogs": {
+    "frame_command_queue": {
+      "count": 3869,
+      "mean": 2.6986301369863015,
+      "max": 7,
+      "p50": 2,
+      "p90": 6,
+      "p95": 7,
+      "p99": 7
+    },
+    "frame_effect_queue": {
+      "count": 3869,
+      "mean": 0.0,
+      "max": 0,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "frame_nav_pending": {
+      "count": 3869,
+      "mean": 0.0,
+      "max": 0,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "tick_nav_pending": {
+      "count": 5318,
+      "mean": 0.0,
+      "max": 0,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "tick_nav_delayed_max": 0,
+    "motion_nav_pending": {
+      "count": 329,
+      "mean": 0.0,
+      "max": 0,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "fow_pending_age_msec": {
+      "count": 329,
+      "mean": 10.495440729483283,
+      "max": 173,
+      "p50": 0,
+      "p90": 28,
+      "p95": 39,
+      "p99": 105
+    },
+    "fow_revisions": [
+      31,
+      709
+    ],
+    "frame_fow_pending_age_msec": {
+      "max": 173
+    }
+  },
+  "frame_and_tick_probe_usec": {
+    "frame": {
+      "count": 3869,
+      "max": 327,
+      "mean": 67.157146549496,
+      "p50": 64,
+      "p90": 82,
+      "p95": 90,
+      "p99": 112
+    },
+    "tick": {
+      "count": 5318,
+      "mean": 34.615456938698756,
+      "max": 137,
+      "p50": 32,
+      "p90": 46,
+      "p95": 54,
+      "p99": 77
+    }
+  },
+  "top_frames": [
+    {
+      "elapsed_sec": 72.395031,
+      "frame_ms": 391.848,
+      "actions_in_frame": [
+        {
+          "elapsed_usec": 72003183,
+          "move_usec": 168225,
+          "go_usec": 162852,
+          "move_accepted": true,
+          "go_accepted": true
+        }
+      ],
+      "measured_move_go_ms": 331.077,
+      "measured_move_go_fraction": 0.8449118025356771,
+      "terrain_ms": 2.757,
+      "controller_ms": 13.429,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 2734
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1028,
+        "feedback_and_security_usec": 12397,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 12397,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "Measured synchronous Move/GO callbacks occur inside this frame; remaining frame time is not uniquely attributed"
+    },
+    {
+      "elapsed_sec": 48.348601,
+      "frame_ms": 347.259,
+      "actions_in_frame": [
+        {
+          "elapsed_usec": 48001342,
+          "move_usec": 146528,
+          "go_usec": 152197,
+          "move_accepted": true,
+          "go_accepted": true
+        }
+      ],
+      "measured_move_go_ms": 298.725,
+      "measured_move_go_fraction": 0.8602368837092775,
+      "terrain_ms": 3.713,
+      "controller_ms": 0.971,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 3692
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 949,
+        "feedback_and_security_usec": 18,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 18,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "Measured synchronous Move/GO callbacks occur inside this frame; remaining frame time is not uniquely attributed"
+    },
+    {
+      "elapsed_sec": 84.323482,
+      "frame_ms": 320.436,
+      "actions_in_frame": [
+        {
+          "elapsed_usec": 84003046,
+          "move_usec": 148215,
+          "go_usec": 113819,
+          "move_accepted": true,
+          "go_accepted": true
+        }
+      ],
+      "measured_move_go_ms": 262.034,
+      "measured_move_go_fraction": 0.8177420764208766,
+      "terrain_ms": 4.055,
+      "controller_ms": 0.962,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 5,
+        "unit_proxy_sync_usec": 4036
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 945,
+        "feedback_and_security_usec": 15,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 15,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "Measured synchronous Move/GO callbacks occur inside this frame; remaining frame time is not uniquely attributed"
+    },
+    {
+      "elapsed_sec": 60.318266,
+      "frame_ms": 318.132,
+      "actions_in_frame": [
+        {
+          "elapsed_usec": 60000134,
+          "move_usec": 149995,
+          "go_usec": 115789,
+          "move_accepted": true,
+          "go_accepted": true
+        }
+      ],
+      "measured_move_go_ms": 265.784,
+      "measured_move_go_fraction": 0.8354519507625765,
+      "terrain_ms": 5.038,
+      "controller_ms": 0.97,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 5017
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 947,
+        "feedback_and_security_usec": 21,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 21,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "Measured synchronous Move/GO callbacks occur inside this frame; remaining frame time is not uniquely attributed"
+    },
+    {
+      "elapsed_sec": 36.318048,
+      "frame_ms": 315.123,
+      "actions_in_frame": [
+        {
+          "elapsed_usec": 36002925,
+          "move_usec": 148031,
+          "go_usec": 112459,
+          "move_accepted": true,
+          "go_accepted": true
+        }
+      ],
+      "measured_move_go_ms": 260.49,
+      "measured_move_go_fraction": 0.8266296017745451,
+      "terrain_ms": 4.344,
+      "controller_ms": 0.937,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 4324
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 920,
+        "feedback_and_security_usec": 14,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 14,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "Measured synchronous Move/GO callbacks occur inside this frame; remaining frame time is not uniquely attributed"
+    },
+    {
+      "elapsed_sec": 24.347473,
+      "frame_ms": 282.241,
+      "actions_in_frame": [
+        {
+          "elapsed_usec": 24065232,
+          "move_usec": 111801,
+          "go_usec": 104299,
+          "move_accepted": true,
+          "go_accepted": true
+        }
+      ],
+      "measured_move_go_ms": 216.1,
+      "measured_move_go_fraction": 0.7656577180494684,
+      "terrain_ms": 3.359,
+      "controller_ms": 10.602,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 4,
+        "unit_proxy_sync_usec": 3341
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1012,
+        "feedback_and_security_usec": 9587,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 9587,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "Measured synchronous Move/GO callbacks occur inside this frame; remaining frame time is not uniquely attributed"
+    },
+    {
+      "elapsed_sec": 12.300777,
+      "frame_ms": 266.132,
+      "actions_in_frame": [
+        {
+          "elapsed_usec": 12034645,
+          "move_usec": 112062,
+          "go_usec": 100429,
+          "move_accepted": true,
+          "go_accepted": true
+        }
+      ],
+      "measured_move_go_ms": 212.491,
+      "measured_move_go_fraction": 0.7984421264635594,
+      "terrain_ms": 4.881,
+      "controller_ms": 0.991,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 5,
+        "unit_proxy_sync_usec": 4861
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 972,
+        "feedback_and_security_usec": 17,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 17,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "Measured synchronous Move/GO callbacks occur inside this frame; remaining frame time is not uniquely attributed"
+    },
+    {
+      "elapsed_sec": 24.588302,
+      "frame_ms": 240.829,
+      "actions_in_frame": [],
+      "measured_move_go_ms": 0.0,
+      "measured_move_go_fraction": 0.0,
+      "terrain_ms": 3.263,
+      "controller_ms": 147.521,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 1,
+        "resize_subviewport_usec": 5,
+        "unit_proxy_sync_usec": 3243
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 147503,
+        "feedback_and_security_usec": 16,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 16,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "No Move/GO callback begins inside this frame; per-frame scopes are evidence, cached owner snapshots are not added as current-frame costs"
+    },
+    {
+      "elapsed_sec": 45.982459,
+      "frame_ms": 223.602,
+      "actions_in_frame": [],
+      "measured_move_go_ms": 0.0,
+      "measured_move_go_fraction": 0.0,
+      "terrain_ms": 3.741,
+      "controller_ms": 178.923,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 1,
+        "resize_subviewport_usec": 5,
+        "unit_proxy_sync_usec": 3718
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 170545,
+        "feedback_and_security_usec": 8373,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 8373,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "No Move/GO callback begins inside this frame; per-frame scopes are evidence, cached owner snapshots are not added as current-frame costs"
+    },
+    {
+      "elapsed_sec": 34.611205,
+      "frame_ms": 222.607,
+      "actions_in_frame": [],
+      "measured_move_go_ms": 0.0,
+      "measured_move_go_fraction": 0.0,
+      "terrain_ms": 5.416,
+      "controller_ms": 173.675,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 5395
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 173653,
+        "feedback_and_security_usec": 19,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 19,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "No Move/GO callback begins inside this frame; per-frame scopes are evidence, cached owner snapshots are not added as current-frame costs"
+    },
+    {
+      "elapsed_sec": 12.594367,
+      "frame_ms": 218.342,
+      "actions_in_frame": [],
+      "measured_move_go_ms": 0.0,
+      "measured_move_go_fraction": 0.0,
+      "terrain_ms": 4.242,
+      "controller_ms": 136.557,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 8,
+        "unit_proxy_sync_usec": 4218
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 118552,
+        "feedback_and_security_usec": 18,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 18,
+        "ui_refresh_usec": 17984
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "No Move/GO callback begins inside this frame; per-frame scopes are evidence, cached owner snapshots are not added as current-frame costs"
+    },
+    {
+      "elapsed_sec": 69.993249,
+      "frame_ms": 215.687,
+      "actions_in_frame": [],
+      "measured_move_go_ms": 0.0,
+      "measured_move_go_fraction": 0.0,
+      "terrain_ms": 4.952,
+      "controller_ms": 184.092,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 8,
+        "unit_proxy_sync_usec": 4926
+      },
+      "controller_scopes_usec": {
+        "execution_updates_usec": 184069,
+        "feedback_and_security_usec": 20,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 20,
+        "ui_refresh_usec": 0
+      },
+      "nav_pending": 0,
+      "ticks_since_previous_frame": 8,
+      "attribution": "No Move/GO callback begins inside this frame; per-frame scopes are evidence, cached owner snapshots are not added as current-frame costs"
+    }
+  ],
+  "top_navigation_queries": [
+    {
+      "elapsed_usec": 24553352,
+      "candidate_count_estimate": 7,
+      "command_type": "move_to_position",
+      "cover_sum": 0.48,
+      "duration_usec": 6952,
+      "expanded_node_estimate": 7,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(1, 15)",
+      "mean_cover": 0.0685714285714286,
+      "mean_exposure": 0.0,
+      "path_cost": 9.23116438457997,
+      "path_grid_count": 7,
+      "path_length_grid": 7,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "same_component",
+      "tick": 3092,
+      "to_grid": "(0, 10)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 24553352,
+      "candidate_count_estimate": 5,
+      "command_type": "move_to_position",
+      "cover_sum": 0.98,
+      "duration_usec": 6268,
+      "expanded_node_estimate": 5,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(-1, 14)",
+      "mean_cover": 0.196,
+      "mean_exposure": 0.0,
+      "path_cost": 6.5396273283458,
+      "path_grid_count": 5,
+      "path_length_grid": 5,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 3092,
+      "to_grid": "(1, 10)",
+      "unit_id": "player_sternenbuergerchen_02",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 36291210,
+      "candidate_count_estimate": 5,
+      "command_type": "move_to_position",
+      "cover_sum": 1.46,
+      "duration_usec": 5871,
+      "expanded_node_estimate": 5,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(1, 10)",
+      "mean_cover": 0.292,
+      "mean_exposure": 0.0,
+      "path_cost": 5.95459263305664,
+      "path_grid_count": 5,
+      "path_length_grid": 5,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 3784,
+      "to_grid": "(-1, 14)",
+      "unit_id": "player_sternenbuergerchen_02",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 12567404,
+      "candidate_count_estimate": 5,
+      "command_type": "move_to_position",
+      "cover_sum": 1.46,
+      "duration_usec": 5836,
+      "expanded_node_estimate": 5,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(1, 10)",
+      "mean_cover": 0.292,
+      "mean_exposure": 0.0,
+      "path_cost": 5.95459276528301,
+      "path_grid_count": 5,
+      "path_length_grid": 5,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 2385,
+      "to_grid": "(-1, 14)",
+      "unit_id": "player_sternenbuergerchen_02",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 37845546,
+      "candidate_count_estimate": 4,
+      "command_type": "move_to_position",
+      "cover_sum": 0.96,
+      "duration_usec": 5789,
+      "expanded_node_estimate": 4,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(0, 11)",
+      "mean_cover": 0.24,
+      "mean_exposure": 0.0,
+      "path_cost": 4.14659263305664,
+      "path_grid_count": 4,
+      "path_length_grid": 4,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 3884,
+      "to_grid": "(-1, 14)",
+      "unit_id": "player_sternenbuergerchen_02",
+      "unreachable": false
+    }
+  ],
+  "ranked_scope_means_usec": [
+    [
+      "owner.fog_owner.total_usec",
+      6400.797363659861
+    ],
+    [
+      "tick.simulation.total_usec",
+      4368.510154193305
+    ],
+    [
+      "owner.fog_owner.advance_usec",
+      3711.3835616438355
+    ],
+    [
+      "tick.combat.enemy_team_tactics_usec",
+      3515.1382618510156
+    ],
+    [
+      "frame.terrain_scopes_usec.unit_proxy_sync_usec",
+      3147.8705091754973
+    ],
+    [
+      "tick.simulation.tick_signal_emit_usec",
+      3071.8593456186536
+    ],
+    [
+      "tick.combat.total_usec",
+      2878.9217751034225
+    ],
+    [
+      "owner.fog_owner.sync_usec",
+      2688.46446110106
+    ],
+    [
+      "frame.controller_scopes_usec.ui_refresh_usec",
+      2067.072628586198
+    ],
+    [
+      "tick.combat.combat_fire_decision_usec",
+      2009.7928893905191
+    ],
+    [
+      "tick.combat.fire_find_contact_pair_usec",
+      1505.6410835214447
+    ],
+    [
+      "owner.meta_transport.total_usec",
+      1429.862496769191
+    ],
+    [
+      "frame.controller_scopes_usec.hud_heavy_usec",
+      1290.5960196433186
+    ],
+    [
+      "owner.meta_transport.refresh_map_usec",
+      1289.3254070819332
+    ],
+    [
+      "tick.simulation.command_queue_usec",
+      1121.7850695750283
+    ]
+  ],
+  "limitations": [
+    "Motion is sampled at about 4Hz; last position sample precedes end of the 90.037s frame window. Distances are summed sampled projected world-space segments, not an exact path-length or hex physical-distance oracle.",
+    "All-fit statement is from captured states; native timers and commands remain unmodified. Seven accepted GO returns alone are not movement proof; actual sampled positions are evaluated independently.",
+    "Simulation total includes synchronous combat signal subscribers; combat times must not be added to simulation totals. Cached owner snapshots are not repeatedly summed as per-frame work.",
+    "GPU frame timer is unavailable. Largest spike attribution uses directly timed synchronous Move/GO calls and coincident frame intervals; unmeasured residual remains unassigned.",
+    "Earlier late stationary frames remain a pre-fix diagnostic, not a high-FPS gameplay comparison or a release claim."
+  ],
+  "source_core_binding": {
+    "sha256_verified_during_analysis": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+    "scope": "The selected per-run source list omits SimulationRoot. This is the current read-only source fingerprint; Root owns the final source-freeze/run binding."
+  }
+}

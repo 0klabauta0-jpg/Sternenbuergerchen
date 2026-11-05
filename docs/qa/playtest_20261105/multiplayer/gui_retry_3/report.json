@@ -1,0 +1,569 @@
+{
+  "schema": "sternenbuergerchen.source_multiplayer_pair.v1",
+  "run_id": "20261105T083903Z-eaee4346",
+  "mode": "drop",
+  "gate": "fail",
+  "uses_release_exe": false,
+  "headless": false,
+  "fullscreen_requested": true,
+  "native_gui_engine": true,
+  "rendering_method_requested": "forward_plus",
+  "rendering_driver_requested": "vulkan",
+  "resolution_requested": "3440x1440",
+  "screen_requested": 0,
+  "source_project": "C:\\dev\\SternenBuergerchen",
+  "output": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346",
+  "engine": "C:\\Users\\bjoer\\AppData\\Local\\Programs\\Godot\\Godot_v4.6.2-stable_win64.exe",
+  "harness_sha256": "a01c63be1e8979f8270efc76c1d244c0609ac889829848d1d6b2a82840876f4b",
+  "overlay_helper_sha256": "0c7d37139826583ca304535dbcc75cc281ac99b1bb3ee71847e30f81eab24f2f",
+  "maximum_owned_runtime_seconds": 240.0,
+  "processes": {
+    "host": {
+      "pid": 41888,
+      "argv": [
+        "C:\\Users\\bjoer\\AppData\\Local\\Programs\\Godot\\Godot_v4.6.2-stable_win64.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\20261105T083903Z-eaee4346-host\\project",
+        "--fullscreen",
+        "--resolution",
+        "3440x1440",
+        "--screen",
+        "0",
+        "--rendering-method",
+        "forward_plus",
+        "--rendering-driver",
+        "vulkan",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\host.log",
+        "--",
+        "--release-multiplayer-host",
+        "--release-multiplayer-port=58175",
+        "--release-multiplayer-trace=C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\host_trace.json",
+        "--qa-mp-probe=C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\host_display.json",
+        "--qa-mp-resolution=3440x1440",
+        "--release-multiplayer-auto-start",
+        "--release-multiplayer-drop-decision"
+      ],
+      "log": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\host.log",
+      "stdio": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\host_stdio.log",
+      "trace": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\host_trace.json"
+    },
+    "client": {
+      "pid": 46828,
+      "argv": [
+        "C:\\Users\\bjoer\\AppData\\Local\\Programs\\Godot\\Godot_v4.6.2-stable_win64.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\20261105T083903Z-eaee4346-client\\project",
+        "--fullscreen",
+        "--resolution",
+        "3440x1440",
+        "--screen",
+        "0",
+        "--rendering-method",
+        "forward_plus",
+        "--rendering-driver",
+        "vulkan",
+        "--log-file",
+        "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\client.log",
+        "--",
+        "--release-multiplayer-join",
+        "--release-multiplayer-port=58175",
+        "--release-multiplayer-trace=C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\client_trace.json",
+        "--qa-mp-probe=C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\client_display.json",
+        "--qa-mp-resolution=3440x1440",
+        "--release-multiplayer-address=127.0.0.1",
+        "--release-multiplayer-drop-decision"
+      ],
+      "log": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\client.log",
+      "stdio": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\client_stdio.log",
+      "trace": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\client_trace.json"
+    }
+  },
+  "traces": {
+    "host": {
+      "active_mission": false,
+      "config": {
+        "address": "127.0.0.1",
+        "auto_ready": true,
+        "auto_start": true,
+        "drop_decision": true,
+        "enabled": true,
+        "first_contact": false,
+        "port": 58175,
+        "read_only_config": true,
+        "role": "host",
+        "schema": "sternenbuergerchen.release_multiplayer_deeplink.v1",
+        "task_id": "TASK_1147",
+        "trace_path": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\host_trace.json",
+        "ui_sets_gameplay_truth": false
+      },
+      "drop_decision": {
+        "command_feedback": {},
+        "craft_id": "",
+        "decision_accepted": false,
+        "decision_sent": false,
+        "deployed_unit_ids": [],
+        "drop_sent": false,
+        "embarked_unit_ids": [],
+        "fireteam_id": "",
+        "lz_sent": false,
+        "mission_drop_cards": [],
+        "schema": "sternenbuergerchen.release_multiplayer_drop_decision.v1",
+        "stage": "disabled",
+        "task_id": "TASK_1148",
+        "ui_sets_gameplay_truth": false
+      },
+      "first_contact": {
+        "advance_attempted": false,
+        "advance_sent": false,
+        "combat_tick_budget": {},
+        "contact_approach_evidence": {},
+        "contact_count": 0,
+        "contacts": [],
+        "diagnostics": {},
+        "fire_event_count": 0,
+        "fire_event_ids": [],
+        "fire_events": [],
+        "fireteam_id": "",
+        "fireteam_position": {},
+        "fireteam_unit_positions": {},
+        "initial_movement_observe_frames": 0,
+        "initial_movement_observed": false,
+        "local_avoidance_debug": {},
+        "mission_hud_runtime_surface_guard": {},
+        "mission_runtime_surface_timing": {},
+        "mission_ui_refresh_timing": {},
+        "mission_visible_frame_timing": {},
+        "movement_distance_travelled": 0.0,
+        "movement_progress_ratio": 0.0,
+        "movement_remaining_distance": 0.0,
+        "movement_start_position": "(0.0, 0.0)",
+        "movement_state": {},
+        "movement_wall_time_msec": 0,
+        "perspective": {},
+        "physics_fps": 1.0,
+        "read_only": true,
+        "recent_movement_trace": {},
+        "requested_target_position": "(0.0, 0.0)",
+        "runtime_tick_budget": {},
+        "schema": "sternenbuergerchen.release_multiplayer_first_contact.v1",
+        "simulation_tick": 0,
+        "simulation_ticks_since_advance": 0,
+        "stage": "disabled",
+        "task_id": "TASK_1150",
+        "terrain_move_debug": {},
+        "ui_sets_gameplay_truth": false
+      },
+      "schema": "sternenbuergerchen.release_multiplayer_playtest.v1",
+      "session": {
+        "assignments": {
+          "lobby_setup": {
+            "connection_mode": "lan",
+            "direct_ip_policy": "LAN mode expects both players on the same local network or VPN.",
+            "map_path": "res://maps/Ground_Mission01_32x32.json",
+            "player_name": "Player",
+            "roster_path": "user://profiles/local_player/roster_v1.json",
+            "team_play_mode": "coop",
+            "team_slot": "team_alpha",
+            "upnp": {
+              "attempted": false,
+              "enabled": false,
+              "external_address": "",
+              "mapped": false,
+              "port": 58175,
+              "result": "not_requested"
+            },
+            "uses_upnp": false
+          },
+          "peer_fireteams": {
+            "1": [
+              "blue",
+              "gold"
+            ]
+          },
+          "peer_roles": {
+            "1": "host"
+          },
+          "peer_rosters": {
+            "1": {
+              "can_manage_private_roster": true,
+              "character_gameplay_authority": "host_server",
+              "fireteam_ids": [
+                "blue",
+                "gold"
+              ],
+              "owner_peer_id": 1,
+              "profile_public_ref": "host:1:profile",
+              "roster_mode": "host_roster",
+              "roster_public_ref": "host:1",
+              "roster_source": "host",
+              "uses_local_roster": true
+            }
+          },
+          "peer_teams": {
+            "1": "team_alpha"
+          },
+          "roster_mode": "host_roster",
+          "selected_map_path": "res://maps/Ground_Mission01_32x32.json",
+          "team_play_mode": "coop"
+        },
+        "can_disconnect": true,
+        "can_start_mission": false,
+        "can_toggle_ready": true,
+        "connected_count": 1,
+        "connection_state": "hosting",
+        "has_active_peer": true,
+        "is_client": false,
+        "is_host": true,
+        "last_error": "",
+        "lobby_setup": {
+          "connection_mode": "lan",
+          "direct_ip_policy": "LAN mode expects both players on the same local network or VPN.",
+          "map_path": "res://maps/Ground_Mission01_32x32.json",
+          "player_name": "Player",
+          "roster_path": "user://profiles/local_player/roster_v1.json",
+          "team_play_mode": "coop",
+          "team_slot": "team_alpha",
+          "upnp": {
+            "attempted": false,
+            "enabled": false,
+            "external_address": "",
+            "mapped": false,
+            "port": 58175,
+            "result": "not_requested"
+          },
+          "uses_upnp": false
+        },
+        "local_peer_id": 1,
+        "local_ready": false,
+        "map_manifest": {
+          "author": "Player",
+          "download_required_policy": "client_consent_before_cache_write",
+          "format_version": 1,
+          "map_hash": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4",
+          "map_id": "gm01_frontier_hex_96x98",
+          "map_name": "GM01 Frontier Hex 96x98",
+          "map_size_bytes": 2425578,
+          "scenario_file_path": "",
+          "scenario_hash": "",
+          "scenario_size_bytes": 0,
+          "schema_version": 1,
+          "source": "host_editor_map"
+        },
+        "map_transfer": {
+          "can_start_client": true,
+          "manifest": {
+            "author": "Player",
+            "download_required_policy": "client_consent_before_cache_write",
+            "format_version": 1,
+            "map_hash": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4",
+            "map_id": "gm01_frontier_hex_96x98",
+            "map_name": "GM01 Frontier Hex 96x98",
+            "map_size_bytes": 2425578,
+            "scenario_file_path": "",
+            "scenario_hash": "",
+            "scenario_size_bytes": 0,
+            "schema_version": 1,
+            "source": "host_editor_map"
+          },
+          "requires_consent": false,
+          "state": "host_manifest_ready"
+        },
+        "max_players": 2,
+        "mission_started": false,
+        "peers": [
+          {
+            "can_manage_private_roster": true,
+            "character_gameplay_authority": "host_server",
+            "connection_mode": "lan",
+            "display_name": "Player",
+            "fireteam_ids": [
+              "blue",
+              "gold"
+            ],
+            "is_host": true,
+            "owner_peer_id": 1,
+            "peer_id": 1,
+            "profile_public_ref": "host:1:profile",
+            "ready": false,
+            "role_id": "host",
+            "roster_entry_path": "user://profiles/local_player/roster_v1.json",
+            "roster_mode": "host_roster",
+            "roster_public_ref": "host:1",
+            "roster_source": "host",
+            "selected_map_path": "res://maps/Ground_Mission01_32x32.json",
+            "team_id": "team_alpha",
+            "team_play_mode": "coop",
+            "uses_local_roster": true
+          }
+        ],
+        "ready_count": 0,
+        "roster": {
+          "host_selects_roster_mode": true,
+          "local_roster_owner_peer_id": 1,
+          "mission_authority": "host_server",
+          "private_data_policy": "local_profile_save_progression_relationships_events_never_snapshot",
+          "private_unit_fields": [
+            "age_years",
+            "availability_status",
+            "biography_text",
+            "core_values",
+            "fireteam_history",
+            "function_scores",
+            "generator_seed",
+            "homeworld",
+            "mission_history",
+            "multiplayer_boundary",
+            "personnel_events",
+            "platform_values",
+            "player_profile_id",
+            "portrait_path",
+            "progression",
+            "recovery_state",
+            "relationship_links",
+            "relationship_pairs",
+            "relationship_summary_text",
+            "roster_seed_index",
+            "save_seed",
+            "seed",
+            "skill_summary_text",
+            "skill_values",
+            "status_text",
+            "trait_ids",
+            "validation"
+          ],
+          "public_data_policy": "identity_role_portrait_fireteam_badges_only",
+          "public_unit_fields": [
+            "unit_id",
+            "display_name",
+            "callsign",
+            "role_id",
+            "role_name",
+            "roster_role_category",
+            "portrait_id",
+            "fireteam_id",
+            "rank_badges"
+          ],
+          "roster_mode": "host_roster",
+          "roster_mode_label": "Host roster",
+          "snapshot_ownership_fields": [
+            "unit_id",
+            "owner_peer_id",
+            "roster_source",
+            "roster_mode",
+            "roster_public_ref",
+            "character_gameplay_authority"
+          ],
+          "uses_local_roster": true,
+          "valid_roster_modes": [
+            "player_rosters",
+            "host_roster",
+            "scenario_roster"
+          ]
+        },
+        "status_text": "Waiting for players... (1/2)",
+        "team_readability": {
+          "configured": true,
+          "entries": [
+            {
+              "assigned_peer_ids": [
+                1
+              ],
+              "badge_text": "Alpha | Host Peer 1 | spawn_alpha",
+              "control_label": "Player controlled",
+              "display_name": "Alpha Attack",
+              "npc_controlled": false,
+              "ownership_label": "Host Peer 1",
+              "peer_label": "Host Peer 1",
+              "play_mode": "coop",
+              "readability_tone": "player",
+              "role_label": "Attack",
+              "short_label": "Alpha",
+              "spawn_chip_text": "Alpha | Spawn spawn_alpha",
+              "spawn_label": "Spawn spawn_alpha",
+              "spawn_marker_id": "spawn_alpha",
+              "team_color_hex": "#5fb7ff",
+              "team_id": "team_alpha",
+              "ui_chip_text": "Alpha: Host Peer 1",
+              "ui_sets_gameplay_truth": false
+            },
+            {
+              "assigned_peer_ids": [],
+              "badge_text": "Bravo | NPC / Scenario | spawn_bravo",
+              "control_label": "NPC controlled",
+              "display_name": "Bravo Defense",
+              "npc_controlled": true,
+              "ownership_label": "NPC / Scenario",
+              "peer_label": "Scenario AI",
+              "play_mode": "coop",
+              "readability_tone": "npc",
+              "role_label": "Defense",
+              "short_label": "Bravo",
+              "spawn_chip_text": "Bravo | Spawn spawn_bravo",
+              "spawn_label": "Spawn spawn_bravo",
+              "spawn_marker_id": "spawn_bravo",
+              "team_color_hex": "#ff9b5e",
+              "team_id": "team_bravo",
+              "ui_chip_text": "Bravo: NPC / Scenario",
+              "ui_sets_gameplay_truth": false
+            }
+          ],
+          "errors": [],
+          "play_mode": "coop",
+          "runtime_authority": "MissionMultiplayerTeamOwnershipContract",
+          "summary_text": "Coop: Alpha -> Host Peer 1 | Bravo -> NPC / Scenario",
+          "ui_sets_gameplay_truth": false,
+          "valid": true
+        },
+        "team_readability_summary": "Coop: Alpha -> Host Peer 1 | Bravo -> NPC / Scenario",
+        "upnp": {
+          "attempted": false,
+          "enabled": false,
+          "external_address": "",
+          "mapped": false,
+          "port": 58175,
+          "result": "not_requested"
+        }
+      },
+      "stage": "hosting",
+      "task_id": "TASK_1147",
+      "ui_sets_gameplay_truth": false
+    },
+    "client": {}
+  },
+  "user_data": {
+    "host": {
+      "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-20261105T083903Z-eaee4346-host",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\20261105T083903Z-eaee4346-host\\project",
+      "app_name": "SB-Codex-Review2-20261105T083903Z-eaee4346-host",
+      "canary": {
+        "project": "SB-Codex-Review2-20261105T083903Z-eaee4346-host",
+        "user_dir": "C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-20261105T083903Z-eaee4346-host"
+      },
+      "verified": true
+    },
+    "client": {
+      "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-20261105T083903Z-eaee4346-client",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\20261105T083903Z-eaee4346-client\\project",
+      "app_name": "SB-Codex-Review2-20261105T083903Z-eaee4346-client",
+      "canary": {
+        "project": "SB-Codex-Review2-20261105T083903Z-eaee4346-client",
+        "user_dir": "C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-20261105T083903Z-eaee4346-client"
+      },
+      "verified": true
+    }
+  },
+  "checks": {
+    "connection_and_active_mission": false,
+    "normal_owned_exit": false,
+    "isolated_private_users": true,
+    "no_engine_diagnostics": false,
+    "protected_roster_unchanged": true,
+    "source_pins_stable": true,
+    "engine_hash_stable": true
+  },
+  "failures": [
+    "RuntimeError: Owned process exited before multiplayer gate"
+  ],
+  "map": {
+    "path": "C:\\dev\\SternenBuergerchen\\maps\\Ground_Mission01_32x32.json",
+    "raw_sha256": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4",
+    "text_sha256": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4"
+  },
+  "roster_before": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "engine_version": "4.6.2.stable.official.71f334935",
+  "engine_sha256": "975bf1d254b989ee12b64df4d07da692a31175f72424baa180f1078bfc0d71b0",
+  "port": 58175,
+  "trace_checks": {
+    "host": {
+      "active_mission": false,
+      "stage": "hosting",
+      "connected_count": 1,
+      "ready_count": 0,
+      "peer_id": 1,
+      "map_matches": true,
+      "local_map_state": "host_manifest_ready"
+    },
+    "client": {
+      "active_mission": false,
+      "stage": "",
+      "connected_count": 0,
+      "ready_count": 0,
+      "peer_id": 0,
+      "map_matches": false,
+      "local_map_state": ""
+    }
+  },
+  "session_wall_seconds": 9.045,
+  "cleanup": {
+    "host": {
+      "pid": 41888,
+      "mode": "normal_probe_exit",
+      "exit_code": 2
+    },
+    "client": {
+      "pid": 46828,
+      "mode": "wm_close_requested",
+      "owned_windows": [
+        {
+          "hwnd": 3280026,
+          "pid": 46828,
+          "title": "SB-Codex-Review2-20261105T083903Z-eaee4346-client (DEBUG)",
+          "outer_bounds": [
+            0,
+            0,
+            2560,
+            1442
+          ],
+          "client_size": [
+            2560,
+            1442
+          ],
+          "monitor_bounds": [
+            0,
+            0,
+            2560,
+            1440
+          ],
+          "minimized": false,
+          "covers_monitor": false
+        }
+      ],
+      "exit_code": 2
+    }
+  },
+  "diagnostics": {
+    "host": {
+      "error_count": 2,
+      "renderer_lines": [
+        "Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER",
+        "Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER"
+      ]
+    },
+    "client": {
+      "error_count": 2,
+      "renderer_lines": [
+        "Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER",
+        "Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER"
+      ]
+    }
+  },
+  "roster_after": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "source_pin_count": 1755,
+  "source_drift": [],
+  "total_wall_seconds": 17.11,
+  "limitations": [
+    "One Windows machine, two source processes over loopback; no LAN/WAN/multi-machine proof.",
+    "Identical pinned GM01 only; no remote map payload transfer or build mismatch handshake proven.",
+    "Native bounds establish fullscreen geometry; screenshots and human visual acceptance remain separate.",
+    "Drop mode drives existing command adapters; no actor/position/HP/timer/loadout/authority patches."
+  ]
+}

@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2-03f3467102004a26b68b5bb6eb4894b9/SternenBuergerchen_UI_Zielbild_Normal_QA
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Homebase layouts use a native display
+PASS: Normal Singleplayer opens the actual Operations UI
+PASS: Capture target is new: homebase_1280
+PASS: Native capture saved: homebase_1280
+PASS: 1280: appropriate preparation column count
+PASS: 1280: actual display remains fullscreen
+PASS: 1280: normal navigation exposes Flight and launch controls
+PASS: Capture target is new: flight_1280
+PASS: Native capture saved: flight_1280
+PASS: Capture target is new: homebase_1600
+PASS: Native capture saved: homebase_1600
+PASS: 1600: appropriate preparation column count
+PASS: 1600: actual display remains fullscreen
+PASS: Capture target is new: homebase_1920
+PASS: Native capture saved: homebase_1920
+PASS: 1920: appropriate preparation column count
+PASS: 1920: actual display remains fullscreen
+PASS: Layout and navigation preserve roster, team and mission data
+PASS: Existing player profile, generator and unit identities remain unchanged
+FRONTIER_MAIN_STARTUP {"evidence_output":"C:/dev/SternenBuergerchen/output/playtest_20261105/homebase_native_responsive_retry/20261105T091339Z-dfaaea72/layouts.json","failed":0,"passed":19,"stages":0}

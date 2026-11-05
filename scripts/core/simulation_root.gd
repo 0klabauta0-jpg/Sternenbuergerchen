@@ -1975,8 +1975,11 @@ func _apply_unit_command_status(cmd: Dictionary, unit = null) -> void:
 	target_unit.call("assign_unit_command", command)
 	var command_token: String = String(cmd.get("command_token", "")).strip_edges()
 	var unit_id: String = String(cmd.get("unit_id", "")).strip_edges()
-	if not command_token.is_empty() and not unit_id.is_empty():
+	if not unit_id.is_empty():
 		_committed_command_token_by_unit_id[unit_id] = command_token
+		if command_token.is_empty():
+			# An authoritative untokenized Hold supersedes already queued Moves.
+			_latest_command_token_by_unit_id[unit_id] = ""
 	_apply_unit_command_facing(cmd, target_unit)
 
 
@@ -2138,7 +2141,7 @@ func _is_stale_tokenized_move_command(cmd: Dictionary, unit) -> bool:
 		return false
 	var unit_id: String = String(cmd.get("unit_id", "")).strip_edges()
 	var latest_token: String = String(_latest_command_token_by_unit_id.get(unit_id, "")).strip_edges()
-	if not latest_token.is_empty() and latest_token != command_token:
+	if _latest_command_token_by_unit_id.has(unit_id) and latest_token != command_token:
 		return true
 	if unit == null or not unit.has_method("get_current_unit_command"):
 		return false
@@ -2153,7 +2156,7 @@ func _is_stale_tokenized_move_command(cmd: Dictionary, unit) -> bool:
 	if current_token == command_token:
 		return false
 	var committed_token: String = String(_committed_command_token_by_unit_id.get(unit_id, "")).strip_edges()
-	return committed_token.is_empty() or committed_token != current_token
+	return not _committed_command_token_by_unit_id.has(unit_id) or committed_token != current_token
 
 
 func _discard_pending_move_commands_for_unit(unit_id: String) -> void:

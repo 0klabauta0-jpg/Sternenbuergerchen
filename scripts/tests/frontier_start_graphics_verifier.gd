@@ -8,7 +8,7 @@ const MENU = preload("res://scenes/ui/main_menu.tscn")
 const META_SCRIPT = preload("res://scripts/meta/meta_layer_flow.gd")
 const GM01 := "res://maps/Ground_Mission01_32x32.json"
 const SCENARIO := "res://data/mission_scenarios/ground_mission01_default.json"
-const IMAGE := "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png"
+const IMAGE := "res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg"
 const PROFILE := "frontier_illustrated_v1"
 const LAYOUT_ID := "gm01_frontier_outpost_v1"
 const ORIGINAL_SCENARIO_SHA := "792bff6b6dfa6fabf739a737e4e45d34c8e3729a4fdc7d6b62a74a374a27b45f"
@@ -38,7 +38,7 @@ func run() -> void:
 	var routes: Dictionary = menu.call("get_route_snapshot")
 	check(String(routes.get("singleplayer", "")) == "res://scenes/meta/meta_layer_test.tscn", "normal Singleplayer route retains the Meta Homebase flow")
 	check(menu.get_node_or_null("MenuRail/MenuMargin/MenuVBox/MenuButtons/SingleplayerButton") is Button, "the normal Singleplayer button still exists")
-	check(String(menu.call("get_background_path")) == IMAGE, "real main-menu background API chooses the new native Outpost image")
+	check(String(menu.call("get_background_path")) == IMAGE, "real main-menu background API chooses the restored original TASK199 image")
 	menu.free()
 	var script_resource: GDScript = META_SCRIPT
 	var constants: Dictionary = script_resource.get_script_constant_map()
@@ -70,20 +70,20 @@ func run() -> void:
 	var workyard = MAP.load_from_file("res://maps/frontier_workyard_24x20.json")
 	check(workyard.get_grid_topology() == "hex_axial_v1" and workyard.get_terrain_visual_theme_id() == PROFILE, "separate authored Hex workyard remains available")
 	var background: Dictionary = BACKGROUNDS.get_entry("main_menu_shell")
-	check(String(background.get("res_path", "")) == IMAGE, "existing background catalog owns the new main image path")
-	check(String(background.get("origin", "")) == "project_native_godot_capture", "background provenance is a native project capture, not the old TASK199 image")
+	check(String(background.get("res_path", "")) == IMAGE, "existing background catalog owns the restored original image path")
+	check(String(background.get("origin", "")) == "task_199_curated_project_asset", "background provenance identifies the restored TASK199 artwork")
 	check(String(background.get("text_safe_zone", "")) == "left_rail_520px" and String(background.get("import_profile", "")) == "ui_background_lossless_default", "existing menu readability and image loading policy are preserved")
-	check(FileAccess.file_exists(IMAGE), "native Outpost image actually exists")
+	check(FileAccess.file_exists(IMAGE), "original TASK199 image actually exists")
 	if FileAccess.file_exists(IMAGE):
-		check(String(background.get("sha256", "")) == FileAccess.get_sha256(IMAGE), "catalog image hash matches the actual native PNG bytes")
+		check(String(background.get("sha256", "")) == FileAccess.get_sha256(IMAGE), "catalog image hash matches the actual original JPEG bytes")
 		check(int(background.get("file_size_bytes", 0)) == FileAccess.get_file_as_bytes(IMAGE).size(), "catalog image byte size is factual")
 		var texture: Texture2D = ResourceLoader.load(IMAGE) as Texture2D
-		check(texture != null, "native background imports as a real Texture2D")
+		check(texture != null, "original background imports as a real Texture2D")
 		if texture != null:
 			check(texture.get_width() == int(background.get("width", 0)) and texture.get_height() == int(background.get("height", 0)), "catalog dimensions match the real imported texture")
-		var source: String = String(background.get("source_capture", ""))
-		check(source.begins_with("res://") and FileAccess.file_exists(source), "native background links to its actual source capture metadata")
-		check(not String(background.get("license_note", "")).is_empty(), "composite image license note distinguishes project geometry and constituent source licenses")
+		var source: String = String(background.get("reference_manifest", ""))
+		check(source.begins_with("res://") and FileAccess.file_exists(source), "restored background links to its original-image source manifest")
+		check(FileAccess.get_sha256(IMAGE) == "8702c2e3989b8e537656bf3824c734e2474ba797f7744b574aad8390299a5563", "restored original artwork bytes match the pre-change TASK199 source")
 	print("=== RESULTS: %d passed, %d failed ===" % [passed, failed])
 	if failed == 0:
 		print("FRONTIER_START_GRAPHICS_ALL_PASS")

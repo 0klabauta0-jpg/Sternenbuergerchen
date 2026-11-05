@@ -11,6 +11,18 @@
 ## 2.5D-View
 - Friendly Dropship-Visuals sitzen auf `mission_air` oberhalb der lokalen Tile-Oberflaeche.
 - Die Mindest-Clearance ist groesser als die Hoehenkante, damit kein Z-Fighting mit Huegeln, Waenden oder Surface-Tints entsteht.
+- Im Vollbild-Spielpass vom 05.11.2026 wird der vorhandene Flugstatus lesend
+  sichtbar: `inbound` gleitet aus dem Reiseflug in der Naehe der tatsaechlichen
+  LZ ab; `landed`, `unloading` und `complete` stehen mit dem Ground-Pivot auf
+  der Oberflaeche. `outbound`/`departing` steigen mit der echten Entfernung von
+  dieser LZ. Der reine Anzeigepfad bestimmt weder Phase noch Landeposition.
+  Die Reiseflug-Mindest-Clearance gilt fuer die Luftphase; bekannter
+  Bodenkontakt darf sie unterschreiten. Payloads ohne bekannten Status behalten
+  ihre bisherige explizite Clearance fuer Kompatibilitaet.
+- Schub liest denselben sichtbaren Flugstatus und bleibt an den vorhandenen
+  Modell-Owner gebunden. Bodenkontakt, Unsichtbarkeit und Ownerentfernung
+  erzeugen keine weiteren Flugeffekte. Eine dekorative Basis-Servicedrohne
+  darf ihren lokalen Meshhover zeigen, ohne Runtime- oder Roster-State zu besitzen.
 - LZ- und Approach-Marker bleiben Terrain-/Surface-Marker und sind nicht Teil der Air-Hoehe.
 
 ## FoW

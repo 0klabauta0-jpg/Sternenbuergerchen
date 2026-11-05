@@ -1,0 +1,5009 @@
+{
+  "source": "output\\playtest_20261105\\baseline\\20261105T061938Z-341212ca\\before_performance.json",
+  "summary": {
+    "duration_usec": 90068384,
+    "frames": 462,
+    "frametime_usec": {
+      "count": 462,
+      "max": 1138314,
+      "mean": 194927.551948052,
+      "p50": 144933,
+      "p90": 223394,
+      "p95": 915949,
+      "p99": 1062998
+    },
+    "hitch_counts": {
+      "over_100ms": 429,
+      "over_250ms": 33,
+      "over_33ms": 462,
+      "over_50ms": 462
+    },
+    "hitches_over_50ms": [
+      {
+        "elapsed_usec": 132509,
+        "frame_usec": 132509,
+        "since_previous_hitch_usec": null
+      },
+      {
+        "elapsed_usec": 291363,
+        "frame_usec": 158854,
+        "since_previous_hitch_usec": 158854
+      },
+      {
+        "elapsed_usec": 451043,
+        "frame_usec": 159680,
+        "since_previous_hitch_usec": 159680
+      },
+      {
+        "elapsed_usec": 579621,
+        "frame_usec": 128578,
+        "since_previous_hitch_usec": 128578
+      },
+      {
+        "elapsed_usec": 764887,
+        "frame_usec": 185266,
+        "since_previous_hitch_usec": 185266
+      },
+      {
+        "elapsed_usec": 905985,
+        "frame_usec": 141098,
+        "since_previous_hitch_usec": 141098
+      },
+      {
+        "elapsed_usec": 1925922,
+        "frame_usec": 1019937,
+        "since_previous_hitch_usec": 1019937
+      },
+      {
+        "elapsed_usec": 2127809,
+        "frame_usec": 201887,
+        "since_previous_hitch_usec": 201887
+      },
+      {
+        "elapsed_usec": 2303047,
+        "frame_usec": 175238,
+        "since_previous_hitch_usec": 175238
+      },
+      {
+        "elapsed_usec": 2432987,
+        "frame_usec": 129940,
+        "since_previous_hitch_usec": 129940
+      },
+      {
+        "elapsed_usec": 2682132,
+        "frame_usec": 249145,
+        "since_previous_hitch_usec": 249145
+      },
+      {
+        "elapsed_usec": 2849974,
+        "frame_usec": 167842,
+        "since_previous_hitch_usec": 167842
+      },
+      {
+        "elapsed_usec": 3005228,
+        "frame_usec": 155254,
+        "since_previous_hitch_usec": 155254
+      },
+      {
+        "elapsed_usec": 3199873,
+        "frame_usec": 194645,
+        "since_previous_hitch_usec": 194645
+      },
+      {
+        "elapsed_usec": 4266364,
+        "frame_usec": 1066491,
+        "since_previous_hitch_usec": 1066491
+      },
+      {
+        "elapsed_usec": 4369119,
+        "frame_usec": 102755,
+        "since_previous_hitch_usec": 102755
+      },
+      {
+        "elapsed_usec": 4590203,
+        "frame_usec": 221084,
+        "since_previous_hitch_usec": 221084
+      },
+      {
+        "elapsed_usec": 4748068,
+        "frame_usec": 157865,
+        "since_previous_hitch_usec": 157865
+      },
+      {
+        "elapsed_usec": 4892229,
+        "frame_usec": 144161,
+        "since_previous_hitch_usec": 144161
+      },
+      {
+        "elapsed_usec": 5034729,
+        "frame_usec": 142500,
+        "since_previous_hitch_usec": 142500
+      },
+      {
+        "elapsed_usec": 5182648,
+        "frame_usec": 147919,
+        "since_previous_hitch_usec": 147919
+      },
+      {
+        "elapsed_usec": 6211590,
+        "frame_usec": 1028942,
+        "since_previous_hitch_usec": 1028942
+      },
+      {
+        "elapsed_usec": 6366991,
+        "frame_usec": 155401,
+        "since_previous_hitch_usec": 155401
+      },
+      {
+        "elapsed_usec": 6462647,
+        "frame_usec": 95656,
+        "since_previous_hitch_usec": 95656
+      },
+      {
+        "elapsed_usec": 6625999,
+        "frame_usec": 163352,
+        "since_previous_hitch_usec": 163352
+      },
+      {
+        "elapsed_usec": 6804497,
+        "frame_usec": 178498,
+        "since_previous_hitch_usec": 178498
+      },
+      {
+        "elapsed_usec": 6939885,
+        "frame_usec": 135388,
+        "since_previous_hitch_usec": 135388
+      },
+      {
+        "elapsed_usec": 7032777,
+        "frame_usec": 92892,
+        "since_previous_hitch_usec": 92892
+      },
+      {
+        "elapsed_usec": 7205346,
+        "frame_usec": 172569,
+        "since_previous_hitch_usec": 172569
+      },
+      {
+        "elapsed_usec": 8212365,
+        "frame_usec": 1007019,
+        "since_previous_hitch_usec": 1007019
+      },
+      {
+        "elapsed_usec": 8357259,
+        "frame_usec": 144894,
+        "since_previous_hitch_usec": 144894
+      },
+      {
+        "elapsed_usec": 8507588,
+        "frame_usec": 150329,
+        "since_previous_hitch_usec": 150329
+      },
+      {
+        "elapsed_usec": 8634595,
+        "frame_usec": 127007,
+        "since_previous_hitch_usec": 127007
+      },
+      {
+        "elapsed_usec": 8792268,
+        "frame_usec": 157673,
+        "since_previous_hitch_usec": 157673
+      },
+      {
+        "elapsed_usec": 9007287,
+        "frame_usec": 215019,
+        "since_previous_hitch_usec": 215019
+      },
+      {
+        "elapsed_usec": 9111593,
+        "frame_usec": 104306,
+        "since_previous_hitch_usec": 104306
+      },
+      {
+        "elapsed_usec": 9284331,
+        "frame_usec": 172738,
+        "since_previous_hitch_usec": 172738
+      },
+      {
+        "elapsed_usec": 10333133,
+        "frame_usec": 1048802,
+        "since_previous_hitch_usec": 1048802
+      },
+      {
+        "elapsed_usec": 10467612,
+        "frame_usec": 134479,
+        "since_previous_hitch_usec": 134479
+      },
+      {
+        "elapsed_usec": 10603690,
+        "frame_usec": 136078,
+        "since_previous_hitch_usec": 136078
+      },
+      {
+        "elapsed_usec": 10754684,
+        "frame_usec": 150994,
+        "since_previous_hitch_usec": 150994
+      },
+      {
+        "elapsed_usec": 10890338,
+        "frame_usec": 135654,
+        "since_previous_hitch_usec": 135654
+      },
+      {
+        "elapsed_usec": 11034747,
+        "frame_usec": 144409,
+        "since_previous_hitch_usec": 144409
+      },
+      {
+        "elapsed_usec": 11235444,
+        "frame_usec": 200697,
+        "since_previous_hitch_usec": 200697
+      },
+      {
+        "elapsed_usec": 11411274,
+        "frame_usec": 175830,
+        "since_previous_hitch_usec": 175830
+      },
+      {
+        "elapsed_usec": 12521263,
+        "frame_usec": 1109989,
+        "since_previous_hitch_usec": 1109989
+      },
+      {
+        "elapsed_usec": 13550449,
+        "frame_usec": 1029186,
+        "since_previous_hitch_usec": 1029186
+      },
+      {
+        "elapsed_usec": 13695805,
+        "frame_usec": 145356,
+        "since_previous_hitch_usec": 145356
+      },
+      {
+        "elapsed_usec": 13880554,
+        "frame_usec": 184749,
+        "since_previous_hitch_usec": 184749
+      },
+      {
+        "elapsed_usec": 14065859,
+        "frame_usec": 185305,
+        "since_previous_hitch_usec": 185305
+      },
+      {
+        "elapsed_usec": 14272451,
+        "frame_usec": 206592,
+        "since_previous_hitch_usec": 206592
+      },
+      {
+        "elapsed_usec": 14388552,
+        "frame_usec": 116101,
+        "since_previous_hitch_usec": 116101
+      },
+      {
+        "elapsed_usec": 15501521,
+        "frame_usec": 1112969,
+        "since_previous_hitch_usec": 1112969
+      },
+      {
+        "elapsed_usec": 15668393,
+        "frame_usec": 166872,
+        "since_previous_hitch_usec": 166872
+      },
+      {
+        "elapsed_usec": 15831987,
+        "frame_usec": 163594,
+        "since_previous_hitch_usec": 163594
+      },
+      {
+        "elapsed_usec": 16019756,
+        "frame_usec": 187769,
+        "since_previous_hitch_usec": 187769
+      },
+      {
+        "elapsed_usec": 16166377,
+        "frame_usec": 146621,
+        "since_previous_hitch_usec": 146621
+      },
+      {
+        "elapsed_usec": 16278493,
+        "frame_usec": 112116,
+        "since_previous_hitch_usec": 112116
+      },
+      {
+        "elapsed_usec": 16484762,
+        "frame_usec": 206269,
+        "since_previous_hitch_usec": 206269
+      },
+      {
+        "elapsed_usec": 16623303,
+        "frame_usec": 138541,
+        "since_previous_hitch_usec": 138541
+      },
+      {
+        "elapsed_usec": 17686301,
+        "frame_usec": 1062998,
+        "since_previous_hitch_usec": 1062998
+      },
+      {
+        "elapsed_usec": 17911347,
+        "frame_usec": 225046,
+        "since_previous_hitch_usec": 225046
+      },
+      {
+        "elapsed_usec": 18088475,
+        "frame_usec": 177128,
+        "since_previous_hitch_usec": 177128
+      },
+      {
+        "elapsed_usec": 18185024,
+        "frame_usec": 96549,
+        "since_previous_hitch_usec": 96549
+      },
+      {
+        "elapsed_usec": 18367164,
+        "frame_usec": 182140,
+        "since_previous_hitch_usec": 182140
+      },
+      {
+        "elapsed_usec": 18551035,
+        "frame_usec": 183871,
+        "since_previous_hitch_usec": 183871
+      },
+      {
+        "elapsed_usec": 18704696,
+        "frame_usec": 153661,
+        "since_previous_hitch_usec": 153661
+      },
+      {
+        "elapsed_usec": 19751869,
+        "frame_usec": 1047173,
+        "since_previous_hitch_usec": 1047173
+      },
+      {
+        "elapsed_usec": 19933549,
+        "frame_usec": 181680,
+        "since_previous_hitch_usec": 181680
+      },
+      {
+        "elapsed_usec": 20062889,
+        "frame_usec": 129340,
+        "since_previous_hitch_usec": 129340
+      },
+      {
+        "elapsed_usec": 20314936,
+        "frame_usec": 252047,
+        "since_previous_hitch_usec": 252047
+      },
+      {
+        "elapsed_usec": 20506673,
+        "frame_usec": 191737,
+        "since_previous_hitch_usec": 191737
+      },
+      {
+        "elapsed_usec": 20697897,
+        "frame_usec": 191224,
+        "since_previous_hitch_usec": 191224
+      },
+      {
+        "elapsed_usec": 20851707,
+        "frame_usec": 153810,
+        "since_previous_hitch_usec": 153810
+      },
+      {
+        "elapsed_usec": 21004078,
+        "frame_usec": 152371,
+        "since_previous_hitch_usec": 152371
+      },
+      {
+        "elapsed_usec": 22062079,
+        "frame_usec": 1058001,
+        "since_previous_hitch_usec": 1058001
+      },
+      {
+        "elapsed_usec": 22219819,
+        "frame_usec": 157740,
+        "since_previous_hitch_usec": 157740
+      },
+      {
+        "elapsed_usec": 22358804,
+        "frame_usec": 138985,
+        "since_previous_hitch_usec": 138985
+      },
+      {
+        "elapsed_usec": 22478389,
+        "frame_usec": 119585,
+        "since_previous_hitch_usec": 119585
+      },
+      {
+        "elapsed_usec": 22709022,
+        "frame_usec": 230633,
+        "since_previous_hitch_usec": 230633
+      },
+      {
+        "elapsed_usec": 22856997,
+        "frame_usec": 147975,
+        "since_previous_hitch_usec": 147975
+      },
+      {
+        "elapsed_usec": 22990694,
+        "frame_usec": 133697,
+        "since_previous_hitch_usec": 133697
+      },
+      {
+        "elapsed_usec": 24129008,
+        "frame_usec": 1138314,
+        "since_previous_hitch_usec": 1138314
+      },
+      {
+        "elapsed_usec": 25113665,
+        "frame_usec": 984657,
+        "since_previous_hitch_usec": 984657
+      },
+      {
+        "elapsed_usec": 25295676,
+        "frame_usec": 182011,
+        "since_previous_hitch_usec": 182011
+      },
+      {
+        "elapsed_usec": 25483332,
+        "frame_usec": 187656,
+        "since_previous_hitch_usec": 187656
+      },
+      {
+        "elapsed_usec": 25645330,
+        "frame_usec": 161998,
+        "since_previous_hitch_usec": 161998
+      },
+      {
+        "elapsed_usec": 25762494,
+        "frame_usec": 117164,
+        "since_previous_hitch_usec": 117164
+      },
+      {
+        "elapsed_usec": 26009979,
+        "frame_usec": 247485,
+        "since_previous_hitch_usec": 247485
+      },
+      {
+        "elapsed_usec": 26144937,
+        "frame_usec": 134958,
+        "since_previous_hitch_usec": 134958
+      },
+      {
+        "elapsed_usec": 27112065,
+        "frame_usec": 967128,
+        "since_previous_hitch_usec": 967128
+      },
+      {
+        "elapsed_usec": 27286183,
+        "frame_usec": 174118,
+        "since_previous_hitch_usec": 174118
+      },
+      {
+        "elapsed_usec": 27423808,
+        "frame_usec": 137625,
+        "since_previous_hitch_usec": 137625
+      },
+      {
+        "elapsed_usec": 27516486,
+        "frame_usec": 92678,
+        "since_previous_hitch_usec": 92678
+      },
+      {
+        "elapsed_usec": 27669708,
+        "frame_usec": 153222,
+        "since_previous_hitch_usec": 153222
+      },
+      {
+        "elapsed_usec": 27813244,
+        "frame_usec": 143536,
+        "since_previous_hitch_usec": 143536
+      },
+      {
+        "elapsed_usec": 27960166,
+        "frame_usec": 146922,
+        "since_previous_hitch_usec": 146922
+      },
+      {
+        "elapsed_usec": 28988391,
+        "frame_usec": 1028225,
+        "since_previous_hitch_usec": 1028225
+      },
+      {
+        "elapsed_usec": 29121455,
+        "frame_usec": 133064,
+        "since_previous_hitch_usec": 133064
+      },
+      {
+        "elapsed_usec": 29286758,
+        "frame_usec": 165303,
+        "since_previous_hitch_usec": 165303
+      },
+      {
+        "elapsed_usec": 29439053,
+        "frame_usec": 152295,
+        "since_previous_hitch_usec": 152295
+      },
+      {
+        "elapsed_usec": 29565106,
+        "frame_usec": 126053,
+        "since_previous_hitch_usec": 126053
+      },
+      {
+        "elapsed_usec": 29734359,
+        "frame_usec": 169253,
+        "since_previous_hitch_usec": 169253
+      },
+      {
+        "elapsed_usec": 29903750,
+        "frame_usec": 169391,
+        "since_previous_hitch_usec": 169391
+      },
+      {
+        "elapsed_usec": 30486344,
+        "frame_usec": 582594,
+        "since_previous_hitch_usec": 582594
+      },
+      {
+        "elapsed_usec": 31497581,
+        "frame_usec": 1011237,
+        "since_previous_hitch_usec": 1011237
+      },
+      {
+        "elapsed_usec": 31715739,
+        "frame_usec": 218158,
+        "since_previous_hitch_usec": 218158
+      },
+      {
+        "elapsed_usec": 31867729,
+        "frame_usec": 151990,
+        "since_previous_hitch_usec": 151990
+      },
+      {
+        "elapsed_usec": 32014425,
+        "frame_usec": 146696,
+        "since_previous_hitch_usec": 146696
+      },
+      {
+        "elapsed_usec": 32163673,
+        "frame_usec": 149248,
+        "since_previous_hitch_usec": 149248
+      },
+      {
+        "elapsed_usec": 32298038,
+        "frame_usec": 134365,
+        "since_previous_hitch_usec": 134365
+      },
+      {
+        "elapsed_usec": 32437434,
+        "frame_usec": 139396,
+        "since_previous_hitch_usec": 139396
+      },
+      {
+        "elapsed_usec": 32572726,
+        "frame_usec": 135292,
+        "since_previous_hitch_usec": 135292
+      },
+      {
+        "elapsed_usec": 33555325,
+        "frame_usec": 982599,
+        "since_previous_hitch_usec": 982599
+      },
+      {
+        "elapsed_usec": 33647787,
+        "frame_usec": 92462,
+        "since_previous_hitch_usec": 92462
+      },
+      {
+        "elapsed_usec": 33891936,
+        "frame_usec": 244149,
+        "since_previous_hitch_usec": 244149
+      },
+      {
+        "elapsed_usec": 33999042,
+        "frame_usec": 107106,
+        "since_previous_hitch_usec": 107106
+      },
+      {
+        "elapsed_usec": 34115015,
+        "frame_usec": 115973,
+        "since_previous_hitch_usec": 115973
+      },
+      {
+        "elapsed_usec": 34223968,
+        "frame_usec": 108953,
+        "since_previous_hitch_usec": 108953
+      },
+      {
+        "elapsed_usec": 34359302,
+        "frame_usec": 135334,
+        "since_previous_hitch_usec": 135334
+      },
+      {
+        "elapsed_usec": 35294447,
+        "frame_usec": 935145,
+        "since_previous_hitch_usec": 935145
+      },
+      {
+        "elapsed_usec": 35377283,
+        "frame_usec": 82836,
+        "since_previous_hitch_usec": 82836
+      },
+      {
+        "elapsed_usec": 35513148,
+        "frame_usec": 135865,
+        "since_previous_hitch_usec": 135865
+      },
+      {
+        "elapsed_usec": 35607827,
+        "frame_usec": 94679,
+        "since_previous_hitch_usec": 94679
+      },
+      {
+        "elapsed_usec": 35697312,
+        "frame_usec": 89485,
+        "since_previous_hitch_usec": 89485
+      },
+      {
+        "elapsed_usec": 35810552,
+        "frame_usec": 113240,
+        "since_previous_hitch_usec": 113240
+      },
+      {
+        "elapsed_usec": 35982617,
+        "frame_usec": 172065,
+        "since_previous_hitch_usec": 172065
+      },
+      {
+        "elapsed_usec": 36125180,
+        "frame_usec": 142563,
+        "since_previous_hitch_usec": 142563
+      },
+      {
+        "elapsed_usec": 37041129,
+        "frame_usec": 915949,
+        "since_previous_hitch_usec": 915949
+      },
+      {
+        "elapsed_usec": 38073045,
+        "frame_usec": 1031916,
+        "since_previous_hitch_usec": 1031916
+      },
+      {
+        "elapsed_usec": 38226118,
+        "frame_usec": 153073,
+        "since_previous_hitch_usec": 153073
+      },
+      {
+        "elapsed_usec": 38356971,
+        "frame_usec": 130853,
+        "since_previous_hitch_usec": 130853
+      },
+      {
+        "elapsed_usec": 38519631,
+        "frame_usec": 162660,
+        "since_previous_hitch_usec": 162660
+      },
+      {
+        "elapsed_usec": 38652389,
+        "frame_usec": 132758,
+        "since_previous_hitch_usec": 132758
+      },
+      {
+        "elapsed_usec": 38751521,
+        "frame_usec": 99132,
+        "since_previous_hitch_usec": 99132
+      },
+      {
+        "elapsed_usec": 38974915,
+        "frame_usec": 223394,
+        "since_previous_hitch_usec": 223394
+      },
+      {
+        "elapsed_usec": 39083823,
+        "frame_usec": 108908,
+        "since_previous_hitch_usec": 108908
+      },
+      {
+        "elapsed_usec": 39186231,
+        "frame_usec": 102408,
+        "since_previous_hitch_usec": 102408
+      },
+      {
+        "elapsed_usec": 39355978,
+        "frame_usec": 169747,
+        "since_previous_hitch_usec": 169747
+      },
+      {
+        "elapsed_usec": 39474718,
+        "frame_usec": 118740,
+        "since_previous_hitch_usec": 118740
+      },
+      {
+        "elapsed_usec": 39613346,
+        "frame_usec": 138628,
+        "since_previous_hitch_usec": 138628
+      },
+      {
+        "elapsed_usec": 39750552,
+        "frame_usec": 137206,
+        "since_previous_hitch_usec": 137206
+      },
+      {
+        "elapsed_usec": 39856511,
+        "frame_usec": 105959,
+        "since_previous_hitch_usec": 105959
+      },
+      {
+        "elapsed_usec": 40000473,
+        "frame_usec": 143962,
+        "since_previous_hitch_usec": 143962
+      },
+      {
+        "elapsed_usec": 40185717,
+        "frame_usec": 185244,
+        "since_previous_hitch_usec": 185244
+      },
+      {
+        "elapsed_usec": 40309042,
+        "frame_usec": 123325,
+        "since_previous_hitch_usec": 123325
+      },
+      {
+        "elapsed_usec": 40417632,
+        "frame_usec": 108590,
+        "since_previous_hitch_usec": 108590
+      },
+      {
+        "elapsed_usec": 40527665,
+        "frame_usec": 110033,
+        "since_previous_hitch_usec": 110033
+      },
+      {
+        "elapsed_usec": 40670444,
+        "frame_usec": 142779,
+        "since_previous_hitch_usec": 142779
+      },
+      {
+        "elapsed_usec": 40783849,
+        "frame_usec": 113405,
+        "since_previous_hitch_usec": 113405
+      },
+      {
+        "elapsed_usec": 40952071,
+        "frame_usec": 168222,
+        "since_previous_hitch_usec": 168222
+      },
+      {
+        "elapsed_usec": 41043465,
+        "frame_usec": 91394,
+        "since_previous_hitch_usec": 91394
+      },
+      {
+        "elapsed_usec": 41187670,
+        "frame_usec": 144205,
+        "since_previous_hitch_usec": 144205
+      },
+      {
+        "elapsed_usec": 41365513,
+        "frame_usec": 177843,
+        "since_previous_hitch_usec": 177843
+      },
+      {
+        "elapsed_usec": 41514422,
+        "frame_usec": 148909,
+        "since_previous_hitch_usec": 148909
+      },
+      {
+        "elapsed_usec": 41629216,
+        "frame_usec": 114794,
+        "since_previous_hitch_usec": 114794
+      },
+      {
+        "elapsed_usec": 41787901,
+        "frame_usec": 158685,
+        "since_previous_hitch_usec": 158685
+      },
+      {
+        "elapsed_usec": 41932186,
+        "frame_usec": 144285,
+        "since_previous_hitch_usec": 144285
+      },
+      {
+        "elapsed_usec": 42048007,
+        "frame_usec": 115821,
+        "since_previous_hitch_usec": 115821
+      },
+      {
+        "elapsed_usec": 42201166,
+        "frame_usec": 153159,
+        "since_previous_hitch_usec": 153159
+      },
+      {
+        "elapsed_usec": 42337209,
+        "frame_usec": 136043,
+        "since_previous_hitch_usec": 136043
+      },
+      {
+        "elapsed_usec": 42430172,
+        "frame_usec": 92963,
+        "since_previous_hitch_usec": 92963
+      },
+      {
+        "elapsed_usec": 42647152,
+        "frame_usec": 216980,
+        "since_previous_hitch_usec": 216980
+      },
+      {
+        "elapsed_usec": 42775007,
+        "frame_usec": 127855,
+        "since_previous_hitch_usec": 127855
+      },
+      {
+        "elapsed_usec": 42881968,
+        "frame_usec": 106961,
+        "since_previous_hitch_usec": 106961
+      },
+      {
+        "elapsed_usec": 43032399,
+        "frame_usec": 150431,
+        "since_previous_hitch_usec": 150431
+      },
+      {
+        "elapsed_usec": 43182949,
+        "frame_usec": 150550,
+        "since_previous_hitch_usec": 150550
+      },
+      {
+        "elapsed_usec": 43289948,
+        "frame_usec": 106999,
+        "since_previous_hitch_usec": 106999
+      },
+      {
+        "elapsed_usec": 43447991,
+        "frame_usec": 158043,
+        "since_previous_hitch_usec": 158043
+      },
+      {
+        "elapsed_usec": 43574819,
+        "frame_usec": 126828,
+        "since_previous_hitch_usec": 126828
+      },
+      {
+        "elapsed_usec": 43709614,
+        "frame_usec": 134795,
+        "since_previous_hitch_usec": 134795
+      },
+      {
+        "elapsed_usec": 43944411,
+        "frame_usec": 234797,
+        "since_previous_hitch_usec": 234797
+      },
+      {
+        "elapsed_usec": 44120490,
+        "frame_usec": 176079,
+        "since_previous_hitch_usec": 176079
+      },
+      {
+        "elapsed_usec": 44218808,
+        "frame_usec": 98318,
+        "since_previous_hitch_usec": 98318
+      },
+      {
+        "elapsed_usec": 44379598,
+        "frame_usec": 160790,
+        "since_previous_hitch_usec": 160790
+      },
+      {
+        "elapsed_usec": 44492934,
+        "frame_usec": 113336,
+        "since_previous_hitch_usec": 113336
+      },
+      {
+        "elapsed_usec": 44648488,
+        "frame_usec": 155554,
+        "since_previous_hitch_usec": 155554
+      },
+      {
+        "elapsed_usec": 44816666,
+        "frame_usec": 168178,
+        "since_previous_hitch_usec": 168178
+      },
+      {
+        "elapsed_usec": 44926542,
+        "frame_usec": 109876,
+        "since_previous_hitch_usec": 109876
+      },
+      {
+        "elapsed_usec": 45052153,
+        "frame_usec": 125611,
+        "since_previous_hitch_usec": 125611
+      },
+      {
+        "elapsed_usec": 45234191,
+        "frame_usec": 182038,
+        "since_previous_hitch_usec": 182038
+      },
+      {
+        "elapsed_usec": 45378288,
+        "frame_usec": 144097,
+        "since_previous_hitch_usec": 144097
+      },
+      {
+        "elapsed_usec": 45502821,
+        "frame_usec": 124533,
+        "since_previous_hitch_usec": 124533
+      },
+      {
+        "elapsed_usec": 45626040,
+        "frame_usec": 123219,
+        "since_previous_hitch_usec": 123219
+      },
+      {
+        "elapsed_usec": 45773669,
+        "frame_usec": 147629,
+        "since_previous_hitch_usec": 147629
+      },
+      {
+        "elapsed_usec": 45925749,
+        "frame_usec": 152080,
+        "since_previous_hitch_usec": 152080
+      },
+      {
+        "elapsed_usec": 46077514,
+        "frame_usec": 151765,
+        "since_previous_hitch_usec": 151765
+      },
+      {
+        "elapsed_usec": 46191793,
+        "frame_usec": 114279,
+        "since_previous_hitch_usec": 114279
+      },
+      {
+        "elapsed_usec": 46291971,
+        "frame_usec": 100178,
+        "since_previous_hitch_usec": 100178
+      },
+      {
+        "elapsed_usec": 46494684,
+        "frame_usec": 202713,
+        "since_previous_hitch_usec": 202713
+      },
+      {
+        "elapsed_usec": 46645434,
+        "frame_usec": 150750,
+        "since_previous_hitch_usec": 150750
+      },
+      {
+        "elapsed_usec": 46739958,
+        "frame_usec": 94524,
+        "since_previous_hitch_usec": 94524
+      },
+      {
+        "elapsed_usec": 46882044,
+        "frame_usec": 142086,
+        "since_previous_hitch_usec": 142086
+      },
+      {
+        "elapsed_usec": 46985539,
+        "frame_usec": 103495,
+        "since_previous_hitch_usec": 103495
+      },
+      {
+        "elapsed_usec": 47110812,
+        "frame_usec": 125273,
+        "since_previous_hitch_usec": 125273
+      },
+      {
+        "elapsed_usec": 47284949,
+        "frame_usec": 174137,
+        "since_previous_hitch_usec": 174137
+      },
+      {
+        "elapsed_usec": 47433298,
+        "frame_usec": 148349,
+        "since_previous_hitch_usec": 148349
+      },
+      {
+        "elapsed_usec": 47554361,
+        "frame_usec": 121063,
+        "since_previous_hitch_usec": 121063
+      },
+      {
+        "elapsed_usec": 47806377,
+        "frame_usec": 252016,
+        "since_previous_hitch_usec": 252016
+      },
+      {
+        "elapsed_usec": 47963276,
+        "frame_usec": 156899,
+        "since_previous_hitch_usec": 156899
+      },
+      {
+        "elapsed_usec": 48089930,
+        "frame_usec": 126654,
+        "since_previous_hitch_usec": 126654
+      },
+      {
+        "elapsed_usec": 49079516,
+        "frame_usec": 989586,
+        "since_previous_hitch_usec": 989586
+      },
+      {
+        "elapsed_usec": 49270608,
+        "frame_usec": 191092,
+        "since_previous_hitch_usec": 191092
+      },
+      {
+        "elapsed_usec": 49371187,
+        "frame_usec": 100579,
+        "since_previous_hitch_usec": 100579
+      },
+      {
+        "elapsed_usec": 49517441,
+        "frame_usec": 146254,
+        "since_previous_hitch_usec": 146254
+      },
+      {
+        "elapsed_usec": 49610112,
+        "frame_usec": 92671,
+        "since_previous_hitch_usec": 92671
+      },
+      {
+        "elapsed_usec": 49720083,
+        "frame_usec": 109971,
+        "since_previous_hitch_usec": 109971
+      },
+      {
+        "elapsed_usec": 49917794,
+        "frame_usec": 197711,
+        "since_previous_hitch_usec": 197711
+      },
+      {
+        "elapsed_usec": 50060535,
+        "frame_usec": 142741,
+        "since_previous_hitch_usec": 142741
+      },
+      {
+        "elapsed_usec": 50153579,
+        "frame_usec": 93044,
+        "since_previous_hitch_usec": 93044
+      },
+      {
+        "elapsed_usec": 50295301,
+        "frame_usec": 141722,
+        "since_previous_hitch_usec": 141722
+      },
+      {
+        "elapsed_usec": 50411716,
+        "frame_usec": 116415,
+        "since_previous_hitch_usec": 116415
+      },
+      {
+        "elapsed_usec": 50557500,
+        "frame_usec": 145784,
+        "since_previous_hitch_usec": 145784
+      },
+      {
+        "elapsed_usec": 50685977,
+        "frame_usec": 128477,
+        "since_previous_hitch_usec": 128477
+      },
+      {
+        "elapsed_usec": 50829995,
+        "frame_usec": 144018,
+        "since_previous_hitch_usec": 144018
+      },
+      {
+        "elapsed_usec": 50952191,
+        "frame_usec": 122196,
+        "since_previous_hitch_usec": 122196
+      },
+      {
+        "elapsed_usec": 51192449,
+        "frame_usec": 240258,
+        "since_previous_hitch_usec": 240258
+      },
+      {
+        "elapsed_usec": 51332271,
+        "frame_usec": 139822,
+        "since_previous_hitch_usec": 139822
+      },
+      {
+        "elapsed_usec": 51435035,
+        "frame_usec": 102764,
+        "since_previous_hitch_usec": 102764
+      },
+      {
+        "elapsed_usec": 51546844,
+        "frame_usec": 111809,
+        "since_previous_hitch_usec": 111809
+      },
+      {
+        "elapsed_usec": 51695015,
+        "frame_usec": 148171,
+        "since_previous_hitch_usec": 148171
+      },
+      {
+        "elapsed_usec": 51809339,
+        "frame_usec": 114324,
+        "since_previous_hitch_usec": 114324
+      },
+      {
+        "elapsed_usec": 51965602,
+        "frame_usec": 156263,
+        "since_previous_hitch_usec": 156263
+      },
+      {
+        "elapsed_usec": 52101934,
+        "frame_usec": 136332,
+        "since_previous_hitch_usec": 136332
+      },
+      {
+        "elapsed_usec": 52202805,
+        "frame_usec": 100871,
+        "since_previous_hitch_usec": 100871
+      },
+      {
+        "elapsed_usec": 52394897,
+        "frame_usec": 192092,
+        "since_previous_hitch_usec": 192092
+      },
+      {
+        "elapsed_usec": 52554841,
+        "frame_usec": 159944,
+        "since_previous_hitch_usec": 159944
+      },
+      {
+        "elapsed_usec": 52648166,
+        "frame_usec": 93325,
+        "since_previous_hitch_usec": 93325
+      },
+      {
+        "elapsed_usec": 52799928,
+        "frame_usec": 151762,
+        "since_previous_hitch_usec": 151762
+      },
+      {
+        "elapsed_usec": 52887383,
+        "frame_usec": 87455,
+        "since_previous_hitch_usec": 87455
+      },
+      {
+        "elapsed_usec": 53006195,
+        "frame_usec": 118812,
+        "since_previous_hitch_usec": 118812
+      },
+      {
+        "elapsed_usec": 53146330,
+        "frame_usec": 140135,
+        "since_previous_hitch_usec": 140135
+      },
+      {
+        "elapsed_usec": 53280544,
+        "frame_usec": 134214,
+        "since_previous_hitch_usec": 134214
+      },
+      {
+        "elapsed_usec": 53396189,
+        "frame_usec": 115645,
+        "since_previous_hitch_usec": 115645
+      },
+      {
+        "elapsed_usec": 53506910,
+        "frame_usec": 110721,
+        "since_previous_hitch_usec": 110721
+      },
+      {
+        "elapsed_usec": 53730232,
+        "frame_usec": 223322,
+        "since_previous_hitch_usec": 223322
+      },
+      {
+        "elapsed_usec": 53868531,
+        "frame_usec": 138299,
+        "since_previous_hitch_usec": 138299
+      },
+      {
+        "elapsed_usec": 53967231,
+        "frame_usec": 98700,
+        "since_previous_hitch_usec": 98700
+      },
+      {
+        "elapsed_usec": 54120518,
+        "frame_usec": 153287,
+        "since_previous_hitch_usec": 153287
+      },
+      {
+        "elapsed_usec": 54235735,
+        "frame_usec": 115217,
+        "since_previous_hitch_usec": 115217
+      },
+      {
+        "elapsed_usec": 54350962,
+        "frame_usec": 115227,
+        "since_previous_hitch_usec": 115227
+      },
+      {
+        "elapsed_usec": 54502940,
+        "frame_usec": 151978,
+        "since_previous_hitch_usec": 151978
+      },
+      {
+        "elapsed_usec": 54607433,
+        "frame_usec": 104493,
+        "since_previous_hitch_usec": 104493
+      },
+      {
+        "elapsed_usec": 54703722,
+        "frame_usec": 96289,
+        "since_previous_hitch_usec": 96289
+      },
+      {
+        "elapsed_usec": 54797733,
+        "frame_usec": 94011,
+        "since_previous_hitch_usec": 94011
+      },
+      {
+        "elapsed_usec": 54966131,
+        "frame_usec": 168398,
+        "since_previous_hitch_usec": 168398
+      },
+      {
+        "elapsed_usec": 55096527,
+        "frame_usec": 130396,
+        "since_previous_hitch_usec": 130396
+      },
+      {
+        "elapsed_usec": 55233075,
+        "frame_usec": 136548,
+        "since_previous_hitch_usec": 136548
+      },
+      {
+        "elapsed_usec": 55392349,
+        "frame_usec": 159274,
+        "since_previous_hitch_usec": 159274
+      },
+      {
+        "elapsed_usec": 55482801,
+        "frame_usec": 90452,
+        "since_previous_hitch_usec": 90452
+      },
+      {
+        "elapsed_usec": 55597225,
+        "frame_usec": 114424,
+        "since_previous_hitch_usec": 114424
+      },
+      {
+        "elapsed_usec": 55706055,
+        "frame_usec": 108830,
+        "since_previous_hitch_usec": 108830
+      },
+      {
+        "elapsed_usec": 55794518,
+        "frame_usec": 88463,
+        "since_previous_hitch_usec": 88463
+      },
+      {
+        "elapsed_usec": 55881457,
+        "frame_usec": 86939,
+        "since_previous_hitch_usec": 86939
+      },
+      {
+        "elapsed_usec": 55959529,
+        "frame_usec": 78072,
+        "since_previous_hitch_usec": 78072
+      },
+      {
+        "elapsed_usec": 56119734,
+        "frame_usec": 160205,
+        "since_previous_hitch_usec": 160205
+      },
+      {
+        "elapsed_usec": 56232083,
+        "frame_usec": 112349,
+        "since_previous_hitch_usec": 112349
+      },
+      {
+        "elapsed_usec": 56391003,
+        "frame_usec": 158920,
+        "since_previous_hitch_usec": 158920
+      },
+      {
+        "elapsed_usec": 56499171,
+        "frame_usec": 108168,
+        "since_previous_hitch_usec": 108168
+      },
+      {
+        "elapsed_usec": 56632825,
+        "frame_usec": 133654,
+        "since_previous_hitch_usec": 133654
+      },
+      {
+        "elapsed_usec": 56727693,
+        "frame_usec": 94868,
+        "since_previous_hitch_usec": 94868
+      },
+      {
+        "elapsed_usec": 56902266,
+        "frame_usec": 174573,
+        "since_previous_hitch_usec": 174573
+      },
+      {
+        "elapsed_usec": 57051611,
+        "frame_usec": 149345,
+        "since_previous_hitch_usec": 149345
+      },
+      {
+        "elapsed_usec": 57157747,
+        "frame_usec": 106136,
+        "since_previous_hitch_usec": 106136
+      },
+      {
+        "elapsed_usec": 57344226,
+        "frame_usec": 186479,
+        "since_previous_hitch_usec": 186479
+      },
+      {
+        "elapsed_usec": 57500842,
+        "frame_usec": 156616,
+        "since_previous_hitch_usec": 156616
+      },
+      {
+        "elapsed_usec": 57601479,
+        "frame_usec": 100637,
+        "since_previous_hitch_usec": 100637
+      },
+      {
+        "elapsed_usec": 57771425,
+        "frame_usec": 169946,
+        "since_previous_hitch_usec": 169946
+      },
+      {
+        "elapsed_usec": 57888994,
+        "frame_usec": 117569,
+        "since_previous_hitch_usec": 117569
+      },
+      {
+        "elapsed_usec": 57996824,
+        "frame_usec": 107830,
+        "since_previous_hitch_usec": 107830
+      },
+      {
+        "elapsed_usec": 58125304,
+        "frame_usec": 128480,
+        "since_previous_hitch_usec": 128480
+      },
+      {
+        "elapsed_usec": 58285304,
+        "frame_usec": 160000,
+        "since_previous_hitch_usec": 160000
+      },
+      {
+        "elapsed_usec": 58414375,
+        "frame_usec": 129071,
+        "since_previous_hitch_usec": 129071
+      },
+      {
+        "elapsed_usec": 58614807,
+        "frame_usec": 200432,
+        "since_previous_hitch_usec": 200432
+      },
+      {
+        "elapsed_usec": 58738870,
+        "frame_usec": 124063,
+        "since_previous_hitch_usec": 124063
+      },
+      {
+        "elapsed_usec": 58866614,
+        "frame_usec": 127744,
+        "since_previous_hitch_usec": 127744
+      },
+      {
+        "elapsed_usec": 59039801,
+        "frame_usec": 173187,
+        "since_previous_hitch_usec": 173187
+      },
+      {
+        "elapsed_usec": 59164734,
+        "frame_usec": 124933,
+        "since_previous_hitch_usec": 124933
+      },
+      {
+        "elapsed_usec": 59272016,
+        "frame_usec": 107282,
+        "since_previous_hitch_usec": 107282
+      },
+      {
+        "elapsed_usec": 59437415,
+        "frame_usec": 165399,
+        "since_previous_hitch_usec": 165399
+      },
+      {
+        "elapsed_usec": 59582528,
+        "frame_usec": 145113,
+        "since_previous_hitch_usec": 145113
+      },
+      {
+        "elapsed_usec": 59696767,
+        "frame_usec": 114239,
+        "since_previous_hitch_usec": 114239
+      },
+      {
+        "elapsed_usec": 59887458,
+        "frame_usec": 190691,
+        "since_previous_hitch_usec": 190691
+      },
+      {
+        "elapsed_usec": 60079576,
+        "frame_usec": 192118,
+        "since_previous_hitch_usec": 192118
+      },
+      {
+        "elapsed_usec": 61022357,
+        "frame_usec": 942781,
+        "since_previous_hitch_usec": 942781
+      },
+      {
+        "elapsed_usec": 61170761,
+        "frame_usec": 148404,
+        "since_previous_hitch_usec": 148404
+      },
+      {
+        "elapsed_usec": 61259355,
+        "frame_usec": 88594,
+        "since_previous_hitch_usec": 88594
+      },
+      {
+        "elapsed_usec": 61382226,
+        "frame_usec": 122871,
+        "since_previous_hitch_usec": 122871
+      },
+      {
+        "elapsed_usec": 61513232,
+        "frame_usec": 131006,
+        "since_previous_hitch_usec": 131006
+      },
+      {
+        "elapsed_usec": 61627143,
+        "frame_usec": 113911,
+        "since_previous_hitch_usec": 113911
+      },
+      {
+        "elapsed_usec": 61748648,
+        "frame_usec": 121505,
+        "since_previous_hitch_usec": 121505
+      },
+      {
+        "elapsed_usec": 61871101,
+        "frame_usec": 122453,
+        "since_previous_hitch_usec": 122453
+      },
+      {
+        "elapsed_usec": 62096649,
+        "frame_usec": 225548,
+        "since_previous_hitch_usec": 225548
+      },
+      {
+        "elapsed_usec": 62225133,
+        "frame_usec": 128484,
+        "since_previous_hitch_usec": 128484
+      },
+      {
+        "elapsed_usec": 62372778,
+        "frame_usec": 147645,
+        "since_previous_hitch_usec": 147645
+      },
+      {
+        "elapsed_usec": 62492944,
+        "frame_usec": 120166,
+        "since_previous_hitch_usec": 120166
+      },
+      {
+        "elapsed_usec": 62612915,
+        "frame_usec": 119971,
+        "since_previous_hitch_usec": 119971
+      },
+      {
+        "elapsed_usec": 62746762,
+        "frame_usec": 133847,
+        "since_previous_hitch_usec": 133847
+      },
+      {
+        "elapsed_usec": 62898057,
+        "frame_usec": 151295,
+        "since_previous_hitch_usec": 151295
+      },
+      {
+        "elapsed_usec": 63033643,
+        "frame_usec": 135586,
+        "since_previous_hitch_usec": 135586
+      },
+      {
+        "elapsed_usec": 63122044,
+        "frame_usec": 88401,
+        "since_previous_hitch_usec": 88401
+      },
+      {
+        "elapsed_usec": 63385578,
+        "frame_usec": 263534,
+        "since_previous_hitch_usec": 263534
+      },
+      {
+        "elapsed_usec": 63527316,
+        "frame_usec": 141738,
+        "since_previous_hitch_usec": 141738
+      },
+      {
+        "elapsed_usec": 63656021,
+        "frame_usec": 128705,
+        "since_previous_hitch_usec": 128705
+      },
+      {
+        "elapsed_usec": 63798920,
+        "frame_usec": 142899,
+        "since_previous_hitch_usec": 142899
+      },
+      {
+        "elapsed_usec": 63940963,
+        "frame_usec": 142043,
+        "since_previous_hitch_usec": 142043
+      },
+      {
+        "elapsed_usec": 64055291,
+        "frame_usec": 114328,
+        "since_previous_hitch_usec": 114328
+      },
+      {
+        "elapsed_usec": 64231940,
+        "frame_usec": 176649,
+        "since_previous_hitch_usec": 176649
+      },
+      {
+        "elapsed_usec": 64370491,
+        "frame_usec": 138551,
+        "since_previous_hitch_usec": 138551
+      },
+      {
+        "elapsed_usec": 64495036,
+        "frame_usec": 124545,
+        "since_previous_hitch_usec": 124545
+      },
+      {
+        "elapsed_usec": 64706934,
+        "frame_usec": 211898,
+        "since_previous_hitch_usec": 211898
+      },
+      {
+        "elapsed_usec": 64850539,
+        "frame_usec": 143605,
+        "since_previous_hitch_usec": 143605
+      },
+      {
+        "elapsed_usec": 64940084,
+        "frame_usec": 89545,
+        "since_previous_hitch_usec": 89545
+      },
+      {
+        "elapsed_usec": 65113311,
+        "frame_usec": 173227,
+        "since_previous_hitch_usec": 173227
+      },
+      {
+        "elapsed_usec": 65224193,
+        "frame_usec": 110882,
+        "since_previous_hitch_usec": 110882
+      },
+      {
+        "elapsed_usec": 65386514,
+        "frame_usec": 162321,
+        "since_previous_hitch_usec": 162321
+      },
+      {
+        "elapsed_usec": 65563695,
+        "frame_usec": 177181,
+        "since_previous_hitch_usec": 177181
+      },
+      {
+        "elapsed_usec": 65664623,
+        "frame_usec": 100928,
+        "since_previous_hitch_usec": 100928
+      },
+      {
+        "elapsed_usec": 65806586,
+        "frame_usec": 141963,
+        "since_previous_hitch_usec": 141963
+      },
+      {
+        "elapsed_usec": 65997146,
+        "frame_usec": 190560,
+        "since_previous_hitch_usec": 190560
+      },
+      {
+        "elapsed_usec": 66141871,
+        "frame_usec": 144725,
+        "since_previous_hitch_usec": 144725
+      },
+      {
+        "elapsed_usec": 66272910,
+        "frame_usec": 131039,
+        "since_previous_hitch_usec": 131039
+      },
+      {
+        "elapsed_usec": 66379398,
+        "frame_usec": 106488,
+        "since_previous_hitch_usec": 106488
+      },
+      {
+        "elapsed_usec": 66518136,
+        "frame_usec": 138738,
+        "since_previous_hitch_usec": 138738
+      },
+      {
+        "elapsed_usec": 66640204,
+        "frame_usec": 122068,
+        "since_previous_hitch_usec": 122068
+      },
+      {
+        "elapsed_usec": 66825701,
+        "frame_usec": 185497,
+        "since_previous_hitch_usec": 185497
+      },
+      {
+        "elapsed_usec": 66947300,
+        "frame_usec": 121599,
+        "since_previous_hitch_usec": 121599
+      },
+      {
+        "elapsed_usec": 67060413,
+        "frame_usec": 113113,
+        "since_previous_hitch_usec": 113113
+      },
+      {
+        "elapsed_usec": 67268135,
+        "frame_usec": 207722,
+        "since_previous_hitch_usec": 207722
+      },
+      {
+        "elapsed_usec": 67436364,
+        "frame_usec": 168229,
+        "since_previous_hitch_usec": 168229
+      },
+      {
+        "elapsed_usec": 67538941,
+        "frame_usec": 102577,
+        "since_previous_hitch_usec": 102577
+      },
+      {
+        "elapsed_usec": 67690033,
+        "frame_usec": 151092,
+        "since_previous_hitch_usec": 151092
+      },
+      {
+        "elapsed_usec": 67784287,
+        "frame_usec": 94254,
+        "since_previous_hitch_usec": 94254
+      },
+      {
+        "elapsed_usec": 67913064,
+        "frame_usec": 128777,
+        "since_previous_hitch_usec": 128777
+      },
+      {
+        "elapsed_usec": 68048566,
+        "frame_usec": 135502,
+        "since_previous_hitch_usec": 135502
+      },
+      {
+        "elapsed_usec": 68192402,
+        "frame_usec": 143836,
+        "since_previous_hitch_usec": 143836
+      },
+      {
+        "elapsed_usec": 68344581,
+        "frame_usec": 152179,
+        "since_previous_hitch_usec": 152179
+      },
+      {
+        "elapsed_usec": 68465787,
+        "frame_usec": 121206,
+        "since_previous_hitch_usec": 121206
+      },
+      {
+        "elapsed_usec": 68705947,
+        "frame_usec": 240160,
+        "since_previous_hitch_usec": 240160
+      },
+      {
+        "elapsed_usec": 68851213,
+        "frame_usec": 145266,
+        "since_previous_hitch_usec": 145266
+      },
+      {
+        "elapsed_usec": 68955201,
+        "frame_usec": 103988,
+        "since_previous_hitch_usec": 103988
+      },
+      {
+        "elapsed_usec": 69132964,
+        "frame_usec": 177763,
+        "since_previous_hitch_usec": 177763
+      },
+      {
+        "elapsed_usec": 69273145,
+        "frame_usec": 140181,
+        "since_previous_hitch_usec": 140181
+      },
+      {
+        "elapsed_usec": 69398234,
+        "frame_usec": 125089,
+        "since_previous_hitch_usec": 125089
+      },
+      {
+        "elapsed_usec": 69544983,
+        "frame_usec": 146749,
+        "since_previous_hitch_usec": 146749
+      },
+      {
+        "elapsed_usec": 69685889,
+        "frame_usec": 140906,
+        "since_previous_hitch_usec": 140906
+      },
+      {
+        "elapsed_usec": 70307649,
+        "frame_usec": 621760,
+        "since_previous_hitch_usec": 621760
+      },
+      {
+        "elapsed_usec": 70545538,
+        "frame_usec": 237889,
+        "since_previous_hitch_usec": 237889
+      },
+      {
+        "elapsed_usec": 70714383,
+        "frame_usec": 168845,
+        "since_previous_hitch_usec": 168845
+      },
+      {
+        "elapsed_usec": 70853475,
+        "frame_usec": 139092,
+        "since_previous_hitch_usec": 139092
+      },
+      {
+        "elapsed_usec": 71003933,
+        "frame_usec": 150458,
+        "since_previous_hitch_usec": 150458
+      },
+      {
+        "elapsed_usec": 71218614,
+        "frame_usec": 214681,
+        "since_previous_hitch_usec": 214681
+      },
+      {
+        "elapsed_usec": 71347021,
+        "frame_usec": 128407,
+        "since_previous_hitch_usec": 128407
+      },
+      {
+        "elapsed_usec": 71555716,
+        "frame_usec": 208695,
+        "since_previous_hitch_usec": 208695
+      },
+      {
+        "elapsed_usec": 71667866,
+        "frame_usec": 112150,
+        "since_previous_hitch_usec": 112150
+      },
+      {
+        "elapsed_usec": 71796152,
+        "frame_usec": 128286,
+        "since_previous_hitch_usec": 128286
+      },
+      {
+        "elapsed_usec": 72015351,
+        "frame_usec": 219199,
+        "since_previous_hitch_usec": 219199
+      },
+      {
+        "elapsed_usec": 73039361,
+        "frame_usec": 1024010,
+        "since_previous_hitch_usec": 1024010
+      },
+      {
+        "elapsed_usec": 73132968,
+        "frame_usec": 93607,
+        "since_previous_hitch_usec": 93607
+      },
+      {
+        "elapsed_usec": 73337496,
+        "frame_usec": 204528,
+        "since_previous_hitch_usec": 204528
+      },
+      {
+        "elapsed_usec": 73474052,
+        "frame_usec": 136556,
+        "since_previous_hitch_usec": 136556
+      },
+      {
+        "elapsed_usec": 73612012,
+        "frame_usec": 137960,
+        "since_previous_hitch_usec": 137960
+      },
+      {
+        "elapsed_usec": 73771194,
+        "frame_usec": 159182,
+        "since_previous_hitch_usec": 159182
+      },
+      {
+        "elapsed_usec": 74048889,
+        "frame_usec": 277695,
+        "since_previous_hitch_usec": 277695
+      },
+      {
+        "elapsed_usec": 74154426,
+        "frame_usec": 105537,
+        "since_previous_hitch_usec": 105537
+      },
+      {
+        "elapsed_usec": 74426739,
+        "frame_usec": 272313,
+        "since_previous_hitch_usec": 272313
+      },
+      {
+        "elapsed_usec": 74567595,
+        "frame_usec": 140856,
+        "since_previous_hitch_usec": 140856
+      },
+      {
+        "elapsed_usec": 74715509,
+        "frame_usec": 147914,
+        "since_previous_hitch_usec": 147914
+      },
+      {
+        "elapsed_usec": 74858580,
+        "frame_usec": 143071,
+        "since_previous_hitch_usec": 143071
+      },
+      {
+        "elapsed_usec": 75004303,
+        "frame_usec": 145723,
+        "since_previous_hitch_usec": 145723
+      },
+      {
+        "elapsed_usec": 75134179,
+        "frame_usec": 129876,
+        "since_previous_hitch_usec": 129876
+      },
+      {
+        "elapsed_usec": 75350969,
+        "frame_usec": 216790,
+        "since_previous_hitch_usec": 216790
+      },
+      {
+        "elapsed_usec": 75513096,
+        "frame_usec": 162127,
+        "since_previous_hitch_usec": 162127
+      },
+      {
+        "elapsed_usec": 75725987,
+        "frame_usec": 212891,
+        "since_previous_hitch_usec": 212891
+      },
+      {
+        "elapsed_usec": 75918918,
+        "frame_usec": 192931,
+        "since_previous_hitch_usec": 192931
+      },
+      {
+        "elapsed_usec": 76100657,
+        "frame_usec": 181739,
+        "since_previous_hitch_usec": 181739
+      },
+      {
+        "elapsed_usec": 76189416,
+        "frame_usec": 88759,
+        "since_previous_hitch_usec": 88759
+      },
+      {
+        "elapsed_usec": 76369257,
+        "frame_usec": 179841,
+        "since_previous_hitch_usec": 179841
+      },
+      {
+        "elapsed_usec": 76453956,
+        "frame_usec": 84699,
+        "since_previous_hitch_usec": 84699
+      },
+      {
+        "elapsed_usec": 76668865,
+        "frame_usec": 214909,
+        "since_previous_hitch_usec": 214909
+      },
+      {
+        "elapsed_usec": 76808538,
+        "frame_usec": 139673,
+        "since_previous_hitch_usec": 139673
+      },
+      {
+        "elapsed_usec": 76968305,
+        "frame_usec": 159767,
+        "since_previous_hitch_usec": 159767
+      },
+      {
+        "elapsed_usec": 77094584,
+        "frame_usec": 126279,
+        "since_previous_hitch_usec": 126279
+      },
+      {
+        "elapsed_usec": 77330749,
+        "frame_usec": 236165,
+        "since_previous_hitch_usec": 236165
+      },
+      {
+        "elapsed_usec": 77466637,
+        "frame_usec": 135888,
+        "since_previous_hitch_usec": 135888
+      },
+      {
+        "elapsed_usec": 77628300,
+        "frame_usec": 161663,
+        "since_previous_hitch_usec": 161663
+      },
+      {
+        "elapsed_usec": 77739411,
+        "frame_usec": 111111,
+        "since_previous_hitch_usec": 111111
+      },
+      {
+        "elapsed_usec": 77957120,
+        "frame_usec": 217709,
+        "since_previous_hitch_usec": 217709
+      },
+      {
+        "elapsed_usec": 78092014,
+        "frame_usec": 134894,
+        "since_previous_hitch_usec": 134894
+      },
+      {
+        "elapsed_usec": 78243093,
+        "frame_usec": 151079,
+        "since_previous_hitch_usec": 151079
+      },
+      {
+        "elapsed_usec": 78330152,
+        "frame_usec": 87059,
+        "since_previous_hitch_usec": 87059
+      },
+      {
+        "elapsed_usec": 78501512,
+        "frame_usec": 171360,
+        "since_previous_hitch_usec": 171360
+      },
+      {
+        "elapsed_usec": 78760417,
+        "frame_usec": 258905,
+        "since_previous_hitch_usec": 258905
+      },
+      {
+        "elapsed_usec": 78903055,
+        "frame_usec": 142638,
+        "since_previous_hitch_usec": 142638
+      },
+      {
+        "elapsed_usec": 79090600,
+        "frame_usec": 187545,
+        "since_previous_hitch_usec": 187545
+      },
+      {
+        "elapsed_usec": 79248503,
+        "frame_usec": 157903,
+        "since_previous_hitch_usec": 157903
+      },
+      {
+        "elapsed_usec": 79429086,
+        "frame_usec": 180583,
+        "since_previous_hitch_usec": 180583
+      },
+      {
+        "elapsed_usec": 79562667,
+        "frame_usec": 133581,
+        "since_previous_hitch_usec": 133581
+      },
+      {
+        "elapsed_usec": 79716986,
+        "frame_usec": 154319,
+        "since_previous_hitch_usec": 154319
+      },
+      {
+        "elapsed_usec": 79875624,
+        "frame_usec": 158638,
+        "since_previous_hitch_usec": 158638
+      },
+      {
+        "elapsed_usec": 80021398,
+        "frame_usec": 145774,
+        "since_previous_hitch_usec": 145774
+      },
+      {
+        "elapsed_usec": 80222432,
+        "frame_usec": 201034,
+        "since_previous_hitch_usec": 201034
+      },
+      {
+        "elapsed_usec": 80362691,
+        "frame_usec": 140259,
+        "since_previous_hitch_usec": 140259
+      },
+      {
+        "elapsed_usec": 80478151,
+        "frame_usec": 115460,
+        "since_previous_hitch_usec": 115460
+      },
+      {
+        "elapsed_usec": 80653168,
+        "frame_usec": 175017,
+        "since_previous_hitch_usec": 175017
+      },
+      {
+        "elapsed_usec": 80764327,
+        "frame_usec": 111159,
+        "since_previous_hitch_usec": 111159
+      },
+      {
+        "elapsed_usec": 80907011,
+        "frame_usec": 142684,
+        "since_previous_hitch_usec": 142684
+      },
+      {
+        "elapsed_usec": 81051779,
+        "frame_usec": 144768,
+        "since_previous_hitch_usec": 144768
+      },
+      {
+        "elapsed_usec": 81168218,
+        "frame_usec": 116439,
+        "since_previous_hitch_usec": 116439
+      },
+      {
+        "elapsed_usec": 81303937,
+        "frame_usec": 135719,
+        "since_previous_hitch_usec": 135719
+      },
+      {
+        "elapsed_usec": 81473813,
+        "frame_usec": 169876,
+        "since_previous_hitch_usec": 169876
+      },
+      {
+        "elapsed_usec": 81618932,
+        "frame_usec": 145119,
+        "since_previous_hitch_usec": 145119
+      },
+      {
+        "elapsed_usec": 81756056,
+        "frame_usec": 137124,
+        "since_previous_hitch_usec": 137124
+      },
+      {
+        "elapsed_usec": 81919193,
+        "frame_usec": 163137,
+        "since_previous_hitch_usec": 163137
+      },
+      {
+        "elapsed_usec": 82072495,
+        "frame_usec": 153302,
+        "since_previous_hitch_usec": 153302
+      },
+      {
+        "elapsed_usec": 82223615,
+        "frame_usec": 151120,
+        "since_previous_hitch_usec": 151120
+      },
+      {
+        "elapsed_usec": 82366541,
+        "frame_usec": 142926,
+        "since_previous_hitch_usec": 142926
+      },
+      {
+        "elapsed_usec": 82518025,
+        "frame_usec": 151484,
+        "since_previous_hitch_usec": 151484
+      },
+      {
+        "elapsed_usec": 82672193,
+        "frame_usec": 154168,
+        "since_previous_hitch_usec": 154168
+      },
+      {
+        "elapsed_usec": 82869664,
+        "frame_usec": 197471,
+        "since_previous_hitch_usec": 197471
+      },
+      {
+        "elapsed_usec": 82999387,
+        "frame_usec": 129723,
+        "since_previous_hitch_usec": 129723
+      },
+      {
+        "elapsed_usec": 83119287,
+        "frame_usec": 119900,
+        "since_previous_hitch_usec": 119900
+      },
+      {
+        "elapsed_usec": 83283577,
+        "frame_usec": 164290,
+        "since_previous_hitch_usec": 164290
+      },
+      {
+        "elapsed_usec": 83432254,
+        "frame_usec": 148677,
+        "since_previous_hitch_usec": 148677
+      },
+      {
+        "elapsed_usec": 83536995,
+        "frame_usec": 104741,
+        "since_previous_hitch_usec": 104741
+      },
+      {
+        "elapsed_usec": 83719163,
+        "frame_usec": 182168,
+        "since_previous_hitch_usec": 182168
+      },
+      {
+        "elapsed_usec": 83880320,
+        "frame_usec": 161157,
+        "since_previous_hitch_usec": 161157
+      },
+      {
+        "elapsed_usec": 84021710,
+        "frame_usec": 141390,
+        "since_previous_hitch_usec": 141390
+      },
+      {
+        "elapsed_usec": 84986896,
+        "frame_usec": 965186,
+        "since_previous_hitch_usec": 965186
+      },
+      {
+        "elapsed_usec": 85147847,
+        "frame_usec": 160951,
+        "since_previous_hitch_usec": 160951
+      },
+      {
+        "elapsed_usec": 85264194,
+        "frame_usec": 116347,
+        "since_previous_hitch_usec": 116347
+      },
+      {
+        "elapsed_usec": 85446072,
+        "frame_usec": 181878,
+        "since_previous_hitch_usec": 181878
+      },
+      {
+        "elapsed_usec": 85594845,
+        "frame_usec": 148773,
+        "since_previous_hitch_usec": 148773
+      },
+      {
+        "elapsed_usec": 85739557,
+        "frame_usec": 144712,
+        "since_previous_hitch_usec": 144712
+      },
+      {
+        "elapsed_usec": 85907402,
+        "frame_usec": 167845,
+        "since_previous_hitch_usec": 167845
+      },
+      {
+        "elapsed_usec": 86058377,
+        "frame_usec": 150975,
+        "since_previous_hitch_usec": 150975
+      },
+      {
+        "elapsed_usec": 86177312,
+        "frame_usec": 118935,
+        "since_previous_hitch_usec": 118935
+      },
+      {
+        "elapsed_usec": 86417493,
+        "frame_usec": 240181,
+        "since_previous_hitch_usec": 240181
+      },
+      {
+        "elapsed_usec": 86556715,
+        "frame_usec": 139222,
+        "since_previous_hitch_usec": 139222
+      },
+      {
+        "elapsed_usec": 86681830,
+        "frame_usec": 125115,
+        "since_previous_hitch_usec": 125115
+      },
+      {
+        "elapsed_usec": 86833203,
+        "frame_usec": 151373,
+        "since_previous_hitch_usec": 151373
+      },
+      {
+        "elapsed_usec": 86994550,
+        "frame_usec": 161347,
+        "since_previous_hitch_usec": 161347
+      },
+      {
+        "elapsed_usec": 87130971,
+        "frame_usec": 136421,
+        "since_previous_hitch_usec": 136421
+      },
+      {
+        "elapsed_usec": 87303319,
+        "frame_usec": 172348,
+        "since_previous_hitch_usec": 172348
+      },
+      {
+        "elapsed_usec": 87431323,
+        "frame_usec": 128004,
+        "since_previous_hitch_usec": 128004
+      },
+      {
+        "elapsed_usec": 87576256,
+        "frame_usec": 144933,
+        "since_previous_hitch_usec": 144933
+      },
+      {
+        "elapsed_usec": 87817560,
+        "frame_usec": 241304,
+        "since_previous_hitch_usec": 241304
+      },
+      {
+        "elapsed_usec": 87964985,
+        "frame_usec": 147425,
+        "since_previous_hitch_usec": 147425
+      },
+      {
+        "elapsed_usec": 88066555,
+        "frame_usec": 101570,
+        "since_previous_hitch_usec": 101570
+      },
+      {
+        "elapsed_usec": 88236313,
+        "frame_usec": 169758,
+        "since_previous_hitch_usec": 169758
+      },
+      {
+        "elapsed_usec": 88394896,
+        "frame_usec": 158583,
+        "since_previous_hitch_usec": 158583
+      },
+      {
+        "elapsed_usec": 88523741,
+        "frame_usec": 128845,
+        "since_previous_hitch_usec": 128845
+      },
+      {
+        "elapsed_usec": 88678632,
+        "frame_usec": 154891,
+        "since_previous_hitch_usec": 154891
+      },
+      {
+        "elapsed_usec": 88822859,
+        "frame_usec": 144227,
+        "since_previous_hitch_usec": 144227
+      },
+      {
+        "elapsed_usec": 88930765,
+        "frame_usec": 107906,
+        "since_previous_hitch_usec": 107906
+      },
+      {
+        "elapsed_usec": 89184225,
+        "frame_usec": 253460,
+        "since_previous_hitch_usec": 253460
+      },
+      {
+        "elapsed_usec": 89328460,
+        "frame_usec": 144235,
+        "since_previous_hitch_usec": 144235
+      },
+      {
+        "elapsed_usec": 89453328,
+        "frame_usec": 124868,
+        "since_previous_hitch_usec": 124868
+      },
+      {
+        "elapsed_usec": 89631825,
+        "frame_usec": 178497,
+        "since_previous_hitch_usec": 178497
+      },
+      {
+        "elapsed_usec": 89788805,
+        "frame_usec": 156980,
+        "since_previous_hitch_usec": 156980
+      },
+      {
+        "elapsed_usec": 89898396,
+        "frame_usec": 109591,
+        "since_previous_hitch_usec": 109591
+      },
+      {
+        "elapsed_usec": 90056529,
+        "frame_usec": 158133,
+        "since_previous_hitch_usec": 158133
+      }
+    ],
+    "probe_usec": {
+      "count": 462,
+      "max": 184,
+      "mean": 88.8679653679654,
+      "p50": 83,
+      "p90": 116,
+      "p95": 123,
+      "p99": 138
+    },
+    "simulation_seconds_per_wall_second": 0.664680146439251,
+    "simulation_ticks": 3592
+  },
+  "display": {
+    "content_scale_size": "(3440, 1440)",
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+    "display": "Windows",
+    "display_server_window_mode": 3,
+    "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+    "max_physics_steps_per_frame": 8,
+    "physics_ticks_per_second": 60,
+    "renderer": "forward_plus",
+    "rendering_driver": "vulkan",
+    "root_size": "(3440, 1440)",
+    "screen_index": 0,
+    "screen_refresh_rate": 240.085006713867,
+    "screen_size": "(3440, 1440)",
+    "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+    "time_scale": 1.0,
+    "viewport_size": "(3440.0, 1440.0)",
+    "vsync_mode": 1,
+    "window_has_focus": true,
+    "window_mode": 3,
+    "window_size": "(3440, 1440)"
+  },
+  "actions": [
+    {
+      "elapsed_usec": 12521263,
+      "go_accepted": true,
+      "move_accepted": true,
+      "target": "(-305.0, 568.0)"
+    },
+    {
+      "elapsed_usec": 24129008,
+      "go_accepted": true,
+      "move_accepted": true,
+      "target": "(-234.2563, 437.1281)"
+    },
+    {
+      "elapsed_usec": 36125180,
+      "go_accepted": true,
+      "move_accepted": true,
+      "target": "(-305.0, 568.0)"
+    },
+    {
+      "elapsed_usec": 48089930,
+      "go_accepted": true,
+      "move_accepted": true,
+      "target": "(-234.2563, 437.1281)"
+    },
+    {
+      "elapsed_usec": 60079576,
+      "go_accepted": true,
+      "move_accepted": true,
+      "target": "(-305.0, 568.0)"
+    },
+    {
+      "elapsed_usec": 72015351,
+      "go_accepted": true,
+      "move_accepted": true,
+      "target": "(-234.2563, 437.1281)"
+    },
+    {
+      "elapsed_usec": 84021710,
+      "go_accepted": true,
+      "move_accepted": true,
+      "target": "(-305.0, 568.0)"
+    }
+  ],
+  "metric_distributions": {
+    "frame_usec": {
+      "count": 462,
+      "mean": 194927.55194805196,
+      "max": 1138314,
+      "p50": 144933,
+      "p90": 223394,
+      "p95": 915949,
+      "p99": 1062998
+    },
+    "probe_usec": {
+      "count": 462,
+      "mean": 88.86796536796537,
+      "max": 184,
+      "p50": 83,
+      "p90": 116,
+      "p95": 123,
+      "p99": 138
+    },
+    "terrain_usec": {
+      "count": 462,
+      "mean": 5121.160173160173,
+      "max": 8807,
+      "p50": 4887,
+      "p90": 6655,
+      "p95": 7155,
+      "p99": 8223
+    },
+    "controller_usec": {
+      "count": 462,
+      "mean": 20547.545454545456,
+      "max": 448468,
+      "p50": 12642,
+      "p90": 55908,
+      "p95": 76480,
+      "p99": 94897
+    },
+    "engine_process_usec": {
+      "count": 462,
+      "mean": 200240.72294372294,
+      "max": 1039447,
+      "p50": 94374,
+      "p90": 868084,
+      "p95": 957263,
+      "p99": 999341
+    },
+    "engine_physics_usec": {
+      "count": 462,
+      "mean": 42353.21212121212,
+      "max": 72803,
+      "p50": 41997,
+      "p90": 47333,
+      "p95": 50562,
+      "p99": 72803
+    },
+    "draw_calls": {
+      "count": 462,
+      "mean": 1775.8593073593074,
+      "max": 1796.0,
+      "p50": 1766.0,
+      "p90": 1793.0,
+      "p95": 1794.0,
+      "p99": 1796.0
+    },
+    "command_queue": {
+      "count": 462,
+      "mean": 2.772727272727273,
+      "max": 7,
+      "p50": 2,
+      "p90": 6,
+      "p95": 6,
+      "p99": 7
+    },
+    "effect_queue": {
+      "count": 462,
+      "mean": 0.0,
+      "max": 0,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "nav_pending": {
+      "count": 462,
+      "mean": 0.0,
+      "max": 0,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "ticks_since_previous_frame": {
+      "count": 462,
+      "mean": 7.774891774891775,
+      "max": 8,
+      "p50": 8,
+      "p90": 8,
+      "p95": 8,
+      "p99": 8
+    },
+    "unit_count": {
+      "count": 462,
+      "mean": 11.0,
+      "max": 11,
+      "p50": 11,
+      "p90": 11,
+      "p95": 11,
+      "p99": 11
+    },
+    "frame.terrain_scopes_usec.dynamic_order_visuals_usec": {
+      "count": 462,
+      "mean": 1.8463203463203464,
+      "max": 7,
+      "p50": 2,
+      "p90": 2,
+      "p95": 3,
+      "p99": 3
+    },
+    "frame.terrain_scopes_usec.resize_subviewport_usec": {
+      "count": 462,
+      "mean": 8.303030303030303,
+      "max": 17,
+      "p50": 8,
+      "p90": 10,
+      "p95": 11,
+      "p99": 12
+    },
+    "frame.terrain_scopes_usec.unit_proxy_sync_usec": {
+      "count": 462,
+      "mean": 5107.047619047619,
+      "max": 8792,
+      "p50": 4874,
+      "p90": 6640,
+      "p95": 7142,
+      "p99": 8207
+    },
+    "frame.controller_scopes_usec.execution_updates_usec": {
+      "count": 462,
+      "mean": 3054.5454545454545,
+      "max": 448463,
+      "p50": 1081,
+      "p90": 1587,
+      "p95": 1678,
+      "p99": 1867
+    },
+    "frame.controller_scopes_usec.feedback_and_security_usec": {
+      "count": 462,
+      "mean": 6240.984848484848,
+      "max": 18621,
+      "p50": 27,
+      "p90": 14641,
+      "p95": 15812,
+      "p99": 17947
+    },
+    "frame.controller_scopes_usec.hud_heavy_usec": {
+      "count": 462,
+      "mean": 7044.768398268398,
+      "max": 94093,
+      "p50": 0,
+      "p90": 53280,
+      "p95": 62741,
+      "p99": 84339
+    },
+    "frame.controller_scopes_usec.hud_light_usec": {
+      "count": 462,
+      "mean": 6240.984848484848,
+      "max": 18621,
+      "p50": 27,
+      "p90": 14641,
+      "p95": 15812,
+      "p99": 17947
+    },
+    "frame.controller_scopes_usec.ui_refresh_usec": {
+      "count": 462,
+      "mean": 11248.43722943723,
+      "max": 94093,
+      "p50": 0,
+      "p90": 53280,
+      "p95": 62741,
+      "p99": 84339
+    },
+    "tick.simulation.total_usec": {
+      "count": 3593,
+      "mean": 12130.692457556359,
+      "max": 72270,
+      "p50": 2067,
+      "p90": 34499,
+      "p95": 38199,
+      "p99": 44287
+    },
+    "tick.simulation.command_apply_usec": {
+      "count": 3593,
+      "mean": 1040.3311995546896,
+      "max": 49801,
+      "p50": 774,
+      "p90": 1842,
+      "p95": 2249,
+      "p99": 3803
+    },
+    "tick.simulation.command_ordering_usec": {
+      "count": 3593,
+      "mean": 10.19677150013916,
+      "max": 120,
+      "p50": 8,
+      "p90": 20,
+      "p95": 23,
+      "p99": 33
+    },
+    "tick.simulation.command_queue_usec": {
+      "count": 3593,
+      "mean": 1052.49485109936,
+      "max": 49841,
+      "p50": 787,
+      "p90": 1862,
+      "p95": 2272,
+      "p99": 3830
+    },
+    "tick.simulation.effect_queue_usec": {
+      "count": 3593,
+      "mean": 1.8569440578903422,
+      "max": 11,
+      "p50": 2,
+      "p90": 3,
+      "p95": 3,
+      "p99": 4
+    },
+    "tick.simulation.local_avoidance_prepare_usec": {
+      "count": 3593,
+      "mean": 0.8338435847481214,
+      "max": 7,
+      "p50": 1,
+      "p90": 2,
+      "p95": 2,
+      "p99": 2
+    },
+    "tick.simulation.objective_capture_usec": {
+      "count": 3593,
+      "mean": 21.72362927915391,
+      "max": 124,
+      "p50": 19,
+      "p90": 31,
+      "p95": 34,
+      "p99": 39
+    },
+    "tick.simulation.snapshot_broadcast_usec": {
+      "count": 3593,
+      "mean": 0.7959922070693014,
+      "max": 87,
+      "p50": 1,
+      "p90": 1,
+      "p95": 2,
+      "p99": 2
+    },
+    "tick.simulation.tick_signal_emit_usec": {
+      "count": 3593,
+      "mean": 10874.265516281659,
+      "max": 52631,
+      "p50": 537,
+      "p90": 33413,
+      "p95": 36973,
+      "p99": 42660
+    },
+    "tick.simulation.unit_minimum_spacing_usec": {
+      "count": 3593,
+      "mean": 172.43167269691065,
+      "max": 607,
+      "p50": 129,
+      "p90": 251,
+      "p95": 344,
+      "p99": 443
+    },
+    "tick.combat.total_usec": {
+      "count": 3593,
+      "mean": 10646.046757584192,
+      "max": 52296,
+      "p50": 275,
+      "p90": 33128,
+      "p95": 36708,
+      "p99": 42338
+    },
+    "tick.combat.bleedout_queue_usec": {
+      "count": 3593,
+      "mean": 18.033676593376008,
+      "max": 197,
+      "p50": 15,
+      "p90": 26,
+      "p95": 28,
+      "p99": 33
+    },
+    "tick.combat.combat_fire_decision_usec": {
+      "count": 1198,
+      "mean": 2279.1060100166947,
+      "max": 4117,
+      "p50": 2077,
+      "p90": 3131,
+      "p95": 3346,
+      "p99": 3646
+    },
+    "tick.combat.combat_resolution_usec": {
+      "count": 1198,
+      "mean": 56.124373956594326,
+      "max": 168,
+      "p50": 54,
+      "p90": 74,
+      "p95": 79,
+      "p99": 103
+    },
+    "tick.combat.combat_visual_refresh_usec": {
+      "count": 1198,
+      "mean": 0.8806343906510852,
+      "max": 6,
+      "p50": 1,
+      "p90": 1,
+      "p95": 1,
+      "p99": 2
+    },
+    "tick.combat.contact_tracking_usec": {
+      "count": 3593,
+      "mean": 170.23712774839967,
+      "max": 441,
+      "p50": 146,
+      "p90": 251,
+      "p95": 259,
+      "p99": 283
+    },
+    "tick.combat.cooldowns_usec": {
+      "count": 3593,
+      "mean": 2.5324241580851656,
+      "max": 16,
+      "p50": 2,
+      "p90": 4,
+      "p95": 5,
+      "p99": 6
+    },
+    "tick.combat.detection_timers_usec": {
+      "count": 3593,
+      "mean": 29.294461452824937,
+      "max": 243,
+      "p50": 1,
+      "p90": 83,
+      "p95": 116,
+      "p99": 131
+    },
+    "tick.combat.enemy_advance_usec": {
+      "count": 1198,
+      "mean": 228.84140233722871,
+      "max": 468,
+      "p50": 201,
+      "p90": 329,
+      "p95": 343,
+      "p99": 369
+    },
+    "tick.combat.enemy_security_usec": {
+      "count": 1198,
+      "mean": 952.6969949916528,
+      "max": 1887,
+      "p50": 897,
+      "p90": 1350,
+      "p95": 1471,
+      "p99": 1706
+    },
+    "tick.combat.enemy_team_tactics_usec": {
+      "count": 1198,
+      "mean": 14393.686978297163,
+      "max": 25018,
+      "p50": 13625,
+      "p90": 18546,
+      "p95": 19780,
+      "p99": 21648
+    },
+    "tick.combat.fire_find_contact_pair_usec": {
+      "count": 1198,
+      "mean": 1677.2813021702839,
+      "max": 3269,
+      "p50": 1530,
+      "p90": 2318,
+      "p95": 2511,
+      "p99": 2781
+    },
+    "tick.combat.fire_no_contact_diagnostic_usec": {
+      "count": 1198,
+      "mean": 598.619365609349,
+      "max": 1143,
+      "p50": 537,
+      "p90": 824,
+      "p95": 864,
+      "p99": 964
+    },
+    "tick.combat.flank_vulnerability_usec": {
+      "count": 1198,
+      "mean": 0.9232053422370617,
+      "max": 9,
+      "p50": 1,
+      "p90": 1,
+      "p95": 2,
+      "p99": 2
+    },
+    "tick.combat.friendly_standard_behavior_usec": {
+      "count": 1198,
+      "mean": 9.160267111853088,
+      "max": 134,
+      "p50": 8,
+      "p90": 13,
+      "p95": 14,
+      "p99": 17
+    },
+    "tick.combat.leadership_usec": {
+      "count": 3593,
+      "mean": 1.0183690509323684,
+      "max": 12,
+      "p50": 1,
+      "p90": 2,
+      "p95": 2,
+      "p99": 3
+    },
+    "tick.combat.medic_support_usec": {
+      "count": 1198,
+      "mean": 344.87312186978295,
+      "max": 642,
+      "p50": 300,
+      "p90": 496,
+      "p95": 511,
+      "p99": 568
+    },
+    "tick.combat.multiplayer_snapshot_context_usec": {
+      "count": 1198,
+      "mean": 817.1043405676127,
+      "max": 1521,
+      "p50": 746,
+      "p90": 1135,
+      "p95": 1179,
+      "p99": 1288
+    },
+    "tick.combat.overwatch_security_usec": {
+      "count": 1198,
+      "mean": 12084.558430717863,
+      "max": 20006,
+      "p50": 11360,
+      "p90": 15223,
+      "p95": 16445,
+      "p99": 17927
+    },
+    "tick.combat.status_update_usec": {
+      "count": 1198,
+      "mean": 59.568447412353926,
+      "max": 163,
+      "p50": 55,
+      "p90": 79,
+      "p95": 83,
+      "p99": 92
+    }
+  },
+  "ranked_scope_means": [
+    [
+      "tick.combat.enemy_team_tactics_usec",
+      14393.686978297163
+    ],
+    [
+      "tick.simulation.total_usec",
+      12130.692457556359
+    ],
+    [
+      "tick.combat.overwatch_security_usec",
+      12084.558430717863
+    ],
+    [
+      "frame.controller_scopes_usec.ui_refresh_usec",
+      11248.43722943723
+    ],
+    [
+      "tick.simulation.tick_signal_emit_usec",
+      10874.265516281659
+    ],
+    [
+      "tick.combat.total_usec",
+      10646.046757584192
+    ],
+    [
+      "frame.controller_scopes_usec.hud_heavy_usec",
+      7044.768398268398
+    ],
+    [
+      "frame.controller_scopes_usec.feedback_and_security_usec",
+      6240.984848484848
+    ],
+    [
+      "frame.controller_scopes_usec.hud_light_usec",
+      6240.984848484848
+    ],
+    [
+      "frame.terrain_scopes_usec.unit_proxy_sync_usec",
+      5107.047619047619
+    ],
+    [
+      "frame.controller_scopes_usec.execution_updates_usec",
+      3054.5454545454545
+    ],
+    [
+      "tick.combat.combat_fire_decision_usec",
+      2279.1060100166947
+    ],
+    [
+      "tick.combat.fire_find_contact_pair_usec",
+      1677.2813021702839
+    ],
+    [
+      "tick.simulation.command_queue_usec",
+      1052.49485109936
+    ],
+    [
+      "tick.simulation.command_apply_usec",
+      1040.3311995546896
+    ],
+    [
+      "tick.combat.enemy_security_usec",
+      952.6969949916528
+    ],
+    [
+      "tick.combat.multiplayer_snapshot_context_usec",
+      817.1043405676127
+    ],
+    [
+      "tick.combat.fire_no_contact_diagnostic_usec",
+      598.619365609349
+    ],
+    [
+      "tick.combat.medic_support_usec",
+      344.87312186978295
+    ],
+    [
+      "tick.combat.enemy_advance_usec",
+      228.84140233722871
+    ],
+    [
+      "tick.simulation.unit_minimum_spacing_usec",
+      172.43167269691065
+    ],
+    [
+      "tick.combat.contact_tracking_usec",
+      170.23712774839967
+    ],
+    [
+      "tick.combat.status_update_usec",
+      59.568447412353926
+    ],
+    [
+      "tick.combat.combat_resolution_usec",
+      56.124373956594326
+    ],
+    [
+      "tick.combat.detection_timers_usec",
+      29.294461452824937
+    ]
+  ],
+  "top_frames": [
+    {
+      "elapsed_usec": 24129008,
+      "frame_usec": 1138314,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 97152,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          88295
+        ],
+        [
+          "command_queue_usec",
+          6574
+        ],
+        [
+          "command_apply_usec",
+          6492
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          2046
+        ],
+        [
+          "objective_capture_usec",
+          165
+        ],
+        [
+          "command_ordering_usec",
+          71
+        ],
+        [
+          "effect_queue_usec",
+          13
+        ],
+        [
+          "snapshot_broadcast_usec",
+          4
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          38733
+        ],
+        [
+          "overwatch_security_usec",
+          33408
+        ],
+        [
+          "combat_fire_decision_usec",
+          6505
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4989
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2149
+        ],
+        [
+          "enemy_security_usec",
+          2099
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1507
+        ],
+        [
+          "contact_tracking_usec",
+          1240
+        ]
+      ],
+      "terrain_usec": 6853,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 3,
+        "resize_subviewport_usec": 10,
+        "unit_proxy_sync_usec": 6836
+      },
+      "controller_usec": 24801,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1667,
+        "feedback_and_security_usec": 5,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 5,
+        "ui_refresh_usec": 23126
+      },
+      "draw_calls": 1790.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 15501521,
+      "frame_usec": 1112969,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 109928,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          100385
+        ],
+        [
+          "command_queue_usec",
+          7140
+        ],
+        [
+          "command_apply_usec",
+          7050
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          2163
+        ],
+        [
+          "objective_capture_usec",
+          158
+        ],
+        [
+          "command_ordering_usec",
+          74
+        ],
+        [
+          "effect_queue_usec",
+          14
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          41557
+        ],
+        [
+          "overwatch_security_usec",
+          40567
+        ],
+        [
+          "combat_fire_decision_usec",
+          8233
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          6164
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2733
+        ],
+        [
+          "enemy_security_usec",
+          2120
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          2060
+        ],
+        [
+          "contact_tracking_usec",
+          1222
+        ]
+      ],
+      "terrain_usec": 4713,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 7,
+        "unit_proxy_sync_usec": 4699
+      },
+      "controller_usec": 63210,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1678,
+        "feedback_and_security_usec": 26,
+        "hud_heavy_usec": 61502,
+        "hud_light_usec": 26,
+        "ui_refresh_usec": 61502
+      },
+      "draw_calls": 1790.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 12521263,
+      "frame_usec": 1109989,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 94648,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          80428
+        ],
+        [
+          "command_queue_usec",
+          10891
+        ],
+        [
+          "command_apply_usec",
+          10745
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          3015
+        ],
+        [
+          "objective_capture_usec",
+          214
+        ],
+        [
+          "command_ordering_usec",
+          127
+        ],
+        [
+          "effect_queue_usec",
+          20
+        ],
+        [
+          "snapshot_broadcast_usec",
+          8
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          34691
+        ],
+        [
+          "overwatch_security_usec",
+          29592
+        ],
+        [
+          "combat_fire_decision_usec",
+          5936
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4510
+        ],
+        [
+          "enemy_security_usec",
+          2148
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1947
+        ],
+        [
+          "contact_tracking_usec",
+          1587
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1418
+        ]
+      ],
+      "terrain_usec": 5392,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 1,
+        "resize_subviewport_usec": 9,
+        "unit_proxy_sync_usec": 5378
+      },
+      "controller_usec": 12327,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1022,
+        "feedback_and_security_usec": 11301,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 11301,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1788.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 4266364,
+      "frame_usec": 1066491,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 73351,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          64093
+        ],
+        [
+          "command_queue_usec",
+          8004
+        ],
+        [
+          "command_apply_usec",
+          7904
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1010
+        ],
+        [
+          "objective_capture_usec",
+          169
+        ],
+        [
+          "command_ordering_usec",
+          87
+        ],
+        [
+          "effect_queue_usec",
+          12
+        ],
+        [
+          "snapshot_broadcast_usec",
+          8
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          26623
+        ],
+        [
+          "overwatch_security_usec",
+          25746
+        ],
+        [
+          "combat_fire_decision_usec",
+          4117
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          3118
+        ],
+        [
+          "enemy_security_usec",
+          1414
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1388
+        ],
+        [
+          "contact_tracking_usec",
+          1284
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          993
+        ]
+      ],
+      "terrain_usec": 5854,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 3,
+        "resize_subviewport_usec": 10,
+        "unit_proxy_sync_usec": 5839
+      },
+      "controller_usec": 1183,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1176,
+        "feedback_and_security_usec": 4,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 4,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1788.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 17686301,
+      "frame_usec": 1062998,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 123112,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          111869
+        ],
+        [
+          "command_queue_usec",
+          8529
+        ],
+        [
+          "command_apply_usec",
+          8412
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          2441
+        ],
+        [
+          "objective_capture_usec",
+          191
+        ],
+        [
+          "command_ordering_usec",
+          99
+        ],
+        [
+          "effect_queue_usec",
+          15
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          54812
+        ],
+        [
+          "overwatch_security_usec",
+          37156
+        ],
+        [
+          "combat_fire_decision_usec",
+          8202
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          5941
+        ],
+        [
+          "enemy_security_usec",
+          2978
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2808
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          2253
+        ],
+        [
+          "contact_tracking_usec",
+          1298
+        ]
+      ],
+      "terrain_usec": 5171,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 9,
+        "unit_proxy_sync_usec": 5156
+      },
+      "controller_usec": 1169,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1160,
+        "feedback_and_security_usec": 5,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 5,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1790.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 22062079,
+      "frame_usec": 1058001,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 129889,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          114997
+        ],
+        [
+          "command_queue_usec",
+          11340
+        ],
+        [
+          "command_apply_usec",
+          11202
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          3226
+        ],
+        [
+          "objective_capture_usec",
+          225
+        ],
+        [
+          "command_ordering_usec",
+          118
+        ],
+        [
+          "effect_queue_usec",
+          15
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          10
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          49567
+        ],
+        [
+          "overwatch_security_usec",
+          42247
+        ],
+        [
+          "combat_fire_decision_usec",
+          9588
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          7231
+        ],
+        [
+          "enemy_security_usec",
+          3229
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2921
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          2345
+        ],
+        [
+          "contact_tracking_usec",
+          1886
+        ]
+      ],
+      "terrain_usec": 4937,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 9,
+        "unit_proxy_sync_usec": 4921
+      },
+      "controller_usec": 16043,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1396,
+        "feedback_and_security_usec": 14643,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 14643,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1790.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 10333133,
+      "frame_usec": 1048802,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 77166,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          67432
+        ],
+        [
+          "command_queue_usec",
+          7420
+        ],
+        [
+          "command_apply_usec",
+          7304
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          2068
+        ],
+        [
+          "objective_capture_usec",
+          164
+        ],
+        [
+          "command_ordering_usec",
+          101
+        ],
+        [
+          "effect_queue_usec",
+          15
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          10
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          29599
+        ],
+        [
+          "overwatch_security_usec",
+          24842
+        ],
+        [
+          "combat_fire_decision_usec",
+          4988
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          3894
+        ],
+        [
+          "enemy_security_usec",
+          1582
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1475
+        ],
+        [
+          "contact_tracking_usec",
+          1319
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1090
+        ]
+      ],
+      "terrain_usec": 4304,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 8,
+        "unit_proxy_sync_usec": 4292
+      },
+      "controller_usec": 30185,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1048,
+        "feedback_and_security_usec": 11842,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 11842,
+        "ui_refresh_usec": 17292
+      },
+      "draw_calls": 1788.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 19751869,
+      "frame_usec": 1047173,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 110916,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          101114
+        ],
+        [
+          "command_queue_usec",
+          7555
+        ],
+        [
+          "command_apply_usec",
+          7456
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          2012
+        ],
+        [
+          "objective_capture_usec",
+          155
+        ],
+        [
+          "command_ordering_usec",
+          85
+        ],
+        [
+          "effect_queue_usec",
+          16
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          7
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          41701
+        ],
+        [
+          "overwatch_security_usec",
+          40382
+        ],
+        [
+          "combat_fire_decision_usec",
+          8568
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          6525
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          3149
+        ],
+        [
+          "enemy_security_usec",
+          2162
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          2033
+        ],
+        [
+          "contact_tracking_usec",
+          1182
+        ]
+      ],
+      "terrain_usec": 4332,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 8,
+        "unit_proxy_sync_usec": 4319
+      },
+      "controller_usec": 35702,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 978,
+        "feedback_and_security_usec": 11155,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 11155,
+        "ui_refresh_usec": 23565
+      },
+      "draw_calls": 1790.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 38073045,
+      "frame_usec": 1031916,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 119489,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          108956
+        ],
+        [
+          "command_queue_usec",
+          8978
+        ],
+        [
+          "command_apply_usec",
+          8867
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1260
+        ],
+        [
+          "objective_capture_usec",
+          206
+        ],
+        [
+          "command_ordering_usec",
+          93
+        ],
+        [
+          "effect_queue_usec",
+          17
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          7
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          49309
+        ],
+        [
+          "overwatch_security_usec",
+          39599
+        ],
+        [
+          "combat_fire_decision_usec",
+          7668
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          5680
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          3137
+        ],
+        [
+          "enemy_security_usec",
+          2727
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1977
+        ],
+        [
+          "contact_tracking_usec",
+          1551
+        ]
+      ],
+      "terrain_usec": 5059,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 7,
+        "unit_proxy_sync_usec": 5047
+      },
+      "controller_usec": 19162,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 963,
+        "feedback_and_security_usec": 14,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 14,
+        "ui_refresh_usec": 18181
+      },
+      "draw_calls": 1766.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 13550449,
+      "frame_usec": 1029186,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 110985,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          100333
+        ],
+        [
+          "command_queue_usec",
+          8232
+        ],
+        [
+          "command_apply_usec",
+          8126
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          2185
+        ],
+        [
+          "objective_capture_usec",
+          161
+        ],
+        [
+          "command_ordering_usec",
+          90
+        ],
+        [
+          "effect_queue_usec",
+          13
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          9
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          42683
+        ],
+        [
+          "overwatch_security_usec",
+          38535
+        ],
+        [
+          "combat_fire_decision_usec",
+          8178
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          6228
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2665
+        ],
+        [
+          "enemy_security_usec",
+          2544
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1941
+        ],
+        [
+          "contact_tracking_usec",
+          1274
+        ]
+      ],
+      "terrain_usec": 3973,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 3962
+      },
+      "controller_usec": 18665,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1237,
+        "feedback_and_security_usec": 20,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 20,
+        "ui_refresh_usec": 17406
+      },
+      "draw_calls": 1793.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 6211590,
+      "frame_usec": 1028942,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 93117,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          86827
+        ],
+        [
+          "command_queue_usec",
+          5119
+        ],
+        [
+          "command_apply_usec",
+          5042
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          966
+        ],
+        [
+          "objective_capture_usec",
+          140
+        ],
+        [
+          "command_ordering_usec",
+          65
+        ],
+        [
+          "effect_queue_usec",
+          16
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          37511
+        ],
+        [
+          "overwatch_security_usec",
+          32719
+        ],
+        [
+          "combat_fire_decision_usec",
+          7435
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          5601
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2162
+        ],
+        [
+          "enemy_security_usec",
+          2091
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1824
+        ],
+        [
+          "contact_tracking_usec",
+          1140
+        ]
+      ],
+      "terrain_usec": 5186,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 11,
+        "unit_proxy_sync_usec": 5167
+      },
+      "controller_usec": 12642,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1189,
+        "feedback_and_security_usec": 11449,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 11449,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1788.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 28988391,
+      "frame_usec": 1028225,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 77230,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          69400
+        ],
+        [
+          "command_queue_usec",
+          6364
+        ],
+        [
+          "command_apply_usec",
+          6272
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1210
+        ],
+        [
+          "objective_capture_usec",
+          177
+        ],
+        [
+          "command_ordering_usec",
+          75
+        ],
+        [
+          "effect_queue_usec",
+          13
+        ],
+        [
+          "snapshot_broadcast_usec",
+          9
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          32955
+        ],
+        [
+          "overwatch_security_usec",
+          23716
+        ],
+        [
+          "combat_fire_decision_usec",
+          4119
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          3032
+        ],
+        [
+          "enemy_security_usec",
+          1960
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1476
+        ],
+        [
+          "contact_tracking_usec",
+          1396
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1081
+        ]
+      ],
+      "terrain_usec": 4831,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 8,
+        "unit_proxy_sync_usec": 4818
+      },
+      "controller_usec": 89576,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1611,
+        "feedback_and_security_usec": 13869,
+        "hud_heavy_usec": 74093,
+        "hud_light_usec": 13869,
+        "ui_refresh_usec": 74093
+      },
+      "draw_calls": 1789.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 73039361,
+      "frame_usec": 1024010,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 86548,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          71262
+        ],
+        [
+          "command_queue_usec",
+          13600
+        ],
+        [
+          "command_apply_usec",
+          13451
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1395
+        ],
+        [
+          "objective_capture_usec",
+          200
+        ],
+        [
+          "command_ordering_usec",
+          129
+        ],
+        [
+          "effect_queue_usec",
+          20
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          9
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          32161
+        ],
+        [
+          "overwatch_security_usec",
+          24074
+        ],
+        [
+          "combat_fire_decision_usec",
+          5271
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          3796
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1922
+        ],
+        [
+          "enemy_security_usec",
+          1750
+        ],
+        [
+          "contact_tracking_usec",
+          1602
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1469
+        ]
+      ],
+      "terrain_usec": 6525,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 6514
+      },
+      "controller_usec": 15998,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1153,
+        "feedback_and_security_usec": 14840,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 14840,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1766.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 1925922,
+      "frame_usec": 1019937,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 110098,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          97742
+        ],
+        [
+          "command_queue_usec",
+          10769
+        ],
+        [
+          "command_apply_usec",
+          10647
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1330
+        ],
+        [
+          "objective_capture_usec",
+          175
+        ],
+        [
+          "command_ordering_usec",
+          104
+        ],
+        [
+          "effect_queue_usec",
+          15
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          8
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          46983
+        ],
+        [
+          "overwatch_security_usec",
+          32514
+        ],
+        [
+          "combat_fire_decision_usec",
+          7024
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          5259
+        ],
+        [
+          "enemy_security_usec",
+          2845
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2243
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1756
+        ],
+        [
+          "contact_tracking_usec",
+          1422
+        ]
+      ],
+      "terrain_usec": 4983,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 9,
+        "unit_proxy_sync_usec": 4969
+      },
+      "controller_usec": 1140,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1132,
+        "feedback_and_security_usec": 4,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 4,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1787.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 31497581,
+      "frame_usec": 1011237,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 97531,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          87477
+        ],
+        [
+          "command_queue_usec",
+          8836
+        ],
+        [
+          "command_apply_usec",
+          8731
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          995
+        ],
+        [
+          "objective_capture_usec",
+          153
+        ],
+        [
+          "command_ordering_usec",
+          87
+        ],
+        [
+          "effect_queue_usec",
+          12
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          5
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          41392
+        ],
+        [
+          "overwatch_security_usec",
+          30896
+        ],
+        [
+          "combat_fire_decision_usec",
+          6048
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4544
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2146
+        ],
+        [
+          "enemy_security_usec",
+          2101
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1495
+        ],
+        [
+          "contact_tracking_usec",
+          1163
+        ]
+      ],
+      "terrain_usec": 5054,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 8,
+        "unit_proxy_sync_usec": 5041
+      },
+      "controller_usec": 12494,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1111,
+        "feedback_and_security_usec": 11378,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 11378,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1788.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 8212365,
+      "frame_usec": 1007019,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 109255,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          98881
+        ],
+        [
+          "command_queue_usec",
+          7832
+        ],
+        [
+          "command_apply_usec",
+          7724
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          2298
+        ],
+        [
+          "objective_capture_usec",
+          169
+        ],
+        [
+          "command_ordering_usec",
+          92
+        ],
+        [
+          "effect_queue_usec",
+          14
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          7
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          42853
+        ],
+        [
+          "overwatch_security_usec",
+          37350
+        ],
+        [
+          "combat_fire_decision_usec",
+          7669
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          5660
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2566
+        ],
+        [
+          "enemy_security_usec",
+          2458
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          2001
+        ],
+        [
+          "contact_tracking_usec",
+          1434
+        ]
+      ],
+      "terrain_usec": 5306,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 8,
+        "unit_proxy_sync_usec": 5293
+      },
+      "controller_usec": 12069,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1065,
+        "feedback_and_security_usec": 11000,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 11000,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1788.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 49079516,
+      "frame_usec": 989586,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 101867,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          94917
+        ],
+        [
+          "command_queue_usec",
+          5644
+        ],
+        [
+          "command_apply_usec",
+          5570
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1067
+        ],
+        [
+          "objective_capture_usec",
+          167
+        ],
+        [
+          "command_ordering_usec",
+          58
+        ],
+        [
+          "effect_queue_usec",
+          14
+        ],
+        [
+          "snapshot_broadcast_usec",
+          7
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "overwatch_security_usec",
+          38735
+        ],
+        [
+          "enemy_team_tactics_usec",
+          37794
+        ],
+        [
+          "combat_fire_decision_usec",
+          7920
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          6016
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2755
+        ],
+        [
+          "enemy_security_usec",
+          2461
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1895
+        ],
+        [
+          "contact_tracking_usec",
+          1277
+        ]
+      ],
+      "terrain_usec": 5511,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 3,
+        "resize_subviewport_usec": 7,
+        "unit_proxy_sync_usec": 5497
+      },
+      "controller_usec": 18311,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1136,
+        "feedback_and_security_usec": 18,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 18,
+        "ui_refresh_usec": 17153
+      },
+      "draw_calls": 1765.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 25113665,
+      "frame_usec": 984657,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 92065,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          80276
+        ],
+        [
+          "command_queue_usec",
+          8857
+        ],
+        [
+          "command_apply_usec",
+          8740
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          2635
+        ],
+        [
+          "objective_capture_usec",
+          206
+        ],
+        [
+          "command_ordering_usec",
+          98
+        ],
+        [
+          "effect_queue_usec",
+          15
+        ],
+        [
+          "snapshot_broadcast_usec",
+          9
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          34112
+        ],
+        [
+          "overwatch_security_usec",
+          30917
+        ],
+        [
+          "combat_fire_decision_usec",
+          5635
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4252
+        ],
+        [
+          "enemy_security_usec",
+          1956
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1626
+        ],
+        [
+          "contact_tracking_usec",
+          1557
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1376
+        ]
+      ],
+      "terrain_usec": 5903,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 3,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 5890
+      },
+      "controller_usec": 16610,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1011,
+        "feedback_and_security_usec": 15595,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 15595,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1792.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 33555325,
+      "frame_usec": 982599,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 82869,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          71001
+        ],
+        [
+          "command_queue_usec",
+          9665
+        ],
+        [
+          "command_apply_usec",
+          9555
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1967
+        ],
+        [
+          "objective_capture_usec",
+          158
+        ],
+        [
+          "command_ordering_usec",
+          94
+        ],
+        [
+          "effect_queue_usec",
+          16
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          35648
+        ],
+        [
+          "overwatch_security_usec",
+          22690
+        ],
+        [
+          "combat_fire_decision_usec",
+          4942
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          3862
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1496
+        ],
+        [
+          "enemy_security_usec",
+          1446
+        ],
+        [
+          "contact_tracking_usec",
+          1175
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1071
+        ]
+      ],
+      "terrain_usec": 4757,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 1,
+        "resize_subviewport_usec": 9,
+        "unit_proxy_sync_usec": 4742
+      },
+      "controller_usec": 11233,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 943,
+        "feedback_and_security_usec": 10288,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 10288,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1785.0,
+      "nav_pending": 0
+    },
+    {
+      "elapsed_usec": 27112065,
+      "frame_usec": 967128,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 100848,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          92831
+        ],
+        [
+          "command_queue_usec",
+          6310
+        ],
+        [
+          "command_apply_usec",
+          6217
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1476
+        ],
+        [
+          "objective_capture_usec",
+          152
+        ],
+        [
+          "command_ordering_usec",
+          80
+        ],
+        [
+          "effect_queue_usec",
+          15
+        ],
+        [
+          "snapshot_broadcast_usec",
+          7
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          42083
+        ],
+        [
+          "overwatch_security_usec",
+          34100
+        ],
+        [
+          "combat_fire_decision_usec",
+          7034
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          5314
+        ],
+        [
+          "enemy_security_usec",
+          2188
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2141
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1710
+        ],
+        [
+          "contact_tracking_usec",
+          1254
+        ]
+      ],
+      "terrain_usec": 4669,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 5,
+        "unit_proxy_sync_usec": 4658
+      },
+      "controller_usec": 1301,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1279,
+        "feedback_and_security_usec": 18,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 18,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1789.0,
+      "nav_pending": 0
+    }
+  ],
+  "top_navigation_queries": [
+    {
+      "elapsed_usec": 73911168,
+      "candidate_count_estimate": 19,
+      "command_type": "move_to_position",
+      "cover_sum": 6.24,
+      "duration_usec": 36865,
+      "expanded_node_estimate": 19,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(-2, 5)",
+      "mean_cover": 0.328421052631579,
+      "mean_exposure": 0.0,
+      "path_cost": 55.4496519437224,
+      "path_grid_count": 19,
+      "path_length_grid": 19,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 4445,
+      "to_grid": "(1, 15)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 33818864,
+      "candidate_count_estimate": 17,
+      "command_type": "move_to_position",
+      "cover_sum": 7.68,
+      "duration_usec": 31045,
+      "expanded_node_estimate": 17,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(0, 11)",
+      "mean_cover": 0.451764705882353,
+      "mean_exposure": 0.0,
+      "path_cost": 20.5169333333333,
+      "path_grid_count": 17,
+      "path_length_grid": 17,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 2544,
+      "to_grid": "(0, 5)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 76590862,
+      "candidate_count_estimate": 18,
+      "command_type": "move_to_position",
+      "cover_sum": 5.76,
+      "duration_usec": 30108,
+      "expanded_node_estimate": 18,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(-3, 5)",
+      "mean_cover": 0.32,
+      "mean_exposure": 0.0,
+      "path_cost": 52.7992366791326,
+      "path_grid_count": 18,
+      "path_length_grid": 18,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 4569,
+      "to_grid": "(1, 15)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 36968728,
+      "candidate_count_estimate": 16,
+      "command_type": "move_to_position",
+      "cover_sum": 7.68,
+      "duration_usec": 29342,
+      "expanded_node_estimate": 16,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(-1, 11)",
+      "mean_cover": 0.48,
+      "mean_exposure": 0.0,
+      "path_cost": 19.2426666666667,
+      "path_grid_count": 16,
+      "path_length_grid": 16,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 2635,
+      "to_grid": "(0, 5)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 70595500,
+      "candidate_count_estimate": 20,
+      "command_type": "move_to_position",
+      "cover_sum": 6.72,
+      "duration_usec": 29030,
+      "expanded_node_estimate": 20,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(-1, 5)",
+      "mean_cover": 0.336,
+      "mean_exposure": 0.0,
+      "path_cost": 57.616856916212,
+      "path_grid_count": 20,
+      "path_length_grid": 20,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 4325,
+      "to_grid": "(1, 15)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 30405933,
+      "candidate_count_estimate": 17,
+      "command_type": "move_to_position",
+      "cover_sum": 8.16,
+      "duration_usec": 28216,
+      "expanded_node_estimate": 17,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(0, 10)",
+      "mean_cover": 0.48,
+      "mean_exposure": 0.0,
+      "path_cost": 20.5169333333333,
+      "path_grid_count": 17,
+      "path_length_grid": 17,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 2458,
+      "to_grid": "(0, 5)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 78662603,
+      "candidate_count_estimate": 17,
+      "command_type": "move_to_position",
+      "cover_sum": 5.28,
+      "duration_usec": 25927,
+      "expanded_node_estimate": 17,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(-4, 6)",
+      "mean_cover": 0.310588235294118,
+      "mean_exposure": 0.0,
+      "path_cost": 49.3966166868613,
+      "path_grid_count": 17,
+      "path_length_grid": 17,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 4669,
+      "to_grid": "(1, 15)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 70220866,
+      "candidate_count_estimate": 21,
+      "command_type": "move_to_position",
+      "cover_sum": 7.2,
+      "duration_usec": 24952,
+      "expanded_node_estimate": 21,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(0, 5)",
+      "mean_cover": 0.342857142857143,
+      "mean_exposure": 0.0,
+      "path_cost": 59.5173260691235,
+      "path_grid_count": 21,
+      "path_length_grid": 21,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 4309,
+      "to_grid": "(1, 15)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 80414187,
+      "candidate_count_estimate": 16,
+      "command_type": "move_to_position",
+      "cover_sum": 4.8,
+      "duration_usec": 21886,
+      "expanded_node_estimate": 16,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(-4, 7)",
+      "mean_cover": 0.3,
+      "mean_exposure": 0.0,
+      "path_cost": 45.9425300279234,
+      "path_grid_count": 16,
+      "path_length_grid": 16,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 4756,
+      "to_grid": "(1, 15)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 82580131,
+      "candidate_count_estimate": 15,
+      "command_type": "move_to_position",
+      "cover_sum": 4.32,
+      "duration_usec": 18218,
+      "expanded_node_estimate": 15,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(-5, 8)",
+      "mean_cover": 0.288,
+      "mean_exposure": 0.0,
+      "path_cost": 41.7362384200516,
+      "path_grid_count": 15,
+      "path_length_grid": 15,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 4874,
+      "to_grid": "(1, 15)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    }
+  ]
+}

@@ -134,7 +134,9 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 		popup.hide()
 	panel.visible = tactical_visible
 	var viewport_size := Vector2i(controller.get_viewport().get_visible_rect().size)
-	var rect: Rect2i = LAYOUT.get_mission_hud_layout(viewport_size).mission_control
+	var hud_layout: Dictionary = LAYOUT.get_mission_hud_layout(viewport_size)
+	var rect: Rect2i = hud_layout.mission_control
+	_apply_readable_geometry(panel, rect, hud_layout)
 	if not panel.is_set_as_top_level():
 		panel.set_as_top_level(true)
 	if not panel.position.is_equal_approx(Vector2(rect.position)):
@@ -170,13 +172,14 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	card.set_meta("mission_dropship_craft_id", craft_id)
 	card.set_meta("mission_dropship_selected", not craft_id.is_empty() and craft_id == selected_id)
 	var transit := bool(controller.call("_is_mission_dropship_card_in_transit", selected_card)) if not selected_card.is_empty() else false
+	var pending := bool(controller.call("_is_network_dropship_command_pending", craft_id)) if not craft_id.is_empty() else false
 	card.set_meta("mission_dropship_card_inaccessible", transit)
 	card.set_meta("mission_dropship_card_accessible", not selected_card.is_empty() and not transit)
 	var title := card.get_node("Contents/Header/Identity/A5TransportHeading") as Label
 	var status := card.get_node("Contents/Header/Identity/A5TransportState") as Label
 	var ship := card.get_node("Contents/Header/ShipTexture") as TextureRect
 	title.text = "Dropship" if selected_card.is_empty() else SHIPS.get_ui_display_name(selected_card, "dropship")
-	THEME.style_section_heading(title, 19)
+	THEME.style_section_heading(title, int(hud_layout.body_font_size) + 6)
 	status.text = "Kein Dropship" if selected_card.is_empty() else _state_text(selected_card)
 	if not selected_card.is_empty():
 		var authoritative_status := String(controller.call("_build_mission_dropship_status_text", selected_card))
@@ -188,8 +191,11 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 			status.text = authoritative_status.replace("Damage ", "Schaden ")
 		elif authoritative_status.begins_with("Threat lock "):
 			status.text = authoritative_status.replace("Threat lock ", "Bedroht ")
-	status.tooltip_text = status.text
-	status.add_theme_color_override("font_color", THEME.COLOR_TEXT_MUTED if selected_card.is_empty() else THEME.COLOR_ACCENT)
+	var status_visual: Dictionary = _status_visual(selected_card, pending, status.text)
+	status.text = String(status_visual.symbol) + "  " + status.text
+	status.tooltip_text = ("Anfrage wird geprüft\n" if pending else "") + status.text
+	status.add_theme_color_override("font_color", status_visual.color)
+	status.set_meta("native_a5_status_shape", status_visual.symbol)
 	ship.texture = controller.call("_get_mission_dropship_card_texture", selected_card) as Texture2D if not selected_card.is_empty() else null
 	ship.visible = ship.texture != null
 	# Wrapped, clipped Labels report a 1px native minimum. Reserve actual font
@@ -202,7 +208,6 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	_set_readout_minimum_height(title, text_width)
 	_set_readout_minimum_height(status, text_width)
 	title.tooltip_text = title.text
-	var pending := bool(controller.call("_is_network_dropship_command_pending", craft_id)) if not craft_id.is_empty() else false
 	for action in ["set_lz", "drop"]:
 		var button := card.get_node("Contents/Actions/" + action) as Button
 		var allowed := false
@@ -218,6 +223,7 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 				button.pressed.disconnect(connection.callable)
 			button.pressed.connect(callback)
 		button.visible = action == "set_lz" or (not selected_card.is_empty() and bool(selected_card.get("has_lz_position", false)) and bool(selected_card.get("has_embarked_payload", false)))
+	_style_primary_action(card, int(hud_layout.body_font_size))
 	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
 	feedback.text = "" if selected_card.is_empty() else String(controller.call("_get_mission_dropship_card_feedback_text", selected_card))
 	feedback.visible = not feedback.text.is_empty() and feedback.text != "Trupp ab"
@@ -227,6 +233,62 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	var target_size := Vector2(rect.size.x, panel.get_combined_minimum_size().y)
 	if not panel.size.is_equal_approx(target_size):
 		panel.size = target_size
+
+
+static func _apply_readable_geometry(panel: VBoxContainer, rect: Rect2i, metrics: Dictionary) -> void:
+	var font_size: int = int(metrics.body_font_size)
+	var signature: String = "%d:%d" % [rect.size.x, font_size]
+	if String(panel.get_meta("native_a5_readable_metrics", "")) == signature:
+		return
+	panel.set_meta("native_a5_readable_metrics", signature)
+	var card := panel.get_node("CompactCard") as PanelContainer
+	card.add_theme_stylebox_override("panel", THEME.build_flat_stylebox(THEME.COLOR_PANEL, THEME.COLOR_ACCENT.darkened(0.38), 6, 2, Vector4(12, 10, 12, 10)))
+	var image := card.get_node("Contents/Header/ShipTexture") as TextureRect
+	image.custom_minimum_size = Vector2(roundf(float(rect.size.x) * 0.38), 112 if font_size >= 18 else (96 if font_size >= 16 else 80))
+	var details := card.get_node("Contents/Header/DetailsButton") as Button
+	details.text = "Details"
+	details.custom_minimum_size = Vector2(68, 40 if font_size >= 18 else 32)
+	details.add_theme_font_size_override("font_size", font_size - 1)
+	var status := card.get_node("Contents/Header/Identity/A5TransportState") as Label
+	THEME.style_label(status, false, font_size)
+	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
+	THEME.style_label(feedback, false, font_size - 1)
+	var actions := card.get_node("Contents/Actions") as HBoxContainer
+	actions.add_theme_constant_override("separation", 8)
+	for action in ["set_lz", "drop"]:
+		var button := actions.get_node(NodePath(action)) as Button
+		button.custom_minimum_size = Vector2(0, 48 if font_size >= 18 else (44 if font_size >= 16 else 40))
+		button.add_theme_font_size_override("font_size", font_size - 1)
+	var selector := panel.get_node("CraftSelector") as OptionButton
+	selector.custom_minimum_size.y = 40 if font_size >= 18 else 34
+	selector.add_theme_font_size_override("font_size", font_size)
+
+
+static func _status_visual(card: Dictionary, pending: bool, text: String) -> Dictionary:
+	if pending:
+		return {"symbol": "…", "color": THEME.COLOR_WARNING}
+	if card.is_empty():
+		return {"symbol": "○", "color": THEME.COLOR_TEXT_MUTED}
+	if text.contains("Verloren") or text.contains("Schaden") or text.contains("Nicht verfügbar") or text.contains("Bedroht"):
+		return {"symbol": "!", "color": THEME.COLOR_DANGER}
+	var phase: String = String(card.get("state", ""))
+	if phase in ["to_mission", "inbound", "outbound", "to_homebase", "to_fob"]:
+		return {"symbol": "➜", "color": THEME.COLOR_ACCENT}
+	return {"symbol": "●", "color": THEME.COLOR_SUCCESS}
+
+
+static func _style_primary_action(card: PanelContainer, font_size: int) -> void:
+	var lz := card.get_node("Contents/Actions/set_lz") as Button
+	var drop := card.get_node("Contents/Actions/drop") as Button
+	var primary: String = "drop" if drop.visible and not drop.disabled else ("set_lz" if not lz.disabled else "details")
+	card.set_meta("native_a5_next_action", primary)
+	for button in [lz, drop]:
+		var key: String = String(button.name) + ":" + str(primary == String(button.name)) + ":" + str(font_size)
+		if String(button.get_meta("native_a5_primary_style", "")) != key:
+			THEME.style_command_button(button, "accent" if primary == String(button.name) else "neutral")
+			button.add_theme_font_size_override("font_size", font_size - 1)
+			button.custom_minimum_size = Vector2(0, 48 if font_size >= 18 else (44 if font_size >= 16 else 40))
+			button.set_meta("native_a5_primary_style", key)
 
 
 static func style_details_card(card: PanelContainer) -> void:

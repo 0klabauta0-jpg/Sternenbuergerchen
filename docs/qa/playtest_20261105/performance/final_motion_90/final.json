@@ -1,0 +1,2592 @@
+{
+	"captures": [
+		{
+			"error": 0,
+			"height": 1440,
+			"id": "01_main_menu",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_captures/01_main_menu.png",
+			"scene": "res://scenes/ui/main_menu.tscn",
+			"sha256": "07985b02115524eac5e39ddb0dd0fe1b79bec88d34910964464a2e058564ce3c",
+			"width": 2560
+		},
+		{
+			"error": 0,
+			"height": 1440,
+			"id": "02_homebase",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_captures/02_homebase.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "11b7954352b674c5b45ab98619796761f658d7b7a4f4caee5f373b9aef66d136",
+			"width": 2560
+		},
+		{
+			"camera_projection": 1,
+			"camera_size": 34.0,
+			"camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (36.96496, 34.02369, 38.08996)]",
+			"error": 0,
+			"height": 1440,
+			"id": "03_default_mission",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_captures/03_default_mission.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "8493f386a59aa59b210c344efebfe3ff250d3b365f7f56960abc957b3be5751a",
+			"width": 2560
+		},
+		{
+			"camera_projection": 1,
+			"camera_size": 34.0,
+			"camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]",
+			"error": 0,
+			"height": 1440,
+			"id": "04_lz_approach",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_captures/04_lz_approach.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "0d5670e71cb237a6112384810c72d625d006ddc95a1253c8eae3e37226dc8190",
+			"width": 2560
+		},
+		{
+			"camera_projection": 1,
+			"camera_size": 34.0,
+			"camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]",
+			"error": 0,
+			"height": 1440,
+			"id": "05_deployed",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_captures/05_deployed.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "82776c99966964bb33d7d89314e5c57b413781f4ef8de3028c925ed073a314db",
+			"width": 2560
+		},
+		{
+			"camera_projection": 1,
+			"camera_size": 34.0,
+			"camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]",
+			"error": 0,
+			"height": 1440,
+			"id": "06_go_movement",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_captures/06_go_movement.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "c5493182a66c3da5693e322ee72b99f8d22ceda690d43e94ec14086d760ee2a9",
+			"width": 2560
+		},
+		{
+			"camera_projection": 1,
+			"camera_size": 27.0,
+			"camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (33.11923, 27.01881, 30.11923)]",
+			"error": 0,
+			"height": 1440,
+			"id": "07_outpost_overview",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_captures/07_outpost_overview.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "45c8fc4dd1142a96aabcb16acb3aa1d5bf84919ec046074188089da9a7127ac7",
+			"width": 2560
+		},
+		{
+			"camera_projection": 1,
+			"camera_size": 28.0,
+			"camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (54.38291, 28.01951, 46.38291)]",
+			"error": 0,
+			"height": 1440,
+			"id": "08_eastern_supply",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_captures/08_eastern_supply.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "229c22ab3389b9acd0c03e6f9a940f7adcaaee7a308a51d2748f9e9e0f15e8ec",
+			"width": 2560
+		},
+		{
+			"camera_projection": 1,
+			"camera_size": 55.0,
+			"camera_transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (65.50214, 55.03832, 61.50214)]",
+			"error": 0,
+			"height": 1440,
+			"id": "09_expanded_map",
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_captures/09_expanded_map.png",
+			"scene": "res://scenes/meta/meta_layer_test.tscn",
+			"sha256": "165132bb52af76a42e41f4680955452cba75879874d21eaa7dfb5b4b7d1f932e",
+			"width": 2560
+		}
+	],
+	"checks": [
+		{
+			"label": "Project normal entry is MainMenu",
+			"passed": true
+		},
+		{
+			"label": "Normal main menu scene loads",
+			"passed": true
+		},
+		{
+			"label": "MainMenu displays a background texture",
+			"passed": true
+		},
+		{
+			"label": "MainMenu background comes from the existing catalog",
+			"passed": true
+		},
+		{
+			"label": "Normal MainMenu restores the original TASK199 title artwork",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 01_main_menu",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 01_main_menu",
+			"passed": true
+		},
+		{
+			"label": "Real Singleplayer button is actionable",
+			"passed": true
+		},
+		{
+			"label": "Normal Singleplayer opens visible Homebase",
+			"passed": true
+		},
+		{
+			"label": "Original normal grid_sweep mission remains selected",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase bootstrap provides a playable team",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase has a craft and pilot",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase payload is ready without fixture mutation",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 02_homebase",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 02_homebase",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase launch command is accepted",
+			"passed": true
+		},
+		{
+			"label": "Normal mission owns TacticalController, Primary3DView and SimulationRoot",
+			"passed": true
+		},
+		{
+			"label": "Menu launch reaches the regular mission scene",
+			"passed": true
+		},
+		{
+			"label": "Handoff retains the original default mission",
+			"passed": true
+		},
+		{
+			"label": "Normal Homebase-to-Mission handoff passes",
+			"passed": true
+		},
+		{
+			"label": "Default mission enables the Frontier visual profile",
+			"passed": true
+		},
+		{
+			"label": "Frontier activation comes from normal map data without a test override",
+			"passed": true
+		},
+		{
+			"label": "Rebuilt default mission uses its saved, user-requested Hex topology",
+			"passed": true
+		},
+		{
+			"label": "Regular renderer remains a read-only state consumer",
+			"passed": true
+		},
+		{
+			"label": "Original default map JSON is available",
+			"passed": true
+		},
+		{
+			"label": "Default mission retains its authored Alpha insertion marker",
+			"passed": true
+		},
+		{
+			"label": "Normal mission exposes the authoritative terrain registry",
+			"passed": true
+		},
+		{
+			"label": "Authored Alpha insertion marker is on walkable terrain",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 03_default_mission",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 03_default_mission",
+			"passed": true
+		},
+		{
+			"label": "Normal Set LZ handler places the existing default-mission LZ",
+			"passed": true
+		},
+		{
+			"label": "Normal planning exposes the requested LZ",
+			"passed": true
+		},
+		{
+			"label": "Normal Drop request retains a playable embarked team",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 04_lz_approach",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 04_lz_approach",
+			"passed": true
+		},
+		{
+			"label": "Normal drop deploys a playable payload without forced unloading",
+			"passed": true
+		},
+		{
+			"label": "Actual regular dropship instance uses the active Ref03 Cutlass bytes",
+			"passed": true
+		},
+		{
+			"label": "Deployed units use actual regular 3D model instances",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 05_deployed",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 05_deployed",
+			"passed": true
+		},
+		{
+			"label": "Existing Move action creates the normal selected-team plan",
+			"passed": true
+		},
+		{
+			"label": "Existing GO action commits the selected-team plan",
+			"passed": true
+		},
+		{
+			"label": "Performance measurement uses a native renderer",
+			"passed": true
+		},
+		{
+			"label": "Performance diagnostics use the normal runtime owners",
+			"passed": true
+		},
+		{
+			"label": "Measured window is genuinely fullscreen",
+			"passed": true
+		},
+		{
+			"label": "Fullscreen covers the active display resolution",
+			"passed": true
+		},
+		{
+			"label": "Measured normal gameplay remains at 1x",
+			"passed": true
+		},
+		{
+			"label": "Performance evidence target is new",
+			"passed": true
+		},
+		{
+			"label": "Performance raw evidence opens",
+			"passed": true
+		},
+		{
+			"label": "Performance measurement completed at normal 1x",
+			"passed": true
+		},
+		{
+			"label": "Measured camera remained unchanged",
+			"passed": true
+		},
+		{
+			"label": "Motion trace evidence target is new",
+			"passed": true
+		},
+		{
+			"label": "Read-only motion trace evidence opens",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 06_go_movement",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 06_go_movement",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 07_outpost_overview",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 07_outpost_overview",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 08_eastern_supply",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 08_eastern_supply",
+			"passed": true
+		},
+		{
+			"label": "Capture target is new: 09_expanded_map",
+			"passed": true
+		},
+		{
+			"label": "Native capture saved: 09_expanded_map",
+			"passed": true
+		}
+	],
+	"elapsed_msec": 139476,
+	"engine": {
+		"build": "official",
+		"hash": "71f334935c000924d403448e698df4441130df18",
+		"hex": 263682,
+		"major": 4,
+		"minor": 6,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.6.2-stable (official)",
+		"timestamp": 0
+	},
+	"facts": {
+		"approach_models": [
+			{
+				"global_position": "(18.0, 0.54, 21.65063)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_6_25/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(18.0, 0.54, 19.91858)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_7_23/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(18.5, 0.54, 20.78461)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_7_24/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(18.5, 0.54, 19.05256)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_8_22/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(6.461938, 0.356934, 11.50241)",
+				"global_scale": "(0.308003, 0.308001, 0.308)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_player_sternenbuergerchen_01/UnitModel_animated_character_medium_astro_male_a/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-a",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+				"sha256": "d6d6fe0ec5baf21d7717449220799d45b95d2d663ace7b22612b255dc1a8b308"
+			},
+			{
+				"global_position": "(6.461938, 0.356934, 11.12741)",
+				"global_scale": "(0.308003, 0.308001, 0.308)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_player_sternenbuergerchen_02/UnitModel_animated_character_medium_astro_male_a/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-b",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
+				"sha256": "7df4457ed864bc0714fc33059ac56d198304092093b1e78dc407b6c829945a4f"
+			},
+			{
+				"global_position": "(6.461938, 0.356934, 10.75241)",
+				"global_scale": "(0.308003, 0.308001, 0.308)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_player_sternenbuergerchen_03/UnitModel_animated_character_medium_astro_male_a/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-a",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+				"sha256": "d6d6fe0ec5baf21d7717449220799d45b95d2d663ace7b22612b255dc1a8b308"
+			},
+			{
+				"global_position": "(14.63643, 0.410911, 9.739096)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_01/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(17.35794, 0.410921, 11.67412)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_02/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(17.35793, 0.410921, 10.67414)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_03/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(18.85794, 0.410921, 11.17412)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_04/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-b",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
+				"sha256": "7df4457ed864bc0714fc33059ac56d198304092093b1e78dc407b6c829945a4f"
+			},
+			{
+				"global_position": "(12.18606, 0.410921, 14.72101)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_01/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(12.56107, 0.410921, 11.09599)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_02/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(13.85631, 0.410762, 11.42631)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_03/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(14.13756, 0.410762, 11.14506)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_04/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-b",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
+				"sha256": "7df4457ed864bc0714fc33059ac56d198304092093b1e78dc407b6c829945a4f"
+			},
+			{
+				"global_position": "(-41.14151, 5.2, 6.069653)",
+				"global_scale": "(0.22, 0.22, 0.22)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/DropRoot3D/DropshipModel_dropship_1/cutlass_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+				"sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf"
+			},
+			{
+				"global_position": "(8.3, 0.0, 6.2)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/habitat_cutaway_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+				"sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+			},
+			{
+				"global_position": "(13.2, 0.0, 6.2)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/freihafen_hall_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+				"sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+			},
+			{
+				"global_position": "(16.1, 0.0, 8.2)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/utility_fuel_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+				"sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+			},
+			{
+				"global_position": "(10.2, 0.15, 8.1)",
+				"global_scale": "(0.5, 0.5, 0.5)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/FrontierUseGroups/Working_table-display",
+				"resource": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+				"sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+			},
+			{
+				"global_position": "(10.68, 0.24, 8.08)",
+				"global_scale": "(0.25, 0.25, 0.25)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/FrontierUseGroups/Working_computer",
+				"resource": "res://Assets/curated/kenney/space_station/models/computer.glb",
+				"sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+			},
+			{
+				"global_position": "(15.3, 0.0, 7.18)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/FrontierUseGroups/Working_container-wide",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			},
+			{
+				"global_position": "(31.0, 0.0, 23.0)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/supply_hall_east",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+				"sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+			},
+			{
+				"global_position": "(28.0, 0.0, 22.8)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/SupplyContainer_00",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			},
+			{
+				"global_position": "(33.5, 0.0, 21.2)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/SupplyContainer_01",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			},
+			{
+				"global_position": "(33.5, 0.0, 22.5)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/SupplyContainer_02",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			}
+		],
+		"default_map": {
+			"gameplay_without_theme_sha256": "99544961558dc60e0cc0c3b347ae39744359aea072d95a9608cf92aad72cf381",
+			"lz_grid": "(0, 13)",
+			"lz_marker": "spawn_alpha",
+			"lz_world": "(-305.0, 568.0)",
+			"path": "res://maps/Ground_Mission01_32x32.json",
+			"sha256": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4"
+		},
+		"deployment_models": [
+			{
+				"global_position": "(18.0, 0.54, 21.65063)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_6_25/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(18.0, 0.54, 19.91858)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_7_23/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(18.5, 0.54, 20.78461)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_7_24/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(18.5, 0.54, 19.05256)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_8_22/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(6.461938, 0.356934, 11.50241)",
+				"global_scale": "(0.308003, 0.308001, 0.308)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_player_sternenbuergerchen_01/UnitModel_animated_character_medium_astro_male_a/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-a",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+				"sha256": "d6d6fe0ec5baf21d7717449220799d45b95d2d663ace7b22612b255dc1a8b308"
+			},
+			{
+				"global_position": "(6.461938, 0.356934, 11.12741)",
+				"global_scale": "(0.308003, 0.308001, 0.308)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_player_sternenbuergerchen_02/UnitModel_animated_character_medium_astro_male_a/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-b",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
+				"sha256": "7df4457ed864bc0714fc33059ac56d198304092093b1e78dc407b6c829945a4f"
+			},
+			{
+				"global_position": "(6.461938, 0.356934, 10.75241)",
+				"global_scale": "(0.308003, 0.308001, 0.308)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_player_sternenbuergerchen_03/UnitModel_animated_character_medium_astro_male_a/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-a",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+				"sha256": "d6d6fe0ec5baf21d7717449220799d45b95d2d663ace7b22612b255dc1a8b308"
+			},
+			{
+				"global_position": "(14.63643, 0.410911, 9.739096)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_01/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(17.35794, 0.410921, 11.67412)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_02/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(17.35793, 0.410921, 10.67414)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_03/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(18.85794, 0.410921, 11.17412)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_04/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-b",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
+				"sha256": "7df4457ed864bc0714fc33059ac56d198304092093b1e78dc407b6c829945a4f"
+			},
+			{
+				"global_position": "(12.18606, 0.410921, 14.72101)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_01/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(12.56107, 0.410921, 11.09599)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_02/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(13.85631, 0.410762, 11.42631)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_03/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(14.13756, 0.410762, 11.14506)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_04/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-b",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
+				"sha256": "7df4457ed864bc0714fc33059ac56d198304092093b1e78dc407b6c829945a4f"
+			},
+			{
+				"global_position": "(-41.14151, 5.2, 6.069653)",
+				"global_scale": "(0.22, 0.22, 0.22)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/DropRoot3D/DropshipModel_dropship_1/cutlass_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+				"sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf"
+			},
+			{
+				"global_position": "(8.3, 0.0, 6.2)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/habitat_cutaway_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+				"sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+			},
+			{
+				"global_position": "(13.2, 0.0, 6.2)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/freihafen_hall_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+				"sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+			},
+			{
+				"global_position": "(16.1, 0.0, 8.2)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/utility_fuel_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+				"sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+			},
+			{
+				"global_position": "(10.2, 0.15, 8.1)",
+				"global_scale": "(0.5, 0.5, 0.5)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/FrontierUseGroups/Working_table-display",
+				"resource": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+				"sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+			},
+			{
+				"global_position": "(10.68, 0.24, 8.08)",
+				"global_scale": "(0.25, 0.25, 0.25)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/FrontierUseGroups/Working_computer",
+				"resource": "res://Assets/curated/kenney/space_station/models/computer.glb",
+				"sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+			},
+			{
+				"global_position": "(15.3, 0.0, 7.18)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/FrontierUseGroups/Working_container-wide",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			},
+			{
+				"global_position": "(31.0, 0.0, 23.0)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/supply_hall_east",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+				"sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+			},
+			{
+				"global_position": "(28.0, 0.0, 22.8)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/SupplyContainer_00",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			},
+			{
+				"global_position": "(33.5, 0.0, 21.2)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/SupplyContainer_01",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			},
+			{
+				"global_position": "(33.5, 0.0, 22.5)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/SupplyContainer_02",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			},
+			{
+				"global_position": "(18.0, 0.54, 21.65063)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_6_25/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(18.0, 0.54, 19.91858)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_7_23/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(18.5, 0.54, 20.78461)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_7_24/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(18.5, 0.54, 19.05256)",
+				"global_scale": "(1.0, 1.0, 1.0)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/MapRoot3D/Asset_slope_se_8_22/terrain_rampLarge2",
+				"resource": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+				"sha256": "4655300cfdfb74242437010f45818ed953a368b5d2ca7524b0f80875ba14af2f"
+			},
+			{
+				"global_position": "(6.4786, 0.356256, 11.77961)",
+				"global_scale": "(0.308003, 0.308001, 0.308)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_player_sternenbuergerchen_01/UnitModel_animated_character_medium_astro_male_a/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-a",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+				"sha256": "d6d6fe0ec5baf21d7717449220799d45b95d2d663ace7b22612b255dc1a8b308"
+			},
+			{
+				"global_position": "(6.680297, 0.368003, 11.48281)",
+				"global_scale": "(0.308003, 0.308002, 0.307999)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_player_sternenbuergerchen_02/UnitModel_animated_character_medium_astro_male_a/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-b",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
+				"sha256": "7df4457ed864bc0714fc33059ac56d198304092093b1e78dc407b6c829945a4f"
+			},
+			{
+				"global_position": "(6.626867, 0.387439, 10.75906)",
+				"global_scale": "(0.308003, 0.308002, 0.307999)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_player_sternenbuergerchen_03/UnitModel_animated_character_medium_astro_male_a/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-a",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+				"sha256": "d6d6fe0ec5baf21d7717449220799d45b95d2d663ace7b22612b255dc1a8b308"
+			},
+			{
+				"global_position": "(14.63631, 0.410805, 9.737149)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_01/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(17.3575, 0.410872, 11.67471)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_02/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(17.35749, 0.410872, 10.67473)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_03/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(18.8575, 0.410872, 11.17472)",
+				"global_scale": "(0.364003, 0.364, 0.364001)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_patrol_04/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-b",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
+				"sha256": "7df4457ed864bc0714fc33059ac56d198304092093b1e78dc407b6c829945a4f"
+			},
+			{
+				"global_position": "(12.18562, 0.410872, 14.7216)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_01/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(12.56062, 0.410872, 11.09659)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_02/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(13.85777, 0.410901, 11.42436)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_03/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-f",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+				"sha256": "ea389c88b7d90ede2763e1f2b5834b9fbaaaa56b8a51ebdf21f61ec46d716320"
+			},
+			{
+				"global_position": "(14.13902, 0.410901, 11.14311)",
+				"global_scale": "(0.364003, 0.364001, 0.364)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/UnitRoot3D/UnitProxy_ground_defense_04/UnitModel_enemy_space_suit_orange/characterMedium/Root/Skeleton3D/RightHandSocket/BlasterVisual_blaster-b",
+				"resource": "res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
+				"sha256": "7df4457ed864bc0714fc33059ac56d198304092093b1e78dc407b6c829945a4f"
+			},
+			{
+				"global_position": "(-2.441025, 5.2, 10.28456)",
+				"global_scale": "(0.22, 0.22, 0.22)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/DropRoot3D/DropshipModel_dropship_1/cutlass_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb",
+				"sha256": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf"
+			},
+			{
+				"global_position": "(8.3, 0.0, 6.2)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/habitat_cutaway_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+				"sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+			},
+			{
+				"global_position": "(13.2, 0.0, 6.2)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/freihafen_hall_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+				"sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+			},
+			{
+				"global_position": "(16.1, 0.0, 8.2)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/utility_fuel_01",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+				"sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+			},
+			{
+				"global_position": "(10.2, 0.15, 8.1)",
+				"global_scale": "(0.5, 0.5, 0.5)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/FrontierUseGroups/Working_table-display",
+				"resource": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+				"sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+			},
+			{
+				"global_position": "(10.68, 0.24, 8.08)",
+				"global_scale": "(0.25, 0.25, 0.25)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/FrontierUseGroups/Working_computer",
+				"resource": "res://Assets/curated/kenney/space_station/models/computer.glb",
+				"sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+			},
+			{
+				"global_position": "(15.3, 0.0, 7.18)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/FrontierUseGroups/Working_container-wide",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			},
+			{
+				"global_position": "(31.0, 0.0, 23.0)",
+				"global_scale": "(0.35, 0.35, 0.35)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/supply_hall_east",
+				"resource": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+				"sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+			},
+			{
+				"global_position": "(28.0, 0.0, 22.8)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/SupplyContainer_00",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			},
+			{
+				"global_position": "(33.5, 0.0, 21.2)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/SupplyContainer_01",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			},
+			{
+				"global_position": "(33.5, 0.0, 22.5)",
+				"global_scale": "(0.43, 0.43, 0.43)",
+				"node": "/root/MetaLayerTest/MissionHost/MissionReactivityTest/Primary3DView/ViewportContainer/SubViewport/WorldRoot/FrontierGM01Outpost/SupplyContainer_02",
+				"resource": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+				"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+			}
+		],
+		"forced_arrival": false,
+		"forced_unloading": false,
+		"fullscreen_performance": {
+			"display": {
+				"content_scale_size": "(2560, 1440)",
+				"cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+				"display": "Windows",
+				"display_server_window_mode": 3,
+				"gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+				"max_physics_steps_per_frame": 8,
+				"physics_ticks_per_second": 60,
+				"renderer": "forward_plus",
+				"rendering_driver": "vulkan",
+				"root_size": "(2560, 1440)",
+				"screen_index": 0,
+				"screen_refresh_rate": 74.9680023193359,
+				"screen_size": "(2560, 1440)",
+				"screen_usable_rect": "[P: (0, 0), S: (2560, 1410)]",
+				"time_scale": 1.0,
+				"viewport_size": "(2560.0, 1440.0)",
+				"vsync_mode": 1,
+				"window_has_focus": true,
+				"window_mode": 3,
+				"window_size": "(2560, 1440)"
+			},
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_performance.json",
+			"summary": {
+				"duration_usec": 90036748,
+				"frames": 3869,
+				"frametime_usec": {
+					"count": 3869,
+					"max": 391848,
+					"mean": 23268.1964331869,
+					"p50": 17308,
+					"p90": 43021,
+					"p95": 54207,
+					"p99": 111590
+				},
+				"hitch_counts": {
+					"over_100ms": 56,
+					"over_250ms": 7,
+					"over_33ms": 981,
+					"over_50ms": 236
+				},
+				"hitches_over_50ms": [
+					{
+						"elapsed_usec": 71105,
+						"frame_usec": 71105,
+						"since_previous_hitch_usec": null
+					},
+					{
+						"elapsed_usec": 173646,
+						"frame_usec": 60697,
+						"since_previous_hitch_usec": 102541
+					},
+					{
+						"elapsed_usec": 287786,
+						"frame_usec": 79110,
+						"since_previous_hitch_usec": 114140
+					},
+					{
+						"elapsed_usec": 404331,
+						"frame_usec": 71322,
+						"since_previous_hitch_usec": 116545
+					},
+					{
+						"elapsed_usec": 1110482,
+						"frame_usec": 142197,
+						"since_previous_hitch_usec": 706151
+					},
+					{
+						"elapsed_usec": 1320127,
+						"frame_usec": 51026,
+						"since_previous_hitch_usec": 209645
+					},
+					{
+						"elapsed_usec": 1760836,
+						"frame_usec": 60877,
+						"since_previous_hitch_usec": 440709
+					},
+					{
+						"elapsed_usec": 2235303,
+						"frame_usec": 152830,
+						"since_previous_hitch_usec": 474467
+					},
+					{
+						"elapsed_usec": 2288463,
+						"frame_usec": 53160,
+						"since_previous_hitch_usec": 53160
+					},
+					{
+						"elapsed_usec": 2384880,
+						"frame_usec": 63261,
+						"since_previous_hitch_usec": 96417
+					},
+					{
+						"elapsed_usec": 2513357,
+						"frame_usec": 66476,
+						"since_previous_hitch_usec": 128477
+					},
+					{
+						"elapsed_usec": 3315552,
+						"frame_usec": 161938,
+						"since_previous_hitch_usec": 802195
+					},
+					{
+						"elapsed_usec": 3376946,
+						"frame_usec": 61394,
+						"since_previous_hitch_usec": 61394
+					},
+					{
+						"elapsed_usec": 3470507,
+						"frame_usec": 61422,
+						"since_previous_hitch_usec": 93561
+					},
+					{
+						"elapsed_usec": 4403670,
+						"frame_usec": 133430,
+						"since_previous_hitch_usec": 933163
+					},
+					{
+						"elapsed_usec": 4474441,
+						"frame_usec": 70771,
+						"since_previous_hitch_usec": 70771
+					},
+					{
+						"elapsed_usec": 4565064,
+						"frame_usec": 61162,
+						"since_previous_hitch_usec": 90623
+					},
+					{
+						"elapsed_usec": 4726677,
+						"frame_usec": 51479,
+						"since_previous_hitch_usec": 161613
+					},
+					{
+						"elapsed_usec": 5495929,
+						"frame_usec": 117244,
+						"since_previous_hitch_usec": 769252
+					},
+					{
+						"elapsed_usec": 6591632,
+						"frame_usec": 139645,
+						"since_previous_hitch_usec": 1095703
+					},
+					{
+						"elapsed_usec": 6673090,
+						"frame_usec": 50235,
+						"since_previous_hitch_usec": 81458
+					},
+					{
+						"elapsed_usec": 7218640,
+						"frame_usec": 54863,
+						"since_previous_hitch_usec": 545550
+					},
+					{
+						"elapsed_usec": 7668942,
+						"frame_usec": 143678,
+						"since_previous_hitch_usec": 450302
+					},
+					{
+						"elapsed_usec": 7719644,
+						"frame_usec": 50702,
+						"since_previous_hitch_usec": 50702
+					},
+					{
+						"elapsed_usec": 7811655,
+						"frame_usec": 61248,
+						"since_previous_hitch_usec": 92011
+					},
+					{
+						"elapsed_usec": 8728608,
+						"frame_usec": 117883,
+						"since_previous_hitch_usec": 916953
+					},
+					{
+						"elapsed_usec": 9026048,
+						"frame_usec": 61893,
+						"since_previous_hitch_usec": 297440
+					},
+					{
+						"elapsed_usec": 9822438,
+						"frame_usec": 128719,
+						"since_previous_hitch_usec": 796390
+					},
+					{
+						"elapsed_usec": 10486339,
+						"frame_usec": 57290,
+						"since_previous_hitch_usec": 663901
+					},
+					{
+						"elapsed_usec": 10900699,
+						"frame_usec": 110471,
+						"since_previous_hitch_usec": 414360
+					},
+					{
+						"elapsed_usec": 12034645,
+						"frame_usec": 168078,
+						"since_previous_hitch_usec": 1133946
+					},
+					{
+						"elapsed_usec": 12300777,
+						"frame_usec": 266132,
+						"since_previous_hitch_usec": 266132
+					},
+					{
+						"elapsed_usec": 12376025,
+						"frame_usec": 75248,
+						"since_previous_hitch_usec": 75248
+					},
+					{
+						"elapsed_usec": 12594367,
+						"frame_usec": 218342,
+						"since_previous_hitch_usec": 218342
+					},
+					{
+						"elapsed_usec": 12671225,
+						"frame_usec": 76858,
+						"since_previous_hitch_usec": 76858
+					},
+					{
+						"elapsed_usec": 12730181,
+						"frame_usec": 58956,
+						"since_previous_hitch_usec": 58956
+					},
+					{
+						"elapsed_usec": 12887524,
+						"frame_usec": 107703,
+						"since_previous_hitch_usec": 157343
+					},
+					{
+						"elapsed_usec": 12948847,
+						"frame_usec": 61323,
+						"since_previous_hitch_usec": 61323
+					},
+					{
+						"elapsed_usec": 13037607,
+						"frame_usec": 88760,
+						"since_previous_hitch_usec": 88760
+					},
+					{
+						"elapsed_usec": 13141400,
+						"frame_usec": 64749,
+						"since_previous_hitch_usec": 103793
+					},
+					{
+						"elapsed_usec": 13298682,
+						"frame_usec": 157282,
+						"since_previous_hitch_usec": 157282
+					},
+					{
+						"elapsed_usec": 13385575,
+						"frame_usec": 86893,
+						"since_previous_hitch_usec": 86893
+					},
+					{
+						"elapsed_usec": 13481789,
+						"frame_usec": 60731,
+						"since_previous_hitch_usec": 96214
+					},
+					{
+						"elapsed_usec": 13620977,
+						"frame_usec": 90016,
+						"since_previous_hitch_usec": 139188
+					},
+					{
+						"elapsed_usec": 13707404,
+						"frame_usec": 61245,
+						"since_previous_hitch_usec": 86427
+					},
+					{
+						"elapsed_usec": 13802615,
+						"frame_usec": 54646,
+						"since_previous_hitch_usec": 95211
+					},
+					{
+						"elapsed_usec": 13963212,
+						"frame_usec": 67176,
+						"since_previous_hitch_usec": 160597
+					},
+					{
+						"elapsed_usec": 14424251,
+						"frame_usec": 158965,
+						"since_previous_hitch_usec": 461039
+					},
+					{
+						"elapsed_usec": 14485323,
+						"frame_usec": 61072,
+						"since_previous_hitch_usec": 61072
+					},
+					{
+						"elapsed_usec": 14555075,
+						"frame_usec": 69752,
+						"since_previous_hitch_usec": 69752
+					},
+					{
+						"elapsed_usec": 14702620,
+						"frame_usec": 69359,
+						"since_previous_hitch_usec": 147545
+					},
+					{
+						"elapsed_usec": 14860612,
+						"frame_usec": 50739,
+						"since_previous_hitch_usec": 157992
+					},
+					{
+						"elapsed_usec": 15055548,
+						"frame_usec": 69170,
+						"since_previous_hitch_usec": 194936
+					},
+					{
+						"elapsed_usec": 15182246,
+						"frame_usec": 50981,
+						"since_previous_hitch_usec": 126698
+					},
+					{
+						"elapsed_usec": 15295216,
+						"frame_usec": 53826,
+						"since_previous_hitch_usec": 112970
+					},
+					{
+						"elapsed_usec": 15503914,
+						"frame_usec": 158283,
+						"since_previous_hitch_usec": 208698
+					},
+					{
+						"elapsed_usec": 15588328,
+						"frame_usec": 84414,
+						"since_previous_hitch_usec": 84414
+					},
+					{
+						"elapsed_usec": 15681775,
+						"frame_usec": 64816,
+						"since_previous_hitch_usec": 93447
+					},
+					{
+						"elapsed_usec": 15800772,
+						"frame_usec": 81178,
+						"since_previous_hitch_usec": 118997
+					},
+					{
+						"elapsed_usec": 15890801,
+						"frame_usec": 58857,
+						"since_previous_hitch_usec": 90029
+					},
+					{
+						"elapsed_usec": 16586885,
+						"frame_usec": 136808,
+						"since_previous_hitch_usec": 696084
+					},
+					{
+						"elapsed_usec": 16674772,
+						"frame_usec": 87887,
+						"since_previous_hitch_usec": 87887
+					},
+					{
+						"elapsed_usec": 16765452,
+						"frame_usec": 63113,
+						"since_previous_hitch_usec": 90680
+					},
+					{
+						"elapsed_usec": 16840448,
+						"frame_usec": 51728,
+						"since_previous_hitch_usec": 74996
+					},
+					{
+						"elapsed_usec": 16896542,
+						"frame_usec": 56094,
+						"since_previous_hitch_usec": 56094
+					},
+					{
+						"elapsed_usec": 17673229,
+						"frame_usec": 139817,
+						"since_previous_hitch_usec": 776687
+					},
+					{
+						"elapsed_usec": 17727864,
+						"frame_usec": 54635,
+						"since_previous_hitch_usec": 54635
+					},
+					{
+						"elapsed_usec": 18331507,
+						"frame_usec": 70488,
+						"since_previous_hitch_usec": 603643
+					},
+					{
+						"elapsed_usec": 18393337,
+						"frame_usec": 61830,
+						"since_previous_hitch_usec": 61830
+					},
+					{
+						"elapsed_usec": 18495516,
+						"frame_usec": 63406,
+						"since_previous_hitch_usec": 102179
+					},
+					{
+						"elapsed_usec": 18706773,
+						"frame_usec": 81241,
+						"since_previous_hitch_usec": 211257
+					},
+					{
+						"elapsed_usec": 19392254,
+						"frame_usec": 63112,
+						"since_previous_hitch_usec": 685481
+					},
+					{
+						"elapsed_usec": 19773904,
+						"frame_usec": 71544,
+						"since_previous_hitch_usec": 381650
+					},
+					{
+						"elapsed_usec": 20060913,
+						"frame_usec": 51284,
+						"since_previous_hitch_usec": 287009
+					},
+					{
+						"elapsed_usec": 20845886,
+						"frame_usec": 84607,
+						"since_previous_hitch_usec": 784973
+					},
+					{
+						"elapsed_usec": 21953497,
+						"frame_usec": 119612,
+						"since_previous_hitch_usec": 1107611
+					},
+					{
+						"elapsed_usec": 23013140,
+						"frame_usec": 71243,
+						"since_previous_hitch_usec": 1059643
+					},
+					{
+						"elapsed_usec": 24065232,
+						"frame_usec": 77163,
+						"since_previous_hitch_usec": 1052092
+					},
+					{
+						"elapsed_usec": 24347473,
+						"frame_usec": 282241,
+						"since_previous_hitch_usec": 282241
+					},
+					{
+						"elapsed_usec": 24588302,
+						"frame_usec": 240829,
+						"since_previous_hitch_usec": 240829
+					},
+					{
+						"elapsed_usec": 24667377,
+						"frame_usec": 79075,
+						"since_previous_hitch_usec": 79075
+					},
+					{
+						"elapsed_usec": 24724463,
+						"frame_usec": 57086,
+						"since_previous_hitch_usec": 57086
+					},
+					{
+						"elapsed_usec": 25443481,
+						"frame_usec": 79670,
+						"since_previous_hitch_usec": 719018
+					},
+					{
+						"elapsed_usec": 26523303,
+						"frame_usec": 103796,
+						"since_previous_hitch_usec": 1079822
+					},
+					{
+						"elapsed_usec": 26609216,
+						"frame_usec": 52492,
+						"since_previous_hitch_usec": 85913
+					},
+					{
+						"elapsed_usec": 27633195,
+						"frame_usec": 109865,
+						"since_previous_hitch_usec": 1023979
+					},
+					{
+						"elapsed_usec": 27706055,
+						"frame_usec": 72860,
+						"since_previous_hitch_usec": 72860
+					},
+					{
+						"elapsed_usec": 27789645,
+						"frame_usec": 54474,
+						"since_previous_hitch_usec": 83590
+					},
+					{
+						"elapsed_usec": 28675631,
+						"frame_usec": 72730,
+						"since_previous_hitch_usec": 885986
+					},
+					{
+						"elapsed_usec": 29774255,
+						"frame_usec": 105185,
+						"since_previous_hitch_usec": 1098624
+					},
+					{
+						"elapsed_usec": 30097465,
+						"frame_usec": 56556,
+						"since_previous_hitch_usec": 323210
+					},
+					{
+						"elapsed_usec": 30842211,
+						"frame_usec": 73060,
+						"since_previous_hitch_usec": 744746
+					},
+					{
+						"elapsed_usec": 30893538,
+						"frame_usec": 51327,
+						"since_previous_hitch_usec": 51327
+					},
+					{
+						"elapsed_usec": 31169994,
+						"frame_usec": 54404,
+						"since_previous_hitch_usec": 276456
+					},
+					{
+						"elapsed_usec": 31935499,
+						"frame_usec": 110771,
+						"since_previous_hitch_usec": 765505
+					},
+					{
+						"elapsed_usec": 33023666,
+						"frame_usec": 102423,
+						"since_previous_hitch_usec": 1088167
+					},
+					{
+						"elapsed_usec": 33334267,
+						"frame_usec": 57570,
+						"since_previous_hitch_usec": 310601
+					},
+					{
+						"elapsed_usec": 34069523,
+						"frame_usec": 76500,
+						"since_previous_hitch_usec": 735256
+					},
+					{
+						"elapsed_usec": 34151704,
+						"frame_usec": 50280,
+						"since_previous_hitch_usec": 82181
+					},
+					{
+						"elapsed_usec": 34611205,
+						"frame_usec": 222607,
+						"since_previous_hitch_usec": 459501
+					},
+					{
+						"elapsed_usec": 34667047,
+						"frame_usec": 55842,
+						"since_previous_hitch_usec": 55842
+					},
+					{
+						"elapsed_usec": 35190052,
+						"frame_usec": 67395,
+						"since_previous_hitch_usec": 523005
+					},
+					{
+						"elapsed_usec": 36318048,
+						"frame_usec": 315123,
+						"since_previous_hitch_usec": 1127996
+					},
+					{
+						"elapsed_usec": 36380353,
+						"frame_usec": 62305,
+						"since_previous_hitch_usec": 62305
+					},
+					{
+						"elapsed_usec": 36476142,
+						"frame_usec": 95789,
+						"since_previous_hitch_usec": 95789
+					},
+					{
+						"elapsed_usec": 37423097,
+						"frame_usec": 50044,
+						"since_previous_hitch_usec": 946955
+					},
+					{
+						"elapsed_usec": 37576492,
+						"frame_usec": 128342,
+						"since_previous_hitch_usec": 153395
+					},
+					{
+						"elapsed_usec": 37672365,
+						"frame_usec": 53401,
+						"since_previous_hitch_usec": 95873
+					},
+					{
+						"elapsed_usec": 37911132,
+						"frame_usec": 56045,
+						"since_previous_hitch_usec": 238767
+					},
+					{
+						"elapsed_usec": 38127406,
+						"frame_usec": 50469,
+						"since_previous_hitch_usec": 216274
+					},
+					{
+						"elapsed_usec": 38629815,
+						"frame_usec": 80270,
+						"since_previous_hitch_usec": 502409
+					},
+					{
+						"elapsed_usec": 38741608,
+						"frame_usec": 51444,
+						"since_previous_hitch_usec": 111793
+					},
+					{
+						"elapsed_usec": 38960136,
+						"frame_usec": 70901,
+						"since_previous_hitch_usec": 218528
+					},
+					{
+						"elapsed_usec": 39314668,
+						"frame_usec": 59766,
+						"since_previous_hitch_usec": 354532
+					},
+					{
+						"elapsed_usec": 39689245,
+						"frame_usec": 71723,
+						"since_previous_hitch_usec": 374577
+					},
+					{
+						"elapsed_usec": 40779155,
+						"frame_usec": 85952,
+						"since_previous_hitch_usec": 1089910
+					},
+					{
+						"elapsed_usec": 41888232,
+						"frame_usec": 103657,
+						"since_previous_hitch_usec": 1109077
+					},
+					{
+						"elapsed_usec": 42209383,
+						"frame_usec": 66627,
+						"since_previous_hitch_usec": 321151
+					},
+					{
+						"elapsed_usec": 42951953,
+						"frame_usec": 105638,
+						"since_previous_hitch_usec": 742570
+					},
+					{
+						"elapsed_usec": 44006463,
+						"frame_usec": 102591,
+						"since_previous_hitch_usec": 1054510
+					},
+					{
+						"elapsed_usec": 44080745,
+						"frame_usec": 54415,
+						"since_previous_hitch_usec": 74282
+					},
+					{
+						"elapsed_usec": 44315854,
+						"frame_usec": 56924,
+						"since_previous_hitch_usec": 235109
+					},
+					{
+						"elapsed_usec": 44859373,
+						"frame_usec": 57990,
+						"since_previous_hitch_usec": 543519
+					},
+					{
+						"elapsed_usec": 45084676,
+						"frame_usec": 92405,
+						"since_previous_hitch_usec": 225303
+					},
+					{
+						"elapsed_usec": 45410697,
+						"frame_usec": 62213,
+						"since_previous_hitch_usec": 326021
+					},
+					{
+						"elapsed_usec": 45982459,
+						"frame_usec": 223602,
+						"since_previous_hitch_usec": 571762
+					},
+					{
+						"elapsed_usec": 46172071,
+						"frame_usec": 67504,
+						"since_previous_hitch_usec": 189612
+					},
+					{
+						"elapsed_usec": 47236835,
+						"frame_usec": 65548,
+						"since_previous_hitch_usec": 1064764
+					},
+					{
+						"elapsed_usec": 48348601,
+						"frame_usec": 347259,
+						"since_previous_hitch_usec": 1111766
+					},
+					{
+						"elapsed_usec": 48407785,
+						"frame_usec": 59184,
+						"since_previous_hitch_usec": 59184
+					},
+					{
+						"elapsed_usec": 48508179,
+						"frame_usec": 100394,
+						"since_previous_hitch_usec": 100394
+					},
+					{
+						"elapsed_usec": 48564242,
+						"frame_usec": 56063,
+						"since_previous_hitch_usec": 56063
+					},
+					{
+						"elapsed_usec": 48655534,
+						"frame_usec": 58245,
+						"since_previous_hitch_usec": 91292
+					},
+					{
+						"elapsed_usec": 48815251,
+						"frame_usec": 65062,
+						"since_previous_hitch_usec": 159717
+					},
+					{
+						"elapsed_usec": 49566494,
+						"frame_usec": 102631,
+						"since_previous_hitch_usec": 751243
+					},
+					{
+						"elapsed_usec": 49642594,
+						"frame_usec": 52734,
+						"since_previous_hitch_usec": 76100
+					},
+					{
+						"elapsed_usec": 50238793,
+						"frame_usec": 61391,
+						"since_previous_hitch_usec": 596199
+					},
+					{
+						"elapsed_usec": 50319408,
+						"frame_usec": 53748,
+						"since_previous_hitch_usec": 80615
+					},
+					{
+						"elapsed_usec": 50621135,
+						"frame_usec": 95113,
+						"since_previous_hitch_usec": 301727
+					},
+					{
+						"elapsed_usec": 50699983,
+						"frame_usec": 53150,
+						"since_previous_hitch_usec": 78848
+					},
+					{
+						"elapsed_usec": 50947105,
+						"frame_usec": 52027,
+						"since_previous_hitch_usec": 247122
+					},
+					{
+						"elapsed_usec": 51302340,
+						"frame_usec": 60685,
+						"since_previous_hitch_usec": 355235
+					},
+					{
+						"elapsed_usec": 51706149,
+						"frame_usec": 90402,
+						"since_previous_hitch_usec": 403809
+					},
+					{
+						"elapsed_usec": 52027518,
+						"frame_usec": 54207,
+						"since_previous_hitch_usec": 321369
+					},
+					{
+						"elapsed_usec": 52788040,
+						"frame_usec": 102020,
+						"since_previous_hitch_usec": 760522
+					},
+					{
+						"elapsed_usec": 52844778,
+						"frame_usec": 56738,
+						"since_previous_hitch_usec": 56738
+					},
+					{
+						"elapsed_usec": 53447127,
+						"frame_usec": 56652,
+						"since_previous_hitch_usec": 602349
+					},
+					{
+						"elapsed_usec": 53867225,
+						"frame_usec": 104426,
+						"since_previous_hitch_usec": 420098
+					},
+					{
+						"elapsed_usec": 53955014,
+						"frame_usec": 57389,
+						"since_previous_hitch_usec": 87789
+					},
+					{
+						"elapsed_usec": 54158485,
+						"frame_usec": 52846,
+						"since_previous_hitch_usec": 203471
+					},
+					{
+						"elapsed_usec": 54515389,
+						"frame_usec": 53829,
+						"since_previous_hitch_usec": 356904
+					},
+					{
+						"elapsed_usec": 54565550,
+						"frame_usec": 50161,
+						"since_previous_hitch_usec": 50161
+					},
+					{
+						"elapsed_usec": 54888237,
+						"frame_usec": 72669,
+						"since_previous_hitch_usec": 322687
+					},
+					{
+						"elapsed_usec": 55600912,
+						"frame_usec": 54580,
+						"since_previous_hitch_usec": 712675
+					},
+					{
+						"elapsed_usec": 56014350,
+						"frame_usec": 107847,
+						"since_previous_hitch_usec": 413438
+					},
+					{
+						"elapsed_usec": 56339636,
+						"frame_usec": 67903,
+						"since_previous_hitch_usec": 325286
+					},
+					{
+						"elapsed_usec": 57071595,
+						"frame_usec": 97070,
+						"since_previous_hitch_usec": 731959
+					},
+					{
+						"elapsed_usec": 57156451,
+						"frame_usec": 51210,
+						"since_previous_hitch_usec": 84856
+					},
+					{
+						"elapsed_usec": 57361303,
+						"frame_usec": 55221,
+						"since_previous_hitch_usec": 204852
+					},
+					{
+						"elapsed_usec": 57412197,
+						"frame_usec": 50894,
+						"since_previous_hitch_usec": 50894
+					},
+					{
+						"elapsed_usec": 58119567,
+						"frame_usec": 79065,
+						"since_previous_hitch_usec": 707370
+					},
+					{
+						"elapsed_usec": 58412914,
+						"frame_usec": 209846,
+						"since_previous_hitch_usec": 293347
+					},
+					{
+						"elapsed_usec": 59258822,
+						"frame_usec": 69460,
+						"since_previous_hitch_usec": 845908
+					},
+					{
+						"elapsed_usec": 60318266,
+						"frame_usec": 318132,
+						"since_previous_hitch_usec": 1059444
+					},
+					{
+						"elapsed_usec": 60379651,
+						"frame_usec": 61385,
+						"since_previous_hitch_usec": 61385
+					},
+					{
+						"elapsed_usec": 60515541,
+						"frame_usec": 104021,
+						"since_previous_hitch_usec": 135890
+					},
+					{
+						"elapsed_usec": 60604310,
+						"frame_usec": 51409,
+						"since_previous_hitch_usec": 88769
+					},
+					{
+						"elapsed_usec": 61189960,
+						"frame_usec": 63157,
+						"since_previous_hitch_usec": 585650
+					},
+					{
+						"elapsed_usec": 61610913,
+						"frame_usec": 115978,
+						"since_previous_hitch_usec": 420953
+					},
+					{
+						"elapsed_usec": 61663464,
+						"frame_usec": 52551,
+						"since_previous_hitch_usec": 52551
+					},
+					{
+						"elapsed_usec": 61858082,
+						"frame_usec": 61291,
+						"since_previous_hitch_usec": 194618
+					},
+					{
+						"elapsed_usec": 61956530,
+						"frame_usec": 57160,
+						"since_previous_hitch_usec": 98448
+					},
+					{
+						"elapsed_usec": 62135145,
+						"frame_usec": 54291,
+						"since_previous_hitch_usec": 178615
+					},
+					{
+						"elapsed_usec": 62768076,
+						"frame_usec": 138034,
+						"since_previous_hitch_usec": 632931
+					},
+					{
+						"elapsed_usec": 62828294,
+						"frame_usec": 60218,
+						"since_previous_hitch_usec": 60218
+					},
+					{
+						"elapsed_usec": 62906612,
+						"frame_usec": 62995,
+						"since_previous_hitch_usec": 78318
+					},
+					{
+						"elapsed_usec": 63428695,
+						"frame_usec": 63910,
+						"since_previous_hitch_usec": 522083
+					},
+					{
+						"elapsed_usec": 63817259,
+						"frame_usec": 72970,
+						"since_previous_hitch_usec": 388564
+					},
+					{
+						"elapsed_usec": 64913390,
+						"frame_usec": 78673,
+						"since_previous_hitch_usec": 1096131
+					},
+					{
+						"elapsed_usec": 65259690,
+						"frame_usec": 53787,
+						"since_previous_hitch_usec": 346300
+					},
+					{
+						"elapsed_usec": 66014089,
+						"frame_usec": 95498,
+						"since_previous_hitch_usec": 754399
+					},
+					{
+						"elapsed_usec": 67117884,
+						"frame_usec": 125801,
+						"since_previous_hitch_usec": 1103795
+					},
+					{
+						"elapsed_usec": 67201036,
+						"frame_usec": 52690,
+						"since_previous_hitch_usec": 83152
+					},
+					{
+						"elapsed_usec": 68187409,
+						"frame_usec": 73611,
+						"since_previous_hitch_usec": 986373
+					},
+					{
+						"elapsed_usec": 69298736,
+						"frame_usec": 103882,
+						"since_previous_hitch_usec": 1111327
+					},
+					{
+						"elapsed_usec": 69993249,
+						"frame_usec": 215687,
+						"since_previous_hitch_usec": 694513
+					},
+					{
+						"elapsed_usec": 70081868,
+						"frame_usec": 53121,
+						"since_previous_hitch_usec": 88619
+					},
+					{
+						"elapsed_usec": 70449173,
+						"frame_usec": 73724,
+						"since_previous_hitch_usec": 367305
+					},
+					{
+						"elapsed_usec": 72395031,
+						"frame_usec": 391848,
+						"since_previous_hitch_usec": 1945858
+					},
+					{
+						"elapsed_usec": 72473770,
+						"frame_usec": 78739,
+						"since_previous_hitch_usec": 78739
+					},
+					{
+						"elapsed_usec": 72803650,
+						"frame_usec": 95154,
+						"since_previous_hitch_usec": 329880
+					},
+					{
+						"elapsed_usec": 72870164,
+						"frame_usec": 66514,
+						"since_previous_hitch_usec": 66514
+					},
+					{
+						"elapsed_usec": 72938022,
+						"frame_usec": 67858,
+						"since_previous_hitch_usec": 67858
+					},
+					{
+						"elapsed_usec": 73042814,
+						"frame_usec": 67989,
+						"since_previous_hitch_usec": 104792
+					},
+					{
+						"elapsed_usec": 73147251,
+						"frame_usec": 52226,
+						"since_previous_hitch_usec": 104437
+					},
+					{
+						"elapsed_usec": 73936779,
+						"frame_usec": 131801,
+						"since_previous_hitch_usec": 789528
+					},
+					{
+						"elapsed_usec": 74665653,
+						"frame_usec": 50461,
+						"since_previous_hitch_usec": 728874
+					},
+					{
+						"elapsed_usec": 74823159,
+						"frame_usec": 56716,
+						"since_previous_hitch_usec": 157506
+					},
+					{
+						"elapsed_usec": 75008873,
+						"frame_usec": 117257,
+						"since_previous_hitch_usec": 185714
+					},
+					{
+						"elapsed_usec": 75662878,
+						"frame_usec": 59704,
+						"since_previous_hitch_usec": 654005
+					},
+					{
+						"elapsed_usec": 75773744,
+						"frame_usec": 50319,
+						"since_previous_hitch_usec": 110866
+					},
+					{
+						"elapsed_usec": 76066180,
+						"frame_usec": 94437,
+						"since_previous_hitch_usec": 292436
+					},
+					{
+						"elapsed_usec": 77179418,
+						"frame_usec": 128303,
+						"since_previous_hitch_usec": 1113238
+					},
+					{
+						"elapsed_usec": 78238443,
+						"frame_usec": 93710,
+						"since_previous_hitch_usec": 1059025
+					},
+					{
+						"elapsed_usec": 78403048,
+						"frame_usec": 57349,
+						"since_previous_hitch_usec": 164605
+					},
+					{
+						"elapsed_usec": 78570069,
+						"frame_usec": 63807,
+						"since_previous_hitch_usec": 167021
+					},
+					{
+						"elapsed_usec": 78804389,
+						"frame_usec": 63517,
+						"since_previous_hitch_usec": 234320
+					},
+					{
+						"elapsed_usec": 79089514,
+						"frame_usec": 53851,
+						"since_previous_hitch_usec": 285125
+					},
+					{
+						"elapsed_usec": 79151025,
+						"frame_usec": 61511,
+						"since_previous_hitch_usec": 61511
+					},
+					{
+						"elapsed_usec": 79361849,
+						"frame_usec": 97609,
+						"since_previous_hitch_usec": 210824
+					},
+					{
+						"elapsed_usec": 79412346,
+						"frame_usec": 50497,
+						"since_previous_hitch_usec": 50497
+					},
+					{
+						"elapsed_usec": 79463456,
+						"frame_usec": 51110,
+						"since_previous_hitch_usec": 51110
+					},
+					{
+						"elapsed_usec": 79668256,
+						"frame_usec": 62444,
+						"since_previous_hitch_usec": 204800
+					},
+					{
+						"elapsed_usec": 80419491,
+						"frame_usec": 87276,
+						"since_previous_hitch_usec": 751235
+					},
+					{
+						"elapsed_usec": 81478148,
+						"frame_usec": 87468,
+						"since_previous_hitch_usec": 1058657
+					},
+					{
+						"elapsed_usec": 81529056,
+						"frame_usec": 50908,
+						"since_previous_hitch_usec": 50908
+					},
+					{
+						"elapsed_usec": 81812312,
+						"frame_usec": 58216,
+						"since_previous_hitch_usec": 283256
+					},
+					{
+						"elapsed_usec": 82444508,
+						"frame_usec": 207811,
+						"since_previous_hitch_usec": 632196
+					},
+					{
+						"elapsed_usec": 82589962,
+						"frame_usec": 72032,
+						"since_previous_hitch_usec": 145454
+					},
+					{
+						"elapsed_usec": 83630189,
+						"frame_usec": 51779,
+						"since_previous_hitch_usec": 1040227
+					},
+					{
+						"elapsed_usec": 84323482,
+						"frame_usec": 320436,
+						"since_previous_hitch_usec": 693293
+					},
+					{
+						"elapsed_usec": 84387667,
+						"frame_usec": 64185,
+						"since_previous_hitch_usec": 64185
+					},
+					{
+						"elapsed_usec": 84907502,
+						"frame_usec": 90893,
+						"since_previous_hitch_usec": 519835
+					},
+					{
+						"elapsed_usec": 85615360,
+						"frame_usec": 62238,
+						"since_previous_hitch_usec": 707858
+					},
+					{
+						"elapsed_usec": 86015235,
+						"frame_usec": 111590,
+						"since_previous_hitch_usec": 399875
+					},
+					{
+						"elapsed_usec": 86122809,
+						"frame_usec": 82220,
+						"since_previous_hitch_usec": 107574
+					},
+					{
+						"elapsed_usec": 86213950,
+						"frame_usec": 60114,
+						"since_previous_hitch_usec": 91141
+					},
+					{
+						"elapsed_usec": 86335150,
+						"frame_usec": 67613,
+						"since_previous_hitch_usec": 121200
+					},
+					{
+						"elapsed_usec": 87133161,
+						"frame_usec": 133268,
+						"since_previous_hitch_usec": 798011
+					},
+					{
+						"elapsed_usec": 87185747,
+						"frame_usec": 52586,
+						"since_previous_hitch_usec": 52586
+					},
+					{
+						"elapsed_usec": 87268497,
+						"frame_usec": 55498,
+						"since_previous_hitch_usec": 82750
+					},
+					{
+						"elapsed_usec": 87460463,
+						"frame_usec": 55146,
+						"since_previous_hitch_usec": 191966
+					},
+					{
+						"elapsed_usec": 87511809,
+						"frame_usec": 51346,
+						"since_previous_hitch_usec": 51346
+					},
+					{
+						"elapsed_usec": 88167515,
+						"frame_usec": 81580,
+						"since_previous_hitch_usec": 655706
+					},
+					{
+						"elapsed_usec": 89250173,
+						"frame_usec": 81950,
+						"since_previous_hitch_usec": 1082658
+					},
+					{
+						"elapsed_usec": 90024652,
+						"frame_usec": 50368,
+						"since_previous_hitch_usec": 774479
+					}
+				],
+				"probe_usec": {
+					"count": 3869,
+					"max": 327,
+					"mean": 67.157146549496,
+					"p50": 64,
+					"p90": 82,
+					"p95": 90,
+					"p99": 112
+				},
+				"simulation_seconds_per_wall_second": 0.98422775849997,
+				"simulation_ticks": 5317
+			}
+		},
+		"isolated_user_data": true,
+		"motion_trace": {
+			"path": "C:/dev/SternenBuergerchen/output/playtest_20261105/final_motion_90/20261105T084901Z-ad9f7065/final_motion.json",
+			"samples": 340
+		},
+		"player_roster_after_sha256": "26c68710e3d1faddfb668e45bf624348cd0fee757d98bfd8db0961fb1d82891b",
+		"player_roster_before_sha256": "",
+		"player_roster_created_by_normal_start": true,
+		"player_roster_existed_before": false,
+		"player_roster_identity_after_sha256": "a20257b0ce5c8b58b1df416ba9ed112d9c6ab51d2133fe5a47adf08876ce6273",
+		"player_roster_identity_before_sha256": "",
+		"private_simulation_state_writes": false,
+		"profile_reset": false,
+		"sources_sha256": {
+			"res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/buccaneer_01.glb": "922bd0fa668a90121dd5101541f4b5792d791f801a6dd1e7caa9d98a59b3a6c3",
+			"res://Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+			"res://project.godot": "9c6f5388cea89b2818c12a518646049afda1e09ed80cd6a52e871b6194c4cff7",
+			"res://scenes/meta/meta_layer_test.tscn": "e8e0f22fa3292ded594daebe72498dbf062ca76213335753283a1b7b74d29051",
+			"res://scenes/tests/mission_reactivity_test.tscn": "e3d5e05923b8042cdaad829eff049447bb6560351a0129c916a8a00dd168a8ce",
+			"res://scenes/ui/main_menu.tscn": "148ac78102575a8691cab391dcc38e3257f0d52869e1cdf4e74f7f0dd3ad5b4b",
+			"res://scripts/meta/meta_layer_flow.gd": "2a203278aa7d6ccf58a161c1f2c055ee63b3da7e938e3de94f18e91702843604",
+			"res://scripts/terrain/terrain_map_3d_view.gd": "d0dc3fe2fc5995bbb63e7c624756d733801c0ab0038656ca379be10c47e6b0b5",
+			"res://scripts/tests/frontier_main_startup_verifier.gd": "2776f09a56f9484c05d07b1371e34bc1cfcc5e448f8350659f6a1dc630d4e34d",
+			"res://scripts/tests/mission_test_setup.gd": "678bfd7bf31e96f0b468b192b6d25f7f13b2e0a24ce0ee07a4a410d9ce3b63a1",
+			"res://scripts/ui/main_menu_screen.gd": "b9f9ab88c667c020a7c7155fa2d77be076058ee84715f26b1695d4b131200405"
+		},
+		"synthetic_fixture": false,
+		"time_acceleration": false,
+		"ui_test_user_data_dir": "C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2-a539d1d6c6b24c84af8d699ca408d64f/SternenBuergerchen_UI_Zielbild_Normal_QA"
+	},
+	"failed": 0,
+	"passed": 61,
+	"renderer": {
+		"display": "Windows",
+		"driver": "vulkan",
+		"method": "forward_plus"
+	},
+	"schema": "sternenbuergerchen.frontier_main_startup.v1",
+	"scope": "Actual normal scene/UI-command route with real timer-driven transport/deployment. Bounded smoke, no complete campaign/combat/performance/art acceptance.",
+	"stages": [
+		{
+			"details": {
+				"background_path": "res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg",
+				"background_sha256": "8702c2e3989b8e537656bf3824c734e2474ba797f7744b574aad8390299a5563",
+				"scene": "res://scenes/ui/main_menu.tscn"
+			},
+			"elapsed_msec": 1549,
+			"id": "main_menu"
+		},
+		{
+			"details": {
+				"craft_id": "dropship_1",
+				"craft_location": "homebase",
+				"payload_seeded": true,
+				"selected_mission_id": "grid_sweep",
+				"selected_mission_map_path": "res://maps/Ground_Mission01_32x32.json",
+				"visible_homebase_post_show_guard_after_actionable": true
+			},
+			"elapsed_msec": 9784,
+			"id": "homebase"
+		},
+		{
+			"details": {
+				"planning": {
+					"deployed_unit_ids": [],
+					"deployed_unit_positions": {
+
+					},
+					"drop_ship_requested": false,
+					"drop_ship_staged": true,
+					"embarked_unit_ids": [
+						"player_sternenbuergerchen_01",
+						"player_sternenbuergerchen_02",
+						"player_sternenbuergerchen_03"
+					],
+					"has_lz_position": false,
+					"lz_position": "(0.0, 0.0)",
+					"mission_drop_craft_id": "dropship_1",
+					"mission_drop_eta_seconds": 18,
+					"mission_drop_progress": 0.0,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_mission",
+					"selected_fireteams": [
+						"ft1"
+					]
+				},
+				"render": {
+					"authored_visual_assets": [
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+							"sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+						},
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+							"sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+						},
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+							"sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+							"sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+							"sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/License.txt",
+							"sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+							"sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+							"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+						}
+					],
+					"authored_visual_layout_active": true,
+					"authored_visual_layout_id": "gm01_frontier_outpost_v1",
+					"authored_visual_owned_tile_count": 1046,
+					"dropship_model_visible": false,
+					"dropship_visual_count": 0,
+					"fog_of_war_mode": "known_terrain",
+					"fow_known_dim_tile_count": 512,
+					"fow_overlay_tile_count": 512,
+					"fow_unknown_tile_count": 0,
+					"frontier_art_enabled": true,
+					"frontier_art_override": -1,
+					"frontier_art_profile_id": "frontier_illustrated_v1",
+					"grid_topology": "hex_axial_v1",
+					"hex_grid_edge_style": "warm_dual_contrast",
+					"hex_grid_visible": true,
+					"hex_grid_width_world": 0.048,
+					"missing_asset_mapping_count": 0,
+					"missing_dropship_model_count": 0,
+					"read_only": true,
+					"tile_count": 9408,
+					"tile_grid_line_count": 28645,
+					"ui_sets_gameplay_truth": false,
+					"unit_model_count": 11
+				},
+				"scene": "res://scenes/tests/mission_reactivity_test.tscn"
+			},
+			"elapsed_msec": 13142,
+			"id": "mission_started"
+		},
+		{
+			"details": {
+				"planning": {
+					"deployed_unit_ids": [],
+					"deployed_unit_positions": {
+
+					},
+					"drop_ship_requested": false,
+					"drop_ship_staged": true,
+					"embarked_unit_ids": [
+						"player_sternenbuergerchen_01",
+						"player_sternenbuergerchen_02",
+						"player_sternenbuergerchen_03"
+					],
+					"has_lz_position": false,
+					"lz_position": "(0.0, 0.0)",
+					"mission_drop_craft_id": "dropship_1",
+					"mission_drop_eta_seconds": 0,
+					"mission_drop_progress": 100.0,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "waiting",
+					"selected_fireteams": [
+						"ft1"
+					]
+				}
+			},
+			"elapsed_msec": 31775,
+			"id": "craft_arrived"
+		},
+		{
+			"details": {
+				"planning": {
+					"deployed_unit_ids": [],
+					"deployed_unit_positions": {
+
+					},
+					"drop_ship_requested": true,
+					"drop_ship_staged": true,
+					"embarked_unit_ids": [
+						"player_sternenbuergerchen_01",
+						"player_sternenbuergerchen_02",
+						"player_sternenbuergerchen_03"
+					],
+					"has_lz_position": true,
+					"lz_position": "(-304.5331, 568.2666)",
+					"mission_drop_craft_id": "dropship_1",
+					"mission_drop_eta_seconds": 0,
+					"mission_drop_progress": 0.0,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "waiting",
+					"selected_fireteams": [
+						"ft1"
+					]
+				}
+			},
+			"elapsed_msec": 32319,
+			"id": "drop_requested"
+		},
+		{
+			"details": {
+				"planning": {
+					"deployed_unit_ids": [],
+					"deployed_unit_positions": {
+
+					},
+					"drop_ship_requested": true,
+					"drop_ship_staged": true,
+					"embarked_unit_ids": [
+						"player_sternenbuergerchen_01",
+						"player_sternenbuergerchen_02",
+						"player_sternenbuergerchen_03"
+					],
+					"has_lz_position": true,
+					"lz_position": "(-304.5331, 568.2666)",
+					"mission_drop_craft_id": "dropship_1",
+					"mission_drop_eta_seconds": 0,
+					"mission_drop_progress": 0.0,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "waiting",
+					"selected_fireteams": [
+						"ft1"
+					]
+				},
+				"render": {
+					"authored_visual_assets": [
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+							"sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+						},
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+							"sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+						},
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+							"sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+							"sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+							"sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/License.txt",
+							"sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+							"sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+							"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+						}
+					],
+					"authored_visual_layout_active": true,
+					"authored_visual_layout_id": "gm01_frontier_outpost_v1",
+					"authored_visual_owned_tile_count": 1046,
+					"dropship_model_visible": true,
+					"dropship_visual_count": 1,
+					"fog_of_war_mode": "known_terrain",
+					"fow_known_dim_tile_count": 9408,
+					"fow_overlay_tile_count": 9408,
+					"fow_unknown_tile_count": 0,
+					"frontier_art_enabled": true,
+					"frontier_art_override": -1,
+					"frontier_art_profile_id": "frontier_illustrated_v1",
+					"grid_topology": "hex_axial_v1",
+					"hex_grid_edge_style": "warm_dual_contrast",
+					"hex_grid_visible": true,
+					"hex_grid_width_world": 0.048,
+					"missing_asset_mapping_count": 0,
+					"missing_dropship_model_count": 0,
+					"read_only": true,
+					"tile_count": 9408,
+					"tile_grid_line_count": 28645,
+					"ui_sets_gameplay_truth": false,
+					"unit_model_count": 11
+				}
+			},
+			"elapsed_msec": 32357,
+			"id": "lz_approach"
+		},
+		{
+			"details": {
+				"planning": {
+					"deployed_unit_ids": [
+						"player_sternenbuergerchen_01",
+						"player_sternenbuergerchen_02",
+						"player_sternenbuergerchen_03"
+					],
+					"deployed_unit_positions": {
+						"player_sternenbuergerchen_01": "(-348.5331, 586.2666)",
+						"player_sternenbuergerchen_02": "(-316.5331, 574.2666)",
+						"player_sternenbuergerchen_03": "(-286.5331, 560.2666)"
+					},
+					"drop_ship_requested": true,
+					"drop_ship_staged": true,
+					"embarked_unit_ids": [],
+					"has_lz_position": true,
+					"lz_position": "(-304.5331, 568.2666)",
+					"mission_drop_craft_id": "dropship_1",
+					"mission_drop_eta_seconds": 0,
+					"mission_drop_progress": 18.7672958374023,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_homebase",
+					"selected_fireteams": [
+						"ft1"
+					]
+				},
+				"render": {
+					"authored_visual_assets": [
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+							"sha256": "6524cd513b1d474dba4a855ef1dad32ec4539513acb46bf73cd1b44463a2d50f"
+						},
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+							"sha256": "cc17a4cebc805a3f165eecd0e3bef95b7a92e851dc592fb8867b92597a894508"
+						},
+						{
+							"path": "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/utility_fuel_01.glb",
+							"sha256": "7e7c54b23548b95ee0483a9233f2c5fd256eaac5a01f153c8b8b7c2a1240b274"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+							"sha256": "6a078d92a273a95f82c2017038c15cf1fb534c0d5dbf4800ea014e63fed3edd3"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png",
+							"sha256": "6ca023be9f12e8c2358fcf94320c8a894b4c05a3dd0bad1f5c268312053caca1"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/License.txt",
+							"sha256": "22c24cb402e4e56099b6520ec808d723d1e2e55d6c1a84fc5c5745f9f835dcf3"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+							"sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7"
+						},
+						{
+							"path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+							"sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0"
+						}
+					],
+					"authored_visual_layout_active": true,
+					"authored_visual_layout_id": "gm01_frontier_outpost_v1",
+					"authored_visual_owned_tile_count": 1046,
+					"dropship_model_visible": true,
+					"dropship_visual_count": 1,
+					"fog_of_war_mode": "known_terrain",
+					"fow_known_dim_tile_count": 9236,
+					"fow_overlay_tile_count": 9236,
+					"fow_unknown_tile_count": 0,
+					"frontier_art_enabled": true,
+					"frontier_art_override": -1,
+					"frontier_art_profile_id": "frontier_illustrated_v1",
+					"grid_topology": "hex_axial_v1",
+					"hex_grid_edge_style": "warm_dual_contrast",
+					"hex_grid_visible": true,
+					"hex_grid_width_world": 0.048,
+					"missing_asset_mapping_count": 0,
+					"missing_dropship_model_count": 0,
+					"read_only": true,
+					"tile_count": 9408,
+					"tile_grid_line_count": 28645,
+					"ui_sets_gameplay_truth": false,
+					"unit_model_count": 11
+				}
+			},
+			"elapsed_msec": 38742,
+			"id": "deployed"
+		},
+		{
+			"details": {
+				"after_positions": {
+					"player_sternenbuergerchen_01": "(-351.3883, 583.9232)",
+					"player_sternenbuergerchen_02": "(-274.1937, 578.0664)",
+					"player_sternenbuergerchen_03": "(-270.5552, 540.1807)"
+				},
+				"before_positions": {
+					"player_sternenbuergerchen_01": "(-350.3094, 586.9222)",
+					"player_sternenbuergerchen_02": "(-279.1809, 577.249)",
+					"player_sternenbuergerchen_03": "(-267.0645, 543.3492)"
+				},
+				"planning": {
+					"deployed_unit_ids": [
+						"player_sternenbuergerchen_01",
+						"player_sternenbuergerchen_02",
+						"player_sternenbuergerchen_03"
+					],
+					"deployed_unit_positions": {
+						"player_sternenbuergerchen_01": "(-348.5331, 586.2666)",
+						"player_sternenbuergerchen_02": "(-316.5331, 574.2666)",
+						"player_sternenbuergerchen_03": "(-286.5331, 560.2666)"
+					},
+					"drop_ship_requested": true,
+					"drop_ship_staged": true,
+					"embarked_unit_ids": [],
+					"has_lz_position": true,
+					"lz_position": "(-304.5331, 568.2666)",
+					"mission_drop_craft_id": "dropship_1",
+					"mission_drop_eta_seconds": 0,
+					"mission_drop_progress": 47.0019836425781,
+					"mission_drop_source": "homebase_direct",
+					"mission_drop_state": "to_homebase",
+					"selected_fireteams": [
+						"ft1"
+					]
+				},
+				"tick_after": 1458,
+				"tick_before": 1450
+			},
+			"elapsed_msec": 40456,
+			"id": "go_movement"
+		}
+	]
+}

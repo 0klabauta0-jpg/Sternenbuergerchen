@@ -7,7 +7,9 @@ const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tacti
 const FORMAT_VERSION: int = 1
 const DOWNLOAD_ROOT: String = "user://downloaded_maps"
 const HASH_LENGTH: int = 64
-const MAX_MAP_BYTES: int = 1024 * 1024
+# The current authored 9408-cell GM01 is 2.43 MB. Keep a bounded allowance
+# covering the shipped default in both manifest and payload verification.
+const MAX_MAP_BYTES: int = 4 * 1024 * 1024
 const FORBIDDEN_MAP_PAYLOAD_KEYS: PackedStringArray = [
 	"script",
 	"resource_path",

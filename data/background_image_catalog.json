@@ -11,13 +11,13 @@
   "backgrounds": [
     {
       "background_id": "main_menu_shell",
-      "res_path": "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png",
-      "source_file": "Frontier Ref03 native Outpost capture",
-      "source_note": "Clean native Godot Ref03 Outpost capture at1920x1080; original menu layout and520px text rail retained. Native source metadata is linked separately.",
-      "origin": "project_native_godot_capture",
-      "width": 1920,
-      "height": 1080,
-      "file_size_bytes": 1670724,
+      "res_path": "res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg",
+      "source_file": "TASK_199 curated mainmenu background",
+      "source_note": "Original preferred TASK199 artwork, restored by explicit user request on 2026-11-05.",
+      "origin": "task_199_curated_project_asset",
+      "width": 1376,
+      "height": 768,
+      "file_size_bytes": 717441,
       "screen_hint": [
         "main_menu",
         "settings_panel"
@@ -26,11 +26,9 @@
       "dim_strength": 0.35,
       "text_safe_zone": "left_rail_520px",
       "import_profile": "ui_background_lossless_default",
-      "sha256": "35c52473d92cbec346577a7be269553f8270d586f69f241067952a3be49bcea6",
-      "source_capture": "res://output/grafik_20261101/main_adoption/menu_background_capture.json",
-      "asset_status": "native_capture_ready",
-      "license_note": "Composite project render: reused Kenney components retain CC0 attribution; project-authored geometry and Ref03 ship candidates retain their documented source provenance. No blanket CC0 claim for the complete image.",
-      "source_capture_sha256": "23386d1facb78b5692a3890e0ef161cc5a0f5747f6e3da75bdd2a20787a34106"
+      "sha256": "8702c2e3989b8e537656bf3824c734e2474ba797f7744b574aad8390299a5563",
+      "reference_manifest": "res://art/menu_restore_20261105/source.json",
+      "asset_status": "restored_original"
     },
     {
       "background_id": "multiplayer_lobby_hangar",
@@ -41,7 +39,10 @@
       "width": 1344,
       "height": 768,
       "file_size_bytes": 1589094,
-      "screen_hint": ["multiplayer_lobby", "mission_setup"],
+      "screen_hint": [
+        "multiplayer_lobby",
+        "mission_setup"
+      ],
       "crop_anchor": "center",
       "dim_strength": 0.58,
       "text_safe_zone": "center_panel",
@@ -56,7 +57,11 @@
       "width": 1376,
       "height": 768,
       "file_size_bytes": 1526978,
-      "screen_hint": ["singleplayer_setup", "mission_select", "editor_setup"],
+      "screen_hint": [
+        "singleplayer_setup",
+        "mission_select",
+        "editor_setup"
+      ],
       "crop_anchor": "center",
       "dim_strength": 0.52,
       "text_safe_zone": "panel_or_rail_only",
@@ -71,7 +76,10 @@
       "width": 1376,
       "height": 768,
       "file_size_bytes": 1702838,
-      "screen_hint": ["loading", "multiplayer_lobby_variant"],
+      "screen_hint": [
+        "loading",
+        "multiplayer_lobby_variant"
+      ],
       "crop_anchor": "center",
       "dim_strength": 0.5,
       "text_safe_zone": "bottom_or_center_panel",
@@ -86,7 +94,11 @@
       "width": 1376,
       "height": 768,
       "file_size_bytes": 788232,
-      "screen_hint": ["loading", "debrief", "mission_result"],
+      "screen_hint": [
+        "loading",
+        "debrief",
+        "mission_result"
+      ],
       "crop_anchor": "center",
       "dim_strength": 0.62,
       "text_safe_zone": "panel_or_bottom_band",

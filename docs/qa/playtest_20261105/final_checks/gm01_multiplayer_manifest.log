@@ -1,0 +1,12 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-9d29ebe8978348bf9363feeeae439c65
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Real current default GM01 produces a valid multiplayer manifest
+PASS: Manifest retains the exact real map size
+PASS: Manifest retains the exact real map SHA-256
+PASS: Matching installed GM01 is recognized without a download
+PASS: Above the bounded maximum remains rejected
+PASS: Changed same-ID map still requires explicit consent
+PASS: Manifest checks never write a downloaded map
+GM01_MULTIPLAYER_MANIFEST: 7 passed, 0 failed

@@ -1,0 +1,981 @@
+{
+  "schema_version": 1,
+  "package_id": "portrait_frontier_20261105",
+  "task": "res://docs/tasks/PLAYTEST_2026_11_05_portrait_refresh.md",
+  "tool": "built-in image_gen",
+  "raster_processing": "none_original_pngs_copied_byte_identically",
+  "quadrant_order": [
+    "upper_left",
+    "upper_right",
+    "lower_left",
+    "lower_right"
+  ],
+  "sheet_count": 11,
+  "face_count": 44,
+  "assigned_identity_count": 42,
+  "reserve_count": 2,
+  "baseline_catalog": "res://art/portraits_20261105/catalog_before_refresh.json",
+  "baseline_catalog_sha256": "113e7a86b313c04eb005459bc80a0b45508a78f455f63f00efa9e104a7890aa7",
+  "prepared_catalog": "res://art/portraits_20261105/catalog_prepared.json",
+  "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+  "style_reference_sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+  "references": [
+    {
+      "path": "res://docs/reports/assets/ui-2026-11-01/menu_fob_loadout.png",
+      "sha256": "ff97752096c4af99b2fc97beefd5337e396451c9d3c16d926467d3157b95cc1a",
+      "role": "confirmed_2d_ui_target_context"
+    },
+    {
+      "path": "res://docs/reports/assets/ui-2026-11-01/menu_heimatbasis.png",
+      "sha256": "2037cc5c58a8cf463040235d332c64c5522242a5a944c928e9040613bb495e92",
+      "role": "confirmed_2d_ui_target_context"
+    },
+    {
+      "path": "res://docs/reports/assets/ui-2026-11-01/menu_debrief.png",
+      "sha256": "3d7600ded373bde99da4b6598211a45524d42e2b5a7daa85d58e6e46042f0c82",
+      "role": "confirmed_2d_ui_target_context"
+    },
+    {
+      "path": "res://docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png",
+      "sha256": "fc9edb8b1d28921653ba5b438e7be8da4db3e0b32b8c751e9b18c4ef94918149",
+      "role": "confirmed_2d_ui_target_context"
+    }
+  ],
+  "sheets": [
+    {
+      "sheet": "a",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+      "bytes": 2358416,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_a_prompt.json",
+      "prompt_sha256": "84f1582cccc343508e402a10aba64abbab1a177d081beb0c23bcc9974cc10511",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa17-cccf-74f2-ad6e-4ea02e9ea001\\exec-995f1e74-dc03-49d4-bb76-874c74c93918.png",
+      "original_sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+      "style_reference": "",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Style reference opened. Four complete warm adult faces, crisp eyes, restrained teal/cream suits. Temple implant and distinct hair/beard silhouettes read clearly.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    },
+    {
+      "sheet": "b",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+      "sha256": "f42eb6ba4069f0c683d2f175c2aa0450b98cd9adc4f70124dcf6f9616ff8d8cc",
+      "bytes": 2413971,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_b_prompt.json",
+      "prompt_sha256": "a10fe7216b5f8f9a3ffd5670e89051afe682bc4446ab88a27d52c5fcbd9101eb",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-4f9b6085-fd3b-4ba6-8297-425d8256572b.png",
+      "original_sha256": "f42eb6ba4069f0c683d2f175c2aa0450b98cd9adc4f70124dcf6f9616ff8d8cc",
+      "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Project PNG opened. Bald moustached man, silver-bob woman, freckled copper-haired man and platinum-haired woman are clearly distinct. Four complete heads; palette matches A.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    },
+    {
+      "sheet": "c",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+      "sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+      "bytes": 2368406,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_c_prompt.json",
+      "prompt_sha256": "7a8c502b10bd9d18aa4ebb038dc06a7ec73bec2dc75190bdf285999aad02ac4b",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-2e4e9e51-1443-4d6c-8680-ef16957122be.png",
+      "original_sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+      "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Project PNG opened. Close-shaved medical woman with temple implant, receding bearded man, braided dark-haired woman and short-haired square-jawed man differ clearly. Four complete heads; palette matches A.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    },
+    {
+      "sheet": "d",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+      "sha256": "40e55b5c332dc1e18f50f355a224af20ae527c56eaed653667643df0560be9ef",
+      "bytes": 2390580,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_d_prompt.json",
+      "prompt_sha256": "124d1ba8115c1a797c1d38717f5a73b0ffba994af2cbbf561c5c05e5c8e2bd28",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-d7c98bd4-b287-46b0-b938-37531328d55c.png",
+      "original_sha256": "40e55b5c332dc1e18f50f355a224af20ae527c56eaed653667643df0560be9ef",
+      "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Project PNG opened. Auburn braid/freckles, short twists, grey cropped hair and dark bun/moustache provide clear silhouettes. Four complete heads; coherent painted faces and suits.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    },
+    {
+      "sheet": "e",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+      "sha256": "456714d746a4422d859617130e91378f78a4b2b8835eff053f44e559a2f1a1a2",
+      "bytes": 2307259,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_e_prompt.json",
+      "prompt_sha256": "a70fcc96a7f2eb8a7b10eab583920eb13603689b5d813e82b8da4e8aa9ebee9e",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-eeacadb2-77f3-42a6-868d-2325cf57734f.png",
+      "original_sha256": "456714d746a4422d859617130e91378f78a4b2b8835eff053f44e559a2f1a1a2",
+      "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Project PNG opened. Black fringe/bob, elderly white curls/moustache, short blonde crop and dark waves distinguish the quartet. Four complete heads; lower-left portrait reads more androgynous than prompt intent.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    },
+    {
+      "sheet": "f",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+      "sha256": "d508d4f16c9fd7f2bfeb88f5b52cfaa0c3e078b2957b9ca8ee1c2eeb6eb88528",
+      "bytes": 2402792,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_f_prompt.json",
+      "prompt_sha256": "4afadc45b3a5437398c5b3e435377a17fa17841c49a37f5c9f77dacac5c30c55",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-309e2238-0a51-4b0a-9f55-b1db9b514086.png",
+      "original_sha256": "d508d4f16c9fd7f2bfeb88f5b52cfaa0c3e078b2957b9ca8ee1c2eeb6eb88528",
+      "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Project PNG opened. White forelock in curls, bald long face/goatee, twin dark braids and ginger full beard differ visibly. Four complete heads; identical costume palette and backdrop.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    },
+    {
+      "sheet": "g",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+      "sha256": "d0e841e58b9d4bcd4de7b3bd82529d8228cd1c24734837714850b50949dcaae6",
+      "bytes": 2331318,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_g_prompt.json",
+      "prompt_sha256": "3b08810f153316515dfe8aa704329d819518aac8d74d0fcc0b938544865a41d0",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-becf36f9-6b2f-430c-85e4-f050d72f47cd.png",
+      "original_sha256": "d0e841e58b9d4bcd4de7b3bd82529d8228cd1c24734837714850b50949dcaae6",
+      "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Project PNG opened. Silver braids, short dark spiky crop, pale pixie cut/freckles and grey-sided moustached man are distinct. Hair tips approach the top edge more closely than the intended seven percent padding; no head is cut.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    },
+    {
+      "sheet": "h",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+      "sha256": "458476b88968eda4499f84bbe84526777e01284f9b99f0e45c16688265ef59a7",
+      "bytes": 2410730,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_h_prompt.json",
+      "prompt_sha256": "ab54d6c3b7367861d3a42fa213b0e1ce1039b7018f5c9d5cd3dc096e464a8a28",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-e56221af-7ade-4266-b32a-df50f216e7e5.png",
+      "original_sha256": "458476b88968eda4499f84bbe84526777e01284f9b99f0e45c16688265ef59a7",
+      "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Project PNG opened. Grey shoulder hair, youthful sandy curls, tall coiled hair and older silver ponytail/beard give clear distinctions. Complete heads; some hair tips have less than the intended seven percent top padding.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    },
+    {
+      "sheet": "i",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+      "sha256": "2130ab04c5edbfc4d593834708562160856f01d23b73478fbef6bb4b118f2a16",
+      "bytes": 2364676,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_i_prompt.json",
+      "prompt_sha256": "f011e998bfdbfa99984aa29175016b1bacf1eb24d34ff41ecde3e73a930a5e0f",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-b55a83e2-ce34-4ab6-b3cd-28384ab26038.png",
+      "original_sha256": "2130ab04c5edbfc4d593834708562160856f01d23b73478fbef6bb4b118f2a16",
+      "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Project PNG opened. Shaved head, blunt black fringe, older copper-grey bob and short mohawk/beard are distinct. Four complete heads and coherent soft lighting.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    },
+    {
+      "sheet": "j",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+      "sha256": "767b66fd59ba3e7e7aec37e4f6b7ba5b4dad2e5f9e0f2640c7e6d84bce6fade7",
+      "bytes": 2368636,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_j_prompt.json",
+      "prompt_sha256": "03e54bac5e0a34012e5da3621733f8712b9eb0cc80b90d89349c5dfc15cf1150",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-60893681-ac6f-4eab-a6a2-ae8481e7ae37.png",
+      "original_sha256": "767b66fd59ba3e7e7aec37e4f6b7ba5b4dad2e5f9e0f2640c7e6d84bce6fade7",
+      "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Project PNG opened. Short tight light curls, silver-streaked upright hair/moustache, dark bob and ginger moustache clearly differ. Complete heads; coherent illustrative treatment.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    },
+    {
+      "sheet": "k",
+      "path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_k.png",
+      "sha256": "f8f48a23f13b1995b0c76628522dec1c674f5010e5b2e98d27a95031dd8c2921",
+      "bytes": 2433975,
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGB",
+      "prompt_path": "res://art/portraits_20261105/atlas_k_prompt.json",
+      "prompt_sha256": "23dabee4f0761147cd38f9bb581cd9367b0e0daa0bd8653170b7d82cf0ac1baf",
+      "tool": "built-in image_gen",
+      "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-790fe093-107d-4c41-85b8-62fd7be64e40.png",
+      "original_sha256": "f8f48a23f13b1995b0c76628522dec1c674f5010e5b2e98d27a95031dd8c2921",
+      "style_reference": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "image_status": "generated_2d_portrait_asset_prepared_for_native_import",
+      "opened_project_file": true,
+      "visual_review": "Project PNG opened at original detail. Long dark-grey side hair and young loose curls are assigned to IDs 041/042. High brown bun and older clean-shaven silver-haired man remain reserves. Four complete heads; upper-left and lower-left share warm angular features but differ visibly in age, eye shape, hair and jaw.",
+      "visual_decision": "accept_for_native_ui_review",
+      "native_validation": "pending_root_serial_import_and_fullscreen_checks"
+    }
+  ],
+  "faces": [
+    {
+      "asset_id": "char_portrait_001",
+      "portrait_id": "char_portrait_001",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_001.tres",
+      "sha256": "bc9508135340d0199c17634167d665474317d93047ef4beedd6de71abe0edfa7",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "sheet": "a",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_002",
+      "portrait_id": "char_portrait_002",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_002.tres",
+      "sha256": "ddddd7e2ceb5bb3da8ba27eee2e02a3ccde6ab38c1bb9d7a845d767f98aa289c",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "sheet": "a",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_003",
+      "portrait_id": "char_portrait_003",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_003.tres",
+      "sha256": "52fc2c091459708dd0355a5773ab0870fd18bdfeadcf8b3ea3bbcb8ea75e4531",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "sheet": "a",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_004",
+      "portrait_id": "char_portrait_004",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_004.tres",
+      "sha256": "52972744c3b22813df3afac3dc2bd79330ee1e0486a9c9a27718fe52ec263a77",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "sheet": "a",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_005",
+      "portrait_id": "char_portrait_005",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_005.tres",
+      "sha256": "3af3f68028c2824580b245321f1c6b1cf805b17bfeda0ec27280bbc780d4c624",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+      "sheet": "b",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_006",
+      "portrait_id": "char_portrait_006",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_006.tres",
+      "sha256": "17ac36e04d97f977c8075aaab61f8d86520c097da2aca8a865a756e0ae4fdc0d",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+      "sheet": "b",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_007",
+      "portrait_id": "char_portrait_007",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_007.tres",
+      "sha256": "6b964eef9b9d530a05bcf700a59005c5fcf38c891652395097ad4d9587054603",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+      "sheet": "b",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_008",
+      "portrait_id": "char_portrait_008",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_008.tres",
+      "sha256": "6eaefabbbc725737051cd1e4f11aa05c42508423f48d9ea722a928cf12584324",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+      "sheet": "b",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_009",
+      "portrait_id": "char_portrait_009",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_009.tres",
+      "sha256": "7d6bce53851673aa0f351251d9270b2c5ca87f3ab533cfd3710679306f2211ee",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+      "sheet": "c",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_010",
+      "portrait_id": "char_portrait_010",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_010.tres",
+      "sha256": "d7a76fbbefff156db21cdc3196151061fc38cd6a4a012cccb044257b67811ae3",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+      "sheet": "c",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_011",
+      "portrait_id": "char_portrait_011",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_011.tres",
+      "sha256": "a4da290547abc7ff13ad16a9ce0c0c9f8cab7058d61e203cfc31575cd486bcfe",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+      "sheet": "c",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_012",
+      "portrait_id": "char_portrait_012",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_012.tres",
+      "sha256": "ec5d8619807d61e070e94d1ef8b4ec661cdfbbc48488b97b7e9a0ce6a775c9c5",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+      "sheet": "c",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_013",
+      "portrait_id": "char_portrait_013",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_013.tres",
+      "sha256": "eb6364930d38002929e48c70b21ef3d23acacea5d6f94585b16ece32036975b4",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+      "sheet": "d",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_014",
+      "portrait_id": "char_portrait_014",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_014.tres",
+      "sha256": "61a159ab90de2294f0eaddb8842681577fbfde14ebc1cbb0214bf3d1048c31f2",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+      "sheet": "d",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_015",
+      "portrait_id": "char_portrait_015",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_015.tres",
+      "sha256": "8cc5473a604b95d68faec2d314015411e2d24ebf461a4db99d06b56720b1078f",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+      "sheet": "d",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_016",
+      "portrait_id": "char_portrait_016",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_016.tres",
+      "sha256": "85701fa2a19e3f2460d42d78eb6773ec83b9a7ce72f85f104f597b83b9558bdb",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+      "sheet": "d",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_017",
+      "portrait_id": "char_portrait_017",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_017.tres",
+      "sha256": "a11c9a5c13e47c006a581d68ef1ef1c53a1deec0ae9a3655403f414c45fcce84",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+      "sheet": "e",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_018",
+      "portrait_id": "char_portrait_018",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_018.tres",
+      "sha256": "9f20b9603614cf60d7080f533f986fe2e40110bef9e176ee729ff4f1905f5232",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+      "sheet": "e",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_019",
+      "portrait_id": "char_portrait_019",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_019.tres",
+      "sha256": "4a65992372bc132faba41326d3e44372413398ffb41fe2ea201df91cef6310a7",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+      "sheet": "e",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_020",
+      "portrait_id": "char_portrait_020",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_020.tres",
+      "sha256": "24073675602334a8e59f9a91890206e192c65a67c4bee791b11687df65a14e75",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+      "sheet": "e",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_021",
+      "portrait_id": "char_portrait_021",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_021.tres",
+      "sha256": "c77d3703b36120d93f9f2de3e356cabb880c140778b0bc5c4050202851c026b4",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+      "sheet": "f",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_022",
+      "portrait_id": "char_portrait_022",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_022.tres",
+      "sha256": "d4077c78b3db0403e814764879367682f4c06f8fdf1d4cf47058836af5618d83",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+      "sheet": "f",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_023",
+      "portrait_id": "char_portrait_023",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_023.tres",
+      "sha256": "b64c5c4fce01d0dd1b24eb07373c2b1c0665c8c99fb9543d88f32b01e88853b0",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+      "sheet": "f",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_024",
+      "portrait_id": "char_portrait_024",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_024.tres",
+      "sha256": "ec1c26122afabfd3cc1fa8b4a1bfa72da672cdc607c01635ab3c7e05440b0a69",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+      "sheet": "f",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_025",
+      "portrait_id": "char_portrait_025",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_025.tres",
+      "sha256": "cf364fdaa49824a8864f540bff3d02cad2e5a4413e2935d5ce54938ad60fbd9a",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+      "sheet": "g",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_026",
+      "portrait_id": "char_portrait_026",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_026.tres",
+      "sha256": "7640c541bdc9a65795a66797baf03d5f61fd31f76723b4f3fd738b14b831c6a6",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+      "sheet": "g",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_027",
+      "portrait_id": "char_portrait_027",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_027.tres",
+      "sha256": "2eeff81a946c066a9b91b99e5f17f4c7a923c5e14cc929c5422805ec2d2c3480",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+      "sheet": "g",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_028",
+      "portrait_id": "char_portrait_028",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_028.tres",
+      "sha256": "7d1d7e65ea5ff246fe3684c0f8a4fda113bbc78d5c69f38e41943a6bfb6c42d6",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+      "sheet": "g",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_029",
+      "portrait_id": "char_portrait_029",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_029.tres",
+      "sha256": "6627ed3c9b02e8915d5e19a1513b285d9ade772e982311ef839a859b19b9e7b3",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+      "sheet": "h",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_030",
+      "portrait_id": "char_portrait_030",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_030.tres",
+      "sha256": "e6243c1dba50863601e5691a6d243dc05bfa5d3c37e128910aada7bfdee8a385",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+      "sheet": "h",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_031",
+      "portrait_id": "char_portrait_031",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_031.tres",
+      "sha256": "f95ab30d8ee1a79a1373f9841a94ee51b9a992c26eed8aedcad9ca6c3be0788c",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+      "sheet": "h",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_032",
+      "portrait_id": "char_portrait_032",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_032.tres",
+      "sha256": "4c73e60f017e9f6222cbc6f44e7b1c4d4e5fa4a294f8d4f525a7cbe9d7264112",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+      "sheet": "h",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_033",
+      "portrait_id": "char_portrait_033",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_033.tres",
+      "sha256": "1a7b9401f19298d03646fe0a7e4df1556814c730edfc4e489b6df08908a28ac2",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+      "sheet": "i",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_034",
+      "portrait_id": "char_portrait_034",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_034.tres",
+      "sha256": "afdbbb98f9c540e969cf5ff7ac5e1f6190c6375aec537984347caed028f6a0df",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+      "sheet": "i",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_035",
+      "portrait_id": "char_portrait_035",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_035.tres",
+      "sha256": "7d5758cd2ad9f43b245649a5ea59535429fe8bc8caa04ddcf0543682e66bf34c",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+      "sheet": "i",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_036",
+      "portrait_id": "char_portrait_036",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_036.tres",
+      "sha256": "edd3552f62289b6d5b29fcb77e5812215791471322cb7000d2ca2e651b9ec3fe",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+      "sheet": "i",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_037",
+      "portrait_id": "char_portrait_037",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_037.tres",
+      "sha256": "3de8e4888edc9b84015e3a9469798d4a9068c0c7a08da8df66b8c377ca6c4f5c",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+      "sheet": "j",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_038",
+      "portrait_id": "char_portrait_038",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_038.tres",
+      "sha256": "4f7956e419e61647de8c74cdfbd3ec597db0385fd36b48b8a131409304bb60da",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+      "sheet": "j",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_039",
+      "portrait_id": "char_portrait_039",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_039.tres",
+      "sha256": "2f7e20e71e1c641850d13122b65511d099cc3daa7e70849ff071676f60861df6",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+      "sheet": "j",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_040",
+      "portrait_id": "char_portrait_040",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_040.tres",
+      "sha256": "c87fce10ee3e3b466f793a02368030c22e4fb62c8fca3bc947ad80117fc081ae",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+      "sheet": "j",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_041",
+      "portrait_id": "char_portrait_041",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_041.tres",
+      "sha256": "eece156ef993d8cf34f7bff2731c9a25bc25eba86859fc0eefc06a4119c5027b",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_k.png",
+      "sheet": "k",
+      "quadrant": "upper_left",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "char_portrait_042",
+      "portrait_id": "char_portrait_042",
+      "assigned": true,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_042.tres",
+      "sha256": "d199d1693ce71b1a428da746199a7457ad54efceddcc8a9ae305810cf7555a8e",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_k.png",
+      "sheet": "k",
+      "quadrant": "upper_right",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "reserve_043",
+      "portrait_id": "",
+      "assigned": false,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/reserve_043.tres",
+      "sha256": "96f5806590205cc789ab95a1ba7526dae5cc2a76b766c93832e404ec755427ab",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_k.png",
+      "sheet": "k",
+      "quadrant": "lower_left",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "asset_id": "reserve_044",
+      "portrait_id": "",
+      "assigned": false,
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/reserve_044.tres",
+      "sha256": "81670aaabb69bb81859edf4dac638dcddabc821870a7189480148f5b51dcd3c4",
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_k.png",
+      "sheet": "k",
+      "quadrant": "lower_right",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    }
+  ],
+  "visual_review": "All eleven actual project PNGs opened; four complete distinct adult portraits per atlas, cohesive palette and technique, no visible repeated identity. Similar painterly conventions remain; the identity distinction is a visual judgment, not biometric proof.",
+  "limitations": [
+    "Some hair tips have less than requested seven percent top padding, but no heads are cut.",
+    "Native import, TextureRect crop/filter and readability at real UI sizes pending Root verification.",
+    "Aesthetic user acceptance remains open; generated assets are not native screenshots."
+  ],
+  "native_validation": "pending_root",
+  "user_aesthetic_acceptance": "open",
+  "prepared_catalog_sha256": "e2b0b6cdb22e81b85c95f6bb998c7ee81a149ce9c66888205791b0935d2c95cd"
+}

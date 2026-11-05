@@ -8,6 +8,10 @@
 - `start_host(port)` erstellt den Host mit maximal `max_players - 1` Clients.
 - `join_session(address, port)` verbindet standardmaessig zu `127.0.0.1:7777`.
 - `disconnect_session()` setzt den MultiplayerPeer zurueck und leert den Session-State.
+- Vor der lokalen Peerfreigabe stoppt der Sessionowner die oeffentliche
+  `NetworkTime.stop()`-API, wenn Netfox und Session dieselbe MultiplayerAPI
+  besitzen. So kann der Client-Sync-Timer auslaufen, bevor er erneut ohne Peer
+  sendet. Unabhaengige MultiplayerAPI-Teilbaeume stoppen keine fremde Root-Uhr.
 
 ## Ready und Start
 - Peers haben einen Ready-State.

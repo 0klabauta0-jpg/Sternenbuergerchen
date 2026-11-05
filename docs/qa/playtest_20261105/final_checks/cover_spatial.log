@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-1b03979aefae460ca7582cfd2b0507b9
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: square8: exact radius, same objects and insertion order
+PASS: square8: repeated query preserves exact result
+PASS: square8: warm local query reads nearby world positions, not all 3000 tiles (actual 7)
+PASS: square8: live eligibility is read even without a revision change
+PASS: square8: runtime override eligibility stays exact
+PASS: square8: notified in-place world relocation rebuilds the derived index
+PASS: square8: replacement retains dictionary insertion priority
+PASS: square8: added cells and negative radius semantics remain exact
+PASS: square8: clear and re-register releases obsolete index entries
+PASS: hex_axial_v1: exact radius, same objects and insertion order
+PASS: hex_axial_v1: repeated query preserves exact result
+PASS: hex_axial_v1: warm local query reads nearby world positions, not all 3000 tiles (actual 7)
+PASS: hex_axial_v1: live eligibility is read even without a revision change
+PASS: hex_axial_v1: runtime override eligibility stays exact
+PASS: hex_axial_v1: notified in-place world relocation rebuilds the derived index
+PASS: hex_axial_v1: replacement retains dictionary insertion priority
+PASS: hex_axial_v1: added cells and negative radius semantics remain exact
+PASS: hex_axial_v1: clear and re-register releases obsolete index entries
+=== RESULTS: 18 passed, 0 failed ===
+PLAYTEST_COVER_QUERY_SPATIAL_ALL_PASS

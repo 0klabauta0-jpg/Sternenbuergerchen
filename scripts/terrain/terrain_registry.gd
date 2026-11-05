@@ -3,6 +3,7 @@ extends Node
 
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
+const COVER_RADIUS_BUCKET_WORLD_SIZE: float = 256.0
 
 var _tiles: Dictionary = {}
 var _tile_id_lookup: Dictionary = {}
@@ -15,6 +16,10 @@ var _grid_origin_world: Vector2 = Vector2.ZERO
 var _half_tile_width: float = 64.0
 var _half_tile_height: float = 32.0
 var _grid_topology: String = "square8"
+var _cover_radius_index_dirty: bool = true
+var _cover_radius_index_tiles: Array = []
+var _cover_radius_index_buckets: Dictionary = {}
+var _cover_radius_index_has_non_finite_positions: bool = false
 
 
 func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half_tile_height: float, grid_topology: String = "square8") -> void:
@@ -72,6 +77,9 @@ func clear_tiles() -> void:
 	_sorted_tiles_cache_dirty = true
 	_dirty_grid_lookup.clear()
 	_runtime_tile_overrides.clear()
+	_cover_radius_index_tiles.clear()
+	_cover_radius_index_buckets.clear()
+	_cover_radius_index_dirty = true
 	_bump_revision()
 
 
@@ -85,6 +93,7 @@ func register_tile(tile_data) -> void:
 		_remove_tile_id_index(_tiles[grid_position])
 	_tiles[grid_position] = tile_data
 	_index_tile_id(tile_data)
+	_cover_radius_index_dirty = true
 	_sorted_tiles_cache_dirty = true
 	_mark_dirty_grid(grid_position)
 	_bump_revision()
@@ -92,6 +101,7 @@ func register_tile(tile_data) -> void:
 
 func notify_tile_data_changed(changed_grids: Array = []) -> void:
 	_rebuild_tile_id_lookup()
+	_cover_radius_index_dirty = true
 	_sorted_tiles_cache_dirty = true
 	if changed_grids.is_empty():
 		for grid_variant in _tiles.keys():
@@ -362,7 +372,7 @@ func get_surface_speed_factor_at_world(world_pos: Vector2) -> float:
 func get_walkable_cover_tiles_in_radius(world_center: Vector2, radius: float) -> Array:
 	var radius_sq: float = radius * radius
 	var result: Array = []
-	for tile_data in _tiles.values():
+	for tile_data in _get_cover_radius_candidates(world_center, radius):
 		if world_center.distance_squared_to(tile_data.world_position) > radius_sq:
 			continue
 		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
@@ -372,6 +382,55 @@ func get_walkable_cover_tiles_in_radius(world_center: Vector2, radius: float) ->
 			continue
 		result.append(tile_data)
 	return result
+
+
+func _get_cover_radius_candidates(world_center: Vector2, radius: float) -> Array:
+	if _cover_radius_index_dirty:
+		_rebuild_cover_radius_index()
+	# Preserve the previous floating-point filter for non-finite authored inputs.
+	if not world_center.is_finite() or not is_finite(radius) or _cover_radius_index_has_non_finite_positions:
+		return _tiles.values()
+	var extent: float = absf(radius)
+	# Broad queries are cheaper as one ordered traversal than many empty bucket
+	# lookups. This also avoids unbounded loops for extremely large radii.
+	if extent > COVER_RADIUS_BUCKET_WORLD_SIZE * float(maxi(_cover_radius_index_buckets.size(), 1)):
+		return _tiles.values()
+	var minimum: Vector2i = _cover_radius_bucket(world_center - Vector2(extent, extent))
+	var maximum: Vector2i = _cover_radius_bucket(world_center + Vector2(extent, extent))
+	var bucket_count: int = (maximum.x - minimum.x + 1) * (maximum.y - minimum.y + 1)
+	if bucket_count > maxi(_cover_radius_index_buckets.size() * 2, 1):
+		return _tiles.values()
+	var indices: Array = []
+	for bucket_y in range(minimum.y, maximum.y + 1):
+		for bucket_x in range(minimum.x, maximum.x + 1):
+			indices.append_array(Array(_cover_radius_index_buckets.get(Vector2i(bucket_x, bucket_y), [])))
+	# Bucket order must never change the old dictionary-insertion tie breaker.
+	indices.sort()
+	var candidates: Array = []
+	for index in indices:
+		candidates.append(_cover_radius_index_tiles[int(index)])
+	return candidates
+
+
+func _rebuild_cover_radius_index() -> void:
+	_cover_radius_index_tiles = _tiles.values()
+	_cover_radius_index_buckets.clear()
+	_cover_radius_index_has_non_finite_positions = false
+	for index in range(_cover_radius_index_tiles.size()):
+		var tile_data = _cover_radius_index_tiles[index]
+		var position: Vector2 = tile_data.world_position
+		if not position.is_finite():
+			_cover_radius_index_has_non_finite_positions = true
+			continue
+		var bucket: Vector2i = _cover_radius_bucket(position)
+		var indices: Array = Array(_cover_radius_index_buckets.get(bucket, []))
+		indices.append(index)
+		_cover_radius_index_buckets[bucket] = indices
+	_cover_radius_index_dirty = false
+
+
+func _cover_radius_bucket(position: Vector2) -> Vector2i:
+	return Vector2i(floori(position.x / COVER_RADIUS_BUCKET_WORLD_SIZE), floori(position.y / COVER_RADIUS_BUCKET_WORLD_SIZE))
 
 
 func world_to_grid(world_pos: Vector2) -> Vector2i:

@@ -192,7 +192,7 @@ func _run() -> void:
 	var background_node := menu.get_node_or_null("Background") as TextureRect
 	_check(background_node!=null and background_node.texture!=null,"MainMenu displays a background texture")
 	_check(bool(background.get("uses_catalog",false)),"MainMenu background comes from the existing catalog")
-	_check(background_path.contains("frontier"),"Normal MainMenu catalog selects the Frontier start image")
+	_check(background_path == "res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg","Normal MainMenu restores the original TASK199 title artwork")
 	_stage("main_menu",{"scene":menu.scene_file_path,"background_path":background_path,"background_sha256":FileAccess.get_sha256(background_path) if FileAccess.file_exists(background_path) else ""})
 	await _capture("01_main_menu")
 	var button := menu.get_node_or_null("MenuRail/MenuMargin/MenuVBox/MenuButtons/SingleplayerButton") as Button

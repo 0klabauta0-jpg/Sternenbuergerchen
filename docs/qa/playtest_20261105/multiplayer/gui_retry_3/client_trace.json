@@ -1,0 +1,315 @@
+{
+	"active_mission": false,
+	"config": {
+		"address": "127.0.0.1",
+		"auto_ready": true,
+		"auto_start": false,
+		"drop_decision": true,
+		"enabled": true,
+		"first_contact": false,
+		"port": 58175,
+		"read_only_config": true,
+		"role": "client",
+		"schema": "sternenbuergerchen.release_multiplayer_deeplink.v1",
+		"task_id": "TASK_1147",
+		"trace_path": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_fullscreen_pair\\20261105T083903Z-eaee4346\\client_trace.json",
+		"ui_sets_gameplay_truth": false
+	},
+	"drop_decision": {
+		"command_feedback": {
+
+		},
+		"craft_id": "",
+		"decision_accepted": false,
+		"decision_sent": false,
+		"deployed_unit_ids": [],
+		"drop_sent": false,
+		"embarked_unit_ids": [],
+		"fireteam_id": "",
+		"lz_sent": false,
+		"mission_drop_cards": [],
+		"schema": "sternenbuergerchen.release_multiplayer_drop_decision.v1",
+		"stage": "disabled",
+		"task_id": "TASK_1148",
+		"ui_sets_gameplay_truth": false
+	},
+	"first_contact": {
+		"advance_attempted": false,
+		"advance_sent": false,
+		"combat_tick_budget": {
+
+		},
+		"contact_approach_evidence": {
+
+		},
+		"contact_count": 0,
+		"contacts": [],
+		"diagnostics": {
+
+		},
+		"fire_event_count": 0,
+		"fire_event_ids": [],
+		"fire_events": [],
+		"fireteam_id": "",
+		"fireteam_position": {
+
+		},
+		"fireteam_unit_positions": {
+
+		},
+		"initial_movement_observe_frames": 0,
+		"initial_movement_observed": false,
+		"local_avoidance_debug": {
+
+		},
+		"mission_hud_runtime_surface_guard": {
+
+		},
+		"mission_runtime_surface_timing": {
+
+		},
+		"mission_ui_refresh_timing": {
+
+		},
+		"mission_visible_frame_timing": {
+
+		},
+		"movement_distance_travelled": 0.0,
+		"movement_progress_ratio": 0.0,
+		"movement_remaining_distance": 0.0,
+		"movement_start_position": "(0.0, 0.0)",
+		"movement_state": {
+
+		},
+		"movement_wall_time_msec": 0,
+		"perspective": {
+
+		},
+		"physics_fps": 1.0,
+		"read_only": true,
+		"recent_movement_trace": {
+
+		},
+		"requested_target_position": "(0.0, 0.0)",
+		"runtime_tick_budget": {
+
+		},
+		"schema": "sternenbuergerchen.release_multiplayer_first_contact.v1",
+		"simulation_tick": 0,
+		"simulation_ticks_since_advance": 0,
+		"stage": "disabled",
+		"task_id": "TASK_1150",
+		"terrain_move_debug": {
+
+		},
+		"ui_sets_gameplay_truth": false
+	},
+	"schema": "sternenbuergerchen.release_multiplayer_playtest.v1",
+	"session": {
+		"assignments": {
+			"lobby_setup": {
+				"connection_mode": "lan",
+				"direct_ip_policy": "LAN mode expects both players on the same local network or VPN.",
+				"map_path": "res://maps/Ground_Mission01_32x32.json",
+				"player_name": "Player",
+				"roster_path": "user://profiles/local_player/roster_v1.json",
+				"team_play_mode": "coop",
+				"team_slot": "team_alpha",
+				"upnp": {
+					"attempted": false,
+					"enabled": false,
+					"external_address": "",
+					"mapped": false,
+					"port": 0,
+					"result": "not_requested"
+				},
+				"uses_upnp": false
+			},
+			"peer_fireteams": {
+
+			},
+			"peer_roles": {
+
+			},
+			"peer_rosters": {
+
+			},
+			"peer_teams": {
+
+			},
+			"roster_mode": "host_roster",
+			"selected_map_path": "res://maps/Ground_Mission01_32x32.json",
+			"team_play_mode": "coop"
+		},
+		"can_disconnect": true,
+		"can_start_mission": false,
+		"can_toggle_ready": false,
+		"connected_count": 0,
+		"connection_state": "connecting",
+		"has_active_peer": true,
+		"is_client": false,
+		"is_host": false,
+		"last_error": "",
+		"lobby_setup": {
+			"connection_mode": "lan",
+			"direct_ip_policy": "LAN mode expects both players on the same local network or VPN.",
+			"map_path": "res://maps/Ground_Mission01_32x32.json",
+			"player_name": "Player",
+			"roster_path": "user://profiles/local_player/roster_v1.json",
+			"team_play_mode": "coop",
+			"team_slot": "team_alpha",
+			"upnp": {
+				"attempted": false,
+				"enabled": false,
+				"external_address": "",
+				"mapped": false,
+				"port": 0,
+				"result": "not_requested"
+			},
+			"uses_upnp": false
+		},
+		"local_peer_id": 569714737,
+		"local_ready": false,
+		"map_manifest": {
+
+		},
+		"map_transfer": {
+			"can_start_client": true,
+			"requires_consent": false,
+			"state": "none"
+		},
+		"max_players": 2,
+		"mission_started": false,
+		"peers": [],
+		"ready_count": 0,
+		"roster": {
+			"host_selects_roster_mode": true,
+			"local_roster_owner_peer_id": 1,
+			"mission_authority": "host_server",
+			"private_data_policy": "local_profile_save_progression_relationships_events_never_snapshot",
+			"private_unit_fields": [
+				"age_years",
+				"availability_status",
+				"biography_text",
+				"core_values",
+				"fireteam_history",
+				"function_scores",
+				"generator_seed",
+				"homeworld",
+				"mission_history",
+				"multiplayer_boundary",
+				"personnel_events",
+				"platform_values",
+				"player_profile_id",
+				"portrait_path",
+				"progression",
+				"recovery_state",
+				"relationship_links",
+				"relationship_pairs",
+				"relationship_summary_text",
+				"roster_seed_index",
+				"save_seed",
+				"seed",
+				"skill_summary_text",
+				"skill_values",
+				"status_text",
+				"trait_ids",
+				"validation"
+			],
+			"public_data_policy": "identity_role_portrait_fireteam_badges_only",
+			"public_unit_fields": [
+				"unit_id",
+				"display_name",
+				"callsign",
+				"role_id",
+				"role_name",
+				"roster_role_category",
+				"portrait_id",
+				"fireteam_id",
+				"rank_badges"
+			],
+			"roster_mode": "host_roster",
+			"roster_mode_label": "Host roster",
+			"snapshot_ownership_fields": [
+				"unit_id",
+				"owner_peer_id",
+				"roster_source",
+				"roster_mode",
+				"roster_public_ref",
+				"character_gameplay_authority"
+			],
+			"uses_local_roster": false,
+			"valid_roster_modes": [
+				"player_rosters",
+				"host_roster",
+				"scenario_roster"
+			]
+		},
+		"status_text": "Connecting to 127.0.0.1:58175...",
+		"team_readability": {
+			"configured": true,
+			"entries": [
+				{
+					"assigned_peer_ids": [
+						1
+					],
+					"badge_text": "Alpha | Host Peer 1 | spawn_alpha",
+					"control_label": "Player controlled",
+					"display_name": "Alpha Attack",
+					"npc_controlled": false,
+					"ownership_label": "Host Peer 1",
+					"peer_label": "Host Peer 1",
+					"play_mode": "coop",
+					"readability_tone": "player",
+					"role_label": "Attack",
+					"short_label": "Alpha",
+					"spawn_chip_text": "Alpha | Spawn spawn_alpha",
+					"spawn_label": "Spawn spawn_alpha",
+					"spawn_marker_id": "spawn_alpha",
+					"team_color_hex": "#5fb7ff",
+					"team_id": "team_alpha",
+					"ui_chip_text": "Alpha: Host Peer 1",
+					"ui_sets_gameplay_truth": false
+				},
+				{
+					"assigned_peer_ids": [],
+					"badge_text": "Bravo | NPC / Scenario | spawn_bravo",
+					"control_label": "NPC controlled",
+					"display_name": "Bravo Defense",
+					"npc_controlled": true,
+					"ownership_label": "NPC / Scenario",
+					"peer_label": "Scenario AI",
+					"play_mode": "coop",
+					"readability_tone": "npc",
+					"role_label": "Defense",
+					"short_label": "Bravo",
+					"spawn_chip_text": "Bravo | Spawn spawn_bravo",
+					"spawn_label": "Spawn spawn_bravo",
+					"spawn_marker_id": "spawn_bravo",
+					"team_color_hex": "#ff9b5e",
+					"team_id": "team_bravo",
+					"ui_chip_text": "Bravo: NPC / Scenario",
+					"ui_sets_gameplay_truth": false
+				}
+			],
+			"errors": [],
+			"play_mode": "coop",
+			"runtime_authority": "MissionMultiplayerTeamOwnershipContract",
+			"summary_text": "Coop: Alpha -> Host Peer 1 | Bravo -> NPC / Scenario",
+			"ui_sets_gameplay_truth": false,
+			"valid": true
+		},
+		"team_readability_summary": "Coop: Alpha -> Host Peer 1 | Bravo -> NPC / Scenario",
+		"upnp": {
+			"attempted": false,
+			"enabled": false,
+			"external_address": "",
+			"mapped": false,
+			"port": 0,
+			"result": "not_requested"
+		}
+	},
+	"stage": "connecting",
+	"task_id": "TASK_1147",
+	"ui_sets_gameplay_truth": false
+}

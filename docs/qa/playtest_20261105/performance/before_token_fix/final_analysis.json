@@ -1,0 +1,4425 @@
+{
+  "source": "output\\playtest_20261105\\native_homebase_performance\\20261105T073815Z-49ce2971\\native_homebase_performance.json",
+  "summary": {
+    "duration_usec": 90014457,
+    "frames": 5687,
+    "frametime_usec": {
+      "count": 5687,
+      "max": 297676,
+      "mean": 15825.9381044487,
+      "p50": 10183,
+      "p90": 33455,
+      "p95": 40820,
+      "p99": 70072
+    },
+    "hitch_counts": {
+      "over_100ms": 28,
+      "over_250ms": 4,
+      "over_33ms": 580,
+      "over_50ms": 149
+    },
+    "hitches_over_50ms": [
+      {
+        "elapsed_usec": 77055,
+        "frame_usec": 77055,
+        "since_previous_hitch_usec": null
+      },
+      {
+        "elapsed_usec": 172061,
+        "frame_usec": 68202,
+        "since_previous_hitch_usec": 95006
+      },
+      {
+        "elapsed_usec": 296959,
+        "frame_usec": 55095,
+        "since_previous_hitch_usec": 124898
+      },
+      {
+        "elapsed_usec": 368255,
+        "frame_usec": 55359,
+        "since_previous_hitch_usec": 71296
+      },
+      {
+        "elapsed_usec": 566565,
+        "frame_usec": 51302,
+        "since_previous_hitch_usec": 198310
+      },
+      {
+        "elapsed_usec": 1090633,
+        "frame_usec": 139291,
+        "since_previous_hitch_usec": 524068
+      },
+      {
+        "elapsed_usec": 1163424,
+        "frame_usec": 72791,
+        "since_previous_hitch_usec": 72791
+      },
+      {
+        "elapsed_usec": 1251605,
+        "frame_usec": 68450,
+        "since_previous_hitch_usec": 88181
+      },
+      {
+        "elapsed_usec": 1362475,
+        "frame_usec": 55355,
+        "since_previous_hitch_usec": 110870
+      },
+      {
+        "elapsed_usec": 1431381,
+        "frame_usec": 50602,
+        "since_previous_hitch_usec": 68906
+      },
+      {
+        "elapsed_usec": 2193786,
+        "frame_usec": 166657,
+        "since_previous_hitch_usec": 762405
+      },
+      {
+        "elapsed_usec": 2254334,
+        "frame_usec": 60548,
+        "since_previous_hitch_usec": 60548
+      },
+      {
+        "elapsed_usec": 2334636,
+        "frame_usec": 65257,
+        "since_previous_hitch_usec": 80302
+      },
+      {
+        "elapsed_usec": 2464522,
+        "frame_usec": 65152,
+        "since_previous_hitch_usec": 129886
+      },
+      {
+        "elapsed_usec": 2796658,
+        "frame_usec": 52358,
+        "since_previous_hitch_usec": 332136
+      },
+      {
+        "elapsed_usec": 3253852,
+        "frame_usec": 135441,
+        "since_previous_hitch_usec": 457194
+      },
+      {
+        "elapsed_usec": 3327761,
+        "frame_usec": 73909,
+        "since_previous_hitch_usec": 73909
+      },
+      {
+        "elapsed_usec": 3426346,
+        "frame_usec": 66620,
+        "since_previous_hitch_usec": 98585
+      },
+      {
+        "elapsed_usec": 3548223,
+        "frame_usec": 57727,
+        "since_previous_hitch_usec": 121877
+      },
+      {
+        "elapsed_usec": 4295778,
+        "frame_usec": 96051,
+        "since_previous_hitch_usec": 747555
+      },
+      {
+        "elapsed_usec": 4366102,
+        "frame_usec": 70324,
+        "since_previous_hitch_usec": 70324
+      },
+      {
+        "elapsed_usec": 4454161,
+        "frame_usec": 68664,
+        "since_previous_hitch_usec": 88059
+      },
+      {
+        "elapsed_usec": 4615176,
+        "frame_usec": 59274,
+        "since_previous_hitch_usec": 161015
+      },
+      {
+        "elapsed_usec": 5387804,
+        "frame_usec": 100495,
+        "since_previous_hitch_usec": 772628
+      },
+      {
+        "elapsed_usec": 5499531,
+        "frame_usec": 51876,
+        "since_previous_hitch_usec": 111727
+      },
+      {
+        "elapsed_usec": 5706391,
+        "frame_usec": 66126,
+        "since_previous_hitch_usec": 206860
+      },
+      {
+        "elapsed_usec": 5902874,
+        "frame_usec": 51142,
+        "since_previous_hitch_usec": 196483
+      },
+      {
+        "elapsed_usec": 6490154,
+        "frame_usec": 120005,
+        "since_previous_hitch_usec": 587280
+      },
+      {
+        "elapsed_usec": 6606274,
+        "frame_usec": 81442,
+        "since_previous_hitch_usec": 116120
+      },
+      {
+        "elapsed_usec": 6678326,
+        "frame_usec": 61057,
+        "since_previous_hitch_usec": 72052
+      },
+      {
+        "elapsed_usec": 6799166,
+        "frame_usec": 64588,
+        "since_previous_hitch_usec": 120840
+      },
+      {
+        "elapsed_usec": 7603246,
+        "frame_usec": 132247,
+        "since_previous_hitch_usec": 804080
+      },
+      {
+        "elapsed_usec": 7664418,
+        "frame_usec": 61172,
+        "since_previous_hitch_usec": 61172
+      },
+      {
+        "elapsed_usec": 7745961,
+        "frame_usec": 57126,
+        "since_previous_hitch_usec": 81543
+      },
+      {
+        "elapsed_usec": 8676724,
+        "frame_usec": 123316,
+        "since_previous_hitch_usec": 930763
+      },
+      {
+        "elapsed_usec": 9302706,
+        "frame_usec": 60483,
+        "since_previous_hitch_usec": 625982
+      },
+      {
+        "elapsed_usec": 9717970,
+        "frame_usec": 111767,
+        "since_previous_hitch_usec": 415264
+      },
+      {
+        "elapsed_usec": 10033301,
+        "frame_usec": 53593,
+        "since_previous_hitch_usec": 315331
+      },
+      {
+        "elapsed_usec": 10813552,
+        "frame_usec": 123295,
+        "since_previous_hitch_usec": 780251
+      },
+      {
+        "elapsed_usec": 11123408,
+        "frame_usec": 64050,
+        "since_previous_hitch_usec": 309856
+      },
+      {
+        "elapsed_usec": 11177108,
+        "frame_usec": 53700,
+        "since_previous_hitch_usec": 53700
+      },
+      {
+        "elapsed_usec": 11277024,
+        "frame_usec": 59304,
+        "since_previous_hitch_usec": 99916
+      },
+      {
+        "elapsed_usec": 11374641,
+        "frame_usec": 68311,
+        "since_previous_hitch_usec": 97617
+      },
+      {
+        "elapsed_usec": 11436116,
+        "frame_usec": 61475,
+        "since_previous_hitch_usec": 61475
+      },
+      {
+        "elapsed_usec": 11509835,
+        "frame_usec": 73719,
+        "since_previous_hitch_usec": 73719
+      },
+      {
+        "elapsed_usec": 11560760,
+        "frame_usec": 50925,
+        "since_previous_hitch_usec": 50925
+      },
+      {
+        "elapsed_usec": 11926563,
+        "frame_usec": 162739,
+        "since_previous_hitch_usec": 365803
+      },
+      {
+        "elapsed_usec": 11995668,
+        "frame_usec": 69105,
+        "since_previous_hitch_usec": 69105
+      },
+      {
+        "elapsed_usec": 12050269,
+        "frame_usec": 54601,
+        "since_previous_hitch_usec": 54601
+      },
+      {
+        "elapsed_usec": 12318031,
+        "frame_usec": 267762,
+        "since_previous_hitch_usec": 267762
+      },
+      {
+        "elapsed_usec": 12559483,
+        "frame_usec": 241452,
+        "since_previous_hitch_usec": 241452
+      },
+      {
+        "elapsed_usec": 12652370,
+        "frame_usec": 92887,
+        "since_previous_hitch_usec": 92887
+      },
+      {
+        "elapsed_usec": 12705903,
+        "frame_usec": 53533,
+        "since_previous_hitch_usec": 53533
+      },
+      {
+        "elapsed_usec": 12810170,
+        "frame_usec": 60437,
+        "since_previous_hitch_usec": 104267
+      },
+      {
+        "elapsed_usec": 12886933,
+        "frame_usec": 53821,
+        "since_previous_hitch_usec": 76763
+      },
+      {
+        "elapsed_usec": 13274299,
+        "frame_usec": 149155,
+        "since_previous_hitch_usec": 387366
+      },
+      {
+        "elapsed_usec": 13330718,
+        "frame_usec": 56419,
+        "since_previous_hitch_usec": 56419
+      },
+      {
+        "elapsed_usec": 13385308,
+        "frame_usec": 54590,
+        "since_previous_hitch_usec": 54590
+      },
+      {
+        "elapsed_usec": 13564244,
+        "frame_usec": 82643,
+        "since_previous_hitch_usec": 178936
+      },
+      {
+        "elapsed_usec": 13666444,
+        "frame_usec": 62643,
+        "since_previous_hitch_usec": 102200
+      },
+      {
+        "elapsed_usec": 13764399,
+        "frame_usec": 69637,
+        "since_previous_hitch_usec": 97955
+      },
+      {
+        "elapsed_usec": 13901878,
+        "frame_usec": 55379,
+        "since_previous_hitch_usec": 137479
+      },
+      {
+        "elapsed_usec": 13982185,
+        "frame_usec": 56877,
+        "since_previous_hitch_usec": 80307
+      },
+      {
+        "elapsed_usec": 14304504,
+        "frame_usec": 103159,
+        "since_previous_hitch_usec": 322319
+      },
+      {
+        "elapsed_usec": 14425965,
+        "frame_usec": 54906,
+        "since_previous_hitch_usec": 121461
+      },
+      {
+        "elapsed_usec": 14654034,
+        "frame_usec": 53102,
+        "since_previous_hitch_usec": 228069
+      },
+      {
+        "elapsed_usec": 14851237,
+        "frame_usec": 51990,
+        "since_previous_hitch_usec": 197203
+      },
+      {
+        "elapsed_usec": 14985543,
+        "frame_usec": 61141,
+        "since_previous_hitch_usec": 134306
+      },
+      {
+        "elapsed_usec": 15417687,
+        "frame_usec": 140330,
+        "since_previous_hitch_usec": 432144
+      },
+      {
+        "elapsed_usec": 15543537,
+        "frame_usec": 52972,
+        "since_previous_hitch_usec": 125850
+      },
+      {
+        "elapsed_usec": 15699875,
+        "frame_usec": 55572,
+        "since_previous_hitch_usec": 156338
+      },
+      {
+        "elapsed_usec": 16504928,
+        "frame_usec": 135262,
+        "since_previous_hitch_usec": 805053
+      },
+      {
+        "elapsed_usec": 16842797,
+        "frame_usec": 51092,
+        "since_previous_hitch_usec": 337869
+      },
+      {
+        "elapsed_usec": 17134407,
+        "frame_usec": 53096,
+        "since_previous_hitch_usec": 291610
+      },
+      {
+        "elapsed_usec": 17564331,
+        "frame_usec": 104498,
+        "since_previous_hitch_usec": 429924
+      },
+      {
+        "elapsed_usec": 17638364,
+        "frame_usec": 74033,
+        "since_previous_hitch_usec": 74033
+      },
+      {
+        "elapsed_usec": 17734404,
+        "frame_usec": 56921,
+        "since_previous_hitch_usec": 96040
+      },
+      {
+        "elapsed_usec": 17878659,
+        "frame_usec": 52313,
+        "since_previous_hitch_usec": 144255
+      },
+      {
+        "elapsed_usec": 18361559,
+        "frame_usec": 51421,
+        "since_previous_hitch_usec": 482900
+      },
+      {
+        "elapsed_usec": 18651641,
+        "frame_usec": 93091,
+        "since_previous_hitch_usec": 290082
+      },
+      {
+        "elapsed_usec": 18743502,
+        "frame_usec": 72834,
+        "since_previous_hitch_usec": 91861
+      },
+      {
+        "elapsed_usec": 19709752,
+        "frame_usec": 64227,
+        "since_previous_hitch_usec": 966250
+      },
+      {
+        "elapsed_usec": 20088826,
+        "frame_usec": 53929,
+        "since_previous_hitch_usec": 379074
+      },
+      {
+        "elapsed_usec": 20436079,
+        "frame_usec": 53786,
+        "since_previous_hitch_usec": 347253
+      },
+      {
+        "elapsed_usec": 20690184,
+        "frame_usec": 51063,
+        "since_previous_hitch_usec": 254105
+      },
+      {
+        "elapsed_usec": 20821185,
+        "frame_usec": 89076,
+        "since_previous_hitch_usec": 131001
+      },
+      {
+        "elapsed_usec": 21695424,
+        "frame_usec": 50635,
+        "since_previous_hitch_usec": 874239
+      },
+      {
+        "elapsed_usec": 21952324,
+        "frame_usec": 123161,
+        "since_previous_hitch_usec": 256900
+      },
+      {
+        "elapsed_usec": 22225765,
+        "frame_usec": 52079,
+        "since_previous_hitch_usec": 273441
+      },
+      {
+        "elapsed_usec": 23013615,
+        "frame_usec": 70918,
+        "since_previous_hitch_usec": 787850
+      },
+      {
+        "elapsed_usec": 24310247,
+        "frame_usec": 297676,
+        "since_previous_hitch_usec": 1296632
+      },
+      {
+        "elapsed_usec": 24532185,
+        "frame_usec": 221938,
+        "since_previous_hitch_usec": 221938
+      },
+      {
+        "elapsed_usec": 24605758,
+        "frame_usec": 73573,
+        "since_previous_hitch_usec": 73573
+      },
+      {
+        "elapsed_usec": 24666661,
+        "frame_usec": 60903,
+        "since_previous_hitch_usec": 60903
+      },
+      {
+        "elapsed_usec": 25176443,
+        "frame_usec": 53044,
+        "since_previous_hitch_usec": 509782
+      },
+      {
+        "elapsed_usec": 25414523,
+        "frame_usec": 93321,
+        "since_previous_hitch_usec": 238080
+      },
+      {
+        "elapsed_usec": 26487232,
+        "frame_usec": 64717,
+        "since_previous_hitch_usec": 1072709
+      },
+      {
+        "elapsed_usec": 27623503,
+        "frame_usec": 123841,
+        "since_previous_hitch_usec": 1136271
+      },
+      {
+        "elapsed_usec": 28653463,
+        "frame_usec": 62934,
+        "since_previous_hitch_usec": 1029960
+      },
+      {
+        "elapsed_usec": 29374610,
+        "frame_usec": 54774,
+        "since_previous_hitch_usec": 721147
+      },
+      {
+        "elapsed_usec": 29737372,
+        "frame_usec": 68634,
+        "since_previous_hitch_usec": 362762
+      },
+      {
+        "elapsed_usec": 29787501,
+        "frame_usec": 50129,
+        "since_previous_hitch_usec": 50129
+      },
+      {
+        "elapsed_usec": 30810775,
+        "frame_usec": 71147,
+        "since_previous_hitch_usec": 1023274
+      },
+      {
+        "elapsed_usec": 31517156,
+        "frame_usec": 63965,
+        "since_previous_hitch_usec": 706381
+      },
+      {
+        "elapsed_usec": 31912035,
+        "frame_usec": 100296,
+        "since_previous_hitch_usec": 394879
+      },
+      {
+        "elapsed_usec": 32576075,
+        "frame_usec": 54511,
+        "since_previous_hitch_usec": 664040
+      },
+      {
+        "elapsed_usec": 32966118,
+        "frame_usec": 67879,
+        "since_previous_hitch_usec": 390043
+      },
+      {
+        "elapsed_usec": 33664478,
+        "frame_usec": 50176,
+        "since_previous_hitch_usec": 698360
+      },
+      {
+        "elapsed_usec": 34063933,
+        "frame_usec": 62659,
+        "since_previous_hitch_usec": 399455
+      },
+      {
+        "elapsed_usec": 34453603,
+        "frame_usec": 203661,
+        "since_previous_hitch_usec": 389670
+      },
+      {
+        "elapsed_usec": 35191807,
+        "frame_usec": 53724,
+        "since_previous_hitch_usec": 738204
+      },
+      {
+        "elapsed_usec": 36284132,
+        "frame_usec": 284016,
+        "since_previous_hitch_usec": 1092325
+      },
+      {
+        "elapsed_usec": 37453454,
+        "frame_usec": 66661,
+        "since_previous_hitch_usec": 1169322
+      },
+      {
+        "elapsed_usec": 42789909,
+        "frame_usec": 74137,
+        "since_previous_hitch_usec": 5336455
+      },
+      {
+        "elapsed_usec": 44901621,
+        "frame_usec": 50469,
+        "since_previous_hitch_usec": 2111712
+      },
+      {
+        "elapsed_usec": 47040624,
+        "frame_usec": 63000,
+        "since_previous_hitch_usec": 2139003
+      },
+      {
+        "elapsed_usec": 48221054,
+        "frame_usec": 217213,
+        "since_previous_hitch_usec": 1180430
+      },
+      {
+        "elapsed_usec": 48282948,
+        "frame_usec": 61894,
+        "since_previous_hitch_usec": 61894
+      },
+      {
+        "elapsed_usec": 52558405,
+        "frame_usec": 79289,
+        "since_previous_hitch_usec": 4275457
+      },
+      {
+        "elapsed_usec": 55782572,
+        "frame_usec": 77808,
+        "since_previous_hitch_usec": 3224167
+      },
+      {
+        "elapsed_usec": 55834086,
+        "frame_usec": 51514,
+        "since_previous_hitch_usec": 51514
+      },
+      {
+        "elapsed_usec": 56449043,
+        "frame_usec": 54427,
+        "since_previous_hitch_usec": 614957
+      },
+      {
+        "elapsed_usec": 57931122,
+        "frame_usec": 93821,
+        "since_previous_hitch_usec": 1482079
+      },
+      {
+        "elapsed_usec": 60239169,
+        "frame_usec": 227957,
+        "since_previous_hitch_usec": 2308047
+      },
+      {
+        "elapsed_usec": 62230253,
+        "frame_usec": 66630,
+        "since_previous_hitch_usec": 1991084
+      },
+      {
+        "elapsed_usec": 64344697,
+        "frame_usec": 60719,
+        "since_previous_hitch_usec": 2114444
+      },
+      {
+        "elapsed_usec": 67579357,
+        "frame_usec": 73603,
+        "since_previous_hitch_usec": 3234660
+      },
+      {
+        "elapsed_usec": 72234407,
+        "frame_usec": 234159,
+        "since_previous_hitch_usec": 4655050
+      },
+      {
+        "elapsed_usec": 72307766,
+        "frame_usec": 73359,
+        "since_previous_hitch_usec": 73359
+      },
+      {
+        "elapsed_usec": 73356673,
+        "frame_usec": 61384,
+        "since_previous_hitch_usec": 1048907
+      },
+      {
+        "elapsed_usec": 74091431,
+        "frame_usec": 65101,
+        "since_previous_hitch_usec": 734758
+      },
+      {
+        "elapsed_usec": 74472981,
+        "frame_usec": 70072,
+        "since_previous_hitch_usec": 381550
+      },
+      {
+        "elapsed_usec": 75172101,
+        "frame_usec": 52633,
+        "since_previous_hitch_usec": 699120
+      },
+      {
+        "elapsed_usec": 76577944,
+        "frame_usec": 52576,
+        "since_previous_hitch_usec": 1405843
+      },
+      {
+        "elapsed_usec": 77348471,
+        "frame_usec": 79568,
+        "since_previous_hitch_usec": 770527
+      },
+      {
+        "elapsed_usec": 78390836,
+        "frame_usec": 51412,
+        "since_previous_hitch_usec": 1042365
+      },
+      {
+        "elapsed_usec": 79448163,
+        "frame_usec": 50287,
+        "since_previous_hitch_usec": 1057327
+      },
+      {
+        "elapsed_usec": 81576926,
+        "frame_usec": 52380,
+        "since_previous_hitch_usec": 2128763
+      },
+      {
+        "elapsed_usec": 82673985,
+        "frame_usec": 92925,
+        "since_previous_hitch_usec": 1097059
+      },
+      {
+        "elapsed_usec": 83385586,
+        "frame_usec": 67089,
+        "since_previous_hitch_usec": 711601
+      },
+      {
+        "elapsed_usec": 83733198,
+        "frame_usec": 60452,
+        "since_previous_hitch_usec": 347612
+      },
+      {
+        "elapsed_usec": 84274212,
+        "frame_usec": 265191,
+        "since_previous_hitch_usec": 541014
+      },
+      {
+        "elapsed_usec": 84361970,
+        "frame_usec": 87758,
+        "since_previous_hitch_usec": 87758
+      },
+      {
+        "elapsed_usec": 86117854,
+        "frame_usec": 68321,
+        "since_previous_hitch_usec": 1755884
+      },
+      {
+        "elapsed_usec": 86828262,
+        "frame_usec": 82764,
+        "since_previous_hitch_usec": 710408
+      },
+      {
+        "elapsed_usec": 86883745,
+        "frame_usec": 55483,
+        "since_previous_hitch_usec": 55483
+      },
+      {
+        "elapsed_usec": 87174947,
+        "frame_usec": 72153,
+        "since_previous_hitch_usec": 291202
+      },
+      {
+        "elapsed_usec": 87535688,
+        "frame_usec": 57211,
+        "since_previous_hitch_usec": 360741
+      },
+      {
+        "elapsed_usec": 89300963,
+        "frame_usec": 51035,
+        "since_previous_hitch_usec": 1765275
+      }
+    ],
+    "probe_usec": {
+      "count": 5687,
+      "max": 291,
+      "mean": 67.4657991911377,
+      "p50": 62,
+      "p90": 92,
+      "p95": 104,
+      "p99": 137
+    },
+    "simulation_seconds_per_wall_second": 0.990396464870082,
+    "simulation_ticks": 5349
+  },
+  "display": {
+    "content_scale_size": "(3440, 1440)",
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+    "display": "Windows",
+    "display_server_window_mode": 3,
+    "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+    "max_physics_steps_per_frame": 8,
+    "physics_ticks_per_second": 60,
+    "renderer": "forward_plus",
+    "rendering_driver": "vulkan",
+    "root_size": "(3440, 1440)",
+    "screen_index": 0,
+    "screen_refresh_rate": 240.085006713867,
+    "screen_size": "(3440, 1440)",
+    "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+    "time_scale": 1.0,
+    "viewport_size": "(3440.0, 1440.0)",
+    "vsync_mode": 1,
+    "window_has_focus": true,
+    "window_mode": 3,
+    "window_size": "(3440, 1440)"
+  },
+  "actions": [
+    {
+      "elapsed_usec": 12050269,
+      "go_accepted": true,
+      "go_usec": 95729,
+      "meta_presentation": {
+        "full_plan_apply_count": 0,
+        "homebase_dirty": true,
+        "read_only": true,
+        "snapshot_serialized": false,
+        "transport_delta_apply_count": 32,
+        "ui_sets_gameplay_truth": false,
+        "unchanged_plan_skip_count": 21
+      },
+      "move_accepted": true,
+      "move_usec": 107021,
+      "target": "(-305.0, 568.0)"
+    },
+    {
+      "elapsed_usec": 24012571,
+      "go_accepted": true,
+      "go_usec": 100583,
+      "meta_presentation": {
+        "full_plan_apply_count": 0,
+        "homebase_dirty": true,
+        "read_only": true,
+        "snapshot_serialized": false,
+        "transport_delta_apply_count": 36,
+        "ui_sets_gameplay_truth": false,
+        "unchanged_plan_skip_count": 25
+      },
+      "move_accepted": true,
+      "move_usec": 111499,
+      "target": "(-234.2563, 437.1281)"
+    },
+    {
+      "elapsed_usec": 36000116,
+      "go_accepted": true,
+      "go_usec": 104731,
+      "meta_presentation": {
+        "full_plan_apply_count": 0,
+        "homebase_dirty": true,
+        "read_only": true,
+        "snapshot_serialized": false,
+        "transport_delta_apply_count": 36,
+        "ui_sets_gameplay_truth": false,
+        "unchanged_plan_skip_count": 29
+      },
+      "move_accepted": true,
+      "move_usec": 141722,
+      "target": "(-305.0, 568.0)"
+    },
+    {
+      "elapsed_usec": 48003841,
+      "go_accepted": true,
+      "go_usec": 93832,
+      "meta_presentation": {
+        "full_plan_apply_count": 0,
+        "homebase_dirty": true,
+        "read_only": true,
+        "snapshot_serialized": false,
+        "transport_delta_apply_count": 36,
+        "ui_sets_gameplay_truth": false,
+        "unchanged_plan_skip_count": 31
+      },
+      "move_accepted": true,
+      "move_usec": 94024,
+      "target": "(-234.2563, 437.1281)"
+    },
+    {
+      "elapsed_usec": 60011212,
+      "go_accepted": true,
+      "go_usec": 98847,
+      "meta_presentation": {
+        "full_plan_apply_count": 0,
+        "homebase_dirty": true,
+        "read_only": true,
+        "snapshot_serialized": false,
+        "transport_delta_apply_count": 36,
+        "ui_sets_gameplay_truth": false,
+        "unchanged_plan_skip_count": 33
+      },
+      "move_accepted": true,
+      "move_usec": 87841,
+      "target": "(-305.0, 568.0)"
+    },
+    {
+      "elapsed_usec": 72000248,
+      "go_accepted": true,
+      "go_usec": 101554,
+      "meta_presentation": {
+        "full_plan_apply_count": 0,
+        "homebase_dirty": true,
+        "read_only": true,
+        "snapshot_serialized": false,
+        "transport_delta_apply_count": 36,
+        "ui_sets_gameplay_truth": false,
+        "unchanged_plan_skip_count": 35
+      },
+      "move_accepted": true,
+      "move_usec": 90892,
+      "target": "(-234.2563, 437.1281)"
+    },
+    {
+      "elapsed_usec": 84009021,
+      "go_accepted": true,
+      "go_usec": 105308,
+      "meta_presentation": {
+        "full_plan_apply_count": 0,
+        "homebase_dirty": true,
+        "read_only": true,
+        "snapshot_serialized": false,
+        "transport_delta_apply_count": 36,
+        "ui_sets_gameplay_truth": false,
+        "unchanged_plan_skip_count": 37
+      },
+      "move_accepted": true,
+      "move_usec": 126378,
+      "target": "(-305.0, 568.0)"
+    }
+  ],
+  "metric_distributions": {
+    "frame_usec": {
+      "count": 5687,
+      "mean": 15825.938104448744,
+      "max": 297676,
+      "p50": 10183,
+      "p90": 33455,
+      "p95": 40820,
+      "p99": 70072
+    },
+    "probe_usec": {
+      "count": 5687,
+      "mean": 67.46579919113768,
+      "max": 291,
+      "p50": 62,
+      "p90": 92,
+      "p95": 104,
+      "p99": 137
+    },
+    "terrain_usec": {
+      "count": 5687,
+      "mean": 4359.976085809742,
+      "max": 17592,
+      "p50": 3694,
+      "p90": 5976,
+      "p95": 9554,
+      "p99": 12110
+    },
+    "controller_usec": {
+      "count": 5687,
+      "mean": 3025.693335677862,
+      "max": 170833,
+      "p50": 859,
+      "p90": 11197,
+      "p95": 15723,
+      "p99": 33125
+    },
+    "engine_process_usec": {
+      "count": 5687,
+      "mean": 65930.75980305961,
+      "max": 264359,
+      "p50": 46476,
+      "p90": 111188,
+      "p95": 197546,
+      "p99": 264359
+    },
+    "engine_physics_usec": {
+      "count": 5687,
+      "mean": 9439.279585018463,
+      "max": 21344,
+      "p50": 9014,
+      "p90": 12525,
+      "p95": 14740,
+      "p99": 19512
+    },
+    "draw_calls": {
+      "count": 5687,
+      "mean": 1800.4068929136627,
+      "max": 1824.0,
+      "p50": 1800.0,
+      "p90": 1803.0,
+      "p95": 1810.0,
+      "p99": 1819.0
+    },
+    "command_queue": {
+      "count": 5687,
+      "mean": 1.6295058906277475,
+      "max": 7,
+      "p50": 0,
+      "p90": 4,
+      "p95": 5,
+      "p99": 7
+    },
+    "effect_queue": {
+      "count": 5687,
+      "mean": 0.0,
+      "max": 0,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "nav_pending": {
+      "count": 5687,
+      "mean": 0.0,
+      "max": 0,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 0
+    },
+    "ticks_since_previous_frame": {
+      "count": 5687,
+      "mean": 0.9405662036222965,
+      "max": 8,
+      "p50": 1,
+      "p90": 2,
+      "p95": 2,
+      "p99": 4
+    },
+    "unit_count": {
+      "count": 5687,
+      "mean": 11.0,
+      "max": 11,
+      "p50": 11,
+      "p90": 11,
+      "p95": 11,
+      "p99": 11
+    },
+    "frame.terrain_scopes_usec.dynamic_order_visuals_usec": {
+      "count": 5687,
+      "mean": 553.3149287849482,
+      "max": 10203,
+      "p50": 7,
+      "p90": 16,
+      "p95": 5830,
+      "p99": 7389
+    },
+    "frame.terrain_scopes_usec.resize_subviewport_usec": {
+      "count": 5687,
+      "mean": 3.905222437137331,
+      "max": 81,
+      "p50": 3,
+      "p90": 6,
+      "p95": 7,
+      "p99": 9
+    },
+    "frame.terrain_scopes_usec.unit_proxy_sync_usec": {
+      "count": 5687,
+      "mean": 3793.4352030947775,
+      "max": 8729,
+      "p50": 3638,
+      "p90": 4708,
+      "p95": 5301,
+      "p99": 6090
+    },
+    "frame.controller_scopes_usec.execution_updates_usec": {
+      "count": 5687,
+      "mean": 960.2442412519782,
+      "max": 162248,
+      "p50": 844,
+      "p90": 1168,
+      "p95": 1347,
+      "p99": 1551
+    },
+    "frame.controller_scopes_usec.feedback_and_security_usec": {
+      "count": 5687,
+      "mean": 881.8053455248813,
+      "max": 20537,
+      "p50": 2,
+      "p90": 15,
+      "p95": 10763,
+      "p99": 13783
+    },
+    "frame.controller_scopes_usec.hud_heavy_usec": {
+      "count": 5687,
+      "mean": 637.592931246703,
+      "max": 95297,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 26523
+    },
+    "frame.controller_scopes_usec.hud_light_usec": {
+      "count": 5687,
+      "mean": 881.8053455248813,
+      "max": 20537,
+      "p50": 2,
+      "p90": 15,
+      "p95": 10763,
+      "p99": 13783
+    },
+    "frame.controller_scopes_usec.ui_refresh_usec": {
+      "count": 5687,
+      "mean": 1181.8088623175663,
+      "max": 95297,
+      "p50": 0,
+      "p90": 0,
+      "p95": 0,
+      "p99": 26723
+    },
+    "owner.fog_owner.total_usec": {
+      "count": 5687,
+      "mean": 2795.4323896606297,
+      "max": 39625,
+      "p50": 1,
+      "p90": 12818,
+      "p95": 17850,
+      "p99": 21381
+    },
+    "owner.fog_owner.advance_usec": {
+      "count": 5687,
+      "mean": 1113.5503780552137,
+      "max": 29422,
+      "p50": 1,
+      "p90": 2,
+      "p95": 17498,
+      "p99": 21105
+    },
+    "owner.fog_owner.sync_usec": {
+      "count": 5687,
+      "mean": 1681.0712150518727,
+      "max": 20118,
+      "p50": 0,
+      "p90": 9449,
+      "p95": 13029,
+      "p99": 16413
+    },
+    "owner.fog_owner.pending_age_msec": {
+      "count": 5687,
+      "mean": 2.371021628275013,
+      "max": 163,
+      "p50": 0,
+      "p90": 0,
+      "p95": 16,
+      "p99": 45
+    },
+    "owner.meta_transport.total_usec": {
+      "count": 5687,
+      "mean": 448.4578864075963,
+      "max": 4281,
+      "p50": 165,
+      "p90": 165,
+      "p95": 3522,
+      "p99": 3703
+    },
+    "owner.meta_transport.ensure_timer_state_usec": {
+      "count": 5687,
+      "mean": 6.922806400562687,
+      "max": 7,
+      "p50": 7,
+      "p90": 7,
+      "p95": 7,
+      "p99": 7
+    },
+    "owner.meta_transport.other_usec": {
+      "count": 5687,
+      "mean": 23.63020924916476,
+      "max": 27,
+      "p50": 24,
+      "p90": 24,
+      "p95": 24,
+      "p99": 24
+    },
+    "owner.meta_transport.refresh_fob_usec": {
+      "count": 5687,
+      "mean": 8.096887638473712,
+      "max": 16,
+      "p50": 8,
+      "p90": 8,
+      "p95": 9,
+      "p99": 10
+    },
+    "owner.meta_transport.refresh_homebase_usec": {
+      "count": 5687,
+      "mean": 8.030420256725867,
+      "max": 14,
+      "p50": 8,
+      "p90": 8,
+      "p95": 8,
+      "p99": 9
+    },
+    "owner.meta_transport.refresh_map_usec": {
+      "count": 5687,
+      "mean": 310.4104097063478,
+      "max": 4094,
+      "p50": 27,
+      "p90": 27,
+      "p95": 3386,
+      "p99": 3566
+    },
+    "owner.meta_transport.sync_transport_usec": {
+      "count": 5687,
+      "mean": 98.28995955688413,
+      "max": 139,
+      "p50": 98,
+      "p90": 98,
+      "p95": 98,
+      "p99": 109
+    },
+    "owner.meta_transport.transfer_advance_and_completions_usec": {
+      "count": 5687,
+      "mean": 14.679444346755758,
+      "max": 15,
+      "p50": 15,
+      "p90": 15,
+      "p95": 15,
+      "p99": 15
+    },
+    "tick.simulation.total_usec": {
+      "count": 5350,
+      "mean": 3428.319065420561,
+      "max": 21152,
+      "p50": 1757,
+      "p90": 9423,
+      "p95": 10208,
+      "p99": 11291
+    },
+    "tick.simulation.command_apply_usec": {
+      "count": 5350,
+      "mean": 601.531214953271,
+      "max": 20566,
+      "p50": 527,
+      "p90": 1524,
+      "p95": 1708,
+      "p99": 2122
+    },
+    "tick.simulation.command_ordering_usec": {
+      "count": 5350,
+      "mean": 12.73570093457944,
+      "max": 101,
+      "p50": 11,
+      "p90": 20,
+      "p95": 25,
+      "p99": 34
+    },
+    "tick.simulation.command_queue_usec": {
+      "count": 5350,
+      "mean": 616.1676635514019,
+      "max": 20588,
+      "p50": 546,
+      "p90": 1539,
+      "p95": 1728,
+      "p99": 2140
+    },
+    "tick.simulation.effect_queue_usec": {
+      "count": 5350,
+      "mean": 1.7856074766355141,
+      "max": 56,
+      "p50": 2,
+      "p90": 2,
+      "p95": 3,
+      "p99": 3
+    },
+    "tick.simulation.local_avoidance_prepare_usec": {
+      "count": 5350,
+      "mean": 0.8183177570093458,
+      "max": 8,
+      "p50": 1,
+      "p90": 1,
+      "p95": 2,
+      "p99": 2
+    },
+    "tick.simulation.objective_capture_usec": {
+      "count": 5350,
+      "mean": 19.785981308411216,
+      "max": 277,
+      "p50": 18,
+      "p90": 28,
+      "p95": 32,
+      "p99": 38
+    },
+    "tick.simulation.snapshot_broadcast_usec": {
+      "count": 5350,
+      "mean": 0.6295327102803738,
+      "max": 10,
+      "p50": 1,
+      "p90": 1,
+      "p95": 1,
+      "p99": 2
+    },
+    "tick.simulation.tick_signal_emit_usec": {
+      "count": 5350,
+      "mean": 2627.183364485981,
+      "max": 15993,
+      "p50": 454,
+      "p90": 8510,
+      "p95": 8846,
+      "p99": 9897
+    },
+    "tick.simulation.unit_minimum_spacing_usec": {
+      "count": 5350,
+      "mean": 155.44803738317756,
+      "max": 615,
+      "p50": 130,
+      "p90": 237,
+      "p95": 245,
+      "p99": 300
+    },
+    "tick.combat.total_usec": {
+      "count": 5350,
+      "mean": 2422.2272897196262,
+      "max": 15617,
+      "p50": 247,
+      "p90": 8327,
+      "p95": 8645,
+      "p99": 9642
+    },
+    "tick.combat.bleedout_queue_usec": {
+      "count": 5350,
+      "mean": 16.6611214953271,
+      "max": 151,
+      "p50": 15,
+      "p90": 23,
+      "p95": 27,
+      "p99": 32
+    },
+    "tick.combat.contact_tracking_usec": {
+      "count": 5350,
+      "mean": 159.60205607476635,
+      "max": 471,
+      "p50": 146,
+      "p90": 216,
+      "p95": 255,
+      "p99": 283
+    },
+    "tick.combat.cooldowns_usec": {
+      "count": 5350,
+      "mean": 2.2528971962616824,
+      "max": 373,
+      "p50": 2,
+      "p90": 3,
+      "p95": 4,
+      "p99": 6
+    },
+    "tick.combat.detection_timers_usec": {
+      "count": 5350,
+      "mean": 26.850467289719628,
+      "max": 237,
+      "p50": 1,
+      "p90": 75,
+      "p95": 85,
+      "p99": 128
+    },
+    "tick.combat.leadership_usec": {
+      "count": 5350,
+      "mean": 0.9542056074766355,
+      "max": 77,
+      "p50": 1,
+      "p90": 2,
+      "p95": 2,
+      "p99": 2
+    },
+    "tick.combat.combat_fire_decision_usec": {
+      "count": 1783,
+      "mean": 2252.2288278182837,
+      "max": 5932,
+      "p50": 2084,
+      "p90": 2961,
+      "p95": 3338,
+      "p99": 3730
+    },
+    "tick.combat.combat_resolution_usec": {
+      "count": 1783,
+      "mean": 47.559169938306226,
+      "max": 150,
+      "p50": 45,
+      "p90": 65,
+      "p95": 72,
+      "p99": 88
+    },
+    "tick.combat.combat_visual_refresh_usec": {
+      "count": 1783,
+      "mean": 0.759394279304543,
+      "max": 3,
+      "p50": 1,
+      "p90": 1,
+      "p95": 1,
+      "p99": 2
+    },
+    "tick.combat.enemy_advance_usec": {
+      "count": 1783,
+      "mean": 212.77509814918676,
+      "max": 645,
+      "p50": 194,
+      "p90": 306,
+      "p95": 335,
+      "p99": 371
+    },
+    "tick.combat.enemy_security_usec": {
+      "count": 1783,
+      "mean": 770.7857543466068,
+      "max": 1852,
+      "p50": 718,
+      "p90": 1005,
+      "p95": 1181,
+      "p99": 1333
+    },
+    "tick.combat.enemy_team_tactics_usec": {
+      "count": 1783,
+      "mean": 1602.8109927089176,
+      "max": 7605,
+      "p50": 161,
+      "p90": 4024,
+      "p95": 4165,
+      "p99": 5197
+    },
+    "tick.combat.fire_find_contact_pair_usec": {
+      "count": 1783,
+      "mean": 1694.6180594503646,
+      "max": 4010,
+      "p50": 1560,
+      "p90": 2290,
+      "p95": 2557,
+      "p99": 2882
+    },
+    "tick.combat.fire_no_contact_diagnostic_usec": {
+      "count": 1783,
+      "mean": 554.9904655075715,
+      "max": 1918,
+      "p50": 510,
+      "p90": 769,
+      "p95": 842,
+      "p99": 929
+    },
+    "tick.combat.flank_vulnerability_usec": {
+      "count": 1783,
+      "mean": 0.641054402692092,
+      "max": 5,
+      "p50": 1,
+      "p90": 1,
+      "p95": 1,
+      "p99": 2
+    },
+    "tick.combat.friendly_standard_behavior_usec": {
+      "count": 1783,
+      "mean": 7.992708917554683,
+      "max": 67,
+      "p50": 7,
+      "p90": 11,
+      "p95": 13,
+      "p99": 15
+    },
+    "tick.combat.medic_support_usec": {
+      "count": 1783,
+      "mean": 318.7358384744812,
+      "max": 904,
+      "p50": 291,
+      "p90": 447,
+      "p95": 499,
+      "p99": 541
+    },
+    "tick.combat.multiplayer_snapshot_context_usec": {
+      "count": 1783,
+      "mean": 755.119461581604,
+      "max": 3164,
+      "p50": 709,
+      "p90": 1000,
+      "p95": 1139,
+      "p99": 1270
+    },
+    "tick.combat.overwatch_security_usec": {
+      "count": 1783,
+      "mean": 591.1862030286035,
+      "max": 1455,
+      "p50": 548,
+      "p90": 798,
+      "p95": 889,
+      "p99": 1045
+    },
+    "tick.combat.status_update_usec": {
+      "count": 1783,
+      "mean": 53.784632641615254,
+      "max": 255,
+      "p50": 50,
+      "p90": 74,
+      "p95": 82,
+      "p99": 95
+    }
+  },
+  "ranked_scope_means": [
+    [
+      "frame.terrain_scopes_usec.unit_proxy_sync_usec",
+      3793.4352030947775
+    ],
+    [
+      "tick.simulation.total_usec",
+      3428.319065420561
+    ],
+    [
+      "owner.fog_owner.total_usec",
+      2795.4323896606297
+    ],
+    [
+      "tick.simulation.tick_signal_emit_usec",
+      2627.183364485981
+    ],
+    [
+      "tick.combat.total_usec",
+      2422.2272897196262
+    ],
+    [
+      "tick.combat.combat_fire_decision_usec",
+      2252.2288278182837
+    ],
+    [
+      "tick.combat.fire_find_contact_pair_usec",
+      1694.6180594503646
+    ],
+    [
+      "owner.fog_owner.sync_usec",
+      1681.0712150518727
+    ],
+    [
+      "tick.combat.enemy_team_tactics_usec",
+      1602.8109927089176
+    ],
+    [
+      "frame.controller_scopes_usec.ui_refresh_usec",
+      1181.8088623175663
+    ],
+    [
+      "owner.fog_owner.advance_usec",
+      1113.5503780552137
+    ],
+    [
+      "frame.controller_scopes_usec.execution_updates_usec",
+      960.2442412519782
+    ],
+    [
+      "frame.controller_scopes_usec.feedback_and_security_usec",
+      881.8053455248813
+    ],
+    [
+      "frame.controller_scopes_usec.hud_light_usec",
+      881.8053455248813
+    ],
+    [
+      "tick.combat.enemy_security_usec",
+      770.7857543466068
+    ],
+    [
+      "tick.combat.multiplayer_snapshot_context_usec",
+      755.119461581604
+    ],
+    [
+      "frame.controller_scopes_usec.hud_heavy_usec",
+      637.592931246703
+    ],
+    [
+      "tick.simulation.command_queue_usec",
+      616.1676635514019
+    ],
+    [
+      "tick.simulation.command_apply_usec",
+      601.531214953271
+    ],
+    [
+      "tick.combat.overwatch_security_usec",
+      591.1862030286035
+    ],
+    [
+      "tick.combat.fire_no_contact_diagnostic_usec",
+      554.9904655075715
+    ],
+    [
+      "frame.terrain_scopes_usec.dynamic_order_visuals_usec",
+      553.3149287849482
+    ],
+    [
+      "owner.meta_transport.total_usec",
+      448.4578864075963
+    ],
+    [
+      "tick.combat.medic_support_usec",
+      318.7358384744812
+    ],
+    [
+      "owner.meta_transport.refresh_map_usec",
+      310.4104097063478
+    ]
+  ],
+  "top_frames": [
+    {
+      "elapsed_usec": 24310247,
+      "frame_usec": 297676,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 33696,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          27022
+        ],
+        [
+          "command_queue_usec",
+          5477
+        ],
+        [
+          "command_apply_usec",
+          5410
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          981
+        ],
+        [
+          "objective_capture_usec",
+          138
+        ],
+        [
+          "command_ordering_usec",
+          58
+        ],
+        [
+          "effect_queue_usec",
+          16
+        ],
+        [
+          "snapshot_broadcast_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          11125
+        ],
+        [
+          "combat_fire_decision_usec",
+          5874
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4270
+        ],
+        [
+          "enemy_security_usec",
+          2043
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1855
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1599
+        ],
+        [
+          "overwatch_security_usec",
+          1453
+        ],
+        [
+          "contact_tracking_usec",
+          1161
+        ]
+      ],
+      "terrain_usec": 2673,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 2651
+      },
+      "controller_usec": 25290,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1005,
+        "feedback_and_security_usec": 16,
+        "hud_heavy_usec": 24266,
+        "hud_light_usec": 16,
+        "ui_refresh_usec": 24266
+      },
+      "draw_calls": 1824.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 17954,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 240484,
+          "full_scan": false,
+          "processed_in_slice": 185,
+          "processed_tile_count": 185,
+          "slice_duration_usec": 9879,
+          "visibility_revision": 233
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 17956,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 65549,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 18,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 24,
+          "refresh_fob_usec": 8,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 27,
+          "sync_transport_usec": 98,
+          "transfer_advance_and_completions_usec": 15
+        },
+        "snapshot_serialized": false,
+        "total_usec": 165,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 36284132,
+      "frame_usec": 284016,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 18465,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          16145
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1061
+        ],
+        [
+          "command_queue_usec",
+          1040
+        ],
+        [
+          "command_apply_usec",
+          982
+        ],
+        [
+          "objective_capture_usec",
+          152
+        ],
+        [
+          "command_ordering_usec",
+          46
+        ],
+        [
+          "effect_queue_usec",
+          12
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          7
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "combat_fire_decision_usec",
+          5850
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4419
+        ],
+        [
+          "enemy_security_usec",
+          2047
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1832
+        ],
+        [
+          "overwatch_security_usec",
+          1461
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1423
+        ],
+        [
+          "contact_tracking_usec",
+          1145
+        ],
+        [
+          "medic_support_usec",
+          833
+        ]
+      ],
+      "terrain_usec": 3693,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 5,
+        "unit_proxy_sync_usec": 3674
+      },
+      "controller_usec": 1020,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1005,
+        "feedback_and_security_usec": 13,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 13,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1801.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 2,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 56099,
+          "full_scan": false,
+          "processed_in_slice": 185,
+          "processed_tile_count": 185,
+          "slice_duration_usec": 11001,
+          "visibility_revision": 322
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 9079,
+        "total_usec": 9083,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 65549,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 18,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 24,
+          "refresh_fob_usec": 8,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 27,
+          "sync_transport_usec": 98,
+          "transfer_advance_and_completions_usec": 15
+        },
+        "snapshot_serialized": false,
+        "total_usec": 165,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 12318031,
+      "frame_usec": 267762,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 31008,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          22752
+        ],
+        [
+          "command_queue_usec",
+          6630
+        ],
+        [
+          "command_apply_usec",
+          6513
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1270
+        ],
+        [
+          "objective_capture_usec",
+          280
+        ],
+        [
+          "command_ordering_usec",
+          102
+        ],
+        [
+          "effect_queue_usec",
+          16
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          5
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          7499
+        ],
+        [
+          "combat_fire_decision_usec",
+          5134
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          3753
+        ],
+        [
+          "enemy_security_usec",
+          1831
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1793
+        ],
+        [
+          "contact_tracking_usec",
+          1548
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1376
+        ],
+        [
+          "overwatch_security_usec",
+          1047
+        ]
+      ],
+      "terrain_usec": 4693,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 5,
+        "unit_proxy_sync_usec": 4673
+      },
+      "controller_usec": 1092,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1074,
+        "feedback_and_security_usec": 15,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 15,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1803.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 2,
+        "enabled": true,
+        "last_work": {
+          "candidate_scan_pending": false,
+          "candidate_scan_processed": 1058,
+          "candidate_tile_count": 185,
+          "completed": false,
+          "full_scan": false,
+          "processed_in_slice": 0,
+          "processed_tile_count": 0,
+          "slice_duration_usec": 3984,
+          "visibility_revision": 134
+        },
+        "pending_age_msec": 15,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 14476,
+        "total_usec": 14480,
+        "visibility_pending": true,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 60394,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 13,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 6,
+          "other_usec": 21,
+          "refresh_fob_usec": 11,
+          "refresh_homebase_usec": 7,
+          "refresh_map_usec": 3353,
+          "sync_transport_usec": 96,
+          "transfer_advance_and_completions_usec": 12
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3488,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 84274212,
+      "frame_usec": 265191,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 27857,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          24052
+        ],
+        [
+          "command_queue_usec",
+          2151
+        ],
+        [
+          "command_apply_usec",
+          2054
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1359
+        ],
+        [
+          "objective_capture_usec",
+          214
+        ],
+        [
+          "command_ordering_usec",
+          85
+        ],
+        [
+          "effect_queue_usec",
+          12
+        ],
+        [
+          "snapshot_broadcast_usec",
+          7
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "combat_fire_decision_usec",
+          9825
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          7714
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2716
+        ],
+        [
+          "enemy_security_usec",
+          2596
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          2102
+        ],
+        [
+          "overwatch_security_usec",
+          2097
+        ],
+        [
+          "contact_tracking_usec",
+          1633
+        ],
+        [
+          "medic_support_usec",
+          1108
+        ]
+      ],
+      "terrain_usec": 6060,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 8,
+        "unit_proxy_sync_usec": 6037
+      },
+      "controller_usec": 1124,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1102,
+        "feedback_and_security_usec": 20,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 20,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1802.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 2,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 56099,
+          "full_scan": false,
+          "processed_in_slice": 185,
+          "processed_tile_count": 185,
+          "slice_duration_usec": 11001,
+          "visibility_revision": 322
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 5,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 65549,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 18,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 24,
+          "refresh_fob_usec": 8,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 27,
+          "sync_transport_usec": 98,
+          "transfer_advance_and_completions_usec": 15
+        },
+        "snapshot_serialized": false,
+        "total_usec": 165,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 12559483,
+      "frame_usec": 241452,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 58600,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          33677
+        ],
+        [
+          "command_queue_usec",
+          23747
+        ],
+        [
+          "command_apply_usec",
+          23640
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          971
+        ],
+        [
+          "objective_capture_usec",
+          139
+        ],
+        [
+          "command_ordering_usec",
+          96
+        ],
+        [
+          "effect_queue_usec",
+          13
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          8
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          15545
+        ],
+        [
+          "combat_fire_decision_usec",
+          6412
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4814
+        ],
+        [
+          "overwatch_security_usec",
+          2142
+        ],
+        [
+          "enemy_security_usec",
+          2057
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2014
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1588
+        ],
+        [
+          "contact_tracking_usec",
+          1134
+        ]
+      ],
+      "terrain_usec": 4287,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 7,
+        "unit_proxy_sync_usec": 4261
+      },
+      "controller_usec": 145315,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 113816,
+        "feedback_and_security_usec": 12958,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 12958,
+        "ui_refresh_usec": 18538
+      },
+      "draw_calls": 1801.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 21195,
+        "enabled": true,
+        "last_work": {
+          "candidate_scan_pending": false,
+          "candidate_scan_processed": 1058,
+          "candidate_tile_count": 186,
+          "completed": false,
+          "full_scan": false,
+          "processed_in_slice": 0,
+          "processed_tile_count": 0,
+          "slice_duration_usec": 4149,
+          "visibility_revision": 135
+        },
+        "pending_age_msec": 14,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 13471,
+        "total_usec": 34668,
+        "visibility_pending": true,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 60394,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 13,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 6,
+          "other_usec": 21,
+          "refresh_fob_usec": 11,
+          "refresh_homebase_usec": 7,
+          "refresh_map_usec": 3353,
+          "sync_transport_usec": 96,
+          "transfer_advance_and_completions_usec": 12
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3488,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 72234407,
+      "frame_usec": 234159,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 21261,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          17768
+        ],
+        [
+          "command_queue_usec",
+          2037
+        ],
+        [
+          "command_apply_usec",
+          1956
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1191
+        ],
+        [
+          "objective_capture_usec",
+          191
+        ],
+        [
+          "command_ordering_usec",
+          68
+        ],
+        [
+          "effect_queue_usec",
+          12
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          7
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "combat_fire_decision_usec",
+          6693
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          5068
+        ],
+        [
+          "enemy_security_usec",
+          1863
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1809
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1620
+        ],
+        [
+          "contact_tracking_usec",
+          1520
+        ],
+        [
+          "overwatch_security_usec",
+          1419
+        ],
+        [
+          "medic_support_usec",
+          829
+        ]
+      ],
+      "terrain_usec": 7149,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 10,
+        "unit_proxy_sync_usec": 7117
+      },
+      "controller_usec": 1614,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1584,
+        "feedback_and_security_usec": 26,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 26,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1803.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 1,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 56099,
+          "full_scan": false,
+          "processed_in_slice": 185,
+          "processed_tile_count": 185,
+          "slice_duration_usec": 11001,
+          "visibility_revision": 322
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 4,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 65549,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 18,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 24,
+          "refresh_fob_usec": 8,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 27,
+          "sync_transport_usec": 98,
+          "transfer_advance_and_completions_usec": 15
+        },
+        "snapshot_serialized": false,
+        "total_usec": 165,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 60239169,
+      "frame_usec": 227957,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 22795,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          19761
+        ],
+        [
+          "command_queue_usec",
+          1711
+        ],
+        [
+          "command_apply_usec",
+          1628
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1099
+        ],
+        [
+          "objective_capture_usec",
+          159
+        ],
+        [
+          "command_ordering_usec",
+          69
+        ],
+        [
+          "effect_queue_usec",
+          10
+        ],
+        [
+          "snapshot_broadcast_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "combat_fire_decision_usec",
+          6696
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4862
+        ],
+        [
+          "enemy_security_usec",
+          2632
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2467
+        ],
+        [
+          "overwatch_security_usec",
+          1881
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1827
+        ],
+        [
+          "contact_tracking_usec",
+          1384
+        ],
+        [
+          "medic_support_usec",
+          1050
+        ]
+      ],
+      "terrain_usec": 5355,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 3,
+        "resize_subviewport_usec": 9,
+        "unit_proxy_sync_usec": 5327
+      },
+      "controller_usec": 1070,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 1049,
+        "feedback_and_security_usec": 19,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 19,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1802.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 2,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 56099,
+          "full_scan": false,
+          "processed_in_slice": 185,
+          "processed_tile_count": 185,
+          "slice_duration_usec": 11001,
+          "visibility_revision": 322
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 4,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 65549,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 18,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 24,
+          "refresh_fob_usec": 8,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 27,
+          "sync_transport_usec": 98,
+          "transfer_advance_and_completions_usec": 15
+        },
+        "snapshot_serialized": false,
+        "total_usec": 165,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 24532185,
+      "frame_usec": 221938,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 48067,
+      "simulation_scopes_usec": [
+        [
+          "command_queue_usec",
+          27379
+        ],
+        [
+          "command_apply_usec",
+          27277
+        ],
+        [
+          "tick_signal_emit_usec",
+          19498
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          984
+        ],
+        [
+          "objective_capture_usec",
+          141
+        ],
+        [
+          "command_ordering_usec",
+          88
+        ],
+        [
+          "effect_queue_usec",
+          14
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          7
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          7520
+        ],
+        [
+          "combat_fire_decision_usec",
+          3803
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          2837
+        ],
+        [
+          "enemy_security_usec",
+          1440
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1387
+        ],
+        [
+          "contact_tracking_usec",
+          1160
+        ],
+        [
+          "overwatch_security_usec",
+          1099
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          961
+        ]
+      ],
+      "terrain_usec": 3398,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 5,
+        "unit_proxy_sync_usec": 3379
+      },
+      "controller_usec": 145598,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 135398,
+        "feedback_and_security_usec": 10197,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 10197,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1821.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 2,
+        "enabled": true,
+        "last_work": {
+          "candidate_scan_pending": false,
+          "candidate_scan_processed": 1058,
+          "candidate_tile_count": 186,
+          "completed": false,
+          "full_scan": false,
+          "processed_in_slice": 0,
+          "processed_tile_count": 0,
+          "slice_duration_usec": 4039,
+          "visibility_revision": 233
+        },
+        "pending_age_msec": 12,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 11543,
+        "total_usec": 11547,
+        "visibility_pending": true,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 65549,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 18,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 24,
+          "refresh_fob_usec": 8,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 27,
+          "sync_transport_usec": 98,
+          "transfer_advance_and_completions_usec": 15
+        },
+        "snapshot_serialized": false,
+        "total_usec": 165,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 48221054,
+      "frame_usec": 217213,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 15591,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          12481
+        ],
+        [
+          "command_queue_usec",
+          1735
+        ],
+        [
+          "command_apply_usec",
+          1664
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1129
+        ],
+        [
+          "objective_capture_usec",
+          180
+        ],
+        [
+          "command_ordering_usec",
+          58
+        ],
+        [
+          "effect_queue_usec",
+          10
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "combat_fire_decision_usec",
+          3935
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          2950
+        ],
+        [
+          "enemy_security_usec",
+          1442
+        ],
+        [
+          "contact_tracking_usec",
+          1336
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1249
+        ],
+        [
+          "overwatch_security_usec",
+          1006
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          981
+        ],
+        [
+          "medic_support_usec",
+          560
+        ]
+      ],
+      "terrain_usec": 4825,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 1,
+        "resize_subviewport_usec": 8,
+        "unit_proxy_sync_usec": 4803
+      },
+      "controller_usec": 954,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 933,
+        "feedback_and_security_usec": 18,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 18,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1803.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 2,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 56099,
+          "full_scan": false,
+          "processed_in_slice": 185,
+          "processed_tile_count": 185,
+          "slice_duration_usec": 11001,
+          "visibility_revision": 322
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 3,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 65549,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 18,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 24,
+          "refresh_fob_usec": 8,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 27,
+          "sync_transport_usec": 98,
+          "transfer_advance_and_completions_usec": 15
+        },
+        "snapshot_serialized": false,
+        "total_usec": 165,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 34453603,
+      "frame_usec": 203661,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 21141,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          15589
+        ],
+        [
+          "command_queue_usec",
+          4350
+        ],
+        [
+          "command_apply_usec",
+          4275
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          999
+        ],
+        [
+          "objective_capture_usec",
+          140
+        ],
+        [
+          "command_ordering_usec",
+          63
+        ],
+        [
+          "effect_queue_usec",
+          12
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "combat_fire_decision_usec",
+          3934
+        ],
+        [
+          "enemy_team_tactics_usec",
+          3909
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          2978
+        ],
+        [
+          "enemy_security_usec",
+          1378
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1308
+        ],
+        [
+          "contact_tracking_usec",
+          1146
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          949
+        ],
+        [
+          "overwatch_security_usec",
+          836
+        ]
+      ],
+      "terrain_usec": 3790,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 4,
+        "unit_proxy_sync_usec": 3771
+      },
+      "controller_usec": 170833,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 162248,
+        "feedback_and_security_usec": 8583,
+        "hud_heavy_usec": 0,
+        "hud_light_usec": 8583,
+        "ui_refresh_usec": 0
+      },
+      "draw_calls": 1791.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 0,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 32975,
+          "full_scan": false,
+          "processed_in_slice": 185,
+          "processed_tile_count": 185,
+          "slice_duration_usec": 11055,
+          "visibility_revision": 321
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 1,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 65549,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 18,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 24,
+          "refresh_fob_usec": 8,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 27,
+          "sync_transport_usec": 98,
+          "transfer_advance_and_completions_usec": 15
+        },
+        "snapshot_serialized": false,
+        "total_usec": 165,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 2193786,
+      "frame_usec": 166657,
+      "simulation_tick_count": 8,
+      "simulation_total_usec": 37174,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          27668
+        ],
+        [
+          "command_queue_usec",
+          7348
+        ],
+        [
+          "command_apply_usec",
+          7260
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1944
+        ],
+        [
+          "objective_capture_usec",
+          144
+        ],
+        [
+          "command_ordering_usec",
+          77
+        ],
+        [
+          "effect_queue_usec",
+          13
+        ],
+        [
+          "snapshot_broadcast_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          11473
+        ],
+        [
+          "combat_fire_decision_usec",
+          6032
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4593
+        ],
+        [
+          "enemy_security_usec",
+          2064
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1846
+        ],
+        [
+          "overwatch_security_usec",
+          1582
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1432
+        ],
+        [
+          "contact_tracking_usec",
+          1153
+        ]
+      ],
+      "terrain_usec": 10074,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 5757,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 4296
+      },
+      "controller_usec": 93636,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 824,
+        "feedback_and_security_usec": 1,
+        "hud_heavy_usec": 92808,
+        "hud_light_usec": 1,
+        "ui_refresh_usec": 92808
+      },
+      "draw_calls": 1798.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 20654,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 59240,
+          "full_scan": false,
+          "processed_in_slice": 223,
+          "processed_tile_count": 223,
+          "slice_duration_usec": 12105,
+          "visibility_revision": 50
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 20654,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 50375,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 3,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 6,
+          "other_usec": 19,
+          "refresh_fob_usec": 9,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 3557,
+          "sync_transport_usec": 97,
+          "transfer_advance_and_completions_usec": 10
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3690,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 11926563,
+      "frame_usec": 162739,
+      "simulation_tick_count": 7,
+      "simulation_total_usec": 29551,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          22805
+        ],
+        [
+          "command_queue_usec",
+          5491
+        ],
+        [
+          "command_apply_usec",
+          5419
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1031
+        ],
+        [
+          "objective_capture_usec",
+          145
+        ],
+        [
+          "command_ordering_usec",
+          57
+        ],
+        [
+          "effect_queue_usec",
+          11
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          7
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          9628
+        ],
+        [
+          "combat_fire_decision_usec",
+          4556
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          3512
+        ],
+        [
+          "enemy_security_usec",
+          1511
+        ],
+        [
+          "overwatch_security_usec",
+          1367
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1317
+        ],
+        [
+          "contact_tracking_usec",
+          1156
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1038
+        ]
+      ],
+      "terrain_usec": 10409,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 6135,
+        "resize_subviewport_usec": 7,
+        "unit_proxy_sync_usec": 4251
+      },
+      "controller_usec": 96143,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 842,
+        "feedback_and_security_usec": 2,
+        "hud_heavy_usec": 95297,
+        "hud_light_usec": 2,
+        "ui_refresh_usec": 95297
+      },
+      "draw_calls": 1798.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 1,
+        "enabled": true,
+        "last_work": {
+          "candidate_scan_pending": false,
+          "candidate_scan_processed": 1058,
+          "candidate_tile_count": 186,
+          "completed": false,
+          "full_scan": false,
+          "processed_in_slice": 0,
+          "processed_tile_count": 0,
+          "slice_duration_usec": 3918,
+          "visibility_revision": 132
+        },
+        "pending_age_msec": 12,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 12624,
+        "total_usec": 12626,
+        "visibility_pending": true,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 60394,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 13,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 6,
+          "other_usec": 21,
+          "refresh_fob_usec": 11,
+          "refresh_homebase_usec": 7,
+          "refresh_map_usec": 3353,
+          "sync_transport_usec": 96,
+          "transfer_advance_and_completions_usec": 12
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3488,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 13274299,
+      "frame_usec": 149155,
+      "simulation_tick_count": 7,
+      "simulation_total_usec": 36395,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          27610
+        ],
+        [
+          "command_queue_usec",
+          7725
+        ],
+        [
+          "command_apply_usec",
+          7642
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          867
+        ],
+        [
+          "objective_capture_usec",
+          132
+        ],
+        [
+          "command_ordering_usec",
+          76
+        ],
+        [
+          "effect_queue_usec",
+          11
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          11423
+        ],
+        [
+          "combat_fire_decision_usec",
+          6019
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4427
+        ],
+        [
+          "enemy_security_usec",
+          2157
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          2124
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1587
+        ],
+        [
+          "overwatch_security_usec",
+          1525
+        ],
+        [
+          "contact_tracking_usec",
+          997
+        ]
+      ],
+      "terrain_usec": 4926,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 12,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 4895
+      },
+      "controller_usec": 94178,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 853,
+        "feedback_and_security_usec": 13,
+        "hud_heavy_usec": 93309,
+        "hud_light_usec": 13,
+        "ui_refresh_usec": 93309
+      },
+      "draw_calls": 1801.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 1,
+        "enabled": true,
+        "last_work": {
+          "candidate_scan_pending": true,
+          "candidate_scan_processed": 2048,
+          "candidate_tile_count": 3174,
+          "completed": false,
+          "full_scan": false,
+          "processed_in_slice": 0,
+          "processed_tile_count": 0,
+          "slice_duration_usec": 7548,
+          "visibility_revision": 140
+        },
+        "pending_age_msec": 17,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 16792,
+        "total_usec": 16794,
+        "visibility_pending": true,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 61598,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 14,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 6,
+          "other_usec": 21,
+          "refresh_fob_usec": 9,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 3309,
+          "sync_transport_usec": 97,
+          "transfer_advance_and_completions_usec": 11
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3444,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 15417687,
+      "frame_usec": 140330,
+      "simulation_tick_count": 7,
+      "simulation_total_usec": 37165,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          27760
+        ],
+        [
+          "command_queue_usec",
+          8340
+        ],
+        [
+          "command_apply_usec",
+          8260
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          874
+        ],
+        [
+          "objective_capture_usec",
+          128
+        ],
+        [
+          "command_ordering_usec",
+          69
+        ],
+        [
+          "effect_queue_usec",
+          11
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          12032
+        ],
+        [
+          "combat_fire_decision_usec",
+          5899
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          4444
+        ],
+        [
+          "enemy_security_usec",
+          2085
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1901
+        ],
+        [
+          "overwatch_security_usec",
+          1474
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          1449
+        ],
+        [
+          "contact_tracking_usec",
+          1001
+        ]
+      ],
+      "terrain_usec": 9081,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 5034,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 4027
+      },
+      "controller_usec": 76430,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 917,
+        "feedback_and_security_usec": 2,
+        "hud_heavy_usec": 75507,
+        "hud_light_usec": 2,
+        "ui_refresh_usec": 75507
+      },
+      "draw_calls": 1798.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 21260,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 70669,
+          "full_scan": false,
+          "processed_in_slice": 209,
+          "processed_tile_count": 209,
+          "slice_duration_usec": 12490,
+          "visibility_revision": 157
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 21262,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 63551,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 16,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 20,
+          "refresh_fob_usec": 16,
+          "refresh_homebase_usec": 9,
+          "refresh_map_usec": 3311,
+          "sync_transport_usec": 102,
+          "transfer_advance_and_completions_usec": 12
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3458,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 1090633,
+      "frame_usec": 139291,
+      "simulation_tick_count": 6,
+      "simulation_total_usec": 25075,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          18570
+        ],
+        [
+          "command_queue_usec",
+          5613
+        ],
+        [
+          "command_apply_usec",
+          5546
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          734
+        ],
+        [
+          "objective_capture_usec",
+          103
+        ],
+        [
+          "command_ordering_usec",
+          59
+        ],
+        [
+          "effect_queue_usec",
+          9
+        ],
+        [
+          "snapshot_broadcast_usec",
+          5
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          7552
+        ],
+        [
+          "combat_fire_decision_usec",
+          3862
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          2917
+        ],
+        [
+          "enemy_security_usec",
+          1426
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1276
+        ],
+        [
+          "overwatch_security_usec",
+          1038
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          941
+        ],
+        [
+          "contact_tracking_usec",
+          865
+        ]
+      ],
+      "terrain_usec": 5228,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 2,
+        "resize_subviewport_usec": 8,
+        "unit_proxy_sync_usec": 5206
+      },
+      "controller_usec": 103809,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 818,
+        "feedback_and_security_usec": 10580,
+        "hud_heavy_usec": 92408,
+        "hud_light_usec": 10580,
+        "ui_refresh_usec": 92408
+      },
+      "draw_calls": 1798.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 337,
+        "enabled": true,
+        "last_work": {
+          "candidate_scan_pending": false,
+          "candidate_scan_processed": 2116,
+          "candidate_tile_count": 215,
+          "completed": false,
+          "full_scan": false,
+          "processed_in_slice": 0,
+          "processed_tile_count": 0,
+          "slice_duration_usec": 299,
+          "visibility_revision": 40
+        },
+        "pending_age_msec": 37,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 338,
+        "visibility_pending": true,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 49335,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 2,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 5,
+          "other_usec": 20,
+          "refresh_fob_usec": 9,
+          "refresh_homebase_usec": 7,
+          "refresh_map_usec": 3566,
+          "sync_transport_usec": 96,
+          "transfer_advance_and_completions_usec": 11
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3698,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 3253852,
+      "frame_usec": 135441,
+      "simulation_tick_count": 6,
+      "simulation_total_usec": 25119,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          19246
+        ],
+        [
+          "command_queue_usec",
+          4274
+        ],
+        [
+          "command_apply_usec",
+          4218
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1444
+        ],
+        [
+          "objective_capture_usec",
+          107
+        ],
+        [
+          "command_ordering_usec",
+          47
+        ],
+        [
+          "effect_queue_usec",
+          11
+        ],
+        [
+          "snapshot_broadcast_usec",
+          4
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          7720
+        ],
+        [
+          "combat_fire_decision_usec",
+          3878
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          2919
+        ],
+        [
+          "enemy_security_usec",
+          1639
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1313
+        ],
+        [
+          "overwatch_security_usec",
+          1135
+        ],
+        [
+          "contact_tracking_usec",
+          965
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          953
+        ]
+      ],
+      "terrain_usec": 10326,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 5968,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 4335
+      },
+      "controller_usec": 94589,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 859,
+        "feedback_and_security_usec": 2,
+        "hud_heavy_usec": 93725,
+        "hud_light_usec": 2,
+        "ui_refresh_usec": 93725
+      },
+      "draw_calls": 1798.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 326,
+        "enabled": true,
+        "last_work": {
+          "candidate_scan_pending": false,
+          "candidate_scan_processed": 2116,
+          "candidate_tile_count": 198,
+          "completed": false,
+          "full_scan": false,
+          "processed_in_slice": 0,
+          "processed_tile_count": 0,
+          "slice_duration_usec": 290,
+          "visibility_revision": 58
+        },
+        "pending_age_msec": 27,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 327,
+        "visibility_pending": true,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 51395,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 4,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 6,
+          "other_usec": 20,
+          "refresh_fob_usec": 9,
+          "refresh_homebase_usec": 7,
+          "refresh_map_usec": 3321,
+          "sync_transport_usec": 95,
+          "transfer_advance_and_completions_usec": 10
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3452,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 16504928,
+      "frame_usec": 135262,
+      "simulation_tick_count": 6,
+      "simulation_total_usec": 27661,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          19296
+        ],
+        [
+          "command_queue_usec",
+          6738
+        ],
+        [
+          "command_apply_usec",
+          6663
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1469
+        ],
+        [
+          "objective_capture_usec",
+          105
+        ],
+        [
+          "command_ordering_usec",
+          66
+        ],
+        [
+          "effect_queue_usec",
+          9
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          5
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          8080
+        ],
+        [
+          "combat_fire_decision_usec",
+          3926
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          2950
+        ],
+        [
+          "enemy_security_usec",
+          1389
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1361
+        ],
+        [
+          "overwatch_security_usec",
+          1017
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          971
+        ],
+        [
+          "contact_tracking_usec",
+          887
+        ]
+      ],
+      "terrain_usec": 9452,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 5100,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 4332
+      },
+      "controller_usec": 73089,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 873,
+        "feedback_and_security_usec": 2,
+        "hud_heavy_usec": 72211,
+        "hud_light_usec": 2,
+        "ui_refresh_usec": 72211
+      },
+      "draw_calls": 1798.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 19966,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 81022,
+          "full_scan": false,
+          "processed_in_slice": 205,
+          "processed_tile_count": 205,
+          "slice_duration_usec": 11849,
+          "visibility_revision": 166
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 19967,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 64541,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 17,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 20,
+          "refresh_fob_usec": 8,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 3714,
+          "sync_transport_usec": 102,
+          "transfer_advance_and_completions_usec": 11
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3852,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 7603246,
+      "frame_usec": 132247,
+      "simulation_tick_count": 7,
+      "simulation_total_usec": 26477,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          19802
+        ],
+        [
+          "command_queue_usec",
+          4778
+        ],
+        [
+          "command_apply_usec",
+          4709
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1705
+        ],
+        [
+          "objective_capture_usec",
+          130
+        ],
+        [
+          "command_ordering_usec",
+          59
+        ],
+        [
+          "effect_queue_usec",
+          11
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          6
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          7938
+        ],
+        [
+          "combat_fire_decision_usec",
+          4050
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          3053
+        ],
+        [
+          "enemy_security_usec",
+          1426
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1361
+        ],
+        [
+          "overwatch_security_usec",
+          1068
+        ],
+        [
+          "contact_tracking_usec",
+          1006
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          993
+        ]
+      ],
+      "terrain_usec": 4803,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 14,
+        "resize_subviewport_usec": 7,
+        "unit_proxy_sync_usec": 4769
+      },
+      "controller_usec": 95606,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 871,
+        "feedback_and_security_usec": 1,
+        "hud_heavy_usec": 94731,
+        "hud_light_usec": 1,
+        "ui_refresh_usec": 94731
+      },
+      "draw_calls": 1798.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 1,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 54181,
+          "full_scan": false,
+          "processed_in_slice": 198,
+          "processed_tile_count": 198,
+          "slice_duration_usec": 11306,
+          "visibility_revision": 96
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 2,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 56369,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 9,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 6,
+          "other_usec": 19,
+          "refresh_fob_usec": 9,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 3537,
+          "sync_transport_usec": 100,
+          "transfer_advance_and_completions_usec": 10
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3673,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 27623503,
+      "frame_usec": 123841,
+      "simulation_tick_count": 5,
+      "simulation_total_usec": 17624,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          10565
+        ],
+        [
+          "command_queue_usec",
+          6299
+        ],
+        [
+          "command_apply_usec",
+          6235
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          621
+        ],
+        [
+          "objective_capture_usec",
+          87
+        ],
+        [
+          "command_ordering_usec",
+          57
+        ],
+        [
+          "effect_queue_usec",
+          7
+        ],
+        [
+          "local_avoidance_prepare_usec",
+          5
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          3930
+        ],
+        [
+          "combat_fire_decision_usec",
+          2129
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          1626
+        ],
+        [
+          "contact_tracking_usec",
+          723
+        ],
+        [
+          "enemy_security_usec",
+          715
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          709
+        ],
+        [
+          "overwatch_security_usec",
+          531
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          499
+        ]
+      ],
+      "terrain_usec": 8623,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 5007,
+        "resize_subviewport_usec": 6,
+        "unit_proxy_sync_usec": 3597
+      },
+      "controller_usec": 65946,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 838,
+        "feedback_and_security_usec": 2,
+        "hud_heavy_usec": 65103,
+        "hud_light_usec": 2,
+        "ui_refresh_usec": 65103
+      },
+      "draw_calls": 1809.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 20161,
+        "enabled": true,
+        "last_work": {
+          "completed": true,
+          "duration_usec": 55326,
+          "full_scan": false,
+          "processed_in_slice": 240,
+          "processed_tile_count": 240,
+          "slice_duration_usec": 12732,
+          "visibility_revision": 261
+        },
+        "pending_age_msec": 0,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 0,
+        "total_usec": 20162,
+        "visibility_pending": false,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 65549,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 18,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 7,
+          "other_usec": 24,
+          "refresh_fob_usec": 8,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 27,
+          "sync_transport_usec": 98,
+          "transfer_advance_and_completions_usec": 15
+        },
+        "snapshot_serialized": false,
+        "total_usec": 165,
+        "ui_sets_gameplay_truth": false
+      }
+    },
+    {
+      "elapsed_usec": 8676724,
+      "frame_usec": 123316,
+      "simulation_tick_count": 6,
+      "simulation_total_usec": 26577,
+      "simulation_scopes_usec": [
+        [
+          "tick_signal_emit_usec",
+          19763
+        ],
+        [
+          "command_queue_usec",
+          5021
+        ],
+        [
+          "command_apply_usec",
+          4957
+        ],
+        [
+          "unit_minimum_spacing_usec",
+          1629
+        ],
+        [
+          "objective_capture_usec",
+          109
+        ],
+        [
+          "command_ordering_usec",
+          53
+        ],
+        [
+          "effect_queue_usec",
+          10
+        ],
+        [
+          "snapshot_broadcast_usec",
+          5
+        ]
+      ],
+      "combat_scopes_usec": [
+        [
+          "enemy_team_tactics_usec",
+          7956
+        ],
+        [
+          "combat_fire_decision_usec",
+          4102
+        ],
+        [
+          "fire_find_contact_pair_usec",
+          3109
+        ],
+        [
+          "enemy_security_usec",
+          1505
+        ],
+        [
+          "multiplayer_snapshot_context_usec",
+          1390
+        ],
+        [
+          "overwatch_security_usec",
+          1187
+        ],
+        [
+          "fire_no_contact_diagnostic_usec",
+          987
+        ],
+        [
+          "contact_tracking_usec",
+          919
+        ]
+      ],
+      "terrain_usec": 4055,
+      "terrain_scopes_usec": {
+        "dynamic_order_visuals_usec": 11,
+        "resize_subviewport_usec": 7,
+        "unit_proxy_sync_usec": 4025
+      },
+      "controller_usec": 72339,
+      "controller_scopes_usec": {
+        "execution_updates_usec": 900,
+        "feedback_and_security_usec": 3,
+        "hud_heavy_usec": 71433,
+        "hud_light_usec": 3,
+        "ui_refresh_usec": 71433
+      },
+      "draw_calls": 1798.0,
+      "nav_pending": 0,
+      "fog_owner": {
+        "advance_usec": 1,
+        "enabled": true,
+        "last_work": {
+          "candidate_scan_pending": true,
+          "candidate_scan_processed": 2048,
+          "candidate_tile_count": 2116,
+          "completed": false,
+          "full_scan": false,
+          "processed_in_slice": 0,
+          "processed_tile_count": 0,
+          "slice_duration_usec": 7396,
+          "visibility_revision": 105
+        },
+        "pending_age_msec": 17,
+        "read_only": true,
+        "sets_gameplay_truth": false,
+        "sync_usec": 16774,
+        "total_usec": 16776,
+        "visibility_pending": true,
+        "work_budget_tiles": 512
+      },
+      "meta_transport": {
+        "completed_at_msec": 57347,
+        "derived_only": true,
+        "enabled": true,
+        "invocation_count": 10,
+        "read_only": true,
+        "scopes_usec": {
+          "ensure_timer_state_usec": 5,
+          "other_usec": 20,
+          "refresh_fob_usec": 7,
+          "refresh_homebase_usec": 8,
+          "refresh_map_usec": 3386,
+          "sync_transport_usec": 101,
+          "transfer_advance_and_completions_usec": 11
+        },
+        "snapshot_serialized": false,
+        "total_usec": 3522,
+        "ui_sets_gameplay_truth": false
+      }
+    }
+  ],
+  "top_navigation_queries": [
+    {
+      "elapsed_usec": 24496873,
+      "candidate_count_estimate": 7,
+      "command_type": "move_to_position",
+      "cover_sum": 0.48,
+      "duration_usec": 6960,
+      "expanded_node_estimate": 7,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(1, 15)",
+      "mean_cover": 0.0685714285714286,
+      "mean_exposure": 0.0,
+      "path_cost": 9.23116438457997,
+      "path_grid_count": 7,
+      "path_length_grid": 7,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "same_component",
+      "tick": 3077,
+      "to_grid": "(0, 10)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 24496873,
+      "candidate_count_estimate": 5,
+      "command_type": "move_to_position",
+      "cover_sum": 0.98,
+      "duration_usec": 6197,
+      "expanded_node_estimate": 5,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(-1, 14)",
+      "mean_cover": 0.196,
+      "mean_exposure": 0.0,
+      "path_cost": 6.5396273283458,
+      "path_grid_count": 5,
+      "path_length_grid": 5,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 3077,
+      "to_grid": "(1, 10)",
+      "unit_id": "player_sternenbuergerchen_02",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 12525973,
+      "candidate_count_estimate": 5,
+      "command_type": "move_to_position",
+      "cover_sum": 1.46,
+      "duration_usec": 6126,
+      "expanded_node_estimate": 5,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(1, 10)",
+      "mean_cover": 0.292,
+      "mean_exposure": 0.0,
+      "path_cost": 5.95459276528301,
+      "path_grid_count": 5,
+      "path_length_grid": 5,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 2371,
+      "to_grid": "(-1, 14)",
+      "unit_id": "player_sternenbuergerchen_02",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 13788738,
+      "candidate_count_estimate": 4,
+      "command_type": "move_to_position",
+      "cover_sum": 0.96,
+      "duration_usec": 5609,
+      "expanded_node_estimate": 4,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(1, 11)",
+      "mean_cover": 0.24,
+      "mean_exposure": 0.0,
+      "path_cost": 4.4133285265071,
+      "path_grid_count": 4,
+      "path_length_grid": 4,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 2453,
+      "to_grid": "(-1, 14)",
+      "unit_id": "player_sternenbuergerchen_02",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 15451868,
+      "candidate_count_estimate": 3,
+      "command_type": "move_to_position",
+      "cover_sum": 0.96,
+      "duration_usec": 5577,
+      "expanded_node_estimate": 3,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(0, 12)",
+      "mean_cover": 0.32,
+      "mean_exposure": 0.0,
+      "path_cost": 2.60532842859653,
+      "path_grid_count": 3,
+      "path_length_grid": 3,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 2552,
+      "to_grid": "(-1, 14)",
+      "unit_id": "player_sternenbuergerchen_02",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 24496873,
+      "candidate_count_estimate": 3,
+      "command_type": "move_to_position",
+      "cover_sum": 0.48,
+      "duration_usec": 5523,
+      "expanded_node_estimate": 3,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(0, 12)",
+      "mean_cover": 0.16,
+      "mean_exposure": 0.0,
+      "path_cost": 2.87631901452495,
+      "path_grid_count": 3,
+      "path_length_grid": 3,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 3077,
+      "to_grid": "(-1, 11)",
+      "unit_id": "player_sternenbuergerchen_03",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 12525973,
+      "candidate_count_estimate": 3,
+      "command_type": "move_to_position",
+      "cover_sum": 0.48,
+      "duration_usec": 5480,
+      "expanded_node_estimate": 3,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(-1, 11)",
+      "mean_cover": 0.16,
+      "mean_exposure": 0.0,
+      "path_cost": 3.00000014686586,
+      "path_grid_count": 3,
+      "path_length_grid": 3,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "hpa",
+      "tick": 2371,
+      "to_grid": "(0, 12)",
+      "unit_id": "player_sternenbuergerchen_03",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 24985663,
+      "candidate_count_estimate": 6,
+      "command_type": "move_to_position",
+      "cover_sum": 0.48,
+      "duration_usec": 5035,
+      "expanded_node_estimate": 6,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(1, 14)",
+      "mean_cover": 0.08,
+      "mean_exposure": 0.0,
+      "path_cost": 7.68325710764095,
+      "path_grid_count": 6,
+      "path_length_grid": 6,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "same_component",
+      "tick": 3113,
+      "to_grid": "(0, 10)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 27015848,
+      "candidate_count_estimate": 5,
+      "command_type": "move_to_position",
+      "cover_sum": 0.48,
+      "duration_usec": 3577,
+      "expanded_node_estimate": 5,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(1, 13)",
+      "mean_cover": 0.096,
+      "mean_exposure": 0.0,
+      "path_cost": 6.08744273840812,
+      "path_grid_count": 5,
+      "path_length_grid": 5,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "same_component",
+      "tick": 3235,
+      "to_grid": "(0, 10)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    },
+    {
+      "elapsed_usec": 12525973,
+      "candidate_count_estimate": 7,
+      "command_type": "move_to_position",
+      "cover_sum": 0.98,
+      "duration_usec": 3130,
+      "expanded_node_estimate": 7,
+      "exposure_sum": 0.0,
+      "fallback_or_delay_reason": "",
+      "from_grid": "(0, 10)",
+      "mean_cover": 0.14,
+      "mean_exposure": 0.0,
+      "path_cost": 9.01030165872455,
+      "path_grid_count": 7,
+      "path_length_grid": 7,
+      "priority": 12,
+      "query_kind": "primary",
+      "route_type": "hpa",
+      "status": "same_component",
+      "tick": 2371,
+      "to_grid": "(1, 15)",
+      "unit_id": "player_sternenbuergerchen_01",
+      "unreachable": false
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "empty_token_green",
+      "script": "res://scripts/tests/playtest_20261105_empty_token_commit_verifier.gd",
+      "success_marker": "PLAYTEST_EMPTY_TOKEN_COMMIT_DONE",
+      "timeout": 120
+    },
+    {
+      "name": "movement_lifecycle_neighbor",
+      "script": "res://scripts/tests/task_501_integrated_movement_command_lifecycle_hardening.gd",
+      "success_marker": "TASK_501: ALL PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "engage_conflict_neighbor",
+      "script": "res://scripts/tests/task_468_fireteam_engage_live_command_conflict_audit.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    }
+  ]
+}

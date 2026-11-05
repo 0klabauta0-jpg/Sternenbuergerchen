@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "scope": "Focused final current-source gates. Seven reproduced original-Main legacy failures are separately documented, never relabeled as pass.",
+  "checks": [
+    {
+      "name": "homebase_operations",
+      "script": "res://scripts/tests/playtest_20261105_homebase_operations_verifier.gd",
+      "success_marker": "HOMEBASE_OPERATIONS_VERIFY_PASS",
+      "timeout": 120
+    },
+    {
+      "name": "cover_spatial",
+      "script": "res://scripts/tests/playtest_20261105_cover_query_spatial_verifier.gd",
+      "success_marker": "PLAYTEST_COVER_QUERY_SPATIAL_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "portrait_atlas",
+      "script": "res://scripts/tests/playtest_20261105_portrait_atlas_verifier.gd",
+      "success_marker": "PORTRAIT_ATLAS_VERIFY_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "portrait_legacy_contract",
+      "script": "res://scripts/tests/task_233_portrait_identity_catalog_and_roster_presentation.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 150
+    },
+    {
+      "name": "explorable_base",
+      "script": "res://scripts/tests/playtest_20261105_explorable_homebase_verifier.gd",
+      "success_marker": "EXPLORABLE_HOMEBASE:",
+      "timeout": 150
+    },
+    {
+      "name": "npc_feedback",
+      "script": "res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd",
+      "success_marker": "NPC COMBAT FEEDBACK:",
+      "timeout": 180
+    },
+    {
+      "name": "flight_grid",
+      "script": "res://scripts/tests/playtest_20261105_flight_grid_verifier.gd",
+      "success_marker": "PLAYTEST_FLIGHT_GRID:",
+      "timeout": 180
+    },
+    {
+      "name": "menu_original",
+      "script": "res://scripts/tests/playtest_20261105_menu_restore_verifier.gd",
+      "success_marker": "PLAYTEST_MENU_RESTORE_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "start_graphics",
+      "script": "res://scripts/tests/frontier_start_graphics_verifier.gd",
+      "success_marker": "FRONTIER_START_GRAPHICS_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "cover_radius_neighbor",
+      "script": "res://scripts/tests/gm01_frontier_cover_radius_verifier.gd",
+      "success_marker": "GM01_FRONTIER_COVER_RADIUS_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "cover_cache_neighbor",
+      "script": "res://scripts/tests/gm01_frontier_cover_score_cache_verifier.gd",
+      "success_marker": "GM01_FRONTIER_COVER_SCORE_CACHE_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "terrain_registry_neighbor",
+      "script": "res://scripts/tests/task_409_terrain_registry_lookup_hpa_audit.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "security_batch",
+      "script": "res://scripts/tests/playtest_20261105_security_visual_batch_verifier.gd",
+      "success_marker": "PLAYTEST_SECURITY_VISUAL_BATCH_ALL_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "hud",
+      "script": "res://scripts/tests/playtest_20261105_mission_hud_groups_verifier.gd",
+      "success_marker": "MISSION_HUD_GROUPS:",
+      "timeout": 150
+    },
+    {
+      "name": "task_112_verifier",
+      "script": "res://scripts/tests/task_112_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_479_fireteam_runtime_hotpath_guards",
+      "script": "res://scripts/tests/task_479_fireteam_runtime_hotpath_guards.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_471_fireteam_weapon_fire_vfx_hit_feedback_perf",
+      "script": "res://scripts/tests/task_471_fireteam_weapon_fire_vfx_hit_feedback_perf.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_474_fireteam_down_vfx_performance_stabilization",
+      "script": "res://scripts/tests/task_474_fireteam_down_vfx_performance_stabilization.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_403_runtime_animation_combat_cases",
+      "script": "res://scripts/tests/task_403_runtime_animation_combat_cases.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "hex_render",
+      "script": "res://scripts/tests/frontier_hex_render_verifier.gd",
+      "success_marker": "FRONTIER_HEX_RENDER",
+      "timeout": 180
+    },
+    {
+      "name": "enet_socket",
+      "script": "res://scripts/tests/bugfix_multiplayer_enet_connectivity_smoke.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 45
+    },
+    {
+      "name": "lobby_map_consent",
+      "script": "res://scripts/tests/review7_lobby_map_consent_verifier.gd",
+      "success_marker": "REVIEW7_LOBBY_MAP_ALL_PASSED",
+      "timeout": 90
+    },
+    {
+      "name": "session_map_consent",
+      "script": "res://scripts/tests/review7_session_map_start_consent_verifier.gd",
+      "success_marker": "REVIEW7_SESSION_MAP_ALL_PASSED",
+      "timeout": 60
+    },
+    {
+      "name": "versus_assignment",
+      "script": "res://scripts/tests/review7_session_versus_assignment_verifier.gd",
+      "success_marker": "REVIEW7_SESSION_VERSUS_ALL_PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "rejoin_after_mission",
+      "script": "res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd",
+      "success_marker": "REVIEW7_SESSION_REJOIN_ALL_PASSED",
+      "timeout": 90
+    },
+    {
+      "name": "private_roster_boundary",
+      "script": "res://scripts/tests/task_240_multiplayer_player_roster_ownership_contract.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "real_rpc_ownership",
+      "script": "res://scripts/tests/task_1083_two_instance_roe_ownership_playtest.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 90
+    },
+    {
+      "name": "hud_multiplayer_lifecycle",
+      "script": "res://scripts/tests/playtest_20261105_multiplayer_hud_lifecycle_verifier.gd",
+      "success_marker": "REVIEW7_LOBBY_MAP_ALL_PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "map_transfer_neighbor",
+      "script": "res://scripts/tests/task_228_multiplayer_editor_map_manifest_download_consent.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "empty_token",
+      "script": "res://scripts/tests/playtest_20261105_empty_token_commit_verifier.gd",
+      "success_marker": "PLAYTEST_EMPTY_TOKEN_COMMIT_DONE",
+      "timeout": 120
+    },
+    {
+      "name": "movement_lifecycle_neighbor",
+      "script": "res://scripts/tests/task_501_integrated_movement_command_lifecycle_hardening.gd",
+      "success_marker": "TASK_501: ALL PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "portrait_consumers_return",
+      "script": "res://scripts/tests/playtest_20261105_portrait_consumers_and_return_verifier.gd",
+      "success_marker": "PORTRAIT_CONSUMERS_RETURN:",
+      "timeout": 180
+    },
+    {
+      "name": "gm01_multiplayer_manifest",
+      "script": "res://scripts/tests/playtest_20261105_multiplayer_gm01_manifest_verifier.gd",
+      "success_marker": "GM01_MULTIPLAYER_MANIFEST:",
+      "timeout": 180
+    },
+    {
+      "name": "disconnect_restart",
+      "script": "res://scripts/tests/playtest_20261105_multiplayer_disconnect_owner_verifier.gd",
+      "success_marker": "MULTIPLAYER_DISCONNECT_OWNER:",
+      "timeout": 180
+    }
+  ]
+}

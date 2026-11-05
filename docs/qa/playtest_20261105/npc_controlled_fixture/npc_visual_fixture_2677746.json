@@ -1,0 +1,336 @@
+{
+	"base_failed": 0,
+	"base_passed": 23,
+	"base_verifier": "playtest_20261105_npc_combat_feedback_verifier.gd",
+	"capture_checks": [
+		{
+			"message": "Actual native fullscreen window",
+			"passed": true
+		},
+		{
+			"message": "Physical window covers active display",
+			"passed": true
+		},
+		{
+			"message": "Actual 1x fixture time",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 01_healthy",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 02_wounded",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 03_down",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 04_healed",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 05_down_again",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 06_bleedout",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 07_respawning",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 08_respawned",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 09_synthetic_shot_early",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 10_synthetic_shot_120ms",
+			"passed": true
+		},
+		{
+			"message": "Native PNG saved: 11_synthetic_shot_expired",
+			"passed": true
+		},
+		{
+			"message": "Second readback is at least 120ms after event birth",
+			"passed": true
+		},
+		{
+			"message": "Expired native frame has no surviving synthetic shot pulse",
+			"passed": true
+		},
+		{
+			"message": "Every original owner health transition has a native image",
+			"passed": true
+		},
+		{
+			"message": "Synthetic shot captured early, at 120ms and after expiry",
+			"passed": true
+		},
+		{
+			"message": "All 23 original feedback assertions remain executed",
+			"passed": true
+		}
+	],
+	"capture_failed": 0,
+	"capture_passed": 19,
+	"captures": [
+		{
+			"actual_position": "(160.0, 160.0)",
+			"camera": {
+				"focus": "(3.75, 1.25)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"health": 100,
+			"id": "01_healthy",
+			"image_size": "(3440, 1440)",
+			"model_instance_id": 105008597077,
+			"model_rotation_degrees": "(0.0, 270.0, 0.0)",
+			"model_visible": true,
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/01_healthy.png",
+			"state_icon_visible": false,
+			"unit_id": "feedback_enemy",
+			"unit_instance_id": 103666419762,
+			"vital_state": "fit",
+			"wall_msec": 3076,
+			"weapon_instance_id": 113581754586
+		},
+		{
+			"actual_position": "(160.0, 160.0)",
+			"camera": {
+				"focus": "(3.75, 1.25)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"health": 70,
+			"id": "02_wounded",
+			"image_size": "(3440, 1440)",
+			"model_instance_id": 105008597077,
+			"model_rotation_degrees": "(0.0, 270.0, 0.0)",
+			"model_visible": true,
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/02_wounded.png",
+			"state_icon_visible": true,
+			"unit_id": "feedback_enemy",
+			"unit_instance_id": 103666419762,
+			"vital_state": "fit",
+			"wall_msec": 3179,
+			"weapon_instance_id": 113581754586
+		},
+		{
+			"actual_position": "(160.0, 160.0)",
+			"camera": {
+				"focus": "(3.75, 1.25)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"health": 0,
+			"id": "03_down",
+			"image_size": "(3440, 1440)",
+			"model_instance_id": 105008597077,
+			"model_rotation_degrees": "(72.0, 270.0, 18.0)",
+			"model_visible": true,
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/03_down.png",
+			"state_icon_visible": true,
+			"unit_id": "feedback_enemy",
+			"unit_instance_id": 103666419762,
+			"vital_state": "down",
+			"wall_msec": 3266,
+			"weapon_instance_id": 113581754586
+		},
+		{
+			"actual_position": "(160.0, 160.0)",
+			"camera": {
+				"focus": "(3.75, 1.25)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"health": 50,
+			"id": "04_healed",
+			"image_size": "(3440, 1440)",
+			"model_instance_id": 105008597077,
+			"model_rotation_degrees": "(0.0, 270.0, 0.0)",
+			"model_visible": true,
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/04_healed.png",
+			"state_icon_visible": true,
+			"unit_id": "feedback_enemy",
+			"unit_instance_id": 103666419762,
+			"vital_state": "fit",
+			"wall_msec": 3368,
+			"weapon_instance_id": 113581754586
+		},
+		{
+			"actual_position": "(160.0, 160.0)",
+			"camera": {
+				"focus": "(3.75, 1.25)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"health": 0,
+			"id": "05_down_again",
+			"image_size": "(3440, 1440)",
+			"model_instance_id": 105008597077,
+			"model_rotation_degrees": "(72.0, 270.0, 18.0)",
+			"model_visible": true,
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/05_down_again.png",
+			"state_icon_visible": true,
+			"unit_id": "feedback_enemy",
+			"unit_instance_id": 103666419762,
+			"vital_state": "down",
+			"wall_msec": 3453,
+			"weapon_instance_id": 113581754586
+		},
+		{
+			"actual_position": "(160.0, 160.0)",
+			"camera": {
+				"focus": "(3.75, 1.25)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"health": 0,
+			"id": "06_bleedout",
+			"image_size": "(3440, 1440)",
+			"model_instance_id": 105008597077,
+			"model_rotation_degrees": "(85.99999, 270.0, 28.0)",
+			"model_visible": true,
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/06_bleedout.png",
+			"state_icon_visible": true,
+			"unit_id": "feedback_enemy",
+			"unit_instance_id": 103666419762,
+			"vital_state": "bleedout",
+			"wall_msec": 3540,
+			"weapon_instance_id": 113581754586
+		},
+		{
+			"actual_position": "(160.0, 160.0)",
+			"camera": {
+				"focus": "(3.75, 1.25)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"health": 0,
+			"id": "07_respawning",
+			"image_size": "(3440, 1440)",
+			"model_instance_id": 105008597077,
+			"model_rotation_degrees": "(85.99999, 270.0, 28.0)",
+			"model_visible": true,
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/07_respawning.png",
+			"state_icon_visible": true,
+			"unit_id": "feedback_enemy",
+			"unit_instance_id": 103666419762,
+			"vital_state": "respawning",
+			"wall_msec": 3626,
+			"weapon_instance_id": 113581754586
+		},
+		{
+			"actual_position": "(160.0, 160.0)",
+			"camera": {
+				"focus": "(3.75, 1.25)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"health": 100,
+			"id": "08_respawned",
+			"image_size": "(3440, 1440)",
+			"model_instance_id": 105008597077,
+			"model_rotation_degrees": "(0.0, 270.0, 0.0)",
+			"model_visible": true,
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/08_respawned.png",
+			"state_icon_visible": false,
+			"unit_id": "feedback_enemy",
+			"unit_instance_id": 103666419762,
+			"vital_state": "fit",
+			"wall_msec": 3714,
+			"weapon_instance_id": 113581754586
+		},
+		{
+			"actual_age_msec": 28,
+			"camera": {
+				"focus": "(3.25, 0.75)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"event_id": "feedback_fire_once",
+			"flash_visible": true,
+			"id": "09_synthetic_shot_early",
+			"image_size": "(3440, 1440)",
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/09_synthetic_shot_early.png",
+			"pulse_visible": true,
+			"shot_icon_visible": true,
+			"synthetic_event": true,
+			"target_age_msec": 0
+		},
+		{
+			"actual_age_msec": 121,
+			"camera": {
+				"focus": "(3.25, 0.75)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"event_id": "feedback_fire_once",
+			"flash_visible": true,
+			"id": "10_synthetic_shot_120ms",
+			"image_size": "(3440, 1440)",
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/10_synthetic_shot_120ms.png",
+			"pulse_visible": true,
+			"shot_icon_visible": true,
+			"synthetic_event": true,
+			"target_age_msec": 120
+		},
+		{
+			"actual_age_msec": 984,
+			"camera": {
+				"focus": "(3.25, 0.75)",
+				"pitch": 34.0,
+				"size": 4.8,
+				"yaw": 45.0
+			},
+			"event_id": "feedback_fire_once",
+			"flash_visible": false,
+			"id": "11_synthetic_shot_expired",
+			"image_size": "(3440, 1440)",
+			"path": "C:/dev/SternenBuergerchen/.godot/review2_isolation/45af4110406449f0838a7b966c03fa7c/project/output/playtest_20261105/npc_visual_fixture_2677746_captures/11_synthetic_shot_expired.png",
+			"pulse_visible": false,
+			"shot_icon_visible": false,
+			"synthetic_event": true,
+			"target_age_msec": 900
+		}
+	],
+	"display": {
+		"display_server": "Windows",
+		"logical_viewport_size": "(3440.0, 1440.0)",
+		"mode": 3,
+		"renderer": "forward_plus",
+		"screen_size": "(3440, 1440)",
+		"time_scale": 1.0,
+		"window_size": "(3440, 1440)"
+	},
+	"product_changes_for_fixture": false,
+	"scope": "CONTROLLED VISUAL FIXTURE; synthetic weapon payload; NOT physical combat acceptance",
+	"state_owner_calls": [
+		"apply_damage",
+		"apply_heal",
+		"advance_bleedout",
+		"begin_respawn",
+		"respawn"
+	],
+	"user_data_dir": "C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-45af4110406449f0838a7b966c03fa7c"
+}

@@ -1,0 +1,17 @@
+{
+  "checked_at_utc": "2026-11-05T06:57:03.329963+00:00",
+  "static_check": "PORTRAIT_SOURCE_VERIFY_PASS",
+  "command": "python art/portraits_20261105/verify_portrait_sources.py",
+  "native_validation": "pending_root",
+  "roster_writes": false,
+  "git_actions": false,
+  "pins": {
+    "data/portrait_identity_catalog.json": "e2b0b6cdb22e81b85c95f6bb998c7ee81a149ce9c66888205791b0935d2c95cd",
+    "scripts/meta/portrait_identity_catalog.gd": "afb699d7d04d7b7873de1bde53acee4c70257635fa667984c289872545f36a44",
+    "scripts/tests/playtest_20261105_portrait_atlas_verifier.gd": "68b5e7679e27bd2ab64b5d0dc234b14d493dc68044f4eb644620b2263dd094ab",
+    "scripts/tests/task_233_portrait_identity_catalog_and_roster_presentation.gd": "64b62a5c755757fa993f21f6b054a131d9f05813f46203fd7e5c054723f22ea1",
+    "art/portraits_20261105/manifest.json": "9c39c5dca805427f1ba97da6b679f616a93e7f11ca1db37fe26094855c69cdf2",
+    "art/portraits_20261105/catalog_before_refresh.json": "113e7a86b313c04eb005459bc80a0b45508a78f455f63f00efa9e104a7890aa7",
+    "art/portraits_20261105/catalog_prepared.json": "e2b0b6cdb22e81b85c95f6bb998c7ee81a149ce9c66888205791b0935d2c95cd"
+  }
+}

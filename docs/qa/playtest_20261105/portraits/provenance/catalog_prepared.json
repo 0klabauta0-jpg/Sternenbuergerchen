@@ -1,0 +1,1188 @@
+{
+  "schema_version": 1,
+  "catalog_id": "portrait_identity_catalog_v1",
+  "source_root": "res://Assets/curated/portraits/frontier_20261105/",
+  "source_inventory": {
+    "scanned_png_count": 11,
+    "dimension_distribution": {
+      "1254x1254": 11
+    },
+    "large_png_count": 0,
+    "max_bytes": 2433975,
+    "atlas_region_count": 44,
+    "assigned_identity_count": 42,
+    "reserve_region_count": 2
+  },
+  "minimum_start_roster_candidates": 30,
+  "fallback_portrait_id": "char_portrait_001",
+  "ui_contract": {
+    "character_sheet_target_size": [
+      96,
+      120
+    ],
+    "roster_thumbnail_size": [
+      64,
+      64
+    ],
+    "compact_thumbnail_size": [
+      38,
+      38
+    ],
+    "stretch_mode": "keep_aspect_cover_or_centered",
+    "load_policy": "res_atlas_texture_exact_quadrant_scaled_by_texture_rect"
+  },
+  "entries": [
+    {
+      "id": "char_portrait_001",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_001.tres",
+      "file_name": "char_portrait_001.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "leader",
+        "medic",
+        "cybernetic"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Düsterer kybernetischer Arzt im Porträt.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "sheet_sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_002",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_002.tres",
+      "file_name": "char_portrait_002.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "medic"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Futuristischer Medizin-Soldat im Pixel-Stil.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "sheet_sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_003",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_003.tres",
+      "file_name": "char_portrait_003.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "engineer"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_22_42.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "sheet_sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_004",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_004.tres",
+      "file_name": "char_portrait_004.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 306,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "pilot"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_30_03.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_a.png",
+      "sheet_sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_005",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_005.tres",
+      "file_name": "char_portrait_005.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "heavy_support"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_31_30.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+      "sheet_sha256": "f42eb6ba4069f0c683d2f175c2aa0450b98cd9adc4f70124dcf6f9616ff8d8cc",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_006",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_006.tres",
+      "file_name": "char_portrait_006.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "leader"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_41_44.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+      "sheet_sha256": "f42eb6ba4069f0c683d2f175c2aa0450b98cd9adc4f70124dcf6f9616ff8d8cc",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_007",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_007.tres",
+      "file_name": "char_portrait_007.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "shooter"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_34_25.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+      "sheet_sha256": "f42eb6ba4069f0c683d2f175c2aa0450b98cd9adc4f70124dcf6f9616ff8d8cc",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_008",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_008.tres",
+      "file_name": "char_portrait_008.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 306,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "leader"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_37_07.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_b.png",
+      "sheet_sha256": "f42eb6ba4069f0c683d2f175c2aa0450b98cd9adc4f70124dcf6f9616ff8d8cc",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_009",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_009.tres",
+      "file_name": "char_portrait_009.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "medic",
+        "cybernetic"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_41_47.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+      "sheet_sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_010",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_010.tres",
+      "file_name": "char_portrait_010.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "engineer"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_42_41.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+      "sheet_sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_011",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_011.tres",
+      "file_name": "char_portrait_011.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "pilot"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_43_50.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+      "sheet_sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_012",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_012.tres",
+      "file_name": "char_portrait_012.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 306,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "heavy_support"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_46_53.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+      "sheet_sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_013",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_013.tres",
+      "file_name": "char_portrait_013.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "scout_sniper"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_49_28.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+      "sheet_sha256": "40e55b5c332dc1e18f50f355a224af20ae527c56eaed653667643df0560be9ef",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_014",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_014.tres",
+      "file_name": "char_portrait_014.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "shooter"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 22_54_19.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+      "sheet_sha256": "40e55b5c332dc1e18f50f355a224af20ae527c56eaed653667643df0560be9ef",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_015",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_015.tres",
+      "file_name": "char_portrait_015.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "leader"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_15_16.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+      "sheet_sha256": "40e55b5c332dc1e18f50f355a224af20ae527c56eaed653667643df0560be9ef",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_016",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_016.tres",
+      "file_name": "char_portrait_016.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 306,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "medic"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_24_54.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_d.png",
+      "sheet_sha256": "40e55b5c332dc1e18f50f355a224af20ae527c56eaed653667643df0560be9ef",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_017",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_017.tres",
+      "file_name": "char_portrait_017.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "engineer"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_26_33.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+      "sheet_sha256": "456714d746a4422d859617130e91378f78a4b2b8835eff053f44e559a2f1a1a2",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_018",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_018.tres",
+      "file_name": "char_portrait_018.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "pilot"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_28_24.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+      "sheet_sha256": "456714d746a4422d859617130e91378f78a4b2b8835eff053f44e559a2f1a1a2",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_019",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_019.tres",
+      "file_name": "char_portrait_019.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "heavy_support"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_28_35.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+      "sheet_sha256": "456714d746a4422d859617130e91378f78a4b2b8835eff053f44e559a2f1a1a2",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_020",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_020.tres",
+      "file_name": "char_portrait_020.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 306,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "scout_sniper"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_29_21.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_e.png",
+      "sheet_sha256": "456714d746a4422d859617130e91378f78a4b2b8835eff053f44e559a2f1a1a2",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_021",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_021.tres",
+      "file_name": "char_portrait_021.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "shooter"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_30_31.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+      "sheet_sha256": "d508d4f16c9fd7f2bfeb88f5b52cfaa0c3e078b2957b9ca8ee1c2eeb6eb88528",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_022",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_022.tres",
+      "file_name": "char_portrait_022.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "leader"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_32_20.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+      "sheet_sha256": "d508d4f16c9fd7f2bfeb88f5b52cfaa0c3e078b2957b9ca8ee1c2eeb6eb88528",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_023",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_023.tres",
+      "file_name": "char_portrait_023.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "medic"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_32_46.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+      "sheet_sha256": "d508d4f16c9fd7f2bfeb88f5b52cfaa0c3e078b2957b9ca8ee1c2eeb6eb88528",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_024",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_024.tres",
+      "file_name": "char_portrait_024.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 306,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "engineer"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_33_31.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_f.png",
+      "sheet_sha256": "d508d4f16c9fd7f2bfeb88f5b52cfaa0c3e078b2957b9ca8ee1c2eeb6eb88528",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_025",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_025.tres",
+      "file_name": "char_portrait_025.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "pilot"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_34_27.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+      "sheet_sha256": "d0e841e58b9d4bcd4de7b3bd82529d8228cd1c24734837714850b50949dcaae6",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_026",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_026.tres",
+      "file_name": "char_portrait_026.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "heavy_support"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_36_59.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+      "sheet_sha256": "d0e841e58b9d4bcd4de7b3bd82529d8228cd1c24734837714850b50949dcaae6",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_027",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_027.tres",
+      "file_name": "char_portrait_027.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "scout_sniper"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_37_39.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+      "sheet_sha256": "d0e841e58b9d4bcd4de7b3bd82529d8228cd1c24734837714850b50949dcaae6",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_028",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_028.tres",
+      "file_name": "char_portrait_028.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 306,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "shooter"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_38_10.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_g.png",
+      "sheet_sha256": "d0e841e58b9d4bcd4de7b3bd82529d8228cd1c24734837714850b50949dcaae6",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_029",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_029.tres",
+      "file_name": "char_portrait_029.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "leader"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_39_22.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+      "sheet_sha256": "458476b88968eda4499f84bbe84526777e01284f9b99f0e45c16688265ef59a7",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_030",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_030.tres",
+      "file_name": "char_portrait_030.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "medic"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/Use AI Image Apr 5, 2026, 23_39_46.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+      "sheet_sha256": "458476b88968eda4499f84bbe84526777e01284f9b99f0e45c16688265ef59a7",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_031",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_031.tres",
+      "file_name": "char_portrait_031.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "leader"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_27_17.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+      "sheet_sha256": "458476b88968eda4499f84bbe84526777e01284f9b99f0e45c16688265ef59a7",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_032",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_032.tres",
+      "file_name": "char_portrait_032.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 306,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "medic"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_29_51.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_h.png",
+      "sheet_sha256": "458476b88968eda4499f84bbe84526777e01284f9b99f0e45c16688265ef59a7",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_033",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_033.tres",
+      "file_name": "char_portrait_033.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "engineer"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_31_45.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+      "sheet_sha256": "2130ab04c5edbfc4d593834708562160856f01d23b73478fbef6bb4b118f2a16",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_034",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_034.tres",
+      "file_name": "char_portrait_034.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "pilot"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_33_34.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+      "sheet_sha256": "2130ab04c5edbfc4d593834708562160856f01d23b73478fbef6bb4b118f2a16",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_035",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_035.tres",
+      "file_name": "char_portrait_035.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "heavy_support"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_35_32.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+      "sheet_sha256": "2130ab04c5edbfc4d593834708562160856f01d23b73478fbef6bb4b118f2a16",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_036",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_036.tres",
+      "file_name": "char_portrait_036.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 306,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "scout_sniper"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_37_50.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_i.png",
+      "sheet_sha256": "2130ab04c5edbfc4d593834708562160856f01d23b73478fbef6bb4b118f2a16",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_037",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_037.tres",
+      "file_name": "char_portrait_037.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "shooter"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_41_25.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+      "sheet_sha256": "767b66fd59ba3e7e7aec37e4f6b7ba5b4dad2e5f9e0f2640c7e6d84bce6fade7",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_038",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_038.tres",
+      "file_name": "char_portrait_038.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "leader"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_42_49.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+      "sheet_sha256": "767b66fd59ba3e7e7aec37e4f6b7ba5b4dad2e5f9e0f2640c7e6d84bce6fade7",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_039",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_039.tres",
+      "file_name": "char_portrait_039.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "medic"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_51_43.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+      "sheet_sha256": "767b66fd59ba3e7e7aec37e4f6b7ba5b4dad2e5f9e0f2640c7e6d84bce6fade7",
+      "region": [
+        0,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_040",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_040.tres",
+      "file_name": "char_portrait_040.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 306,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "engineer"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 23_08_28.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_j.png",
+      "sheet_sha256": "767b66fd59ba3e7e7aec37e4f6b7ba5b4dad2e5f9e0f2640c7e6d84bce6fade7",
+      "region": [
+        627,
+        627,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_041",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_041.tres",
+      "file_name": "char_portrait_041.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 302,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "pilot"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 23_11_37.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_k.png",
+      "sheet_sha256": "f8f48a23f13b1995b0c76628522dec1c674f5010e5b2e98d27a95031dd8c2921",
+      "region": [
+        0,
+        0,
+        627,
+        627
+      ]
+    },
+    {
+      "id": "char_portrait_042",
+      "path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_042.tres",
+      "file_name": "char_portrait_042.tres",
+      "width": 627,
+      "height": 627,
+      "bytes": 304,
+      "candidate": true,
+      "duplicate_group": "",
+      "tags": [
+        "heavy_support"
+      ],
+      "diagnostics": [
+        "shared_source_atlas_exact_quadrant_use_scaled_texture_rect"
+      ],
+      "legacy_paths": [
+        "res://Assets/Char/ChatGPT Image 12. Mai 2026, 23_13_45.png"
+      ],
+      "sheet_path": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_k.png",
+      "sheet_sha256": "f8f48a23f13b1995b0c76628522dec1c674f5010e5b2e98d27a95031dd8c2921",
+      "region": [
+        627,
+        0,
+        627,
+        627
+      ]
+    }
+  ],
+  "art_revision": "frontier_20261105",
+  "provenance_manifest": "res://art/portraits_20261105/manifest.json",
+  "legacy_source_inventory": {
+    "scanned_png_count": 99,
+    "dimension_distribution": {
+      "1024x1024": 9,
+      "1184x864": 67,
+      "1200x896": 1,
+      "1254x1254": 7,
+      "1122x1402": 7,
+      "1920x1920": 8
+    },
+    "large_png_count": 8,
+    "max_bytes": 6307311
+  }
+}

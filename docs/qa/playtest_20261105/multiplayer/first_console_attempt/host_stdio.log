@@ -1,0 +1,18 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-20261105T075417Z-eb85b70a-host
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+[DBG][@279][#1][_][netfox::NetworkTimeSynchronizer] Requested initial timestamp @ 1793865276.5430s raw time
+[DBG][@280][#1][_][netfox::NetworkTime] Peer #666509776 is now on time!
+[DBG][@280][#1][_][netfox::NetworkTickrateHandshake] Received tickrate 30 from peer 666509776
+[DBG][@280][#1][_][netfox::NetworkTime] Game stalled for 4.3960s, assuming it was a pause
+[DBG][@968][#1][_][netfox::NetworkTime] Game stalled for 2.6540s, assuming it was a pause
+[DBG][@1195][#1][_][netfox::NetworkTime] Game stalled for 1.0410s, assuming it was a pause
+[DBG][@1227][#1][_][netfox::NetworkTime] Game stalled for 2.5850s, assuming it was a pause
+[DBG][@1304][#1][_][netfox::NetworkTime] Game stalled for 1.0080s, assuming it was a pause
+[DBG][@1335][#1][_][netfox::NetworkTime] Game stalled for 1.0660s, assuming it was a pause
+[DBG][@1367][#1][_][netfox::NetworkTime] Game stalled for 1.0340s, assuming it was a pause
+[DBG][@1398][#1][_][netfox::NetworkTime] Game stalled for 2.1830s, assuming it was a pause
+[DBG][@1479][#1][_][netfox::NetworkTime] Game stalled for 1.4660s, assuming it was a pause
+[DBG][@1571][#1][_][netfox::NetworkTime] Game stalled for 1.1810s, assuming it was a pause

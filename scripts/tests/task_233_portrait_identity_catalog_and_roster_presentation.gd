@@ -40,9 +40,14 @@ func _test_inventory_doc_and_json() -> void:
 	_assert(int(catalog.get("schema_version", 0)) == 1, "Portrait catalog schema is v1")
 	_assert(String(catalog.get("catalog_id", "")) == "portrait_identity_catalog_v1", "Portrait catalog has stable catalog id")
 	var source_png_count: int = _count_char_pngs()
-	_assert(int(Dictionary(catalog.get("source_inventory", {})).get("scanned_png_count", 0)) == source_png_count, "Inventory records all source PNGs under Assets/Char")
+	_assert(int(Dictionary(catalog.get("legacy_source_inventory", {})).get("scanned_png_count", 0)) == source_png_count, "Legacy inventory still records all original PNGs under Assets/Char")
 	_assert(doc.contains("PNG-Dateien gesamt: %d" % source_png_count), "Inventory doc records total PNG count")
 	_assert(doc.contains("96x120") and doc.contains("64x64") and doc.contains("38x38"), "Inventory doc documents fixed UI target sizes")
+	var active_count: int = _count_pngs("res://Assets/curated/portraits/frontier_20261105/sheets")
+	_assert(active_count == 11, "Active source directory has all eleven portrait sheets")
+	_assert(int(Dictionary(catalog.get("source_inventory", {})).get("scanned_png_count", 0)) == active_count, "Active inventory records actual portrait sheet count")
+	_assert(doc.contains("Aktive Viererboegen: %d" % active_count), "Inventory doc records the current atlas count")
+	_assert(String(catalog.get("source_root", "")) == "res://Assets/curated/portraits/frontier_20261105/", "Active catalog uses the curated project-local portrait package")
 
 
 func _test_catalog_helper_validation_and_loadability() -> void:
@@ -51,7 +56,7 @@ func _test_catalog_helper_validation_and_loadability() -> void:
 	_assert(int(validation.get("entry_count", 0)) >= 30, "Portrait catalog contains at least 30 entries")
 	_assert(int(validation.get("candidate_count", 0)) >= 30, "Portrait catalog contains at least 30 start-roster candidates")
 	_assert(int(validation.get("loadable_count", 0)) >= 30, "Portrait catalog contains at least 30 loadable portraits")
-	_assert(int(validation.get("large_source_count", 0)) > 0, "Large source PNGs are diagnosed")
+	_assert(int(validation.get("large_source_count", 0)) > 0, "Shared source atlas handling is diagnosed")
 	var loaded: Dictionary = Dictionary(PORTRAIT_CATALOG_SCRIPT.call("load_catalog"))
 	var seen_ids: Dictionary = {}
 	for entry_variant in Array(loaded.get("entries", [])):
@@ -61,7 +66,7 @@ func _test_catalog_helper_validation_and_loadability() -> void:
 		_assert(not id.is_empty(), "Portrait entry has stable id")
 		_assert(not seen_ids.has(id), "Portrait id is unique: %s" % id)
 		seen_ids[id] = true
-		_assert(path.begins_with("res://Assets/Char/"), "Portrait path uses project res path: %s" % id)
+		_assert(path.begins_with(String(loaded.get("source_root", ""))), "Portrait path uses active curated project root: %s" % id)
 		_assert(not path.contains("C:/") and not path.contains("C:\\"), "Portrait path is not an absolute local path: %s" % id)
 		_assert(ResourceLoader.exists(path), "ResourceLoader sees portrait path: %s" % id)
 		_assert(ResourceLoader.load(path) != null, "ResourceLoader loads portrait texture: %s" % id)
@@ -101,7 +106,7 @@ func _test_start_roster_generator_uses_portrait_ids() -> void:
 		_assert(portrait_id.begins_with("char_portrait_"), "Generated unit has catalog portrait id")
 		_assert(not seen_portrait_ids.has(portrait_id), "Generated 30-unit roster does not repeat portrait id: %s" % portrait_id)
 		seen_portrait_ids[portrait_id] = true
-		_assert(portrait_path.begins_with("res://Assets/Char/"), "Generated unit portrait path stays under Assets/Char")
+		_assert(portrait_path.begins_with("res://Assets/curated/portraits/frontier_20261105/portraits/"), "Generated unit portrait path stays under active curated portrait root")
 		_assert(ResourceLoader.exists(portrait_path), "Generated unit portrait path is loadable")
 		var profile = META_UNIT_PROFILE_SCRIPT.new(unit)
 		_assert(String(profile.portrait_id) == portrait_id and String(profile.portrait_path) == portrait_path, "MetaUnitProfile preserves portrait id and path")
@@ -155,7 +160,11 @@ func _assignment_fingerprint(entries: Array) -> String:
 
 
 func _count_char_pngs() -> int:
-	var dir := DirAccess.open("res://Assets/Char")
+	return _count_pngs("res://Assets/Char")
+
+
+func _count_pngs(path: String) -> int:
+	var dir := DirAccess.open(path)
 	if dir == null:
 		return 0
 	var count: int = 0

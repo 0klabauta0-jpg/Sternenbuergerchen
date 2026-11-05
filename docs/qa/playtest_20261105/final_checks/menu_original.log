@@ -1,0 +1,13 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-697039a88598448383967acb6f0102ee
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Real main-menu API restores the user-selected original artwork
+PASS: Original provenance is distinguished from the newer native capture
+PASS: Original title artwork bytes are unchanged
+PASS: Active catalog pins the exact original image
+PASS: Original image remains loadable at its real dimensions
+PASS: Singleplayer retains the real authoritative Meta route
+PASS: Real Singleplayer callback/control remains
+MENU_RESTORE_RESULT 7 passed, 0 failed
+PLAYTEST_MENU_RESTORE_ALL_PASS

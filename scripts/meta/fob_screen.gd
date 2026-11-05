@@ -2,6 +2,7 @@ class_name FOBTestScreen
 extends Control
 
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
@@ -4815,7 +4816,6 @@ func _build_overlay_loadout_text(unit_id: String, profile) -> String:
 
 
 func _load_portrait_texture(portrait_path: String) -> Texture2D:
-	if portrait_path.is_empty():
+	if portrait_path.is_empty() or not ResourceLoader.exists(portrait_path):
 		return null
-	var resource: Resource = load(portrait_path)
-	return resource as Texture2D
+	return PORTRAIT_IDENTITY_CATALOG_SCRIPT.load_texture("", portrait_path)

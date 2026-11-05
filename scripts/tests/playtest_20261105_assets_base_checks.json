@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "homebase_operations_red",
+      "script": "res://scripts/tests/playtest_20261105_homebase_operations_verifier.gd",
+      "success_marker": "HOMEBASE_OPERATIONS_VERIFY_PASS",
+      "timeout": 120
+    },
+    {
+      "name": "cover_spatial",
+      "script": "res://scripts/tests/playtest_20261105_cover_query_spatial_verifier.gd",
+      "success_marker": "PLAYTEST_COVER_QUERY_SPATIAL_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "portrait_atlas",
+      "script": "res://scripts/tests/playtest_20261105_portrait_atlas_verifier.gd",
+      "success_marker": "PORTRAIT_ATLAS_VERIFY_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "portrait_legacy_contract",
+      "script": "res://scripts/tests/task_233_portrait_identity_catalog_and_roster_presentation.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 150
+    },
+    {
+      "name": "explorable_base",
+      "script": "res://scripts/tests/playtest_20261105_explorable_homebase_verifier.gd",
+      "success_marker": "EXPLORABLE_HOMEBASE:",
+      "timeout": 150
+    }
+  ]
+}

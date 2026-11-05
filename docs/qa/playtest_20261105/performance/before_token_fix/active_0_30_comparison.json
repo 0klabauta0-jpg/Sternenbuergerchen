@@ -1,0 +1,106 @@
+{
+  "before": {
+    "source": "output\\playtest_20261105\\baseline\\20261105T061938Z-341212ca\\before_performance.json",
+    "frames": 104,
+    "window_duration_sec": 29.90375,
+    "mean_ms": 287.5360576923077,
+    "fps": 3.4778246875391883,
+    "percentiles_ms": {
+      "50": 161.998,
+      "90": 1028.225,
+      "95": 1058.001,
+      "99": 1112.969
+    },
+    "max_ms": 1138.314,
+    "hitches": {
+      "33": 104,
+      "50": 104,
+      "100": 100,
+      "250": 16
+    },
+    "tick_count": 825,
+    "simulation_seconds": 13.75,
+    "simulation_per_wall": 0.45980855243907537,
+    "registered_units": [
+      11
+    ],
+    "pending_nav_max": 0,
+    "actions": [
+      {
+        "elapsed_usec": 12521263,
+        "go_accepted": true,
+        "move_accepted": true,
+        "target": "(-305.0, 568.0)"
+      },
+      {
+        "elapsed_usec": 24129008,
+        "go_accepted": true,
+        "move_accepted": true,
+        "target": "(-234.2563, 437.1281)"
+      }
+    ]
+  },
+  "after": {
+    "source": "output\\playtest_20261105\\native_homebase_performance\\20261105T073815Z-49ce2971\\native_homebase_performance.json",
+    "frames": 971,
+    "window_duration_sec": 29.998942,
+    "mean_ms": 30.89489392378991,
+    "fps": 32.367808171368175,
+    "percentiles_ms": {
+      "50": 28.444,
+      "90": 51.063,
+      "95": 64.717,
+      "99": 135.441
+    },
+    "max_ms": 297.676,
+    "hitches": {
+      "33": 379,
+      "50": 102,
+      "100": 21,
+      "250": 2
+    },
+    "tick_count": 1778,
+    "simulation_seconds": 29.633333333333333,
+    "simulation_per_wall": 0.9878126146359872,
+    "registered_units": [
+      11
+    ],
+    "pending_nav_max": 0,
+    "actions": [
+      {
+        "elapsed_usec": 12050269,
+        "go_accepted": true,
+        "go_usec": 95729,
+        "meta_presentation": {
+          "full_plan_apply_count": 0,
+          "homebase_dirty": true,
+          "read_only": true,
+          "snapshot_serialized": false,
+          "transport_delta_apply_count": 32,
+          "ui_sets_gameplay_truth": false,
+          "unchanged_plan_skip_count": 21
+        },
+        "move_accepted": true,
+        "move_usec": 107021,
+        "target": "(-305.0, 568.0)"
+      },
+      {
+        "elapsed_usec": 24012571,
+        "go_accepted": true,
+        "go_usec": 100583,
+        "meta_presentation": {
+          "full_plan_apply_count": 0,
+          "homebase_dirty": true,
+          "read_only": true,
+          "snapshot_serialized": false,
+          "transport_delta_apply_count": 36,
+          "ui_sets_gameplay_truth": false,
+          "unchanged_plan_skip_count": 25
+        },
+        "move_accepted": true,
+        "move_usec": 111499,
+        "target": "(-234.2563, 437.1281)"
+      }
+    ]
+  }
+}

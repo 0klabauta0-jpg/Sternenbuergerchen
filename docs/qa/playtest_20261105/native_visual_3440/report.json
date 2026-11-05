@@ -1,0 +1,60 @@
+{
+  "schema": "sternenbuergerchen.playtest_20261105.v1",
+  "checks": [
+    {
+      "name": "playtest_20261105_fullscreen_visual_capture",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\SB-Codex-Review2-01a8899126b346a5a671ada6e629cc0e\\SternenBuergerchen_UI_Zielbild_Normal_QA",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\01a8899126b346a5a671ada6e629cc0e\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\native_visual_3440\\20261105T075819Z-078ae826\\playtest_20261105_fullscreen_visual_capture.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\01a8899126b346a5a671ada6e629cc0e\\project",
+        "--fullscreen",
+        "--rendering-method",
+        "forward_plus",
+        "--rendering-driver",
+        "vulkan",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\01a8899126b346a5a671ada6e629cc0e\\project\\scripts\\tests\\playtest_20261105_fullscreen_visual_capture.gd",
+        "--",
+        "--evidence-output=C:/dev/SternenBuergerchen/output/playtest_20261105/native_visual_3440/20261105T075819Z-078ae826/visual.json",
+        "--startup-timeout-seconds=280",
+        "--ui-size=3440x1440",
+        "--shot-wait-seconds=20"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      }
+    }
+  ],
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

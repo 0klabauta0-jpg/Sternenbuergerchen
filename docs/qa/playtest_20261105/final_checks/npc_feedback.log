@@ -1,0 +1,28 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-6052fb8500ef4d529c21725df5643581
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+[PASS] Actual runtime enemy receives a 3D proxy
+[PASS] Actual animated character model is present before damage
+[PASS] Owner wound state displays a visible shape icon
+[PASS] Down retains the identical visible original model
+[PASS] Down retains the identical weapon attachment
+[PASS] Down visibly lays the existing model horizontally
+[PASS] Down hides the upright visual capsule beside the original figure
+[PASS] Down model bounds stay above the proxy ground plane
+[PASS] Down owner state displays a visible critical icon
+[PASS] Critical and wounded icons differ by shape, not only modulation
+[PASS] Owner healing restores the same model and its original transform
+[PASS] Bleedout keeps the same original lying model
+[PASS] Respawn countdown preserves lying identity without the capsule
+[PASS] Actual respawn restores the same model and its original transform
+[PASS] Actual respawn restores the normal readable body policy
+[PASS] No event produces no firing impulse
+[PASS] A real event creates a visible muzzle impulse
+[PASS] Event impulse includes a camera-facing flash card
+[PASS] The same event displays a readable shot symbol
+[PASS] Flash and shot symbol expire without another gameplay event
+[PASS] Rebuilding another order does not replay an old shot
+[PASS] Unknown combat does not leak a firing impulse through the existing FoW gate
+[PASS] A visible target does not expose a still unknown shooter's source icon
+=== NPC COMBAT FEEDBACK: 23 passed, 0 failed ===

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "description": "Targeted current local multiplayer preflight; existing scripts only, Root runs serially in fresh isolated user data.",
+  "checks": [
+    {"name": "enet_socket", "script": "res://scripts/tests/bugfix_multiplayer_enet_connectivity_smoke.gd", "success_marker": "=== RESULTS:", "timeout": 45},
+    {"name": "lobby_map_consent", "script": "res://scripts/tests/review7_lobby_map_consent_verifier.gd", "success_marker": "REVIEW7_LOBBY_MAP_ALL_PASSED", "timeout": 90},
+    {"name": "session_map_consent", "script": "res://scripts/tests/review7_session_map_start_consent_verifier.gd", "success_marker": "REVIEW7_SESSION_MAP_ALL_PASSED", "timeout": 60},
+    {"name": "versus_assignment", "script": "res://scripts/tests/review7_session_versus_assignment_verifier.gd", "success_marker": "REVIEW7_SESSION_VERSUS_ALL_PASSED", "timeout": 45},
+    {"name": "rejoin_after_mission", "script": "res://scripts/tests/review7_session_rejoin_after_completion_verifier.gd", "success_marker": "REVIEW7_SESSION_REJOIN_ALL_PASSED", "timeout": 90},
+    {"name": "private_roster_boundary", "script": "res://scripts/tests/task_240_multiplayer_player_roster_ownership_contract.gd", "success_marker": "ALL TESTS PASSED", "timeout": 45},
+    {"name": "real_rpc_ownership", "script": "res://scripts/tests/task_1083_two_instance_roe_ownership_playtest.gd", "success_marker": "=== RESULTS:", "timeout": 90}
+  ]
+}

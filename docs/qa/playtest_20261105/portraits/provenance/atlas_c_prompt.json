@@ -1,0 +1,21 @@
+{
+  "tool": "built-in image_gen",
+  "use_case": "style-transfer",
+  "sheet": "c",
+  "prompt": "Use case: style-transfer. Asset type: production game character portrait atlas for SternenBuergerchen. Input image 1 is STYLE AND LAYOUT REFERENCE ONLY. Create a NEW companion atlas with FOUR entirely NEW, mutually different adult people. Do not preserve or repeat any identity from the reference. Preserve the reference exact equal 2 by 2 grid layout, centered head-and-shoulders scale, mature illustrative painting technique, crisp readable eyes, warm human skin shading, cream and muted teal practical frontier space-work suits with restrained ochre details, and plain dark desaturated petrol backgrounds. Every quadrant is an independent square tile with the entire head and hair inside its quadrant and at least 7 percent top/side breathing room. Same head scale and soft studio lighting in all four quadrants. Shoulders end at each quadrant bottom. Modern cohesive illustrated tactical crew portrait art, gently stylized realistic adult proportions, confident painterly shapes and restrained brush texture. This is one square atlas containing exactly four people in four equal square quadrants, no gutters or grid lines. Replace ALL FOUR faces, hair and identifying features with the following explicit new subjects. No helmets, hands, foreground weapons, scenery, logos, writing, labels, numbers, frames, symbols or watermarks. No pixel art, anime, photorealism, plastic airbrush or ornamental clutter.\nUpper left: woman age 46, dark brown skin, shaved hair with a thin silver temple line, round face and wide-set eyes, tiny medical temple implant, medic collar.\nUpper right: man age 56, fair weathered skin, receding light brown hair, compact ginger-grey beard, square jaw, hazel eyes, engineering collar.\nLower left: woman age 31, South Asian features, warm medium brown skin, long straight black hair braided behind the shoulder, long oval face, dark brows, pilot collar.\nLower right: man age 38, East Asian features, broad jaw, close-cropped black hair, a small diagonal eyebrow scar, clean shaven, heavy support collar.\nAll four must be clearly distinguishable at small portrait scale; vary bone structure and facial silhouette, not only hair.",
+  "referenced_image_paths": [
+    "C:\\dev\\SternenBuergerchen\\Assets\\curated\\portraits\\frontier_20261105\\sheets\\crew_a.png"
+  ],
+  "project_sheet": "res://Assets/curated/portraits/frontier_20261105/sheets/crew_c.png",
+  "subjects": [
+    "woman age 46, dark brown skin, shaved hair with a thin silver temple line, round face and wide-set eyes, tiny medical temple implant, medic collar",
+    "man age 56, fair weathered skin, receding light brown hair, compact ginger-grey beard, square jaw, hazel eyes, engineering collar",
+    "woman age 31, South Asian features, warm medium brown skin, long straight black hair braided behind the shoulder, long oval face, dark brows, pilot collar",
+    "man age 38, East Asian features, broad jaw, close-cropped black hair, a small diagonal eyebrow scar, clean shaven, heavy support collar"
+  ],
+  "status": "project_png_opened_visual_review_complete_native_import_pending",
+  "generated_original": "C:\\Users\\bjoer\\.codex\\generated_images\\01a1aa6d-c7e9-7f61-8379-b2059625c9e1\\exec-2e4e9e51-1443-4d6c-8680-ef16957122be.png",
+  "sha256": "25b8bef849c6d1e5d5bf84902723de77302b1747ef2a4ebbde97b9ae6602200e",
+  "reference_sha256": "962f56cbba609e2520a07493f21b4d7c9d3f52fb15593baf535d23dedb66ed2e",
+  "visual_review": "Project PNG opened. Close-shaved medical woman with temple implant, receding bearded man, braided dark-haired woman and short-haired square-jawed man differ clearly. Four complete heads; palette matches A."
+}

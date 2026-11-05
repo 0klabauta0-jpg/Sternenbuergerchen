@@ -1,0 +1,1073 @@
+{
+	"active_mission": true,
+	"config": {
+		"address": "127.0.0.1",
+		"auto_ready": true,
+		"auto_start": true,
+		"drop_decision": true,
+		"enabled": true,
+		"first_contact": false,
+		"port": 64903,
+		"read_only_config": true,
+		"role": "host",
+		"schema": "sternenbuergerchen.release_multiplayer_deeplink.v1",
+		"task_id": "TASK_1147",
+		"trace_path": "C:\\dev\\SternenBuergerchen\\output\\playtest_20261105\\multiplayer_gui_pair\\20261105T082910Z-5362c154\\host_trace.json",
+		"ui_sets_gameplay_truth": false
+	},
+	"drop_decision": {
+		"command_feedback": {
+			"accepted": true,
+			"command_type": "move",
+			"compact_line": "MOVE BLUE HOST OK",
+			"fireteam_id": "blue",
+			"read_only": true,
+			"reason": "",
+			"status": "accepted",
+			"ui_sets_gameplay_truth": false
+		},
+		"craft_id": "dropship_blue",
+		"decision_accepted": true,
+		"decision_sent": true,
+		"deployed_unit_ids": [
+			"unit_alpha",
+			"unit_bravo",
+			"unit_charlie",
+			"unit_delta",
+			"unit_echo",
+			"unit_foxtrot",
+			"unit_golf",
+			"unit_hotel"
+		],
+		"drop_sent": true,
+		"embarked_unit_ids": [],
+		"fireteam_id": "blue",
+		"lz_sent": true,
+		"mission_drop_cards": [
+			{
+				"approach_angle": "NW",
+				"boarded_fireteam_ids": [
+					"blue"
+				],
+				"card_feedback_text": "DROP dropship_blue -> HOST",
+				"craft_id": "dropship_blue",
+				"display_name": "Dropship BLUE",
+				"drop_sequence_position": "(235.9473, 131.8783)",
+				"drop_ship_requested": false,
+				"drop_ship_staged": true,
+				"dropship_position": "(235.9473, 131.8783)",
+				"embarked_unit_ids": [],
+				"eta_seconds": 0,
+				"has_embarked_payload": true,
+				"has_lz_position": true,
+				"lz_label": "LZ1 Dropship BLUE",
+				"lz_name": "LZ1 Dropship BLUE",
+				"lz_position": "(384.0, 224.0)",
+				"passenger_count": 0,
+				"payload_source": "multiplayer_lobby",
+				"pilot_display_name": "",
+				"pilot_portrait_path": "",
+				"pilot_text": "",
+				"pilot_unit_id": "",
+				"progress": 0.843240831447795,
+				"queued_fireteam_ids": [],
+				"state": "outbound",
+				"status_line": "",
+				"texture_path": "",
+				"title_text": "#1 Dropship BLUE"
+			},
+			{
+				"approach_angle": "SE",
+				"boarded_fireteam_ids": [
+					"gold"
+				],
+				"card_feedback_text": "Trupp ab",
+				"craft_id": "dropship_gold",
+				"display_name": "Dropship GOLD",
+				"drop_sequence_position": "(8069.034, 4966.688)",
+				"drop_ship_requested": false,
+				"drop_ship_staged": true,
+				"dropship_position": "(8069.034, 4966.688)",
+				"embarked_unit_ids": [],
+				"eta_seconds": 0,
+				"has_embarked_payload": true,
+				"has_lz_position": true,
+				"lz_label": "LZ2 Dropship GOLD",
+				"lz_name": "LZ2 Dropship GOLD",
+				"lz_position": "(704.0, 384.0)",
+				"passenger_count": 0,
+				"payload_source": "multiplayer_lobby",
+				"pilot_display_name": "",
+				"pilot_portrait_path": "",
+				"pilot_text": "",
+				"pilot_unit_id": "",
+				"progress": 41.9479185281202,
+				"queued_fireteam_ids": [],
+				"state": "outbound",
+				"status_line": "",
+				"texture_path": "",
+				"title_text": "#2 Dropship GOLD"
+			}
+		],
+		"schema": "sternenbuergerchen.release_multiplayer_drop_decision.v1",
+		"stage": "first_decision_accepted",
+		"task_id": "TASK_1148",
+		"ui_sets_gameplay_truth": false
+	},
+	"first_contact": {
+		"advance_attempted": false,
+		"advance_sent": false,
+		"combat_tick_budget": {
+
+		},
+		"contact_approach_evidence": {
+
+		},
+		"contact_count": 0,
+		"contacts": [],
+		"diagnostics": {
+			"active_enemy_count": 1,
+			"active_friendly_count": 8,
+			"candidate": {
+				"attack_quality_label": "no_los",
+				"attacker_ready": true,
+				"attacker_unit_id": "unit_alpha",
+				"candidate_pair_scan_count": 1,
+				"candidate_reason": "no_los",
+				"combat_attackable": false,
+				"distance_world": 772.381225585938,
+				"los_state": "blocked",
+				"range_state": "in_range",
+				"target_receive_attack": true,
+				"target_unit_id": "enemy_delta",
+				"weapon_id": "rifle",
+				"weapon_range_world": 1788.85440826416
+			},
+			"combat_enemy_count": 1,
+			"combat_friendly_count": 8,
+			"contact_count": 0,
+			"cooldown_ticks_remaining": 0,
+			"current_tick": 852,
+			"detection_pending_count": 1,
+			"first_detection": {
+				"attacker_unit_id": "enemy_delta",
+				"key": "enemy_delta:unit_charlie",
+				"target_unit_id": "unit_charlie",
+				"ticks_remaining": 8
+			},
+			"last_contact_tracking_los_cache_hit_count": 0,
+			"last_contact_tracking_los_check_count": 8,
+			"last_contact_tracking_scan_pair_count": 8,
+			"next_attack_tick": 1,
+			"potential_combat_pair_count": 8,
+			"read_only": true,
+			"reason": "no_contact_pair",
+			"source": "MissionCombatLoopDriver",
+			"status": "blocked",
+			"tick": 852
+		},
+		"fire_event_count": 0,
+		"fire_event_ids": [],
+		"fire_events": [],
+		"fireteam_id": "blue",
+		"fireteam_position": {
+			"grid_position": "(6, 1)",
+			"has_grid": true,
+			"has_position": true,
+			"text": "G6,1",
+			"world_position": "(352.6859, 248.89)"
+		},
+		"fireteam_unit_positions": {
+			"unit_alpha": {
+				"command": {
+					"aim_readiness_percent": 30.0,
+					"attack_bonus": 0.0,
+					"command_token": "blue_2:1:move:0:r0:unit_alpha",
+					"command_type": "move_to_position",
+					"contact_initiative_seconds": 0.3,
+					"cover_score": 45.5,
+					"engagement_range_factor": 1.0,
+					"fire_rule": "",
+					"fire_status": "fire_at_will",
+					"move_speed_factor": 0.67460211,
+					"movement_posture": "travel",
+					"phase": 1,
+					"posture_policy_id": "move_stance",
+					"priority": 12,
+					"sight_range_factor": 0.8,
+					"source_command_type": "move",
+					"target_position": "(610.2975, 526.8513)",
+					"team_id": "team_alpha",
+					"team_target_support_percent": 0.0,
+					"unit_id": "unit_alpha",
+					"weapon_posture": "lowered"
+				},
+				"position": "(352.6859, 248.89)"
+			},
+			"unit_bravo": {
+				"command": {
+					"aim_readiness_percent": 30.0,
+					"attack_bonus": 0.0,
+					"command_token": "blue_2:1:move:0:r0:unit_bravo",
+					"command_type": "move_to_position",
+					"contact_initiative_seconds": 0.3,
+					"cover_score": 45.5,
+					"engagement_range_factor": 1.0,
+					"fire_rule": "",
+					"fire_status": "fire_at_will",
+					"move_speed_factor": 0.67460211,
+					"movement_posture": "travel",
+					"phase": 1,
+					"posture_policy_id": "move_stance",
+					"priority": 12,
+					"sight_range_factor": 0.8,
+					"source_command_type": "move",
+					"target_position": "(360.5744, 235.7128)",
+					"team_id": "team_alpha",
+					"team_target_support_percent": 0.0,
+					"unit_id": "unit_bravo",
+					"weapon_posture": "lowered"
+				},
+				"position": "(327.0665, 219.8176)"
+			},
+			"unit_delta": {
+				"command": {
+					"aim_readiness_percent": 30.0,
+					"attack_bonus": 0.0,
+					"command_token": "blue_2:1:move:0:r0:unit_delta",
+					"command_type": "move_to_position",
+					"contact_initiative_seconds": 0.3,
+					"cover_score": 45.5,
+					"engagement_range_factor": 1.0,
+					"fire_rule": "",
+					"fire_status": "fire_at_will",
+					"move_speed_factor": 0.67460211,
+					"movement_posture": "travel",
+					"phase": 1,
+					"posture_policy_id": "move_stance",
+					"priority": 12,
+					"sight_range_factor": 0.8,
+					"source_command_type": "move",
+					"target_position": "(306.1542, 214.2489)",
+					"team_id": "team_alpha",
+					"team_target_support_percent": 0.0,
+					"unit_id": "unit_delta",
+					"weapon_posture": "lowered"
+				},
+				"position": "(362.3244, 212.5455)"
+			},
+			"unit_golf": {
+				"command": {
+					"aim_readiness_percent": 30.0,
+					"attack_bonus": 0.0,
+					"command_token": "blue_2:1:move:0:r0:unit_golf",
+					"command_type": "move_to_position",
+					"contact_initiative_seconds": 0.3,
+					"cover_score": 45.5,
+					"engagement_range_factor": 1.0,
+					"fire_rule": "",
+					"fire_status": "fire_at_will",
+					"move_speed_factor": 0.67460211,
+					"movement_posture": "travel",
+					"phase": 1,
+					"posture_policy_id": "move_stance",
+					"priority": 12,
+					"sight_range_factor": 0.8,
+					"source_command_type": "move",
+					"target_position": "(251.7341, 192.7851)",
+					"team_id": "team_alpha",
+					"team_target_support_percent": 0.0,
+					"unit_id": "unit_golf",
+					"weapon_posture": "lowered"
+				},
+				"position": "(409.1242, 201.7219)"
+			},
+			"unit_hotel": {
+				"command": {
+					"aim_readiness_percent": 30.0,
+					"attack_bonus": 0.0,
+					"command_token": "blue_2:1:move:0:r0:unit_hotel",
+					"command_type": "move_to_position",
+					"contact_initiative_seconds": 0.3,
+					"cover_score": 45.5,
+					"engagement_range_factor": 1.0,
+					"fire_rule": "",
+					"fire_status": "fire_at_will",
+					"move_speed_factor": 0.67460211,
+					"movement_posture": "travel",
+					"phase": 1,
+					"posture_policy_id": "move_stance",
+					"priority": 12,
+					"sight_range_factor": 0.8,
+					"source_command_type": "move",
+					"target_position": "(145.1487, 183.4256)",
+					"team_id": "team_alpha",
+					"team_target_support_percent": 0.0,
+					"unit_id": "unit_hotel",
+					"weapon_posture": "lowered"
+				},
+				"position": "(316.8413, 256.9991)"
+			}
+		},
+		"initial_movement_observe_frames": 0,
+		"initial_movement_observed": false,
+		"local_avoidance_debug": {
+			"unit_alpha": {
+
+			},
+			"unit_bravo": {
+
+			},
+			"unit_delta": {
+
+			},
+			"unit_golf": {
+
+			},
+			"unit_hotel": {
+
+			}
+		},
+		"mission_hud_runtime_surface_guard": {
+			"command_matrix_apply_count": 4,
+			"command_matrix_skip_count": 79,
+			"craft_controls_apply_count": 44,
+			"craft_controls_skip_count": 39,
+			"creates_command": false,
+			"creates_damage_event": false,
+			"creates_fire_event": false,
+			"creates_movement": false,
+			"fireteam_card_group_apply_count": 63,
+			"fireteam_card_group_skip_count": 20,
+			"mini_cards_apply_count": 54,
+			"mini_cards_skip_count": 51,
+			"read_only": true,
+			"selected_cards_apply_count": 23,
+			"selected_cards_skip_count": 82,
+			"sets_multiplayer_truth": false,
+			"strategic_status_apply_count": 44,
+			"strategic_status_skip_count": 39,
+			"ui_sets_gameplay_truth": false
+		},
+		"mission_runtime_surface_timing": {
+
+		},
+		"mission_ui_refresh_timing": {
+
+		},
+		"mission_visible_frame_timing": {
+
+		},
+		"movement_distance_travelled": 0.0,
+		"movement_progress_ratio": 0.0,
+		"movement_remaining_distance": 0.0,
+		"movement_start_position": "(0.0, 0.0)",
+		"movement_state": {
+			"advance_style": "rush",
+			"bound_count": 1,
+			"bound_distance": 13.5711622238159,
+			"bound_index": 1,
+			"bound_origin_position": "(355.5951, 248.3375)",
+			"bound_target_position": "(360.5744, 235.7128)",
+			"command_revision": 0,
+			"command_type": "move",
+			"completed_stage_count": 0,
+			"contact_cover_assignment_count": 0,
+			"contact_cover_decision_active": false,
+			"contact_cover_decision_mode": "",
+			"contact_cover_decisions": [],
+			"contact_cover_fire_now_count": 0,
+			"contact_halt_active": false,
+			"contact_halt_context": {
+
+			},
+			"contact_halt_issued_count": 0,
+			"contact_halt_unit_ids": [],
+			"contact_stability": 0.64623,
+			"covering_unit_ids": [],
+			"current_anchor_origin_position": "(355.5951, 248.3375)",
+			"current_anchor_target_position": "(360.5744, 235.7128)",
+			"current_covering_unit_ids": [],
+			"current_moving_unit_ids": [
+				"unit_alpha",
+				"unit_bravo",
+				"unit_delta",
+				"unit_golf",
+				"unit_hotel"
+			],
+			"current_navigation_context_debug": [
+				{
+					"blocker_clearance_weight": 0.386,
+					"corridor_end": "(360.5744, 235.7128)",
+					"corridor_half_width_world": 157.95,
+					"corridor_start": "(355.5951, 248.3375)",
+					"corridor_weight": 0.62,
+					"cover_weight": 0.5775,
+					"lane_offset_world": -339.126953125,
+					"lane_weight": 0.88,
+					"source_command_type": "move",
+					"unit_id": "unit_alpha"
+				},
+				{
+					"blocker_clearance_weight": 0.386,
+					"corridor_end": "(360.5744, 235.7128)",
+					"corridor_half_width_world": 157.95,
+					"corridor_start": "(355.5951, 248.3375)",
+					"corridor_weight": 0.62,
+					"cover_weight": 0.5775,
+					"lane_offset_world": 0.0,
+					"lane_weight": 0.88,
+					"source_command_type": "move",
+					"unit_id": "unit_bravo"
+				},
+				{
+					"blocker_clearance_weight": 0.386,
+					"corridor_end": "(360.5744, 235.7128)",
+					"corridor_half_width_world": 157.95,
+					"corridor_start": "(355.5951, 248.3375)",
+					"corridor_weight": 0.62,
+					"cover_weight": 0.5775,
+					"lane_offset_world": 58.4999923706055,
+					"lane_weight": 0.88,
+					"source_command_type": "move",
+					"unit_id": "unit_delta"
+				},
+				{
+					"blocker_clearance_weight": 0.386,
+					"corridor_end": "(360.5744, 235.7128)",
+					"corridor_half_width_world": 157.95,
+					"corridor_start": "(355.5951, 248.3375)",
+					"corridor_weight": 0.62,
+					"cover_weight": 0.5775,
+					"lane_offset_world": 117.000015258789,
+					"lane_weight": 0.88,
+					"source_command_type": "move",
+					"unit_id": "unit_golf"
+				},
+				{
+					"blocker_clearance_weight": 0.386,
+					"corridor_end": "(360.5744, 235.7128)",
+					"corridor_half_width_world": 157.95,
+					"corridor_start": "(355.5951, 248.3375)",
+					"corridor_weight": 0.62,
+					"cover_weight": 0.5775,
+					"lane_offset_world": 219.585983276367,
+					"lane_weight": 0.88,
+					"source_command_type": "move",
+					"unit_id": "unit_hotel"
+				}
+			],
+			"current_target_positions": {
+				"unit_alpha": "(610.2975, 526.8513)",
+				"unit_bravo": "(360.5744, 235.7128)",
+				"unit_delta": "(306.1542, 214.2489)",
+				"unit_golf": "(251.7341, 192.7851)",
+				"unit_hotel": "(145.1487, 183.4256)"
+			},
+			"current_target_spacing_adjustment_count": 0,
+			"current_target_spacing_conflict_count": 0,
+			"current_target_spacing_debug": [],
+			"current_target_spacing_min_distance": 58.4999885559082,
+			"current_target_spacing_unresolved_count": 0,
+			"current_walkable_target_adjustment_count": 1,
+			"doctrine_style": "rush",
+			"effective_style": "rush",
+			"engage_doctrine": {
+
+			},
+			"execution_cohesion": 0.67787872,
+			"execution_fire_discipline": 0.56228,
+			"execution_hint": "No single execution risk dominates this order.",
+			"execution_label": "STEADY",
+			"execution_reason": "balanced_execution",
+			"final_target_position": "(360.5744, 235.7128)",
+			"fire_rule": "",
+			"fireteam_id": "blue",
+			"formation_leader_slot": "auto",
+			"formation_parallel_spacing_world": 117.0,
+			"formation_preset_key": "move:normal",
+			"formation_scatter_factor": 1.0,
+			"formation_slot_source": "fireteam_formation_tuning_2026-05-17T08-46-56-746Z_05",
+			"formation_slot_spacing_world": 117.0,
+			"group_count": 1,
+			"group_count_for_anchor": 1,
+			"group_cycle": [],
+			"group_index": 1,
+			"groups_issued_for_anchor": 1,
+			"initiative": 0.7189,
+			"leader_unit_id": "unit_alpha",
+			"local_avoidance_command_opt_in": true,
+			"map_readability": {
+				"advance_style": "rush",
+				"bound_count": 1,
+				"bound_distance": 13.5711622238159,
+				"bound_index": 1,
+				"bound_origin_position": "(355.5951, 248.3375)",
+				"bound_target_position": "(360.5744, 235.7128)",
+				"covering_unit_ids": [],
+				"group_count": 1,
+				"group_cycle": [],
+				"group_index": 1,
+				"movement_sequence": [
+					"unit_alpha",
+					"unit_bravo",
+					"unit_delta",
+					"unit_golf",
+					"unit_hotel"
+				],
+				"moving_unit_ids": [
+					"unit_alpha",
+					"unit_bravo",
+					"unit_delta",
+					"unit_golf",
+					"unit_hotel"
+				],
+				"multi_tile_bound": false,
+				"status_line": "RSH 1/1 | 5 move",
+				"style_code": "RSH"
+			},
+			"move_speed_multiplier": 1.012536,
+			"move_stance_sight_range_factor": 0.8,
+			"move_stance_speed_multiplier": 0.65,
+			"movement_sequence": [
+				"unit_alpha",
+				"unit_bravo",
+				"unit_delta",
+				"unit_golf",
+				"unit_hotel"
+			],
+			"moving_unit_ids": [
+				"unit_alpha",
+				"unit_bravo",
+				"unit_delta",
+				"unit_golf",
+				"unit_hotel"
+			],
+			"multi_tile_bound": false,
+			"order_fidelity": 0.6634538,
+			"order_target_offset": "(0.0, 0.0)",
+			"origin_anchor_position": "(355.5951, 248.3375)",
+			"phase": 1,
+			"progress_anchor_position": "(360.5744, 235.7128)",
+			"raw_style": "rush",
+			"reaction_delay_seconds": 0.248507323904,
+			"readability_status_line": "RSH 1/1 | 5 move",
+			"requested_target_position": "(360.5744, 235.7128)",
+			"simplified_due_to_losses": false,
+			"stage_index": 0,
+			"style_code": "RSH",
+			"tactical_stance": "normal",
+			"take_doctrine": {
+
+			}
+		},
+		"movement_wall_time_msec": 0,
+		"perspective": {
+
+		},
+		"physics_fps": 2.0,
+		"read_only": true,
+		"recent_movement_trace": {
+			"advance_style": "rush",
+			"bound_count": 1,
+			"bound_distance": 13.5711622238159,
+			"bound_index": 1,
+			"bound_origin_position": "(355.5951, 248.3375)",
+			"bound_target_position": "(360.5744, 235.7128)",
+			"command_revision": 0,
+			"command_type": "move",
+			"completed_stage_count": 0,
+			"contact_cover_assignment_count": 0,
+			"contact_cover_decision_active": false,
+			"contact_cover_decision_mode": "",
+			"contact_cover_decisions": [],
+			"contact_cover_fire_now_count": 0,
+			"contact_halt_active": false,
+			"contact_halt_context": {
+
+			},
+			"contact_halt_issued_count": 0,
+			"contact_halt_unit_ids": [],
+			"contact_stability": 0.64623,
+			"covering_unit_ids": [],
+			"current_anchor_origin_position": "(355.5951, 248.3375)",
+			"current_anchor_target_position": "(360.5744, 235.7128)",
+			"current_covering_unit_ids": [],
+			"current_moving_unit_ids": [
+				"unit_alpha",
+				"unit_bravo",
+				"unit_delta",
+				"unit_golf",
+				"unit_hotel"
+			],
+			"current_navigation_context_debug": [
+				{
+					"blocker_clearance_weight": 0.386,
+					"corridor_end": "(360.5744, 235.7128)",
+					"corridor_half_width_world": 157.95,
+					"corridor_start": "(355.5951, 248.3375)",
+					"corridor_weight": 0.62,
+					"cover_weight": 0.5775,
+					"lane_offset_world": -339.126953125,
+					"lane_weight": 0.88,
+					"source_command_type": "move",
+					"unit_id": "unit_alpha"
+				},
+				{
+					"blocker_clearance_weight": 0.386,
+					"corridor_end": "(360.5744, 235.7128)",
+					"corridor_half_width_world": 157.95,
+					"corridor_start": "(355.5951, 248.3375)",
+					"corridor_weight": 0.62,
+					"cover_weight": 0.5775,
+					"lane_offset_world": 0.0,
+					"lane_weight": 0.88,
+					"source_command_type": "move",
+					"unit_id": "unit_bravo"
+				},
+				{
+					"blocker_clearance_weight": 0.386,
+					"corridor_end": "(360.5744, 235.7128)",
+					"corridor_half_width_world": 157.95,
+					"corridor_start": "(355.5951, 248.3375)",
+					"corridor_weight": 0.62,
+					"cover_weight": 0.5775,
+					"lane_offset_world": 58.4999923706055,
+					"lane_weight": 0.88,
+					"source_command_type": "move",
+					"unit_id": "unit_delta"
+				},
+				{
+					"blocker_clearance_weight": 0.386,
+					"corridor_end": "(360.5744, 235.7128)",
+					"corridor_half_width_world": 157.95,
+					"corridor_start": "(355.5951, 248.3375)",
+					"corridor_weight": 0.62,
+					"cover_weight": 0.5775,
+					"lane_offset_world": 117.000015258789,
+					"lane_weight": 0.88,
+					"source_command_type": "move",
+					"unit_id": "unit_golf"
+				},
+				{
+					"blocker_clearance_weight": 0.386,
+					"corridor_end": "(360.5744, 235.7128)",
+					"corridor_half_width_world": 157.95,
+					"corridor_start": "(355.5951, 248.3375)",
+					"corridor_weight": 0.62,
+					"cover_weight": 0.5775,
+					"lane_offset_world": 219.585983276367,
+					"lane_weight": 0.88,
+					"source_command_type": "move",
+					"unit_id": "unit_hotel"
+				}
+			],
+			"current_target_positions": {
+				"unit_alpha": "(610.2975, 526.8513)",
+				"unit_bravo": "(360.5744, 235.7128)",
+				"unit_delta": "(306.1542, 214.2489)",
+				"unit_golf": "(251.7341, 192.7851)",
+				"unit_hotel": "(145.1487, 183.4256)"
+			},
+			"current_target_spacing_adjustment_count": 0,
+			"current_target_spacing_conflict_count": 0,
+			"current_target_spacing_debug": [],
+			"current_target_spacing_min_distance": 58.4999885559082,
+			"current_target_spacing_unresolved_count": 0,
+			"current_walkable_target_adjustment_count": 1,
+			"doctrine_style": "rush",
+			"effective_style": "rush",
+			"engage_doctrine": {
+
+			},
+			"execution_cohesion": 0.67787872,
+			"execution_fire_discipline": 0.56228,
+			"execution_hint": "No single execution risk dominates this order.",
+			"execution_label": "STEADY",
+			"execution_reason": "balanced_execution",
+			"final_target_position": "(360.5744, 235.7128)",
+			"fire_rule": "",
+			"fireteam_id": "blue",
+			"formation_leader_slot": "auto",
+			"formation_parallel_spacing_world": 117.0,
+			"formation_preset_key": "move:normal",
+			"formation_scatter_factor": 1.0,
+			"formation_slot_source": "fireteam_formation_tuning_2026-05-17T08-46-56-746Z_05",
+			"formation_slot_spacing_world": 117.0,
+			"group_count": 1,
+			"group_count_for_anchor": 1,
+			"group_cycle": [],
+			"group_index": 1,
+			"groups_issued_for_anchor": 1,
+			"initiative": 0.7189,
+			"leader_unit_id": "unit_alpha",
+			"local_avoidance_command_opt_in": true,
+			"map_readability": {
+				"advance_style": "rush",
+				"bound_count": 1,
+				"bound_distance": 13.5711622238159,
+				"bound_index": 1,
+				"bound_origin_position": "(355.5951, 248.3375)",
+				"bound_target_position": "(360.5744, 235.7128)",
+				"covering_unit_ids": [],
+				"group_count": 1,
+				"group_cycle": [],
+				"group_index": 1,
+				"movement_sequence": [
+					"unit_alpha",
+					"unit_bravo",
+					"unit_delta",
+					"unit_golf",
+					"unit_hotel"
+				],
+				"moving_unit_ids": [
+					"unit_alpha",
+					"unit_bravo",
+					"unit_delta",
+					"unit_golf",
+					"unit_hotel"
+				],
+				"multi_tile_bound": false,
+				"status_line": "RSH 1/1 | 5 move",
+				"style_code": "RSH"
+			},
+			"move_speed_multiplier": 1.012536,
+			"move_stance_sight_range_factor": 0.8,
+			"move_stance_speed_multiplier": 0.65,
+			"movement_sequence": [
+				"unit_alpha",
+				"unit_bravo",
+				"unit_delta",
+				"unit_golf",
+				"unit_hotel"
+			],
+			"moving_unit_ids": [
+				"unit_alpha",
+				"unit_bravo",
+				"unit_delta",
+				"unit_golf",
+				"unit_hotel"
+			],
+			"multi_tile_bound": false,
+			"order_fidelity": 0.6634538,
+			"order_target_offset": "(0.0, 0.0)",
+			"origin_anchor_position": "(355.5951, 248.3375)",
+			"phase": 1,
+			"progress_anchor_position": "(360.5744, 235.7128)",
+			"raw_style": "rush",
+			"reaction_delay_seconds": 0.248507323904,
+			"read_only": true,
+			"readability_status_line": "RSH 1/1 | 5 move",
+			"recent_trace": true,
+			"recent_trace_reason": "active",
+			"recent_trace_recorded_msec": 59118,
+			"requested_target_position": "(360.5744, 235.7128)",
+			"simplified_due_to_losses": false,
+			"stage_index": 0,
+			"style_code": "RSH",
+			"tactical_stance": "normal",
+			"take_doctrine": {
+
+			},
+			"ui_sets_gameplay_truth": false
+		},
+		"requested_target_position": "(0.0, 0.0)",
+		"runtime_tick_budget": {
+
+		},
+		"schema": "sternenbuergerchen.release_multiplayer_first_contact.v1",
+		"simulation_tick": 852,
+		"simulation_ticks_since_advance": 852,
+		"stage": "disabled",
+		"task_id": "TASK_1150",
+		"terrain_move_debug": {
+			"unit_alpha": {
+
+			},
+			"unit_bravo": {
+
+			},
+			"unit_delta": {
+
+			},
+			"unit_golf": {
+
+			},
+			"unit_hotel": {
+
+			}
+		},
+		"ui_sets_gameplay_truth": false
+	},
+	"schema": "sternenbuergerchen.release_multiplayer_playtest.v1",
+	"session": {
+		"assignments": {
+			"lobby_setup": {
+				"connection_mode": "lan",
+				"direct_ip_policy": "LAN mode expects both players on the same local network or VPN.",
+				"map_path": "res://maps/Ground_Mission01_32x32.json",
+				"player_name": "Player",
+				"roster_path": "user://profiles/local_player/roster_v1.json",
+				"team_play_mode": "coop",
+				"team_slot": "team_alpha",
+				"upnp": {
+					"attempted": false,
+					"enabled": false,
+					"external_address": "",
+					"mapped": false,
+					"port": 64903,
+					"result": "not_requested"
+				},
+				"uses_upnp": false
+			},
+			"peer_fireteams": {
+				"1": [
+					"blue"
+				]
+			},
+			"peer_roles": {
+				"1": "host"
+			},
+			"peer_rosters": {
+				"1": {
+					"can_manage_private_roster": true,
+					"character_gameplay_authority": "host_server",
+					"fireteam_ids": [
+						"blue"
+					],
+					"owner_peer_id": 1,
+					"profile_public_ref": "host:1:profile",
+					"roster_mode": "host_roster",
+					"roster_public_ref": "host:1",
+					"roster_source": "host",
+					"uses_local_roster": true
+				}
+			},
+			"peer_teams": {
+				"1": "team_alpha"
+			},
+			"roster_mode": "host_roster",
+			"selected_map_path": "res://maps/Ground_Mission01_32x32.json",
+			"team_play_mode": "coop"
+		},
+		"can_disconnect": true,
+		"can_start_mission": false,
+		"can_toggle_ready": false,
+		"connected_count": 1,
+		"connection_state": "mission",
+		"has_active_peer": true,
+		"is_client": false,
+		"is_host": true,
+		"last_error": "",
+		"lobby_setup": {
+			"connection_mode": "lan",
+			"direct_ip_policy": "LAN mode expects both players on the same local network or VPN.",
+			"map_path": "res://maps/Ground_Mission01_32x32.json",
+			"player_name": "Player",
+			"roster_path": "user://profiles/local_player/roster_v1.json",
+			"team_play_mode": "coop",
+			"team_slot": "team_alpha",
+			"upnp": {
+				"attempted": false,
+				"enabled": false,
+				"external_address": "",
+				"mapped": false,
+				"port": 64903,
+				"result": "not_requested"
+			},
+			"uses_upnp": false
+		},
+		"local_peer_id": 1,
+		"local_ready": true,
+		"map_manifest": {
+			"author": "Player",
+			"download_required_policy": "client_consent_before_cache_write",
+			"format_version": 1,
+			"map_hash": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4",
+			"map_id": "gm01_frontier_hex_96x98",
+			"map_name": "GM01 Frontier Hex 96x98",
+			"map_size_bytes": 2425578,
+			"scenario_file_path": "",
+			"scenario_hash": "",
+			"scenario_size_bytes": 0,
+			"schema_version": 1,
+			"source": "host_editor_map"
+		},
+		"map_transfer": {
+			"can_start_client": true,
+			"manifest": {
+				"author": "Player",
+				"download_required_policy": "client_consent_before_cache_write",
+				"format_version": 1,
+				"map_hash": "24d55aeaf91b8a3032e7e118e686360d18d7172d4cb3fd1687ea700ecd9981d4",
+				"map_id": "gm01_frontier_hex_96x98",
+				"map_name": "GM01 Frontier Hex 96x98",
+				"map_size_bytes": 2425578,
+				"scenario_file_path": "",
+				"scenario_hash": "",
+				"scenario_size_bytes": 0,
+				"schema_version": 1,
+				"source": "host_editor_map"
+			},
+			"requires_consent": false,
+			"state": "host_manifest_ready"
+		},
+		"max_players": 2,
+		"mission_started": true,
+		"peers": [
+			{
+				"can_manage_private_roster": true,
+				"character_gameplay_authority": "host_server",
+				"connection_mode": "lan",
+				"display_name": "Player",
+				"fireteam_ids": [
+					"blue"
+				],
+				"is_host": true,
+				"owner_peer_id": 1,
+				"peer_id": 1,
+				"profile_public_ref": "host:1:profile",
+				"ready": true,
+				"role_id": "host",
+				"roster_entry_path": "user://profiles/local_player/roster_v1.json",
+				"roster_mode": "host_roster",
+				"roster_public_ref": "host:1",
+				"roster_source": "host",
+				"selected_map_path": "res://maps/Ground_Mission01_32x32.json",
+				"team_id": "team_alpha",
+				"team_play_mode": "coop",
+				"uses_local_roster": true
+			}
+		],
+		"ready_count": 1,
+		"roster": {
+			"host_selects_roster_mode": true,
+			"local_roster_owner_peer_id": 1,
+			"mission_authority": "host_server",
+			"private_data_policy": "local_profile_save_progression_relationships_events_never_snapshot",
+			"private_unit_fields": [
+				"age_years",
+				"availability_status",
+				"biography_text",
+				"core_values",
+				"fireteam_history",
+				"function_scores",
+				"generator_seed",
+				"homeworld",
+				"mission_history",
+				"multiplayer_boundary",
+				"personnel_events",
+				"platform_values",
+				"player_profile_id",
+				"portrait_path",
+				"progression",
+				"recovery_state",
+				"relationship_links",
+				"relationship_pairs",
+				"relationship_summary_text",
+				"roster_seed_index",
+				"save_seed",
+				"seed",
+				"skill_summary_text",
+				"skill_values",
+				"status_text",
+				"trait_ids",
+				"validation"
+			],
+			"public_data_policy": "identity_role_portrait_fireteam_badges_only",
+			"public_unit_fields": [
+				"unit_id",
+				"display_name",
+				"callsign",
+				"role_id",
+				"role_name",
+				"roster_role_category",
+				"portrait_id",
+				"fireteam_id",
+				"rank_badges"
+			],
+			"roster_mode": "host_roster",
+			"roster_mode_label": "Host roster",
+			"snapshot_ownership_fields": [
+				"unit_id",
+				"owner_peer_id",
+				"roster_source",
+				"roster_mode",
+				"roster_public_ref",
+				"character_gameplay_authority"
+			],
+			"uses_local_roster": true,
+			"valid_roster_modes": [
+				"player_rosters",
+				"host_roster",
+				"scenario_roster"
+			]
+		},
+		"status_text": "Mission running...",
+		"team_readability": {
+			"configured": true,
+			"entries": [
+				{
+					"assigned_peer_ids": [
+						1
+					],
+					"badge_text": "Alpha | Host Peer 1 | spawn_alpha",
+					"control_label": "Player controlled",
+					"display_name": "Alpha Attack",
+					"npc_controlled": false,
+					"ownership_label": "Host Peer 1",
+					"peer_label": "Host Peer 1",
+					"play_mode": "coop",
+					"readability_tone": "player",
+					"role_label": "Attack",
+					"short_label": "Alpha",
+					"spawn_chip_text": "Alpha | Spawn spawn_alpha",
+					"spawn_label": "Spawn spawn_alpha",
+					"spawn_marker_id": "spawn_alpha",
+					"team_color_hex": "#5fb7ff",
+					"team_id": "team_alpha",
+					"ui_chip_text": "Alpha: Host Peer 1",
+					"ui_sets_gameplay_truth": false
+				},
+				{
+					"assigned_peer_ids": [],
+					"badge_text": "Bravo | NPC / Scenario | spawn_bravo",
+					"control_label": "NPC controlled",
+					"display_name": "Bravo Defense",
+					"npc_controlled": true,
+					"ownership_label": "NPC / Scenario",
+					"peer_label": "Scenario AI",
+					"play_mode": "coop",
+					"readability_tone": "npc",
+					"role_label": "Defense",
+					"short_label": "Bravo",
+					"spawn_chip_text": "Bravo | Spawn spawn_bravo",
+					"spawn_label": "Spawn spawn_bravo",
+					"spawn_marker_id": "spawn_bravo",
+					"team_color_hex": "#ff9b5e",
+					"team_id": "team_bravo",
+					"ui_chip_text": "Bravo: NPC / Scenario",
+					"ui_sets_gameplay_truth": false
+				}
+			],
+			"errors": [],
+			"play_mode": "coop",
+			"runtime_authority": "MissionMultiplayerTeamOwnershipContract",
+			"summary_text": "Coop: Alpha -> Host Peer 1 | Bravo -> NPC / Scenario",
+			"ui_sets_gameplay_truth": false,
+			"valid": true
+		},
+		"team_readability_summary": "Coop: Alpha -> Host Peer 1 | Bravo -> NPC / Scenario",
+		"upnp": {
+			"attempted": false,
+			"enabled": false,
+			"external_address": "",
+			"mapped": false,
+			"port": 64903,
+			"result": "not_requested"
+		}
+	},
+	"stage": "drop_decision:first_decision_accepted",
+	"task_id": "TASK_1147",
+	"ui_sets_gameplay_truth": false
+}

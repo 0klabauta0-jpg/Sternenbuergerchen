@@ -84,6 +84,9 @@ const LEGACY_FALLBACK_SURFACE_BY_TILE: Dictionary = {
 @export var fog_of_war_sight_range_world: float = FOW_DEFAULT_SIGHT_RANGE_WORLD
 @export var fog_viewer_team_id: String = ""
 @export_range(16, 2048, 16) var fog_of_war_work_budget_tiles: int = FOW_DEFAULT_WORK_BUDGET_TILES
+var _fog_frame_timing_debug_enabled: bool = false
+var _fog_frame_timing_debug_snapshot: Dictionary = {}
+var _fog_visibility_work_debug_snapshot: Dictionary = {}
 
 var member_loadouts: Dictionary = {}
 var unit_loadout_modifiers_by_unit_id: Dictionary = {}
@@ -299,12 +302,45 @@ func _process(delta: float) -> void:
 		return
 	if String(fog_of_war_mode).strip_edges().to_lower() == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF:
 		return
+	var frame_started_usec: int = Time.get_ticks_usec() if _fog_frame_timing_debug_enabled else 0
 	_advance_fog_of_war_visibility_work()
+	var advance_usec: int = Time.get_ticks_usec() - frame_started_usec if _fog_frame_timing_debug_enabled else 0
 	_fog_update_elapsed += delta
 	if _fog_update_elapsed < FOW_UPDATE_INTERVAL_SECONDS:
+		if _fog_frame_timing_debug_enabled:
+			_record_fog_frame_timing_debug_snapshot(frame_started_usec, advance_usec, 0)
 		return
 	_fog_update_elapsed = 0.0
+	var sync_started_usec: int = Time.get_ticks_usec() if _fog_frame_timing_debug_enabled else 0
 	_sync_fog_of_war_visual_state(false)
+	if _fog_frame_timing_debug_enabled:
+		_record_fog_frame_timing_debug_snapshot(frame_started_usec, advance_usec, Time.get_ticks_usec() - sync_started_usec)
+
+
+func set_fog_frame_timing_debug_enabled(enabled: bool) -> void:
+	_fog_frame_timing_debug_enabled = enabled
+	if not enabled:
+		_fog_frame_timing_debug_snapshot.clear()
+		_fog_visibility_work_debug_snapshot.clear()
+
+
+func get_fog_frame_timing_debug_snapshot() -> Dictionary:
+	return _fog_frame_timing_debug_snapshot.duplicate(true)
+
+
+func _record_fog_frame_timing_debug_snapshot(frame_started_usec: int, advance_usec: int, sync_usec: int) -> void:
+	_fog_frame_timing_debug_snapshot = {
+		"enabled": true,
+		"total_usec": Time.get_ticks_usec() - frame_started_usec,
+		"advance_usec": advance_usec,
+		"sync_usec": sync_usec,
+		"visibility_pending": not _fog_requested_runtime_signature.is_empty(),
+		"pending_age_msec": maxi(Time.get_ticks_msec() - _fog_pending_visibility_started_msec, 0) if not _fog_requested_runtime_signature.is_empty() else 0,
+		"work_budget_tiles": fog_of_war_work_budget_tiles,
+		"last_work": _fog_visibility_work_debug_snapshot.duplicate(true),
+		"read_only": true,
+		"sets_gameplay_truth": false,
+	}
 
 
 func get_unit_loadout_modifiers_dict(unit_id: String) -> Dictionary:
@@ -1112,6 +1148,11 @@ func _advance_fog_of_war_visibility_work() -> void:
 		return
 	var viewer_team_id: String = _get_fog_viewer_team_id()
 	var update: Dictionary = Dictionary(_fog_of_war_system.call("process_pending_tile_visibility_work", viewer_team_id, fog_of_war_work_budget_tiles))
+	if _fog_frame_timing_debug_enabled:
+		_fog_visibility_work_debug_snapshot.clear()
+		for key in ["completed", "visibility_revision", "candidate_tile_count", "candidate_scan_pending", "candidate_scan_processed", "processed_tile_count", "processed_in_slice", "slice_duration_usec", "duration_usec", "full_scan"]:
+			if update.has(key):
+				_fog_visibility_work_debug_snapshot[key] = update[key]
 	if not bool(update.get("completed", false)):
 		return
 	_fog_runtime_signature = _fog_requested_runtime_signature

@@ -2,6 +2,7 @@ extends Node
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
+const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const MISSION_PROGRESSION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/mission_progression_resolver.gd")
@@ -165,6 +166,10 @@ var _last_meta_timer_text: String = ""
 var _transport_refresh_timing_debug_enabled: bool = false
 var _transport_refresh_timing_debug_snapshot: Dictionary = {}
 var _transport_refresh_timing_debug_invocation_count: int = 0
+var _homebase_presentation_dirty: bool = false
+var _full_plan_apply_count: int = 0
+var _transport_delta_apply_count: int = 0
+var _unchanged_plan_skip_count: int = 0
 var _release_start_mission_deeplink_requested: bool = false
 var _release_start_mission_deeplink_applied: bool = false
 var _release_start_mission_deeplink_status: String = "idle"
@@ -270,6 +275,18 @@ func set_transport_refresh_timing_debug_enabled(enabled: bool) -> void:
 
 func get_transport_refresh_timing_debug_snapshot() -> Dictionary:
 	return _transport_refresh_timing_debug_snapshot.duplicate(true)
+
+
+func get_meta_presentation_debug_snapshot() -> Dictionary:
+	return {
+		"homebase_dirty": _homebase_presentation_dirty,
+		"full_plan_apply_count": _full_plan_apply_count,
+		"transport_delta_apply_count": _transport_delta_apply_count,
+		"unchanged_plan_skip_count": _unchanged_plan_skip_count,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"snapshot_serialized": false,
+	}
 
 
 func get_selected_unit_ids() -> PackedStringArray:
@@ -4451,6 +4468,7 @@ func _on_homebase_transport_timer_timeout() -> void:
 	if profile_enabled:
 		refresh_scopes_usec["refresh_fob_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
+	var previous_transport_planning: Dictionary = _mission_planning_state.duplicate(true)
 	if _is_homebase_direct_mission_drop_source():
 		_sync_homebase_direct_mission_drop_transport_fields()
 	else:
@@ -4462,7 +4480,12 @@ func _on_homebase_transport_timer_timeout() -> void:
 	if profile_enabled:
 		refresh_scopes_usec["refresh_homebase_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
-	_refresh_map_screen()
+	# The Timer changed transport fields, not the tactical order plan. Send only
+	# that actual delta to the existing mission owner; legacy consumers retain
+	# the full refresh fallback. Transfer/recovery mutations above are unchanged.
+	var transport_delta: Dictionary = _build_planning_delta(previous_transport_planning, _mission_planning_state)
+	if _active_mission == null or not _try_apply_mission_transport_delta(_active_mission, transport_delta):
+		_refresh_map_screen()
 	if profile_enabled:
 		refresh_scopes_usec["refresh_map_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -4619,12 +4642,17 @@ func _refresh_homebase_screen() -> void:
 	var homebase_screen = _get_homebase_screen()
 	if homebase_screen == null:
 		return
+	# Keep the owner's normalization even when only its hidden presenter waits.
+	_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, _homebase_staged_fireteam_ids)
+	if _active_mission != null and not homebase_screen.is_visible_in_tree():
+		_homebase_presentation_dirty = true
+		return
+	_homebase_presentation_dirty = false
 	var fob_screen = _get_fob_screen()
 	var fireteam_definitions: Array = []
 	if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
 		fireteam_definitions = Array(fob_screen.call("get_fireteam_definitions")).duplicate(true)
 	homebase_screen.setup_roster(_available_team_units, _homebase_staged_unit_ids)
-	_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, _homebase_staged_fireteam_ids)
 	homebase_screen.set_fireteam_context(_homebase_staged_fireteam_ids, fireteam_definitions)
 	var selected_mission: Dictionary = _get_selected_mission_definition()
 	homebase_screen.set_mission_context(
@@ -5362,7 +5390,11 @@ func _resolve_unit_portrait_path(unit_id: String) -> String:
 		var unit_data: Dictionary = unit_variant
 		if String(unit_data.get("unit_id", "")).strip_edges() != unit_id:
 			continue
-		return String(unit_data.get("portrait_path", "")).strip_edges()
+		var portrait_id := String(unit_data.get("portrait_id", "")).strip_edges()
+		var portrait_path := String(unit_data.get("portrait_path", "")).strip_edges()
+		if portrait_id.is_empty() and portrait_path.is_empty():
+			return ""
+		return PORTRAIT_IDENTITY_CATALOG_SCRIPT.resolve_path(portrait_id, portrait_path)
 	return ""
 
 
@@ -6773,7 +6805,38 @@ func _apply_planning_state_to_mission(mission_instance: Node) -> void:
 		return
 	var tactical_controller = mission_instance.get_node_or_null("TacticalController")
 	if tactical_controller != null and tactical_controller.has_method("set_planning_state"):
+		if tactical_controller.has_method("get_planning_state"):
+			var current_planning: Dictionary = Dictionary(tactical_controller.call("get_planning_state"))
+			var delta: Dictionary = _build_planning_delta(current_planning, _mission_planning_state)
+			if _try_apply_mission_transport_delta(mission_instance, delta):
+				return
+		_full_plan_apply_count += 1
 		tactical_controller.call("set_planning_state", _mission_planning_state)
+
+
+func _build_planning_delta(previous: Dictionary, incoming: Dictionary) -> Dictionary:
+	# This is an immediate comparison of existing owners, not retained mission
+	# state. Missing keys keep set_planning_state's existing partial-input meaning.
+	var delta: Dictionary = {}
+	for key in incoming:
+		if not previous.has(key) or previous[key] != incoming[key]:
+			delta[key] = incoming[key]
+	return delta
+
+
+func _try_apply_mission_transport_delta(mission_instance: Node, delta: Dictionary) -> bool:
+	if delta.is_empty():
+		_unchanged_plan_skip_count += 1
+		return true
+	if mission_instance == null:
+		return false
+	var controller = mission_instance.get_node_or_null("TacticalController")
+	if controller == null or not controller.has_method("apply_meta_transport_planning_delta"):
+		return false
+	if not bool(controller.call("apply_meta_transport_planning_delta", delta)):
+		return false
+	_transport_delta_apply_count += 1
+	return true
 
 
 func _on_mission_planning_state_changed(planning_state: Dictionary) -> void:
