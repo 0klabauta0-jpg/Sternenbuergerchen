@@ -1,0 +1,11 @@
+{
+  "foreign_files_unchanged": 38,
+  "historical_rosters_unchanged": 437,
+  "comparison": "SHA256, bytes and mtime_ns",
+  "actual_player_roster_unchanged": true,
+  "actual_player_roster_state": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  }
+}

@@ -22,7 +22,9 @@
   begrenzen einen kausalen Framezeitvergleich.
 - Task `docs/tasks/CONTINUE_2026_11_05_command_hitches_and_legacy.md`,
   Bericht `docs/qa/continue_20261105/README.md`, unabhaengiges Nachreview
-  APPROVED scoped. Integration/Main-Smoke werden separat quittiert.
+  APPROVED scoped. Main `22ed4668f` per Fast-forward integriert und gepusht;
+  frischer Main-Vollbild-Smoke 86/86, Fehler/Warnungen 0, alle 1948
+  Arbeitsbaum-Codepins unveraendert. Quittung `docs/qa/continue_20261105/main_receipt.json`.
 
 ### Vollbild-Spielpass - Basis, Taktik, Grafik und Multiplayer, 2026-11-05
 - Regelmaessigen versteckten Homebase-Rebuild durch Dirty-/Transportdeltas

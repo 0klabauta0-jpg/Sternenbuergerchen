@@ -8,7 +8,9 @@
 - Normale 90 s bei 1x und native Vollbildfixtures bestanden. Allgemeine
   Framezeitverbesserung nicht belegt; verbleibender HUDhitch offen dokumentiert.
 - Aufgabe `docs/tasks/CONTINUE_2026_11_05_command_hitches_and_legacy.md`,
-  QA `docs/qa/continue_20261105/README.md`; Mainreceipt folgt separat.
+  QA `docs/qa/continue_20261105/README.md`; Main `22ed4668f` integriert und
+  gepusht, frischer nativer Main-Smoke 86/86 ohne Fehler/Warnungen. Separate
+  Integrationsquittung `docs/qa/continue_20261105/main_receipt.json`.
 
 ## Nutzerauftrag 2026-11-05 - Vollbild-Spielpass und neue Basis-UX
 - Basis/Loadout/Fireteam-/Dropship-UI referenzgefuehrt ueberarbeitet,

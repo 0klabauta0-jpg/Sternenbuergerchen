@@ -1,8 +1,88 @@
 {
   "schema": "sternenbuergerchen.continue_main_receipt.v1",
-  "status": "PENDING",
-  "main_commit": null,
-  "main_smoke": null,
-  "owner": "Root",
-  "note": "Separate post-integration receipt. May be updated without rebuilding the frozen pre-integration QA ZIP."
+  "status": "VERIFIED_MAIN_SOURCE_AND_PUBLISHED",
+  "verified_utc": "2026-11-05T15:17:24.062540+00:00",
+  "previous_main": "01ab595a7b89632629eee0ad3523281e542148a0",
+  "tested_main_source_commit": "22ed4668fe9a44b12a529717d60aa557f2085270",
+  "verified_remote_main_source_commit": "22ed4668fe9a44b12a529717d60aa557f2085270",
+  "integration": "Ancestry-checked fast-forward using compare-and-swap update-ref, then switch to identical tree; no reset/clean/stash.",
+  "main_smoke": {
+    "passed": 86,
+    "failed": 0,
+    "exit_code": 0,
+    "error_count": 0,
+    "warnings": 0,
+    "isolation_verified": true,
+    "source_inputs_stable": true,
+    "critical_source_pins_before": {
+      "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+      "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+      "scripts/tests/mission_tactical_sandbox_controller.gd": "144b88b2afa3a530e04c402e17a4bb9dbd44b86544243901d861406128430e6a",
+      "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+      "scripts/tests/playtest_20261105_native_homebase_capture.gd": "c54c876b1b4f2c0148f76603ee0dc22824c6d2d37806b440924a1b345191a792",
+      "scripts/tests/run_continue_20261105.py": "f47a02752d7db0d80f44c2f7597af083090d5fcd50fe5c93c4e7b7b240563dce",
+      "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+      "scripts/ui/mission_a5_hud_layout.gd": "85d68388d54c0153bb46855d74b46e976bfb9021280e26d4835e87affd5f94dd"
+    },
+    "critical_source_pins_after": {
+      "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+      "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+      "scripts/tests/mission_tactical_sandbox_controller.gd": "144b88b2afa3a530e04c402e17a4bb9dbd44b86544243901d861406128430e6a",
+      "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+      "scripts/tests/playtest_20261105_native_homebase_capture.gd": "c54c876b1b4f2c0148f76603ee0dc22824c6d2d37806b440924a1b345191a792",
+      "scripts/tests/run_continue_20261105.py": "f47a02752d7db0d80f44c2f7597af083090d5fcd50fe5c93c4e7b7b240563dce",
+      "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+      "scripts/ui/mission_a5_hud_layout.gd": "85d68388d54c0153bb46855d74b46e976bfb9021280e26d4835e87affd5f94dd"
+    },
+    "display": {
+      "content_scale_size": "(2560, 1440)",
+      "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+      "display": "Windows",
+      "display_server_window_mode": 3,
+      "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+      "max_physics_steps_per_frame": 8,
+      "physics_ticks_per_second": 60,
+      "renderer": "forward_plus",
+      "rendering_driver": "vulkan",
+      "root_size": "(2560, 1440)",
+      "screen_index": 0,
+      "screen_refresh_rate": 74.9680023193359,
+      "screen_size": "(2560, 1440)",
+      "screen_usable_rect": "[P: (0, 0), S: (2560, 1410)]",
+      "time_scale": 1.0,
+      "viewport_size": "(2560.0, 1440.0)",
+      "vsync_mode": 1,
+      "window_has_focus": true,
+      "window_mode": 3,
+      "window_size": "(2560, 1440)"
+    },
+    "artifacts": [
+      {
+        "path": "main_smoke/report.json",
+        "sha256": "b076efe3984fb5892d3c5f83c0c6e87727700c1b6144d931a10a17bfafb652c9",
+        "bytes": 4589
+      },
+      {
+        "path": "main_smoke/main.json",
+        "sha256": "0d8c75fdc099369742b23133123a551e2c06565fca311dbde69a8a3700544291",
+        "bytes": 82544
+      },
+      {
+        "path": "main_smoke/playtest_20261105_native_homebase_capture.log",
+        "sha256": "3f3d0167a1180e4ee90d6c3b75e783ca07e900a808194329ebfe96b17bca322e",
+        "bytes": 9079
+      }
+    ]
+  },
+  "all_1948_working_code_pins_unchanged": true,
+  "index_binding": "main_sources_index.json",
+  "index_boundary": "1945 exact Git blob matches; 3 untouched baseline verification helpers differ only in existing CRLF/LF normalization. All changed code is exact.",
+  "preservation": "main_preservation.json",
+  "native_fixture_and_benchmark_evidence": "Immutable pre-integration archive and manifest remain unchanged.",
+  "limits": [
+    "One remaining 288.544-ms HUD hitch in the normal90 run. General frame-time improvement is not established.",
+    "Native controlled facing/fire-event/air fixtures do not prove a physical shot in the normal mission.",
+    "No new EXE, release or WAN qualification."
+  ],
+  "documentation_followup": "This receipt and its supporting records are committed from the task branch after the verified source push; they do not change tested runtime/code."
 }
