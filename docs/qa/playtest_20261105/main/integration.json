@@ -1,0 +1,25 @@
+{
+  "schema": "sternenbuergerchen.playtest.main_integration.v1",
+  "generated_utc": "2026-11-05T09:55:29.726379+00:00",
+  "source_commit": "4abd830bad56154444bbfccf376d216221a152d8",
+  "integration_method": "Verified ancestor + compare-and-swap fast-forward of refs/heads/main; switch between identical trees preserves pinned working bytes",
+  "original_main": "90e1f373cd4e070a9a29135225e19cebd297b201",
+  "main_native_smoke": {
+    "passed": 86,
+    "failed": 0,
+    "runner_exit": 0,
+    "engine_errors": 0,
+    "warnings": 0,
+    "physical_display": "2560x1440",
+    "scope": "Normal menu, actual native mouse/key base movement and console use, mission, real timed transport, deployment and Move/GO. Five-second profiling is diagnostic only."
+  },
+  "source_files_checked": 1846,
+  "source_drift": [],
+  "preserved_foreign_files": 38,
+  "preserved_old_roster_files": 437,
+  "mismatches": [],
+  "git_blob_byte_preservation_checked": 261,
+  "runtime_code_changes_after_validation": false,
+  "release_acceptance": false,
+  "visual_user_acceptance": "OPEN"
+}

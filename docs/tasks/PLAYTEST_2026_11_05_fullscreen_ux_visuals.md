@@ -95,6 +95,6 @@ Host/Join/Ready/GM01/Drop/Befehls-/Disconnectcheck ohne Enginefehler; Vorlaeufe
 mit Fehlern bleiben erhalten. 90 s fortgesetzte Bewegung bei 1x und 0.984
 Simulationsdurchsatz belegt. Einzelne Move-/GO-Klickspitzen bis 391.848 ms,
 sieben identische Original-Main-Altgates und alle Aussagegrenzen stehen im
-Bericht. Originalroster und fremde Dateien bleiben geschuetzt. Integration
-und frischer Main-Smoke folgen nach dem Quellcommit. Es wurde keine
+Bericht. Originalroster und fremde Dateien bleiben geschuetzt. Main `4abd830ba` per geprüftem Fast-forward integriert;
+frischer Main-Smoke 86/86 ohne Fehler/Warnungen, 1846 Quellpins ohne Drift. Es wurde keine
 Zwischenfreigabe benoetigt.

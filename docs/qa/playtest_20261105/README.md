@@ -1,12 +1,12 @@
 # QA-Paket: Vollbild-Spielpass 05.11.2026
 
-**Kandidat / Integration PENDING. Gestalterische Nutzerabnahme offen.**
+**Main-Quellstand integriert und nativ nachgeprüft. Gestalterische Nutzerabnahme offen.**
 
 Die Git-Fassung enthält ausgewählte unveränderte Rohbelege. Der [lesbare Bericht](../../reports/PLAYTEST_2026-11-05.md) ordnet Ergebnisse und Grenzen ein. Historische Aufnahmen belegen 3440×1440 zur damaligen Laufzeit. Aktuell ist laut Root nur 2560×1440 angeschlossen; der 3440-Monitor ist inzwischen getrennt. Daraus folgt kein Verlust des historischen Nachweises und kein aktueller 3440-Nachweis.
 
 ## Umfang und Integrität
 
-172 kopierte Rohdateien, 22 native Original-PNGs, 70,50 MiB an Rohkopien (rund 71 MiB einschließlich Index/Prüfhilfe). Kein Bild wurde verkleinert, beschnitten oder anderweitig bearbeitet. Genau ein Vorher-/Nachherpaar der Baseline-Missionsansicht ist enthalten. Wiederholte Menü-/Missionsbilder und vollständige große Performance-Frame-JSONs werden nicht dupliziert.
+177 kopierte Rohdateien, 22 native Original-PNGs, 70,83 MiB an Rohkopien (rund 71 MiB einschließlich Index/Prüfhilfe). Kein Bild wurde verkleinert, beschnitten oder anderweitig bearbeitet. Genau ein Vorher-/Nachherpaar der Baseline-Missionsansicht ist enthalten. Wiederholte Menü-/Missionsbilder und vollständige große Performance-Frame-JSONs werden nicht dupliziert.
 
 Die vollständige frühere Fassung mit 218 Rohkopien / 402,58 MiB bleibt unverändert lokal unter `output/playtest_20261105/evidence_archive/full_qa_bundle` erhalten. Vor dem Verschieben wurden Quelle und absolutes Ziel im Workspace geprüft; alle 218 Hashes wurden verifiziert. Auch der frühere Bericht bleibt daneben als `PLAYTEST_2026-11-05_before_lean.md` erhalten. Nichts wurde gelöscht.
 
@@ -82,6 +82,10 @@ Die ältere 1280-Homebaseaufnahme `output/playtest_20261105/native_logical_sizes
 
 ## Offene Schlussgates
 
-Nur Main-Integration und der anschließende Smoke sind **PENDING Root**. Finale Sourcepins sind stabil; 34/34 gezielte Gates und der native MP-Paarlauf mit 10/10 sind bestätigt. Der 90-s-Bewegungsnachweis und die nativen logischen UI-Größen sind bestätigt. Move-/Go-Klickkosten von 212–331 ms bleiben offen; die MP-Rohlogs enthalten weiterhin Netfox-Stall-Debugmeldungen bis 2,755 s. Keine allgemeine FPS-/Jitterfreigabe. Keine EXE-/LAN-/WAN-/Mehrrechner- oder stilistische Nutzerabnahme.
+Main-Integration und der anschließende native Smoke sind **bestätigt: 86/86**. Finale Sourcepins sind stabil; 34/34 gezielte Gates und der native MP-Paarlauf mit 10/10 sind bestätigt. Der 90-s-Bewegungsnachweis und die nativen logischen UI-Größen sind bestätigt. Move-/Go-Klickkosten von 212–331 ms bleiben offen; die MP-Rohlogs enthalten weiterhin Netfox-Stall-Debugmeldungen bis 2,755 s. Keine allgemeine FPS-/Jitterfreigabe. Keine EXE-/LAN-/WAN-/Mehrrechner- oder stilistische Nutzerabnahme.
 
 Sieben gegen Original-Main bestätigte historische Altgates (sechs bekannte plus TASK468 mit 13 PASS / 1 FAIL) werden getrennt geführt und nicht als neue Regressionen ausgegeben. Alle RED-/FAIL-Rohbelege bleiben erhalten.
+
+## Main-Abschluss
+
+[Integrationsnachweis](main/integration.json), [frischer nativer Main-Smoke](main/main_smoke.json) und [Runnerbericht](main/report.json): 86/86, keine Enginefehler oder Warnungen. 1846 Quellpins ohne Drift; 38 fremde Dateien und 437 alte Rosterdateien unverändert. Der Quellcommit ist `4abd830bad56154444bbfccf376d216221a152d8`; danach nur Doku/Evidenz. Große Rohdaten und historische Fehlläufe bleiben lokal erhalten.

@@ -1,6 +1,6 @@
 {
   "schema": "sternenbuergerchen.playtest_20261105.qa_bundle.v2",
-  "integration_status": "PENDING",
+  "integration_status": "MAIN_SOURCE_VERIFIED",
   "visual_user_acceptance": "OPEN",
   "task": "docs/tasks/PLAYTEST_2026_11_05_fullscreen_ux_visuals.md",
   "working_basis_from_task": {
@@ -9,7 +9,7 @@
     "git_not_queried_by_packager": true
   },
   "copy_policy": "Selected raw PNG/JSON/log/MD copied byte identically, without image editing or embedded-path rewriting. External references retain original path, size and SHA; old full copies preserved locally.",
-  "final_source_pin_status": "Final multiplayer source pins stable and hash-bound in multiplayer/final_pair/source_pins_before.json; Main integration and post-integration smoke pending Root.",
+  "final_source_pin_status": "1846 working source files checked before and after Main fast-forward/native smoke, zero byte drift; critical Core and clock hashes also independently reviewed.",
   "known_core_token_fix_sha256": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
   "assembled_utc": "2026-11-05T09:24:59.792224+00:00",
   "package_policy": "Lean Git package; selected original PNGs plus compact JSON/log/analysis/source pins. Existing repository references and large raw traces indexed externally by original path and SHA. No image editing.",
@@ -20,8 +20,8 @@
     "prior_raw_bytes": 422132608,
     "all_prior_copies_preserved": true
   },
-  "file_count": 172,
-  "total_bytes": 73919803,
+  "file_count": 177,
+  "total_bytes": 74273898,
   "native_png_count": 22,
   "files": [
     {
@@ -1757,6 +1757,41 @@
       "group": "final_checks",
       "evidence_status": "PASS_34_targeted_gates_zero_engine_errors_not_all_historical_gates",
       "byte_identical": true
+    },
+    {
+      "bundle_path": "main/main_smoke.json",
+      "original_path": "output/playtest_20261105/main_native_smoke/20261105T094621Z-784642e1/main_smoke.json",
+      "bytes": 82412,
+      "sha256": "95dd928585d0184399cbba18deaa704ac4b23501c5c59c463329dac9eab52d8f",
+      "kind": "main_integration_evidence"
+    },
+    {
+      "bundle_path": "main/report.json",
+      "original_path": "output/playtest_20261105/main_native_smoke/20261105T094621Z-784642e1/report.json",
+      "bytes": 2459,
+      "sha256": "bdd3285b3fc122312eb73a6bc678cafef64b09aef14e5545b978c51093add940",
+      "kind": "main_integration_evidence"
+    },
+    {
+      "bundle_path": "main/native_smoke.log",
+      "original_path": "output/playtest_20261105/main_native_smoke/20261105T094621Z-784642e1/playtest_20261105_native_homebase_capture.log",
+      "bytes": 8939,
+      "sha256": "eda676a0f983b29b10f2ac3979568b1c0b482fe47b895090aa69c68a1b10aaa9",
+      "kind": "main_integration_evidence"
+    },
+    {
+      "bundle_path": "main/source_freeze.json",
+      "original_path": "output/playtest_20261105/source_freeze_before_main.json",
+      "bytes": 259226,
+      "sha256": "77a3f72a7ac8cf6a3ab037c9f713098d2e752a3b0478244d7c157673abc9e4ed",
+      "kind": "main_integration_evidence"
+    },
+    {
+      "bundle_path": "main/integration.json",
+      "original_path": "output/playtest_20261105/main_integration.json",
+      "bytes": 1059,
+      "sha256": "45b64f5daa38efb1a6963b1bed7ddf1823631e92e75e89b4f78ebabb51ecd2d3",
+      "kind": "main_integration_evidence"
     }
   ],
   "external_files": [
@@ -3521,5 +3556,7 @@
     "Main integration by Root",
     "post-integration smoke by Root"
   ],
-  "historical_baseline_gate_count": 7
+  "historical_baseline_gate_count": 7,
+  "main_source_commit": "4abd830bad56154444bbfccf376d216221a152d8",
+  "main_native_smoke": "86/86, Exit0, zero engine errors/warnings"
 }

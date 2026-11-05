@@ -11,7 +11,7 @@
   bis Deployment/Befehlen und sauberem Beenden bestanden. LAN/WAN, fremder
   Kartenpayloadtransport, Buildhandshake und Release bleiben eigene Grenzen.
 - Haupttask `docs/tasks/PLAYTEST_2026_11_05_fullscreen_ux_visuals.md`, Bericht
-  `docs/reports/PLAYTEST_2026-11-05.md`; Mainintegration/Smoke nach Quellcommit.
+  `docs/reports/PLAYTEST_2026-11-05.md`; Main `4abd830ba` integriert; nativer Main-Smoke 86/86 ohne Fehler/Warnungen.
 
 ## Nutzerauftrag 2026-11-05 - Review, Bedienung und Grafikpass
 - Vier belegte Korrekturen und referenzgefuehrter Hallenpass geprueft.

@@ -24,8 +24,8 @@
   17.308/54.207/111.590/391.848 ms. Verbleibende Move-/GO-Klickspitzen
   sind dokumentiert; keine allgemeine Fluessigkeitsfreigabe.
 - Bericht `docs/reports/PLAYTEST_2026-11-05.md`, QA-Index
-  `docs/qa/playtest_20261105/README.md`. Mainintegration/Smoke folgen
-  nach dem verifizierten Quellcommit. Gestalterische Nutzerabnahme offen.
+  `docs/qa/playtest_20261105/README.md`. Main per geprüftem Fast-forward auf `4abd830ba`;
+  frischer nativer Main-Smoke 86/86, Fehler/Warnungen 0, 1846 Quellpins gleich. Gestalterische Nutzerabnahme offen.
 
 ### REVIEW8 - Code, Bedienung und Hallengrafik, 2026-11-05
 - Basis Main `93c2e6810`, neuer isolierter Task-Branch. Vier bestaetigte
