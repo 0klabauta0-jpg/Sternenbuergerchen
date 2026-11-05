@@ -1,0 +1,11 @@
+{
+  "tested_source_files": 1800,
+  "semantic_drift": [],
+  "text_eol_normalization_only": [
+    "scripts/tests/review7_20261103_checks.json",
+    "scripts/tests/review8_20261105_adjacent_checks.json",
+    "scripts/tests/review8_20261105_checks.json",
+    "scripts/tests/review8_20261105_native_checks.json"
+  ],
+  "main_code_commit": "0cd0833e0e1eb2b48773a93bb9371cbe8568ade9"
+}

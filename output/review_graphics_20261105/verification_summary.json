@@ -125,5 +125,20 @@
     "No EXE/package gate",
     "Human aesthetic acceptance remains open"
   ],
-  "integration": "Pending fast-forward and push"
+  "integration": {
+    "method": "fast-forward without force",
+    "main_code_commit": "0cd0833e0e1eb2b48773a93bb9371cbe8568ade9",
+    "original_checkout": "C:/dev/SternenBuergerchen",
+    "original_checkout_branch": "main",
+    "main_import_exit_code": 0,
+    "main_import_diagnostics": 0,
+    "main_smoke_report": "output/review_graphics_20261105/main_smoke/20261105T054557Z-11eb6a6c/report.json",
+    "main_smoke_gates": 4,
+    "main_smoke_assertions": 236,
+    "main_source_pins_verified": 1800,
+    "semantic_source_drift": 0,
+    "text_eol_normalization_only": 4,
+    "main_protected_files_and_rosters_unchanged": true,
+    "final_followup_scope": "Documentation and evidence only; push verified by final Git commands"
+  }
 }

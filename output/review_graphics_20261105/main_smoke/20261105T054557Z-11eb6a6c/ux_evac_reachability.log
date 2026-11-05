@@ -1,0 +1,80 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-4f906dbc47f24c0081e3bfc51aa46bc5
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: (1920, 1080): ground-start fixture exposes an existing fireteam
+PASS: (1920, 1080): selection has a real ground fireteam anchor
+PASS: (1920, 1080): visible Details affordance names the evacuation action
+REVIEW8_UX_MOUSE control=/root/MissionReactivityTest/TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/A5DetailsButton local=(830.0, 971.0) routed=(830.0, 971.0) viewport=/root
+REVIEW8_UX_MOUSE hovered=/root/MissionReactivityTest/TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/A5DetailsButton
+PASS: (1920, 1080): real mouse activation opens the native Details window
+PASS: (1920, 1080): original command remains in its preserved hidden source path
+PASS: (1920, 1080): details contain a real native evacuation action
+PASS: (1920, 1080): missing LZ keeps the reachable action disabled
+PASS: (1920, 1080): disabled action preserves the authoritative source explanation
+PASS: (1920, 1080): forced activation cannot bypass the missing-LZ gate
+PASS: (1920, 1080): regular LZ input accepts a valid remote map position
+PASS: (1920, 1080): outside-LZ state remains disabled with the same regroup requirement
+PASS: (1920, 1080): regular LZ input places the zone at the unchanged ground team
+PASS: (1920, 1080): existing owner confirms evacuation eligibility
+PASS: (1920, 1080): eligible host can reach the enabled native action
+REVIEW8_EVAC_GEOMETRY root=[P: (0.0, 0.0), S: (1920.0, 1080.0)] popup=[P: (587.0, 329.0), S: (366.0, 246.0)] button=[P: (23.0, 189.0), S: (320.0, 32.0)] embedded=true
+PASS: (1920, 1080): whole button rect fits viewport and every clipping ancestor
+PASS: (1920, 1080): authority loss disables the same action
+PASS: (1920, 1080): forced client activation cannot emit the original command
+PASS: (1920, 1080): restored host reads the valid original state
+WARNING: The Viewport was previously notified that the mouse is in its area. There is no need to notify it at this time.
+   at: notify_mouse_entered (scene/main/viewport.cpp:3594)
+   GDScript backtrace (most recent call first):
+       [0] _click (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:153)
+       [1] _check_mission (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:96)
+       [2] _frames (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:181)
+REVIEW8_UX_MOUSE control=/root/MissionReactivityTest/TacticalUI/A5TeamDetailsPopup/Margin/Box/A5EvacuationButton local=(183.0, 205.0) routed=(770.0, 534.0) viewport=/root
+REVIEW8_UX_MOUSE hovered=/root/MissionReactivityTest/TacticalUI/A5TeamDetailsPopup/Margin/Box/A5EvacuationButton
+REVIEW8_EVAC_GUI pressed=true local=(160.0, 16.0) disabled=false
+REVIEW8_EVAC_GUI pressed=false local=(160.0, 16.0) disabled=false
+REVIEW8_EVAC_CLICK_RESULT proxy=3 before=2 source=1 gui_mouse_events=2 result={ "winning_team_id": "", "friendly_team_id": "team_alpha", "mission_outcome": "aborted", "result": "aborted", "win_condition_type": "evacuation", "objective_captured": false, "duration_seconds": 2.575, "team_states": [{ "unit_id": "unit_alpha", "display_name": "Anja Voss", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_bravo", "display_name": "Milo Saren", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_charlie", "display_name": "Leona Rhee", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_delta", "display_name": "Darius Holt", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_echo", "display_name": "Talia Mercer", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_foxtrot", "display_name": "Kenzo Vale", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_golf", "display_name": "Sabine Orlov", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_hotel", "display_name": "Idris Kane", "vital_state": "fit", "health_points": 100 }], "fireteam_tactical_debrief": [] }
+PASS: (1920, 1080): real mouse down/up reaches and activates the native evacuation control once
+PASS: (1920, 1080): real native action invokes the original callback once and resolves the existing abort result
+PASS: (1280, 720): ground-start fixture exposes an existing fireteam
+PASS: (1280, 720): selection has a real ground fireteam anchor
+PASS: (1280, 720): visible Details affordance names the evacuation action
+WARNING: The Viewport was previously notified that the mouse is in its area. There is no need to notify it at this time.
+   at: notify_mouse_entered (scene/main/viewport.cpp:3594)
+   GDScript backtrace (most recent call first):
+       [0] _click (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:153)
+       [1] _check_mission (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:51)
+       [2] _frames (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:181)
+REVIEW8_UX_MOUSE control=/root/MissionReactivityTest/TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/A5DetailsButton local=(830.0, 611.0) routed=(830.0, 611.0) viewport=/root
+REVIEW8_UX_MOUSE hovered=/root/MissionReactivityTest/TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/A5DetailsButton
+PASS: (1280, 720): real mouse activation opens the native Details window
+PASS: (1280, 720): original command remains in its preserved hidden source path
+PASS: (1280, 720): details contain a real native evacuation action
+PASS: (1280, 720): missing LZ keeps the reachable action disabled
+PASS: (1280, 720): disabled action preserves the authoritative source explanation
+PASS: (1280, 720): forced activation cannot bypass the missing-LZ gate
+PASS: (1280, 720): regular LZ input accepts a valid remote map position
+PASS: (1280, 720): outside-LZ state remains disabled with the same regroup requirement
+PASS: (1280, 720): regular LZ input places the zone at the unchanged ground team
+PASS: (1280, 720): existing owner confirms evacuation eligibility
+PASS: (1280, 720): eligible host can reach the enabled native action
+REVIEW8_EVAC_GEOMETRY root=[P: (0.0, 0.0), S: (1280.0, 720.0)] popup=[P: (267.0, 149.0), S: (366.0, 246.0)] button=[P: (23.0, 189.0), S: (320.0, 32.0)] embedded=true
+PASS: (1280, 720): whole button rect fits viewport and every clipping ancestor
+PASS: (1280, 720): authority loss disables the same action
+PASS: (1280, 720): forced client activation cannot emit the original command
+PASS: (1280, 720): restored host reads the valid original state
+WARNING: The Viewport was previously notified that the mouse is in its area. There is no need to notify it at this time.
+   at: notify_mouse_entered (scene/main/viewport.cpp:3594)
+   GDScript backtrace (most recent call first):
+       [0] _click (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:153)
+       [1] _check_mission (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:96)
+       [2] _frames (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:181)
+REVIEW8_UX_MOUSE control=/root/MissionReactivityTest/TacticalUI/A5TeamDetailsPopup/Margin/Box/A5EvacuationButton local=(183.0, 205.0) routed=(450.0, 354.0) viewport=/root
+REVIEW8_UX_MOUSE hovered=/root/MissionReactivityTest/TacticalUI/A5TeamDetailsPopup/Margin/Box/A5EvacuationButton
+REVIEW8_EVAC_GUI pressed=true local=(160.0, 16.0) disabled=false
+REVIEW8_EVAC_GUI pressed=false local=(160.0, 16.0) disabled=false
+REVIEW8_EVAC_CLICK_RESULT proxy=3 before=2 source=1 gui_mouse_events=2 result={ "winning_team_id": "", "friendly_team_id": "team_alpha", "mission_outcome": "aborted", "result": "aborted", "win_condition_type": "evacuation", "objective_captured": false, "duration_seconds": 2.122, "team_states": [{ "unit_id": "unit_alpha", "display_name": "Anja Voss", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_bravo", "display_name": "Milo Saren", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_charlie", "display_name": "Leona Rhee", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_delta", "display_name": "Darius Holt", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_echo", "display_name": "Talia Mercer", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_foxtrot", "display_name": "Kenzo Vale", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_golf", "display_name": "Sabine Orlov", "vital_state": "fit", "health_points": 100 }, { "unit_id": "unit_hotel", "display_name": "Idris Kane", "vital_state": "fit", "health_points": 100 }], "fireteam_tactical_debrief": [] }
+PASS: (1280, 720): real mouse down/up reaches and activates the native evacuation control once
+PASS: (1280, 720): real native action invokes the original callback once and resolves the existing abort result
+REVIEW8_UX_EVAC: 40 passed, 0 failed
+PASS: review8 UX evacuation reachability

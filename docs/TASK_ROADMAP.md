@@ -6,7 +6,8 @@
   native UI 102/102, GPU-FoW 39/39, normale Vorher-/Nachherlaeufe
   bei 1920x1080 und 1280x720 je 50/50. Source- und Roster-Gates gruen.
 - Task `docs/tasks/REVIEW8_2026_11_05_code_ux_graphics.md`;
-  direkte Main-Integration ist Teil dieses ausdruecklichen Auftrags.
+  Main per Fast-forward uebernommen, frischer Import und Smoke 4/4 /236
+  Assertions auf Main ohne Sourceabweichung. Danach nur Doku/Evidence.
 - Bestehende Releasegrenzen und offene gestalterische Nutzerabnahme bleiben.
 
 ## Nutzerauftrag 2026-11-03 - Drei weitere Review-/Fixzyklen (4-6)
@@ -99,11 +100,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 ---
 
 ## TASK_1198 - Simulation Command Attribution (diagnostisch abgeschlossen)
-- Ergebnis: SimulationRoot-Command-Verarbeitung ist nach Ordering, Apply und Command-Typen messbar aufgeschlüsselt. Die Instrumentierung bleibt read-only, nicht serialisiert und ändert keine Autorität oder Requeue-Semantik.
-- Evidenz: Auf `f84e7173fa2c7b255f5dac44fb2e85827229af2e` sind acht SHA-identische Exit-0-Reports dokumentiert. Haupt-Scopes umfassen 1200 Samples; `move_to_position` 204 und `hold_position` 350 conditional Samples. Die vollständigen Werte stehen in `docs/tasks/TASK_1198_simulation_command_attribution.md` und `docs/IMPLEMENTATION_STATUS.md`.
-- Auswahl: Nach den Regeln des Masterplans wird ausschließlich der `move_to_position`-Command-Apply-Pfad für TASK 1199 gewählt: Ordering `29 / 63697` liegt unter 25 %, `move_to_position` `67793.5 / 63665` über 40 % und ist in 8/8 Läufen dominant. Der Signalpfad wird nicht parallel ausgewählt.
-- Hinweis: Der erste Kaltlauf auf `193c736...` wurde wegen unvollständiger Fixture-Sampling-Abdeckung verworfen. Simulation- und Release-Budgets bleiben überschritten; kein Release-GO.
-- Nächster Schritt: TASK 1200 nach dem P05-Vertrag, weiterhin strikt seriell.
+- Ergebnis: SimulationRoot-Command-Verarbeitung ist nach Ordering, Apply und Command-Typen messbar aufgeschlÃ¼sselt. Die Instrumentierung bleibt read-only, nicht serialisiert und Ã¤ndert keine AutoritÃ¤t oder Requeue-Semantik.
+- Evidenz: Auf `f84e7173fa2c7b255f5dac44fb2e85827229af2e` sind acht SHA-identische Exit-0-Reports dokumentiert. Haupt-Scopes umfassen 1200 Samples; `move_to_position` 204 und `hold_position` 350 conditional Samples. Die vollstÃ¤ndigen Werte stehen in `docs/tasks/TASK_1198_simulation_command_attribution.md` und `docs/IMPLEMENTATION_STATUS.md`.
+- Auswahl: Nach den Regeln des Masterplans wird ausschlieÃŸlich der `move_to_position`-Command-Apply-Pfad fÃ¼r TASK 1199 gewÃ¤hlt: Ordering `29 / 63697` liegt unter 25 %, `move_to_position` `67793.5 / 63665` Ã¼ber 40 % und ist in 8/8 LÃ¤ufen dominant. Der Signalpfad wird nicht parallel ausgewÃ¤hlt.
+- Hinweis: Der erste Kaltlauf auf `193c736...` wurde wegen unvollstÃ¤ndiger Fixture-Sampling-Abdeckung verworfen. Simulation- und Release-Budgets bleiben Ã¼berschritten; kein Release-GO.
+- NÃ¤chster Schritt: TASK 1200 nach dem P05-Vertrag, weiterhin strikt seriell.
 
 ---
 
@@ -137,7 +138,7 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 ---
 
 ## TASK_1191 - Gemeinsamer Combat-Visibility-Cache (implementiert im Arbeitsstand)
-- Ergebnis: Eine ticklokale, abgeleitete `CombatVisibilityCache`-Node teilt reine Terrain-Occlusion zwischen Contact Tracking, Enemy Security und Fire-Decision-Resolver. Ihre Key-Reihenfolge bleibt absichtlich source-/target-gerichtet; Weltpositionen sichern Wall-Segment-LoS auch innerhalb derselben Grid-Zelle ab. Gameplay-Entscheidungen und Snapshots bleiben außerhalb des Caches.
+- Ergebnis: Eine ticklokale, abgeleitete `CombatVisibilityCache`-Node teilt reine Terrain-Occlusion zwischen Contact Tracking, Enemy Security und Fire-Decision-Resolver. Ihre Key-Reihenfolge bleibt absichtlich source-/target-gerichtet; Weltpositionen sichern Wall-Segment-LoS auch innerhalb derselben Grid-Zelle ab. Gameplay-Entscheidungen und Snapshots bleiben auÃŸerhalb des Caches.
 - Verifikation: TASK_1191 12/12, mit 16v12/600 Ticks, aktiver Bewegung, sichtbaren Cache-Hits und bit-exaktem Cache-an/aus-Oracle; TASK_162 23/23, TASK_208 57/57 und der cache-verdrahtete TASK_218 81/81 sind gruen. TASK_202 22/2 ist auf `dd69cbffc` identisch rot; TASK_543 erreichte im historischen Meta-Gesamtpfad keinen Abschluss und ist nicht als gruen gewertet.
 - Naechster Schritt: Synthetische First-Contact-/First-Fire-Abkuerzungen aus dem normalen Meta-Flow in eine explizite Release-Fixture auslagern, damit der Produktpfad keine Testmutationen enthaelt.
 
@@ -183,7 +184,7 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Grundlage: TASK_1071 erreichte Victory mit testseitiger Formation-Positionierung; der echte erste Zielweg unter NPC-Druck war nicht geschlossen.
 - Ziel: Homebase -> Drop -> normaler Move zur AA -> Bravo-Contact -> sichtbares AA -> GO -> vorhandene AA-Completion ohne Positions-, Gate- oder Contact-Override pruefen.
 - Ergebnis: Die NPC-AA-Wache startet am vorhandenen `factory_danger_zone` statt am entfernten PvP-Spawn. TASK_1175 belegt reale Formation-Bewegung, Contact, Context-Intent, getrenntes GO und `aa_disabled` auf dem normalen Runtime-Pfad.
-- Verifikation: TASK_1175 16/16 gruen; der große 192x192-Headless-Trace kostet rund 266 Sekunden und bleibt als Harness-Performancepunkt offen.
+- Verifikation: TASK_1175 16/16 gruen; der groÃŸe 192x192-Headless-Trace kostet rund 266 Sekunden und bleibt als Harness-Performancepunkt offen.
 - Naechster Schritt: Den zweiten Spielermoment nach AA unter aktivem Contact auswaehlen: Stationstuer/Computer mit klarer Fire-, Hold- oder Rueckzugsentscheidung, ohne wieder Positionshilfen einzufuehren.
 
 ---
@@ -707,7 +708,7 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Naechster Schritt: TASK_1103 - Parallel Interaction Ownership Feedback Readability.
 
 ## TASK_1100 - Connected Interaction Snapshot Loss/Jitter Resilience (implementiert im Arbeitsstand)
-- Grundlage: Die Payload ist klein; verbleibendes Multiplayer-Risiko waren ausgelassene und verspätete unreliable Snapshots.
+- Grundlage: Die Payload ist klein; verbleibendes Multiplayer-Risiko waren ausgelassene und verspÃ¤tete unreliable Snapshots.
 - Ergebnis: Der akzeptierte Host-Tick laeuft read-only bis ins Feedback. Alte Ticks erreichen weder CombatDriver/Gates noch HUD, Completion bleibt geschlossen und identische neuere Snapshots erzeugen kein neues Label-Update. Neuere autoritative Hold-Resets und gerenderte Dauer-Korrekturen bleiben sichtbar.
 - Verifikation: TASK_1100 31/31 sowie TASK_1096, TASK_1098, TASK_1099 und echter TASK_1091-ENet-Drill gruen.
 - Naechster Schritt: TASK_1101 - Connected Interaction Reconnect State Recovery.
@@ -899,7 +900,7 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 ## TASK_1083 - Two-Instance ROE Ownership Playtest (implementiert im Arbeitsstand)
 - Grundlage: TASK_1082 pruefte Authority und Snapshot isoliert; TASK_607 verband ENet nur vor den Mission-Instanzen und reichte Commands danach direkt ein.
 - Ergebnis: TASK_1083 ist 24/24 gruen. Der Client-Setter laeuft durch echten RPC, Host-Commit und Snapshot zurueck; akzeptierte und abgewiesene ROE-Requests werden clientseitig lesbar. Der dabei entdeckte 14,7-KB-Unreliable-State wird ZSTD-komprimiert und in ungeordnete maximal 1000-Byte-Chunks transportiert; Reverse-Order-Reassembly und die breiten Pack-/Apply-Budgets sind belegt.
-- Naechster Schritt: TASK_1084 behebt den bestaetigten TASK_284-Architekturverstoß der Release-Deep-Link-Helfer, bevor weiterer visueller Missionspolish Runtime-Wahrheit im Meta-Layer zementiert.
+- Naechster Schritt: TASK_1084 behebt den bestaetigten TASK_284-ArchitekturverstoÃŸ der Release-Deep-Link-Helfer, bevor weiterer visueller Missionspolish Runtime-Wahrheit im Meta-Layer zementiert.
 
 ## TASK_1082 - Multiplayer ROE Authority And Replication (implementiert im Arbeitsstand)
 - Grundlage: TASK_1080/1081 machen ROE wirksam und lesbar, aber der sichtbare Buttonpfad umging im Netzwerk noch den allgemeinen Authority-Contract.
@@ -1849,40 +1850,40 @@ git checkout -b batch/<batch-name>
 - TASK_725 - Station Route Host/Client Recapture Acceptance Review (implementiert)
 - TASK_726 - One-Screen Multiplayer Station Scenario Drill (implementiert)
 
-Phase 0 – Fundament (abgeschlossen)
+Phase 0 â€“ Fundament (abgeschlossen)
 TASK_006 Workflow Setup
 TASK_001 RuntimeLeader
 TASK_002 EventRouter
 TASK_003 SimulationRoot
 TASK_004 Registries
 TASK_005 UpdateManager
-Phase 1 – Integration (abgeschlossen)
+Phase 1 â€“ Integration (abgeschlossen)
 TASK_007 RuntimeLeader Integration Test
 TASK_008 Unit Stub + Registry Test
 TASK_009 Minimaler Command-Flow
 TASK_010 Tick-Verarbeitung in SimulationRoot
 TASK_011 Unit-Target Command
 TASK_012 Team-/FTL-Command
-Phase 2 – Datenmodelle (abgeschlossen)
+Phase 2 â€“ Datenmodelle (abgeschlossen)
 TASK_013 CommanderCommand
 TASK_014 FTLTask
 TASK_015 Command -> FTLTask Translator
-Phase 3 – FTL-Datenfluss vervollstaendigen
-TASK_016 – FTLTask im RuntimeLeader annehmen
+Phase 3 â€“ FTL-Datenfluss vervollstaendigen
+TASK_016 â€“ FTLTask im RuntimeLeader annehmen
 
 Ziel:
 
 RuntimeLeader kann FTLTask empfangen
 minimaler Nachweis
 keine Ausfuehrung
-TASK_017 – FTLTask-Queue im RuntimeLeader
+TASK_017 â€“ FTLTask-Queue im RuntimeLeader
 
 Ziel:
 
 RuntimeLeader verwaltet Tasks
 aktueller Task + Queue
 keine KI
-TASK_018 – FTL-State-Modell minimal
+TASK_018 â€“ FTL-State-Modell minimal
 
 Ziel:
 
@@ -1893,19 +1894,19 @@ holding
 engaging
 retreating
 keine echte Wirkung
-TASK_019 – FTLTask -> RuntimeStatus
+TASK_019 â€“ FTLTask -> RuntimeStatus
 
 Ziel:
 
 Task fuehrt zu einfachem Statuswechsel
 keine Bewegung
-Phase 4 – Unit-Ebene anbinden
-TASK_020 – UnitCommand-Stub
+Phase 4 â€“ Unit-Ebene anbinden
+TASK_020 â€“ UnitCommand-Stub
 
 Ziel:
 
 einfache Unit-Kommandos als Daten
-TASK_021 – TestUnit Runtime-Status
+TASK_021 â€“ TestUnit Runtime-Status
 
 Ziel:
 
@@ -1914,20 +1915,20 @@ idle
 assigned
 pending_move
 holding
-TASK_022 – FTLTask -> Unit-Zuweisung
+TASK_022 â€“ FTLTask -> Unit-Zuweisung
 
 Ziel:
 
 FTL referenziert Units korrekt
 keine Aktion
-TASK_023 – mehrere Units pro FTL
+TASK_023 â€“ mehrere Units pro FTL
 
 Ziel:
 
-2–3 Units pro Team
+2â€“3 Units pro Team
 nur Datenfluss
-Phase 5 – erste sichtbare Reaktion
-TASK_024 – Missions-Testszene
+Phase 5 â€“ erste sichtbare Reaktion
+TASK_024 â€“ Missions-Testszene
 
 Ziel:
 
@@ -1935,168 +1936,168 @@ einfache Szene mit:
 FTL
 Units
 Ziel
-TASK_025 – Move-Target als Daten
+TASK_025 â€“ Move-Target als Daten
 
 Ziel:
 
 Zielposition speichern
 keine Navigation
-TASK_026 – minimaler Move im SimulationRoot
+TASK_026 â€“ minimaler Move im SimulationRoot
 
 Ziel:
 
 einfache Positionsaenderung erlaubt
 kein Pathfinding
-TASK_027 – erster sichtbarer Flow
+TASK_027 â€“ erster sichtbarer Flow
 
 Ziel:
 Commander -> FTL -> SimulationRoot -> Unit
 
-Phase 6 – taktische Grundsysteme
-TASK_028 – Line of Sight minimal
-TASK_029 – Fog of War minimal
-TASK_030 – Treffer-/Damage-Modell minimal
-TASK_031 – Down-/Bleedout-Zustaende
-TASK_032 – Friendly Fire
-Phase 7 – Meta-Layer
-TASK_033 – Heimatbasis
-TASK_034 – FOB
-TASK_035 – Teamtransfer
-TASK_036 – Respawn-Logik
-TASK_037 – Rover/Frachter minimal
-Phase 8 – Vertical Slice
-TASK_038 – Fireteam-Aufteilung
-TASK_039 – Phasen-Wirkung
-TASK_040 – Take-Befehl und Objective
-TASK_041 – Siegbedingung
-TASK_042 – Respawn-Timer-Anzeige
-Phase 9 – Gegner-Verhalten
-TASK_043 – Einfache Gegner-Positionierung
-TASK_044 – Gegner-Reaktion auf Kontakt
-TASK_045 – Gegner-Wellen
-Phase 10 – Unit-Identitaet
-TASK_046 – Unit-Skill-Werte
-TASK_047 – Skill-Wirkung im Combat
-TASK_048 – Persoenlichkeitsmerkmale
-TASK_049 – Heimatbasis: Unit-Uebersicht mit Skills
-Phase 11 – Multiplayer-Prototyp V1
-TASK_050 – Server-autoritativer SimulationRoot
-TASK_051 – Host/Join mit Testteams
-TASK_052 – Befehlsuebertragung ueber Netzwerk
-TASK_053 – Synchronisierte Spielzustandsanzeige
-Phase 12 – Terrain-System und Gameplay-Wirkung
-TASK_054 – Terrain-Tile-Datenmodell und Registry
-TASK_055 – Walkability und einfaches A*-Pathfinding
-TASK_056 – LOS ueber Terrain-Tiles
-TASK_057 – Cover aus Terrain-Tiles
-TASK_058 – Hoehenstufen
-TASK_059 – Strassen und Oberflaechen
-Phase 13 – Map Editor
-TASK_060 – Terrain-Daten als JSON-Datei
-TASK_061 – Map-Editor-Szene: Tile-Auswahl und Anzeige
-TASK_062 – Map-Editor: Tile-Properties bearbeiten
-TASK_063 – Map-Editor: Speichern und Laden
-TASK_064 – MissionTestSetup: Terrain aus JSON laden
-Phase 14 – Map-Editor-Workflow und Politur
-TASK_065 – Tile-Typ-Katalog und Palette
-TASK_066 – Corridor-Wall Typen, Typ-Texturen und Auto-Cliff
-TASK_067 – Fix Map-Editor 64x64 Flat Ground
-TASK_068 – Zoom-Inversion und Auto-Wall-Overlays
-TASK_068b – Drag-Painting und Hover-Preview
-TASK_068c – Gitternetz-Overlay und Himmelsrichtungen
-TASK_069 – Map-Editor: Auswahl, Save As und Workflow-Polish
-Phase 15 – Meta-Layer-Roster-Lesbarkeit
-TASK_070 – NPC-Karten-Komponente
-TASK_071 – Heimatbasis: NPC-Karten und Auswahlfokus
-TASK_072 – FOB: Teamkarten und Einsatzstatus
-TASK_073 – Homebase: Charakterbogen und Drag-and-Drop-Teamstaging
-TASK_074 – Homebase: Layout-Neuordnung und Missionsinfoleiste
-TASK_075 – Homebase: Kartenverdichtung, Tooltip-Polish und Charakterbogen-Fokus
-TASK_076 – Meta-Layer: Graue Kenney-UI-Rahmen
-TASK_077 – FOB: Fireteam-Auswahl und Startvorbereitung
-TASK_078 – Meta-Layer: Navigation und Map-Ansicht
-TASK_079 – FOB: Fireteam-Management, Respawn-/Loadout-Staging und Dropship-Wartezone
-TASK_080 – Meta-Layer: Transfer-Sichtbarkeit, Pool-DnD und Charakterbogen-Toggle
-TASK_081 – Meta-Layer: UI-Harmonisierung fuer FOB, Homebase und Loadout
+Phase 6 â€“ taktische Grundsysteme
+TASK_028 â€“ Line of Sight minimal
+TASK_029 â€“ Fog of War minimal
+TASK_030 â€“ Treffer-/Damage-Modell minimal
+TASK_031 â€“ Down-/Bleedout-Zustaende
+TASK_032 â€“ Friendly Fire
+Phase 7 â€“ Meta-Layer
+TASK_033 â€“ Heimatbasis
+TASK_034 â€“ FOB
+TASK_035 â€“ Teamtransfer
+TASK_036 â€“ Respawn-Logik
+TASK_037 â€“ Rover/Frachter minimal
+Phase 8 â€“ Vertical Slice
+TASK_038 â€“ Fireteam-Aufteilung
+TASK_039 â€“ Phasen-Wirkung
+TASK_040 â€“ Take-Befehl und Objective
+TASK_041 â€“ Siegbedingung
+TASK_042 â€“ Respawn-Timer-Anzeige
+Phase 9 â€“ Gegner-Verhalten
+TASK_043 â€“ Einfache Gegner-Positionierung
+TASK_044 â€“ Gegner-Reaktion auf Kontakt
+TASK_045 â€“ Gegner-Wellen
+Phase 10 â€“ Unit-Identitaet
+TASK_046 â€“ Unit-Skill-Werte
+TASK_047 â€“ Skill-Wirkung im Combat
+TASK_048 â€“ Persoenlichkeitsmerkmale
+TASK_049 â€“ Heimatbasis: Unit-Uebersicht mit Skills
+Phase 11 â€“ Multiplayer-Prototyp V1
+TASK_050 â€“ Server-autoritativer SimulationRoot
+TASK_051 â€“ Host/Join mit Testteams
+TASK_052 â€“ Befehlsuebertragung ueber Netzwerk
+TASK_053 â€“ Synchronisierte Spielzustandsanzeige
+Phase 12 â€“ Terrain-System und Gameplay-Wirkung
+TASK_054 â€“ Terrain-Tile-Datenmodell und Registry
+TASK_055 â€“ Walkability und einfaches A*-Pathfinding
+TASK_056 â€“ LOS ueber Terrain-Tiles
+TASK_057 â€“ Cover aus Terrain-Tiles
+TASK_058 â€“ Hoehenstufen
+TASK_059 â€“ Strassen und Oberflaechen
+Phase 13 â€“ Map Editor
+TASK_060 â€“ Terrain-Daten als JSON-Datei
+TASK_061 â€“ Map-Editor-Szene: Tile-Auswahl und Anzeige
+TASK_062 â€“ Map-Editor: Tile-Properties bearbeiten
+TASK_063 â€“ Map-Editor: Speichern und Laden
+TASK_064 â€“ MissionTestSetup: Terrain aus JSON laden
+Phase 14 â€“ Map-Editor-Workflow und Politur
+TASK_065 â€“ Tile-Typ-Katalog und Palette
+TASK_066 â€“ Corridor-Wall Typen, Typ-Texturen und Auto-Cliff
+TASK_067 â€“ Fix Map-Editor 64x64 Flat Ground
+TASK_068 â€“ Zoom-Inversion und Auto-Wall-Overlays
+TASK_068b â€“ Drag-Painting und Hover-Preview
+TASK_068c â€“ Gitternetz-Overlay und Himmelsrichtungen
+TASK_069 â€“ Map-Editor: Auswahl, Save As und Workflow-Polish
+Phase 15 â€“ Meta-Layer-Roster-Lesbarkeit
+TASK_070 â€“ NPC-Karten-Komponente
+TASK_071 â€“ Heimatbasis: NPC-Karten und Auswahlfokus
+TASK_072 â€“ FOB: Teamkarten und Einsatzstatus
+TASK_073 â€“ Homebase: Charakterbogen und Drag-and-Drop-Teamstaging
+TASK_074 â€“ Homebase: Layout-Neuordnung und Missionsinfoleiste
+TASK_075 â€“ Homebase: Kartenverdichtung, Tooltip-Polish und Charakterbogen-Fokus
+TASK_076 â€“ Meta-Layer: Graue Kenney-UI-Rahmen
+TASK_077 â€“ FOB: Fireteam-Auswahl und Startvorbereitung
+TASK_078 â€“ Meta-Layer: Navigation und Map-Ansicht
+TASK_079 â€“ FOB: Fireteam-Management, Respawn-/Loadout-Staging und Dropship-Wartezone
+TASK_080 â€“ Meta-Layer: Transfer-Sichtbarkeit, Pool-DnD und Charakterbogen-Toggle
+TASK_081 â€“ Meta-Layer: UI-Harmonisierung fuer FOB, Homebase und Loadout
 
-Phase 16 – Charakterbogen-Kampfwirkung
-TASK_082 – Gemeinsamer Terrain-Renderer fuer Editor und Mission
-TASK_085 – Charakterbogen Combat-Integration (get_combat_effects)
-TASK_086 – Waffenmodell (WeaponData)
-TASK_087 – Loadout-Pipeline und Waffen-Sprites
+Phase 16 â€“ Charakterbogen-Kampfwirkung
+TASK_082 â€“ Gemeinsamer Terrain-Renderer fuer Editor und Mission
+TASK_085 â€“ Charakterbogen Combat-Integration (get_combat_effects)
+TASK_086 â€“ Waffenmodell (WeaponData)
+TASK_087 â€“ Loadout-Pipeline und Waffen-Sprites
 
-Phase 17A – Waffen und Loadout (abhaengig von 086/087)
+Phase 17A â€“ Waffen und Loadout (abhaengig von 086/087)
 (bereits in Phase 16 enthalten)
 
-Phase 17B – Teamdynamik
-TASK_088 – Leadership-Bonus auf Fireteam-Mitglieder
+Phase 17B â€“ Teamdynamik
+TASK_088 â€“ Leadership-Bonus auf Fireteam-Mitglieder
 
-Phase 17C – Gegner
-TASK_089 – Enemy Cover-Seeking
-TASK_090 – Differenzierte Enemy-Typen
+Phase 17C â€“ Gegner
+TASK_089 â€“ Enemy Cover-Seeking
+TASK_090 â€“ Differenzierte Enemy-Typen
 
-Phase 17D – Wahrnehmung
-TASK_091 – Awareness: Detection-Delay
-TASK_092 – Stealth: Reduzierte Sichtreichweite
+Phase 17D â€“ Wahrnehmung
+TASK_091 â€“ Awareness: Detection-Delay
+TASK_092 â€“ Stealth: Reduzierte Sichtreichweite
 
-Phase 17E – Verhaltensqualitaet
-TASK_093 – Discipline: Hold-Fire-Disziplinbrueche
-TASK_094 – Recognition: Friendly-Fire-Verwechslung
+Phase 17E â€“ Verhaltensqualitaet
+TASK_093 â€“ Discipline: Hold-Fire-Disziplinbrueche
+TASK_094 â€“ Recognition: Friendly-Fire-Verwechslung
 
-Phase 17F – Support-Rollen
-TASK_095 – Combat Medic Support
+Phase 17F â€“ Support-Rollen
+TASK_095 â€“ Combat Medic Support
 
-Phase 17G – Meta-Layer Recovery
-TASK_096 – Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
+Phase 17G â€“ Meta-Layer Recovery
+TASK_096 â€“ Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 
-Phase 17H – Taktisches Kampfsystem
-TASK_097 – Datenmodelle, engage und Ad-hoc-Vertraege (implementiert)
-TASK_098 – TacticalInputController und Fireteam-Auswahl (implementiert)
-TASK_099 – Wegpunktplanung, Kontextmenue und Order-Visualisierung (implementiert)
-TASK_100 – PhaseController und globale Plan-Ausfuehrung
-TASK_101 – FireteamBehaviorResolver, geplantes Flankieren und Standardverhalten
-TASK_102 – AdHocOrderController und Gefechts-Sofortbefehle
-TASK_103 – Suppression, Interruption und Return-to-Plan
-TASK_104 – Inter-Fireteam-Koordination und Leader-initiiertes Flankieren
-TASK_105 – Leader-Nachfolge, Lead-Rueckgabe und UI-Synchronisierung
-TASK_106 – Dropship-LZ, Insertion und verzoegerte Aktivierung
-TASK_107 – LoadoutModifierResolver und initiale Missions-Effects
+Phase 17H â€“ Taktisches Kampfsystem
+TASK_097 â€“ Datenmodelle, engage und Ad-hoc-Vertraege (implementiert)
+TASK_098 â€“ TacticalInputController und Fireteam-Auswahl (implementiert)
+TASK_099 â€“ Wegpunktplanung, Kontextmenue und Order-Visualisierung (implementiert)
+TASK_100 â€“ PhaseController und globale Plan-Ausfuehrung
+TASK_101 â€“ FireteamBehaviorResolver, geplantes Flankieren und Standardverhalten
+TASK_102 â€“ AdHocOrderController und Gefechts-Sofortbefehle
+TASK_103 â€“ Suppression, Interruption und Return-to-Plan
+TASK_104 â€“ Inter-Fireteam-Koordination und Leader-initiiertes Flankieren
+TASK_105 â€“ Leader-Nachfolge, Lead-Rueckgabe und UI-Synchronisierung
+TASK_106 â€“ Dropship-LZ, Insertion und verzoegerte Aktivierung
+TASK_107 â€“ LoadoutModifierResolver und initiale Missions-Effects
 
-Phase 17I – Gegner-Patrouillen und Editor
-TASK_108 – PatrolEditorTool und Pre-Contact-Patrol
+Phase 17I â€“ Gegner-Patrouillen und Editor
+TASK_108 â€“ PatrolEditorTool und Pre-Contact-Patrol
 
-Phase 17J – Taktische Erweiterungen
-TASK_109 – TacticalStanceController und TacticalStancePanel
-TASK_110 – FireteamMovementController und Bewegungsmuster
-TASK_111 – FireteamSecurityController und Overwatch
-TASK_112 – ContactTracker und ContactMapOverlay
-TASK_113 – FlankVulnerabilityResolver und Sektorstrafen
+Phase 17J â€“ Taktische Erweiterungen
+TASK_109 â€“ TacticalStanceController und TacticalStancePanel
+TASK_110 â€“ FireteamMovementController und Bewegungsmuster
+TASK_111 â€“ FireteamSecurityController und Overwatch
+TASK_112 â€“ ContactTracker und ContactMapOverlay
+TASK_113 â€“ FlankVulnerabilityResolver und Sektorstrafen
 
-Phase 17K – Marker-Follow-up
-TASK_115 – Gemeinsames Markersystem fuer Editor und Taktikkarte
+Phase 17K â€“ Marker-Follow-up
+TASK_115 â€“ Gemeinsames Markersystem fuer Editor und Taktikkarte
 
-Phase 17L – Architektur- und Spielgefuehl-Nacharbeit
-TASK_116 – Runtime-Systeme aus scripts/tests herausloesen
-TASK_117 – Dropship-Deploy als SimulationRoot-Effects
-TASK_118 – Combat-Entscheidungen aus MissionCombatLoopDriver herausloesen
-TASK_119 – Seeded Combat RNG und roll_override begrenzen
-TASK_120 – Teamqualitaet als FTL-Ausfuehrungsfaktor
+Phase 17L â€“ Architektur- und Spielgefuehl-Nacharbeit
+TASK_116 â€“ Runtime-Systeme aus scripts/tests herausloesen
+TASK_117 â€“ Dropship-Deploy als SimulationRoot-Effects
+TASK_118 â€“ Combat-Entscheidungen aus MissionCombatLoopDriver herausloesen
+TASK_119 â€“ Seeded Combat RNG und roll_override begrenzen
+TASK_120 â€“ Teamqualitaet als FTL-Ausfuehrungsfaktor
 
-Phase 17M – Area Orders und Bewegungsrobustheit
-TASK_121 – Area Order Marker
-TASK_122 – Defend Area Semantik
-TASK_123 – Attack Area Semantik
-TASK_124 – Area Feedback in #17 Selected Fireteam
-TASK_125 – Terrain Blocker Debug und Walkability Tests
+Phase 17M â€“ Area Orders und Bewegungsrobustheit
+TASK_121 â€“ Area Order Marker
+TASK_122 â€“ Defend Area Semantik
+TASK_123 â€“ Attack Area Semantik
+TASK_124 â€“ Area Feedback in #17 Selected Fireteam
+TASK_125 â€“ Terrain Blocker Debug und Walkability Tests
 
-Phase 17N – HPA Navigation und Performance
-TASK_126 – HPA Navigation Foundation
-TASK_127 – HPA Pathfinder Integration
-TASK_128 – Navigation Budgeting und Debug
-TASK_129 – Deckungsbewusste Pfade mit HPA und Subgoal-Vorbereitung
-TASK_130 – Lokale Unit-Avoidance mit ORCA/RVO-Light
+Phase 17N â€“ HPA Navigation und Performance
+TASK_126 â€“ HPA Navigation Foundation
+TASK_127 â€“ HPA Pathfinder Integration
+TASK_128 â€“ Navigation Budgeting und Debug
+TASK_129 â€“ Deckungsbewusste Pfade mit HPA und Subgoal-Vorbereitung
+TASK_130 â€“ Lokale Unit-Avoidance mit ORCA/RVO-Light
 
-Phase 18 – Erweiterung (spaeter)
+Phase 18 â€“ Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik
 persistente Teams
@@ -2427,20 +2428,20 @@ Batch-Empfehlung
 Codex soll Tasks in kleinen Gruppen bearbeiten:
 
 Batch 1
-TASK_016–019
+TASK_016â€“019
 Batch 2
-TASK_020–023
+TASK_020â€“023
 Batch 3
-TASK_024–027
+TASK_024â€“027
 
 Batch 4
-TASK_074–077
+TASK_074â€“077
 
 Batch 5
-TASK_078–079
+TASK_078â€“079
 
 Batch 6
-TASK_080–081
+TASK_080â€“081
 
 Nach jedem Batch:
 
@@ -2472,5 +2473,5 @@ stoppen
 Problem melden
 nicht improvisieren
 
-## Zusatzauftrag 2026-11-02: reguläre GM01 mit Frontier-Grafiken
-Umgesetzt auf eigenem Taskbranch auf UI R4; keine Mainintegration. Auf weiteren Nutzerwunsch2304echteHexzellen mit vergrößertem Außenposten-/Versorgungsensemble, gespeicherten Hüllenfakten und sichtbarem Hexraster. Statische Editor-Komposition geschützt; Szenario unverändert. Logik-, Quellen-, Sichtmasken-, Readiness- und echte normale Cutlass-/LZ-/Entlade-/GO-Prüfungen bestanden. Performance bleibt gesondert begrenzt. Task: `docs/tasks/TASK_GM01_FRONTIER_REBUILD_20261102.md`; Nachweise: `docs/qa/gm01_frontier_20261102/README.md`.
+## Zusatzauftrag 2026-11-02: regulÃ¤re GM01 mit Frontier-Grafiken
+Umgesetzt auf eigenem Taskbranch auf UI R4; keine Mainintegration. Auf weiteren Nutzerwunsch2304echteHexzellen mit vergrÃ¶ÃŸertem AuÃŸenposten-/Versorgungsensemble, gespeicherten HÃ¼llenfakten und sichtbarem Hexraster. Statische Editor-Komposition geschÃ¼tzt; Szenario unverÃ¤ndert. Logik-, Quellen-, Sichtmasken-, Readiness- und echte normale Cutlass-/LZ-/Entlade-/GO-PrÃ¼fungen bestanden. Performance bleibt gesondert begrenzt. Task: `docs/tasks/TASK_GM01_FRONTIER_REBUILD_20261102.md`; Nachweise: `docs/qa/gm01_frontier_20261102/README.md`.
