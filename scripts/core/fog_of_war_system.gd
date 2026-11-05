@@ -492,18 +492,39 @@ func _build_dirty_candidate_regions(previous_observers: Dictionary, current_obse
 		var next_state: Dictionary = Dictionary(current_observers.get(observer_id, {}))
 		if old_state == next_state:
 			continue
+		var observer_regions: Array = []
 		for observer_state in [old_state, next_state]:
 			if observer_state.is_empty():
 				continue
 			var grid_radius: int = _get_observer_reach_grid_radius(observer_state, terrain_registry)
 			var center_grid: Vector2i = Vector2i(observer_state.get("grid_position", Vector2i.ZERO))
-			regions.append({
+			observer_regions.append({
 				"observer_state": observer_state,
 				"min_x": center_grid.x - grid_radius,
 				"max_x": center_grid.x + grid_radius,
 				"min_y": center_grid.y - grid_radius,
 				"max_y": center_grid.y + grid_radius,
 			})
+		if observer_regions.size() == 2 and not _uses_hex_grid(terrain_registry):
+			var first: Dictionary = Dictionary(observer_regions[0])
+			var second: Dictionary = Dictionary(observer_regions[1])
+			var first_bounds := Rect2i(Vector2i(first.min_x, first.min_y), Vector2i(first.max_x - first.min_x + 1, first.max_y - first.min_y + 1))
+			var second_bounds := Rect2i(Vector2i(second.min_x, second.min_y), Vector2i(second.max_x - second.min_x + 1, second.max_y - second.min_y + 1))
+			var merged_bounds: Rect2i = first_bounds.merge(second_bounds)
+			# Nearby positions usually cover almost the same rectangle. Scan it
+			# once, retaining the exact old-or-new circle test below. A distant
+			# move keeps separate regions when merging would add lookup work.
+			if merged_bounds.get_area() <= first_bounds.get_area() + second_bounds.get_area():
+				regions.append({
+					"observer_state": old_state,
+					"additional_observer_state": next_state,
+					"min_x": merged_bounds.position.x,
+					"max_x": merged_bounds.end.x - 1,
+					"min_y": merged_bounds.position.y,
+					"max_y": merged_bounds.end.y - 1,
+				})
+				continue
+		regions.append_array(observer_regions)
 	return regions
 
 
@@ -518,9 +539,13 @@ func _get_observer_reach_grid_radius(observer_state: Dictionary, terrain_registr
 		# A physical circle has wider axial coordinate extents: the two axial
 		# basis vectors are 60 degrees apart, so max |q|/|r| is 2R/sqrt(3).
 		return maxi(ceili((sight_range_world / hex_spacing) * (2.0 / sqrt(3.0))) + 2, 1)
-	var axis_x_spacing: float = origin.distance_to(Vector2(terrain_registry.call("grid_to_world", Vector2i(1, 0))))
-	var axis_y_spacing: float = origin.distance_to(Vector2(terrain_registry.call("grid_to_world", Vector2i(0, 1))))
-	var grid_spacing: float = maxf(minf(axis_x_spacing, axis_y_spacing), 0.001)
+	var axis_x: Vector2 = Vector2(terrain_registry.call("grid_to_world", Vector2i(1, 0))) - origin
+	var axis_y: Vector2 = Vector2(terrain_registry.call("grid_to_world", Vector2i(0, 1))) - origin
+	# Opposing projected basis vectors can cancel. The distance between
+	# parallel grid-coordinate lines, rather than a basis vector's length,
+	# bounds the coordinates reached by a world-space circle. The padding
+	# also covers an observer offset from its rounded grid centre.
+	var grid_spacing: float = maxf(absf(axis_x.cross(axis_y)) / maxf(maxf(axis_x.length(), axis_y.length()), 0.001), 0.001)
 	return maxi(ceili(sight_range_world / grid_spacing) + 2, 1)
 
 
@@ -559,7 +584,10 @@ func _collect_pending_dirty_candidate_tiles(work: Dictionary, lookup_budget_tile
 		var region: Dictionary = Dictionary(regions[region_index])
 		var observer_state: Dictionary = Dictionary(region.get("observer_state", {}))
 		var tile_data = terrain_registry.call("get_tile_at_grid", Vector2i(grid_x, grid_y))
-		if tile_data != null and _tile_is_within_observer_reach(tile_data, observer_state, terrain_registry):
+		var within_reach: bool = tile_data != null and _tile_is_within_observer_reach(tile_data, observer_state, terrain_registry)
+		if not within_reach and tile_data != null and region.has("additional_observer_state"):
+			within_reach = _tile_is_within_observer_reach(tile_data, Dictionary(region.additional_observer_state), terrain_registry)
+		if within_reach:
 			var tile_id: String = _tile_id_for_tile(tile_data)
 			if not tile_id.is_empty() and not candidate_tile_ids.has(tile_id):
 				candidate_tile_ids[tile_id] = true

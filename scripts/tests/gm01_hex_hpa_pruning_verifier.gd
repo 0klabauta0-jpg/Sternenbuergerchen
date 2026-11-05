@@ -1,5 +1,9 @@
 extends SceneTree
 ## Exact old/new route comparison against the byte-pinned pre-change source.
+## REVIEW8 gives the compiled old linear A* the same corrected square8 cover
+## heuristic, keeping this a pruning/memo comparison rather than a bug oracle.
+## The stored historical source and its SHA remain unchanged; REVIEW8's cover
+## verifier separately characterizes that uninstrumented historical bug.
 ## No actors, simulation clocks, map files or authority settings are changed.
 const HPA = preload("res://scripts/terrain/hpa_pathfinder.gd")
 const GRAPH = preload("res://scripts/terrain/hpa_navigation_graph.gd")
@@ -104,9 +108,21 @@ func _run() -> void:
 		return
 	_check(FileAccess.get_sha256(TERRAIN_BASELINE) == TERRAIN_BASELINE_SHA, "Old TerrainPathfinder source remains byte-identical and independently pinned")
 	_baseline_terrain_script = GDScript.new()
-	_baseline_terrain_script.source_code = FileAccess.get_file_as_string(TERRAIN_BASELINE).replace("class_name TerrainPathfinder\n", "").replace("class_name TerrainPathfinder\r\n", "")
+	var terrain_source: String = FileAccess.get_file_as_string(TERRAIN_BASELINE).replace("class_name TerrainPathfinder\n", "").replace("class_name TerrainPathfinder\r\n", "")
+	var old_square_estimate: String = "\treturn (straight_steps + (diagonal_steps * DIAGONAL_COST_MULTIPLIER)) * MIN_SURFACE_PATH_COST"
+	_check(terrain_source.count(old_square_estimate) == 1, "Pinned old source has one square8 heuristic to align for the pruning comparison")
+	if terrain_source.count(old_square_estimate) != 1:
+		_finish()
+		return
+	var corrected_square_estimate: String = "\n".join([
+		"\tvar minimum_cost: float = MIN_SURFACE_PATH_COST",
+		"\tif bool(options.get(\"cover_aware_enabled\", false)):",
+		"\t\tminimum_cost = maxf(MIN_COVER_AWARE_STEP_COST, MIN_SURFACE_PATH_COST - maxf(float(options.get(\"cover_weight\", 0.0)), 0.0))",
+		"\treturn (straight_steps + (diagonal_steps * DIAGONAL_COST_MULTIPLIER)) * minimum_cost",
+	])
+	_baseline_terrain_script.source_code = terrain_source.replace(old_square_estimate, corrected_square_estimate)
 	var terrain_error := _baseline_terrain_script.reload()
-	_check(terrain_error == OK, "Old HPA uses a separately compiled old TerrainPathfinder, not the new heap")
+	_check(terrain_error == OK, "Old HPA uses a separate linear frontier with the same corrected square8 cover policy, not the new heap")
 	if terrain_error != OK:
 		_finish()
 		return
@@ -282,7 +298,7 @@ func _test_legacy() -> void:
 	var graph := GRAPH.new()
 	_check(graph.build_from_registry(registry, 3), "Legacy square fixture builds")
 	_compare("legacy square unchanged", registry, graph, Vector2i(-4, -3), Vector2i(4, 3))
-	_compare("legacy weighted unchanged", registry, graph, Vector2i(-4, -3), Vector2i(4, 3), {"cover_aware_enabled": true, "cover_weight": 0.8, "exposure_weight": 0.2})
+	_compare("legacy weighted exact with corrected cover heuristic", registry, graph, Vector2i(-4, -3), Vector2i(4, 3), {"cover_aware_enabled": true, "cover_weight": 0.8, "exposure_weight": 0.2})
 	registry.get_tile_at_grid(Vector2i(1, 1)).height_level = 1
 	registry.get_tile_at_grid(Vector2i(1, 1)).edge_type = TILE.EDGE_SLOPE
 	registry.notify_tile_data_changed([Vector2i(1, 1)])

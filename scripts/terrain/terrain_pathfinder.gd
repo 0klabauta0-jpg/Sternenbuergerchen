@@ -355,7 +355,12 @@ func _estimate_cost(from_grid: Vector2i, to_grid: Vector2i, registry = null, opt
 	var distance_y: float = absf(float(delta.y))
 	var diagonal_steps: float = minf(distance_x, distance_y)
 	var straight_steps: float = absf(distance_x - distance_y)
-	return (straight_steps + (diagonal_steps * DIAGONAL_COST_MULTIPLIER)) * MIN_SURFACE_PATH_COST
+	var minimum_cost: float = MIN_SURFACE_PATH_COST
+	if bool(options.get("cover_aware_enabled", false)):
+		# Cover can discount every destination cell. A larger heuristic can
+		# finish an expensive open route before discovering cheaper cover.
+		minimum_cost = maxf(MIN_COVER_AWARE_STEP_COST, MIN_SURFACE_PATH_COST - maxf(float(options.get("cover_weight", 0.0)), 0.0))
+	return (straight_steps + (diagonal_steps * DIAGONAL_COST_MULTIPLIER)) * minimum_cost
 
 
 func _is_neighbor_walkable_scoped(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary) -> bool:
