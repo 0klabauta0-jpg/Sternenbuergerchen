@@ -1,0 +1,95 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-e883d9848e76401a9963a378a67d165a
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+ERROR: FAIL: (1920, 1080) aborted: native heading identifies the actual completed or incomplete outcome
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:70)
+       [1] _check_result (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:43)
+       [2] _frames (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:61)
+ERROR: FAIL: (1920, 1080) aborted: outcome chip names the authority result
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:70)
+       [1] _check_result (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:44)
+       [2] _frames (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:61)
+ERROR: FAIL: (1920, 1080) aborted: condition chip identifies evacuation without a diagnostic fallback
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:70)
+       [1] _check_result (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:45)
+       [2] _frames (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:61)
+ERROR: FAIL: (1920, 1080) aborted: confirmed abort is not depicted as a missing result
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:70)
+       [1] _check_result (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:47)
+       [2] _frames (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:61)
+PASS: (1920, 1080) aborted: presentation preserves the complete authority payload
+PASS: (1920, 1080) aborted: original report details preserve result and condition
+PASS: (1920, 1080) aborted: actual report remains inside the viewport
+PASS: (1920, 1080) victory: native heading identifies the actual completed or incomplete outcome
+PASS: (1920, 1080) victory: outcome chip names the authority result
+PASS: (1920, 1080) victory: condition chip identifies evacuation without a diagnostic fallback
+PASS: (1920, 1080) victory: presentation preserves the complete authority payload
+PASS: (1920, 1080) victory: original report details preserve result and condition
+PASS: (1920, 1080) victory: actual report remains inside the viewport
+PASS: (1920, 1080) defeat: native heading identifies the actual completed or incomplete outcome
+PASS: (1920, 1080) defeat: outcome chip names the authority result
+PASS: (1920, 1080) defeat: condition chip identifies evacuation without a diagnostic fallback
+PASS: (1920, 1080) defeat: presentation preserves the complete authority payload
+PASS: (1920, 1080) defeat: original report details preserve result and condition
+PASS: (1920, 1080) defeat: actual report remains inside the viewport
+PASS: (1920, 1080) unknown_review8_fixture: native heading identifies the actual completed or incomplete outcome
+PASS: (1920, 1080) unknown_review8_fixture: outcome chip names the authority result
+PASS: (1920, 1080) unknown_review8_fixture: condition chip identifies evacuation without a diagnostic fallback
+PASS: (1920, 1080) unknown_review8_fixture: presentation preserves the complete authority payload
+PASS: (1920, 1080) unknown_review8_fixture: original report details preserve result and condition
+PASS: (1920, 1080) unknown_review8_fixture: actual report remains inside the viewport
+ERROR: FAIL: (1280, 720) aborted: native heading identifies the actual completed or incomplete outcome
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:70)
+       [1] _check_result (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:43)
+       [2] _frames (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:61)
+ERROR: FAIL: (1280, 720) aborted: outcome chip names the authority result
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:70)
+       [1] _check_result (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:44)
+       [2] _frames (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:61)
+ERROR: FAIL: (1280, 720) aborted: condition chip identifies evacuation without a diagnostic fallback
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:70)
+       [1] _check_result (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:45)
+       [2] _frames (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:61)
+ERROR: FAIL: (1280, 720) aborted: confirmed abort is not depicted as a missing result
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:70)
+       [1] _check_result (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:47)
+       [2] _frames (res://scripts/tests/review8_ux_debrief_abort_verifier.gd:61)
+PASS: (1280, 720) aborted: presentation preserves the complete authority payload
+PASS: (1280, 720) aborted: original report details preserve result and condition
+PASS: (1280, 720) aborted: actual report remains inside the viewport
+PASS: (1280, 720) victory: native heading identifies the actual completed or incomplete outcome
+PASS: (1280, 720) victory: outcome chip names the authority result
+PASS: (1280, 720) victory: condition chip identifies evacuation without a diagnostic fallback
+PASS: (1280, 720) victory: presentation preserves the complete authority payload
+PASS: (1280, 720) victory: original report details preserve result and condition
+PASS: (1280, 720) victory: actual report remains inside the viewport
+PASS: (1280, 720) defeat: native heading identifies the actual completed or incomplete outcome
+PASS: (1280, 720) defeat: outcome chip names the authority result
+PASS: (1280, 720) defeat: condition chip identifies evacuation without a diagnostic fallback
+PASS: (1280, 720) defeat: presentation preserves the complete authority payload
+PASS: (1280, 720) defeat: original report details preserve result and condition
+PASS: (1280, 720) defeat: actual report remains inside the viewport
+PASS: (1280, 720) unknown_review8_fixture: native heading identifies the actual completed or incomplete outcome
+PASS: (1280, 720) unknown_review8_fixture: outcome chip names the authority result
+PASS: (1280, 720) unknown_review8_fixture: condition chip identifies evacuation without a diagnostic fallback
+PASS: (1280, 720) unknown_review8_fixture: presentation preserves the complete authority payload
+PASS: (1280, 720) unknown_review8_fixture: original report details preserve result and condition
+PASS: (1280, 720) unknown_review8_fixture: actual report remains inside the viewport
+REVIEW8_UX_DEBRIEF: 42 passed, 8 failed

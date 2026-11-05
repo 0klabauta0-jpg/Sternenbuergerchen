@@ -1,5 +1,25 @@
 # IMPLEMENTATION_STATUS
 
+### REVIEW8 - Code, Bedienung und Hallengrafik, 2026-11-05
+- Basis Main `93c2e6810`, neuer isolierter Task-Branch. Vier bestaetigte
+  Fehler behoben: konservative Square8-FoW-Grenzen, optimale Cover-Pfade,
+  erreichbare A5-Evakuierung und korrekter Abbruch-Debrief.
+- FoW-Mehrarbeit durch einmalige Sammlung ueberlappender Bereiche begrenzt;
+  unveraenderter 512er Workload haelt 350 ms geschaetzte Verzoegerung.
+- Gezielter Hallenpass zur A5-2D-Vorlage: geneigte Tealdachflaechen und helle
+  Konstruktion; 58->53 Meshes, 2508->2304 Tris, bisherige Huelle/Access erhalten.
+- Final 39/39 Headless-Gates (neue Regressionen 236/236); native EVAC 46/46,
+  Debrief 56/56 und zwingender GPU-Readback 39/39. Vier identische native
+  Gebaeudekamerapaare, je 30/30. Normale Vorher-/Nachherroute in beiden
+  Aufloesungen je 50/50; kein Actor-, Timer- oder Transportphasenpatch.
+- 1800 Sourcepins ohne Drift; 42 fremde Dateien und 437 bestehende Rosterdateien
+  bleiben in Bytes, Laenge und Schreibzeit gleich. Unabhaengige Reviews APPROVED.
+- Bericht `docs/reports/REVIEW8_2026-11-05.md`, Aufgabe
+  `docs/tasks/REVIEW8_2026_11_05_code_ux_graphics.md`, Rohindex
+  `output/review_graphics_20261105/verification_summary.json`.
+- Main-Fast-forward und Push folgen als ausdruecklich beauftragter Abschluss.
+  Keine allgemeine FPS-/EXE-/Release- oder gestalterische Nutzerabnahme.
+
 ### A5 – Zweiter Einsatz nach Debrief, 2026-11-04
 - Der Einzelspieler-Metaübergang verwirft den taktischen Plan der
   abgeschlossenen Mission. Der zweite Einsatz erhält einen neuen Plan

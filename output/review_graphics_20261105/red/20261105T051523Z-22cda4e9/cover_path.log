@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-6ba881bee27b4fd39aa0df36b09d6e81
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== REVIEW8 cover-aware square8 A* oracle ===
+PASS: Independent Dijkstra confirms hand-checked fixture cost
+PASS: Cover path retains source and destination
+PASS: Cover path obeys real traversal and corner rules
+ERROR: FAIL: Cover-aware search discovers cheaper covered detour
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review8_cover_path_verifier.gd:139)
+       [1] _test_cover_route (res://scripts/tests/review8_cover_path_verifier.gd:42)
+       [2] _run (res://scripts/tests/review8_cover_path_verifier.gd:19)
+ERROR: FAIL: Cover-aware path costs less than the open eight-step line
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review8_cover_path_verifier.gd:139)
+       [1] _test_cover_route (res://scripts/tests/review8_cover_path_verifier.gd:43)
+       [2] _run (res://scripts/tests/review8_cover_path_verifier.gd:19)
+ERROR: FAIL: Cover-aware A* cost equals independent Dijkstra oracle
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review8_cover_path_verifier.gd:139)
+       [1] _test_cover_route (res://scripts/tests/review8_cover_path_verifier.gd:44)
+       [2] _run (res://scripts/tests/review8_cover_path_verifier.gd:19)
+PASS: Fixture builds a real HPA component
+PASS: HPA uses legal local cover-aware route
+ERROR: FAIL: Real HPA local query retains optimal cover-aware cost
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/review8_cover_path_verifier.gd:139)
+       [1] _test_cover_route (res://scripts/tests/review8_cover_path_verifier.gd:53)
+       [2] _run (res://scripts/tests/review8_cover_path_verifier.gd:19)
+PASS: Neutral or disabled cover keeps shortest open route
+PASS: Neutral or disabled cover keeps shortest open route
+PASS: Neutral or disabled cover keeps shortest open route
+=== RESULTS: 8 passed, 4 failed ===

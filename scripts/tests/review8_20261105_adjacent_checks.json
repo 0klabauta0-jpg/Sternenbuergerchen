@@ -1,0 +1,215 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "review_p1_navigation",
+      "script": "res://scripts/tests/review_20261102_p1_navigation_verifier.gd",
+      "success_marker": "REVIEW_20261102_P1_NAVIGATION_RESULT",
+      "timeout": 45
+    },
+    {
+      "name": "review_p2_hex_budget",
+      "script": "res://scripts/tests/review_20261102_p2_hex_budget_verifier.gd",
+      "success_marker": "REVIEW_20261102_P2_HEX_RESULT",
+      "timeout": 45
+    },
+    {
+      "name": "navigation125",
+      "script": "res://scripts/tests/task_125_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "navigation127",
+      "script": "res://scripts/tests/task_127_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 45
+    },
+    {
+      "name": "cycle_density_fow_refresh",
+      "script": "res://scripts/tests/review_cycles_20261103_density_fow_refresh_verifier.gd",
+      "success_marker": "REVIEW_CYCLES_DENSITY_FOW_REFRESH_RESULT",
+      "timeout": 180
+    },
+    {
+      "name": "fow_dirty1189",
+      "script": "res://scripts/tests/task_1189_fow_dirty_region_fanout.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "fow_runtime224",
+      "script": "res://scripts/tests/task_224_fog_of_war_tile_visibility_height_cover_runtime.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "fow_overlay225",
+      "script": "res://scripts/tests/task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_1188_unit_proxy_dirty_sync",
+      "script": "res://scripts/tests/task_1188_unit_proxy_dirty_sync.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "review7_fow",
+      "script": "res://scripts/tests/review7_fow_verifier.gd",
+      "success_marker": "REVIEW7_FOW_RESULT",
+      "timeout": 90
+    },
+    {
+      "name": "review7_fow_view",
+      "script": "res://scripts/tests/review7_fow_view_verifier.gd",
+      "success_marker": "REVIEW7_FOW_VIEW_RESULT",
+      "timeout": 90
+    },
+    {
+      "name": "review7_fow_motion",
+      "script": "res://scripts/tests/review7_fow_motion_verifier.gd",
+      "success_marker": "REVIEW7_FOW_MOTION_RESULT",
+      "timeout": 90
+    },
+    {
+      "name": "review7_camera",
+      "script": "res://scripts/tests/review7_camera_verifier.gd",
+      "success_marker": "REVIEW7_CAMERA_RESULT",
+      "timeout": 90
+    },
+    {
+      "name": "review7_animation",
+      "script": "res://scripts/tests/review7_animation_verifier.gd",
+      "success_marker": "REVIEW7_ANIMATION_RESULT",
+      "timeout": 90
+    },
+    {
+      "name": "review7_fow_moving_view",
+      "script": "res://scripts/tests/review7_fow_moving_view_verifier.gd",
+      "success_marker": "REVIEW7_FOW_MOVING_VIEW_RESULT",
+      "timeout": 90
+    },
+    {
+      "name": "map_compat_cover",
+      "script": "res://scripts/tests/gm01_frontier_cover_radius_verifier.gd",
+      "success_marker": "GM01_FRONTIER_COVER_RADIUS_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "map_compat_start",
+      "script": "res://scripts/tests/frontier_start_graphics_verifier.gd",
+      "success_marker": "FRONTIER_START_GRAPHICS_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "stable_astar_frontier",
+      "script": "res://scripts/tests/gm01_stable_astar_frontier_verifier.gd",
+      "success_marker": "GM01_STABLE_ASTAR_FRONTIER_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "hex_hpa_pruning",
+      "script": "res://scripts/tests/gm01_hex_hpa_pruning_verifier.gd",
+      "success_marker": "GM01_HEX_HPA_PRUNING_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "map_edge",
+      "script": "res://scripts/tests/gm01_frontier_map_edge_verifier.gd",
+      "success_marker": "GM01_FRONTIER_MAP_EDGE_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "hex_rebuild",
+      "script": "res://scripts/tests/gm01_frontier_rebuild_verifier.gd",
+      "success_marker": "GM01_FRONTIER_REBUILD_RESULT",
+      "timeout": 150
+    },
+    {
+      "name": "hex_fow",
+      "script": "res://scripts/tests/gm01_frontier_hex_fow_verifier.gd",
+      "success_marker": "GM01_HEX_FOW_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "hex_minimap",
+      "script": "res://scripts/tests/gm01_frontier_hex_minimap_verifier.gd",
+      "success_marker": "GM01_FRONTIER_HEX_MINIMAP_ALL_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "ui_a5",
+      "script": "res://scripts/tests/ui_a5_native_hud_verifier.gd",
+      "success_marker": "PASS: native A5 HUD",
+      "timeout": 100
+    },
+    {
+      "name": "ui_reference_groups",
+      "script": "res://scripts/tests/ui_a5_reference_groups_verifier.gd",
+      "success_marker": "A5_REFERENCE_GROUPS_ALL_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "r2_mission_feedback",
+      "script": "res://scripts/tests/ui_mission_r2_verifier.gd",
+      "success_marker": "PASS: native mission R2",
+      "timeout": 100
+    },
+    {
+      "name": "r3_readout",
+      "script": "res://scripts/tests/ui_native_r3_mission_readout_verifier.gd",
+      "success_marker": "PASS: native mission R3 readout",
+      "timeout": 100
+    },
+    {
+      "name": "cutlass_identity",
+      "script": "res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd",
+      "success_marker": "PASS: native R4 Cutlass identity",
+      "timeout": 100
+    },
+    {
+      "name": "evac_authority",
+      "script": "res://scripts/tests/task_1069_station_route_evac_abort_outcome.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 100
+    },
+    {
+      "name": "debrief_r3",
+      "script": "res://scripts/tests/ui_native_r3_debrief_verifier.gd",
+      "success_marker": "PASS: native R3 debrief",
+      "timeout": 100
+    },
+    {
+      "name": "second_sortie",
+      "script": "res://scripts/tests/second_sortie_planning_lifecycle_verifier.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 150
+    },
+    {
+      "name": "building_environment",
+      "script": "res://scripts/tests/frontier_pass05_environment_verifier.gd",
+      "success_marker": "FRONTIER_PASS05_ENVIRONMENT",
+      "timeout": 100
+    },
+    {
+      "name": "building_current_environment",
+      "script": "res://scripts/tests/frontier_main_environment_verifier.gd",
+      "success_marker": "FRONTIER_MAIN_ENVIRONMENT",
+      "timeout": 100
+    },
+    {
+      "name": "navigation128",
+      "script": "res://scripts/tests/task_128_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "navigation129",
+      "script": "res://scripts/tests/task_129_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 150
+    }
+  ]
+}

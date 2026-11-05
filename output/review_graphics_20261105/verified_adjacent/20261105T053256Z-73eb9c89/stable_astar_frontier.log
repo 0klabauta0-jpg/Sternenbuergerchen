@@ -1,0 +1,145 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-aaca5032f0c04b8399674ff434b8a97b
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Linear-frontier TerrainPathfinder baseline is byte-pinned
+PASS: Old A* compiles after removing only its global class_name
+PASS: Decrease-key retains original ordinal ahead of equally ranked later entries
+PASS: Popped and reopened node receives a new ordinal behind existing equal entries
+PASS: Further decreases and complete draining match the original insertion scan
+PASS: Large deterministic replay preserves every pop under equal scores, key changes and repeated reopenings
+PASS: Signed zero and both infinities preserve old tie ordering
+PASS: NaN switches before selection and reconstructs the current old insertion list
+PASS: Every NaN fallback pop matches the original >= scan exactly
+PASS: Real saved GM01 remains the 9408-cell comparison source
+PASS: GM01 exact measured endpoints: exact ordered path array
+PASS: GM01 exact measured endpoints: exact scoring floats
+PASS: GM01 exact measured endpoints: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"GM01 exact measured endpoints","exact":true,"new_usec":6037,"old_usec":5027,"path_size":11}
+PASS: GM01 actual western cells: exact ordered path array
+PASS: GM01 actual western cells: exact scoring floats
+PASS: GM01 actual western cells: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"GM01 actual western cells","exact":true,"new_usec":2503,"old_usec":2293,"path_size":10}
+PASS: Production option builders include cover, corridor, lane and blocker-clearance costs together
+PASS: GM01 production normal MOVE options: exact ordered path array
+PASS: GM01 production normal MOVE options: exact scoring floats
+PASS: GM01 production normal MOVE options: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"GM01 production normal MOVE options","exact":true,"new_usec":16959,"old_usec":15888,"path_size":11}
+PASS: A* comparisons never write the saved map
+PASS: Hex (-4, -3) to (4, 3): exact ordered path array
+PASS: Hex (-4, -3) to (4, 3): exact scoring floats
+PASS: Hex (-4, -3) to (4, 3): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex (-4, -3) to (4, 3)","exact":true,"new_usec":5656,"old_usec":4595,"path_size":15}
+PASS: Hex (4, 3) to (-4, -3): exact ordered path array
+PASS: Hex (4, 3) to (-4, -3): exact scoring floats
+PASS: Hex (4, 3) to (-4, -3): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex (4, 3) to (-4, -3)","exact":true,"new_usec":5564,"old_usec":4756,"path_size":15}
+PASS: Hex (-2, 1) to (2, -1): exact ordered path array
+PASS: Hex (-2, 1) to (2, -1): exact scoring floats
+PASS: Hex (-2, 1) to (2, -1): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex (-2, 1) to (2, -1)","exact":true,"new_usec":561,"old_usec":500,"path_size":5}
+PASS: Hex (-1, -1) to (-1, -1): exact ordered path array
+PASS: Hex (-1, -1) to (-1, -1): exact scoring floats
+PASS: Hex (-1, -1) to (-1, -1): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex (-1, -1) to (-1, -1)","exact":true,"new_usec":3,"old_usec":7,"path_size":1}
+PASS: Hex (0, 0) to (30, 30): exact ordered path array
+PASS: Hex (0, 0) to (30, 30): exact scoring floats
+PASS: Hex (0, 0) to (30, 30): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex (0, 0) to (30, 30)","exact":true,"new_usec":3,"old_usec":7,"path_size":0}
+PASS: Hex cover and road ties: exact ordered path array
+PASS: Hex cover and road ties: exact scoring floats
+PASS: Hex cover and road ties: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex cover and road ties","exact":true,"new_usec":10921,"old_usec":10051,"path_size":16}
+PASS: Hex negative custom weights: exact ordered path array
+PASS: Hex negative custom weights: exact scoring floats
+PASS: Hex negative custom weights: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex negative custom weights","exact":true,"new_usec":7343,"old_usec":6704,"path_size":15}
+PASS: Hex disconnected barrier: exact ordered path array
+PASS: Hex disconnected barrier: exact scoring floats
+PASS: Hex disconnected barrier: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex disconnected barrier","exact":true,"new_usec":2828,"old_usec":2529,"path_size":0}
+PASS: Hex blocked endpoint: exact ordered path array
+PASS: Hex blocked endpoint: exact scoring floats
+PASS: Hex blocked endpoint: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"Hex blocked endpoint","exact":true,"new_usec":2701,"old_usec":2267,"path_size":0}
+PASS: legacy square (-4, -3) to (4, 3): exact ordered path array
+PASS: legacy square (-4, -3) to (4, 3): exact scoring floats
+PASS: legacy square (-4, -3) to (4, 3): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square (-4, -3) to (4, 3)","exact":true,"new_usec":6020,"old_usec":5076,"path_size":9}
+PASS: legacy square (4, 3) to (-4, -3): exact ordered path array
+PASS: legacy square (4, 3) to (-4, -3): exact scoring floats
+PASS: legacy square (4, 3) to (-4, -3): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square (4, 3) to (-4, -3)","exact":true,"new_usec":5837,"old_usec":5270,"path_size":9}
+PASS: legacy square (-2, 1) to (2, -1): exact ordered path array
+PASS: legacy square (-2, 1) to (2, -1): exact scoring floats
+PASS: legacy square (-2, 1) to (2, -1): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square (-2, 1) to (2, -1)","exact":true,"new_usec":836,"old_usec":802,"path_size":5}
+PASS: legacy square (-1, -1) to (-1, -1): exact ordered path array
+PASS: legacy square (-1, -1) to (-1, -1): exact scoring floats
+PASS: legacy square (-1, -1) to (-1, -1): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square (-1, -1) to (-1, -1)","exact":true,"new_usec":3,"old_usec":7,"path_size":1}
+PASS: legacy square (0, 0) to (30, 30): exact ordered path array
+PASS: legacy square (0, 0) to (30, 30): exact scoring floats
+PASS: legacy square (0, 0) to (30, 30): no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square (0, 0) to (30, 30)","exact":true,"new_usec":3,"old_usec":6,"path_size":0}
+PASS: legacy square cover and road ties: exact ordered path array
+PASS: legacy square cover and road ties: exact scoring floats
+PASS: legacy square cover and road ties: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square cover and road ties","exact":true,"new_usec":12841,"old_usec":2355,"path_size":9}
+PASS: legacy square negative custom weights: exact ordered path array
+PASS: legacy square negative custom weights: exact scoring floats
+PASS: legacy square negative custom weights: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square negative custom weights","exact":true,"new_usec":7234,"old_usec":6474,"path_size":9}
+PASS: legacy square disconnected barrier: exact ordered path array
+PASS: legacy square disconnected barrier: exact scoring floats
+PASS: legacy square disconnected barrier: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square disconnected barrier","exact":true,"new_usec":4242,"old_usec":3858,"path_size":0}
+PASS: legacy square blocked endpoint: exact ordered path array
+PASS: legacy square blocked endpoint: exact scoring floats
+PASS: legacy square blocked endpoint: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"legacy square blocked endpoint","exact":true,"new_usec":4212,"old_usec":3862,"path_size":0}
+PASS: invalid null registry: exact ordered path array
+PASS: invalid null registry: exact scoring floats
+STABLE_ASTAR_QUERY {"case":"invalid null registry","exact":true,"new_usec":1,"old_usec":3,"path_size":0}
+PASS: infinite clearance cost: exact ordered path array
+PASS: infinite clearance cost: exact scoring floats
+PASS: infinite clearance cost: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"infinite clearance cost","exact":true,"new_usec":65,"old_usec":63,"path_size":0}
+PASS: NaN custom lane cost: exact ordered path array
+PASS: NaN custom lane cost: exact scoring floats
+PASS: NaN custom lane cost: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"NaN custom lane cost","exact":true,"new_usec":63,"old_usec":58,"path_size":2}
+PASS: NaN custom exposure: exact ordered path array
+PASS: NaN custom exposure: exact scoring floats
+PASS: NaN custom exposure: no terrain-authority mutation
+STABLE_ASTAR_QUERY {"case":"NaN custom exposure","exact":true,"new_usec":66,"old_usec":62,"path_size":2}
+PASS: Directed memo retains different target-surface costs in both directions
+PASS: Memoized repeated-edge scoring preserves every float while avoiding actual recomputation
+PASS: Registry revision invalidates existing context before reusing a changed runtime-override cost
+PASS: A context for another registry falls back to the original computation
+PASS: Registries without revision support bypass memoization
+PASS: An untyped caller value cannot activate the private cost context
+PASS: Cost-context test leaves caller-owned cost options untouched
+PASS: Scoped traversability caches exact true results even with irrelevant nonfinite cost options
+PASS: Reverse traversability uses its own directed cache key
+PASS: False non-neighbor/outside results are cached without inventing playable terrain
+PASS: Public can_traverse_step retains the original rule independently of the private memo
+PASS: Revision change drops both caches before returning newly blocked truth
+PASS: Cost computation reuses the same blocked traversal result and retains INF
+PASS: Removing the runtime blocker invalidates both caches and restores the exact original cost
+PASS: Unsupported registries retain original traversability without memo reuse
+PASS: Hex: mixed-height/diagonal directed costs keep exact old float math
+PASS: Hex: two incoming edges compute the same target components only once
+PASS: Hex: scoring reuses target inputs while preserving every original sum and mean
+PASS: Hex: a revision atomically clears edge/traversal/cell caches before reading new cover truth
+PASS: Hex: nonfinite component floats retain original semantics on cache hits
+PASS: Hex: nonfinite memo scoring remains exactly equal to old scoring
+PASS: legacy diagonal: mixed-height/diagonal directed costs keep exact old float math
+PASS: legacy diagonal: two incoming edges compute the same target components only once
+PASS: legacy diagonal: scoring reuses target inputs while preserving every original sum and mean
+PASS: legacy diagonal: a revision atomically clears edge/traversal/cell caches before reading new cover truth
+PASS: legacy diagonal: nonfinite component floats retain original semantics on cache hits
+PASS: legacy diagonal: nonfinite memo scoring remains exactly equal to old scoring
+PASS: Unsupported registries keep original component helper execution without cell memoization
+Stable A* frontier: 114 passed, 0 failed
+GM01_STABLE_ASTAR_FRONTIER_ALL_PASS

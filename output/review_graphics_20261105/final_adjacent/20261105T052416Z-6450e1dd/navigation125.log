@@ -1,0 +1,71 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-37520253eeb140f7a64968f98f4950de
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_125 Terrain Blocker Debug + Walkability Verifier ===
+PASS: Rock target is reported as non-walkable
+PASS: Rock target debug names the blocker reason
+PASS: Rock replacement target is stable across repeated resolution
+PASS: Rock target replacement points to a walkable grid
+PASS: Open terrain path uses diagonal steps instead of axis-first doglegs
+PASS: Diagonal pathing routes around blocked tile corners instead of cutting through them
+PASS: Pathfinder returns a path around a rock blocker
+PASS: Path waypoint never targets the rock blocker
+PASS: Path waypoint never targets the rock blocker
+PASS: Path waypoint never targets the rock blocker
+PASS: Path waypoint never targets the rock blocker
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit movement never enters the rock blocker tile
+PASS: Unit reaches a walkable target by moving around the blocker
+PASS: Unreachable movement never tunnels through a rock blocker
+PASS: Unreachable movement never tunnels through a rock blocker
+PASS: Unreachable movement never tunnels through a rock blocker
+PASS: Unreachable movement never tunnels through a rock blocker
+PASS: Unreachable movement never tunnels through a rock blocker
+PASS: Unreachable movement never tunnels through a rock blocker
+PASS: Unreachable movement never tunnels through a rock blocker
+PASS: Unreachable movement never tunnels through a rock blocker
+PASS: Unreachable movement never tunnels through a rock blocker
+PASS: Unreachable movement never tunnels through a rock blocker
+PASS: Unreachable target keeps the unit at a stable reachable fallback
+PASS: Terrain move debug reports no reachable path
+PASS: Terrain move debug exposes the stable fallback grid
+PASS: Tactical controller exposes a readable terrain debug line
+PASS: Terrain debug line names original target, replacement and reason
+=== RESULTS: 64 passed, 0 failed ===
+ALL TESTS PASSED

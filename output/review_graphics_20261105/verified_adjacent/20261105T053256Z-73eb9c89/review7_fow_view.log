@@ -1,0 +1,36 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-8e6ab8ab9ad44bfd907c3fe610cfce2a
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Real mission setup completes its terrain visibility job
+PASS: Initial real FoW publication has one committed terrain revision
+PASS: Real view initially displays the in-range enemy proxy
+PASS: Fixture observes a real partially built FoW MultiMesh
+PASS: Target-only update hides the actual out-of-range proxy while overlay is pending
+PASS: Pending overlay target removal retains the exact terrain MultiMesh instance
+PASS: Pending overlay target removal retains exact cursor and pending state
+PASS: Pending overlay target removal retains the existing safety-cover lifecycle
+PASS: Pending overlay target removal retains the full-rebuild count
+PASS: Target-only update reveals the same real proxy while overlay is pending
+PASS: Pending overlay target return retains the exact terrain MultiMesh instance
+PASS: Pending overlay target return retains exact cursor and pending state
+PASS: Pending overlay target return retains the existing safety-cover lifecycle
+PASS: Pending overlay target return retains the full-rebuild count
+PASS: Initial overlay finishes exactly once despite dynamic target updates
+PASS: Completed real overlay removes its safety blackout
+PASS: Completed overlay still hides the out-of-range target immediately
+PASS: Completed overlay target removal retains the exact terrain MultiMesh instance
+PASS: Completed overlay target removal retains exact cursor and pending state
+PASS: Completed overlay target removal retains the existing safety-cover lifecycle
+PASS: Completed overlay target removal retains the full-rebuild count
+PASS: Completed overlay still reveals the returning target immediately
+PASS: Completed overlay target return retains the exact terrain MultiMesh instance
+PASS: Completed overlay target return retains exact cursor and pending state
+PASS: Completed overlay target return retains the existing safety-cover lifecycle
+PASS: Completed overlay target return retains the full-rebuild count
+PASS: Target-only updates do not schedule a delayed extra terrain rebuild
+PASS: Target-only consumer updates leave the terrain revision unchanged
+PASS: A real FoW mode change still invalidates terrain visuals
+PASS: A viewer-team change still invalidates terrain visuals
+REVIEW7_FOW_VIEW_FACTS {"completed_before":{"cursor":0,"full_rebuilds":1,"mesh_id":122121358664,"pending":false,"safety_id":0},"final_overlay":{"cursor":0,"full_rebuilds":2,"mesh_id":122775670088,"pending":true,"safety_id":0},"headless_is_not_pixel_capture":true,"pending_before":{"cursor":512,"full_rebuilds":0,"mesh_id":122121358664,"pending":true,"safety_id":122154913098},"real_view":true}
+REVIEW7_FOW_VIEW_RESULT passed=30 failed=0

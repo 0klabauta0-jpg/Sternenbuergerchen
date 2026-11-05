@@ -1,0 +1,165 @@
+{
+  "builder_sha256": "a17fcd6fd3ec462ffe49225396bd31e8c063da015204c7a0f8925d9b3b8e8f62",
+  "captures": [
+    {
+      "building": "hall",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "camera_size": 4.90000009536743,
+      "light": "unchanged FrontierArtProfile",
+      "path": "C:/dev/SternenBuergerchen/.godot/review_graphics_worktree/output/review_graphics_20261105/graphics_before/20261105T051729Z-783d83cd/hall/native_hall_front.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "sha256": "679c1330f92a042316e12e61c1d35b444e03a90d4cb03060be0c330dddeb590e",
+      "view": "front"
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (-0.816968, 0.0, 0.576683), Y: (0.30555, 0.848097, 0.432863), Z: (-0.489084, 0.52984, -0.692868), O: (-6.847169, 8.167766, -9.700156)]",
+      "camera_size": 4.90000009536743,
+      "light": "unchanged FrontierArtProfile",
+      "path": "C:/dev/SternenBuergerchen/.godot/review_graphics_worktree/output/review_graphics_20261105/graphics_before/20261105T051729Z-783d83cd/hall/native_hall_rear.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "sha256": "91b2d253f75daf32aa1c7bce56d0eea7a8a9522c5fab0fc7fd44ef9c63b818a5",
+      "view": "rear"
+    },
+    {
+      "building": "hall",
+      "camera": "[X: (0.145494, 0.0, 0.989359), Y: (0.497643, 0.864289, -0.073183), Z: (-0.855092, 0.502995, 0.125749), O: (-11.97129, 7.791936, 1.760484)]",
+      "camera_size": 4.90000009536743,
+      "light": "unchanged FrontierArtProfile",
+      "path": "C:/dev/SternenBuergerchen/.godot/review_graphics_worktree/output/review_graphics_20261105/graphics_before/20261105T051729Z-783d83cd/hall/native_hall_side.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "sha256": "5699fe8dbc6c2ade48c96baa41774bc616222fceb4dbceabe7c092ceda0a85dd",
+      "view": "side"
+    },
+    {
+      "building": "ensemble",
+      "camera": "[X: (0.816968, 0.0, -0.576683), Y: (-0.30555, 0.848097, -0.432863), Z: (0.489083, 0.52984, 0.692868), O: (6.847169, 8.167766, 9.700156)]",
+      "camera_size": 9.5,
+      "light": "unchanged FrontierArtProfile",
+      "path": "C:/dev/SternenBuergerchen/.godot/review_graphics_worktree/output/review_graphics_20261105/graphics_before/20261105T051729Z-783d83cd/hall/native_ensemble_game.png",
+      "renderer": "forward_plus/vulkan",
+      "resolution": "(1280, 900)",
+      "sha256": "bbbaff8626bd4652704be46b499887bf1aa3d065aa221826dcede75a6c1c8c98",
+      "view": "game"
+    }
+  ],
+  "construction_reference": {
+    "path": "res://docs/reports/assets/grafik-2026-11-01/references/current/02_freihafen_distribution_center.png",
+    "sha256": "463a74527ef36b38cf819039a35725aa21b33c0f44cf5146213327dcd9473530"
+  },
+  "diagnostics": [
+    {
+      "bounds_max": [
+        1.2924998998642,
+        1.20255744457245,
+        1.46049988269806
+      ],
+      "bounds_min": [
+        -1.2924998998642,
+        0.0,
+        -1.27499997615814
+      ],
+      "clockwise_normal_errors": 0,
+      "combined_bounds_local": "[P: (-1.2925, 0.0, -1.275), S: (2.585, 1.202557, 2.7355)]",
+      "conservative_detached_candidates": [],
+      "degenerate_triangles": 0,
+      "finite": true,
+      "height_extension": 0.150807499885559,
+      "id": "habitat",
+      "includes_label_bounds": true,
+      "mesh_count": 57,
+      "nonpaired_welded_edges": 0,
+      "original_bounds_local": "[P: (-1.2075, 0.0, -1.2425), S: (2.415, 1.05175, 2.485)]",
+      "roof_parts": [
+        "HabitatRoofWell",
+        "HabitatWestRoof",
+        "HabitatRearRoof",
+        "HabitatFrontRoof",
+        "HabitatLifeSupportBase",
+        "HabitatLifeSupportInset",
+        "LifeSupportLouver",
+        "HabitatRoofServicePlate"
+      ],
+      "triangles": 2588,
+      "window_frames_clear": true,
+      "xz_extensions": [
+        0.0849999189376831,
+        0.0849999189376831,
+        0.0325000286102295,
+        0.217999935150146
+      ]
+    },
+    {
+      "bounds_max": [
+        1.92249989509583,
+        1.61680018901825,
+        1.42925000190735
+      ],
+      "bounds_min": [
+        -1.92249989509583,
+        0.0,
+        -1.24624991416931
+      ],
+      "clockwise_normal_errors": 0,
+      "combined_bounds_local": "[P: (-1.9225, 0.0, -1.24625), S: (3.845, 1.6168, 2.6755)]",
+      "conservative_detached_candidates": [],
+      "degenerate_triangles": 0,
+      "finite": true,
+      "height_extension": 0.14680016040802,
+      "id": "hall",
+      "includes_label_bounds": true,
+      "mesh_count": 58,
+      "nonpaired_welded_edges": 0,
+      "original_bounds_local": "[P: (-1.8375, 0.0, -1.21625), S: (3.675, 1.47, 2.4325)]",
+      "roof_parts": [
+        "IndustrialBayRoof",
+        "OfficeRoofShoulder",
+        "OfficeRoofField",
+        "HallRoofMonitorBase",
+        "HallRoofMonitorCap",
+        "MonitorClerestory",
+        "HallRoofCrossRib"
+      ],
+      "triangles": 2508,
+      "window_frames_clear": true,
+      "xz_extensions": [
+        0.0849999189376831,
+        0.0849999189376831,
+        0.0299999713897705,
+        0.213000059127808
+      ]
+    }
+  ],
+  "engine": {
+    "build": "official",
+    "hash": "71f334935c000924d403448e698df4441130df18",
+    "hex": 263682,
+    "major": 4,
+    "minor": 6,
+    "patch": 2,
+    "status": "stable",
+    "string": "4.6.2-stable (official)",
+    "timestamp": 0
+  },
+  "failed": 0,
+  "passed": 30,
+  "primary_reference": {
+    "path": "res://docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png",
+    "sha256": "fc9edb8b1d28921653ba5b438e7be8da4db3e0b32b8c751e9b18c4ef94918149"
+  },
+  "schema": "sternenbuergerchen.review8.hall_graphics.v1",
+  "scope": "Existing finite/winding/topology/envelope/connectivity audit, assembly budget and original access anchor. Native controlled geometry captures. No mission or general mesh intersection oracle.",
+  "source_hashes": {
+    "res://art/frontier_illustrated_20261101/environment/pass05/buildings/look_probe.gd": "ba23062eeb5bd133a27b2aefcaf938a61ed5a193b2eaf36f93fbf18b91d54b87",
+    "res://project.godot": "cbbd3e90a4c491de2a0255cd766a552bd65cbfd4e4c23b9ef1496c22343fa64d",
+    "res://scripts/terrain/frontier_access_anchors.gd": "87f63e39592899102d5878f4edd8724a5274c4de4c95164565816056d70f7b43",
+    "res://scripts/terrain/frontier_art_profile.gd": "8b6e8e6af6e832e0eda04bfc39baddd5400192135d3e8202447078c6fc1986d4",
+    "res://scripts/terrain/frontier_closed_buildings.gd": "a17fcd6fd3ec462ffe49225396bd31e8c063da015204c7a0f8925d9b3b8e8f62",
+    "res://scripts/tests/review8_graphics_verifier.gd": "57932b9846217a8eabe838ccf8d3608ce70cd940913133f6a50c636363599abc",
+    "res://shaders/terrain/frontier_building_wear.gdshader": "57463c649ee0f1b900b4d3e40e4f3586e21f222350bdfa9310e9948760d8734b"
+  },
+  "synthetic_fixture": true
+}

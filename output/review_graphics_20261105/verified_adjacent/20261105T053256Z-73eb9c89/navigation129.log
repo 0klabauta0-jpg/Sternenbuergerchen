@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-90eaaaef99b842b99adc3280e9485d3d
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_129 Cover-aware HPA/Subgoal Vorbereitung Verifier ===
+PASS: Plain and cover-aware pathfinding both return paths
+PASS: Cover-aware path has lower exposure sum than plain path
+PASS: Cover-aware path prefers higher cover tiles
+PASS: Cover-aware path keeps terrain traversal rules
+PASS: HPA portal snapshot exposes static cover metadata for later subgoal annotation
+PASS: Cover-aware HPA still returns an HPA route across clusters
+PASS: Cover-aware HPA route lowers exposure against the plain HPA route
+PASS: SimulationRoot builds cover-aware move path
+PASS: Navigation debug snapshot exposes path length
+PASS: Navigation debug snapshot exposes exposure and cover sums
+PASS: Navigation debug cover sum reflects covered route tiles
+PASS: Defend commands weight cover more strongly than neutral move
+PASS: Flank commands avoid exposure more strongly than neutral move
+=== RESULTS: 13 passed, 0 failed ===
+ALL TESTS PASSED

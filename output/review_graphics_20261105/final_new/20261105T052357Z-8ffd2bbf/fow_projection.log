@@ -1,0 +1,141 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-3bf65612c2774bca9f683b8517bb735c
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== REVIEW8 square8 FoW projection oracle ===
+PASS: Hand-checked old fringe tile starts visible
+PASS: task1189_scale (65, 64) + (0.0, 0.0) uses dirty work
+PASS: task1189_scale (65, 64) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: task1189_scale (65, 64) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: task1189_scale (65, 64) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+PASS: Hand-checked old fringe tile loses current visibility
+REVIEW8_FOW_PROJECTION_WORKLOAD {"actual_grid_lookups":9120,"estimated_grid_lookups":9120,"evaluated_tiles":5114,"projection":"task1189_scale","sight_range_world":640.0,"slice_count":29,"work_budget_tiles":256}
+PASS: task1189_scale (66, 65) + (0.0, 0.0) uses dirty work
+PASS: task1189_scale (66, 65) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: task1189_scale (66, 65) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: task1189_scale (66, 65) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+PASS: task1189_scale (66, 65) + (0.49, -0.49) uses dirty work
+PASS: task1189_scale (66, 65) + (0.49, -0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: task1189_scale (66, 65) + (0.49, -0.49) dirty work terminates within bounded slices
+PASS: task1189_scale (66, 65) + (0.49, -0.49) visible and explored tiles equal full-scan oracle
+PASS: task1189_scale (64, 64) + (-0.49, 0.49) uses dirty work
+PASS: task1189_scale (64, 64) + (-0.49, 0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: task1189_scale (64, 64) + (-0.49, 0.49) dirty work terminates within bounded slices
+PASS: task1189_scale (64, 64) + (-0.49, 0.49) visible and explored tiles equal full-scan oracle
+PASS: task1189_scale (64, 64) + (0.0, 0.0) uses dirty work
+PASS: task1189_scale (64, 64) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: task1189_scale (64, 64) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: task1189_scale (64, 64) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+PASS: task1189_scale (2, 2) + (-0.49, -0.49) uses dirty work
+PASS: task1189_scale (2, 2) + (-0.49, -0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: task1189_scale (2, 2) + (-0.49, -0.49) dirty work terminates within bounded slices
+PASS: task1189_scale (2, 2) + (-0.49, -0.49) visible and explored tiles equal full-scan oracle
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: task1189_scale observer removal clears all current sight and retains explored history
+PASS: regular_iso (65, 64) + (0.0, 0.0) uses dirty work
+PASS: regular_iso (65, 64) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: regular_iso (65, 64) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: regular_iso (65, 64) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+REVIEW8_FOW_PROJECTION_WORKLOAD {"actual_grid_lookups":870,"estimated_grid_lookups":870,"evaluated_tiles":342,"projection":"regular_iso","sight_range_world":640.0,"slice_count":3,"work_budget_tiles":256}
+PASS: regular_iso (66, 65) + (0.0, 0.0) uses dirty work
+PASS: regular_iso (66, 65) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: regular_iso (66, 65) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: regular_iso (66, 65) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+PASS: regular_iso (66, 65) + (0.49, -0.49) uses dirty work
+PASS: regular_iso (66, 65) + (0.49, -0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: regular_iso (66, 65) + (0.49, -0.49) dirty work terminates within bounded slices
+PASS: regular_iso (66, 65) + (0.49, -0.49) visible and explored tiles equal full-scan oracle
+PASS: regular_iso (64, 64) + (-0.49, 0.49) uses dirty work
+PASS: regular_iso (64, 64) + (-0.49, 0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: regular_iso (64, 64) + (-0.49, 0.49) dirty work terminates within bounded slices
+PASS: regular_iso (64, 64) + (-0.49, 0.49) visible and explored tiles equal full-scan oracle
+PASS: regular_iso (64, 64) + (0.0, 0.0) uses dirty work
+PASS: regular_iso (64, 64) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: regular_iso (64, 64) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: regular_iso (64, 64) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+PASS: regular_iso (2, 2) + (-0.49, -0.49) uses dirty work
+PASS: regular_iso (2, 2) + (-0.49, -0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: regular_iso (2, 2) + (-0.49, -0.49) dirty work terminates within bounded slices
+PASS: regular_iso (2, 2) + (-0.49, -0.49) visible and explored tiles equal full-scan oracle
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: regular_iso observer removal clears all current sight and retains explored history
+PASS: wide_iso (65, 64) + (0.0, 0.0) uses dirty work
+PASS: wide_iso (65, 64) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: wide_iso (65, 64) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: wide_iso (65, 64) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+REVIEW8_FOW_PROJECTION_WORKLOAD {"actual_grid_lookups":7656,"estimated_grid_lookups":7656,"evaluated_tiles":1332,"projection":"wide_iso","sight_range_world":640.0,"slice_count":14,"work_budget_tiles":256}
+PASS: wide_iso (66, 65) + (0.0, 0.0) uses dirty work
+PASS: wide_iso (66, 65) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: wide_iso (66, 65) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: wide_iso (66, 65) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+PASS: wide_iso (66, 65) + (0.49, -0.49) uses dirty work
+PASS: wide_iso (66, 65) + (0.49, -0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: wide_iso (66, 65) + (0.49, -0.49) dirty work terminates within bounded slices
+PASS: wide_iso (66, 65) + (0.49, -0.49) visible and explored tiles equal full-scan oracle
+PASS: wide_iso (64, 64) + (-0.49, 0.49) uses dirty work
+PASS: wide_iso (64, 64) + (-0.49, 0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: wide_iso (64, 64) + (-0.49, 0.49) dirty work terminates within bounded slices
+PASS: wide_iso (64, 64) + (-0.49, 0.49) visible and explored tiles equal full-scan oracle
+PASS: wide_iso (64, 64) + (0.0, 0.0) uses dirty work
+PASS: wide_iso (64, 64) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: wide_iso (64, 64) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: wide_iso (64, 64) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+PASS: wide_iso (2, 2) + (-0.49, -0.49) uses dirty work
+PASS: wide_iso (2, 2) + (-0.49, -0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: wide_iso (2, 2) + (-0.49, -0.49) dirty work terminates within bounded slices
+PASS: wide_iso (2, 2) + (-0.49, -0.49) visible and explored tiles equal full-scan oracle
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: wide_iso observer removal clears all current sight and retains explored history
+PASS: tall_iso (65, 64) + (0.0, 0.0) uses dirty work
+PASS: tall_iso (65, 64) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: tall_iso (65, 64) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: tall_iso (65, 64) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+REVIEW8_FOW_PROJECTION_WORKLOAD {"actual_grid_lookups":4556,"estimated_grid_lookups":4556,"evaluated_tiles":1464,"projection":"tall_iso","sight_range_world":480.0,"slice_count":11,"work_budget_tiles":256}
+PASS: tall_iso (66, 65) + (0.0, 0.0) uses dirty work
+PASS: tall_iso (66, 65) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: tall_iso (66, 65) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: tall_iso (66, 65) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+PASS: tall_iso (66, 65) + (0.49, -0.49) uses dirty work
+PASS: tall_iso (66, 65) + (0.49, -0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: tall_iso (66, 65) + (0.49, -0.49) dirty work terminates within bounded slices
+PASS: tall_iso (66, 65) + (0.49, -0.49) visible and explored tiles equal full-scan oracle
+PASS: tall_iso (64, 64) + (-0.49, 0.49) uses dirty work
+PASS: tall_iso (64, 64) + (-0.49, 0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: tall_iso (64, 64) + (-0.49, 0.49) dirty work terminates within bounded slices
+PASS: tall_iso (64, 64) + (-0.49, 0.49) visible and explored tiles equal full-scan oracle
+PASS: tall_iso (64, 64) + (0.0, 0.0) uses dirty work
+PASS: tall_iso (64, 64) + (0.0, 0.0) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: tall_iso (64, 64) + (0.0, 0.0) dirty work terminates within bounded slices
+PASS: tall_iso (64, 64) + (0.0, 0.0) visible and explored tiles equal full-scan oracle
+PASS: tall_iso (2, 2) + (-0.49, -0.49) uses dirty work
+PASS: tall_iso (2, 2) + (-0.49, -0.49) publishes no partial terrain revision
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: tall_iso (2, 2) + (-0.49, -0.49) dirty work terminates within bounded slices
+PASS: tall_iso (2, 2) + (-0.49, -0.49) visible and explored tiles equal full-scan oracle
+PASS: Every visibility evaluation slice honors its tile budget
+PASS: tall_iso observer removal clears all current sight and retains explored history
+=== RESULTS: 130 passed, 0 failed ===
+REVIEW8_FOW_PROJECTION_PASS

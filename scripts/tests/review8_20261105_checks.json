@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "fow_projection",
+      "script": "res://scripts/tests/review8_fow_projection_verifier.gd",
+      "success_marker": "REVIEW8_FOW_PROJECTION_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "cover_path",
+      "script": "res://scripts/tests/review8_cover_path_verifier.gd",
+      "success_marker": "REVIEW8_COVER_PATH_PASS",
+      "timeout": 100
+    },
+    {
+      "name": "ux_debrief_abort",
+      "script": "res://scripts/tests/review8_ux_debrief_abort_verifier.gd",
+      "success_marker": "PASS: review8 UX aborted debrief",
+      "timeout": 100
+    },
+    {
+      "name": "ux_evac_reachability",
+      "script": "res://scripts/tests/review8_ux_evac_reachability_verifier.gd",
+      "success_marker": "PASS: review8 UX evacuation reachability",
+      "timeout": 100
+    }
+  ]
+}

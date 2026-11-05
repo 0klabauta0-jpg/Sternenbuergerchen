@@ -1,0 +1,13 @@
+{
+  "status": "APPROVED",
+  "scope": "Read-only independent review of complete product/test diff and final adapter/gate selection",
+  "base_commit": "93c2e6810bf3699ea4237b8a4cdc60e2412660bb",
+  "important_findings": [],
+  "final_adapter_sha256": "87504c293864597481bc1f4287a023fdc5b0cc095be61e0b82ba8d1b41b886a3",
+  "source_pins_verified": 1800,
+  "drift": 0,
+  "root_remaining_at_review": [
+    "Complete final native and normal after runs",
+    "Commit and integrate without force"
+  ]
+}

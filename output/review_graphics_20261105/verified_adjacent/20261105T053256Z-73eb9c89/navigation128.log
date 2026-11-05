@@ -1,0 +1,22 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-40a0fde79cba4aad8a7d672d772f52dd
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_128 Navigation Budgeting und Debug Verifier ===
+PASS: SimulationRoot still builds a path while navigation debug is active
+PASS: Navigation snapshot counts new path requests
+PASS: Navigation snapshot counts concrete pathfinder queries
+PASS: Navigation snapshot includes the querying unit id
+PASS: Navigation budget allows only one new path request in the first tick
+PASS: Navigation budget leaves two pending path requests
+PASS: Navigation budget preserves priority before enqueue order
+PASS: Second tick processes the next delayed path request
+PASS: Delayed same-priority commands keep enqueue order
+PASS: Remaining delayed path request is processed deterministically
+PASS: Contact recompute is limited by the navigation budget
+PASS: Contact recompute staggers remaining units into later ticks
+PASS: Unreachable path still uses the existing safe local fallback
+PASS: Navigation debug marks unreachable query attempts
+PASS: Navigation debug snapshot exposes unreachable status per query
+=== RESULTS: 15 passed, 0 failed ===
+ALL TESTS PASSED

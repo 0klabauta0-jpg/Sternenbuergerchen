@@ -1,0 +1,47 @@
+{
+  "schema": "sternenbuergerchen.review8.v1",
+  "checks": [
+    {
+      "name": "fow_projection",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "errors": [],
+      "marker_found": true,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5088aadc6462490caf19437540ef0fe0",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review_graphics_worktree\\.godot\\review2_isolation\\5088aadc6462490caf19437540ef0fe0\\project",
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "log": "C:\\dev\\SternenBuergerchen\\.godot\\review_graphics_worktree\\output\\review_graphics_20261105\\green_runtime\\20261105T051702Z-71ff06a1\\fow_projection.log",
+      "argv": [
+        "godot_console.exe",
+        "--headless",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review_graphics_worktree\\.godot\\review2_isolation\\5088aadc6462490caf19437540ef0fe0\\project",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review_graphics_worktree\\.godot\\review2_isolation\\5088aadc6462490caf19437540ef0fe0\\project\\scripts\\tests\\review8_fow_projection_verifier.gd"
+      ]
+    }
+  ],
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

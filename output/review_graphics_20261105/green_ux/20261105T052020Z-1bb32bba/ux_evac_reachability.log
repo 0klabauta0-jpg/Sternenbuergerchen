@@ -1,0 +1,57 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-608ab1683bc048a69c87c5a9e90ec0e0
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: (1920, 1080): ground-start fixture exposes an existing fireteam
+PASS: (1920, 1080): selection has a real ground fireteam anchor
+PASS: (1920, 1080): visible Details affordance names the evacuation action
+PASS: (1920, 1080): real mouse activation opens the native Details window
+PASS: (1920, 1080): original command remains in its preserved hidden source path
+PASS: (1920, 1080): details contain a real native evacuation action
+PASS: (1920, 1080): missing LZ keeps the reachable action disabled
+PASS: (1920, 1080): disabled action preserves the authoritative source explanation
+PASS: (1920, 1080): forced activation cannot bypass the missing-LZ gate
+PASS: (1920, 1080): regular LZ input accepts a valid remote map position
+PASS: (1920, 1080): outside-LZ state remains disabled with the same regroup requirement
+PASS: (1920, 1080): regular LZ input places the zone at the unchanged ground team
+PASS: (1920, 1080): existing owner confirms evacuation eligibility
+PASS: (1920, 1080): eligible host can reach the enabled native action
+REVIEW8_EVAC_GEOMETRY root=[P: (0.0, 0.0), S: (1920.0, 1080.0)] popup=[P: (587.0, 329.0), S: (366.0, 246.0)] button=[P: (23.0, 189.0), S: (320.0, 32.0)] embedded=true
+PASS: (1920, 1080): whole button rect fits viewport and every clipping ancestor
+PASS: (1920, 1080): authority loss disables the same action
+PASS: (1920, 1080): forced client activation cannot emit the original command
+PASS: (1920, 1080): restored host reads the valid original state
+ERROR: FAIL: (1920, 1080): real native action invokes the original callback once and resolves the existing abort result
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:145)
+       [1] _check_mission (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:90)
+       [2] _click (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:126)
+       [3] _frames (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:136)
+PASS: (1280, 720): ground-start fixture exposes an existing fireteam
+PASS: (1280, 720): selection has a real ground fireteam anchor
+PASS: (1280, 720): visible Details affordance names the evacuation action
+PASS: (1280, 720): real mouse activation opens the native Details window
+PASS: (1280, 720): original command remains in its preserved hidden source path
+PASS: (1280, 720): details contain a real native evacuation action
+PASS: (1280, 720): missing LZ keeps the reachable action disabled
+PASS: (1280, 720): disabled action preserves the authoritative source explanation
+PASS: (1280, 720): forced activation cannot bypass the missing-LZ gate
+PASS: (1280, 720): regular LZ input accepts a valid remote map position
+PASS: (1280, 720): outside-LZ state remains disabled with the same regroup requirement
+PASS: (1280, 720): regular LZ input places the zone at the unchanged ground team
+PASS: (1280, 720): existing owner confirms evacuation eligibility
+PASS: (1280, 720): eligible host can reach the enabled native action
+REVIEW8_EVAC_GEOMETRY root=[P: (0.0, 0.0), S: (1280.0, 720.0)] popup=[P: (267.0, 149.0), S: (366.0, 246.0)] button=[P: (23.0, 189.0), S: (320.0, 32.0)] embedded=true
+PASS: (1280, 720): whole button rect fits viewport and every clipping ancestor
+PASS: (1280, 720): authority loss disables the same action
+PASS: (1280, 720): forced client activation cannot emit the original command
+PASS: (1280, 720): restored host reads the valid original state
+ERROR: FAIL: (1280, 720): real native action invokes the original callback once and resolves the existing abort result
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _check (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:145)
+       [1] _check_mission (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:90)
+       [2] _click (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:126)
+       [3] _frames (res://scripts/tests/review8_ux_evac_reachability_verifier.gd:136)
+REVIEW8_UX_EVAC: 36 passed, 2 failed

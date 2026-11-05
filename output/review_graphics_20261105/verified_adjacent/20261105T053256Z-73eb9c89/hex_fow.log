@@ -1,0 +1,64 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-e83d7bd3af1648a68e306ef7564a8092
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Default mission is a real Hex map
+PASS: Known terrain never receives a temporary all-black rectangle, including a cold rebuild
+PASS: Removing the known-map flash preserves dynamic enemy filtering
+PASS: Actual Hex edges are visible by default
+PASS: Visibility mask has six flat triangles, without doubled prism faces
+PASS: Unexplored mode retains its protective blackout while unknown cells are batched
+PASS: Unknown protection is above the actual tall meshes, independently of gameplay height classes
+PASS: Completed unknown-cell masks protect every saved cell and replace the temporary cover
+PASS: Continuous-snapshot regression uses all 9408 actual saved GM01 cells
+PASS: known_terrain/team_alpha continuous full snapshots: resident mask covers the actual map
+PASS: known_terrain/team_alpha continuous full snapshots: mode/team switch starts the original full build
+PASS: known_terrain/team_alpha continuous full snapshots: only unknown terrain starts with protective blackout
+PASS: known_terrain/team_alpha continuous full snapshots: finishes within the unchanged 48-frame bound despite continual updates
+PASS: known_terrain/team_alpha continuous full snapshots: setters never reset the original 512-cell cursor or replace its mask
+PASS: known_terrain/team_alpha continuous full snapshots: complete snapshots update both previously built and still-pending slots across skipped revisions
+PASS: known_terrain/team_alpha continuous full snapshots: contact-only updates preserve terrain work and keep the real contact/event filter current
+PASS: known_terrain/team_alpha continuous full snapshots: unknown protection survives to completion; known terrain never flashes black
+PASS: known_terrain/team_alpha continuous full snapshots: exactly one full build completes
+PASS: known_terrain/team_alpha continuous full snapshots: every final CPU tile state matches the latest complete snapshot
+FOW_RENDERED_SLOTS_SKIPPED {"case":"known_terrain/team_alpha continuous full snapshots","reason":"headless Dummy returns zero transforms/default colors; CPU state/counters remain checked","rendered_evidence":false}
+PASS: known_terrain/team_alpha continuous full snapshots: all aggregate counters equal the independently counted final states
+PASS: known_terrain/team_alpha continuous full snapshots: final mask revision equals the latest skipped producer revision
+PASS: known_terrain/team_alpha continuous full snapshots: completed terrain also ignores contact-only revisions without rebuilding
+FOW_CONTINUOUS_SNAPSHOT {"cells":9408,"frames":19,"last_revision":180,"mode":"known_terrain","team_id":"team_alpha"}
+PASS: unexplored_blackout/team_alpha continuous full snapshots: resident mask covers the actual map
+PASS: unexplored_blackout/team_alpha continuous full snapshots: mode/team switch starts the original full build
+PASS: unexplored_blackout/team_alpha continuous full snapshots: only unknown terrain starts with protective blackout
+PASS: unexplored_blackout/team_alpha continuous full snapshots: finishes within the unchanged 48-frame bound despite continual updates
+PASS: unexplored_blackout/team_alpha continuous full snapshots: setters never reset the original 512-cell cursor or replace its mask
+PASS: unexplored_blackout/team_alpha continuous full snapshots: complete snapshots update both previously built and still-pending slots across skipped revisions
+PASS: unexplored_blackout/team_alpha continuous full snapshots: contact-only updates preserve terrain work and keep the real contact/event filter current
+PASS: unexplored_blackout/team_alpha continuous full snapshots: unknown protection survives to completion; known terrain never flashes black
+PASS: unexplored_blackout/team_alpha continuous full snapshots: exactly one full build completes
+PASS: unexplored_blackout/team_alpha continuous full snapshots: every final CPU tile state matches the latest complete snapshot
+FOW_RENDERED_SLOTS_SKIPPED {"case":"unexplored_blackout/team_alpha continuous full snapshots","reason":"headless Dummy returns zero transforms/default colors; CPU state/counters remain checked","rendered_evidence":false}
+PASS: unexplored_blackout/team_alpha continuous full snapshots: all aggregate counters equal the independently counted final states
+PASS: unexplored_blackout/team_alpha continuous full snapshots: final mask revision equals the latest skipped producer revision
+PASS: unexplored_blackout/team_alpha continuous full snapshots: completed terrain also ignores contact-only revisions without rebuilding
+FOW_CONTINUOUS_SNAPSHOT {"cells":9408,"frames":19,"last_revision":180,"mode":"unexplored_blackout","team_id":"team_alpha"}
+PASS: unexplored_blackout/team_beta continuous full snapshots: resident mask covers the actual map
+PASS: unexplored_blackout/team_beta continuous full snapshots: mode/team switch starts the original full build
+PASS: unexplored_blackout/team_beta continuous full snapshots: only unknown terrain starts with protective blackout
+PASS: unexplored_blackout/team_beta continuous full snapshots: finishes within the unchanged 48-frame bound despite continual updates
+PASS: unexplored_blackout/team_beta continuous full snapshots: setters never reset the original 512-cell cursor or replace its mask
+PASS: unexplored_blackout/team_beta continuous full snapshots: complete snapshots update both previously built and still-pending slots across skipped revisions
+PASS: unexplored_blackout/team_beta continuous full snapshots: contact-only updates preserve terrain work and keep the real contact/event filter current
+PASS: unexplored_blackout/team_beta continuous full snapshots: unknown protection survives to completion; known terrain never flashes black
+PASS: unexplored_blackout/team_beta continuous full snapshots: exactly one full build completes
+PASS: unexplored_blackout/team_beta continuous full snapshots: every final CPU tile state matches the latest complete snapshot
+FOW_RENDERED_SLOTS_SKIPPED {"case":"unexplored_blackout/team_beta continuous full snapshots","reason":"headless Dummy returns zero transforms/default colors; CPU state/counters remain checked","rendered_evidence":false}
+PASS: unexplored_blackout/team_beta continuous full snapshots: all aggregate counters equal the independently counted final states
+PASS: unexplored_blackout/team_beta continuous full snapshots: final mask revision equals the latest skipped producer revision
+PASS: unexplored_blackout/team_beta continuous full snapshots: completed terrain also ignores contact-only revisions without rebuilding
+FOW_CONTINUOUS_SNAPSHOT {"cells":9408,"frames":19,"last_revision":180,"mode":"unexplored_blackout","team_id":"team_beta"}
+PASS: Negative axial coordinates remain reachable by the real camera clamp
+PASS: Streaming bounds include negative Hex chunks and reject distant chunks
+PASS: Default framing uses the physical Hex footprint
+PASS: Keyboard and drag panning use the camera's physical directions on Hex terrain
+=== RESULTS: 52 passed, 0 failed ===
+GM01_HEX_FOW_ALL_PASS

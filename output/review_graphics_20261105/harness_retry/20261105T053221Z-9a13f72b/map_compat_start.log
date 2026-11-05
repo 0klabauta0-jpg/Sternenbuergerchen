@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-4bb753b32bd94916a1feaccfc13fc244
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: default profile gate runs without the Frontier CLI flag
+PASS: normal project entry is the real main menu
+PASS: normal Singleplayer route retains the Meta Homebase flow
+PASS: the normal Singleplayer button still exists
+PASS: real main-menu background API chooses the new native Outpost image
+PASS: playable default mission remains Grid Sweep
+PASS: normal Meta default preserves the GM01 map and scenario
+PASS: default map remains a valid JSON dictionary
+PASS: GM01 explicitly selects the Frontier visual profile
+PASS: saved GM01 selects the real authored Outpost composition
+PASS: rebuilt default uses true Hex topology
+PASS: scenario, enemy groups, objectives and patrol rules remain byte-identical
+PASS: normal MapData loader selects true Hex
+PASS: default GM01 covers the displayed ground up to its edge with 9408 real Hex cells
+PASS: actual normal map/view path activates Frontier without a test flag
+PASS: profile activation comes from saved map data, not an explicit preview override
+PASS: normal renderer installs the saved Outpost, without the isolated art-preview scene
+PASS: separate authored Hex workyard remains available
+PASS: existing background catalog owns the new main image path
+PASS: background provenance is a native project capture, not the old TASK199 image
+PASS: existing menu readability and image loading policy are preserved
+PASS: native Outpost image actually exists
+PASS: catalog image hash matches the actual native PNG bytes
+PASS: catalog image byte size is factual
+PASS: native background imports as a real Texture2D
+PASS: catalog dimensions match the real imported texture
+PASS: native background links to its actual source capture metadata
+PASS: composite image license note distinguishes project geometry and constituent source licenses
+=== RESULTS: 28 passed, 0 failed ===
+FRONTIER_START_GRAPHICS_ALL_PASS

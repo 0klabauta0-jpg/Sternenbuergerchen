@@ -1,5 +1,14 @@
 # TASK_ROADMAP
 
+## Nutzerauftrag 2026-11-05 - Review, Bedienung und Grafikpass
+- Vier belegte Korrekturen und referenzgefuehrter Hallenpass geprueft.
+- Neue Regressionen 236/236; gemeinsame Headlessmatrix 39/39;
+  native UI 102/102, GPU-FoW 39/39, normale Vorher-/Nachherlaeufe
+  bei 1920x1080 und 1280x720 je 50/50. Source- und Roster-Gates gruen.
+- Task `docs/tasks/REVIEW8_2026_11_05_code_ux_graphics.md`;
+  direkte Main-Integration ist Teil dieses ausdruecklichen Auftrags.
+- Bestehende Releasegrenzen und offene gestalterische Nutzerabnahme bleiben.
+
 ## Nutzerauftrag 2026-11-03 - Drei weitere Review-/Fixzyklen (4-6)
 - Drei Runden, vier bestaetigte Fixes mit neuen Regressionen 173/173; getrennte
   Commits und unabhaengige Nachreviews APPROVED. Basis Main `21bacf0f2`.

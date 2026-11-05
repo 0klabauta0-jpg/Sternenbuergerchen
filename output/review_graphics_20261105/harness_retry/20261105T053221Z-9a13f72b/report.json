@@ -1,0 +1,55 @@
+{
+  "schema": "sternenbuergerchen.review8.v1",
+  "checks": [
+    {
+      "name": "map_compat_start",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4bb753b32bd94916a1feaccfc13fc244",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review_graphics_worktree\\.godot\\review2_isolation\\4bb753b32bd94916a1feaccfc13fc244\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\.godot\\review_graphics_worktree\\output\\review_graphics_20261105\\harness_retry\\20261105T053221Z-9a13f72b\\map_compat_start.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review_graphics_worktree\\.godot\\review2_isolation\\4bb753b32bd94916a1feaccfc13fc244\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review_graphics_worktree\\.godot\\review2_isolation\\4bb753b32bd94916a1feaccfc13fc244\\project\\scripts\\tests\\frontier_start_graphics_verifier.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/main_adoption/menu_background_capture.json",
+          "sha256": "23386d1facb78b5692a3890e0ef161cc5a0f5747f6e3da75bdd2a20787a34106"
+        },
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      }
+    }
+  ],
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

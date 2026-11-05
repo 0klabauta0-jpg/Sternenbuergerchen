@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-2e63959d90d94d8cb1ff4cfc71e7f550
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== REVIEW8 cover-aware square8 A* oracle ===
+PASS: Historical TerrainPathfinder remains byte-pinned
+PASS: Uninstrumented historical linear search compiles separately
+PASS: Historical version retains the diagnosed suboptimal open route at cost eight
+PASS: Characterizing historical bug leaves baseline bytes unchanged
+PASS: Independent Dijkstra confirms hand-checked fixture cost
+PASS: Cover path retains source and destination
+PASS: Cover path obeys real traversal and corner rules
+PASS: Cover-aware search discovers cheaper covered detour
+PASS: Cover-aware path costs less than the open eight-step line
+PASS: Cover-aware A* cost equals independent Dijkstra oracle
+REVIEW8_COVER_POLICY_CHANGE {"corrected_cost":7.4207106781185,"hand_checked_cost":7.42071067811866,"historical_cost":8.0,"independent_dijkstra_cost":7.4207106781185}
+PASS: Fixture builds a real HPA component
+PASS: HPA uses legal local cover-aware route
+PASS: Real HPA local query retains optimal cover-aware cost
+PASS: Neutral or disabled cover keeps shortest open route
+PASS: Neutral or disabled cover keeps shortest open route
+PASS: Neutral or disabled cover keeps shortest open route
+=== RESULTS: 16 passed, 0 failed ===
+REVIEW8_COVER_PATH_PASS

@@ -1,0 +1,129 @@
+{
+  "schema": "sternenbuergerchen.review8_final.v1",
+  "base_commit": "93c2e6810bf3699ea4237b8a4cdc60e2412660bb",
+  "product_commits": [
+    "3a945196e85c27085b6682a06d3ddedca441959a",
+    "22cb0b76b1f7512a2ed9bf0c7694fc8c03e0c880",
+    "a85fc7ada18e7f933ecdb6f0bc6ee4f3520f0c7e"
+  ],
+  "reports": {
+    "verified_new": {
+      "report": "output/review_graphics_20261105/verified_new/20261105T053237Z-8e8a64a9/report.json",
+      "summary": {
+        "selected": 4,
+        "passed": 4,
+        "failed": 0
+      }
+    },
+    "verified_adjacent": {
+      "report": "output/review_graphics_20261105/verified_adjacent/20261105T053256Z-73eb9c89/report.json",
+      "summary": {
+        "selected": 35,
+        "passed": 35,
+        "failed": 0
+      }
+    },
+    "verified_native": {
+      "report": "output/review_graphics_20261105/verified_native/20261105T053740Z-c30711cd/report.json",
+      "summary": {
+        "selected": 3,
+        "passed": 3,
+        "failed": 0
+      }
+    },
+    "normal_before_1920": {
+      "report": "output/review_graphics_20261105/normal_before_1920/20261105T051740Z-919123cf/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    },
+    "normal_before_1280": {
+      "report": "output/review_graphics_20261105/normal_before_1280/20261105T051854Z-13223935/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    },
+    "normal_after_1920": {
+      "report": "output/review_graphics_20261105/normal_after_1920/20261105T053829Z-43ae51f7/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    },
+    "normal_after_1280": {
+      "report": "output/review_graphics_20261105/normal_after_1280/20261105T053932Z-493b6e65/report.json",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      }
+    }
+  },
+  "headless_gates": 39,
+  "new_assertions": 236,
+  "native_ux_assertions": 102,
+  "native_fow_assertions": 39,
+  "native_geometry_before_after_assertions": [
+    30,
+    30
+  ],
+  "normal_route_assertions_per_run": 50,
+  "source_fingerprints": 1800,
+  "source_drift": 0,
+  "preservation": {
+    "foreign_untracked": {
+      "checked": 42,
+      "changed_or_missing": [],
+      "mtime_changes": []
+    },
+    "rosters": {
+      "checked": 437,
+      "changed_or_missing": [],
+      "mtime_changes": []
+    }
+  },
+  "hardware": {
+    "cpu": "AMD Ryzen 7 7800X3D",
+    "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+    "os": "Windows 10 Pro 10.0.19045",
+    "godot": "4.6.2.stable.official.71f334935",
+    "native_renderer": "Forward+/Vulkan 1.4.357"
+  },
+  "performance": {
+    "fow_512_budget_estimated_staleness_ms_128_and_256": [
+      350.0,
+      350.0
+    ],
+    "max_slice_ms_128_and_256": [
+      6.76,
+      7.1
+    ],
+    "proxy_count": 28,
+    "proxy_duration_ms": 60003,
+    "proxy_samples": 8696,
+    "proxy_p99_us": 3222,
+    "proxy_budget_us": 8000,
+    "whole_game_fps_measured": false
+  },
+  "graphic_scope": "Procedural closed hall roof only; no GLB/map/actor/collider change",
+  "hall_meshes": [
+    58,
+    53
+  ],
+  "hall_triangles": [
+    2508,
+    2304
+  ],
+  "review": "Independent overall and final adapter reviews APPROVED; no P1/P2 open",
+  "limits": [
+    "No general FPS or release acceptance",
+    "No EXE/package gate",
+    "Human aesthetic acceptance remains open"
+  ],
+  "integration": "Pending fast-forward and push"
+}

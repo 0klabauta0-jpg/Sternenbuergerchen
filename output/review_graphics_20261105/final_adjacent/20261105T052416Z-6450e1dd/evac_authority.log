@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-51c84bf997694bd88ab7a0dbcd076b07
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1069 Station Route LZ Evacuation Abort Outcome ===
+PASS: Authority contract preserves aborted result
+PASS: Authority contract exposes aborted mission outcome
+PASS: Authority contract preserves evacuation condition
+PASS: Evac trace exposes Homebase
+PASS: Evac trace exposes Station mission runtime
+PASS: Evac trace keeps Station scenario
+PASS: Tactical Controller exposes read-only evacuation eligibility
+PASS: Tactical Controller exposes evacuation request
+PASS: Combat Driver exposes authoritative evacuation request
+PASS: Non-authority evacuation request is rejected
+PASS: Rejected client evacuation leaves mission active
+PASS: Evac trace receives mission dropship
+PASS: Evac stays blocked before LZ placement
+PASS: Evac names missing LZ
+PASS: Evac trace places LZ
+PASS: Evac trace deboards a Ground-Fireteam
+PASS: Evac stays blocked while Fireteam is outside LZ
+PASS: Evac names regroup requirement
+PASS: Visible EVAC button is disabled outside LZ
+PASS: Evac becomes available with selected Ground-Fireteam in LZ
+PASS: Evac eligibility remains read-only
+PASS: Visible EVAC button becomes actionable in LZ
+PASS: Host evacuation request is accepted in LZ
+PASS: Evacuation resolves aborted mission result
+PASS: Evacuation result uses aborted outcome
+PASS: Evacuation result keeps evacuation condition
+PASS: Evacuation reaches existing Debrief view
+PASS: Debrief preserves evacuation result
+=== RESULTS: 28 passed, 0 failed ===

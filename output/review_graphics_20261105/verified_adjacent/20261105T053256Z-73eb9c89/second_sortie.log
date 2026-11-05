@@ -1,0 +1,48 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-a19c92b9f30246f5b478cd41533ba14a
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: The normal Singleplayer button is enabled
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3911)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3716)
+       [2] _press (res://scripts/tests/second_sortie_planning_lifecycle_verifier.gd:243)
+       [3] _run (res://scripts/tests/second_sortie_planning_lifecycle_verifier.gd:33)
+       [4] _frames (res://scripts/tests/second_sortie_planning_lifecycle_verifier.gd:249)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _change_scene (res://scripts/ui/main_menu_screen.gd:3911)
+       [1] _on_singleplayer_pressed (res://scripts/ui/main_menu_screen.gd:3716)
+       [2] _press (res://scripts/tests/second_sortie_planning_lifecycle_verifier.gd:243)
+       [3] _run (res://scripts/tests/second_sortie_planning_lifecycle_verifier.gd:33)
+       [4] _frames (res://scripts/tests/second_sortie_planning_lifecycle_verifier.gd:249)
+PASS: The normal menu opens the Meta flow
+PASS: Homebase starts the first live sortie
+PASS: First launch creates an active mission
+PASS: First sortie starts with the real staged craft and crew
+PASS: Fixture starts a genuine RTB transfer with elapsed time
+PASS: Meta routes the combat result to the real Debrief
+PASS: Completion releases mission one and ends its timer
+PASS: Mission completion keeps the existing RTB transfer and its elapsed time
+PASS: A late callback from the released mission cannot rewrite planning
+PASS: A repeated old return does not restart the pending transfer
+PASS: The real Debrief button returns to Homebase
+PASS: Homebase is visible and the previous result is still available
+PASS: Homebase Start stays disabled while the only craft is returning
+PASS: The flightdeck explains that the Cutlass is returning
+PASS: Mission navigation cannot bypass the post-Debrief launch gate
+PASS: The navigation callback cannot open an unprepared second sortie
+PASS: The regular transport timer completes the existing RTB
+PASS: The completed return parks the same craft at Homebase
+PASS: Homebase starts a second sortie with the returned craft
+PASS: A new active mission owns the second sortie
+PASS: The second sortie has a fresh timer
+PASS: The second sortie reuses the returned craft with the newly staged crew
+PASS: The second sortie starts a fresh outbound transfer to the mission
+PASS: The new flight contains no previous LZ, drop request or deployed crew
+PASS: The second transport reaches normal waiting after transit
+PASS: Arrival still needs a fresh LZ and Drop command
+=== RESULTS: 27 passed, 0 failed ===

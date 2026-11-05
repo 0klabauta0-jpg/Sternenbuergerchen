@@ -1,0 +1,31 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-a675a6f24a07415b9c6f64ae15464259
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1189 FOW Dirty Region Fan-out ===
+PASS: One-cell observer movement creates a dirty-region request
+PASS: Dirty region is smaller than the full 32x32 map
+PASS: Dirty-region request reports affected chunks
+PASS: Incomplete dirty work is not published early
+PASS: Published visibility remains atomic during partial work
+PASS: Completed dirty work publishes a visibility revision
+PASS: Completed revision reports changed tile deltas
+PASS: Published snapshot retains the visibility revision
+PASS: Published snapshot retains the visibility delta
+PASS: Dirty-region result equals the full-scan visibility oracle
+PASS: Dirty-region result preserves explored-tile truth
+PASS: LOS movement still uses a dirty region
+PASS: Dirty-region visibility equals the LOS full-scan oracle
+PASS: LOS blocker remains hidden after dirty-region movement
+PASS: 128x128 movement avoids a full-map candidate scan
+PASS: One visibility slice honors its tile-work budget
+PASS: Large-map visibility remains incremental after one bounded slice
+PASS: 128x128 movement remains a dirty-region request
+PASS: 128x128 dirty-region request stays within its frame budget (1.68 ms)
+PASS: 128x128 bounded visibility slices stay within their frame budget (6.76 ms)
+PASS: 128x128 dirty visibility publishes within the 350 ms staleness limit (350.00 ms)
+PASS: 256x256 movement remains a dirty-region request
+PASS: 256x256 dirty-region request stays within its frame budget (2.32 ms)
+PASS: 256x256 bounded visibility slices stay within their frame budget (7.10 ms)
+PASS: 256x256 dirty visibility publishes within the 350 ms staleness limit (350.00 ms)
+=== RESULTS: 25 passed, 0 failed ===

@@ -1,0 +1,82 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-2d74dc68b3a24324997bb8df1a425a91
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Regular GM01 loads as real saved TerrainMapData
+PASS: Original GM01 QA snapshot remains byte-identical
+PASS: Scenario remains byte-identical, including IDs/tactics/limits
+PASS: Regular GM01 has 96x98 real Hex cells up to the displayed ground edge and an accurate name
+PASS: Real axial hex gameplay topology and unchanged art origin are explicit
+PASS: Iso tile geometry remains64/32
+PASS: Saved map selects the Frontier art family
+PASS: Saved map selects the concrete versioned outpost layout
+PASS: Map enemy tactics and slot budget are preserved
+PASS: Five marker IDs and the existing patrol path ID are preserved
+PASS: Authored markerspawn_alpha occupies the nearest legal hex(0, 13) beside the original art anchor
+PASS: Authored markerobjective_point occupies the nearest legal hex(4, 14) beside the original art anchor
+PASS: Authored markerspawn_enemy_defense occupies the nearest legal hex(5, 15) beside the original art anchor
+PASS: Authored markerspawn_enemy_patrol occupies the nearest legal hex(11, 13) beside the original art anchor
+PASS: Authored markerspawn_bravo occupies the nearest legal hex(14, 14) beside the original art anchor
+PASS: Unchanged regular scenario validates against the rebuilt map: { "valid": true, "errors": [] }
+PASS: Scenario still dispatches to regular GM01
+PASS: Scenario retains two groups and eight original enemies
+PASS: 1200-second limit, eight enemy slots and96-unit objective radius remain
+PASS: All eight real friendly slot offsets have legal H0 floor, including the first three units
+PASS: All real enemy global slot offsets0..7 remain legal; group two does not reset the index
+PASS: Alpha LZ provides a normal legal three-hex initial move along a real hex edge
+PASS: HPA builds from actual saved GM01 facts
+PASS: Expanded supply-yard/outer access anchor(19, 31) has actual walkable saved floor
+PASS: Expanded supply-yard/outer access anchor(27, 30) has actual walkable saved floor
+PASS: Expanded supply-yard/outer access anchor(26, 34) has actual walkable saved floor
+PASS: Actual GM01 navigation has exactly six hex edges and rejects the square diagonal
+PASS: Patrol keeps four meaningful waypoints
+PASS: A* and HPA return legal adjacent steps(0, 13)→(4, 14)
+PASS: A* and HPA return legal adjacent steps(5, 15)→(4, 14)
+PASS: A* and HPA return legal adjacent steps(14, 14)→(4, 14)
+PASS: A* and HPA return legal adjacent steps(6, 24)→(8, 24)
+PASS: A* and HPA return legal adjacent steps(0, 13)→(19, 31)
+PASS: A* and HPA return legal adjacent steps(0, 13)→(27, 30)
+PASS: A* and HPA return legal adjacent steps(0, 13)→(26, 34)
+PASS: A* and HPA return legal adjacent steps(11, 13)→(14, 13)
+PASS: A* and HPA return legal adjacent steps(14, 13)→(13, 15)
+PASS: A* and HPA return legal adjacent steps(13, 15)→(10, 15)
+PASS: A* and HPA return legal adjacent steps(10, 15)→(11, 13)
+PASS: Physical1179 loading-yard corridor survives as axial6,24→7,24→8,24 with real H0→rampH1→yardH1
+PASS: HPA builds on independently eroded three-hex-wide space
+PASS: A* and HPA both preserve three-hex clearance for squad route(0, 13)→(4, 14)
+PASS: A* and HPA both preserve three-hex clearance for squad route(11, 13)→(14, 14)
+PASS: A* and HPA both preserve three-hex clearance for squad route(0, 13)→(19, 31)
+PASS: A* and HPA both preserve three-hex clearance for squad route(0, 13)→(27, 30)
+PASS: A* and HPA both preserve three-hex clearance for squad route(0, 13)→(26, 34)
+PASS: Cold visual composition does not mutate saved facts or Registry revision
+PASS: Cold visual composition does not write the map
+PASS: All9408 axial cells fill96x98 offset coverage, including valid negative-q and negative-r edges
+PASS: Every massive visible footprint matches saved walkability/LOS/object height/cover, with no phantom objects
+PASS: Concrete solid edges provide usable walkable adjacent cover
+PASS: Saved footprint type is a registered object layer entry
+PASS: Actual continuous ground and versioned layout are available to the normal view
+PASS: Composition includes no preview citizens or static preview dropship
+PASS: Every referenced model/atlas/license source has a valid real file SHA256
+PASS: Imported Frontier structure remains source-pinned: habitat_cutaway_01.glb
+PASS: Imported Frontier structure remains source-pinned: freihafen_hall_01.glb
+PASS: Imported Frontier structure remains source-pinned: utility_fuel_01.glb
+PASS: Regular GM01 exactly matches its deterministic offline authoring source
+PASS: Offline authoring safety checks pass: []
+PASS: Normal TerrainMapData save writes an isolated user-data roundtrip
+PASS: Save/Load preserves every authored terrain fact, marker, patrol and tactic
+PASS: Save/Load preserves versioned layout ID and real axial hex topology
+PASS: Normal view installs the saved layout, owns every solid and shows the subtle actual hex grid
+PASS: Authored hex visibility uses one flat six-sided surface instead of square planes or double-blended boxes
+PASS: Render diagnostics include the complete authored scenery
+PASS: Western negative-q probe is a real playable cell
+PASS: Camera can focus negative-q western ground without a zero-based clamp
+PASS: Screen picking resolves the same negative-q hex under the focused camera
+PASS: Streaming does not discard the playable negative-q chunk
+PASS: Map-center framing uses actual physical hex coverage instead of axial metadata midpoints
+PASS: Repeated render/configure reuses one stage without duplicate scenery
+PASS: Authored actual hex grid remains explicitly available for diagnostics
+PASS: Normal view and debug-grid controls leave every gameplay fact unchanged
+PASS: Switching to a legacy map removes authored stage and object ownership
+PASS: Legacy visibility overlay geometry is preserved
+PASS: Unknown layout IDs remain opaque saved data and do not instantiate a guessed scene
+GM01_FRONTIER_REBUILD_RESULT passed=77 failed=0 report=user://gm01_frontier_rebuild_verifier.json

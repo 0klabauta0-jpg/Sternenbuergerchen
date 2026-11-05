@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-aa10808c8794451bb65a46ae77ba3c21
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Odd-row fixture retains negative axial q and all sixteen real cells
+PASS: Hex minimap bounds follow actual negative-q rectangle, including nonzero origin
+PASS: Negative-q objective marker projects to its actual interior minimap position
+PASS: Empty-map/fallback coordinate dispatch uses Hex axial geometry
+PASS: Visual minimap retains negative-q terrain samples in the same bounds
+PASS: Both presenters leave every source cell and marker unchanged
+PASS: Legacy Square8 full-rectangle minimap bounds remain unchanged
+PASS: Legacy objective projection remains unchanged
+PASS: Fallback keeps the existing Square8 coordinate dispatch
+PASS: Regular GM01 uses the actual saved 96x98 Hex map
+PASS: Regular GM01 minimap encloses all 9408 saved Hex cells, including both negative-coordinate sides
+PASS: Larger GM01 retains bounded coarse sampling with all four minimap sides represented
+PASS: Regular-map minimap checks change neither memory facts nor saved source bytes
+=== RESULTS: 13 passed, 0 failed ===
+GM01_FRONTIER_HEX_MINIMAP_ALL_PASS

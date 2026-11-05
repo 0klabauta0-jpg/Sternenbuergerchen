@@ -1,0 +1,48 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-f99236be7d87485f95272f5568d50e86
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: actual first-player factory retains its stable craft ID and type
+PASS: actual first-player factory uses a declared texture path, not a hidden direct Speeder override
+PASS: declared dropship role resolves the actual Cutlass identity
+PASS: UI identity points at the active exact Ref03 GLB
+PASS: active model bytes match the visual catalog
+PASS: preview is documented as a native exact-model capture
+PASS: native preview provenance pins the exact model bytes
+PASS: preview does not alter model geometry or materials
+PASS: Cutlass preview replaces the generic Speeder resource
+PASS: model preview retains a transparent background
+PASS: same native UI preview resource is cached and reused
+PASS: default first-ship label visibly names the Cutlass class
+PASS: player-selected ship names remain verbatim beside the class
+PASS: class projection retains order number, custom name and context
+PASS: UI projection never changes craft IDs, names, texture paths or state
+PASS: other craft classes are not relabeled or pictured as Cutlass
+PASS: non-dropship label remains unchanged
+PASS: explicit unknown visual identity does not impersonate the default Cutlass
+PASS: a different known model without this preview cannot borrow the Cutlass picture
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd:58)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/ui_native_r4_cutlass_identity_verifier.gd:58)
+PASS: Homebase shipcards use the exact native Cutlass preview
+PASS: actual first-player definition reaches the exact preview in Homebase
+PASS: an obsolete direct Speeder texture cannot override the declared Cutlass visual model
+CUTLASS_HOMEBASE_PREVIEW_GEOMETRY position=(0.0, 0.0) size=(94.0, 62.0) minimum=(94.0, 62.0)
+PASS: Homebase card records actual model-preview identity
+PASS: old Speeder crop cannot clip the complete Cutlass silhouette
+PASS: Homebase geometry metadata describes the actual uncropped model preview
+PASS: FOB retains the actual Cutlass preview during parked
+PASS: FOB retains the actual Cutlass preview during mission_transit_to_map
+PASS: FOB retains the actual Cutlass preview during mission_transit_to_fob
+PASS: FOB retains the actual Cutlass preview during is_in_transit
+PASS: FOB title projects class without overwriting the custom name
+PASS: mission card uses the exact model preview
+PASS: static UI preview is never substituted for a directional world sprite
+PASS: mission title preserves custom identity with the Cutlass class
+RESULTS: 33 passed, 0 failed
+PASS: native R4 Cutlass identity

@@ -1,0 +1,27 @@
+{
+  "button_disabled": false,
+  "button_rect_in_popup": [
+    23.0,
+    369.0,
+    700.0,
+    32.0
+  ],
+  "button_visible": true,
+  "capture": "C:/dev/SternenBuergerchen/.godot/review_graphics_worktree/output/review_graphics_20261105/verified_native/20261105T053740Z-c30711cd/ux/review8_ux_evac_1920x1080.png",
+  "display_server": "Windows",
+  "fixture_type": "ground_start_native_ui_contract",
+  "physical_gameplay_proof": false,
+  "popup_rect": [
+    587,
+    329,
+    746,
+    426
+  ],
+  "schema": "sternenbuergerchen.review8_ux_capture.v1",
+  "source_disabled": false,
+  "source_tooltip": "End this host mission through the existing Debrief path.",
+  "viewport": [
+    1920,
+    1080
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "capture": "C:/dev/SternenBuergerchen/.godot/review_graphics_worktree/output/review_graphics_20261105/verified_native/20261105T053740Z-c30711cd/ux/review8_ux_debrief_abort_1280x720.png",
+  "display_server": "Windows",
+  "fixture_type": "native_debrief_authority_contract_consumer",
+  "heading": "Einsatz abgebrochen",
+  "mission_outcome": "aborted",
+  "panel_rect": [
+    24.0,
+    47.0,
+    1232.0,
+    626.0
+  ],
+  "physical_gameplay_proof": false,
+  "result": "aborted",
+  "schema": "sternenbuergerchen.review8_ux_capture.v1",
+  "viewport": [
+    1280,
+    720
+  ],
+  "win_condition_type": "evacuation"
+}

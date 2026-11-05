@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "ux_evac_native",
+      "script": "res://scripts/tests/review8_ux_evac_reachability_verifier.gd",
+      "success_marker": "PASS: review8 UX evacuation reachability",
+      "timeout": 100,
+      "args": [
+        "--ux-output={RUN}/ux"
+      ]
+    },
+    {
+      "name": "ux_debrief_native",
+      "script": "res://scripts/tests/review8_ux_debrief_abort_verifier.gd",
+      "success_marker": "PASS: review8 UX aborted debrief",
+      "timeout": 100,
+      "args": [
+        "--ux-output={RUN}/ux"
+      ]
+    },
+    {
+      "name": "fow_gpu_readback",
+      "script": "res://scripts/tests/review7_fow_moving_view_verifier.gd",
+      "success_marker": "REVIEW7_FOW_MOVING_VIEW_RESULT",
+      "timeout": 150
+    }
+  ]
+}

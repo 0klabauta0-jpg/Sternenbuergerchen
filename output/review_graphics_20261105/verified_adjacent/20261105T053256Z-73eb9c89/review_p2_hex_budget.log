@@ -1,0 +1,32 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-f08a2953824741cebcc0da367d105792
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+HEX_OPERATION_COUNTS {"a_star_calls":5,"map":"24x20","path_size":43,"step_cost_calls":2459}
+PASS: 24x20 query needs at most 12 assembly A* calls, not one per portal
+PASS: 24x20 local traversals stay within component-sized step budget
+PASS: 24x20 HPA returns a legal endpoint-preserving hex path
+PASS: Open 24x20 route retains 42 unit-cost steps
+PASS: Repeated query is deterministic
+PASS: Repeated query retains bounded A* assembly work
+PASS: Plain hex route takes straight shortest corridor
+PASS: Exposure-weighted route remains legal
+PASS: Changed options avoid expensive exposure on same graph
+PASS: Mutating same options dictionary cannot reuse stale exposure distances
+PASS: Revision plus dirty rebuild respects effective blocked hex
+PASS: Reopening terrain restores deterministic original route
+PASS: Changed surface route remains legal
+PASS: Terrain cost changes do not reuse stale local distances
+PASS: Shared component cost traversal exists
+PASS: Local costs include destination surface and ramp: 1.7 + 1.5
+PASS: Reverse goal map uses forward directed costs
+PASS: Opposite travel preserves asymmetric road/sand costs: 0.7 + 2.0
+PASS: Forward/reverse local costs preserve option case 0
+PASS: Forward/reverse local costs preserve option case 1
+PASS: Forward/reverse local costs preserve option case 2
+PASS: Forward/reverse local costs preserve option case 3
+PASS: Forward/reverse local costs preserve option case 4
+PASS: Local traversal never leaves supplied component
+PASS: Local cost traversal respects runtime blocked door
+PASS: Reverse cost traversal excludes effectively blocked source hexes
+REVIEW_20261102_P2_HEX_RESULT passed=26 failed=0

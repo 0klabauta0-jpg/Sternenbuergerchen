@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-16e90d7d923d4c15ae78776a67ba06db
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: tactical uses the real visible animated model, player and skeleton
+PASS: tactical exercises the expected stable idle clip
+PASS: tactical positive-delta frames advance actual animation time and bone poses
+PASS: tactical every observed bone-pose change requests a real viewport redraw
+PASS: tactical stable clip redraws through UPDATE_ONCE after bootstrap
+PASS: crouch uses the real visible animated model, player and skeleton
+PASS: crouch exercises the expected stable idle clip
+PASS: crouch positive-delta frames advance actual animation time and bone poses
+PASS: crouch every observed bone-pose change requests a real viewport redraw
+PASS: crouch stable clip redraws through UPDATE_ONCE after bootstrap
+PASS: Frozen real animation leaves time and bone poses unchanged
+PASS: Frozen animation does not request recurring redraws
+PASS: Zero-delta settled frames neither advance animation nor request redraws
+PASS: Ordinary runtime unit visibility hides the real proxy
+PASS: Hidden animation does not request recurring viewport redraws
+PASS: Revealing the same animated proxy restores pose redraws
+PASS: Static terrain with no animated units does not request recurring redraws
+REVIEW7_ANIMATION_FACTS {"cases":[{"all_redraws_use_update_once":true,"animation_name":"idle","bone_changed_frames":36,"fixture_ok":true,"pose_changed_without_redraw_frames":0,"posture":"tactical","proxy_visible":true,"redraw_calls":36,"time_changed_frames":36},{"all_redraws_use_update_once":true,"animation_name":"crouchIdle","bone_changed_frames":36,"fixture_ok":true,"pose_changed_without_redraw_frames":0,"posture":"crouch","proxy_visible":true,"redraw_calls":36,"time_changed_frames":36}],"headless_is_not_pixel_capture":true,"real_assets":true}
+REVIEW7_ANIMATION_RESULT passed=17 failed=0
