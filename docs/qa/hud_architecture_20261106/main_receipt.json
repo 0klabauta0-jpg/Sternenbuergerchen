@@ -1,0 +1,121 @@
+{
+  "schema": "sternenbuergerchen.hud_main_receipt.v1",
+  "status": "VERIFIED_MAIN_SOURCE_AND_PUBLISHED",
+  "verified_utc": "2026-11-06T15:09:17.957387+00:00",
+  "previous_main": "be1dd404a61317f18307e0eff42a0530f07fa647",
+  "tested_main_source_commit": "638a5ae032f312174caf020b1787cface77de874",
+  "verified_remote_main_source_commit": "638a5ae032f312174caf020b1787cface77de874",
+  "integration": "Ancestry-checked compare-and-swap fast-forward and switch to identical tree; no reset, clean or stash.",
+  "main_smoke": {
+    "passed": 86,
+    "failed": 0,
+    "exit_code": 0,
+    "error_count": 0,
+    "warnings": 0,
+    "isolation_verified": true,
+    "source_inputs_stable": true,
+    "display": {
+      "content_scale_size": "(3440, 1440)",
+      "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+      "display": "Windows",
+      "display_server_window_mode": 3,
+      "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+      "max_physics_steps_per_frame": 8,
+      "physics_ticks_per_second": 60,
+      "renderer": "forward_plus",
+      "rendering_driver": "vulkan",
+      "root_size": "(3440, 1440)",
+      "screen_index": 0,
+      "screen_refresh_rate": 240.085006713867,
+      "screen_size": "(3440, 1440)",
+      "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+      "time_scale": 1.0,
+      "viewport_size": "(3440.0, 1440.0)",
+      "vsync_mode": 1,
+      "window_has_focus": true,
+      "window_mode": 3,
+      "window_size": "(3440, 1440)"
+    },
+    "artifacts": [
+      {
+        "path": "main_smoke/report.json",
+        "bytes": 5891,
+        "sha256": "c5adaa158d9acf27d0ca8986175021b87a3144545f2a3fb297bdcd8e947151c3"
+      },
+      {
+        "path": "main_smoke/main.json",
+        "bytes": 95259,
+        "sha256": "80bb1c226f9f68fa285169c2eef3787a60f7a852560ba7e147603f363f4e012d"
+      },
+      {
+        "path": "main_smoke/playtest_20261105_native_homebase_capture.log",
+        "bytes": 25747,
+        "sha256": "7461f65b0a0f6c3d8fd6d9097c6a79c0c3af3e7b274e847ab3269e2f4c3eacb7"
+      }
+    ],
+    "critical_source_pins_before": {
+      "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+      "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+      "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+      "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+      "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+      "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+      "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+      "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+      "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+      "scripts/tests/playtest_20261105_native_homebase_capture.gd": "c54c876b1b4f2c0148f76603ee0dc22824c6d2d37806b440924a1b345191a792",
+      "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+      "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+      "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+    },
+    "critical_source_pins_after": {
+      "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+      "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+      "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+      "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+      "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+      "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+      "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+      "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+      "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+      "scripts/tests/playtest_20261105_native_homebase_capture.gd": "c54c876b1b4f2c0148f76603ee0dc22824c6d2d37806b440924a1b345191a792",
+      "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+      "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+      "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+    }
+  },
+  "working_code_pin_count": 2205,
+  "all_tested_working_bytes_unchanged": true,
+  "changed_code_exact": true,
+  "index_binding": "main_sources_index.json",
+  "index_boundary": {
+    "exact_git_blob_matches": 2189,
+    "unchanged_baseline_crlf_lf_only_count": 16,
+    "unchanged_baseline_crlf_lf_only_paths": [
+      "data/background_image_catalog.json",
+      "data/portrait_identity_catalog.json",
+      "maps/homebase_frontier_exploration.json",
+      "scripts/tests/frontier_start_graphics_verifier.gd",
+      "scripts/tests/playtest_20261105_assets_base_checks.json",
+      "scripts/tests/playtest_20261105_baseline_neighbors.json",
+      "scripts/tests/playtest_20261105_final_checks.json",
+      "scripts/tests/playtest_20261105_final_followups.json",
+      "scripts/tests/playtest_20261105_move_lifecycle_checks.json",
+      "scripts/tests/playtest_20261105_multiplayer_followup_checks.json",
+      "scripts/tests/playtest_20261105_native_logical_checks.json",
+      "scripts/tests/playtest_20261105_targeted_regressions.json",
+      "scripts/tests/playtest_20261105_visual_checks.json",
+      "scripts/tests/review7_20261103_checks.json",
+      "scripts/tests/run_playtest_20261105.py",
+      "scripts/tests/run_playtest_20261105_multiplayer.py"
+    ]
+  },
+  "preservation": "main_preservation.json",
+  "immutable_qa": "manifest.json and frozen ZIP remain unchanged; these Main records are separate.",
+  "limits": [
+    "Scoped 90-second normal source route; further frame hitches remain, no general smoothness or GPU-frame-time claim.",
+    "Local two-process loopback only; no LAN/WAN, exported EXE or release qualification.",
+    "Original 2D composition remains visibly different; no aesthetic user acceptance."
+  ],
+  "documentation_followup": "These receipt/supporting records are committed from the task branch after the verified source push. Their followup changes no tested runtime/code."
+}
