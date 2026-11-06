@@ -1,0 +1,1483 @@
+{
+  "base": "173a1e3c33b733a78a396a93db9cedf631d84998",
+  "approved_final_run": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313",
+  "budget_bytes": 188743680,
+  "entries": [
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline.json",
+      "path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline_camera_audit.json",
+      "path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline_camera_audit.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline_motion.json",
+      "path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline_motion.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline_performance.json",
+      "path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline_performance.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/reference_polish_r3_20261106_native_capture.log",
+      "path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/reference_polish_r3_20261106_native_capture.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/report.json",
+      "path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/baseline_repeat.json",
+      "path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/baseline_repeat.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/baseline_repeat_camera_audit.json",
+      "path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/baseline_repeat_camera_audit.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/baseline_repeat_motion.json",
+      "path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/baseline_repeat_motion.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/baseline_repeat_performance.json",
+      "path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/baseline_repeat_performance.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/reference_polish_r3_20261106_native_capture.log",
+      "path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/reference_polish_r3_20261106_native_capture.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/report.json",
+      "path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/camera_green/20261106T230858Z-60fdec40/reference_polish_r3_20261106_camera_verifier.log",
+      "path": "output/reference_polish_r3_20261106/camera_green/20261106T230858Z-60fdec40/reference_polish_r3_20261106_camera_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/camera_green/20261106T230858Z-60fdec40/report.json",
+      "path": "output/reference_polish_r3_20261106/camera_green/20261106T230858Z-60fdec40/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/camera_red/20261106T230805Z-e9a5928c/reference_polish_r3_20261106_camera_verifier.log",
+      "path": "output/reference_polish_r3_20261106/camera_red/20261106T230805Z-e9a5928c/reference_polish_r3_20261106_camera_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/camera_red/20261106T230805Z-e9a5928c/report.json",
+      "path": "output/reference_polish_r3_20261106/camera_red/20261106T230805Z-e9a5928c/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/command_style_owner_green/20261106T233206Z-29d021d1/reference_polish_r3_20261106_command_style_owner_verifier.log",
+      "path": "output/reference_polish_r3_20261106/command_style_owner_green/20261106T233206Z-29d021d1/reference_polish_r3_20261106_command_style_owner_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/command_style_owner_green/20261106T233206Z-29d021d1/report.json",
+      "path": "output/reference_polish_r3_20261106/command_style_owner_green/20261106T233206Z-29d021d1/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/command_style_owner_red/20261106T232858Z-4740df95/reference_polish_r3_20261106_command_style_owner_verifier.log",
+      "path": "output/reference_polish_r3_20261106/command_style_owner_red/20261106T232858Z-4740df95/reference_polish_r3_20261106_command_style_owner_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/command_style_owner_red/20261106T232858Z-4740df95/report.json",
+      "path": "output/reference_polish_r3_20261106/command_style_owner_red/20261106T232858Z-4740df95/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/command_style_owner_red_corrected/20261106T233050Z-b0aa40b4/reference_polish_r3_20261106_command_style_owner_verifier.log",
+      "path": "output/reference_polish_r3_20261106/command_style_owner_red_corrected/20261106T233050Z-b0aa40b4/reference_polish_r3_20261106_command_style_owner_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/command_style_owner_red_corrected/20261106T233050Z-b0aa40b4/report.json",
+      "path": "output/reference_polish_r3_20261106/command_style_owner_red_corrected/20261106T233050Z-b0aa40b4/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_final_green/20261106T232107Z-6b745319/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "path": "output/reference_polish_r3_20261106/controller_final_green/20261106T232107Z-6b745319/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_final_green/20261106T232107Z-6b745319/report.json",
+      "path": "output/reference_polish_r3_20261106/controller_final_green/20261106T232107Z-6b745319/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_owner_target_final_green/20261106T232431Z-ad77d9f6/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "path": "output/reference_polish_r3_20261106/controller_owner_target_final_green/20261106T232431Z-ad77d9f6/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_owner_target_final_green/20261106T232431Z-ad77d9f6/report.json",
+      "path": "output/reference_polish_r3_20261106/controller_owner_target_final_green/20261106T232431Z-ad77d9f6/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_ownership_green/20261106T231745Z-63cf977e/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "path": "output/reference_polish_r3_20261106/controller_ownership_green/20261106T231745Z-63cf977e/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_ownership_green/20261106T231745Z-63cf977e/report.json",
+      "path": "output/reference_polish_r3_20261106/controller_ownership_green/20261106T231745Z-63cf977e/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_ownership_red/20261106T231500Z-af15272c/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "path": "output/reference_polish_r3_20261106/controller_ownership_red/20261106T231500Z-af15272c/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_ownership_red/20261106T231500Z-af15272c/report.json",
+      "path": "output/reference_polish_r3_20261106/controller_ownership_red/20261106T231500Z-af15272c/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_target_boundary_diagnostic/20261106T231904Z-fc8bca89/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "path": "output/reference_polish_r3_20261106/controller_target_boundary_diagnostic/20261106T231904Z-fc8bca89/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_target_boundary_diagnostic/20261106T231904Z-fc8bca89/report.json",
+      "path": "output/reference_polish_r3_20261106/controller_target_boundary_diagnostic/20261106T231904Z-fc8bca89/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_target_red/20261106T231647Z-dfbd4998/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "path": "output/reference_polish_r3_20261106/controller_target_red/20261106T231647Z-dfbd4998/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/controller_target_red/20261106T231647Z-dfbd4998/report.json",
+      "path": "output/reference_polish_r3_20261106/controller_target_red/20261106T231647Z-dfbd4998/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/final_fixed34.json",
+      "path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/final_fixed34.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/final_fixed34_camera_audit.json",
+      "path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/final_fixed34_camera_audit.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/final_fixed34_motion.json",
+      "path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/final_fixed34_motion.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/final_fixed34_performance.json",
+      "path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/final_fixed34_performance.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/reference_polish_r3_20261106_native_capture.log",
+      "path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/reference_polish_r3_20261106_native_capture.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/report.json",
+      "path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal.json",
+      "path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal_camera_audit.json",
+      "path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal_camera_audit.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal_motion.json",
+      "path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal_motion.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal_performance.json",
+      "path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal_performance.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/reference_polish_r3_20261106_native_capture.log",
+      "path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/reference_polish_r3_20261106_native_capture.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/report.json",
+      "path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/bugfix_mission_fire_sector_overlay.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/bugfix_mission_fire_sector_overlay.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/continue_20261105_command_hud_batch_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/continue_20261105_command_hud_batch_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/gm01_frontier_editor_guard_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/gm01_frontier_editor_guard_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/gm01_frontier_hex_fow_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/gm01_frontier_hex_fow_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/gm01_frontier_map_edge_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/gm01_frontier_map_edge_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_active_order_readout_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_active_order_readout_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_hidden_cards_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_hidden_cards_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_homebase_flightdeck_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_homebase_flightdeck_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_live_projection_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_live_projection_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_native_style_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_native_style_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_read_scope_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_read_scope_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_style_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/hud_architecture_20261106_style_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/playtest_20261105_homebase_operations_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/playtest_20261105_homebase_operations_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_camera_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_camera_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_command_style_owner_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_command_style_owner_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_controller_ownership_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_fog_single_slice_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_fog_single_slice_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_homebase_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_homebase_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_native_labels_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_native_labels_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_strategic_loop_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_strategic_loop_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_theme_idempotency_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_theme_idempotency_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/report.json",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/report.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/review2_20261102_p2_editor_picking_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/review2_20261102_p2_editor_picking_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_1044_mission_hud_runtime_surface_guard.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_1044_mission_hud_runtime_surface_guard.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_111_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_111_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_113_verifier.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_113_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_230_flight_altitude_layer_and_air_visibility_audit.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_230_flight_altitude_layer_and_air_visibility_audit.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_374_objective_countdown_indicator.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_374_objective_countdown_indicator.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_401_facing_sightline_debug_map.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_401_facing_sightline_debug_map.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_436_fireteam_sight_security_visuals.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_436_fireteam_sight_security_visuals.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_468_fireteam_engage_live_command_conflict_audit.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_468_fireteam_engage_live_command_conflict_audit.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_518_mission_scenario_runtime_gates.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_518_mission_scenario_runtime_gates.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_687_mission_interaction_object_reaction.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_687_mission_interaction_object_reaction.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_692_door_runtime_collision_los_contract.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_692_door_runtime_collision_los_contract.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_693_door_runtime_state_producer.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_693_door_runtime_state_producer.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_696_door_runtime_visual_animation_asset_swap.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_696_door_runtime_visual_animation_asset_swap.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_697_door_interaction_multiplayer_authority_check.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_697_door_interaction_multiplayer_authority_check.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_707_mission_door_computer_cargo_smoke.log",
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/task_707_mission_door_computer_cargo_smoke.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/fog_green/20261106T184440Z-9a07f9e1/reference_polish_r3_20261106_fog_single_slice_verifier.log",
+      "path": "output/reference_polish_r3_20261106/fog_green/20261106T184440Z-9a07f9e1/reference_polish_r3_20261106_fog_single_slice_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/fog_green/20261106T184440Z-9a07f9e1/report.json",
+      "path": "output/reference_polish_r3_20261106/fog_green/20261106T184440Z-9a07f9e1/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/fog_red/20261106T184027Z-53a462f2/reference_polish_r3_20261106_fog_single_slice_verifier.log",
+      "path": "output/reference_polish_r3_20261106/fog_red/20261106T184027Z-53a462f2/reference_polish_r3_20261106_fog_single_slice_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/fog_red/20261106T184027Z-53a462f2/report.json",
+      "path": "output/reference_polish_r3_20261106/fog_red/20261106T184027Z-53a462f2/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_corrected_green/20261106T231321Z-df649fd0/reference_polish_r3_20261106_homebase_verifier.log",
+      "path": "output/reference_polish_r3_20261106/homebase_corrected_green/20261106T231321Z-df649fd0/reference_polish_r3_20261106_homebase_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_corrected_green/20261106T231321Z-df649fd0/report.json",
+      "path": "output/reference_polish_r3_20261106/homebase_corrected_green/20261106T231321Z-df649fd0/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_geometry_diagnostic/20261106T231135Z-6e25a856/reference_polish_r3_20261106_homebase_verifier.log",
+      "path": "output/reference_polish_r3_20261106/homebase_geometry_diagnostic/20261106T231135Z-6e25a856/reference_polish_r3_20261106_homebase_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_geometry_diagnostic/20261106T231135Z-6e25a856/report.json",
+      "path": "output/reference_polish_r3_20261106/homebase_geometry_diagnostic/20261106T231135Z-6e25a856/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_green/20261106T190234Z-d3b25583/reference_polish_r3_20261106_homebase_verifier.log",
+      "path": "output/reference_polish_r3_20261106/homebase_green/20261106T190234Z-d3b25583/reference_polish_r3_20261106_homebase_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_green/20261106T190234Z-d3b25583/report.json",
+      "path": "output/reference_polish_r3_20261106/homebase_green/20261106T190234Z-d3b25583/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/reference_polish_r3_20261106_homebase_native_fixture.log",
+      "path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/reference_polish_r3_20261106_homebase_native_fixture.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/report.json",
+      "path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_native_fixture/20261106T231548Z-da98ed40/reference_polish_r3_20261106_homebase_native_fixture.log",
+      "path": "output/reference_polish_r3_20261106/homebase_native_fixture/20261106T231548Z-da98ed40/reference_polish_r3_20261106_homebase_native_fixture.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_native_fixture/20261106T231548Z-da98ed40/report.json",
+      "path": "output/reference_polish_r3_20261106/homebase_native_fixture/20261106T231548Z-da98ed40/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_red/20261106T183422Z-69f591c1/reference_polish_r3_20261106_homebase_verifier.log",
+      "path": "output/reference_polish_r3_20261106/homebase_red/20261106T183422Z-69f591c1/reference_polish_r3_20261106_homebase_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_red/20261106T183422Z-69f591c1/report.json",
+      "path": "output/reference_polish_r3_20261106/homebase_red/20261106T183422Z-69f591c1/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_corrected_logical_green/20261106T231006Z-cdfe4710/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "path": "output/reference_polish_r3_20261106/mission_ui_corrected_logical_green/20261106T231006Z-cdfe4710/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_corrected_logical_green/20261106T231006Z-cdfe4710/report.json",
+      "path": "output/reference_polish_r3_20261106/mission_ui_corrected_logical_green/20261106T231006Z-cdfe4710/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_final_green/20261106T231058Z-66edfe3d/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "path": "output/reference_polish_r3_20261106/mission_ui_final_green/20261106T231058Z-66edfe3d/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_final_green/20261106T231058Z-66edfe3d/report.json",
+      "path": "output/reference_polish_r3_20261106/mission_ui_final_green/20261106T231058Z-66edfe3d/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_geometry_diagnostic/20261106T230904Z-d1073e21/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "path": "output/reference_polish_r3_20261106/mission_ui_geometry_diagnostic/20261106T230904Z-d1073e21/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_geometry_diagnostic/20261106T230904Z-d1073e21/report.json",
+      "path": "output/reference_polish_r3_20261106/mission_ui_geometry_diagnostic/20261106T230904Z-d1073e21/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_green/20261106T230815Z-149c3997/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "path": "output/reference_polish_r3_20261106/mission_ui_green/20261106T230815Z-149c3997/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_green/20261106T230815Z-149c3997/report.json",
+      "path": "output/reference_polish_r3_20261106/mission_ui_green/20261106T230815Z-149c3997/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_native_final/20261106T234355Z-96f262fc/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "path": "output/reference_polish_r3_20261106/mission_ui_native_final/20261106T234355Z-96f262fc/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_native_final/20261106T234355Z-96f262fc/report.json",
+      "path": "output/reference_polish_r3_20261106/mission_ui_native_final/20261106T234355Z-96f262fc/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_native_fixture/20261106T231558Z-00552bd8/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "path": "output/reference_polish_r3_20261106/mission_ui_native_fixture/20261106T231558Z-00552bd8/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_native_fixture/20261106T231558Z-00552bd8/report.json",
+      "path": "output/reference_polish_r3_20261106/mission_ui_native_fixture/20261106T231558Z-00552bd8/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_red/20261106T184039Z-0fe5823d/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "path": "output/reference_polish_r3_20261106/mission_ui_red/20261106T184039Z-0fe5823d/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_red/20261106T184039Z-0fe5823d/report.json",
+      "path": "output/reference_polish_r3_20261106/mission_ui_red/20261106T184039Z-0fe5823d/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_viewport_diagnostic/20261106T230937Z-f08d5c78/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "path": "output/reference_polish_r3_20261106/mission_ui_viewport_diagnostic/20261106T230937Z-f08d5c78/reference_polish_r3_20261106_mission_ui_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_viewport_diagnostic/20261106T230937Z-f08d5c78/report.json",
+      "path": "output/reference_polish_r3_20261106/mission_ui_viewport_diagnostic/20261106T230937Z-f08d5c78/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/native_labels_green/20261106T184443Z-953fdbbe/reference_polish_r3_20261106_native_labels_verifier.log",
+      "path": "output/reference_polish_r3_20261106/native_labels_green/20261106T184443Z-953fdbbe/reference_polish_r3_20261106_native_labels_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/native_labels_green/20261106T184443Z-953fdbbe/report.json",
+      "path": "output/reference_polish_r3_20261106/native_labels_green/20261106T184443Z-953fdbbe/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/native_labels_red/20261106T184029Z-d293e5b1/reference_polish_r3_20261106_native_labels_verifier.log",
+      "path": "output/reference_polish_r3_20261106/native_labels_red/20261106T184029Z-d293e5b1/reference_polish_r3_20261106_native_labels_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/native_labels_red/20261106T184029Z-d293e5b1/report.json",
+      "path": "output/reference_polish_r3_20261106/native_labels_red/20261106T184029Z-d293e5b1/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/perf_only.json",
+      "path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/perf_only.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/perf_only_camera_audit.json",
+      "path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/perf_only_camera_audit.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/perf_only_motion.json",
+      "path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/perf_only_motion.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/perf_only_performance.json",
+      "path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/perf_only_performance.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/reference_polish_r3_20261106_native_capture.log",
+      "path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/reference_polish_r3_20261106_native_capture.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/report.json",
+      "path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/perf_only_repeat.json",
+      "path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/perf_only_repeat.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/perf_only_repeat_camera_audit.json",
+      "path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/perf_only_repeat_camera_audit.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/perf_only_repeat_motion.json",
+      "path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/perf_only_repeat_motion.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/perf_only_repeat_performance.json",
+      "path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/perf_only_repeat_performance.json",
+      "role": "original_result",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/reference_polish_r3_20261106_native_capture.log",
+      "path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/reference_polish_r3_20261106_native_capture.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/report.json",
+      "path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/portrait_homebase_regression/20261106T233726Z-4a4a1473/hud_architecture_20261106_homebase_flightdeck_verifier.log",
+      "path": "output/reference_polish_r3_20261106/portrait_homebase_regression/20261106T233726Z-4a4a1473/hud_architecture_20261106_homebase_flightdeck_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/portrait_homebase_regression/20261106T233726Z-4a4a1473/playtest_20261105_homebase_operations_verifier.log",
+      "path": "output/reference_polish_r3_20261106/portrait_homebase_regression/20261106T233726Z-4a4a1473/playtest_20261105_homebase_operations_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/portrait_homebase_regression/20261106T233726Z-4a4a1473/reference_polish_r3_20261106_homebase_verifier.log",
+      "path": "output/reference_polish_r3_20261106/portrait_homebase_regression/20261106T233726Z-4a4a1473/reference_polish_r3_20261106_homebase_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/portrait_homebase_regression/20261106T233726Z-4a4a1473/report.json",
+      "path": "output/reference_polish_r3_20261106/portrait_homebase_regression/20261106T233726Z-4a4a1473/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/strategic_loop_green/20261106T232654Z-14b2f7ba/reference_polish_r3_20261106_strategic_loop_verifier.log",
+      "path": "output/reference_polish_r3_20261106/strategic_loop_green/20261106T232654Z-14b2f7ba/reference_polish_r3_20261106_strategic_loop_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/strategic_loop_green/20261106T232654Z-14b2f7ba/report.json",
+      "path": "output/reference_polish_r3_20261106/strategic_loop_green/20261106T232654Z-14b2f7ba/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/strategic_loop_red/20261106T232439Z-2f475508/reference_polish_r3_20261106_strategic_loop_verifier.log",
+      "path": "output/reference_polish_r3_20261106/strategic_loop_red/20261106T232439Z-2f475508/reference_polish_r3_20261106_strategic_loop_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/strategic_loop_red/20261106T232439Z-2f475508/report.json",
+      "path": "output/reference_polish_r3_20261106/strategic_loop_red/20261106T232439Z-2f475508/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/theme_green/20261106T184439Z-df403d60/reference_polish_r3_20261106_theme_idempotency_verifier.log",
+      "path": "output/reference_polish_r3_20261106/theme_green/20261106T184439Z-df403d60/reference_polish_r3_20261106_theme_idempotency_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/theme_green/20261106T184439Z-df403d60/report.json",
+      "path": "output/reference_polish_r3_20261106/theme_green/20261106T184439Z-df403d60/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/theme_red/20261106T184025Z-8a96f65f/reference_polish_r3_20261106_theme_idempotency_verifier.log",
+      "path": "output/reference_polish_r3_20261106/theme_red/20261106T184025Z-8a96f65f/reference_polish_r3_20261106_theme_idempotency_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/theme_red/20261106T184025Z-8a96f65f/report.json",
+      "path": "output/reference_polish_r3_20261106/theme_red/20261106T184025Z-8a96f65f/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_all_final_green/20261106T232912Z-4d0ad6cb/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_all_final_green/20261106T232912Z-4d0ad6cb/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_all_final_green/20261106T232912Z-4d0ad6cb/report.json",
+      "path": "output/reference_polish_r3_20261106/world_all_final_green/20261106T232912Z-4d0ad6cb/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_center_order_red/20261106T232805Z-00ea3a52/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_center_order_red/20261106T232805Z-00ea3a52/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_center_order_red/20261106T232805Z-00ea3a52/report.json",
+      "path": "output/reference_polish_r3_20261106/world_center_order_red/20261106T232805Z-00ea3a52/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_final_green/20261106T231943Z-c5e24012/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_final_green/20261106T231943Z-c5e24012/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_final_green/20261106T231943Z-c5e24012/report.json",
+      "path": "output/reference_polish_r3_20261106/world_final_green/20261106T231943Z-c5e24012/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/reference_polish_r3_20261106_world_gpu_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/reference_polish_r3_20261106_world_gpu_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/report.json",
+      "path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_first/20261106T231516Z-88c44b8b/reference_polish_r3_20261106_world_gpu_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_gpu_first/20261106T231516Z-88c44b8b/reference_polish_r3_20261106_world_gpu_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_first/20261106T231516Z-88c44b8b/report.json",
+      "path": "output/reference_polish_r3_20261106/world_gpu_first/20261106T231516Z-88c44b8b/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_second/20261106T231945Z-a0f95cdf/reference_polish_r3_20261106_world_gpu_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_gpu_second/20261106T231945Z-a0f95cdf/reference_polish_r3_20261106_world_gpu_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_second/20261106T231945Z-a0f95cdf/report.json",
+      "path": "output/reference_polish_r3_20261106/world_gpu_second/20261106T231945Z-a0f95cdf/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_green_first/20261106T231448Z-16f170db/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_green_first/20261106T231448Z-16f170db/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_green_first/20261106T231448Z-16f170db/report.json",
+      "path": "output/reference_polish_r3_20261106/world_green_first/20261106T231448Z-16f170db/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_red/20261106T185521Z-4a26db91/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_red/20261106T185521Z-4a26db91/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_red/20261106T185521Z-4a26db91/report.json",
+      "path": "output/reference_polish_r3_20261106/world_red/20261106T185521Z-4a26db91/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_red_corrected/20261106T190157Z-99847758/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_red_corrected/20261106T190157Z-99847758/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_red_corrected/20261106T190157Z-99847758/report.json",
+      "path": "output/reference_polish_r3_20261106/world_red_corrected/20261106T190157Z-99847758/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_reuse_red/20261106T231646Z-64b44aa0/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_reuse_red/20261106T231646Z-64b44aa0/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_reuse_red/20261106T231646Z-64b44aa0/report.json",
+      "path": "output/reference_polish_r3_20261106/world_reuse_red/20261106T231646Z-64b44aa0/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_reuse_red_corrected/20261106T231736Z-e91e8ad8/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_reuse_red_corrected/20261106T231736Z-e91e8ad8/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_reuse_red_corrected/20261106T231736Z-e91e8ad8/report.json",
+      "path": "output/reference_polish_r3_20261106/world_reuse_red_corrected/20261106T231736Z-e91e8ad8/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_wrapper_green/20261106T232701Z-3006f5cd/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_wrapper_green/20261106T232701Z-3006f5cd/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_wrapper_green/20261106T232701Z-3006f5cd/report.json",
+      "path": "output/reference_polish_r3_20261106/world_wrapper_green/20261106T232701Z-3006f5cd/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_wrapper_red/20261106T232532Z-f17de236/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "path": "output/reference_polish_r3_20261106/world_wrapper_red/20261106T232532Z-f17de236/reference_polish_r3_20261106_world_dressing_verifier.log",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_wrapper_red/20261106T232532Z-f17de236/report.json",
+      "path": "output/reference_polish_r3_20261106/world_wrapper_red/20261106T232532Z-f17de236/report.json",
+      "role": "original_result",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/git_blob_scripts__terrain__frontier_gm01_layout.gd.txt",
+      "path": "sources/source_baseline/git_blob_scripts__terrain__frontier_gm01_layout.gd.txt",
+      "role": "baseline_git_blob_not_raw_worktree",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/git_blob_scripts__ui__native_ui_icons.gd.txt",
+      "path": "sources/source_baseline/git_blob_scripts__ui__native_ui_icons.gd.txt",
+      "role": "baseline_git_blob_not_raw_worktree",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/manifest.json",
+      "path": "sources/source_baseline/manifest.json",
+      "role": "baseline_source_raw",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/r3_native_capture_pre_navigation.gd.txt",
+      "path": "sources/source_baseline/r3_native_capture_pre_navigation.gd.txt",
+      "role": "baseline_source_raw",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/scripts__meta__homebase_operations_presenter.gd.txt",
+      "path": "sources/source_baseline/scripts__meta__homebase_operations_presenter.gd.txt",
+      "role": "baseline_source_raw",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/scripts__meta__homebase_screen.gd.txt",
+      "path": "sources/source_baseline/scripts__meta__homebase_screen.gd.txt",
+      "role": "baseline_source_raw",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/scripts__terrain__terrain_map_3d_view.gd.txt",
+      "path": "sources/source_baseline/scripts__terrain__terrain_map_3d_view.gd.txt",
+      "role": "baseline_source_raw",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/scripts__tests__mission_tactical_sandbox_controller.gd.txt",
+      "path": "sources/source_baseline/scripts__tests__mission_tactical_sandbox_controller.gd.txt",
+      "role": "baseline_source_raw",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/scripts__tests__mission_test_setup.gd.txt",
+      "path": "sources/source_baseline/scripts__tests__mission_test_setup.gd.txt",
+      "role": "baseline_source_raw",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/scripts__ui__mission_a5_hud_layout.gd.txt",
+      "path": "sources/source_baseline/scripts__ui__mission_a5_hud_layout.gd.txt",
+      "role": "baseline_source_raw",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/source_baseline/scripts__ui__tactical_ui_theme.gd.txt",
+      "path": "sources/source_baseline/scripts__ui__tactical_ui_theme.gd.txt",
+      "role": "baseline_source_raw",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_candidate_source/manifest.json",
+      "path": "sources/perf_candidate_source/manifest.json",
+      "role": "perf_only_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_candidate_source/scripts__tests__mission_tactical_sandbox_controller.gd.txt",
+      "path": "sources/perf_candidate_source/scripts__tests__mission_tactical_sandbox_controller.gd.txt",
+      "role": "perf_only_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_candidate_source/scripts__tests__mission_test_setup.gd.txt",
+      "path": "sources/perf_candidate_source/scripts__tests__mission_test_setup.gd.txt",
+      "role": "perf_only_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/perf_candidate_source/scripts__ui__tactical_ui_theme.gd.txt",
+      "path": "sources/perf_candidate_source/scripts__ui__tactical_ui_theme.gd.txt",
+      "role": "perf_only_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/preserved_untracked.json",
+      "path": "binding/preserved_untracked.json",
+      "role": "fresh_protection_or_source_binding",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/preserved_rosters.json",
+      "path": "binding/preserved_rosters.json",
+      "role": "fresh_protection_or_source_binding",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/roster_baseline.json",
+      "path": "binding/roster_baseline.json",
+      "role": "fresh_protection_or_source_binding",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_code_manifest.json",
+      "path": "binding/final_code_manifest.json",
+      "role": "fresh_protection_or_source_binding",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/checks_latest.json",
+      "path": "binding/checks_latest.json",
+      "role": "fresh_protection_or_source_binding",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/pre_main_preservation_v2.json",
+      "path": "binding/pre_main_preservation_v2.json",
+      "role": "fresh_protection_or_source_binding",
+      "storage": "copy"
+    },
+    {
+      "original_path": "docs/reports/assets/ui-2026-11-01/menu_heimatbasis.png",
+      "path": "references/menu_heimatbasis.png",
+      "role": "original_2d_target",
+      "storage": "copy"
+    },
+    {
+      "original_path": "docs/reports/assets/ui-2026-11-01/menu_fob_loadout.png",
+      "path": "references/menu_fob_loadout.png",
+      "role": "original_2d_target",
+      "storage": "copy"
+    },
+    {
+      "original_path": "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png",
+      "path": "references/mockup_a5_mission_zweireihig.png",
+      "role": "original_2d_target",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline_captures/02_homebase.png",
+      "path": "raw/before/02_homebase.png",
+      "role": "fresh_native_before",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline_captures/06_go_movement.png",
+      "path": "raw/before/06_go_movement.png",
+      "role": "fresh_native_before",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal_captures/02_homebase.png",
+      "path": "raw/final/02_homebase.png",
+      "role": "normal_native_after",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal_captures/06_go_movement.png",
+      "path": "raw/final/06_go_movement.png",
+      "role": "normal_native_after",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal_captures/07_outpost_overview.png",
+      "path": "raw/final/07_outpost_overview.png",
+      "role": "normal_native_after",
+      "storage": "copy"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/homebase_fixture_1280x720_mission.png",
+      "path": "raw/homebase_native_final/homebase_fixture_1280x720_mission.png",
+      "role": "native_presenter_fixture",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/homebase_fixture_1280x720_squad.png",
+      "path": "raw/homebase_native_final/homebase_fixture_1280x720_squad.png",
+      "role": "native_presenter_fixture",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/homebase_fixture_1600x1080_squad.png",
+      "path": "raw/homebase_native_final/homebase_fixture_1600x1080_squad.png",
+      "role": "native_presenter_fixture",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/homebase_fixture_1920x1080_squad.png",
+      "path": "raw/homebase_native_final/homebase_fixture_1920x1080_squad.png",
+      "role": "native_presenter_fixture",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/homebase_fixture_1920x1080_squad_return.png",
+      "path": "raw/homebase_native_final/homebase_fixture_1920x1080_squad_return.png",
+      "role": "native_presenter_fixture",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/homebase_fixture_3440x1440_squad.png",
+      "path": "raw/homebase_native_final/homebase_fixture_3440x1440_squad.png",
+      "role": "native_presenter_fixture",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_native_final/20261106T234355Z-96f262fc/mission_fixture_1280x720.png",
+      "path": "raw/mission_ui_native_final/mission_fixture_1280x720.png",
+      "role": "native_presenter_fixture",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_native_final/20261106T234355Z-96f262fc/mission_fixture_1920x1080.png",
+      "path": "raw/mission_ui_native_final/mission_fixture_1920x1080.png",
+      "role": "native_presenter_fixture",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/mission_ui_native_final/20261106T234355Z-96f262fc/mission_fixture_3440x1440.png",
+      "path": "raw/mission_ui_native_final/mission_fixture_3440x1440.png",
+      "role": "native_presenter_fixture",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/captures/00_angle0_off.png",
+      "path": "raw/world_gpu_final/00_angle0_off.png",
+      "role": "controlled_native_gpu_diagnostic",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/captures/01_angle0_blackout_unknown.png",
+      "path": "raw/world_gpu_final/01_angle0_blackout_unknown.png",
+      "role": "controlled_native_gpu_diagnostic",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/captures/02_angle0_blackout_mixed.png",
+      "path": "raw/world_gpu_final/02_angle0_blackout_mixed.png",
+      "role": "controlled_native_gpu_diagnostic",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/captures/03_angle0_known_terrain.png",
+      "path": "raw/world_gpu_final/03_angle0_known_terrain.png",
+      "role": "controlled_native_gpu_diagnostic",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/captures/04_angle1_off.png",
+      "path": "raw/world_gpu_final/04_angle1_off.png",
+      "role": "controlled_native_gpu_diagnostic",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/captures/05_angle1_blackout_unknown.png",
+      "path": "raw/world_gpu_final/05_angle1_blackout_unknown.png",
+      "role": "controlled_native_gpu_diagnostic",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/captures/06_angle1_blackout_mixed.png",
+      "path": "raw/world_gpu_final/06_angle1_blackout_mixed.png",
+      "role": "controlled_native_gpu_diagnostic",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/captures/07_angle1_known_terrain.png",
+      "path": "raw/world_gpu_final/07_angle1_known_terrain.png",
+      "role": "controlled_native_gpu_diagnostic",
+      "storage": "archive"
+    },
+    {
+      "original_path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/captures/native_world_gpu.json",
+      "path": "raw/world_gpu_final/native_world_gpu.json",
+      "role": "controlled_native_gpu_diagnostic",
+      "storage": "copy"
+    },
+    {
+      "original_path": "scripts/meta/homebase_operations_presenter.gd",
+      "path": "sources/final/scripts/meta/homebase_operations_presenter.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/terrain/frontier_gm01_layout.gd",
+      "path": "sources/final/scripts/terrain/frontier_gm01_layout.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/terrain/frontier_reference_dressing.gd",
+      "path": "sources/final/scripts/terrain/frontier_reference_dressing.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/terrain/terrain_map_3d_view.gd",
+      "path": "sources/final/scripts/terrain/terrain_map_3d_view.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "path": "sources/final/scripts/tests/mission_tactical_sandbox_controller.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/mission_test_setup.gd",
+      "path": "sources/final/scripts/tests/mission_test_setup.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_camera_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_camera_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_command_style_owner_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_command_style_owner_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_controller_ownership_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_controller_ownership_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_fog_single_slice_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_fog_single_slice_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_homebase_native_fixture.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_homebase_native_fixture.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_homebase_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_homebase_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_mission_ui_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_mission_ui_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_native_capture.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_native_capture.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_native_labels_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_native_labels_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_regression_manifest.json",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_regression_manifest.json",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_strategic_loop_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_strategic_loop_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_theme_idempotency_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_theme_idempotency_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_world_dressing_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_world_dressing_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/reference_polish_r3_20261106_world_gpu_verifier.gd",
+      "path": "sources/final/scripts/tests/reference_polish_r3_20261106_world_gpu_verifier.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/run_reference_polish_r3_20261106.py",
+      "path": "sources/final/scripts/tests/run_reference_polish_r3_20261106.py",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/tests/summarize_reference_polish_r3_20261106.py",
+      "path": "sources/final/scripts/tests/summarize_reference_polish_r3_20261106.py",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/ui/mission_a5_hud_layout.gd",
+      "path": "sources/final/scripts/ui/mission_a5_hud_layout.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/ui/native_ui_icons.gd",
+      "path": "sources/final/scripts/ui/native_ui_icons.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "scripts/ui/tactical_ui_theme.gd",
+      "path": "sources/final/scripts/ui/tactical_ui_theme.gd.txt",
+      "role": "final_candidate_source",
+      "storage": "archive"
+    },
+    {
+      "original_path": "docs/qa/reference_polish_r3_20261106/binding_work.py",
+      "path": "binding/binding_work.py",
+      "role": "readonly_validation_helper",
+      "storage": "copy"
+    }
+  ]
+}

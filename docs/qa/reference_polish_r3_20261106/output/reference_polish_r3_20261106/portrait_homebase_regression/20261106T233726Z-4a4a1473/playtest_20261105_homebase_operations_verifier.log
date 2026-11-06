@@ -1,0 +1,69 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-91950e3a550545b1a293ec9f110c449e
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+HOMEBASE_OPERATIONS_VERIFY_BEGIN
+PASS: Homebase exposes read-only operations snapshot
+PASS: Homebase exposes whitelisted operation bridge
+PASS: Primary entry opens squad and equipment
+PASS: All real roster identities are projected
+PASS: New primary surface exists
+PASS: Legacy workbench is not primary
+PASS: Unknown operations are rejected
+PASS: Real unit can be focused
+PASS: Armor selector delegates to existing member loadout
+PASS: Selected member displays confirmed armor
+PASS: Unknown equipment value is rejected
+PASS: Remove uses existing fireteam callback
+PASS: Removed member leaves focused fireteam
+PASS: Remove releases the existing global staging selection
+PASS: Assign restores the real unit to team
+PASS: Remove real member until team is empty: unit_alpha
+PASS: Remove real member until team is empty: unit_bravo
+PASS: Remove real member until team is empty: unit_charlie
+PASS: Last removal leaves no stale definition member
+PASS: Empty squad cannot board
+PASS: Removed person is available for pilot assignment
+PASS: Pilot selector projects the existing manager assignment
+PASS: Squad restores from actual roster identity: unit_alpha
+PASS: Squad restores from actual roster identity: unit_bravo
+PASS: Squad restores from actual roster identity: unit_charlie
+PASS: Board uses existing craft payload callback
+PASS: Boarding payload prevents equipment mutation
+PASS: Boarding-state fixture completion exposes existing launch gate
+PASS: Staged payload can return to preparation
+PASS: Unboard clears existing payload
+PASS: Start emits existing mission request once
+PASS: Actual transit fixture projects busy craft
+PASS: Transit payload cannot be removed
+PASS: Transit craft cannot be sent twice
+PASS: Other free squad remains editable during first craft transit
+PASS: Input roster bytes stay unchanged
+PASS: Exactly three focused equipment selectors
+PASS: Focused portrait stays a large square rather than a cropped banner
+PASS: Focused portrait preserves full head and aspect
+PASS: Flightdeck uses exact catalog Ref03 Cutlass native preview
+PASS: Four visible squad slots
+PASS: Roster rows are cached by real ID
+PASS: Navigation reuses cached roster rows
+PASS: Base navigation activates actual explorable scene
+PASS: Base does not pause the global SceneTree
+PASS: Leaving base deactivates its runtime branch
+PASS: Advanced tools preserve old panels and NodePaths
+PASS: Primary navigation returns from legacy tools
+PASS: Narrow regression uses actual 1280 root layout
+PASS: Narrow squad uses three preparation columns and moves flight to its navigation page
+PASS: 1280 roster preserves at least 100px for person name
+PASS: 1280 roster preserves portrait and assignment sizes
+PASS: 1280 roster has full row width and never wraps role or status by letter
+PASS: Narrow flight navigation remains fully visible
+PASS: Narrow navigation opens the existing flightdeck page
+PASS: Narrow resize and flight navigation preserve roster, loadouts and transport owners
+PASS: Narrow personnel page keeps its two readable columns
+PASS: 1600-wide squad keeps all four columns
+PASS: 1600-wide roster keeps readable names and single-line roles
+PASS: 1920-wide squad keeps all four columns
+PASS: 1920-wide roster keeps readable names and single-line roles
+PASS: Hidden presenter does not poll
+=== RESULTS: 62 passed, 0 failed ===
+HOMEBASE_OPERATIONS_VERIFY_PASS

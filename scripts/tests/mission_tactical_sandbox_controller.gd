@@ -4287,7 +4287,7 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		set_lz_button.text = "Click Map..." if _is_lz_placement_armed else "Set LZ"
 
 	var target_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton") as Button
-	if target_button != null:
+	if target_button != null and not _native_a5_owns_primary_command_presentation(target_button):
 		target_button.text = "ST" if _is_target_placement_armed else "ZL"
 
 	var call_dropship_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button
@@ -5724,42 +5724,58 @@ func _apply_fireteam_mini_status_summary(card: Control, status_snapshot: Diction
 func _apply_left_tactical_stack_1280_mini_card_style(card: Control, selected_fireteam: bool) -> void:
 	if card == null:
 		return
-	card.custom_minimum_size = Vector2(
-		maxf(card.custom_minimum_size.x, LEFT_TACTICAL_STACK_1280_CARD_MIN_SIZE.x),
-		maxf(card.custom_minimum_size.y, LEFT_TACTICAL_STACK_1280_CARD_MIN_SIZE.y)
-	)
+	# Keep the final native fields with their existing presenter. The remaining
+	# legacy fonts, hidden detail presentation and compatibility metadata still
+	# initialize normally, including on a card's first pass before A5 owns it.
+	var native_a5_style: bool = bool(card.get_meta("native_a5_portrait_team_card", false))
+	if not native_a5_style:
+		card.custom_minimum_size = Vector2(
+			maxf(card.custom_minimum_size.x, LEFT_TACTICAL_STACK_1280_CARD_MIN_SIZE.x),
+			maxf(card.custom_minimum_size.y, LEFT_TACTICAL_STACK_1280_CARD_MIN_SIZE.y)
+		)
 	card.set_meta("left_tactical_stack_1280_style_id", LEFT_TACTICAL_STACK_1280_READABILITY_STYLE_ID)
 	card.set_meta("left_tactical_stack_1280_focus_style_applied", selected_fireteam)
 	card.set_meta("left_tactical_stack_1280_ui_sets_gameplay_truth", false)
 	var title_edit := card.get_node_or_null("Margin/VBox/HeaderRow/TitleEdit") as LineEdit
 	if title_edit != null:
-		title_edit.add_theme_font_size_override("font_size", maxi(16, LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE))
-		title_edit.add_theme_font_override("font", TACTICAL_UI_THEME_SCRIPT.get_heading_font())
-		title_edit.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
-		title_edit.add_theme_color_override("font_uneditable_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
-		title_edit.set_meta("left_tactical_stack_1280_font_size", title_edit.get_theme_font_size("font_size"))
+		var legacy_title_size: int = maxi(16, LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE)
+		if not native_a5_style:
+			title_edit.add_theme_font_size_override("font_size", legacy_title_size)
+		var heading_font: Font = TACTICAL_UI_THEME_SCRIPT.get_heading_font()
+		if not title_edit.has_theme_font_override("font") or title_edit.get_theme_font("font") != heading_font:
+			title_edit.add_theme_font_override("font", heading_font)
+		var title_color: Color = TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT
+		if not title_edit.has_theme_color_override("font_color") or title_edit.get_theme_color("font_color") != title_color:
+			title_edit.add_theme_color_override("font_color", title_color)
+		if not native_a5_style:
+			title_edit.add_theme_color_override("font_uneditable_color", title_color)
+		title_edit.set_meta("left_tactical_stack_1280_font_size", legacy_title_size)
 	var stage_label := card.get_node_or_null("Margin/VBox/StageLabel") as Label
 	if stage_label != null:
-		stage_label.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE)
+		if not native_a5_style:
+			stage_label.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE)
 		stage_label.set_meta("left_tactical_stack_1280_font_size", LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE)
 	var member_label := card.get_node_or_null("Margin/VBox/MemberLabel") as Label
 	if member_label != null:
-		member_label.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_DETAIL_LEAD_FONT_SIZE)
+		if not member_label.has_theme_font_size_override("font_size") or member_label.get_theme_font_size("font_size") != LEFT_TACTICAL_STACK_1280_DETAIL_LEAD_FONT_SIZE:
+			member_label.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_DETAIL_LEAD_FONT_SIZE)
 		member_label.set_meta("left_tactical_stack_1280_font_size", LEFT_TACTICAL_STACK_1280_LEAD_FONT_SIZE)
 		member_label.set_meta("left_tactical_stack_1280_detail_font_size", LEFT_TACTICAL_STACK_1280_DETAIL_LEAD_FONT_SIZE)
 		member_label.set_meta("left_tactical_stack_1280_detail_polish_member_strip", true)
-	card.custom_minimum_size = Vector2(
-		maxf(card.custom_minimum_size.x, LEFT_TACTICAL_STACK_1280_DETAIL_CARD_MIN_SIZE.x),
-		maxf(card.custom_minimum_size.y, LEFT_TACTICAL_STACK_1280_DETAIL_CARD_MIN_SIZE.y)
-	)
+	if not native_a5_style:
+		card.custom_minimum_size = Vector2(
+			maxf(card.custom_minimum_size.x, LEFT_TACTICAL_STACK_1280_DETAIL_CARD_MIN_SIZE.x),
+			maxf(card.custom_minimum_size.y, LEFT_TACTICAL_STACK_1280_DETAIL_CARD_MIN_SIZE.y)
+		)
 	card.set_meta("left_tactical_stack_1280_detail_polish_style_id", LEFT_TACTICAL_STACK_1280_DETAIL_POLISH_STYLE_ID)
 	card.set_meta("left_tactical_stack_1280_detail_polish_style_applied", true)
-	var stylebox: StyleBoxFlat = TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
-		TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_ALT if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL,
-		TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER,
-		4, LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
-	)
-	card.add_theme_stylebox_override("panel", stylebox)
+	if not native_a5_style:
+		var stylebox: StyleBoxFlat = TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
+			TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_ALT if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL,
+			TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected_fireteam else TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER,
+			4, LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
+		)
+		card.add_theme_stylebox_override("panel", stylebox)
 	card.set_meta("native_r4_portrait_card", true)
 
 
@@ -9132,6 +9148,7 @@ func _build_strategic_status_text() -> String:
 		lines.append(next_interaction_line)
 	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var combat_hud_line: String = String(combat_hud_density.get("mission_control_line", "")).strip_edges()
+	var loop_two_readout: Dictionary = {}
 	if bool(combat_hud_density.get("active", false)) and not combat_hud_line.is_empty():
 		var combat_status_line: String = "Kampf %s" % combat_hud_line
 		if not lines.has(combat_status_line):
@@ -9139,17 +9156,18 @@ func _build_strategic_status_text() -> String:
 		var firefight_decision_line: String = _build_release_candidate_firefight_decision_line()
 		if not firefight_decision_line.is_empty() and not lines.has(firefight_decision_line):
 			lines.append(firefight_decision_line)
-		var loop_two_line: String = _build_release_first_decision_loop_two_hud_line()
+		loop_two_readout = _build_strategic_loop_two_readout()
+		var loop_two_line: String = String(loop_two_readout.get("loop_line", ""))
 		if not loop_two_line.is_empty() and not lines.has(loop_two_line):
 			lines.append(loop_two_line)
-		var loop_two_polish_line: String = _build_release_first_decision_loop_two_polish_hud_line()
+		var loop_two_polish_line: String = String(loop_two_readout.get("polish_line", ""))
 		if not loop_two_polish_line.is_empty() and not lines.has(loop_two_polish_line):
 			lines.append(loop_two_polish_line)
 	var debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var debrief_handoff_line: String = String(debrief_handoff.get("handoff_line", "")).strip_edges()
 	if bool(debrief_handoff.get("handoff_ready", false)) and not debrief_handoff_line.is_empty():
 		lines.append(debrief_handoff_line)
-	var station_debrief_handoff: Dictionary = _build_station_scenario_debrief_handoff_cue_snapshot()
+	var station_debrief_handoff: Dictionary = _build_station_scenario_debrief_handoff_cue_snapshot({}, {}, {}, interaction_density)
 	var station_debrief_handoff_line: String = String(station_debrief_handoff.get("handoff_line", "")).strip_edges()
 	if bool(station_debrief_handoff.get("handoff_ready", false)) and not station_debrief_handoff_line.is_empty() and not lines.has(station_debrief_handoff_line):
 		lines.append(station_debrief_handoff_line)
@@ -9158,15 +9176,42 @@ func _build_strategic_status_text() -> String:
 		return "\n".join(lines)
 	var compact_player_decision: String = _compact_release_first_exchange_contact_fire_secondary_line(_build_release_candidate_firefight_decision_line())
 	var player_decision_visible: bool = not compact_player_decision.is_empty() and lines.has(compact_player_decision)
-	var loop_two_line_after_priority: String = _build_release_first_decision_loop_two_hud_line()
+	if loop_two_readout.is_empty():
+		loop_two_readout = _build_strategic_loop_two_readout()
+	var loop_two_line_after_priority: String = String(loop_two_readout.get("loop_line", ""))
 	if not player_decision_visible and not loop_two_line_after_priority.is_empty() and not lines.has(loop_two_line_after_priority):
 		lines.append(loop_two_line_after_priority)
-	var loop_two_polish_line_after_priority: String = _build_release_first_decision_loop_two_polish_hud_line()
+	var loop_two_polish_line_after_priority: String = String(loop_two_readout.get("polish_line", ""))
 	if not player_decision_visible and not loop_two_polish_line_after_priority.is_empty() and not lines.has(loop_two_polish_line_after_priority):
 		lines.append(loop_two_polish_line_after_priority)
 	if not player_decision_visible and bool(order_preview_threat_overlay.get("active", false)) and not order_preview_threat_overlay_line.is_empty() and not lines.has(order_preview_threat_overlay_line):
 		lines.append(order_preview_threat_overlay_line)
 	return "\n".join(lines)
+
+
+func _build_strategic_loop_two_readout() -> Dictionary:
+	# This value belongs only to one synchronous Strategic RAW assembly. Keep
+	# source construction inside the same available helper guard as its first
+	# former read, rather than moving a recursive producer outside that guard.
+	var readout: Dictionary = {"loop_line": "", "polish_line": ""}
+	var hud_depth: int = _release_first_decision_loop_two_hud_build_depth
+	var polish_depth: int = _release_first_decision_loop_two_polish_hud_build_depth
+	if hud_depth > 0 and polish_depth > 0:
+		return readout
+	if hud_depth == 0:
+		_release_first_decision_loop_two_hud_build_depth += 1
+	else:
+		_release_first_decision_loop_two_polish_hud_build_depth += 1
+	var next_loop: Dictionary = get_release_first_decision_next_playable_loop_snapshot()
+	_release_first_decision_loop_two_hud_build_depth = hud_depth
+	_release_first_decision_loop_two_polish_hud_build_depth = polish_depth
+	# A missing source remains empty instead of triggering the helpers' legacy
+	# empty-override fallback and issuing another source read in this assembly.
+	if next_loop.is_empty():
+		return readout
+	readout["loop_line"] = _build_release_first_decision_loop_two_hud_line(next_loop)
+	readout["polish_line"] = _build_release_first_decision_loop_two_polish_hud_line(next_loop)
+	return readout
 
 
 func _prioritize_release_firefight_bottom_dock_lines(source_lines: PackedStringArray, combat_hud_density: Dictionary = {}) -> PackedStringArray:
@@ -11133,10 +11178,13 @@ func _apply_release_firefight_command_primary_button_polish(active: bool) -> voi
 		var button := get_node_or_null(NodePath(String(spec.get("path", "")))) as Button
 		if button == null:
 			continue
-		button.text = String(spec.get("text", button.text))
+		var native_presentation: bool = _native_a5_owns_primary_command_presentation(button)
+		if not native_presentation:
+			button.text = String(spec.get("text", button.text))
 		button.tooltip_text = String(spec.get("tooltip", button.tooltip_text))
-		button.clip_text = true
-		button.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE)
+		if not native_presentation:
+			button.clip_text = true
+			button.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE)
 		button.set_meta("release_firefight_command_matrix_style_id", RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID)
 		button.set_meta("release_firefight_command_matrix_task", "TASK_836")
 		button.set_meta("release_firefight_command_matrix_active", active)
@@ -11144,7 +11192,7 @@ func _apply_release_firefight_command_primary_button_polish(active: bool) -> voi
 		button.set_meta("release_firefight_command_matrix_readable", active and not button.text.strip_edges().is_empty() and not button.tooltip_text.strip_edges().is_empty())
 		button.set_meta("release_firefight_command_matrix_font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE)
 		button.set_meta("release_firefight_command_matrix_visual_weight", RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_VISUAL_WEIGHT if active else 1.0)
-		if active:
+		if active and not native_presentation:
 			button.self_modulate = Color(0.86, 0.95, 1.0, 1.0)
 
 
@@ -11153,10 +11201,13 @@ func _apply_release_firefight_command_go_button_polish(active: bool) -> void:
 	if go_button == null:
 		return
 	var go_ready: bool = not go_button.disabled and not preview_mode and _can_issue_local_commands() and _has_selected_fireteam_orders_to_execute()
-	go_button.text = "GO"
+	var native_presentation: bool = _native_a5_owns_primary_command_presentation(go_button)
+	if not native_presentation:
+		go_button.text = "GO"
 	go_button.tooltip_text = "GO: geplante Orders ausfuehren." if go_ready else "GO blockiert: erst Fireteam waehlen und Order/Waypoint planen."
-	go_button.clip_text = true
-	go_button.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE)
+	if not native_presentation:
+		go_button.clip_text = true
+		go_button.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE)
 	go_button.set_meta("release_firefight_command_matrix_style_id", RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID)
 	go_button.set_meta("release_firefight_command_matrix_task", "TASK_836")
 	go_button.set_meta("release_firefight_command_matrix_active", active)
@@ -11165,7 +11216,7 @@ func _apply_release_firefight_command_go_button_polish(active: bool) -> void:
 	go_button.set_meta("release_firefight_command_matrix_go_ready", go_ready)
 	go_button.set_meta("release_firefight_command_matrix_font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE)
 	go_button.set_meta("release_firefight_command_matrix_visual_weight", RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT if active else 1.0)
-	if active:
+	if active and not native_presentation:
 		go_button.self_modulate = Color(0.70, 1.0, 0.82, 1.0) if go_ready else Color(1.0, 0.86, 0.42, 1.0)
 		go_button.add_theme_color_override("font_color", Color(0.02, 0.06, 0.035, 1.0))
 		go_button.add_theme_color_override("font_hover_color", Color(0.0, 0.04, 0.02, 1.0))
@@ -15911,7 +15962,8 @@ func _apply_drop_light_hud_button_labels() -> void:
 		var button := get_node_or_null(String(path_variant)) as Button
 		if button == null:
 			continue
-		button.text = String(command_labels[path_variant])
+		if not _native_a5_owns_primary_command_presentation(button):
+			button.text = String(command_labels[path_variant])
 		button.tooltip_text = _get_command_matrix_player_tooltip(String(path_variant), String(command_labels[path_variant]))
 	_apply_command_matrix_player_icons()
 
@@ -15926,6 +15978,10 @@ func _apply_drop_light_hud_button_labels() -> void:
 		drop_button.tooltip_text = "Call dropship"
 	_apply_command_button_markers()
 	_apply_command_matrix_1280_readability()
+
+
+func _native_a5_owns_primary_command_presentation(button: Button) -> bool:
+	return bool(get_meta("native_a5_legacy_setup_complete", false)) and NATIVE_A5_HUD_LAYOUT_SCRIPT.LABELS.has(String(button.name))
 
 
 func _get_command_matrix_player_tooltip(path: String, fallback: String) -> String:
@@ -15960,9 +16016,16 @@ func _apply_command_matrix_player_icons() -> void:
 		var button := get_node_or_null(String(path_variant)) as Button
 		if button == null:
 			continue
+		var native_a5: bool = bool(get_meta("native_a5_legacy_setup_complete", false))
+		var button_name := String(button.name)
+		if native_a5 and (NATIVE_A5_HUD_LAYOUT_SCRIPT.ICON_IDS.has(button_name) or NATIVE_A5_HUD_LAYOUT_SCRIPT.RULES.has(button_name)):
+			continue
 		button.icon = _get_compact_command_matrix_icon(String(path_variant), icons_by_path[path_variant] as Texture2D)
-		button.expand_icon = false
-		button.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE)
+		# A5 Target can still use this legacy texture until its native presenter
+		# owns an icon; its final typography and expansion already belong to A5.
+		if not _native_a5_owns_primary_command_presentation(button):
+			button.expand_icon = false
+			button.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE)
 
 
 func _get_compact_command_matrix_icon(cache_key: String, source: Texture2D) -> Texture2D:

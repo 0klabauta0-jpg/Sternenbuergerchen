@@ -1,0 +1,2624 @@
+[
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-090dda95cb79456399349457d39ae875\\task_299_roster_v1.json",
+    "sha256": "f1b0ed91a4bf06b4af20f5e350e4b010f4b9f7fe2bbf31dbedb28202333875b1",
+    "size": 106508,
+    "mtime_ns": 1793679930302549100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-38f3cd86c4d94d8a952859af01199a4b\\task_299_roster_v1.json",
+    "sha256": "6a925eb05bf0805c0b813bf7f9a83eb4494efe694d0ff914f22fe1a22dacb694",
+    "size": 106508,
+    "mtime_ns": 1793766791976236800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-48c25898d74448e991b9e56c4d290b69\\task_299_roster_v1.json",
+    "sha256": "3941de102009e3c31909b55bcca61b43909f48aec1b4498b7d17542f68015704",
+    "size": 106508,
+    "mtime_ns": 1793718797029958900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-52a80d400ae14169996e50b7c1294404\\task_299_roster_v1.json",
+    "sha256": "1a3adbba3edfe4f7f4b0e4f586d81eeb57ee5992f7899f20563b2e0ca402470f",
+    "size": 106508,
+    "mtime_ns": 1793717705211573600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7451b5709301423eba0194355ecbf860\\task_299_roster_v1.json",
+    "sha256": "da7242d91f479874ef32b403529db47f560e83c93b37135373ce270049b5c059",
+    "size": 106508,
+    "mtime_ns": 1793744636996952300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-84d5e38889bb4ca198b9469fe9b3525c\\task_299_roster_v1.json",
+    "sha256": "7264747164b28cb718416a7ec2c701fbeaa1bd7ef0d83db791e0529f9b38a342",
+    "size": 106508,
+    "mtime_ns": 1793680302453096500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-aff67d4453f143b7bc11b5530a802941\\task_299_roster_v1.json",
+    "sha256": "83bdaf1770f0571ebdd3c3b26a3505a085b2bf7b75ec9f2f4ed190e6030c926d",
+    "size": 106508,
+    "mtime_ns": 1793681366438513800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ceb962aec9f640ea94818dff6b80f1e0\\task_299_roster_v1.json",
+    "sha256": "d5994fbdf0c3d2afb631b51fc9f288901028c1380979877579a8d472e8151e2c",
+    "size": 106508,
+    "mtime_ns": 1793743468582952600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\task_299_roster_v1.json",
+    "sha256": "69b157561ca231f3bf6bd2295a86f33b472d8a541fd1cb17c3c8f28c482985e9",
+    "size": 103688,
+    "mtime_ns": 1778436329462236900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\ui_native_r1_capture_roster.cfg",
+    "sha256": "6c126e001e91c7f07175fac96f72b7f37e6491090b7d217c878eb09644ec6d9d",
+    "size": 132472,
+    "mtime_ns": 1793572258707827600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\ui_native_r2_capture_roster.cfg",
+    "sha256": "fccd3b27aaeb54f9bf4419de3cbe05d26d817526f239ad68d0579970129b6d99",
+    "size": 132539,
+    "mtime_ns": 1793575638296572800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\sternenbuerger_proto\\roster_debug_v01.json",
+    "sha256": "0aad2918efc5d4ea4bfbbadc0fd50b0ba027f510e7627059bd08a9ab2c5a95e6",
+    "size": 4157,
+    "mtime_ns": 1774633965632082300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1011\\roster_v1.json",
+    "sha256": "d332b0a67c351374d42ad3c7b1b2c0f64340e600ace0d31a39e6711ab30c3a0b",
+    "size": 129552,
+    "mtime_ns": 1778442744962729500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1027\\roster_v1.json",
+    "sha256": "6c461ddeb691be68ad54c4956cd7b1c1bce85b84b5f1a048d7064fecd04cb8db",
+    "size": 140024,
+    "mtime_ns": 1778508239159940500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1043\\roster_v1.json",
+    "sha256": "bbb11e1627a81162758426ccd532a67fbe9b60e62afdec6e99758c7261622417",
+    "size": 139843,
+    "mtime_ns": 1778449661771791400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1048\\roster_v1.json",
+    "sha256": "c59a58d10a67e6a2ba11ad5023d19a8865c4bca224ff80f8ba2a2e5602c3a5ec",
+    "size": 129285,
+    "mtime_ns": 1778438716138515200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1049\\roster_v1.json",
+    "sha256": "cd9e320d162f748235594c6c65e29d574d03c0f1635a0ea115b292f046931366",
+    "size": 140051,
+    "mtime_ns": 1778543171803099400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1050\\roster_v1.json",
+    "sha256": "eb83fc4e1a803bea044f4e20e322551d8dfea015e25f593ba6fbdc0782771c87",
+    "size": 129552,
+    "mtime_ns": 1778441336816272800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1057\\roster_v1.json",
+    "sha256": "9278204bb8f8448c4cbdbe019008b992fe63c5463c028a5120c9afb43070d8bb",
+    "size": 140051,
+    "mtime_ns": 1778546486628695000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1063\\roster_v1.json",
+    "sha256": "aa27b78506b3007b4c5ba866f0c72fbd6a5a12bc94f917153c86be87fba0213f",
+    "size": 140082,
+    "mtime_ns": 1778546621243780700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1066\\roster_v1.json",
+    "sha256": "237b1b891d8ca340588d706a26d82a970a736145cee45968608c12738f07708e",
+    "size": 140082,
+    "mtime_ns": 1778546760480820700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1067\\roster_v1.json",
+    "sha256": "d933f59662806a541abac950f0db86257d2eb1c6bdb549979ad96dab7f709752",
+    "size": 139843,
+    "mtime_ns": 1778448729043487100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1074\\roster_v1.json",
+    "sha256": "61a019550dd823d2ec5ad79aab831bfc475bced2f1f3b9d408856120e7130a8b",
+    "size": 140082,
+    "mtime_ns": 1778546864834037500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1078\\roster_v1.json",
+    "sha256": "f59af47648933708fd31ba0666bcf17f4822ed586a75ba4f0888c43b52eb13b4",
+    "size": 139843,
+    "mtime_ns": 1778450039794538900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1083\\roster_v1.json",
+    "sha256": "dc68f20f6cc1f3d2c4302e45367ed2ee1b0ef32369c7eff052112c1c5e0104d9",
+    "size": 140082,
+    "mtime_ns": 1778546789999104800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1093\\roster_v1.json",
+    "sha256": "c22e6950679c908e7ffa309ad37179a8c261f7c715778269249fa53cefb067cc",
+    "size": 129552,
+    "mtime_ns": 1778442676345948800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1105\\roster_v1.json",
+    "sha256": "00d72ccc4f274d5f72505083efd08ad66a1846327c514d2affc80a9f9bda4bdf",
+    "size": 140051,
+    "mtime_ns": 1778543066196061500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1131\\roster_v1.json",
+    "sha256": "a5aa48753fb12aed0b7ab304110d4c6c4927207430dac8e1141df068d86051fd",
+    "size": 140024,
+    "mtime_ns": 1778508257364222800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1133\\roster_v1.json",
+    "sha256": "758452a2525f5efc59badb40e35d7877d72642f81c4974432194acd47ddd2302",
+    "size": 129285,
+    "mtime_ns": 1778438756048355400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1137\\roster_v1.json",
+    "sha256": "37cc31080f13fcf64cad1990ae833bf129f8b9d3c8f7441a247dc14edc2e3269",
+    "size": 130682,
+    "mtime_ns": 1778549269693595100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1146\\roster_v1.json",
+    "sha256": "e54e1de14df864eb1f49fdb3bf87d8d55f914c02f5f0878d685d6e57973a4c29",
+    "size": 140082,
+    "mtime_ns": 1778546903315037600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1150\\roster_v1.json",
+    "sha256": "2a5e5267e41aa825000fb9c62c68a2125d83b1416c2c953f0099f048a76d46aa",
+    "size": 129285,
+    "mtime_ns": 1778438841695088300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1155\\roster_v1.json",
+    "sha256": "ed78234bf865d5a6d5bd96a222e9c99ea8ec18770bf9ef8f0e3b946a1df96e78",
+    "size": 140114,
+    "mtime_ns": 1778508418791010800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1174\\roster_v1.json",
+    "sha256": "fe638dec54988183791b8e0816fa413508a029ef8e494266fa3a6ceb214e0391",
+    "size": 130682,
+    "mtime_ns": 1778549222631962800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1187\\roster_v1.json",
+    "sha256": "455ca4592b57171199149e0e8067180b9f3531af22d17a4015dd95852ef875a2",
+    "size": 130682,
+    "mtime_ns": 1778549177857959700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1188\\roster_v1.json",
+    "sha256": "b55a6cdcfdb1c4b2d099c0a520f19d726b14eadcc4d921a41f9990c070cfd2c6",
+    "size": 154077,
+    "mtime_ns": 1778547904985341700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1197\\roster_v1.json",
+    "sha256": "9d45bc3e15dc5521b23293c53e33beb2641cddd01c08844070c5a2bc09940628",
+    "size": 140067,
+    "mtime_ns": 1778509562784946700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1223\\roster_v1.json",
+    "sha256": "35ba2b314db5d4c523d04e22f056ffc81fc7df3ba64c83dc7444a7d8e30eb25f",
+    "size": 154077,
+    "mtime_ns": 1778547872129633800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1253\\roster_v1.json",
+    "sha256": "295118cc3dcf2cbd3d762fc24eb78e3424fd9b372a2f406121067ed344cba56d",
+    "size": 139843,
+    "mtime_ns": 1778450011821969500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1254\\roster_v1.json",
+    "sha256": "442a4a1aa34cb946ada2fbdd57ab599ae9070f796dbab6e981fc13f39e38b034",
+    "size": 140051,
+    "mtime_ns": 1778543093903620600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1278\\roster_v1.json",
+    "sha256": "735c60dbdd1845ed775fe9a977f3de4eaf0fef1c9e4ada66ec3fb22d4dfa95e5",
+    "size": 130682,
+    "mtime_ns": 1778552155905574100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1283\\roster_v1.json",
+    "sha256": "4bd9a73ad5dea33fd9a1801946362ef3d2d2d02411956e86244bb8a26ab1892e",
+    "size": 129552,
+    "mtime_ns": 1778443065188919200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1310\\roster_v1.json",
+    "sha256": "1fb53719973d34c70aa71d38da1a98afe74145f91344d0ea9c3c722feabfecf0",
+    "size": 130682,
+    "mtime_ns": 1778549166270473100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1319\\roster_v1.json",
+    "sha256": "90eb01144e9423ca6efc7036556f348cdad5d270ba091a7bbcb48cd5d20d1a5c",
+    "size": 154063,
+    "mtime_ns": 1778547952347579000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1340\\roster_v1.json",
+    "sha256": "5d5b1c8742f757da65b6b9f4b843e1c9988a34c90817d0c55621054e70a7a10e",
+    "size": 130682,
+    "mtime_ns": 1778549205079222000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1486\\roster_v1.json",
+    "sha256": "9ef507f13e2fd97ce978494bf9969c3eac6038e701986913a51b46c1a7eda234",
+    "size": 140067,
+    "mtime_ns": 1778539217780111500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_1861\\roster_v1.json",
+    "sha256": "d16b9eb8b2b27fbf15e9360660950812d49ae6b95395592ea875dd35cacb9f45",
+    "size": 140067,
+    "mtime_ns": 1778539235699521800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_2035\\roster_v1.json",
+    "sha256": "e8b82a7823f3ec8dddfd70d0fe279afe3d89149a73619bd30eb51baa3e4c8b23",
+    "size": 140067,
+    "mtime_ns": 1778509642243798100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_2497\\roster_v1.json",
+    "sha256": "45fc9bd6415bfc08c2b1cc7a7230cb7c2693e140fbccdce79cb00b2d0d626240",
+    "size": 140067,
+    "mtime_ns": 1778540603847677700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_6479\\roster_v1.json",
+    "sha256": "b9207c658f41f21bda51eb5f6ba3cec1239216dfa03cbe537dde01971d0215fb",
+    "size": 140067,
+    "mtime_ns": 1778539169054740500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_982\\roster_v1.json",
+    "sha256": "d2f9253a4db8dfcbdcf2cad2d323fb4dcd47dce020428889a395b1b7f23604ac",
+    "size": 139843,
+    "mtime_ns": 1778498800014734800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_character_editor_991\\roster_v1.json",
+    "sha256": "c566e16df4128feac8db225ff8b19aee644393ab08963fbbc476e5b160b890d8",
+    "size": 140024,
+    "mtime_ns": 1778508162719415300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_1045\\roster_v1.json",
+    "sha256": "642148081ceab9985df9d19f24b464411e624e511a2d7cbbe0b2df32b84648cf",
+    "size": 135831,
+    "mtime_ns": 1782741671034486400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_438\\roster_v1.json",
+    "sha256": "5f89bea3dff21c53a2a3edae1fcb4000f92d367c99a54cefc83d072fe033f86c",
+    "size": 131720,
+    "mtime_ns": 1778414581438906900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_444\\roster_v1.json",
+    "sha256": "dbf1f27ec2bf29396a8ce91fcd945803be8549b5102588285af88e794b43192e",
+    "size": 131720,
+    "mtime_ns": 1778414544688032700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_472\\roster_v1.json",
+    "sha256": "b11aa88880b6da88147ccb598e0c45a3fc4b133c48236ce0286f6df75b1f0616",
+    "size": 132817,
+    "mtime_ns": 1778432216416361200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_507\\roster_v1.json",
+    "sha256": "e2d38a0fddf26698b8caae2b707be81c3a7cddd135135710d0a1b395141d650d",
+    "size": 132817,
+    "mtime_ns": 1778430846582698400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_517\\roster_v1.json",
+    "sha256": "e9d985c390239c545c3f408d08966fb3d6cede9b0e489efdcd97c493813d05d9",
+    "size": 134670,
+    "mtime_ns": 1778442684253917300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_529\\roster_v1.json",
+    "sha256": "0cc693dcb01ce58ef6ea6e69b4c043a6f23cb0a809a07ffaba0fab18f30d3086",
+    "size": 145151,
+    "mtime_ns": 1778508176435341400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_531\\roster_v1.json",
+    "sha256": "f4f1d7f54694c58d497339f88b27d272aea0468348406f2723761b1a9b1ef2e1",
+    "size": 135817,
+    "mtime_ns": 1778552577470998600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_541\\roster_v1.json",
+    "sha256": "936ada3ba13fcffb96465b03ee6ffea2550a9576b58c7316bbe50c803742ad87",
+    "size": 132817,
+    "mtime_ns": 1778432234219302600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_543\\roster_v1.json",
+    "sha256": "ce3e1959be67c82748a1836d4ed143e9a898e078ac6447ff2449de1547846383",
+    "size": 132817,
+    "mtime_ns": 1778436297637979300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_547\\roster_v1.json",
+    "sha256": "b4bb0e76b0390ee995163de4b50d0ab01389de88620d0ed37ef116f59ecf61fd",
+    "size": 134670,
+    "mtime_ns": 1778441348900060800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_548\\roster_v1.json",
+    "sha256": "3654f1865b1116498ee6332b2f279283a25d2b546b33ed78258e198eac5b8ed5",
+    "size": 132817,
+    "mtime_ns": 1778430794958926300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_551\\roster_v1.json",
+    "sha256": "398f45227643bfd6a7d7608b90ebd841e6c6d3c5b8435fd49d8b482e1f4eec65",
+    "size": 144960,
+    "mtime_ns": 1778449482807265300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_552\\roster_v1.json",
+    "sha256": "2e251c0ed81c2fad443aa2103425effbf43455ac103d2e0d44e117fa827863ef",
+    "size": 135817,
+    "mtime_ns": 1778552594729604500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_569\\roster_v1.json",
+    "sha256": "29edc06d35103be6bfe3b7e75e2d4d3b3ba09f2e7c4e50eae0211a9162d1fc95",
+    "size": 134670,
+    "mtime_ns": 1778443078949482800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_571\\roster_v1.json",
+    "sha256": "86e9b33fe5e2f3ba8f9bc4f9a40a88f9012215415a6f2e59bcbdc4159c39dc94",
+    "size": 132817,
+    "mtime_ns": 1778436194732653500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_577\\roster_v1.json",
+    "sha256": "0381355debbcf72c0c2287d8a268d82d1d0f3ce7bfe046207d926cf6ca98ebca",
+    "size": 132817,
+    "mtime_ns": 1778430837391842400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_606\\roster_v1.json",
+    "sha256": "339dd09651226f37b22f4c2a8019f4caf05da6b353ca26b6b07fe5fb15186267",
+    "size": 145179,
+    "mtime_ns": 1778543065599101800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_622\\roster_v1.json",
+    "sha256": "75ecdb607140f1c4edbbb90d8cd7b995a691cd2bf472f3a48ec2d064e953b7c1",
+    "size": 145179,
+    "mtime_ns": 1778546921345448000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_625\\roster_v1.json",
+    "sha256": "f0a470f42f23a47dc4283183b3a1e8e71d6333a701c72b34e15db0def67fbe7e",
+    "size": 132817,
+    "mtime_ns": 1778436178061915400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_632\\roster_v1.json",
+    "sha256": "262e7315fa1edd8318c61724ef7952832ae8b3a20f9740a5362cf3151ac8969b",
+    "size": 134670,
+    "mtime_ns": 1778442756160838000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_653\\roster_v1.json",
+    "sha256": "4276bc600924214ce23a32da09d964f5dc785e4ab6f136ffbcfb6cad50e033d1",
+    "size": 158513,
+    "mtime_ns": 1778547971887551100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_685\\roster_v1.json",
+    "sha256": "77feb25f24262a52240e2c8ef0ab9982315dca9e3156a35be8fdf3161af2d206",
+    "size": 134400,
+    "mtime_ns": 1778438772774435600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\bugfix_team_library_708\\roster_v1.json",
+    "sha256": "8cd3096bb6a533b530e41a1102b48a09864df7d18001daecebf6d015f98d168d",
+    "size": 145179,
+    "mtime_ns": 1778543093412004900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\ui_native_r2_verifier\\native_shell_1280_720_3799609\\roster.json",
+    "sha256": "299241a444eb287cb34a27ee7142d828342aae3b92c1f5d45e2a085794113c05",
+    "size": 134577,
+    "mtime_ns": 1793575459895356700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\ui_native_r2_verifier\\task232\\roster.json",
+    "sha256": "a17a830cdc05401f42fdb3aa772ac0b682926105d830c42caec3ebead61b6f74",
+    "size": 132170,
+    "mtime_ns": 1793575462963856900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\ui_native_r2_verifier\\ui_native_shell_fixture\\roster.json",
+    "sha256": "097a2b8a9b13e72241b1a7bec73cff902c843bd02706c975b8b9e418a3487adb",
+    "size": 134560,
+    "mtime_ns": 1793575460134358700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\task_287_profiles\\task_287_player\\roster_v1.json",
+    "sha256": "ac62f998b9dae33d7294081b1e3157928806661670b63538c91278c178592c19",
+    "size": 108639,
+    "mtime_ns": 1793569210316316400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\local_player\\roster_v1.json",
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "size": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\roster_v1.json",
+    "sha256": "c733f0209b610bd6597f8a37df5c16e06deb7cea50631646a6dabc83e553243e",
+    "size": 131786,
+    "mtime_ns": 1793575473136857300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_recovery\\roster_v1.json",
+    "sha256": "f26c264096844427928f8cd3a86926e5125539b41dbdf13f44fd00d137a7e73e",
+    "size": 132636,
+    "mtime_ns": 1793575467200357600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\roster_v1.json",
+    "sha256": "9a8dd753221829adea7e4006554d9192e982c82bda4897219c1060f6785f8961",
+    "size": 131200,
+    "mtime_ns": 1793575467397357200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_roundtrip\\roster_v1.json",
+    "sha256": "3f8bff9a1949245a7e0a22f88daa52cf197163ae94ce5f2f847a4075234b7679",
+    "size": 132360,
+    "mtime_ns": 1793575466978358400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\roster_v1.json",
+    "sha256": "d496afe68cc2bbbcce1f6e9ff2e2e1c08d082dc1d94f2f8927dc52974c03c1ce",
+    "size": 130716,
+    "mtime_ns": 1793575465264858100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778121438.json",
+    "sha256": "a403a6732a412cb76b443bcf9264cafe7748b0ac9d85735ef279eb67e9b7219d",
+    "size": 84792,
+    "mtime_ns": 1778171448425402000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778121855.json",
+    "sha256": "45c3f2595ba064ae6c3357745f288dac05fb2232504672a70bf4efe6d5a23114",
+    "size": 96204,
+    "mtime_ns": 1778171448427409100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778122442.json",
+    "sha256": "5b4e6c8fcc9f53137bf24a7002abb8ee8ae2d3b0476c2193af207ed75c24f925",
+    "size": 122126,
+    "mtime_ns": 1778171448429415900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778178233.json",
+    "sha256": "bb6c3d20bd588c8d91b1714e872413ea527d0077eac85e6709471988c5458baf",
+    "size": 124555,
+    "mtime_ns": 1778178233988790000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778386166.json",
+    "sha256": "7d19b047b700250913c7733b42ae4056a4c12f267dfe843e58a124ef1d4bacb9",
+    "size": 124555,
+    "mtime_ns": 1778386166884257400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778430864.json",
+    "sha256": "4268ccc592683151921c63273014210f7d8e6d4dd8544b7717b0f17a469464fa",
+    "size": 126055,
+    "mtime_ns": 1778430864485650200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778432247.json",
+    "sha256": "98eff32b118eeb69bba42c7f0bb61981bf652bb0f0814ee89fc3ee31ea93efe1",
+    "size": 126055,
+    "mtime_ns": 1778432247883666600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778436316.json",
+    "sha256": "653e40a38802423c62616a1cc661abe2bd49e634870c07acdf9ad3da33127223",
+    "size": 126055,
+    "mtime_ns": 1778436316695044800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778438773.json",
+    "sha256": "d0b202b11b6c2c9eae19399f20ce1de7f51e594169c8c56e055e1c6a6981beef",
+    "size": 127630,
+    "mtime_ns": 1778438773536546200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778438840.json",
+    "sha256": "8ea929b2e126b899d081d5a7b7791b2d95d488bf2af76996e969e2b06920cb19",
+    "size": 127630,
+    "mtime_ns": 1778438840805541200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778441356.json",
+    "sha256": "a7324780073a57e43f4727e4878ec720e7e11d223c55b830cf511d824fcc0bc6",
+    "size": 127900,
+    "mtime_ns": 1778441356685943600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778508446.json",
+    "sha256": "c50e64cc06c361680beb8d7d35878819a741008f770a2102314037dfc09b0d2a",
+    "size": 138409,
+    "mtime_ns": 1778508446722071100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778547970.json",
+    "sha256": "d83308f0e833b998f8a67a4e2db62c979ac2d6a01f6ae178486259c4e0991262",
+    "size": 154372,
+    "mtime_ns": 1778547970541990100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778549163.json",
+    "sha256": "2edc5e77207b9c5fcc078242a27b52fe3a0a9b3f5d8b03772d6b5c805c176c8a",
+    "size": 129059,
+    "mtime_ns": 1778549163131776800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778549174.json",
+    "sha256": "553afcbafad3c1251d0d25b016fd0b3f110c392ae1ea675958bfd62f9fd7e1b5",
+    "size": 129059,
+    "mtime_ns": 1778549174729297500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778549201.json",
+    "sha256": "166547c7866e6d264a89b3065c0e1168c977aa994324ea13d8f7f01d98f10ae2",
+    "size": 129059,
+    "mtime_ns": 1778549201080093900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1778549236.json",
+    "sha256": "cb7798cfaca6309b99e4fa73d9b76a39215a03f2e0789d0e47fe8238795c8687",
+    "size": 129059,
+    "mtime_ns": 1778549236706638400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1793574292.json",
+    "sha256": "964aeca10973417fb8e718c10966e0f1e55bb9b876d39370745bc64ce33903f2",
+    "size": 129068,
+    "mtime_ns": 1793574292204931000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\test_task232_menu\\archive\\roster_v1_1793575465.json",
+    "sha256": "e352973e9670db37ba5236a0a37151b79cc35d108918ab263399f11879442d41",
+    "size": 129068,
+    "mtime_ns": 1793575465193358100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778121419.json",
+    "sha256": "b848432a03b1f60f2e7523f8a030279badb42a6d2f6576eb12542683cdd1cf21",
+    "size": 85531,
+    "mtime_ns": 1778171448402824900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778121438.json",
+    "sha256": "03a51fb62a7f1a909170b1e802d11b17ac690481ee9079eb8b65668c2578502e",
+    "size": 85531,
+    "mtime_ns": 1778171448404832100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778121846.json",
+    "sha256": "840bb7160e5e3a53ceaad5d89fb3a81e5081ea240a8f668bcf4888047605276e",
+    "size": 96765,
+    "mtime_ns": 1778171448408343800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778122442.json",
+    "sha256": "4ae9262196e3188ca164bf57a4cc27971d630d174ae1c1b3f2d1620351e6fdda",
+    "size": 127806,
+    "mtime_ns": 1778171448410852600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778123001.json",
+    "sha256": "dc550e58f648f36f01920a95751ac832cb9433a835277e0f6b0737ea7a281962",
+    "size": 127840,
+    "mtime_ns": 1778171448412859600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778123714.json",
+    "sha256": "459e2ce0e363df88801ada6570daec3f498b65ddb0b04a1f534335867ffa892d",
+    "size": 127840,
+    "mtime_ns": 1778171448416873500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778178324.json",
+    "sha256": "df7c8b266ef4e7490de58c447fc8931197fa8fe17d17f0a02be707c8d8b2d216",
+    "size": 130214,
+    "mtime_ns": 1778178324586265200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778386169.json",
+    "sha256": "7c776c52c0ae0d0973f631517b25b612c1d58db4dbb3e5cef0a32f3bc4a0e284",
+    "size": 130214,
+    "mtime_ns": 1778386169171596000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778414544.json",
+    "sha256": "7ca40ff5750c647fb8b03a1b9e760198097e1637558359251c2b1bc9afec226f",
+    "size": 130214,
+    "mtime_ns": 1778414544681510400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778430803.json",
+    "sha256": "b119b7bdf126dd79808f766b53e34b85a3834b60dbbad0c321c9ac8d803944ac",
+    "size": 131714,
+    "mtime_ns": 1778430803269659300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778430833.json",
+    "sha256": "54f09ad53cfa56458558a0b614dd9a37a5948eae5878dcfae08cf3f22f7a8bc4",
+    "size": 131714,
+    "mtime_ns": 1778430833716753800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778430853.json",
+    "sha256": "3c845fdc1beae3653fffd8707970686d604990bb7aa16d84100a266a55a11912",
+    "size": 131714,
+    "mtime_ns": 1778430853790312100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778432247.json",
+    "sha256": "5adc5906c1406cf3587d9080a460781c6f12934390686adc1e482ae43d0bb3b3",
+    "size": 131714,
+    "mtime_ns": 1778432247133598000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1778436321.json",
+    "sha256": "497856c92e748b18fd37aa1097e70cbb1840e3d1dba01a1dc23a7145c9cbc18a",
+    "size": 131714,
+    "mtime_ns": 1778436321483715300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1793574294.json",
+    "sha256": "b28039c755b833ca924fd9db6c4cf0057f773b066047e73ffb7e9386a27ed86f",
+    "size": 134346,
+    "mtime_ns": 1793574294239934000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_reset\\archive\\roster_v1_1793575467.json",
+    "sha256": "172e37c8ef17e4b3eecb77d08cda2caddea0bdea1a2ab1a8ce5a400ca337a4b0",
+    "size": 134346,
+    "mtime_ns": 1793575467296357900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778121419.json",
+    "sha256": "a32c8410f1c4ea59cd05efa5fe848dab7d45a88f0bc276c6b45060238c81b92d",
+    "size": 85748,
+    "mtime_ns": 1778171448376233800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778121438.json",
+    "sha256": "6fca918784a76db3d2ad397ea46d6b4103046dbea91639fc2c9aa9109d2054b6",
+    "size": 85748,
+    "mtime_ns": 1778171448384262000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778121847.json",
+    "sha256": "27c69007dd7997bd76d1e35121cd32ff6eb690fc4bbccf6671494b802ac0a942",
+    "size": 97160,
+    "mtime_ns": 1778171448386268200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778122442.json",
+    "sha256": "68e1af673c36ab8cee90ce67252d7d9f70b635b2effd25b06048991e5963e378",
+    "size": 127018,
+    "mtime_ns": 1778171448388776900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778123001.json",
+    "sha256": "cdfd1de31c8ab1d4b5e03741c2e1f7f2c0a3514e25fec1ae1cbe89259858ac2a",
+    "size": 127052,
+    "mtime_ns": 1778171448393793900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778123714.json",
+    "sha256": "cc0cbe1b1167aa02508c5ee42261f9764875938687599abbe1a696f9c4570cb4",
+    "size": 127052,
+    "mtime_ns": 1778171448395801600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778178325.json",
+    "sha256": "1eef4b00d64c36bca4912961ab186e043d87171b004fbf921d26d5b5be81d690",
+    "size": 129448,
+    "mtime_ns": 1778178325505414800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778386169.json",
+    "sha256": "5fd499e6078accc180fc78522dbba6bba0201f29e2a8a41f463c499bdb8da1eb",
+    "size": 129448,
+    "mtime_ns": 1778386169434997700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778414545.json",
+    "sha256": "d6f09ccaa6abd6fb300c3b569721a36534bee6ec2c9d03a10279b6308b7dcc28",
+    "size": 129448,
+    "mtime_ns": 1778414545318692600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778430807.json",
+    "sha256": "2a6068e1c1f12cf104cceaace8966d2dc4fbe69ed13aae2536d6858e9d5b6f4e",
+    "size": 131486,
+    "mtime_ns": 1778430807698328900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778430838.json",
+    "sha256": "6dec74c8904dab82e2d12034c9fa20e82f74b920bfe6bea8e94620238560f7a5",
+    "size": 131486,
+    "mtime_ns": 1778430838224193400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778430858.json",
+    "sha256": "6bc88a682e977efdde7160992a5e137bd799bf728561db68fdd00035d93e8789",
+    "size": 131486,
+    "mtime_ns": 1778430858080507300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778432248.json",
+    "sha256": "bf73623a48875228885ef0012c0599726667fe69c141b7c1557eaf69e41f952e",
+    "size": 131486,
+    "mtime_ns": 1778432248439570400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1778436324.json",
+    "sha256": "098231f68c12d664bbb3ab50226474a985e4569d3a6684b7f272136062a6b380",
+    "size": 131486,
+    "mtime_ns": 1778436324139813100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1793574299.json",
+    "sha256": "41fa9c7eec66c922a335b1b5b5401d7f169b32d6a9e2a526bc6bb8a888a88399",
+    "size": 133728,
+    "mtime_ns": 1793574299616431200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\task_234_menu\\archive\\roster_v1_1793575473.json",
+    "sha256": "7ddfd7a96b4e3fa188834f556e0be467a87beb302bc12bd51af1eb20f82eb585",
+    "size": 133728,
+    "mtime_ns": 1793575473060858200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ff723cd94b5b4681bf4dff6eaec7d2a2\\profiles\\local_player\\roster_v1.json",
+    "sha256": "5e113dc3fc18b5e6132133023e0f360bbdd75e553f84872aae3b0cb60cb31ecc",
+    "size": 131833,
+    "mtime_ns": 1793766964317237100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ff2e91faeaf9442d8ac1d90a1763c688\\profiles\\local_player\\roster_v1.json",
+    "sha256": "f5a7f747314bbfae1cd204ccdf0af4980c809c32e29084140e4209cf14faabdf",
+    "size": 131833,
+    "mtime_ns": 1793718660173638400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fda9051728fb43aab9f123797afeabff\\review46_roster_reset_918529\\blocked\\roster_v1.json",
+    "sha256": "6417f4c550610cb5714fc5b7dd7c081949ba859d9513d8710e284f34a0f03909",
+    "size": 108748,
+    "mtime_ns": 1793681339717014700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fda9051728fb43aab9f123797afeabff\\review46_roster_reset_918529\\menu\\roster_v1.json",
+    "sha256": "998adc610b1d5ab2459ce70874e2ddfaed37d048fe00f20c951f85ee2c2732b0",
+    "size": 110584,
+    "mtime_ns": 1793681342693014000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fda9051728fb43aab9f123797afeabff\\review46_roster_reset_918529\\menu_button\\roster_v1.json",
+    "sha256": "29367f64f7021366efb256d6ebc9bfa504d4862aeee15ccb34b1fa5b86213e64",
+    "size": 108157,
+    "mtime_ns": 1793681346053012400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fda9051728fb43aab9f123797afeabff\\review46_roster_reset_918529\\missing\\roster_v1.json",
+    "sha256": "2afc05bccc3593cf4ca97812a95f1374a29f5d0579ce62083eaa5edbf5ec1929",
+    "size": 108482,
+    "mtime_ns": 1793681340070513300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fda9051728fb43aab9f123797afeabff\\review46_roster_reset_918529\\no_archive\\roster_v1.json",
+    "sha256": "8acfaa293cfeb4e49f8622b203181ace523342cc16ab7f737077231d6e0edd3c",
+    "size": 107855,
+    "mtime_ns": 1793681340290014400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fda9051728fb43aab9f123797afeabff\\review46_roster_reset_918529\\success\\roster_v1.json",
+    "sha256": "eb580dcb906900eef0f65cfb5eda346e1c8fcf0b5176ecb925a3328eccf2ff36",
+    "size": 109292,
+    "mtime_ns": 1793681339941513800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fda9051728fb43aab9f123797afeabff\\review46_roster_reset_918529\\success\\archive\\roster_v1_1793681339.json",
+    "sha256": "ab4d64505d9336a73f6e195a4589f4fdc910561a15971f0b63e12a971a45ca61",
+    "size": 106987,
+    "mtime_ns": 1793681339859014100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fda9051728fb43aab9f123797afeabff\\review46_roster_reset_918529\\menu_button\\archive\\roster_v1_1793681345.json",
+    "sha256": "05464b62699086c1aeb9fc61146856e7f197e3b331cd8b9692e77bd86484983f",
+    "size": 110813,
+    "mtime_ns": 1793681345584012900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fda9051728fb43aab9f123797afeabff\\review46_roster_reset_918529\\menu\\archive\\roster_v1_1793681342.json",
+    "sha256": "72a2bf2ed44fbb2f65e665634e28398a2234ba67029b32cef2d63f5b70edb5ac",
+    "size": 111442,
+    "mtime_ns": 1793681342633515100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fbc917950ed245489cb1c29c586cc3bd\\profiles\\task_234_menu\\roster_v1.json",
+    "sha256": "ef51c6f78dc93686c53a29c6a80224ec3fe8702ee226de4c1a425c0db15997b6",
+    "size": 131786,
+    "mtime_ns": 1793744635312953500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fbc917950ed245489cb1c29c586cc3bd\\profiles\\task_234_recovery\\roster_v1.json",
+    "sha256": "1079ec231edab8724855d2bfae8f574ab0c2c85dfa04563cf00ca350bd8cd504",
+    "size": 132636,
+    "mtime_ns": 1793744630406453400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fbc917950ed245489cb1c29c586cc3bd\\profiles\\task_234_reset\\roster_v1.json",
+    "sha256": "4a3f9729d97cbaf40d67c38787956e0359b4bce606ef83f7bbf0d10f6ceb4b4d",
+    "size": 131200,
+    "mtime_ns": 1793744630615452200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fbc917950ed245489cb1c29c586cc3bd\\profiles\\task_234_roundtrip\\roster_v1.json",
+    "sha256": "8a351fa9ee796d80c9a16dd6774add2c32568d3690cbe424159a4f4f30a575f0",
+    "size": 132360,
+    "mtime_ns": 1793744630158953500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fbc917950ed245489cb1c29c586cc3bd\\profiles\\task_234_reset\\archive\\roster_v1_1793744630.json",
+    "sha256": "e15a624f93a68753059f93b0cfd019a48ebc3cdd63a8309e18ee5f8500863b45",
+    "size": 134346,
+    "mtime_ns": 1793744630521453500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fbc917950ed245489cb1c29c586cc3bd\\profiles\\task_234_menu\\archive\\roster_v1_1793744635.json",
+    "sha256": "5cc52ce7ea525d5a8bb63b261c70e4af87ba9bb7803e676de9f07504fa7e2890",
+    "size": 133728,
+    "mtime_ns": 1793744635242952600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-fb70393cf3a149cba38f59ed17422989\\profiles\\local_player\\roster_v1.json",
+    "sha256": "aec3f98e964c8bdab8635c13d8177868d5441f4dfc859437bf2db8d39dd520fb",
+    "size": 131833,
+    "mtime_ns": 1793654849594893700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f94bf9cee54d4f138ad0e24e0c694005\\profiles\\local_player\\roster_v1.json",
+    "sha256": "76481fbb2b2a80d2cc441cf4cd409e8f22804fae5dcb732a978a0f1c6cd38e92",
+    "size": 131833,
+    "mtime_ns": 1793716931424727200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f76a1271252b4bcfa31200c33d1373ea\\review46_roster_reset_919131\\blocked\\roster_v1.json",
+    "sha256": "9eebf8036a948dca894f07977fbe1af4283f4f363971cace8cfa7643494c1295",
+    "size": 108748,
+    "mtime_ns": 1793680431342116800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f76a1271252b4bcfa31200c33d1373ea\\review46_roster_reset_919131\\menu\\roster_v1.json",
+    "sha256": "06e9b90144847de30657a5f2c9bd521c34144ea40d93a3078296fb32d98199ab",
+    "size": 110584,
+    "mtime_ns": 1793680434204115900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f76a1271252b4bcfa31200c33d1373ea\\review46_roster_reset_919131\\menu_button\\roster_v1.json",
+    "sha256": "3a3ade0e5f3d9d7cb95b9d5c755eceb17f4793e882f608be124bbf1c16681a84",
+    "size": 108157,
+    "mtime_ns": 1793680437391117400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f76a1271252b4bcfa31200c33d1373ea\\review46_roster_reset_919131\\missing\\roster_v1.json",
+    "sha256": "c868f82e963e8e6670b74218e7a5cf544862faa4651eb2ec5e8bca0f3d682c28",
+    "size": 108482,
+    "mtime_ns": 1793680431689115800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f76a1271252b4bcfa31200c33d1373ea\\review46_roster_reset_919131\\no_archive\\roster_v1.json",
+    "sha256": "e37621d69bae358c15a36abdd10ba87574cff588b0a1f85ade372d3ed92dd1ed",
+    "size": 107855,
+    "mtime_ns": 1793680431882616400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f76a1271252b4bcfa31200c33d1373ea\\review46_roster_reset_919131\\success\\roster_v1.json",
+    "sha256": "c1875bdb1e34a6fa80325ad4c9f1be15d7f7d1d80630036bf84a79326dc629f2",
+    "size": 109292,
+    "mtime_ns": 1793680431574617000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f76a1271252b4bcfa31200c33d1373ea\\review46_roster_reset_919131\\success\\archive\\roster_v1_1793680431.json",
+    "sha256": "8ab6fe8086726c78576b6ed1fc993f69de3a867225616baa1dc33572f626002f",
+    "size": 106987,
+    "mtime_ns": 1793680431491116800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f76a1271252b4bcfa31200c33d1373ea\\review46_roster_reset_919131\\menu_button\\archive\\roster_v1_1793680436.json",
+    "sha256": "731957100a0526ac92354d9bcafe55ab3a752076d513d8be545a028ca0fcb286",
+    "size": 110813,
+    "mtime_ns": 1793680436911117300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f76a1271252b4bcfa31200c33d1373ea\\review46_roster_reset_919131\\menu\\archive\\roster_v1_1793680434.json",
+    "sha256": "ebd0b24ab6e7638f6029cab3dd93ad494170191097e178a4cd3e250dcb6c3f3a",
+    "size": 111442,
+    "mtime_ns": 1793680434146116500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f64900e72e98489aaa59bed45a980c31\\profiles\\local_player\\roster_v1.json",
+    "sha256": "9de0887cd3e547e0ca8b12985c3f9101056ef3837dad3dc5ffe78c8870e4f4fe",
+    "size": 131833,
+    "mtime_ns": 1793652762147308000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f35cbb42e25f42d8bdc97c024df5b4fc\\profiles\\local_player\\roster_v1.json",
+    "sha256": "3c18a8430ce16dd766bfc36657e5f55e6f369b1621361549407263456982c00a",
+    "size": 131833,
+    "mtime_ns": 1793717204204832600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f337354562054ba29683187bcf18ca7e\\profiles\\local_player\\roster_v1.json",
+    "sha256": "ed8ce7a3d928041d9ed7f4d1df7cf89f02d13759d44bedb378158c22d84e01f4",
+    "size": 131833,
+    "mtime_ns": 1793743645406952300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f11c98bb11364a6193811cd03fbb237c\\profiles\\local_player\\roster_v1.json",
+    "sha256": "7faeb75bdf0058fafb839f5199bae133bf85e2337152a0e934d931ae5db4eae2",
+    "size": 131833,
+    "mtime_ns": 1793744079534454800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f0acaf9751bf412388a666809af51162\\review46_roster_reset_1081817\\blocked\\roster_v1.json",
+    "sha256": "3ecb0ad6fab244397181a657601c04abd5ca98b3416f693178a8618f2907e66e",
+    "size": 108748,
+    "mtime_ns": 1793681711940171800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f0acaf9751bf412388a666809af51162\\review46_roster_reset_1081817\\menu\\roster_v1.json",
+    "sha256": "87eaa90e9350027e1b2289a9be9f98302228dcefc84462514f16b759beb99baa",
+    "size": 110584,
+    "mtime_ns": 1793681715114671000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f0acaf9751bf412388a666809af51162\\review46_roster_reset_1081817\\menu_button\\roster_v1.json",
+    "sha256": "19643e0c9e1ad6a648ed6a7cf3ad9c29c1be259478a2d4b86698e4ca0c1c9cc6",
+    "size": 108157,
+    "mtime_ns": 1793681718517671900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f0acaf9751bf412388a666809af51162\\review46_roster_reset_1081817\\missing\\roster_v1.json",
+    "sha256": "adfa933b3e855bf890f5bfc0e8b43df7c4317aea2d3e4a7809eb6b0674a68202",
+    "size": 108482,
+    "mtime_ns": 1793681712363671400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f0acaf9751bf412388a666809af51162\\review46_roster_reset_1081817\\no_archive\\roster_v1.json",
+    "sha256": "cd3bcb11e947eab2de28db3c8a4581e1aaea02379e423f3c4ea5669363b6749e",
+    "size": 107855,
+    "mtime_ns": 1793681712603670000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f0acaf9751bf412388a666809af51162\\review46_roster_reset_1081817\\success\\roster_v1.json",
+    "sha256": "00509914279fe08d74aaa05c1522f2b7b5990b13b7de64d13958539ad6da85e3",
+    "size": 109292,
+    "mtime_ns": 1793681712207672000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f0acaf9751bf412388a666809af51162\\review46_roster_reset_1081817\\success\\archive\\roster_v1_1793681712.json",
+    "sha256": "403824494aa32075d0d25f70714b6a57e1175677f371ac2f01cf31f0b3408244",
+    "size": 106987,
+    "mtime_ns": 1793681712102172300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f0acaf9751bf412388a666809af51162\\review46_roster_reset_1081817\\menu_button\\archive\\roster_v1_1793681718.json",
+    "sha256": "487c970a86cb90def88464a895397e6b5c168cd00c011e0e46f28f9b0e29311c",
+    "size": 110813,
+    "mtime_ns": 1793681718052171900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f0acaf9751bf412388a666809af51162\\review46_roster_reset_1081817\\menu\\archive\\roster_v1_1793681715.json",
+    "sha256": "1be5e3203c2bab33058f5e633eee13257a4bbcdb068a3847e62dd9e0daf26778",
+    "size": 111442,
+    "mtime_ns": 1793681715046669800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f050074e47fb410c99edfeaeec9628e9\\review46_roster_reset_931457\\blocked\\roster_v1.json",
+    "sha256": "67be7c5898e93d647863072b10ba6bb24c32c7f4da935c39f87932d2d66113c1",
+    "size": 108748,
+    "mtime_ns": 1793680291015107700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f050074e47fb410c99edfeaeec9628e9\\review46_roster_reset_931457\\menu\\roster_v1.json",
+    "sha256": "0fff5bcb65724be9e52a41278eeb92748535c540d23f5ef11938880c4ae0b0a3",
+    "size": 110584,
+    "mtime_ns": 1793680293774108400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f050074e47fb410c99edfeaeec9628e9\\review46_roster_reset_931457\\missing\\roster_v1.json",
+    "sha256": "a18ed4dbbfd731e354018781ebbd99e8e501e28c96ee2c2739447568370048c9",
+    "size": 108482,
+    "mtime_ns": 1793680291350609400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f050074e47fb410c99edfeaeec9628e9\\review46_roster_reset_931457\\no_archive\\roster_v1.json",
+    "sha256": "addade53bbed628a99fec573275a495e2cfcddf746204b11f0ce80cc13186673",
+    "size": 107855,
+    "mtime_ns": 1793680291532112800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f050074e47fb410c99edfeaeec9628e9\\review46_roster_reset_931457\\success\\roster_v1.json",
+    "sha256": "081b7ec6b5016657a1b8b505998f85bbc2944579d7aef50cc862cf0c2ac54edd",
+    "size": 109292,
+    "mtime_ns": 1793680291236108200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f050074e47fb410c99edfeaeec9628e9\\review46_roster_reset_931457\\success\\archive\\roster_v1_1793680291.json",
+    "sha256": "019ac685d4aaecd69ef869cd9037af8e3b5796d1e7a38a297d4b9e230adaf0f1",
+    "size": 106987,
+    "mtime_ns": 1793680291151110700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-f050074e47fb410c99edfeaeec9628e9\\review46_roster_reset_931457\\menu\\archive\\roster_v1_1793680293.json",
+    "sha256": "4ec89196f1f0b233837d7ebad33e8e5bba75e02ef9bae3e7cf8abf6c51a31417",
+    "size": 111442,
+    "mtime_ns": 1793680293715608200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ef5b706378d646219caf7ccd47534fd0\\profiles\\local_player\\roster_v1.json",
+    "sha256": "7f732ae57fefa808b567b3c158ea0c66813829e6b5c99fdc2785cd199aefb17b",
+    "size": 131833,
+    "mtime_ns": 1793718926335975000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e97f6ec6fb164fa4b3784970b1966b91\\profiles\\local_player\\roster_v1.json",
+    "sha256": "7314f52755edd6754cf09560dd480235fedcd2ee81b0024cb793bb2d8757a9ef",
+    "size": 131833,
+    "mtime_ns": 1793823766306871900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e79b38608a8b495ba6b843168f5a79f2\\profiles\\local_player\\roster_v1.json",
+    "sha256": "6ff7ee16de06ec48f3b3de8e94c5312b5b13b441062ae9f58d741b10bba94288",
+    "size": 131833,
+    "mtime_ns": 1793766257438737900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e500601784d34292926764f5cdb6205d\\profiles\\local_player\\roster_v1.json",
+    "sha256": "91e565580422ec00503b949e8ebc2c7b74c96be84f0997d80de79892aa0155cb",
+    "size": 131833,
+    "mtime_ns": 1793663226500186800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e4fe2a46f1534d4da5c07870f4467b8a\\profiles\\local_player\\roster_v1.json",
+    "sha256": "a30d1458f9b762facb66d871e39df552ef1ac08ee27b6336861058a9801dc9fa",
+    "size": 131833,
+    "mtime_ns": 1793681187501009500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e4b60d6b6c5a40819a5a6b27d7b626ca\\profiles\\local_player\\roster_v1.json",
+    "sha256": "077e4442e1a295b6903df965b1387f995274f2fe52bb3cdb65705b9c086ed9e4",
+    "size": 131833,
+    "mtime_ns": 1793717577372337200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e04967e8b61d4170b502457993f4bd72\\profiles\\local_player\\roster_v1.json",
+    "sha256": "63c7243441c7070573031617bfea9cf326887307ca0c17a7d03bfba590c694d6",
+    "size": 131833,
+    "mtime_ns": 1793681233345522100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-db8b0963945b4072981f06bac262a1ec\\review46_effective_roster_skills_645251\\case_0\\roster_v1.json",
+    "sha256": "2e44f0d0574ab00bdff53d29c42f3c116fdfe10567039552446ee3a5abd5b2d6",
+    "size": 109292,
+    "mtime_ns": 1793681337852014300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-db8b0963945b4072981f06bac262a1ec\\review46_effective_roster_skills_645251\\case_1\\roster_v1.json",
+    "sha256": "f422931972bbf3804254c2bd64d48f46b5a492f60278df120e61caa685906d5e",
+    "size": 108482,
+    "mtime_ns": 1793681337966513200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-db8b0963945b4072981f06bac262a1ec\\review46_effective_roster_skills_645251\\case_2\\roster_v1.json",
+    "sha256": "2dae3badecf5b8cefd34a96682ce4e8b2a7d7c4b2c80f5f609fa074bb3dba891",
+    "size": 111020,
+    "mtime_ns": 1793681338088513900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-db8b0963945b4072981f06bac262a1ec\\review46_effective_roster_skills_645251\\case_3\\roster_v1.json",
+    "sha256": "a0325c0b7740f2476233986d13f9475190fc08b21a090165257e005541d21e47",
+    "size": 110584,
+    "mtime_ns": 1793681338208014400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-da8c023a93d44816bdc653fc1362e7c5\\profiles\\local_player\\roster_v1.json",
+    "sha256": "d4c622bf9e073a0307de7fe4c5f4f91660a8c2f3443496771df81dde59ff32cc",
+    "size": 131833,
+    "mtime_ns": 1793653104566996900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d875f8d6f5e64af6947b257271e834d9\\profiles\\local_player\\roster_v1.json",
+    "sha256": "bc58d2499c1d6060921e429bea8d1f3edab3bc8871c24b0e1dabfe1f307e45f3",
+    "size": 131833,
+    "mtime_ns": 1793680247162181200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d875f8d6f5e64af6947b257271e834d9\\profiles\\test_task232_menu\\roster_v1.json",
+    "sha256": "b96b11c44f69689f4392c14edd8ff2ca5d179fda300f692b2c18fe84000919fb",
+    "size": 130716,
+    "mtime_ns": 1793680249340182100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d875f8d6f5e64af6947b257271e834d9\\profiles\\test_task232_menu\\archive\\roster_v1_1793680249.json",
+    "sha256": "52dc3706c45e5519f9615b5aad01deb12ab984f37129abd8e9e848427fc0aaa9",
+    "size": 129068,
+    "mtime_ns": 1793680249268183900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d7ef12cc8d1d451690880a7be99b7164\\review46_roster_reset_867996\\blocked\\roster_v1.json",
+    "sha256": "5d97dd32a583842d70c4731440a48076c867077b83a6277d1bd2e3e84f2ee759",
+    "size": 108748,
+    "mtime_ns": 1793717680112326800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d7ef12cc8d1d451690880a7be99b7164\\review46_roster_reset_867996\\menu\\roster_v1.json",
+    "sha256": "c535f6284e18810337df9941459a6733675fcbca6d6c256a6eed31992d70c724",
+    "size": 110584,
+    "mtime_ns": 1793717682892160600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d7ef12cc8d1d451690880a7be99b7164\\review46_roster_reset_867996\\menu_button\\roster_v1.json",
+    "sha256": "cc181a8fc7c3cfa4625f8e39c61c666a9413915526382be0ced1cd46738ae5d9",
+    "size": 108157,
+    "mtime_ns": 1793717686000661000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d7ef12cc8d1d451690880a7be99b7164\\review46_roster_reset_867996\\missing\\roster_v1.json",
+    "sha256": "4282eb0bcd6a5182d82d136568586fcdd8a4dab43efa21e43ae12e8530eab3ee",
+    "size": 108482,
+    "mtime_ns": 1793717680448826900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d7ef12cc8d1d451690880a7be99b7164\\review46_roster_reset_867996\\no_archive\\roster_v1.json",
+    "sha256": "1689246df9f2434f2e977489fbddd5139fc40c9b3c9f84e30a41428a4d9a9043",
+    "size": 107855,
+    "mtime_ns": 1793717680635827100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d7ef12cc8d1d451690880a7be99b7164\\review46_roster_reset_867996\\success\\roster_v1.json",
+    "sha256": "341d9cdedb935cb1d427a87d38d7dab7d9bbc0a65301ee240c31a66cdd7f83a4",
+    "size": 109292,
+    "mtime_ns": 1793717680333326200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d7ef12cc8d1d451690880a7be99b7164\\review46_roster_reset_867996\\success\\archive\\roster_v1_1793717680.json",
+    "sha256": "2e6aa7252d86bd944ee3a12cbbea93997559260948bd24b8c0ad2946d6625cc2",
+    "size": 106987,
+    "mtime_ns": 1793717680250827500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d7ef12cc8d1d451690880a7be99b7164\\review46_roster_reset_867996\\menu_button\\archive\\roster_v1_1793717685.json",
+    "sha256": "14519c48e84f5fc8cdd808dfe3ef2cbb388c33a1a60ab51998afa7cd15c07aa5",
+    "size": 110813,
+    "mtime_ns": 1793717685552161100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d7ef12cc8d1d451690880a7be99b7164\\review46_roster_reset_867996\\menu\\archive\\roster_v1_1793717682.json",
+    "sha256": "6025e9a8b05d8698f5fdb03cbd05fa40d884bbeeb81aafe99f8d3a4264406eb5",
+    "size": 111442,
+    "mtime_ns": 1793717682835161900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d5d140e8726b4875894976dd10916251\\profiles\\local_player\\roster_v1.json",
+    "sha256": "6cb3e089292d58d0bb899b625875a10e64d7e7d77b968485d1fe95f23f2d5415",
+    "size": 131833,
+    "mtime_ns": 1793654172406839900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-d4a6c96ac6914e0fb110ea3874a3a4eb\\profiles\\local_player\\roster_v1.json",
+    "sha256": "80ff5351ddbf2d02ed1205f1c1c9ff52d3de03bc5a17a4104a9eafb1a8e347d8",
+    "size": 139645,
+    "mtime_ns": 1793823297902870400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c885829da7d847ad89a5c11c69237d5e\\profiles\\local_player\\roster_v1.json",
+    "sha256": "1cfd14b9b2e12b40b0f3c785bbbd375a643fbfd1130f257bc9aa79f7e2c0bcc7",
+    "size": 131833,
+    "mtime_ns": 1793652994420059700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c526cff85fc946209ca8062553d80406\\profiles\\local_player\\roster_v1.json",
+    "sha256": "89491c20efef1dc53176fea24e7e9258a6fb9eef6bc547ee88eb26f62f70e987",
+    "size": 131833,
+    "mtime_ns": 1793717171350227600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c4c8bc2db1814b609912155ca2286adf\\profiles\\local_player\\roster_v1.json",
+    "sha256": "1f00298f5c461bd9ea754d54485062fc69be3a64f1d8842a6afd5457da9b1aa1",
+    "size": 131833,
+    "mtime_ns": 1793718614258764800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c388804432bb4bcea34013454df10bc0\\profiles\\local_player\\roster_v1.json",
+    "sha256": "8ccf60d00dd65d0a81d51c9188d1bd2e5921b27f162536dbf12d8dd3bf9a239e",
+    "size": 131833,
+    "mtime_ns": 1793823045683370400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c2a3e23bb14743ba9f0c3d88cd7ddbeb\\profiles\\local_player\\roster_v1.json",
+    "sha256": "cd607ff73953a2d5e52dcaffc70c49085c2becdf5b69a35e2a19478310cd9c1f",
+    "size": 131833,
+    "mtime_ns": 1793716892803727400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c1cf5505fc6d4ceab5e5495a9facb010\\profiles\\local_player\\roster_v1.json",
+    "sha256": "bd6f9a0b0a0da365359d8c1a828f952ae2b10adcc6d3e717d371906e2f13cfc3",
+    "size": 131833,
+    "mtime_ns": 1793743683283953200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c17fa919e243489f8a16498070fe3667\\profiles\\local_player\\roster_v1.json",
+    "sha256": "a7895b705f7f11d6f8299250973b8ef9d94aab04f912fd2ee311d47425a168c2",
+    "size": 139645,
+    "mtime_ns": 1793823246538870400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c054be45045e4bc1996da84bf5a94f63\\profiles\\local_player\\roster_v1.json",
+    "sha256": "4b1261e4763c9eb58b9943b65161037685053330b908e2d201cfdaa085eb88e2",
+    "size": 131833,
+    "mtime_ns": 1793717694539074000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c054be45045e4bc1996da84bf5a94f63\\profiles\\test_task232_menu\\roster_v1.json",
+    "sha256": "f85883192246d67d8f0b020fca8f04edfb1b32015ac044d16c834283bf8c1ee9",
+    "size": 130716,
+    "mtime_ns": 1793717696705073200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-c054be45045e4bc1996da84bf5a94f63\\profiles\\test_task232_menu\\archive\\roster_v1_1793717696.json",
+    "sha256": "91170c9170508c216960f121777d9ec06d5be616ed483ab7f8470b2672bca0b3",
+    "size": 129068,
+    "mtime_ns": 1793717696636573400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-bb9f30c860584b6b8a1e0ec8ad2a13b7\\profiles\\local_player\\roster_v1.json",
+    "sha256": "efda914b748e9e967e98e20ebf80b90beb2e314a797df38ab7559c02918400ce",
+    "size": 131833,
+    "mtime_ns": 1793744782720953600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-bb4007443d9746f1847d11902ec895cc\\profiles\\local_player\\roster_v1.json",
+    "sha256": "5ecdd5a58a07e7926579c23a7e294eb74a4c2ea471b27af72d25634e2b8f9401",
+    "size": 131833,
+    "mtime_ns": 1793717831174883300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-bad231816a45498281224e2a5d10bd9e\\review46_effective_roster_skills_638555\\case_0\\roster_v1.json",
+    "sha256": "e498fff5dfdb8f3ba92d89e93ed2bac55c8803aed2b71fd869d28fd33d048176",
+    "size": 109292,
+    "mtime_ns": 1793680218088692800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-bad231816a45498281224e2a5d10bd9e\\review46_effective_roster_skills_638555\\case_1\\roster_v1.json",
+    "sha256": "2d5e65be8d227ddc8dc4c3654817e7d28df5580817cc9ab9706f92a065d85a41",
+    "size": 108482,
+    "mtime_ns": 1793680218197693400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-bad231816a45498281224e2a5d10bd9e\\review46_effective_roster_skills_638555\\case_2\\roster_v1.json",
+    "sha256": "65d78dd3de337fb4da4e56aabfe1382d348099649be28931c83ed333be9f7d68",
+    "size": 111020,
+    "mtime_ns": 1793680218304192300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-bad231816a45498281224e2a5d10bd9e\\review46_effective_roster_skills_638555\\case_3\\roster_v1.json",
+    "sha256": "cf85c231eefcd172af68899de090ca74bbc12215b7198ef7b9b9f773357999eb",
+    "size": 110584,
+    "mtime_ns": 1793680218409192200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ba4c12caa2cc415292b9e19e1ed7304d\\profiles\\local_player\\roster_v1.json",
+    "sha256": "f24edd5433b2f628e332445ef5518ce1260674ebe5525eedeee0e0da2204e0cb",
+    "size": 131833,
+    "mtime_ns": 1793717098634727200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-b9794819dbda4d1ea7dbcb8a805ed4ef\\profiles\\local_player\\roster_v1.json",
+    "sha256": "3a7ceb56db1a51bbdb05c82f5ae3e5bf1a8d00e5b7eababc07b0c92cae113357",
+    "size": 131833,
+    "mtime_ns": 1793766666988238500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-b40a8f313ce845aa8bdef9eccaad4d31\\profiles\\local_player\\roster_v1.json",
+    "sha256": "9037446ba5e1bb5f41346c4dfb6fe1db06d314dd96464c9506d2b1520f43dde3",
+    "size": 131833,
+    "mtime_ns": 1793717844820385300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-afc386a755df4040bdb9a8a30e4ebd25\\review46_effective_roster_skills_726176\\case_0\\roster_v1.json",
+    "sha256": "eb7551929fa0391206aa1005fd51213dee18e871fc6dbc14f547b554d684a4de",
+    "size": 109292,
+    "mtime_ns": 1793681709864672600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-afc386a755df4040bdb9a8a30e4ebd25\\review46_effective_roster_skills_726176\\case_1\\roster_v1.json",
+    "sha256": "c0cae2da82c153159138849529cc5dfeb9035c29e9bdf32bea5c3e6a83ae948b",
+    "size": 108482,
+    "mtime_ns": 1793681709982171200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-afc386a755df4040bdb9a8a30e4ebd25\\review46_effective_roster_skills_726176\\case_2\\roster_v1.json",
+    "sha256": "82cbd825ab73cc827d4a78bc5d94effed9ff1fadb1792b81b8b36c5e46e86975",
+    "size": 111020,
+    "mtime_ns": 1793681710107173700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-afc386a755df4040bdb9a8a30e4ebd25\\review46_effective_roster_skills_726176\\case_3\\roster_v1.json",
+    "sha256": "9ce71a05196a5bbb0218da9704fefa5273a0ff14449139a61d16ee7e081e7beb",
+    "size": 110584,
+    "mtime_ns": 1793681710243170700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-af90b2c425294adcb9e140254ecc034d\\profiles\\local_player\\roster_v1.json",
+    "sha256": "4506209572a0b27d9e60436725bed0605280ffc38c58b1a76cba7d047702c976",
+    "size": 131833,
+    "mtime_ns": 1793663179655200900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ade0b06ca39441239a42164527461401\\review46_effective_roster_skills_703657\\case_0\\roster_v1.json",
+    "sha256": "52a2a9c011caa2a07e3a9bd63f952efff483c81662190784f0e3dec1f351fb8d",
+    "size": 109292,
+    "mtime_ns": 1793744609704952400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ade0b06ca39441239a42164527461401\\review46_effective_roster_skills_703657\\case_1\\roster_v1.json",
+    "sha256": "fcb74d3804e2f2ce3fbf42d419e14c0d4bf0445e2e93be67ced1503f07092cea",
+    "size": 108482,
+    "mtime_ns": 1793744609842952300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ade0b06ca39441239a42164527461401\\review46_effective_roster_skills_703657\\case_2\\roster_v1.json",
+    "sha256": "e80b50128a14ba0129406558ff4dfba06e83b3e56ad6d874d2900f51fbdb539f",
+    "size": 111020,
+    "mtime_ns": 1793744609980952400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ade0b06ca39441239a42164527461401\\review46_effective_roster_skills_703657\\case_3\\roster_v1.json",
+    "sha256": "7422094d922b5f6a6c5b7cd45f5ae603b2219262817bf97beb57863a5a3b0603",
+    "size": 110584,
+    "mtime_ns": 1793744610106952500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-acc2381e6d7d4059b10840e5da042cae\\review46_effective_roster_skills_615777\\case_3\\roster_v1.json",
+    "sha256": "5538da04f0ff728224282fff9f7b58f90cc3ac6fdd12769ac80899e5cf3d7591",
+    "size": 110584,
+    "mtime_ns": 1793680202145123500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ab51b26f38324fd396e0df68c7f18b7e\\review46_effective_roster_skills_653555\\case_0\\roster_v1.json",
+    "sha256": "f049d9fa30089852e0151e3d109f470844d9adbca3209af069f1eff64ae68479",
+    "size": 109292,
+    "mtime_ns": 1793743441243452300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ab51b26f38324fd396e0df68c7f18b7e\\review46_effective_roster_skills_653555\\case_1\\roster_v1.json",
+    "sha256": "1873da64f73ad02bca75a99be25fb5790330a0b1e8ddb54df41fd2cd7f2420d0",
+    "size": 108482,
+    "mtime_ns": 1793743441360953400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ab51b26f38324fd396e0df68c7f18b7e\\review46_effective_roster_skills_653555\\case_2\\roster_v1.json",
+    "sha256": "e8e195a10ca0998e510b29beb0df6b702e3f6a02deb626f57dded5d217a34b05",
+    "size": 111020,
+    "mtime_ns": 1793743441477452300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-ab51b26f38324fd396e0df68c7f18b7e\\review46_effective_roster_skills_653555\\case_3\\roster_v1.json",
+    "sha256": "66c95e0179dfddce8c6122714e50da378a6607ebb99c36f4c89eeff1240060a0",
+    "size": 110584,
+    "mtime_ns": 1793743441586452400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a8dcb61b69e3453b9b3fbc11941cbdd7\\profiles\\local_player\\roster_v1.json",
+    "sha256": "f8564da6e4d2c0867d811fca6cbff9a0f803fa5a9d3d77feb82bdad0d8a2bdcd",
+    "size": 131833,
+    "mtime_ns": 1793652905424103300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a84191744b9441fa98cba4e7ddd02b8e\\profiles\\task_234_menu\\roster_v1.json",
+    "sha256": "73e07c4c7a94264134070a0bbcdfb2be0c97ff30c0672428f91cf079d015acc5",
+    "size": 131786,
+    "mtime_ns": 1793766790386238300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a84191744b9441fa98cba4e7ddd02b8e\\profiles\\task_234_recovery\\roster_v1.json",
+    "sha256": "572b30aa4ebd8850d3803580e5d998a4416ff4e030dbbe7e797bf569bff3a699",
+    "size": 132636,
+    "mtime_ns": 1793766785561738600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a84191744b9441fa98cba4e7ddd02b8e\\profiles\\task_234_reset\\roster_v1.json",
+    "sha256": "4c282245eef34ebbfed07e66be6411704c4420f550e2fe24cae7ea6e460ae5bb",
+    "size": 131200,
+    "mtime_ns": 1793766785770737100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a84191744b9441fa98cba4e7ddd02b8e\\profiles\\task_234_roundtrip\\roster_v1.json",
+    "sha256": "a8317b5261217e2fd104fa7d626892abb510eed9de98dbd9c36fc7c229c5f243",
+    "size": 132360,
+    "mtime_ns": 1793766785314736900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a84191744b9441fa98cba4e7ddd02b8e\\profiles\\task_234_reset\\archive\\roster_v1_1793766785.json",
+    "sha256": "d8694ff26759ed9abd3cce8bd0048c2b03871760e05d4d30b2ed6197a349a729",
+    "size": 134346,
+    "mtime_ns": 1793766785674738300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a84191744b9441fa98cba4e7ddd02b8e\\profiles\\task_234_menu\\archive\\roster_v1_1793766790.json",
+    "sha256": "bb80a762fb019b9a63604698cde3d63d5e5049041627c529ec34121b183ad229",
+    "size": 133728,
+    "mtime_ns": 1793766790317237600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a66db1fb97c644cd8cf0cdcc3621322f\\profiles\\local_player\\roster_v1.json",
+    "sha256": "1906d8580df05f994d1324722df093aa4abc17cb2b30d18e906998cf763e1f8a",
+    "size": 131833,
+    "mtime_ns": 1793744810763453500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a24a7a2b004a43718c00e6028a780f5b\\ui_native_r2_verifier\\task232\\roster.json",
+    "sha256": "339c3733d3aabc60807c6b23b190a561dfefc0d1ac1260f4dbd20d5eafc8bb3a",
+    "size": 131678,
+    "mtime_ns": 1793766781317238000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a24a7a2b004a43718c00e6028a780f5b\\profiles\\test_task232_menu\\roster_v1.json",
+    "sha256": "30af751f51615756b6c039944aaae929adab4c6ae766ad64c4f2dd2f6c843bfa",
+    "size": 130716,
+    "mtime_ns": 1793766783506737200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a24a7a2b004a43718c00e6028a780f5b\\profiles\\test_task232_menu\\archive\\roster_v1_1793766783.json",
+    "sha256": "c77cc0d05baa33c2d03acb33396f0a8253c81391960739ce824a0331919ea6a6",
+    "size": 129068,
+    "mtime_ns": 1793766783436236700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a1944b321df642f6bc973c9c19f79cae\\profiles\\local_player\\roster_v1.json",
+    "sha256": "a66efc50b9be38ca4ae54d7c67b393810d908f193cb6c5016835a145bcf9ddd8",
+    "size": 132325,
+    "mtime_ns": 1793681362395013200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a1944b321df642f6bc973c9c19f79cae\\profiles\\task_234_menu\\roster_v1.json",
+    "sha256": "31f2307531fb83bab02bda592781af084e665e3696040e89dff7adb6d4d4cd0f",
+    "size": 131786,
+    "mtime_ns": 1793681364630512900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a1944b321df642f6bc973c9c19f79cae\\profiles\\task_234_recovery\\roster_v1.json",
+    "sha256": "ed2618dc3d3fe90817bd500378250724a5addfafafae390f8d0f47c5c91f62ba",
+    "size": 132636,
+    "mtime_ns": 1793681359536013300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a1944b321df642f6bc973c9c19f79cae\\profiles\\task_234_reset\\roster_v1.json",
+    "sha256": "874436fc192a8d7784ebf62cdc47ca619a476794ec262062e548e185ffb5c06d",
+    "size": 131200,
+    "mtime_ns": 1793681359751014000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a1944b321df642f6bc973c9c19f79cae\\profiles\\task_234_roundtrip\\roster_v1.json",
+    "sha256": "47c2318389bdbd28ad54a3ee1d2cf588e34d04148dfeb2c4d0f882b04058c858",
+    "size": 132360,
+    "mtime_ns": 1793681359240014600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a1944b321df642f6bc973c9c19f79cae\\profiles\\task_234_reset\\archive\\roster_v1_1793681359.json",
+    "sha256": "28311f624c6c6c5fd8f1a3bf705c9912d6bff6c9879f86ba965587c704eab340",
+    "size": 134346,
+    "mtime_ns": 1793681359651512600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a1944b321df642f6bc973c9c19f79cae\\profiles\\task_234_menu\\archive\\roster_v1_1793681364.json",
+    "sha256": "ae2f2a6842a913a94e1abdf91b78fa1fa0a95cbd36972f9fbdfd599183098768",
+    "size": 133728,
+    "mtime_ns": 1793681364556512800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a0865dcc6beb408b9722fef618f81b74\\profiles\\local_player\\roster_v1.json",
+    "sha256": "8d813f88f42cfab1ab3c5eeee2695d3cf3e6148c77d54b79197349074025c680",
+    "size": 131833,
+    "mtime_ns": 1793743885940452900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9e57877cef624b049d4286670074a988\\review46_roster_reset_1072399\\blocked\\roster_v1.json",
+    "sha256": "2290d34201fdc909befd60f7133c593122c4b274e023badc23f7c77ca1da8ccd",
+    "size": 108748,
+    "mtime_ns": 1793718767281457200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9e57877cef624b049d4286670074a988\\review46_roster_reset_1072399\\menu\\roster_v1.json",
+    "sha256": "9cb4d72e8cba07038f3ea506414ca15dcdfc2d8dcfe2bd7938202ee54acc6725",
+    "size": 110584,
+    "mtime_ns": 1793718770619957900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9e57877cef624b049d4286670074a988\\review46_roster_reset_1072399\\menu_button\\roster_v1.json",
+    "sha256": "278481405cb48412eb2ab330ebd14202fd86716acd63bbebcf139d4d9a490fad",
+    "size": 108157,
+    "mtime_ns": 1793718774233957100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9e57877cef624b049d4286670074a988\\review46_roster_reset_1072399\\missing\\roster_v1.json",
+    "sha256": "b81bfc6202aa0ed14bd963cd7b9cb571fb51740abfbe2e657695505b8d0ed625",
+    "size": 108482,
+    "mtime_ns": 1793718767683459300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9e57877cef624b049d4286670074a988\\review46_roster_reset_1072399\\no_archive\\roster_v1.json",
+    "sha256": "ca56d8bdfa297de26bf8a5169e08953988ade6b76053498454bb4e607be650c5",
+    "size": 107855,
+    "mtime_ns": 1793718767913957800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9e57877cef624b049d4286670074a988\\review46_roster_reset_1072399\\success\\roster_v1.json",
+    "sha256": "52e646ed995dc996a40e86913e5c2ee05eff09f0233b688bc9d43fdbe0ef30f1",
+    "size": 109292,
+    "mtime_ns": 1793718767536959400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9e57877cef624b049d4286670074a988\\review46_roster_reset_1072399\\success\\archive\\roster_v1_1793718767.json",
+    "sha256": "dbdf67b76b9519f9bebd74f2ac7a35d1d1a5daf65171317ba08132f139828fb2",
+    "size": 106987,
+    "mtime_ns": 1793718767445459300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9e57877cef624b049d4286670074a988\\review46_roster_reset_1072399\\menu_button\\archive\\roster_v1_1793718773.json",
+    "sha256": "d9c4e2f49201a99044c8129a47b43c7168461bdcd0a0305426be63f3b4547514",
+    "size": 110813,
+    "mtime_ns": 1793718773697959700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9e57877cef624b049d4286670074a988\\review46_roster_reset_1072399\\menu\\archive\\roster_v1_1793718770.json",
+    "sha256": "f8d935443c138abfc5dbe7862bb7b007e723737145a4cddb331a1b516ec5755e",
+    "size": 111442,
+    "mtime_ns": 1793718770556458400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9ae4f770cc544cf99a590fd609e94ae8\\profiles\\local_player\\roster_v1.json",
+    "sha256": "08bda0bdfecd46ef79483c3ea626273f9cc78d5a0a695471d69717804d637e9f",
+    "size": 131833,
+    "mtime_ns": 1793767001214736900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-99c413a79bd744fa81a6f8c4b8c73450\\profiles\\local_player\\roster_v1.json",
+    "sha256": "fe16bf2d96a3d2cbeb4a6ef391e1d5beec8c52a9f7d68d309f8f995f0b41bd8b",
+    "size": 131833,
+    "mtime_ns": 1793766343388737600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9938e1c34b6541aab0f71e2efbe62f2d\\profiles\\local_player\\roster_v1.json",
+    "sha256": "e11ce4128306933f283176c5f32f498544c4e60cf4e37d6482d288b8f59018ea",
+    "size": 131833,
+    "mtime_ns": 1793744847737952200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-95695f5805d14e41b11e8cdb6864aaa2\\profiles\\local_player\\roster_v1.json",
+    "sha256": "238b438150067360434ef12e1fefbc808f77685c24d0ceb80cf863753b20bdcb",
+    "size": 131833,
+    "mtime_ns": 1793718924668251600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8fc4be03de95468ab8461f4d3a7be428\\review46_roster_reset_923664\\blocked\\roster_v1.json",
+    "sha256": "db5affad8d16d18be727c68cba9fa137daaa8a3fd43b4990cda191558ae96a0a",
+    "size": 108748,
+    "mtime_ns": 1793680483711147900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8fc4be03de95468ab8461f4d3a7be428\\review46_roster_reset_923664\\menu\\roster_v1.json",
+    "sha256": "72bb722e35baa8a8657f4f9d30fb3eafd75f0c173743c5988c5886e06a19b897",
+    "size": 110584,
+    "mtime_ns": 1793680486773148300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8fc4be03de95468ab8461f4d3a7be428\\review46_roster_reset_923664\\menu_button\\roster_v1.json",
+    "sha256": "38fe616a808073aa09711c4f0d7716bfa8b158d2399df04ab86a92ed45927b05",
+    "size": 108157,
+    "mtime_ns": 1793680490088648800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8fc4be03de95468ab8461f4d3a7be428\\review46_roster_reset_923664\\missing\\roster_v1.json",
+    "sha256": "dae3feda6ad13d959b786cefcc5b4438e447a7f9e56f40a92e5dcfb05652456d",
+    "size": 108482,
+    "mtime_ns": 1793680484078147500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8fc4be03de95468ab8461f4d3a7be428\\review46_roster_reset_923664\\no_archive\\roster_v1.json",
+    "sha256": "84e10c68c54ecaa1871e188e5bf568635f357876d091e65d4953faf8cd16c934",
+    "size": 107855,
+    "mtime_ns": 1793680484302148800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8fc4be03de95468ab8461f4d3a7be428\\review46_roster_reset_923664\\success\\roster_v1.json",
+    "sha256": "d6863cc4e3615215ccae349eaf4151a05e63ae812472be22e6708d7b9bc161d1",
+    "size": 109292,
+    "mtime_ns": 1793680483951647200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8fc4be03de95468ab8461f4d3a7be428\\review46_roster_reset_923664\\success\\archive\\roster_v1_1793680483.json",
+    "sha256": "93e7cbbdebfded4441522ab8c639f5785640eb393ac75c87dec0a6a412a2c516",
+    "size": 106987,
+    "mtime_ns": 1793680483860648100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8fc4be03de95468ab8461f4d3a7be428\\review46_roster_reset_923664\\menu_button\\archive\\roster_v1_1793680489.json",
+    "sha256": "9354166e85a51d972af944ea66650ad40ccb14733947a91ac97d50099c20ab03",
+    "size": 110813,
+    "mtime_ns": 1793680489618147900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8fc4be03de95468ab8461f4d3a7be428\\review46_roster_reset_923664\\menu\\archive\\roster_v1_1793680486.json",
+    "sha256": "e0a67407ca47f296afb749b996fe16f7b74998d883740024d054760d26ec4fad",
+    "size": 111442,
+    "mtime_ns": 1793680486711648100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8c867f8ffa8d44339f171f8bd9207523\\profiles\\local_player\\roster_v1.json",
+    "sha256": "095c776245995e5b04cb58a0ad35972463dfbb332dcb3899ba93ea39b2b537ae",
+    "size": 131833,
+    "mtime_ns": 1793717529037837700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8c0470219b0b44609eb0a88f35c32229\\profiles\\local_player\\roster_v1.json",
+    "sha256": "174aed6ebbb544f3c372d6855cc00225e5c0e3985bc5c235a6baa87c09204f07",
+    "size": 132325,
+    "mtime_ns": 1793680298667701700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8c0470219b0b44609eb0a88f35c32229\\profiles\\task_234_menu\\roster_v1.json",
+    "sha256": "cf9a33914f824a16079f07dce68e5a5af23f7aaa3f74099b27703a73fdf8eb35",
+    "size": 131786,
+    "mtime_ns": 1793680300769202100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8c0470219b0b44609eb0a88f35c32229\\profiles\\task_234_recovery\\roster_v1.json",
+    "sha256": "cc56a5c29a069d8871269b98c80fddaf38971e88aa469214c63290e6b109c366",
+    "size": 132636,
+    "mtime_ns": 1793680295914203600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8c0470219b0b44609eb0a88f35c32229\\profiles\\task_234_reset\\roster_v1.json",
+    "sha256": "743de72e269e2b623cfb6d892ef646a769e0464d56eaf0f802727859cf27816a",
+    "size": 131200,
+    "mtime_ns": 1793680296178202800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8c0470219b0b44609eb0a88f35c32229\\profiles\\task_234_roundtrip\\roster_v1.json",
+    "sha256": "3e4abadd9ab241c2fabbf2743b3fa721f1354a354c9248fde4aab142d03daa8a",
+    "size": 132360,
+    "mtime_ns": 1793680295671201100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8c0470219b0b44609eb0a88f35c32229\\profiles\\task_234_reset\\archive\\roster_v1_1793680296.json",
+    "sha256": "142fe914b75755221617aff73807d1ed912d1132e08e478e40010c1a356873f6",
+    "size": 134346,
+    "mtime_ns": 1793680296037202200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8c0470219b0b44609eb0a88f35c32229\\profiles\\task_234_menu\\archive\\roster_v1_1793680300.json",
+    "sha256": "73918c856c8eeae30eeee656b002ad6ef8e9fc81418aa28683580424c68db183",
+    "size": 133728,
+    "mtime_ns": 1793680300699702000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8bdb0c50d9564a3a9d734f2cbb19d15b\\profiles\\local_player\\roster_v1.json",
+    "sha256": "da3dbbc6909e1c41b07045c7b6d7b23704ea0126b8f666ac8b5dd9729fe3a4ca",
+    "size": 131833,
+    "mtime_ns": 1793663757613934300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-8a447e6a6da942e8871973da6c6530ed\\profiles\\local_player\\roster_v1.json",
+    "sha256": "3b92a52cc354e6d73aa9ce426d5ff8df1f8272fc49f6c4e898a15a66db8c9a86",
+    "size": 131833,
+    "mtime_ns": 1793824034895870600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-875e34dbe6d94add8b36f717264413e1\\profiles\\local_player\\roster_v1.json",
+    "sha256": "ade0b3691493404af2da0685305836cf8b631518562010459bf6d9658a0870f9",
+    "size": 131833,
+    "mtime_ns": 1793766923488737800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-873f85dbeea34a69b182cb8da4b799b4\\review46_roster_reset_1330401\\blocked\\roster_v1.json",
+    "sha256": "ed7452fbf68074457e8893a7c68014ebbc0ea0bd1e779aeb0f0db599ee7864c8",
+    "size": 108748,
+    "mtime_ns": 1793744611979452500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-873f85dbeea34a69b182cb8da4b799b4\\review46_roster_reset_1330401\\menu\\roster_v1.json",
+    "sha256": "c00b236bc0f3b6a886864efe34d898f7b0fd7180e7758b9e493fdec6f1730804",
+    "size": 110584,
+    "mtime_ns": 1793744614764453500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-873f85dbeea34a69b182cb8da4b799b4\\review46_roster_reset_1330401\\menu_button\\roster_v1.json",
+    "sha256": "54e03189a60404fbf5d039bb1f4ee17791e29c47847fed17f498793ed77a0087",
+    "size": 108157,
+    "mtime_ns": 1793744617864952200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-873f85dbeea34a69b182cb8da4b799b4\\review46_roster_reset_1330401\\missing\\roster_v1.json",
+    "sha256": "23797a56efee135aff0513de888acf94e903ac345bc3d839bb23205d85e3b1e0",
+    "size": 108482,
+    "mtime_ns": 1793744612315452700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-873f85dbeea34a69b182cb8da4b799b4\\review46_roster_reset_1330401\\no_archive\\roster_v1.json",
+    "sha256": "1feb3ed411f6426b09e0c85633be0b03720fc5205a2cfa331342f4a846d1fb9d",
+    "size": 107855,
+    "mtime_ns": 1793744612505953500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-873f85dbeea34a69b182cb8da4b799b4\\review46_roster_reset_1330401\\success\\roster_v1.json",
+    "sha256": "65159834434b163be2f1a063e999162b9e2ff409ca93f1e119ab4299da2cce28",
+    "size": 109292,
+    "mtime_ns": 1793744612202952300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-873f85dbeea34a69b182cb8da4b799b4\\review46_roster_reset_1330401\\success\\archive\\roster_v1_1793744612.json",
+    "sha256": "126b2cf672d829f66cf18a71e0c0dde3ef9438e18f5aa120e2a4d0f59c2d7062",
+    "size": 106987,
+    "mtime_ns": 1793744612119953900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-873f85dbeea34a69b182cb8da4b799b4\\review46_roster_reset_1330401\\menu_button\\archive\\roster_v1_1793744617.json",
+    "sha256": "79065ad2bd582b6a01644f23f14e1a525d4a18439ce282699390d664bf0e5ba6",
+    "size": 110813,
+    "mtime_ns": 1793744617412452400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-873f85dbeea34a69b182cb8da4b799b4\\review46_roster_reset_1330401\\menu\\archive\\roster_v1_1793744614.json",
+    "sha256": "6211921c2894c8d22de99c01d2400c9ef0a99f01e754e52a4d72b099931ddde5",
+    "size": 111442,
+    "mtime_ns": 1793744614705452400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-84e14e0c2a9c4fc8bd8603938c7df9f2\\profiles\\local_player\\roster_v1.json",
+    "sha256": "f1f221e91ea604ea1a9d7a3b7b5f44ab02636aedb57492bada231c133916248d",
+    "size": 131833,
+    "mtime_ns": 1793744508856453300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7d16456ab77143d780c2015b79e753d1\\profiles\\local_player\\roster_v1.json",
+    "sha256": "64a9f23dab6994e50ffbcf00df88bf471c3776ad98fe4a8c2b54f576a087f202",
+    "size": 131833,
+    "mtime_ns": 1793766624068738700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7bae89011f364eb6a52ee9ee6ba7c385\\profiles\\local_player\\roster_v1.json",
+    "sha256": "d7e43a92c8ac3e13c984a8cfd17abc4929f1e66f2dfac296ddd3873a18f2afd4",
+    "size": 131833,
+    "mtime_ns": 1793743616914952500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-759e789a2cbd425791ba5de36586071c\\profiles\\local_player\\roster_v1.json",
+    "sha256": "53c1108d95020837425a475468d4c3444b0049688c6927519b43364c26a0b0df",
+    "size": 139645,
+    "mtime_ns": 1793823276509372900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7283baa7b8e14f86aa145b515b6d2f05\\profiles\\task_234_menu\\roster_v1.json",
+    "sha256": "4c6164715136b437b0d5777b24071205466fbbb88107e99fcca5ecf94d009cd5",
+    "size": 131786,
+    "mtime_ns": 1793743466895952100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7283baa7b8e14f86aa145b515b6d2f05\\profiles\\task_234_recovery\\roster_v1.json",
+    "sha256": "a0d8f20fb0ed0847d378a7a81aacebed55938e9b7dcd37b4ad34e8d4da75f484",
+    "size": 132636,
+    "mtime_ns": 1793743461798954100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7283baa7b8e14f86aa145b515b6d2f05\\profiles\\task_234_reset\\roster_v1.json",
+    "sha256": "81ab867de1457735d3ae7c8b920ac5cefbc5ede0ce2397ac6b169a23c6766b76",
+    "size": 131200,
+    "mtime_ns": 1793743462018452300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7283baa7b8e14f86aa145b515b6d2f05\\profiles\\task_234_roundtrip\\roster_v1.json",
+    "sha256": "ebfdf72c8c7e88880c3415a6f36d8d716e49583b5f886fa8e7d9c21fd2c0438b",
+    "size": 132360,
+    "mtime_ns": 1793743461547453500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7283baa7b8e14f86aa145b515b6d2f05\\profiles\\task_234_reset\\archive\\roster_v1_1793743461.json",
+    "sha256": "463b3d90f9dbb1b0c94f4f0fdda256b4d49aba5a4fa6bed30b6dc0cb0339a90b",
+    "size": 134346,
+    "mtime_ns": 1793743461913953800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7283baa7b8e14f86aa145b515b6d2f05\\profiles\\task_234_menu\\archive\\roster_v1_1793743466.json",
+    "sha256": "a0be232d04c4d389fd6e6b40cf3857d902050e90a45f14551a45f58076c3a3c8",
+    "size": 133728,
+    "mtime_ns": 1793743466823953400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-724832d6b062482ab9f506d2912ac632\\profiles\\local_player\\roster_v1.json",
+    "sha256": "e1ea9634210c72800d0877ef0f244d18a86be96ced751c669da24c9db9b48fa6",
+    "size": 131833,
+    "mtime_ns": 1793718996332398800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-71f0b24f88a24451afa43dcb6a8b44fb\\profiles\\local_player\\roster_v1.json",
+    "sha256": "5f09ac561b8c00cbc7f57e89baaeaf23cff9547b4597b48c842e05386c807524",
+    "size": 131833,
+    "mtime_ns": 1793823152788871200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-71df52c947c547a1ac805245d1b74b17\\profiles\\local_player\\roster_v1.json",
+    "sha256": "7899a2cd2451ad451930bd5c4120bcb902ee1aebba5f4bf60d306a89b8054c04",
+    "size": 131833,
+    "mtime_ns": 1793717904625382900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6caec1c3cf55493599587e46107a5b37\\review46_roster_reset_867513\\blocked\\roster_v1.json",
+    "sha256": "2617e1df890881e68640b0665502c0a23bb2c907007cd25fe2c035185e13f693",
+    "size": 107813,
+    "mtime_ns": 1793680219990938900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6caec1c3cf55493599587e46107a5b37\\review46_roster_reset_867513\\menu\\roster_v1.json",
+    "sha256": "d013a79bbbc218d5b2b8ada59c3c5a1cd0ef329ceb745b7c83978990b8792bcb",
+    "size": 107107,
+    "mtime_ns": 1793680223188438600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6caec1c3cf55493599587e46107a5b37\\review46_roster_reset_867513\\missing\\roster_v1.json",
+    "sha256": "1bac280c656d504a3d0c5fbac805e760d6b4054ce891d6e8f7d196c0825a790c",
+    "size": 108482,
+    "mtime_ns": 1793680220310938600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6caec1c3cf55493599587e46107a5b37\\review46_roster_reset_867513\\no_archive\\roster_v1.json",
+    "sha256": "dbb498b51e97962210bb2d94ffbdc40f5a9ed1cfdb2e38394a03838819b98e56",
+    "size": 107855,
+    "mtime_ns": 1793680220493938300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6caec1c3cf55493599587e46107a5b37\\review46_roster_reset_867513\\success\\roster_v1.json",
+    "sha256": "5e3010fc3e405e497ef159a6f46194ebf22c49bca0d313a0e9121a5b1e02888d",
+    "size": 109292,
+    "mtime_ns": 1793680220194438200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6caec1c3cf55493599587e46107a5b37\\review46_roster_reset_867513\\success\\archive\\roster_v1_1793680220.json",
+    "sha256": "2676c1f00285a4a68a7244706d693d03d614daefb238d45b030913108f668f7d",
+    "size": 106987,
+    "mtime_ns": 1793680220107938500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-6caec1c3cf55493599587e46107a5b37\\review46_roster_reset_867513\\menu\\archive\\roster_v1_1793680223.json",
+    "sha256": "80b749ead3b29a254d0ed64a9891449d93be8792634c879ab4c699af64a09649",
+    "size": 110584,
+    "mtime_ns": 1793680223131938400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-69b09c98fb52483c93e415ae439b4f8c\\review46_effective_roster_skills_624912\\case_0\\roster_v1.json",
+    "sha256": "277e185e57a4863e768d8549dc486ff6e46066e900918d7cdbe3aaa4772df104",
+    "size": 109292,
+    "mtime_ns": 1793766765650238200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-69b09c98fb52483c93e415ae439b4f8c\\review46_effective_roster_skills_624912\\case_1\\roster_v1.json",
+    "sha256": "8776b169193c1945bc70ea942187cc69d9528e8e258ea40535a498607244ed45",
+    "size": 108482,
+    "mtime_ns": 1793766765758737100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-69b09c98fb52483c93e415ae439b4f8c\\review46_effective_roster_skills_624912\\case_2\\roster_v1.json",
+    "sha256": "4a170a05133ff3dc23eb47cc328d86c4c8693514a4b8fe850424a435d96e0538",
+    "size": 111020,
+    "mtime_ns": 1793766765871737000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-69b09c98fb52483c93e415ae439b4f8c\\review46_effective_roster_skills_624912\\case_3\\roster_v1.json",
+    "sha256": "b5e26df0e6a95762a5d60cda976a7a7b2c3541aba5819444d61b05a32038d31d",
+    "size": 110584,
+    "mtime_ns": 1793766765977737100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-693dafca03bf44dd87f6984d7842a9ba\\profiles\\local_player\\roster_v1.json",
+    "sha256": "0cd7dccf359d0f5d432edc7a54faa12d425453ce53ac9744cb5c5daea94d72d2",
+    "size": 131833,
+    "mtime_ns": 1793823182726871400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-682f010af4384edaa793d174d6c05cb1\\profiles\\local_player\\roster_v1.json",
+    "sha256": "1dc1f84ea9b01d97ff74059dee3373d9f1fd06f3c2085d77c964ced75ba1b7e4",
+    "size": 131833,
+    "mtime_ns": 1793743292780452600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-659827cab5aa461f8e9f9219cdddc75e\\profiles\\local_player\\roster_v1.json",
+    "sha256": "94dc32601f328bee73b5e412dd9466ae0de940dbfc22ed387b741a575c1288b9",
+    "size": 131833,
+    "mtime_ns": 1793718784278957900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-659827cab5aa461f8e9f9219cdddc75e\\profiles\\test_task232_menu\\roster_v1.json",
+    "sha256": "54dba68822d4ada42c1e23943e2a7556c324cbb8519d50efc73068d1e2e8f587",
+    "size": 130716,
+    "mtime_ns": 1793718786791958600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-659827cab5aa461f8e9f9219cdddc75e\\profiles\\test_task232_menu\\archive\\roster_v1_1793718786.json",
+    "sha256": "83202eac31a1d7b66bef4d6f0d83eb1cadd72df91dd74237d2f7bcf1049dd295",
+    "size": 129068,
+    "mtime_ns": 1793718786710458300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-62283350980e4fb592a73d88b926b33c\\profiles\\local_player\\roster_v1.json",
+    "sha256": "9a15e9662a55a6bbcf7f892a28cb378f5d51f9f1aa967b62d278e4ead0858fea",
+    "size": 131833,
+    "mtime_ns": 1793743338700952400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-60cc99dc6c78413687a19a41af4b20f6\\review46_roster_reset_950822\\blocked\\roster_v1.json",
+    "sha256": "0dce9c7e5f8fe3a4be55bed492a2805ba6f4136d41e0a017688ece5c79b2ef17",
+    "size": 107813,
+    "mtime_ns": 1793680049037487000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-60cc99dc6c78413687a19a41af4b20f6\\review46_roster_reset_950822\\no_archive\\roster_v1.json",
+    "sha256": "545a676cacb9ac395e744ec6049e8b8d41d99efa7fcc4aafe847c2b4fa53bc3d",
+    "size": 107855,
+    "mtime_ns": 1793680049551487100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-60cc99dc6c78413687a19a41af4b20f6\\review46_roster_reset_950822\\success\\roster_v1.json",
+    "sha256": "a30ec01f667591a4c713db26792abc57d03c349c8c93f7f049d720b7f2ca2488",
+    "size": 106987,
+    "mtime_ns": 1793680049152988300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-60cc99dc6c78413687a19a41af4b20f6\\review46_roster_reset_950822\\success\\archive\\roster_v1_1793680049.json",
+    "sha256": "a30ec01f667591a4c713db26792abc57d03c349c8c93f7f049d720b7f2ca2488",
+    "size": 106987,
+    "mtime_ns": 1793680049163987500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5f119db4eec443dea265fec970e50f45\\review46_effective_roster_skills_608972\\case_0\\roster_v1.json",
+    "sha256": "902d64d8c5313db34a0a3e9cd06299c723843e6b7cf4281a99a3d844290714b5",
+    "size": 109292,
+    "mtime_ns": 1793717678464327200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5f119db4eec443dea265fec970e50f45\\review46_effective_roster_skills_608972\\case_1\\roster_v1.json",
+    "sha256": "08da1d4a2a11a72f6ebc647f13cf1c3f030817382464a0b339732f97427092cc",
+    "size": 108482,
+    "mtime_ns": 1793717678572327500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5f119db4eec443dea265fec970e50f45\\review46_effective_roster_skills_608972\\case_2\\roster_v1.json",
+    "sha256": "36da334dd0d47f513ebaf46863869738300608e1fcf089a994111d7f4cf5502c",
+    "size": 111020,
+    "mtime_ns": 1793717678680326800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5f119db4eec443dea265fec970e50f45\\review46_effective_roster_skills_608972\\case_3\\roster_v1.json",
+    "sha256": "397cef7ab8507530a805553ab23cc3d4e8366555d77ec06c3e53b1bcd62e1e54",
+    "size": 110584,
+    "mtime_ns": 1793717678785826700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5cee623c003443d395d35001d976404f\\profiles\\local_player\\roster_v1.json",
+    "sha256": "a5ed3558505866cc4c1de604fb940cf1800af3fdaae65dc765a7895ea84ef954",
+    "size": 131833,
+    "mtime_ns": 1793654903325130700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5b2147fd5b534d7fb70a6b7331ee7c48\\review46_effective_roster_skills_694451\\case_0\\roster_v1.json",
+    "sha256": "0e4524810a03132c6fa2d100e61dec96d035a6bf7092caa4d194d3647d60ea61",
+    "size": 109292,
+    "mtime_ns": 1793718765255457600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5b2147fd5b534d7fb70a6b7331ee7c48\\review46_effective_roster_skills_694451\\case_1\\roster_v1.json",
+    "sha256": "18de8d08bc81345e9df57bfd167670f31b390aad2b70470ae522ff4a4941651e",
+    "size": 108482,
+    "mtime_ns": 1793718765375458200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5b2147fd5b534d7fb70a6b7331ee7c48\\review46_effective_roster_skills_694451\\case_2\\roster_v1.json",
+    "sha256": "6c4179a556639e6478f16b2c58a0d6dd4be56d3be2eb7f86566a9697f9eeedd9",
+    "size": 111020,
+    "mtime_ns": 1793718765511957000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5b2147fd5b534d7fb70a6b7331ee7c48\\review46_effective_roster_skills_694451\\case_3\\roster_v1.json",
+    "sha256": "e0b8315c60187bd4f6252a4239492722c2d2aa6f769cdda6283202b4c6fe1fa1",
+    "size": 110584,
+    "mtime_ns": 1793718765630957700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-5441773ed3014d859b2e0ace7efbedf3\\profiles\\local_player\\roster_v1.json",
+    "sha256": "008491cbb837e4629e5845ef1bb0f4b6c3a52950dea7f4468687328f9323fcce",
+    "size": 131833,
+    "mtime_ns": 1793765995018737000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-53eb091cddbc4a9aae3b39bbeba44cb0\\profiles\\local_player\\roster_v1.json",
+    "sha256": "6d46688b3eca694917a41bc58c72c80574cd7328c5a21aa0036278d23ea5f0a7",
+    "size": 131833,
+    "mtime_ns": 1793717832904883600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4e9910afe9814a8bbb671248c50b13ce\\profiles\\local_player\\roster_v1.json",
+    "sha256": "e4021c98c315239ce85a49734ba0c6de5100073b93ef3070bf220dcb17f8c7ed",
+    "size": 131833,
+    "mtime_ns": 1793718938038310400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4c41fd58eeee4ab59a6941edcaa7f36c\\profiles\\local_player\\roster_v1.json",
+    "sha256": "b2068536e73c7bee9d7fe0046a074bf5c646ca2944e8b4a972785f5350c92524",
+    "size": 131833,
+    "mtime_ns": 1793766936287736900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4bd3e2f8ef8c46d89fbc5211c7335339\\profiles\\local_player\\roster_v1.json",
+    "sha256": "64733dbe503c2a7b317336532c691b6821e36e10251b8ad98b09f4578cadc7a8",
+    "size": 132325,
+    "mtime_ns": 1793679926476549600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4bd3e2f8ef8c46d89fbc5211c7335339\\profiles\\task_234_menu\\roster_v1.json",
+    "sha256": "d3aca2be9974f1d29cd10541adf378c904dc7bac50c82be7137121d1371808be",
+    "size": 131786,
+    "mtime_ns": 1793679928641548300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4bd3e2f8ef8c46d89fbc5211c7335339\\profiles\\task_234_recovery\\roster_v1.json",
+    "sha256": "84d951dd23c708310c7cb051de8b823e40f7d19b9138bde31bb268a99965e49d",
+    "size": 132636,
+    "mtime_ns": 1793679923630048200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4bd3e2f8ef8c46d89fbc5211c7335339\\profiles\\task_234_reset\\roster_v1.json",
+    "sha256": "c267f6db17c1014c2fab104d2f6243986c943fddc4f1c13e507d1894029bc496",
+    "size": 131200,
+    "mtime_ns": 1793679923849048900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4bd3e2f8ef8c46d89fbc5211c7335339\\profiles\\task_234_roundtrip\\roster_v1.json",
+    "sha256": "5fb7a0fb27be3fb455b14f1c7a0ab0ee181c1d8f1c58fad97eff4e2103cf4a20",
+    "size": 132360,
+    "mtime_ns": 1793679923383047900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4bd3e2f8ef8c46d89fbc5211c7335339\\profiles\\task_234_reset\\archive\\roster_v1_1793679923.json",
+    "sha256": "3eb35ae4445a66941312190310227a50c67b525ca2b8ffbec3495acfe080c3d6",
+    "size": 134346,
+    "mtime_ns": 1793679923750048000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4bd3e2f8ef8c46d89fbc5211c7335339\\profiles\\task_234_menu\\archive\\roster_v1_1793679928.json",
+    "sha256": "02c1b068d498aac4926f318fadb23ce677bb01b750453ce348cc3abd9c3ad476",
+    "size": 133728,
+    "mtime_ns": 1793679928571549000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4b968b3335d24df58fad3c0422574afd\\review46_roster_reset_899262\\blocked\\roster_v1.json",
+    "sha256": "bd6aa5eeef18f4858b193086860b937bc38fdb725ce8776f7aebbc92b7a4613b",
+    "size": 108748,
+    "mtime_ns": 1793743442951453900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4b968b3335d24df58fad3c0422574afd\\review46_roster_reset_899262\\menu\\roster_v1.json",
+    "sha256": "4b18bc3ab79729d3f53bc2d62ba7d902f85e77afd4c3220c5077b3faedee45e3",
+    "size": 110584,
+    "mtime_ns": 1793743445815453200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4b968b3335d24df58fad3c0422574afd\\review46_roster_reset_899262\\menu_button\\roster_v1.json",
+    "sha256": "3ffa2b070556f7607c857be95e7be5a2b71072e55e7d96d9ac6696304b3a71fd",
+    "size": 108157,
+    "mtime_ns": 1793743448964452200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4b968b3335d24df58fad3c0422574afd\\review46_roster_reset_899262\\missing\\roster_v1.json",
+    "sha256": "ec86f3d562e5f5fb445ea37901f59a1c34fcc30aa5e73ccf843a849c4d3f7f2d",
+    "size": 108482,
+    "mtime_ns": 1793743443291953400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4b968b3335d24df58fad3c0422574afd\\review46_roster_reset_899262\\no_archive\\roster_v1.json",
+    "sha256": "58cbab257dded2a8161d4979deca1437efd1e84b3adbd51d828a73beade1a3be",
+    "size": 107855,
+    "mtime_ns": 1793743443487953400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4b968b3335d24df58fad3c0422574afd\\review46_roster_reset_899262\\success\\roster_v1.json",
+    "sha256": "cf018eec1aa4b3a04a6c28609aef4ba928a4871cea38f2c4ba06da2a5fc72fb0",
+    "size": 109292,
+    "mtime_ns": 1793743443172953300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4b968b3335d24df58fad3c0422574afd\\review46_roster_reset_899262\\success\\archive\\roster_v1_1793743443.json",
+    "sha256": "28039457b3f59ae4704c66ecccdbc0fad053fa010755bf1dde00ed0628d65a5a",
+    "size": 106987,
+    "mtime_ns": 1793743443086953600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4b968b3335d24df58fad3c0422574afd\\review46_roster_reset_899262\\menu_button\\archive\\roster_v1_1793743448.json",
+    "sha256": "76ab6ebb72d24b4cb5b83aee84e10b5991af141d9bdbb796037c018f27ff86fb",
+    "size": 110813,
+    "mtime_ns": 1793743448507453800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4b968b3335d24df58fad3c0422574afd\\review46_roster_reset_899262\\menu\\archive\\roster_v1_1793743445.json",
+    "sha256": "2e614444ecc637c858dc5b50bf5fe7efc9589ed06b4ee84217ddc17620bbdfb6",
+    "size": 111442,
+    "mtime_ns": 1793743445753958400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-498c5ad30b574cc094fcb28490b5262c\\profiles\\local_player\\roster_v1.json",
+    "sha256": "02389968a69a2527ea83a2fb6e4f0ef1c93195f01590f8e20949150d966fa6df",
+    "size": 131833,
+    "mtime_ns": 1793743973073953300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-46fb19aca494400ea9f1403e3ccb3392\\profiles\\local_player\\roster_v1.json",
+    "sha256": "9380a076bc0fa05ed1a11ca266376e48f3e5f26518a75668fb78820fff76e18c",
+    "size": 131833,
+    "mtime_ns": 1793766921529236800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-43b6d25dad9640329b53870de925dc4d\\profiles\\local_player\\roster_v1.json",
+    "sha256": "73b61a20e6c6a7ca3a55a115d45ad54c3b6c380908815613f6d3cb6962233ae8",
+    "size": 139645,
+    "mtime_ns": 1793822903013870400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-4351d9ca66ac43d5a77f0ffacaedf8f1\\profiles\\local_player\\roster_v1.json",
+    "sha256": "9675b3b5121036f3d5a9d4886e0c66c67a62df615ef28267f2c47c0cb1e91935",
+    "size": 131833,
+    "mtime_ns": 1793823163333905600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-427c64c206c24da6a25f7d07518df2b9\\profiles\\local_player\\roster_v1.json",
+    "sha256": "f50b9811ed9ea22fcd886a3ef8598fd4f9ae56a599d6f2e51d4b902314493663",
+    "size": 131833,
+    "mtime_ns": 1793823798514870600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-413ce955301f41f68fafb9470f6e12af\\profiles\\local_player\\roster_v1.json",
+    "sha256": "004741fc6cfb33e71cc3cc5497f73578efe13c278d8616540f291c674d3fddc8",
+    "size": 131833,
+    "mtime_ns": 1793716891066728500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-3f64a14fba0043c1b5f728cabf8123d4\\profiles\\local_player\\roster_v1.json",
+    "sha256": "bb788845b3c43d39c05af23ac1e9279512b21e7e63cd4de68007a8542d8318a0",
+    "size": 139645,
+    "mtime_ns": 1793822994401870800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-3c9bbe72dcc4413ba93632f8e969e849\\profiles\\local_player\\roster_v1.json",
+    "sha256": "05c4f67d84a93639a2d392a15564815ce6e4d7d2be50355895204f74098ebc2d",
+    "size": 139645,
+    "mtime_ns": 1793823022820872100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-3c1467b1697b470ab8baa1b8a07e321a\\profiles\\local_player\\roster_v1.json",
+    "sha256": "0562fdc652f96e0ef1493a9e3d0b574678ee47feebe5dd57f2119034bae287ad",
+    "size": 131833,
+    "mtime_ns": 1793823299652872700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-387a588e2ab34a65bf9fc32290d1ec98\\profiles\\local_player\\roster_v1.json",
+    "sha256": "7ed8c950c0668cc95be03b52979b0b68cf34fdb5055990ecdc3cf8aae47ca2f7",
+    "size": 131833,
+    "mtime_ns": 1793743603484952100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-3512bf5406bd446f9c7add92ebc27ad6\\profiles\\local_player\\roster_v1.json",
+    "sha256": "e0db8334c846433b66cdb8989a0a046863c4af568e8210747de4cf463811857c",
+    "size": 131833,
+    "mtime_ns": 1793744158667453000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-3462267a1d10463faede28af542bd90f\\profiles\\local_player\\roster_v1.json",
+    "sha256": "e8b2a147aa8c58cf825b8a6855a3a2605e4acd6821a5502c857dd98b2eaadc46",
+    "size": 131833,
+    "mtime_ns": 1793718961379274000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-32aabf8bb742481caf89d2170692e4f3\\profiles\\local_player\\roster_v1.json",
+    "sha256": "58661875d95c50e57c0cdb39789f011cb1e9b7db8ee5312d583818cf2b90fc91",
+    "size": 131833,
+    "mtime_ns": 1793717868782889700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-325b38c2e7244692bc1102bedcbed5bf\\profiles\\local_player\\roster_v1.json",
+    "sha256": "73f38c0730a3ff8476d3a0d20d676ba6ed2145f5845c6851b35bcfeb503579b1",
+    "size": 131833,
+    "mtime_ns": 1793716905541230500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-315c2b6e94c544a890ce56533fcce1e0\\profiles\\local_player\\roster_v1.json",
+    "sha256": "10a52cc6ad76b50b6d17cee76a44910e6994689818ecabffc5599fb440b245f3",
+    "size": 139645,
+    "mtime_ns": 1793823043894370600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-30d5f939251e4a3ab2073be2fa52c73b\\ui_native_r2_verifier\\task232\\roster.json",
+    "sha256": "7de3d4e506a4604d9859e363c93775c6d8368604f044ddc911c670943d050d35",
+    "size": 131678,
+    "mtime_ns": 1793743457375453300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-30d5f939251e4a3ab2073be2fa52c73b\\profiles\\test_task232_menu\\roster_v1.json",
+    "sha256": "addc0c40b56e9c2c33e15f8b41db451e28e39c8950692b3c7259b035dcb843da",
+    "size": 130716,
+    "mtime_ns": 1793743459652953600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-30d5f939251e4a3ab2073be2fa52c73b\\profiles\\test_task232_menu\\archive\\roster_v1_1793743459.json",
+    "sha256": "1a634a344a027664fca530c4848b2d4a150d5d46140f8d6a3a35d1333ffab28c",
+    "size": 129068,
+    "mtime_ns": 1793743459578452300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-2afed480ab4b42edb07c83d5a1bc8b9c\\profiles\\local_player\\roster_v1.json",
+    "sha256": "22bf411b193c64097e2a90d3146b307364db4b0e3662f129281022f9e4275181",
+    "size": 131833,
+    "mtime_ns": 1793654117272685300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-283ed05f04714b9d9a118bbb7159c671\\profiles\\local_player\\roster_v1.json",
+    "sha256": "fab6ad2a51c82fc5f0c2a579c572b4950241ac8a7f786bbaae6bd1dc0c811490",
+    "size": 132325,
+    "mtime_ns": 1793717701422572900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-283ed05f04714b9d9a118bbb7159c671\\profiles\\task_234_menu\\roster_v1.json",
+    "sha256": "e75e08ddd74d0dd548e25847a3f40ac43aa58d35391677840f830e29c950b045",
+    "size": 131786,
+    "mtime_ns": 1793717703571073200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-283ed05f04714b9d9a118bbb7159c671\\profiles\\task_234_recovery\\roster_v1.json",
+    "sha256": "a5823f03fea75dec127b0943b687404bfba3d1b2d92e98f4accd20f6bc450e96",
+    "size": 132636,
+    "mtime_ns": 1793717698734574500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-283ed05f04714b9d9a118bbb7159c671\\profiles\\task_234_reset\\roster_v1.json",
+    "sha256": "4432e1d9019bcefd3d1622a61437a4ea4578769a117eb7ed9cd9449b956cd0dc",
+    "size": 131200,
+    "mtime_ns": 1793717698945573700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-283ed05f04714b9d9a118bbb7159c671\\profiles\\task_234_roundtrip\\roster_v1.json",
+    "sha256": "caab7d4759b9cb0acd3eb83d0d8eabdfeb6ff685bc793bd265497e42961bb493",
+    "size": 132360,
+    "mtime_ns": 1793717698493574300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-283ed05f04714b9d9a118bbb7159c671\\profiles\\task_234_reset\\archive\\roster_v1_1793717698.json",
+    "sha256": "fc1cc20779a7255c154833afc2d00a176c1a962afc4ece662ecfebaac32f84a0",
+    "size": 134346,
+    "mtime_ns": 1793717698846076100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-283ed05f04714b9d9a118bbb7159c671\\profiles\\task_234_menu\\archive\\roster_v1_1793717703.json",
+    "sha256": "605351dcfc7bb343e831529793c0dff3c085ffbe90b0d31e4a330551d9eec3c8",
+    "size": 133728,
+    "mtime_ns": 1793717703501073600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-1f37f4d7183b4229b94b27d56dae82a3\\profiles\\local_player\\roster_v1.json",
+    "sha256": "2d8429307092fc921bd6614f96fc78f9a4a5e379a385da9adba788891cbc6813",
+    "size": 131833,
+    "mtime_ns": 1793663711117446500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-1c39772ecc30428084128071ece0ec04\\profiles\\local_player\\roster_v1.json",
+    "sha256": "2da33e2fb22431010c8fc4e34b84c3bef949241cf1c581ae4c4a47243b6d665d",
+    "size": 131833,
+    "mtime_ns": 1793744464809453600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-19da075ef73a4ffa85cea27fab61552a\\ui_native_r2_verifier\\task232\\roster.json",
+    "sha256": "110b96c5e9bb098747e8fd91ffa4baa4e118535ece625aba342d7d1111c26353",
+    "size": 131678,
+    "mtime_ns": 1793744626091952300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-19da075ef73a4ffa85cea27fab61552a\\profiles\\test_task232_menu\\roster_v1.json",
+    "sha256": "3257ae146beb2ebce1f5948485d5af37f7cfac1e16d68d01f2c1967777eec298",
+    "size": 130716,
+    "mtime_ns": 1793744628318452100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-19da075ef73a4ffa85cea27fab61552a\\profiles\\test_task232_menu\\archive\\roster_v1_1793744628.json",
+    "sha256": "0d7683f505afb2e1b297f56ba55a1a5bdffa51f964b3d9a85bb497d5e04c98ff",
+    "size": 129068,
+    "mtime_ns": 1793744628245953400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-15b8d4eb209b4ca9878adec262c94c26\\review46_roster_reset_939412\\blocked\\roster_v1.json",
+    "sha256": "ae554c5cc3051d577229dfd48fc966c44df94de8a420735f556ab4e514b8eb21",
+    "size": 108748,
+    "mtime_ns": 1793680417605116200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-15b8d4eb209b4ca9878adec262c94c26\\review46_roster_reset_939412\\menu\\roster_v1.json",
+    "sha256": "e90c140f22793b172960ebb59b582770eb1d1db803d225a925f7a24e43ca7f37",
+    "size": 110584,
+    "mtime_ns": 1793680420476116400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-15b8d4eb209b4ca9878adec262c94c26\\review46_roster_reset_939412\\menu_button\\roster_v1.json",
+    "sha256": "62436509c4e3e433d155970242251b16456c72a780d0cb7754fbeeb389602a3b",
+    "size": 108157,
+    "mtime_ns": 1793680424137615600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-15b8d4eb209b4ca9878adec262c94c26\\review46_roster_reset_939412\\missing\\roster_v1.json",
+    "sha256": "c4773c15341e9b58c0ddb9280f6ed16ff3ea2d979c744e8de149633b850ea826",
+    "size": 108482,
+    "mtime_ns": 1793680417944116500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-15b8d4eb209b4ca9878adec262c94c26\\review46_roster_reset_939412\\no_archive\\roster_v1.json",
+    "sha256": "735d03c7cbe8fc478bf90fd243684b7f1862851ebd239e38b9a384ce347ed9c1",
+    "size": 107855,
+    "mtime_ns": 1793680418139616500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-15b8d4eb209b4ca9878adec262c94c26\\review46_roster_reset_939412\\success\\roster_v1.json",
+    "sha256": "690fd36da4b984440f890f94631a8811edecd3b1a6fc9cbcb340b8b8adeacf9e",
+    "size": 109292,
+    "mtime_ns": 1793680417826615900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-15b8d4eb209b4ca9878adec262c94c26\\review46_roster_reset_939412\\success\\archive\\roster_v1_1793680417.json",
+    "sha256": "6a7d8953311a3a112d54f133d9a79306b1f041d5a850bf8dbc282b8e6c94966d",
+    "size": 106987,
+    "mtime_ns": 1793680417744618600
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-15b8d4eb209b4ca9878adec262c94c26\\review46_roster_reset_939412\\menu_button\\archive\\roster_v1_1793680423.json",
+    "sha256": "95770c1e3824ee93d6527a22df7ccbc789819dfc1797887649a5ba0a56c2d975",
+    "size": 110813,
+    "mtime_ns": 1793680423666115800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-15b8d4eb209b4ca9878adec262c94c26\\review46_roster_reset_939412\\menu\\archive\\roster_v1_1793680420.json",
+    "sha256": "3b1e11ae5f532d90a116c23a4120cb4a55bab6dc8705c6f4fe583964e43eb3a9",
+    "size": 111442,
+    "mtime_ns": 1793680420419116500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-124e8938b13c47d5810fa42dff92bbf5\\profiles\\local_player\\roster_v1.json",
+    "sha256": "8b7556b1123783517d27c5d3230acab8fabe3eb23c0b7333549da848ba613eb8",
+    "size": 131833,
+    "mtime_ns": 1793743601545452200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-1237bf0b3b5e4991a0cda07bcc37ed6e\\profiles\\local_player\\roster_v1.json",
+    "sha256": "4284e614142133d9c310bd511d3097bedd626e24e9159197df8fd63415ee6b64",
+    "size": 131833,
+    "mtime_ns": 1793653053677507000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-11088e3b94af4fb6a30562e01fcf3d8b\\profiles\\local_player\\roster_v1.json",
+    "sha256": "7c00babbf82f658ae912209a05f17e501b3b3ff4589ea5de6567139630801ed8",
+    "size": 131833,
+    "mtime_ns": 1793744769658952400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0e954d16ada94019b421c65588ad7ed6\\profiles\\local_player\\roster_v1.json",
+    "sha256": "10e63d81611ff179886efd88ae1c5da8b37e5abed8ad27f7331c4f76ee8e59f6",
+    "size": 131833,
+    "mtime_ns": 1793681354919012400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0e954d16ada94019b421c65588ad7ed6\\profiles\\test_task232_menu\\roster_v1.json",
+    "sha256": "15cb8622d099632ee49cc8f457238243cde9442cd8bc416063af25f4719ebd5f",
+    "size": 130716,
+    "mtime_ns": 1793681357215513000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0e954d16ada94019b421c65588ad7ed6\\profiles\\test_task232_menu\\archive\\roster_v1_1793681357.json",
+    "sha256": "c16a18c858e9cf2a37167f72ddcd082656a655f0734a97b09dd55ac6cc5b942f",
+    "size": 129068,
+    "mtime_ns": 1793681357139513500
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0b9b0c02d6844b7a94eee223b965a78b\\profiles\\local_player\\roster_v1.json",
+    "sha256": "9252c52c03f336079f6683bc335b12ea2928e2f9211bdbf565d79564fdc6829f",
+    "size": 131833,
+    "mtime_ns": 1793766103422737100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-09b694bee55e4f59a6d1dd74c43f476f\\profiles\\local_player\\roster_v1.json",
+    "sha256": "47c36ec1a69e19e62d430d4079b95a92adba73d583e67d748c5c8160f29e8b6d",
+    "size": 131833,
+    "mtime_ns": 1793744767763952300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0857cc44a97a4daaaab672cb937edd79\\review46_roster_reset_882043\\blocked\\roster_v1.json",
+    "sha256": "0aad3f9ee23c507217f02533555c76154d53afb4ffd84d2bb86fcc1e5a02105c",
+    "size": 108748,
+    "mtime_ns": 1793766767370236900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0857cc44a97a4daaaab672cb937edd79\\review46_roster_reset_882043\\menu\\roster_v1.json",
+    "sha256": "6c92eb57202ccc7a0b0616472d956301a86b9afcac9ba40a4cae551eba5b774e",
+    "size": 110584,
+    "mtime_ns": 1793766770139238900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0857cc44a97a4daaaab672cb937edd79\\review46_roster_reset_882043\\menu_button\\roster_v1.json",
+    "sha256": "827526280f57e5103688d362589acec71933d2ac74270202afa4242cc31c17ce",
+    "size": 108157,
+    "mtime_ns": 1793766773231236900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0857cc44a97a4daaaab672cb937edd79\\review46_roster_reset_882043\\missing\\roster_v1.json",
+    "sha256": "7f6373d8abe90d32bd6cd69d41cd54b3e836ceb75baa2bea93f2530d6d29af8a",
+    "size": 108482,
+    "mtime_ns": 1793766767700737800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0857cc44a97a4daaaab672cb937edd79\\review46_roster_reset_882043\\no_archive\\roster_v1.json",
+    "sha256": "2be74e06300b6f48cc659047afc2260241785c2f1f93eb920efc4fe08d893b6e",
+    "size": 107855,
+    "mtime_ns": 1793766767885237100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0857cc44a97a4daaaab672cb937edd79\\review46_roster_reset_882043\\success\\roster_v1.json",
+    "sha256": "e9acf28b4b5fd70a348c21e0cd2b42879b9a51392338624331a1813c3c45efc0",
+    "size": 109292,
+    "mtime_ns": 1793766767587738200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0857cc44a97a4daaaab672cb937edd79\\review46_roster_reset_882043\\success\\archive\\roster_v1_1793766767.json",
+    "sha256": "6e1d98040138366e1e6610ba414a0dffa0836fc9f89f789aab2d1c28f05cc040",
+    "size": 106987,
+    "mtime_ns": 1793766767506236900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0857cc44a97a4daaaab672cb937edd79\\review46_roster_reset_882043\\menu_button\\archive\\roster_v1_1793766772.json",
+    "sha256": "24b859b0d17dd03faa22c332afe86fd721af6a47bf13a1da819949dfc5832568",
+    "size": 110813,
+    "mtime_ns": 1793766772775738300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0857cc44a97a4daaaab672cb937edd79\\review46_roster_reset_882043\\menu\\archive\\roster_v1_1793766770.json",
+    "sha256": "eaeb2f02bea08a4b7c2809b8d8a941906776749cb093b031a42a5d2ebe5b5636",
+    "size": 111442,
+    "mtime_ns": 1793766770081737100
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-059b22a94adc4a82932769f826028f06\\review46_roster_reset_879515\\blocked\\roster_v1.json",
+    "sha256": "adf9f0551316039cec36ff2c94b8b7756610fc617595e6b960d99b158c6b7aa2",
+    "size": 107813,
+    "mtime_ns": 1793679977816138900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-059b22a94adc4a82932769f826028f06\\review46_roster_reset_879515\\no_archive\\roster_v1.json",
+    "sha256": "91ad79ce1d11ee1fc620535280c699a00bce5113ceef37189ad9ca5506cd4ac2",
+    "size": 107855,
+    "mtime_ns": 1793679978305638000
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-059b22a94adc4a82932769f826028f06\\review46_roster_reset_879515\\success\\roster_v1.json",
+    "sha256": "d6f6c49e0cae7a5b2b8c63b9556bb91f182f0ddb366b7bfb2f776d044295537a",
+    "size": 106987,
+    "mtime_ns": 1793679977928139900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-059b22a94adc4a82932769f826028f06\\review46_roster_reset_879515\\success\\archive\\roster_v1_1793679977.json",
+    "sha256": "d6f6c49e0cae7a5b2b8c63b9556bb91f182f0ddb366b7bfb2f776d044295537a",
+    "size": 106987,
+    "mtime_ns": 1793679977938137800
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-03b5257d053749d6b688d10ecb4e0819\\profiles\\local_player\\roster_v1.json",
+    "sha256": "27fc35923bae712f27c889a03be695ddac6ab15bf8d9934ae59bc249cbbcca0a",
+    "size": 131833,
+    "mtime_ns": 1793823173776870400
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0117fa4a1b8d430da5751c862b185a4a\\profiles\\local_player\\roster_v1.json",
+    "sha256": "d916f595aa6d860c067e98d1bddcd94f4995349a335d66acd60a56c9227cacdd",
+    "size": 132325,
+    "mtime_ns": 1793718792503959200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0117fa4a1b8d430da5751c862b185a4a\\profiles\\task_234_menu\\roster_v1.json",
+    "sha256": "9a876a72c190f8f00c320d10ffd2d3ae010177114c4b62bbc6d313167e2c5678",
+    "size": 131786,
+    "mtime_ns": 1793718795080958900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0117fa4a1b8d430da5751c862b185a4a\\profiles\\task_234_recovery\\roster_v1.json",
+    "sha256": "8d79ad155152fe4cba302f1cfb18659260082c2a6372230449e84df8a0462232",
+    "size": 132636,
+    "mtime_ns": 1793718789334958200
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0117fa4a1b8d430da5751c862b185a4a\\profiles\\task_234_reset\\roster_v1.json",
+    "sha256": "2ed3576e67feb70976e2e29c494d219df8eef79e466639d3126e72611e123b89",
+    "size": 131200,
+    "mtime_ns": 1793718789560456900
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0117fa4a1b8d430da5751c862b185a4a\\profiles\\task_234_roundtrip\\roster_v1.json",
+    "sha256": "efec0e6eb17ce48080d2c3c5ee71e366c73df595f89e56cc9bd1c5428221f7af",
+    "size": 132360,
+    "mtime_ns": 1793718789057960300
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0117fa4a1b8d430da5751c862b185a4a\\profiles\\task_234_reset\\archive\\roster_v1_1793718789.json",
+    "sha256": "4439207f7e67581a97c86d376ebe437b1170d550f7aee52dcefde86c2d3e6a9b",
+    "size": 134346,
+    "mtime_ns": 1793718789455958700
+  },
+  {
+    "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-0117fa4a1b8d430da5751c862b185a4a\\profiles\\task_234_menu\\archive\\roster_v1_1793718795.json",
+    "sha256": "505952c84f330f0765996dba88481d0a7cda266d1a7b3b76ad674b0c7ec98450",
+    "size": 133728,
+    "mtime_ns": 1793718795007460200
+  }
+]

@@ -1,0 +1,40 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-2b86f4517da74eb9ba3d5a4a43b42c0b
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: ReadModel exposes begin_projection_pass for an explicit bounded projection pass
+PASS: ReadModel exposes end_projection_pass for an explicit bounded projection pass
+PASS: ReadModel exposes project for an explicit bounded projection pass
+PASS: Repeated top-level read shares its one built result
+PASS: A hit does not call the producer
+PASS: Diagnostics distinguish the single build and hit
+PASS: Outer end drops all snapshot entries immediately
+PASS: Out-of-scope reads always call the owner afresh
+PASS: A new explicit pass in the same engineframe is fresh
+PASS: An unmatched end cannot retain or underflow a scope
+PASS: Nested begin joins the current synchronous pass
+PASS: Inner end preserves only its still-open outer scope
+PASS: The balanced nested pass leaves no persistent projection owner
+PASS: Only the outer result is stored, not its nested producer
+PASS: A nested result is rebuilt when later requested at top level
+PASS: Reentry caches the complete outer result rather than its recursive fallback
+PASS: Nested reads bypass existing top-level entries and cannot replace them
+PASS: Diagnostics account for all three nested producer bypasses
+PASS: Mutating a first return cannot mutate owner health, identities, commands or effects
+PASS: First-return mutation cannot poison the stored nested Dictionary/Array snapshot
+PASS: Each cache hit also returns a deep defensive copy
+PASS: Later producer-source mutation cannot change the stored pass snapshot
+PASS: Returned diagnostics cannot mutate owner revisions
+PASS: Pure projection operations produce no owner commands or effects
+PASS: An unchanged light value retains its existing revision
+PASS: Unchanged light values and invalid IDs preserve the current pass entry
+PASS: A real light revision invalidates a pass immediately
+PASS: A heavy revision invalidates a pass immediately
+PASS: A fireteam heavy revision invalidates the shared projection without losing normalization
+PASS: A producer invalidated while building cannot repopulate an expired generation
+PASS: The next read rebuilds after in-producer revision invalidation
+PASS: A leaked pass cannot reuse old snapshots on the next engineframe
+PASS: Frame expiration discards the complete nested leaked scope and records it once
+PASS: Only an explicit begin establishes a fresh pass after a leak
+HUD_ARCHITECTURE_20261106_READ_SCOPE: 34 passed, 0 failed
+HUD_READ_SCOPE_VERIFY_PASS

@@ -1,5 +1,24 @@
 # IMPLEMENTATION_STATUS
 
+### Referenzpolish R3 und weitere Framehitches, 2026-11-07
+- Native Theme-/Primary-/GO-/Minikarten-Besitzer vermeiden Legacy-Zwischenstile;
+  Fog bezahlt im normalen Scheduler einen Slice. Strategic-RAW teilt Density
+  und einmaligen lokalen Next-Loop-Readout bei unveraenderten Guards/RAW-Texten.
+- GM01-Kamera startet einmal mit22; manuelle Kamerawahl bleibt.62 niedrige
+  visuelle Props in2Batches, deterministisch und FoW-freigegeben pro Quellzelle;
+  keine neuen Nav-/LOS-/Cover-/Gameplayhindernisse.
+- Homebase gewichtet Personal/Trupp, Ausruestungsfokus, native Basisszene und
+  breites Flugdeck. Fokusportrait176/224px erhalten; schmale Navigation und
+  neun symbolisierte Missionsaktionen nativ in echten Vollbildansichten geprueft.
+- 40 unterschiedliche Gates zuletzt gruen; der39/40-Zwischenstand samt echtem
+  Portraitfail bleibt, drei betroffene Homebase-Nachlaeufe bestehen erneut.
+  Welt45/45 CPU +56/56 native GPU; zwei normale native90-s-Routen je68/68.
+- Gleiche Kamera34: P99 von128-135 auf70.357ms, >100ms von75-77 auf9/90s;
+  neue Produktkamera22: P99=72.958ms,15/90s. Einzelne Spitzen bis177ms bleiben.
+- Bericht `docs/qa/reference_polish_r3_20261106/REPORT.md`; Mainintegration,
+  Remoteabgleich und Main-Smoke werden separat im dortigen `main_receipt.json`
+  quittiert. Keine neue EXE-/WAN-/Releasebehauptung.
+
 ### HUD-Architektur und Ruckelspitzen, 2026-11-06
 - Tuerindex von HUD-/3D-Sync in den bestehenden Runtime-Driver verlagert;
   vier Gate-/Countdown-/Playabilitygetter sind lesend. Registry-/Marker-

@@ -13,6 +13,7 @@ const DRESSING = preload("res://scripts/terrain/frontier_art_dressing.gd")
 const CLOSED_BUILDING = preload("res://scripts/terrain/frontier_closed_buildings.gd")
 const WORKLIFE = preload("res://scripts/terrain/frontier_worklife.gd")
 const ACCESS = preload("res://scripts/terrain/frontier_access_anchors.gd")
+const REFERENCE_DRESSING = preload("res://scripts/terrain/frontier_reference_dressing.gd")
 const ART_ROOT := "res://Assets/curated/frontier_illustrated_20261101/structures_pass04/"
 const MODEL_SCALE := 0.35
 const OBJECT_HEIGHT_STEP := 0.42
@@ -110,7 +111,7 @@ static func build(parent: Node3D, saved_ground_grids = null) -> Dictionary:
 	var paths: Array = access_snapshot.get("paths", []).duplicate(true)
 	_extend_supply_country(root, profile, geology, blockers, paths, assets)
 
-	return {
+	var facts := {
 		"root": root,
 		"flat_ground": ground,
 		"blockers": blockers,
@@ -119,6 +120,68 @@ static func build(parent: Node3D, saved_ground_grids = null) -> Dictionary:
 		"layout_id": LAYOUT_ID,
 		"grid_size": GRID_SIZE,
 	}
+	facts["reference_dressing_context"] = _reference_dressing_context(root, blockers, paths)
+	var plant := dressing.find_child("DryAgave", true, false) as MeshInstance3D
+	var gravel := worklife.get_node_or_null("ContactGravelBatch") as MultiMeshInstance3D
+	if plant != null and gravel != null and gravel.multimesh != null:
+		facts["reference_dressing_sources"] = {"agave_mesh": plant.mesh, "agave_material": plant.material_override,
+			"gravel_mesh": gravel.multimesh.mesh, "gravel_material": gravel.material_override}
+	return facts
+
+
+static func refresh_reference_dressing(facts: Dictionary, map_data) -> Dictionary:
+	var root := facts.get("root") as Node3D
+	if not is_instance_valid(root):
+		return {"installed": false, "reason": "no_authored_root"}
+	var previous := root.get_node_or_null(REFERENCE_DRESSING.LAYER_NAME) as Node3D
+	var previous_was_visible := previous != null and previous.visible
+	if previous != null:
+		previous.visible = false
+	var plan: Dictionary = REFERENCE_DRESSING.build_plan(map_data, facts.get("reference_dressing_context", {}))
+	var result: Dictionary = REFERENCE_DRESSING.install(root, plan, facts.get("reference_dressing_sources", {}))
+	if bool(result.get("installed", false)) and bool(result.get("reused", false)) and is_instance_valid(previous):
+		previous.visible = previous_was_visible
+	if not bool(result.get("installed", false)) and is_instance_valid(previous):
+		root.remove_child(previous)
+		previous.free()
+	facts["reference_dressing_layer"] = result.get("layer")
+	return result
+
+
+static func _reference_dressing_context(root: Node3D, blockers: Array, paths: Array) -> Dictionary:
+	var centers: Array[Vector2] = []
+	var pads: Array[Rect2] = []
+	var doors: Array[Vector2] = []
+	# Existing envelopes define only visual cluster centres, never new obstacles.
+	for blocker in blockers:
+		if String(blocker.get("kind", "")) in ["building", "working_container", "container_stack", "solar_array"]:
+			var rect: Rect2 = blocker["rect"]
+			centers.append(rect.position - Vector2.ONE * 0.9)
+			centers.append(rect.end + Vector2.ONE * 0.9)
+	# Cold own-root inspection only; no SceneTree scan or per-frame discovery.
+	for child in root.get_children():
+		if child.has_meta("access_anchor"):
+			var anchor: Dictionary = child.get_meta("access_anchor")
+			if anchor.get("ground") is Vector2:
+				doors.append(anchor["ground"])
+		if String(child.name).begins_with("PaintedLandingApron"):
+			var pad := child.get_node_or_null("GroundLevelCompactedApron") as MeshInstance3D
+			if pad != null:
+				pads.append(_mesh_xz_bounds(pad, root))
+		elif String(child.name) == "EasternOpenSupplyCourt" and child is MeshInstance3D:
+			pads.append(_mesh_xz_bounds(child, root))
+	return {"cluster_centers": centers, "blockers": blockers, "paths": paths, "pad_rects": pads, "door_points": doors}
+
+
+static func _mesh_xz_bounds(mesh: MeshInstance3D, space: Node3D) -> Rect2:
+	var bounds := mesh.mesh.get_aabb()
+	var transform := space.global_transform.affine_inverse() * mesh.global_transform
+	var result := Rect2()
+	for corner in range(8):
+		var local := bounds.position + bounds.size * Vector3(float(corner & 1), float((corner >> 1) & 1), float((corner >> 2) & 1))
+		var point: Vector3 = transform * local
+		result = Rect2(Vector2(point.x, point.z), Vector2.ZERO) if corner == 0 else result.expand(Vector2(point.x, point.z))
+	return result
 
 
 static func get_authoring_grid_positions() -> Array[Vector2i]:

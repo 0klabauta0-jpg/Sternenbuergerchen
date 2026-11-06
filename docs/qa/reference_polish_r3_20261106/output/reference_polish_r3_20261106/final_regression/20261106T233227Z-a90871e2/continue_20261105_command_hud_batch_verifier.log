@@ -1,0 +1,51 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-66b6d96be5774107b774991601c613f7
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Continue 20261105 Command HUD Batch ===
+PASS: Real mission fixture exposes command, simulation and A5 presentation owners
+PASS: Real mission fixture has a normally initialized selected fireteam
+PASS: Fixture uses the existing authorized live-command path
+PASS: GO is disabled before a plan is created
+PASS: Public Move accepts a real pending waypoint
+PASS: Move publishes its pending plan immediately
+PASS: Move publishes planning-state feedback synchronously
+PASS: Move immediately enables GO according to the existing owner policy
+PASS: Compact A5 immediately shows planned order and actionable GO feedback
+PASS: Move invokes no heavy runtime HUD surfaces synchronously
+PASS: Move leaves one command HUD refresh pending
+PASS: Public GO accepts the pending Move in the same frame
+PASS: GO immediately activates the actual plan and waypoint
+PASS: GO immediately enqueues real tokenized Move commands in SimulationRoot
+PASS: Move and GO publish the latest plan within the same input frame
+PASS: GO immediately preserves the existing active-order Continue policy
+PASS: Compact A5 immediately identifies the actual Move after GO
+PASS: Move plus GO coalesces without synchronous heavy surface traversal
+PASS: The same-frame Move plus GO burst remains pending for one full refresh
+PASS: Real SimulationRoot physics commits the public GO commands
+PASS: A5 uses the visible portrait team cards while the legacy member strip is hidden
+PASS: One actual owner process step flushes the coalesced HUD work exactly once
+PASS: The pending flush forces both craft and fireteam surface groups
+PASS: The coalesced full refresh clears pending
+PASS: The delayed full refresh retains the actual Move and latest GO state
+PASS: The flushed team status reads the currently committed Move state
+PASS: The visible portrait team card reads the committed Move and displays its current status
+PASS: The same flush preserves hidden legacy member instances without rebuilding them
+PASS: Quiescent light process steps schedule no repeated command full refresh
+PASS: The ordinary periodic heavy pass uses its unchanged-state guard instead of forcing a rebuild
+PASS: Quiescent periodic work does not restore command pending state
+PASS: Interleaved transport case begins with pending command HUD work
+PASS: A guarded full transport pass consumes the command force request instead of losing it
+PASS: Cadence after an interleaved full pass does not force the same command twice
+PASS: Separate details case starts with a new pending command refresh
+PASS: The original Details callback opens the actual team popup
+PASS: Opening details flushes pending full sources once before display
+PASS: Newly opened details contain the complete current feedback and team status sources
+PASS: Opening current details creates or changes no gameplay plan or command
+PASS: Public Take changes planning while details remain open
+PASS: The open-details action retains a real pending Take waypoint
+PASS: Open details preserve command batching for subsequent input
+PASS: Already open details immediately replace stale command text with the latest Take feedback
+COMMAND_HUD_BATCH_FACTS {"actor_writes":false,"after_commands":{"command_matrix_apply_count":3,"command_matrix_skip_count":2,"craft_controls_apply_count":4,"craft_controls_skip_count":1,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":5,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":4,"mini_cards_skip_count":1,"read_only":true,"selected_cards_apply_count":1,"selected_cards_skip_count":0,"sets_multiplayer_truth":false,"strategic_status_apply_count":4,"strategic_status_skip_count":1,"ui_sets_gameplay_truth":false},"before":{"command_matrix_apply_count":3,"command_matrix_skip_count":2,"craft_controls_apply_count":4,"craft_controls_skip_count":1,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":5,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":4,"mini_cards_skip_count":1,"read_only":true,"selected_cards_apply_count":1,"selected_cards_skip_count":0,"sets_multiplayer_truth":false,"strategic_status_apply_count":4,"strategic_status_skip_count":1,"ui_sets_gameplay_truth":false},"before_flush":{"command_matrix_apply_count":3,"command_matrix_skip_count":2,"craft_controls_apply_count":4,"craft_controls_skip_count":1,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":5,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":4,"mini_cards_skip_count":1,"read_only":true,"selected_cards_apply_count":1,"selected_cards_skip_count":0,"sets_multiplayer_truth":false,"strategic_status_apply_count":4,"strategic_status_skip_count":1,"ui_sets_gameplay_truth":false},"cadence_seconds":0.35,"flushed":{"command_matrix_apply_count":4,"command_matrix_skip_count":2,"craft_controls_apply_count":5,"craft_controls_skip_count":1,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":6,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":5,"mini_cards_skip_count":1,"read_only":true,"selected_cards_apply_count":1,"selected_cards_skip_count":0,"sets_multiplayer_truth":false,"strategic_status_apply_count":5,"strategic_status_skip_count":1,"ui_sets_gameplay_truth":false},"periodic":{"command_matrix_apply_count":4,"command_matrix_skip_count":3,"craft_controls_apply_count":5,"craft_controls_skip_count":2,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":6,"fireteam_card_group_skip_count":1,"mini_cards_apply_count":5,"mini_cards_skip_count":1,"read_only":true,"selected_cards_apply_count":1,"selected_cards_skip_count":0,"sets_multiplayer_truth":false,"strategic_status_apply_count":5,"strategic_status_skip_count":2,"ui_sets_gameplay_truth":false},"quiet":{"command_matrix_apply_count":4,"command_matrix_skip_count":2,"craft_controls_apply_count":5,"craft_controls_skip_count":1,"creates_command":false,"creates_damage_event":false,"creates_fire_event":false,"creates_movement":false,"fireteam_card_group_apply_count":6,"fireteam_card_group_skip_count":0,"mini_cards_apply_count":5,"mini_cards_skip_count":1,"read_only":true,"selected_cards_apply_count":1,"selected_cards_skip_count":0,"sets_multiplayer_truth":false,"strategic_status_apply_count":5,"strategic_status_skip_count":1,"ui_sets_gameplay_truth":false},"synthetic_owner_process":true}
+=== RESULTS: 43 passed, 0 failed ===
+COMMAND_HUD_BATCH_ALL_PASS

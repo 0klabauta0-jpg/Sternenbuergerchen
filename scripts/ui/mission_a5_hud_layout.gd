@@ -14,7 +14,7 @@ const SECOND: PackedStringArray = ["TargetButton", "ClearTargetButton", "DeleteO
 const RULES: PackedStringArray = ["FireRuleHoldButton", "FireRuleReturnButton", "FireRuleFreeButton", "FireRuleSuppressButton"]
 const RULE_LABELS := {"FireRuleHoldButton": "FH", "FireRuleReturnButton": "AF", "FireRuleFreeButton": "FF", "FireRuleSuppressButton": "UN"}
 const LABELS := {"MoveButton": "Bewegen", "TakeButton": "Nehmen", "HoldButton": "Halten", "FlankButton": "Flanke", "GoCommandMatrixButton": "Plan\nausführen", "TargetButton": "Ziel", "ClearTargetButton": "Leeren", "DeleteOrderButton": "Löschen", "SortCommandMatrixButton": "Ordnen"}
-const ICON_IDS := {"MoveButton": "move", "TakeButton": "take", "HoldButton": "defend", "FlankButton": "flank"}
+const ICON_IDS := {"MoveButton": "move", "TakeButton": "take", "HoldButton": "defend", "FlankButton": "flank", "TargetButton": "order_target", "ClearTargetButton": "order_clear", "DeleteOrderButton": "order_delete", "SortCommandMatrixButton": "order_sort", "GoCommandMatrixButton": "order_go"}
 const CHARACTER_OVERLAY_Z := 64
 const FIRE_CODES: PackedStringArray = ["hold", "return", "free", "suppress"]
 const FIRE_NAMES: PackedStringArray = ["Feuer halten", "Antwortfeuer", "Feuer frei", "Unterdrücken"]
@@ -57,6 +57,9 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 	_layout_target_labels(target, Rect2(layout.target_order))
 	var team_panel := controller.get_node_or_null(BASE + "FireteamPanel") as PanelContainer
 	if team_panel != null:
+		if not bool(team_panel.get_meta("native_a5_quiet_frame", false)):
+			team_panel.set_meta("native_a5_quiet_frame", true)
+			team_panel.queue_redraw()
 		_ensure_team_controls(controller, team_panel, layer)
 		_layout_selected_team_controls(controller, team_panel, Rect2(team), layout)
 	var command_panel := controller.get_node_or_null(BASE + "CommandPanel") as PanelContainer
@@ -298,6 +301,14 @@ static func _present_primary_action(button: Button, state: Dictionary) -> void:
 		_remember_button_style(button, selected)
 	if button.text != LABELS[name]:
 		button.text = LABELS[name]
+	# The native slot owns the final size even after a generic theme refresh.
+	# At 1280px the generic 64px minimum otherwise expands the 52px square.
+	var edge := float(button.get_meta("native_a5_action_edge", 52))
+	var native_size := Vector2(edge, edge)
+	if button.custom_minimum_size != native_size:
+		button.custom_minimum_size = native_size
+	if button.size != native_size:
+		button.size = native_size
 	if ICON_IDS.has(name):
 		var icon: Texture2D = ICONS.get_icon(ICON_IDS[name])
 		if button.icon != icon:
@@ -305,7 +316,7 @@ static func _present_primary_action(button: Button, state: Dictionary) -> void:
 	button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 	button.expand_icon = true
-	var icon_width: int = maxi(24, roundi(float(button.get_meta("native_a5_action_edge", 52)) * 0.43))
+	var icon_width: int = maxi(12, roundi(edge * 0.22)) if name == "GoCommandMatrixButton" else maxi(22, roundi(edge * 0.43))
 	if button.get_theme_constant("icon_max_width") != icon_width:
 		button.add_theme_constant_override("icon_max_width", icon_width)
 	button.alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -913,7 +924,7 @@ static func _style_execute_tile(button: Button) -> void:
 	button.icon = null
 	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
 		var base := button.get_theme_stylebox(state) as StyleBoxFlat
-		button.add_theme_stylebox_override(state, THEME.build_flat_stylebox(base.bg_color, base.border_color, base.corner_radius_top_left, base.border_width_left, Vector4(2, 4, 2, 4)))
+		button.add_theme_stylebox_override(state, THEME.build_flat_stylebox(base.bg_color, base.border_color, base.corner_radius_top_left, base.border_width_left, Vector4(2, 3, 2, 3)))
 
 
 static func _layout_team_readouts(controller: Node, _rect: Rect2) -> void:

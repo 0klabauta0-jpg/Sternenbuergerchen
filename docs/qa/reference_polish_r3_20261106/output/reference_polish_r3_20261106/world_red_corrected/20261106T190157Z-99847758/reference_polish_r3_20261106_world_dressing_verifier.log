@@ -1,0 +1,11 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-4171bc6bfac543cd8e2a7dc310db20e6
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+ERROR: FAIL: R3 bounded dressing helper exists
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] check (res://scripts/tests/reference_polish_r3_20261106_world_dressing_verifier.gd:41)
+       [1] run (res://scripts/tests/reference_polish_r3_20261106_world_dressing_verifier.gd:46)
+R3_WORLD_COMPONENT_RESULTS 0 passed, 1 failed; native GPU gate separate
+REFERENCE_R3_WORLD_DRESSING_FAILED

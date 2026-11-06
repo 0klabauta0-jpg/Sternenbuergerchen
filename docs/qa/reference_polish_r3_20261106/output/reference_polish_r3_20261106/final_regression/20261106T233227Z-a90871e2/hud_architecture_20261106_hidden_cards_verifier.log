@@ -1,0 +1,83 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-6eff3e99a3564f45a35070d378e23278
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Real mission fixture exposes the selected member-card subtree
+PASS: Fixture has a real selected fireteam
+PASS: a5_hidden_by_ancestor fixture distinguishes local from effective visibility
+PASS: a5_hidden_by_ancestor periodic dispatch refreshes only the required selected-card surface
+PASS: a5_hidden_by_ancestor avoids hidden A5 profile construction and keeps required profiles current
+PASS: a5_hidden_by_ancestor preserves the mini-card dispatch
+PASS: a5_hidden_by_ancestor preserves the ad-hoc visibility dispatch
+PASS: a5_hidden_by_ancestor preserves the open character-overlay dispatch
+PASS: a5_revealed fixture distinguishes local from effective visibility
+PASS: a5_revealed periodic dispatch refreshes only the required selected-card surface
+PASS: a5_revealed avoids hidden A5 profile construction and keeps required profiles current
+PASS: a5_revealed preserves the mini-card dispatch
+PASS: a5_revealed preserves the ad-hoc visibility dispatch
+PASS: a5_revealed preserves the open character-overlay dispatch
+PASS: legacy_hidden fixture distinguishes local from effective visibility
+PASS: legacy_hidden periodic dispatch refreshes only the required selected-card surface
+PASS: legacy_hidden avoids hidden A5 profile construction and keeps required profiles current
+PASS: legacy_hidden preserves the mini-card dispatch
+PASS: legacy_hidden preserves the ad-hoc visibility dispatch
+PASS: legacy_hidden preserves the open character-overlay dispatch
+PASS: legacy_revealed fixture distinguishes local from effective visibility
+PASS: legacy_revealed periodic dispatch refreshes only the required selected-card surface
+PASS: legacy_revealed avoids hidden A5 profile construction and keeps required profiles current
+PASS: legacy_revealed preserves the mini-card dispatch
+PASS: legacy_revealed preserves the ad-hoc visibility dispatch
+PASS: legacy_revealed preserves the open character-overlay dispatch
+PASS: reveal_same_inputs hidden A5 consumes the group refresh without building selected profiles
+PASS: reveal_same_inputs hidden group signature is genuinely current
+PASS: reveal_same_inputs transition changes no selected-card source input
+PASS: reveal_same_inputs non-forced handoff synchronously builds previously hidden current profiles
+PASS: reveal_same_inputs non-forced handoff replaces the stale selected projection
+PASS: reveal_same_inputs handoff retains neighboring group dispatches
+PASS: reveal_same_inputs unchanged non-forced follow-up skips selected work
+PASS: reveal_same_inputs unchanged non-forced follow-up keeps the group quiescent
+PASS: leave_a5_same_inputs hidden A5 consumes the group refresh without building selected profiles
+PASS: leave_a5_same_inputs hidden group signature is genuinely current
+PASS: leave_a5_same_inputs transition changes no selected-card source input
+PASS: leave_a5_same_inputs non-forced handoff synchronously builds previously hidden current profiles
+PASS: leave_a5_same_inputs non-forced handoff replaces the stale selected projection
+PASS: leave_a5_same_inputs handoff retains neighboring group dispatches
+PASS: leave_a5_same_inputs unchanged non-forced follow-up skips selected work
+PASS: leave_a5_same_inputs unchanged non-forced follow-up keeps the group quiescent
+PASS: Explicit refresh builds fresh profiles even while the A5 strip is hidden
+PASS: Changed UI inputs replace the explicit selected-card projection
+PASS: Explicit card retains its existing selected-member source context
+PASS: Explicit card still represents a real member identity
+PASS: Explicit card retains its character-opening callback
+PASS: Existing card signal routes the same member identity to the character callback
+PASS: Explicit card retains its existing selected-member source context
+PASS: Explicit card still represents a real member identity
+PASS: Explicit card retains its character-opening callback
+PASS: Existing card signal routes the same member identity to the character callback
+PASS: Explicit card retains its existing selected-member source context
+PASS: Explicit card still represents a real member identity
+PASS: Explicit card retains its character-opening callback
+PASS: Existing card signal routes the same member identity to the character callback
+PASS: Explicit card retains its existing selected-member source context
+PASS: Explicit card still represents a real member identity
+PASS: Explicit card retains its character-opening callback
+PASS: Existing card signal routes the same member identity to the character callback
+PASS: Explicit card retains its existing selected-member source context
+PASS: Explicit card still represents a real member identity
+PASS: Explicit card retains its character-opening callback
+PASS: Existing card signal routes the same member identity to the character callback
+PASS: Explicit card retains its existing selected-member source context
+PASS: Explicit card still represents a real member identity
+PASS: Explicit card retains its character-opening callback
+PASS: Existing card signal routes the same member identity to the character callback
+PASS: Explicit card retains its existing selected-member source context
+PASS: Explicit card still represents a real member identity
+PASS: Explicit card retains its character-opening callback
+PASS: Existing card signal routes the same member identity to the character callback
+PASS: Explicit card retains its existing selected-member source context
+PASS: Explicit card still represents a real member identity
+PASS: Explicit card retains its character-opening callback
+PASS: Existing card signal routes the same member identity to the character callback
+PASS: Revealed legacy surface rebuilds current cards in the same dispatch
+HUD_ARCHITECTURE_20261106_HIDDEN_CARDS: 77 passed, 0 failed
+HUD_HIDDEN_CARDS_VERIFY_PASS

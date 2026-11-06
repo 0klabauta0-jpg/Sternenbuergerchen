@@ -1,0 +1,48 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-1cd85113091a4adfb623763ab6301f4d
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Authored mission normally initializes real fireteam cards
+PASS: blue current card refresh avoids native style/minimum/font intermediate resets
+PASS: blue compatibility styling emits no redundant visible card/title/stage theme notifications
+PASS: blue preserves final styles, hidden details, metadata, tooltips, portraits and actual callback identities
+PASS: blue card refresh changes no command/effect, plan, actor or simulation owner
+PASS: blue repeated explicit refresh remains free of generic native resets
+PASS: gold current card refresh avoids native style/minimum/font intermediate resets
+PASS: gold compatibility styling emits no redundant visible card/title/stage theme notifications
+PASS: gold preserves final styles, hidden details, metadata, tooltips, portraits and actual callback identities
+PASS: gold card refresh changes no command/effect, plan, actor or simulation owner
+PASS: gold repeated explicit refresh remains free of generic native resets
+PASS: Legacy or fresh initialization retains its established minimum geometry
+PASS: Legacy or fresh initialization keeps its title font and size
+PASS: Legacy or fresh initialization retains visible and hidden compatibility fonts
+PASS: Legacy compatibility metadata remains available
+PASS: Explicit old strategic route really rebuilds its handoff density
+PASS: Strategic RAW assembly calls its actual handoff builder once
+PASS: Handoff receives the current already-built density exactly
+PASS: Handoff avoids the second density build without mutating its caller input
+PASS: Strategic RAW text remains byte-identical to the real old fallback route
+PASS: Strategic text remains read-only for plans, actors, command/effect queues and simulation
+PASS: Explicit old strategic route really rebuilds its handoff density
+PASS: Strategic RAW assembly calls its actual handoff builder once
+PASS: Handoff receives the current already-built density exactly
+PASS: Handoff avoids the second density build without mutating its caller input
+PASS: Strategic RAW text remains byte-identical to the real old fallback route
+PASS: Strategic text remains read-only for plans, actors, command/effect queues and simulation
+PASS: Real UI update reaches its final target/layout boundary
+FAIL: Native Target keeps Ziel and legacy keeps ST/ZL before final layout
+PASS: Target keeps original callback identity and current armed state
+PASS: Target presentation does not enqueue or execute gameplay
+PASS: Real UI update reaches its final target/layout boundary
+PASS: Native Target keeps Ziel and legacy keeps ST/ZL before final layout
+PASS: Target keeps original callback identity and current armed state
+PASS: Target presentation does not enqueue or execute gameplay
+PASS: Real UI update reaches its final target/layout boundary
+PASS: Native Target keeps Ziel and legacy keeps ST/ZL before final layout
+PASS: Target keeps original callback identity and current armed state
+PASS: Target presentation does not enqueue or execute gameplay
+PASS: Real UI update reaches its final target/layout boundary
+FAIL: Native Target keeps Ziel and legacy keeps ST/ZL before final layout
+PASS: Target keeps original callback identity and current armed state
+PASS: Target presentation does not enqueue or execute gameplay
+R3_CONTROLLER_OWNERSHIP: 41 passed, 2 failed

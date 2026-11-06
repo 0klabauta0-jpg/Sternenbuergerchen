@@ -1,0 +1,68 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-bb71331ad9b248189004519a72be0ff8
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: real_current_state strategic RAW builds one local next-loop source, or none when both guards block
+PASS: real_current_state RAW remains byte-identical to the actual old helper fallback route
+PASS: real_current_state restores the exact prior guard depths
+PASS: real_current_state causes no recursive source build
+PASS: real_current_state source construction retains an existing helper recursion guard
+PASS: real_current_state explicit nested helper probes retain guard behavior
+PASS: real_current_state leaves actor, command, effect, plan and simulation owners unchanged
+R3_STRATEGIC_LOOP_FACTS {"actual_source_calls":1,"case":"real_current_state","expected_source_calls":1,"guard_depths":"(0, 0)","legacy_source_calls":3,"raw_equal":true,"source_guards":[{"hud_depth":1,"normal_reentry_blocked":true,"polish_depth":0,"polish_reentry_blocked":true}]}
+PASS: real_current_state the next independent RAW assembly reads fresh instead of retaining a display cache
+PASS: display_no_combat strategic RAW builds one local next-loop source, or none when both guards block
+PASS: display_no_combat RAW remains byte-identical to the actual old helper fallback route
+PASS: display_no_combat restores the exact prior guard depths
+PASS: display_no_combat causes no recursive source build
+PASS: display_no_combat source construction retains an existing helper recursion guard
+PASS: display_no_combat explicit nested helper probes retain guard behavior
+PASS: display_no_combat leaves actor, command, effect, plan and simulation owners unchanged
+R3_STRATEGIC_LOOP_FACTS {"actual_source_calls":1,"case":"display_no_combat","expected_source_calls":1,"guard_depths":"(0, 0)","legacy_source_calls":3,"raw_equal":true,"source_guards":[{"hud_depth":1,"normal_reentry_blocked":true,"polish_depth":0,"polish_reentry_blocked":true}]}
+PASS: display_no_combat the next independent RAW assembly reads fresh instead of retaining a display cache
+PASS: display_combat_no_contact strategic RAW builds one local next-loop source, or none when both guards block
+PASS: display_combat_no_contact RAW remains byte-identical to the actual old helper fallback route
+PASS: display_combat_no_contact restores the exact prior guard depths
+PASS: display_combat_no_contact causes no recursive source build
+PASS: display_combat_no_contact source construction retains an existing helper recursion guard
+PASS: display_combat_no_contact explicit nested helper probes retain guard behavior
+PASS: display_combat_no_contact leaves actor, command, effect, plan and simulation owners unchanged
+R3_STRATEGIC_LOOP_FACTS {"actual_source_calls":1,"case":"display_combat_no_contact","expected_source_calls":1,"guard_depths":"(0, 0)","legacy_source_calls":3,"raw_equal":true,"source_guards":[{"hud_depth":1,"normal_reentry_blocked":true,"polish_depth":0,"polish_reentry_blocked":true}]}
+PASS: display_combat_no_contact the next independent RAW assembly reads fresh instead of retaining a display cache
+PASS: display_contact_fire_early_return strategic RAW builds one local next-loop source, or none when both guards block
+PASS: display_contact_fire_early_return RAW remains byte-identical to the actual old helper fallback route
+PASS: display_contact_fire_early_return restores the exact prior guard depths
+PASS: display_contact_fire_early_return causes no recursive source build
+PASS: display_contact_fire_early_return source construction retains an existing helper recursion guard
+PASS: display_contact_fire_early_return explicit nested helper probes retain guard behavior
+PASS: display_contact_fire_early_return leaves actor, command, effect, plan and simulation owners unchanged
+R3_STRATEGIC_LOOP_FACTS {"actual_source_calls":1,"case":"display_contact_fire_early_return","expected_source_calls":1,"guard_depths":"(0, 0)","legacy_source_calls":3,"raw_equal":true,"source_guards":[{"hud_depth":1,"normal_reentry_blocked":true,"polish_depth":0,"polish_reentry_blocked":true}]}
+PASS: display_contact_fire_early_return the next independent RAW assembly reads fresh instead of retaining a display cache
+PASS: hud_guard_active strategic RAW builds one local next-loop source, or none when both guards block
+PASS: hud_guard_active RAW remains byte-identical to the actual old helper fallback route
+PASS: hud_guard_active restores the exact prior guard depths
+PASS: hud_guard_active causes no recursive source build
+PASS: hud_guard_active source construction retains an existing helper recursion guard
+PASS: hud_guard_active explicit nested helper probes retain guard behavior
+PASS: hud_guard_active leaves actor, command, effect, plan and simulation owners unchanged
+R3_STRATEGIC_LOOP_FACTS {"actual_source_calls":1,"case":"hud_guard_active","expected_source_calls":1,"guard_depths":"(1, 0)","legacy_source_calls":2,"raw_equal":true,"source_guards":[{"hud_depth":1,"normal_reentry_blocked":true,"polish_depth":1,"polish_reentry_blocked":true}]}
+PASS: hud_guard_active the next independent RAW assembly reads fresh instead of retaining a display cache
+PASS: polish_guard_active strategic RAW builds one local next-loop source, or none when both guards block
+PASS: polish_guard_active RAW remains byte-identical to the actual old helper fallback route
+PASS: polish_guard_active restores the exact prior guard depths
+PASS: polish_guard_active causes no recursive source build
+PASS: polish_guard_active source construction retains an existing helper recursion guard
+PASS: polish_guard_active explicit nested helper probes retain guard behavior
+PASS: polish_guard_active leaves actor, command, effect, plan and simulation owners unchanged
+R3_STRATEGIC_LOOP_FACTS {"actual_source_calls":1,"case":"polish_guard_active","expected_source_calls":1,"guard_depths":"(0, 1)","legacy_source_calls":2,"raw_equal":true,"source_guards":[{"hud_depth":1,"normal_reentry_blocked":true,"polish_depth":1,"polish_reentry_blocked":true}]}
+PASS: polish_guard_active the next independent RAW assembly reads fresh instead of retaining a display cache
+PASS: both_existing_guards_active strategic RAW builds one local next-loop source, or none when both guards block
+PASS: both_existing_guards_active RAW remains byte-identical to the actual old helper fallback route
+PASS: both_existing_guards_active restores the exact prior guard depths
+PASS: both_existing_guards_active causes no recursive source build
+PASS: both_existing_guards_active leaves actor, command, effect, plan and simulation owners unchanged
+R3_STRATEGIC_LOOP_FACTS {"actual_source_calls":0,"case":"both_existing_guards_active","expected_source_calls":0,"guard_depths":"(1, 1)","legacy_source_calls":0,"raw_equal":true,"source_guards":[]}
+PASS: both_existing_guards_active the next independent RAW assembly reads fresh instead of retaining a display cache
+PASS: Existing explicit helper overrides still bypass the runtime source
+R3_STRATEGIC_LOOP: 55 passed, 0 failed
+R3_STRATEGIC_LOOP_PASS

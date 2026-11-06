@@ -1,0 +1,130 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-9f76ae0f7a404ded9ce1a24d0381ccbc
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+REFERENCE_POLISH_R3_HOMEBASE_VERIFY_BEGIN
+PASS: 3440x1440 squad layout/refresh is a read-only projection
+PASS: 3440 keeps all existing work roles visible
+FAIL: 3440 starts personnel near the workspace edge instead of an ultrawide empty gutter
+PASS: 3440 retains left-to-right personnel, team and focused identity
+FAIL: 3440 uses a broad boarding footer below the focused equipment card
+PASS: 3440 flight footer never covers the left work roles
+PASS: 3440 keeps every existing work role inside the actual screen
+FAIL: 3440 shows the passive native basis stage
+FAIL: 3440 has a real native scene surface rather than a metadata-only claim
+PASS: wide_3440 keeps _mission_selector fully reachable without a hidden footer scroll
+PASS: wide_3440 keeps _craft_selector fully reachable without a hidden footer scroll
+PASS: wide_3440 keeps _pilot_selector fully reachable without a hidden footer scroll
+PASS: wide_3440 keeps _board fully reachable without a hidden footer scroll
+PASS: wide_3440 keeps _start fully reachable without a hidden footer scroll
+PASS: 3440 resize reuses the existing selectors, actions, rows and active ship preview
+PASS: 1920x1080 squad layout/refresh is a read-only projection
+PASS: 1920 keeps all existing work roles visible
+PASS: 1920 starts personnel near the workspace edge instead of an ultrawide empty gutter
+PASS: 1920 retains left-to-right personnel, team and focused identity
+FAIL: 1920 uses a broad boarding footer below the focused equipment card
+PASS: 1920 flight footer never covers the left work roles
+PASS: 1920 keeps every existing work role inside the actual screen
+FAIL: 1920 shows the passive native basis stage
+FAIL: 1920 has a real native scene surface rather than a metadata-only claim
+PASS: wide_1920 keeps _mission_selector fully reachable without a hidden footer scroll
+PASS: wide_1920 keeps _craft_selector fully reachable without a hidden footer scroll
+PASS: wide_1920 keeps _pilot_selector fully reachable without a hidden footer scroll
+PASS: wide_1920 keeps _board fully reachable without a hidden footer scroll
+PASS: wide_1920 keeps _start fully reachable without a hidden footer scroll
+PASS: 1920 resize reuses the existing selectors, actions, rows and active ship preview
+PASS: 1280x720 squad layout/refresh is a read-only projection
+PASS: 1280 squad keeps three preparation roles and the existing flight navigation
+FAIL: 1280 squad does not cover preparation with the passive scene
+PASS: 1280 keeps real name width and single-line role/status text
+PASS: 1280 keeps the existing flight navigation fully inside the screen
+PASS: 1280x720 mission layout/refresh is a read-only projection
+PASS: 1280 mission uses the existing team, equipment and flight roles
+PASS: narrow_mission keeps _mission_selector fully reachable without a hidden footer scroll
+PASS: narrow_mission keeps _craft_selector fully reachable without a hidden footer scroll
+PASS: narrow_mission keeps _pilot_selector fully reachable without a hidden footer scroll
+FAIL: narrow_mission keeps _board fully reachable without a hidden footer scroll
+FAIL: narrow_mission keeps _start fully reachable without a hidden footer scroll
+FAIL: 1280 shows the passive native basis stage
+FAIL: 1280 has a real native scene surface rather than a metadata-only claim
+PASS: Narrow navigation retains the same action/selector/row instances
+PASS: 1920x1080 squad layout/refresh is a read-only projection
+PASS: empty display never writes owner data or sends operations
+PASS: empty shows the precise owner status text
+PASS: empty preserves boarding permission
+PASS: empty preserves launch permission
+PASS: empty preserves return permission and payload visibility
+PASS: empty shows only the real progress
+PASS: empty keeps pilot editability at its owner gate
+PASS: empty never fabricates a selected replacement ship
+PASS: empty keeps the one-built control and roster instances
+PASS: missing_pilot display never writes owner data or sends operations
+PASS: missing_pilot shows the precise owner status text
+PASS: missing_pilot preserves boarding permission
+PASS: missing_pilot preserves launch permission
+PASS: missing_pilot preserves return permission and payload visibility
+PASS: missing_pilot shows only the real progress
+PASS: missing_pilot keeps pilot editability at its owner gate
+PASS: missing_pilot never fabricates a selected replacement ship
+PASS: missing_pilot keeps the one-built control and roster instances
+PASS: preparing display never writes owner data or sends operations
+PASS: preparing shows the precise owner status text
+PASS: preparing preserves boarding permission
+PASS: preparing preserves launch permission
+PASS: preparing preserves return permission and payload visibility
+PASS: preparing shows only the real progress
+PASS: preparing keeps pilot editability at its owner gate
+PASS: preparing never fabricates a selected replacement ship
+PASS: preparing keeps the one-built control and roster instances
+PASS: boarding display never writes owner data or sends operations
+PASS: boarding shows the precise owner status text
+PASS: boarding preserves boarding permission
+PASS: boarding preserves launch permission
+PASS: boarding preserves return permission and payload visibility
+PASS: boarding shows only the real progress
+PASS: boarding keeps pilot editability at its owner gate
+PASS: boarding never fabricates a selected replacement ship
+PASS: boarding keeps the one-built control and roster instances
+PASS: ready display never writes owner data or sends operations
+PASS: ready shows the precise owner status text
+PASS: ready preserves boarding permission
+PASS: ready preserves launch permission
+PASS: ready preserves return permission and payload visibility
+PASS: ready shows only the real progress
+PASS: ready keeps pilot editability at its owner gate
+PASS: ready never fabricates a selected replacement ship
+PASS: ready keeps the one-built control and roster instances
+PASS: transit display never writes owner data or sends operations
+PASS: transit shows the precise owner status text
+PASS: transit preserves boarding permission
+PASS: transit preserves launch permission
+PASS: transit preserves return permission and payload visibility
+PASS: transit shows only the real progress
+PASS: transit keeps pilot editability at its owner gate
+PASS: transit never fabricates a selected replacement ship
+PASS: transit keeps the one-built control and roster instances
+PASS: Empty focus has no invented portrait or enabled details
+PASS: Empty focus disables armor via the existing input gate
+PASS: Empty focus disables weapon_1 via the existing input gate
+PASS: Empty focus disables weapon_2 via the existing input gate
+PASS: armor selector retains the existing operation and owner IDs
+PASS: weapon_1 selector retains the existing operation and owner IDs
+PASS: weapon_2 selector retains the existing operation and owner IDs
+PASS: mission selector delegates the original exact payload
+PASS: craft selector delegates the original exact payload
+PASS: pilot selector delegates the original exact payload
+PASS: details callback fixture uses its actual enabled state
+PASS: details button keeps the existing operation and owner IDs
+PASS: remove callback fixture uses its actual enabled state
+PASS: remove button keeps the existing operation and owner IDs
+PASS: board callback fixture uses its actual enabled state
+PASS: board button keeps the existing operation and owner IDs
+PASS: unboard callback fixture uses its actual enabled state
+PASS: unboard button keeps the existing operation and owner IDs
+PASS: start callback fixture uses its actual enabled state
+PASS: start button keeps the existing operation and owner IDs
+PASS: Callback exercise never recreates controls or roster identities
+PASS: _mission_selector remains connected exactly once
+PASS: _craft_selector remains connected exactly once
+PASS: _pilot_selector remains connected exactly once
+REFERENCE_POLISH_R3_HOMEBASE: 112 passed, 12 failed

@@ -1,0 +1,96 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-f1ff5abc41214ee3b2f19c44a0095f02
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Fresh A5 setup still initializes a Target texture before any earlier generic pass
+PASS: Fresh Target keeps its actual native or compatible legacy texture identity
+PASS: ready generic label/icon pass performs no intermediate native-primary mutation
+PASS: ready final native labels, icons, fonts and alignments remain identical
+PASS: ready preserves disabled/toggle state, metadata and actual callback identities
+PASS: ready styling changes no command/effect queue or real plan owner
+PASS: MoveButton retains the existing detailed command tooltip
+PASS: TakeButton retains the existing detailed command tooltip
+PASS: HoldButton retains the existing detailed command tooltip
+PASS: FlankButton retains the existing detailed command tooltip
+PASS: GoCommandMatrixButton retains the existing detailed command tooltip
+PASS: TargetButton retains the existing detailed command tooltip
+PASS: ClearTargetButton retains the existing detailed command tooltip
+PASS: DeleteOrderButton retains the existing detailed command tooltip
+PASS: SortCommandMatrixButton retains the existing detailed command tooltip
+PASS: FireRuleHoldButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleReturnButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleFreeButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleSuppressButton retains native hidden-ROE icon/font presentation
+PASS: target_armed generic label/icon pass performs no intermediate native-primary mutation
+PASS: target_armed final native labels, icons, fonts and alignments remain identical
+PASS: target_armed preserves disabled/toggle state, metadata and actual callback identities
+PASS: target_armed styling changes no command/effect queue or real plan owner
+PASS: MoveButton retains the existing detailed command tooltip
+PASS: TakeButton retains the existing detailed command tooltip
+PASS: HoldButton retains the existing detailed command tooltip
+PASS: FlankButton retains the existing detailed command tooltip
+PASS: GoCommandMatrixButton retains the existing detailed command tooltip
+PASS: TargetButton retains the existing detailed command tooltip
+PASS: ClearTargetButton retains the existing detailed command tooltip
+PASS: DeleteOrderButton retains the existing detailed command tooltip
+PASS: SortCommandMatrixButton retains the existing detailed command tooltip
+PASS: FireRuleHoldButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleReturnButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleFreeButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleSuppressButton retains native hidden-ROE icon/font presentation
+PASS: preview generic label/icon pass performs no intermediate native-primary mutation
+PASS: preview final native labels, icons, fonts and alignments remain identical
+PASS: preview preserves disabled/toggle state, metadata and actual callback identities
+PASS: preview styling changes no command/effect queue or real plan owner
+PASS: MoveButton retains the existing detailed command tooltip
+PASS: TakeButton retains the existing detailed command tooltip
+PASS: HoldButton retains the existing detailed command tooltip
+PASS: FlankButton retains the existing detailed command tooltip
+PASS: GoCommandMatrixButton retains the existing detailed command tooltip
+PASS: TargetButton retains the existing detailed command tooltip
+PASS: ClearTargetButton retains the existing detailed command tooltip
+PASS: DeleteOrderButton retains the existing detailed command tooltip
+PASS: SortCommandMatrixButton retains the existing detailed command tooltip
+PASS: FireRuleHoldButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleReturnButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleFreeButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleSuppressButton retains native hidden-ROE icon/font presentation
+PASS: observer generic label/icon pass performs no intermediate native-primary mutation
+PASS: observer final native labels, icons, fonts and alignments remain identical
+PASS: observer preserves disabled/toggle state, metadata and actual callback identities
+PASS: observer styling changes no command/effect queue or real plan owner
+PASS: MoveButton retains the existing detailed command tooltip
+PASS: TakeButton retains the existing detailed command tooltip
+PASS: HoldButton retains the existing detailed command tooltip
+PASS: FlankButton retains the existing detailed command tooltip
+PASS: GoCommandMatrixButton retains the existing detailed command tooltip
+PASS: TargetButton retains the existing detailed command tooltip
+PASS: ClearTargetButton retains the existing detailed command tooltip
+PASS: DeleteOrderButton retains the existing detailed command tooltip
+PASS: SortCommandMatrixButton retains the existing detailed command tooltip
+PASS: FireRuleHoldButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleReturnButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleFreeButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleSuppressButton retains native hidden-ROE icon/font presentation
+PASS: no_selection generic label/icon pass performs no intermediate native-primary mutation
+PASS: no_selection final native labels, icons, fonts and alignments remain identical
+PASS: no_selection preserves disabled/toggle state, metadata and actual callback identities
+PASS: no_selection styling changes no command/effect queue or real plan owner
+PASS: MoveButton retains the existing detailed command tooltip
+PASS: TakeButton retains the existing detailed command tooltip
+PASS: HoldButton retains the existing detailed command tooltip
+PASS: FlankButton retains the existing detailed command tooltip
+PASS: GoCommandMatrixButton retains the existing detailed command tooltip
+PASS: TargetButton retains the existing detailed command tooltip
+PASS: ClearTargetButton retains the existing detailed command tooltip
+PASS: DeleteOrderButton retains the existing detailed command tooltip
+PASS: SortCommandMatrixButton retains the existing detailed command tooltip
+PASS: FireRuleHoldButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleReturnButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleFreeButton retains native hidden-ROE icon/font presentation
+PASS: FireRuleSuppressButton retains native hidden-ROE icon/font presentation
+PASS: Legacy mode still reaches its original short labels before its compatibility overlay
+PASS: Legacy presentation preserves its original gates and callback identities
+PASS: Legacy Target texture remains available
+R3_NATIVE_LABELS: 90 passed, 0 failed
+R3_NATIVE_LABELS_PASS

@@ -1,0 +1,3090 @@
+{
+  "schema": "sternenbuergerchen.reference_polish_r3.analysis.v1",
+  "base": "173a1e3c33b733a78a396a93db9cedf631d84998",
+  "runs": [
+    {
+      "path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/report.json",
+      "sha256": "cc54349fe219a6d8b1a8e322413870a9f8a3b8cee576de04564dd043f37bd376",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_native_capture",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/report.json",
+      "sha256": "97b79efd8180df9e2813017e62db80a1c05b26eb997ecf7bc8f7ae7c3593e672",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_native_capture",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/camera_green/20261106T230858Z-60fdec40/report.json",
+      "sha256": "ea784769e7f27d763efbc49464872c861ed2e57d649fe36b1470f3c9bc4a85c0",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_camera_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/camera_red/20261106T230805Z-e9a5928c/report.json",
+      "sha256": "cb30fda2f903e4740bd5f02a5510be63a7cc45420bfd75883351f932456481a4",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_camera_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/command_style_owner_green/20261106T233206Z-29d021d1/report.json",
+      "sha256": "c1cd2e87898b4a89cfe66eff85f928792f1a5a7e62b77060d88eb0ce928054b1",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_command_style_owner_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/command_style_owner_red/20261106T232858Z-4740df95/report.json",
+      "sha256": "544ed4817281ff5e3bd0b1ab06e77ea6f21c60ce50276b07238878accc69283f",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_command_style_owner_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 1,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/command_style_owner_red_corrected/20261106T233050Z-b0aa40b4/report.json",
+      "sha256": "a6c16ff9c2015637949a08a07e12fc8b0b9c6ad17afd70f2ed22f035ff5a9d1e",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_command_style_owner_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/controller_final_green/20261106T232107Z-6b745319/report.json",
+      "sha256": "6a31273712fa43e245b2ec9914ff1bdc7f805b1e41f2686ac23c9d2ea2b4cf31",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_controller_ownership_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/controller_owner_target_final_green/20261106T232431Z-ad77d9f6/report.json",
+      "sha256": "c11a100aad7e8820164685fe7ea87d75e1f6e35f2d837e97c1e9c8bf02566dc8",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_controller_ownership_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/controller_ownership_green/20261106T231745Z-63cf977e/report.json",
+      "sha256": "1c12e2346710312db188bca6c77fa1902eb24f408e026e4b0c776d8deb34a2ea",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_controller_ownership_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/controller_ownership_red/20261106T231500Z-af15272c/report.json",
+      "sha256": "275cd4807d76929233416b0e5903bf3d7da6c8da885e4c11307b5056a921295b",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_controller_ownership_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/controller_target_boundary_diagnostic/20261106T231904Z-fc8bca89/report.json",
+      "sha256": "6b6ef39509b3cd9dd1d2badd71d3bdbd3719e276f3cc15d8c44923b1bf4c963b",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_controller_ownership_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/controller_target_red/20261106T231647Z-dfbd4998/report.json",
+      "sha256": "7ab209e2a6dbfee134244f0da2cc747fc65c846c9b11459377fd1e7aaa545989",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_controller_ownership_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/report.json",
+      "sha256": "d41947d4bedd6b75b97015657bd16e1e420133b440a79970c1460252f91fd28d",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_native_capture",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/report.json",
+      "sha256": "d4f160f4961a21edc7fc692e0f87b18b948f7dc495e7b352c2e0c46e224ca548",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_native_capture",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/final_regression/20261106T233227Z-a90871e2/report.json",
+      "sha256": "4a50d8a926a99786e2190b84e40860f9a7e8c6ce352d920f89901a3b8dea8147",
+      "summary": {
+        "selected": 40,
+        "passed": 39,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "hud_architecture_20261106_style_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "hud_architecture_20261106_homebase_flightdeck_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "hud_architecture_20261106_read_scope_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "hud_architecture_20261106_live_projection_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "hud_architecture_20261106_door_runtime_authority_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "hud_architecture_20261106_active_order_readout_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "hud_architecture_20261106_hidden_cards_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "hud_architecture_20261106_native_style_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "continue_20261105_command_hud_batch_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_1044_mission_hud_runtime_surface_guard",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "playtest_20261105_homebase_operations_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 1,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_111_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_113_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_230_flight_altitude_layer_and_air_visibility_audit",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_401_facing_sightline_debug_map",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_436_fireteam_sight_security_visuals",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_468_fireteam_engage_live_command_conflict_audit",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "bugfix_mission_fire_sector_overlay",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_374_objective_countdown_indicator",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_518_mission_scenario_runtime_gates",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_692_door_runtime_collision_los_contract",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_693_door_runtime_state_producer",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_687_mission_interaction_object_reaction",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_696_door_runtime_visual_animation_asset_swap",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_697_door_interaction_multiplayer_authority_check",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "task_707_mission_door_computer_cargo_smoke",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "gm01_frontier_map_edge_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "gm01_frontier_hex_fow_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "gm01_frontier_editor_guard_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "review2_20261102_p2_editor_picking_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_theme_idempotency_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_fog_single_slice_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_native_labels_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_controller_ownership_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_camera_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_mission_ui_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_homebase_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_strategic_loop_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_command_style_owner_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/fog_green/20261106T184440Z-9a07f9e1/report.json",
+      "sha256": "3326b9268e2653e67d3af492e271c3b1105f1f97e8059646f5d9bf48409f13e0",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_fog_single_slice_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/fog_red/20261106T184027Z-53a462f2/report.json",
+      "sha256": "14b63a1fe4dd49762e110c08b668908fa8d441aa158c37223e5ef7237bc2891b",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_fog_single_slice_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/homebase_corrected_green/20261106T231321Z-df649fd0/report.json",
+      "sha256": "70efc660426322470a9d1864f750f0976cd110f8002a7ad1436daf0894b4ff6a",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_homebase_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/homebase_geometry_diagnostic/20261106T231135Z-6e25a856/report.json",
+      "sha256": "9e371c1f9c10f688a88a3980458b2a1f493a2e0ec707cbaba29b30e05d585f81",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_homebase_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/homebase_green/20261106T190234Z-d3b25583/report.json",
+      "sha256": "0fb60c91638fd1309c46fb9eb86d6cab658d966228e88377b8826aee6a715e05",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_homebase_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/homebase_native_final/20261106T234350Z-a16c3f9f/report.json",
+      "sha256": "5566284c693468412afacd358ec3ea914282f65b55d04f65e2a4e28be0380de4",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_homebase_native_fixture",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/homebase_native_fixture/20261106T231548Z-da98ed40/report.json",
+      "sha256": "fd04eae24612606dab3b302a060924d27aa6f3857184ee22b42f541c6fa909f4",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_homebase_native_fixture",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/homebase_red/20261106T183422Z-69f591c1/report.json",
+      "sha256": "08f783965091cda13cd74e840207c91c5b9048e6fdcc0f7d70185c04b6e514c1",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_homebase_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/mission_ui_corrected_logical_green/20261106T231006Z-cdfe4710/report.json",
+      "sha256": "b56617aac2b12d3a513dc26019334fbe5c1bdffa99af939b9d25e5cbb06a470c",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_mission_ui_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/mission_ui_final_green/20261106T231058Z-66edfe3d/report.json",
+      "sha256": "404f0aeacf0da60e3b49cc06dadbe7ef0b254d948a06c63af4cb0fb1c97fe4ca",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_mission_ui_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/mission_ui_geometry_diagnostic/20261106T230904Z-d1073e21/report.json",
+      "sha256": "5d2bdb8774f59fdfd9439e21ef33d334fa75706124befaaec561621e8b9239e1",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_mission_ui_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/mission_ui_green/20261106T230815Z-149c3997/report.json",
+      "sha256": "225f59c88e7e35cb936ec6d822baff71e39761d193172cfeb723b9eb731b1076",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_mission_ui_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/mission_ui_native_final/20261106T234355Z-96f262fc/report.json",
+      "sha256": "0b2da8c27200004bccf635e970d4857d7da3b22917f358ba088ba1c7fa2d329d",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_mission_ui_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/mission_ui_native_fixture/20261106T231558Z-00552bd8/report.json",
+      "sha256": "06ecb18b1aa4ebf75ed75d556eaaf952a82a5c10ee7f7db773253a7e504b6c61",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_mission_ui_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/mission_ui_red/20261106T184039Z-0fe5823d/report.json",
+      "sha256": "38d9b78dff03f0be9444d7cdb8f5cf3c8280ab3b8995a2da38b4c355016fcfb8",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_mission_ui_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/mission_ui_viewport_diagnostic/20261106T230937Z-f08d5c78/report.json",
+      "sha256": "9ea27223b02bdc943bb44a5106ab10188b91d4a92166e80b155adca3c7d1d47e",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_mission_ui_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/native_labels_green/20261106T184443Z-953fdbbe/report.json",
+      "sha256": "788d8d3f8879355982648ab85152e8c72112c0b6ee394c7e9d8554a245712a42",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_native_labels_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/native_labels_red/20261106T184029Z-d293e5b1/report.json",
+      "sha256": "1a5db0b7db7d0176e87f3b32354b63aa795c804877552a7b4aaa86bccaaa6219",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_native_labels_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/report.json",
+      "sha256": "6762312abd48a502a5f159956f86ea22441cab59ebf9569f31c7c995fc0cec6f",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_native_capture",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/report.json",
+      "sha256": "06e2a87322a55de4047089a07b9b3c2a2d19839ca54a85ca4d877d7864f9a72b",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_native_capture",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/portrait_homebase_regression/20261106T233726Z-4a4a1473/report.json",
+      "sha256": "3e54bfb81e85fbe0580b79e183727e27c41473dbb07eb4182dfaa5314340e6d0",
+      "summary": {
+        "selected": 3,
+        "passed": 3,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "hud_architecture_20261106_homebase_flightdeck_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "playtest_20261105_homebase_operations_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        },
+        {
+          "name": "reference_polish_r3_20261106_homebase_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/strategic_loop_green/20261106T232654Z-14b2f7ba/report.json",
+      "sha256": "601eecdece7a118948c080bb5109a8afc14225030341c5b7dce314b1848402f4",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_strategic_loop_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/strategic_loop_red/20261106T232439Z-2f475508/report.json",
+      "sha256": "efc1e62b4ced6e4ed214570036fb19f147eabeb62403f0658c6f0b60c8852376",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_strategic_loop_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/theme_green/20261106T184439Z-df403d60/report.json",
+      "sha256": "7220554c5bb6c689ff5ac29f234a037316bd03652c8aa659c50a13cc97dc1c94",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_theme_idempotency_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/theme_red/20261106T184025Z-8a96f65f/report.json",
+      "sha256": "9c94025bdbe167b645207db113d397b56070bf586e5b5c22d2c28eb8a396eef8",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_theme_idempotency_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_all_final_green/20261106T232912Z-4d0ad6cb/report.json",
+      "sha256": "4454899d3c647682208c84ad142ea51e6bf34c232ba1ab5111ac263c01c63458",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_center_order_red/20261106T232805Z-00ea3a52/report.json",
+      "sha256": "989072e5d545cf9001248b2925573102b25d645b99a090f2164e2a5d85c04dde",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 1,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_final_green/20261106T231943Z-c5e24012/report.json",
+      "sha256": "57a2d60956740edea20af5e1eb872c07126e6c5fedf96e9a816c37b1bba0d47f",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_gpu_final/20261106T232940Z-273e078e/report.json",
+      "sha256": "dc7e5a46c43f49d78156b4e4984b6fa35593d3fea89beb45459f650fbf4be96b",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_gpu_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_gpu_first/20261106T231516Z-88c44b8b/report.json",
+      "sha256": "15b0d313958b82a582abde54d2175b2cfa6d33fb88c34d4059688fea9fbd9da3",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_gpu_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 4,
+          "timed_out": false,
+          "isolation_verified": false,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_gpu_second/20261106T231945Z-a0f95cdf/report.json",
+      "sha256": "48bd30217c358f28504edb133c2a903d91023bba4077b9b37be36ee476d07604",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_gpu_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_green_first/20261106T231448Z-16f170db/report.json",
+      "sha256": "7df88ee7e59e34538780a4664e93e185cdafb0391eb75723b210c2ef34bee1b6",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_red/20261106T185521Z-4a26db91/report.json",
+      "sha256": "6c191a856f7d23987367b0bfd93950397c0b6cc59fa2cc473d76b9593fe1c786",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 3,
+          "timed_out": false,
+          "isolation_verified": false,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_red_corrected/20261106T190157Z-99847758/report.json",
+      "sha256": "6667db99a54e855eb87af8ec20d7dfcdb9c5437eec1887270becb9b9f3bdbd3d",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 1,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_reuse_red/20261106T231646Z-64b44aa0/report.json",
+      "sha256": "c40f7040d5f5b57b4c740de7ff0aa24fc52132b9ede103dbab665fa7df2adda5",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 2,
+          "timed_out": false,
+          "isolation_verified": false,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_reuse_red_corrected/20261106T231736Z-e91e8ad8/report.json",
+      "sha256": "4915583260f692482bd10d9b95f81b176756610ce8e4cc0770a35786e430943d",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 2,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_wrapper_green/20261106T232701Z-3006f5cd/report.json",
+      "sha256": "622fa4774738d675d901fb21bea9ff7644aa0cb9d05b79081a074c4f6dea0a63",
+      "summary": {
+        "selected": 1,
+        "passed": 1,
+        "failed": 0
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": true,
+          "exit_code": 0,
+          "error_count": 0,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/world_wrapper_red/20261106T232532Z-f17de236/report.json",
+      "sha256": "3756bc550ac851a946e6aa8f7e8eaf5b1626b68e1c800b97ede08c740cc63c6e",
+      "summary": {
+        "selected": 1,
+        "passed": 0,
+        "failed": 1
+      },
+      "checks": [
+        {
+          "name": "reference_polish_r3_20261106_world_dressing_verifier",
+          "passed": false,
+          "exit_code": 1,
+          "error_count": 1,
+          "timed_out": false,
+          "isolation_verified": true,
+          "source_inputs_stable": true
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "path": "output/reference_polish_r3_20261106/baseline_native/20261106T182737Z-85865690/baseline_performance.json",
+      "sha256": "1cef6913cb05a7d724747bdc7b763ae89abbeeed28094749df74f2ea8aed07c6",
+      "duration_usec": 90007408,
+      "frames": 3162,
+      "frametime_usec": {
+        "count": 3162,
+        "max": 281806,
+        "mean": 28464.4351676154,
+        "p50": 21687,
+        "p90": 58877,
+        "p95": 77390,
+        "p99": 135478
+      },
+      "hitch_counts": {
+        "over_100ms": 77,
+        "over_250ms": 1,
+        "over_33ms": 1064,
+        "over_50ms": 445
+      },
+      "simulation_seconds_per_wall_second": 0.991585048199588,
+      "simulation_ticks": 5355,
+      "camera_before": {
+        "projection": 1,
+        "size": 34.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]"
+      },
+      "camera_after": {
+        "projection": 1,
+        "size": 34.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]"
+      },
+      "display_samples": [
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        }
+      ],
+      "unique_ui_samples": 254,
+      "ui_max_usec": 97294,
+      "draw_calls_p50_p95_max": [
+        1805.0,
+        1819.0,
+        1824.0
+      ],
+      "scope": {
+        "forced_arrival": false,
+        "forced_unloading": false,
+        "gpu_frame_time": "unavailable",
+        "private_simulation_state_writes": false,
+        "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+        "synthetic_fixture": false,
+        "time_acceleration": false,
+        "warmup_seconds": 3
+      }
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/baseline_native_repeat/20261106T183555Z-b075c83b/baseline_repeat_performance.json",
+      "sha256": "3b917fb4bdf0ba8dd2153f7a716f2a16f6702c5078a471300e9bb1bc845bbfe3",
+      "duration_usec": 90050716,
+      "frames": 3148,
+      "frametime_usec": {
+        "count": 3148,
+        "max": 210299,
+        "mean": 28604.4526683609,
+        "p50": 20748,
+        "p90": 63049,
+        "p95": 78849,
+        "p99": 128271
+      },
+      "hitch_counts": {
+        "over_100ms": 75,
+        "over_250ms": 0,
+        "over_33ms": 1126,
+        "over_50ms": 524
+      },
+      "simulation_seconds_per_wall_second": 0.997771078244397,
+      "simulation_ticks": 5391,
+      "camera_before": {
+        "projection": 1,
+        "size": 34.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]"
+      },
+      "camera_after": {
+        "projection": 1,
+        "size": 34.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]"
+      },
+      "display_samples": [
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        }
+      ],
+      "unique_ui_samples": 256,
+      "ui_max_usec": 92655,
+      "draw_calls_p50_p95_max": [
+        1805.0,
+        1819.0,
+        1824.0
+      ],
+      "scope": {
+        "forced_arrival": false,
+        "forced_unloading": false,
+        "gpu_frame_time": "unavailable",
+        "private_simulation_state_writes": false,
+        "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+        "synthetic_fixture": false,
+        "time_acceleration": false,
+        "warmup_seconds": 3
+      }
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/final_native_fixed34/20261106T234111Z-5d18dd42/final_fixed34_performance.json",
+      "sha256": "5bf03a0e1048a7f37e82f2cc84661e9fac28a6f210a93dc8464fa51adf6842e1",
+      "duration_usec": 90019461,
+      "frames": 5062,
+      "frametime_usec": {
+        "count": 5062,
+        "max": 163575,
+        "mean": 17780.9853812722,
+        "p50": 14700,
+        "p90": 35763,
+        "p95": 42328,
+        "p99": 70357
+      },
+      "hitch_counts": {
+        "over_100ms": 9,
+        "over_250ms": 0,
+        "over_33ms": 666,
+        "over_50ms": 128
+      },
+      "simulation_seconds_per_wall_second": 1.00033924886531,
+      "simulation_ticks": 5403,
+      "camera_before": {
+        "projection": 1,
+        "size": 34.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]"
+      },
+      "camera_after": {
+        "projection": 1,
+        "size": 34.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]"
+      },
+      "display_samples": [
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        }
+      ],
+      "unique_ui_samples": 265,
+      "ui_max_usec": 55723,
+      "draw_calls_p50_p95_max": [
+        1803.0,
+        1816.0,
+        1821.0
+      ],
+      "scope": {
+        "forced_arrival": false,
+        "forced_unloading": false,
+        "gpu_frame_time": "unavailable",
+        "private_simulation_state_writes": false,
+        "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+        "synthetic_fixture": false,
+        "time_acceleration": false,
+        "warmup_seconds": 3
+      }
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/final_native_normal/20261106T233817Z-060aa313/final_normal_performance.json",
+      "sha256": "3b3c94dadfc1e79271aa7a2f9a2362ea9395c88ef398ae2d754fddf94dc86978",
+      "duration_usec": 90017880,
+      "frames": 4828,
+      "frametime_usec": {
+        "count": 4828,
+        "max": 177310,
+        "mean": 18644.4604391052,
+        "p50": 15371,
+        "p90": 36601,
+        "p95": 43411,
+        "p99": 72958
+      },
+      "hitch_counts": {
+        "over_100ms": 15,
+        "over_250ms": 0,
+        "over_33ms": 701,
+        "over_50ms": 157
+      },
+      "simulation_seconds_per_wall_second": 0.999616224391569,
+      "simulation_ticks": 5399,
+      "camera_before": {
+        "projection": 1,
+        "size": 22.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (23.29305, 22.01533, 28.05867)]"
+      },
+      "camera_after": {
+        "projection": 1,
+        "size": 22.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (23.29305, 22.01533, 28.05867)]"
+      },
+      "display_samples": [
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        }
+      ],
+      "unique_ui_samples": 264,
+      "ui_max_usec": 62874,
+      "draw_calls_p50_p95_max": [
+        1550.0,
+        1565.0,
+        1570.0
+      ],
+      "scope": {
+        "forced_arrival": false,
+        "forced_unloading": false,
+        "gpu_frame_time": "unavailable",
+        "private_simulation_state_writes": false,
+        "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+        "synthetic_fixture": false,
+        "time_acceleration": false,
+        "warmup_seconds": 3
+      }
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/perf_only_native/20261106T184550Z-bcfc8c01/perf_only_performance.json",
+      "sha256": "71fd3d6a7f079ee106d2cfeca0aa7661c7d0881b5556c514e81b7c1740010ca2",
+      "duration_usec": 90020068,
+      "frames": 3303,
+      "frametime_usec": {
+        "count": 3303,
+        "max": 169908,
+        "mean": 27250.2897366031,
+        "p50": 23387,
+        "p90": 55032,
+        "p95": 65573,
+        "p99": 107195
+      },
+      "hitch_counts": {
+        "over_100ms": 42,
+        "over_250ms": 0,
+        "over_33ms": 1063,
+        "over_50ms": 448
+      },
+      "simulation_seconds_per_wall_second": 0.999777071930228,
+      "simulation_ticks": 5400,
+      "camera_before": {
+        "projection": 1,
+        "size": 34.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]"
+      },
+      "camera_after": {
+        "projection": 1,
+        "size": 34.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]"
+      },
+      "display_samples": [
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        }
+      ],
+      "unique_ui_samples": 260,
+      "ui_max_usec": 89954,
+      "draw_calls_p50_p95_max": [
+        1805.0,
+        1819.0,
+        1824.0
+      ],
+      "scope": {
+        "forced_arrival": false,
+        "forced_unloading": false,
+        "gpu_frame_time": "unavailable",
+        "private_simulation_state_writes": false,
+        "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+        "synthetic_fixture": false,
+        "time_acceleration": false,
+        "warmup_seconds": 3
+      }
+    },
+    {
+      "path": "output/reference_polish_r3_20261106/perf_only_native_repeat/20261106T184851Z-66f7083e/perf_only_repeat_performance.json",
+      "sha256": "331d9624029c3441e0c0ae71d10a6ae5fb23bdcf0e009bfd6faabd9cb188f771",
+      "duration_usec": 90012498,
+      "frames": 3884,
+      "frametime_usec": {
+        "count": 3884,
+        "max": 192464,
+        "mean": 23172.7597837281,
+        "p50": 18125,
+        "p90": 45536,
+        "p95": 57675,
+        "p99": 103197
+      },
+      "hitch_counts": {
+        "over_100ms": 44,
+        "over_250ms": 0,
+        "over_33ms": 914,
+        "over_50ms": 297
+      },
+      "simulation_seconds_per_wall_second": 0.998009557887543,
+      "simulation_ticks": 5390,
+      "camera_before": {
+        "projection": 1,
+        "size": 34.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]"
+      },
+      "camera_after": {
+        "projection": 1,
+        "size": 34.0,
+        "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (32.45715, 34.02369, 37.22277)]"
+      },
+      "display_samples": [
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        },
+        {
+          "content_scale_size": "(3440, 1440)",
+          "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+          "display": "Windows",
+          "display_server_window_mode": 3,
+          "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+          "max_physics_steps_per_frame": 8,
+          "physics_ticks_per_second": 60,
+          "renderer": "forward_plus",
+          "rendering_driver": "vulkan",
+          "root_size": "(3440, 1440)",
+          "screen_index": 0,
+          "screen_refresh_rate": 240.085006713867,
+          "screen_size": "(3440, 1440)",
+          "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+          "time_scale": 1.0,
+          "viewport_size": "(3440.0, 1440.0)",
+          "vsync_mode": 1,
+          "window_has_focus": true,
+          "window_mode": 3,
+          "window_size": "(3440, 1440)"
+        }
+      ],
+      "unique_ui_samples": 260,
+      "ui_max_usec": 76749,
+      "draw_calls_p50_p95_max": [
+        1806.0,
+        1819.0,
+        1824.0
+      ],
+      "scope": {
+        "forced_arrival": false,
+        "forced_unloading": false,
+        "gpu_frame_time": "unavailable",
+        "private_simulation_state_writes": false,
+        "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+        "synthetic_fixture": false,
+        "time_acceleration": false,
+        "warmup_seconds": 3
+      }
+    }
+  ],
+  "limits": "Native measured route only; nested scopes are not additive. Product camera/density and fixed camera34 are separate. No EXE, WAN or whole-game acceptance."
+}

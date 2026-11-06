@@ -11,6 +11,7 @@ const MUTED := Color("a8c0ca")
 const CYAN := Color("29e1e7")
 const GOLD := Color("ffd348")
 const REFRESH_SECONDS: float = 0.25
+const REFERENCE_STAGE_PATH := "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png"
 
 var _screen: WeakRef
 var _built: bool = false
@@ -53,6 +54,12 @@ var _focused_id: String = ""
 var _craft_id: String = ""
 var _fireteam_id: String = ""
 var _option_signatures: Dictionary = {}
+var _reference_stage: PanelContainer
+var _stage_content: Control
+var _stage_name: Label
+var _stage_caption: Label
+var _workflow: HBoxContainer
+var _workflow_labels: Dictionary = {}
 
 
 func configure(screen: Control) -> void:
@@ -125,11 +132,22 @@ func _build() -> void:
 	header.custom_minimum_size.y = 56
 	outer.add_child(header)
 	var title: Label = _label("STERNENBÜRGERCHEN  /  Heimatbasis", 27, CREAM)
+	THEME.style_section_heading(title, 30)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
 	var tools: Button = _button("Erweiterte Werkzeuge", false)
 	header.add_child(tools)
 	tools.pressed.connect(func(): _act("legacy"))
+	_workflow = HBoxContainer.new()
+	_workflow.name = "PreparationSequence"
+	_workflow.add_theme_constant_override("separation", 24)
+	outer.add_child(_workflow)
+	for entry in [{"id": "personnel", "label": "01  PERSONAL"}, {"id": "squad", "label": "02  TRUPP & AUSRÜSTUNG"}, {"id": "mission", "label": "03  EINSATZ & ABFLUG"}]:
+		var step: Label = _label(String(entry.label), 16, MUTED)
+		THEME.style_section_heading(step, 18)
+		step.autowrap_mode = TextServer.AUTOWRAP_OFF
+		_workflow.add_child(step)
+		_workflow_labels[String(entry.id)] = step
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 12)
@@ -190,7 +208,9 @@ func _column(key: String, heading: String) -> VBoxContainer:
 	var content := VBoxContainer.new()
 	content.add_theme_constant_override("separation", 10)
 	margin.add_child(content)
-	content.add_child(_label(heading, 23, CREAM))
+	var title: Label = _label(heading, 23, CREAM)
+	THEME.style_section_heading(title, 26)
+	content.add_child(title)
 	return content
 
 
@@ -239,11 +259,11 @@ func _build_squad() -> void:
 
 
 func _build_equipment() -> void:
-	var content: VBoxContainer = _column("equipment", "Ausrüstung")
+	var content: VBoxContainer = _column("equipment", "Ausrüstung · Fokus")
 	var list: VBoxContainer = _scroll(content)
 	_identity_row = BoxContainer.new()
-	_identity_row.vertical = true
-	_identity_row.add_theme_constant_override("separation", 18)
+	_identity_row.vertical = false
+	_identity_row.add_theme_constant_override("separation", 16)
 	list.add_child(_identity_row)
 	_focused_portrait = _portrait(Vector2(176, 176))
 	_focused_portrait.name = "FocusedPortrait"
@@ -253,18 +273,27 @@ func _build_equipment() -> void:
 	_identity_row.add_child(_focused_portrait)
 	var identity_text := VBoxContainer.new()
 	identity_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	identity_text.add_theme_constant_override("separation", 12)
+	identity_text.add_theme_constant_override("separation", 10)
 	_identity_row.add_child(identity_text)
 	_focused_name = _label("Mitglied auswählen", 24, CREAM)
+	THEME.style_section_heading(_focused_name, 28)
+	_focused_name.max_lines_visible = 2
+	_focused_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	identity_text.add_child(_focused_name)
 	_focused_role = _label("", 17, MUTED)
 	identity_text.add_child(_focused_role)
 	_focused_status = _label("", 15, GOLD)
 	identity_text.add_child(_focused_status)
-	for spec in [{"id": "armor", "label": "Rüstung"}, {"id": "weapon_1", "label": "Primärwaffe"}, {"id": "weapon_2", "label": "Sekundärwaffe"}]:
+	for spec in [{"id": "armor", "label": "Rüstung"}, {"id": "weapon_1", "label": "Primär"}, {"id": "weapon_2", "label": "Sekundär"}]:
 		var key: String = String(spec.id)
-		list.add_child(_label(String(spec.label), 16, MUTED))
-		var selector: OptionButton = _option(list, key.capitalize() + "Selector")
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		list.add_child(row)
+		var field: Label = _label(String(spec.label), 16, MUTED)
+		field.custom_minimum_size.x = 76
+		field.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		row.add_child(field)
+		var selector: OptionButton = _option(row, key.capitalize() + "Selector")
 		selector.item_selected.connect(func(index: int): _act("loadout", {"unit_id": _focused_id, "key": key, "value": String(selector.get_item_metadata(index))}))
 		_selectors[key] = selector
 	_remove_member = _button("Aus Trupp entfernen", false)
@@ -276,40 +305,108 @@ func _build_equipment() -> void:
 
 
 func _build_flightdeck() -> void:
-	var content: VBoxContainer = _column("flight", "Einsatz & Abflug")
-	var list: VBoxContainer = _scroll(content)
+	var content: VBoxContainer = _column("flight", "Flugdeck · Einsatz & Abflug")
+	var groups := HBoxContainer.new()
+	groups.name = "FlightdeckGroups"
+	groups.add_theme_constant_override("separation", 16)
+	groups.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.add_child(groups)
+	var mission: VBoxContainer = _flight_group(groups, "Selection")
+	var pilot: VBoxContainer = _flight_group(groups, "Readiness")
+	var actions: VBoxContainer = _flight_group(groups, "Actions")
 	_mission_name = _label("Einsatz", 20, CREAM)
-	list.add_child(_mission_name)
-	_mission_selector = _option(list, "MissionSelector")
+	mission.add_child(_mission_name)
+	_mission_selector = _option(mission, "MissionSelector")
 	_mission_selector.item_selected.connect(func(index: int): _act("mission", {"mission_id": String(_mission_selector.get_item_metadata(index))}))
-	_craft_selector = _option(list, "CraftSelector")
+	mission.add_child(_label("Schiff", 16, MUTED))
+	_craft_selector = _option(mission, "CraftSelector")
 	_craft_selector.item_selected.connect(func(index: int): _act("craft", {"craft_id": String(_craft_selector.get_item_metadata(index))}))
-	_craft_image = _portrait(Vector2(120, 150))
-	_craft_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	list.add_child(_craft_image)
-	list.add_child(_label("Pilot", 16, MUTED))
-	_pilot_selector = _option(list, "PilotSelector")
+	pilot.add_child(_label("Pilot", 16, MUTED))
+	_pilot_selector = _option(pilot, "PilotSelector")
 	_pilot_selector.item_selected.connect(func(index: int): _act("pilot", {"unit_id": String(_pilot_selector.get_item_metadata(index)), "craft_id": _craft_id}))
 	_craft_status = _label("Kein Schiff verfügbar", 19, THEME.status_color("neutral"))
-	list.add_child(_craft_status)
+	pilot.add_child(_craft_status)
 	_payload_label = _label("", 16, CREAM)
-	list.add_child(_payload_label)
+	pilot.add_child(_payload_label)
 	_progress = ProgressBar.new()
 	_progress.custom_minimum_size.y = 18
 	_progress.show_percentage = false
-	list.add_child(_progress)
+	pilot.add_child(_progress)
 	_board = _button("Boarding starten", false)
 	_board.custom_minimum_size.y = 52
-	list.add_child(_board)
+	actions.add_child(_board)
 	_board.pressed.connect(func(): _act("board", {"fireteam_id": _fireteam_id, "craft_id": _craft_id}))
 	_unboard = _button("Trupp zurückholen", false)
-	list.add_child(_unboard)
+	actions.add_child(_unboard)
 	_unboard.pressed.connect(func(): _act("unboard", {"fireteam_id": _fireteam_id, "craft_id": _craft_id}))
 	_start = _button("Einsatz starten  ›", true)
 	_start.name = "StartMission"
 	_start.custom_minimum_size.y = 64
-	list.add_child(_start)
+	actions.add_child(_start)
 	_start.pressed.connect(func(): _act("start", {"craft_id": _craft_id}))
+	_build_reference_stage()
+
+
+func _flight_group(parent: Control, id: String) -> VBoxContainer:
+	var group := VBoxContainer.new()
+	group.name = id
+	group.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	group.add_theme_constant_override("separation", 6)
+	parent.add_child(group)
+	return group
+
+
+func _build_reference_stage() -> void:
+	_reference_stage = PanelContainer.new()
+	_reference_stage.name = "ReferenceBaseStage"
+	_reference_stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_reference_stage.clip_contents = true
+	_reference_stage.add_theme_stylebox_override("panel", _style(Color("0a2935"), Color("2e7b8a")))
+	_reference_stage.set_meta("visual_only", true)
+	_reference_stage.set_meta("source_resource", REFERENCE_STAGE_PATH)
+	_reference_stage.set_meta("image_status", "static_native_capture")
+	_workspace.add_child(_reference_stage)
+	_stage_content = Control.new()
+	_stage_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_reference_stage.add_child(_stage_content)
+	var background := _portrait(Vector2.ZERO)
+	background.name = "BaseImage"
+	background.texture = load(REFERENCE_STAGE_PATH) as Texture2D
+	background.modulate = Color(0.56, 0.62, 0.64, 1.0)
+	_stage_content.add_child(background)
+	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var shade := ColorRect.new()
+	shade.color = Color(0.01, 0.08, 0.11, 0.18)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_stage_content.add_child(shade)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_stage_name = _label("Heimatbasis", 28, CREAM)
+	_stage_name.name = "SelectedCraftName"
+	THEME.style_section_heading(_stage_name, 30)
+	_stage_content.add_child(_stage_name)
+	_craft_image = _portrait(Vector2.ZERO)
+	_craft_image.name = "SelectedCraftPreview"
+	_craft_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_stage_content.add_child(_craft_image)
+	_stage_caption = _label("Basisansicht · Schiffsvorschau", 15, CREAM)
+	_stage_caption.name = "StageCaption"
+	_stage_content.add_child(_stage_caption)
+	_reference_stage.resized.connect(_layout_reference_stage)
+	_stage_content.resized.connect(_layout_reference_stage)
+
+
+func _layout_reference_stage() -> void:
+	if _stage_content == null or _craft_image == null:
+		return
+	var area: Vector2 = _stage_content.size
+	_stage_name.position = Vector2(16, 12)
+	_stage_name.size = Vector2(maxf(area.x - 32, 0), 42)
+	var preview_width: float = minf(maxf(area.x - 32, 0), 840.0)
+	var preview_height: float = maxf(minf(area.y * 0.73, area.y - 84), 0.0)
+	_craft_image.position = Vector2((area.x - preview_width) * 0.5, 58 + maxf((area.y - 84 - preview_height) * 0.5, 0.0))
+	_craft_image.size = Vector2(preview_width, preview_height)
+	_stage_caption.position = Vector2(16, maxf(area.y - 30, 0))
+	_stage_caption.size = Vector2(maxf(area.x - 32, 0), 24)
 
 
 func _person_row(parent: Control, id: String, with_assign: bool) -> Dictionary:
@@ -378,6 +475,9 @@ func refresh() -> void:
 		for key in _nav:
 			var button: Button = _nav[key]
 			button.add_theme_stylebox_override("normal", _style(Color("15505d") if key == _mode else PANEL, CYAN if key == _mode else Color("2b5361")))
+		for key in _workflow_labels:
+			(_workflow_labels[key] as Label).add_theme_color_override("font_color", GOLD if key == _mode else MUTED)
+		_workflow.visible = _mode != "base"
 	_update_roster(Array(snapshot.get("roster", [])))
 	var team: Dictionary = Dictionary(snapshot.get("focused_fireteam", {}))
 	_update_team(team, Array(snapshot.get("fireteams", [])))
@@ -428,25 +528,30 @@ func _filter_rows() -> void:
 
 func _fill_person(row: Dictionary, unit: Dictionary) -> void:
 	var portrait: TextureRect = row.portrait
+	var panel: PanelContainer = row.root
 	var wide: bool = _workspace.size.x > 2200.0
-	var portrait_edge: float = 112.0 if wide else 96.0
-	portrait.custom_minimum_size = Vector2(portrait_edge, portrait_edge)
+	var compact_slot: bool = row.assign == null and size.x < 1600.0
+	var portrait_edge: float = 64.0 if compact_slot else (112.0 if wide else 96.0)
+	var style_signature: String = "%s:%s" % [wide, compact_slot]
+	if String(panel.get_meta("operations_row_style", "")) != style_signature:
+		portrait.custom_minimum_size = Vector2(portrait_edge, portrait_edge)
+		(row.focus as Button).add_theme_font_size_override("font_size", 17 if compact_slot else (23 if wide else 19))
+		(row.role as Label).add_theme_font_size_override("font_size", 14 if compact_slot else (17 if wide else 15))
+		(row.status as Label).add_theme_font_size_override("font_size", 13 if compact_slot else (16 if wide else 14))
+		panel.set_meta("operations_row_style", style_signature)
+	portrait.visible = not unit.is_empty()
 	_set_portrait(portrait, unit)
 	var focus: Button = row.focus
-	focus.add_theme_font_size_override("font_size", 23 if wide else 19)
 	focus.text = String(unit.get("name", "Freier Platz"))
 	focus.tooltip_text = focus.text
 	focus.disabled = unit.is_empty()
 	var role: Label = row.role
-	role.add_theme_font_size_override("font_size", 17 if wide else 15)
-	role.text = String(unit.get("role", "Personal auswählen"))
+	role.text = String(unit.get("role", "Personal zuweisen"))
 	role.tooltip_text = role.text
 	var status: Label = row.status
-	status.add_theme_font_size_override("font_size", 16 if wide else 14)
 	status.text = String(unit.get("status", ""))
 	status.tooltip_text = status.text
-	var panel: PanelContainer = row.root
-	panel.custom_minimum_size.y = 128.0 if wide else 112.0
+	panel.custom_minimum_size.y = 58.0 if unit.is_empty() else (80.0 if compact_slot else (128.0 if wide else 112.0))
 	var selected: bool = not unit.is_empty() and String(unit.get("id", "")) == _focused_id
 	if not panel.has_meta("operations_selected") or bool(panel.get_meta("operations_selected")) != selected:
 		panel.add_theme_stylebox_override("panel", _style(Color("173d49"), GOLD if selected else Color("28515e")))
@@ -487,6 +592,7 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	_set_options(_pilot_selector, Array(craft.get("pilot_options", [])), String(craft.get("pilot_id", "")))
 	_pilot_selector.disabled = bool(craft.get("busy", false)) or craft.is_empty()
 	_set_texture(_craft_image, String(craft.get("texture_path", "")))
+	_stage_name.text = String(craft.get("name", "Heimatbasis"))
 	_craft_status.text = String(craft.get("status", "Kein Schiff verfügbar"))
 	var status_color: Color = THEME.status_color(_craft_status_key(craft))
 	if _craft_status.get_theme_color("font_color") != status_color:
@@ -555,44 +661,63 @@ func _layout_columns() -> void:
 	if _workspace == null or _columns.size() != 4:
 		return
 	var available: Vector2 = _workspace.size
-	var keys: Array = ["roster", "squad", "equipment", "flight"]
-	var weights: Array = [0.24, 0.23, 0.26, 0.27]
+	var gap: float = 12.0
+	var narrow: bool = available.x < 1450.0 and size.x < 1600.0
+	var rects: Dictionary = {}
+	var scene_rect := Rect2()
 	if _mode == "personnel":
-		keys = ["roster", "equipment"]
-		weights = [0.58, 0.42]
-	elif _mode == "mission":
-		keys = ["squad", "equipment", "flight"]
-		weights = [0.28, 0.30, 0.42]
+		var roster_width: float = available.x * (0.50 if narrow else 0.28)
+		var equipment_width: float = available.x - roster_width - gap if narrow else clampf(available.x * 0.28, 340.0, 680.0)
+		rects["roster"] = Rect2(0, 0, roster_width, available.y)
+		rects["equipment"] = Rect2(roster_width + gap, 0, equipment_width, available.y)
+		if not narrow:
+			var scene_x: float = roster_width + equipment_width + gap * 2.0
+			scene_rect = Rect2(scene_x, 0, maxf(available.x - scene_x, 0), available.y)
 	elif _mode == "base":
-		keys = []
-		weights = []
-	elif available.x < 1450.0 and size.x < 1600.0:
-		# Boarding stays on its existing navigation page when four columns
-		# would squeeze a portrait, readable name and assignment into a sliver.
-		keys = ["roster", "squad", "equipment"]
-		weights = [0.32, 0.30, 0.38]
-	# Keep the reference-like grouping readable on ultrawide displays rather
-	# than stretching short controls and portraits across empty 800px columns.
-	var design_width: float = minf(available.x, 2400.0)
-	var x: float = maxf((available.x - design_width) * 0.5, 0.0)
-	var usable: float = maxf(design_width - maxf(keys.size() - 1, 0) * 12.0, 0.0)
+		pass
+	elif narrow and _mode == "squad":
+		var usable: float = maxf(available.x - gap * 2.0, 0.0)
+		var roster_width: float = usable * 0.32
+		var squad_width: float = usable * 0.30
+		rects["roster"] = Rect2(0, 0, roster_width, available.y)
+		rects["squad"] = Rect2(roster_width + gap, 0, squad_width, available.y)
+		rects["equipment"] = Rect2(roster_width + squad_width + gap * 2.0, 0, usable * 0.38, available.y)
+	else:
+		var start_x: float = 0.0
+		if _mode != "mission":
+			var roster_width: float = clampf(available.x * 0.20, 304.0, 560.0)
+			rects["roster"] = Rect2(start_x, 0, roster_width, available.y)
+			start_x += roster_width + gap
+		var squad_width: float = clampf(available.x * (0.25 if narrow else 0.18), 260.0 if narrow else 280.0, 480.0)
+		rects["squad"] = Rect2(start_x, 0, squad_width, available.y)
+		start_x += squad_width + gap
+		var right_width: float = maxf(available.x - start_x, 0.0)
+		var footer_height: float = minf(248.0, available.y)
+		var top_height: float = maxf(available.y - footer_height - gap, 0.0)
+		var equipment_width: float = clampf(right_width * 0.43, 300.0, 620.0)
+		rects["equipment"] = Rect2(start_x, 0, equipment_width, top_height)
+		scene_rect = Rect2(start_x + equipment_width + gap, 0, maxf(right_width - equipment_width - gap, 0.0), top_height)
+		rects["flight"] = Rect2(start_x, top_height + gap, right_width, footer_height)
 	for key in _columns:
 		var panel: Control = _columns[key]
-		panel.visible = keys.has(key)
-	for index in range(keys.size()):
-		var panel: Control = _columns[keys[index]]
-		var width: float = usable * float(weights[index])
-		var maximum_height: float = 850.0 if keys[index] in ["squad", "equipment"] else (1060.0 if keys[index] == "flight" else available.y)
-		panel.position = Vector2(x, 0)
-		panel.size = Vector2(width, minf(available.y, maximum_height))
-		x += width + 12
+		panel.visible = rects.has(key)
+		if panel.visible:
+			var rect: Rect2 = rects[key]
+			panel.position = rect.position
+			panel.size = rect.size
+	if _reference_stage != null:
+		_reference_stage.visible = scene_rect.size.x > 0 and scene_rect.size.y > 0
+		_reference_stage.position = scene_rect.position
+		_reference_stage.size = scene_rect.size
+		_layout_reference_stage()
 	if _identity_row != null:
 		var equipment_panel: Control = _columns.equipment
-		_identity_row.vertical = equipment_panel.size.x < 450.0
-		var portrait_edge: float = 224.0 if available.x > 2200.0 else 176.0
+		_identity_row.vertical = equipment_panel.size.x < 310.0
+		var portrait_edge: float = 224.0 if available.x > 2200.0 else (112.0 if narrow else 176.0)
 		_focused_portrait.custom_minimum_size = Vector2(portrait_edge, portrait_edge)
-		_focused_name.add_theme_font_size_override("font_size", 30 if available.x > 2200.0 else 24)
-		_craft_image.custom_minimum_size.y = clampf(available.y * 0.28, 180.0, 360.0)
+		var identity_size: int = 30 if available.x > 2200.0 else (23 if narrow else 26)
+		if _focused_name.get_theme_font_size("font_size") != identity_size:
+			_focused_name.add_theme_font_size_override("font_size", identity_size)
 	if _base != null:
 		_base.visible = _mode == "base"
 
@@ -644,6 +769,10 @@ func get_presentation_snapshot() -> Dictionary:
 		"mission_navigation_visible": mission_navigation.is_visible_in_tree(),
 		"mission_navigation_rect": Rect2(mission_navigation.global_position, mission_navigation.size),
 		"ship_preview_path": String(_craft_image.get_meta("rendered_path", "")),
+		"reference_stage_visible": _reference_stage != null and _reference_stage.is_visible_in_tree(),
+		"reference_stage_rect": _reference_stage.get_global_rect() if _reference_stage != null else Rect2(),
+		"reference_stage_source": REFERENCE_STAGE_PATH,
+		"reference_stage_kind": "static_native_capture",
 		"base": _base.call("get_exploration_snapshot") if _base != null else {}}
 
 

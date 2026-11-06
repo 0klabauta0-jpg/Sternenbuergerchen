@@ -1,0 +1,28 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-9d122733f9cd42b2bc8867d68d7cff20
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Explicit Force preserves its immediate real service slice
+PASS: Small authored terrain seed completes normally
+PASS: Initial publication matches the full-scan oracle
+PASS: Dynamic enemy begins outside current LOS
+PASS: Movement queues a real incremental request
+PASS: Candidate collection remains an incomplete atomic sample
+PASS: One process pass cannot complete old terrain and execute a second new terrain slice
+PASS: The frozen seven-position sample commits atomically before the next request
+PASS: Newest moving observer state is queued instead of discarded
+PASS: Current dynamic-target LOS remains independent of pending terrain
+PASS: Each following process pass preserves the one-slice bound
+PASS: Single-slice scheduling preserves the original 512-tile work budget
+PASS: Each following process pass preserves the one-slice bound
+PASS: Single-slice scheduling preserves the original 512-tile work budget
+PASS: Queued moving-state terrain completes without starvation
+PASS: Final visible/explored sets equal the complete full-scan sequence
+PASS: Synthetic continuation stays within the existing estimated 350ms staleness bound
+PASS: Static invalidation also processes at most one real slice in a process pass
+PASS: Changed terrain rejects stale work and converges to the real LOS oracle
+PASS: Explicit Force remains immediate after normal scheduling and invalidation
+PASS: Existing renderer consumer continues receiving actual service snapshots
+R3_FOG_SLICE_FACTS {"continuation_frames":2,"dynamic_enemy_visible":true,"physical_play_proof":false,"synthetic_process_delta":true,"work_budget_tiles":512}
+R3_FOG_SINGLE_SLICE: 21 passed, 0 failed
+R3_FOG_SINGLE_SLICE_PASS

@@ -1,0 +1,11 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "mode" variable because the value doesn't have a set type.
+   at: GDScript::reload (res://scripts/tests/reference_polish_r3_20261106_world_gpu_verifier.gd:85)
+SCRIPT ERROR: Parse Error: Cannot find member "resource_path" in base "res://scripts/terrain/frontier_reference_dressing.gd".
+   at: GDScript::reload (res://scripts/tests/reference_polish_r3_20261106_world_gpu_verifier.gd:106)
+SCRIPT ERROR: Parse Error: Cannot find member "resource_path" in base "TerrainMap3DView".
+   at: GDScript::reload (res://scripts/tests/reference_polish_r3_20261106_world_gpu_verifier.gd:106)
+ERROR: Failed to load script "res://scripts/tests/reference_polish_r3_20261106_world_gpu_verifier.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:2907)

@@ -1,0 +1,611 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-a9c8ec18b47c4651987a03ae15b0559e
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: local_ready applies one final base skin to each of 25 non-ROE buttons
+PASS: local_ready HomebaseNavButton has no neutral intermediate application
+PASS: local_ready HomebaseNavButton uses its current final active state
+PASS: local_ready HomebaseNavButton preserves the visible skin and role overlays
+PASS: local_ready FOBNavButton has no neutral intermediate application
+PASS: local_ready FOBNavButton uses its current final active state
+PASS: local_ready FOBNavButton preserves the visible skin and role overlays
+PASS: local_ready MissionNavButton has no neutral intermediate application
+PASS: local_ready MissionNavButton uses its current final active state
+PASS: local_ready MissionNavButton preserves the visible skin and role overlays
+PASS: local_ready AllFireteamsButton has no neutral intermediate application
+PASS: local_ready AllFireteamsButton uses its current final active state
+PASS: local_ready AllFireteamsButton preserves the visible skin and role overlays
+PASS: local_ready MoveButton has no neutral intermediate application
+PASS: local_ready MoveButton uses its current final active state
+PASS: local_ready MoveButton preserves the visible skin and role overlays
+PASS: local_ready HoldButton has no neutral intermediate application
+PASS: local_ready HoldButton uses its current final active state
+PASS: local_ready HoldButton preserves the visible skin and role overlays
+PASS: local_ready FlankButton has no neutral intermediate application
+PASS: local_ready FlankButton uses its current final active state
+PASS: local_ready FlankButton preserves the visible skin and role overlays
+PASS: local_ready TakeButton has no neutral intermediate application
+PASS: local_ready TakeButton uses its current final active state
+PASS: local_ready TakeButton preserves the visible skin and role overlays
+PASS: local_ready DoorBreachButton has no neutral intermediate application
+PASS: local_ready DoorBreachButton uses its current final active state
+PASS: local_ready DoorBreachButton preserves the visible skin and role overlays
+PASS: local_ready TargetButton has no neutral intermediate application
+PASS: local_ready TargetButton uses its current final active state
+PASS: local_ready TargetButton preserves the visible skin and role overlays
+PASS: local_ready ClearTargetButton has no neutral intermediate application
+PASS: local_ready ClearTargetButton uses its current final active state
+PASS: local_ready ClearTargetButton preserves the visible skin and role overlays
+PASS: local_ready DeleteOrderButton has no neutral intermediate application
+PASS: local_ready DeleteOrderButton uses its current final active state
+PASS: local_ready DeleteOrderButton preserves the visible skin and role overlays
+PASS: local_ready WaypointEraseButton has no neutral intermediate application
+PASS: local_ready WaypointEraseButton uses its current final active state
+PASS: local_ready WaypointEraseButton preserves the visible skin and role overlays
+PASS: local_ready SortCommandMatrixButton has no neutral intermediate application
+PASS: local_ready SortCommandMatrixButton uses its current final active state
+PASS: local_ready SortCommandMatrixButton preserves the visible skin and role overlays
+PASS: local_ready FireRuleHoldButton has no neutral intermediate application
+PASS: local_ready FireRuleHoldButton preserves the visible skin and role overlays
+PASS: local_ready FireRuleReturnButton has no neutral intermediate application
+PASS: local_ready FireRuleReturnButton preserves the visible skin and role overlays
+PASS: local_ready FireRuleFreeButton has no neutral intermediate application
+PASS: local_ready FireRuleFreeButton preserves the visible skin and role overlays
+PASS: local_ready FireRuleSuppressButton has no neutral intermediate application
+PASS: local_ready FireRuleSuppressButton preserves the visible skin and role overlays
+PASS: local_ready GoCommandMatrixButton has no neutral intermediate application
+PASS: local_ready GoCommandMatrixButton uses its current final active state
+PASS: local_ready GoCommandMatrixButton preserves the visible skin and role overlays
+PASS: local_ready SetLZButton has no neutral intermediate application
+PASS: local_ready SetLZButton uses its current final active state
+PASS: local_ready SetLZButton preserves the visible skin and role overlays
+PASS: local_ready CallDropshipButton has no neutral intermediate application
+PASS: local_ready CallDropshipButton uses its current final active state
+PASS: local_ready CallDropshipButton preserves the visible skin and role overlays
+PASS: local_ready PrevEditPhaseButton has no neutral intermediate application
+PASS: local_ready PrevEditPhaseButton uses its current final active state
+PASS: local_ready PrevEditPhaseButton preserves the visible skin and role overlays
+PASS: local_ready AddPhaseButton has no neutral intermediate application
+PASS: local_ready AddPhaseButton uses its current final active state
+PASS: local_ready AddPhaseButton preserves the visible skin and role overlays
+PASS: local_ready NextEditPhaseButton has no neutral intermediate application
+PASS: local_ready NextEditPhaseButton uses its current final active state
+PASS: local_ready NextEditPhaseButton preserves the visible skin and role overlays
+PASS: local_ready NextPhaseButton has no neutral intermediate application
+PASS: local_ready NextPhaseButton uses its current final active state
+PASS: local_ready NextPhaseButton preserves the visible skin and role overlays
+PASS: local_ready NWButton has no neutral intermediate application
+PASS: local_ready NWButton uses its current final active state
+PASS: local_ready NWButton preserves the visible skin and role overlays
+PASS: local_ready NEButton has no neutral intermediate application
+PASS: local_ready NEButton uses its current final active state
+PASS: local_ready NEButton preserves the visible skin and role overlays
+PASS: local_ready SWButton has no neutral intermediate application
+PASS: local_ready SWButton uses its current final active state
+PASS: local_ready SWButton preserves the visible skin and role overlays
+PASS: local_ready SEButton has no neutral intermediate application
+PASS: local_ready SEButton uses its current final active state
+PASS: local_ready SEButton preserves the visible skin and role overlays
+PASS: local_ready preserves the single ROE-owner refresh
+PASS: local_ready preserves the final layout boundary
+PASS: local_ready keeps door authority metadata read-only
+PASS: local_ready FireRuleHoldButton preserves ROE enable and active semantics
+PASS: local_ready FireRuleReturnButton preserves ROE enable and active semantics
+PASS: local_ready FireRuleFreeButton preserves ROE enable and active semantics
+PASS: local_ready FireRuleSuppressButton preserves ROE enable and active semantics
+PASS: local_ready still reads every final style on a repeated pass
+PASS: local_ready repeated HomebaseNavButton output is stable
+PASS: local_ready repeated FOBNavButton output is stable
+PASS: local_ready repeated MissionNavButton output is stable
+PASS: local_ready repeated AllFireteamsButton output is stable
+PASS: local_ready repeated MoveButton output is stable
+PASS: local_ready repeated HoldButton output is stable
+PASS: local_ready repeated FlankButton output is stable
+PASS: local_ready repeated TakeButton output is stable
+PASS: local_ready repeated DoorBreachButton output is stable
+PASS: local_ready repeated TargetButton output is stable
+PASS: local_ready repeated ClearTargetButton output is stable
+PASS: local_ready repeated DeleteOrderButton output is stable
+PASS: local_ready repeated WaypointEraseButton output is stable
+PASS: local_ready repeated SortCommandMatrixButton output is stable
+PASS: local_ready repeated FireRuleHoldButton output is stable
+PASS: local_ready repeated FireRuleReturnButton output is stable
+PASS: local_ready repeated FireRuleFreeButton output is stable
+PASS: local_ready repeated FireRuleSuppressButton output is stable
+PASS: local_ready repeated GoCommandMatrixButton output is stable
+PASS: local_ready repeated SetLZButton output is stable
+PASS: local_ready repeated CallDropshipButton output is stable
+PASS: local_ready repeated PrevEditPhaseButton output is stable
+PASS: local_ready repeated AddPhaseButton output is stable
+PASS: local_ready repeated NextEditPhaseButton output is stable
+PASS: local_ready repeated NextPhaseButton output is stable
+PASS: local_ready repeated NWButton output is stable
+PASS: local_ready repeated NEButton output is stable
+PASS: local_ready repeated SWButton output is stable
+PASS: local_ready repeated SEButton output is stable
+PASS: preview applies one final base skin to each of 25 non-ROE buttons
+PASS: preview HomebaseNavButton has no neutral intermediate application
+PASS: preview HomebaseNavButton uses its current final active state
+PASS: preview HomebaseNavButton preserves the visible skin and role overlays
+PASS: preview FOBNavButton has no neutral intermediate application
+PASS: preview FOBNavButton uses its current final active state
+PASS: preview FOBNavButton preserves the visible skin and role overlays
+PASS: preview MissionNavButton has no neutral intermediate application
+PASS: preview MissionNavButton uses its current final active state
+PASS: preview MissionNavButton preserves the visible skin and role overlays
+PASS: preview AllFireteamsButton has no neutral intermediate application
+PASS: preview AllFireteamsButton uses its current final active state
+PASS: preview AllFireteamsButton preserves the visible skin and role overlays
+PASS: preview MoveButton has no neutral intermediate application
+PASS: preview MoveButton uses its current final active state
+PASS: preview MoveButton preserves the visible skin and role overlays
+PASS: preview HoldButton has no neutral intermediate application
+PASS: preview HoldButton uses its current final active state
+PASS: preview HoldButton preserves the visible skin and role overlays
+PASS: preview FlankButton has no neutral intermediate application
+PASS: preview FlankButton uses its current final active state
+PASS: preview FlankButton preserves the visible skin and role overlays
+PASS: preview TakeButton has no neutral intermediate application
+PASS: preview TakeButton uses its current final active state
+PASS: preview TakeButton preserves the visible skin and role overlays
+PASS: preview DoorBreachButton has no neutral intermediate application
+PASS: preview DoorBreachButton uses its current final active state
+PASS: preview DoorBreachButton preserves the visible skin and role overlays
+PASS: preview TargetButton has no neutral intermediate application
+PASS: preview TargetButton uses its current final active state
+PASS: preview TargetButton preserves the visible skin and role overlays
+PASS: preview ClearTargetButton has no neutral intermediate application
+PASS: preview ClearTargetButton uses its current final active state
+PASS: preview ClearTargetButton preserves the visible skin and role overlays
+PASS: preview DeleteOrderButton has no neutral intermediate application
+PASS: preview DeleteOrderButton uses its current final active state
+PASS: preview DeleteOrderButton preserves the visible skin and role overlays
+PASS: preview WaypointEraseButton has no neutral intermediate application
+PASS: preview WaypointEraseButton uses its current final active state
+PASS: preview WaypointEraseButton preserves the visible skin and role overlays
+PASS: preview SortCommandMatrixButton has no neutral intermediate application
+PASS: preview SortCommandMatrixButton uses its current final active state
+PASS: preview SortCommandMatrixButton preserves the visible skin and role overlays
+PASS: preview FireRuleHoldButton has no neutral intermediate application
+PASS: preview FireRuleHoldButton preserves the visible skin and role overlays
+PASS: preview FireRuleReturnButton has no neutral intermediate application
+PASS: preview FireRuleReturnButton preserves the visible skin and role overlays
+PASS: preview FireRuleFreeButton has no neutral intermediate application
+PASS: preview FireRuleFreeButton preserves the visible skin and role overlays
+PASS: preview FireRuleSuppressButton has no neutral intermediate application
+PASS: preview FireRuleSuppressButton preserves the visible skin and role overlays
+PASS: preview GoCommandMatrixButton has no neutral intermediate application
+PASS: preview GoCommandMatrixButton uses its current final active state
+PASS: preview GoCommandMatrixButton preserves the visible skin and role overlays
+PASS: preview SetLZButton has no neutral intermediate application
+PASS: preview SetLZButton uses its current final active state
+PASS: preview SetLZButton preserves the visible skin and role overlays
+PASS: preview CallDropshipButton has no neutral intermediate application
+PASS: preview CallDropshipButton uses its current final active state
+PASS: preview CallDropshipButton preserves the visible skin and role overlays
+PASS: preview PrevEditPhaseButton has no neutral intermediate application
+PASS: preview PrevEditPhaseButton uses its current final active state
+PASS: preview PrevEditPhaseButton preserves the visible skin and role overlays
+PASS: preview AddPhaseButton has no neutral intermediate application
+PASS: preview AddPhaseButton uses its current final active state
+PASS: preview AddPhaseButton preserves the visible skin and role overlays
+PASS: preview NextEditPhaseButton has no neutral intermediate application
+PASS: preview NextEditPhaseButton uses its current final active state
+PASS: preview NextEditPhaseButton preserves the visible skin and role overlays
+PASS: preview NextPhaseButton has no neutral intermediate application
+PASS: preview NextPhaseButton uses its current final active state
+PASS: preview NextPhaseButton preserves the visible skin and role overlays
+PASS: preview NWButton has no neutral intermediate application
+PASS: preview NWButton uses its current final active state
+PASS: preview NWButton preserves the visible skin and role overlays
+PASS: preview NEButton has no neutral intermediate application
+PASS: preview NEButton uses its current final active state
+PASS: preview NEButton preserves the visible skin and role overlays
+PASS: preview SWButton has no neutral intermediate application
+PASS: preview SWButton uses its current final active state
+PASS: preview SWButton preserves the visible skin and role overlays
+PASS: preview SEButton has no neutral intermediate application
+PASS: preview SEButton uses its current final active state
+PASS: preview SEButton preserves the visible skin and role overlays
+PASS: preview preserves the single ROE-owner refresh
+PASS: preview preserves the final layout boundary
+PASS: preview keeps door authority metadata read-only
+PASS: preview FireRuleHoldButton preserves ROE enable and active semantics
+PASS: preview FireRuleReturnButton preserves ROE enable and active semantics
+PASS: preview FireRuleFreeButton preserves ROE enable and active semantics
+PASS: preview FireRuleSuppressButton preserves ROE enable and active semantics
+PASS: preview still reads every final style on a repeated pass
+PASS: preview repeated HomebaseNavButton output is stable
+PASS: preview repeated FOBNavButton output is stable
+PASS: preview repeated MissionNavButton output is stable
+PASS: preview repeated AllFireteamsButton output is stable
+PASS: preview repeated MoveButton output is stable
+PASS: preview repeated HoldButton output is stable
+PASS: preview repeated FlankButton output is stable
+PASS: preview repeated TakeButton output is stable
+PASS: preview repeated DoorBreachButton output is stable
+PASS: preview repeated TargetButton output is stable
+PASS: preview repeated ClearTargetButton output is stable
+PASS: preview repeated DeleteOrderButton output is stable
+PASS: preview repeated WaypointEraseButton output is stable
+PASS: preview repeated SortCommandMatrixButton output is stable
+PASS: preview repeated FireRuleHoldButton output is stable
+PASS: preview repeated FireRuleReturnButton output is stable
+PASS: preview repeated FireRuleFreeButton output is stable
+PASS: preview repeated FireRuleSuppressButton output is stable
+PASS: preview repeated GoCommandMatrixButton output is stable
+PASS: preview repeated SetLZButton output is stable
+PASS: preview repeated CallDropshipButton output is stable
+PASS: preview repeated PrevEditPhaseButton output is stable
+PASS: preview repeated AddPhaseButton output is stable
+PASS: preview repeated NextEditPhaseButton output is stable
+PASS: preview repeated NextPhaseButton output is stable
+PASS: preview repeated NWButton output is stable
+PASS: preview repeated NEButton output is stable
+PASS: preview repeated SWButton output is stable
+PASS: preview repeated SEButton output is stable
+PASS: remote_observer applies one final base skin to each of 25 non-ROE buttons
+PASS: remote_observer HomebaseNavButton has no neutral intermediate application
+PASS: remote_observer HomebaseNavButton uses its current final active state
+PASS: remote_observer HomebaseNavButton preserves the visible skin and role overlays
+PASS: remote_observer FOBNavButton has no neutral intermediate application
+PASS: remote_observer FOBNavButton uses its current final active state
+PASS: remote_observer FOBNavButton preserves the visible skin and role overlays
+PASS: remote_observer MissionNavButton has no neutral intermediate application
+PASS: remote_observer MissionNavButton uses its current final active state
+PASS: remote_observer MissionNavButton preserves the visible skin and role overlays
+PASS: remote_observer AllFireteamsButton has no neutral intermediate application
+PASS: remote_observer AllFireteamsButton uses its current final active state
+PASS: remote_observer AllFireteamsButton preserves the visible skin and role overlays
+PASS: remote_observer MoveButton has no neutral intermediate application
+PASS: remote_observer MoveButton uses its current final active state
+PASS: remote_observer MoveButton preserves the visible skin and role overlays
+PASS: remote_observer HoldButton has no neutral intermediate application
+PASS: remote_observer HoldButton uses its current final active state
+PASS: remote_observer HoldButton preserves the visible skin and role overlays
+PASS: remote_observer FlankButton has no neutral intermediate application
+PASS: remote_observer FlankButton uses its current final active state
+PASS: remote_observer FlankButton preserves the visible skin and role overlays
+PASS: remote_observer TakeButton has no neutral intermediate application
+PASS: remote_observer TakeButton uses its current final active state
+PASS: remote_observer TakeButton preserves the visible skin and role overlays
+PASS: remote_observer DoorBreachButton has no neutral intermediate application
+PASS: remote_observer DoorBreachButton uses its current final active state
+PASS: remote_observer DoorBreachButton preserves the visible skin and role overlays
+PASS: remote_observer TargetButton has no neutral intermediate application
+PASS: remote_observer TargetButton uses its current final active state
+PASS: remote_observer TargetButton preserves the visible skin and role overlays
+PASS: remote_observer ClearTargetButton has no neutral intermediate application
+PASS: remote_observer ClearTargetButton uses its current final active state
+PASS: remote_observer ClearTargetButton preserves the visible skin and role overlays
+PASS: remote_observer DeleteOrderButton has no neutral intermediate application
+PASS: remote_observer DeleteOrderButton uses its current final active state
+PASS: remote_observer DeleteOrderButton preserves the visible skin and role overlays
+PASS: remote_observer WaypointEraseButton has no neutral intermediate application
+PASS: remote_observer WaypointEraseButton uses its current final active state
+PASS: remote_observer WaypointEraseButton preserves the visible skin and role overlays
+PASS: remote_observer SortCommandMatrixButton has no neutral intermediate application
+PASS: remote_observer SortCommandMatrixButton uses its current final active state
+PASS: remote_observer SortCommandMatrixButton preserves the visible skin and role overlays
+PASS: remote_observer FireRuleHoldButton has no neutral intermediate application
+PASS: remote_observer FireRuleHoldButton preserves the visible skin and role overlays
+PASS: remote_observer FireRuleReturnButton has no neutral intermediate application
+PASS: remote_observer FireRuleReturnButton preserves the visible skin and role overlays
+PASS: remote_observer FireRuleFreeButton has no neutral intermediate application
+PASS: remote_observer FireRuleFreeButton preserves the visible skin and role overlays
+PASS: remote_observer FireRuleSuppressButton has no neutral intermediate application
+PASS: remote_observer FireRuleSuppressButton preserves the visible skin and role overlays
+PASS: remote_observer GoCommandMatrixButton has no neutral intermediate application
+PASS: remote_observer GoCommandMatrixButton uses its current final active state
+PASS: remote_observer GoCommandMatrixButton preserves the visible skin and role overlays
+PASS: remote_observer SetLZButton has no neutral intermediate application
+PASS: remote_observer SetLZButton uses its current final active state
+PASS: remote_observer SetLZButton preserves the visible skin and role overlays
+PASS: remote_observer CallDropshipButton has no neutral intermediate application
+PASS: remote_observer CallDropshipButton uses its current final active state
+PASS: remote_observer CallDropshipButton preserves the visible skin and role overlays
+PASS: remote_observer PrevEditPhaseButton has no neutral intermediate application
+PASS: remote_observer PrevEditPhaseButton uses its current final active state
+PASS: remote_observer PrevEditPhaseButton preserves the visible skin and role overlays
+PASS: remote_observer AddPhaseButton has no neutral intermediate application
+PASS: remote_observer AddPhaseButton uses its current final active state
+PASS: remote_observer AddPhaseButton preserves the visible skin and role overlays
+PASS: remote_observer NextEditPhaseButton has no neutral intermediate application
+PASS: remote_observer NextEditPhaseButton uses its current final active state
+PASS: remote_observer NextEditPhaseButton preserves the visible skin and role overlays
+PASS: remote_observer NextPhaseButton has no neutral intermediate application
+PASS: remote_observer NextPhaseButton uses its current final active state
+PASS: remote_observer NextPhaseButton preserves the visible skin and role overlays
+PASS: remote_observer NWButton has no neutral intermediate application
+PASS: remote_observer NWButton uses its current final active state
+PASS: remote_observer NWButton preserves the visible skin and role overlays
+PASS: remote_observer NEButton has no neutral intermediate application
+PASS: remote_observer NEButton uses its current final active state
+PASS: remote_observer NEButton preserves the visible skin and role overlays
+PASS: remote_observer SWButton has no neutral intermediate application
+PASS: remote_observer SWButton uses its current final active state
+PASS: remote_observer SWButton preserves the visible skin and role overlays
+PASS: remote_observer SEButton has no neutral intermediate application
+PASS: remote_observer SEButton uses its current final active state
+PASS: remote_observer SEButton preserves the visible skin and role overlays
+PASS: remote_observer preserves the single ROE-owner refresh
+PASS: remote_observer preserves the final layout boundary
+PASS: remote_observer keeps door authority metadata read-only
+PASS: remote_observer FireRuleHoldButton preserves ROE enable and active semantics
+PASS: remote_observer FireRuleReturnButton preserves ROE enable and active semantics
+PASS: remote_observer FireRuleFreeButton preserves ROE enable and active semantics
+PASS: remote_observer FireRuleSuppressButton preserves ROE enable and active semantics
+PASS: remote_observer still reads every final style on a repeated pass
+PASS: remote_observer repeated HomebaseNavButton output is stable
+PASS: remote_observer repeated FOBNavButton output is stable
+PASS: remote_observer repeated MissionNavButton output is stable
+PASS: remote_observer repeated AllFireteamsButton output is stable
+PASS: remote_observer repeated MoveButton output is stable
+PASS: remote_observer repeated HoldButton output is stable
+PASS: remote_observer repeated FlankButton output is stable
+PASS: remote_observer repeated TakeButton output is stable
+PASS: remote_observer repeated DoorBreachButton output is stable
+PASS: remote_observer repeated TargetButton output is stable
+PASS: remote_observer repeated ClearTargetButton output is stable
+PASS: remote_observer repeated DeleteOrderButton output is stable
+PASS: remote_observer repeated WaypointEraseButton output is stable
+PASS: remote_observer repeated SortCommandMatrixButton output is stable
+PASS: remote_observer repeated FireRuleHoldButton output is stable
+PASS: remote_observer repeated FireRuleReturnButton output is stable
+PASS: remote_observer repeated FireRuleFreeButton output is stable
+PASS: remote_observer repeated FireRuleSuppressButton output is stable
+PASS: remote_observer repeated GoCommandMatrixButton output is stable
+PASS: remote_observer repeated SetLZButton output is stable
+PASS: remote_observer repeated CallDropshipButton output is stable
+PASS: remote_observer repeated PrevEditPhaseButton output is stable
+PASS: remote_observer repeated AddPhaseButton output is stable
+PASS: remote_observer repeated NextEditPhaseButton output is stable
+PASS: remote_observer repeated NextPhaseButton output is stable
+PASS: remote_observer repeated NWButton output is stable
+PASS: remote_observer repeated NEButton output is stable
+PASS: remote_observer repeated SWButton output is stable
+PASS: remote_observer repeated SEButton output is stable
+PASS: no_selection applies one final base skin to each of 25 non-ROE buttons
+PASS: no_selection HomebaseNavButton has no neutral intermediate application
+PASS: no_selection HomebaseNavButton uses its current final active state
+PASS: no_selection HomebaseNavButton preserves the visible skin and role overlays
+PASS: no_selection FOBNavButton has no neutral intermediate application
+PASS: no_selection FOBNavButton uses its current final active state
+PASS: no_selection FOBNavButton preserves the visible skin and role overlays
+PASS: no_selection MissionNavButton has no neutral intermediate application
+PASS: no_selection MissionNavButton uses its current final active state
+PASS: no_selection MissionNavButton preserves the visible skin and role overlays
+PASS: no_selection AllFireteamsButton has no neutral intermediate application
+PASS: no_selection AllFireteamsButton uses its current final active state
+PASS: no_selection AllFireteamsButton preserves the visible skin and role overlays
+PASS: no_selection MoveButton has no neutral intermediate application
+PASS: no_selection MoveButton uses its current final active state
+PASS: no_selection MoveButton preserves the visible skin and role overlays
+PASS: no_selection HoldButton has no neutral intermediate application
+PASS: no_selection HoldButton uses its current final active state
+PASS: no_selection HoldButton preserves the visible skin and role overlays
+PASS: no_selection FlankButton has no neutral intermediate application
+PASS: no_selection FlankButton uses its current final active state
+PASS: no_selection FlankButton preserves the visible skin and role overlays
+PASS: no_selection TakeButton has no neutral intermediate application
+PASS: no_selection TakeButton uses its current final active state
+PASS: no_selection TakeButton preserves the visible skin and role overlays
+PASS: no_selection DoorBreachButton has no neutral intermediate application
+PASS: no_selection DoorBreachButton uses its current final active state
+PASS: no_selection DoorBreachButton preserves the visible skin and role overlays
+PASS: no_selection TargetButton has no neutral intermediate application
+PASS: no_selection TargetButton uses its current final active state
+PASS: no_selection TargetButton preserves the visible skin and role overlays
+PASS: no_selection ClearTargetButton has no neutral intermediate application
+PASS: no_selection ClearTargetButton uses its current final active state
+PASS: no_selection ClearTargetButton preserves the visible skin and role overlays
+PASS: no_selection DeleteOrderButton has no neutral intermediate application
+PASS: no_selection DeleteOrderButton uses its current final active state
+PASS: no_selection DeleteOrderButton preserves the visible skin and role overlays
+PASS: no_selection WaypointEraseButton has no neutral intermediate application
+PASS: no_selection WaypointEraseButton uses its current final active state
+PASS: no_selection WaypointEraseButton preserves the visible skin and role overlays
+PASS: no_selection SortCommandMatrixButton has no neutral intermediate application
+PASS: no_selection SortCommandMatrixButton uses its current final active state
+PASS: no_selection SortCommandMatrixButton preserves the visible skin and role overlays
+PASS: no_selection FireRuleHoldButton has no neutral intermediate application
+PASS: no_selection FireRuleHoldButton preserves the visible skin and role overlays
+PASS: no_selection FireRuleReturnButton has no neutral intermediate application
+PASS: no_selection FireRuleReturnButton preserves the visible skin and role overlays
+PASS: no_selection FireRuleFreeButton has no neutral intermediate application
+PASS: no_selection FireRuleFreeButton preserves the visible skin and role overlays
+PASS: no_selection FireRuleSuppressButton has no neutral intermediate application
+PASS: no_selection FireRuleSuppressButton preserves the visible skin and role overlays
+PASS: no_selection GoCommandMatrixButton has no neutral intermediate application
+PASS: no_selection GoCommandMatrixButton uses its current final active state
+PASS: no_selection GoCommandMatrixButton preserves the visible skin and role overlays
+PASS: no_selection SetLZButton has no neutral intermediate application
+PASS: no_selection SetLZButton uses its current final active state
+PASS: no_selection SetLZButton preserves the visible skin and role overlays
+PASS: no_selection CallDropshipButton has no neutral intermediate application
+PASS: no_selection CallDropshipButton uses its current final active state
+PASS: no_selection CallDropshipButton preserves the visible skin and role overlays
+PASS: no_selection PrevEditPhaseButton has no neutral intermediate application
+PASS: no_selection PrevEditPhaseButton uses its current final active state
+PASS: no_selection PrevEditPhaseButton preserves the visible skin and role overlays
+PASS: no_selection AddPhaseButton has no neutral intermediate application
+PASS: no_selection AddPhaseButton uses its current final active state
+PASS: no_selection AddPhaseButton preserves the visible skin and role overlays
+PASS: no_selection NextEditPhaseButton has no neutral intermediate application
+PASS: no_selection NextEditPhaseButton uses its current final active state
+PASS: no_selection NextEditPhaseButton preserves the visible skin and role overlays
+PASS: no_selection NextPhaseButton has no neutral intermediate application
+PASS: no_selection NextPhaseButton uses its current final active state
+PASS: no_selection NextPhaseButton preserves the visible skin and role overlays
+PASS: no_selection NWButton has no neutral intermediate application
+PASS: no_selection NWButton uses its current final active state
+PASS: no_selection NWButton preserves the visible skin and role overlays
+PASS: no_selection NEButton has no neutral intermediate application
+PASS: no_selection NEButton uses its current final active state
+PASS: no_selection NEButton preserves the visible skin and role overlays
+PASS: no_selection SWButton has no neutral intermediate application
+PASS: no_selection SWButton uses its current final active state
+PASS: no_selection SWButton preserves the visible skin and role overlays
+PASS: no_selection SEButton has no neutral intermediate application
+PASS: no_selection SEButton uses its current final active state
+PASS: no_selection SEButton preserves the visible skin and role overlays
+PASS: no_selection preserves the single ROE-owner refresh
+PASS: no_selection preserves the final layout boundary
+PASS: no_selection keeps door authority metadata read-only
+PASS: no_selection FireRuleHoldButton preserves ROE enable and active semantics
+PASS: no_selection FireRuleReturnButton preserves ROE enable and active semantics
+PASS: no_selection FireRuleFreeButton preserves ROE enable and active semantics
+PASS: no_selection FireRuleSuppressButton preserves ROE enable and active semantics
+PASS: no_selection still reads every final style on a repeated pass
+PASS: no_selection repeated HomebaseNavButton output is stable
+PASS: no_selection repeated FOBNavButton output is stable
+PASS: no_selection repeated MissionNavButton output is stable
+PASS: no_selection repeated AllFireteamsButton output is stable
+PASS: no_selection repeated MoveButton output is stable
+PASS: no_selection repeated HoldButton output is stable
+PASS: no_selection repeated FlankButton output is stable
+PASS: no_selection repeated TakeButton output is stable
+PASS: no_selection repeated DoorBreachButton output is stable
+PASS: no_selection repeated TargetButton output is stable
+PASS: no_selection repeated ClearTargetButton output is stable
+PASS: no_selection repeated DeleteOrderButton output is stable
+PASS: no_selection repeated WaypointEraseButton output is stable
+PASS: no_selection repeated SortCommandMatrixButton output is stable
+PASS: no_selection repeated FireRuleHoldButton output is stable
+PASS: no_selection repeated FireRuleReturnButton output is stable
+PASS: no_selection repeated FireRuleFreeButton output is stable
+PASS: no_selection repeated FireRuleSuppressButton output is stable
+PASS: no_selection repeated GoCommandMatrixButton output is stable
+PASS: no_selection repeated SetLZButton output is stable
+PASS: no_selection repeated CallDropshipButton output is stable
+PASS: no_selection repeated PrevEditPhaseButton output is stable
+PASS: no_selection repeated AddPhaseButton output is stable
+PASS: no_selection repeated NextEditPhaseButton output is stable
+PASS: no_selection repeated NextPhaseButton output is stable
+PASS: no_selection repeated NWButton output is stable
+PASS: no_selection repeated NEButton output is stable
+PASS: no_selection repeated SWButton output is stable
+PASS: no_selection repeated SEButton output is stable
+PASS: selected_without_orders applies one final base skin to each of 25 non-ROE buttons
+PASS: selected_without_orders HomebaseNavButton has no neutral intermediate application
+PASS: selected_without_orders HomebaseNavButton uses its current final active state
+PASS: selected_without_orders HomebaseNavButton preserves the visible skin and role overlays
+PASS: selected_without_orders FOBNavButton has no neutral intermediate application
+PASS: selected_without_orders FOBNavButton uses its current final active state
+PASS: selected_without_orders FOBNavButton preserves the visible skin and role overlays
+PASS: selected_without_orders MissionNavButton has no neutral intermediate application
+PASS: selected_without_orders MissionNavButton uses its current final active state
+PASS: selected_without_orders MissionNavButton preserves the visible skin and role overlays
+PASS: selected_without_orders AllFireteamsButton has no neutral intermediate application
+PASS: selected_without_orders AllFireteamsButton uses its current final active state
+PASS: selected_without_orders AllFireteamsButton preserves the visible skin and role overlays
+PASS: selected_without_orders MoveButton has no neutral intermediate application
+PASS: selected_without_orders MoveButton uses its current final active state
+PASS: selected_without_orders MoveButton preserves the visible skin and role overlays
+PASS: selected_without_orders HoldButton has no neutral intermediate application
+PASS: selected_without_orders HoldButton uses its current final active state
+PASS: selected_without_orders HoldButton preserves the visible skin and role overlays
+PASS: selected_without_orders FlankButton has no neutral intermediate application
+PASS: selected_without_orders FlankButton uses its current final active state
+PASS: selected_without_orders FlankButton preserves the visible skin and role overlays
+PASS: selected_without_orders TakeButton has no neutral intermediate application
+PASS: selected_without_orders TakeButton uses its current final active state
+PASS: selected_without_orders TakeButton preserves the visible skin and role overlays
+PASS: selected_without_orders DoorBreachButton has no neutral intermediate application
+PASS: selected_without_orders DoorBreachButton uses its current final active state
+PASS: selected_without_orders DoorBreachButton preserves the visible skin and role overlays
+PASS: selected_without_orders TargetButton has no neutral intermediate application
+PASS: selected_without_orders TargetButton uses its current final active state
+PASS: selected_without_orders TargetButton preserves the visible skin and role overlays
+PASS: selected_without_orders ClearTargetButton has no neutral intermediate application
+PASS: selected_without_orders ClearTargetButton uses its current final active state
+PASS: selected_without_orders ClearTargetButton preserves the visible skin and role overlays
+PASS: selected_without_orders DeleteOrderButton has no neutral intermediate application
+PASS: selected_without_orders DeleteOrderButton uses its current final active state
+PASS: selected_without_orders DeleteOrderButton preserves the visible skin and role overlays
+PASS: selected_without_orders WaypointEraseButton has no neutral intermediate application
+PASS: selected_without_orders WaypointEraseButton uses its current final active state
+PASS: selected_without_orders WaypointEraseButton preserves the visible skin and role overlays
+PASS: selected_without_orders SortCommandMatrixButton has no neutral intermediate application
+PASS: selected_without_orders SortCommandMatrixButton uses its current final active state
+PASS: selected_without_orders SortCommandMatrixButton preserves the visible skin and role overlays
+PASS: selected_without_orders FireRuleHoldButton has no neutral intermediate application
+PASS: selected_without_orders FireRuleHoldButton preserves the visible skin and role overlays
+PASS: selected_without_orders FireRuleReturnButton has no neutral intermediate application
+PASS: selected_without_orders FireRuleReturnButton preserves the visible skin and role overlays
+PASS: selected_without_orders FireRuleFreeButton has no neutral intermediate application
+PASS: selected_without_orders FireRuleFreeButton preserves the visible skin and role overlays
+PASS: selected_without_orders FireRuleSuppressButton has no neutral intermediate application
+PASS: selected_without_orders FireRuleSuppressButton preserves the visible skin and role overlays
+PASS: selected_without_orders GoCommandMatrixButton has no neutral intermediate application
+PASS: selected_without_orders GoCommandMatrixButton uses its current final active state
+PASS: selected_without_orders GoCommandMatrixButton preserves the visible skin and role overlays
+PASS: selected_without_orders SetLZButton has no neutral intermediate application
+PASS: selected_without_orders SetLZButton uses its current final active state
+PASS: selected_without_orders SetLZButton preserves the visible skin and role overlays
+PASS: selected_without_orders CallDropshipButton has no neutral intermediate application
+PASS: selected_without_orders CallDropshipButton uses its current final active state
+PASS: selected_without_orders CallDropshipButton preserves the visible skin and role overlays
+PASS: selected_without_orders PrevEditPhaseButton has no neutral intermediate application
+PASS: selected_without_orders PrevEditPhaseButton uses its current final active state
+PASS: selected_without_orders PrevEditPhaseButton preserves the visible skin and role overlays
+PASS: selected_without_orders AddPhaseButton has no neutral intermediate application
+PASS: selected_without_orders AddPhaseButton uses its current final active state
+PASS: selected_without_orders AddPhaseButton preserves the visible skin and role overlays
+PASS: selected_without_orders NextEditPhaseButton has no neutral intermediate application
+PASS: selected_without_orders NextEditPhaseButton uses its current final active state
+PASS: selected_without_orders NextEditPhaseButton preserves the visible skin and role overlays
+PASS: selected_without_orders NextPhaseButton has no neutral intermediate application
+PASS: selected_without_orders NextPhaseButton uses its current final active state
+PASS: selected_without_orders NextPhaseButton preserves the visible skin and role overlays
+PASS: selected_without_orders NWButton has no neutral intermediate application
+PASS: selected_without_orders NWButton uses its current final active state
+PASS: selected_without_orders NWButton preserves the visible skin and role overlays
+PASS: selected_without_orders NEButton has no neutral intermediate application
+PASS: selected_without_orders NEButton uses its current final active state
+PASS: selected_without_orders NEButton preserves the visible skin and role overlays
+PASS: selected_without_orders SWButton has no neutral intermediate application
+PASS: selected_without_orders SWButton uses its current final active state
+PASS: selected_without_orders SWButton preserves the visible skin and role overlays
+PASS: selected_without_orders SEButton has no neutral intermediate application
+PASS: selected_without_orders SEButton uses its current final active state
+PASS: selected_without_orders SEButton preserves the visible skin and role overlays
+PASS: selected_without_orders preserves the single ROE-owner refresh
+PASS: selected_without_orders preserves the final layout boundary
+PASS: selected_without_orders keeps door authority metadata read-only
+PASS: selected_without_orders FireRuleHoldButton preserves ROE enable and active semantics
+PASS: selected_without_orders FireRuleReturnButton preserves ROE enable and active semantics
+PASS: selected_without_orders FireRuleFreeButton preserves ROE enable and active semantics
+PASS: selected_without_orders FireRuleSuppressButton preserves ROE enable and active semantics
+PASS: selected_without_orders still reads every final style on a repeated pass
+PASS: selected_without_orders repeated HomebaseNavButton output is stable
+PASS: selected_without_orders repeated FOBNavButton output is stable
+PASS: selected_without_orders repeated MissionNavButton output is stable
+PASS: selected_without_orders repeated AllFireteamsButton output is stable
+PASS: selected_without_orders repeated MoveButton output is stable
+PASS: selected_without_orders repeated HoldButton output is stable
+PASS: selected_without_orders repeated FlankButton output is stable
+PASS: selected_without_orders repeated TakeButton output is stable
+PASS: selected_without_orders repeated DoorBreachButton output is stable
+PASS: selected_without_orders repeated TargetButton output is stable
+PASS: selected_without_orders repeated ClearTargetButton output is stable
+PASS: selected_without_orders repeated DeleteOrderButton output is stable
+PASS: selected_without_orders repeated WaypointEraseButton output is stable
+PASS: selected_without_orders repeated SortCommandMatrixButton output is stable
+PASS: selected_without_orders repeated FireRuleHoldButton output is stable
+PASS: selected_without_orders repeated FireRuleReturnButton output is stable
+PASS: selected_without_orders repeated FireRuleFreeButton output is stable
+PASS: selected_without_orders repeated FireRuleSuppressButton output is stable
+PASS: selected_without_orders repeated GoCommandMatrixButton output is stable
+PASS: selected_without_orders repeated SetLZButton output is stable
+PASS: selected_without_orders repeated CallDropshipButton output is stable
+PASS: selected_without_orders repeated PrevEditPhaseButton output is stable
+PASS: selected_without_orders repeated AddPhaseButton output is stable
+PASS: selected_without_orders repeated NextEditPhaseButton output is stable
+PASS: selected_without_orders repeated NextPhaseButton output is stable
+PASS: selected_without_orders repeated NWButton output is stable
+PASS: selected_without_orders repeated NEButton output is stable
+PASS: selected_without_orders repeated SWButton output is stable
+PASS: selected_without_orders repeated SEButton output is stable
+HUD_ARCHITECTURE_20261106_STYLES: 605 passed, 0 failed
+HUD_STYLE_VERIFY_PASS

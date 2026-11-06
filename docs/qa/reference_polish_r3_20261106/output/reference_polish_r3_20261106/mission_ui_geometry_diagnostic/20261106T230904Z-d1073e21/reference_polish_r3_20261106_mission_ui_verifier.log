@@ -1,0 +1,154 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-d89ecf61320840eea3ab0f974dbf3b70
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: TargetButton has a real bounded glyph texture
+PASS: TargetButton reuses its original cached glyph
+PASS: ClearTargetButton has a real bounded glyph texture
+PASS: ClearTargetButton reuses its original cached glyph
+PASS: DeleteOrderButton has a real bounded glyph texture
+PASS: DeleteOrderButton reuses its original cached glyph
+PASS: SortCommandMatrixButton has a real bounded glyph texture
+PASS: SortCommandMatrixButton reuses its original cached glyph
+PASS: GoCommandMatrixButton has a real bounded glyph texture
+PASS: GoCommandMatrixButton reuses its original cached glyph
+PASS: Unknown IDs keep the existing null contract
+PASS: Existing move identity remains unchanged
+PASS: Existing take identity remains unchanged
+PASS: Existing defend identity remains unchanged
+PASS: Existing flank identity remains unchanged
+PASS: Existing dropship identity remains unchanged
+PASS: Existing loadout identity remains unchanged
+R3_ACTION_RECT (3440, 1440) MoveButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=72
+PASS: (3440, 1440) MoveButton has its visible final icon
+PASS: (3440, 1440) MoveButton preserves original node and callback
+PASS: (3440, 1440) MoveButton stays inside its square slot
+R3_ACTION_RECT (3440, 1440) TakeButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=72
+PASS: (3440, 1440) TakeButton has its visible final icon
+PASS: (3440, 1440) TakeButton preserves original node and callback
+PASS: (3440, 1440) TakeButton stays inside its square slot
+R3_ACTION_RECT (3440, 1440) HoldButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=72
+PASS: (3440, 1440) HoldButton has its visible final icon
+PASS: (3440, 1440) HoldButton preserves original node and callback
+PASS: (3440, 1440) HoldButton stays inside its square slot
+R3_ACTION_RECT (3440, 1440) FlankButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=72
+PASS: (3440, 1440) FlankButton has its visible final icon
+PASS: (3440, 1440) FlankButton preserves original node and callback
+PASS: (3440, 1440) FlankButton stays inside its square slot
+R3_ACTION_RECT (3440, 1440) GoCommandMatrixButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=72
+PASS: (3440, 1440) GoCommandMatrixButton has its visible final icon
+PASS: (3440, 1440) GoCommandMatrixButton preserves original node and callback
+PASS: (3440, 1440) GoCommandMatrixButton stays inside its square slot
+PASS: (3440, 1440) GoCommandMatrixButton uses the explicit native glyph owner
+R3_ACTION_RECT (3440, 1440) TargetButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=72
+PASS: (3440, 1440) TargetButton has its visible final icon
+PASS: (3440, 1440) TargetButton preserves original node and callback
+PASS: (3440, 1440) TargetButton stays inside its square slot
+PASS: (3440, 1440) TargetButton uses the explicit native glyph owner
+R3_ACTION_RECT (3440, 1440) ClearTargetButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=72
+PASS: (3440, 1440) ClearTargetButton has its visible final icon
+PASS: (3440, 1440) ClearTargetButton preserves original node and callback
+PASS: (3440, 1440) ClearTargetButton stays inside its square slot
+PASS: (3440, 1440) ClearTargetButton uses the explicit native glyph owner
+R3_ACTION_RECT (3440, 1440) DeleteOrderButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=72
+PASS: (3440, 1440) DeleteOrderButton has its visible final icon
+PASS: (3440, 1440) DeleteOrderButton preserves original node and callback
+PASS: (3440, 1440) DeleteOrderButton stays inside its square slot
+PASS: (3440, 1440) DeleteOrderButton uses the explicit native glyph owner
+R3_ACTION_RECT (3440, 1440) SortCommandMatrixButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=72
+PASS: (3440, 1440) SortCommandMatrixButton has its visible final icon
+PASS: (3440, 1440) SortCommandMatrixButton preserves original node and callback
+PASS: (3440, 1440) SortCommandMatrixButton stays inside its square slot
+PASS: (3440, 1440) SortCommandMatrixButton uses the explicit native glyph owner
+PASS: (3440, 1440) uses the quiet native frame without a short legacy header divider
+PASS: (3440, 1440) retains the current selected-team identity
+PASS: (3440, 1440) pure icon/frame formatting leaves real owners unchanged
+R3_ACTION_RECT (1920, 1080) MoveButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=64
+PASS: (1920, 1080) MoveButton has its visible final icon
+PASS: (1920, 1080) MoveButton preserves original node and callback
+PASS: (1920, 1080) MoveButton stays inside its square slot
+R3_ACTION_RECT (1920, 1080) TakeButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=64
+PASS: (1920, 1080) TakeButton has its visible final icon
+PASS: (1920, 1080) TakeButton preserves original node and callback
+PASS: (1920, 1080) TakeButton stays inside its square slot
+R3_ACTION_RECT (1920, 1080) HoldButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=64
+PASS: (1920, 1080) HoldButton has its visible final icon
+PASS: (1920, 1080) HoldButton preserves original node and callback
+PASS: (1920, 1080) HoldButton stays inside its square slot
+R3_ACTION_RECT (1920, 1080) FlankButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=64
+PASS: (1920, 1080) FlankButton has its visible final icon
+PASS: (1920, 1080) FlankButton preserves original node and callback
+PASS: (1920, 1080) FlankButton stays inside its square slot
+R3_ACTION_RECT (1920, 1080) GoCommandMatrixButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=64
+PASS: (1920, 1080) GoCommandMatrixButton has its visible final icon
+PASS: (1920, 1080) GoCommandMatrixButton preserves original node and callback
+PASS: (1920, 1080) GoCommandMatrixButton stays inside its square slot
+PASS: (1920, 1080) GoCommandMatrixButton uses the explicit native glyph owner
+R3_ACTION_RECT (1920, 1080) TargetButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=64
+PASS: (1920, 1080) TargetButton has its visible final icon
+PASS: (1920, 1080) TargetButton preserves original node and callback
+PASS: (1920, 1080) TargetButton stays inside its square slot
+PASS: (1920, 1080) TargetButton uses the explicit native glyph owner
+R3_ACTION_RECT (1920, 1080) ClearTargetButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=64
+PASS: (1920, 1080) ClearTargetButton has its visible final icon
+PASS: (1920, 1080) ClearTargetButton preserves original node and callback
+PASS: (1920, 1080) ClearTargetButton stays inside its square slot
+PASS: (1920, 1080) ClearTargetButton uses the explicit native glyph owner
+R3_ACTION_RECT (1920, 1080) DeleteOrderButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=64
+PASS: (1920, 1080) DeleteOrderButton has its visible final icon
+PASS: (1920, 1080) DeleteOrderButton preserves original node and callback
+PASS: (1920, 1080) DeleteOrderButton stays inside its square slot
+PASS: (1920, 1080) DeleteOrderButton uses the explicit native glyph owner
+R3_ACTION_RECT (1920, 1080) SortCommandMatrixButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=64
+PASS: (1920, 1080) SortCommandMatrixButton has its visible final icon
+PASS: (1920, 1080) SortCommandMatrixButton preserves original node and callback
+PASS: (1920, 1080) SortCommandMatrixButton stays inside its square slot
+PASS: (1920, 1080) SortCommandMatrixButton uses the explicit native glyph owner
+PASS: (1920, 1080) uses the quiet native frame without a short legacy header divider
+PASS: (1920, 1080) retains the current selected-team identity
+PASS: (1920, 1080) pure icon/frame formatting leaves real owners unchanged
+R3_ACTION_RECT (1280, 720) MoveButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=52
+PASS: (1280, 720) MoveButton has its visible final icon
+PASS: (1280, 720) MoveButton preserves original node and callback
+FAIL: (1280, 720) MoveButton stays inside its square slot
+R3_ACTION_RECT (1280, 720) TakeButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=52
+PASS: (1280, 720) TakeButton has its visible final icon
+PASS: (1280, 720) TakeButton preserves original node and callback
+FAIL: (1280, 720) TakeButton stays inside its square slot
+R3_ACTION_RECT (1280, 720) HoldButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=52
+PASS: (1280, 720) HoldButton has its visible final icon
+PASS: (1280, 720) HoldButton preserves original node and callback
+FAIL: (1280, 720) HoldButton stays inside its square slot
+R3_ACTION_RECT (1280, 720) FlankButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=52
+PASS: (1280, 720) FlankButton has its visible final icon
+PASS: (1280, 720) FlankButton preserves original node and callback
+FAIL: (1280, 720) FlankButton stays inside its square slot
+R3_ACTION_RECT (1280, 720) GoCommandMatrixButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=52
+PASS: (1280, 720) GoCommandMatrixButton has its visible final icon
+PASS: (1280, 720) GoCommandMatrixButton preserves original node and callback
+FAIL: (1280, 720) GoCommandMatrixButton stays inside its square slot
+PASS: (1280, 720) GoCommandMatrixButton uses the explicit native glyph owner
+R3_ACTION_RECT (1280, 720) TargetButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=52
+PASS: (1280, 720) TargetButton has its visible final icon
+PASS: (1280, 720) TargetButton preserves original node and callback
+FAIL: (1280, 720) TargetButton stays inside its square slot
+PASS: (1280, 720) TargetButton uses the explicit native glyph owner
+R3_ACTION_RECT (1280, 720) ClearTargetButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=52
+PASS: (1280, 720) ClearTargetButton has its visible final icon
+PASS: (1280, 720) ClearTargetButton preserves original node and callback
+FAIL: (1280, 720) ClearTargetButton stays inside its square slot
+PASS: (1280, 720) ClearTargetButton uses the explicit native glyph owner
+R3_ACTION_RECT (1280, 720) DeleteOrderButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=52
+PASS: (1280, 720) DeleteOrderButton has its visible final icon
+PASS: (1280, 720) DeleteOrderButton preserves original node and callback
+FAIL: (1280, 720) DeleteOrderButton stays inside its square slot
+PASS: (1280, 720) DeleteOrderButton uses the explicit native glyph owner
+R3_ACTION_RECT (1280, 720) SortCommandMatrixButton size=(64.0, 64.0) min=(64.0, 64.0) custom=(64.0, 64.0) edge=52
+PASS: (1280, 720) SortCommandMatrixButton has its visible final icon
+PASS: (1280, 720) SortCommandMatrixButton preserves original node and callback
+FAIL: (1280, 720) SortCommandMatrixButton stays inside its square slot
+PASS: (1280, 720) SortCommandMatrixButton uses the explicit native glyph owner
+PASS: (1280, 720) uses the quiet native frame without a short legacy header divider
+PASS: (1280, 720) retains the current selected-team identity
+PASS: (1280, 720) pure icon/frame formatting leaves real owners unchanged
+REFERENCE_POLISH_R3_MISSION_UI: 113 passed, 9 failed

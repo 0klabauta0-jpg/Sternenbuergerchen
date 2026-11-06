@@ -1,0 +1,51 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-f316ce60972c4ef880735b1c15605b8c
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: R3 bounded dressing helper exists
+PASS: Dressing helper parses
+PASS: Real source-cell plan produces clustered decoration
+PASS: One cold tile collection; zero per-instance linear MapData searches
+PASS: Candidate validation stays within the 512-cell bound
+PASS: Map array order cannot move, renumber or reroll the visual plan
+PASS: A permutation of the same semantic cluster centers cannot reroll a seeded plan
+PASS: Planning preserves both source contexts and their original center-array order
+PASS: A different seed changes placement variants without wall-clock randomness
+PASS: Pure planning preserves every source TileData value
+PASS: Every instance refers to a real allowed source cell with a unique semantic ID
+PASS: Whole props stay grounded inside their source Hex, also at negative axial coordinates
+PASS: Whole footprints preserve actual buildings, service lanes, pads and door clearances
+PASS: Both shape budgets remain bounded
+PASS: Unsupported topology fails closed
+PASS: Other maps do not inherit GM01 decoration
+PASS: A valid visual plan installs atomically
+PASS: Only two bounded static mesh batches are installed
+PASS: New layer stays hidden until actual terrain visibility is published
+PASS: Normalization and visibility do not mutate source geometry or shared materials
+PASS: Batches reuse the source mesh resources without collision or gameplay nodes
+PASS: Actual cached source transforms normalize absolute XZ and put every source AABB on the planned ground
+PASS: Mixed unknown/current/explored slots in the same batch follow their own source-cell state
+PASS: A visibility publication stays within the per-slot lookup/write bound
+PASS: Unchanged visibility performs no instance transform writes
+PASS: Known-terrain mode admits all static terrain decoration
+PASS: Blackout never admits stale known-mode cache values
+PASS: Off-mode transition restores static decoration without target data
+PASS: Team/context change with missing cell facts fails closed
+PASS: Unchanged plan and sources retain the existing layer and both actual MultiMesh resources
+PASS: Unchanged installation preserves published visibility and performs no rebuild or transform work
+PASS: Missing source resources cannot leave a partial visual scene
+PASS: A stale caller-supplied signature cannot admit changed placement records
+PASS: Same geometry in a different actual Mesh resource cannot reuse the old batch
+PASS: A changed actual Material identity cannot reuse the old batch
+PASS: Reinstallation replaces the old local layer instead of retaining stale slots
+PASS: Replacement starts hidden instead of inheriting the previous map's visibility
+PASS: Planner also consumes the actual saved 9408-cell GM01
+PASS: Real map values and registry revision stay unchanged
+PASS: Actual retained plant and gravel source meshes remain available
+PASS: Actual existing native source meshes can populate the visual layer
+PASS: Installing actual source meshes preserves MapData and registry truth
+PASS: Actual GM01 cold wrapper installs its real semantic plan
+PASS: Unchanged actual-map wrapper refresh preserves the existing layer and both batches
+PASS: Unchanged actual-map wrapper refresh preserves the published visible property and complete visibility receipt
+R3_WORLD_COMPONENT_RESULTS 45 passed, 0 failed; native GPU gate separate
+REFERENCE_R3_WORLD_DRESSING_PASS

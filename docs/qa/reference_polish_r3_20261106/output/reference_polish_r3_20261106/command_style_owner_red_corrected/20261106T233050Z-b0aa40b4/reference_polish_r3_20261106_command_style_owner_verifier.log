@@ -1,0 +1,189 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-90560dde5ce24f88940de68b1fb74532
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Actual local authority permits the controlled presenter readiness cases
+PASS: (3440, 1440) actual logical viewport
+PASS: (3440, 1440) ready=false active=false reaches both real polish functions
+FAIL: (3440, 1440) ready=false active=false primary preserves native presentation at the legacy boundary
+FAIL: (3440, 1440) ready=false active=false primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (3440, 1440) ready=false active=false primary
+FAIL: (3440, 1440) ready=false active=false go preserves native presentation at the legacy boundary
+FAIL: (3440, 1440) ready=false active=false go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (3440, 1440) ready=false active=false go
+PASS: (3440, 1440) ready=false active=false reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (3440, 1440) ready=false active=false disabled=true local=true actual_ready=false
+PASS: (3440, 1440) ready=false active=false native polish leaves all owners unchanged
+PASS: (3440, 1440) ready=false active=false identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (3440, 1440) ready=false active=false keeps complete historical legacy presentation
+PASS: (3440, 1440) ready=false active=false legacy oracle leaves all owners unchanged
+PASS: (3440, 1440) ready=false active=true reaches both real polish functions
+FAIL: (3440, 1440) ready=false active=true primary preserves native presentation at the legacy boundary
+FAIL: (3440, 1440) ready=false active=true primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (3440, 1440) ready=false active=true primary
+FAIL: (3440, 1440) ready=false active=true go preserves native presentation at the legacy boundary
+FAIL: (3440, 1440) ready=false active=true go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (3440, 1440) ready=false active=true go
+PASS: (3440, 1440) ready=false active=true reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (3440, 1440) ready=false active=true disabled=true local=true actual_ready=false
+PASS: (3440, 1440) ready=false active=true native polish leaves all owners unchanged
+PASS: (3440, 1440) ready=false active=true identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (3440, 1440) ready=false active=true keeps complete historical legacy presentation
+PASS: (3440, 1440) ready=false active=true legacy oracle leaves all owners unchanged
+PASS: (3440, 1440) ready=true active=false reaches both real polish functions
+FAIL: (3440, 1440) ready=true active=false primary preserves native presentation at the legacy boundary
+FAIL: (3440, 1440) ready=true active=false primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (3440, 1440) ready=true active=false primary
+FAIL: (3440, 1440) ready=true active=false go preserves native presentation at the legacy boundary
+FAIL: (3440, 1440) ready=true active=false go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (3440, 1440) ready=true active=false go
+PASS: (3440, 1440) ready=true active=false reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (3440, 1440) ready=true active=false disabled=false local=true actual_ready=true
+PASS: (3440, 1440) ready=true active=false native polish leaves all owners unchanged
+PASS: (3440, 1440) ready=true active=false identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (3440, 1440) ready=true active=false keeps complete historical legacy presentation
+PASS: (3440, 1440) ready=true active=false legacy oracle leaves all owners unchanged
+PASS: (3440, 1440) ready=true active=true reaches both real polish functions
+FAIL: (3440, 1440) ready=true active=true primary preserves native presentation at the legacy boundary
+FAIL: (3440, 1440) ready=true active=true primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (3440, 1440) ready=true active=true primary
+FAIL: (3440, 1440) ready=true active=true go preserves native presentation at the legacy boundary
+FAIL: (3440, 1440) ready=true active=true go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (3440, 1440) ready=true active=true go
+PASS: (3440, 1440) ready=true active=true reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (3440, 1440) ready=true active=true disabled=false local=true actual_ready=true
+PASS: (3440, 1440) ready=true active=true native polish leaves all owners unchanged
+PASS: (3440, 1440) ready=true active=true identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (3440, 1440) ready=true active=true keeps complete historical legacy presentation
+PASS: (3440, 1440) ready=true active=true legacy oracle leaves all owners unchanged
+PASS: (3440, 1440) real full update reaches both real polish functions
+FAIL: (3440, 1440) real full update primary preserves native presentation at the legacy boundary
+FAIL: (3440, 1440) real full update primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (3440, 1440) real full update primary
+FAIL: (3440, 1440) real full update go preserves native presentation at the legacy boundary
+FAIL: (3440, 1440) real full update go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (3440, 1440) real full update go
+PASS: (3440, 1440) full UI update leaves owners unchanged
+PASS: (1920, 1080) actual logical viewport
+PASS: (1920, 1080) ready=false active=false reaches both real polish functions
+FAIL: (1920, 1080) ready=false active=false primary preserves native presentation at the legacy boundary
+FAIL: (1920, 1080) ready=false active=false primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1920, 1080) ready=false active=false primary
+FAIL: (1920, 1080) ready=false active=false go preserves native presentation at the legacy boundary
+FAIL: (1920, 1080) ready=false active=false go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1920, 1080) ready=false active=false go
+PASS: (1920, 1080) ready=false active=false reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (1920, 1080) ready=false active=false disabled=true local=true actual_ready=false
+PASS: (1920, 1080) ready=false active=false native polish leaves all owners unchanged
+PASS: (1920, 1080) ready=false active=false identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (1920, 1080) ready=false active=false keeps complete historical legacy presentation
+PASS: (1920, 1080) ready=false active=false legacy oracle leaves all owners unchanged
+PASS: (1920, 1080) ready=false active=true reaches both real polish functions
+FAIL: (1920, 1080) ready=false active=true primary preserves native presentation at the legacy boundary
+FAIL: (1920, 1080) ready=false active=true primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1920, 1080) ready=false active=true primary
+FAIL: (1920, 1080) ready=false active=true go preserves native presentation at the legacy boundary
+FAIL: (1920, 1080) ready=false active=true go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1920, 1080) ready=false active=true go
+PASS: (1920, 1080) ready=false active=true reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (1920, 1080) ready=false active=true disabled=true local=true actual_ready=false
+PASS: (1920, 1080) ready=false active=true native polish leaves all owners unchanged
+PASS: (1920, 1080) ready=false active=true identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (1920, 1080) ready=false active=true keeps complete historical legacy presentation
+PASS: (1920, 1080) ready=false active=true legacy oracle leaves all owners unchanged
+PASS: (1920, 1080) ready=true active=false reaches both real polish functions
+FAIL: (1920, 1080) ready=true active=false primary preserves native presentation at the legacy boundary
+FAIL: (1920, 1080) ready=true active=false primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1920, 1080) ready=true active=false primary
+FAIL: (1920, 1080) ready=true active=false go preserves native presentation at the legacy boundary
+FAIL: (1920, 1080) ready=true active=false go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1920, 1080) ready=true active=false go
+PASS: (1920, 1080) ready=true active=false reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (1920, 1080) ready=true active=false disabled=false local=true actual_ready=true
+PASS: (1920, 1080) ready=true active=false native polish leaves all owners unchanged
+PASS: (1920, 1080) ready=true active=false identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (1920, 1080) ready=true active=false keeps complete historical legacy presentation
+PASS: (1920, 1080) ready=true active=false legacy oracle leaves all owners unchanged
+PASS: (1920, 1080) ready=true active=true reaches both real polish functions
+FAIL: (1920, 1080) ready=true active=true primary preserves native presentation at the legacy boundary
+FAIL: (1920, 1080) ready=true active=true primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1920, 1080) ready=true active=true primary
+FAIL: (1920, 1080) ready=true active=true go preserves native presentation at the legacy boundary
+FAIL: (1920, 1080) ready=true active=true go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1920, 1080) ready=true active=true go
+PASS: (1920, 1080) ready=true active=true reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (1920, 1080) ready=true active=true disabled=false local=true actual_ready=true
+PASS: (1920, 1080) ready=true active=true native polish leaves all owners unchanged
+PASS: (1920, 1080) ready=true active=true identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (1920, 1080) ready=true active=true keeps complete historical legacy presentation
+PASS: (1920, 1080) ready=true active=true legacy oracle leaves all owners unchanged
+PASS: (1920, 1080) real full update reaches both real polish functions
+FAIL: (1920, 1080) real full update primary preserves native presentation at the legacy boundary
+FAIL: (1920, 1080) real full update primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1920, 1080) real full update primary
+FAIL: (1920, 1080) real full update go preserves native presentation at the legacy boundary
+FAIL: (1920, 1080) real full update go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1920, 1080) real full update go
+PASS: (1920, 1080) full UI update leaves owners unchanged
+PASS: (1280, 720) actual logical viewport
+PASS: (1280, 720) ready=false active=false reaches both real polish functions
+FAIL: (1280, 720) ready=false active=false primary preserves native presentation at the legacy boundary
+FAIL: (1280, 720) ready=false active=false primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1280, 720) ready=false active=false primary
+FAIL: (1280, 720) ready=false active=false go preserves native presentation at the legacy boundary
+FAIL: (1280, 720) ready=false active=false go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1280, 720) ready=false active=false go
+PASS: (1280, 720) ready=false active=false reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (1280, 720) ready=false active=false disabled=true local=true actual_ready=false
+PASS: (1280, 720) ready=false active=false native polish leaves all owners unchanged
+PASS: (1280, 720) ready=false active=false identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (1280, 720) ready=false active=false keeps complete historical legacy presentation
+PASS: (1280, 720) ready=false active=false legacy oracle leaves all owners unchanged
+PASS: (1280, 720) ready=false active=true reaches both real polish functions
+FAIL: (1280, 720) ready=false active=true primary preserves native presentation at the legacy boundary
+FAIL: (1280, 720) ready=false active=true primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1280, 720) ready=false active=true primary
+FAIL: (1280, 720) ready=false active=true go preserves native presentation at the legacy boundary
+FAIL: (1280, 720) ready=false active=true go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1280, 720) ready=false active=true go
+PASS: (1280, 720) ready=false active=true reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (1280, 720) ready=false active=true disabled=true local=true actual_ready=false
+PASS: (1280, 720) ready=false active=true native polish leaves all owners unchanged
+PASS: (1280, 720) ready=false active=true identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (1280, 720) ready=false active=true keeps complete historical legacy presentation
+PASS: (1280, 720) ready=false active=true legacy oracle leaves all owners unchanged
+PASS: (1280, 720) ready=true active=false reaches both real polish functions
+FAIL: (1280, 720) ready=true active=false primary preserves native presentation at the legacy boundary
+FAIL: (1280, 720) ready=true active=false primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1280, 720) ready=true active=false primary
+FAIL: (1280, 720) ready=true active=false go preserves native presentation at the legacy boundary
+FAIL: (1280, 720) ready=true active=false go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1280, 720) ready=true active=false go
+PASS: (1280, 720) ready=true active=false reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (1280, 720) ready=true active=false disabled=false local=true actual_ready=true
+PASS: (1280, 720) ready=true active=false native polish leaves all owners unchanged
+PASS: (1280, 720) ready=true active=false identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (1280, 720) ready=true active=false keeps complete historical legacy presentation
+PASS: (1280, 720) ready=true active=false legacy oracle leaves all owners unchanged
+PASS: (1280, 720) ready=true active=true reaches both real polish functions
+FAIL: (1280, 720) ready=true active=true primary preserves native presentation at the legacy boundary
+FAIL: (1280, 720) ready=true active=true primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1280, 720) ready=true active=true primary
+FAIL: (1280, 720) ready=true active=true go preserves native presentation at the legacy boundary
+FAIL: (1280, 720) ready=true active=true go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1280, 720) ready=true active=true go
+PASS: (1280, 720) ready=true active=true reaches the intended actual readiness projection
+R3_STYLE_READINESS_FACTS (1280, 720) ready=true active=true disabled=false local=true actual_ready=true
+PASS: (1280, 720) ready=true active=true native polish leaves all owners unchanged
+PASS: (1280, 720) ready=true active=true identical tooltip/meta/readiness/disabled/callback projection to explicit legacy oracle
+PASS: (1280, 720) ready=true active=true keeps complete historical legacy presentation
+PASS: (1280, 720) ready=true active=true legacy oracle leaves all owners unchanged
+PASS: (1280, 720) real full update reaches both real polish functions
+FAIL: (1280, 720) real full update primary preserves native presentation at the legacy boundary
+FAIL: (1280, 720) real full update primary emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1280, 720) real full update primary
+FAIL: (1280, 720) real full update go preserves native presentation at the legacy boundary
+FAIL: (1280, 720) real full update go emits no redundant native theme notice
+R3_COMMAND_STYLE_BOUNDARY_DIFF (1280, 720) real full update go
+PASS: (1280, 720) full UI update leaves owners unchanged
+R3_COMMAND_STYLE_OWNER: 82 passed, 60 failed

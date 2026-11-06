@@ -312,7 +312,9 @@ func _process(delta: float) -> void:
 		return
 	_fog_update_elapsed = 0.0
 	var sync_started_usec: int = Time.get_ticks_usec() if _fog_frame_timing_debug_enabled else 0
-	_sync_fog_of_war_visual_state(false)
+	# The frame already serviced its bounded slice above. A newly requested
+	# sample starts next frame rather than doubling work after a completion.
+	_sync_fog_of_war_visual_state(false, false)
 	if _fog_frame_timing_debug_enabled:
 		_record_fog_frame_timing_debug_snapshot(frame_started_usec, advance_usec, Time.get_ticks_usec() - sync_started_usec)
 
@@ -1032,9 +1034,36 @@ func _configure_primary_3d_view(view: Node, unit_nodes: Array) -> void:
 		view.call("configure_from_map", _loaded_terrain_map_data)
 	if view.has_method("set_unit_nodes"):
 		view.call("set_unit_nodes", unit_nodes)
+	if _frame_reference_mission_camera(view):
+		return
 	var objective_marker := _resolve_marker(objective_point_path)
 	if objective_marker != null and view.has_method("focus_world_position"):
 		view.call("focus_world_position", objective_marker.global_position)
+
+
+func _frame_reference_mission_camera(view: Node) -> bool:
+	# Mission-only initial composition. The view retains camera math and all
+	# subsequent manual navigation; no actor or enemy lookup is needed.
+	if view == null or not is_instance_valid(view) or _loaded_terrain_map_data == null:
+		return false
+	if not _loaded_terrain_map_data.has_method("get_authored_visual_layout_id") or String(_loaded_terrain_map_data.call("get_authored_visual_layout_id")) != "gm01_frontier_outpost_v1":
+		return false
+	if bool(view.get_meta("gm01_reference_initial_camera", false)):
+		return true
+	if not view.has_method("frame_world_positions"):
+		return false
+	var points: Array = []
+	for path in [spawn_alpha_path, objective_point_path]:
+		var marker := _resolve_marker(path)
+		if marker != null:
+			points.append(marker.global_position)
+	if points.is_empty():
+		return false
+	var result: Dictionary = view.call("frame_world_positions", points, 6.0, 22.0, 22.0)
+	if not bool(result.get("framed", false)):
+		return false
+	view.set_meta("gm01_reference_initial_camera", true)
+	return true
 
 
 func set_fog_of_war_mode(mode: String) -> void:
@@ -1074,12 +1103,12 @@ func _initialize_fog_of_war(unit_nodes: Array, terrain_registry) -> void:
 	call_deferred("_sync_fog_of_war_visual_state", true)
 
 
-func _sync_fog_of_war_visual_state(force: bool = false) -> void:
+func _sync_fog_of_war_visual_state(force: bool = false, advance_work: bool = true) -> void:
 	if _fog_of_war_system == null:
 		return
 	var view = _terrain_3d_view
 	if view == null or not is_instance_valid(view) or not view.is_inside_tree():
-		call_deferred("_sync_fog_of_war_visual_state", force)
+		call_deferred("_sync_fog_of_war_visual_state", force, advance_work)
 		return
 	var mode: String = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", fog_of_war_mode))
 	var viewer_team_id: String = _get_fog_viewer_team_id()
@@ -1134,7 +1163,8 @@ func _sync_fog_of_war_visual_state(force: bool = false) -> void:
 		var pending_snapshot: Dictionary = _fog_of_war_system.call("build_team_state_snapshot", viewer_team_id)
 		pending_snapshot["visibility_pending"] = true
 		view.call("set_fog_of_war_state", pending_snapshot)
-	_advance_fog_of_war_visibility_work()
+	if advance_work:
+		_advance_fog_of_war_visibility_work()
 
 
 func _advance_fog_of_war_visibility_work() -> void:

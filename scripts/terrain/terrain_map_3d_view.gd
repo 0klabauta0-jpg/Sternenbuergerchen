@@ -16,6 +16,7 @@ const HEX_GRID_COVERAGE_SHADER: Shader = preload("res://shaders/terrain/hex_grid
 const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const HEX_GROUND_BATCH_SCRIPT: GDScript = preload("res://scripts/terrain/hex_ground_batch.gd")
 const FRONTIER_GM01_LAYOUT_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_gm01_layout.gd")
+const FRONTIER_REFERENCE_DRESSING_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_reference_dressing.gd")
 
 const VIEWPORT_CONTAINER_NAME: String = "ViewportContainer"
 const VIEWPORT_NAME: String = "SubViewport"
@@ -1393,20 +1394,23 @@ func _sync_authored_visual_layout() -> void:
 			_authored_visual_layout_root = _authored_visual_layout_facts.get("root") as Node3D
 			if is_instance_valid(_authored_visual_layout_root):
 				_authored_visual_layout_id = requested_id
-				var bounds: Dictionary = _get_local_visual_bounds(_authored_visual_layout_root)
-				if bool(bounds.get("valid", false)):
-					_authored_visual_top_y = Vector3(bounds.get("max", Vector3.ZERO)).y
-				_authored_visual_budget = _build_node_budget_for_root(_authored_visual_layout_root)
 	if not is_instance_valid(_authored_visual_layout_root):
 		return
+	# Cold revalidation includes same-layout maps with changed height/object/
+	# walkability and unchanged grid coverage. New slots remain hidden until the
+	# existing FoW cache is reset/published later in render_map.
+	FRONTIER_GM01_LAYOUT_SCRIPT.refresh_reference_dressing(_authored_visual_layout_facts, _terrain_map_data)
 	var ground := _authored_visual_layout_facts.get("flat_ground") as MeshInstance3D
 	if is_instance_valid(ground):
 		# A same-layout map switch may have a different saved coverage. Update only
 		# its cold ground geometry; the source MapData remains untouched.
 		if String(ground.get_meta("ground_grid_signature", "")) != saved_ground_signature:
 			FRONTIER_GM01_LAYOUT_SCRIPT.configure_ground_mesh(ground, saved_ground_grids, true)
-			_authored_visual_budget = _build_node_budget_for_root(_authored_visual_layout_root)
 		_flat_ground_visual_owner = weakref(ground)
+	var bounds: Dictionary = _get_local_visual_bounds(_authored_visual_layout_root)
+	if bool(bounds.get("valid", false)):
+		_authored_visual_top_y = Vector3(bounds.get("max", Vector3.ZERO)).y
+	_authored_visual_budget = _build_node_budget_for_root(_authored_visual_layout_root)
 	_authored_visual_layout_facts["saved_ground_signature"] = saved_ground_signature
 	_authored_visual_layout_facts["saved_ground_cell_count"] = saved_ground_grids.size()
 	for tile in _terrain_map_data.call("get_tiles"):
@@ -2686,6 +2690,7 @@ func get_render_snapshot() -> Dictionary:
 		"authored_visual_owned_tile_count": _authored_visual_owned_grids.size(),
 		"authored_visual_grid_visible": _authored_visual_grid_visible,
 		"authored_visual_assets": _authored_visual_layout_facts.get("assets", []).duplicate(true),
+		"reference_dressing": get_reference_dressing_snapshot(),
 		"authored_ground_cell_count": ground_snapshot.get("cell_count", 0),
 		"authored_ground_plane_bounds": ground_snapshot.get("plane_bounds", {}),
 		"ground_matches_saved_hex_coverage": ground_snapshot.get("matches_saved_hex_coverage", false),
@@ -6329,6 +6334,7 @@ func _process_pending_fow_overlay_full_rebuild() -> void:
 		_apply_fow_overlay_tile_to_multimesh(tile_id)
 	if _fow_overlay_pending_cursor >= _fow_overlay_pending_tile_ids.size():
 		_finalize_fow_overlay_full_rebuild()
+	_publish_reference_dressing_visibility()
 
 
 func _apply_pending_fow_snapshot_changes(previous: Dictionary, current: Dictionary) -> void:
@@ -6363,6 +6369,7 @@ func _apply_pending_fow_snapshot_changes(previous: Dictionary, current: Dictiona
 	_fow_overlay_dirty_chunk_rebuild_count += dirty_chunks.size()
 	_fow_overlay_delta_apply_count += 1
 	_fow_overlay_visibility_revision = int(_fog_of_war_state.get("visibility_revision", 0))
+	_publish_reference_dressing_visibility()
 
 
 func _finalize_fow_overlay_full_rebuild() -> void:
@@ -6439,6 +6446,7 @@ func _apply_fow_overlay_delta(next_fog_state: Dictionary) -> bool:
 	_fow_overlay_delta_apply_count += 1
 	_fow_overlay_visibility_revision = int(next_fog_state.get("visibility_revision", _fow_overlay_visibility_revision))
 	_fow_overlay_rebuild_count += 1
+	_publish_reference_dressing_visibility()
 	return true
 
 
@@ -6460,6 +6468,21 @@ func _clear_fow_overlay_runtime_cache(preserve_render_tiles: bool = false) -> vo
 	_fow_overlay_safety_cover = null
 	_fow_overlay_blackout_y = 0.0
 	_fow_overlay_visibility_revision = -1
+	# This is also the immediate mode/team/map-transition publication. Unknown
+	# slots fail closed before any bounded rebuild slice or next rendered frame;
+	# off/known modes admit static public terrain without target/enemy knowledge.
+	_publish_reference_dressing_visibility()
+
+
+func _publish_reference_dressing_visibility() -> void:
+	var layer := _authored_visual_layout_facts.get("reference_dressing_layer") as Node3D
+	if is_instance_valid(layer):
+		FRONTIER_REFERENCE_DRESSING_SCRIPT.apply_visibility(layer, _fog_of_war_mode, _fow_overlay_tile_states_by_id)
+
+
+func get_reference_dressing_snapshot() -> Dictionary:
+	var layer := _authored_visual_layout_facts.get("reference_dressing_layer") as Node3D
+	return FRONTIER_REFERENCE_DRESSING_SCRIPT.get_snapshot(layer)
 
 
 func _get_fow_overlay_chunk_position(tile_data) -> Vector2i:

@@ -1,0 +1,98 @@
+{
+  "schema": "sternenbuergerchen.reference_polish_r3_20261106.v1",
+  "checks": [
+    {
+      "name": "reference_polish_r3_20261106_homebase_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-868a60e2da674d0caff3c334937679cd",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\868a60e2da674d0caff3c334937679cd\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\reference_polish_r3_20261106\\homebase_corrected_green\\20261106T231321Z-df649fd0\\reference_polish_r3_20261106_homebase_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\868a60e2da674d0caff3c334937679cd\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\868a60e2da674d0caff3c334937679cd\\project\\scripts\\tests\\reference_polish_r3_20261106_homebase_verifier.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "81f1570a3840d4d5f01355ce90a874f8d5466503e742e8c77aa98f7e7958f976",
+        "scripts/meta/homebase_screen.gd": "d970699cd605269de7b4360ad071bec55ab436f46b869f9ea93bafe1a711bd5d",
+        "scripts/meta/meta_ui_skin.gd": "64dbb2ee42cf81db94b96dd29a99d69517c3b92bcece703085e9e499e8254540",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "e87cfe88e3723e973a2cce8d5092c28e3b3c2b5d4ef3c683c05d061ed85a5a75",
+        "scripts/tests/hud_architecture_20261106_native_capture.gd": "769d5e2c6359e2471a34b2f48fe8b3b72514cca613a8fa771efc18bdadbc2644",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bdecc250219229874f79880e53d3c2bb211833fc46df57596798e989df35ed04",
+        "scripts/tests/mission_test_setup.gd": "64da64da090566e3bc06da06eb6a754161a943033b191d3572c218dc98bd2aaf",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/playtest_20261105_motion_order_capture.gd": "d116b56adcd8006eb2ae06a7111842aabc7b9008639b7541f2332d025b3b95fa",
+        "scripts/tests/reference_polish_r3_20261106_homebase_verifier.gd": "6154ed1e9729bbecd69b85c67543afd6db06867e317cb017f63e000eef33553b",
+        "scripts/tests/run_reference_polish_r3_20261106.py": "4acf931e3072e6b0a4eecc1e641b00547f359d8b04672d157ee352a79fdde3cf",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "5342a804244cc97df59a30a1f8d4837e79a93cd0bd2e25a39ec27c2544f6a9ed",
+        "scripts/ui/native_ui_icons.gd": "4450b9f91586d95112d615c11fde6c8e77f2fe1a6bd951c6917d7161f8de276e",
+        "scripts/ui/reference_panel_frame.gd": "4b5c7b51f17356443d8e1bfa7ed49f72a47a33456bf149320e546c34e6cb30ce",
+        "scripts/ui/tactical_ui_theme.gd": "87df9617a029fb292f4aa808b10422c3be082b22714112111960a603fc533729"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "81f1570a3840d4d5f01355ce90a874f8d5466503e742e8c77aa98f7e7958f976",
+        "scripts/meta/homebase_screen.gd": "d970699cd605269de7b4360ad071bec55ab436f46b869f9ea93bafe1a711bd5d",
+        "scripts/meta/meta_ui_skin.gd": "64dbb2ee42cf81db94b96dd29a99d69517c3b92bcece703085e9e499e8254540",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "e87cfe88e3723e973a2cce8d5092c28e3b3c2b5d4ef3c683c05d061ed85a5a75",
+        "scripts/tests/hud_architecture_20261106_native_capture.gd": "769d5e2c6359e2471a34b2f48fe8b3b72514cca613a8fa771efc18bdadbc2644",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bdecc250219229874f79880e53d3c2bb211833fc46df57596798e989df35ed04",
+        "scripts/tests/mission_test_setup.gd": "64da64da090566e3bc06da06eb6a754161a943033b191d3572c218dc98bd2aaf",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/playtest_20261105_motion_order_capture.gd": "d116b56adcd8006eb2ae06a7111842aabc7b9008639b7541f2332d025b3b95fa",
+        "scripts/tests/reference_polish_r3_20261106_homebase_verifier.gd": "6154ed1e9729bbecd69b85c67543afd6db06867e317cb017f63e000eef33553b",
+        "scripts/tests/run_reference_polish_r3_20261106.py": "4acf931e3072e6b0a4eecc1e641b00547f359d8b04672d157ee352a79fdde3cf",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "5342a804244cc97df59a30a1f8d4837e79a93cd0bd2e25a39ec27c2544f6a9ed",
+        "scripts/ui/native_ui_icons.gd": "4450b9f91586d95112d615c11fde6c8e77f2fe1a6bd951c6917d7161f8de276e",
+        "scripts/ui/reference_panel_frame.gd": "4b5c7b51f17356443d8e1bfa7ed49f72a47a33456bf149320e546c34e6cb30ce",
+        "scripts/ui/tactical_ui_theme.gd": "87df9617a029fb292f4aa808b10422c3be082b22714112111960a603fc533729"
+      },
+      "source_inputs_stable": true
+    }
+  ],
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

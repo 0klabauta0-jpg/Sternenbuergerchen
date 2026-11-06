@@ -1,0 +1,11 @@
+{
+  "schema": "sternenbuergerchen.hud_qa_zip_receipt.v1",
+  "path": "reference_polish_r3_20261106.zip",
+  "bytes": 74194174,
+  "sha256": "9ee033b7d782e79d01400657be4beb0f352ee01785ffba4227c8f45f2bf3e961",
+  "members": 254,
+  "uncompressed_bytes": 431092508,
+  "package_bytes_before_receipt": 103504715,
+  "budget_bytes": 188743680,
+  "main_receipt": "Separate mutable receipt owned by Root."
+}

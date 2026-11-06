@@ -1,0 +1,169 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-9bbf3eba868e42f594725d90d2124ab5
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Controller exposes the bounded live legacy-action projection
+PASS: Real mission scene exposes plan and simulation owners
+PASS: Existing next-loop contract accepts the controlled first-decision source
+PASS: active_with_synthetic_smoke reference actually exercises the old backward reads
+PASS: active_with_synthetic_smoke local DAG reads the next-loop source exactly once
+PASS: active_with_synthetic_smoke current RAW texts prevent repeated panel construction
+PASS: active_with_synthetic_smoke local DAG does not read trimmed text back from other panels
+PASS: active_with_synthetic_smoke projection includes runtime_button
+PASS: active_with_synthetic_smoke runtime_button matches unchanged getters with identical source/RAW inputs
+PASS: active_with_synthetic_smoke runtime_button remains a read-only contract
+PASS: active_with_synthetic_smoke projection includes runtime_visual
+PASS: active_with_synthetic_smoke runtime_visual matches unchanged getters with identical source/RAW inputs
+PASS: active_with_synthetic_smoke runtime_visual remains a read-only contract
+PASS: active_with_synthetic_smoke projection includes choice_buttons
+PASS: active_with_synthetic_smoke choice_buttons matches unchanged getters with identical source/RAW inputs
+PASS: active_with_synthetic_smoke choice_buttons remains a read-only contract
+PASS: active_with_synthetic_smoke projection includes choice_visual
+PASS: active_with_synthetic_smoke choice_visual matches unchanged getters with identical source/RAW inputs
+PASS: active_with_synthetic_smoke choice_visual remains a read-only contract
+PASS: active_with_synthetic_smoke projection includes execution_hook
+PASS: active_with_synthetic_smoke execution_hook matches unchanged getters with identical source/RAW inputs
+PASS: active_with_synthetic_smoke execution_hook remains a read-only contract
+PASS: active_with_synthetic_smoke runtime gate follows the current RAW visibility evidence
+PASS: active_with_synthetic_smoke four-choice gate requires its existing smoke source
+PASS: active_with_synthetic_smoke runtime projection keeps GO separate
+PASS: active_with_synthetic_smoke command draft never auto-executes
+PASS: active_with_synthetic_smoke draft preserves the selected fireteam and HOLD intent
+PASS: active_with_synthetic_smoke draft preserves the existing GO owner
+PASS: active_with_synthetic_smoke secure_area retains manual confirm then GO
+PASS: active_with_synthetic_smoke push_objective retains manual confirm then GO
+PASS: active_with_synthetic_smoke flank_pressure retains manual confirm then GO
+PASS: active_with_synthetic_smoke reset_spacing retains manual confirm then GO
+PASS: active_with_synthetic_smoke preserves all four ordered choices
+PASS: active_with_synthetic_smoke preserves existing choice command types
+PASS: active_with_synthetic_smoke both apply paths consume the supplied projection
+PASS: active_with_synthetic_smoke pure projection/apply leaves commands, effects, plans, ROE and units unchanged
+PASS: normal_unobserved_smoke reference actually exercises the old backward reads
+PASS: normal_unobserved_smoke local DAG reads the next-loop source exactly once
+PASS: normal_unobserved_smoke current RAW texts prevent repeated panel construction
+PASS: normal_unobserved_smoke local DAG does not read trimmed text back from other panels
+PASS: normal_unobserved_smoke projection includes runtime_button
+PASS: normal_unobserved_smoke runtime_button matches unchanged getters with identical source/RAW inputs
+PASS: normal_unobserved_smoke runtime_button remains a read-only contract
+PASS: normal_unobserved_smoke projection includes runtime_visual
+PASS: normal_unobserved_smoke runtime_visual matches unchanged getters with identical source/RAW inputs
+PASS: normal_unobserved_smoke runtime_visual remains a read-only contract
+PASS: normal_unobserved_smoke projection includes choice_buttons
+PASS: normal_unobserved_smoke choice_buttons matches unchanged getters with identical source/RAW inputs
+PASS: normal_unobserved_smoke choice_buttons remains a read-only contract
+PASS: normal_unobserved_smoke projection includes choice_visual
+PASS: normal_unobserved_smoke choice_visual matches unchanged getters with identical source/RAW inputs
+PASS: normal_unobserved_smoke choice_visual remains a read-only contract
+PASS: normal_unobserved_smoke projection includes execution_hook
+PASS: normal_unobserved_smoke execution_hook matches unchanged getters with identical source/RAW inputs
+PASS: normal_unobserved_smoke execution_hook remains a read-only contract
+PASS: normal_unobserved_smoke runtime gate follows the current RAW visibility evidence
+PASS: normal_unobserved_smoke four-choice gate requires its existing smoke source
+PASS: normal_unobserved_smoke runtime projection keeps GO separate
+PASS: normal_unobserved_smoke command draft never auto-executes
+PASS: normal_unobserved_smoke draft preserves the selected fireteam and HOLD intent
+PASS: normal_unobserved_smoke draft preserves the existing GO owner
+PASS: normal_unobserved_smoke both apply paths consume the supplied projection
+PASS: normal_unobserved_smoke pure projection/apply leaves commands, effects, plans, ROE and units unchanged
+PASS: selected_raw_missing reference actually exercises the old backward reads
+PASS: selected_raw_missing local DAG reads the next-loop source exactly once
+PASS: selected_raw_missing current RAW texts prevent repeated panel construction
+PASS: selected_raw_missing local DAG does not read trimmed text back from other panels
+PASS: selected_raw_missing projection includes runtime_button
+PASS: selected_raw_missing runtime_button matches unchanged getters with identical source/RAW inputs
+PASS: selected_raw_missing runtime_button remains a read-only contract
+PASS: selected_raw_missing projection includes runtime_visual
+PASS: selected_raw_missing runtime_visual matches unchanged getters with identical source/RAW inputs
+PASS: selected_raw_missing runtime_visual remains a read-only contract
+PASS: selected_raw_missing projection includes choice_buttons
+PASS: selected_raw_missing choice_buttons matches unchanged getters with identical source/RAW inputs
+PASS: selected_raw_missing choice_buttons remains a read-only contract
+PASS: selected_raw_missing projection includes choice_visual
+PASS: selected_raw_missing choice_visual matches unchanged getters with identical source/RAW inputs
+PASS: selected_raw_missing choice_visual remains a read-only contract
+PASS: selected_raw_missing projection includes execution_hook
+PASS: selected_raw_missing execution_hook matches unchanged getters with identical source/RAW inputs
+PASS: selected_raw_missing execution_hook remains a read-only contract
+PASS: selected_raw_missing runtime gate follows the current RAW visibility evidence
+PASS: selected_raw_missing four-choice gate requires its existing smoke source
+PASS: selected_raw_missing runtime projection keeps GO separate
+PASS: selected_raw_missing command draft never auto-executes
+PASS: selected_raw_missing both apply paths consume the supplied projection
+PASS: selected_raw_missing pure projection/apply leaves commands, effects, plans, ROE and units unchanged
+PASS: strategic_raw_missing reference actually exercises the old backward reads
+PASS: strategic_raw_missing local DAG reads the next-loop source exactly once
+PASS: strategic_raw_missing current RAW texts prevent repeated panel construction
+PASS: strategic_raw_missing local DAG does not read trimmed text back from other panels
+PASS: strategic_raw_missing projection includes runtime_button
+PASS: strategic_raw_missing runtime_button matches unchanged getters with identical source/RAW inputs
+PASS: strategic_raw_missing runtime_button remains a read-only contract
+PASS: strategic_raw_missing projection includes runtime_visual
+PASS: strategic_raw_missing runtime_visual matches unchanged getters with identical source/RAW inputs
+PASS: strategic_raw_missing runtime_visual remains a read-only contract
+PASS: strategic_raw_missing projection includes choice_buttons
+PASS: strategic_raw_missing choice_buttons matches unchanged getters with identical source/RAW inputs
+PASS: strategic_raw_missing choice_buttons remains a read-only contract
+PASS: strategic_raw_missing projection includes choice_visual
+PASS: strategic_raw_missing choice_visual matches unchanged getters with identical source/RAW inputs
+PASS: strategic_raw_missing choice_visual remains a read-only contract
+PASS: strategic_raw_missing projection includes execution_hook
+PASS: strategic_raw_missing execution_hook matches unchanged getters with identical source/RAW inputs
+PASS: strategic_raw_missing execution_hook remains a read-only contract
+PASS: strategic_raw_missing runtime gate follows the current RAW visibility evidence
+PASS: strategic_raw_missing four-choice gate requires its existing smoke source
+PASS: strategic_raw_missing runtime projection keeps GO separate
+PASS: strategic_raw_missing command draft never auto-executes
+PASS: strategic_raw_missing both apply paths consume the supplied projection
+PASS: strategic_raw_missing pure projection/apply leaves commands, effects, plans, ROE and units unchanged
+PASS: changed_raw_does_not_confirm_visibility reference actually exercises the old backward reads
+PASS: changed_raw_does_not_confirm_visibility local DAG reads the next-loop source exactly once
+PASS: changed_raw_does_not_confirm_visibility current RAW texts prevent repeated panel construction
+PASS: changed_raw_does_not_confirm_visibility local DAG does not read trimmed text back from other panels
+PASS: changed_raw_does_not_confirm_visibility projection includes runtime_button
+PASS: changed_raw_does_not_confirm_visibility runtime_button matches unchanged getters with identical source/RAW inputs
+PASS: changed_raw_does_not_confirm_visibility runtime_button remains a read-only contract
+PASS: changed_raw_does_not_confirm_visibility projection includes runtime_visual
+PASS: changed_raw_does_not_confirm_visibility runtime_visual matches unchanged getters with identical source/RAW inputs
+PASS: changed_raw_does_not_confirm_visibility runtime_visual remains a read-only contract
+PASS: changed_raw_does_not_confirm_visibility projection includes choice_buttons
+PASS: changed_raw_does_not_confirm_visibility choice_buttons matches unchanged getters with identical source/RAW inputs
+PASS: changed_raw_does_not_confirm_visibility choice_buttons remains a read-only contract
+PASS: changed_raw_does_not_confirm_visibility projection includes choice_visual
+PASS: changed_raw_does_not_confirm_visibility choice_visual matches unchanged getters with identical source/RAW inputs
+PASS: changed_raw_does_not_confirm_visibility choice_visual remains a read-only contract
+PASS: changed_raw_does_not_confirm_visibility projection includes execution_hook
+PASS: changed_raw_does_not_confirm_visibility execution_hook matches unchanged getters with identical source/RAW inputs
+PASS: changed_raw_does_not_confirm_visibility execution_hook remains a read-only contract
+PASS: changed_raw_does_not_confirm_visibility runtime gate follows the current RAW visibility evidence
+PASS: changed_raw_does_not_confirm_visibility four-choice gate requires its existing smoke source
+PASS: changed_raw_does_not_confirm_visibility runtime projection keeps GO separate
+PASS: changed_raw_does_not_confirm_visibility command draft never auto-executes
+PASS: changed_raw_does_not_confirm_visibility both apply paths consume the supplied projection
+PASS: changed_raw_does_not_confirm_visibility pure projection/apply leaves commands, effects, plans, ROE and units unchanged
+PASS: blocked_first_decision reference actually exercises the old backward reads
+PASS: blocked_first_decision local DAG reads the next-loop source exactly once
+PASS: blocked_first_decision current RAW texts prevent repeated panel construction
+PASS: blocked_first_decision local DAG does not read trimmed text back from other panels
+PASS: blocked_first_decision projection includes runtime_button
+PASS: blocked_first_decision runtime_button matches unchanged getters with identical source/RAW inputs
+PASS: blocked_first_decision runtime_button remains a read-only contract
+PASS: blocked_first_decision projection includes runtime_visual
+PASS: blocked_first_decision runtime_visual matches unchanged getters with identical source/RAW inputs
+PASS: blocked_first_decision runtime_visual remains a read-only contract
+PASS: blocked_first_decision projection includes choice_buttons
+PASS: blocked_first_decision choice_buttons matches unchanged getters with identical source/RAW inputs
+PASS: blocked_first_decision choice_buttons remains a read-only contract
+PASS: blocked_first_decision projection includes choice_visual
+PASS: blocked_first_decision choice_visual matches unchanged getters with identical source/RAW inputs
+PASS: blocked_first_decision choice_visual remains a read-only contract
+PASS: blocked_first_decision projection includes execution_hook
+PASS: blocked_first_decision execution_hook matches unchanged getters with identical source/RAW inputs
+PASS: blocked_first_decision execution_hook remains a read-only contract
+PASS: blocked_first_decision runtime gate follows the current RAW visibility evidence
+PASS: blocked_first_decision four-choice gate requires its existing smoke source
+PASS: blocked_first_decision runtime projection keeps GO separate
+PASS: blocked_first_decision command draft never auto-executes
+PASS: blocked_first_decision both apply paths consume the supplied projection
+PASS: blocked_first_decision pure projection/apply leaves commands, effects, plans, ROE and units unchanged
+HUD_ARCHITECTURE_20261106_LIVE_PROJECTION: 163 passed, 0 failed
+HUD_LIVE_PROJECTION_VERIFY_PASS

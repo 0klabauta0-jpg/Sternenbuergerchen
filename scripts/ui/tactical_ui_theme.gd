@@ -164,11 +164,11 @@ static func style_screen_heading(label: Label, font_size: int = 26) -> void:
 static func _style_heading(label: Label, font_size: int, kind: String) -> void:
 	if label == null:
 		return
-	label.add_theme_font_override("font", get_heading_font())
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_color", COLOR_TEXT)
-	label.add_theme_color_override("font_shadow_color", Color("02141c"))
-	label.add_theme_constant_override("shadow_offset_y", 1)
+	_override_font(label, "font", get_heading_font())
+	_override_font_size(label, "font_size", font_size)
+	_override_color(label, "font_color", COLOR_TEXT)
+	_override_color(label, "font_shadow_color", Color("02141c"))
+	_override_constant(label, "shadow_offset_y", 1)
 	label.set_meta("native_heading_kind", kind)
 
 
@@ -188,13 +188,9 @@ static func _set_button_theme(result: Theme, type_name: String) -> void:
 static func style_action_tile(button: Button, selected: bool = false, primary: bool = false) -> void:
 	if button == null:
 		return
-	style_command_button(button, "accent" if primary else ("selected" if selected else "neutral"))
-	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
-		var base := button.get_theme_stylebox(state) as StyleBoxFlat
-		button.add_theme_stylebox_override(state, build_flat_stylebox(base.bg_color, base.border_color, base.corner_radius_top_left, base.border_width_left, Vector4(4, 4, 4, 4)))
+	_style_command_button(button, "accent" if primary else ("selected" if selected else "neutral"), Vector4(4, 4, 4, 4), 11)
 	button.custom_minimum_size = ACTION_TILE_SIZE
-	button.add_theme_font_size_override("font_size", 11)
-	button.add_theme_constant_override("icon_max_width", 24)
+	_override_constant(button, "icon_max_width", 24)
 
 
 static func status_color(status_key: String) -> Color:
@@ -216,7 +212,8 @@ static func status_color(status_key: String) -> Color:
 static func style_card(panel: PanelContainer, selected: bool = false) -> void:
 	if panel == null:
 		return
-	panel.add_theme_stylebox_override(
+	_override_stylebox(
+		panel,
 		"panel",
 		build_flat_stylebox(
 			COLOR_PANEL_SELECTED if selected else COLOR_PANEL,
@@ -235,22 +232,28 @@ static func style_badge(label: Label, status_key: String) -> void:
 	if label == null:
 		return
 	var color := status_color(status_key)
-	label.add_theme_stylebox_override("normal", build_flat_stylebox(color, color, 6, 1, BADGE_PADDING, 0.16))
-	label.add_theme_color_override("font_color", color)
-	label.add_theme_font_size_override("font_size", 11)
+	_override_stylebox(label, "normal", build_flat_stylebox(color, color, 6, 1, BADGE_PADDING, 0.16))
+	_override_color(label, "font_color", color)
+	_override_font_size(label, "font_size", 11)
 
 
 static func style_label(label: Label, muted: bool = false, font_size: int = 13) -> void:
 	if label == null:
 		return
-	label.add_theme_color_override("font_color", COLOR_TEXT_MUTED if muted else COLOR_TEXT)
-	label.add_theme_font_size_override("font_size", font_size)
+	_override_color(label, "font_color", COLOR_TEXT_MUTED if muted else COLOR_TEXT)
+	_override_font_size(label, "font_size", font_size)
 
 
 static func style_command_button(button: Button, status_key: String = "neutral") -> void:
+	_style_command_button(button, status_key, Vector4(8, 4, 8, 4), BUTTON_FONT_SIZE)
+
+
+static func _style_command_button(button: Button, status_key: String, content_margin: Vector4, font_size: int) -> void:
 	if button == null:
 		return
-	button.theme = get_theme()
+	var shared_theme := get_theme()
+	if button.theme != shared_theme:
+		button.theme = shared_theme
 	var primary := status_key in ["accent", "command", "go"]
 	var normal_fill := (COLOR_BORDER_SELECTED if status_key == "go" else COLOR_ACCENT) if primary else COLOR_PANEL_ALT
 	var border := COLOR_BORDER_SELECTED if status_key == "selected" else COLOR_BORDER
@@ -263,29 +266,58 @@ static func style_command_button(button: Button, status_key: String = "neutral")
 		normal_text = COLOR_TEXT_DARK
 	elif status_key == "warning":
 		border = COLOR_WARNING
-	button.add_theme_stylebox_override("normal", build_flat_stylebox(normal_fill, border, 5, 1, Vector4(8, 4, 8, 4)))
-	button.add_theme_stylebox_override("hover", build_flat_stylebox(normal_fill.lightened(0.08), COLOR_ACCENT if status_key != "selected" else COLOR_BORDER_SELECTED, 5, 1, Vector4(8, 4, 8, 4)))
-	button.add_theme_stylebox_override("pressed", build_flat_stylebox(normal_fill.darkened(0.12), COLOR_ACCENT if status_key != "selected" else COLOR_BORDER_SELECTED, 5, 1, Vector4(8, 4, 8, 4)))
-	button.add_theme_stylebox_override("hover_pressed", button.get_theme_stylebox("pressed"))
-	button.add_theme_stylebox_override("disabled", build_flat_stylebox(COLOR_PANEL, COLOR_BORDER.darkened(0.25), 5, 1, Vector4(8, 4, 8, 4)))
-	button.add_theme_stylebox_override("focus", build_flat_stylebox(Color.TRANSPARENT, COLOR_ACCENT, 5, 2))
-	button.add_theme_color_override("font_color", normal_text)
-	button.add_theme_color_override("font_hover_color", normal_text)
-	button.add_theme_color_override("font_pressed_color", normal_text)
-	button.add_theme_color_override("font_focus_color", normal_text)
-	button.add_theme_color_override("font_hover_pressed_color", normal_text)
-	button.add_theme_color_override("font_disabled_color", COLOR_TEXT_MUTED.darkened(0.16))
-	button.add_theme_font_size_override("font_size", BUTTON_FONT_SIZE)
+	_override_stylebox(button, "normal", build_flat_stylebox(normal_fill, border, 5, 1, content_margin))
+	_override_stylebox(button, "hover", build_flat_stylebox(normal_fill.lightened(0.08), COLOR_ACCENT if status_key != "selected" else COLOR_BORDER_SELECTED, 5, 1, content_margin))
+	_override_stylebox(button, "pressed", build_flat_stylebox(normal_fill.darkened(0.12), COLOR_ACCENT if status_key != "selected" else COLOR_BORDER_SELECTED, 5, 1, content_margin))
+	_override_stylebox(button, "hover_pressed", button.get_theme_stylebox("pressed"))
+	_override_stylebox(button, "disabled", build_flat_stylebox(COLOR_PANEL, COLOR_BORDER.darkened(0.25), 5, 1, content_margin))
+	_override_stylebox(button, "focus", build_flat_stylebox(Color.TRANSPARENT, COLOR_ACCENT, 5, 2))
+	_override_color(button, "font_color", normal_text)
+	_override_color(button, "font_hover_color", normal_text)
+	_override_color(button, "font_pressed_color", normal_text)
+	_override_color(button, "font_focus_color", normal_text)
+	_override_color(button, "font_hover_pressed_color", normal_text)
+	_override_color(button, "font_disabled_color", COLOR_TEXT_MUTED.darkened(0.16))
+	_override_font_size(button, "font_size", font_size)
 	if button is OptionButton:
-		(button as OptionButton).get_popup().theme = get_theme()
+		var popup := (button as OptionButton).get_popup()
+		if popup.theme != shared_theme:
+			popup.theme = shared_theme
 
 
 static func style_progress_bar(progress_bar: ProgressBar, status_key: String = "neutral") -> void:
 	if progress_bar == null:
 		return
 	var color := status_color(status_key)
-	progress_bar.add_theme_stylebox_override("background", build_flat_stylebox(COLOR_PANEL, COLOR_BORDER, 6, 1, Vector4.ZERO))
-	progress_bar.add_theme_stylebox_override("fill", build_flat_stylebox(color, color, 5, 0, Vector4.ZERO))
+	_override_stylebox(progress_bar, "background", build_flat_stylebox(COLOR_PANEL, COLOR_BORDER, 6, 1, Vector4.ZERO))
+	_override_stylebox(progress_bar, "fill", build_flat_stylebox(color, color, 5, 0, Vector4.ZERO))
+
+
+# Check the real owned override rather than a remembered style signature. This
+# avoids redundant engine notifications while still repairing external changes.
+static func _override_stylebox(control: Control, item: String, value: StyleBox) -> void:
+	if not control.has_theme_stylebox_override(item) or control.get_theme_stylebox(item) != value:
+		control.add_theme_stylebox_override(item, value)
+
+
+static func _override_font(control: Control, item: String, value: Font) -> void:
+	if not control.has_theme_font_override(item) or control.get_theme_font(item) != value:
+		control.add_theme_font_override(item, value)
+
+
+static func _override_font_size(control: Control, item: String, value: int) -> void:
+	if not control.has_theme_font_size_override(item) or control.get_theme_font_size(item) != value:
+		control.add_theme_font_size_override(item, value)
+
+
+static func _override_color(control: Control, item: String, value: Color) -> void:
+	if not control.has_theme_color_override(item) or control.get_theme_color(item) != value:
+		control.add_theme_color_override(item, value)
+
+
+static func _override_constant(control: Control, item: String, value: int) -> void:
+	if not control.has_theme_constant_override(item) or control.get_theme_constant(item) != value:
+		control.add_theme_constant_override(item, value)
 
 
 static func build_flat_stylebox(fill_color: Color, border_color: Color, radius: int = CORNER_RADIUS, border_width: int = 1, content_margin: Vector4 = Vector4.ZERO, alpha: float = 1.0, shadow_size: int = 0) -> StyleBoxFlat:
