@@ -1,0 +1,32 @@
+{
+  "schema": "sternenbuergerchen.reference_r3.main_integration.v1",
+  "recorded_utc": "2026-11-06T23:58:11.844266+00:00",
+  "base": "173a1e3c33b733a78a396a93db9cedf631d84998",
+  "integrated_runtime_commit": "fa8fb9d7faed761a23ce122eeaf960b9437c2c86",
+  "verified_remote_after_runtime_push": "fa8fb9d7faed761a23ce122eeaf960b9437c2c86",
+  "integration": "verified fast-forward; identical tree switch preserved exact worktree bytes",
+  "native_main_smoke": {
+    "passed": 68,
+    "failed": 0,
+    "report": "main_smoke/report.json",
+    "facts": "main_smoke/main_normal.json",
+    "source_inputs_stable": true,
+    "engine_errors": 0,
+    "fullscreen": "3440x1440 Vulkan Forward+",
+    "profile_seconds": 15,
+    "camera": 22,
+    "ordinary_move_go_actions": 1
+  },
+  "latest_distinct_gates": 40,
+  "preservation": {
+    "preserved_untracked": 1101,
+    "preserved_rosters": 437,
+    "final_code_inputs": 2230,
+    "actual_player_roster": 1
+  },
+  "final_code_input_manifest_sha256": "884d5a01f54f3ed842583debbff1ac206506bba7eec0da7a19aaca7ca74caab3",
+  "frozen_zip_sha256": "9ee033b7d782e79d01400657be4beb0f352ee01785ffba4227c8f45f2bf3e961",
+  "archive_rebuilt_after_main": false,
+  "push_warning": "GitHub accepted the 70.76MiB QA ZIP and warned about its recommended 50MiB limit; push succeeded.",
+  "receipt_followup_policy": "Following receipt commit contains only these QA integration receipts. Runtime code and all 2230 bound inputs remain unchanged; final remote confirmation is recorded separately to avoid a self-referential commit hash."
+}

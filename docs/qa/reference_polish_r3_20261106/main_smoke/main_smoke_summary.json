@@ -1,0 +1,92 @@
+{
+  "scope": "15s smoke only, not a replacement for either 90s profile",
+  "original_path": "output/reference_polish_r3_20261106/main_smoke/20261106T235416Z-dfe90513/main_normal_performance.json",
+  "sha256": "95590a59efb74d21349e72d3ceb1b97fb403f361bb74cc7eecf2397a2267efe3",
+  "summary": {
+    "duration_usec": 15001537,
+    "frames": 590,
+    "frametime_usec": {
+      "count": 590,
+      "max": 112837,
+      "mean": 25426.2271186441,
+      "p50": 23429,
+      "p90": 41838,
+      "p95": 50073,
+      "p99": 82668
+    },
+    "hitch_counts": {
+      "over_100ms": 1,
+      "over_250ms": 0,
+      "over_33ms": 156,
+      "over_50ms": 30
+    },
+    "probe_usec": {
+      "count": 590,
+      "max": 115,
+      "mean": 63.0440677966102,
+      "p50": 62,
+      "p90": 74,
+      "p95": 79,
+      "p99": 102
+    },
+    "simulation_seconds_per_wall_second": 1.0010085411026,
+    "simulation_ticks": 901
+  },
+  "display_samples": [
+    {
+      "content_scale_size": "(3440, 1440)",
+      "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+      "display": "Windows",
+      "display_server_window_mode": 3,
+      "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+      "max_physics_steps_per_frame": 8,
+      "physics_ticks_per_second": 60,
+      "renderer": "forward_plus",
+      "rendering_driver": "vulkan",
+      "root_size": "(3440, 1440)",
+      "screen_index": 0,
+      "screen_refresh_rate": 240.085006713867,
+      "screen_size": "(3440, 1440)",
+      "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+      "time_scale": 1.0,
+      "viewport_size": "(3440.0, 1440.0)",
+      "vsync_mode": 1,
+      "window_has_focus": true,
+      "window_mode": 3,
+      "window_size": "(3440, 1440)"
+    },
+    {
+      "content_scale_size": "(3440, 1440)",
+      "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+      "display": "Windows",
+      "display_server_window_mode": 3,
+      "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+      "max_physics_steps_per_frame": 8,
+      "physics_ticks_per_second": 60,
+      "renderer": "forward_plus",
+      "rendering_driver": "vulkan",
+      "root_size": "(3440, 1440)",
+      "screen_index": 0,
+      "screen_refresh_rate": 240.085006713867,
+      "screen_size": "(3440, 1440)",
+      "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+      "time_scale": 1.0,
+      "viewport_size": "(3440.0, 1440.0)",
+      "vsync_mode": 1,
+      "window_has_focus": true,
+      "window_mode": 3,
+      "window_size": "(3440, 1440)"
+    }
+  ],
+  "camera_before": {
+    "projection": 1,
+    "size": 22.0,
+    "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (23.29305, 22.01533, 28.05867)]"
+  },
+  "camera_after": {
+    "projection": 1,
+    "size": 22.0,
+    "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (23.29305, 22.01533, 28.05867)]"
+  },
+  "ordinary_actions": 1
+}

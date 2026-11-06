@@ -1,0 +1,87 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/SB-Codex-Review2-741c0b0d2feb4476bf4ca306f0852d89/SternenBuergerchen_UI_Zielbild_Normal_QA
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Project normal entry is MainMenu
+PASS: Normal main menu scene loads
+PASS: MainMenu displays a background texture
+PASS: MainMenu background comes from the existing catalog
+PASS: Normal MainMenu restores the original TASK199 title artwork
+FRONTIER_STARTUP_STAGE main_menu
+PASS: Capture target is new: 01_main_menu
+PASS: Native capture saved: 01_main_menu
+PASS: Real Singleplayer button is actionable
+PASS: Normal Singleplayer opens visible Homebase
+PASS: Original normal grid_sweep mission remains selected
+PASS: Normal Homebase bootstrap provides a playable team
+PASS: Normal Homebase has a craft and pilot
+PASS: Normal Homebase payload is ready without fixture mutation
+FRONTIER_STARTUP_STAGE homebase
+PASS: Capture target is new: 02_homebase
+PASS: Native capture saved: 02_homebase
+PASS: Normal Homebase launch command is accepted
+PASS: Normal mission owns TacticalController, Primary3DView and SimulationRoot
+PASS: Menu launch reaches the regular mission scene
+PASS: Handoff retains the original default mission
+PASS: Normal Homebase-to-Mission handoff passes
+PASS: Default mission enables the Frontier visual profile
+PASS: Frontier activation comes from normal map data without a test override
+PASS: Rebuilt default mission uses its saved, user-requested Hex topology
+PASS: Regular renderer remains a read-only state consumer
+PASS: Original default map JSON is available
+PASS: Default mission retains its authored Alpha insertion marker
+PASS: Normal mission exposes the authoritative terrain registry
+PASS: Authored Alpha insertion marker is on walkable terrain
+FRONTIER_STARTUP_STAGE mission_started
+PASS: Capture target is new: 03_default_mission
+PASS: Native capture saved: 03_default_mission
+FRONTIER_STARTUP_STAGE craft_arrived
+PASS: Normal Set LZ handler places the existing default-mission LZ
+PASS: Normal planning exposes the requested LZ
+PASS: Normal Drop request retains a playable embarked team
+FRONTIER_STARTUP_STAGE drop_requested
+FRONTIER_STARTUP_STAGE lz_approach
+PASS: Capture target is new: 04_lz_approach
+PASS: Native capture saved: 04_lz_approach
+PASS: Normal drop deploys a playable payload without forced unloading
+PASS: Actual regular dropship instance uses the active Ref03 Cutlass bytes
+PASS: Deployed units use actual regular 3D model instances
+FRONTIER_STARTUP_STAGE deployed
+PASS: Capture target is new: 05_deployed
+PASS: Native capture saved: 05_deployed
+PASS: Existing Move action creates the normal selected-team plan
+PASS: Existing GO action commits the selected-team plan
+FRONTIER_STARTUP_STAGE go_movement
+PASS: Performance measurement uses a native renderer
+PASS: Performance diagnostics use the normal runtime owners
+PASS: Measured window is genuinely fullscreen
+PASS: Fullscreen covers the active display resolution
+PASS: Measured normal gameplay remains at 1x
+PLAYTEST_PERF_START {"display":{"content_scale_size":"(3440, 1440)","cpu":"AMD Ryzen 7 7800X3D 8-Core Processor","display":"Windows","display_server_window_mode":3,"gpu":"NVIDIA GeForce RTX 4070 Ti SUPER","max_physics_steps_per_frame":8,"physics_ticks_per_second":60,"renderer":"forward_plus","rendering_driver":"vulkan","root_size":"(3440, 1440)","screen_index":0,"screen_refresh_rate":240.085006713867,"screen_size":"(3440, 1440)","screen_usable_rect":"[P: (2560, 0), S: (3440, 1410)]","time_scale":1.0,"viewport_size":"(3440.0, 1440.0)","vsync_mode":1,"window_has_focus":true,"window_mode":3,"window_size":"(3440, 1440)"},"seconds":15.0,"tick":1633}
+PLAYTEST_PERF_PROGRESS {"elapsed_seconds":10.037755,"fog_owner":{"advance_usec":19641,"enabled":true,"last_work":{"completed":true,"duration_usec":60476,"full_scan":false,"processed_in_slice":199,"processed_tile_count":199,"slice_duration_usec":11063,"visibility_revision":111},"pending_age_msec":0,"read_only":true,"sets_gameplay_truth":false,"sync_usec":0,"total_usec":19642,"visibility_pending":false,"work_budget_tiles":512},"frames":400,"meta_transport":{"completed_at_msec":54534,"derived_only":true,"enabled":true,"invocation_count":11,"read_only":true,"scopes_usec":{"ensure_timer_state_usec":8,"other_usec":22,"refresh_fob_usec":8,"refresh_homebase_usec":8,"refresh_map_usec":10287,"sync_transport_usec":102,"transfer_advance_and_completions_usec":13},"snapshot_serialized":false,"total_usec":10427,"ui_sets_gameplay_truth":false},"nav_pending":0,"tick":2236}
+PASS: Performance evidence target is new
+PASS: Performance raw evidence opens
+PASS: Performance measurement completed at normal 1x
+PASS: Measured camera remained unchanged
+PLAYTEST_PERF_DONE {"path":"C:/dev/SternenBuergerchen/output/reference_polish_r3_20261106/main_smoke/20261106T235416Z-dfe90513/main_normal_performance.json","summary":{"duration_usec":15001537,"frames":590,"frametime_usec":{"count":590,"max":112837,"mean":25426.2271186441,"p50":23429,"p90":41838,"p95":50073,"p99":82668},"hitch_counts":{"over_100ms":1,"over_250ms":0,"over_33ms":156,"over_50ms":30},"hitches_over_50ms":[{"elapsed_usec":394172,"frame_usec":75337,"since_previous_hitch_usec":null},{"elapsed_usec":448501,"frame_usec":54329,"since_previous_hitch_usec":54329},{"elapsed_usec":541580,"frame_usec":55545,"since_previous_hitch_usec":93079},{"elapsed_usec":1477643,"frame_usec":83675,"since_previous_hitch_usec":936063},{"elapsed_usec":2156616,"frame_usec":57124,"since_previous_hitch_usec":678973},{"elapsed_usec":2562479,"frame_usec":112837,"since_previous_hitch_usec":405863},{"elapsed_usec":3651179,"frame_usec":85392,"since_previous_hitch_usec":1088700},{"elapsed_usec":4718880,"frame_usec":64823,"since_previous_hitch_usec":1067701},{"elapsed_usec":5792065,"frame_usec":67099,"since_previous_hitch_usec":1073185},{"elapsed_usec":5888729,"frame_usec":55194,"since_previous_hitch_usec":96664},{"elapsed_usec":6562992,"frame_usec":71809,"since_previous_hitch_usec":674263},{"elapsed_usec":6891066,"frame_usec":62188,"since_previous_hitch_usec":328074},{"elapsed_usec":6944686,"frame_usec":53620,"since_previous_hitch_usec":53620},{"elapsed_usec":7249103,"frame_usec":60108,"since_previous_hitch_usec":304417},{"elapsed_usec":7645867,"frame_usec":59332,"since_previous_hitch_usec":396764},{"elapsed_usec":7763011,"frame_usec":78619,"since_previous_hitch_usec":117144},{"elapsed_usec":8010885,"frame_usec":79893,"since_previous_hitch_usec":247874},{"elapsed_usec":9070590,"frame_usec":67250,"since_previous_hitch_usec":1059705},{"elapsed_usec":10151082,"frame_usec":62572,"since_previous_hitch_usec":1080492},{"elapsed_usec":10204249,"frame_usec":53167,"since_previous_hitch_usec":53167},{"elapsed_usec":11255492,"frame_usec":64116,"since_previous_hitch_usec":1051243},{"elapsed_usec":12112494,"frame_usec":82668,"since_previous_hitch_usec":857002},{"elapsed_usec":12281212,"frame_usec":82879,"since_previous_hitch_usec":168718},{"elapsed_usec":12412943,"frame_usec":92970,"since_previous_hitch_usec":131731},{"elapsed_usec":12754430,"frame_usec":50073,"since_previous_hitch_usec":341487},{"elapsed_usec":13477302,"frame_usec":77595,"since_previous_hitch_usec":722872},{"elapsed_usec":13850612,"frame_usec":51597,"since_previous_hitch_usec":373310},{"elapsed_usec":14534870,"frame_usec":66480,"since_previous_hitch_usec":684258},{"elapsed_usec":14612432,"frame_usec":52151,"since_previous_hitch_usec":77562},{"elapsed_usec":14708089,"frame_usec":55651,"since_previous_hitch_usec":95657}],"probe_usec":{"count":590,"max":115,"mean":63.0440677966102,"p50":62,"p90":74,"p95":79,"p99":102},"simulation_seconds_per_wall_second":1.0010085411026,"simulation_ticks":901}}
+PASS: Motion trace evidence target is new
+PASS: Read-only motion trace evidence opens
+PLAYTEST_MOTION_TRACE_DONE {"path":"C:/dev/SternenBuergerchen/output/reference_polish_r3_20261106/main_smoke/20261106T235416Z-dfe90513/main_normal_motion.json","samples":68}
+PASS: Camera audit evidence target is new
+PASS: Read-only camera audit evidence opens
+HUD_CAMERA_AUDIT_DONE C:/dev/SternenBuergerchen/output/reference_polish_r3_20261106/main_smoke/20261106T235416Z-dfe90513/main_normal_camera_audit.json
+PASS: Native navigation uses actual mission setup/map
+PASS: Native camera accepts zoom/pan/rotation
+PASS: Native GM01 setup recognizes its completed initial frame
+PASS: Repeated mission framing preserves manual camera selection
+PASS: Public APIs restore screenshot camera after navigation check
+PASS: Capture target is new: 06_go_movement
+PASS: Native capture saved: 06_go_movement
+PASS: Capture target is new: 07_outpost_overview
+PASS: Native capture saved: 07_outpost_overview
+PASS: Capture target is new: 08_eastern_supply
+PASS: Native capture saved: 08_eastern_supply
+PASS: Capture target is new: 09_expanded_map
+PASS: Native capture saved: 09_expanded_map
+FRONTIER_MAIN_STARTUP {"evidence_output":"C:/dev/SternenBuergerchen/output/reference_polish_r3_20261106/main_smoke/20261106T235416Z-dfe90513/main_normal.json","failed":0,"passed":68,"stages":8}
