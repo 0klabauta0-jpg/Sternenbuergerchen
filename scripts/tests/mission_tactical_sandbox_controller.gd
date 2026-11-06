@@ -144,7 +144,6 @@ const MISSION_INTERACTION_USE_FEEDBACK_SCRIPT: GDScript = preload("res://scripts
 const MISSION_INTERACTION_OBJECTIVE_GATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_objective_gate.gd")
 const MISSION_INTERACTION_VISUAL_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_visual_state.gd")
 const MISSION_INTERACTION_OBJECT_REACTION_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_object_reaction.gd")
-const MISSION_INTERACTION_DOOR_RUNTIME_COLLISION_LOS_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_runtime_collision_los.gd")
 const MISSION_INTERACTION_DOOR_MULTIPLAYER_AUTHORITY_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_multiplayer_authority.gd")
 const MISSION_INTERACTION_MULTIPLAYER_COMMAND_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_multiplayer_command.gd")
 const MISSION_MULTIPLAYER_DOOR_FEEDBACK_CAPTURE_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_door_feedback_capture.gd")
@@ -560,8 +559,6 @@ var _network_dropship_pending_blocked_submit_count: int = 0
 var _network_mission_interaction_progress_fingerprint: String = ""
 var _network_mission_interaction_progress_update_count: int = 0
 var _last_mission_interaction_door_use_breach_hook_snapshot: Dictionary = {}
-var _last_mission_interaction_door_runtime_override_fingerprint: String = ""
-var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
 var _release_candidate_firefight_decision_line_build_depth: int = 0
 var _release_first_decision_loop_two_hud_build_depth: int = 0
 var _selected_fireteam_player_decision_snapshot: Dictionary = {}
@@ -616,6 +613,8 @@ var _mission_visible_frame_timing_debug_enabled: bool = false
 var _mission_visible_frame_timing_debug_snapshot: Dictionary = {}
 var _mission_ui_refresh_timing_debug_snapshot: Dictionary = {}
 var _mission_ui_refresh_timing_debug_invocation_count: int = 0
+var _hud_projection_debug_calls: Dictionary = {}
+var _hud_projection_debug_scopes_usec: Dictionary = {}
 var _mission_runtime_surface_timing_debug_snapshot: Dictionary = {}
 var _fireteam_security_refresh_timing_debug_snapshot: Dictionary = {}
 var _fireteam_security_refresh_timing_totals: Dictionary = {}
@@ -4059,6 +4058,9 @@ func _refresh_order_command_feedback() -> void:
 
 
 func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool = true) -> void:
+	if _mission_visible_frame_timing_debug_enabled:
+		_hud_projection_debug_calls.clear()
+		_hud_projection_debug_scopes_usec.clear()
 	if include_heavy_surfaces:
 		# A transport/security refresh may arrive before the command cadence.
 		# It must consume the pending force request rather than silently drop it.
@@ -4069,6 +4071,9 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 	var scopes_usec: Dictionary = {}
 	var scope_started_usec: int = 0
 	_record_mission_hud_light_read_state()
+	var projection_read_model: Node = _mission_hud_read_model
+	if projection_read_model != null:
+		projection_read_model.call("begin_projection_pass")
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
 	_apply_block_labels()
@@ -4138,9 +4143,11 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		scopes_usec["primary_hotkey_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 
+	var fireteam_status_raw: String = ""
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
-		_set_mission_label_text_delta(fireteam_status_label, _build_fireteam_status_text())
+		fireteam_status_raw = _build_fireteam_status_text()
+		_set_mission_label_text_delta(fireteam_status_label, fireteam_status_raw)
 	if profile_enabled:
 		scopes_usec["primary_fireteam_status_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -4190,14 +4197,16 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 			scopes_usec["runtime_surfaces_usec"] = 0
 			scopes_usec["secondary_labels_usec"] = 0
 			_record_mission_ui_refresh_timing_snapshot(refresh_started_usec, scopes_usec)
+		if projection_read_model != null:
+			projection_read_model.call("end_projection_pass")
 		return
 	_refresh_runtime_mission_hud_surfaces(force_heavy_surfaces)
-	_apply_release_firefight_command_matrix_visual_polish()
 	if profile_enabled:
 		scopes_usec["runtime_surfaces_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 
 	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
+	var strategic_status_raw: String = String(strategic_status_label.get_meta("mission_hud_raw_status_text", "")) if strategic_status_label != null else ""
 	var strategic_status_signature: String = _build_periodic_strategic_status_signature()
 	var refresh_strategic_status: bool = force_heavy_surfaces or strategic_status_signature != _last_periodic_strategic_status_signature
 	if strategic_status_label != null and refresh_strategic_status:
@@ -4205,7 +4214,9 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "strategic_status")
 		if profile_enabled:
 			scope_started_usec = Time.get_ticks_usec()
-		_set_mission_label_text_delta(strategic_status_label, _build_strategic_status_text())
+		strategic_status_raw = _build_strategic_status_text()
+		strategic_status_label.set_meta("mission_hud_raw_status_text", strategic_status_raw)
+		_set_mission_label_text_delta(strategic_status_label, strategic_status_raw)
 		if profile_enabled:
 			scopes_usec["secondary_strategic_text_usec"] = Time.get_ticks_usec() - scope_started_usec
 			scope_started_usec = Time.get_ticks_usec()
@@ -4247,6 +4258,14 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 			scopes_usec["secondary_preview_contract_usec"] = 0
 			scopes_usec["secondary_decision_contract_usec"] = 0
 			scopes_usec["secondary_density_contract_usec"] = 0
+	# Rendering consumes the already assembled RAW owner readouts. Legacy
+	# acceptance adapters must not rebuild other panels while drawing buttons.
+	var matrix_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	_apply_release_firefight_command_matrix_visual_polish(fireteam_status_raw, strategic_status_raw)
+	if profile_enabled:
+		scopes_usec["command_matrix_usec"] = Time.get_ticks_usec() - matrix_started_usec
+		scopes_usec["runtime_surfaces_usec"] = int(scopes_usec.get("runtime_surfaces_usec", 0)) + int(scopes_usec["command_matrix_usec"])
+		scope_started_usec = Time.get_ticks_usec()
 	_apply_release_first_exchange_real_window_hud_source_sync_to_labels()
 	if profile_enabled:
 		scopes_usec["secondary_release_sync_usec"] = Time.get_ticks_usec() - scope_started_usec
@@ -4301,6 +4320,8 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 				secondary_total_usec += int(scopes_usec.get(scope_name, 0))
 		scopes_usec["secondary_labels_usec"] = secondary_total_usec
 		_record_mission_ui_refresh_timing_snapshot(refresh_started_usec, scopes_usec)
+	if projection_read_model != null:
+		projection_read_model.call("end_projection_pass")
 
 
 func _refresh_tactical_event_log_panel() -> Dictionary:
@@ -4365,11 +4386,28 @@ func _refresh_runtime_mission_hud_surfaces(force_refresh: bool = true) -> void:
 	if force_refresh or fireteam_cards_signature != _last_periodic_fireteam_cards_signature:
 		_last_periodic_fireteam_cards_signature = fireteam_cards_signature
 		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "fireteam_card_group")
+		var cards_part_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 		_refresh_ad_hoc_panel_visibility()
-		_refresh_selected_fireteam_cards()
+		if profile_enabled:
+			scopes_usec["ad_hoc_panel_usec"] = Time.get_ticks_usec() - cards_part_started_usec
+			cards_part_started_usec = Time.get_ticks_usec()
+		var selected_card_row := get_node_or_null(FIRETEAM_SELECTED_CARDS_ROW_PATH) as Control
+		var hidden_a5_member_cards: bool = bool(get_meta("native_a5_legacy_setup_complete", false)) and selected_card_row != null and not selected_card_row.is_visible_in_tree()
+		# A5 presents identities in mini cards. Explicit diagnostics still call
+		# the existing selected-card builder directly when its hidden data is needed.
+		if not hidden_a5_member_cards:
+			_refresh_selected_fireteam_cards()
+		if profile_enabled:
+			scopes_usec["selected_member_cards_usec"] = Time.get_ticks_usec() - cards_part_started_usec
+			cards_part_started_usec = Time.get_ticks_usec()
 		_refresh_fireteam_mini_cards()
+		if profile_enabled:
+			scopes_usec["fireteam_mini_cards_usec"] = Time.get_ticks_usec() - cards_part_started_usec
+			cards_part_started_usec = Time.get_ticks_usec()
 		if _character_overlay_open:
 			_update_character_overlay()
+		if profile_enabled:
+			scopes_usec["character_overlay_usec"] = Time.get_ticks_usec() - cards_part_started_usec
 	else:
 		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "fireteam_card_group")
 	if profile_enabled:
@@ -5349,11 +5387,16 @@ func _build_periodic_craft_controls_signature() -> String:
 
 
 func _build_periodic_fireteam_cards_signature() -> String:
-	return "%s\n%s\n%s\n%s" % [
+	var selected_card_row := get_node_or_null(FIRETEAM_SELECTED_CARDS_ROW_PATH) as Control
+	# A hidden A5 pass consumes the group signature without building selected
+	# cards. Revalidate that pending projection when visibility or ownership changes.
+	return "%s\n%s\n%s\n%s\nselected_visible=%s|a5=%s" % [
 		_build_selected_fireteam_cards_runtime_signature(),
 		_build_fireteam_mini_cards_runtime_signature(),
 		str(_character_overlay_open),
 		_focused_fireteam_id,
+		str(selected_card_row != null and selected_card_row.is_visible_in_tree()),
+		str(bool(get_meta("native_a5_legacy_setup_complete", false))),
 	]
 
 
@@ -5481,6 +5524,11 @@ func _record_mission_visible_frame_timing_snapshot(frame_started_usec: int, scop
 	}
 
 
+func _note_hud_projection_build_call(key: String) -> void:
+	if _mission_visible_frame_timing_debug_enabled:
+		_hud_projection_debug_calls[key] = int(_hud_projection_debug_calls.get(key, 0)) + 1
+
+
 func _record_mission_ui_refresh_timing_snapshot(refresh_started_usec: int, scopes_usec: Dictionary) -> void:
 	_mission_ui_refresh_timing_debug_invocation_count += 1
 	_mission_ui_refresh_timing_debug_snapshot = {
@@ -5488,6 +5536,9 @@ func _record_mission_ui_refresh_timing_snapshot(refresh_started_usec: int, scope
 		"total_usec": Time.get_ticks_usec() - refresh_started_usec,
 		"scopes_usec": scopes_usec.duplicate(true),
 		"invocation_count": _mission_ui_refresh_timing_debug_invocation_count,
+		"projection_build_calls": _hud_projection_debug_calls.duplicate(),
+		"projection_scopes_usec": _hud_projection_debug_scopes_usec.duplicate(),
+		"projection_pass": _mission_hud_read_model.call("get_diagnostics_snapshot") if _mission_hud_read_model != null else {},
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,
@@ -7927,6 +7978,7 @@ func _get_selected_fireteam_id() -> String:
 
 
 func _build_fireteam_status_text() -> String:
+	_note_hud_projection_build_call("_build_fireteam_status_text")
 	_selected_fireteam_player_decision_snapshot = {}
 	if _selected_fireteam_ids.is_empty():
 		var no_selection_loop_line: String = _build_release_first_decision_loop_two_hud_line()
@@ -8056,6 +8108,7 @@ func _build_selected_fireteam_decision_detail_tooltip(snapshot: Dictionary) -> S
 
 
 func _build_selected_fireteam_live_decision_detail_tooltip() -> String:
+	_note_hud_projection_build_call("_build_selected_fireteam_live_decision_detail_tooltip")
 	return _build_selected_fireteam_decision_detail_tooltip(_selected_fireteam_player_decision_snapshot)
 
 
@@ -9029,6 +9082,7 @@ func _format_compass_direction_label(direction: Vector2, short_label: bool = fal
 
 
 func _build_strategic_status_text() -> String:
+	_note_hud_projection_build_call("_build_strategic_status_text")
 	if not _last_planning_state_issue.is_empty():
 		return "Alte Planungsdaten erkannt\nBitte Plan im aktuellen\nPhasensystem neu anlegen."
 	var selected_card_state: String = ""
@@ -9870,6 +9924,13 @@ func _compact_unit_id_for_diagnostics(unit_id: String) -> String:
 
 
 func _build_mission_combat_hud_density_snapshot() -> Dictionary:
+	if _mission_hud_read_model != null:
+		return Dictionary(_mission_hud_read_model.call("project", "combat_density", Callable(self, "_build_mission_combat_hud_density_snapshot_uncached")))
+	return _build_mission_combat_hud_density_snapshot_uncached()
+
+
+func _build_mission_combat_hud_density_snapshot_uncached() -> Dictionary:
+	_note_hud_projection_build_call("_build_mission_combat_hud_density_snapshot")
 	var diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
 	var cover_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	var fire_events: Array = get_fire_event_snapshot()
@@ -10414,6 +10475,15 @@ func _build_release_candidate_firefight_decision_line() -> String:
 func _build_release_candidate_firefight_decision_line_snapshot() -> Dictionary:
 	if _release_candidate_firefight_decision_line_build_depth > 0:
 		return _build_empty_release_candidate_firefight_decision_line_snapshot("recursive_readout_guard")
+	if _mission_hud_read_model != null:
+		return Dictionary(_mission_hud_read_model.call("project", "firefight_decision", Callable(self, "_build_release_candidate_firefight_decision_line_snapshot_uncached")))
+	return _build_release_candidate_firefight_decision_line_snapshot_uncached()
+
+
+func _build_release_candidate_firefight_decision_line_snapshot_uncached() -> Dictionary:
+	_note_hud_projection_build_call("_build_release_candidate_firefight_decision_line_snapshot")
+	if _release_candidate_firefight_decision_line_build_depth > 0:
+		return _build_empty_release_candidate_firefight_decision_line_snapshot("recursive_readout_guard")
 	_release_candidate_firefight_decision_line_build_depth += 1
 	var diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
 	var engagement_snapshot: Dictionary = {
@@ -10908,6 +10978,7 @@ func get_release_first_exchange_real_window_hud_source_sync_snapshot() -> Dictio
 
 
 func _build_mission_combat_hud_detail_tooltip_text() -> String:
+	_note_hud_projection_build_call("_build_mission_combat_hud_detail_tooltip_text")
 	var snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
 	return String(snapshot.get("tooltip_text", "")).strip_edges()
 
@@ -10977,7 +11048,7 @@ func _apply_release_firefight_bottom_dock_density_label_contract(label: Label) -
 	label.set_meta("release_firefight_bottom_dock_density_task", "TASK_835")
 
 
-func _apply_release_firefight_command_matrix_visual_polish() -> void:
+func _apply_release_firefight_command_matrix_visual_polish(selected_raw: String = "", strategic_raw: String = "") -> void:
 	var command_grid := get_node_or_null(COMMAND_GRID_PATH) as GridContainer
 	if command_grid == null:
 		return
@@ -10996,8 +11067,49 @@ func _apply_release_firefight_command_matrix_visual_polish() -> void:
 	_apply_release_firefight_command_go_button_polish(active)
 	_apply_release_firefight_command_fire_rule_button_polish(active)
 	_apply_release_firefight_command_placeholder_polish(active)
-	_apply_release_first_decision_loop_two_runtime_button_polish(active)
-	_apply_release_first_decision_loop_two_player_loop_runtime_choice_buttons(active)
+	var legacy_projection: Dictionary = {}
+	if _mission_hud_read_model != null and bool(_mission_hud_read_model.call("is_projection_pass_active")):
+		var projection_started_usec: int = Time.get_ticks_usec() if _mission_visible_frame_timing_debug_enabled else 0
+		legacy_projection = _build_live_hud_legacy_action_projection(selected_raw, strategic_raw)
+		if _mission_visible_frame_timing_debug_enabled:
+			_hud_projection_debug_scopes_usec["live_legacy_projection_usec"] = Time.get_ticks_usec() - projection_started_usec
+	var legacy_started_usec: int = Time.get_ticks_usec() if _mission_visible_frame_timing_debug_enabled else 0
+	_apply_release_first_decision_loop_two_runtime_button_polish(active, legacy_projection)
+	if _mission_visible_frame_timing_debug_enabled:
+		_hud_projection_debug_scopes_usec["legacy_runtime_button_usec"] = Time.get_ticks_usec() - legacy_started_usec
+		legacy_started_usec = Time.get_ticks_usec()
+	_apply_release_first_decision_loop_two_player_loop_runtime_choice_buttons(active, legacy_projection)
+	if _mission_visible_frame_timing_debug_enabled:
+		_hud_projection_debug_scopes_usec["legacy_player_loop_buttons_usec"] = Time.get_ticks_usec() - legacy_started_usec
+
+
+func _build_live_hud_legacy_action_projection(selected_raw: String, strategic_raw: String) -> Dictionary:
+	_note_hud_projection_build_call("_build_live_hud_legacy_action_projection")
+	var next_loop: Dictionary = get_release_first_decision_next_playable_loop_snapshot()
+	# An explicit empty source is blocked by the existing contract. It must not
+	# take the compatibility getter's empty-override fallback into other panels.
+	var playtest: Dictionary = RELEASE_FIRST_DECISION_LOOP_TWO_PLAYTEST_SCRIPT.call("build_snapshot", next_loop, {
+		"selected_fireteam_status_text": selected_raw.strip_edges(),
+		"mission_control_status_text": strategic_raw.strip_edges(),
+		"command_feedback_line": String(next_loop.get("visible_loop_line", next_loop.get("primary_line", ""))).strip_edges(),
+		"command_feedback_status": String(next_loop.get("status", "")).strip_edges(),
+	}, {})
+	var polish: Dictionary = get_release_first_decision_loop_two_polish_snapshot(next_loop, playtest)
+	var execution: Dictionary = get_release_first_decision_loop_two_execution_hook_snapshot(polish)
+	var go_smoke: Dictionary = get_release_first_decision_loop_two_go_smoke_snapshot(execution, {})
+	var runtime_button: Dictionary = get_release_first_decision_loop_two_runtime_button_snapshot(go_smoke, execution)
+	var runtime_visual: Dictionary = get_release_first_decision_loop_two_visual_polish_snapshot({}, runtime_button)
+	var acceptance: Dictionary = get_release_first_decision_loop_two_playability_smoke_snapshot(runtime_visual, {})
+	var extension: Dictionary = get_release_first_decision_loop_two_player_loop_extension_snapshot(_project_loop_two_extension_source(acceptance), {})
+	var wiring: Dictionary = get_release_first_decision_loop_two_player_loop_hud_wiring_snapshot(extension, {
+		"selected_fireteam_status_text": selected_raw,
+		"mission_control_status_text": strategic_raw,
+		"command_feedback_text": _get_label_text(command_feedback_label_path),
+	})
+	var choice_hook: Dictionary = get_release_first_decision_loop_two_player_loop_choice_hook_snapshot(wiring)
+	var choice_buttons: Dictionary = get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot(choice_hook, wiring)
+	var choice_visual: Dictionary = get_release_first_decision_loop_two_player_loop_visual_polish_snapshot({}, choice_buttons)
+	return {"execution_hook": execution, "runtime_button": runtime_button, "runtime_visual": runtime_visual, "choice_buttons": choice_buttons, "choice_visual": choice_visual}
 
 
 func _build_release_firefight_command_matrix_visual_signature(active: bool, decision_line: String, command_grid: GridContainer) -> String:
@@ -11101,9 +11213,13 @@ func _apply_release_firefight_command_placeholder_polish(active: bool) -> void:
 		placeholder.set_meta("release_firefight_command_matrix_quiet_placeholder", active)
 
 
-func _apply_release_first_decision_loop_two_runtime_button_polish(active: bool) -> void:
-	var runtime_button_snapshot: Dictionary = get_release_first_decision_loop_two_runtime_button_snapshot()
-	var visual_polish_snapshot: Dictionary = get_release_first_decision_loop_two_visual_polish_snapshot({}, runtime_button_snapshot)
+func _apply_release_first_decision_loop_two_runtime_button_polish(active: bool, projection: Dictionary = {}) -> void:
+	var runtime_button_snapshot: Dictionary = Dictionary(projection.get("runtime_button", {}))
+	if runtime_button_snapshot.is_empty():
+		runtime_button_snapshot = get_release_first_decision_loop_two_runtime_button_snapshot()
+	var visual_polish_snapshot: Dictionary = Dictionary(projection.get("runtime_visual", {}))
+	if visual_polish_snapshot.is_empty():
+		visual_polish_snapshot = get_release_first_decision_loop_two_visual_polish_snapshot({}, runtime_button_snapshot)
 	var button := get_node_or_null("%s/CommandSlot07" % COMMAND_GRID_PATH) as Button
 	if button == null:
 		return
@@ -11131,10 +11247,14 @@ func _apply_release_first_decision_loop_two_runtime_button_polish(active: bool) 
 		button.pressed.connect(_on_release_first_decision_loop_two_button_pressed)
 
 
-func _apply_release_first_decision_loop_two_player_loop_runtime_choice_buttons(active: bool) -> void:
-	var snapshot: Dictionary = get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot()
+func _apply_release_first_decision_loop_two_player_loop_runtime_choice_buttons(active: bool, projection: Dictionary = {}) -> void:
+	var snapshot: Dictionary = Dictionary(projection.get("choice_buttons", {}))
+	if snapshot.is_empty():
+		snapshot = get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot()
 	var specs: Array = Array(snapshot.get("button_specs", []))
-	var visual_polish: Dictionary = get_release_first_decision_loop_two_player_loop_visual_polish_snapshot({}, snapshot)
+	var visual_polish: Dictionary = Dictionary(projection.get("choice_visual", {}))
+	if visual_polish.is_empty():
+		visual_polish = get_release_first_decision_loop_two_player_loop_visual_polish_snapshot({}, snapshot)
 	var visual_specs_by_choice_id: Dictionary = {}
 	for visual_spec_variant in Array(visual_polish.get("button_visual_specs", [])):
 		var visual_spec := Dictionary(visual_spec_variant)
@@ -15196,7 +15316,7 @@ func _sync_primary_3d_mission_status_visuals() -> void:
 		payload["mission_interaction_object_reaction_summary"] = String(interaction_object_reaction.get("summary", ""))
 		payload["mission_interaction_object_reaction_kind_counts"] = Dictionary(interaction_object_reaction.get("kind_counts", {})).duplicate(true)
 		payload["mission_interaction_object_reaction_state_counts"] = Dictionary(interaction_object_reaction.get("state_counts", {})).duplicate(true)
-	var door_runtime_collision_los: Dictionary = apply_mission_interaction_door_runtime_collision_los_snapshot()
+	var door_runtime_collision_los: Dictionary = get_mission_interaction_door_runtime_collision_los_snapshot()
 	if not door_runtime_collision_los.is_empty():
 		payload["mission_interaction_door_runtime_collision_los_schema"] = String(door_runtime_collision_los.get("schema", ""))
 		payload["mission_interaction_door_runtime_collision_los_override_count"] = int(door_runtime_collision_los.get("override_count", 0))
@@ -15571,6 +15691,7 @@ func _apply_native_a5_hud_layout() -> void:
 
 
 func _build_native_player_readout_context() -> Dictionary:
+	_note_hud_projection_build_call("_build_native_player_readout_context")
 	# Existing owners and contracts supply every value. This bounded snapshot is
 	# consumed immediately by a pure UI projection and never written back.
 	var focused_order = _get_area_order_from_ref(_focused_area_order_ref)
@@ -15584,6 +15705,7 @@ func _build_native_player_readout_context() -> Dictionary:
 		remaining = float(driver.call("get_remaining_time_limit_seconds"))
 	var go := get_node_or_null(COMMAND_GRID_PATH + "/GoCommandMatrixButton") as Button
 	var executing_count := 0
+	var active_order_labels: PackedStringArray = []
 	for fireteam_id_variant in _selected_fireteam_ids:
 		var fireteam_id := String(fireteam_id_variant).strip_edges().to_lower()
 		var executing := not Dictionary(_phase_execution_by_fireteam.get(fireteam_id, {})).is_empty() \
@@ -15594,6 +15716,18 @@ func _build_native_player_readout_context() -> Dictionary:
 			executing = bool(_fireteam_movement_controller.call("has_active_execution", fireteam_id))
 		if executing:
 			executing_count += 1
+			var active_command_type := String(get_fireteam_movement_state(fireteam_id).get("command_type", "")).strip_edges().to_lower()
+			if active_command_type.is_empty():
+				var area_execution: Dictionary = Dictionary(_area_defense_execution_by_fireteam.get(fireteam_id, {}))
+				if area_execution.is_empty():
+					area_execution = Dictionary(_area_attack_execution_by_fireteam.get(fireteam_id, {}))
+				active_command_type = String(area_execution.get("command_type", "")).strip_edges().to_lower()
+			if active_command_type.is_empty():
+				var profile: Dictionary = get_active_behavior_profile(fireteam_id)
+				active_command_type = String(Dictionary(profile.get("metadata", {})).get("origin_command_type", "")).strip_edges().to_lower()
+			# Missing or unknown active sources must not become the display helper's
+			# historical MOVE fallback. Preserve one slot per executing team.
+			active_order_labels.append(_get_waypoint_command_display_name(active_command_type) if active_command_type in ["move", "take", "defend", "flank", "engage"] else "")
 	return {
 		"objective": _build_mission_objective_state_snapshot(),
 		"local_team_id": get_local_command_team_id(),
@@ -15605,6 +15739,7 @@ func _build_native_player_readout_context() -> Dictionary:
 		"route_cue": Dictionary(body.get_meta("native_a5_route_cue", {})) if body != null else {},
 		"selection_count": _selected_fireteam_ids.size(),
 		"executing_count": executing_count,
+		"active_order_labels": active_order_labels,
 		"target_selected": _has_selected_tile,
 		"target_armed": _is_target_placement_armed,
 		"planned_count": _count_selected_phase_waypoints() + _count_selected_area_orders(),
@@ -17680,6 +17815,25 @@ func _apply_fireteam_panel_action_button_contract() -> void:
 
 
 func _refresh_dynamic_button_styles() -> void:
+	# Resolve current presentation inputs once, then apply each final base skin.
+	# ROE retains its own existing style/affordance owner below.
+	var can_issue_commands: bool = not preview_mode and _can_issue_local_commands()
+	var has_deletable_focus: bool = _has_deletable_order_focus()
+	var door_breach_button := get_node_or_null(DOOR_BREACH_BUTTON_PATH) as Button
+	var active_by_path: Dictionary = {
+		"../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionNavButton": true,
+		FIRETEAM_ALL_BUTTON_PATH: _is_all_fireteams_selected(),
+		COMMAND_GRID_PATH + "/TargetButton": _is_target_placement_armed,
+		DELETE_ORDER_BUTTON_PATH: has_deletable_focus,
+		WAYPOINT_ERASE_BUTTON_PATH: has_deletable_focus,
+		SORT_COMMAND_BUTTON_PATH: can_issue_commands and not _selected_fireteam_ids.is_empty(),
+		DOOR_BREACH_BUTTON_PATH: door_breach_button != null and bool(door_breach_button.get_meta("door_interaction_button_enabled", false)),
+		COMMAND_GRID_PATH + "/GoCommandMatrixButton": can_issue_commands and _has_selected_fireteam_orders_to_execute(),
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton": _is_lz_placement_armed,
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton": _drop_ship_requested,
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton": PHASE_PLANNING_ENABLED and can_issue_commands and not _phase_execution_by_fireteam.is_empty(),
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/%sButton" % _get_approach_angle_name(): true,
+	}
 	for path in [
 		"../TacticalUI/TopNavPanel/NavMargin/NavRow/HomebaseNavButton",
 		"../TacticalUI/TopNavPanel/NavMargin/NavRow/FOBNavButton",
@@ -17695,10 +17849,6 @@ func _refresh_dynamic_button_styles() -> void:
 		DELETE_ORDER_BUTTON_PATH,
 		WAYPOINT_ERASE_BUTTON_PATH,
 		SORT_COMMAND_BUTTON_PATH,
-		FIRE_RULE_HOLD_BUTTON_PATH,
-		FIRE_RULE_RETURN_BUTTON_PATH,
-		FIRE_RULE_FREE_BUTTON_PATH,
-		FIRE_RULE_SUPPRESS_BUTTON_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton",
@@ -17713,25 +17863,22 @@ func _refresh_dynamic_button_styles() -> void:
 	]:
 		var button := get_node_or_null(path) as Button
 		if button != null:
-			META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
+			_apply_dynamic_button_base_style(button, bool(active_by_path.get(path, false)))
 
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionNavButton") as Button, true)
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(FIRETEAM_ALL_BUTTON_PATH) as Button, _is_all_fireteams_selected())
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton") as Button, _is_target_placement_armed)
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(DELETE_ORDER_BUTTON_PATH) as Button, _has_deletable_order_focus())
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(WAYPOINT_ERASE_BUTTON_PATH) as Button, _has_deletable_order_focus())
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(SORT_COMMAND_BUTTON_PATH) as Button, not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty())
-	var door_breach_button := get_node_or_null(DOOR_BREACH_BUTTON_PATH) as Button
-	META_UI_SKIN_SCRIPT.style_tactical_button(door_breach_button, door_breach_button != null and bool(door_breach_button.get_meta("door_interaction_button_enabled", false)))
 	if door_breach_button != null:
 		_apply_door_authority_button_affordance(door_breach_button, String(door_breach_button.get_meta("door_authority_ui_severity", "")).strip_edges())
 	_refresh_fire_rule_button_state()
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton") as Button, not preview_mode and _can_issue_local_commands() and _has_selected_fireteam_orders_to_execute())
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button, _is_lz_placement_armed)
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button, _drop_ship_requested)
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as Button, PHASE_PLANNING_ENABLED and not preview_mode and _can_issue_local_commands() and not _phase_execution_by_fireteam.is_empty())
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/%sButton" % _get_approach_angle_name()) as Button, true)
 	_apply_command_matrix_1280_readability()
+
+
+func _apply_dynamic_button_base_style(button: Button, is_active: bool) -> void:
+	if button != null and bool(get_meta("native_a5_legacy_setup_complete", false)):
+		var button_name: String = String(button.name)
+		if NATIVE_A5_HUD_LAYOUT_SCRIPT.FIRST.has(button_name) or NATIVE_A5_HUD_LAYOUT_SCRIPT.SECOND.has(button_name):
+			# The same synchronous refresh reaches the native final presenter below.
+			# Avoid replacing its action-tile resources with an intermediate base skin.
+			return
+	META_UI_SKIN_SCRIPT.style_tactical_button(button, is_active)
 
 
 func _apply_block_labels() -> void:
@@ -26324,6 +26471,7 @@ func get_release_first_decision_next_playable_loop_snapshot(source_findings_over
 
 
 func get_release_first_decision_loop_two_playtest_snapshot(next_loop_override: Dictionary = {}, selected_fireteam_status_override: String = "", mission_control_status_override: String = "", command_feedback_override: Dictionary = {}) -> Dictionary:
+	_note_hud_projection_build_call("get_release_first_decision_loop_two_playtest_snapshot")
 	var next_loop: Dictionary = next_loop_override.duplicate(true) if not next_loop_override.is_empty() else get_release_first_decision_next_playable_loop_snapshot()
 	var selected_text: String = selected_fireteam_status_override.strip_edges()
 	if selected_text.is_empty():
@@ -26373,6 +26521,7 @@ func get_release_first_decision_loop_two_go_smoke_snapshot(execution_hook_overri
 
 
 func get_release_first_decision_loop_two_runtime_button_snapshot(go_smoke_override: Dictionary = {}, execution_hook_override: Dictionary = {}) -> Dictionary:
+	_note_hud_projection_build_call("get_release_first_decision_loop_two_runtime_button_snapshot")
 	var execution_hook: Dictionary = execution_hook_override.duplicate(true) if not execution_hook_override.is_empty() else get_release_first_decision_loop_two_execution_hook_snapshot()
 	var go_smoke: Dictionary = go_smoke_override.duplicate(true) if not go_smoke_override.is_empty() else get_release_first_decision_loop_two_go_smoke_snapshot(execution_hook, {})
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_RUNTIME_BUTTON_SCRIPT.call("build_snapshot", go_smoke, execution_hook)).duplicate(true)
@@ -26391,6 +26540,7 @@ func get_release_first_decision_loop_two_playability_smoke_snapshot(visual_polis
 
 
 func get_release_first_decision_loop_two_player_loop_extension_snapshot(source_acceptance_override: Dictionary = {}, tactical_context_override: Dictionary = {}) -> Dictionary:
+	_note_hud_projection_build_call("get_release_first_decision_loop_two_player_loop_extension_snapshot")
 	var source_acceptance: Dictionary = source_acceptance_override.duplicate(true) if not source_acceptance_override.is_empty() else _build_release_first_decision_loop_two_player_loop_extension_source()
 	var tactical_context: Dictionary = tactical_context_override.duplicate(true) if not tactical_context_override.is_empty() else _build_release_first_decision_loop_two_player_loop_tactical_context()
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_EXTENSION_SCRIPT.call("build_snapshot", source_acceptance, tactical_context)).duplicate(true)
@@ -26412,6 +26562,7 @@ func get_release_first_decision_loop_two_player_loop_choice_hook_snapshot(player
 
 
 func get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot(player_loop_choice_hook_override: Dictionary = {}, player_loop_hud_wiring_override: Dictionary = {}) -> Dictionary:
+	_note_hud_projection_build_call("get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot")
 	var player_loop_hud_wiring: Dictionary = player_loop_hud_wiring_override.duplicate(true) if not player_loop_hud_wiring_override.is_empty() else get_release_first_decision_loop_two_player_loop_hud_wiring_snapshot()
 	var player_loop_choice_hook: Dictionary = player_loop_choice_hook_override.duplicate(true) if not player_loop_choice_hook_override.is_empty() else get_release_first_decision_loop_two_player_loop_choice_hook_snapshot(player_loop_hud_wiring, "")
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_RUNTIME_CHOICE_BUTTONS_SCRIPT.call("build_snapshot", player_loop_choice_hook, player_loop_hud_wiring)).duplicate(true)
@@ -27159,7 +27310,10 @@ func _build_release_first_decision_loop_two_playability_smoke_trace(visual_polis
 
 
 func _build_release_first_decision_loop_two_player_loop_extension_source() -> Dictionary:
-	var playability_smoke: Dictionary = get_release_first_decision_loop_two_playability_smoke_snapshot()
+	return _project_loop_two_extension_source(get_release_first_decision_loop_two_playability_smoke_snapshot())
+
+
+func _project_loop_two_extension_source(playability_smoke: Dictionary) -> Dictionary:
 	var passed: bool = bool(playability_smoke.get("playability_smoke_passed", false)) and String(playability_smoke.get("gate", "")) == "loop_two_playability_smoke_passed"
 	var smoke_line: String = String(playability_smoke.get("smoke_line", playability_smoke.get("post_go_feedback_line", ""))).strip_edges()
 	return {
@@ -28681,72 +28835,26 @@ func get_mission_interaction_object_reaction_snapshot() -> Dictionary:
 	var visual_state_snapshot: Dictionary = get_mission_interaction_visual_state_snapshot()
 	return Dictionary(MISSION_INTERACTION_OBJECT_REACTION_SCRIPT.call(
 		"build_snapshot",
-		visual_state_snapshot
+		visual_state_snapshot,
+		get_mission_interaction_door_runtime_collision_los_snapshot()
 	)).duplicate(true)
 
 
 func get_mission_interaction_door_runtime_collision_los_snapshot() -> Dictionary:
-	var object_reaction_snapshot: Dictionary = get_mission_interaction_object_reaction_snapshot()
-	var terrain_registry = _get_terrain_registry()
-	return Dictionary(MISSION_INTERACTION_DOOR_RUNTIME_COLLISION_LOS_SCRIPT.call(
-		"build_snapshot",
-		object_reaction_snapshot,
-		terrain_registry
-	)).duplicate(true)
+	var driver = _get_combat_loop_driver()
+	if driver == null or not driver.has_method("get_mission_interaction_door_runtime_collision_los_snapshot"):
+		return {}
+	return Dictionary(driver.call("get_mission_interaction_door_runtime_collision_los_snapshot")).duplicate(true)
 
 
 func apply_mission_interaction_door_runtime_collision_los_snapshot() -> Dictionary:
-	var snapshot: Dictionary = get_mission_interaction_door_runtime_collision_los_snapshot()
-	var terrain_registry = _get_terrain_registry()
-	var result: Dictionary = snapshot.duplicate(true)
-	result["producer_schema"] = "sternenbuergerchen.mission_interaction_door_runtime_state_producer.v1"
-	result["producer_source"] = "MissionTacticalSandboxController"
-	result["producer_applied"] = false
-	result["producer_apply_reason"] = "terrain_registry_unavailable"
-	result["producer_reads_runtime_truth"] = true
-	result["ui_sets_gameplay_truth"] = false
-	if terrain_registry == null or not terrain_registry.has_method("set_runtime_tile_overrides"):
-		_last_mission_interaction_door_runtime_snapshot = result.duplicate(true)
-		return result
-	var overrides: Array = Array(snapshot.get("overrides", []))
-	var fingerprint: String = _build_mission_interaction_door_runtime_override_fingerprint(overrides)
-	if fingerprint == _last_mission_interaction_door_runtime_override_fingerprint:
-		result["producer_apply_reason"] = "unchanged"
-		result["terrain_registry_revision"] = int(terrain_registry.call("get_revision")) if terrain_registry.has_method("get_revision") else -1
-		_last_mission_interaction_door_runtime_snapshot = result.duplicate(true)
-		return result
-	terrain_registry.call("set_runtime_tile_overrides", overrides)
-	_last_mission_interaction_door_runtime_override_fingerprint = fingerprint
-	result["producer_applied"] = true
-	result["producer_apply_reason"] = "override_changed"
-	result["terrain_registry_revision"] = int(terrain_registry.call("get_revision")) if terrain_registry.has_method("get_revision") else -1
-	_last_mission_interaction_door_runtime_snapshot = result.duplicate(true)
-	return result
+	# Compatibility read for existing diagnostics. Only the runtime producer
+	# commits the derived navigation/LOS index; drawing never advances gameplay.
+	return get_mission_interaction_door_runtime_collision_los_snapshot()
 
 
 func get_last_mission_interaction_door_runtime_collision_los_snapshot() -> Dictionary:
-	return _last_mission_interaction_door_runtime_snapshot.duplicate(true)
-
-
-func _build_mission_interaction_door_runtime_override_fingerprint(overrides: Array) -> String:
-	var parts: PackedStringArray = PackedStringArray()
-	for override_variant in overrides:
-		if typeof(override_variant) != TYPE_DICTIONARY:
-			continue
-		var override: Dictionary = Dictionary(override_variant)
-		var grid: Vector2i = Vector2i(override.get("grid_position", Vector2i.ZERO))
-		parts.append("%d,%d:%s:%s:%d:%d:%s:%s" % [
-			grid.x,
-			grid.y,
-			str(bool(override.get("walkable_override", false))),
-			str(bool(override.get("blocks_los_override", false))),
-			int(override.get("object_height_override", 0)),
-			int(override.get("cover_value_override", 0)),
-			String(override.get("source_interaction_id", "")).strip_edges(),
-			String(override.get("source_runtime_visual_state", "")).strip_edges(),
-		])
-	parts.sort()
-	return "|".join(parts)
+	return get_mission_interaction_door_runtime_collision_los_snapshot()
 
 
 func _build_mission_interaction_progress_readability_snapshot(use_feedback: Dictionary = {}) -> Dictionary:

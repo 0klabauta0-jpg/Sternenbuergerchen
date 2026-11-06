@@ -1,0 +1,64 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-f44462090a0c46efae311b37d28ff1e7
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== HUD Door Runtime Authority: synthetic component contract ===
+PASS: Fixture has no HUD/controller/Primary3DView
+FAIL: Runtime configure publishes the closed door index without a HUD refresh
+PASS: Configured effective movement and LOS agree
+PASS: Configured effective height and cover agree
+PASS: Configured actual pathfinder follows runtime index
+PASS: Configured actual LOS follows runtime index
+PASS: 50 percent runtime effective movement and LOS agree
+PASS: 50 percent runtime effective height and cover agree
+PASS: 50 percent runtime actual pathfinder follows runtime index
+PASS: 50 percent runtime actual LOS follows runtime index
+PASS: Visual and effective runtime retain the same opening boundary
+PASS: 84 percent runtime effective movement and LOS agree
+PASS: 84 percent runtime effective height and cover agree
+PASS: 84 percent runtime actual pathfinder follows runtime index
+PASS: 84 percent runtime actual LOS follows runtime index
+PASS: Visual and effective runtime retain the same opening boundary
+FAIL: 85 percent runtime effective movement and LOS agree
+FAIL: 85 percent runtime effective height and cover agree
+FAIL: 85 percent runtime actual pathfinder follows runtime index
+FAIL: 85 percent runtime actual LOS follows runtime index
+PASS: Visual and effective runtime retain the same opening boundary
+PASS: Interrupted unfinished effective movement and LOS agree
+PASS: Interrupted unfinished effective height and cover agree
+PASS: Interrupted unfinished actual pathfinder follows runtime index
+PASS: Interrupted unfinished actual LOS follows runtime index
+FAIL: Completed effective movement and LOS agree
+FAIL: Completed effective height and cover agree
+FAIL: Completed actual pathfinder follows runtime index
+FAIL: Completed actual LOS follows runtime index
+PASS: Runtime door index leaves every static tile field unchanged
+PASS: Progress projection emits no commands or effects
+FAIL: Runtime owner exposes its read-only door receipt
+FAIL: Repeated HUD-facing getters do not change gate clocks/completion, interaction state, cargo or objective countdown
+PASS: Repeated snapshot reads do not dirty terrain
+PASS: Repeated read emits no commands or effects
+PASS: Stable runtime ticks do not cause self-revision loops
+PASS: Rebuilt registry genuinely lost the old runtime override
+FAIL: Same-fingerprint registry rebuild effective movement and LOS agree
+FAIL: Same-fingerprint registry rebuild effective height and cover agree
+FAIL: Same-fingerprint registry rebuild actual pathfinder follows runtime index
+FAIL: Same-fingerprint registry rebuild actual LOS follows runtime index
+PASS: Reapply stores its resulting revision and then remains stable
+FAIL: Replacement registry identity effective movement and LOS agree
+FAIL: Replacement registry identity effective height and cover agree
+FAIL: Replacement registry identity actual pathfinder follows runtime index
+FAIL: Replacement registry identity actual LOS follows runtime index
+PASS: Empty remote state effective movement and LOS agree
+PASS: Empty remote state effective height and cover agree
+PASS: Empty remote state actual pathfinder follows runtime index
+PASS: Empty remote state actual LOS follows runtime index
+FAIL: Completed remote state effective movement and LOS agree
+FAIL: Completed remote state effective height and cover agree
+FAIL: Completed remote state actual pathfinder follows runtime index
+FAIL: Completed remote state actual LOS follows runtime index
+PASS: Duplicate remote state does not dirty terrain
+PASS: Remote index projection emits no commands or effects
+PASS: Missing runtime marker never creates a fabricated origin override
+PASS: Missing runtime marker is not guessed from unrelated terrain
+=== RESULTS: 35 passed, 23 failed ===

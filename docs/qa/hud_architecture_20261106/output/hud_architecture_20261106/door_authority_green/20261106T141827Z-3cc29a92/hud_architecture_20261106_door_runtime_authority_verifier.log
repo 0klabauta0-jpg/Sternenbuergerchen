@@ -1,0 +1,68 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-95d874c366394ad98dab7e6d1c254b3d
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== HUD Door Runtime Authority: synthetic component contract ===
+PASS: Fixture has no HUD/controller/Primary3DView
+PASS: Runtime configure publishes the closed door index without a HUD refresh
+PASS: Configured effective movement and LOS agree
+PASS: Configured effective height and cover agree
+PASS: Configured actual pathfinder follows runtime index
+PASS: Configured actual LOS follows runtime index
+PASS: 50 percent runtime effective movement and LOS agree
+PASS: 50 percent runtime effective height and cover agree
+PASS: 50 percent runtime actual pathfinder follows runtime index
+PASS: 50 percent runtime actual LOS follows runtime index
+PASS: Visual and effective runtime retain the same opening boundary
+PASS: 84 percent runtime effective movement and LOS agree
+PASS: 84 percent runtime effective height and cover agree
+PASS: 84 percent runtime actual pathfinder follows runtime index
+PASS: 84 percent runtime actual LOS follows runtime index
+PASS: Visual and effective runtime retain the same opening boundary
+PASS: 85 percent runtime effective movement and LOS agree
+PASS: 85 percent runtime effective height and cover agree
+PASS: 85 percent runtime actual pathfinder follows runtime index
+PASS: 85 percent runtime actual LOS follows runtime index
+PASS: Visual and effective runtime retain the same opening boundary
+PASS: Interrupted unfinished effective movement and LOS agree
+PASS: Interrupted unfinished effective height and cover agree
+PASS: Interrupted unfinished actual pathfinder follows runtime index
+PASS: Interrupted unfinished actual LOS follows runtime index
+PASS: Completed effective movement and LOS agree
+PASS: Completed effective height and cover agree
+PASS: Completed actual pathfinder follows runtime index
+PASS: Completed actual LOS follows runtime index
+PASS: Runtime door index leaves every static tile field unchanged
+PASS: Progress projection emits no commands or effects
+PASS: Door receipt identifies the real runtime producer
+PASS: Door receipt preserves read-only and static-data guarantees
+PASS: Door receipt records the applied terrain revision and override count
+PASS: Receipt output cannot mutate the runtime index
+PASS: Repeated HUD-facing getters do not change gate clocks/completion, interaction state, cargo or objective countdown
+PASS: Repeated snapshot reads do not dirty terrain
+PASS: Repeated read emits no commands or effects
+PASS: Stable runtime ticks do not cause self-revision loops
+PASS: Rebuilt registry genuinely lost the old runtime override
+PASS: Same-fingerprint registry rebuild effective movement and LOS agree
+PASS: Same-fingerprint registry rebuild effective height and cover agree
+PASS: Same-fingerprint registry rebuild actual pathfinder follows runtime index
+PASS: Same-fingerprint registry rebuild actual LOS follows runtime index
+PASS: Reapply stores its resulting revision and then remains stable
+PASS: Replacement registry identity effective movement and LOS agree
+PASS: Replacement registry identity effective height and cover agree
+PASS: Replacement registry identity actual pathfinder follows runtime index
+PASS: Replacement registry identity actual LOS follows runtime index
+PASS: Empty remote state effective movement and LOS agree
+PASS: Empty remote state effective height and cover agree
+PASS: Empty remote state actual pathfinder follows runtime index
+PASS: Empty remote state actual LOS follows runtime index
+PASS: Completed remote state effective movement and LOS agree
+PASS: Completed remote state effective height and cover agree
+PASS: Completed remote state actual pathfinder follows runtime index
+PASS: Completed remote state actual LOS follows runtime index
+PASS: Duplicate remote state does not dirty terrain
+PASS: Remote index projection emits no commands or effects
+PASS: Missing runtime marker never creates a fabricated origin override
+PASS: Missing runtime marker is not guessed from unrelated terrain
+=== RESULTS: 61 passed, 0 failed ===
+HUD_DOOR_RUNTIME_AUTHORITY_VERIFY_PASS

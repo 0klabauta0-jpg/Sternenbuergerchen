@@ -3,6 +3,7 @@ extends Control
 
 const PORTRAITS: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const BASE_SCENE: PackedScene = preload("res://scenes/meta/explorable_homebase.tscn")
+const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const INK := Color("08232e")
 const PANEL := Color("102f3b")
 const CREAM := Color("f4f2e9")
@@ -277,7 +278,7 @@ func _build_equipment() -> void:
 func _build_flightdeck() -> void:
 	var content: VBoxContainer = _column("flight", "Einsatz & Abflug")
 	var list: VBoxContainer = _scroll(content)
-	_mission_name = _label("Einsatz auswählen", 20, CREAM)
+	_mission_name = _label("Einsatz", 20, CREAM)
 	list.add_child(_mission_name)
 	_mission_selector = _option(list, "MissionSelector")
 	_mission_selector.item_selected.connect(func(index: int): _act("mission", {"mission_id": String(_mission_selector.get_item_metadata(index))}))
@@ -289,7 +290,7 @@ func _build_flightdeck() -> void:
 	list.add_child(_label("Pilot", 16, MUTED))
 	_pilot_selector = _option(list, "PilotSelector")
 	_pilot_selector.item_selected.connect(func(index: int): _act("pilot", {"unit_id": String(_pilot_selector.get_item_metadata(index)), "craft_id": _craft_id}))
-	_craft_status = _label("Kein Schiff verfügbar", 19, GOLD)
+	_craft_status = _label("Kein Schiff verfügbar", 19, THEME.status_color("neutral"))
 	list.add_child(_craft_status)
 	_payload_label = _label("", 16, CREAM)
 	list.add_child(_payload_label)
@@ -483,11 +484,13 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	_craft_id = String(craft.get("id", ""))
 	_set_options(_craft_selector, Array(snapshot.get("crafts", [])), _craft_id)
 	_set_options(_mission_selector, Array(snapshot.get("missions", [])), String(snapshot.get("mission_id", "")))
-	_mission_name.text = String(snapshot.get("mission_name", "Einsatz"))
 	_set_options(_pilot_selector, Array(craft.get("pilot_options", [])), String(craft.get("pilot_id", "")))
 	_pilot_selector.disabled = bool(craft.get("busy", false)) or craft.is_empty()
 	_set_texture(_craft_image, String(craft.get("texture_path", "")))
 	_craft_status.text = String(craft.get("status", "Kein Schiff verfügbar"))
+	var status_color: Color = THEME.status_color(_craft_status_key(craft))
+	if _craft_status.get_theme_color("font_color") != status_color:
+		_craft_status.add_theme_color_override("font_color", status_color)
 	_payload_label.text = "%d Kräfte an Bord / im Boarding" % int(craft.get("passenger_count", 0))
 	_progress.value = float(craft.get("progress", 0.0))
 	_board.disabled = not bool(craft.get("can_board", false))
@@ -495,6 +498,21 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	_unboard.visible = bool(craft.get("has_payload", false))
 	_start.disabled = not bool(craft.get("can_start", false))
 	_start.tooltip_text = String(craft.get("next_step", ""))
+
+
+static func _craft_status_key(craft: Dictionary) -> String:
+	# Presentation only: use the existing snapshot gates, never localized text.
+	if craft.is_empty():
+		return "neutral"
+	if bool(craft.get("busy", false)):
+		return "transit"
+	if String(craft.get("pilot_id", "")).is_empty():
+		return "blocked"
+	if bool(craft.get("can_start", false)):
+		return "ready"
+	if bool(craft.get("has_payload", false)) and float(craft.get("progress", 0.0)) < 100.0:
+		return "transit"
+	return "pending"
 
 
 func _set_portrait(rect: TextureRect, unit: Dictionary) -> void:

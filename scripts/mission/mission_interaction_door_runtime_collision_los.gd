@@ -2,6 +2,51 @@ class_name MissionInteractionDoorRuntimeCollisionLOS
 extends RefCounted
 
 const SNAPSHOT_SCHEMA: String = "sternenbuergerchen.mission_interaction_door_runtime_collision_los.v1"
+const OPEN_PROGRESS_THRESHOLD: float = 0.85
+
+
+static func resolve_door_state(state: String, progress: float) -> String:
+	match state.strip_edges().to_lower():
+		"complete", "open":
+			return "open"
+		"active", "holding", "operating", "in_progress":
+			return "open" if progress >= OPEN_PROGRESS_THRESHOLD else "half"
+		_:
+			return "closed"
+
+
+static func build_runtime_snapshot(bindings: Array, interaction_states: Dictionary, terrain_map_data = null, terrain_registry = null) -> Dictionary:
+	# Runtime bindings and the existing Interaction owner are the physical source.
+	# Local selection, visual anchors, range labels and render availability are not.
+	var entries: Array = []
+	var unresolved_marker_ids: PackedStringArray = PackedStringArray()
+	for binding_variant in bindings:
+		if typeof(binding_variant) != TYPE_DICTIONARY:
+			continue
+		var binding: Dictionary = Dictionary(binding_variant)
+		if String(binding.get("interaction_type", "")).strip_edges().to_lower() != "door":
+			continue
+		var interaction_id: String = String(binding.get("interaction_id", "")).strip_edges()
+		var marker_id: String = String(binding.get("marker_id", "")).strip_edges()
+		if interaction_id.is_empty():
+			continue
+		if terrain_map_data == null or marker_id.is_empty() or not terrain_map_data.has_method("has_marker") or not bool(terrain_map_data.call("has_marker", marker_id)):
+			unresolved_marker_ids.append(marker_id)
+			continue
+		var state: Dictionary = Dictionary(interaction_states.get(interaction_id, {}))
+		var state_name: String = "complete" if bool(state.get("complete", false)) else String(state.get("state", ""))
+		entries.append({
+			"interaction_id": interaction_id,
+			"marker_id": marker_id,
+			"object_kind": "door",
+			"world_position": Vector2(terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO)),
+			"runtime_visual_state": resolve_door_state(state_name, clampf(float(state.get("progress", 0.0)), 0.0, 1.0)),
+		})
+	var snapshot: Dictionary = build_snapshot({"schema": "sternenbuergerchen.mission_interaction_door_runtime_projection.v1", "entries": entries}, terrain_registry)
+	snapshot["runtime_authority"] = "MissionCombatLoopDriver interaction state"
+	snapshot["unresolved_marker_ids"] = unresolved_marker_ids
+	snapshot["unresolved_marker_count"] = unresolved_marker_ids.size()
+	return snapshot
 
 
 static func build_snapshot(object_reaction_snapshot: Dictionary, terrain_registry = null) -> Dictionary:

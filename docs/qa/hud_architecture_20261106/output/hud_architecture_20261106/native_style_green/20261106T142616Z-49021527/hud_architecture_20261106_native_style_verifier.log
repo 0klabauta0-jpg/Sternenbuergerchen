@@ -1,0 +1,140 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-6c1da24a24f84d47b7608250c9722a42
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Real mission scene retains MoveButton
+PASS: Real mission scene retains TakeButton
+PASS: Real mission scene retains HoldButton
+PASS: Real mission scene retains FlankButton
+PASS: Real mission scene retains GoCommandMatrixButton
+PASS: Real mission scene retains TargetButton
+PASS: Real mission scene retains ClearTargetButton
+PASS: Real mission scene retains DeleteOrderButton
+PASS: Real mission scene retains SortCommandMatrixButton
+PASS: selected_ready A5 primary controls avoid the intermediate generic base reset
+PASS: selected_ready retains all 16 non-primary base calls
+PASS: selected_ready MoveButton matches the former final native style
+PASS: selected_ready MoveButton preserves its existing callbacks
+PASS: selected_ready TakeButton matches the former final native style
+PASS: selected_ready TakeButton preserves its existing callbacks
+PASS: selected_ready HoldButton matches the former final native style
+PASS: selected_ready HoldButton preserves its existing callbacks
+PASS: selected_ready FlankButton matches the former final native style
+PASS: selected_ready FlankButton preserves its existing callbacks
+PASS: selected_ready GoCommandMatrixButton matches the former final native style
+PASS: selected_ready GoCommandMatrixButton preserves its existing callbacks
+PASS: selected_ready TargetButton matches the former final native style
+PASS: selected_ready TargetButton preserves its existing callbacks
+PASS: selected_ready ClearTargetButton matches the former final native style
+PASS: selected_ready ClearTargetButton preserves its existing callbacks
+PASS: selected_ready DeleteOrderButton matches the former final native style
+PASS: selected_ready DeleteOrderButton preserves its existing callbacks
+PASS: selected_ready SortCommandMatrixButton matches the former final native style
+PASS: selected_ready SortCommandMatrixButton preserves its existing callbacks
+PASS: selected_ready retains the current GO gate
+PASS: selected_ready repeated refresh performs no generic primary-style mutation
+PASS: selected_ready repeated MoveButton output stays current and stable
+PASS: selected_ready repeated TakeButton output stays current and stable
+PASS: selected_ready repeated HoldButton output stays current and stable
+PASS: selected_ready repeated FlankButton output stays current and stable
+PASS: selected_ready repeated GoCommandMatrixButton output stays current and stable
+PASS: selected_ready repeated TargetButton output stays current and stable
+PASS: selected_ready repeated ClearTargetButton output stays current and stable
+PASS: selected_ready repeated DeleteOrderButton output stays current and stable
+PASS: selected_ready repeated SortCommandMatrixButton output stays current and stable
+PASS: preview_blocked A5 primary controls avoid the intermediate generic base reset
+PASS: preview_blocked retains all 16 non-primary base calls
+PASS: preview_blocked MoveButton matches the former final native style
+PASS: preview_blocked MoveButton preserves its existing callbacks
+PASS: preview_blocked TakeButton matches the former final native style
+PASS: preview_blocked TakeButton preserves its existing callbacks
+PASS: preview_blocked HoldButton matches the former final native style
+PASS: preview_blocked HoldButton preserves its existing callbacks
+PASS: preview_blocked FlankButton matches the former final native style
+PASS: preview_blocked FlankButton preserves its existing callbacks
+PASS: preview_blocked GoCommandMatrixButton matches the former final native style
+PASS: preview_blocked GoCommandMatrixButton preserves its existing callbacks
+PASS: preview_blocked TargetButton matches the former final native style
+PASS: preview_blocked TargetButton preserves its existing callbacks
+PASS: preview_blocked ClearTargetButton matches the former final native style
+PASS: preview_blocked ClearTargetButton preserves its existing callbacks
+PASS: preview_blocked DeleteOrderButton matches the former final native style
+PASS: preview_blocked DeleteOrderButton preserves its existing callbacks
+PASS: preview_blocked SortCommandMatrixButton matches the former final native style
+PASS: preview_blocked SortCommandMatrixButton preserves its existing callbacks
+PASS: preview_blocked retains the current GO gate
+PASS: preview_blocked repeated refresh performs no generic primary-style mutation
+PASS: preview_blocked repeated MoveButton output stays current and stable
+PASS: preview_blocked repeated TakeButton output stays current and stable
+PASS: preview_blocked repeated HoldButton output stays current and stable
+PASS: preview_blocked repeated FlankButton output stays current and stable
+PASS: preview_blocked repeated GoCommandMatrixButton output stays current and stable
+PASS: preview_blocked repeated TargetButton output stays current and stable
+PASS: preview_blocked repeated ClearTargetButton output stays current and stable
+PASS: preview_blocked repeated DeleteOrderButton output stays current and stable
+PASS: preview_blocked repeated SortCommandMatrixButton output stays current and stable
+PASS: observer A5 primary controls avoid the intermediate generic base reset
+PASS: observer retains all 16 non-primary base calls
+PASS: observer MoveButton matches the former final native style
+PASS: observer MoveButton preserves its existing callbacks
+PASS: observer TakeButton matches the former final native style
+PASS: observer TakeButton preserves its existing callbacks
+PASS: observer HoldButton matches the former final native style
+PASS: observer HoldButton preserves its existing callbacks
+PASS: observer FlankButton matches the former final native style
+PASS: observer FlankButton preserves its existing callbacks
+PASS: observer GoCommandMatrixButton matches the former final native style
+PASS: observer GoCommandMatrixButton preserves its existing callbacks
+PASS: observer TargetButton matches the former final native style
+PASS: observer TargetButton preserves its existing callbacks
+PASS: observer ClearTargetButton matches the former final native style
+PASS: observer ClearTargetButton preserves its existing callbacks
+PASS: observer DeleteOrderButton matches the former final native style
+PASS: observer DeleteOrderButton preserves its existing callbacks
+PASS: observer SortCommandMatrixButton matches the former final native style
+PASS: observer SortCommandMatrixButton preserves its existing callbacks
+PASS: observer retains the current GO gate
+PASS: observer repeated refresh performs no generic primary-style mutation
+PASS: observer repeated MoveButton output stays current and stable
+PASS: observer repeated TakeButton output stays current and stable
+PASS: observer repeated HoldButton output stays current and stable
+PASS: observer repeated FlankButton output stays current and stable
+PASS: observer repeated GoCommandMatrixButton output stays current and stable
+PASS: observer repeated TargetButton output stays current and stable
+PASS: observer repeated ClearTargetButton output stays current and stable
+PASS: observer repeated DeleteOrderButton output stays current and stable
+PASS: observer repeated SortCommandMatrixButton output stays current and stable
+PASS: no_selection_or_orders A5 primary controls avoid the intermediate generic base reset
+PASS: no_selection_or_orders retains all 16 non-primary base calls
+PASS: no_selection_or_orders MoveButton matches the former final native style
+PASS: no_selection_or_orders MoveButton preserves its existing callbacks
+PASS: no_selection_or_orders TakeButton matches the former final native style
+PASS: no_selection_or_orders TakeButton preserves its existing callbacks
+PASS: no_selection_or_orders HoldButton matches the former final native style
+PASS: no_selection_or_orders HoldButton preserves its existing callbacks
+PASS: no_selection_or_orders FlankButton matches the former final native style
+PASS: no_selection_or_orders FlankButton preserves its existing callbacks
+PASS: no_selection_or_orders GoCommandMatrixButton matches the former final native style
+PASS: no_selection_or_orders GoCommandMatrixButton preserves its existing callbacks
+PASS: no_selection_or_orders TargetButton matches the former final native style
+PASS: no_selection_or_orders TargetButton preserves its existing callbacks
+PASS: no_selection_or_orders ClearTargetButton matches the former final native style
+PASS: no_selection_or_orders ClearTargetButton preserves its existing callbacks
+PASS: no_selection_or_orders DeleteOrderButton matches the former final native style
+PASS: no_selection_or_orders DeleteOrderButton preserves its existing callbacks
+PASS: no_selection_or_orders SortCommandMatrixButton matches the former final native style
+PASS: no_selection_or_orders SortCommandMatrixButton preserves its existing callbacks
+PASS: no_selection_or_orders retains the current GO gate
+PASS: no_selection_or_orders repeated refresh performs no generic primary-style mutation
+PASS: no_selection_or_orders repeated MoveButton output stays current and stable
+PASS: no_selection_or_orders repeated TakeButton output stays current and stable
+PASS: no_selection_or_orders repeated HoldButton output stays current and stable
+PASS: no_selection_or_orders repeated FlankButton output stays current and stable
+PASS: no_selection_or_orders repeated GoCommandMatrixButton output stays current and stable
+PASS: no_selection_or_orders repeated TargetButton output stays current and stable
+PASS: no_selection_or_orders repeated ClearTargetButton output stays current and stable
+PASS: no_selection_or_orders repeated DeleteOrderButton output stays current and stable
+PASS: no_selection_or_orders repeated SortCommandMatrixButton output stays current and stable
+PASS: Legacy mode still applies the original generic primary skin
+HUD_ARCHITECTURE_20261106_NATIVE_STYLE: 134 passed, 0 failed
+HUD_NATIVE_STYLE_VERIFY_PASS

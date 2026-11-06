@@ -1,0 +1,230 @@
+[
+  {
+    "path": "builds/Sternenbuergerchen_rel_2026_07_05/Sternenbuergerchen_rel.console.exe",
+    "sha256": "446ff4197f017ea753e4c75e5644ee68fa323448add126b1e6b3490ad75bcae6",
+    "size": 91136,
+    "mtime_ns": 1783276468503395300
+  },
+  {
+    "path": "builds/Sternenbuergerchen_rel_2026_07_05/Sternenbuergerchen_rel.exe",
+    "sha256": "0f62f71cb565b8c52cde789257f84ce37d3a3f1e3b740a1f09e4013ad6e850dc",
+    "size": 104553472,
+    "mtime_ns": 1783276468425629300
+  },
+  {
+    "path": "builds/Sternenbuergerchen_rel_2026_07_05/Sternenbuergerchen_rel.pck",
+    "sha256": "f91e41298b3774a22b83dafd9c076cb427cd9eb1751a8fecc1739dae2e668e9c",
+    "size": 361751312,
+    "mtime_ns": 1783276490571488300
+  },
+  {
+    "path": "builds/Sternenbuergerchen_rel_2026_07_05/exe_headless_smoke.log",
+    "sha256": "b04bfb89a126a8be4b8cba943e420a0f5a23ccc9eb0d90b3e5511b894d32718f",
+    "size": 302,
+    "mtime_ns": 1783275417721347500
+  },
+  {
+    "path": "builds/Sternenbuergerchen_rel_2026_07_05/exe_singleplayer_bootstrap_test.log",
+    "sha256": "b04bfb89a126a8be4b8cba943e420a0f5a23ccc9eb0d90b3e5511b894d32718f",
+    "size": 302,
+    "mtime_ns": 1783276550683903300
+  },
+  {
+    "path": "builds/Sternenbuergerchen_rel_2026_07_05/export_release.log",
+    "sha256": "a722c59f5a6a89e8aa4ed523750ad382e57962f0d3a849e01c22bb491f3febad",
+    "size": 6694974,
+    "mtime_ns": 1783276491197633500
+  },
+  {
+    "path": "builds/Sternenbuergerchen_rel_2026_07_05/liblimboai.windows.template_release.x86_64.dll",
+    "sha256": "7b3c8a9bbbffa0073bfa2e3702e89b0fd466313115cbd3fdcb6b90b9a43e4815",
+    "size": 3461632,
+    "mtime_ns": 1783276490713475500
+  },
+  {
+    "path": "builds/Sternenbuergerchen_rel_2026_07_05/libterrain.windows.release.x86_64.dll",
+    "sha256": "7e483bd1d917fa84a1668cef64e96e5fc7e6ddf9879de67adc776c10eca3c8cd",
+    "size": 3549184,
+    "mtime_ns": 1783276490982396000
+  },
+  {
+    "path": "docs/qa/mission_a5_kartenrand_20261102/cover_radius/cover_radius_query_pairs_20261105T072332-pid44984.json",
+    "sha256": "e1563f47ed936cfa019d76c77bad2d04b2f4096b5a3bfcf28a5761d746fa1027",
+    "size": 9643,
+    "mtime_ns": 1793863412038463700
+  },
+  {
+    "path": "docs/qa/mission_a5_kartenrand_20261102/cover_radius/cover_radius_query_pairs_20261105T092527-pid46984.json",
+    "sha256": "1c42ec87e96ff19f0306af895b10e0fb7b4a0ff4eee71c474a2961495326491b",
+    "size": 9624,
+    "mtime_ns": 1793870727243830000
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/debrief_portraits_1280x720.png.import",
+    "sha256": "82b2d3a39deec43d643bfa81f009db15b13afc95274cf5b3110f0baf9bb07517",
+    "size": 1053,
+    "mtime_ns": 1793857480817963300
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/debrief_portraits_1920x1080.png.import",
+    "sha256": "f395b21866be54a9fc6c52eb0806239568c63689dde11c472c3fabf4d0b7ede7",
+    "size": 1056,
+    "mtime_ns": 1793857481109461700
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/fob_populated_1280x720.png.import",
+    "sha256": "14dd69d3a90815c2cebfa7f56ef5afb0318f8ff715f6014fb410dc9407c65b20",
+    "size": 1040,
+    "mtime_ns": 1793857480807963400
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/fob_populated_1920x1080.png.import",
+    "sha256": "04102a2519f2a4d9c936f8312ac3abaf754ae040893ed08e4c972d054b1e81db",
+    "size": 1043,
+    "mtime_ns": 1793857481032461800
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/homebase_teams_1280x720.png.import",
+    "sha256": "d311212bae7ad10410d6b0740f3a760c51e64197dd17f7706d2db74ded9df5a5",
+    "size": 1044,
+    "mtime_ns": 1793857480890962600
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/homebase_teams_1920x1080.png.import",
+    "sha256": "0fb14ff6ddab01b8f481c6dc94e5553fbc06ad796a0d64196883fe781d7f80bd",
+    "size": 1047,
+    "mtime_ns": 1793857481151962600
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/01_main_menu.png.import",
+    "sha256": "a9aa852e45e3203a56acd70af9e8d073610c4e3d52935f91fbf4d52ebc5cc27a",
+    "size": 1032,
+    "mtime_ns": 1793857479695462300
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/02_homebase.png.import",
+    "sha256": "8bcd455df8de7f9c3a1b4bd0499a6cbe22ff3c66865709efdb1af1a8e41b0038",
+    "size": 1029,
+    "mtime_ns": 1793857479653462300
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/03_default_mission.png.import",
+    "sha256": "7fc7963a00448aadc7892a223072147918708d7f33094a6dc9f7fb0b83433e8b",
+    "size": 1050,
+    "mtime_ns": 1793857479783464200
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/04_lz_approach.png.import",
+    "sha256": "0699472113631fb5adc8b3d32cc82e387265c813df1889a9910e10fa0b76b7f7",
+    "size": 1038,
+    "mtime_ns": 1793857479740962400
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/05_deployed.png.import",
+    "sha256": "2ec2936540e65b50bcdebc395e354c30ca4e49b939259f5b34c47652ad2f40d6",
+    "size": 1028,
+    "mtime_ns": 1793857479725962300
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/06_go_movement.png.import",
+    "sha256": "903442c415ac076161f8a881258a1234f8ddd50ec160fd7e71958f878a99e22b",
+    "size": 1038,
+    "mtime_ns": 1793857479761462500
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/07_outpost_overview.png.import",
+    "sha256": "200858e4bc5eb7478710e9c4a600c7e5874f3da1b57dc52a4720e516a0fd2d39",
+    "size": 1053,
+    "mtime_ns": 1793857479779463500
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/08_eastern_supply.png.import",
+    "sha256": "eda0d32dd8daae9cf701b622190cc44df4454e0c51401659ba5458dcb94be1b9",
+    "size": 1047,
+    "mtime_ns": 1793857479777962700
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1280x720/startup_captures/09_expanded_map.png.import",
+    "sha256": "38c40aac22878ee0d79ede44e70ddceec780a25720bbe1aa624988abbfb0e862",
+    "size": 1041,
+    "mtime_ns": 1793857479948464100
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/01_main_menu.png.import",
+    "sha256": "1a6c67020fd10f3f372414011299a5ebed3b20ce99641b9f1c751b2457ceb732",
+    "size": 1032,
+    "mtime_ns": 1793857480186463300
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/02_homebase.png.import",
+    "sha256": "49d2a7091485ac5495b08b980e81ea983791e4ec637646d10e549bad238df9e6",
+    "size": 1029,
+    "mtime_ns": 1793857480119964100
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/03_default_mission.png.import",
+    "sha256": "d2ebc711a62d6ac7c3c2ceb58f4984b5fc27d5063c4cc0886616c6511bc98ef4",
+    "size": 1051,
+    "mtime_ns": 1793857480463962300
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/04_lz_approach.png.import",
+    "sha256": "985230070c54997739d018d178c0ad5ce8042bf150482c2f50ddbe85e6cca55a",
+    "size": 1039,
+    "mtime_ns": 1793857480457462400
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/05_deployed.png.import",
+    "sha256": "269ed7c61bbb134b346b49005ea46c1c748e3be6368b6832488e8e4e8661ddd4",
+    "size": 1030,
+    "mtime_ns": 1793857480431463600
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/06_go_movement.png.import",
+    "sha256": "6f88a2ba2a093f2df915c1925a26b45e1f1089537db0b6e8b8fa673a6ba6159c",
+    "size": 1039,
+    "mtime_ns": 1793857480493461900
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/07_outpost_overview.png.import",
+    "sha256": "49b71cd4e3b1a7ae49dece8c2467f559ac7215f12054d42efd068b7a82a68738",
+    "size": 1053,
+    "mtime_ns": 1793857480525461800
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/08_eastern_supply.png.import",
+    "sha256": "89dd784cf3c1f65b85375693a70205f6e5a3fb555d2866a47971152858e68193",
+    "size": 1047,
+    "mtime_ns": 1793857480627964100
+  },
+  {
+    "path": "docs/qa/ui_zielbild_20261102/normal_start/20261102T162357_805920Z/1920x1080/startup_captures/09_expanded_map.png.import",
+    "sha256": "a3ba1b700d0186e1a4f12d8003a5ee33721102d01011c91792b778578dd4c5bc",
+    "size": 1042,
+    "mtime_ns": 1793857480698461800
+  },
+  {
+    "path": "docs/tasks/TASK_1064_station_route_first_round_readability.md",
+    "sha256": "4f28c89cba99f7cab8e430b63ab70a9a383a8234bad95fd9f372b45b4fe8adda",
+    "size": 1219,
+    "mtime_ns": 1783669889870038900
+  },
+  {
+    "path": "docs/tasks/TASK_1180_ground_mission_first_contact_live_fire_trace.md",
+    "sha256": "d290c5115b3be6044c2cfcd3086dbfdcf92ee55294fe7b0ded21eddcb25119e6",
+    "size": 3330,
+    "mtime_ns": 1783878069922011700
+  },
+  {
+    "path": "export_presets.cfg",
+    "sha256": "a297f5fae7513def5fe2fb946303766d725e63942b66bb64c1f056ca5bea1018",
+    "size": 2717,
+    "mtime_ns": 1783866399924737600
+  },
+  {
+    "path": "scripts/tests/task_1180_ground_mission_first_contact_live_fire_trace.gd",
+    "sha256": "6b7fe3b301d58603445a8c12c9582d75e1c8115b6d51ae0b8dc3c6f44c3bb83a",
+    "size": 8329,
+    "mtime_ns": 1783878069921510000
+  }
+]

@@ -1,5 +1,16 @@
 # TASK_693 - Door Runtime State Producer
 
+## Runtime-Autoritaetskorrektur, 2026-11-06
+`HUD_ARCHITECTURE_2026_11_06_door_runtime_authority.md` korrigiert den
+historischen HUD-abhaengigen Producer. `MissionCombatLoopDriver` publiziert
+jetzt den effektiven Index bei Runtime-Aenderungen. Die bisherigen
+Controller-Getter einschliesslich `apply_...` bleiben reine Kompatibilitaets-
+Lesezugaenge. `producer_applied` beschreibt den letzten Runtime-Producerpass,
+nicht einen Apply durch den Leser; `producer_apply_count` und Registryrevision
+belegen tatsaechliche Mutationen. `producer_index_current` wird in der
+Rueckgabekopie gegen Registry- und Mapzustand geprueft. Ein ungueltiger Receipt
+wird erst durch einen Runtime-Update repariert.
+
 ## Ziel / Problem
 TASK_692 hat den effektiven Door-Collision-/LOS-Contract gebaut. Es fehlte aber noch der Producer, der den vorhandenen Mission-Interaction-Runtime-State wirklich in diese TerrainRegistry-Overrides schreibt.
 
@@ -8,8 +19,8 @@ Spielerisch ist es widerspruechlich, wenn eine Door-Reaktion visuell offen ist, 
 
 ## Umfang
 - `MissionTacticalSandboxController` exportiert `get_mission_interaction_door_runtime_collision_los_snapshot()`.
-- `MissionTacticalSandboxController.apply_mission_interaction_door_runtime_collision_los_snapshot()` wendet Door-Overrides auf die `TerrainRegistry` an.
-- Der Apply-Pfad nutzt einen Override-Fingerprint und setzt gleiche Overrides nicht erneut.
+- `MissionCombatLoopDriver` wendet Door-Overrides auf die `TerrainRegistry` an; der gleichnamige Controller-Apply ist seit der Korrektur ein reiner Leseadapter.
+- Der Runtime-Pfad nutzt einen Override-Fingerprint und setzt gleiche Overrides nicht erneut; Registrytausch und rebuild werden ebenfalls erkannt.
 - Der 3D-Mission-Status-Sync exportiert Door-Override-Diagnosewerte fuer Render-/Verifier-Snapshots.
 - Neuer Verifier erzeugt eine temporaere Door-Interaction im Missionsszenario und prueft half/closed vs. open gegen die echte Registry.
 
@@ -30,7 +41,7 @@ Spielerisch ist es widerspruechlich, wenn eine Door-Reaktion visuell offen ist, 
 - In-progress/half Door-State wird als blockierender Runtime-Override angewendet.
 - Complete/open Door-State wird als walkable und LOS-clear Runtime-Override angewendet.
 - Statische `TerrainTileData` und `TerrainMapData` werden nicht mutiert.
-- Wiederholtes Apply ohne Aenderung wird per Fingerprint uebersprungen.
+- Wiederholte Kompatibilitaets-Leseaufrufe veraendern weder Applycount noch Registryrevision; der Receipt des letzten echten Producerpasses bleibt dabei erhalten.
 - Snapshot/Manifest melden `ui_sets_gameplay_truth = false`.
 
 ## Betroffene Dateien

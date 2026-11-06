@@ -1,0 +1,320 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-86a5b31853dc4c75a7dc95cb24bbf04d
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_401 Facing Sightline Debug Map ===
+PASS: Facing debug map loads from data file
+PASS: Facing debug map is exactly 12x12
+PASS: Facing debug map contains 144 authored tiles
+PASS: Facing debug map keeps two mission slots for the two NPC fixture
+PASS: North compass marker is authored as Nord
+PASS: East compass marker is authored as Ost
+PASS: South compass marker is authored as Sued
+PASS: West compass marker is authored as West
+PASS: Facing debug scenario loads from data file
+PASS: Facing debug scenario validates without authoring errors
+PASS: Facing debug scenario points at the 12x12 map
+PASS: Debug scene exposes controller, Primary3DView and SimulationRoot
+PASS: Debug scene keeps the two fixture NPC nodes
+PASS: NPCs use the fixture fireteam IDs
+PASS: North NPC uses existing runtime weapon_posture=aimed
+PASS: South NPC uses existing runtime weapon_posture=aimed
+PASS: North NPC uses engage posture
+PASS: South NPC uses engage posture
+PASS: Fixture NPCs stand far enough apart for manual sightline checks
+PASS: Primary3DView renders the 12x12 map tiles
+PASS: Primary3DView renders all four compass markers without clicks
+PASS: North compass label renders as Nord
+PASS: East compass label renders as Ost
+PASS: South compass label renders as Sued
+PASS: West compass label renders as West
+PASS: Selected NPC marker sits at foot/ground height
+PASS: Map NPC selection keeps the 3D camera focus unchanged
+PASS: Lower Fireteam mini card keeps a direct click target
+CONTINUE_FACING_CARD_SCROLL_GEOMETRY {
+"card": Rect2(16, 540, 336, 168),
+"card_selected": true,
+"children": [{
+"combined_minimum": Vector2(336, 168),
+"custom_minimum": Vector2(336, 168),
+"minimum": Vector2(336, 157),
+"name": "FireteamMiniCard_Aim",
+"rect": Rect2(16, 364, 336, 168),
+"scale": Vector2(1, 1),
+"size_flags_vertical": 1
+}, {
+"combined_minimum": Vector2(336, 168),
+"custom_minimum": Vector2(336, 168),
+"minimum": Vector2(336, 157),
+"name": "FireteamMiniCard_Look",
+"rect": Rect2(16, 540, 336, 168),
+"scale": Vector2(1, 1),
+"size_flags_vertical": 1
+}],
+"horizontal_mode": 0,
+"horizontal_visible": false,
+"host": Rect2(16, 228, 352, 480),
+"phase": "after_initial_ensure",
+"scroll": Rect2(16, 228, 352, 480),
+"scroll_vertical": 0,
+"selected_scroll_seen": true,
+"vertical_max": 344.0,
+"vertical_page": 344.0,
+"vertical_visible": false
+}
+CONTINUE_FACING_CARD_SCROLL_GEOMETRY {
+"card": Rect2(16, 540, 336, 168),
+"card_selected": true,
+"children": [{
+"combined_minimum": Vector2(336, 168),
+"custom_minimum": Vector2(336, 168),
+"minimum": Vector2(336, 157),
+"name": "FireteamMiniCard_Aim",
+"rect": Rect2(16, 364, 336, 168),
+"scale": Vector2(1, 1),
+"size_flags_vertical": 1
+}, {
+"combined_minimum": Vector2(336, 168),
+"custom_minimum": Vector2(336, 168),
+"minimum": Vector2(336, 157),
+"name": "FireteamMiniCard_Look",
+"rect": Rect2(16, 540, 336, 168),
+"scale": Vector2(1, 1),
+"size_flags_vertical": 1
+}],
+"horizontal_mode": 0,
+"horizontal_visible": false,
+"host": Rect2(16, 228, 352, 480),
+"phase": "after_settled_ensure",
+"scroll": Rect2(16, 228, 352, 480),
+"scroll_vertical": 0,
+"selected_scroll_seen": true,
+"vertical_max": 344.0,
+"vertical_page": 344.0,
+"vertical_visible": false
+}
+PASS: A5 fireteam cards and right-side event log occupy separate visible rectangles
+PASS: A5 lower fireteam card retains its complete reachable click surface beside the event log
+PASS: A5 neighboring team cards keep separate click surfaces after selection refresh
+PASS: Left Fireteam card click is the path that recenters the 3D camera
+PASS: Left Fireteam card click keeps the lower NPC Fireteam selected
+PASS: Primary3DView renders both fixture NPC proxies
+PASS: Rendered north NPC exposes aimed proxy posture
+PASS: Rendered south NPC exposes aimed proxy posture
+PASS: Aimed NPC model root corrects the imported character forward axis
+PASS: South aimed NPC model root corrects the imported character forward axis
+PASS: Walk animations strip imported heading-control rotation tracks for live NPC proxies
+PASS: Walk animation leaves proxy/model-root facing as the only heading owner
+PASS: Walk animation strips the body-root Hips rotation that can turn the model's back into facing
+PASS: unit_alpha model forward matches runtime facing (0.0, -1.0) (dot 1.000)
+PASS: unit_alpha model forward matches runtime facing (0.0, 1.0) (dot 1.000)
+PASS: unit_alpha model forward matches runtime facing (1.0, 0.0) (dot 1.000)
+PASS: unit_alpha model forward matches runtime facing (-1.0, 0.0) (dot 1.000)
+PASS: unit_alpha model forward matches runtime facing (0.894427, -0.447214) (dot 1.000)
+PASS: unit_alpha model forward matches runtime facing (-0.894427, -0.447214) (dot 1.000)
+PASS: unit_alpha model forward matches runtime facing (0.894427, 0.447214) (dot 1.000)
+PASS: unit_alpha model forward matches runtime facing (-0.894427, 0.447214) (dot 1.000)
+PASS: unit_bravo model forward matches runtime facing (0.0, -1.0) (dot 1.000)
+PASS: unit_bravo model forward matches runtime facing (0.0, 1.0) (dot 1.000)
+PASS: unit_bravo model forward matches runtime facing (1.0, 0.0) (dot 1.000)
+PASS: unit_bravo model forward matches runtime facing (-1.0, 0.0) (dot 1.000)
+PASS: unit_bravo model forward matches runtime facing (0.894427, -0.447214) (dot 1.000)
+PASS: unit_bravo model forward matches runtime facing (-0.894427, -0.447214) (dot 1.000)
+PASS: unit_bravo model forward matches runtime facing (0.894427, 0.447214) (dot 1.000)
+PASS: unit_bravo model forward matches runtime facing (-0.894427, 0.447214) (dot 1.000)
+PASS: Existing orientation overlay draws Facing/Sichtlinie arrows for both NPCs
+PASS: Aimed NPC facing/sightline arrow points north from facing metadata
+PASS: South aimed NPC facing/sightline arrow points south from facing metadata
+PASS: Fixture enables the existing fire-sector overlay automatically
+PASS: Fixture selects the aimed fireteam for the weapon/shot line
+PASS: Primary3DView receives the fire-sector overlay toggle
+PASS: Existing fire-sector LOS path draws the visible weapon/shot line
+PASS: North aimed NPC owns the visible weapon/shot line entry
+PASS: Weapon/shot line uses the existing LOS-line visual shape
+PASS: Sight/fire line starts at the head sight anchor
+PASS: Sight/fire line uses the weapon tile range instead of an arbitrary length
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim_direction": Vector2(-3.411969e-08, -1),
+"command_type": "",
+"diagnostic_fixture_only": true,
+"facing_angle": -1.5707963267948966,
+"frame": -1,
+"hips_forward_xz": Vector2(-0.70710665, -0.7071069),
+"orientation_direction": Vector2(-4.371139e-08, -1),
+"orientation_source": "unit_facing_live",
+"proxy_world_direction": Vector2(0, -1),
+"proxy_yaw": 314.99997,
+"resolved_live_aim_direction": Vector2(-4.371139e-08, -1),
+"runtime_target": Vector2(1216, 352),
+"security_facing_active": false,
+"security_facing_angle": null,
+"unit_id": "unit_alpha",
+"world_position": Vector2(832, 352)
+}
+PASS: Weapon/shot line follows the north-facing sightline instead of the authored target
+PASS: North aimed NPC exposes an attached weapon visual
+PASS: North aimed NPC applies the existing aim direction to the weapon pose
+PASS: North aimed NPC binds weapon yaw to the same facing direction as the sightline
+PASS: North aimed NPC applies the imported shoot aiming upper-body pose
+PASS: North aimed NPC drives enough upper-body bones for a visible weapon-up pose
+PASS: North aimed NPC takes the aim pose from the imported shoot animation
+PASS: North aimed NPC keeps the weapon root on the hand anchor (distance 0.306)
+PASS: North aimed NPC keeps the weapon root position on the hand socket while aimed (offset 0.0000)
+PASS: North aimed NPC uses the imported shoot grip keeps hands near the weapon instead of a T-pose (spread 0.0117)
+PASS: unit_alpha remains in aimed weapon posture after Q/E camera rotation
+PASS: unit_alpha keeps the imported shoot upper-body pose after Q/E camera rotation
+PASS: unit_alpha camera rotation does not fall back to idle/manual pose
+PASS: unit_alpha keeps the shoot aim pose after camera rotation keeps hands near the weapon instead of a T-pose (spread 0.0110)
+PASS: Unselected south aimed NPC has no selected weapon/shot line in the fixture
+PASS: Primary3DView orientation visual uses current live unit facing while order payload is stale
+PASS: Primary3DView render snapshot marks live unit facing as orientation source
+PASS: Weapon/shot line follows live facing during movement instead of stale anchor payload
+PASS: Selecting the south aimed NPC uses the existing fire-sector path
+PASS: South aimed NPC applies the imported shoot aiming upper-body pose
+PASS: South aimed NPC takes the aim pose from the imported shoot animation
+PASS: Selected south aimed NPC weapon/target line overlaps its south-facing sightline
+PASS: South aimed NPC sight/fire line starts at the head sight anchor
+PASS: Switching selection removes the upper NPC weapon/shot line
+PASS: South aimed NPC uses the imported shoot grip keeps hands near the weapon instead of a T-pose (spread 0.0112)
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim_direction": Vector2(0.8944272, -0.44721362),
+"command_type": "move_to_position",
+"diagnostic_fixture_only": true,
+"facing_angle": -0.4636476,
+"frame": 4,
+"hips_forward_xz": Vector2(-2.513033e-08, -1),
+"orientation_direction": Vector2(0.89442724, -0.44721362),
+"orientation_source": "unit_facing_live",
+"proxy_world_direction": Vector2(0.8944272, -0.4472136),
+"proxy_yaw": 270.0,
+"resolved_live_aim_direction": Vector2(0.89442724, -0.44721362),
+"runtime_target": Vector2(928, 160),
+"security_facing_active": false,
+"security_facing_angle": null,
+"unit_id": "unit_alpha",
+"world_position": Vector2(837.809, 349.0955)
+}
+PASS: unit_alpha repeated same-tick visual sync keeps committed movement heading at frame 4
+PASS: unit_alpha moving model forward follows live Facing/Sichtlinie at frame 4 (dot 1.000)
+PASS: unit_alpha moving weapon root stays on the hand socket at frame 4 (offset 0.0000)
+PASS: unit_alpha moving weapon/shot line follows the same live heading at frame 4
+PASS: unit_alpha moving aimed pose keeps the imported shoot grip at frame 4 keeps hands near the weapon instead of a T-pose (spread 0.0117)
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim_direction": Vector2(-0.8944272, -0.44721347),
+"command_type": "move_to_position",
+"diagnostic_fixture_only": true,
+"facing_angle": -2.6779451,
+"frame": 4,
+"hips_forward_xz": Vector2(-1, 1.3205449e-08),
+"orientation_direction": Vector2(-0.89442724, -0.44721362),
+"orientation_source": "unit_facing_live",
+"proxy_world_direction": Vector2(-0.8944272, -0.4472136),
+"proxy_yaw": 0.0,
+"resolved_live_aim_direction": Vector2(-0.89442724, -0.4472135),
+"runtime_target": Vector2(832, 480),
+"security_facing_active": false,
+"security_facing_angle": null,
+"unit_id": "unit_bravo",
+"world_position": Vector2(633.8141, 572.90704)
+}
+PASS: unit_bravo repeated same-tick visual sync keeps committed movement heading at frame 4
+PASS: unit_bravo moving model forward follows live Facing/Sichtlinie at frame 4 (dot 1.000)
+PASS: unit_bravo moving weapon root stays on the hand socket at frame 4 (offset 0.0000)
+PASS: unit_bravo moving weapon/shot line follows the same live heading at frame 4
+PASS: unit_bravo moving aimed pose keeps the imported shoot grip at frame 4 keeps hands near the weapon instead of a T-pose (spread 0.0117)
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim_direction": Vector2(0.8944272, -0.44721362),
+"command_type": "move_to_position",
+"diagnostic_fixture_only": true,
+"facing_angle": -0.4636476,
+"frame": 24,
+"hips_forward_xz": Vector2(-2.513033e-08, -1),
+"orientation_direction": Vector2(0.89442724, -0.44721362),
+"orientation_source": "unit_facing_live",
+"proxy_world_direction": Vector2(0.8944272, -0.4472136),
+"proxy_yaw": 270.0,
+"resolved_live_aim_direction": Vector2(0.89442724, -0.44721362),
+"runtime_target": Vector2(928, 160),
+"security_facing_active": false,
+"security_facing_angle": null,
+"unit_id": "unit_alpha",
+"world_position": Vector2(861.0451, 337.47745)
+}
+PASS: unit_alpha repeated same-tick visual sync keeps committed movement heading at frame 24
+PASS: unit_alpha moving model forward follows live Facing/Sichtlinie at frame 24 (dot 1.000)
+PASS: unit_alpha moving weapon root stays on the hand socket at frame 24 (offset 0.0000)
+PASS: unit_alpha moving weapon/shot line follows the same live heading at frame 24
+PASS: unit_alpha moving aimed pose keeps the imported shoot grip at frame 24 keeps hands near the weapon instead of a T-pose (spread 0.0117)
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim_direction": Vector2(-0.8944272, -0.44721347),
+"command_type": "move_to_position",
+"diagnostic_fixture_only": true,
+"facing_angle": -2.6779451,
+"frame": 24,
+"hips_forward_xz": Vector2(-1, 1.3205449e-08),
+"orientation_direction": Vector2(-0.89442724, -0.44721362),
+"orientation_source": "unit_facing_live",
+"proxy_world_direction": Vector2(-0.8944272, -0.4472136),
+"proxy_yaw": 0.0,
+"resolved_live_aim_direction": Vector2(-0.89442724, -0.4472135),
+"runtime_target": Vector2(832, 480),
+"security_facing_active": false,
+"security_facing_angle": null,
+"unit_id": "unit_bravo",
+"world_position": Vector2(609.07043, 560.5352)
+}
+PASS: unit_bravo repeated same-tick visual sync keeps committed movement heading at frame 24
+PASS: unit_bravo moving model forward follows live Facing/Sichtlinie at frame 24 (dot 1.000)
+PASS: unit_bravo moving weapon root stays on the hand socket at frame 24 (offset 0.0000)
+PASS: unit_bravo moving weapon/shot line follows the same live heading at frame 24
+PASS: unit_bravo moving aimed pose keeps the imported shoot grip at frame 24 keeps hands near the weapon instead of a T-pose (spread 0.0117)
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim_direction": Vector2(-3.411969e-08, -1),
+"command_type": "move_to_position",
+"diagnostic_fixture_only": true,
+"facing_angle": -1.5707964,
+"frame": 64,
+"hips_forward_xz": Vector2(-0.70710665, -0.7071069),
+"orientation_direction": Vector2(0, -1),
+"orientation_source": "unit_facing_live",
+"proxy_world_direction": Vector2(1.3486986e-06, -1),
+"proxy_yaw": 314.99997,
+"resolved_live_aim_direction": Vector2(0, -1),
+"runtime_target": Vector2(928, 160),
+"security_facing_active": false,
+"security_facing_angle": null,
+"unit_id": "unit_alpha",
+"world_position": Vector2(896, 301.92694)
+}
+PASS: unit_alpha repeated same-tick visual sync keeps committed movement heading at frame 64
+PASS: unit_alpha moving model forward follows live Facing/Sichtlinie at frame 64 (dot 1.000)
+PASS: unit_alpha moving weapon root stays on the hand socket at frame 64 (offset 0.0000)
+PASS: unit_alpha moving weapon/shot line follows the same live heading at frame 64
+PASS: unit_alpha moving aimed pose keeps the imported shoot grip at frame 64 keeps hands near the weapon instead of a T-pose (spread 0.0110)
+CONTINUE_FACING_DIAGNOSTIC_SAMPLE {
+"aim_direction": Vector2(-0.8944272, -0.44721347),
+"command_type": "move_to_position",
+"diagnostic_fixture_only": true,
+"facing_angle": -2.6779451,
+"frame": 64,
+"hips_forward_xz": Vector2(-1, 1.3205449e-08),
+"orientation_direction": Vector2(-0.89442724, -0.44721362),
+"orientation_source": "unit_facing_live",
+"proxy_world_direction": Vector2(-0.8944272, -0.4472136),
+"proxy_yaw": 0.0,
+"resolved_live_aim_direction": Vector2(-0.89442724, -0.4472135),
+"runtime_target": Vector2(832, 480),
+"security_facing_active": false,
+"security_facing_angle": null,
+"unit_id": "unit_bravo",
+"world_position": Vector2(554.6344, 533.3172)
+}
+PASS: unit_bravo repeated same-tick visual sync keeps committed movement heading at frame 64
+PASS: unit_bravo moving model forward follows live Facing/Sichtlinie at frame 64 (dot 1.000)
+PASS: unit_bravo moving weapon root stays on the hand socket at frame 64 (offset 0.0000)
+PASS: unit_bravo moving weapon/shot line follows the same live heading at frame 64
+PASS: unit_bravo moving aimed pose keeps the imported shoot grip at frame 64 keeps hands near the weapon instead of a T-pose (spread 0.0117)
+PASS: Visual refresh enqueues no SimulationRoot commands
+PASS: Visual refresh enqueues no SimulationRoot effects
+=== RESULTS: 125 passed, 0 failed ===
+ALL TESTS PASSED

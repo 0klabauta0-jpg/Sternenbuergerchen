@@ -1,5 +1,28 @@
 # IMPLEMENTATION_STATUS
 
+### HUD-Architektur und Ruckelspitzen, 2026-11-06
+- Tuerindex von HUD-/3D-Sync in den bestehenden Runtime-Driver verlagert;
+  vier Gate-/Countdown-/Playabilitygetter sind lesend. Registry-/Marker-
+  Lifecycle, Remote-Anwendung und Client-/Host-Grace: 85/85 ohne HUD/3D.
+- Begrenzter ReadModel-Pass, vorwaertige Live-Matrix, finale Styleowners und
+  Hidden-Member-Guard mit nicht erzwungenem Reveal. Bestehende GO-/Command-
+  und Authority-Grenzen erhalten; unabhaengiger Review APPROVED scoped.
+- Finale Nachbarmatrix 15/15, darin alle sieben alten Gates erneut gruen.
+  Komponenten 10/11 plus sachlich aktualisierter Command-Batch-Nachlauf43/43;
+  roter Originalbeleg bleibt erhalten. Acht neue fokussierte Komponenten gruen.
+- Normaler 3440x1440-Vollbildpfad 63/63. Gleiches0-38-s-Fenster: HUD-Maximum
+  207.868 -> 79.006ms, Frame-Maximum278.098 -> 140.208ms,
+  p95 89.415 -> 65.728ms. Ganze90s:3949Frames/5400Ticks, Sim/Wand0.999834.
+  Weitere Framehitches bleiben; kein allgemeines FPS-/Ruckelfreiheitsversprechen.
+- Konkrete laufende Auftraege, eindeutiger Einsatzfeldtitel und semantische
+  Bereitschaftsfarbe nativ bestaetigt. Kamera-/Weltkomposition und Gewichtung
+  der Homebase bleiben sichtbar von den originalen2D-Zielen entfernt.
+- Zwei echte native Vollbildprozesse bestehen erneut lokalen Host/Join,
+  Ready, Mission, Drop und erste bestaetigte Befehle. Kein LAN/WAN-/EXE-Beleg.
+- Task `docs/tasks/HUD_ARCHITECTURE_2026_11_06.md`, Bericht
+  `docs/qa/hud_architecture_20261106/REPORT.md`. Mainintegration und frischer
+  Main-Smoke werden separat in `main_receipt.json` des Pakets quittiert.
+
 ### Fortsetzung - Befehlsfeedback, Blickrichtung und Alt-Gates, 2026-11-05
 - Move-/GO-UI-Arbeit auf sofortiges Feedback plus gebuendelte bestehende
   350-ms-Kadenz umgestellt; Interleaving mit Transportvollpass abgesichert.

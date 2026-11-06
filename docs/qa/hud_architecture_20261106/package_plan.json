@@ -1,0 +1,924 @@
+{
+  "schema": "sternenbuergerchen.hud_qa_plan.v1",
+  "state": "PROFILE_DONE_DOCS_FINAL_ROOT_REFREEZE_APPROVED",
+  "base": "be1dd404a61317f18307e0eff42a0530f07fa647",
+  "approved_final_run": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c",
+  "budget_bytes": 26214400,
+  "entries": [
+    {
+      "original_path": "output/hud_architecture_20261106/active_order_green/20261106T141846Z-dad19117/hud_architecture_20261106_active_order_readout_verifier.log",
+      "path": "output/hud_architecture_20261106/active_order_green/20261106T141846Z-dad19117/hud_architecture_20261106_active_order_readout_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/active_order_green/20261106T141846Z-dad19117/report.json",
+      "path": "output/hud_architecture_20261106/active_order_green/20261106T141846Z-dad19117/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/active_order_red_runtime/20261106T141443Z-9a759486/hud_architecture_20261106_active_order_readout_verifier.log",
+      "path": "output/hud_architecture_20261106/active_order_red_runtime/20261106T141443Z-9a759486/hud_architecture_20261106_active_order_readout_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/active_order_red_runtime/20261106T141443Z-9a759486/report.json",
+      "path": "output/hud_architecture_20261106/active_order_red_runtime/20261106T141443Z-9a759486/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/after_forward_projection/20261106T140743Z-49507f56/forward.json",
+      "path": "output/hud_architecture_20261106/after_forward_projection/20261106T140743Z-49507f56/forward.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/after_forward_projection/20261106T140743Z-49507f56/playtest_20261105_motion_order_capture.log",
+      "path": "output/hud_architecture_20261106/after_forward_projection/20261106T140743Z-49507f56/playtest_20261105_motion_order_capture.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/after_forward_projection/20261106T140743Z-49507f56/report.json",
+      "path": "output/hud_architecture_20261106/after_forward_projection/20261106T140743Z-49507f56/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/after_read_scope/20261106T134304Z-74d18615/after.json",
+      "path": "output/hud_architecture_20261106/after_read_scope/20261106T134304Z-74d18615/after.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/after_read_scope/20261106T134304Z-74d18615/playtest_20261105_motion_order_capture.log",
+      "path": "output/hud_architecture_20261106/after_read_scope/20261106T134304Z-74d18615/playtest_20261105_motion_order_capture.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/after_read_scope/20261106T134304Z-74d18615/report.json",
+      "path": "output/hud_architecture_20261106/after_read_scope/20261106T134304Z-74d18615/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/bugfix_mission_fire_sector_overlay.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/bugfix_mission_fire_sector_overlay.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/report.json",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_111_verifier.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_111_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_113_verifier.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_113_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_230_flight_altitude_layer_and_air_visibility_audit.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_230_flight_altitude_layer_and_air_visibility_audit.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_374_objective_countdown_indicator.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_374_objective_countdown_indicator.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_401_facing_sightline_debug_map.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_401_facing_sightline_debug_map.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_436_fireteam_sight_security_visuals.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_436_fireteam_sight_security_visuals.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_468_fireteam_engage_live_command_conflict_audit.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_468_fireteam_engage_live_command_conflict_audit.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_518_mission_scenario_runtime_gates.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_518_mission_scenario_runtime_gates.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_687_mission_interaction_object_reaction.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_687_mission_interaction_object_reaction.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_692_door_runtime_collision_los_contract.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_692_door_runtime_collision_los_contract.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_693_door_runtime_state_producer.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_693_door_runtime_state_producer.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_696_door_runtime_visual_animation_asset_swap.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_696_door_runtime_visual_animation_asset_swap.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_697_door_interaction_multiplayer_authority_check.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_697_door_interaction_multiplayer_authority_check.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_707_mission_door_computer_cargo_smoke.log",
+      "path": "output/hud_architecture_20261106/architecture_neighbors_and_seven_gates/20261106T142141Z-0de386f4/task_707_mission_door_computer_cargo_smoke.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/baseline.json",
+      "path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/baseline.json",
+      "storage": "copy",
+      "role": "baseline_61_pass_normal1x"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/playtest_20261105_motion_order_capture.log",
+      "path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/playtest_20261105_motion_order_capture.log",
+      "storage": "copy",
+      "role": "baseline_61_pass_normal1x"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/report.json",
+      "path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/report.json",
+      "storage": "copy",
+      "role": "baseline_61_pass_normal1x"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/command_batch_neighbor/20261106T134224Z-432a3a07/continue_20261105_command_hud_batch_verifier.log",
+      "path": "output/hud_architecture_20261106/command_batch_neighbor/20261106T134224Z-432a3a07/continue_20261105_command_hud_batch_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/command_batch_neighbor/20261106T134224Z-432a3a07/report.json",
+      "path": "output/hud_architecture_20261106/command_batch_neighbor/20261106T134224Z-432a3a07/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/command_hidden_contract_green/20261106T143429Z-4144e1b4/continue_20261105_command_hud_batch_verifier.log",
+      "path": "output/hud_architecture_20261106/command_hidden_contract_green/20261106T143429Z-4144e1b4/continue_20261105_command_hud_batch_verifier.log",
+      "storage": "copy",
+      "role": "FOCUSED_REPLACEMENT_43_PASS"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/command_hidden_contract_green/20261106T143429Z-4144e1b4/report.json",
+      "path": "output/hud_architecture_20261106/command_hidden_contract_green/20261106T143429Z-4144e1b4/report.json",
+      "storage": "copy",
+      "role": "FOCUSED_REPLACEMENT_43_PASS"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/command_order_neighbor_green/20261106T141914Z-9ca4e472/continue_20261105_command_hud_batch_verifier.log",
+      "path": "output/hud_architecture_20261106/command_order_neighbor_green/20261106T141914Z-9ca4e472/continue_20261105_command_hud_batch_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/command_order_neighbor_green/20261106T141914Z-9ca4e472/report.json",
+      "path": "output/hud_architecture_20261106/command_order_neighbor_green/20261106T141914Z-9ca4e472/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_authority_extended_green/20261106T142134Z-e828fe1c/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "path": "output/hud_architecture_20261106/door_authority_extended_green/20261106T142134Z-e828fe1c/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_authority_extended_green/20261106T142134Z-e828fe1c/report.json",
+      "path": "output/hud_architecture_20261106/door_authority_extended_green/20261106T142134Z-e828fe1c/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_authority_green/20261106T141827Z-3cc29a92/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "path": "output/hud_architecture_20261106/door_authority_green/20261106T141827Z-3cc29a92/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_authority_green/20261106T141827Z-3cc29a92/report.json",
+      "path": "output/hud_architecture_20261106/door_authority_green/20261106T141827Z-3cc29a92/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_authority_red/20261106T141317Z-860547e6/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "path": "output/hud_architecture_20261106/door_authority_red/20261106T141317Z-860547e6/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_authority_red/20261106T141317Z-860547e6/report.json",
+      "path": "output/hud_architecture_20261106/door_authority_red/20261106T141317Z-860547e6/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_authority_red_runtime/20261106T141404Z-653b671f/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "path": "output/hud_architecture_20261106/door_authority_red_runtime/20261106T141404Z-653b671f/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_authority_red_runtime/20261106T141404Z-653b671f/report.json",
+      "path": "output/hud_architecture_20261106/door_authority_red_runtime/20261106T141404Z-653b671f/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_startup_grace_green/20261106T142811Z-2769b374/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "path": "output/hud_architecture_20261106/door_startup_grace_green/20261106T142811Z-2769b374/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_startup_grace_green/20261106T142811Z-2769b374/report.json",
+      "path": "output/hud_architecture_20261106/door_startup_grace_green/20261106T142811Z-2769b374/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_startup_grace_red/20261106T142711Z-904c99fc/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "path": "output/hud_architecture_20261106/door_startup_grace_red/20261106T142711Z-904c99fc/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_startup_grace_red/20261106T142711Z-904c99fc/report.json",
+      "path": "output/hud_architecture_20261106/door_startup_grace_red/20261106T142711Z-904c99fc/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_startup_grace_wallclock/20261106T143004Z-63731b07/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "path": "output/hud_architecture_20261106/door_startup_grace_wallclock/20261106T143004Z-63731b07/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_startup_grace_wallclock/20261106T143004Z-63731b07/report.json",
+      "path": "output/hud_architecture_20261106/door_startup_grace_wallclock/20261106T143004Z-63731b07/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_startup_grace_wallclock_red/20261106T143122Z-8ca8d71f/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "path": "output/hud_architecture_20261106/door_startup_grace_wallclock_red/20261106T143122Z-8ca8d71f/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/door_startup_grace_wallclock_red/20261106T143122Z-8ca8d71f/report.json",
+      "path": "output/hud_architecture_20261106/door_startup_grace_wallclock_red/20261106T143122Z-8ca8d71f/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/continue_20261105_command_hud_batch_verifier.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/continue_20261105_command_hud_batch_verifier.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_active_order_readout_verifier.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_active_order_readout_verifier.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_door_runtime_authority_verifier.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_hidden_cards_verifier.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_hidden_cards_verifier.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_homebase_flightdeck_verifier.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_homebase_flightdeck_verifier.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_live_projection_verifier.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_live_projection_verifier.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_native_style_verifier.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_native_style_verifier.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_read_scope_verifier.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_read_scope_verifier.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_style_verifier.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/hud_architecture_20261106_style_verifier.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/playtest_20261105_homebase_operations_verifier.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/playtest_20261105_homebase_operations_verifier.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/report.json",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/report.json",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/task_1044_mission_hud_runtime_surface_guard.log",
+      "path": "output/hud_architecture_20261106/final_components/20261106T143141Z-89d3e189/task_1044_mission_hud_runtime_surface_guard.log",
+      "storage": "copy",
+      "role": "HISTORICAL_10_OF11_OLD_TEXT_ORACLE_SEPARATE_REPLACEMENT43"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_90/20261106T143538Z-795aeddc/final.json",
+      "path": "output/hud_architecture_20261106/final_native_90/20261106T143538Z-795aeddc/final.json",
+      "storage": "copy",
+      "role": "REJECTED_60_PASS1_FAIL_CAMERA_CHANGED_NOT_FINAL_COMPARISON"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_90/20261106T143538Z-795aeddc/playtest_20261105_motion_order_capture.log",
+      "path": "output/hud_architecture_20261106/final_native_90/20261106T143538Z-795aeddc/playtest_20261105_motion_order_capture.log",
+      "storage": "copy",
+      "role": "REJECTED_60_PASS1_FAIL_CAMERA_CHANGED_NOT_FINAL_COMPARISON"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_90/20261106T143538Z-795aeddc/report.json",
+      "path": "output/hud_architecture_20261106/final_native_90/20261106T143538Z-795aeddc/report.json",
+      "storage": "copy",
+      "role": "REJECTED_60_PASS1_FAIL_CAMERA_CHANGED_NOT_FINAL_COMPARISON"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/audited.json",
+      "path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/audited.json",
+      "storage": "copy",
+      "role": "APPROVED_FINAL_63_PASS_normal1x_camera34_audited"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/audited_camera_audit.json",
+      "path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/audited_camera_audit.json",
+      "storage": "copy",
+      "role": "APPROVED_FINAL_63_PASS_normal1x_camera34_audited"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/hud_architecture_20261106_native_capture.log",
+      "path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/hud_architecture_20261106_native_capture.log",
+      "storage": "copy",
+      "role": "APPROVED_FINAL_63_PASS_normal1x_camera34_audited"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/report.json",
+      "path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/report.json",
+      "storage": "copy",
+      "role": "APPROVED_FINAL_63_PASS_normal1x_camera34_audited"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/bugfix_mission_fire_sector_overlay.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/bugfix_mission_fire_sector_overlay.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/report.json",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/report.json",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_111_verifier.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_111_verifier.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_113_verifier.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_113_verifier.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_230_flight_altitude_layer_and_air_visibility_audit.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_230_flight_altitude_layer_and_air_visibility_audit.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_374_objective_countdown_indicator.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_374_objective_countdown_indicator.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_401_facing_sightline_debug_map.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_401_facing_sightline_debug_map.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_436_fireteam_sight_security_visuals.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_436_fireteam_sight_security_visuals.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_468_fireteam_engage_live_command_conflict_audit.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_468_fireteam_engage_live_command_conflict_audit.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_518_mission_scenario_runtime_gates.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_518_mission_scenario_runtime_gates.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_687_mission_interaction_object_reaction.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_687_mission_interaction_object_reaction.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_692_door_runtime_collision_los_contract.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_692_door_runtime_collision_los_contract.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_693_door_runtime_state_producer.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_693_door_runtime_state_producer.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_696_door_runtime_visual_animation_asset_swap.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_696_door_runtime_visual_animation_asset_swap.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_697_door_interaction_multiplayer_authority_check.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_697_door_interaction_multiplayer_authority_check.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_707_mission_door_computer_cargo_smoke.log",
+      "path": "output/hud_architecture_20261106/final_neighbors_and_seven_gates/20261106T144335Z-c46bd643/task_707_mission_door_computer_cargo_smoke.log",
+      "storage": "copy",
+      "role": "FINAL_15_OF15_NEIGHBOR_AND_SEVEN_GATES"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/forward_projection_neighbor/20261106T140119Z-84cee1ab/continue_20261105_command_hud_batch_verifier.log",
+      "path": "output/hud_architecture_20261106/forward_projection_neighbor/20261106T140119Z-84cee1ab/continue_20261105_command_hud_batch_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/forward_projection_neighbor/20261106T140119Z-84cee1ab/report.json",
+      "path": "output/hud_architecture_20261106/forward_projection_neighbor/20261106T140119Z-84cee1ab/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/hidden_cards_green/20261106T142514Z-9cff2a79/hud_architecture_20261106_hidden_cards_verifier.log",
+      "path": "output/hud_architecture_20261106/hidden_cards_green/20261106T142514Z-9cff2a79/hud_architecture_20261106_hidden_cards_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/hidden_cards_green/20261106T142514Z-9cff2a79/report.json",
+      "path": "output/hud_architecture_20261106/hidden_cards_green/20261106T142514Z-9cff2a79/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/hidden_cards_red/20261106T142348Z-806e3883/hud_architecture_20261106_hidden_cards_verifier.log",
+      "path": "output/hud_architecture_20261106/hidden_cards_red/20261106T142348Z-806e3883/hud_architecture_20261106_hidden_cards_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/hidden_cards_red/20261106T142348Z-806e3883/report.json",
+      "path": "output/hud_architecture_20261106/hidden_cards_red/20261106T142348Z-806e3883/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/hidden_cards_reveal_green/20261106T143125Z-d5e20312/hud_architecture_20261106_hidden_cards_verifier.log",
+      "path": "output/hud_architecture_20261106/hidden_cards_reveal_green/20261106T143125Z-d5e20312/hud_architecture_20261106_hidden_cards_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/hidden_cards_reveal_green/20261106T143125Z-d5e20312/report.json",
+      "path": "output/hud_architecture_20261106/hidden_cards_reveal_green/20261106T143125Z-d5e20312/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/hidden_cards_reveal_red/20261106T142933Z-0527104d/hud_architecture_20261106_hidden_cards_verifier.log",
+      "path": "output/hud_architecture_20261106/hidden_cards_reveal_red/20261106T142933Z-0527104d/hud_architecture_20261106_hidden_cards_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/hidden_cards_reveal_red/20261106T142933Z-0527104d/report.json",
+      "path": "output/hud_architecture_20261106/hidden_cards_reveal_red/20261106T142933Z-0527104d/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/homebase_green/20261106T133858Z-f9c0fea8/hud_architecture_20261106_homebase_flightdeck_verifier.log",
+      "path": "output/hud_architecture_20261106/homebase_green/20261106T133858Z-f9c0fea8/hud_architecture_20261106_homebase_flightdeck_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/homebase_green/20261106T133858Z-f9c0fea8/report.json",
+      "path": "output/hud_architecture_20261106/homebase_green/20261106T133858Z-f9c0fea8/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/homebase_neighbor/20261106T133900Z-b188056e/playtest_20261105_homebase_operations_verifier.log",
+      "path": "output/hud_architecture_20261106/homebase_neighbor/20261106T133900Z-b188056e/playtest_20261105_homebase_operations_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/homebase_neighbor/20261106T133900Z-b188056e/report.json",
+      "path": "output/hud_architecture_20261106/homebase_neighbor/20261106T133900Z-b188056e/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/homebase_red/20261106T133238Z-cff638d5/hud_architecture_20261106_homebase_flightdeck_verifier.log",
+      "path": "output/hud_architecture_20261106/homebase_red/20261106T133238Z-cff638d5/hud_architecture_20261106_homebase_flightdeck_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/homebase_red/20261106T133238Z-cff638d5/report.json",
+      "path": "output/hud_architecture_20261106/homebase_red/20261106T133238Z-cff638d5/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/hud_surface_guard_neighbor/20261106T140454Z-a2389a84/report.json",
+      "path": "output/hud_architecture_20261106/hud_surface_guard_neighbor/20261106T140454Z-a2389a84/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/hud_surface_guard_neighbor/20261106T140454Z-a2389a84/task_1044_mission_hud_runtime_surface_guard.log",
+      "path": "output/hud_architecture_20261106/hud_surface_guard_neighbor/20261106T140454Z-a2389a84/task_1044_mission_hud_runtime_surface_guard.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/live_projection_green/20261106T140446Z-b7310cde/hud_architecture_20261106_live_projection_verifier.log",
+      "path": "output/hud_architecture_20261106/live_projection_green/20261106T140446Z-b7310cde/hud_architecture_20261106_live_projection_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/live_projection_green/20261106T140446Z-b7310cde/report.json",
+      "path": "output/hud_architecture_20261106/live_projection_green/20261106T140446Z-b7310cde/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/live_projection_red/20261106T140356Z-cc21d118/hud_architecture_20261106_live_projection_verifier.log",
+      "path": "output/hud_architecture_20261106/live_projection_red/20261106T140356Z-cc21d118/hud_architecture_20261106_live_projection_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/live_projection_red/20261106T140356Z-cc21d118/report.json",
+      "path": "output/hud_architecture_20261106/live_projection_red/20261106T140356Z-cc21d118/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/client.log",
+      "path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/client.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/client_display.json",
+      "path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/client_display.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/client_stdio.log",
+      "path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/client_stdio.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/client_trace.json",
+      "path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/client_trace.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/host.log",
+      "path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/host.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/host_display.json",
+      "path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/host_display.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/host_stdio.log",
+      "path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/host_stdio.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/host_trace.json",
+      "path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/host_trace.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/report.json",
+      "path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/source_pins_before.json",
+      "path": "output/hud_architecture_20261106/multiplayer_final/20261106T144905Z-c2fe37a2/source_pins_before.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/native_style_green/20261106T142616Z-49021527/hud_architecture_20261106_native_style_verifier.log",
+      "path": "output/hud_architecture_20261106/native_style_green/20261106T142616Z-49021527/hud_architecture_20261106_native_style_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/native_style_green/20261106T142616Z-49021527/report.json",
+      "path": "output/hud_architecture_20261106/native_style_green/20261106T142616Z-49021527/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/native_style_red/20261106T142522Z-ae2e539d/hud_architecture_20261106_native_style_verifier.log",
+      "path": "output/hud_architecture_20261106/native_style_red/20261106T142522Z-ae2e539d/hud_architecture_20261106_native_style_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/native_style_red/20261106T142522Z-ae2e539d/report.json",
+      "path": "output/hud_architecture_20261106/native_style_red/20261106T142522Z-ae2e539d/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/read_scope_green/20261106T134223Z-891c2550/hud_architecture_20261106_read_scope_verifier.log",
+      "path": "output/hud_architecture_20261106/read_scope_green/20261106T134223Z-891c2550/hud_architecture_20261106_read_scope_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/read_scope_green/20261106T134223Z-891c2550/report.json",
+      "path": "output/hud_architecture_20261106/read_scope_green/20261106T134223Z-891c2550/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/read_scope_red/20261106T134056Z-13a3c7b1/hud_architecture_20261106_read_scope_verifier.log",
+      "path": "output/hud_architecture_20261106/read_scope_red/20261106T134056Z-13a3c7b1/hud_architecture_20261106_read_scope_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/read_scope_red/20261106T134056Z-13a3c7b1/report.json",
+      "path": "output/hud_architecture_20261106/read_scope_red/20261106T134056Z-13a3c7b1/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/style_green/20261106T133853Z-c3898cc2/hud_architecture_20261106_style_verifier.log",
+      "path": "output/hud_architecture_20261106/style_green/20261106T133853Z-c3898cc2/hud_architecture_20261106_style_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/style_green/20261106T133853Z-c3898cc2/report.json",
+      "path": "output/hud_architecture_20261106/style_green/20261106T133853Z-c3898cc2/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/style_red/20261106T133233Z-ada89157/hud_architecture_20261106_style_verifier.log",
+      "path": "output/hud_architecture_20261106/style_red/20261106T133233Z-ada89157/hud_architecture_20261106_style_verifier.log",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/style_red/20261106T133233Z-ada89157/report.json",
+      "path": "output/hud_architecture_20261106/style_red/20261106T133233Z-ada89157/report.json",
+      "storage": "copy",
+      "role": "component_or_neighbor_original_result"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/baseline_performance.json",
+      "path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/baseline_performance.json",
+      "storage": "archive",
+      "role": "EXACT_RAW_ANALYSIS_INPUT_ARCHIVE_ONLY"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/baseline_motion.json",
+      "path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/baseline_motion.json",
+      "storage": "archive",
+      "role": "EXACT_RAW_ANALYSIS_INPUT_ARCHIVE_ONLY"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/after_read_scope/20261106T134304Z-74d18615/after_performance.json",
+      "path": "output/hud_architecture_20261106/after_read_scope/20261106T134304Z-74d18615/after_performance.json",
+      "storage": "archive",
+      "role": "EXACT_RAW_ANALYSIS_INPUT_ARCHIVE_ONLY"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/after_forward_projection/20261106T140743Z-49507f56/forward_performance.json",
+      "path": "output/hud_architecture_20261106/after_forward_projection/20261106T140743Z-49507f56/forward_performance.json",
+      "storage": "archive",
+      "role": "EXACT_RAW_ANALYSIS_INPUT_ARCHIVE_ONLY"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/audited_performance.json",
+      "path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/audited_performance.json",
+      "storage": "archive",
+      "role": "EXACT_RAW_ANALYSIS_INPUT_ARCHIVE_ONLY"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/audited_motion.json",
+      "path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/audited_motion.json",
+      "storage": "archive",
+      "role": "EXACT_RAW_ANALYSIS_INPUT_ARCHIVE_ONLY"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/controller_original.gd.txt",
+      "path": "output/hud_architecture_20261106/controller_original.gd.txt",
+      "storage": "archive",
+      "role": "baseline_source_original_backup"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/controller_profiled_baseline.gd.txt",
+      "path": "output/hud_architecture_20261106/controller_profiled_baseline.gd.txt",
+      "storage": "archive",
+      "role": "baseline_source_original_backup"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/controller_forward_candidate_before_contract_fix.gd.txt",
+      "path": "output/hud_architecture_20261106/controller_forward_candidate_before_contract_fix.gd.txt",
+      "storage": "archive",
+      "role": "repaired_first_DAG_source_backup_not_baseline"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/preserved_untracked.json",
+      "path": "output/hud_architecture_20261106/preserved_untracked.json",
+      "storage": "copy",
+      "role": "protected_data_hash_metadata_only_no_roster_contents"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/roster_baseline.json",
+      "path": "output/hud_architecture_20261106/roster_baseline.json",
+      "storage": "copy",
+      "role": "protected_data_hash_metadata_only_no_roster_contents"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/baseline_captures/02_homebase.png",
+      "path": "raw/images/before_homebase.png",
+      "storage": "copy",
+      "role": "native3440_original_PNG_no_image_editing"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/baseline_captures/06_go_movement.png",
+      "path": "raw/images/before_go.png",
+      "storage": "archive",
+      "role": "native3440_original_PNG_no_image_editing"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/audited_captures/02_homebase.png",
+      "path": "raw/images/after_homebase.png",
+      "storage": "copy",
+      "role": "native3440_original_PNG_no_image_editing"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_native_audited/20261106T144051Z-f2bdfc4c/audited_captures/06_go_movement.png",
+      "path": "raw/images/after_go.png",
+      "storage": "copy",
+      "role": "native3440_original_PNG_no_image_editing"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_code_manifest.json",
+      "path": "output/hud_architecture_20261106/final_code_manifest.json",
+      "storage": "copy",
+      "role": "final_worktree_runtime_input_pins_and_hash_size_mtime_preservation_not_output_hashes"
+    },
+    {
+      "original_path": "output/hud_architecture_20261106/final_preservation.json",
+      "path": "output/hud_architecture_20261106/final_preservation.json",
+      "storage": "copy",
+      "role": "final_worktree_runtime_input_pins_and_hash_size_mtime_preservation_not_output_hashes"
+    },
+    {
+      "original_path": "docs/dev/mission_hud_projection_authority_contract.md",
+      "path": "references/mission_hud_projection_authority_contract.md",
+      "storage": "copy",
+      "role": "frozen_source_contract_review_task_original_bytes"
+    },
+    {
+      "original_path": "docs/reviews/HUD_ARCHITECTURE_2026_11_06_independent_review.md",
+      "path": "references/HUD_ARCHITECTURE_2026_11_06_independent_review.md",
+      "storage": "copy",
+      "role": "frozen_source_contract_review_task_original_bytes"
+    },
+    {
+      "original_path": "docs/reviews/HUD_ARCHITECTURE_2026_11_06_reference_review.md",
+      "path": "references/HUD_ARCHITECTURE_2026_11_06_reference_review.md",
+      "storage": "copy",
+      "role": "frozen_source_contract_review_task_original_bytes"
+    },
+    {
+      "original_path": "docs/tasks/HUD_ARCHITECTURE_2026_11_06.md",
+      "path": "references/HUD_ARCHITECTURE_2026_11_06.md",
+      "storage": "copy",
+      "role": "frozen_source_contract_review_task_original_bytes"
+    }
+  ],
+  "notes": [
+    "Root explicitly approved PROFILE_DONE for audited63/63 only.",
+    "First60/1 camera-changed run is preserved small and rejected from comparison.",
+    "Historical component10/11 plus separate43/43 and final15/15 are distinct records.",
+    "Large raw inputs and three original source backups are archive-only to avoid duplicate bulk.",
+    "All four nativePNG originals enterZIP; three are direct copies.",
+    "Root owns REPORT/README/main_receipt/analysis_work.py/analysis.json; archive requires DOCS_FINAL.",
+    "Root DOCS_FINAL re-freeze includes portable reference links. main_receipt/main_preservation/main_sources_index/main_smoke remain outside frozen payload."
+  ]
+}

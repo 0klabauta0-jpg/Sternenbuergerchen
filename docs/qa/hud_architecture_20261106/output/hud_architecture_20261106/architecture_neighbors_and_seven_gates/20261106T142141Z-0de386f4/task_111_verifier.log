@@ -1,0 +1,39 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-aebd98ca85d5463b8975e1f32339d7f4
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_111 Fireteam Security + Overwatch Verifier ===
+  PASS: High-leadership hold fireteams default to 360 security
+  PASS: 360 security builds one sector assignment per fit member
+  PASS: Holding fireteams become defense-ready when no movement is active
+  PASS: Current defense baseline keeps automatic overwatch disabled
+  PASS: Current defense snapshot exposes no automatic overwatch unit ids
+  PASS: Low leadership or aggressive threat focus selects directional security
+  PASS: Directional security still assigns all fit members
+  PASS: Directional security distributes the front pair across the threat sector
+  PASS: Member scan stays bounded around its assigned base direction
+  PASS: Member scan stays bounded around its assigned base direction
+  PASS: Post-drop behavior profile can force immediate 360 security
+  PASS: Mid-leadership fireteams keep their sector until the delayed shift matures
+  PASS: Delayed directional sector shifts eventually rotate toward an uncovered threat
+  PASS: Current defense snapshots do not trigger legacy overwatch damage
+  PASS: Explicit legacy overwatch opt-in triggers a shot on enemy movement into a watched sector
+  PASS: Overwatch exposes per-member ready state for UI feedback
+  PASS: Fired overwatch member reports cooldown until the next ready tick
+  PASS: Overwatch enqueues an authoritative damage effect
+  PASS: Overwatch shots receive the configured hit chance bonus
+  PASS: Overwatch ignores moving enemies outside the contact-range prefilter
+  PASS: Out-of-range overwatch candidates do not enqueue effects
+  PASS: Suppression disables defense readiness
+  PASS: Active movement disables defense readiness
+  PASS: Suppression disables overwatch readiness
+  PASS: Active movement disables overwatch readiness
+  PASS: Scene phase start succeeds for security integration
+  PASS: Mission tactical controller exposes active security states
+  PASS: At least one holding fireteam becomes defense-ready in the mission scene
+  PASS: Mission defense snapshot carries assigned member sectors
+  PASS: Mission snapshots preserve the disabled automatic overwatch baseline
+  PASS: Mission controller syncs security facing onto unit metadata
+  PASS: Mission unit HUD metadata keeps automatic overwatch disabled
+=== RESULTS: 32 passed, 0 failed ===
+ALL TESTS PASSED

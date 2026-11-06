@@ -1,0 +1,66 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-a40efb2f98f64eb199376d6a2f131d83
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_436 Fireteam Sight Security Visuals ===
+  PASS: Directional defense assigns all four members
+  PASS: Directional defense splits into two front guards plus left/right flank
+  PASS: Front-left guard is only slightly left of march direction
+  PASS: Front-right guard is only slightly right of march direction
+  PASS: Left flank guard covers the left shoulder
+  PASS: Right flank guard covers the right shoulder
+  PASS: 360 defense uses cardinal coverage roles
+  PASS: Selected fireteam emits one friendly sight/fire entry
+  PASS: Sight/fire entry is anchored at the head sight point
+  PASS: Friendly sight/fire line uses actual weapon range instead of going infinite
+  PASS: Friendly sight/fire line stores weapon world range as visual range
+  PASS: Muzzle flash and bloom are present
+  PASS: Muzzle flash stays in the small debug baseline
+  PASS: Fire trace is thin enough for sustained contact performance
+  PASS: HUD feedback bubble text is top-left aligned
+  PASS: HUD feedback bubble wraps long command text into shorter lines
+  PASS: HUD feedback bubble stays moderately sized
+  PASS: Drill map loads for TASK_436
+  PASS: Bush object keeps a ground tile under it
+  PASS: Bush object tile remains walkable ground
+  PASS: Bush object keeps a ground tile under it
+  PASS: Bush object tile remains walkable ground
+  PASS: Bush object keeps a ground tile under it
+  PASS: Bush object tile remains walkable ground
+  PASS: Bush object keeps a ground tile under it
+  PASS: Bush object tile remains walkable ground
+  PASS: Bush object keeps a ground tile under it
+  PASS: Bush object tile remains walkable ground
+  PASS: Bush object keeps a ground tile under it
+  PASS: Bush object tile remains walkable ground
+  PASS: Bush object keeps a ground tile under it
+  PASS: Bush object tile remains walkable ground
+  PASS: Bush object keeps a ground tile under it
+  PASS: Bush object tile remains walkable ground
+  PASS: Drill map has several bush objects on floor tiles
+  PASS: Drill map contains patrol route enemy_drill_watch_route
+  PASS: Drill map contains patrol route enemy_drill_echo_route
+  PASS: Drill map contains patrol route enemy_drill_foxtrot_route
+  PASS: Drill map contains patrol route enemy_drill_golf_route
+  PASS: Drill scenario loads for TASK_436
+  PASS: Drill scenario binds all four enemies to patrol routes
+  PASS: Drill scene exposes setup and controller
+  PASS: Drill scene has four enemy runtime NPCs
+  PASS: Enemy NPC spawn offsets keep four separate visible bodies
+  PASS: Security card test has four friendly members and controller
+  PASS: Drill fireteam uses the current A5 portrait card
+  PASS: A5 keeps legacy security diagnostics off the compact portrait surface
+  PASS: Mini-card coverage bar reports front plus both flanks
+  PASS: Hidden coverage diagnostic retains all four active security members
+  PASS: A5 shows all four original member portraits
+  PASS: A5 keeps one readable primary team status
+  PASS: Repeated card presentation does not mutate runtime security assignments
+  PASS: Security assignments write visible facing meta to unit_alpha
+  PASS: Security assignments write visible facing meta to unit_bravo
+  PASS: Security assignments write visible facing meta to unit_charlie
+  PASS: Security assignments write visible facing meta to unit_delta
+  PASS: TASK_436 task file exists
+  PASS: Implementation status documents TASK_436
+  PASS: Roadmap lists TASK_436
+=== RESULTS: 59 passed, 0 failed ===
+ALL TESTS PASSED

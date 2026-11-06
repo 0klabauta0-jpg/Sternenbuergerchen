@@ -435,13 +435,28 @@ static func build_player_readout(context: Dictionary) -> Dictionary:
 	var executing := clampi(int(context.get("executing_count", 0)), 0, maxi(selected, 0))
 	var planned := int(context.get("planned_count", 0))
 	var focused := String(context.get("focused_order_label", "")).strip_edges()
-	focused = String({"MOVE": "Bewegen", "TAKE": "Nehmen", "DEFEND": "Halten", "FLANK": "Flankieren", "ENGAGE": "Ziel bekämpfen"}.get(focused.to_upper(), focused))
+	var command_labels := {"MOVE": "Bewegen", "TAKE": "Nehmen", "DEFEND": "Halten", "FLANK": "Flankieren", "ENGAGE": "Ziel bekämpfen"}
+	focused = String(command_labels.get(focused.to_upper(), focused))
 	if selected <= 0:
 		order = "Auftrag: Fireteam auswählen"
 	elif not focused.is_empty():
 		order = "Auftrag: %s" % focused
 	elif executing > 0:
 		order = "Auftrag: Wird ausgeführt" if executing == selected else "Auftrag: %d von %d Teams aktiv" % [executing, selected]
+		if executing == selected:
+			var active_labels: Array = Array(context.get("active_order_labels", []))
+			var labels_complete: bool = active_labels.size() == executing
+			var active_names: Dictionary = {}
+			for label_variant in active_labels:
+				var active_name := String(command_labels.get(String(label_variant).strip_edges().to_upper(), ""))
+				if active_name.is_empty():
+					labels_complete = false
+				else:
+					active_names[active_name] = true
+			if labels_complete and active_names.size() == 1:
+				order = "Auftrag: %s" % String(active_names.keys()[0])
+			elif labels_complete and active_names.size() > 1:
+				order = "Auftrag: Verschiedene Befehle"
 	elif planned > 0:
 		order = "Auftrag: %d %s geplant" % [planned, "Befehl" if planned == 1 else "Befehle"]
 	var feedback := _player_command_feedback(String(context.get("feedback", "")))

@@ -1,0 +1,94 @@
+{
+  "checks": [
+    {
+      "name": "task_111_verifier",
+      "script": "res://scripts/tests/task_111_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_113_verifier",
+      "script": "res://scripts/tests/task_113_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_230_flight_altitude_layer_and_air_visibility_audit",
+      "script": "res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_401_facing_sightline_debug_map",
+      "script": "res://scripts/tests/task_401_facing_sightline_debug_map.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_436_fireteam_sight_security_visuals",
+      "script": "res://scripts/tests/task_436_fireteam_sight_security_visuals.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_468_fireteam_engage_live_command_conflict_audit",
+      "script": "res://scripts/tests/task_468_fireteam_engage_live_command_conflict_audit.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "bugfix_mission_fire_sector_overlay",
+      "script": "res://scripts/tests/bugfix_mission_fire_sector_overlay.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_374_objective_countdown_indicator",
+      "script": "res://scripts/tests/task_374_objective_countdown_indicator.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_518_mission_scenario_runtime_gates",
+      "script": "res://scripts/tests/task_518_mission_scenario_runtime_gates.gd",
+      "success_marker": "TASK_518: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_692_door_runtime_collision_los_contract",
+      "script": "res://scripts/tests/task_692_door_runtime_collision_los_contract.gd",
+      "success_marker": "TASK_692: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_693_door_runtime_state_producer",
+      "script": "res://scripts/tests/task_693_door_runtime_state_producer.gd",
+      "success_marker": "TASK_693: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_687_mission_interaction_object_reaction",
+      "script": "res://scripts/tests/task_687_mission_interaction_object_reaction.gd",
+      "success_marker": "TASK_687: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_696_door_runtime_visual_animation_asset_swap",
+      "script": "res://scripts/tests/task_696_door_runtime_visual_animation_asset_swap.gd",
+      "success_marker": "TASK_696: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_697_door_interaction_multiplayer_authority_check",
+      "script": "res://scripts/tests/task_697_door_interaction_multiplayer_authority_check.gd",
+      "success_marker": "TASK_697: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_707_mission_door_computer_cargo_smoke",
+      "script": "res://scripts/tests/task_707_mission_door_computer_cargo_smoke.gd",
+      "success_marker": "TASK_707: ALL PASSED",
+      "timeout": 170
+    }
+  ]
+}

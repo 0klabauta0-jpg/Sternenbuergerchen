@@ -21,3 +21,6 @@ docs/qa/playtest_20261105/** -text whitespace=blank-at-eol,blank-at-eof,space-be
 
 # Continuation evidence includes byte-hashed native captures and receipts.
 docs/qa/continue_20261105/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# HUD authority/performance evidence keeps exact native and diagnostic bytes.
+docs/qa/hud_architecture_20261106/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

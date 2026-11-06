@@ -1,0 +1,81 @@
+{
+  "schema": "sternenbuergerchen.hud_architecture_20261106.v1",
+  "checks": [
+    {
+      "name": "playtest_20261105_motion_order_capture",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\SB-Codex-Review2-2b9a9be6900d40668b952ee30d7638bf\\SternenBuergerchen_UI_Zielbild_Normal_QA",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\2b9a9be6900d40668b952ee30d7638bf\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\baseline_profile\\20261106T132842Z-c93dc5aa\\playtest_20261105_motion_order_capture.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\2b9a9be6900d40668b952ee30d7638bf\\project",
+        "--fullscreen",
+        "--rendering-method",
+        "forward_plus",
+        "--rendering-driver",
+        "vulkan",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\2b9a9be6900d40668b952ee30d7638bf\\project\\scripts\\tests\\playtest_20261105_motion_order_capture.gd",
+        "--",
+        "--evidence-output=C:/dev/SternenBuergerchen/output/hud_architecture_20261106/baseline_profile/20261106T132842Z-c93dc5aa/baseline.json",
+        "--profile-seconds=38",
+        "--startup-timeout-seconds=260",
+        "--ui-size=2560x1440"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "4ec0d5de73715c7f647d6513ffb3ac4cf0736d96cab64af70eac74c4f54b0378",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/playtest_20261105_motion_order_capture.gd": "d116b56adcd8006eb2ae06a7111842aabc7b9008639b7541f2332d025b3b95fa",
+        "scripts/tests/run_hud_architecture_20261106.py": "f25c1a05370fd22ed4bc28bfb89e106f202a62d5c3edc8f790c5397fc398ae5d",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "85d68388d54c0153bb46855d74b46e976bfb9021280e26d4835e87affd5f94dd"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "4ec0d5de73715c7f647d6513ffb3ac4cf0736d96cab64af70eac74c4f54b0378",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/playtest_20261105_motion_order_capture.gd": "d116b56adcd8006eb2ae06a7111842aabc7b9008639b7541f2332d025b3b95fa",
+        "scripts/tests/run_hud_architecture_20261106.py": "f25c1a05370fd22ed4bc28bfb89e106f202a62d5c3edc8f790c5397fc398ae5d",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "85d68388d54c0153bb46855d74b46e976bfb9021280e26d4835e87affd5f94dd"
+      },
+      "source_inputs_stable": true
+    }
+  ],
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "summary": {
+    "selected": 1,
+    "passed": 1,
+    "failed": 0
+  }
+}

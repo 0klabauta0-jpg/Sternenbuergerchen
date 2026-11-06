@@ -1,0 +1,70 @@
+{
+  "checks": [
+    {
+      "name": "hud_architecture_20261106_style_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_style_verifier.gd",
+      "success_marker": "HUD_STYLE_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_homebase_flightdeck_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd",
+      "success_marker": "HUD_HOMEBASE_FLIGHTDECK_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_read_scope_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_read_scope_verifier.gd",
+      "success_marker": "HUD_READ_SCOPE_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_live_projection_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_live_projection_verifier.gd",
+      "success_marker": "HUD_LIVE_PROJECTION_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_door_runtime_authority_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_door_runtime_authority_verifier.gd",
+      "success_marker": "HUD_DOOR_RUNTIME_AUTHORITY_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_active_order_readout_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd",
+      "success_marker": "HUD_ACTIVE_ORDER_READOUT_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_hidden_cards_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_hidden_cards_verifier.gd",
+      "success_marker": "HUD_HIDDEN_CARDS_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_native_style_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_native_style_verifier.gd",
+      "success_marker": "HUD_NATIVE_STYLE_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "continue_20261105_command_hud_batch_verifier",
+      "script": "res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd",
+      "success_marker": "COMMAND_HUD_BATCH_ALL_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "task_1044_mission_hud_runtime_surface_guard",
+      "script": "res://scripts/tests/task_1044_mission_hud_runtime_surface_guard.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 170
+    },
+    {
+      "name": "playtest_20261105_homebase_operations_verifier",
+      "script": "res://scripts/tests/playtest_20261105_homebase_operations_verifier.gd",
+      "success_marker": "HOMEBASE_OPERATIONS_VERIFY_PASS",
+      "timeout": 170
+    }
+  ]
+}

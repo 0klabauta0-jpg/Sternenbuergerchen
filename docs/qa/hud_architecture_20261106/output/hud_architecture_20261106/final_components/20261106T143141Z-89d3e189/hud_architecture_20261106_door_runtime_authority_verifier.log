@@ -1,0 +1,93 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-3ba5055638144dd2b5f3d24a5f9d7184
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== HUD Door Runtime Authority: synthetic component contract ===
+PASS: Fixture has no HUD/controller/Primary3DView
+PASS: Runtime configure publishes the closed door index without a HUD refresh
+PASS: Configured effective movement and LOS agree
+PASS: Configured effective height and cover agree
+PASS: Configured actual pathfinder follows runtime index
+PASS: Configured actual LOS follows runtime index
+PASS: 50 percent runtime effective movement and LOS agree
+PASS: 50 percent runtime effective height and cover agree
+PASS: 50 percent runtime actual pathfinder follows runtime index
+PASS: 50 percent runtime actual LOS follows runtime index
+PASS: Visual and effective runtime retain the same opening boundary
+PASS: 84 percent runtime effective movement and LOS agree
+PASS: 84 percent runtime effective height and cover agree
+PASS: 84 percent runtime actual pathfinder follows runtime index
+PASS: 84 percent runtime actual LOS follows runtime index
+PASS: Visual and effective runtime retain the same opening boundary
+PASS: 85 percent runtime effective movement and LOS agree
+PASS: 85 percent runtime effective height and cover agree
+PASS: 85 percent runtime actual pathfinder follows runtime index
+PASS: 85 percent runtime actual LOS follows runtime index
+PASS: Visual and effective runtime retain the same opening boundary
+PASS: Interrupted unfinished effective movement and LOS agree
+PASS: Interrupted unfinished effective height and cover agree
+PASS: Interrupted unfinished actual pathfinder follows runtime index
+PASS: Interrupted unfinished actual LOS follows runtime index
+PASS: Completed effective movement and LOS agree
+PASS: Completed effective height and cover agree
+PASS: Completed actual pathfinder follows runtime index
+PASS: Completed actual LOS follows runtime index
+PASS: Runtime door index leaves every static tile field unchanged
+PASS: Progress projection emits no commands or effects
+PASS: Door receipt identifies the real runtime producer
+PASS: Receipt distinguishes the last producer pass from current read admission
+PASS: Door receipt preserves read-only and static-data guarantees
+PASS: Door receipt records the applied terrain revision and override count
+PASS: Receipt output cannot mutate the runtime index
+PASS: Repeated HUD-facing getters do not change gate clocks/completion, interaction state, cargo or objective countdown
+PASS: Repeated snapshot reads do not dirty terrain
+PASS: Repeated read emits no commands or effects
+PASS: Stable runtime ticks do not cause self-revision loops
+PASS: Rebuilt registry genuinely lost the old runtime override
+PASS: Same-fingerprint registry rebuild effective movement and LOS agree
+PASS: Same-fingerprint registry rebuild effective height and cover agree
+PASS: Same-fingerprint registry rebuild actual pathfinder follows runtime index
+PASS: Same-fingerprint registry rebuild actual LOS follows runtime index
+PASS: Reapply stores its resulting revision and then remains stable
+PASS: Replacement registry identity effective movement and LOS agree
+PASS: Replacement registry identity effective height and cover agree
+PASS: Replacement registry identity actual pathfinder follows runtime index
+PASS: Replacement registry identity actual LOS follows runtime index
+PASS: Empty remote state effective movement and LOS agree
+PASS: Empty remote state effective height and cover agree
+PASS: Empty remote state actual pathfinder follows runtime index
+PASS: Empty remote state actual LOS follows runtime index
+PASS: Completed remote state effective movement and LOS agree
+PASS: Completed remote state effective height and cover agree
+PASS: Completed remote state actual pathfinder follows runtime index
+PASS: Completed remote state actual LOS follows runtime index
+PASS: Duplicate remote state does not dirty terrain
+PASS: Remote index projection emits no commands or effects
+PASS: Applied runtime receipt owns the visible door asset despite local out-of-range feedback
+PASS: Applied runtime receipt owns door gap and label
+PASS: Nested receipt mutation cannot poison runtime entries or overrides
+PASS: Mutating visual receipt copies cannot change the applied terrain index
+PASS: A pure receipt read marks an externally cleared registry stale without repairing it
+PASS: Visual consumer does not admit a stale applied receipt
+PASS: Runtime tick repairs the cleared index and publishes a current receipt
+PASS: In-place marker changes invalidate only the returned receipt until a runtime update
+PASS: Runtime tick follows the real changed marker and removes the old derived index entry
+PASS: Receipt/visual projection emits no commands or effects
+PASS: Missing runtime marker never creates a fabricated origin override
+PASS: Missing runtime marker is not guessed from unrelated terrain
+GRACE_TIMING_DIAG {"countdown_after":9.944,"countdown_before":10.0,"hold_after":0.056,"hold_before":0.0,"time_scale":1.0,"wall_elapsed_seconds":0.056}
+PASS: Grace timing check keeps normal 1x engine time
+PASS: Grace timing fixture observes at least 50 milliseconds of actual wall time
+PASS: Authoritative grace tick advances the existing scenario hold without a HUD read side effect
+PASS: Authoritative grace tick publishes countdown progress at the existing wall-clock rate
+PASS: Grace tick preserves staging instead of running zero-roster combat resolution
+PASS: Startup grace emits no commands or effects
+PASS: Local ENet connection supplies real client/server authority contexts
+PASS: Real client authority branch declines local execution
+PASS: Client runtime callback does not advance local hold/completion/countdown
+PASS: The next real runtime callback adopts host authority
+PASS: Authority transition refreshes the preserved countdown during startup grace
+PASS: Authority transition retains startup grace without starting combat resolution
+PASS: Client/host grace transition emits no commands or effects
+=== RESULTS: 85 passed, 0 failed ===
+HUD_DOOR_RUNTIME_AUTHORITY_VERIFY_PASS

@@ -102,9 +102,11 @@ func _test_controller_applies_door_runtime_overrides() -> void:
 	_assert(String(half_override.get("source_runtime_visual_state", "")) == "half", "Half door override records half visual state")
 	_assert(not bool(half_override.get("walkable_override", true)), "Half door keeps movement blocked")
 	_assert(bool(half_override.get("blocks_los_override", false)), "Half door keeps LOS blocked")
+	var applied_revision: int = int(terrain_registry.call("get_revision"))
+	var applied_count: int = int(half_snapshot.get("producer_apply_count", 0))
 	var unchanged_snapshot: Dictionary = Dictionary(controller.call("apply_mission_interaction_door_runtime_collision_los_snapshot"))
-	_assert(not bool(unchanged_snapshot.get("producer_applied", true)), "Unchanged door override is skipped")
-	_assert(String(unchanged_snapshot.get("producer_apply_reason", "")) == "unchanged", "Unchanged apply reports unchanged")
+	_assert(int(terrain_registry.call("get_revision")) == applied_revision and int(unchanged_snapshot.get("producer_apply_count", -1)) == applied_count, "Compatibility read never reapplies an unchanged runtime index")
+	_assert(bool(unchanged_snapshot.get("producer_applied", false)) and String(unchanged_snapshot.get("producer_applied_semantics", "")) == "last_runtime_producer_pass", "Compatibility read preserves the honest last-producer apply receipt")
 
 	combat_driver.call("update_mission_interaction_runtime_progress", {
 		"interaction_id": DOOR_INTERACTION_ID,

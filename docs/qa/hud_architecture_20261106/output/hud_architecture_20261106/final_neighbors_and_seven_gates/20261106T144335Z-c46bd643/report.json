@@ -1,0 +1,1006 @@
+{
+  "schema": "sternenbuergerchen.hud_architecture_20261106.v1",
+  "checks": [
+    {
+      "name": "task_111_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-b4816fdebc1746b3a88a45e25aa2b739",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b4816fdebc1746b3a88a45e25aa2b739\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_111_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b4816fdebc1746b3a88a45e25aa2b739\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b4816fdebc1746b3a88a45e25aa2b739\\project\\scripts\\tests\\task_111_verifier.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_111_verifier.gd": "ca458d08e231ee75eb688c6431c7ad436925fa7ca2d1cf10c689fd3b1f002007",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_111_verifier.gd": "ca458d08e231ee75eb688c6431c7ad436925fa7ca2d1cf10c689fd3b1f002007",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_113_verifier",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-01a91d5f74634cc4b7a1a4d02886d938",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\01a91d5f74634cc4b7a1a4d02886d938\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_113_verifier.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\01a91d5f74634cc4b7a1a4d02886d938\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\01a91d5f74634cc4b7a1a4d02886d938\\project\\scripts\\tests\\task_113_verifier.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_113_verifier.gd": "d483ef4c5d3e9abeeb60a0b454c17d59f0887b04e3d012003cedd8fefcb7aeec",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_113_verifier.gd": "d483ef4c5d3e9abeeb60a0b454c17d59f0887b04e3d012003cedd8fefcb7aeec",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_230_flight_altitude_layer_and_air_visibility_audit",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-1cf633ee94d8440da8ef9c9da60d18e7",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\1cf633ee94d8440da8ef9c9da60d18e7\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_230_flight_altitude_layer_and_air_visibility_audit.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\1cf633ee94d8440da8ef9c9da60d18e7\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\1cf633ee94d8440da8ef9c9da60d18e7\\project\\scripts\\tests\\task_230_flight_altitude_layer_and_air_visibility_audit.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd": "6fa20d44faabfced4b43d92a15f30dc04ab3d8501ff8b72b6fd48dcdd8deedf3",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd": "6fa20d44faabfced4b43d92a15f30dc04ab3d8501ff8b72b6fd48dcdd8deedf3",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_401_facing_sightline_debug_map",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-9dda47de5d68436c85300869ba75ab58",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\9dda47de5d68436c85300869ba75ab58\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_401_facing_sightline_debug_map.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\9dda47de5d68436c85300869ba75ab58\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\9dda47de5d68436c85300869ba75ab58\\project\\scripts\\tests\\task_401_facing_sightline_debug_map.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_401_facing_sightline_debug_map.gd": "023604fb4d6d7fc2d11b68eb94727b011d2eb81d65ea1d984f436b5de7b1218b",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_401_facing_sightline_debug_map.gd": "023604fb4d6d7fc2d11b68eb94727b011d2eb81d65ea1d984f436b5de7b1218b",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_436_fireteam_sight_security_visuals",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a40efb2f98f64eb199376d6a2f131d83",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a40efb2f98f64eb199376d6a2f131d83\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_436_fireteam_sight_security_visuals.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a40efb2f98f64eb199376d6a2f131d83\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a40efb2f98f64eb199376d6a2f131d83\\project\\scripts\\tests\\task_436_fireteam_sight_security_visuals.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_436_fireteam_sight_security_visuals.gd": "441c5373815b66ee47172e27ca7f7374da41d58e642c7cb99fff6267af1c02ff",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_436_fireteam_sight_security_visuals.gd": "441c5373815b66ee47172e27ca7f7374da41d58e642c7cb99fff6267af1c02ff",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_468_fireteam_engage_live_command_conflict_audit",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-b52a670d59d5483fb93e9febc821e8d2",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b52a670d59d5483fb93e9febc821e8d2\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_468_fireteam_engage_live_command_conflict_audit.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b52a670d59d5483fb93e9febc821e8d2\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b52a670d59d5483fb93e9febc821e8d2\\project\\scripts\\tests\\task_468_fireteam_engage_live_command_conflict_audit.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_468_fireteam_engage_live_command_conflict_audit.gd": "28cc9461f0ce897edbe7c82fe3da1873e59ec55e9d2820c4af421180bedf1862",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_468_fireteam_engage_live_command_conflict_audit.gd": "28cc9461f0ce897edbe7c82fe3da1873e59ec55e9d2820c4af421180bedf1862",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "bugfix_mission_fire_sector_overlay",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-69985221767e4ca0a5dd5599b9bf801d",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\69985221767e4ca0a5dd5599b9bf801d\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\bugfix_mission_fire_sector_overlay.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\69985221767e4ca0a5dd5599b9bf801d\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\69985221767e4ca0a5dd5599b9bf801d\\project\\scripts\\tests\\bugfix_mission_fire_sector_overlay.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/bugfix_mission_fire_sector_overlay.gd": "4359f7f98d31b1c8e090c5d63c0de96cd5f24cf8216b086780891f35fcf8b801",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/bugfix_mission_fire_sector_overlay.gd": "4359f7f98d31b1c8e090c5d63c0de96cd5f24cf8216b086780891f35fcf8b801",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_374_objective_countdown_indicator",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-42be4ad768cb42278bf464123f44986f",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\42be4ad768cb42278bf464123f44986f\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_374_objective_countdown_indicator.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\42be4ad768cb42278bf464123f44986f\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\42be4ad768cb42278bf464123f44986f\\project\\scripts\\tests\\task_374_objective_countdown_indicator.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_374_objective_countdown_indicator.gd": "541a6a9cc1b8250c7b953d0de1efd36000f97eb9baf256ee350b37a00ab98145",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_374_objective_countdown_indicator.gd": "541a6a9cc1b8250c7b953d0de1efd36000f97eb9baf256ee350b37a00ab98145",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_518_mission_scenario_runtime_gates",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-e52e79cc48da485e970dcc142fd5e78d",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\e52e79cc48da485e970dcc142fd5e78d\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_518_mission_scenario_runtime_gates.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\e52e79cc48da485e970dcc142fd5e78d\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\e52e79cc48da485e970dcc142fd5e78d\\project\\scripts\\tests\\task_518_mission_scenario_runtime_gates.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_518_mission_scenario_runtime_gates.gd": "7bd7fb483ec2e58688ce7aad6d0bdc7e44076e5de5b99b1872d9324127eac7b4",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_518_mission_scenario_runtime_gates.gd": "7bd7fb483ec2e58688ce7aad6d0bdc7e44076e5de5b99b1872d9324127eac7b4",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_692_door_runtime_collision_los_contract",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-a01b599067ef4e43b805e140e19063c6",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a01b599067ef4e43b805e140e19063c6\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_692_door_runtime_collision_los_contract.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a01b599067ef4e43b805e140e19063c6\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\a01b599067ef4e43b805e140e19063c6\\project\\scripts\\tests\\task_692_door_runtime_collision_los_contract.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_692_door_runtime_collision_los_contract.gd": "4e49e1273e69a279e53c3e5eba187dd42411ff3ea3fff3fce203e791d01a863a",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_692_door_runtime_collision_los_contract.gd": "4e49e1273e69a279e53c3e5eba187dd42411ff3ea3fff3fce203e791d01a863a",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_693_door_runtime_state_producer",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-56dbf1a4472944869939ed97e34abb7b",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\56dbf1a4472944869939ed97e34abb7b\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_693_door_runtime_state_producer.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\56dbf1a4472944869939ed97e34abb7b\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\56dbf1a4472944869939ed97e34abb7b\\project\\scripts\\tests\\task_693_door_runtime_state_producer.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_693_door_runtime_state_producer.gd": "bbed28f0040d4b6708b7489cd1b045a567575c117c5efac4d5e2a19f607c540f",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_693_door_runtime_state_producer.gd": "bbed28f0040d4b6708b7489cd1b045a567575c117c5efac4d5e2a19f607c540f",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_687_mission_interaction_object_reaction",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-7dcb0ca8e7c14a3ab4f30715339c58c5",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\7dcb0ca8e7c14a3ab4f30715339c58c5\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_687_mission_interaction_object_reaction.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\7dcb0ca8e7c14a3ab4f30715339c58c5\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\7dcb0ca8e7c14a3ab4f30715339c58c5\\project\\scripts\\tests\\task_687_mission_interaction_object_reaction.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_687_mission_interaction_object_reaction.gd": "5277369232c66f205478ff87e675b48480d02dd9e508ed0b7ec48e7b2b3f80be",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_687_mission_interaction_object_reaction.gd": "5277369232c66f205478ff87e675b48480d02dd9e508ed0b7ec48e7b2b3f80be",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_696_door_runtime_visual_animation_asset_swap",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-17c65530486146ddbe907d86dc052a36",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\17c65530486146ddbe907d86dc052a36\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_696_door_runtime_visual_animation_asset_swap.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\17c65530486146ddbe907d86dc052a36\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\17c65530486146ddbe907d86dc052a36\\project\\scripts\\tests\\task_696_door_runtime_visual_animation_asset_swap.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_696_door_runtime_visual_animation_asset_swap.gd": "c8e18f2942724e7863e2234e898c10ee54ad32b9dab596c18448aece9cd1a547",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_696_door_runtime_visual_animation_asset_swap.gd": "c8e18f2942724e7863e2234e898c10ee54ad32b9dab596c18448aece9cd1a547",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_697_door_interaction_multiplayer_authority_check",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-b53b82062e3142bd97f9c149626a6523",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b53b82062e3142bd97f9c149626a6523\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_697_door_interaction_multiplayer_authority_check.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b53b82062e3142bd97f9c149626a6523\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\b53b82062e3142bd97f9c149626a6523\\project\\scripts\\tests\\task_697_door_interaction_multiplayer_authority_check.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_697_door_interaction_multiplayer_authority_check.gd": "b1e0d8fc3ebbeadb1a76ee4d4fdd52dce04a1aae096519ec516ed8ff4e8d8e4f",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_697_door_interaction_multiplayer_authority_check.gd": "b1e0d8fc3ebbeadb1a76ee4d4fdd52dce04a1aae096519ec516ed8ff4e8d8e4f",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    },
+    {
+      "name": "task_707_mission_door_computer_cargo_smoke",
+      "passed": true,
+      "exit_code": 0,
+      "timed_out": false,
+      "error_count": 0,
+      "isolation_verified": true,
+      "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\SB-Codex-Review2-88a2f13fb3ae4aa796ffed205c780333",
+      "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\88a2f13fb3ae4aa796ffed205c780333\\project",
+      "log": "C:\\dev\\SternenBuergerchen\\output\\hud_architecture_20261106\\final_neighbors_and_seven_gates\\20261106T144335Z-c46bd643\\task_707_mission_door_computer_cargo_smoke.log",
+      "argv": [
+        "godot_console.exe",
+        "--path",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\88a2f13fb3ae4aa796ffed205c780333\\project",
+        "--headless",
+        "--script",
+        "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\88a2f13fb3ae4aa796ffed205c780333\\project\\scripts\\tests\\task_707_mission_door_computer_cargo_smoke.gd"
+      ],
+      "immutable_input_records": [
+        {
+          "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+          "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+        }
+      ],
+      "roster_before": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "roster_after": {
+        "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+        "length": 221299,
+        "mtime_ns": 1793820794249246900
+      },
+      "source_inputs_before": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_707_mission_door_computer_cargo_smoke.gd": "4dd7ccdd71861a1cf3ebe294c7cbb2469f48943e10925156fd74dda464c4432d",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_after": {
+        "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+        "scripts/meta/homebase_operations_presenter.gd": "84959f74a6c5471b7f580bcfc795810a5d72ac514bef5db77414e0c21881c836",
+        "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+        "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+        "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+        "scripts/terrain/terrain_map_3d_view.gd": "469e5d7920ddf82970c03b92ae992a332fcb6b82b37e5bdaaafca7f8e7498b54",
+        "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+        "scripts/tests/mission_tactical_sandbox_controller.gd": "bb68b68d2624258c2d574f9d8f875d16e3898774e9a0647fc60fb81468dfc1e7",
+        "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+        "scripts/tests/run_hud_architecture_20261106.py": "769a54bcbb0b39f261fd625d9ce1e89d0bdc18f5d00f6e61753e2aa9acce4593",
+        "scripts/tests/task_707_mission_door_computer_cargo_smoke.gd": "4dd7ccdd71861a1cf3ebe294c7cbb2469f48943e10925156fd74dda464c4432d",
+        "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+        "scripts/ui/mission_a5_hud_layout.gd": "31283d6437d7c04950b53423e1faff1a9f9774e9bad8f685813c02592a708ec2"
+      },
+      "source_inputs_stable": true
+    }
+  ],
+  "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+  "protected_roster": {
+    "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+    "length": 221299,
+    "mtime_ns": 1793820794249246900
+  },
+  "summary": {
+    "selected": 15,
+    "passed": 15,
+    "failed": 0
+  }
+}

@@ -8,6 +8,8 @@ const CONTROLLER: GDScript = preload("res://scripts/tests/mission_tactical_sandb
 const BASE: String = "TacticalUI/BottomDock/BottomMargin/BottomRow/"
 const GRID: String = BASE + "CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"
 const TEAM: String = BASE + "FireteamPanel"
+const MEMBER_ROW: String = TEAM + "/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsRow"
+const MINI_CARDS: String = "TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox"
 const FEEDBACK_SOURCE: String = TEAM + "/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/CommandFeedbackLabel"
 const TEAM_STATUS: String = TEAM + "/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel"
 
@@ -73,7 +75,7 @@ func _run() -> void:
 	_check(_has_queued_move(simulation, controller, fireteam_id), "GO immediately enqueues real tokenized Move commands in SimulationRoot")
 	_check(publications.size() >= 2 and Engine.get_process_frames() == command_frame, "Move and GO publish the latest plan within the same input frame")
 	_check(_go_matches_owner(controller, go), "GO immediately preserves the existing active-order Continue policy")
-	_check(compact_order.text.contains("Wird ausgeführt") and compact_feedback.text == "Ausführung läuft", "Compact A5 immediately shows the latest executing state after GO")
+	_check(compact_order.text == "Auftrag: Bewegen" and compact_feedback.text == "Ausführung läuft", "Compact A5 immediately identifies the actual Move after GO")
 	var after_commands: Dictionary = _guard(controller)
 	_check(_heavy_calls(after_commands) == _heavy_calls(before), "Move plus GO coalesces without synchronous heavy surface traversal")
 	_check(_pending(controller), "The same-frame Move plus GO burst remains pending for one full refresh")
@@ -85,14 +87,19 @@ func _run() -> void:
 	var units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
 	_check(_all_units_have_move(units), "Real SimulationRoot physics commits the public GO commands")
 	var before_flush: Dictionary = _guard(controller)
+	var hidden_members := scene.get_node(MEMBER_ROW) as Control
+	var hidden_member_ids := _card_instance_ids(hidden_members)
+	_check(not hidden_members.is_visible_in_tree(), "A5 uses the visible portrait team cards while the legacy member strip is hidden")
 	controller.call("_process", float(CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS) + 0.001)
 	var flushed: Dictionary = _guard(controller)
 	_check(_heavy_calls(flushed) == _heavy_calls(before_flush) + 1, "One actual owner process step flushes the coalesced HUD work exactly once")
 	_check(int(flushed.get("craft_controls_apply_count", 0)) == int(before_flush.get("craft_controls_apply_count", 0)) + 1 and int(flushed.get("fireteam_card_group_apply_count", 0)) == int(before_flush.get("fireteam_card_group_apply_count", 0)) + 1, "The pending flush forces both craft and fireteam surface groups")
 	_check(not _pending(controller), "The coalesced full refresh clears pending")
-	_check(compact_order.text.contains("Wird ausgeführt") and compact_feedback.text == "Ausführung läuft", "The delayed full refresh retains the latest GO state")
+	_check(compact_order.text == "Auftrag: Bewegen" and compact_feedback.text == "Ausführung läuft", "The delayed full refresh retains the actual Move and latest GO state")
 	var status: Label = scene.get_node(TEAM_STATUS) as Label
-	_check(not status.text.is_empty() and status.text == String(controller.call("_build_fireteam_status_text")) and int(flushed.get("selected_cards_apply_count", 0)) > int(before_flush.get("selected_cards_apply_count", 0)), "The flushed team status and member cards read the currently committed Move state")
+	_check(not status.text.is_empty() and status.text == String(controller.call("_build_fireteam_status_text")), "The flushed team status reads the currently committed Move state")
+	_check(int(flushed.get("mini_cards_apply_count", 0)) > int(before_flush.get("mini_cards_apply_count", 0)) and _visible_team_card_matches_owner(scene, controller, fireteam_id), "The visible portrait team card reads the committed Move and displays its current status")
+	_check(int(flushed.get("selected_cards_apply_count", 0)) == int(before_flush.get("selected_cards_apply_count", 0)) and _card_instance_ids(hidden_members) == hidden_member_ids, "The same flush preserves hidden legacy member instances without rebuilding them")
 	for _step in range(3):
 		controller.call("_process", 0.2)
 	var quiet: Dictionary = _guard(controller)
@@ -145,6 +152,28 @@ func _test_details_are_current(scene: Node, controller: Node, simulation: Node, 
 
 func _guard(controller: Node) -> Dictionary:
 	return Dictionary(controller.call("get_mission_hud_runtime_surface_guard_snapshot"))
+
+
+func _card_instance_ids(row: Node) -> PackedInt64Array:
+	var result := PackedInt64Array()
+	for child in row.get_children():
+		if not child.is_queued_for_deletion():
+			result.append(child.get_instance_id())
+	return result
+
+
+func _visible_team_card_matches_owner(scene: Node, controller: Node, fireteam_id: String) -> bool:
+	for card in scene.get_node(MINI_CARDS).get_children():
+		if String(card.get_meta("fireteam_id", "")) != fireteam_id:
+			continue
+		var snapshot: Dictionary = card.get_meta("mission_fireteam_status_card_snapshot", {})
+		var movement: Dictionary = controller.call("get_fireteam_movement_state", fireteam_id)
+		var status := card.get_node_or_null("Margin/VBox/StageLabel") as Label
+		return card.is_visible_in_tree() and status != null and status.is_visible_in_tree() \
+			and String(movement.get("command_type", "")) == "move" \
+			and Dictionary(snapshot.get("movement_state", {})) == movement \
+			and status.text == String(controller.call("_native_a5_team_status", snapshot, false))
+	return false
 
 
 func _heavy_calls(snapshot: Dictionary) -> int:

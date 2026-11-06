@@ -1,0 +1,80 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-a4371560d4614951960724d6c119534a
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_707 Mission Door/Computer/Cargo Smoke ===
+PASS: TASK_707 task file exists
+PASS: Task documents Door/Computer/Cargo smoke
+PASS: Interaction contract documents TASK_707
+PASS: Implementation status tracks TASK_707
+PASS: Roadmap marks TASK_707 implemented
+PASS: Report references TASK_707
+PASS: Report exports TASK_707 playtest check
+PASS: TASK_707 temp scenario is written
+WARNING: 'res://Assets/curated/kenney/factory/models/detail-tank.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-a.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+WARNING: 'res://Assets/curated/kenney/factory/models/chimney-medium.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-d.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+PASS: Mission scene exposes controller, driver and setup
+PASS: Combat driver configures TASK_707 scenario
+PASS: Verifier selects a fireteam
+PASS: After AA complete next gate remains station computer before Door
+PASS: Door smoke does not replace computer objective gate
+PASS: Primary 3D view exposes render snapshot
+PASS: Door opens before computer step
+PASS: Door open exports success layout tone
+PASS: Door open readout is visible in render snapshot
+PASS: Door smoke visual remains non-authoritative
+PASS: Door open does not complete or skip station computer gate
+PASS: Computer control advances to cargo gate
+PASS: Cargo gate maps to cargo hold interaction
+PASS: Cargo next line is visible
+PASS: Cargo departed completes all objective gates
+PASS: Complete line remains stable
+PASS: Complete objective snapshot remains read-only
+PASS: TASK_707 manifest is written
+PASS: Manifest records TASK_707
+PASS: Manifest records Door success tone
+PASS: Manifest records objective completion
+=== RESULTS: 29 passed, 0 failed ===
+TASK_707: ALL PASSED

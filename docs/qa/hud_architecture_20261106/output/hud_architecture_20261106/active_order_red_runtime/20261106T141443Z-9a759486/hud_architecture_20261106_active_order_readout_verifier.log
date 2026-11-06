@@ -1,0 +1,108 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-3de46c159f8147f2b429b0617df7c682
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+HUD_ACTIVE_ORDER_READOUT_VERIFY_BEGIN
+ERROR: FAIL: move has a concrete, mixed or appropriately incomplete order
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_projection (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:84)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:48)
+PASS: move projection preserves input and has no gameplay authority
+ERROR: FAIL: stationary_defend has a concrete, mixed or appropriately incomplete order
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_projection (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:84)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:48)
+PASS: stationary_defend projection preserves input and has no gameplay authority
+ERROR: FAIL: same_take has a concrete, mixed or appropriately incomplete order
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_projection (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:84)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:48)
+PASS: same_take projection preserves input and has no gameplay authority
+ERROR: FAIL: mixed has a concrete, mixed or appropriately incomplete order
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_projection (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:84)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:48)
+PASS: mixed projection preserves input and has no gameplay authority
+PASS: partial has a concrete, mixed or appropriately incomplete order
+PASS: partial projection preserves input and has no gameplay authority
+PASS: unknown has a concrete, mixed or appropriately incomplete order
+PASS: unknown projection preserves input and has no gameplay authority
+PASS: legacy_missing_labels has a concrete, mixed or appropriately incomplete order
+PASS: legacy_missing_labels projection preserves input and has no gameplay authority
+PASS: no_selection has a concrete, mixed or appropriately incomplete order
+PASS: no_selection projection preserves input and has no gameplay authority
+PASS: Focused future command keeps its separate priority over the running Move
+PASS: GO BLUE keeps its existing feedback text
+PASS: FIRE HOLD REQUEST keeps its existing feedback text
+PASS: FIRE HOLD REQUEST REJECTED keeps its existing feedback text
+PASS: HOST TIMEOUT keeps its existing feedback text
+PASS: OBSERVER MODE keeps its existing feedback text
+ERROR: FAIL: movement_wins projects only the existing selected execution sources
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_context_sources (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:108)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:59)
+PASS: movement_wins readout leaves all synthetic owner sources unchanged
+PASS: movement_wins never reads an unselected team's active order
+ERROR: FAIL: profile_fallback projects only the existing selected execution sources
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_context_sources (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:108)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:59)
+PASS: profile_fallback readout leaves all synthetic owner sources unchanged
+PASS: profile_fallback never reads an unselected team's active order
+ERROR: FAIL: area_fallback projects only the existing selected execution sources
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_context_sources (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:108)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:59)
+PASS: area_fallback readout leaves all synthetic owner sources unchanged
+PASS: area_fallback never reads an unselected team's active order
+ERROR: FAIL: unknown_no_move_default projects only the existing selected execution sources
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_context_sources (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:108)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:59)
+PASS: unknown_no_move_default readout leaves all synthetic owner sources unchanged
+PASS: unknown_no_move_default never reads an unselected team's active order
+PASS: idle_profile_not_execution projects only the existing selected execution sources
+PASS: idle_profile_not_execution readout leaves all synthetic owner sources unchanged
+PASS: idle_profile_not_execution never reads an unselected team's active order
+ERROR: FAIL: unselected_ignored projects only the existing selected execution sources
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_context_sources (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:108)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:59)
+PASS: unselected_ignored readout leaves all synthetic owner sources unchanged
+PASS: unselected_ignored never reads an unselected team's active order
+PASS: Real mission fixture has a normally selected team
+PASS: Public Move plans an actual waypoint
+PASS: Public GO starts that actual plan
+ERROR: FAIL: Real Move execution exports the existing movement command type
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_public_move (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:124)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:60)
+ERROR: FAIL: Real Move and GO produce concrete order plus unchanged running feedback
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:136)
+       [1] _check_public_move (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:126)
+       [2] _run (res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd:60)
+PASS: Real readout creates no command and changes no plan or movement state
+=== RESULTS: 35 passed, 11 failed ===
+HUD_ACTIVE_ORDER_READOUT_VERIFY_FAIL

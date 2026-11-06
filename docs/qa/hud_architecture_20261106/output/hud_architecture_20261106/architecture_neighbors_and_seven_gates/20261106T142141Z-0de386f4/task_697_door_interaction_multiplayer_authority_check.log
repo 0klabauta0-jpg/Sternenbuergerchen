@@ -1,0 +1,93 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-d9b2047985f04c38a9c9de90bdd32111
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_697 Door Interaction Multiplayer Authority Check ===
+PASS: TASK_697 task file exists
+PASS: Task documents door multiplayer authority check
+PASS: Interaction contract documents door multiplayer authority check
+PASS: Implementation status tracks TASK_697
+PASS: Roadmap marks TASK_697 implemented
+PASS: Current handbook references TASK_697
+PASS: Current handbook exports TASK_697 manifest path
+PASS: Door hook projects to commander command category
+PASS: Door hook projects breach to take command
+PASS: Door command carries unit id
+PASS: Door command carries team id
+PASS: Door command carries interaction id
+PASS: Door command carries runtime hook metadata
+PASS: Door command carries requested runtime target as metadata
+PASS: Door command does not carry forbidden runtime_state mutation
+PASS: Door command still records GO requirement
+PASS: TASK_697 temp scenario is written
+WARNING: 'res://Assets/curated/kenney/factory/models/detail-tank.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-a.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+WARNING: 'res://Assets/curated/kenney/factory/models/chimney-medium.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-d.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+PASS: Mission scene exposes controller, driver, setup, terrain registry and simulation root
+PASS: Door authority test registers a known fireteam unit
+PASS: Door authority hook is accepted
+PASS: Door authority command projection is not empty
+PASS: Door authority command uses commander contract category
+PASS: Door authority command records source context
+PASS: Authority accepts own-team door command
+PASS: Wrong-team peer is rejected for door command
+PASS: Wrong-team rejection names team mismatch
+PASS: Door runtime state mutation payload is rejected
+PASS: Door runtime state rejection names forbidden key
+PASS: Runtime producer applies door authority state
+PASS: Door authority path opens runtime visual state
+PASS: Door authority path opens walkability
+PASS: Door authority path opens LOS
+PASS: Door multiplayer authority snapshot passes
+PASS: Authority snapshot records host accept
+PASS: Authority snapshot records wrong-team reject
+PASS: Authority snapshot records state mutation reject
+PASS: Authority snapshot records open door runtime override
+PASS: Authority snapshot is read-only
+PASS: Authority snapshot does not set gameplay truth
+PASS: Command feedback exports door authority snapshot
+PASS: Command feedback exports door authority summary
+PASS: TASK_697 manifest is written
+=== RESULTS: 42 passed, 0 failed ===
+TASK_697: ALL PASSED

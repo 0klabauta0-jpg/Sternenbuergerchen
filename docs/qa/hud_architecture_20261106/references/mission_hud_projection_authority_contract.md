@@ -1,0 +1,86 @@
+# Mission-HUD: Projektion und Runtime-Autoritaet
+
+Stand: 06.11.2026; Task `HUD_ARCHITECTURE_2026_11_06`.
+
+## Datenfluss
+
+`SimulationRoot` und die bestehenden Runtime-Komponenten verarbeiten Commands
+und Interaktionen. `MissionCombatLoopDriver` besitzt die Interaction- und
+Missionsablaufdaten. Er veroeffentlicht daraus den effektiven Tuerindex in der
+`TerrainRegistry`. Navigation und LOS lesen diesen Index. HUD und 3D-Ansicht
+lesen die zugehoerigen Snapshots; ihre Anwesenheit und Auswahl beeinflussen den
+Index nicht.
+
+## Tuerindex
+
+- Configure, Interaction-Fortschritt, autoritativer Remote-Snapshot und
+  Runtime-Tick aktualisieren die abgeleitete Projektion.
+- Es gibt keine zweite gespeicherte Offen/Geschlossen-Wahrheit. Bindings und
+  echte Kartenmarker verorten den vorhandenen Interaction-State.
+- Die gemeinsame Oeffnungsgrenze liegt bei 85 Prozent aktiven Fortschritts.
+  Unterbrechung schliesst eine unvollendete Tuer. Fehlende Marker erzeugen
+  keinen erfundenen Override am Ursprung.
+- Registry-Identitaet, Revision und Markerkoordinaten invalidieren die
+  Projektion. Nach dem Apply wird die resultierende Revision gespeichert;
+  unveraenderte Ticks erzeugen keine eigene Revisionsschleife.
+- Der Getter liefert eine defensive Receipt-Kopie. Externe Index-/Marker-
+  aenderungen markieren diese Kopie ungueltig, reparieren aber nichts beim
+  Lesen. `producer_applied` beschreibt den letzten Producer-Pass;
+  `producer_index_current` beschreibt die Zulassung dieser gelesenen Receipt.
+- Der historische Controller-`apply_*`-Einstieg bleibt ein Kompatibilitaets-
+  **Lesezugriff**. Er schreibt weder Registry noch Controller-Doorstate.
+  `ObjectReaction` uebernimmt nur eine aktuelle angewandte Runtime-Receipt.
+- Initiale Clients lesen Remote-Publikationen. Ohne neue Publikation ist ein
+  externer Registryumbau auf einem initialen Client kein hier abgenommener
+  Lifecyclepfad; ein HUD-Refresh darf diesen Fall nicht heimlich reparieren.
+
+## Missionsablauf und Countdown
+
+`get_playability_snapshot`, `get_objective_countdown_snapshot`,
+`get_mission_scenario_runtime_gate_snapshot` und
+`get_mission_cargo_touchdown_snapshot` schreiben keinen Gameplay-State.
+Configure, Runtime-Updates und der autoritative Tick halten die Quellen frisch.
+Die Kampf-Startpause unterdrueckt weiterhin Kampfentscheidungen; der vorhandene
+Gate-/Countdown-Publisher laeuft dort weiter. Der Client-Authority-Guard bleibt
+vor dieser Arbeit. Eine Getterabfrage ersetzt keinen Tick.
+
+## Begrenzte HUD-Lesevorgaenge
+
+Der vorhandene `MissionHudReadModel` teilt reine Combat-/Decision-Projektionen
+nur innerhalb eines synchronen `_update_ui`-Durchlaufs. Ende, Framewechsel und
+Revision verwerfen Werte; Dictionary-/Array-Ergebnisse werden defensiv kopiert.
+Rekursive Produzenten duerfen keine kontextabhaengigen Fallbacks in diesen
+Cache legen. Ein neuer Command-Refresh im selben Frame bekommt einen neuen
+Lesevorgang. Ausserhalb des Passes wird direkt gelesen.
+
+Die Live-Commandmatrix fuehrt ihre bestehenden Anzeige-Contracts einmal
+vorwaerts mit den bereits vorhandenen RAW-Texten aus. Sie liest dafuer keine
+anderen Panels rueckwaerts neu. Leere Inputs bleiben leer und blockiert. Alte
+Diagnose-Getter bleiben explizit aufrufbar; Callback und GO bleiben die
+bestehenden Command-Grenzen. Der feste historische Empfehlungskontext ist
+weiterhin dokumentierte Legacy-Schuld, keine zusaetzliche Spielwahrheit.
+
+## Sichtbare Darstellung
+
+Die nativen A5-Primary-Actions besitzen ihren finalen Stil selbst. Der
+generische Basisskin setzt sie nicht vorher zurueck. Andere Controls, ROE und
+Tuer-Affordance behalten ihre bisherigen Presenter und Gates.
+
+Eine effektiv versteckte A5-Memberreihe wird periodisch nicht neu aufgebaut.
+Explizite Refreshes bleiben moeglich. Effektive Sichtbarkeit und A5-Besitz
+gehoeren in die Gruppensignatur: Beim Reveal wird synchron frisch gelesen;
+ein unveraenderter Folgeaufruf darf wieder uebersprungen werden. Sichtbare
+Mini-Karten, Ad-hoc-Bereich und geoeffnete Charakterdetails bleiben aktuell.
+
+Die konkrete laufende Order wird aus den bestehenden ausgewählten
+Movement-/Area-/Profilquellen abgeleitet. Unbekannte oder gemischte Quellen
+erfinden keinen gemeinsamen Move. Ein fokussierter kuenftiger Planbefehl
+bleibt getrennt und vorrangig; Feedback, Pending und Ablehnungen bleiben erhalten.
+
+## Nachweise
+
+Die neuen `hud_architecture_20261106_*_verifier.gd` pruefen diese Grenzen als
+Komponenten. Der Command-Batch-Nachbar prueft echte oeffentliche Move-/GO-
+Commands, ihren Physics-Commit, aktuelle sichtbare Karten und frische Details.
+Normales Spielen, native Bilder, Framezeiten und Mainintegration sind separate
+Nachweise im QA-Paket; ein Komponententest ist keine visuelle Gesamtabnahme.

@@ -1,0 +1,53 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-83c07ce816044c1fa69c4c0a3ad4acd0
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+HUD_ACTIVE_ORDER_READOUT_VERIFY_BEGIN
+PASS: move has a concrete, mixed or appropriately incomplete order
+PASS: move projection preserves input and has no gameplay authority
+PASS: stationary_defend has a concrete, mixed or appropriately incomplete order
+PASS: stationary_defend projection preserves input and has no gameplay authority
+PASS: same_take has a concrete, mixed or appropriately incomplete order
+PASS: same_take projection preserves input and has no gameplay authority
+PASS: mixed has a concrete, mixed or appropriately incomplete order
+PASS: mixed projection preserves input and has no gameplay authority
+PASS: partial has a concrete, mixed or appropriately incomplete order
+PASS: partial projection preserves input and has no gameplay authority
+PASS: unknown has a concrete, mixed or appropriately incomplete order
+PASS: unknown projection preserves input and has no gameplay authority
+PASS: legacy_missing_labels has a concrete, mixed or appropriately incomplete order
+PASS: legacy_missing_labels projection preserves input and has no gameplay authority
+PASS: no_selection has a concrete, mixed or appropriately incomplete order
+PASS: no_selection projection preserves input and has no gameplay authority
+PASS: Focused future command keeps its separate priority over the running Move
+PASS: GO BLUE keeps its existing feedback text
+PASS: FIRE HOLD REQUEST keeps its existing feedback text
+PASS: FIRE HOLD REQUEST REJECTED keeps its existing feedback text
+PASS: HOST TIMEOUT keeps its existing feedback text
+PASS: OBSERVER MODE keeps its existing feedback text
+PASS: movement_wins projects only the existing selected execution sources
+PASS: movement_wins readout leaves all synthetic owner sources unchanged
+PASS: movement_wins never reads an unselected team's active order
+PASS: profile_fallback projects only the existing selected execution sources
+PASS: profile_fallback readout leaves all synthetic owner sources unchanged
+PASS: profile_fallback never reads an unselected team's active order
+PASS: area_fallback projects only the existing selected execution sources
+PASS: area_fallback readout leaves all synthetic owner sources unchanged
+PASS: area_fallback never reads an unselected team's active order
+PASS: unknown_no_move_default projects only the existing selected execution sources
+PASS: unknown_no_move_default readout leaves all synthetic owner sources unchanged
+PASS: unknown_no_move_default never reads an unselected team's active order
+PASS: idle_profile_not_execution projects only the existing selected execution sources
+PASS: idle_profile_not_execution readout leaves all synthetic owner sources unchanged
+PASS: idle_profile_not_execution never reads an unselected team's active order
+PASS: unselected_ignored projects only the existing selected execution sources
+PASS: unselected_ignored readout leaves all synthetic owner sources unchanged
+PASS: unselected_ignored never reads an unselected team's active order
+PASS: Real mission fixture has a normally selected team
+PASS: Public Move plans an actual waypoint
+PASS: Public GO starts that actual plan
+PASS: Real Move execution exports the existing movement command type
+PASS: Real Move and GO produce concrete order plus unchanged running feedback
+PASS: Real readout creates no command and changes no plan or movement state
+=== RESULTS: 46 passed, 0 failed ===
+HUD_ACTIVE_ORDER_READOUT_VERIFY_PASS

@@ -1,0 +1,115 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-e01b6deb16e04895b09a86d017212407
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+HUD_HOMEBASE_FLIGHTDECK_VERIFY_BEGIN
+ERROR: FAIL: Field title identifies the mission selector without repeating its value
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:107)
+       [1] _run (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:39)
+PASS: Selector still shows the actual selected mission
+PASS: Selector preserves actual selected mission ID
+ERROR: FAIL: no_craft uses the existing semantic theme tone
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:107)
+       [1] _run (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:59)
+PASS: no_craft preserves the runtime status text
+PASS: no_craft refresh neither changes snapshot nor sends an operation
+PASS: no_craft preserves start gate
+PASS: no_craft preserves boarding gate
+PASS: no_craft preserves return gate
+PASS: no_craft preserves runtime progress
+PASS: no_craft preserves pilot gate
+ERROR: FAIL: missing_pilot uses the existing semantic theme tone
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:107)
+       [1] _run (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:59)
+PASS: missing_pilot preserves the runtime status text
+PASS: missing_pilot refresh neither changes snapshot nor sends an operation
+PASS: missing_pilot preserves start gate
+PASS: missing_pilot preserves boarding gate
+PASS: missing_pilot preserves return gate
+PASS: missing_pilot preserves runtime progress
+PASS: missing_pilot preserves pilot gate
+ERROR: FAIL: ready uses the existing semantic theme tone
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:107)
+       [1] _run (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:59)
+PASS: ready preserves the runtime status text
+PASS: ready refresh neither changes snapshot nor sends an operation
+PASS: ready preserves start gate
+PASS: ready preserves boarding gate
+PASS: ready preserves return gate
+PASS: ready preserves runtime progress
+PASS: ready preserves pilot gate
+ERROR: FAIL: transit uses the existing semantic theme tone
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:107)
+       [1] _run (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:59)
+PASS: transit preserves the runtime status text
+PASS: transit refresh neither changes snapshot nor sends an operation
+PASS: transit preserves start gate
+PASS: transit preserves boarding gate
+PASS: transit preserves return gate
+PASS: transit preserves runtime progress
+PASS: transit preserves pilot gate
+ERROR: FAIL: boarding uses the existing semantic theme tone
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:107)
+       [1] _run (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:59)
+PASS: boarding preserves the runtime status text
+PASS: boarding refresh neither changes snapshot nor sends an operation
+PASS: boarding preserves start gate
+PASS: boarding preserves boarding gate
+PASS: boarding preserves return gate
+PASS: boarding preserves runtime progress
+PASS: boarding preserves pilot gate
+PASS: preparation uses the existing semantic theme tone
+PASS: preparation preserves the runtime status text
+PASS: preparation refresh neither changes snapshot nor sends an operation
+PASS: preparation preserves start gate
+PASS: preparation preserves boarding gate
+PASS: preparation preserves return gate
+PASS: preparation preserves runtime progress
+PASS: preparation preserves pilot gate
+ERROR: FAIL: ready_again uses the existing semantic theme tone
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:107)
+       [1] _run (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:59)
+PASS: ready_again preserves the runtime status text
+PASS: ready_again refresh neither changes snapshot nor sends an operation
+PASS: ready_again preserves start gate
+PASS: ready_again preserves boarding gate
+PASS: ready_again preserves return gate
+PASS: ready_again preserves runtime progress
+PASS: ready_again preserves pilot gate
+ERROR: FAIL: neutral_again uses the existing semantic theme tone
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:107)
+       [1] _run (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:59)
+PASS: neutral_again preserves the runtime status text
+PASS: neutral_again refresh neither changes snapshot nor sends an operation
+PASS: neutral_again preserves start gate
+PASS: neutral_again preserves boarding gate
+PASS: neutral_again preserves return gate
+PASS: neutral_again preserves runtime progress
+PASS: neutral_again preserves pilot gate
+ERROR: FAIL: Mission change updates only the real selector value
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _assert (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:107)
+       [1] _run (res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd:71)
+PASS: Mission change preserves the selected owner ID
+PASS: Refresh reuses the existing selector and status controls
+PASS: Original mission selector callback remains connected once
+PASS: Display-only fixture never requests an operation
+=== RESULTS: 63 passed, 9 failed ===
+HUD_HOMEBASE_FLIGHTDECK_VERIFY_FAIL

@@ -1,0 +1,90 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-fb5921fb5e7e48d6b3fe847f61537678
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_696 Door Runtime Visual Animation/Asset Swap ===
+PASS: TASK_696 task file exists
+PASS: Task documents door visual animation asset swap
+PASS: Interaction contract documents door visual animation asset swap
+PASS: Implementation status tracks TASK_696
+PASS: Roadmap marks TASK_696 implemented
+PASS: Current handbook references TASK_696
+PASS: Current handbook exports TASK_696 manifest path
+PASS: Door visual snapshot is read-only
+PASS: Door visual snapshot does not set gameplay truth
+PASS: Closed door stays closed
+PASS: Closed door exports closed asset swap state
+PASS: Closed door exports closed animation phase
+PASS: Closed door leaf gap is zero
+PASS: Operating door resolves half visual state
+PASS: Operating door exports half asset swap state
+PASS: Operating door exports opening animation phase
+PASS: Operating door leaf gap is visible
+PASS: Open door resolves open state
+PASS: Open door exports open asset swap state
+PASS: Open door exports open phase
+PASS: Open door threshold is visible
+PASS: Door visual names collision source
+PASS: Door visual does not claim gameplay truth
+PASS: TASK_696 temp scenario is written
+WARNING: 'res://Assets/curated/kenney/factory/models/detail-tank.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-a.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+WARNING: 'res://Assets/curated/kenney/factory/models/chimney-medium.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+WARNING: 'res://Assets/curated/kenney/factory/models/building-d.glb': In external resource #0, invalid UID: 'uid://dsxohkhemn17r' - using text path instead: 'res://Assets/curated/kenney/factory/models/Textures/colormap.png'.
+   at: open (core/io/resource_format_binary.cpp:1089)
+   GDScript backtrace (most recent call first):
+       [0] _get_asset_model_scene_by_path (res://scripts/terrain/terrain_map_3d_view.gd:14273)
+       [1] _get_asset_model_scene (res://scripts/terrain/terrain_map_3d_view.gd:14248)
+       [2] _add_asset_model_visual (res://scripts/terrain/terrain_map_3d_view.gd:5510)
+       [3] _add_object_visual (res://scripts/terrain/terrain_map_3d_view.gd:4027)
+       [4] _add_tile_visual (res://scripts/terrain/terrain_map_3d_view.gd:4021)
+       [5] render_map (res://scripts/terrain/terrain_map_3d_view.gd:1560)
+       [6] configure_from_map (res://scripts/terrain/terrain_map_3d_view.gd:1428)
+       [7] _configure_primary_3d_view (res://scripts/tests/mission_test_setup.gd:1032)
+PASS: Mission scene exposes controller, driver and setup
+PASS: Primary 3D view exposes render snapshot
+PASS: Render snapshot exports half door state
+PASS: Render snapshot exports half asset swap
+PASS: Render snapshot exports opening phase
+PASS: Render snapshot exports visible leaf gap
+PASS: Half door threshold is not open yet
+PASS: Render snapshot exports open door state
+PASS: Render snapshot swaps to open door asset type
+PASS: Render snapshot exports open phase
+PASS: Open render snapshot exports threshold
+PASS: Render snapshot visual does not claim gameplay truth
+PASS: TASK_696 manifest is written
+PASS: Manifest records TASK_696
+PASS: Manifest records open door state
+=== RESULTS: 39 passed, 0 failed ===
+TASK_696: ALL PASSED

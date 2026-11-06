@@ -2,17 +2,24 @@ class_name MissionInteractionObjectReaction
 extends RefCounted
 
 const SNAPSHOT_SCHEMA: String = "sternenbuergerchen.mission_interaction_object_reaction.v1"
+const DOOR_RUNTIME_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_runtime_collision_los.gd")
 
 
-static func build_snapshot(visual_state_snapshot: Dictionary) -> Dictionary:
+static func build_snapshot(visual_state_snapshot: Dictionary, door_runtime_snapshot: Dictionary = {}) -> Dictionary:
 	var visual_entries: Array = Array(visual_state_snapshot.get("entries", []))
+	var applied_door_states: Dictionary = {}
+	var applied_entries: Array = Array(door_runtime_snapshot.get("entries", [])) if bool(door_runtime_snapshot.get("producer_index_current", false)) else []
+	for door_variant in applied_entries:
+		if typeof(door_variant) == TYPE_DICTIONARY:
+			var door: Dictionary = Dictionary(door_variant)
+			applied_door_states[String(door.get("interaction_id", ""))] = String(door.get("runtime_visual_state", "closed"))
 	var entries: Array = []
 	var kind_counts: Dictionary = {}
 	var state_counts: Dictionary = {}
 	for visual_variant in visual_entries:
 		if typeof(visual_variant) != TYPE_DICTIONARY:
 			continue
-		var entry: Dictionary = _build_entry(Dictionary(visual_variant), entries.size())
+		var entry: Dictionary = _build_entry(Dictionary(visual_variant), entries.size(), applied_door_states)
 		if entry.is_empty():
 			continue
 		var kind: String = String(entry.get("object_kind", "unknown")).strip_edges().to_lower()
@@ -34,7 +41,7 @@ static func build_snapshot(visual_state_snapshot: Dictionary) -> Dictionary:
 	}
 
 
-static func _build_entry(visual_entry: Dictionary, index: int) -> Dictionary:
+static func _build_entry(visual_entry: Dictionary, index: int, applied_door_states: Dictionary = {}) -> Dictionary:
 	if typeof(visual_entry.get("world_position", null)) != TYPE_VECTOR2:
 		return {}
 	var interaction_id: String = String(visual_entry.get("interaction_id", "")).strip_edges()
@@ -46,8 +53,16 @@ static func _build_entry(visual_entry: Dictionary, index: int) -> Dictionary:
 	var progress: float = clampf(float(visual_entry.get("progress", 0.0)), 0.0, 1.0)
 	if status == "complete":
 		progress = 1.0
-	var accent: Color = _accent_color_for_reaction(object_kind, reaction_state)
 	var runtime_visual_state: String = _runtime_visual_state_for_reaction(object_kind, reaction_state, progress)
+	if object_kind == "door" and applied_door_states.has(interaction_id):
+		runtime_visual_state = String(applied_door_states.get(interaction_id, "closed"))
+		if runtime_visual_state == "open":
+			reaction_state = "open"
+		elif runtime_visual_state == "half":
+			reaction_state = "active"
+		elif ["open", "active"].has(reaction_state):
+			reaction_state = "idle"
+	var accent: Color = _accent_color_for_reaction(object_kind, reaction_state)
 	var visual_asset_type_id: String = _visual_asset_type_id_for_state(object_kind, runtime_visual_state)
 	return {
 		"id": "interaction_object_reaction_%s" % interaction_id,
@@ -65,7 +80,7 @@ static func _build_entry(visual_entry: Dictionary, index: int) -> Dictionary:
 		"world_position": Vector2(visual_entry.get("world_position", Vector2.ZERO)),
 		"grid_position": Vector2i(visual_entry.get("grid_position", Vector2i.ZERO)) if typeof(visual_entry.get("grid_position", null)) == TYPE_VECTOR2I or typeof(visual_entry.get("grid_position", null)) == TYPE_VECTOR2 else null,
 		"progress": progress,
-		"open_fraction": _open_fraction_for_reaction(object_kind, reaction_state, progress),
+		"open_fraction": 0.0 if object_kind == "door" and runtime_visual_state == "closed" else _open_fraction_for_reaction(object_kind, reaction_state, progress),
 		"runtime_visual_state": runtime_visual_state,
 		"visual_swap_state": _visual_swap_state_for_reaction(object_kind, runtime_visual_state),
 		"visual_asset_family": _visual_asset_family_for_kind(object_kind),
@@ -149,17 +164,7 @@ static func _resolve_reaction_state(object_kind: String, status: String, is_next
 static func _runtime_visual_state_for_reaction(object_kind: String, reaction_state: String, progress: float) -> String:
 	match object_kind:
 		"door":
-			match reaction_state:
-				"open":
-					return "open"
-				"active":
-					return "open" if progress >= 0.85 else "half"
-				"ready":
-					return "closed"
-				"locked", "blocked":
-					return "closed"
-				_:
-					return "closed"
+			return DOOR_RUNTIME_CONTRACT_SCRIPT.resolve_door_state(reaction_state, progress)
 		"computer":
 			match reaction_state:
 				"controlled", "complete":

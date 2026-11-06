@@ -22,6 +22,8 @@ const MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT: GDScript = preload("res://scrip
 const MISSION_COMBAT_RESOLUTION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_resolution_resolver.gd")
 const MISSION_SCENARIO_RUNTIME_GATES_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_runtime_gates.gd")
 const MISSION_CARGO_TOUCHDOWN_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_cargo_touchdown_bridge.gd")
+const MISSION_INTERACTION_BINDING_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_point_binding.gd")
+const MISSION_INTERACTION_DOOR_RUNTIME_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_runtime_collision_los.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const COMBAT_READABILITY_PRESENTER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_readability_presenter.gd")
 const WIN_CONDITION_ELIMINATION: String = "elimination"
@@ -222,6 +224,17 @@ var _mission_scenario_cargo_hold_seconds: float = 0.0
 var _mission_cargo_touchdown_bridge = MISSION_CARGO_TOUCHDOWN_BRIDGE_SCRIPT.new()
 var _mission_cargo_touchdown_snapshot: Dictionary = {}
 var _mission_interaction_runtime_states: Dictionary = {}
+# Static binding index and a derived terrain receipt, never a second Door state.
+var _mission_interaction_door_bindings: Array = []
+var _mission_interaction_door_runtime_configured: bool = false
+var _mission_interaction_door_runtime_dirty: bool = true
+var _mission_interaction_door_runtime_snapshot: Dictionary = {}
+var _mission_interaction_door_runtime_fingerprint: String = ""
+var _mission_interaction_door_runtime_registry_id: int = 0
+var _mission_interaction_door_runtime_registry_revision: int = -1
+var _mission_interaction_door_runtime_map_id: int = 0
+var _mission_interaction_door_runtime_map_signature: String = ""
+var _mission_interaction_door_runtime_apply_count: int = 0
 var _pending_network_mission_interactions: Dictionary = {}
 var _readability_presenter = COMBAT_READABILITY_PRESENTER_SCRIPT.new()
 var _audio_event_bus = null
@@ -409,11 +422,20 @@ func configure_scenario_runtime_gates_from_file(path: String) -> bool:
 	if _mission_scenario_runtime_gates == null:
 		return false
 	_mission_interaction_runtime_states.clear()
+	var scenario: Dictionary = {}
+	if not path.strip_edges().is_empty() and FileAccess.file_exists(path):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if typeof(parsed) == TYPE_DICTIONARY:
+			scenario = Dictionary(parsed)
+	_configure_mission_interaction_door_runtime_bindings(scenario)
 	_mission_scenario_runtime_gates.call("configure_from_file", path)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
 	if _mission_cargo_touchdown_bridge != null:
 		_mission_cargo_touchdown_bridge.call("configure_from_file", path)
 		_update_mission_cargo_touchdown_bridge(_mission_scenario_runtime_gate_snapshot)
+	_update_mission_scenario_runtime_gates()
+	if _runs_local_authority:
+		_sync_objective_countdown_state()
 	return bool(_mission_scenario_runtime_gates.call("is_configured"))
 
 
@@ -421,16 +443,19 @@ func configure_scenario_runtime_gates(slice: Dictionary) -> bool:
 	if _mission_scenario_runtime_gates == null:
 		return false
 	_mission_interaction_runtime_states.clear()
+	_configure_mission_interaction_door_runtime_bindings({"vertical_slice": slice})
 	_mission_scenario_runtime_gates.call("configure_from_slice", slice)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
 	if _mission_cargo_touchdown_bridge != null:
 		_mission_cargo_touchdown_bridge.call("configure_from_slice", slice)
 		_update_mission_cargo_touchdown_bridge(_mission_scenario_runtime_gate_snapshot)
+	_update_mission_scenario_runtime_gates()
+	if _runs_local_authority:
+		_sync_objective_countdown_state()
 	return bool(_mission_scenario_runtime_gates.call("is_configured"))
 
 
 func get_mission_scenario_runtime_gate_snapshot() -> Dictionary:
-	_update_mission_scenario_runtime_gates()
 	return _mission_scenario_runtime_gate_snapshot.duplicate(true)
 
 
@@ -444,8 +469,115 @@ func configure_mission_cargo_touchdown_bridge(config: Dictionary) -> bool:
 
 
 func get_mission_cargo_touchdown_snapshot() -> Dictionary:
-	_update_mission_scenario_runtime_gates()
 	return _mission_cargo_touchdown_snapshot.duplicate(true)
+
+
+func _configure_mission_interaction_door_runtime_bindings(scenario: Dictionary) -> void:
+	_mission_interaction_door_bindings.clear()
+	for binding_variant in MISSION_INTERACTION_BINDING_SCRIPT.normalize_scenario_bindings(scenario):
+		var binding: Dictionary = Dictionary(binding_variant)
+		if String(binding.get("interaction_type", "")) == "door":
+			_mission_interaction_door_bindings.append(binding.duplicate(true))
+	_mission_interaction_door_runtime_configured = true
+	_mission_interaction_door_runtime_dirty = true
+
+
+func get_mission_interaction_door_runtime_collision_los_snapshot() -> Dictionary:
+	var result: Dictionary = _mission_interaction_door_runtime_snapshot.duplicate(true)
+	if result.is_empty():
+		return result
+	var registry = _get_terrain_registry()
+	var terrain_map_data = _get_mission_interaction_door_runtime_map_data()
+	var registry_id: int = int(registry.get_instance_id()) if registry != null else 0
+	var registry_revision: int = int(registry.call("get_revision")) if registry != null and registry.has_method("get_revision") else -1
+	var map_id: int = int(terrain_map_data.get_instance_id()) if terrain_map_data != null else 0
+	# Validate the receipt in the returned copy. Reads never repair or publish it.
+	result["producer_index_current"] = bool(result.get("producer_index_current", false)) and registry_id == _mission_interaction_door_runtime_registry_id and registry_revision == _mission_interaction_door_runtime_registry_revision and map_id == _mission_interaction_door_runtime_map_id and _build_mission_interaction_door_runtime_map_signature(terrain_map_data) == _mission_interaction_door_runtime_map_signature
+	return result
+
+
+func _get_mission_interaction_door_runtime_map_data():
+	var setup: Node = get_node_or_null("../MissionSetup")
+	return setup.get("_loaded_terrain_map_data") if setup != null else null
+
+
+func _build_mission_interaction_door_runtime_map_signature(terrain_map_data) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for binding_variant in _mission_interaction_door_bindings:
+		var binding: Dictionary = Dictionary(binding_variant)
+		var marker_id: String = String(binding.get("marker_id", ""))
+		if terrain_map_data == null or not terrain_map_data.has_method("has_marker") or not bool(terrain_map_data.call("has_marker", marker_id)):
+			parts.append("%s:missing" % marker_id)
+			continue
+		var position: Vector2 = Vector2(terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO))
+		parts.append("%s:%s" % [marker_id, JSON.stringify([position.x, position.y])])
+	parts.sort()
+	return "|".join(parts)
+
+
+func _refresh_mission_interaction_door_runtime_overrides() -> void:
+	if not _mission_interaction_door_runtime_configured:
+		return
+	var registry = _get_terrain_registry()
+	# MissionSetup owns the already loaded map. This path has no HUD/controller
+	# dependency and never reads local selection or rendered unit anchors.
+	var terrain_map_data = _get_mission_interaction_door_runtime_map_data()
+	var registry_id: int = int(registry.get_instance_id()) if registry != null else 0
+	var registry_revision: int = int(registry.call("get_revision")) if registry != null and registry.has_method("get_revision") else -1
+	var map_id: int = int(terrain_map_data.get_instance_id()) if terrain_map_data != null else 0
+	var map_signature: String = _build_mission_interaction_door_runtime_map_signature(terrain_map_data)
+	if not _mission_interaction_door_runtime_dirty and registry_id == _mission_interaction_door_runtime_registry_id and registry_revision == _mission_interaction_door_runtime_registry_revision and map_id == _mission_interaction_door_runtime_map_id and map_signature == _mission_interaction_door_runtime_map_signature:
+		return
+	var result: Dictionary = MISSION_INTERACTION_DOOR_RUNTIME_SCRIPT.build_runtime_snapshot(_mission_interaction_door_bindings, _mission_interaction_runtime_states, terrain_map_data, registry)
+	result["producer_schema"] = "sternenbuergerchen.mission_interaction_door_runtime_state_producer.v1"
+	result["producer_source"] = "MissionCombatLoopDriver"
+	result["producer_reads_runtime_truth"] = true
+	result["producer_applied"] = false
+	result["producer_applied_semantics"] = "last_runtime_producer_pass"
+	result["producer_index_current"] = false
+	result["producer_apply_reason"] = "terrain_registry_unavailable"
+	result["terrain_registry_revision"] = registry_revision
+	var overrides: Array = Array(result.get("overrides", []))
+	var fingerprint: String = _build_mission_interaction_door_runtime_fingerprint(overrides)
+	if registry != null and registry.has_method("set_runtime_tile_overrides"):
+		var overrides_match: bool = _mission_interaction_door_runtime_overrides_match(registry, overrides)
+		if fingerprint != _mission_interaction_door_runtime_fingerprint or not overrides_match:
+			registry.call("set_runtime_tile_overrides", overrides)
+			_mission_interaction_door_runtime_apply_count += 1
+			result["producer_applied"] = true
+			result["producer_apply_reason"] = "override_changed" if fingerprint != _mission_interaction_door_runtime_fingerprint else "registry_override_missing_or_changed"
+		else:
+			result["producer_apply_reason"] = "unchanged"
+		result["producer_index_current"] = _mission_interaction_door_runtime_overrides_match(registry, overrides)
+		result["terrain_registry_revision"] = int(registry.call("get_revision")) if registry.has_method("get_revision") else -1
+	_mission_interaction_door_runtime_dirty = false
+	_mission_interaction_door_runtime_fingerprint = fingerprint
+	_mission_interaction_door_runtime_registry_id = registry_id
+	_mission_interaction_door_runtime_registry_revision = int(result.get("terrain_registry_revision", -1))
+	_mission_interaction_door_runtime_map_id = map_id
+	_mission_interaction_door_runtime_map_signature = map_signature
+	result["producer_apply_count"] = _mission_interaction_door_runtime_apply_count
+	_mission_interaction_door_runtime_snapshot = result
+
+
+func _mission_interaction_door_runtime_overrides_match(registry: Node, overrides: Array) -> bool:
+	if not registry.has_method("get_runtime_tile_override"):
+		return false
+	for override_variant in overrides:
+		var expected: Dictionary = Dictionary(override_variant)
+		if Dictionary(registry.call("get_runtime_tile_override", Vector2i(expected.get("grid_position", Vector2i.ZERO)))) != expected:
+			return false
+	return true
+
+
+func _build_mission_interaction_door_runtime_fingerprint(overrides: Array) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for override_variant in overrides:
+		var override: Dictionary = Dictionary(override_variant)
+		var grid: Vector2i = Vector2i(override.get("grid_position", Vector2i.ZERO))
+		parts.append("%d,%d:%s:%s:%d:%d:%s:%s" % [grid.x, grid.y, str(bool(override.get("walkable_override", false))), str(bool(override.get("blocks_los_override", false))), int(override.get("object_height_override", 0)), int(override.get("cover_value_override", 0)), String(override.get("source_interaction_id", "")), String(override.get("source_runtime_visual_state", ""))])
+	parts.sort()
+	return "|".join(parts)
 
 
 func get_mission_interaction_runtime_states() -> Dictionary:
@@ -477,6 +609,7 @@ func get_mission_interaction_runtime_state_snapshot() -> Dictionary:
 func apply_multiplayer_interaction_snapshot(snapshot: Dictionary) -> Dictionary:
 	var source_states: Dictionary = Dictionary(snapshot.get("interaction_states", {}))
 	_mission_interaction_runtime_states.clear()
+	_mission_interaction_door_runtime_dirty = true
 	_mission_scenario_runtime_step_states.clear()
 	var interaction_ids: Array = source_states.keys()
 	interaction_ids.sort()
@@ -493,6 +626,7 @@ func apply_multiplayer_interaction_snapshot(snapshot: Dictionary) -> Dictionary:
 		else:
 			_apply_in_progress_mission_interaction_state(state)
 	_update_mission_scenario_runtime_gates()
+	_refresh_mission_interaction_door_runtime_overrides()
 	return {
 		"applied_count": _mission_interaction_runtime_states.size(),
 		"read_only": true,
@@ -687,10 +821,12 @@ func update_mission_interaction_runtime_progress(payload: Dictionary) -> Diction
 	var next_hold_bucket: int = int(round(hold_seconds * 10.0))
 	var state_changed: bool = String(previous_state.get("state", "")) != state_name or bool(previous_state.get("complete", false)) != complete or previous_progress_bucket != next_progress_bucket or previous_hold_bucket != next_hold_bucket
 	_mission_interaction_runtime_states[interaction_id] = state.duplicate(true)
+	_mission_interaction_door_runtime_dirty = true
 	if complete:
 		_apply_completed_mission_interaction_state(state)
 	elif state_changed:
 		_apply_in_progress_mission_interaction_state(state)
+	_refresh_mission_interaction_door_runtime_overrides()
 	return state.duplicate(true)
 
 
@@ -741,9 +877,6 @@ func _apply_completed_mission_interaction_state(state: Dictionary) -> void:
 
 
 func get_playability_snapshot() -> Dictionary:
-	if _runs_local_authority:
-		_sync_objective_countdown_state()
-	_update_mission_scenario_runtime_gates()
 	var base_snapshot: Dictionary = {
 		"combat_state": "resolved" if _combat_finished else "active",
 		"win_condition_type": win_condition,
@@ -762,8 +895,6 @@ func get_playability_snapshot() -> Dictionary:
 
 
 func get_objective_countdown_snapshot() -> Dictionary:
-	if _runs_local_authority:
-		_sync_objective_countdown_state()
 	var objective_status = _get_objective_status()
 	if objective_status == null or not objective_status.has_method("get_countdown_snapshot"):
 		return {}
@@ -1437,6 +1568,7 @@ func _receive_remote_event(
 
 func _on_tick_processed(tick: int) -> void:
 	_current_tick = tick
+	_refresh_mission_interaction_door_runtime_overrides()
 	var simulation_root = get_node_or_null(simulation_root_path)
 	if not _refresh_runtime_authority(simulation_root):
 		_close_hotpath_unit_cache_scope()
@@ -1472,6 +1604,9 @@ func _on_tick_processed(tick: int) -> void:
 
 	_update_presence_seen_flags()
 	if _current_tick < _combat_startup_grace_ticks:
+		# Grace delays combat decisions, while the existing owner still publishes
+		# scenario/countdown progress. Snapshot readers remain side-effect free.
+		_sync_objective_countdown_state()
 		_update_status_label("staging")
 		_publish_multiplayer_snapshot_context(simulation_root)
 		if profile_enabled:
@@ -2119,10 +2254,12 @@ func _update_mission_scenario_runtime_gates() -> void:
 	if _mission_scenario_runtime_gates == null or not bool(_mission_scenario_runtime_gates.call("is_configured")):
 		_mission_scenario_runtime_gate_snapshot = {}
 		_update_mission_cargo_touchdown_bridge({})
+		_refresh_mission_interaction_door_runtime_overrides()
 		return
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("update", _build_mission_scenario_runtime_gate_context())).duplicate(true)
 	_update_mission_cargo_touchdown_bridge(_mission_scenario_runtime_gate_snapshot)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("update", _build_mission_scenario_runtime_gate_context())).duplicate(true)
+	_refresh_mission_interaction_door_runtime_overrides()
 
 
 func _update_mission_cargo_touchdown_bridge(gate_snapshot: Dictionary) -> void:

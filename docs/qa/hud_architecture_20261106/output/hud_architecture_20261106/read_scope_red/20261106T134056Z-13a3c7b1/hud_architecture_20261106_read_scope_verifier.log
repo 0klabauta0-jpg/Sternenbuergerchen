@@ -1,0 +1,8 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+REVIEW2_ISOLATED_USER_DATA C:/Users/bjoer/AppData/Roaming/Godot/app_userdata/SB-Codex-Review2-c175bdc2c69a48d08ac901e856eb2f5e
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: ReadModel exposes begin_projection_pass for an explicit bounded projection pass
+FAIL: ReadModel exposes end_projection_pass for an explicit bounded projection pass
+FAIL: ReadModel exposes project for an explicit bounded projection pass
+HUD_ARCHITECTURE_20261106_READ_SCOPE: 0 passed, 3 failed
