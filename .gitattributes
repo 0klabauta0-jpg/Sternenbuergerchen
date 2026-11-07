@@ -24,3 +24,6 @@ docs/qa/continue_20261105/** -text whitespace=blank-at-eol,blank-at-eof,space-be
 
 # HUD authority/performance evidence keeps exact native and diagnostic bytes.
 docs/qa/hud_architecture_20261106/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# R3 source bindings, raw diagnostics and fullscreen captures keep exact bytes.
+docs/qa/reference_polish_r3_20261106/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

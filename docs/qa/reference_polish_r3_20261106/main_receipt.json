@@ -28,5 +28,6 @@
   "frozen_zip_sha256": "9ee033b7d782e79d01400657be4beb0f352ee01785ffba4227c8f45f2bf3e961",
   "archive_rebuilt_after_main": false,
   "push_warning": "GitHub accepted the 70.76MiB QA ZIP and warned about its recommended 50MiB limit; push succeeded.",
-  "receipt_followup_policy": "Following receipt commit contains only these QA integration receipts. Runtime code and all 2230 bound inputs remain unchanged; final remote confirmation is recorded separately to avoid a self-referential commit hash."
+  "receipt_followup_policy": "Following receipt commit contains only these QA integration receipts. Runtime code and all 2230 bound inputs remain unchanged; final remote confirmation is recorded separately to avoid a self-referential commit hash.",
+  "qa_checkout_byte_preservation": "Dedicated -text attribute for the new R3 QA namespace; restaged only this owned namespace without changing worktree bytes or rebuilding the frozen archive."
 }
