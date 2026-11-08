@@ -62,3 +62,24 @@ Wahrscheinliche Grenzen sind synchrone HUD-/Runtimeprojektionen,
 Fog-/LOS-/Hex-Koordinaten und Unitmodell-/Fire-Event-Zulassung.
 Caches duerfen weder sichtbares Feedback noch echte Gameplayfortschritte
 verzoegern. CPU-/GPU-/Hintergrundlast und neue Diagnosekosten getrennt halten.
+
+## Code-/Berichtcheckpoint am08.11.2026
+
+Produktcode `14a7e9188a0bad8227105ce6ee3d8273adc157a5` liegt auf diesem
+Taskbranch; aktuelle Matrix75/75 mit stabilen Quellen und errors0.
+Nearest-Guardreorder folgt auf105/2 Counter-RED mit107/0 GREEN bei identischer
+Auswahl und aktuellen Live-Daten. Reviews finden im gebundenen Produktumfang
+keine offenen P1/P2. Gegenbelege und sachliche Testoraclemigrationen bleiben.
+
+Die Gesamtleistungsabnahme bleibt offen: letzter90-s-Nachlauf321.078ms Max,
+P99=143.812ms, Sim/Wand0.980801. Einzelne Movement-Scopes sinken, die gesamten
+Frametimes werden nicht als Verbesserung ausgegeben. Zusaetzliche Quellen-
+pruefung belegt keinen Doppelrender im normalen Einstieg. Ein separater
+GPU-Diagnoseharness besteht nur den privaten Godot-Parsercheck; nativer
+Verfuegbarkeits-/GPU-/Ursachenbeleg steht aus.
+
+Der Nutzer waehlt ausdruecklich zunaechst Bericht und Code-Abschluss.
+Die weiteren Vollbildmessungen und die anschliessende Mainintegration samt
+Main-Smoke bleiben offen. Main ist weiterhin `3b12b2878`; dieser Checkpoint
+ist keine Main-, Ruckelfreiheits- oder Releasefreigabe. Der gebundene Bericht
+steht unter `docs/qa/runtime_hitches_r4_20261107/REPORT.md`.

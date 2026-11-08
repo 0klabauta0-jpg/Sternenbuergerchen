@@ -2,7 +2,7 @@
 
 Never starts Godot/Git, overwrites an artifact, deletes data or restores a pin.
 Run only by Root, after profiling: python -B scripts/tests/package_runtime_hitches_r4_20261107.py
-    --profile-done [--image output/runtime_hitches_r4_20261107/...png]
+    (--profile-done | --native-deferred) [--image output/runtime_hitches_r4_20261107/...png]
 An interrupted/failed run preserves its new partial artifacts for inspection.
 """
 from __future__ import annotations
@@ -262,8 +262,11 @@ def write_raw_archive(archive: Path, paths: list[Path]) -> list[dict]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--profile-done", action="store_true", required=True,
-                        help="Root confirms all timed native runs are over; elapsed time is not permission.")
+    phase = parser.add_mutually_exclusive_group(required=True)
+    phase.add_argument("--profile-done", action="store_true",
+                       help="Root confirms the planned native measurement phase is over.")
+    phase.add_argument("--native-deferred", action="store_true",
+                       help="The user deferred remaining native runs; package the current checkpoint without claiming Main readiness.")
     parser.add_argument("--image", action="append", default=[], help="Explicit existing PNG inside the R4 output tree; repeatable.")
     parser.add_argument("--script", action="append", default=[], help="Additional selected .gd/.py source input; repeatable.")
     args = parser.parse_args()
@@ -330,6 +333,8 @@ def main() -> int:
         return 2
     manifest = {"schema": "sternenbuergerchen.runtime_hitches_r4.qa.v1",
                 "created_utc": datetime.now(timezone.utc).isoformat(), "passed": True,
+                "native_phase": "deferred_by_user" if args.native_deferred else "measurement_phase_finished",
+                "passed_scope": "Evidence bytes, source binding and preservation only; not performance or Main readiness.",
                 "archive": {"path": archive.name, **pin_file(archive), "streamed_readback_verified": True,
                             "strict_limit_bytes": LIMIT_BYTES},
                 "files": entries, "captures": captures,

@@ -1,5 +1,20 @@
 # IMPLEMENTATION_STATUS
 
+### R4: gepruefter Arbeitsstand, Main noch offen, 2026-11-08
+- Produktcode `14a7e9188` auf `task/runtime-hitches-r4-20261107`:
+  begrenzte vierteilige HUD-Projektion, redundante LOS-/Lookup-/Presenterarbeit
+  reduziert; aktuelle Schussquelle, echte Muendungsanker und Humanmodelle.
+- Aktuelle komplette Matrix75/75 ohne Enginefehler; Nearest-Oracle107/0,
+  gleiche Auswahl bei2 statt258 Live-Walkabilityreads in den Zaehlfixtures.
+  Menschliche und horizontal liegende Originalfigur nativ belegt; exakte
+  Bodenauflage bleibt unbelegt. Nah-Ausblendungsfehler nicht reproduziert.
+- Gesamtleistung weiterhin offen: letzter90-s-Nachlauf maximal321ms,
+  Sim/Wand0.980801 trotz kuerzerer einzelner Bewegungsstarts. Kein allgemeiner
+  Ruckelfreiheitsnachweis. Separater GPU-Diagnoseharness nur parsergeprueft.
+- Nutzer waehlt zunaechst Bericht und Code-Abschluss. Weitere Vollbildlaeufe,
+  Mainintegration und Main-Smoke bleiben ausstehend; Main weiterhin `3b12b2878`.
+  Checkpointbericht `docs/qa/runtime_hitches_r4_20261107/REPORT.md`.
+
 ### Referenzpolish R3 und weitere Framehitches, 2026-11-07
 - Native Theme-/Primary-/GO-/Minikarten-Besitzer vermeiden Legacy-Zwischenstile;
   Fog bezahlt im normalen Scheduler einen Slice. Strategic-RAW teilt Density

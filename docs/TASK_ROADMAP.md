@@ -1,5 +1,15 @@
 # TASK_ROADMAP
 
+## R4-Arbeitsstand, 2026-11-08 - Bericht und Code vor weiterer Messung
+- HUD-/Fog-/Lookupkorrekturen und lesbares Kampfgeschehen im Taskbranch
+  `task/runtime-hitches-r4-20261107`, Produktcode `14a7e9188`,75/75 Gates gruen.
+- Allgemeine Leistung noch offen: letzter Vollbildlauf321ms; lokale
+  Movement-Teilkostengewinne sind keine gesamte FPS-Abnahme.
+- Nutzer priorisiert Bericht/Code-Abschluss. GPU-Diagnose, weitere native
+  Messung und anschliessende Mainintegration/Main-Smoke bleiben offen.
+- Task `docs/tasks/RUNTIME_HITCHES_R4_2026_11_07.md`, Checkpointbericht
+  `docs/qa/runtime_hitches_r4_20261107/REPORT.md`; Main unveraendert `3b12b2878`.
+
 ## Fortsetzung 2026-11-05 - Befehlsruckler und historische Gates
 - Synchrone Move-/GO-Kosten reduziert, HUD-Interleaving, konsistente
   Blickrichtung, FoW-/Cargo-/Drop-Visibility und vollstaendige Karten korrigiert.
