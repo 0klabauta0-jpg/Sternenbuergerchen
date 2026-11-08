@@ -1,0 +1,546 @@
+{
+  "schema": "sternenbuergerchen.ui_flow_snapshot.v1",
+  "source_commit": "33bc504c4e8ebdd4e8055e7b1d1fb2fb4924cb49",
+  "captured_at": "2026-11-08T14:35:12.664801+00:00",
+  "report_branch": "task/ui-flow-bilanz-20261108",
+  "branch_base": "integration/core-foundation · 3cae5a216 · 31.08.2026",
+  "files": [
+    {
+      "kind": "image",
+      "id": "mission_main",
+      "file": "images/mission_main.png",
+      "origin": "docs/qa/runtime_hitches_r4_finish_20261108/captures/main_smoke/06_go_movement.png",
+      "sha256": "1ea16c068699238235d218eb05ea397585d73abd9d74fd1353d0fd9b82c3c05d",
+      "bytes": 5854611,
+      "binding": "git:33bc504c4",
+      "status": "Native Mainaufnahme · keine heutige neue Spielsitzung",
+      "date": "08.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "homebase_main",
+      "file": "images/homebase_main.png",
+      "origin": "docs/qa/runtime_hitches_r4_finish_20261108/captures/finish_normal_b/20261108T134038Z-98193de7/normal_b_captures/02_homebase.png",
+      "sha256": "03fbcb325797576e5757dc96d38caeb691ae13600eca24808003b791d33b400a",
+      "bytes": 1728304,
+      "binding": "git:33bc504c4",
+      "status": "Native normale Route · 3440×1440",
+      "date": "08.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "homebase_target",
+      "file": "images/homebase_target.png",
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_heimatbasis.png",
+      "sha256": "2037cc5c58a8cf463040235d332c64c5522242a5a944c928e9040613bb495e92",
+      "bytes": 1963380,
+      "binding": "git:33bc504c4",
+      "status": "Generierter Entwurf · Beispielwerte",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "loadout_target",
+      "file": "images/loadout_target.png",
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_fob_loadout.png",
+      "sha256": "ff97752096c4af99b2fc97beefd5337e396451c9d3c16d926467d3157b95cc1a",
+      "bytes": 2002569,
+      "binding": "git:33bc504c4",
+      "status": "Generierter Entwurf · heutiger Arbeitsort Homebase Direct",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "mission_target",
+      "file": "images/mission_target.png",
+      "origin": "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png",
+      "sha256": "fc9edb8b1d28921653ba5b438e7be8da4db3e0b32b8c751e9b18c4ef94918149",
+      "bytes": 2558195,
+      "binding": "git:33bc504c4",
+      "status": "Generierter Entwurf · spätere Nutzerkorrekturen beachten",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "debrief_target",
+      "file": "images/debrief_target.png",
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_debrief.png",
+      "sha256": "3d7600ded373bde99da4b6598211a45524d42e2b5a7daa85d58e6e46042f0c82",
+      "bytes": 2049277,
+      "binding": "git:33bc504c4",
+      "status": "Generierter Entwurf · keine echten Resultate",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "debrief_old",
+      "file": "images/debrief_old.png",
+      "origin": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/debrief_portraits_1920x1080.png",
+      "sha256": "1c21a0029ce3859e9d18f1aa54311a1ad8f590279b1a51537817302a918a9620",
+      "bytes": 905662,
+      "binding": "git:33bc504c4",
+      "status": "Native synthetische Fixture · kein abgeschlossener heutiger Einsatz",
+      "date": "02.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "fob_old",
+      "file": "images/fob_old.png",
+      "origin": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/fob_populated_1920x1080.png",
+      "sha256": "a717d9b1c9b01e1a4628536054fca9f0eb0df939719f6e7dd4e1dd25599f3454",
+      "bytes": 543288,
+      "binding": "git:33bc504c4",
+      "status": "Native Fixture · historischer alternativer Arbeitsort",
+      "date": "02.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "character_target",
+      "file": "images/character_target.png",
+      "origin": "docs/reports/assets/ui-2026-11-01/board_charakterkarten.png",
+      "sha256": "f73450b2a01d714bfe759d7f31df8c29a82230ef21b132b67bfde0fd3e90c5e0",
+      "bytes": 1968478,
+      "binding": "git:33bc504c4",
+      "status": "Generierter Entwurf · Beispielpersonen und -werte",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "character_old",
+      "file": "images/character_old.png",
+      "origin": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/05b_character_details.png",
+      "sha256": "778831105bc53266fc1d6a1becad479cd90012171d25ff8a88d4d0b3fce30d44",
+      "bytes": 1397100,
+      "binding": "git:33bc504c4",
+      "status": "Native Aufnahme · Portraitstand inzwischen erneuert",
+      "date": "02.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "main_target",
+      "file": "images/main_target.png",
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_hauptmenue.png",
+      "sha256": "90cfb1d8d2acb78d9b325226977e8379361d00ccb21703489bdc738d3a551b09",
+      "bytes": 2108832,
+      "binding": "git:33bc504c4",
+      "status": "Generierter Entwurf · Hintergrund später ausdrücklich anders entschieden",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "main_native",
+      "file": "images/main_native.png",
+      "origin": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke_captures/01_main_menu.png",
+      "sha256": "9ddf726b4ad71246355e33e4a1a1f3204a6206675f5dffd3de4682f0e4d932b5",
+      "bytes": 2919740,
+      "binding": "working-copy; captured immutable for this report",
+      "status": "Native normale Aufnahme · ursprüngliches Menübild absichtlich zurück",
+      "date": "08.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "lobby_target",
+      "file": "images/lobby_target.png",
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_lobby.png",
+      "sha256": "7cd54bed31ee2111fb2fbade5f827be0c65babeadb497b55030174a6d1b6ce97",
+      "bytes": 1945673,
+      "binding": "git:33bc504c4",
+      "status": "Generierter Entwurf · dargestellte Optionen keine Funktionsbelege",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "lobby_old",
+      "file": "images/lobby_old.png",
+      "origin": "docs/qa/ui_native_r2_20261101/captures/lobby_1920x1080.png",
+      "sha256": "119d515fd99150f815e9dcecace2aec531170323771e19d23b1eeda6e9f70ecb",
+      "bytes": 1671342,
+      "binding": "git:33bc504c4",
+      "status": "Native Fixture · kein aktueller Peer-/WAN-Nachweis",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "editor_target",
+      "file": "images/editor_target.png",
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_editor.png",
+      "sha256": "1039090f95a1c4dc24d3c3194d8f3471f6a6dafc4c776bdd9d3e6e5fed92b25d",
+      "bytes": 2431123,
+      "binding": "git:33bc504c4",
+      "status": "Generierter Entwurf · kein Auftrag zum Rasterwechsel",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "team_target",
+      "file": "images/team_target.png",
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_teameditor.png",
+      "sha256": "03c5dcea32978ab9d6542d5ad72d59691e0a1f9a769b2280931887020a78720e",
+      "bytes": 1865321,
+      "binding": "git:33bc504c4",
+      "status": "Generierter Entwurf · editierbarer Creator getrennt von Lesebogen",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "image",
+      "id": "detail_target",
+      "file": "images/detail_target.png",
+      "origin": "docs/reports/assets/ui-2026-11-01/board_detailkarten.png",
+      "sha256": "e9cd37213917a41bb1deddefd7b4e365a29a4dc28a26bd890f951ab55fcec8b8",
+      "bytes": 1940945,
+      "binding": "git:33bc504c4",
+      "status": "Generierter Entwurf · keine zusätzliche Runtimefunktion",
+      "date": "01.11.2026"
+    },
+    {
+      "kind": "source",
+      "id": "brief",
+      "file": "sources/brief.md",
+      "origin": "docs/PROJECT_BRIEF.md",
+      "sha256": "bf014f2dd8d16202725e930cee656f31f129b31effa79c82322faa6791e6cdd3",
+      "bytes": 1700,
+      "binding": "git:33bc504c4",
+      "lines": "16–36; alte Basis-/FOB-Aussage durch Operationsvertrag fortgeschrieben"
+    },
+    {
+      "kind": "source",
+      "id": "architecture",
+      "file": "sources/architecture.md",
+      "origin": "docs/ARCHITECTURE.md",
+      "sha256": "a30d7542eba9503ec75718ef87a4f30ffebec27109459a78992f7be9020dc6e7",
+      "bytes": 4602,
+      "binding": "git:33bc504c4",
+      "lines": "Grundsatz, Wahrheitsquellen und RuntimeLeader"
+    },
+    {
+      "kind": "source",
+      "id": "core_decisions",
+      "file": "sources/core_decisions.md",
+      "origin": "docs/DECISIONS.md",
+      "sha256": "0d2bf8dcf6eb34ecc993be17255c2e440aacfd225035f6cb018c1c414b16d65b",
+      "bytes": 2304,
+      "binding": "git:33bc504c4",
+      "lines": "Bisher fest; Architektur-Entscheidungen"
+    },
+    {
+      "kind": "source",
+      "id": "status",
+      "file": "sources/status.md",
+      "origin": "docs/IMPLEMENTATION_STATUS.md",
+      "sha256": "f5fc98629acb1830fac95257719473f52858f059a101c0f5b1f43104a7970ccc",
+      "bytes": 1822666,
+      "binding": "git:33bc504c4",
+      "lines": "1–55; jüngste Fortsetzung vor älteren Checkpoints"
+    },
+    {
+      "kind": "source",
+      "id": "feedback",
+      "file": "sources/feedback.md",
+      "origin": "docs/ui_concepts/ui_20261101/FEEDBACK_20261101.md",
+      "sha256": "b53adc50d18497811e82452f67312aacf7296164cc8e267e3e5b0c934a75939d",
+      "bytes": 15855,
+      "binding": "git:33bc504c4",
+      "lines": "13–29 sowie Abschnitte A2/A3/A4/A5"
+    },
+    {
+      "kind": "source",
+      "id": "export_original",
+      "file": "sources/export_original.json",
+      "origin": "docs/ui_concepts/ui_20261101/review_export_20261101_154755.json",
+      "sha256": "02dcedb8e801704f48288b1ca0f7a8a04791b7d22ee77de44513b4940683c366",
+      "bytes": 2014,
+      "binding": "git:33bc504c4",
+      "lines": "controls.review und controls.checks"
+    },
+    {
+      "kind": "source",
+      "id": "ui",
+      "file": "sources/ui.md",
+      "origin": "docs/dev/ui_native_design_contract.md",
+      "sha256": "bd0243d4f8009291da9578f8c4b824b8b05611d4ff845015740e237994cf0ec2",
+      "bytes": 16618,
+      "binding": "git:33bc504c4",
+      "lines": "Gestaltungsautorität, Mission, Debrief, Cutlass"
+    },
+    {
+      "kind": "source",
+      "id": "operations",
+      "file": "sources/operations.md",
+      "origin": "docs/dev/homebase_operations_ux_contract.md",
+      "sha256": "03a36d32d0066b9155117950561bc14a792109b27b4922ddeae7eee277811559",
+      "bytes": 2821,
+      "binding": "git:33bc504c4",
+      "lines": "3–20; begehbare Basis und Direct-Start"
+    },
+    {
+      "kind": "source",
+      "id": "direct",
+      "file": "sources/direct.md",
+      "origin": "docs/dev/homebase_direct_dropship_flow_contract.md",
+      "sha256": "32873caa619494d636c6bef47831d491f68c8ac6c6e746b75b6a84e273e96444",
+      "bytes": 4972,
+      "binding": "git:33bc504c4",
+      "lines": "Homebase Direct, Mission Dropships, Per-Craft, Normalstart"
+    },
+    {
+      "kind": "source",
+      "id": "playtest_task",
+      "file": "sources/playtest_task.md",
+      "origin": "docs/tasks/PLAYTEST_2026_11_05_fullscreen_ux_visuals.md",
+      "sha256": "753cad364f30c0b674efb4b6e333960e31583c7f78135389bc83ae92aeed5910",
+      "bytes": 6516,
+      "binding": "git:33bc504c4",
+      "lines": "Ziel, Umfang, Akzeptanz und Status"
+    },
+    {
+      "kind": "source",
+      "id": "playtest",
+      "file": "sources/playtest.md",
+      "origin": "docs/reports/PLAYTEST_2026-11-05.md",
+      "sha256": "c211aa56a67c7b8ca6cdfb32330d7dd5579c3792a8e759c53d51b3d402e96f50",
+      "bytes": 26237,
+      "binding": "git:33bc504c4",
+      "lines": "Portraits, Hauptmenü, Flug, Multiplayer und verbleibende Hitches"
+    },
+    {
+      "kind": "source",
+      "id": "r3",
+      "file": "sources/r3.md",
+      "origin": "docs/qa/reference_polish_r3_20261106/REPORT.md",
+      "sha256": "1ddce8534790ae76abd008cbc12c86da3d0cae77988f8be0fb3211d4776abb94",
+      "bytes": 9068,
+      "binding": "git:33bc504c4",
+      "lines": "Referenzvergleich; native Routen und Aussagegrenzen"
+    },
+    {
+      "kind": "source",
+      "id": "r4_checkpoint",
+      "file": "sources/r4_checkpoint.md",
+      "origin": "docs/qa/runtime_hitches_r4_20261107/REPORT.md",
+      "sha256": "592f6f7006e466944a3f64f92153b2b9a322269357eec0757001202a52676d5d",
+      "bytes": 11315,
+      "binding": "git:33bc504c4",
+      "lines": "Figuren-/Schussbelege; Sichtbefund; KI und Leistungsgrenzen"
+    },
+    {
+      "kind": "source",
+      "id": "r4",
+      "file": "sources/r4.md",
+      "origin": "docs/qa/runtime_hitches_r4_finish_20261108/REPORT.md",
+      "sha256": "6b59ad5cd1557e6ff5a4c2d33a5ad252d2d9222319e59f9c5cd02191722b1ddb",
+      "bytes": 8283,
+      "binding": "git:33bc504c4",
+      "lines": "Zwei normale Vollbildläufe; Main-Smoke; keine isolierte Leistungsabnahme"
+    },
+    {
+      "kind": "source",
+      "id": "r5",
+      "file": "sources/r5.md",
+      "origin": "docs/tasks/CPU_HUD_R5_2026_11_08.md",
+      "sha256": "9705ed010d16b90c2a767f881b3effa205253c5d34449a973befdc070972d570",
+      "bytes": 5645,
+      "binding": "working-copy; captured immutable for this report",
+      "lines": "Ziel und Umfang, keine Abschlussbehauptung · Separat erfasster laufender Auftrag außerhalb des Produktpins; keine Ergebnisabnahme"
+    },
+    {
+      "kind": "source",
+      "id": "gdd",
+      "file": "sources/gdd.md",
+      "origin": "docs/GDD_STATUS.md",
+      "sha256": "7d6752c11080cfce7554084ef6d830ba5cd1e9afba1b17f271abce4b122bf7d6",
+      "bytes": 1841,
+      "binding": "git:33bc504c4",
+      "lines": "Status, konkrete Konflikte und Arbeitsregel"
+    },
+    {
+      "kind": "source",
+      "id": "gm01",
+      "file": "sources/gm01.md",
+      "origin": "docs/dev/gm01_frontier_map_contract.md",
+      "sha256": "e4e2166dd556611e587aee2267a79f201447aeb1bfdbf22df7e447aa330d985d",
+      "bytes": 7280,
+      "binding": "git:33bc504c4",
+      "lines": "Größe, Topologie und Authoringgrenzen"
+    },
+    {
+      "kind": "source",
+      "id": "commands",
+      "file": "sources/commands.md",
+      "origin": "docs/dev/mission_command_feedback_contract.md",
+      "sha256": "1afe6f176b93e202a38f9a7a2018e159c675b433050050e501e28e9efe65e9f4",
+      "bytes": 655097,
+      "binding": "git:33bc504c4",
+      "lines": "Plan-/GO-/Feedbackvertrag"
+    },
+    {
+      "kind": "source",
+      "id": "behavior",
+      "file": "sources/behavior.md",
+      "origin": "docs/dev/fireteam_behavior_modes_contract.md",
+      "sha256": "2c9d7f8ad661df7d64fcab757f6f12c44a7865c7663012e00bc455cb5b55746e",
+      "bytes": 29858,
+      "binding": "git:33bc504c4",
+      "lines": "Move/Take/Engage/Defend und Ausführung"
+    },
+    {
+      "kind": "source",
+      "id": "runtime",
+      "file": "sources/runtime.md",
+      "origin": "docs/dev/fireteam_runtime_execution_path_contract.md",
+      "sha256": "64e7e8778b236974c1cece03eb5890dd05103810eaa3c1507ea4cff9f2cb2fef",
+      "bytes": 4387,
+      "binding": "git:33bc504c4",
+      "lines": "Aktiver Ausführungspfad und Legacygrenze"
+    },
+    {
+      "kind": "source",
+      "id": "evac",
+      "file": "sources/evac.md",
+      "origin": "docs/dev/mission_evacuation_abort_contract.md",
+      "sha256": "c5ef41f4e6fb48d3c70f7170534968ab11c67f87e5ab60f0f91d4cfb9d38c75e",
+      "bytes": 1829,
+      "binding": "git:33bc504c4",
+      "lines": "LZ, ausgewählte Teams und Hostautorität"
+    },
+    {
+      "kind": "source",
+      "id": "sortie",
+      "file": "sources/sortie.md",
+      "origin": "docs/tasks/BUGFIX_2026_11_04_a5_second_sortie.md",
+      "sha256": "4fab93fbff67ed6149231f4fbf2426523d30e2e76065c738005d7a8a0a4cee27",
+      "bytes": 2404,
+      "binding": "git:33bc504c4",
+      "lines": "Ziel, Gates und Ergebnis"
+    },
+    {
+      "kind": "source",
+      "id": "roster",
+      "file": "sources/roster.md",
+      "origin": "docs/dev/player_roster_save_contract.md",
+      "sha256": "aa9422692a264d65f98889cf32d43529070e89825cba5e7466977b60c50f4cc5",
+      "bytes": 3201,
+      "binding": "git:33bc504c4",
+      "lines": "Vorhandene Identitäten und explizite Erstellung"
+    },
+    {
+      "kind": "source",
+      "id": "meta_code",
+      "file": "sources/meta_code.gd.txt",
+      "origin": "scripts/meta/meta_layer_flow.gd",
+      "sha256": "2a203278aa7d6ccf58a161c1f2c055ee63b3da7e938e3de94f18e91702843604",
+      "bytes": 349860,
+      "binding": "git:33bc504c4",
+      "lines": "3754–3774; 3981ff.; 4128ff.; 4298ff.; 5783ff."
+    },
+    {
+      "kind": "source",
+      "id": "presenter_code",
+      "file": "sources/presenter_code.gd.txt",
+      "origin": "scripts/meta/homebase_operations_presenter.gd",
+      "sha256": "c888208292fad054250ffe8e999de362102965927634a78147fd764e12958f41",
+      "bytes": 36293,
+      "binding": "git:33bc504c4",
+      "lines": "359–391; 771–775; snapshot/request_operation"
+    },
+    {
+      "kind": "source",
+      "id": "debrief_code",
+      "file": "sources/debrief_code.gd.txt",
+      "origin": "scripts/meta/debrief_screen.gd",
+      "sha256": "f75d7b7cf841455794e22a1705301193bc0c802c4c42b0c3a964685ca6fdaeee",
+      "bytes": 100888,
+      "binding": "git:33bc504c4",
+      "lines": "54–64"
+    },
+    {
+      "kind": "source",
+      "id": "controller_code",
+      "file": "sources/controller_code.gd.txt",
+      "origin": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "sha256": "b247162e46edaca4e5696c9d96242384aca102ff03cb8f2e2c84c103627cddaf",
+      "bytes": 1896377,
+      "binding": "git:33bc504c4",
+      "lines": "307; 386; 1532; 3611ff.; 3809; 3871ff."
+    },
+    {
+      "kind": "source",
+      "id": "icons_code",
+      "file": "sources/icons_code.gd.txt",
+      "origin": "scripts/ui/native_ui_icons.gd",
+      "sha256": "4450b9f91586d95112d615c11fde6c8e77f2fe1a6bd951c6917d7161f8de276e",
+      "bytes": 2388,
+      "binding": "git:33bc504c4",
+      "lines": "11–12"
+    },
+    {
+      "kind": "source",
+      "id": "r4_ui",
+      "file": "sources/r4_ui.md",
+      "origin": "docs/qa/ui_native_r4_20261102/README.md",
+      "sha256": "40357c66ff9ed6e34ad3367c66c4f4932008329c59c454beaf7ea80180c46dc3",
+      "bytes": 8460,
+      "binding": "git:33bc504c4",
+      "lines": "Native Fixture versus normale Route; historische Restabstände"
+    },
+    {
+      "kind": "source",
+      "id": "workbench",
+      "file": "sources/workbench.md",
+      "origin": "docs/dev/html_report_workbench_contract.md",
+      "sha256": "d862bd231fa4d5abaef4d25d0a64771b1534c35ee3b575ff33ba58b762f74f0f",
+      "bytes": 2895,
+      "binding": "git:33bc504c4",
+      "lines": "Pflichtbestandteile und JSON-Export"
+    },
+    {
+      "kind": "source",
+      "id": "graphics",
+      "file": "sources/graphics.md",
+      "origin": "docs/dev/graphics_reference_revision_contract.md",
+      "sha256": "a040782b266350a4c43e95aacf7230d206f83d4d05bb81530a580344563d8822",
+      "bytes": 5859,
+      "binding": "git:33bc504c4",
+      "lines": "Referenzstatus, Nachweis und HTML-Vergleich"
+    },
+    {
+      "kind": "source",
+      "id": "air_threat",
+      "file": "sources/air_threat.md",
+      "origin": "docs/dev/air_asset_threat_damage_contract.md",
+      "sha256": "3868c4ff383f49eda5df3f9dc13fa3124a45f240e2962dc6dba9a416a58af7ea",
+      "bytes": 2583,
+      "binding": "git:33bc504c4",
+      "lines": "Scope, Statusmodell, Warnphase, Zielbarkeit und SimulationRoot-Effects"
+    },
+    {
+      "kind": "source",
+      "id": "homebase_code",
+      "file": "sources/homebase_code.gd.txt",
+      "origin": "scripts/meta/homebase_screen.gd",
+      "sha256": "d970699cd605269de7b4360ad071bec55ab436f46b869f9ea93bafe1a711bd5d",
+      "bytes": 483177,
+      "binding": "git:33bc504c4",
+      "lines": "9124–9190; keine Rollenbearbeitung im Operationsrequest"
+    },
+    {
+      "kind": "source",
+      "id": "air_recovery",
+      "file": "sources/air_recovery.md",
+      "origin": "docs/dev/air_asset_loss_recovery_meta_loop.md",
+      "sha256": "4d7fe589766490fbac68ce54fc192a86563bcd5a1c894d5b6026a2b4f6e83b25",
+      "bytes": 2342,
+      "binding": "git:33bc504c4",
+      "lines": "TASK_278: Recovery, Verfügbarkeit und Meta-Folgen"
+    }
+  ],
+  "template_derived_from": {
+    "origin": "docs/reports/_html_workbench_template.html",
+    "sha256": "0386a2c2652924eb4c8490bb88f7ed553cdabb75afc370a05de291e09374a5b7",
+    "commit": "33bc504c4e8ebdd4e8055e7b1d1fb2fb4924cb49",
+    "adaptation": "report_template.html; offline export schema/controls adapted"
+  },
+  "report": {
+    "file": "STERNENBUERGERCHEN_UI_FLOW_BILANZ_2026-11-08.html",
+    "sha256": "9b813cfb5d6da1335060e5e15b60189836fceaf46ede9ce637590703a4f7b9e1"
+  }
+}

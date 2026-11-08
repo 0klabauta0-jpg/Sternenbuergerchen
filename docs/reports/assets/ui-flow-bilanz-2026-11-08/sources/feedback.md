@@ -1,0 +1,158 @@
+# Nutzerfeedback und Revisionen A2 bis A5 · 01.11.2026
+
+Dieser Eintrag dokumentiert die tatsächliche Auswahl und den anschließenden Revisionsauftrag. Er ergänzt die [Übergabe](UEBERGABE.md); die ursprünglichen Vorschläge bleiben erhalten.
+
+## Quellen und zeitliche Zuordnung
+
+- Originalexport: `C:/Users/bjoer/Downloads/sternenbuergerchen_ui_20261101_2026-11-01T14-47-55-564Z_01.json`.
+- Unverändert archivierte Projektfassung: [review_export_20261101_154755.json](review_export_20261101_154755.json).
+- Exportzeit: `2026-11-01T14:47:55.564Z`, entsprechend **15:47:55 Uhr Europe/Berlin**.
+- Ergänzend: die anschließende mündliche Rückmeldung im selben Chat, hier sinngemäß zusammengefasst. Die konkreten Pixelziele unten sind unsere Umsetzung des Größenwunschs, kein wörtliches Nutzerzitat.
+- Fortsetzung desselben Konzepttasks auf `task/ui-entwuerfe-20261101`; keine neue Runtime-Aufgabe.
+
+## Was im Export tatsächlich entschieden ist
+
+| Feld | Wert | Bedeutung |
+|---|---|---|
+| `controls.review.mission_preference` | `a` | A ist die gewählte Missionsrichtung |
+| `controls.review.staging_verdict` | `continue` | C als Staging-Grundlage weiterentwickeln |
+| Bewegen | `continue` | Motiv als Grundlage weiterführen |
+| Verteidigen | `continue` | Motiv als Grundlage weiterführen |
+| Flankieren | `unclear` | Bedeutung unklar; alternative Motivlösung nötig |
+| Nehmen | `continue` | Motiv als Grundlage weiterführen |
+| Dropship | `unclear` | Bedeutung unklar; alternative Motivlösung nötig |
+| Ausrüstung | `continue` | Motiv als Grundlage weiterführen |
+
+`active_choices.preview.variant = c` bedeutet lediglich, dass zuletzt C angezeigt wurde. Die Missionsentscheidung steht im getrennten Präferenzfeld und lautet A. Beide Felder dürfen nicht gegeneinander vertauscht werden.
+
+Alle fünf Checkboxen unter `controls.checks` sind `false`: Hierarchie, Lesbarkeit, kleine Icons, Weltstil und Übergabe wurden nicht ausdrücklich abgehakt. `review_checks_checked = 0` bestätigt das. Die freien Notizen und der Prüfkontext sind leer. Daraus keine zusätzliche Begründung oder Freigabe ergänzen.
+
+Die Icons wurden zuletzt mit dunklem Hintergrund und 48px angezeigt. Das belegt keine Sichtung bei 24/32px, keinen Alpha-Test und keine native Godot-Prüfung. `runtime_integrated = false` bleibt unverändert.
+
+## Mündliche Ergänzung: A gefällt, benötigt weniger große Buttons
+
+- Der grundsätzliche Entwurf A gefällt.
+- Die Buttons sind zu groß. Es soll Platz für spätere Planung und weitere Aktionen bleiben.
+- Die linke Teamübersicht gefällt und soll erhalten bleiben.
+- Der rechte Dropdown-/Planungsbereich gefällt ebenfalls und soll erhalten bleiben.
+- Oben links wird kein großer Spieltitel benötigt.
+
+Das Feedback beauftragt eine kompaktere visuelle Revision. Es bestätigt keine neuen Spielfunktionen und ist keine Abnahme des aktuellen Klickwegs.
+
+## Historischer Gestaltungsbrief für A2
+
+Diese horizontale Geometrie gehört zum vorherigen Versuch. Die spätere explizite Rückmeldung zu A3 verlangt wieder quadratische Buttons und verschobene Teamkarten; sie hat für den aktuellen Bildauftrag Vorrang.
+
+Neue Datei: [mockup_a2_kommandodeck_kompakt.png](../../reports/assets/ui-2026-11-01/mockup_a2_kommandodeck_kompakt.png). Das ursprüngliche `mockup_a_kommandodeck.png` bleibt als historischer Vergleich erhalten.
+
+| Teil | Ziel bei 1920×1080 | Begründung |
+|---|---|---|
+| Aktionsbuttons | 40–44px hoch | Geringere Flächenbelegung, stabile gleichmäßige Controls |
+| Icons | 18–22px neben einem lesbaren Label | Bedeutung bleibt über Text gesichert; kein riesiges Bild über Minischrift |
+| Gesamtes unteres Dock | 112–128px hoch einschließlich Kopfzeile | Mehr Karte und Layoutreserve, ohne weitere aktive Controls zu erfinden |
+| Selected-Team-Kontext | Schmale Kopfzeile mit Team/Status | Kontext erhalten, umfangreiche Erklärung aus dem Hauptweg nehmen |
+| Zielerklärung | Kein großer dauerhafter Erklärungsblock | Raum dem aktuellen Auftrag und seinen Aktionen geben |
+| Linker Teamteil | Bisherigen Aufbau bewahren | Vom Nutzer positiv bewertet |
+| Oberer rechter Bereich | Transport/Dropdown/Planungsaufbau bewahren | Vom Nutzer positiv bewertet |
+| Branding oben links | Großen Spieltitel entfernen | Aktionsraum und Karte priorisieren |
+
+Kompakt wird die Oberfläche durch kleinere Flächen, klarere Gruppen und passende Abstände. Schrift nicht verkleinern, um größere Kacheln künstlich unterzubringen. Für spätere Funktionen Freiraum lassen; keine unbeauftragten aktiven Buttons als Platzhalter einzeichnen. Die bestehenden Funktionen bleiben Grundlage.
+
+Die Maße sind Ziele für den Entwurf und die spätere native Umsetzung. Ein generiertes Rasterbild garantiert keine exakten Control-Abmessungen. Nach Erzeugung Abweichungen sichtbar festhalten; bei späterer Godot-Umsetzung den echten Layout-/Klickpfad prüfen.
+
+## Zwei Iconmotive überarbeiten
+
+Flankieren soll vor allem einen deutlich seitlich um ein Hindernis geführten Weg zeigen. Es muss sich vom direkten Bewegen-Pfeil unterscheiden. Dropship soll als Transportmittel erkennbar sein; Silhouette und Einstieg-/Transportbezug sind wichtiger als dekorative Fahrzeugdetails.
+
+Neue Kandidaten bleiben getrennte Varianten. Die vier als Grundlage geeigneten Motive werden nicht ungefragt ersetzt. Auch `continue` bedeutet Weiterentwicklungsrichtung und nicht bereits erfolgreiche Erkennung auf jeder Zielgröße.
+
+Exakte neue Prompts stehen in [prompts_revision2.json](prompts_revision2.json), die ursprünglichen bleiben in [prompts.json](prompts.json). Dateizuordnung und Herkunft stehen in [manifest.json](manifest.json). Die Bewertung der tatsächlich erzeugten Bilder steht in [PRUEFUNG.md](PRUEFUNG.md). Dieses Feedbackdokument nimmt das Ergebnis nicht vorweg.
+
+## Grenzen für den nächsten Chat
+
+GO führt einen vorhandenen Plan aus und pausiert die Echtzeitmission nicht. Einzelportraits sind in der Taktik lesende Identitäts-/Detailzugänge, keine individuellen NPC-Move-Buttons. FoW und bekannte Kontakte bleiben verbindlich. Keine große Zielerklärung ist eine Layoutentscheidung, keine Entfernung nötiger Ablehnungsgründe.
+
+Keine Runtime-, Input-, Gameplay-, Szenen- oder aktiven Assetänderung ist mit der Bildrevision erledigt oder automatisch beauftragt. Die [Task-Akzeptanz](../../tasks/TASK_UI_KONZEPT_20261101.md) und die tatsächlichen späteren Prüfergebnisse bestimmen, was geliefert ist.
+
+## Vorherige Rückmeldung: A3 mit quadratischem Randband
+
+Die neue mündliche Rückmeldung im selben Chat präzisiert den Aufbau nach Betrachtung von A2. Sie ist kein neuer JSON-Export und ändert die archivierten Werte des ersten Exports nicht.
+
+- Das Befehlsband soll an der absoluten unteren Kante liegen, **an der linken unteren Ecke beginnen** und von dort kompakt nach rechts laufen.
+- Die Buttons sollen wieder quadratisch und kompakt sein. Die horizontalen A2-Rechtecke sind damit nicht die aktuelle Richtung.
+- Die Teamkarten werden nach oben versetzt, sodass das Band darunter beginnen kann. „Linke Übersicht erhalten“ bedeutet ihren Inhalt/Charakter erhalten, nicht ihre alte Position einfrieren.
+- Das Log wird über das Band nach oben verschoben.
+- Dropship oben rechts und der Missions-/Zielbereich im oberen rechten Mittelteil bleiben vorhanden. Dropship/LZ darf maßvoll kleiner werden.
+
+Gewählte Anordnung des Assistenten: ein Quadrat „Plan ausführen“ unmittelbar rechts von „Flankieren“. Die Aktionsreihe lautet **Bewegen → Nehmen → Verteidigen → Flankieren → Plan ausführen**. Haltung und Feuerregeln bleiben rechts als eigene kompakte Gruppen. Das führt keine zusätzliche Funktion ein.
+
+### A3-Maßziele und erhaltene Grenzen
+
+| Teil | Aktueller Zielentwurf | Herkunft |
+|---|---|---|
+| Bandanker | Linke Bandkante x=0; untere Kante bündig mit tatsächlichem Bild-/Viewportende | Expliziter Nutzerwunsch |
+| Aktionsform | Gleich große kompakte Quadrate | Expliziter Nutzerwunsch |
+| Aktionsmaß | Bei 1920×1080 etwa 56–64px Seitenlänge | Assistentenvorschlag, keine Nutzermaßangabe |
+| Iconmaß | 24–28px im Quadrat | Assistentenvorschlag |
+| Beschriftung | Lesbar separat unter dem jeweiligen Quadrat | Assistentenvorschlag für lange deutsche Labels |
+| Struktur | Eine Aktionsreihe plus schmale Team-/Kontextzeile | Assistentenvorschlag zur Verdichtung |
+| Teamkarten/Log | Vollständig oberhalb des Bands mit erkennbarem Abstand | Explizite Verschiebung, Abstand als Layoutausarbeitung |
+| Oberer rechter Bereich | Erhalten; Dropship/LZ behutsam kleiner | Expliziter Nutzerwunsch |
+
+Keinen dekorativen Außenabstand unter oder links neben dem Band einzeichnen. Das Rasterbild ist anhand seiner tatsächlichen Größe zu prüfen: A2 hat 1672×941px; eine Pixelkoordinate dieser Vorlage ist kein absoluter Wert für 1920×1080. Für andere Ausgabegrößen bleiben Kantenbezug und Proportionen maßgeblich.
+
+Neuer Einzelkandidat: [mockup_a3_randband_quadratisch.png](../../reports/assets/ui-2026-11-01/mockup_a3_randband_quadratisch.png), aus A2 abgeleitet. A, A2 und B/C bleiben erhalten. Die Haltung „Normal“ aus A2 wird beibehalten; sie ist weiterhin ein illustrativer Zustand, keine neue Gameplay-Regel.
+
+Die sechs derzeitigen Galerie-Icons bleiben in dieser Runde unverändert. Vorhandene V2-Kandidaten werden nicht erneut gestaltet. Platzreserven dürfen keine erfundenen aktiven Controls zeigen; Text nicht für scheinbare Kompaktheit verkleinern. Spieltitel oben links und großer Zielerklärungsblock kehren nicht zurück.
+
+Tatsächliche Zieltreue des neuen Bilds wird erst nach dessen Sichtprüfung in [PRUEFUNG.md](PRUEFUNG.md) festgehalten. Keine nachträglichen Review-Häkchen, keine Runtime-Freigabe und kein Eingriff in Simulation, Inputs oder aktive Assets aus der Bildrevision ableiten.
+
+## Vorherige Rückmeldung: A4 mit Innenbeschriftung und drei Blöcken
+
+Der Nutzer möchte die Aktionsbuttons unten links noch etwas kompakter und näher zusammen. **Der Text gehört in die Buttons**, damit später Platz für eine zweite Reihe bleibt. Alpha/Bereit bildet den Header; Haltung und Feuerregel sollen darunter stehen, die gesamte Gruppe weiter links. „Ziel gewählt / Auftrag: Bewegen“ soll zwischen dem bisherigen ersten Aktionsblock und dem bisherigen zweiten Team-/Haltungsblock liegen.
+
+Die bereits im Chat mitgeteilte Layoutauslegung lautet **Aktionen → Ziel/Auftrag → Alpha + Haltung + Feuerregel** von links nach rechts. Das ist die praktische Interpretation der Ortsbeschreibung, keine neue Spielregel. Gegenüber A3 sind damit Außenlabels und bisherige Blockreihenfolge überholt; dessen bündige Randverankerung bleibt bestehen.
+
+### Gestaltungsbrief A4
+
+| Teil | Ziel | Herkunft |
+|---|---|---|
+| Aktionsbuttons | Kompaktere Quadrate, enger zusammen; Text im Button | Nutzerwunsch |
+| Größen-/Abstandsziel | Bildkörper um 60px, Abstand 4–6px | Assistentenvorschlag, keine exakten Nutzermaße |
+| Innenaufbau | Icon oben, kurzes lesbares Label darunter innerhalb des Quadrats | Gestalterische Ausarbeitung |
+| Plan ausführen | Fünftes Quadrat direkt nach Flankieren; Label bei Bedarf innen zweizeilig | Bestehende Reihenfolge, kompakte Ausarbeitung |
+| Ziel/Auftrag | Schmaler Mittelblock zwischen Aktionen und Teamgruppe | Nutzerwunsch, als Drei-Block-Auslegung konkretisiert |
+| Alpha-Gruppe | Header Alpha/Bereit; Haltung und Feuerregel darunter; kompakt nach links | Nutzerwunsch |
+| Zweite Reihe | Freie Reserve unter der ersten Aktionsreihe | Späterer Layoutspielraum, keine neuen aktiven Funktionen |
+
+Orientierung für die Bildvorlage: Ziel-/Auftragsblock ungefähr im Bereich x=344–530, danach dezente Trennlinie und Teamgruppe etwa x=545–920. Diese Bereiche sind Assistentenentwurf für die Vorlage, keine normativen Koordinaten für jede Auflösung. Rechts bleibt Platz; die Bandhöhe wird nicht vergrößert.
+
+Neuer Einzelkandidat: [mockup_a4_band_bloecke_kompakt.png](../../reports/assets/ui-2026-11-01/mockup_a4_band_bloecke_kompakt.png), aus A3. Welt, Teamkarten, Log und obere rechte Bereiche bleiben unverändert; Normal bleibt ausgewählt. Keine neue Iconrunde und keine Änderung der sechs aktuellen Galerie-Motive.
+
+Text nicht verkleinern, um die Kacheln künstlich zu verdichten. Keine aktive zweite Reihe, keine ausgegrauten Fantasiebefehle und keine zusätzliche Zielbestätigung einzeichnen. Der Mittelblock zeigt bereits vorhandenen Ziel-/Auftragskontext, während GO weiterhin den vorhandenen Plan ausführt.
+
+Die tatsächliche Darstellung wird im separaten Bildprüfbericht bewertet. Frühere Bilder und Feedback bleiben erhalten. Der erste JSON-Export wird nicht nachträglich umgeschrieben; keine Häkchen oder Runtime-Freigaben daraus ergänzen.
+
+## Neueste Erweiterung: A5 und Vorschläge für alle Menüs/Karten
+
+Der Nutzer erweitert denselben Konzeptauftrag ausdrücklich: kleinere Missionsbuttons, die **zwei echte Reihen** ermöglichen, und Bild-KI-Vorschläge für sämtliche vorhandenen Menüs, Detailansichten und kleinen Charakterkarten im etablierten Stil. Das Gesamtpaket soll im HTML sichtbar sein und erklären, warum die Anordnungen gewählt wurden.
+
+Die Bitte um Erklärungen des Bildgenerators wird als nachvollziehbare Gestaltungsabsicht plus spätere Interpretation des sichtbaren Ergebnisses erfüllt. Das Tool liefert keine auslesbaren internen Gedanken; solche werden nicht erfunden.
+
+### A5: bestehende Actions auf zwei Reihen verteilen
+
+- Reihe 1: Bewegen, Nehmen, Verteidigen, Flankieren, Plan ausführen.
+- Reihe 2: Ziel, Leeren, Löschen, Ordnen; fünfte Position leer, ohne Ghost-Control.
+- Diese neun Aktionen sind im aktuellen `mission_command_hierarchy_contract.gd:81–113` belegt. Ein Zukunfts-/Statusfeld wird nicht als neuer Befehl umgedeutet.
+- Assistentenziel für die 1672px-Bildvorlage: etwa 50–52px-Buttonkörper und 4px Abstand; beide Reihen in der bisherigen etwa 127px-Bandhöhe. Keine wörtlichen Nutzermaße und kein bereits gemessener Godot-Nachweis.
+- Lesbare Innenbeschriftung, Aktionen → Ziel/Auftrag → Alpha mit Haltung/Feuerregel darunter, bündige Randverankerung und übrige Bildbereiche bleiben erhalten. A4s nur freie Reserve ist für diesen Auftrag durch eine belegte zweite Reihe ersetzt.
+
+Neue Mission: [mockup_a5_mission_zweireihig.png](../../reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png). Daneben zehn Tafeln: Hauptmenü, Heimatbasis, FOB/Loadout, Charakterkarten mit lesendem Bogen, Detailkarten, Debrief, Lobby, Settings/Hilfe/Escape, Editor und ein eigener bearbeitbarer Teameditor. Dateizuordnung und ausführliche Begründungen stehen in [MENUES_UND_KARTEN.md](MENUES_UND_KARTEN.md).
+
+### Erneute Quellenprüfung vor den Menübildern
+
+Der aktuelle Loadout-Vertrag enthält SMG, Rifle, Sniper, Railgun, Rocket launcher und Medictool, sekundär beziehungsweise in FOB auch None. Die alte Beschreibung „nur SMG/Medictool“ wird korrigiert. Rifle ist als Sturmgewehr belegt; Scout Sniper und Combat Engineer sind vorhandene Startprofile. Eine separate Pistolenoption und zusätzliche Rollenaktionen sind dadurch nicht belegt.
+
+Kompaktkarte und lesender Bogen in Heimatbasis/FOB werden von den bearbeitbaren Budgets/Locks des Teameditors getrennt. Die Mission steuert weiterhin Fireteams, keine Einzel-NPCs über Portraits. Settings zeigt Eingaben als Übersicht ohne Rebinding; Audio-Contract und jeweils tatsächlich sichtbare Slider werden unterschieden. Escape „Weiter“ bedeutet Menü schließen, keine Pause.
+
+Die elf Tafeln sind neue Bildvorschläge, keine Umsetzung. Alte Bilder, sechs aktuelle Galerie-Icons, erster Review-Export und offene Checkboxen bleiben erhalten. Exakte neue Prompts stehen in [prompts_revision5.json](prompts_revision5.json); tatsächliche Bildabweichungen und Grenzen werden nach Erzeugung in [PRUEFUNG.md](PRUEFUNG.md) dokumentiert.

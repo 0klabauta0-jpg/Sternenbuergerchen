@@ -1,0 +1,124 @@
+async (page) => {
+  const checks = [], errors = [], external = [];
+  const base = 'http://127.0.0.1:8796/STERNENBUERGERCHEN_UI_FLOW_BILANZ_2026-11-08.html';
+  const qa = 'C:/Users/bjoer/.codex/worktrees/ui-flow-bilanz-20261108/SternenBuergerchen/docs/qa/ui_flow_bilanz_20261108/';
+  const ok = (name, value) => { if (!value) throw new Error(name); checks.push(name); };
+  page.on('pageerror', error => errors.push(String(error)));
+  page.on('request', request => { if (/^https?:/.test(request.url()) && !request.url().startsWith('http://127.0.0.1:8796/')) external.push(request.url()); });
+  await page.goto(base);
+  await page.evaluate(() => localStorage.removeItem('ui_flow_bilanz_20261108.notes.v1'));
+  await page.reload();
+  await page.setViewportSize({width:1440,height:1080});
+  await page.locator('#panel-overview img').first().waitFor({state:'visible'});
+  await page.locator('#panel-overview img').first().evaluate(im => im.decode());
+  ok('Seven accessible tabs', await page.locator('[role=tab]').count() === 7);
+  ok('Initial slice has not been tested', await page.locator('#testResult').inputValue() === 'ungetestet');
+  ok('No slice boxes prechecked', await page.locator('[data-slice-check]:checked').count() === 0);
+  ok('Local storage is opt-in', !(await page.locator('#rememberLocal').isChecked()));
+  ok('Desktop has no horizontal overflow', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+  await page.screenshot({path:qa+'overview_desktop.png'});
+  for (const id of ['overview','screens','flow','ideas','slice','feedback','sources']) {
+    await page.locator('#tab-'+id).click();
+    ok('Tab opens '+id, await page.locator('#panel-'+id).isVisible());
+    for (const select of await page.locator('#panel-'+id+' select:visible').all()) {
+      const values = await select.locator('option').evaluateAll(options => options.map(o => o.value));
+      const name = await select.getAttribute('data-export-key');
+      ok('Select has real alternatives '+name, values.length >= 2 && new Set(values).size === values.length);
+      const original = await select.inputValue();
+      await select.selectOption(values[values.length-1]);
+      ok('Select changes value '+name, await select.inputValue() === values[values.length-1]);
+      await select.selectOption(original);
+    }
+    const broken = await page.locator('#panel-'+id+' img[src]').evaluateAll(async images => {
+      images.forEach(im => { im.loading = 'eager'; });
+      await Promise.all(images.map(im => im.decode().catch(() => null)));
+      return images.filter(im => !im.naturalWidth).map(im => im.getAttribute('src'));
+    });
+    ok('Images load '+id, broken.length === 0);
+  }
+  await page.locator('#tab-screens').click();
+  ok('Ten screen comparisons', await page.locator('.screen-card').count() === 10);
+  await page.locator('#screenSearch').fill('Nachbesprechung');
+  ok('Screen search narrows results', await page.locator('.screen-card:visible').count() === 1);
+  await page.locator('#screenSearch').fill('');
+  await page.locator('#screenArea').selectOption({label:'Taktik'});
+  ok('Area filter selects mission', await page.locator('.screen-card:visible').count() === 1);
+  await page.locator('[data-image="mission_target"]').first().click();
+  ok('Image dialog opens', await page.locator('#imageDialog').isVisible());
+  ok('Dialog identifies source', (await page.locator('#dialogImageMeta').innerText()).includes('mockup_a5_mission_zweireihig.png'));
+  await page.keyboard.press('Escape');
+  ok('Escape closes dialog', !(await page.locator('#imageDialog').isVisible()));
+  await page.locator('[data-choice-group="screens.mission.decision"] [data-choice-value="nacharbeiten"]').click();
+  await page.locator('[data-export-key="screens.mission.note"]').fill('QA: Bildnähe prüfen – Größe & Übergang.');
+  await page.screenshot({path:qa+'screen_compare_desktop.png'});
+  await page.locator('#tab-flow').click();
+  await page.locator('[data-flow="repeat"]').click();
+  ok('Flow selection changes to second sortie', await page.locator('#flowState').inputValue() === 'repeat');
+  await page.locator('#tab-ideas').click();
+  await page.locator('#issueOrigin').selectOption({label:'Nutzer'});
+  ok('User issue filter', await page.locator('.issue:visible').count() === 10);
+  await page.locator('#issueSearch').fill('Gegner laufen');
+  ok('Issue search', await page.locator('.issue:visible').count() === 1);
+  await page.locator('#issueSearch').fill('');
+  await page.locator('#tab-slice').click();
+  await page.locator('[data-slice-check]').first().check();
+  await page.locator('#testDuration').fill('17');
+  await page.locator('#sliceObservation').fill('QA: kein echter Spieltest, nur Browserprüfung.');
+  await page.locator('#tab-feedback').click();
+  await page.locator('[data-note-key="user.problems"]').fill('QA: Eigener Befund mit Umlaut ä und Emoji 🚀.');
+  await page.locator('#userNext').fill('QA: Nächsten Slice normal spielen.');
+  await page.locator('#exportDetails > summary').click();
+  await page.locator('#showJsonButton').click();
+  const payload = JSON.parse(await page.locator('#jsonOutput').inputValue());
+  ok('Expected export schema', payload.schema === 'sternenbuergerchen.html_workbench.v1');
+  ok('Correct report id', payload.report_id === 'ui_flow_bilanz_20261108');
+  ok('Hidden screen decision exported', payload.active_choices.screens.mission.decision === 'nacharbeiten');
+  ok('Hidden comment exported', payload.controls.screens.mission.note.includes('Übergang'));
+  ok('Contenteditable and Unicode exported', payload.notes.user.problems.includes('🚀'));
+  ok('Number parameter and checklist exported', payload.controls.slice.parameters.minutes === 17 && payload.computed.slice_checked === 1);
+  ok('Flow selection exported', payload.controls.view.selected_flow === 'repeat');
+  ok('Source metadata exported', payload.metadata.sources.length === 34 && Object.keys(payload.metadata.images).length === 17);
+  const downloaded = page.waitForEvent('download');
+  await page.locator('#exportJsonButton').click();
+  const download = await downloaded;
+  await download.saveAs(qa+'browser_export.json');
+  ok('Actual JSON download', download.suggestedFilename().startsWith('ui_flow_bilanz_20261108_'));
+  const upload = async (name, body) => page.locator('#importJsonInput').setInputFiles({name,mimeType:'application/json',buffer:Buffer.from(body)});
+  await page.locator('#userNext').fill('QA: modified after export');
+  await upload('restore.json',JSON.stringify(payload));
+  await page.locator('#exportStatus.good').waitFor();
+  ok('Import restores text', await page.locator('#userNext').inputValue() === payload.controls.user.next_step);
+  await upload('wrong-report.json',JSON.stringify({...payload,report_id:'other-report'}));
+  await page.locator('#exportStatus.error').waitFor();
+  ok('Wrong report import rejected', (await page.locator('#exportStatus').innerText()).includes('anderen Report'));
+  ok('Rejected import preserves text', await page.locator('#userNext').inputValue() === payload.controls.user.next_step);
+  await upload('invalid.json','{broken');
+  await page.locator('#exportStatus.error').waitFor();
+  ok('Malformed JSON rejected', (await page.locator('#exportStatus').innerText()).includes('nicht übernommen'));
+  await page.locator('#rememberLocal').check();
+  await page.locator('#saveStatus').filter({hasText:'Lokal gespeichert'}).waitFor();
+  await page.reload();
+  ok('Opt-in persistence restores text', await page.locator('#userNext').inputValue() === payload.controls.user.next_step);
+  await page.locator('#exportDetails > summary').click();
+  await page.locator('#rememberLocal').uncheck();
+  await page.reload();
+  ok('Fresh report remains untested after QA', await page.locator('#testResult').inputValue() === 'ungetestet');
+  for (const id of ['overview','screens','flow','ideas','slice','feedback','sources']) {
+    await page.setViewportSize({width:390,height:844});
+    await page.locator('#tab-'+id).click();
+    ok('390px no page overflow '+id, await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    if (['overview','screens'].includes(id)) await page.screenshot({path:qa+id+'_390.png'});
+  }
+  await page.setViewportSize({width:1440,height:1080});
+  await page.locator('#tab-overview').click();
+  await page.locator('#tab-overview').focus();
+  await page.keyboard.press('ArrowRight');
+  ok('Keyboard tab navigation', await page.locator('#tab-screens').getAttribute('aria-selected') === 'true');
+  await page.locator('#tab-overview').click();
+  await page.evaluate(() => scrollTo(0,0));
+  ok('No uncaught JavaScript errors', errors.length === 0);
+  ok('No external HTTP dependencies', external.length === 0);
+  return {passed:checks.length,checks,errors,external,
+    browser_protocol:'HTTP on 127.0.0.1 for browser QA; file:// navigation blocked by tool policy and not tested',
+    no_game_test:true};
+}

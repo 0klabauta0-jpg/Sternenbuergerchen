@@ -1,0 +1,1210 @@
+{
+  "meta": {
+    "title": "SternenBuergerchen · Vom Zielbild zur spielbaren Runde",
+    "date": "08.11.2026",
+    "pin": "33bc504c4",
+    "source_repo": "C:\\dev\\SternenBuergerchen",
+    "report_branch": "task/ui-flow-bilanz-20261108",
+    "branch_base": "integration/core-foundation · 3cae5a216 · 31.08.2026",
+    "captured_at": ""
+  },
+  "images": {
+    "mission_main": {
+      "origin": "docs/qa/runtime_hitches_r4_finish_20261108/captures/main_smoke/06_go_movement.png",
+      "label": "Mission auf Main · normale Route",
+      "status": "Native Mainaufnahme · keine heutige neue Spielsitzung",
+      "date": "08.11.2026"
+    },
+    "homebase_main": {
+      "origin": "docs/qa/runtime_hitches_r4_finish_20261108/captures/finish_normal_b/20261108T134038Z-98193de7/normal_b_captures/02_homebase.png",
+      "label": "Heimatbasis · normale R4-Route B",
+      "status": "Native normale Route · 3440×1440",
+      "date": "08.11.2026"
+    },
+    "homebase_target": {
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_heimatbasis.png",
+      "label": "Heimatbasis · Original-2D-Ziel",
+      "status": "Generierter Entwurf · Beispielwerte",
+      "date": "01.11.2026"
+    },
+    "loadout_target": {
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_fob_loadout.png",
+      "label": "Ausrüstung / FOB · Original-2D-Ziel",
+      "status": "Generierter Entwurf · heutiger Arbeitsort Homebase Direct",
+      "date": "01.11.2026"
+    },
+    "mission_target": {
+      "origin": "docs/reports/assets/ui-2026-11-01/mockup_a5_mission_zweireihig.png",
+      "label": "Mission A5 · Original-2D-Ziel",
+      "status": "Generierter Entwurf · spätere Nutzerkorrekturen beachten",
+      "date": "01.11.2026"
+    },
+    "debrief_target": {
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_debrief.png",
+      "label": "Nachbesprechung · Original-2D-Ziel",
+      "status": "Generierter Entwurf · keine echten Resultate",
+      "date": "01.11.2026"
+    },
+    "debrief_old": {
+      "origin": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/debrief_portraits_1920x1080.png",
+      "label": "Debrief mit Personen · historische Fixture",
+      "status": "Native synthetische Fixture · kein abgeschlossener heutiger Einsatz",
+      "date": "02.11.2026"
+    },
+    "fob_old": {
+      "origin": "docs/qa/ui_zielbild_20261102/fixtures/20261102T162723_807177Z/captures/fob_populated_1920x1080.png",
+      "label": "FOB · historische belegte Fixture",
+      "status": "Native Fixture · historischer alternativer Arbeitsort",
+      "date": "02.11.2026"
+    },
+    "character_target": {
+      "origin": "docs/reports/assets/ui-2026-11-01/board_charakterkarten.png",
+      "label": "Charakterkarten · 2D-Zieltafel",
+      "status": "Generierter Entwurf · Beispielpersonen und -werte",
+      "date": "01.11.2026"
+    },
+    "character_old": {
+      "origin": "docs/qa/mission_a5_kartenrand_20261102/normal_start/20261102T191425_077481Z/1920x1080/startup_captures/05b_character_details.png",
+      "label": "Lesender Charakterbogen · historische normale Route",
+      "status": "Native Aufnahme · Portraitstand inzwischen erneuert",
+      "date": "02.11.2026"
+    },
+    "main_target": {
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_hauptmenue.png",
+      "label": "Hauptmenü · 2D-Konzept",
+      "status": "Generierter Entwurf · Hintergrund später ausdrücklich anders entschieden",
+      "date": "01.11.2026"
+    },
+    "main_native": {
+      "origin": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke_captures/01_main_menu.png",
+      "label": "Hauptmenü · R4-Main-Smoke",
+      "status": "Native normale Aufnahme · ursprüngliches Menübild absichtlich zurück",
+      "date": "08.11.2026"
+    },
+    "lobby_target": {
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_lobby.png",
+      "label": "Lobby · 2D-Ziel",
+      "status": "Generierter Entwurf · dargestellte Optionen keine Funktionsbelege",
+      "date": "01.11.2026"
+    },
+    "lobby_old": {
+      "origin": "docs/qa/ui_native_r2_20261101/captures/lobby_1920x1080.png",
+      "label": "Lobby · historische Fixture",
+      "status": "Native Fixture · kein aktueller Peer-/WAN-Nachweis",
+      "date": "01.11.2026"
+    },
+    "editor_target": {
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_editor.png",
+      "label": "Karteneditor · 2D-Ziel",
+      "status": "Generierter Entwurf · kein Auftrag zum Rasterwechsel",
+      "date": "01.11.2026"
+    },
+    "team_target": {
+      "origin": "docs/reports/assets/ui-2026-11-01/menu_teameditor.png",
+      "label": "Team-Editor · 2D-Ziel",
+      "status": "Generierter Entwurf · editierbarer Creator getrennt von Lesebogen",
+      "date": "01.11.2026"
+    },
+    "detail_target": {
+      "origin": "docs/reports/assets/ui-2026-11-01/board_detailkarten.png",
+      "label": "Detailkarten · 2D-Hierarchie",
+      "status": "Generierter Entwurf · keine zusätzliche Runtimefunktion",
+      "date": "01.11.2026"
+    }
+  },
+  "sources": [
+    {
+      "id": "brief",
+      "title": "Projektbrief: Kernziel und alte Core-Loop-Grenze",
+      "origin": "docs/PROJECT_BRIEF.md",
+      "lines": "16–36; alte Basis-/FOB-Aussage durch Operationsvertrag fortgeschrieben"
+    },
+    {
+      "id": "architecture",
+      "title": "Aktuelle Architektur und mission_tactical",
+      "origin": "docs/ARCHITECTURE.md",
+      "lines": "Grundsatz, Wahrheitsquellen und RuntimeLeader"
+    },
+    {
+      "id": "core_decisions",
+      "title": "Entscheidungen: historische UI-first-Basis",
+      "origin": "docs/DECISIONS.md",
+      "lines": "Bisher fest; Architektur-Entscheidungen"
+    },
+    {
+      "id": "status",
+      "title": "Statushistorie mit jüngster R4-Fortsetzung",
+      "origin": "docs/IMPLEMENTATION_STATUS.md",
+      "lines": "1–55; jüngste Fortsetzung vor älteren Checkpoints"
+    },
+    {
+      "id": "feedback",
+      "title": "Archiviertes Nutzerfeedback A → A5 und Iconurteile",
+      "origin": "docs/ui_concepts/ui_20261101/FEEDBACK_20261101.md",
+      "lines": "13–29 sowie Abschnitte A2/A3/A4/A5"
+    },
+    {
+      "id": "export_original",
+      "title": "Originaler Nutzerexport vom 01.11.",
+      "origin": "docs/ui_concepts/ui_20261101/review_export_20261101_154755.json",
+      "lines": "controls.review und controls.checks"
+    },
+    {
+      "id": "ui",
+      "title": "Native UI: Originalziele, Prioritäten und Screenverträge",
+      "origin": "docs/dev/ui_native_design_contract.md",
+      "lines": "Gestaltungsautorität, Mission, Debrief, Cutlass"
+    },
+    {
+      "id": "operations",
+      "title": "Heimatbasis Operations UX: jüngere Anweisung gewinnt",
+      "origin": "docs/dev/homebase_operations_ux_contract.md",
+      "lines": "3–20; begehbare Basis und Direct-Start"
+    },
+    {
+      "id": "direct",
+      "title": "Homebase Direct: Boarding, Transit, LZ und sichtbarer Kartenbesitz",
+      "origin": "docs/dev/homebase_direct_dropship_flow_contract.md",
+      "lines": "Homebase Direct, Mission Dropships, Per-Craft, Normalstart"
+    },
+    {
+      "id": "playtest_task",
+      "title": "Nutzerprobleme und Auftrag vom 05.11.",
+      "origin": "docs/tasks/PLAYTEST_2026_11_05_fullscreen_ux_visuals.md",
+      "lines": "Ziel, Umfang, Akzeptanz und Status"
+    },
+    {
+      "id": "playtest",
+      "title": "Vollbild-Spielpass: vorhandene Änderungen und Grenzen",
+      "origin": "docs/reports/PLAYTEST_2026-11-05.md",
+      "lines": "Portraits, Hauptmenü, Flug, Multiplayer und verbleibende Hitches"
+    },
+    {
+      "id": "r3",
+      "title": "Referenzpolish R3: Nutzerkorrekturen und verbleibender 2D-Abstand",
+      "origin": "docs/qa/reference_polish_r3_20261106/REPORT.md",
+      "lines": "Referenzvergleich; native Routen und Aussagegrenzen"
+    },
+    {
+      "id": "r4_checkpoint",
+      "title": "R4: Kampfvisuals, Sichtbefund und offene KI-Frage",
+      "origin": "docs/qa/runtime_hitches_r4_20261107/REPORT.md",
+      "lines": "Figuren-/Schussbelege; Sichtbefund; KI und Leistungsgrenzen"
+    },
+    {
+      "id": "r4",
+      "title": "R4-Fortsetzung 08.11.: Main, Messwerte und Fremdlast",
+      "origin": "docs/qa/runtime_hitches_r4_finish_20261108/REPORT.md",
+      "lines": "Zwei normale Vollbildläufe; Main-Smoke; keine isolierte Leistungsabnahme"
+    },
+    {
+      "id": "r5",
+      "title": "CPU-/HUD-R5: laufender separater Auftrag",
+      "origin": "docs/tasks/CPU_HUD_R5_2026_11_08.md",
+      "lines": "Ziel und Umfang, keine Abschlussbehauptung",
+      "mode": "working"
+    },
+    {
+      "id": "gdd",
+      "title": "Alt-GDD ist Inspiration und Migrationsquelle",
+      "origin": "docs/GDD_STATUS.md",
+      "lines": "Status, konkrete Konflikte und Arbeitsregel"
+    },
+    {
+      "id": "gm01",
+      "title": "GM01: 96×98 Hex und geschützte Authoringgrenzen",
+      "origin": "docs/dev/gm01_frontier_map_contract.md",
+      "lines": "Größe, Topologie und Authoringgrenzen"
+    },
+    {
+      "id": "commands",
+      "title": "Missionsbefehle: Planung, Annahme und Ausführung",
+      "origin": "docs/dev/mission_command_feedback_contract.md",
+      "lines": "Plan-/GO-/Feedbackvertrag"
+    },
+    {
+      "id": "behavior",
+      "title": "Fireteamverhalten: Auftrag, Haltung und Doctrine",
+      "origin": "docs/dev/fireteam_behavior_modes_contract.md",
+      "lines": "Move/Take/Engage/Defend und Ausführung"
+    },
+    {
+      "id": "runtime",
+      "title": "Autoritativer sichtbarer Mission-Tactical-Pfad",
+      "origin": "docs/dev/fireteam_runtime_execution_path_contract.md",
+      "lines": "Aktiver Ausführungspfad und Legacygrenze"
+    },
+    {
+      "id": "evac",
+      "title": "Zulässige Evakuierung und Missionsabbruch",
+      "origin": "docs/dev/mission_evacuation_abort_contract.md",
+      "lines": "LZ, ausgewählte Teams und Hostautorität"
+    },
+    {
+      "id": "sortie",
+      "title": "Second-Sortie-Lifecycle: Fix und Nachweisgrenzen",
+      "origin": "docs/tasks/BUGFIX_2026_11_04_a5_second_sortie.md",
+      "lines": "Ziel, Gates und Ergebnis"
+    },
+    {
+      "id": "roster",
+      "title": "Roster-Speichervertrag",
+      "origin": "docs/dev/player_roster_save_contract.md",
+      "lines": "Vorhandene Identitäten und explizite Erstellung"
+    },
+    {
+      "id": "meta_code",
+      "title": "MetaLayerFlow: Direct, Ergebnis und Folgeeinsatz",
+      "origin": "scripts/meta/meta_layer_flow.gd",
+      "lines": "3754–3774; 3981ff.; 4128ff.; 4298ff.; 5783ff."
+    },
+    {
+      "id": "presenter_code",
+      "title": "Homebase-Presenter: Controls und statische native Bühne",
+      "origin": "scripts/meta/homebase_operations_presenter.gd",
+      "lines": "359–391; 771–775; snapshot/request_operation"
+    },
+    {
+      "id": "debrief_code",
+      "title": "Debrief: FOB-Rückweg im Normalspiel verborgen",
+      "origin": "scripts/meta/debrief_screen.gd",
+      "lines": "54–64"
+    },
+    {
+      "id": "controller_code",
+      "title": "Missionscontroller: inaktive Phasen/Autoflanks und GO",
+      "origin": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "lines": "307; 386; 1532; 3611ff.; 3809; 3871ff."
+    },
+    {
+      "id": "icons_code",
+      "title": "Aktive Flank-/Dropship-V2-Icons",
+      "origin": "scripts/ui/native_ui_icons.gd",
+      "lines": "11–12"
+    },
+    {
+      "id": "r4_ui",
+      "title": "Native UI R4 vom 02.11.: historische Fixturegrenzen",
+      "origin": "docs/qa/ui_native_r4_20261102/README.md",
+      "lines": "Native Fixture versus normale Route; historische Restabstände"
+    },
+    {
+      "id": "workbench",
+      "title": "HTML-Workbench-Vertrag und Exportformat",
+      "origin": "docs/dev/html_report_workbench_contract.md",
+      "lines": "Pflichtbestandteile und JSON-Export"
+    },
+    {
+      "id": "graphics",
+      "title": "Grafikreferenzen, Bildstatus und native Vergleiche",
+      "origin": "docs/dev/graphics_reference_revision_contract.md",
+      "lines": "Referenzstatus, Nachweis und HTML-Vergleich"
+    },
+    {
+      "id": "air_threat",
+      "title": "Air Asset Threat/Damage: spätere begrenzte Scopeerweiterung",
+      "origin": "docs/dev/air_asset_threat_damage_contract.md",
+      "lines": "Scope, Statusmodell, Warnphase, Zielbarkeit und SimulationRoot-Effects"
+    },
+    {
+      "id": "homebase_code",
+      "title": "Homebase-Aktionen: Zuweisung und Loadout-Gates",
+      "origin": "scripts/meta/homebase_screen.gd",
+      "lines": "9124–9190; keine Rollenbearbeitung im Operationsrequest"
+    },
+    {
+      "id": "air_recovery",
+      "title": "Air-Asset-Verlust und Meta-Recovery",
+      "origin": "docs/dev/air_asset_loss_recovery_meta_loop.md",
+      "lines": "TASK_278: Recovery, Verfügbarkeit und Meta-Folgen"
+    }
+  ],
+  "screens": [
+    {
+      "id": "homebase",
+      "title": "Heimatbasis: Menschen → Trupp → Abflug",
+      "area": "Vorbereitung",
+      "state": "Teilweise angenähert",
+      "target": "homebase_target",
+      "native": "homebase_main",
+      "goal": "Personal, Trupp und Schiff bilden eine verständliche Vorbereitung. Personen sind wiedererkennbar; die Szene macht den Ort greifbar.",
+      "current": "Personal, Viererplätze, eine Fokusperson mit Ausrüstung und Flugdeck sind nativ vorhanden. Navigation und optionales Erkunden führen zu denselben Operationsfunktionen.",
+      "gap": "Die rechte Szene ist eine statische native Kulisse mit echter Schiffsvorschau. Inszenierung, Materialwirkung und Kulissendichte sind deutlich einfacher als im Original; eine animierte Boardingwelt ist hier nicht belegt.",
+      "workflow": "Person einem freien Trupp zuweisen → Fokusperson und drei Loadoutfelder → Pilot/Payload/Boarding prüfen → gültigen Start auslösen. Beschäftigte/gebordete Teams gegebenenfalls erst regulär zurückholen. Spätere Nutzeranweisung ersetzt den alten Pflichtweg über FOB.",
+      "sources": [
+        "operations",
+        "direct",
+        "r3",
+        "presenter_code"
+      ]
+    },
+    {
+      "id": "loadout",
+      "title": "Loadout: Die Arbeit ist in die Homebase gewandert",
+      "area": "Vorbereitung",
+      "state": "Workflow umgesetzt, Bildabstand offen",
+      "target": "loadout_target",
+      "native": "homebase_main",
+      "goal": "Eine erkennbare Person ausrüsten und die Wirkung auf den Trupp sowie die Abflugbereitschaft verstehen.",
+      "current": "Rüstung, Primär- und Sekundärwaffe sind direkt bei der Fokusperson erreichbar. Beschäftigte oder unterwegs befindliche Teams folgen bestehenden Sperren.",
+      "gap": "Die warme Hangarkomposition mit Figuren an der Rampe ist nicht als heutiger Runtimezustand umgesetzt. Ein fehlender separater FOB-Zwischenschritt ist dagegen beabsichtigt.",
+      "workflow": "Frei bearbeitbares, zugewiesenes Truppmitglied wählen → Ausrüstung ändern → bestätigte Auswahl wiederfinden → boarden → starten. Bildwerte und Beispielrollen erzeugen keine zusätzlichen Spielregeln.",
+      "sources": [
+        "operations",
+        "direct",
+        "ui",
+        "r3"
+      ]
+    },
+    {
+      "id": "mission",
+      "title": "Mission A5: Planen, ausführen, verstehen",
+      "area": "Taktik",
+      "state": "Struktur vorhanden, Szene deutlich einfacher",
+      "target": "mission_target",
+      "native": "mission_main",
+      "goal": "Teams links, zwei kompakte Aktionsreihen unten, klarer Auftrag und Transport oben rechts. Der Blick bleibt bei der taktischen Situation.",
+      "current": "Portraitteam, Haltung/Feuerregel links, zwei Aktionsreihen, Ziel/Auftrag, echte Cutlasskarte und Protokoll sind vorhanden. Konkrete laufende Order und Ausführung werden getrennt angezeigt.",
+      "gap": "Im nativen Spielbild wirken Figuren und Außenposten kleiner und die Sandflächen leerer. Dichte, Gebäudekonstruktion und szenische Nähe des Originals sind noch nicht erreicht. Die Verlagerung der Teamparameter nach links ist ausdrücklich gewollt.",
+      "workflow": "Team auswählen → Aktion und Ziel planen → GO → bestätigte Ausführung lesen → Kontakt beurteilen. GO pausiert nicht; laufender Auftrag braucht kein zweites GO.",
+      "sources": [
+        "ui",
+        "feedback",
+        "commands",
+        "r3",
+        "r4"
+      ]
+    },
+    {
+      "id": "debrief",
+      "title": "Nachbesprechung / Debrief: Vom Ergebnis zur nächsten Entscheidung",
+      "area": "Ergebnis",
+      "state": "Nur historischer Bildbeleg",
+      "target": "debrief_target",
+      "native": "debrief_old",
+      "goal": "Ergebnis, Personenfolgen und Entwicklung verständlich zusammenführen und zeigen, was für die nächste Runde bereit ist.",
+      "current": "Resultate, Personen, AAR, Entwicklung und Rückweg sind implementiert. Fehlende Werte bleiben unbekannt; der vollständige Rohbericht ist lesend zugänglich. Normaler Rückweg führt zur Homebase.",
+      "gap": "Das gezeigte native Bild ist eine Fixture vom 02.11. mit altem Portraitstand. Es beweist keinen heutigen vollständigen Einsatzabschluss. Die illustrative Timeline-/Inszenierungsnähe ist offen.",
+      "workflow": "Ergebnis prüfen → einsatzfähige Personen und Folgen verstehen → Homebase → Rückflug/Bereitschaft beachten → neue Sortie.",
+      "sources": [
+        "ui",
+        "debrief_code",
+        "meta_code",
+        "sortie",
+        "r4_ui"
+      ]
+    },
+    {
+      "id": "character",
+      "title": "Charakter: Identität lesen, Creator getrennt halten",
+      "area": "Personen",
+      "state": "Aktueller Detailvergleich fehlt",
+      "target": "character_target",
+      "native": "character_old",
+      "goal": "Personen wiedererkennen und Rolle, Zustand, Werte und Ausrüstung erfassen, ohne eine Datenwand durchzuarbeiten.",
+      "current": "Lesender Charakterbogen mit Werten, Traits, Rolle, Loadout und Recovery vorhanden. Aktuelle illustrierte Portraits sind im Homebasebild belegt; das Detailbild hier ist älter.",
+      "gap": "Der historische Dialog enthält dichte und teilweise englische Fachanzeigen. Ob genau diese Detaildarstellung heute ausreichend verdichtet ist, wurde nicht vollständig neu visuell geprüft.",
+      "workflow": "Portrait → lesende Details → zurück zur Teamebene. Editierbare Metriken gehören in den Creator; einzelne NPCs werden taktisch nicht direkt kommandiert.",
+      "sources": [
+        "ui",
+        "playtest",
+        "roster"
+      ]
+    },
+    {
+      "id": "main_menu",
+      "title": "Hauptmenü: Originalhintergrund absichtlich zurück",
+      "area": "Einstieg",
+      "state": "Spätere Entscheidung umgesetzt",
+      "target": "main_target",
+      "native": "main_native",
+      "goal": "Einstieg, vorhandene Teams und zusätzliche Werkzeuge übersichtlich anbieten.",
+      "current": "Normale Mainaufnahme zeigt die echte Startoberfläche. Das ursprüngliche Menübild wurde auf ausdrücklichen Wunsch wiederhergestellt.",
+      "gap": "Das Menü ist schlichter als das neuere Konzept. Der andere Hintergrund ist eine spätere bewusste Entscheidung und kein versehentlich vergessener Austausch.",
+      "workflow": "Vorhandenen Roster verwenden → Einzelspieler → handlungsfähige Homebase. Erstellen und Bibliothek sind Zusatzwege.",
+      "sources": [
+        "playtest_task",
+        "playtest",
+        "roster"
+      ]
+    },
+    {
+      "id": "fob",
+      "title": "FOB: Erhaltener alternativer Arbeitsort",
+      "area": "Kompatibilität",
+      "state": "Historische Fixture, kein Normalweg",
+      "target": "loadout_target",
+      "native": "fob_old",
+      "goal": "Ausrüstung und Transport an einem vorgelagerten Arbeitsort bündeln, sofern dieser Modus verwendet wird.",
+      "current": "Native historische Fixture zeigt Pool, Teams, Ausrüstung und Transport. Bestehende FOB-Kompatibilität wurde nicht gelöscht.",
+      "gap": "Formularlastiger als das Ziel; kein neuer visueller Beleg in der gesichteten aktuellen Route. Der alte Pflicht-FOB ist durch den Direct-Workflow überholt.",
+      "workflow": "Nur als alternativen/kompatiblen Modus beurteilen. Nicht als fehlenden obligatorischen Bildschirm im Normalstart bewerten.",
+      "sources": [
+        "direct",
+        "operations",
+        "r4_ui"
+      ]
+    },
+    {
+      "id": "lobby",
+      "title": "Lobby: Verbunden ist noch nicht startbereit",
+      "area": "Mehrspieler",
+      "state": "Historischer UI-Beleg, begrenzter Netztest",
+      "target": "lobby_target",
+      "native": "lobby_old",
+      "goal": "Host/Join, Teamwahl, Kartenannahme und Bereitschaft als klare Schritte zeigen.",
+      "current": "Die alte native Fixture belegt Host/Join und Setupoberfläche. Spätere echte lokale Zwei-Prozess-Tests reichen bis Mission, Drop und erste Commands.",
+      "gap": "Es fehlt ein aktueller vollständiger visueller Lobbyvergleich. LAN/WAN, fremde Kartenpayloads und Buildhandshake sind durch die lokalen Belege nicht vollständig abgedeckt.",
+      "workflow": "Verbinden → Setup/Karte akzeptieren → Ready → Host darf starten. Die im Konzept gezeichneteten Optionen sind keine automatischen Funktionsnachweise.",
+      "sources": [
+        "playtest",
+        "ui",
+        "r4"
+      ]
+    },
+    {
+      "id": "editor",
+      "title": "Editor: Vorlage vorhanden, aktueller Bildvergleich offen",
+      "area": "Werkzeuge",
+      "state": "Istbild fehlt",
+      "target": "editor_target",
+      "native": null,
+      "goal": "Werkzeug, Kategorie, Kartenbühne und Eigenschaften nachvollziehbar gliedern.",
+      "current": "Interner Runtime-Editor besteht. Die aktuelle GM01 nutzt 96×98 echte Hexfelder; ihr fester Frontier-Verbund besitzt absichtliche Authoringgrenzen.",
+      "gap": "In dieser Untersuchung wurde keine passende aktuelle native Editoransicht gesichtet. Deshalb kein Urteil über heutige visuelle Zielnähe.",
+      "workflow": "Interner Contentworkflow. Das quadratische Vorlagenraster ist kein Auftrag, die bestätigte Hexkarte zurückzubauen.",
+      "sources": [
+        "gm01",
+        "ui",
+        "gdd"
+      ]
+    },
+    {
+      "id": "creator",
+      "title": "Teameditor und Detailkarten: offene Vergleichslücke",
+      "area": "Werkzeuge",
+      "state": "Istbild fehlt",
+      "target": "team_target",
+      "native": null,
+      "goal": "Erstellen/Bearbeiten im Creator von schnellen Identitäts- und Statuskarten im Spiel unterscheiden.",
+      "current": "Bibliothek/Creator und lesende Personen-/Teamdetails sind als getrennte Wege vorgesehen und vorhanden. Kleine Karten dürfen echte Details öffnen.",
+      "gap": "Für den aktuellen Creator fehlt in dieser Sichtung ein direkter nativer Zielvergleich. Die Detailkartentafel bleibt zusätzliche Hierarchiereferenz.",
+      "workflow": "Nur im Creator editieren; im Spiel Auswahl und Detailzugang nutzen. Ein gezeichnetes Rollenicon schafft keinen neuen taktischen Befehl.",
+      "sources": [
+        "ui",
+        "roster",
+        "gdd"
+      ]
+    }
+  ],
+  "flow": [
+    {
+      "id": "start",
+      "title": "01 · Einsteigen",
+      "intent": "Mit bekannten Personen in die nächste Runde kommen.",
+      "input": "Einzelspieler mit vorhandenem Roster wählen; Erstellen nur bewusst verwenden.",
+      "feedback": "Heimatbasis ist handlungsfähig; keine still erzwungene Neuerstellung.",
+      "owner": "MainMenu / MetaLayerFlow / PlayerRoster",
+      "gate": "Vorhandenes Profil erhalten; Roster ist keine gemeinsame Multiplayerwahrheit.",
+      "state": "Code + datierte normale Route",
+      "image": "main_native",
+      "sources": [
+        "roster",
+        "direct"
+      ]
+    },
+    {
+      "id": "base",
+      "title": "02 · Basis & Orientierung",
+      "intent": "Den Ort und die vorbereitenden Arbeitsbereiche verstehen.",
+      "input": "Trupp & Ausrüstung, Personal oder Einsatz & Abflug öffnen. Optional Basis erkunden; dort WASD/Rechtsklick/E.",
+      "feedback": "Terminals und Navigation erreichen dieselben echten Operationsseiten. Wechsel zurück zur UI bleibt erreichbar.",
+      "owner": "ExplorableHomebase für lokalen Commander; bestehende Meta-Owner für Teams/Transport",
+      "gate": "Erkundungsinput nur im aktiven Basiszweig; die große Operationskulisse selbst ist statisch.",
+      "state": "Implementiert; Verständnisprüfung offen",
+      "image": "homebase_main",
+      "sources": [
+        "operations",
+        "presenter_code"
+      ]
+    },
+    {
+      "id": "team",
+      "title": "03 · Trupp & Ausrüstung",
+      "intent": "Personen erkennen und einen geeigneten Trupp vorbereiten.",
+      "input": "Rollen prüfen, Personen einem freien Trupp zuweisen und bei einem bereits zugewiesenen, frei bearbeitbaren Mitglied die drei Loadoutfelder ändern.",
+      "feedback": "Fokusportrait, echte Belegung, Loadout und vorhandene Sperrgründe. Keine erfundene vierte Person aus dem Mockup.",
+      "owner": "Meta-/Roster-/Loadout-Owner; Operationspresenter liest Snapshot und sendet Aktion",
+      "gate": "Beschäftigte/unterwegs befindliche Zuordnung nicht umschreiben; freie Trupps bleiben bearbeitbar.",
+      "state": "Code + normale Homebaseaufnahme",
+      "image": "homebase_main",
+      "sources": [
+        "operations",
+        "ui",
+        "homebase_code"
+      ]
+    },
+    {
+      "id": "flightdeck",
+      "title": "04 · Boarding & Start",
+      "intent": "Trupp und Schiff für einen gültigen Abflug zusammenbringen.",
+      "input": "Pilot, Payload, Kapazität und Boarding prüfen; bei Bedarf Team zuweisen; gültigen Missionsstart auslösen.",
+      "feedback": "Pilot, Boardfortschritt, Bereitschaft und Transit bleiben getrennte Zustände; verfügbare nächste Aktion sichtbar.",
+      "owner": "MetaLayerFlow / vorhandene Aircraft- und Payloaddaten",
+      "gate": "Kein globaler Lock für andere freie Schiffe; einziges zurückfliegendes Schiff blockiert erneuten Start.",
+      "state": "Implementiert; mehrere historische Gates",
+      "image": "homebase_main",
+      "sources": [
+        "direct",
+        "meta_code",
+        "sortie"
+      ]
+    },
+    {
+      "id": "lz",
+      "title": "05 · Anflug & Landung",
+      "intent": "Am gewählten taktischen Ort ins Spiel kommen.",
+      "input": "Schiff wählen → LZ → Approach → Landen/Drop → reguläres Entladen.",
+      "feedback": "Transit grau; aktive Map-Phasen bedienbar. Sichtbarer Reiseflug, Abstieg, Landung und Start; Teamkarte wechselt nach Deboarding auf den Boden.",
+      "owner": "Meta-/Aircraftflow → Mission-Tactical → SimulationRoot",
+      "gate": "LZ und Flugphase pro Craft; kein doppelter sichtbarer Teamkartenbesitzer.",
+      "state": "Normale Route + Flugbelege vorhanden",
+      "image": "mission_main",
+      "sources": [
+        "direct",
+        "playtest",
+        "meta_code"
+      ]
+    },
+    {
+      "id": "go",
+      "title": "06 · Auftrag & GO",
+      "intent": "Eine taktische Absicht in einen bestätigten Auftrag verwandeln.",
+      "input": "Bodentrupp wählen → Aktion/Ziel planen → Plan ausführen.",
+      "feedback": "Vorschau, vorbereitet, angenommen, laufend und abgelehnt unterscheiden; konkreten Auftrag getrennt vom Ausführungsstatus lesen.",
+      "owner": "Mission-Tactical-Resolver / UnitCommand / SimulationRoot",
+      "gate": "GO ist Ausführung, keine Pause. Fehlendes Team/Ziel oder noch nicht eingesetzte Units liefern einen Grund.",
+      "state": "Code + native Move/GO-Route",
+      "image": "mission_main",
+      "sources": [
+        "commands",
+        "runtime",
+        "controller_code"
+      ]
+    },
+    {
+      "id": "contact",
+      "title": "07 · Kontakt & Zielwirkung",
+      "intent": "Aus Sicht, Deckung und Auftrag eine wirksame Entscheidung treffen.",
+      "input": "Haltung/Feuerregel wählen; bewegen, bekämpfen, nehmen oder halten; Folgeauftrag geben.",
+      "feedback": "Echtes Feuer folgt Kontakt/LOS/Reichweite/Vitalzustand. Move wechselt Position, Take betrifft Kontrolle, Engage den Kampf, Defend das Sichern.",
+      "owner": "Taktische Resolver / Combat / SimulationRoot; Visuals zeigen reale Ereignisse",
+      "gate": "Keine unbekannten Feinde aus Konzeptbildern offenlegen; automatische Gegeninitiative der Gegner bleibt eigener Prüfpunkt.",
+      "state": "Technische Teilbelege; KI-Abnahme offen",
+      "image": "mission_main",
+      "sources": [
+        "behavior",
+        "runtime",
+        "r4_checkpoint"
+      ]
+    },
+    {
+      "id": "result",
+      "title": "08 · Ergebnis & Rückweg",
+      "intent": "Verstehen, was geschehen ist und was es für das Team bedeutet.",
+      "input": "Ziel regulär abschließen; alternativ zulässige LZ-Evakuierung. Ergebnis/AAR/Personen prüfen.",
+      "feedback": "Echte Resultate, Status, Recovery und Entwicklung; fehlende Angaben bleiben unbekannt. Normaler Rückweg zur Homebase.",
+      "owner": "Simulation/Result → MetaLayerFlow → lesender Debrief",
+      "gate": "Evac nur bei passenden Bodenteams im LZ-Radius und zulässiger Hostautorität. Keine erfundenen Werte.",
+      "state": "Code + historische Fixture; heutiger End-to-End-Beleg offen",
+      "image": "debrief_old",
+      "sources": [
+        "evac",
+        "ui",
+        "debrief_code",
+        "meta_code"
+      ]
+    },
+    {
+      "id": "repeat",
+      "title": "09 · Zweite Sortie",
+      "intent": "Die nächste Entscheidung aus der vorherigen Runde ableiten.",
+      "input": "Zur Homebase → Rückflug/Readiness abwarten → ggf. Ausrüstung ändern → neue LZ und neuer Auftrag.",
+      "feedback": "Alter taktischer Plan ist verworfen; echte Identität, Resultat, Ausrüstung und Transfer bleiben. Frischer Einsatz reagiert auf GO.",
+      "owner": "MetaLayerFlow und neuer Mission-Tactical-Lifecycle",
+      "gate": "Navigation darf Bereitschaftsgate nicht umgehen. Alter EXE-Test ersetzt keinen vollständigen aktuellen R4/R5-Durchlauf.",
+      "state": "Historischer Fix; aktuelle Gesamtprüfung vorgeschlagen",
+      "image": "homebase_main",
+      "sources": [
+        "sortie",
+        "direct",
+        "meta_code"
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "id": "hitches",
+      "title": "Verbleibende Ruckler und CPU-/HUD-Spitzen",
+      "origin": "Nutzer",
+      "status": "Offen",
+      "confidence": "Belegt",
+      "priority": "P1",
+      "detail": "Seit 05.11. wiederholt gemeldetes Hakeln und Move-/GO-Spitzen. Mehrere Teilursachen wurden behoben; das Gesamtgefühl ist noch nicht abgenommen.",
+      "now": "R4 ist integriert. Zwei 90-s-Serien vom 08.11. zeigen p99 151,579/158,233 ms und Max 194,886/199,881 ms unter autorisierter fremder GPU-Last. Diese Werte erlauben keine isolierte Produktleistungsbewertung. CPU-/HUD-R5 läuft separat.",
+      "next": "R5-Ergebnisse mit Quellenbindung abwarten und einen vergleichbaren normalen Durchlauf beurteilen; Funktionsparität, CPU-Teilkosten und Gesamtframezeit getrennt lesen.",
+      "sources": [
+        "playtest_task",
+        "r4",
+        "r5"
+      ]
+    },
+    {
+      "id": "ai",
+      "title": "Gegner laufen hin und her / greifen nicht sinnvoll an",
+      "origin": "Nutzer",
+      "status": "Offen",
+      "confidence": "Als offener Auftrag belegt",
+      "priority": "P1",
+      "detail": "Der Nutzer meldete unplausible Bewegung und fehlende Initiative erneut am 07.11.",
+      "now": "R4 behandelt Schuss-/Figurenvisuals; das Angriffsverhalten ist ausdrücklich ein eigener Folgepunkt. Ein korrekt sichtbarer Schuss löst keine taktische KI-Frage.",
+      "next": "Normalen ersten Kontakt verfolgen: Wahrnehmung, Zielwahl, Positionswechsel, Halt und Feuer zeitlich zuordnen. Danach erst Ursache und kleinsten Verhaltenseingriff festlegen.",
+      "sources": [
+        "r4_checkpoint",
+        "behavior"
+      ]
+    },
+    {
+      "id": "full_slice",
+      "title": "Heutiger vollständiger Weg bis zum zweiten Kontakt fehlt",
+      "origin": "Analyse",
+      "status": "Nachweis fehlt",
+      "confidence": "Evidenzlücke",
+      "priority": "P1",
+      "detail": "Viele gute Teilprüfungen liegen vor, aber ihre Kombination beweist nicht automatisch den aktuellen ganzen Loop.",
+      "now": "R4 belegt besonders Start, Drop, Move/GO und begrenzte Laufzeit. Der Second-Sortie-Fix hat eigene ältere Belege.",
+      "next": "Den vorgeschlagenen Slice auf einem einzigen gebundenen Stand normal bis Debrief und zweitem Einsatz prüfen.",
+      "sources": [
+        "r4",
+        "sortie"
+      ]
+    },
+    {
+      "id": "style",
+      "title": "UI und Welt noch deutlich schlichter als die 2D-Vorlagen",
+      "origin": "Nutzer",
+      "status": "Teilweise umgesetzt",
+      "confidence": "Bildvergleich",
+      "priority": "P1",
+      "detail": "Wiederholte Kritik an zu großer Entfernung zum Zielbild, Textlast, kleinen Figuren und schwacher Szenengewichtung.",
+      "now": "Neue Portraits, Operationsansicht, Kamera22, kompakte Aktionen und zusätzliche niedrige Props sind vorhanden. Materialwirkung, Gebäudeformen, dichte Komposition und Hangarinszenierung bleiben offene Abstände.",
+      "next": "Pro Screen den stärksten sichtbaren Abstand bewerten. Eine begrenzte nächste Runde aus dem Spielerziel ableiten und anschließend bei gleicher Kamera vergleichen.",
+      "sources": [
+        "ui",
+        "r3",
+        "playtest"
+      ]
+    },
+    {
+      "id": "flash",
+      "title": "Mündungsfeuer und Schussfeedback schwer erkennbar",
+      "origin": "Nutzer",
+      "status": "Korrigiert, Urteil offen",
+      "confidence": "Native Teilbelege",
+      "priority": "P2",
+      "detail": "Der Nutzer sah trotz früherer Umsetzung kein verlässlich lesbares Schussfeedback.",
+      "now": "R4 korrigiert reale Fire-Eventquelle, Waffenfront/Muzzleanker und Flash-/Iconprojektion. Echte native Schüsse sind belegt; persönliche Erkennbarkeit ist nicht bestätigt.",
+      "next": "Am normalen Spielabstand ohne Diagnosehilfe erkennen lassen, wer schießt und warum gegebenenfalls nicht.",
+      "sources": [
+        "r4_checkpoint",
+        "playtest_task"
+      ]
+    },
+    {
+      "id": "down",
+      "title": "Kapseln statt liegender Originalfiguren",
+      "origin": "Nutzer",
+      "status": "Korrigiert, Rest offen",
+      "confidence": "Native Teilbelege",
+      "priority": "P2",
+      "detail": "Pillen-/Kapselwirkung wurde nach älterer Korrektur erneut gemeldet.",
+      "now": "R4 beseitigt den verdeckenden Capsule-Core und zeigt menschliche sowie horizontal liegende Originalfiguren. Exakte Bodenauflage ist nicht belegt.",
+      "next": "Down/Bleedout/Heilbarkeit/Respawn bei normalem Spielabstand prüfen; Bodenauflage und Durchdringungen gesondert ansehen.",
+      "sources": [
+        "r4_checkpoint"
+      ]
+    },
+    {
+      "id": "visibility",
+      "title": "Vermutete zu kurze Sichtweite / nahe Gegner verschwinden",
+      "origin": "Nutzer",
+      "status": "Nicht reproduziert",
+      "confidence": "Ursache unbestätigt",
+      "priority": "P2",
+      "detail": "Die Wahrnehmung des Nutzers ist dokumentiert; eine bestimmte LOS-/Reichweitenursache ist damit noch nicht bewiesen.",
+      "now": "R4 reproduzierte den behaupteten Nah-Ausblendungsfehler nicht. Beobachtete Sichtwechsel passten zum bestehenden LOS-/Tile-Freigabepfad.",
+      "next": "Konkreten Standort, Blickrichtung, Entfernung und Zeitpunkt bei erneutem Auftreten sichern. Keine vorsorgliche Sichtweitenänderung daraus ableiten.",
+      "sources": [
+        "r4_checkpoint"
+      ]
+    },
+    {
+      "id": "boarding",
+      "title": "Ist die Abflugfolge ohne Entwicklerhilfe verständlich?",
+      "origin": "Analyse",
+      "status": "Zu prüfen",
+      "confidence": "UX-Hypothese",
+      "priority": "P2",
+      "detail": "Pilot, Payload, Boarding, Start, Transit, LZ, Landen und Deboarding sind mehrere legitime Zustände.",
+      "now": "Technische Gates und Rückmeldungen bestehen. Ein menschlicher Verständnisnachweis für die ganze Folge fehlt.",
+      "next": "Eine Person die nächste gültige Aktion benennen und die Runde ohne Hilfestellung starten lassen; Fehlwege beobachten.",
+      "sources": [
+        "direct",
+        "operations"
+      ]
+    },
+    {
+      "id": "go_clarity",
+      "title": "Geplant, laufend und abgeschlossen sofort unterscheiden",
+      "origin": "Analyse",
+      "status": "Zu prüfen",
+      "confidence": "UX-Hypothese",
+      "priority": "P2",
+      "detail": "Die UI kann korrekt sein und trotzdem dieselben Texte als unklare Zwischenzustände vermitteln.",
+      "now": "Konkrete Order und Ausführungsstatus wurden getrennt; GO bleibt eigener Schritt. Die laufende Simulation pausiert nicht.",
+      "next": "Vor GO und nach GO erklären lassen, was als Nächstes passiert und ob ein weiterer Klick nötig ist.",
+      "sources": [
+        "commands",
+        "r3",
+        "ui"
+      ]
+    },
+    {
+      "id": "icons",
+      "title": "Flankieren und Dropship: Bedeutungen wirklich erkannt?",
+      "origin": "Nutzer",
+      "status": "Integriert, Verständnis offen",
+      "confidence": "Export + Code",
+      "priority": "P2",
+      "detail": "Im originalen Nutzerexport waren beide Motive unklar.",
+      "now": "V2-Varianten stehen im aktiven NativeUIIcons-Code. Ein menschlicher Erkennungstest bei 24/32 px ist nicht belegt; die fünf alten Reviewhäkchen waren false.",
+      "next": "Motiv zusammen mit seinem realen Label in normaler Größe prüfen. Keine neue Iconrunde allein aus dem alten Urteil ableiten.",
+      "sources": [
+        "feedback",
+        "export_original",
+        "icons_code"
+      ]
+    },
+    {
+      "id": "debrief_gap",
+      "title": "Debrief und Folgeentscheidung neu visuell prüfen",
+      "origin": "Analyse",
+      "status": "Nachweis fehlt",
+      "confidence": "Historischer Bildstand",
+      "priority": "P2",
+      "detail": "Aktuelle Quellen beschreiben Resultat-/Progressionslogik; das greifbare Vergleichsbild stammt vom 02.11.",
+      "now": "Das historische Bild zeigt keine heutige Gesamtqualität und noch ältere Portraits.",
+      "next": "Frisches normales Ergebnis aufnehmen: Was ist erreicht, wer ist bereit, was ändere ich und wann startet die nächste Sortie?",
+      "sources": [
+        "ui",
+        "sortie",
+        "debrief_code"
+      ]
+    },
+    {
+      "id": "details",
+      "title": "Charakterbogen, Creator, Editor und Lobby neu vergleichen",
+      "origin": "Analyse",
+      "status": "Nachweis fehlt",
+      "confidence": "Unvollständige Sichtung",
+      "priority": "P2",
+      "detail": "Eigene 2D-Vorlagen existieren; neue aktuelle Bildpaare fehlen in dieser Bestandsaufnahme.",
+      "now": "Charakter-/Lobbybilder sind historisch. Für aktuellen Editor und Creator liegt hier kein passender nativer Bildbeleg vor.",
+      "next": "Gezielte echte Aufnahmen dieser Screens beschaffen und erst dann heutige Lesbarkeit/Stilnähe beurteilen.",
+      "sources": [
+        "ui",
+        "r4_ui",
+        "gm01"
+      ]
+    },
+    {
+      "id": "mp",
+      "title": "Mehrspieler auf mehreren Rechnern und außerhalb Loopback",
+      "origin": "Nutzer",
+      "status": "Teilweise nachgewiesen",
+      "confidence": "Begrenzte vorhandene Tests",
+      "priority": "P2",
+      "detail": "Der Nutzer wollte Multiplayer anschließend angehen und Grenzen konkret prüfen.",
+      "now": "Echte lokale Zwei-Prozess-Tests belegen Host/Join/Ready/Mission/Drop und erste Commands. LAN/WAN, fremder Kartenpayload und Buildhandshake sind damit nicht umfassend bewiesen.",
+      "next": "Einen eigenen Mehrrechnerpfad mit klarer Karte/Version/Netzkontext und Endbedingung abnehmen.",
+      "sources": [
+        "playtest",
+        "r4",
+        "ui"
+      ]
+    },
+    {
+      "id": "portraits",
+      "title": "Kohärente Portraits und Originalmenü wiederherstellen",
+      "origin": "Nutzer",
+      "status": "Umgesetzt, Urteil offen",
+      "confidence": "Task + native Bilder",
+      "priority": "P3",
+      "detail": "Neue zusammenhängende Vierer-Portraits und der ursprüngliche Menübackground wurden ausdrücklich verlangt.",
+      "now": "Integriert und im normalen Homebase-/Menübild sichtbar. Alte pauschale Pixelportraitkritik ist überholt; das historische Detailbild bleibt alt.",
+      "next": "Persönliche Beurteilung der Wiedererkennbarkeit und gewollten Stilwirkung in dieser Workbench festhalten.",
+      "sources": [
+        "playtest_task",
+        "playtest"
+      ]
+    },
+    {
+      "id": "flight",
+      "title": "Flug, Landung, Drohnen und ruhige Hexkanten",
+      "origin": "Nutzer",
+      "status": "Umgesetzt, Urteil offen",
+      "confidence": "Datierter nativer Pass",
+      "priority": "P3",
+      "detail": "Zu flacher Flug, fehlende Landung, statische Drohnen und gepunktete Fernkanten wurden gemeldet.",
+      "now": "Der Pass vom 05.11. dokumentiert Reise-/Abstiegs-/Landesequenz, sanfte Schubbewegung und ruhigere Kanten.",
+      "next": "In einem neuen normalen Slice mitbewerten; historische technische Korrektur getrennt vom heutigen Eindruck halten.",
+      "sources": [
+        "playtest_task",
+        "playtest"
+      ]
+    },
+    {
+      "id": "doc_drift",
+      "title": "Veraltete Kerntexte können alte Arbeitswege zurückbringen",
+      "origin": "Analyse",
+      "status": "Offen",
+      "confidence": "Dokumentvergleich",
+      "priority": "P2",
+      "detail": "Projektbrief/Decisions nennen weiterhin menügetriebene Basis und einen FOB-Core-Loop.",
+      "now": "Spätere ausdrückliche Nutzeranweisung und Operations-/Direct-Vertrag regeln den heutigen Weg anders. Dieser Report markiert die Drift, ändert die Produktverträge nicht still.",
+      "next": "In einem kleinen separaten Dokumentationsschritt Kerntexte auf die jüngeren bestätigten Verträge verweisen lassen.",
+      "sources": [
+        "brief",
+        "core_decisions",
+        "operations",
+        "direct"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d1",
+      "title": "A oder C?",
+      "state": "Aufgelöst",
+      "then": "Export zeigte zuletzt Vorschau C.",
+      "now": "Die Missionspräferenz war A. C galt dem Staging; preview.variant=c war nur der zuletzt angezeigte Entwurf.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "feedback"
+      ]
+    },
+    {
+      "id": "d2",
+      "title": "Rechtecke oder Quadrate?",
+      "state": "Überholt",
+      "then": "Ältere A2/A3/A4-Ausarbeitung.",
+      "now": "A2-Rechtecke wurden durch A3-Quadrate, A4-Innenbeschriftung und A5 mit zwei echten Reihen ersetzt.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "feedback"
+      ]
+    },
+    {
+      "id": "d3",
+      "title": "FOB als Pflichtstation?",
+      "state": "Aufgelöst",
+      "then": "Alter Core Loop führte über FOB.",
+      "now": "Die heutige normale Vorbereitung und der Missionsstart liegen direkt in der Heimatbasis. FOB bleibt Kompatibilität.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "direct"
+      ]
+    },
+    {
+      "id": "d4",
+      "title": "Basis nur Menü?",
+      "state": "Dokumentdrift",
+      "then": "Kerntexte schreiben UI-first/nicht begehbar.",
+      "now": "Die Nutzeranweisung vom 05.11. und der Operationsvertrag erlauben die echte begehbare Basis. Alte Kerntexte sind noch nicht durchgehend fortgeschrieben.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "operations"
+      ]
+    },
+    {
+      "id": "d5",
+      "title": "Wer setzt den Stil?",
+      "state": "Gültig",
+      "then": "Brücken- und native Zwischenbilder kamen später hinzu.",
+      "now": "Die letzten Original-2D-Ziele plus spätere Nutzerkorrekturen. Brückenbilder und native Zwischenstände ersetzen sie nicht.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "ui"
+      ]
+    },
+    {
+      "id": "d6",
+      "title": "Teamparameter unten oder links?",
+      "state": "Aufgelöst",
+      "then": "A5 zeigt Parameter im unteren Band.",
+      "now": "Spätere Anweisung: links unter den Portraitteamkarten. Die A5-Anordnung ist deshalb gezielt verändert.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "r3"
+      ]
+    },
+    {
+      "id": "d7",
+      "title": "Pixelportraits offen?",
+      "state": "Teilweise überholt",
+      "then": "Ältere Reviews bemängeln Pixelportraits.",
+      "now": "Neue zusammenhängende illustrierte Portraits sind seit 05.11. integriert; historische Dialogaufnahmen zeigen den alten Stand.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "playtest"
+      ]
+    },
+    {
+      "id": "d8",
+      "title": "Welches Dropship?",
+      "state": "Aufgelöst",
+      "then": "Konzept enthält illustratives Beispielschiff.",
+      "now": "Die echte aktive Ref03-Cutlass und ihr nativer Preview bleiben die Identität. Illustrative Beispielschiffe sind keine Ersatzfreigabe.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "ui"
+      ]
+    },
+    {
+      "id": "d9",
+      "title": "GO oder Echtzeitpause?",
+      "state": "Gültig",
+      "then": "Ausführen könnte als Pause missverstanden werden.",
+      "now": "GO bestätigt einen vorbereiteten Plan. Die Mission läuft ohne Pause; angenommene laufende Aufträge brauchen kein wiederholtes GO.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "feedback"
+      ]
+    },
+    {
+      "id": "d10",
+      "title": "Square8 oder Hex?",
+      "state": "Aufgelöst",
+      "then": "Alte Square8-Inhalte und historischer 32x32-Dateiname.",
+      "now": "GM01 ist ausdrücklich 96×98 Hex. Altinhalte ohne Topologiefeld bleiben square8. Ein historischer 32x32-Dateiname ändert keine Kartenfakten.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "architecture"
+      ]
+    },
+    {
+      "id": "d11",
+      "title": "R4 noch nicht auf Main?",
+      "state": "Überholt",
+      "then": "Älterer R4-Checkpoint sagt Main offen.",
+      "now": "Der ältere Checkpoint ist durch den Fortsetzungsbericht und die Mainquittung vom 08.11. überholt.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "r4"
+      ]
+    },
+    {
+      "id": "d12",
+      "title": "R5 schon fertig?",
+      "state": "Laufend",
+      "then": "Nach R4 wurde weitere Optimierung beauftragt.",
+      "now": "CPU-/HUD-R5 ist eine parallel laufende Aufgabe. Dieser Bericht verwendet deren Ergebnisse nicht als Abnahme.",
+      "reason": "Jüngere ausdrückliche Korrekturen und der jeweils besitzende aktuelle Vertrag haben Vorrang; datierte Historie bleibt erhalten.",
+      "sources": [
+        "r5"
+      ]
+    }
+  ],
+  "ideas": [
+    {
+      "id": "phases",
+      "title": "Phasenplanung und autonome Leader-Flanks",
+      "state": "Bewusst inaktiv",
+      "detail": "Die Controllerflags PHASE_PLANNING_ENABLED und AUTONOMOUS_LEADER_FLANKS_ENABLED stehen ausdrücklich auf false. Das ist kein Nachweis, dass eine fertige Funktion versehentlich verloren ging.",
+      "next": "Nur mit einer neuen konkreten Produktentscheidung reaktivieren; heutige manuelle Flankenaktionen nicht damit verwechseln.",
+      "sources": [
+        "controller_code",
+        "behavior"
+      ]
+    },
+    {
+      "id": "social",
+      "title": "Tiefe Sozialdynamik, große NPC-Zahlen und viele Weltraumebenen",
+      "state": "Langfristige Inspiration",
+      "detail": "Das alte DOCX enthält deutlich größere Visionen. GDD_STATUS macht es zur Inspirations-/Migrationsquelle, nicht zur aktuellen bindenden Implementierungsliste.",
+      "next": "Gewünschte Teile erst als kleine Markdownentscheidung und eigenen Task formulieren.",
+      "sources": [
+        "gdd",
+        "brief"
+      ]
+    },
+    {
+      "id": "websocket",
+      "title": "Node-/WebSocket-Server aus dem alten GDD",
+      "state": "Überholte Technikidee",
+      "detail": "Aktuell ist Godot High-Level Multiplayer mit ENet/Direct-IP vorgesehen. Ein alter Node-Server ist keine offene Umsetzungsschuld.",
+      "next": "Nur bei begründetem neuem Architekturentscheid neu bewerten.",
+      "sources": [
+        "gdd",
+        "core_decisions"
+      ]
+    },
+    {
+      "id": "full_fob",
+      "title": "FOB als obligatorische Zwischenstation",
+      "state": "Aus Normalweg entfernt",
+      "detail": "Die Funktionen bleiben kompatibel vorhanden; der spätere Nutzerwunsch verlangt zunächst den direkten Homebaseablauf.",
+      "next": "Nicht ungefragt wieder zum Hauptpfad machen. Ein künftiger FOB-Zweck braucht eine klare Spielerentscheidung.",
+      "sources": [
+        "direct",
+        "operations"
+      ]
+    },
+    {
+      "id": "ship_attack",
+      "title": "Dropship-Bedrohung, Schaden und Recovery",
+      "state": "Scope später begrenzt erweitert",
+      "detail": "Der alte Projektbrief schließt das Abschießen für V1 aus. Spätere TASK_277-/TASK_278-Verträge und der Controller enthalten aber einen begrenzten autoritativen Threat-/Damage-/Recovery-Pfad mit Warnung, Treffer und Verlust. Ein natürlicher automatischer Abschuss in der normalen GM01 ist durch diese Sichtung nicht belegt.",
+      "next": "Alte Scopegrenze mit späteren Verträgen abgleichen. Vorhandenen Hook und echte normale Gefährdung auseinanderhalten; weder pauschal als fehlend noch als vollständig spielerisch abgenommen führen.",
+      "sources": [
+        "brief",
+        "air_threat",
+        "controller_code",
+        "air_recovery"
+      ]
+    },
+    {
+      "id": "editor",
+      "title": "Freier Multi-Cell-Editor für den festen Frontier-Verbund",
+      "state": "Bewusste Authoringgrenze",
+      "detail": "GM01 besitzt einen festen 96×98-Hex-Verbund mit geschützten Layoutteilen. Das ist kein versehentlich verschwundener Bedienknopf.",
+      "next": "Falls freie Bearbeitung gewünscht wird, Format, Visual-/Gameplayfakten und Imports als eigenen Task spezifizieren.",
+      "sources": [
+        "gm01",
+        "architecture"
+      ]
+    },
+    {
+      "id": "details_goal",
+      "title": "Weniger Text bei weiterhin erreichbaren Details",
+      "state": "Weiter gültig",
+      "detail": "Verdichtung soll Planwerkzeuge, wichtige Sperrgründe und echte Charakterdaten erreichbar lassen. Der Nutzer verlangte keine Entfernung notwendiger Information.",
+      "next": "Häufige Entscheidung in den Hauptweg, längeren Kontext in erreichbare Details legen und den Rückweg prüfen.",
+      "sources": [
+        "feedback",
+        "ui",
+        "operations"
+      ]
+    },
+    {
+      "id": "vehicles",
+      "title": "Komplexe Fahrzeuge und echte Ballistik",
+      "state": "V1-Nichtziel im Projektbrief",
+      "detail": "Diese großen Systeme stehen im Projektbrief außerhalb des V1-Umfangs. Ein begrenzter Transport-Threat-Hook begründet weder Flugsimulation noch physische Ballistik.",
+      "next": "Nur nach ausdrücklicher neuer Designentscheidung als eigenen begrenzten Task aufnehmen.",
+      "sources": [
+        "brief",
+        "air_threat"
+      ]
+    }
+  ],
+  "slice": [
+    {
+      "id": "s1",
+      "title": "Start und Identität",
+      "action": "Mit isoliertem Testprofil normal über Einzelspieler in die Homebase; bestehende Personen wiedererkennen.",
+      "success": "Kein erzwungener neuer Roster; nächste gültige Aktion erkennbar."
+    },
+    {
+      "id": "s2",
+      "title": "Ausrüstung nachvollziehen",
+      "action": "Ein bereits zugewiesenes, frei bearbeitbares Truppmitglied fokussieren; gegebenenfalls regulär zurückholen. Ein Loadout ändern und im Trupp später wiederfinden.",
+      "success": "Bestätigter Wert konsistent; keine zweite UI-Wahrheit."
+    },
+    {
+      "id": "s3",
+      "title": "Basis optional erkunden",
+      "action": "Erkundung betreten, Terminal benutzen und zur Operationsansicht zurückkehren.",
+      "success": "Beide Wege führen zu denselben Daten; Eingabe bleibt beim sichtbaren Modus."
+    },
+    {
+      "id": "s4",
+      "title": "Boarding und Start",
+      "action": "Pilot/Payload prüfen, regulär boarden und direkt aus der Homebase starten.",
+      "success": "Readiness begründet; kein FOB-Zwang und keine Startabkürzung."
+    },
+    {
+      "id": "s5",
+      "title": "LZ, Landung und Teamkarten",
+      "action": "Regulären Transit, Anflug, Landung und Deboarding durchführen.",
+      "success": "Echte Flugphasen; Karte besitzt jedes Team genau einmal sichtbar."
+    },
+    {
+      "id": "s6",
+      "title": "Plan und Ausführung",
+      "action": "Move mit Ziel planen, Zustand vor GO lesen, dann GO auslösen und Ankunft verfolgen.",
+      "success": "Vor GO keine Ausführung; danach bestätigter Auftrag, kein wiederholtes GO nötig."
+    },
+    {
+      "id": "s7",
+      "title": "Erster echter Kontakt",
+      "action": "Kontakt regulär herstellen; Feuer, Haltung, Deckung und eine Take-/Engageentscheidung beobachten.",
+      "success": "Schussfeedback lesbar, unbekannte Feinde geschützt, KI-Verhalten nachvollziehbar dokumentiert."
+    },
+    {
+      "id": "s8",
+      "title": "Ergebnis und Rückkehr",
+      "action": "Ziel regulär erfüllen oder zulässig evakuieren; Debrief und Personenfolgen beurteilen.",
+      "success": "Resultat und fehlende Werte korrekt; nächste Vorbereitung verständlich."
+    },
+    {
+      "id": "s9",
+      "title": "Zweite Sortie",
+      "action": "Rückflug/Bereitschaft abwarten, erneut starten, neue LZ und frischen Auftrag wählen.",
+      "success": "Kein alter Plan/Lifecycleblocker; zweiter echter Kontakt erreichbar."
+    },
+    {
+      "id": "s10",
+      "title": "Spielgefühl getrennt bewerten",
+      "action": "Auf derselben Route Frametime-/Eingabeeindruck und Nähe zur 2D-Vorlage beurteilen.",
+      "success": "Funktionsdurchlauf, Leistung und persönliches Stilurteil separat dokumentiert."
+    }
+  ],
+  "chats": [
+    {
+      "title": "UI-Vorschläge und Icons erarbeiten",
+      "id": "01a19786-4aaf-7e82-a801-2bcb6244233e",
+      "coverage": "Lesbare relevante Nutzerturns 01.–02.11.; sehr großer älterer Turn über Chatwerkzeug nicht ladbar. Archivierter Export + FEEDBACK ergänzen die Lücke."
+    },
+    {
+      "title": "Review, Grafikpass und Integration",
+      "id": "01a1aa17-cccf-74f2-ad6e-4ea02e9ea001",
+      "coverage": "Kompletter über das Chatwerkzeug lesbarer Verlauf, insbesondere Nutzerkorrekturen 05.–08.11. und spätere Fortsetzungen alter Pausen."
+    },
+    {
+      "title": "Review-Fixes prüfen",
+      "id": "01a1a35c-224b-7102-8ad0-b011e2ca01d9",
+      "coverage": "Zehn jüngste gelesene Turns vom 03.–05.11.; datierte Integration und Second-Sortie-Nachweise. Ältere Turns bleiben außerhalb dieser Sichtung (Cursor rolloutOrdinal 276)."
+    },
+    {
+      "title": "Prüfe Performance und Architektur",
+      "id": "01a19dcb-e831-7653-b919-33271338343b",
+      "coverage": "Relevante Nutzerbeiträge zur früheren Review-/Performancearbeit; heutiger Status zusätzlich gegen owning Code/QA abgeglichen."
+    },
+    {
+      "title": "R4-GPU-Ruckler beheben",
+      "id": "01a1bb52-8e0f-7493-b820-d3bf6aaf00cc",
+      "coverage": "Nutzerbeiträge 08.11. zu erlaubter Fremdlast und neuem CPU-/HUD-R5-Auftrag. Laufende Ergebnisse sind ausgeschlossen."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "report_hash": true,
+  "verified_assets": 51,
+  "images": 17,
+  "sources": 34,
+  "screens": 10,
+  "flow_steps": 9,
+  "issues": 16,
+  "decisions": 12,
+  "ideas": 8,
+  "missing_references": 0,
+  "no_external_runtime_dependencies": true,
+  "no_new_game_tests": true,
+  "file_browser_check": "blocked by browser tool URL policy; not claimed"
+}

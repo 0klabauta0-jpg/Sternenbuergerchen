@@ -1,5 +1,22 @@
 # IMPLEMENTATION_STATUS
 
+### UI-/2D-/Game-Flow-Bilanz, 08.11.2026 — nur Dokumentation
+- Interaktive HTML-Workbench unter
+  `docs/reports/STERNENBUERGERCHEN_UI_FLOW_BILANZ_2026-11-08.html`:
+  zehn Screenbereiche, neun Flow-Schritte, Nutzer-/Analysebefunde,
+  Entscheidungschronik, Ideen/Scope und ungetesteter Slicevorschlag.
+- Bericht untersucht ausdrücklich den neueren Main-Pin `33bc504c4` und
+  datierte QA, obwohl dieser Dokumentationsbranch von der alten
+  `integration/core-foundation`-Basis `3cae5a216` ausgeht. Die nachfolgenden
+  historischen Statuseinträge sind dadurch nicht heutige Produktaussagen.
+- 17 Bilder und 34 Quellenkopien gehasht. 117 Browserchecks bestanden;
+  direkter file://-Aufruf durch Toolpolicy blockiert, Browserprüfung über
+  temporäre lokale Vorschau und lokale Pfad-/Hashprüfung getrennt belegt.
+- Keine Runtime-/Gameplay-/Originalassetänderung, keine Godottests, keine
+  Mainintegration. Laufender CPU-/HUD-R5-Auftrag bleibt außerhalb der Abnahme.
+- Task `docs/tasks/UI_FLOW_BILANZ_2026_11_08.md`, QA
+  `docs/qa/ui_flow_bilanz_20261108/README.md`.
+
 ### TASK_1201 - FOW Stability (P06, VERIFIED_NO_CODE)
 - Status: `VERIFIED_NO_CODE`; keine Runtime-, Test- oder Phaseninstrumentierungsaenderung. Basis/Mess-SHA `f657ad68860d9ccb9be7ebb1f85ec1a2bae29060`; Produktionsdiff gegen P05 `d319e3c...f657ad6` fuer `scripts data scenes project.godot` leer.
 - Umgebung: Godot 4.6.2 official, Ryzen 7 7800X3D, 64 GB, Windows 10 19045. 3-cold/5-warm: FoW p99 `[1653,1638,1679,1913,1909,1810,1863,1978]` usec, 8/8 PASS <=2000; Dynamic p99 2 usec in 8/8. Proxy p99 `[2921,3083,3089,3117,3117,3110,3153,3010]` usec.
