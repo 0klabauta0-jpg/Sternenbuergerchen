@@ -1,5 +1,18 @@
 # IMPLEMENTATION_STATUS
 
+### R4-Fortsetzung: GPU und Vollbild abgeschlossen, Integration folgt, 2026-11-08
+- Uncommitteten Diagnosestand erhalten und privat parser-/nativ geprueft:
+  GPU70/0,850 passende Pre/Post-Grenzen; Displayfacts167-254us bestaetigen
+  keine Ursache des alten359-ms-Peaks. Kein neuer spekulativer Produktpatch.
+- Frische Gesamtmatrix75/75, errors0; normale90-s-Laeufe je68/0.
+  P99=151.579/158.233ms, Max194.886/199.881ms, Sim/Wand0.997734/0.996363.
+- Nutzer waehlt Tests unter laufender Fremdlast (SteelDivision2/GPU100%);
+  keine isolierte Leistungs-/Ruckelfreiheitsabnahme. Native Sicht geprueft.
+- Neues Paket docs/qa/runtime_hitches_r4_finish_20261108/REPORT.md;
+  Altbelege, fremde WIP und Roster unveraendert. Main-Smoke/Remotequittung
+  wird nach Fast-forward separat im neuen Paket dokumentiert.
+
+
 ### R4: gepruefter Arbeitsstand, Main noch offen, 2026-11-08
 - Produktcode `14a7e9188` auf `task/runtime-hitches-r4-20261107`:
   begrenzte vierteilige HUD-Projektion, redundante LOS-/Lookup-/Presenterarbeit

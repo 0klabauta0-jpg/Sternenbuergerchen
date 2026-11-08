@@ -1,5 +1,12 @@
 # TASK_ROADMAP
 
+### R4-Fortsetzung 08.11.2026
+GPUdiagnose70/0, Gesamtmatrix75/75, zwei normale90-s-Vollbildlaeufe je68/0.
+Fortsetzung unter ausdruecklich gewaehlter Fremdlast; kein isolierter
+Leistungsnachweis. Mainintegration mit frischem Smoke ist der naechste Schritt.
+Details: docs/qa/runtime_hitches_r4_finish_20261108/REPORT.md.
+
+
 ## R4-Arbeitsstand, 2026-11-08 - Bericht und Code vor weiterer Messung
 - HUD-/Fog-/Lookupkorrekturen und lesbares Kampfgeschehen im Taskbranch
   `task/runtime-hitches-r4-20261107`, Produktcode `14a7e9188`,75/75 Gates gruen.

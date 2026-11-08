@@ -1,0 +1,24 @@
+{
+  "schema": "sternenbuergerchen.runtime_hitches_r4.preservation.v1",
+  "groups": {
+    "preserved_untracked": {
+      "count": 1415,
+      "baseline": "output/runtime_hitches_r4_20261107/preserved_untracked.json",
+      "baseline_sha256": "57ea94867070e046ff6ea3ce7a5d68c23f37db15a9396231391ec8c45aeb6cc0"
+    },
+    "preserved_rosters": {
+      "count": 502,
+      "baseline": "output/runtime_hitches_r4_20261107/preserved_rosters.json",
+      "baseline_sha256": "22bc1ecf4cf9ed45b0d04ba83afb98e1a87be0ea7754790f0237b6d1a7d8417e"
+    },
+    "actual_player_roster": {
+      "count": 1,
+      "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\local_player\\roster_v1.json",
+      "baseline_sha256": "29624ceee0b439f58023aea5840200669d95d01632fd929be0d9b7d50d9210d0"
+    }
+  },
+  "passed": true,
+  "errors": [],
+  "policy": "Compare only SHA256, size and mtime_ns. Never restore or delete.",
+  "scope": "Before packaging; successful final manifest additionally requires the post-packaging comparison."
+}

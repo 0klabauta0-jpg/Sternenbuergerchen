@@ -2,6 +2,10 @@ extends "res://scripts/tests/runtime_hitches_r4_20261107_native_capture.gd"
 ## Separate diagnostic instrumentation; never a fair unchanged FPS baseline.
 ## The inherited normal route, product, renderer quality and gameplay stay intact.
 
+const GPU_DISPLAY_FACT_CALL_LIMIT: int = 64
+var _gpu_display_fact_calls: Array[Dictionary] = []
+var _gpu_display_fact_calls_dropped: int = 0
+
 class GpuFrameProbe extends Node:
 	const MAX_ROWS: int = 16384
 	const MONITOR_NAMES: PackedStringArray = [
@@ -24,6 +28,11 @@ class GpuFrameProbe extends Node:
 	var _gpu_viewports: Array[Dictionary] = []
 	var _gpu_monitor_ids: Dictionary = {}
 	var _gpu_metadata: Dictionary = {}
+	var _gpu_pre_draw_usec: int = -1
+	var _gpu_pre_draw_frame: int = -1
+	var _gpu_pre_callback_count: int = 0
+	var _gpu_consumed_pre_sequence: int = 0
+	var _gpu_pre_probe_usec: int = 0
 
 
 	func start(root_viewport: Viewport, game_viewport: Viewport) -> void:
@@ -35,6 +44,7 @@ class GpuFrameProbe extends Node:
 			timing_methods_available = timing_methods_available and available
 		var native_renderer: bool = DisplayServer.get_name() != "headless"
 		var signal_available: bool = RenderingServer.has_signal("frame_post_draw")
+		var pre_signal_available: bool = RenderingServer.has_signal("frame_pre_draw")
 		_gpu_metadata = {
 			"observer_started_usec": Time.get_ticks_usec(),
 			"engine": Engine.get_version_info(),
@@ -44,6 +54,7 @@ class GpuFrameProbe extends Node:
 			"native_renderer": native_renderer,
 			"timing_methods": methods,
 			"frame_post_draw_available": signal_available,
+			"frame_pre_draw_available": pre_signal_available,
 			"frame_setup_cpu_available": RenderingServer.has_method("get_frame_setup_time_cpu"),
 			"monitor_availability": {},
 			"timer_request_before_inherited_warmup": true,
@@ -59,6 +70,8 @@ class GpuFrameProbe extends Node:
 		if not can_measure:
 			return
 		_gpu_running = true
+		if pre_signal_available:
+			RenderingServer.frame_pre_draw.connect(_on_frame_pre_draw)
 		RenderingServer.frame_post_draw.connect(_on_frame_post_draw)
 
 
@@ -102,14 +115,46 @@ class GpuFrameProbe extends Node:
 		return value if is_finite(value) and value >= 0.0 else null
 
 
+	func _on_frame_pre_draw() -> void:
+		if not _gpu_running:
+			return
+		var started_usec: int = Time.get_ticks_usec()
+		_gpu_pre_draw_usec = started_usec
+		_gpu_pre_draw_frame = Engine.get_process_frames()
+		_gpu_pre_callback_count += 1
+		_gpu_pre_probe_usec = Time.get_ticks_usec() - started_usec
+
+
 	func _on_frame_post_draw() -> void:
 		if not _gpu_running:
 			return
 		var started_usec: int = Time.get_ticks_usec()
+		var engine_frame: int = Engine.get_process_frames()
+		var pre_status: String = "unavailable_signal"
+		if bool(_gpu_metadata.get("frame_pre_draw_available", false)):
+			if _gpu_pre_callback_count == 0:
+				pre_status = "unavailable_no_pre"
+			elif _gpu_pre_callback_count <= _gpu_consumed_pre_sequence:
+				pre_status = "unavailable_consumed_pre"
+			elif _gpu_pre_draw_frame != engine_frame:
+				pre_status = "frame_mismatch"
+			elif _gpu_pre_draw_usec <= 0 or _gpu_pre_draw_usec > started_usec:
+				pre_status = "nonmonotonic_pre"
+			else:
+				pre_status = "matched"
+		var pre_matches: bool = pre_status == "matched"
+		_gpu_consumed_pre_sequence = _gpu_pre_callback_count
 		_gpu_callback_count += 1
 		var row: Dictionary = {
 			"observed_usec": started_usec,
-			"engine_frame": Engine.get_process_frames(),
+			"engine_frame": engine_frame,
+			"pre_draw_observed_usec": _gpu_pre_draw_usec if _gpu_pre_callback_count > 0 else null,
+			"pre_draw_engine_frame": _gpu_pre_draw_frame if _gpu_pre_callback_count > 0 else null,
+			"pre_draw_sequence": _gpu_pre_callback_count,
+			"pre_draw_matches_post_frame": pre_matches,
+			"pre_draw_status": pre_status,
+			"pre_to_post_usec": started_usec - _gpu_pre_draw_usec if pre_matches else null,
+			"pre_probe_usec": _gpu_pre_probe_usec if _gpu_pre_callback_count > 0 else null,
 			"viewports": {}, "monitors": {}, "frame_setup_cpu_ms": null,
 		}
 		for record in _gpu_viewports:
@@ -138,6 +183,8 @@ class GpuFrameProbe extends Node:
 
 	func stop() -> void:
 		_gpu_running = false
+		if RenderingServer.frame_pre_draw.is_connected(_on_frame_pre_draw):
+			RenderingServer.frame_pre_draw.disconnect(_on_frame_pre_draw)
 		if RenderingServer.frame_post_draw.is_connected(_on_frame_post_draw):
 			RenderingServer.frame_post_draw.disconnect(_on_frame_post_draw)
 		for record in _gpu_viewports:
@@ -167,6 +214,8 @@ class GpuFrameProbe extends Node:
 		var after_window: int = 0
 		var valid_window: bool = start_usec > 0 and duration_usec > 0
 		var end_usec: int = start_usec + duration_usec
+		var boundary_status_counts: Dictionary = {}
+		var matched_pre_outside_window: int = 0
 		var nonzero_seen: Dictionary = {"root_cpu": false, "root_gpu": false, "game_cpu": false, "game_gpu": false, "frame_setup_cpu": false}
 		for row in ordered:
 			var observed_usec: int = int(row["observed_usec"])
@@ -177,6 +226,14 @@ class GpuFrameProbe extends Node:
 				after_window += 1
 				continue
 			row["profile_elapsed_usec"] = observed_usec - start_usec
+			var pre_usec: Variant = row.get("pre_draw_observed_usec")
+			var pre_inside_window: bool = pre_usec != null and int(pre_usec) >= start_usec and int(pre_usec) <= end_usec
+			row["pre_draw_inside_window"] = pre_inside_window
+			row["pre_to_post_inside_window"] = bool(row.get("pre_draw_matches_post_frame", false)) and pre_inside_window
+			var pre_status: String = String(row.get("pre_draw_status", "unavailable"))
+			boundary_status_counts[pre_status] = int(boundary_status_counts.get(pre_status, 0)) + 1
+			if bool(row.get("pre_draw_matches_post_frame", false)) and not pre_inside_window:
+				matched_pre_outside_window += 1
 			window_rows.append(row)
 			for role in ["root", "game"]:
 				var sample: Dictionary = row["viewports"].get(role, {})
@@ -199,10 +256,50 @@ class GpuFrameProbe extends Node:
 			"window": {"start_usec": start_usec, "duration_usec": duration_usec, "end_usec": end_usec, "valid": valid_window, "exact": exact_window, "source": window_source, "filter": "start_usec <= observed_usec <= end_usec; warmup and later observations excluded"},
 			"capacity": {"row_limit": MAX_ROWS, "callbacks_observed": _gpu_callback_count, "retained_before_filter": ordered.size(), "overwritten_rows": _gpu_overwritten_rows, "window_may_be_truncated": _gpu_overwritten_rows > 0, "discarded_before_window": before_window, "discarded_after_window": after_window},
 			"window_row_count": window_rows.size(), "nonzero_seen_in_window": nonzero_seen,
+			"frame_boundaries": {"pre_callbacks_observed": _gpu_pre_callback_count, "status_counts_in_window": boundary_status_counts, "matched_pre_outside_window": matched_pre_outside_window, "pre_probe_unit": "microseconds", "post_probe_usec_excludes_separate_pre_probe": true, "pre_to_post_is_wall_interval_not_gpu_duration": true, "matching_engine_frame_is_not_a_guaranteed_gpu_frame_id": true},
 			"any_gpu_nonzero_seen_in_window": bool(nonzero_seen["root_gpu"]) or bool(nonzero_seen["game_gpu"]),
 			"rows": window_rows,
 			"scope": {"diagnostic_only": true, "fair_fps_baseline": false, "performance_gain_claim": false, "timing_unit": "milliseconds", "probe_unit": "microseconds", "viewport_values_are_last_frame_measurements": true, "observation_frame_is_not_a_guaranteed_gpu_frame_id": true, "root_and_game_values_may_overlap_do_not_sum": true, "cpu_render_time_excludes_script_cpu": true, "zero_is_not_proof_of_zero_gpu_work": true, "pipeline_monitors_are_counters_not_durations": true, "actor_writes": false, "authority_writes": false, "quality_changes": false, "forced_draw_or_readback": false},
 		}
+
+
+func _display_facts() -> Dictionary:
+	var started_frame: int = Engine.get_process_frames()
+	var started_usec: int = Time.get_ticks_usec()
+	var facts: Dictionary = super._display_facts()
+	var finished_usec: int = Time.get_ticks_usec()
+	var finished_frame: int = Engine.get_process_frames()
+	# The timer brackets only the real parent call. Recording and these frame
+	# lookups are diagnostic overhead, outside the measured display-facts body.
+	if _gpu_display_fact_calls.size() < GPU_DISPLAY_FACT_CALL_LIMIT:
+		_gpu_display_fact_calls.append({"started_usec": started_usec, "finished_usec": finished_usec, "duration_usec": finished_usec - started_usec, "engine_frame": started_frame, "finished_engine_frame": finished_frame})
+	else:
+		_gpu_display_fact_calls_dropped += 1
+	return facts
+
+
+func _gpu_build_display_fact_report(window: Dictionary) -> Dictionary:
+	var start_usec: int = int(window.get("start_usec", 0))
+	var end_usec: int = int(window.get("end_usec", 0))
+	var valid_window: bool = bool(window.get("valid", false)) and end_usec > start_usec
+	var rows: Array = []
+	var relation_counts: Dictionary = {}
+	for source in _gpu_display_fact_calls:
+		var row: Dictionary = source.duplicate()
+		var started_usec: int = int(row["started_usec"])
+		var finished_usec: int = int(row["finished_usec"])
+		var inside: bool = valid_window and started_usec >= start_usec and finished_usec <= end_usec
+		var overlaps: bool = valid_window and finished_usec > start_usec and started_usec < end_usec
+		var relation: String = "unavailable_window"
+		if valid_window:
+			relation = "inside" if inside else ("partial" if overlaps else "outside")
+		row["window_relation"] = relation
+		row["fully_inside_window"] = inside
+		row["partially_inside_window"] = overlaps and not inside
+		row["overlap_usec"] = maxi(0, mini(finished_usec, end_usec) - maxi(started_usec, start_usec)) if valid_window else null
+		rows.append(row)
+		relation_counts[relation] = int(relation_counts.get(relation, 0)) + 1
+	return {"row_limit": GPU_DISPLAY_FACT_CALL_LIMIT, "captured_calls": rows.size(), "dropped_calls": _gpu_display_fact_calls_dropped, "window_relation_counts": relation_counts, "rows": rows, "timed_scope": "super._display_facts only; frame lookups and recording excluded", "returns_parent_dictionary_unchanged": true, "caches_display_facts": false, "shadows_print": false, "measures_json_or_print_cost": false, "all_hitch_cause_claim": false}
 
 
 func _profile_normal_movement(view: Node) -> void:
@@ -223,6 +320,7 @@ func _profile_normal_movement(view: Node) -> void:
 		duration_usec = roundi(clampf(float(_argument("--profile-seconds", "90")), 5.0, 180.0) * 1000000.0)
 		window_source = "INEXACT argument duration fallback; inherited summary duration unavailable"
 	var evidence: Dictionary = probe.build_report(_profile_start_usec, duration_usec, exact_window, window_source)
+	evidence["display_facts_calls"] = _gpu_build_display_fact_report(Dictionary(evidence["window"]))
 	evidence["base_performance_path"] = Dictionary(_facts.get("fullscreen_performance", {})).get("path", "")
 	evidence["official_api_reference"] = "https://docs.godotengine.org/en/4.6/classes/class_renderingserver.html#class-renderingserver-method-viewport-get-measured-render-time-gpu"
 	probe.queue_free()
