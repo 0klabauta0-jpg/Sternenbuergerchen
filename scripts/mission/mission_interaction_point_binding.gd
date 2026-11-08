@@ -8,6 +8,16 @@ const TYPE_HOLD_ZONE: String = "hold_zone"
 const ALLOWED_TYPES: PackedStringArray = [TYPE_DOOR, TYPE_COMPUTER, TYPE_HOLD_ZONE]
 const ALLOWED_ORDERS: PackedStringArray = ["take", "hold", "defend", "operate", "breach"]
 
+# Only the parse of identical file contents is reusable. Runtime context and
+# map validation are always rebuilt below, and the file is still read each time.
+const SCENARIO_PARSE_TEXT_LIMIT: int = 1048576
+static var _scenario_parse_text: String = ""
+static var _scenario_parse_data: Dictionary = {}
+static var _scenario_parse_has_entry: bool = false
+static var _scenario_parse_retained_bytes: int = 0
+static var _scenario_parse_count: int = 0
+static var _scenario_parse_hit_count: int = 0
+
 const OBJECTIVE_TYPE_TO_INTERACTION_TYPE: Dictionary = {
 	"air_defense_shutdown": TYPE_HOLD_ZONE,
 	"computer_hold": TYPE_COMPUTER,
@@ -24,12 +34,42 @@ static func load_snapshot_from_file(path: String, terrain_map_data = null, runti
 	var scenario: Dictionary = {}
 	var normalized_path: String = path.strip_edges()
 	if not normalized_path.is_empty() and FileAccess.file_exists(normalized_path):
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(normalized_path))
+		var parsed: Variant = _parse_scenario_text(FileAccess.get_file_as_string(normalized_path))
 		if typeof(parsed) == TYPE_DICTIONARY:
 			scenario = Dictionary(parsed)
 	var snapshot: Dictionary = build_snapshot(scenario, terrain_map_data, runtime_context)
 	snapshot["source_path"] = normalized_path
 	return snapshot
+
+
+static func _parse_scenario_text(text: String) -> Variant:
+	if _scenario_parse_has_entry and text == _scenario_parse_text:
+		_scenario_parse_hit_count += 1
+		return _scenario_parse_data
+	_scenario_parse_count += 1
+	var parsed: Variant = JSON.parse_string(text)
+	# Never retain malformed/non-object input: repeated errors keep their former
+	# behavior. A single entry replaces the previous one; no path-keyed growth.
+	_scenario_parse_has_entry = false
+	_scenario_parse_text = ""
+	_scenario_parse_data = {}
+	_scenario_parse_retained_bytes = 0
+	if parsed is Dictionary and text.length() <= SCENARIO_PARSE_TEXT_LIMIT:
+		var bytes: int = text.to_utf8_buffer().size()
+		if bytes <= SCENARIO_PARSE_TEXT_LIMIT:
+			_scenario_parse_text = text
+			_scenario_parse_data = parsed
+			_scenario_parse_has_entry = true
+			_scenario_parse_retained_bytes = bytes
+	return parsed
+
+
+static func get_scenario_parse_cache_diagnostics() -> Dictionary:
+	return {"parse_count": _scenario_parse_count, "hit_count": _scenario_parse_hit_count,
+		"entry_count": 1 if _scenario_parse_has_entry else 0,
+		"retained_text_bytes": _scenario_parse_retained_bytes,
+		"text_limit_bytes": SCENARIO_PARSE_TEXT_LIMIT, "read_only": true,
+		"caches_runtime_snapshots": false, "skips_file_reads": false}
 
 
 static func build_snapshot(scenario: Dictionary, terrain_map_data = null, runtime_context: Dictionary = {}) -> Dictionary:

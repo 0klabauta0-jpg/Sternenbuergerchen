@@ -33,3 +33,8 @@ docs/qa/runtime_hitches_r4_20261107/** -text whitespace=blank-at-eol,blank-at-eo
 
 # R4 continuation keeps diagnostic, receipt and native capture bytes exact.
 docs/qa/runtime_hitches_r4_finish_20261108/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# CPU/HUD R5 evidence is hashed and retains original bytes.
+docs/qa/cpu_hud_r5_20261108/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+scripts/tests/cpu_hud_r5_20261108_* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/tasks/CPU_HUD_R5_2026_11_08.md -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

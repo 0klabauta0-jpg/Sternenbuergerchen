@@ -621,6 +621,7 @@ var _periodic_hud_last_request_external: bool = false
 var _fireteam_security_refresh_time_remaining: float = 0.0
 var _fireteam_security_visuals_pending: bool = false
 var _mission_visible_frame_timing_debug_enabled: bool = false
+var _process_review_identity: Dictionary = {}
 var _mission_visible_frame_timing_debug_snapshot: Dictionary = {}
 var _mission_ui_refresh_timing_debug_snapshot: Dictionary = {}
 var _command_commit_timing_debug_receipts: Array[Dictionary] = []
@@ -8362,6 +8363,15 @@ func _build_fireteam_status_text() -> String:
 	)
 	_selected_fireteam_player_decision_snapshot = player_decision.duplicate(true)
 	var player_decision_lines: PackedStringArray = PackedStringArray(player_decision.get("visible_lines", PackedStringArray()))
+	if not contact_fire_primary_line.is_empty():
+		var firefight_lines: PackedStringArray = PackedStringArray([
+			_compact_release_first_exchange_contact_fire_line(contact_fire_primary_line),
+		])
+		if not firefight_decision_line.is_empty():
+			firefight_lines.append(_compact_release_first_exchange_contact_fire_secondary_line(firefight_decision_line))
+		return "\n".join(firefight_lines)
+	if not player_decision_lines.is_empty():
+		return "\n".join(player_decision_lines)
 	var first_line: String = "%s%s | Karten %d | Wegpunkte %d | Gebiete %d | Stance %s | Ausfuehrung %s" % [
 		mode_text,
 		_get_fireteam_name(),
@@ -8378,15 +8388,6 @@ func _build_fireteam_status_text() -> String:
 		_build_selected_flank_display_text(),
 		drop_state_text,
 	]
-	if not contact_fire_primary_line.is_empty():
-		var firefight_lines: PackedStringArray = PackedStringArray([
-			_compact_release_first_exchange_contact_fire_line(contact_fire_primary_line),
-		])
-		if not firefight_decision_line.is_empty():
-			firefight_lines.append(_compact_release_first_exchange_contact_fire_secondary_line(firefight_decision_line))
-		return "\n".join(firefight_lines)
-	if not player_decision_lines.is_empty():
-		return "\n".join(player_decision_lines)
 	if not firefight_decision_line.is_empty():
 		if not loop_two_line.is_empty() and loop_two_line != firefight_decision_line:
 			if not combat_hud_line.is_empty():
@@ -12647,7 +12648,11 @@ func _build_review_session_team_label(team_id: String) -> String:
 
 
 func _get_review_session_identity_snapshot() -> Dictionary:
-	return build_review_session_identity_snapshot().duplicate(true)
+	# OS user arguments are immutable for this process. This is startup config,
+	# not mission/team authority; get_local_command_team_id still reads peers live.
+	if _process_review_identity.is_empty():
+		_process_review_identity = build_review_session_identity_snapshot()
+	return _process_review_identity.duplicate(true)
 
 
 func build_station_scenario_identity_body_snapshot(route_readout: Dictionary = {}, args: Array = [], station_route_cue: Dictionary = {}) -> Dictionary:

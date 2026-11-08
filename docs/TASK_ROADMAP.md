@@ -1,5 +1,12 @@
 # TASK_ROADMAP
 
+### CPU/HUD R5 08.11.2026
+Drei belegte Aufbereitungsredundanzen behoben;83/83 Gates und zweimal
+normal90s je68/0. Primaere HUD-P95 40.494 ->33.098/33.945ms unter
+unverringerter Qualitaet/Gameplay. Main-Smoke/Push folgen; Fremdlast begrenzt
+Gesamtleistungsannahmen. docs/qa/cpu_hud_r5_20261108/REPORT.md.
+
+
 ### R4-Fortsetzung 08.11.2026
 GPUdiagnose70/0, Gesamtmatrix75/75, zwei normale90-s-Vollbildlaeufe je68/0.
 Fortsetzung unter ausdruecklich gewaehlter Fremdlast; kein isolierter

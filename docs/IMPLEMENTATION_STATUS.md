@@ -1,5 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### CPU/HUD R5: geprueft, Mainintegration folgt, 2026-11-08
+- Wiederholtes Bootargumentparsen, verworfene Status-Fallbackformatierung und
+  erneutes JSONparsen identischer Szenariobytes reduziert. Runtime-/Mapdaten
+  bleiben frisch; Datei weiter je Abfrage gelesen,1Eintrag/1MiB Textcache.
+- RED/GREEN35/0,20/0,28/0; aktuelle Gesamtmatrix83/83, errors0.
+- Normale90-s-Nachlaeufe je68/0; primaere HUD-P95 von40.494ms auf
+  33.098/33.945ms, Max46.373 auf38.089/38.831ms. Gesamtframe-P99
+  109.544 auf89.123/96.916ms, Spitzen bis169.312ms bleiben.
+- Gleiche Qualitaet/11 Units/7MoveGO/1x; Fremdlast autorisiert, kein isolierter
+  FPS-/Ruckelfreiheitsnachweis. Unabhaengiges Sourcereview ohne Blocker.
+- Neues Paket docs/qa/cpu_hud_r5_20261108/REPORT.md. Mainintegration,
+  frischer privater Main-Smoke und Remotequittung sind der naechste Schritt.
+
+
 ### R4-Fortsetzung: auf Main integriert und gepusht, 2026-11-08
 - Uncommitteten Diagnosestand erhalten und privat parser-/nativ geprueft:
   GPU70/0,850 passende Pre/Post-Grenzen; Displayfacts167-254us bestaetigen

@@ -70,6 +70,22 @@ bisherigen synchronen Fullpfad, Sceneexit/detached meldet keine neuen Jobs an.
 Externe Manager-Phasentimings sind keine Controller-_process-Walltime und
 werden in der nativen Diagnose getrennt gefuehrt.
 
+Die Review-Identitaet aus unveraenderlichen OS-Startargumenten wird pro
+Controllerleben einmal gelesen und defensiv kopiert. Explizite Argumente
+bleiben separat auswertbar. Das ist Prozesskonfiguration; eine bestehende
+Live-Peer-/Teamzuordnung wird weiterhin vorrangig live gelesen.
+
+Kompakte Contact-/Playerdecision-Ausgaben bauen keine verworfenen ausfuehrlichen
+Fallbackzeilen. Der Playerdecision-Snapshot wird davor weiterhin frisch
+publiziert; der ausfuehrliche Pfad behaelt seine urspruenglichen Quellen.
+
+MissionInteractionPointBinding darf den JSONparse genau eines identischen
+Szenariotextes bis1MiB UTF-8 wiederverwenden. Jede Abfrage liest weiterhin die
+Datei und projiziert aktuelle Runtime-/Marker-/Mapdaten neu. Fertige Bindings
+oder Runtime-Snapshots werden nicht gespeichert; Textwechsel gleicher Laenge
+oder gleicher Dateizeit werden anhand des vollstaendigen Inhalts erkannt.
+Uebergrosse oder Nicht-Objekt-Eingaben werden nicht im Parsecache gehalten.
+
 Die Live-Commandmatrix fuehrt ihre bestehenden Anzeige-Contracts einmal
 vorwaerts mit den bereits vorhandenen RAW-Texten aus. Sie liest dafuer keine
 anderen Panels rueckwaerts neu. Leere Inputs bleiben leer und blockiert. Alte
