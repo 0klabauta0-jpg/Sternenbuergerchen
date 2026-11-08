@@ -1,0 +1,560 @@
+{
+  "checks": [
+    {
+      "name": "hud_architecture_20261106_style_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_style_verifier.gd",
+      "success_marker": "HUD_STYLE_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_homebase_flightdeck_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_homebase_flightdeck_verifier.gd",
+      "success_marker": "HUD_HOMEBASE_FLIGHTDECK_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_read_scope_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_read_scope_verifier.gd",
+      "success_marker": "HUD_READ_SCOPE_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_live_projection_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_live_projection_verifier.gd",
+      "success_marker": "HUD_LIVE_PROJECTION_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_door_runtime_authority_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_door_runtime_authority_verifier.gd",
+      "success_marker": "HUD_DOOR_RUNTIME_AUTHORITY_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_active_order_readout_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_active_order_readout_verifier.gd",
+      "success_marker": "HUD_ACTIVE_ORDER_READOUT_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_hidden_cards_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_hidden_cards_verifier.gd",
+      "success_marker": "HUD_HIDDEN_CARDS_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "hud_architecture_20261106_native_style_verifier",
+      "script": "res://scripts/tests/hud_architecture_20261106_native_style_verifier.gd",
+      "success_marker": "HUD_NATIVE_STYLE_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "continue_20261105_command_hud_batch_verifier",
+      "script": "res://scripts/tests/continue_20261105_command_hud_batch_verifier.gd",
+      "success_marker": "COMMAND_HUD_BATCH_ALL_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "task_1044_mission_hud_runtime_surface_guard",
+      "script": "res://scripts/tests/task_1044_mission_hud_runtime_surface_guard.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 170
+    },
+    {
+      "name": "playtest_20261105_homebase_operations_verifier",
+      "script": "res://scripts/tests/playtest_20261105_homebase_operations_verifier.gd",
+      "success_marker": "HOMEBASE_OPERATIONS_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "task_111_verifier",
+      "script": "res://scripts/tests/task_111_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_113_verifier",
+      "script": "res://scripts/tests/task_113_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_230_flight_altitude_layer_and_air_visibility_audit",
+      "script": "res://scripts/tests/task_230_flight_altitude_layer_and_air_visibility_audit.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_401_facing_sightline_debug_map",
+      "script": "res://scripts/tests/task_401_facing_sightline_debug_map.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_436_fireteam_sight_security_visuals",
+      "script": "res://scripts/tests/task_436_fireteam_sight_security_visuals.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_468_fireteam_engage_live_command_conflict_audit",
+      "script": "res://scripts/tests/task_468_fireteam_engage_live_command_conflict_audit.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "bugfix_mission_fire_sector_overlay",
+      "script": "res://scripts/tests/bugfix_mission_fire_sector_overlay.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_374_objective_countdown_indicator",
+      "script": "res://scripts/tests/task_374_objective_countdown_indicator.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_518_mission_scenario_runtime_gates",
+      "script": "res://scripts/tests/task_518_mission_scenario_runtime_gates.gd",
+      "success_marker": "TASK_518: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_692_door_runtime_collision_los_contract",
+      "script": "res://scripts/tests/task_692_door_runtime_collision_los_contract.gd",
+      "success_marker": "TASK_692: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_693_door_runtime_state_producer",
+      "script": "res://scripts/tests/task_693_door_runtime_state_producer.gd",
+      "success_marker": "TASK_693: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_687_mission_interaction_object_reaction",
+      "script": "res://scripts/tests/task_687_mission_interaction_object_reaction.gd",
+      "success_marker": "TASK_687: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_696_door_runtime_visual_animation_asset_swap",
+      "script": "res://scripts/tests/task_696_door_runtime_visual_animation_asset_swap.gd",
+      "success_marker": "TASK_696: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_697_door_interaction_multiplayer_authority_check",
+      "script": "res://scripts/tests/task_697_door_interaction_multiplayer_authority_check.gd",
+      "success_marker": "TASK_697: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_707_mission_door_computer_cargo_smoke",
+      "script": "res://scripts/tests/task_707_mission_door_computer_cargo_smoke.gd",
+      "success_marker": "TASK_707: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "gm01_frontier_map_edge_verifier",
+      "script": "res://scripts/tests/gm01_frontier_map_edge_verifier.gd",
+      "success_marker": "GM01_FRONTIER_MAP_EDGE_ALL_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "gm01_frontier_hex_fow_verifier",
+      "script": "res://scripts/tests/gm01_frontier_hex_fow_verifier.gd",
+      "success_marker": "GM01_HEX_FOW_ALL_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "gm01_frontier_editor_guard_verifier",
+      "script": "res://scripts/tests/gm01_frontier_editor_guard_verifier.gd",
+      "success_marker": "GM01_FRONTIER_EDITOR_GUARD_ALL_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "review2_20261102_p2_editor_picking_verifier",
+      "script": "res://scripts/tests/review2_20261102_p2_editor_picking_verifier.gd",
+      "success_marker": "REVIEW2_P2_EDITOR_PICKING_PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "reference_polish_r3_20261106_theme_idempotency_verifier",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_theme_idempotency_verifier.gd",
+      "success_marker": "R3_THEME_IDEMPOTENCY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "reference_polish_r3_20261106_fog_single_slice_verifier",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_fog_single_slice_verifier.gd",
+      "success_marker": "R3_FOG_SINGLE_SLICE_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "reference_polish_r3_20261106_native_labels_verifier",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_native_labels_verifier.gd",
+      "success_marker": "R3_NATIVE_LABELS_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "reference_polish_r3_20261106_controller_ownership_verifier",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_controller_ownership_verifier.gd",
+      "success_marker": "R3_CONTROLLER_OWNERSHIP_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "reference_polish_r3_20261106_camera_verifier",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_camera_verifier.gd",
+      "success_marker": "R3_REFERENCE_CAMERA_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "reference_polish_r3_20261106_mission_ui_verifier",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_mission_ui_verifier.gd",
+      "success_marker": "REFERENCE_POLISH_R3_MISSION_UI_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "reference_polish_r3_20261106_homebase_verifier",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_homebase_verifier.gd",
+      "success_marker": "REFERENCE_POLISH_R3_HOMEBASE_VERIFY_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "reference_polish_r3_20261106_world_dressing_verifier",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_world_dressing_verifier.gd",
+      "success_marker": "REFERENCE_R3_WORLD_DRESSING_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "reference_polish_r3_20261106_strategic_loop_verifier",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_strategic_loop_verifier.gd",
+      "success_marker": "R3_STRATEGIC_LOOP_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "reference_polish_r3_20261106_command_style_owner_verifier",
+      "script": "res://scripts/tests/reference_polish_r3_20261106_command_style_owner_verifier.gd",
+      "success_marker": "R3_COMMAND_STYLE_OWNER_PASS",
+      "timeout": 170
+    },
+    {
+      "name": "task_174_character_helmet_blaster_attachment_verifier",
+      "script": "res://scripts/tests/task_174_character_helmet_blaster_attachment_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_175_npc_loadout_attachment_verifier",
+      "script": "res://scripts/tests/task_175_npc_loadout_attachment_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_344_ground_mission_default_enemy_visuals",
+      "script": "res://scripts/tests/task_344_ground_mission_default_enemy_visuals.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_403_runtime_animation_combat_cases",
+      "script": "res://scripts/tests/task_403_runtime_animation_combat_cases.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_225_fog_of_war_2_5d_visual_overlay_and_contacts",
+      "script": "res://scripts/tests/task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_246_visual_scale_alignment_asset_pass_verifier",
+      "script": "res://scripts/tests/task_246_visual_scale_alignment_asset_pass_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_205_weapon_fire_vfx_muzzle_flash_particles",
+      "script": "res://scripts/tests/task_205_weapon_fire_vfx_muzzle_flash_particles.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_474_fireteam_down_vfx_performance_stabilization",
+      "script": "res://scripts/tests/task_474_fireteam_down_vfx_performance_stabilization.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "playtest_20261105_npc_combat_feedback_verifier",
+      "script": "res://scripts/tests/playtest_20261105_npc_combat_feedback_verifier.gd",
+      "success_marker": "=== NPC COMBAT FEEDBACK:",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_command_projection_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_command_projection_verifier.gd",
+      "success_marker": "R4_COMMAND_PROJECTION_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_fog_los_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_fog_los_verifier.gd",
+      "success_marker": "R4_FOG_LOS_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_fog_projection_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_fog_projection_verifier.gd",
+      "success_marker": "R4_FOG_PROJECTION_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_hostile_model_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_hostile_model_verifier.gd",
+      "success_marker": "R4_HOSTILE_MODEL_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_muzzle_admission_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_muzzle_admission_verifier.gd",
+      "success_marker": "R4_MUZZLE_ADMISSION_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_muzzle_anchor_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_muzzle_anchor_verifier.gd",
+      "success_marker": "R4_MUZZLE_ANCHOR_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_muzzle_context_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_muzzle_context_verifier.gd",
+      "success_marker": "R4_MUZZLE_CONTEXT_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_muzzle_lifetime_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_muzzle_lifetime_verifier.gd",
+      "success_marker": "R4_MUZZLE_LIFETIME_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_muzzle_sort_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_muzzle_sort_verifier.gd",
+      "success_marker": "R4_MUZZLE_SORT_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_muzzle_source_order_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_muzzle_source_order_verifier.gd",
+      "success_marker": "R4_MUZZLE_SOURCE_ORDER_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_native_card_chain_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_native_card_chain_verifier.gd",
+      "success_marker": "R4_NATIVE_CARD_CHAIN_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_native_card_projection_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_native_card_projection_verifier.gd",
+      "success_marker": "R4_NATIVE_CARD_PROJECTION_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_native_craft_chain_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_native_craft_chain_verifier.gd",
+      "success_marker": "R4_NATIVE_CRAFT_CHAIN_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "task_1189_fow_dirty_region_fanout",
+      "script": "res://scripts/tests/task_1189_fow_dirty_region_fanout.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 180
+    },
+    {
+      "name": "task_224_fog_of_war_tile_visibility_height_cover_runtime",
+      "script": "res://scripts/tests/task_224_fog_of_war_tile_visibility_height_cover_runtime.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_pose_stability_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_pose_stability_verifier.gd",
+      "success_marker": "R4_POSE_STABILITY_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "task_402_npc_animation_showcase_map",
+      "script": "res://scripts/tests/task_402_npc_animation_showcase_map.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_strategic_source_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_strategic_source_verifier.gd",
+      "success_marker": "R4_STRATEGIC_SOURCE_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_periodic_hud_queue_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_periodic_hud_queue_verifier.gd",
+      "success_marker": "R4_PERIODIC_HUD_QUEUE_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_fire_pose_feed_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_fire_pose_feed_verifier.gd",
+      "success_marker": "R4_FIRE_POSE_FEED_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "task_409_terrain_registry_lookup_hpa_audit",
+      "script": "res://scripts/tests/task_409_terrain_registry_lookup_hpa_audit.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_125_verifier",
+      "script": "res://scripts/tests/task_125_verifier.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_475_fireteam_pathfinding_avoidance_stability_pass",
+      "script": "res://scripts/tests/task_475_fireteam_pathfinding_avoidance_stability_pass.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_501_integrated_movement_command_lifecycle_hardening",
+      "script": "res://scripts/tests/task_501_integrated_movement_command_lifecycle_hardening.gd",
+      "success_marker": "TASK_501: ALL PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "task_423_normal_move_parallel_spacing",
+      "script": "res://scripts/tests/task_423_normal_move_parallel_spacing.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 180
+    },
+    {
+      "name": "runtime_hitches_r4_20261107_nearest_walkable_verifier",
+      "script": "res://scripts/tests/runtime_hitches_r4_20261107_nearest_walkable_verifier.gd",
+      "success_marker": "R4_NEAREST_WALKABLE_PASS",
+      "timeout": 180
+    },
+    {
+      "name": "cpu_hud_r5_20261108_identity_verifier",
+      "script": "res://scripts/tests/cpu_hud_r5_20261108_identity_verifier.gd",
+      "success_marker": "R5_IDENTITY_DONE",
+      "timeout": 170
+    },
+    {
+      "name": "cpu_hud_r5_20261108_status_verifier",
+      "script": "res://scripts/tests/cpu_hud_r5_20261108_status_verifier.gd",
+      "success_marker": "R5_STATUS_DONE",
+      "timeout": 170
+    },
+    {
+      "name": "cpu_hud_r5_20261108_scenario_parse_verifier",
+      "script": "res://scripts/tests/cpu_hud_r5_20261108_scenario_parse_verifier.gd",
+      "success_marker": "R5_SCENARIO_PARSE_DONE",
+      "timeout": 170
+    },
+    {
+      "name": "task_674_mission_interaction_point_bindings",
+      "script": "res://scripts/tests/task_674_mission_interaction_point_bindings.gd",
+      "success_marker": "TASK_674: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_680_mission_interaction_binding_inspector",
+      "script": "res://scripts/tests/task_680_mission_interaction_binding_inspector.gd",
+      "success_marker": "TASK_680: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_681_mission_interaction_binding_editor",
+      "script": "res://scripts/tests/task_681_mission_interaction_binding_editor.gd",
+      "success_marker": "TASK_681: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_682_mission_interaction_binding_presets",
+      "script": "res://scripts/tests/task_682_mission_interaction_binding_presets.gd",
+      "success_marker": "TASK_682: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_517_mission_scenario_vertical_slice",
+      "script": "res://scripts/tests/task_517_mission_scenario_vertical_slice.gd",
+      "success_marker": "TASK_517: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "cpu_hud_r6_20261108_use_state_default",
+      "script": "res://scripts/tests/cpu_hud_r6_20261108_use_state_verifier.gd",
+      "success_marker": "R6_USE_STATE_DONE",
+      "timeout": 170,
+      "args": []
+    },
+    {
+      "name": "cpu_hud_r6_20261108_use_state_frontier",
+      "script": "res://scripts/tests/cpu_hud_r6_20261108_use_state_verifier.gd",
+      "success_marker": "R6_USE_STATE_DONE",
+      "timeout": 170,
+      "args": [
+        "--r6-frontier-fixture"
+      ]
+    },
+    {
+      "name": "task_675_mission_interaction_runtime_use_state",
+      "script": "res://scripts/tests/task_675_mission_interaction_runtime_use_state.gd",
+      "success_marker": "TASK_675: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_676_mission_interaction_use_feedback",
+      "script": "res://scripts/tests/task_676_mission_interaction_use_feedback.gd",
+      "success_marker": "TASK_676: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_677_mission_interaction_use_intent",
+      "script": "res://scripts/tests/task_677_mission_interaction_use_intent.gd",
+      "success_marker": "TASK_677: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_678_mission_interaction_runtime_progress",
+      "script": "res://scripts/tests/task_678_mission_interaction_runtime_progress.gd",
+      "success_marker": "TASK_678: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_685_mission_interaction_objective_gate",
+      "script": "res://scripts/tests/task_685_mission_interaction_objective_gate.gd",
+      "success_marker": "TASK_685: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "task_686_mission_interaction_visual_state",
+      "script": "res://scripts/tests/task_686_mission_interaction_visual_state.gd",
+      "success_marker": "TASK_686: ALL PASSED",
+      "timeout": 170
+    },
+    {
+      "name": "cpu_hud_r7_20261108_los_verifier",
+      "script": "res://scripts/tests/cpu_hud_r7_20261108_los_verifier.gd",
+      "success_marker": "R7_LOS_DONE",
+      "timeout": 170
+    }
+  ]
+}

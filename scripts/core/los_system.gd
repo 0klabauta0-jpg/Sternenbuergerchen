@@ -13,13 +13,13 @@ func has_line_of_sight_between_points(
 	max_range: float = DEFAULT_MAX_RANGE,
 	terrain_registry = null
 ) -> bool:
+	# The terrain entry owns the same range guard. Delegate before computing it
+	# here so admitted terrain queries do not repeat the identical calculation.
+	if terrain_registry != null:
+		return has_line_of_sight_with_terrain(source_position, target_position, terrain_registry, max_range)
 	if max_range >= 0.0 and _range_distance(source_position, target_position, terrain_registry) > max_range:
 		return false
-
-	if terrain_registry == null:
-		return true
-
-	return has_line_of_sight_with_terrain(source_position, target_position, terrain_registry, max_range)
+	return true
 
 
 func has_line_of_sight_to_position(

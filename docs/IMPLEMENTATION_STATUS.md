@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### CPU/Fog R7: geprueft, Mainintegration folgt, 2026-11-08
+- Doppelte Reichweitenrechnung im Punkt-/Terrain-LOS-Pfad entfernt. Voller
+  Terrainguard bleibt, Nullregistry lokal geprueft; kein Cache/Qualitaetsabbau.
+- RED30/2 ->GREEN32/0, erweitert48/0; Gesamtmatrix92/92 errors0,
+  unabhaengiger Review. 2560Hexqueries:5120->2560 Rangechecks,
+  begrenzter Komponentenpaarlauf66.444->59.394ms, kein nativer FPSbeweis.
+- Normale90-s-Laeufe je68/0: Baseline91.517ms Max, R7 167.322/179.189ms;
+  unveraenderter Main-Kontrolllauf181.623ms. Kein gesamter Leistungsgewinn
+  oder feste196-ms-Grenze unter variabler autorisierter Fremdlast.
+- Paket docs/qa/cpu_hud_r7_20261108/REPORT.md. Main-Smoke/Push folgen.
+
+
 ### CPU/HUD R6: auf Main integriert und gepusht, 2026-11-08
 - Use-State-Lesekette teilt frische Projektionen nur im vorhandenen synchronen
   ReadModel-Pass:7/27 Kontextaufbauten proLight/Full auf1; keine neue Runtime-

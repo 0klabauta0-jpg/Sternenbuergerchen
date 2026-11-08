@@ -1,5 +1,12 @@
 # TASK_ROADMAP
 
+### CPU/Fog R7 08.11.2026
+Doppelte LOS-Reichweitenrechnung entfernt,92/92 Gates und zwei90-s-
+Vollbildnachlaeufe je68/0. Ganze Frames weiter lang; Mainkontrolle181.623ms
+auch ohne R7, keine Gesamtleistungsfreigabe. Main-Smoke/Push folgen.
+docs/qa/cpu_hud_r7_20261108/REPORT.md.
+
+
 ### CPU/HUD R6 08.11.2026
 Use-State-Kontextaufbauten7/27 ->1 je synchronem HUDpass;91/91 Gates und
 zwei normale90-s-Nachlaeufe je68/0. Primaere HUD-P95 niedriger, gesamte

@@ -62,3 +62,13 @@ Nur aktuell sichtbare Tiles sind `visible`. Bereits betretene oder beobachtete T
 
 ## Grenzen
 Dieser Task baut noch keine 2.5D-Overlay-Visualisierung und keine neue Stealth-Balance. TASK_224 setzt Tile-Sicht, Hoehenlinien, Deckung und LOS konkret um; TASK_225 visualisiert die Modi.
+
+## LOS-Reichweitenpruefung R7, 08.11.2026
+Punktabfragen mit TerrainRegistry delegieren an den vorhandenen vollstaendig
+geschuetzten Terrain-LOS-Einstieg. Dieser prueft die unveraenderte Distanz und
+Reichweitengrenze einmal vor jeder Traversierung. Ohne Registry prueft der
+Punkt-Einstieg weiter selbst. Direkte Terrainabfragen bleiben vollstaendig
+geschuetzt; negative Reichweite bleibt unbegrenzt. Es entsteht kein Cache.
+Hex-/Square-Metrik, Occlusion, Runtime-Tuerblocker, Sichtweite, Fogbudget,
+Kandidatenfolge und atomare Full-/Dirty-Veröffentlichung bleiben erhalten.
+Der separate Fog-Reichweitenguard vor dem LOS-Aufruf bleibt bestehen.
