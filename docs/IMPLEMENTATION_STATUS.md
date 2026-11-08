@@ -172,7 +172,7 @@
   17.308/54.207/111.590/391.848 ms. Verbleibende Move-/GO-Klickspitzen
   sind dokumentiert; keine allgemeine Fluessigkeitsfreigabe.
 - Bericht `docs/reports/PLAYTEST_2026-11-05.md`, QA-Index
-  `docs/qa/playtest_20261105/README.md`. Main per geprÃ¼ftem Fast-forward auf `4abd830ba`;
+  `docs/qa/playtest_20261105/README.md`. Main per geprüftem Fast-forward auf `4abd830ba`;
   frischer nativer Main-Smoke 86/86, Fehler/Warnungen 0, 1846 Quellpins gleich. Gestalterische Nutzerabnahme offen.
 
 ### REVIEW8 - Code, Bedienung und Hallengrafik, 2026-11-05
@@ -197,33 +197,33 @@
   stimmen, vier reine Text-EOL-Normalisierungen. Danach nur Doku/Evidence.
   Keine allgemeine FPS-/EXE-/Release- oder gestalterische Nutzerabnahme.
 
-### A5 â€“ Zweiter Einsatz nach Debrief, 2026-11-04
-- Der Einzelspieler-MetaÃ¼bergang verwirft den taktischen Plan der
-  abgeschlossenen Mission. Der zweite Einsatz erhÃ¤lt einen neuen Plan
+### A5 – Zweiter Einsatz nach Debrief, 2026-11-04
+- Der Einzelspieler-Metaübergang verwirft den taktischen Plan der
+  abgeschlossenen Mission. Der zweite Einsatz erhält einen neuen Plan
   und den aktuellen Trupp aus der Heimatbasis.
-- Die RÃ¼ckfluganzeige und Startfreigabe folgen dem laufenden Transfer.
-  Reparatur, Roster und Debrief behalten ihre ZustÃ¤ndigkeiten.
-- Akzeptanz und isolierte PrÃ¼fschritte in
+- Die Rückfluganzeige und Startfreigabe folgen dem laufenden Transfer.
+  Reparatur, Roster und Debrief behalten ihre Zuständigkeiten.
+- Akzeptanz und isolierte Prüfschritte in
   docs/tasks/BUGFIX_2026_11_04_a5_second_sortie.md.
 
-### Drei Ã¤ltere Gates auf Main, 2026-11-04
+### Drei ältere Gates auf Main, 2026-11-04
 - TASK839 bewertet weiterhin das Weltlabel-Declutter und verlangt das
   aktuelle TASK838-Event-Log-Gate. Die historische HUD-Geometrie steht
   im Diagnosepfad. TASK1122 deckt Frontier-ACES und generisches Filmic
-  ab. TASK326 prÃ¼ft Host-Roster, lokale Opt-in-Roster und den BodenmaÃŸstab.
+  ab. TASK326 prüft Host-Roster, lokale Opt-in-Roster und den Bodenmaßstab.
 - Review 7 103/103, A5 13/13, gezielte und benachbarte Gates 11/11.
-  Alle 127 erfolgreichen LÃ¤ufe mit eigenem Profil und Pfadguard.
-  Original-Roster unverÃ¤ndert. Details in
+  Alle 127 erfolgreichen Läufe mit eigenem Profil und Pfadguard.
+  Original-Roster unverändert. Details in
   `docs/tasks/LEGACY_GATES_2026_11_04.md`.
 
 ### A5-Integration auf Review 7, 2026-11-03
-- A5 `854a19e3b` mit Review 7 `bc6deb3a7` zusammengefÃ¼hrt. A5-HUD, GM01
+- A5 `854a19e3b` mit Review 7 `bc6deb3a7` zusammengeführt. A5-HUD, GM01
   mit 9408 spielbaren Hexfeldern und A5-Navigation auf dem Review-7-Stand.
 - HPA-Kostenkarten und begrenzter A5-Ergebniscache, FoW-Deltas und
-  vollstÃ¤ndige Snapshots wÃ¤hrend des Aufbaus, inkrementelle Transportdetails.
+  vollständige Snapshots während des Aufbaus, inkrementelle Transportdetails.
 - Isoliert A5 13/13 und Review 7 100/103. Alle elf neuen Review-7-Gates
-  grÃ¼n. Die drei bekannten Altfehler reproduzieren sich unverÃ¤ndert.
-  Native FoW-, UI- und Normalstart-PrÃ¼fungen einschlieÃŸlich Westmarsch
+  grün. Die drei bekannten Altfehler reproduzieren sich unverändert.
+  Native FoW-, UI- und Normalstart-Prüfungen einschließlich Westmarsch
   bestanden. Details in `docs/tasks/A5_MAIN_INTEGRATION_2026_11_03.md`.
 
 ### REVIEW7, 2026-11-03 - Sieben weitere Performance-/Architekturbefunde
@@ -341,59 +341,59 @@
 - Keine Main-Integration, keine neue Release-/FPS-/GPU-Abnahme.
 
 
-### Mission A5 / Kartenrand 2026-11-02 â€“ echte Hexabdeckung und kompakte Karten
-- Der bisherige96Ã—84m-Dekoboden war grÃ¶ÃŸer als die gespeicherte48Ã—48-Karte. GM01 besitzt jetzt96Ã—98/9408 tatsÃ¤chlich gespeicherte Hexzellen bis zur sichtbaren BodenauÃŸenkante. Der Boden ist die exakte Hexunion; auÃŸerhalb liegt klar abgesetztes Petrol statt sandfarbigem Hintergrund. UrsprÃ¼ngliche Marker/Szenarioregeln und Modellanker bleiben erhalten;1046Solidzellen/560begehbare Deckungszellen, keine zusÃ¤tzlichen Runtime-Visual-Fakten.
-- A5-Gruppierung:272px portraitgefÃ¼hrte Fireteamkarten links Ã¼ber dem Band, kein zweiter NPC-Streifen. Eine kompakte echte Ref03-Cutlasskarte rechts oben, vollstÃ¤ndige lesbare Transportdetails mit inhaltsabhÃ¤ngiger FensterhÃ¶he und nativem Scroll. Protokoll rechts direkt Ã¼ber dem Band; ausgewÃ¤hlte Team-/Haltungsgruppe392px statt512px. Bestehende52px-Aktionen in zwei Reihen/128px-Band, Commands und Gameplaybesitz unverÃ¤ndert.
-- GroÃŸe Sichtmasken werden bei neuen Vollsnapshots wÃ¤hrend des Aufbaus nicht mehr neu gestartet. VollstÃ¤ndige alte/neue Terrainkenntnis aktualisiert bereits gebaute Slots; reine KontaktÃ¤nderungen lassen den Aufbau bestehen. Known/Unknown und Teamwechsel jeweils9408Zellen/19Frames; Unknownschutz und dynamischer Gegner-/Ereignisfilter bleiben erhalten. TatsÃ¤chliche Vulkan-Slotfarben und Positionen separat geprÃ¼ft, Dummy-Readback ausdrÃ¼cklich kein Rendernachweis.
-- Gemessene notwendige Navigationskorrekturen: stabile A*-Queue, konservatives HPA-Pruning, querylokale Kosten-/Begehbarkeits-/Zielzellenmemos und maximal64 erfolgreiche abgeleitete HPA-Ergebnisse. Exakte Variantbytes sÃ¤mtlicher Kostenoptionen, Registry-/GraphidentitÃ¤t und beide Revisionen begrenzen Wiederverwendung; FIFO, tiefe Kopien und Unsupported-Fallback. Alte/neue Pfade und Scoring-Floats werden gegen bytegesicherte Altquellen verglichen. Ein beobachteter16Frame-GO-Abschnitt: Queryzeit7,430â†’1,559s, Gesamtdauer10,191â†’4,400s; kein Gesamt-FPS-/Langzeitnachweis.
-- 13gezielte Engine-Gates/1398Assertions grÃ¼n; separat56Vulkan-FoW- und113aktuelle Vulkan-GUI-GruppenprÃ¼fungen. Zwei normale native MenÃ¼â†’Heimatbasisâ†’GM01â†’Transfer/LZ/Cutlass/Entladungâ†’Move/GO-LÃ¤ufe:84Checks bei1920Ã—1080 und71bei1280Ã—720, jeweils Exit0 ohne erkannte Engine-/Leakfehler. Der1920-Lauf fÃ¼hrt dieselben ursprÃ¼nglich ausgeladenen Akteure tatsÃ¤chlich Ã¼ber die frÃ¼here Westgrenze:39,839Wallclocksekunden/1088Simulationsticks, kein Actor-/Timerpatch. Native Detailfenster in beiden GrÃ¶ÃŸen mit ursprÃ¼nglicher Unit-ID geÃ¶ffnet/geschlossen. Nachfolgender rein eingabeseitiger Tooltipfix ist separat vom unverÃ¤nderten PNG-Quellenstand dokumentiert und aktuell geprÃ¼ft. Die lokale Workbench besteht10Offline-VM-/ExportprÃ¼fungen; kein Browserlayoutnachweis.
-- Gestalterisches Nutzerurteil bleibt offen. GelÃ¤nde/Kamera, uneinheitliche Portraits, krÃ¤ftiges gepunktetes Raster und der weiterhin dichte/teils englische Charakterbogen liegen erkennbar vom gemalten A5-Ziel entfernt. Kein vollstÃ¤ndiger Stil-, Kampagnen-, Mehrspieler-, EXE- oder Releaseabschluss.
-- Ãœbergabe: `docs/reports/STERNENBUERGERCHEN_MISSION_A5_2026-11-02.html`, `docs/tasks/UI_2026_11_02_a5_kartenrand.md` und `docs/qa/mission_a5_kartenrand_20261102/`. Eigener Branch `task/mission-a5-kartenrand-20261102` bewusst auf noch nicht integriertem Zielbildstand `a6802ea5c`; keine Mainintegration.
+### Mission A5 / Kartenrand 2026-11-02 – echte Hexabdeckung und kompakte Karten
+- Der bisherige96×84m-Dekoboden war größer als die gespeicherte48×48-Karte. GM01 besitzt jetzt96×98/9408 tatsächlich gespeicherte Hexzellen bis zur sichtbaren Bodenaußenkante. Der Boden ist die exakte Hexunion; außerhalb liegt klar abgesetztes Petrol statt sandfarbigem Hintergrund. Ursprüngliche Marker/Szenarioregeln und Modellanker bleiben erhalten;1046Solidzellen/560begehbare Deckungszellen, keine zusätzlichen Runtime-Visual-Fakten.
+- A5-Gruppierung:272px portraitgeführte Fireteamkarten links über dem Band, kein zweiter NPC-Streifen. Eine kompakte echte Ref03-Cutlasskarte rechts oben, vollständige lesbare Transportdetails mit inhaltsabhängiger Fensterhöhe und nativem Scroll. Protokoll rechts direkt über dem Band; ausgewählte Team-/Haltungsgruppe392px statt512px. Bestehende52px-Aktionen in zwei Reihen/128px-Band, Commands und Gameplaybesitz unverändert.
+- Große Sichtmasken werden bei neuen Vollsnapshots während des Aufbaus nicht mehr neu gestartet. Vollständige alte/neue Terrainkenntnis aktualisiert bereits gebaute Slots; reine Kontaktänderungen lassen den Aufbau bestehen. Known/Unknown und Teamwechsel jeweils9408Zellen/19Frames; Unknownschutz und dynamischer Gegner-/Ereignisfilter bleiben erhalten. Tatsächliche Vulkan-Slotfarben und Positionen separat geprüft, Dummy-Readback ausdrücklich kein Rendernachweis.
+- Gemessene notwendige Navigationskorrekturen: stabile A*-Queue, konservatives HPA-Pruning, querylokale Kosten-/Begehbarkeits-/Zielzellenmemos und maximal64 erfolgreiche abgeleitete HPA-Ergebnisse. Exakte Variantbytes sämtlicher Kostenoptionen, Registry-/Graphidentität und beide Revisionen begrenzen Wiederverwendung; FIFO, tiefe Kopien und Unsupported-Fallback. Alte/neue Pfade und Scoring-Floats werden gegen bytegesicherte Altquellen verglichen. Ein beobachteter16Frame-GO-Abschnitt: Queryzeit7,430→1,559s, Gesamtdauer10,191→4,400s; kein Gesamt-FPS-/Langzeitnachweis.
+- 13gezielte Engine-Gates/1398Assertions grün; separat56Vulkan-FoW- und113aktuelle Vulkan-GUI-Gruppenprüfungen. Zwei normale native Menü→Heimatbasis→GM01→Transfer/LZ/Cutlass/Entladung→Move/GO-Läufe:84Checks bei1920×1080 und71bei1280×720, jeweils Exit0 ohne erkannte Engine-/Leakfehler. Der1920-Lauf führt dieselben ursprünglich ausgeladenen Akteure tatsächlich über die frühere Westgrenze:39,839Wallclocksekunden/1088Simulationsticks, kein Actor-/Timerpatch. Native Detailfenster in beiden Größen mit ursprünglicher Unit-ID geöffnet/geschlossen. Nachfolgender rein eingabeseitiger Tooltipfix ist separat vom unveränderten PNG-Quellenstand dokumentiert und aktuell geprüft. Die lokale Workbench besteht10Offline-VM-/Exportprüfungen; kein Browserlayoutnachweis.
+- Gestalterisches Nutzerurteil bleibt offen. Gelände/Kamera, uneinheitliche Portraits, kräftiges gepunktetes Raster und der weiterhin dichte/teils englische Charakterbogen liegen erkennbar vom gemalten A5-Ziel entfernt. Kein vollständiger Stil-, Kampagnen-, Mehrspieler-, EXE- oder Releaseabschluss.
+- Übergabe: `docs/reports/STERNENBUERGERCHEN_MISSION_A5_2026-11-02.html`, `docs/tasks/UI_2026_11_02_a5_kartenrand.md` und `docs/qa/mission_a5_kartenrand_20261102/`. Eigener Branch `task/mission-a5-kartenrand-20261102` bewusst auf noch nicht integriertem Zielbildstand `a6802ea5c`; keine Mainintegration.
 
-### UI-Zielbildabgleich 2026-11-02 â€“ Dokumentaudit vor weiterer nativer Runde
-- Zuerst aktive MD-/Designregeln geprÃ¼ft und bereinigt: bestÃ¤tigte Original-2D-Ziele sind AutoritÃ¤t, alte Pixel-/Portrait-/SchlichtrahmenmaÃŸe verÃ¤nderbare ZwischenstÃ¤nde; dekorative Raster-/Nine-Patch-/native Ebenen um echte Controls erlaubt. Historische TASK164-/R4-Grenzen und Square8-Angaben zeitlich eingeordnet; Architektur nennt die inzwischen echte Hex-GM01. Zustandsbesitz und exakte Ref03-Cutlass bleiben verbindlich.
-- Danach vier Originalziele direkt neben nativen Mission-/Heimatbasis-/FOB-/Debrief-Bildern geÃ¶ffnet. Begrenzte Umsetzung: gemeinsame passive gestufte Rahmen/KartenkÃ¶pfe/Portraitfenster, Petrol-Protokoll, normale NPC-Namenszeile14px unter Erhalt expliziter Overrides. Missionsband128px mit zwei Reihen52px-Aktionen; volle Pendingtexte und eigener Kontexttoolslot erhalten sichtbare RÃ¼ckmeldungen. GM01-Hexkanten erhalten Dualkontrast; Topologie, Kartenfakten, bekannte8%-Bodenmaske und dynamischer Gegnerfilter unverÃ¤ndert.
-- Acht gezielte Gates /857 Assertions sowie zwei normale physische StartlÃ¤ufe /102 Checks bei1920Ã—1080 und1280Ã—720 grÃ¼n, jeweils ohne Engine-/Leakfehler. Sechs getrennte native Fixturebilder und zehn Offline-HTML-Checks. FrÃ¼he Metadaten-/Layoutfehler korrigiert; verworfene Ogg-Audio-ExitvorlÃ¤ufe und350ms rein nachgelagerte Capture-Testfreigabe dokumentiert. Kein Produktions-Audiopatch oder gelockerter Warnfilter.
-- GrÃ¶ÃŸter offener Bildabstand bleibt Welt-/Personen-/Szenenstil. Konkreter Renderpfad: GM01 blendet Habitat-/Hallen-Schnitt-GLBs aus und zeigt prozedurale HÃ¼llen aus `frontier_closed_buildings.gd`. Ein GLB-Austausch allein Ã¤ndert diese Silhouette nicht. GrÃ¶ÃŸere HÃ¼llen-/Fels-/BÃ¼hnen-/Portraitrevision und gestalterisches Nutzerurteil bleiben offen; kein pauschaler 2D-Zieltreue-, Leistungs- oder Gameplaynachweis.
-- Ãœbergabe: `docs/reports/STERNENBUERGERCHEN_UI_ZIELBILD_2026-11-02.html`, Task und `docs/qa/ui_zielbild_20261102/`. Bewusst auf noch nicht integriertem GM01 `6e05e080d`, eigener Branch `task/ui-zielbild-abgleich-20261102`; keine Mainintegration, EXE, Kampagnen-, Mehrspieler- oder Releaseabnahme.
+### UI-Zielbildabgleich 2026-11-02 – Dokumentaudit vor weiterer nativer Runde
+- Zuerst aktive MD-/Designregeln geprüft und bereinigt: bestätigte Original-2D-Ziele sind Autorität, alte Pixel-/Portrait-/Schlichtrahmenmaße veränderbare Zwischenstände; dekorative Raster-/Nine-Patch-/native Ebenen um echte Controls erlaubt. Historische TASK164-/R4-Grenzen und Square8-Angaben zeitlich eingeordnet; Architektur nennt die inzwischen echte Hex-GM01. Zustandsbesitz und exakte Ref03-Cutlass bleiben verbindlich.
+- Danach vier Originalziele direkt neben nativen Mission-/Heimatbasis-/FOB-/Debrief-Bildern geöffnet. Begrenzte Umsetzung: gemeinsame passive gestufte Rahmen/Kartenköpfe/Portraitfenster, Petrol-Protokoll, normale NPC-Namenszeile14px unter Erhalt expliziter Overrides. Missionsband128px mit zwei Reihen52px-Aktionen; volle Pendingtexte und eigener Kontexttoolslot erhalten sichtbare Rückmeldungen. GM01-Hexkanten erhalten Dualkontrast; Topologie, Kartenfakten, bekannte8%-Bodenmaske und dynamischer Gegnerfilter unverändert.
+- Acht gezielte Gates /857 Assertions sowie zwei normale physische Startläufe /102 Checks bei1920×1080 und1280×720 grün, jeweils ohne Engine-/Leakfehler. Sechs getrennte native Fixturebilder und zehn Offline-HTML-Checks. Frühe Metadaten-/Layoutfehler korrigiert; verworfene Ogg-Audio-Exitvorläufe und350ms rein nachgelagerte Capture-Testfreigabe dokumentiert. Kein Produktions-Audiopatch oder gelockerter Warnfilter.
+- Größter offener Bildabstand bleibt Welt-/Personen-/Szenenstil. Konkreter Renderpfad: GM01 blendet Habitat-/Hallen-Schnitt-GLBs aus und zeigt prozedurale Hüllen aus `frontier_closed_buildings.gd`. Ein GLB-Austausch allein ändert diese Silhouette nicht. Größere Hüllen-/Fels-/Bühnen-/Portraitrevision und gestalterisches Nutzerurteil bleiben offen; kein pauschaler 2D-Zieltreue-, Leistungs- oder Gameplaynachweis.
+- Übergabe: `docs/reports/STERNENBUERGERCHEN_UI_ZIELBILD_2026-11-02.html`, Task und `docs/qa/ui_zielbild_20261102/`. Bewusst auf noch nicht integriertem GM01 `6e05e080d`, eigener Branch `task/ui-zielbild-abgleich-20261102`; keine Mainintegration, EXE, Kampagnen-, Mehrspieler- oder Releaseabnahme.
 
-### GM01 Frontier-Neubau 2026-11-02 â€“ groÃŸe echte Hex-Standardkarte
-- Nutzerauftrag umgesetzt: regulÃ¤re GM01 mit den vorhandenen Frontier-Grafiken neu bauen, auf weiteren Wunsch vergrÃ¶ÃŸern und ausdrÃ¼cklich auf echte Hexfelder umstellen.48Ã—48 versetzte Reihen ergeben2304Zellen aufca48Ã—41m; negativeAxialkoordinaten bleiben gÃ¼ltig. Historischer Map-/Szenariopfad erhalten; acht Gegner, Taktiken, Zielradius und Zeitlimit unverÃ¤ndert.
-- UrsprÃ¼nglicher AuÃŸenposten plus Ã¶stlicher Versorgungshof, zusÃ¤tzliche FelszÃ¼ge, zwei Zufahrten und echte Runtime-Cutlass.56 konkrete HÃ¼llen ergeben817gespeicherte Solidzellen und440begehbare Deckungsnachbarn. Optionales Layout-ID verbindet kalten Authoringbuilder und reine Runtimevisuals; Kamera, Minimap, Panning, Picking und Save/Load passen zur HexflÃ¤che. Editor schÃ¼tzt das feste Ensemble vor freien Geometrie-/FaktenÃ¤nderungen.
-- Dunkler kleiner Kasten als alte Sichtmaske identifiziert. Standard-known_terrain erhÃ¤lt keinen temporÃ¤ren schwarzen Schutzkasten mehr; Unknownschutz bleibt und berÃ¼cksichtigt tatsÃ¤chliche hohe Modelle. Flache Hexmasken und dezent sichtbare Hexkanten ersetzen die alte Rasterwirkung.
-- Gemessene Funktionsblockaden eng korrigiert: lokale identische Cover-Scores wiederverwenden, Radius vor teuren Registrygettern prÃ¼fen, unverÃ¤ndertes statisches Briefing per Inhalts-SHA wiederverwenden. Dynamische Readiness/Loadout/Transportdaten und Timerregeln bleiben erhalten. Alte Diagnose- und TestprÃ¤dikate an bereits bestehende deutsche R4-Startaktion und gefaltete Details angeglichen; Vorcachebeleg dokumentiert.
-- Nachweis:24 gezielte Engine-Gates mit881Assertions sowie102Checks in zwei vollstÃ¤ndigen nativen normalen MenÃ¼â†’Heimatbasisâ†’GM01â†’Transfer/LZ/Cutlass/Entladungâ†’Move/GO-LÃ¤ufen bei1920Ã—1080 und1280Ã—720. Akzeptierte Prozesse jeweils Exit0 ohne Script-/Leakfehler.32gepaarte warme CPU-Querymessungen: Median20,8â†’2,4ms pro8Abfragen; keine Gesamt-FPS-Behauptung. Es bleiben merkliche UI-/Transportspitzen, keine Freigabe als insgesamt flÃ¼ssiges Spiel.
-- Ãœbergabe: `docs/reports/STERNENBUERGERCHEN_GM01_FRONTIER_2026-11-02.html`, `docs/dev/gm01_frontier_map_contract.md`, `docs/qa/gm01_frontier_20261102/VERIFIKATION.json`. Eigener Branch `task/gm01-frontier-rebuild-20261102` bewusst auf unintegriertem UI R4 `49220b59e` mit dessen Main-Grafikbasis. Keine Mainintegration, Kampagnen-/Mehrspieler-/Langzeit-/EXE-Abnahme. Finale PrÃ¼fungen mit isolierten Userdaten; verworfene frÃ¼he VorlÃ¤ufe und ihre Grenzen imQA-README.
+### GM01 Frontier-Neubau 2026-11-02 – große echte Hex-Standardkarte
+- Nutzerauftrag umgesetzt: reguläre GM01 mit den vorhandenen Frontier-Grafiken neu bauen, auf weiteren Wunsch vergrößern und ausdrücklich auf echte Hexfelder umstellen.48×48 versetzte Reihen ergeben2304Zellen aufca48×41m; negativeAxialkoordinaten bleiben gültig. Historischer Map-/Szenariopfad erhalten; acht Gegner, Taktiken, Zielradius und Zeitlimit unverändert.
+- Ursprünglicher Außenposten plus östlicher Versorgungshof, zusätzliche Felszüge, zwei Zufahrten und echte Runtime-Cutlass.56 konkrete Hüllen ergeben817gespeicherte Solidzellen und440begehbare Deckungsnachbarn. Optionales Layout-ID verbindet kalten Authoringbuilder und reine Runtimevisuals; Kamera, Minimap, Panning, Picking und Save/Load passen zur Hexfläche. Editor schützt das feste Ensemble vor freien Geometrie-/Faktenänderungen.
+- Dunkler kleiner Kasten als alte Sichtmaske identifiziert. Standard-known_terrain erhält keinen temporären schwarzen Schutzkasten mehr; Unknownschutz bleibt und berücksichtigt tatsächliche hohe Modelle. Flache Hexmasken und dezent sichtbare Hexkanten ersetzen die alte Rasterwirkung.
+- Gemessene Funktionsblockaden eng korrigiert: lokale identische Cover-Scores wiederverwenden, Radius vor teuren Registrygettern prüfen, unverändertes statisches Briefing per Inhalts-SHA wiederverwenden. Dynamische Readiness/Loadout/Transportdaten und Timerregeln bleiben erhalten. Alte Diagnose- und Testprädikate an bereits bestehende deutsche R4-Startaktion und gefaltete Details angeglichen; Vorcachebeleg dokumentiert.
+- Nachweis:24 gezielte Engine-Gates mit881Assertions sowie102Checks in zwei vollständigen nativen normalen Menü→Heimatbasis→GM01→Transfer/LZ/Cutlass/Entladung→Move/GO-Läufen bei1920×1080 und1280×720. Akzeptierte Prozesse jeweils Exit0 ohne Script-/Leakfehler.32gepaarte warme CPU-Querymessungen: Median20,8→2,4ms pro8Abfragen; keine Gesamt-FPS-Behauptung. Es bleiben merkliche UI-/Transportspitzen, keine Freigabe als insgesamt flüssiges Spiel.
+- Übergabe: `docs/reports/STERNENBUERGERCHEN_GM01_FRONTIER_2026-11-02.html`, `docs/dev/gm01_frontier_map_contract.md`, `docs/qa/gm01_frontier_20261102/VERIFIKATION.json`. Eigener Branch `task/gm01-frontier-rebuild-20261102` bewusst auf unintegriertem UI R4 `49220b59e` mit dessen Main-Grafikbasis. Keine Mainintegration, Kampagnen-/Mehrspieler-/Langzeit-/EXE-Abnahme. Finale Prüfungen mit isolierten Userdaten; verworfene frühe Vorläufe und ihre Grenzen imQA-README.
 
-### Native UI R4 2026-11-02 â€“ stÃ¤rkere NÃ¤he zur 2D-Vorlage
-- Nutzerauftrag: R3 visuell noch zu weit von den bestÃ¤tigten 2D-Tafeln; ReferenznÃ¤he ausdrÃ¼cklich priorisieren und Bild-KI fÃ¼r die Ãœbersetzung nutzen. Eigener Branch `task/ui-2d-r4-20261102` auf R3 `5500bcbe2`, geprÃ¼fter Main `7f594530f` nur dort integriert (`98e3ba7b0`). Hauptcheckout/Main unverÃ¤ndert.
-- Vier neue referenzgestÃ¼tzte integrierte Bild-KI-BrÃ¼cken fÃ¼r Heimatbasis, FOB/Loadout, Nachbesprechung und Mission. Finale alte2D-Vorlagen bleiben Grundlage; exakte Prompts, unverÃ¤nderte Originale, SHA und sichtbare DesignbegrÃ¼ndungen unter `docs/ui_concepts/ui_20261102_r4/`. Keine behaupteten internen Modellgedanken oder ungeprÃ¼ften BeispielidentitÃ¤ten.
-- Gemeinsames Petrol-/Cyan-/Gelbsystem, gewichtete gebÃ¼ndelte Barlow-Titel und Namen, dekorative kuratierte Main-BÃ¼hne im freien Bereich. Debrief mit klarer Ergebnis-/Portraitwirkung und dunklen Neutralchips; Mission mit prominenteren Team-Portraits und passivem durchgehendem 160px-Band unter den bestehenden zwei 64px-Befehlsreihen. Reale Controls, Daten, Callbacks, Gates und R3-Dichte bleiben erhalten.
-- Normalstart deckte zusÃ¤tzliche Vor-Tree-Viewportzugriffe und spÃ¤tes ZurÃ¼ckschreiben winziger HaltungskÃ¼rzel auf. Guard am tatsÃ¤chlichen Controller-Entry und begrenzte Restaurierung nach letztem Legacywriter; Missions-R3-Verifier jetzt104/104 mit echtem set_planning_state vor Treeeintritt sowie Updatefolgen vor/nach GO. Kein neuer Polling-/Gameplaypfad.
-- Nachweis: 26 gezielte Checks mit 2.266 Assertions; zusÃ¤tzlich 90 Checks in zwei tatsÃ¤chlichen normalen MenÃ¼â†’Homebaseâ†’GM01â†’Transfer/LZ/Dropâ†’Move/GO-LÃ¤ufen bei 1920/1280, jeweils Exit0 ohne Script-/Leakfehler. Finale Normalstarts mit eigenem Testuserdata und bytegenauer Projektkonfigurationswiederherstellung.17 ausgewÃ¤hlte native Ansichten, davon 6 physisch/logisch 1280Ã—720; unabhÃ¤ngige Source-/BildgegenprÃ¼fung und lokale Offline-HTML-/ExportprÃ¼fung. Quellen, letzte akzeptierte Einzelruns und Artefakthashes in `docs/qa/ui_native_r4_20261102/VERIFIKATION.json`.
-- Main-PrÃ¤zisierung: Frontierprofil und Ref03 sind integriert; regulÃ¤re GM01 zeigt trotzdem gemischte alte Stations-/Rasterkomposition und bleibt Square8. Kuratierte AuÃŸenpostenbÃ¼hne und separate Hex-Werft sind keine vollstÃ¤ndige Migration der normalen Mission. Kein beschÃ¤digter Dispatch behauptet.
-- Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_NATIVE_R4_2026-11-02.html` mit finalenVorlagen/R3/BrÃ¼cken/R4, GrÃ¼nden und getrenntem lokalem JSON-Feedback. Grenzen: bestehende Pixelportraits, dynamische Karten, ausstehendes Nutzerurteil zur StilnÃ¤he. Kein vollstÃ¤ndiger menschlicher Durchspieltest, Peer-/Release-/EXE-/Langzeitnachweis. FrÃ¼he verworfene Normalstarts nutzten den normalen Profilpfad (IdentitÃ¤ten gleich, Dateihash geÃ¤ndert); finale LÃ¤ufe isoliert, Details imQA-Bericht.
+### Native UI R4 2026-11-02 – stärkere Nähe zur 2D-Vorlage
+- Nutzerauftrag: R3 visuell noch zu weit von den bestätigten 2D-Tafeln; Referenznähe ausdrücklich priorisieren und Bild-KI für die Übersetzung nutzen. Eigener Branch `task/ui-2d-r4-20261102` auf R3 `5500bcbe2`, geprüfter Main `7f594530f` nur dort integriert (`98e3ba7b0`). Hauptcheckout/Main unverändert.
+- Vier neue referenzgestützte integrierte Bild-KI-Brücken für Heimatbasis, FOB/Loadout, Nachbesprechung und Mission. Finale alte2D-Vorlagen bleiben Grundlage; exakte Prompts, unveränderte Originale, SHA und sichtbare Designbegründungen unter `docs/ui_concepts/ui_20261102_r4/`. Keine behaupteten internen Modellgedanken oder ungeprüften Beispielidentitäten.
+- Gemeinsames Petrol-/Cyan-/Gelbsystem, gewichtete gebündelte Barlow-Titel und Namen, dekorative kuratierte Main-Bühne im freien Bereich. Debrief mit klarer Ergebnis-/Portraitwirkung und dunklen Neutralchips; Mission mit prominenteren Team-Portraits und passivem durchgehendem 160px-Band unter den bestehenden zwei 64px-Befehlsreihen. Reale Controls, Daten, Callbacks, Gates und R3-Dichte bleiben erhalten.
+- Normalstart deckte zusätzliche Vor-Tree-Viewportzugriffe und spätes Zurückschreiben winziger Haltungskürzel auf. Guard am tatsächlichen Controller-Entry und begrenzte Restaurierung nach letztem Legacywriter; Missions-R3-Verifier jetzt104/104 mit echtem set_planning_state vor Treeeintritt sowie Updatefolgen vor/nach GO. Kein neuer Polling-/Gameplaypfad.
+- Nachweis: 26 gezielte Checks mit 2.266 Assertions; zusätzlich 90 Checks in zwei tatsächlichen normalen Menü→Homebase→GM01→Transfer/LZ/Drop→Move/GO-Läufen bei 1920/1280, jeweils Exit0 ohne Script-/Leakfehler. Finale Normalstarts mit eigenem Testuserdata und bytegenauer Projektkonfigurationswiederherstellung.17 ausgewählte native Ansichten, davon 6 physisch/logisch 1280×720; unabhängige Source-/Bildgegenprüfung und lokale Offline-HTML-/Exportprüfung. Quellen, letzte akzeptierte Einzelruns und Artefakthashes in `docs/qa/ui_native_r4_20261102/VERIFIKATION.json`.
+- Main-Präzisierung: Frontierprofil und Ref03 sind integriert; reguläre GM01 zeigt trotzdem gemischte alte Stations-/Rasterkomposition und bleibt Square8. Kuratierte Außenpostenbühne und separate Hex-Werft sind keine vollständige Migration der normalen Mission. Kein beschädigter Dispatch behauptet.
+- Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_NATIVE_R4_2026-11-02.html` mit finalenVorlagen/R3/Brücken/R4, Gründen und getrenntem lokalem JSON-Feedback. Grenzen: bestehende Pixelportraits, dynamische Karten, ausstehendes Nutzerurteil zur Stilnähe. Kein vollständiger menschlicher Durchspieltest, Peer-/Release-/EXE-/Langzeitnachweis. Frühe verworfene Normalstarts nutzten den normalen Profilpfad (Identitäten gleich, Dateihash geändert); finale Läufe isoliert, Details imQA-Bericht.
 
-### Native UI R3 2026-11-02 â€“ Leerraum und Anzeigen Ã¼berarbeitet
-- Nutzerauftrag: verbliebene LeerflÃ¤chen und unklare/veraltete Statusanzeigen beheben. Branch `task/ui-verdichtung-r3-20261102`, bewusst auf noch nicht integriertem R2 `b1342b939`; Integrationsbasis `3cae5a216`.
-- Heimatbasis/FOB: belegungsabhÃ¤ngige Team-/TransporthÃ¶hen, passende Schiffskartenspalten und vollstÃ¤ndig gefaltete Briefingdetails. Leere TruppflÃ¤che 128 statt 848px, leeres FOB-Flugdeck 176 statt 712px. Bestehende Zuweisungs-, Loadout-, Boarding-, Transit- und Read-only-Pfade erhalten.
-- Mission: kompakte verstÃ¤ndliche Hauptanzeigen aus vorhandenen Objective-/Transport-/Planowners. Geplant, laufend und ausstehend bleiben getrennt; abgeschlossene leere RÃ¼ckflÃ¼ge folgen dem bestehenden Filter. Rohdiagnose erreichbar; volle HaltungswÃ¶rter bleiben auch nach Lightrefresh erhalten.
-- Debrief: Fenster nach Datenumfang; Standard 1240Ã—624 statt 1872Ã—1032px (rund 60 Prozent weniger FlÃ¤che). Fehlende Werte bleiben unbekannt, Vorschau und bestÃ¤tigte Folgen getrennt. Originalbericht begrenzt Maus/Tastatur und stellt GUI wieder her; Zahlen stehen vor kÃ¼rzbaren Beschreibungen. RÃ¼ckwegzeile folgt dem nativen Slot auch bei Ancestorbewegung ohne Polling.
-- Nachweis: 19 gezielte Checks / 1.617 Assertions ohne Fehler, 13 reale Windows-/GL-Captures (vier echte logische/physische 1280Ã—720), 10 Offline-HTML-/ExportprÃ¼fungen. UnabhÃ¤ngige Source-/BildgegenprÃ¼fung; bestÃ¤tigte Befunde gezielt RED/GREEN korrigiert. Letzte akzeptierte Einzelruns und Quellen-/Artefakthashes: `docs/qa/ui_native_r3_20261102/VERIFIKATION.json`.
-- Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_NATIVE_R3_2026-11-02.html` mit 13 Ansichten, GrÃ¼nden, R2-/Konzeptvergleich und vollstÃ¤ndigem lokalem JSON-Feedback. Alte Konzeptseite erhÃ¤lt nur einen Link; ihre Skripte/Exportfelder und historische Nachweise bleiben erhalten.
-- Grenzen: keine menschlich vollstÃ¤ndig durchgespielte Runde, reale Mehrspielerpartie, Browserlayout-/Download-, Release-/EXE- oder Langzeitabnahme. Bestehende Lobby-Payload-NetzwerklÃ¼cke auÃŸerhalb dieses Passes; Hauptcheckout unverÃ¤ndert.
+### Native UI R3 2026-11-02 – Leerraum und Anzeigen überarbeitet
+- Nutzerauftrag: verbliebene Leerflächen und unklare/veraltete Statusanzeigen beheben. Branch `task/ui-verdichtung-r3-20261102`, bewusst auf noch nicht integriertem R2 `b1342b939`; Integrationsbasis `3cae5a216`.
+- Heimatbasis/FOB: belegungsabhängige Team-/Transporthöhen, passende Schiffskartenspalten und vollständig gefaltete Briefingdetails. Leere Truppfläche 128 statt 848px, leeres FOB-Flugdeck 176 statt 712px. Bestehende Zuweisungs-, Loadout-, Boarding-, Transit- und Read-only-Pfade erhalten.
+- Mission: kompakte verständliche Hauptanzeigen aus vorhandenen Objective-/Transport-/Planowners. Geplant, laufend und ausstehend bleiben getrennt; abgeschlossene leere Rückflüge folgen dem bestehenden Filter. Rohdiagnose erreichbar; volle Haltungswörter bleiben auch nach Lightrefresh erhalten.
+- Debrief: Fenster nach Datenumfang; Standard 1240×624 statt 1872×1032px (rund 60 Prozent weniger Fläche). Fehlende Werte bleiben unbekannt, Vorschau und bestätigte Folgen getrennt. Originalbericht begrenzt Maus/Tastatur und stellt GUI wieder her; Zahlen stehen vor kürzbaren Beschreibungen. Rückwegzeile folgt dem nativen Slot auch bei Ancestorbewegung ohne Polling.
+- Nachweis: 19 gezielte Checks / 1.617 Assertions ohne Fehler, 13 reale Windows-/GL-Captures (vier echte logische/physische 1280×720), 10 Offline-HTML-/Exportprüfungen. Unabhängige Source-/Bildgegenprüfung; bestätigte Befunde gezielt RED/GREEN korrigiert. Letzte akzeptierte Einzelruns und Quellen-/Artefakthashes: `docs/qa/ui_native_r3_20261102/VERIFIKATION.json`.
+- Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_NATIVE_R3_2026-11-02.html` mit 13 Ansichten, Gründen, R2-/Konzeptvergleich und vollständigem lokalem JSON-Feedback. Alte Konzeptseite erhält nur einen Link; ihre Skripte/Exportfelder und historische Nachweise bleiben erhalten.
+- Grenzen: keine menschlich vollständig durchgespielte Runde, reale Mehrspielerpartie, Browserlayout-/Download-, Release-/EXE- oder Langzeitabnahme. Bestehende Lobby-Payload-Netzwerklücke außerhalb dieses Passes; Hauptcheckout unverändert.
 
-### Native UI R2 2026-11-02 â€“ Verdichtung und FunktionsprÃ¼fung
-- Nutzerauftrag: weiterer Pass nÃ¤her an den bestÃ¤tigten Bild-KI-Vorlagen, ausdrÃ¼cklich mit Logik-/FunktionsprÃ¼fung. Branch `task/ui-umsetzung-r2-20261101`, bewusst auf dem noch nicht integrierten R1 `80593f416` und Konzeptstand `135466b5c`; Integrationsbasis `3cae5a216`.
-- Mission: 160px-Randband, begrenzte Teamgruppe, flacherer Mitgliederstreifen, verstÃ¤ndliche Haltung und bestÃ¤tigte Feuerregel im nativen Dropdown. Alte Callbacks/Gates bleiben Owner; Diagnose in Details, korrekte Aktionsmarkierungen, Popup schlieÃŸt beim Metawechsel.
-- Heimatbasis/FOB: kompaktes Briefing und volle Arbeitsbereiche, erreichbare Details/ScrollflÃ¤chen, flexible Poolkarten und kompakter Respawn. Zuweisungs-/Loadout-/Lead-/Transit-/Read-only-Pfade bleiben erhalten. FOB-Kontext folgt dem vorhandenen State-Refresh auch bei reinem Fokuswechsel ohne Resize.
-- Debrief: gegliederte native Ergebnis-/Personen-/FTL-/Ereignis-/Entwicklungskarten aus vorhandenen Resultaten, ehrliche LeerzustÃ¤nde, feste RÃ¼ckwege. SlotÃ¤nderungen werden signalgetrieben statt per Frame nachgefÃ¼hrt. Settings: beschriftete AudioentwÃ¼rfe und Cancel; Bibliothek erhÃ¤lt Fokus/Controls. Lobby: Setup scrollt, Verbindung/Sitzung bleibt fest und gegatet, Badges und verschobene Kontexthilfe erhalten.
-- BestÃ¤tigter Savefehler korrigiert: Basiswurfgrenze 0.22 wurde fÃ¤lschlich auf effektive Traitwerte angewandt. Validator akzeptiert nun den bestehenden endlichen 0..1-Profilvertrag; Generatorwerte, Traits und Balance unverÃ¤ndert. Echte problematische Roster roundtrippen durch den Store.
-- Nachweis: 27 gezielte Checks / 1.731 Assertions ohne Fehler,17 reale Windows-/GL-Captures (davon 6 physisch/logisch 1280Ã—720),10 Offline-HTML-/ExportprÃ¼fungen. Akzeptierte letzte Einzelruns und fixierte Quellen-/Artefakthashes: `docs/qa/ui_native_r2_20261101/VERIFIKATION.json`.
-- Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_NATIVE_R2_2026-11-02.html` mit getrenntem R2/R1/Konzeptvergleich und vollstÃ¤ndigem lokalem JSON-Feedback; Task und Designvertrag dokumentieren GrÃ¼nde und Owners.
-- Grenzen: keine menschlich vollstÃ¤ndig durchgespielte Runde/Release-/EXE-/Langzeitabnahme. Die bestehende fehlende Lobby-Payload-Netzwerkanbindung bleibt ausdrÃ¼cklich offen; NativeUI-R2 ist keine bestÃ¤tigte reale Mehrspielerpartie. Hauptcheckout und alte Nachweise bleiben erhalten.
+### Native UI R2 2026-11-02 – Verdichtung und Funktionsprüfung
+- Nutzerauftrag: weiterer Pass näher an den bestätigten Bild-KI-Vorlagen, ausdrücklich mit Logik-/Funktionsprüfung. Branch `task/ui-umsetzung-r2-20261101`, bewusst auf dem noch nicht integrierten R1 `80593f416` und Konzeptstand `135466b5c`; Integrationsbasis `3cae5a216`.
+- Mission: 160px-Randband, begrenzte Teamgruppe, flacherer Mitgliederstreifen, verständliche Haltung und bestätigte Feuerregel im nativen Dropdown. Alte Callbacks/Gates bleiben Owner; Diagnose in Details, korrekte Aktionsmarkierungen, Popup schließt beim Metawechsel.
+- Heimatbasis/FOB: kompaktes Briefing und volle Arbeitsbereiche, erreichbare Details/Scrollflächen, flexible Poolkarten und kompakter Respawn. Zuweisungs-/Loadout-/Lead-/Transit-/Read-only-Pfade bleiben erhalten. FOB-Kontext folgt dem vorhandenen State-Refresh auch bei reinem Fokuswechsel ohne Resize.
+- Debrief: gegliederte native Ergebnis-/Personen-/FTL-/Ereignis-/Entwicklungskarten aus vorhandenen Resultaten, ehrliche Leerzustände, feste Rückwege. Slotänderungen werden signalgetrieben statt per Frame nachgeführt. Settings: beschriftete Audioentwürfe und Cancel; Bibliothek erhält Fokus/Controls. Lobby: Setup scrollt, Verbindung/Sitzung bleibt fest und gegatet, Badges und verschobene Kontexthilfe erhalten.
+- Bestätigter Savefehler korrigiert: Basiswurfgrenze 0.22 wurde fälschlich auf effektive Traitwerte angewandt. Validator akzeptiert nun den bestehenden endlichen 0..1-Profilvertrag; Generatorwerte, Traits und Balance unverändert. Echte problematische Roster roundtrippen durch den Store.
+- Nachweis: 27 gezielte Checks / 1.731 Assertions ohne Fehler,17 reale Windows-/GL-Captures (davon 6 physisch/logisch 1280×720),10 Offline-HTML-/Exportprüfungen. Akzeptierte letzte Einzelruns und fixierte Quellen-/Artefakthashes: `docs/qa/ui_native_r2_20261101/VERIFIKATION.json`.
+- Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_NATIVE_R2_2026-11-02.html` mit getrenntem R2/R1/Konzeptvergleich und vollständigem lokalem JSON-Feedback; Task und Designvertrag dokumentieren Gründe und Owners.
+- Grenzen: keine menschlich vollständig durchgespielte Runde/Release-/EXE-/Langzeitabnahme. Die bestehende fehlende Lobby-Payload-Netzwerkanbindung bleibt ausdrücklich offen; NativeUI-R2 ist keine bestätigte reale Mehrspielerpartie. Hauptcheckout und alte Nachweise bleiben erhalten.
 
-### Native UI R1 2026-11-01 â€“ bestaetigte Entwuerfe im Spiel
+### Native UI R1 2026-11-01 – bestaetigte Entwuerfe im Spiel
 - Nutzerfreigabe: Gestaltung positiv bewertet und native Umsetzung beauftragt. Neuer Branch `task/ui-umsetzung-r1-20261101`, bewusst auf noch nicht integriertem Konzeptstand `135466b5c` auf Basis `integration/core-foundation` aufgebaut.
 - Gemeinsames gecachtes natives Theme fuer Fenster, Karten, Buttons, Dropdowns, Inputs, Tabs, Scrollbars und Fokus; MetaUISkin delegiert. Hauptmenue/Creator, Settings/Escape/Hilfe, Lobby, Heimatbasis/FOB, Personenbogen, Debrief und Editor angebunden. Separate rechte Teamlibrary, begrenzte scrollbare Settings-/Creatorfenster mit festen Aktionen.
 - Mission: zwei kompakte Reihen vorhandener 64px-Aktionen, Ziel/Auftrag vor Team, Haltung und vier Feuerregeln; Karten/Log ueber dem Randband, Kontrolle oben rechts. Kontextbefehle/Callbacks erhalten, Personenoverlay ueber Mini-Karten; unveraenderte Refreshes schreiben keine Geometrie. Vorhandene eingeschiffte Mitglieder werden deaktiviert angezeigt.
@@ -401,49 +401,49 @@
 - Pruefung: 16 gezielte Checks mit jeweils sauberem Endnachweis; nach letzten Korrekturen nur betroffene A5-/Hierarchie-/Shell-Checks wiederholt. Native A5 352 Assertions, Shell 63 Assertions; HTML-Export offline 9/9. Details und Quellenhashes im QA-Paket.
 - Pruefgrenzen: echte Godot-4.6.2-/GL-Captures mit Fixturedaten; 1280-Bilder skalieren den 1920-Viewport, getrennte Strukturchecks pruefen 1280-Layout. Keine menschliche Bedien-/Release-/allgemeine Performanceabnahme. Rostergenerator-/Store-Validierungsrandfall beobachtet und separat dokumentiert; keine Balance-/Generatoraenderung.
 
-### UI-Konzept 2026-11-01 â€“ A5 und MenÃ¼-/Kartenfamilie
+### UI-Konzept 2026-11-01 – A5 und Menü-/Kartenfamilie
 - Status: angeforderte Fortsetzung des bestehenden, noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`; Revisionsbasis `478bceac3`. Keine Runtime-Aenderung.
 - Elf neue Bild-KI-Tafeln: Mission A5 mit zwei belegten Reihen bestehender Aktionen; Hauptmenue, Heimatbasis, FOB/Loadout, Charakterbogen/kompakte Karten, Detailkarten, Debrief, Lobby, Settings/Hilfe/Escape, Karteneditor und Teameditor. Fuenf gezielte Korrekturen; alle ersten Versuche erhalten. Gesamtpaket 32 PNG-Artefakte plus zwei Referenzen.
 - Bestehende Review-Workbench erweitert: fuenf Missionsstaende, zehn Menue-/Kartenansichten, Erklaerung von Absicht und sichtbarem Ergebnis, eigene Bewertungen/Notizen samt JSON-Export. Neue Tafeln bleiben unbewertet; Erstrundenexport und acht Icons unveraendert.
 - Einstieg: `docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html`, `MENUES_UND_KARTEN.md` und `BILDPRUEFUNG_REVISION5.md` im Konzeptpaket. Exakte Eingaben in `prompts_revision5*.json`, Herkunft/Hashes im Manifest.
 - Pruefgrenze: Bilder gesichtet und mit aktuellen Funktionsquellen abgeglichen; lokale Integritaet und UI-/Exportlogik offline. Verbleibende Text-/Zustands-/Glyph-Abweichungen dokumentiert. Keine Browser-, Godot-, nativen Groessen- oder Performanceabnahme.
 
-### UI-Konzept 2026-11-01 â€“ Revision A4: Innenlabels und kompakte Blockfolge
+### UI-Konzept 2026-11-01 – Revision A4: Innenlabels und kompakte Blockfolge
 - Status: angeforderte Fortsetzung des bestehenden, noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`; Revisionsbasis `040e5f4e2`. Keine Runtime-Aenderung.
 - Aenderung: enger gruppierte Aktionstasten mit Innenbeschriftung; Ziel/Auftrag steht zwischen Aktionen und ALPHA. Haltung/Feuerregel unter dem ALPHA-Header links ausgerichtet. Freie Reserve unter der ersten Reihe; keine neuen aktiven Befehle.
 - Ein erster A4-Versuch hatte zu grosse Tasten; der gezielte zweite Aufruf verdichtete die Aktionsgruppe und zog Folgegruppen nach links. Beide Bilder und Prompts erhalten; A4 ist die neue Standardvorschau, A3/A2/A bleiben vergleichbar. Iconauswahl und bestehender JSON-Review unveraendert.
 - Pruefung: zwei Bildsichtungen, Quellen-/Hash-/Verweispruefung, Syntax und vier Vorschau-/Exportzustaende offline. Exakte native Masse und vollstaendige zweite Buttonreihe nicht nachgewiesen; Band im Raster geringfuegig hoeher als A3. Kein Browser- oder Godot-Nachweis.
 - Einstieg: bestehende Review-HTML, `UEBERGABE.md`, `FEEDBACK_20261101.md`, `PRUEFUNG.md`; neue Eingaben `prompts_revision4*.json`. A4 ist ein neuer, noch nicht bewerteter Bildvorschlag.
 
-### UI-Konzept 2026-11-01 â€“ Revision A3: quadratisches Randband
+### UI-Konzept 2026-11-01 – Revision A3: quadratisches Randband
 - Status: angeforderte Fortsetzung desselben noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`; Revisionsbasis `c976edcea`. Keine Runtime-Aenderung.
 - Aenderung: Band beginnt buendig links unten und endet an der unteren Bildkante; kompakte quadratische Tasten mit Planausfuehrung direkt nach Flankieren; Teamkarten und separates Protokoll darueber. Dropship/LZ oben rechts kleiner, Zielkasten beibehalten. Kein neuer Iconpass.
 - Der erste A3-Versuch bettete das Protokoll noch ins Band ein; ein gezielter Korrekturaufruf setzte es darueber. Beide Generatororiginale und Prompts sind erhalten. Die Review zeigt final A3 standardmaessig und bietet A2/A als Vergleich.
 - Pruefung: zwei Bildsichtungen, Quellen-/Hash-/PNG- und Verweispruefung, JS-Syntax sowie drei Umschaltzustaende und Export offline geprueft. Native Quadrat-/Bandmasse, Fokus und Laufzeit offen; Rasterkacheln sind nur annaehernd quadratisch, Welt ist durch Bildbearbeitung weicher geworden.
 - Einstieg unveraendert `docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html`, Begruendung in `UEBERGABE.md`, `FEEDBACK_20261101.md`, `PRUEFUNG.md`; neue Eingaben `prompts_revision3*.json`. A3 bleibt ein neuer unbewerteter Vorschlag.
 
-### UI-Konzept 2026-11-01 â€“ Nutzerfeedback und kompakte Revision A2
+### UI-Konzept 2026-11-01 – Nutzerfeedback und kompakte Revision A2
 - Status: Fortsetzung des noch nicht integrierten Konzepttasks auf `task/ui-entwuerfe-20261101`, Revisionsbasis `2286e5b07`; keine Runtime-Aenderung.
 - Nutzerexport aus Downloads gefunden und unveraendert archiviert: Mission A, Staging C weiterfuehren; vier Iconmotive geeignet, Flankieren/Dropship unklar. Alle fuenf Pruefcheckboxen bleiben ungesetzt.
 - Aenderung: A2 mit flacherem Dock und horizontalen beschrifteten Buttons, linke Teams/rechter Steuerbereich erhalten, Spieltitel oben links entfernt. Zwei neue separate Iconalternativen. Vorherbilder bleiben verfuegbar; Review zeigt A2 standardmaessig und erfasst die jeweiligen Assetversionen.
 - Pruefung: Sichtvergleich durch zwei Agenten, PNG-/Alpha-/Hashpruefung, lokale Verweise, JS-Syntax sowie Export-/Umschaltfunktionen offline. Echter Nutzerexport bestaetigt einen Download, ersetzt keine automatisierte Browser-/Fokus- oder Godot-Pruefung. Native Pixelziele und kleine Icongroessen bleiben offen.
 - Einstieg: `docs/ui_concepts/ui_20261101/FEEDBACK_20261101.md`, `UEBERGABE.md` und die bestehende Review-HTML. A2 und die neuen Icons sind neue Kandidaten, noch keine Nutzerfreigabe.
 
-### UI-Konzept 2026-11-01 â€“ Alternativen und Bildgenerator-Icons
+### UI-Konzept 2026-11-01 – Alternativen und Bildgenerator-Icons
 - Status: Konzeptpaket erstellt; keine Runtime-Integration. Basis `integration/core-foundation` / `3cae5a216`, Branch `task/ui-entwuerfe-20261101`.
-- Stand: Funktionsinventar; drei generierte Layoutkandidaten (A Kommandodeck, B Feldtablet, C Einsatztafel); sechs separate transparente PNG-Icons; lokale Review-Workbench mit JSON-Export; vollstÃ¤ndige GestaltungsbegrÃ¼ndung, Prompts, Dateihashes und Next-Chat-Start.
+- Stand: Funktionsinventar; drei generierte Layoutkandidaten (A Kommandodeck, B Feldtablet, C Einsatztafel); sechs separate transparente PNG-Icons; lokale Review-Workbench mit JSON-Export; vollständige Gestaltungsbegründung, Prompts, Dateihashes und Next-Chat-Start.
 - Einstieg: `docs/ui_concepts/ui_20261101/UEBERGABE.md`; Vorschau `docs/reports/STERNENBUERGERCHEN_UI_2026-11-01.html`; Task `docs/tasks/TASK_UI_KONZEPT_20261101.md`.
-- PrÃ¼fung: Neun PNGs gesichtet und unverÃ¤ndert gesichert, sechs Icons mit echtem Alpha; lokale Verweise und JS-Syntax geprÃ¼ft, Exportfunktionen offline mit synthetischen Controls geprÃ¼ft. Details in `PRUEFUNG.md` und den JSON-Nachweisen.
-- Grenzen: Browserdienst blockiert `file://`; reale Browser-/Download-/24px-SichtprÃ¼fung offen. A/B haben unterschiedliche generierte Kameras/Haltungen, C enthÃ¤lt illustrative Rollen-/Waffentexte und einen zu korrigierenden Boardingzustand. Keine Godot-, Performance- oder Nutzerabnahme. NÃ¤chster Schritt: Variante bewerten und einen kleinen nativen UI-Slice beauftragen.
+- Prüfung: Neun PNGs gesichtet und unverändert gesichert, sechs Icons mit echtem Alpha; lokale Verweise und JS-Syntax geprüft, Exportfunktionen offline mit synthetischen Controls geprüft. Details in `PRUEFUNG.md` und den JSON-Nachweisen.
+- Grenzen: Browserdienst blockiert `file://`; reale Browser-/Download-/24px-Sichtprüfung offen. A/B haben unterschiedliche generierte Kameras/Haltungen, C enthält illustrative Rollen-/Waffentexte und einen zu korrigierenden Boardingzustand. Keine Godot-, Performance- oder Nutzerabnahme. Nächster Schritt: Variante bewerten und einen kleinen nativen UI-Slice beauftragen.
 ### ART 2026-11-01 Main-Adoption: Frontier und Astra Ref03
-- Nutzerbeauftragte Main-Ãœbernahme: Code `177991ac4962c17be0d02ef909949826967c7f57` auf lokalem Main und `origin/main`. Fast-forward vom alten Main `633a0ea5`, einschlieÃŸlich der bestehenden Foundation; keine selektive Grafikdateikopie auf den Aprilstand.
-- Sauberer nativer AuÃŸenpostenrender als normales MenÃ¼bild; GM01 wÃ¤hlt Frontier Ã¼ber gespeicherte Daten ohne CLI-Flag. Alle Ã¼brigen GM01-Kartenbytes und das Szenario bleiben unverÃ¤ndert. GM01 bleibt Square8; die neue Hex-Werft ist separat verfÃ¼gbar, keine vollstÃ¤ndige Kampagnen-/Hexmigration.
-- Astra Ref03 bytegleich adoptiert: Cutlass mit vier Triebwerken, Buccaneer mit geschlossener Cockpitwanne. Gemeinsamer Visualkatalog; Cutlass ist auch der echte Missionsdropship mit passender +Z-Flugrichtung und altem Mappingfallback. Buccaneer ist ein aktives statisches Modell, noch kein Fighter-Spielpfad. Finale editierbare Quellen, Exporte und 161 gehashte Quellrecords kuratiert; vollstÃ¤ndiges frÃ¼heres Astra-Archiv bleibt ausdrÃ¼cklich auÃŸerhalb des Adoptionsumfangs.
-- Aktuelle Matrix 29/29 strenge Gates. Neuer Ref03-Gate 86/86 mit explizitem <25k-Budget ersetzt historischen R02-20k-Gate; neuer Umgebungsgate prÃ¼ft sieben unverÃ¤nderte Assets und genau zwei neue Schiffe. Historische Tests/Rohbelege bleiben erhalten, einschlieÃŸlich des ersten P06-Altinvarianten-Fehlers.
-- Echter normaler MenÃ¼/Homebase/GM01/18s-Transfer/LZ/Drop/Entladung/GO-Pfad: headless 33/33, nativ Vulkan 45/45; drei regulÃ¤re Units ausgestiegen, Cutlass im tatsÃ¤chlichen Inbound sichtbar. Keine Teleports, erzwungene Entladung oder Preview als Spielmission. Nativer externer OS-Exitcode nicht separat gesammelt; vollstÃ¤ndiger Erfolgsmarker und JSON liegen vor. Direkt im aktualisierten Main-Ordner zusÃ¤tzlich Startgrafik 27/27, Exit0 und getrackter Stand sauber.
-- 20 native Vergleichsansichten plus sechs echte Startansichten und ein sauberes MenÃ¼motiv. Gleiche P07-Kameras/Licht geprÃ¼ft. Offline-Workbench 204/204 Browserchecks, 40 Bilder/80 Derivate, 17 Screenshotlayouts und zwei tatsÃ¤chliche JSON-Exporte; Bilder geÃ¶ffnet, keine externen Requests oder Browserfehler. HTML-SHA256 `86edd3811d9282cbd2249450c799122a12000d405a467ce2e89557b1401c0b3d`. P07-HTML bytegleich archiviert.
-- Grenzen bleiben sichtbar: vereinfachte Materialien/Glas/DÃ¼sen, keine perfekte 2D-Rekonstruktion, TASK158/159 und Tactical-Release weiterhin gesondert rot/blockiert. Voller Editorimport Exit0 mit bestehenden Plugin-/UID-/Shutdown-Leakdiagnosen; isolierter frischer Assetimport und tatsÃ¤chliche Runtimegates getrennt geprÃ¼ft. Keine UI-Neugestaltung; diese folgt erst auf den nÃ¤chsten Nutzerauftrag.
-- Belege: `output/grafik_20261101/main_adoption/verification_manifest.json`, `main_adoption_runtime/README.md`, neuer Adoptionsauftrag und aktueller HTML-Bericht. AbschlieÃŸender Reportcommit ergÃ¤nzt nur Dokumentation und Browserbelege.
+- Nutzerbeauftragte Main-Übernahme: Code `177991ac4962c17be0d02ef909949826967c7f57` auf lokalem Main und `origin/main`. Fast-forward vom alten Main `633a0ea5`, einschließlich der bestehenden Foundation; keine selektive Grafikdateikopie auf den Aprilstand.
+- Sauberer nativer Außenpostenrender als normales Menübild; GM01 wählt Frontier über gespeicherte Daten ohne CLI-Flag. Alle übrigen GM01-Kartenbytes und das Szenario bleiben unverändert. GM01 bleibt Square8; die neue Hex-Werft ist separat verfügbar, keine vollständige Kampagnen-/Hexmigration.
+- Astra Ref03 bytegleich adoptiert: Cutlass mit vier Triebwerken, Buccaneer mit geschlossener Cockpitwanne. Gemeinsamer Visualkatalog; Cutlass ist auch der echte Missionsdropship mit passender +Z-Flugrichtung und altem Mappingfallback. Buccaneer ist ein aktives statisches Modell, noch kein Fighter-Spielpfad. Finale editierbare Quellen, Exporte und 161 gehashte Quellrecords kuratiert; vollständiges früheres Astra-Archiv bleibt ausdrücklich außerhalb des Adoptionsumfangs.
+- Aktuelle Matrix 29/29 strenge Gates. Neuer Ref03-Gate 86/86 mit explizitem <25k-Budget ersetzt historischen R02-20k-Gate; neuer Umgebungsgate prüft sieben unveränderte Assets und genau zwei neue Schiffe. Historische Tests/Rohbelege bleiben erhalten, einschließlich des ersten P06-Altinvarianten-Fehlers.
+- Echter normaler Menü/Homebase/GM01/18s-Transfer/LZ/Drop/Entladung/GO-Pfad: headless 33/33, nativ Vulkan 45/45; drei reguläre Units ausgestiegen, Cutlass im tatsächlichen Inbound sichtbar. Keine Teleports, erzwungene Entladung oder Preview als Spielmission. Nativer externer OS-Exitcode nicht separat gesammelt; vollständiger Erfolgsmarker und JSON liegen vor. Direkt im aktualisierten Main-Ordner zusätzlich Startgrafik 27/27, Exit0 und getrackter Stand sauber.
+- 20 native Vergleichsansichten plus sechs echte Startansichten und ein sauberes Menümotiv. Gleiche P07-Kameras/Licht geprüft. Offline-Workbench 204/204 Browserchecks, 40 Bilder/80 Derivate, 17 Screenshotlayouts und zwei tatsächliche JSON-Exporte; Bilder geöffnet, keine externen Requests oder Browserfehler. HTML-SHA256 `86edd3811d9282cbd2249450c799122a12000d405a467ce2e89557b1401c0b3d`. P07-HTML bytegleich archiviert.
+- Grenzen bleiben sichtbar: vereinfachte Materialien/Glas/Düsen, keine perfekte 2D-Rekonstruktion, TASK158/159 und Tactical-Release weiterhin gesondert rot/blockiert. Voller Editorimport Exit0 mit bestehenden Plugin-/UID-/Shutdown-Leakdiagnosen; isolierter frischer Assetimport und tatsächliche Runtimegates getrennt geprüft. Keine UI-Neugestaltung; diese folgt erst auf den nächsten Nutzerauftrag.
+- Belege: `output/grafik_20261101/main_adoption/verification_manifest.json`, `main_adoption_runtime/README.md`, neuer Adoptionsauftrag und aktueller HTML-Bericht. Abschließender Reportcommit ergänzt nur Dokumentation und Browserbelege.
 
 ### ART 2026-11-01 Pass07 - Wege und Beginn der regulaeren Grafikmigration
 - Code278c5b61fb6a1584420fbfaa4e526c30640fea69 committed/gepusht; bewusste Fortsetzung von501201b0c auf unintegriertem task/grafikreferenzen-20261101. Keine Main-Integration oder pauschale Spiel-/Kampagnenmigration.
@@ -451,11 +451,11 @@
 - Schwarzer Strassensaum durch geglaettete gegenorientierte Union-Mikrosliver-Normalen nativ isoliert. Planare UP-Normalen beseitigen ihn bei unveraendert aktiven Schatten/SSAO; keine pauschale Beleuchtungsabschaltung.
 - Gespeicherte24x20Frontier-Hexkarte plus Scenario, eigenes gespeichertes Theme, originale Utility-GLB-Katalogintegration und7gespeicherte Reservierungen. Editor/MissionSetup reichen die Topologie an TerrainRegistry durch; CLI-/expliziteProfiloverrides und alteSquare-Karten bleiben konsistent. Keine Preview-Akteure als neue Spielwahrheit.
 - Echter Editor Save/Reload/Live-Mission-Pfad, normale Units/FTL und MOVE/GO->SimulationRoot: Leader645px durch13legaleHexzellen ohneTeleport/Spruenge/reservierteZellen.40/40headless und40/40nativeChecks;3xDiagnosetempo, keine vollstaendigeTeamankunfts-/LZ-/Deployment-/Releaseabnahme. Einstieg in art/frontier_illustrated_20261101/environment/pass07/runtime/README.md.
--27fokussierte strengeGates explizit aus26tatsaechlich gruenerMatrix plus25/25Hex-Bewegungsretry konsolidiert. Alter FileOpen-Timeout/Originalberichte bleiben erhalten; nur Evidencewriter erhielt privatenAusgabepfad/Close/Fehlerausstieg. Kein neuer Single-Run-AllesgruÌˆn-Claim. Beleg: output/grafik_20261101/pass07_paths_check_runs/verified_combined/metadata/report.json.
+-27fokussierte strengeGates explizit aus26tatsaechlich gruenerMatrix plus25/25Hex-Bewegungsretry konsolidiert. Alter FileOpen-Timeout/Originalberichte bleiben erhalten; nur Evidencewriter erhielt privatenAusgabepfad/Close/Fehlerausstieg. Kein neuer Single-Run-Allesgrün-Claim. Beleg: output/grafik_20261101/pass07_paths_check_runs/verified_combined/metadata/report.json.
 - TASK158/159 bleiben mit13/6Fehlern rot; ausgefuehrtes isoliertes501201b0c-Archiv belegt exakt gleicheFehlerlabels/-folge. legacy_baseline_comparison.json verlinkt beideRohseiten. Keine Altfehler verschwiegen oder Tests abgeschwaecht. NeueH0Flatmap von480falschenCliff-Hinweisen bereinigt; ein no_cover_tiles-Authoringhinweis bleibt.
 -20nativeP07-Previewbilder plus4separate echteEditor-/Missionsbilder,12festeP06/P07Paare und24Runtime-/Karten-/Scenarioquellen an gepushtenGitblobs gebunden. P06-HTML/Bilder bytegleich archiviert. Alle9primaerenGLBs undP06Geologie bleiben unveraendert; Astra-Schiffe weiterhin separat.
 - Grenzen: gespeicherten Hex-Kartenpfad begonnen, kein vollstaendiger Hex-Tool-/GridMap-/Kampagnenumbau. GrosseGebaeude/Pads brauchen explizite mehrzelligeAuthoring-/Rampenfakten; keine neueBasisbau-/Innenraum-/Wirtschaftsmechanik. Quellen/Belege unter environment/pass07/{paths,runtime} und pass07_paths_verification_manifest.json.
-- FinaleOffline-Workbench238/238frischeBrowserchecks undSichtpruefungPASS:39Bilder/78Derivate,37geoeffneteScreenshotlayouts,3echteJSONexports,0Console-/Pagefehler/Netzabrufe. HTML-SHA2569b24e1089961ad58c6f21dcb99f7fd299458e755469114bd066be946f96c03c0. ZwÃ¶lfPreviewpaare,vierseparateRuntimeansichten,Quellen,Notizen,Export,Desktop/Mobil geprueft. ErsterQA-Oraclefehler bleibt imDiagnosebericht erhalten; finaleHTMLbytes unveraendert erneutgeprueft. Browsernachweis unter browser_qa_pass07_paths/browser_qa.json.
+- FinaleOffline-Workbench238/238frischeBrowserchecks undSichtpruefungPASS:39Bilder/78Derivate,37geoeffneteScreenshotlayouts,3echteJSONexports,0Console-/Pagefehler/Netzabrufe. HTML-SHA2569b24e1089961ad58c6f21dcb99f7fd299458e755469114bd066be946f96c03c0. ZwölfPreviewpaare,vierseparateRuntimeansichten,Quellen,Notizen,Export,Desktop/Mobil geprueft. ErsterQA-Oraclefehler bleibt imDiagnosebericht erhalten; finaleHTMLbytes unveraendert erneutgeprueft. Browsernachweis unter browser_qa_pass07_paths/browser_qa.json.
 
 ### ART 2026-11-01 Pass06 Umgebung - Relief, Erosion und Materialabrieb
 - Code 5929d3dabf8535ba5652065110ae2252d5f38b69 committed und gepusht; bewusste Fortsetzung des unintegrierten Grafikbranches task/grafikreferenzen-20261101 auf04e934f60. Keine Main-/Kampagnenintegration und keine Astra-Adoption.
@@ -472,7 +472,7 @@
 - Direkter Vergleich Rostgrenze/Freihafen/taktische Karte mit nativen P4-Bildern: fehlende Formhierarchie, Bodenkontakte, ungleiche Komposition, Funktionsgruppen und Materialgewicht verursachen Sterilitaet; mehr gleichmaessige Details alleine haetten dies nicht geloest. Analyse in docs/reports/FRONTIER_UMGEBUNG_ANALYSE_2026-11-01.md.
 - Habitat mit gestaffeltem niedrigem Dach/Servicekanal und gefasstem Eingang; Halle mit hoeherer Lagerbay, niedrigerem seitlichen Buero und schwerem Portal. Eigene Godot-Huellen2588/2508Tris, Geometrie21/21, C-Umschalter und konservative Originalhuelle+.22 erhalten; keine neuen Lichter/Innenraum-/Torzustaende.
 - Felsen: asymmetrische Grundrisse, lokale Frontspalten/Bruchzonen, ungleiche Absaetze und abnehmender Talus statt periodischen Ringlippen.54Meshes/23112Vertices;14Anker/Navhuellen unveraendert(MaxDelta0.95Mikrometer), Geometrievertrag12/12.
-- Boden/Wege: breite Sedimenttoene, Boden-Kontaktshader mit lokalen Staub-/Verdichtungsfeldern unterPflaster, matter Vorplatz mit Gebrauchsstreifen, niedriges GerÃ¶ll als begrenzter MultiMesh. Drei funktionale Arbeits-/Liefer-/Versorgungsgruppen mit3originalKenneyGLBs/Atlas/Lizenzhashes und getrennt duplizierter warm getoenter Instanzmaterialroute.
+- Boden/Wege: breite Sedimenttoene, Boden-Kontaktshader mit lokalen Staub-/Verdichtungsfeldern unterPflaster, matter Vorplatz mit Gebrauchsstreifen, niedriges Geröll als begrenzter MultiMesh. Drei funktionale Arbeits-/Liefer-/Versorgungsgruppen mit3originalKenneyGLBs/Atlas/Lizenzhashes und getrennt duplizierter warm getoenter Instanzmaterialroute.
 - Vier originale Citizen-/Gear-GLBs/IdleWalk erhalten; Startpositionen/Blickrichtung am Arbeitsplatz statt Praesentationsreihe. NeueAufstellungs-/Kontaktpruefung19/19, gesamte strengeGodotSerie18/18 PASS.20nativeForward+/Vulkan-PNGs;9kamera-/lichtgleicheP4-P5Paare und3neueDetailkameras nurNachher. KeinefehlendenAssets.
 - Unabhaengige nativeSichtpruefung: keinekonkretenneuenBodenstands-/Normalen-/Ueberlappungsblocker. TechnischePruefung ist keinegestalterischeNutzerabnahme. Zielabstand bleibt bei ebenerBodenflaeche, grossenruhigenPlateaus, kompakterGesamtkomposition undgeringeremMaterial-/Erosions-/Gebrauchsreichtum.
 - FrischeOffline-Workbench297/297BrowserchecksPASS,111eingebetteteBilder/222Decodes,38Screenshotsplus5Sichtnachweise,2echteJSONexports. ExakterHTML-SHA256ab79aeec33e86fcf2c4cbe1751937dba6e1b6b8f81b84f2e355d2a51981a28aa;Analyse/9Paare/Detailkarten/Quellen/NotizenDesktopundMobilgeprueft.
@@ -541,20 +541,20 @@
 
 ### TASK_1198 - Simulation Command Attribution (P03)
 - Status: Diagnose abgeschlossen; keine Optimierung und keine Release-Freigabe.
-- Die offizielle 3-Kalt-/5-Warm-Serie auf `f84e7173fa2c7b255f5dac44fb2e85827229af2e` lieferte 8/8 Exit-0-Reports mit identischem SHA. Haupt-Scopes haben je 1200 Samples, `move_to_position` 204 und `hold_position` 350 conditional Samples. `command_queue_usec` p99: `66917,65097,68009,64018,63376,62608,62986,61257` (Range `61257â€“68009`, Median `63697`); Ordering: `29,27,29,29,33,29,29,28` (Range `27â€“33`, Median `29`); Apply: `66895,65065,67985,63987,63343,62577,62955,61228` (Range `61228â€“67985`, Median `63665`).
-- Command-Typen: `move_to_position` p99 `68407,69209,84284,67180,65820,79321,63413,60882` (Range `60882â€“84284`, Median `67793.5`), `hold_position` `2126,2070,2709,2230,2249,2305,2421,2102` (Range `2070â€“2709`, Median `2239.5`). Tick-Signal: `121134,117298,123024,117556,117661,117797,116420,112988` (Range `112988â€“123024`, Median `117608.5`); Simulation total: `122229,118298,126398,118745,119152,119801,117426,113832` (Range `113832â€“126398`, Median `118948.5`). TypzÃ¤hler p99 Ã¼berall `4/4`, Requeue p99 Ã¼berall `1/0`; die Typzeiten sind conditional und nicht additiv.
-- Der erste Kaltlauf auf `193c7362276a64af16f6fd7821e1f82c9ac82ed1` ist wegen fehlender Attribution im groÃŸen Fixture verworfen. Tests: TASK-1198 24/24, TASK-162 23/23, TASK-166 15/15, TASK-168 20/20, TASK-501 10/10, TASK-218 81/81. P04/TASK-1199 bearbeitet deterministisch `move_to_position` im Command-Apply-Pfad: Ordering unterschreitet 25 %, `67793.5 / 63665` Ã¼berschreitet 40 %; der Signalpfad wird deshalb nicht gewÃ¤hlt. Budgets bleiben rot.
+- Die offizielle 3-Kalt-/5-Warm-Serie auf `f84e7173fa2c7b255f5dac44fb2e85827229af2e` lieferte 8/8 Exit-0-Reports mit identischem SHA. Haupt-Scopes haben je 1200 Samples, `move_to_position` 204 und `hold_position` 350 conditional Samples. `command_queue_usec` p99: `66917,65097,68009,64018,63376,62608,62986,61257` (Range `61257–68009`, Median `63697`); Ordering: `29,27,29,29,33,29,29,28` (Range `27–33`, Median `29`); Apply: `66895,65065,67985,63987,63343,62577,62955,61228` (Range `61228–67985`, Median `63665`).
+- Command-Typen: `move_to_position` p99 `68407,69209,84284,67180,65820,79321,63413,60882` (Range `60882–84284`, Median `67793.5`), `hold_position` `2126,2070,2709,2230,2249,2305,2421,2102` (Range `2070–2709`, Median `2239.5`). Tick-Signal: `121134,117298,123024,117556,117661,117797,116420,112988` (Range `112988–123024`, Median `117608.5`); Simulation total: `122229,118298,126398,118745,119152,119801,117426,113832` (Range `113832–126398`, Median `118948.5`). Typzähler p99 überall `4/4`, Requeue p99 überall `1/0`; die Typzeiten sind conditional und nicht additiv.
+- Der erste Kaltlauf auf `193c7362276a64af16f6fd7821e1f82c9ac82ed1` ist wegen fehlender Attribution im großen Fixture verworfen. Tests: TASK-1198 24/24, TASK-162 23/23, TASK-166 15/15, TASK-168 20/20, TASK-501 10/10, TASK-218 81/81. P04/TASK-1199 bearbeitet deterministisch `move_to_position` im Command-Apply-Pfad: Ordering unterschreitet 25 %, `67793.5 / 63665` überschreitet 40 %; der Signalpfad wird deshalb nicht gewählt. Budgets bleiben rot.
 
 ### TASK_1197 - Selected combat hotspot (Task 3)
-- Status: Effect-Gate PASS; Evidence auf unverÃ¤ndertem Produktions-SHA `24f340d59dddd8ef59d69e617d3eac895eadeda4`.
+- Status: Effect-Gate PASS; Evidence auf unverändertem Produktions-SHA `24f340d59dddd8ef59d69e617d3eac895eadeda4`.
 - Die 3-cold/5-warm-Serie lieferte acht SHA-identische Exit-0-JSON-Zeilen. Pair Search p99 Median `32826.5` usec (min/max `30095/39599`) liegt 14.2374 % unter P01 `38276`. Contact `20885` (+4.3676 %, unter 5-%-Ceiling `21011.55`), Enemy-Tactics `23693.5` (-3.8745 %, unter `25880.925`) und Fire-Decision `39995` (-10.3070 %, unter `46820.55`) bestehen ebenfalls.
-- Combat-Gesamt `97210` und Simulation-Gesamt `98802.5` usec bleiben budgetÃ¼berschritten; keine Release-Freigabe. Direkte Gates: TASK-1197 35/35, TASK-1196 12/12, TASK-1191 12/12, TASK-162 23/23, TASK-208 57/57, TASK-218 81/81. NÃ¤chstes Paket: TASK-1198 Command-Type-Attribution.
+- Combat-Gesamt `97210` und Simulation-Gesamt `98802.5` usec bleiben budgetüberschritten; keine Release-Freigabe. Direkte Gates: TASK-1197 35/35, TASK-1196 12/12, TASK-1191 12/12, TASK-162 23/23, TASK-208 57/57, TASK-218 81/81. Nächstes Paket: TASK-1198 Command-Type-Attribution.
 
 ### TASK_1196 - Combat observed candidate index (Task 3)
 
-- Same-series `combat_scope.enemy_team_tactics_usec` p99 values (usec): `26351, 23876, 25094, 24608, 23346, 22949, 25116, 24689`; exact range `22949â€“26351`. Fire-find-contact-pair `36057â€“40881` remains larger than enemy-team-tactics and contact-tracking, so Rule 1 selects exactly `CombatVisibilityCache`.
+- Same-series `combat_scope.enemy_team_tactics_usec` p99 values (usec): `26351, 23876, 25094, 24608, 23346, 22949, 25116, 24689`; exact range `22949–26351`. Fire-find-contact-pair `36057–40881` remains larger than enemy-team-tactics and contact-tracking, so Rule 1 selects exactly `CombatVisibilityCache`.
 
-- Measurement completed on SHA `0b5fbbf32b317282938a9cbb850b17261f34ed1e`, Ryzen 7 7800X3D / 64 GB / Windows 10 19045 / Godot 4.6.2. Cold diagnostic and 3-cold/5-warm series exited 0; eight SHA-identical stdout JSON results. Oracle/regressions: TASK-1196 12/12, TASK-1191 12/12, TASK-162 23/23, TASK-208 57/57; resolver `legacy=3535`, `indexed=3535` (non-degradation only). Exact p99 ranges (usec): combat total `107998â€“111972`; simulation total `109227â€“113078`; fire-find-contact-pair `36057â€“40881`; contact tracking `19240â€“20403`; combat fire decision `42386â€“47341`. Total budgets remain exceeded. Independent cold plausibility command_queue p99 was 53255 usec; Rule 1 still precedes Rule 4 because Combat has not fallen in the release/budget sense and fire-find-contact-pair remains the largest exclusive Combat scope. After a budget-relevant Combat reduction, command-type attribution is required before SimulationRoot optimization. Next package exactly `CombatVisibilityCache` key/allocation-cost specification. Dynamic Overlay/FoW remain separate.
+- Measurement completed on SHA `0b5fbbf32b317282938a9cbb850b17261f34ed1e`, Ryzen 7 7800X3D / 64 GB / Windows 10 19045 / Godot 4.6.2. Cold diagnostic and 3-cold/5-warm series exited 0; eight SHA-identical stdout JSON results. Oracle/regressions: TASK-1196 12/12, TASK-1191 12/12, TASK-162 23/23, TASK-208 57/57; resolver `legacy=3535`, `indexed=3535` (non-degradation only). Exact p99 ranges (usec): combat total `107998–111972`; simulation total `109227–113078`; fire-find-contact-pair `36057–40881`; contact tracking `19240–20403`; combat fire decision `42386–47341`. Total budgets remain exceeded. Independent cold plausibility command_queue p99 was 53255 usec; Rule 1 still precedes Rule 4 because Combat has not fallen in the release/budget sense and fire-find-contact-pair remains the largest exclusive Combat scope. After a budget-relevant Combat reduction, command-type attribution is required before SimulationRoot optimization. Next package exactly `CombatVisibilityCache` key/allocation-cost specification. Dynamic Overlay/FoW remain separate.
 
 ### TASK_1195 - Tactical Performance Status Report
 - Status: Dokumentation erstellt und lokal geprueft
@@ -588,7 +588,7 @@
 
 ### TASK_1190 - Mission Runtime Index und HUD-Deltas
 - Status: implementiert und headless regressionsgeprueft
-- Aenderung: `MissionRuntimeIndex` cached die direkten Mission-Units als sortierte Friendly-/Enemy-/Fireteam-Lookups und invalidiert ausschlieÃŸlich bei einer Root-Membership-Aenderung. Der Tactical-Controller verwendet den Index fuer Friendly-, Enemy-, Fireteam- und Fireteam-ID-Lookups; er bleibt ein abgeleiteter Lookup und besitzt keine Gameplay-Wahrheit.
+- Aenderung: `MissionRuntimeIndex` cached die direkten Mission-Units als sortierte Friendly-/Enemy-/Fireteam-Lookups und invalidiert ausschließlich bei einer Root-Membership-Aenderung. Der Tactical-Controller verwendet den Index fuer Friendly-, Enemy-, Fireteam- und Fireteam-ID-Lookups; er bleibt ein abgeleiteter Lookup und besitzt keine Gameplay-Wahrheit.
 - HUD: `MissionHudReadModel` trennt leichte Command-/Selection-/Tile-Revisionen von breiten Heavy-Revisionen je Fireteam. Ein Security-Refresh vergleicht den betroffenen Fireteam-State direkt statt vorher/nachher den kompletten Snapshot per JSON zu serialisieren. Direkter Tile-Feedback bleibt synchron im bestehenden UI-Aufruf sichtbar.
 - Lokale Pruefung: TASK_1190 16/16, TASK_1152 18/18 und TASK_1157 35 Checks gruen. Die vollstaendige TASK_1187-Messserie (3 Kalt-/5 Warmlauefe, Godot 4.6.2, Ryzen 7 7800X3D) bestand als Measurement-Runner: `controller.execution_updates_usec` p99 0.228-0.316 ms (Ziel <= 4 ms) und `controller.hud_light_usec` p99 4.092-4.845 ms (Ziel <= 16.7 ms).
 - Risiken/offen: Die Serie markiert weiterhin die getrennten Combat-/Simulation-p99-Budgets sowie die einmalige LZ-Eingabe als ueberschritten. `terrain.fow_work_usec` lag in 2/8 Laeufen ueber 2 ms (2.057/2.897 ms); Dynamic Overlay war in einem Lauf ueber 1 ms. Diese Messbefunde sind nicht durch Task 1190 verdeckt und bleiben fuer die nachfolgenden Slices offen.
@@ -1476,7 +1476,7 @@
 ### TASK_1090 - Two-Player Station Route Decision Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1090_two_player_station_route_decision_playtest.md`, TASK_712, TASK_714, TASK_1082, TASK_1083
-- Stand: Der aktuelle Godot-4.6.2-Zwei-Fensterlauf zeigt Host `P1 ALPHA` und Client `P2 BRAVO` mit derselben Station-Route-Karte, lokal getrennten Fireteam-Mini-Cards und initial ausgewÃ¤hlten lokalen Mitgliedern.
+- Stand: Der aktuelle Godot-4.6.2-Zwei-Fensterlauf zeigt Host `P1 ALPHA` und Client `P2 BRAVO` mit derselben Station-Route-Karte, lokal getrennten Fireteam-Mini-Cards und initial ausgewählten lokalen Mitgliedern.
 - Architektur: Controller-Commands und UI lesen die lokale Peer-/Review-Team-Perspektive. Der Szenario-Bootstrap bleibt unveraendert autoritativ; nur die FoW-Darstellung erhaelt mit `fog_viewer_team_id` eine getrennte lokale Sichtperspektive.
 - Ursache/Fix: Der Controller war an mehreren Stellen fest auf `team_alpha` verdrahtet, Bravo-Szenario-Gruppen verloren ihre Fireteam-ID, und es gab keine stabile initiale Auswahl. Diese drei Uebergaben sind jetzt lokal-perspektivisch und regressionsgesichert.
 - Risiken/offen: Der Capture-Helfer startet zwei unabhaengige Sichtinstanzen und ist noch kein echter verbundener Station-Route-Match. Der 192x192-Unterbau ist fuer parallele Debug-Instanzen schwer; feste Capture-Wartezeiten sind unzuverlaessig.
@@ -1563,7 +1563,7 @@
 ### TASK_1058 - Embarked Fireteam Selected HUD Truth
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1058_embarked_fireteam_selected_hud_truth.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
-- Stand: Der Selected-Fireteam-Renderer filtert eingebarkte Units jetzt immer aus den Boden-Member-Cards. Bei erhaltener Fireteam-Auswahl zeigt #17 die klare Zeile `Fireteam im Dropship.`; nach Deboarding werden die regulÃ¤ren Member-Cards wieder aufgebaut.
+- Stand: Der Selected-Fireteam-Renderer filtert eingebarkte Units jetzt immer aus den Boden-Member-Cards. Bei erhaltener Fireteam-Auswahl zeigt #17 die klare Zeile `Fireteam im Dropship.`; nach Deboarding werden die regulären Member-Cards wieder aufgebaut.
 - Ursache/Fix: Der alte Sonderpfad erkannte den Embarked-State, uebersprang danach aber den Ground-Filter. Renderer und Runtime-Signatur folgen jetzt derselben Ground-Unit-Regel wie die linke Mini-Card-Liste.
 - Lokale Pruefung: `task_503_mission_dropship_fireteam_hud_truth.gd` 10/10, `task_396_mission_dropship_lz_drop_hotfix.gd` 17/17.
 - Naechster Schritt: Mehr-Fireteam First Contact nach Deboarding mit Combat-Registry und LOS.
@@ -3905,7 +3905,7 @@
 - Relevante Docs/Contracts: `docs/tasks/TASK_845_release_first_exchange_real_window_recapture.md`, `docs/tasks/TASK_844_release_first_exchange_tension_tuning.md`, `docs/dev/mission_command_feedback_contract.md`
 - Stand: `capture_release_first_exchange_real_window.ps1` haengt einen eigenen TASK_845-Recapture an den bestehenden TASK_837-First-GO-Firefight-Capture und nutzt weiter `--release-singleplayer-first-go-firefight`.
 - Stand: Das Manifest `tmp/release_first_exchange_real_window_recapture.json` nennt TASK_844 als Quelle, erwartet Schema `sternenbuergerchen.release_first_exchange_tension_tuning.v1` und Style-ID `task_844_release_first_exchange_tension_tuning_v1`.
-- Stand: Eigene Desktop-/Window-Screenshotpfade und Pflichtchecks pruefen den echten Fensterblick auf sichtbares `CONTACT FIRE`, FireEvent-/Trace-/Impact-Lesbarkeit, Gegner-/Fireteam-Kontext und weiter bedienbare HUD-/Command-FlÃ¤chen.
+- Stand: Eigene Desktop-/Window-Screenshotpfade und Pflichtchecks pruefen den echten Fensterblick auf sichtbares `CONTACT FIRE`, FireEvent-/Trace-/Impact-Lesbarkeit, Gegner-/Fireteam-Kontext und weiter bedienbare HUD-/Command-Flächen.
 - Stand: `docs/reports/release_first_exchange_zwischenbericht_2026_07_08.html` fasst Arbeitsstand, echten Fensterbefund, lokale Screenshot-Referenz und naechste Polish-Entscheidung als JSON-exportierbare Workbench zusammen.
 - Risiken/offen: Der Recapture erzeugt Evidenz, bewertet aber den PNG-Befund nicht automatisch; die visuelle Bewertung bleibt TASK_846.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_845_release_first_exchange_real_window_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_844_release_first_exchange_tension_tuning.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_real_window.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 32`, `git diff --check`.
@@ -4683,7 +4683,7 @@
 - Relevante Docs/Contracts: `docs/tasks/TASK_776_station_reentry_contact_pressure_feel_pass.md`, `docs/tasks/TASK_775_station_reentry_mission_interaction_feel_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
 - Stand: `StationReentryContactPressureFeelPass` bewertet TASK_775-Interaction-Feel, Contact-Report, Threat-/Risk-Preview, Pressure-/Engagement-Feedback und kompakte Combat-HUD-Zeile als read-only Contact-Pressure-Gate.
 - Stand: Bei sichtbarer Kontaktmeldung, Risk-/LOS-Grund, Fire/Wait/No-Fire-Druck und Contact/Risk/LOS/Cover-HUD meldet der Snapshot `ready_for_contact_pressure_playtest`; einzelne Luecken routen gezielt zu Contact-, Threat-, Pressure- oder HUD-Polish.
-- Risiken/offen: Der Pass beweist Lesbarkeit des ersten Druckmoments, aber noch keine Qualitaet der eigentlichen KampfauflÃ¶sung oder echte Spannung ueber mehrere Feuerwechsel.
+- Risiken/offen: Der Pass beweist Lesbarkeit des ersten Druckmoments, aber noch keine Qualitaet der eigentlichen Kampfauflösung oder echte Spannung ueber mehrere Feuerwechsel.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_776_station_reentry_contact_pressure_feel_pass.gd`, TASK_775 Regression, `git diff --check`.
 - Naechster Schritt: TASK_777 - Station Reentry Firefight Tension Feel Pass (implementiert); danach TASK_778 - Station Reentry Firefight Visual Playtest Packet.
 
@@ -6139,7 +6139,7 @@
 - Stand: Nicht-headless Laeufe muessen einen echten Viewport-Readback liefern; Headless-Laeufe erzeugen ein markiertes Evidence-Board und lassen den menschlichen Fensterentscheid offen.
 - Risiken/offen: TASK_656 bewertet keine finale Optik. Konkrete Sichtbefunde gehoeren in TASK_657.
 - Lokale Pruefung: `task_656_frontier_probe_real_f6_visual_review.gd`, `task_655_frontier_probe_one_screen_visual_tuning_findings.gd`, `task_654_frontier_probe_one_screen_f6_playtest_notes.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_657 - Frontier Probe F6 Visual Polish Findings`, falls der echte F6-Blick Platzierung, Kontrast oder Dichte bemÃ¤ngelt.
+- Naechster Schritt: `TASK_657 - Frontier Probe F6 Visual Polish Findings`, falls der echte F6-Blick Platzierung, Kontrast oder Dichte bemängelt.
 
 ### TASK_657 - Frontier Probe F6 Visual Polish Findings
 - Status: implementiert im Arbeitsstand
@@ -6234,7 +6234,7 @@
 ### TASK_667 - Map Editor Persistent Palette Presets
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_667_map_editor_persistent_palette_presets.md`, `docs/tasks/TASK_516_editor_builder_ux_pass.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
-- Stand: `map_editor.tscn` laedt lokale Palette-ArbeitsprÃ¤ferenzen aus `user://map_editor_builder_preferences.json` und speichert Favoriten, Recent-Assets sowie Placement-Scale bei Aenderungen.
+- Stand: `map_editor.tscn` laedt lokale Palette-Arbeitspräferenzen aus `user://map_editor_builder_preferences.json` und speichert Favoriten, Recent-Assets sowie Placement-Scale bei Aenderungen.
 - Stand: Der Palette-Snapshot nennt Pfad, Schema, Lade-/Speicherstatus, Zaehler und `ui_sets_gameplay_truth = false`, damit die Grenze zwischen Editor-Komfort und Gameplay-/Map-Wahrheit sichtbar bleibt.
 - Stand: `task_667_map_editor_persistent_palette_presets.gd` beweist mit zwei Editor-Instanzen, dass `factory_building_a`, `station_set_door_single` und Scale `1.6` persistent bleiben und der Favoritenfilter nach Neustart weiter funktioniert.
 - Risiken/offen: TASK_667 speichert noch keine Asset-Override-Presets pro Asset oder geteilte Team-/Projektprofile. TASK_666 bleibt als echter Host/Client-Fensterklickbefund offen.
@@ -6762,7 +6762,7 @@
 - Stand: Der sichtbare Mission-Teamchip nutzt nun kompakte Owner-/Spawn-Tokens (`Host`, `P2`, `A-LZ`, `B-LZ`), damit #18 Mission Control im echten F6-Fenster nicht mehr unruhig ueber mehrere Zeilen bricht.
 - Stand: Tooltip und `status_text` behalten die vollstaendigen Multiplayer-Daten (`Host Peer 1`, `Peer 2`, `spawn_alpha`, `spawn_bravo`); die UI verschiebt keine Gameplay-Wahrheit.
 - Stand: `get_frontier_probe_multiplayer_f6_hover_panel_polish_snapshot()` prueft Teamchip-Hover, sichtbare Textlaenge, Tooltip-Volltext, Einzeilen-Konfiguration, Panel-Bounds und Bottom-HUD-Weltverdeckung read-only.
-- Risiken/offen: Native Tooltip-Position bleibt engine-seitig; TASK_566 prueft Hoverbarkeit und geschÃ¤tzte Panel-/Weltverdeckung, ersetzt aber keinen finalen Spielgefuehl-Test.
+- Risiken/offen: Native Tooltip-Position bleibt engine-seitig; TASK_566 prueft Hoverbarkeit und geschätzte Panel-/Weltverdeckung, ersetzt aber keinen finalen Spielgefuehl-Test.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_566_frontier_probe_multiplayer_f6_hover_panel_polish_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_560_frontier_probe_multiplayer_teamchip_tooltip_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_565_frontier_probe_multiplayer_real_f6_screenshot_review_pass.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_567 - Frontier Probe First Move Threat Preview Readability Pass`, damit die erste Bewegungsentscheidung wieder staerker in Richtung taktischer Entscheidungsklarheit geht.
 
@@ -7107,7 +7107,7 @@
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_533_recommended_loadout_selection_bridge.md`, `docs/tasks/TASK_532_briefing_background_loadout_recommendation_polish.md`, `docs/dev/mission_briefing_contract.md`, `docs/tasks/TASK_528_rolling_html_status_report.md`
 - Stand: `MissionBriefingPanelPresenter` liefert pro Empfehlung stabile `recommendation_id`-Felder, Waffen-IDs und eine read-only `loadout_patch_preview`.
-- Stand: `HomebaseTestScreen` rendert Briefing-Empfehlungen als auswÃ¤hlbare Karten mit separatem Apply-Button und Statuslabel.
+- Stand: `HomebaseTestScreen` rendert Briefing-Empfehlungen als auswählbare Karten mit separatem Apply-Button und Statuslabel.
 - Stand: Der Apply schreibt erst nach Bestaetigung in den bestehenden Homebase-Member-Loadout-Sync und veraendert keinen Missionsruntime-State.
 - Stand: Der Rolling-HTML-Bericht nennt TASK_533 als aktuellen Zwischenstand und haelt offene naechste Schritte sichtbar.
 - Risiken/offen: Die Anwendung ist homogen fuer gestagte Operatoren; rollenfeine Verteilung und manueller FullHD-Sichttest bleiben Folgearbeit.
@@ -8376,7 +8376,7 @@
 - Relevante Docs/Contracts: `docs/tasks/TASK_408_static_nature_prop_multimesh_batching.md`, `docs/tasks/TASK_254_nature_trees_rocks_vegetation_cover_props.md`, `docs/tasks/TASK_294_nature_prop_scale_cover_visibility_repair.md`, `docs/tasks/TASK_407_static_tile_visual_batching_completion.md`, `docs/performance/2_5d_rendering_profile_report.md`, `docs/dev/nature_terrain_prop_rules.md`
 - Stand: `TerrainMap3DView` batcht jetzt die fuenf sicheren Nature-Prop-Typen (`nature_tree_blocker`, `nature_rock_cover`, `nature_bush_cover`, `nature_cactus_cover`, `nature_deco_logs`) pro Modell, Rotation und 8x8-Karten-Chunk als `MultiMeshInstance3D`.
 - Stand: Die Gameplay-Wahrheit bleibt unveraendert in `TerrainTileData` und `TerrainRegistry`. `nature_prop_model_count`, Rollenverteilung und `nature_prop_visual_entries` bleiben Coverage-/Diagnosedaten pro Prop; neue Snapshot-Zaehler `static_prop_individual_model_count`, `static_prop_multimesh_instance_count` und `static_prop_multimesh_model_count` trennen Batch- und Einzelmodellpfade.
-- Stand: WÃ¤nde, Struktur-Layer, Space-Station-Interieur, Fahrzeuge, Units, Dropships, Skeletons, Labels und UI bleiben bewusst im bestehenden Pfad. Nicht freigegebene oder nicht eindeutig extrahierbare Objektmodelle werden nicht pauschal gebatcht.
+- Stand: Wände, Struktur-Layer, Space-Station-Interieur, Fahrzeuge, Units, Dropships, Skeletons, Labels und UI bleiben bewusst im bestehenden Pfad. Nicht freigegebene oder nicht eindeutig extrahierbare Objektmodelle werden nicht pauschal gebatcht.
 - Risiken: MultiMesh reduziert Node-/Instance-Druck fuer prop-dichte Nature-Karten, ersetzt aber keinen echten Godot-Profiler-Lauf auf sehr grossen Karten. Weitere Objektklassen brauchen eigene Sicht-/Interaktionspruefung, weil einige Tests und Editor-Workflows konkrete Einzelobjekt-Nodes erwarten.
 - Lokale Pruefung: `task_408_static_nature_prop_multimesh_batching.gd`, `task_254_nature_trees_rocks_vegetation_cover_props.gd`, `task_294_nature_prop_scale_cover_visibility_repair.gd`, `task_255_nature_kit_hill_playability_visual_performance_smoke.gd`, `task_216_2_5d_rendering_node_draw_budget_pass.gd`, `task_298_editor_terrain_visual_playability_smoke.gd`, `task_407_static_tile_visual_batching_completion.gd`, `task_185_hill_visuals_edge_lines_verifier.gd` und `bugfix_map_editor_station_floor_structure_undo.gd` laufen gruen.
 - Offener Hinweis: Der alte breite `task_159_verifier.gd` ist als Batching-Gate nicht mehr aktuell; er sucht teilweise konkrete Ground-Einzel-Nodes und meldet zusaetzlich bestehende Unit-/Dropship-Ausrichtungschecks rot. Die aktuellen spezialisierten Render-/Batching-Gates sind fuer diesen Arbeitsstand massgeblich.
@@ -8893,7 +8893,7 @@
 - Stand: Homebase-Direct-`Send` aktiviert den `TransportTimer` sofort nach dem Anlegen des craft-spezifischen `to_mission`-Transfers. Homebase- und Mission-Karten koennen dadurch ohne Mission-Map-Navigationsklick weiter Progress anzeigen.
 - Stand: Mission-Dropshipkarten seed-en LZ-Scalar-Felder bei mehreren Karten nur noch aus echten positiven LZ-Daten. Eine neue Alpha-LZ loescht Beta-LZ/Approach nicht mehr, und Alpha/Beta koennen parallel inbound gehen.
 - Stand: Der 3D-Anflugvektor wird als breite Pfeilform aus dem geplanten Approach-Ursprung zur LZ gerendert. Render-Snapshots melden `dropship_approach_vector_shape = wide_arrow` und `dropship_approach_arrow_count`.
-- Risiken: Der Drag-Refresh-Guard verzÃ¶gert nur die visuelle Rebuild-Aktualisierung waehrend des Drags; Boarding-State laeuft weiter. Die finale Pfeilbreite/-Form bleibt ein manueller FullHD-Sichtcheck.
+- Risiken: Der Drag-Refresh-Guard verzögert nur die visuelle Rebuild-Aktualisierung waehrend des Drags; Boarding-State laeuft weiter. Die finale Pfeilbreite/-Form bleibt ein manueller FullHD-Sichtcheck.
 - Lokale Pruefung: `task_395_manual_dropship_parallel_flow.gd`, `task_394_per_craft_shipcard_commands.gd`, `task_393_direct_dropship_independence_lz_vector.gd`, `task_392_parallel_boarding_transit_feedback.gd`, `task_390_homebase_direct_mission_transit_cards.gd` und `git diff --check` laufen gruen.
 
 ### TASK_396 - Mission Dropship LZ Drop Hotfix
@@ -10232,267 +10232,267 @@
 - Risiken: Die Simulation bleibt weiterhin auf den bestehenden `Node2D`-Runtime-Ankern. Die 3D-View ist Darstellung und Eingabeprojektion, nicht Gameplay-Wahrheit.
 - Naechster Schritt: Manuelle Godot-Pruefung von Mission Start -> LZ setzen -> Dropship Call -> Attack Area mit sichtbarer kalibrierter 3D-Map.
 
-### TASK_001 â€“ RuntimeLeader / FTL
+### TASK_001 – RuntimeLeader / FTL
 - Status: implementiert
 - Stand: `RuntimeLeader` als eigene `Node`-Komponente mit `class_name`, Signalen fuer Promotion, Demotion, Assignment und Command-Weitergabe sowie der API `promote()`, `demote()`, `assign(entity)` und `command(order)` eingefuehrt.
 - Offene Punkte: keine FTL-Ausfuehrungslogik, keine Befehlsinterpretation, keine EventRouter- oder SimulationRoot-Anbindung, keine Szenenverdrahtung.
 - Risiken: Signalvertraege und Zustandsbasis stehen, die spaetere Einbindung in autoritative Gameplay-Systeme muss konsistent bleiben.
 - Naechster Schritt: RuntimeLeader an EventRouter und SimulationRoot anbinden, sobald die Folgesysteme implementiert sind.
 
-### TASK_002 â€“ EventRouter
+### TASK_002 – EventRouter
 - Status: implementiert
 - Stand: `EventRouter` als eigene `Node`-Komponente mit Signalen fuer Squad-Commands, Unit-Ausfaelle, Threat-Meldungen, Leader-Wechsel und Respawn-Anfragen sowie schlanken Routing-Methoden eingefuehrt.
 - Offene Punkte: keine RuntimeLeader-Anbindung, keine Missionslogik, kein Autoload, keine SimulationRoot- oder Registry-Integration.
 - Risiken: Die Signalvertraege stehen, die spaetere Einbindung muss ohne harte Direktkopplung zwischen Runtime-Systemen, UI und Autoritaetslogik erfolgen.
 - Naechster Schritt: EventRouter an kommende Systeme anbinden, sobald SimulationRoot und weitere Laufzeitkomponenten existieren.
 
-### TASK_003 â€“ SimulationRoot mit Command- und Effects-Queues, deterministischer Tick-Verarbeitung in `_physics_process()`, Guard-Checks, Stub-Apply-Methoden und `tick_processed`-Signal eingefuehrt.
+### TASK_003 – SimulationRoot mit Command- und Effects-Queues, deterministischer Tick-Verarbeitung in `_physics_process()`, Guard-Checks, Stub-Apply-Methoden und `tick_processed`-Signal eingefuehrt.
 - Offene Punkte: keine Gameplay-Mechanik, keine Missionslogik, keine Registry- oder UpdateManager-Anbindung, keine Zustandsmutation an fremden Nodes.
 - Risiken: Die autoritative Verarbeitungsstruktur steht, die spaetere Befehls- und Effektsemantik muss strikt innerhalb von `SimulationRoot` bleiben.
 - Naechster Schritt: konkrete Command- und Effect-Typen einfuehren, sobald die Folgesysteme definiert sind.
 
-### TASK_013 â€“ Commander Command Model
+### TASK_013 – Commander Command Model
 - Status: implementiert
 - Stand: `CommanderCommand` als leichtgewichtiges datenorientiertes Modell unter `res://scripts/command/commander_command.gd` eingefuehrt; formalisiert die aktuell bekannten Commander-Befehlstypen `move`, `take`, `defend` und `flank` sowie `priority`, `unit_id`, `team_id`, optional `target_position` und `phase`.
 - Offene Punkte: keine echte Befehlsausfuehrung, keine FTL-Entscheidungslogik, keine UI-Bindings und keine tiefere Command-Semantik ueber den reinen Datenvertrag hinaus.
 - Risiken: Der aktuelle Vertrag ist bewusst klein und Dictionary-kompatibel; spaetere Erweiterungen muessen die bestehende `"type"`-Kompatibilitaet zu RuntimeLeader/EventRouter/SimulationRoot erhalten.
 - Naechster Schritt: das Modell bei Bedarf in kleine Integrationspfade einspeisen, ohne die bestehenden Runtime-Systeme von Dictionary-Vertraegen abrupt zu entkoppeln.
 
-### TASK_014 â€“ FTL Task Model
+### TASK_014 – FTL Task Model
 - Status: implementiert
 - Stand: `FTLTask` als leichtgewichtiges datenorientiertes Modell unter `res://scripts/ftl/ftl_task.gd` eingefuehrt; formalisiert die minimalen FTL-Task-Typen `seek_cover`, `move_to_area`, `engage_in_area`, `hold_position` und `retreat` sowie `priority`, `unit_id`, `team_id`, optional `target_position`, `target_area_id`, `source_command_type` und `phase`.
 - Offene Punkte: keine echte Task-Ausfuehrung, keine RuntimeLeader-AI, keine Uebersetzungslogik aus Commander-Befehlen und keine UI-Bindings.
 - Risiken: Das Modell ist bewusst klein und dictionary-orientiert; spaetere Erweiterungen sollten diese Datenkompatibilitaet erhalten und keine versteckte Ausfuehrungslogik in das Modell ziehen.
 - Naechster Schritt: bei Bedarf spaeter einen kleinen, expliziten Uebersetzungspfad von Commander-Commands zu FTL-Tasks ergaenzen, ohne die Modelle eng zu koppeln.
 
-### TASK_015 â€“ Command to FTLTask Translator
+### TASK_015 – Command to FTLTask Translator
 - Status: implementiert
 - Stand: ein schlanker `CommandToFTLTaskTranslator` unter `res://scripts/command/command_to_ftltask_translator.gd` uebersetzt gueltige `CommanderCommand`-Daten in `FTLTask`-Daten.
 - Offene Punkte: keine echte FTL-Entscheidungslogik, keine Task-Queue, keine RuntimeLeader-Erweiterung und keine Ausfuehrung in `SimulationRoot`.
 - Risiken: Die V1-Abbildung ist bewusst einfach und statisch; spaetere feinere taktische Zerlegung von `take` und `flank` muss explizit und separat eingefuehrt werden.
 - Naechster Schritt: spaeter Integration in RuntimeLeader / SimulationRoot, ohne neue Kopplungen aufzubauen.
-### TASK_018 â€“ FTL-State-Modell minimal
+### TASK_018 – FTL-State-Modell minimal
 - Status: implementiert
 - Stand: `FTLRuntimeStatus` unter `res://scripts/ftl/ftl_runtime_status.gd` formalisiert jetzt einen kleinen Laufzeitstatus fuer FTLs mit den erlaubten Werten `idle`, `seeking_cover`, `moving_to_area`, `engaging_in_area`, `holding_position` und `retreating` sowie einem einfachen Dictionary-Roundtrip.
 - Offene Punkte: noch keine RuntimeLeader-Anbindung, keine Status-Uebergaenge aus FTLTasks und keine Ausfuehrungslogik.
 - Risiken: Das Modell ist bewusst klein und statuszentriert; spaetere Erweiterungen sollten keine versteckte Gameplay-Logik in den Datentraeger ziehen.
 - Naechster Schritt: einen minimalen Uebergang von `FTLTask` zu `FTLRuntimeStatus` im `RuntimeLeader` abbilden.
 
-### TASK_019 â€“ minimaler FTLTask -> RuntimeStatus Uebergang
+### TASK_019 – minimaler FTLTask -> RuntimeStatus Uebergang
 - Status: implementiert
 - Stand: `RuntimeLeader` erzeugt jetzt beim minimalen Verarbeiten eines gueltigen `FTLTask` einen passenden `FTLRuntimeStatus`; dabei werden `seek_cover`, `move_to_area`, `engage_in_area`, `hold_position` und `retreat` auf die entsprechenden Laufzeitstatus abgebildet und ueber `runtime_status_changed(...)` signalisiert.
 - Offene Punkte: keine tiefere Statusmaschine, keine Task-Abschlusslogik, keine Ausfuehrung und keine Rueckuebergaenge nach `idle`.
 - Risiken: Der Uebergang ist bewusst rein datenbasiert und einseitig; spaetere komplexere Statuswechsel muessen explizit auf diesem einfachen Mapping aufbauen.
 - Naechster Schritt: spaetere Statuswechsel und Task-Lebenszyklen nur dann ergaenzen, wenn dafuer ein klarer eigener Task vorliegt.
 
-### TASK_020 â€“ minimaler UnitCommand-Stub
+### TASK_020 – minimaler UnitCommand-Stub
 - Status: implementiert
 - Stand: `UnitCommand` unter `res://scripts/npc/unit_command.gd` formalisiert jetzt minimale Unit-Kommandos als Datenmodell mit den Typen `move_to_position`, `hold_position`, `engage_area`, `retreat` und `seek_cover` sowie kleinem Dictionary-Roundtrip.
 - Offene Punkte: keine TestUnit-Anbindung, keine Ausfuehrung, keine Navigation und keine Runtime-Integration.
 - Risiken: Das Modell ist bewusst nur ein Datentraeger; spaetere Unit-Logik muss darauf aufsetzen, ohne versteckte Wirkung in das Modell zu verlagern.
 - Naechster Schritt: ein minimales Runtime-Status-Modell fuer `TestUnit` ergaenzen.
 
-### TASK_021 â€“ TestUnit Runtime-Status
+### TASK_021 – TestUnit Runtime-Status
 - Status: implementiert
 - Stand: `UnitRuntimeStatus` unter `res://scripts/npc/unit_runtime_status.gd` formalisiert die minimalen Unit-Zustaende `idle`, `assigned`, `pending_move` und `holding`; `TestUnit` unter `res://scripts/npc/test_unit.gd` traegt jetzt einen solchen Laufzeitstatus und signalisiert Statuswechsel ueber `runtime_status_changed(...)`.
 - Offene Punkte: noch keine FTLTask-Zuweisung, keine UnitCommand-Anbindung und keine Ausfuehrungslogik.
 - Risiken: Der Unit-Zustand ist bewusst klein und datenbasiert; spaetere Command- oder Simulationslogik darf diesen Datentraeger nicht still zur Gameplay-Wahrheit ausbauen.
 - Naechster Schritt: einen minimalen FTLTask -> Unit-Zuweisungspfad ergaenzen.
 
-### TASK_022 â€“ FTLTask -> Unit-Zuweisung
+### TASK_022 – FTLTask -> Unit-Zuweisung
 - Status: implementiert
 - Stand: `RuntimeLeader` kann den aktuell gehaltenen `FTLTask` jetzt minimal auf die aktuell referenzierte `TestUnit` abbilden; dafuer wird ein einfacher `UnitCommand` erzeugt und ueber `assign_current_ftl_task_to_unit()` an die Unit uebergeben.
 - Offene Punkte: noch keine Mehrfach-Unit-Verteilung, keine Registry-Anbindung und keine Ausfuehrungslogik.
 - Risiken: Die Abbildung bleibt bewusst direkt und lokal; spaetere komplexere Verteilung oder feinere Unit-Kommandosemantik muss explizit in eigenen Tasks folgen.
 - Naechster Schritt: mehrere Units pro FTL als reinen Datenfluss ergaenzen.
 
-### TASK_023 â€“ mehrere Units pro FTL
+### TASK_023 – mehrere Units pro FTL
 - Status: implementiert
-- Stand: `RuntimeLeader` kann jetzt mehrere unit-aehnliche Referenzen ueber `add_unit_member(...)` halten und den aktuellen `FTLTask` ueber `assign_current_ftl_task_to_all_units()` minimal an 2â€“3 Units als reine Datenzuweisung verteilen.
+- Stand: `RuntimeLeader` kann jetzt mehrere unit-aehnliche Referenzen ueber `add_unit_member(...)` halten und den aktuellen `FTLTask` ueber `assign_current_ftl_task_to_all_units()` minimal an 2–3 Units als reine Datenzuweisung verteilen.
 - Offene Punkte: keine Registry-Nutzung, keine differenzierte Verteilung pro Unit und keine Ausfuehrungslogik.
 - Risiken: Die Mehrfachverteilung ist bewusst identisch fuer alle gehaltenen Units; spaetere feinere Aufteilung oder Priorisierung muss explizit und separat eingefuehrt werden.
 - Naechster Schritt: den Batch abschliessen und erst im naechsten Batch sichtbare Reaktion oder Missionsszenen ergaenzen.
 
 
 
-### TASK_024 â€“ minimale Missions-Testszene
+### TASK_024 – minimale Missions-Testszene
 - Status: implementiert
 - Stand: eine minimale Start- und Testszene unter `res://scenes/tests/mission_reactivity_test.tscn` haelt jetzt `SimulationRoot`, `EventRouter`, `UnitRegistry`, `FTLRegistry`, `UpdateManager`, einen `RuntimeLeader`, drei `TestUnit`-Instanzen und einen einfachen Zielmarker zusammen; ein kleiner Setup-Node registriert Units und FTL ueber direkte Referenzen.
 - Offene Punkte: noch keine Move-Daten, keine sichtbare Reaktion, keine echte Missionslogik und keine autoritative Positionsveraenderung.
 - Risiken: die Szene ist bewusst nur ein kontrolliertes Integrationsfeld; spaetere sichtbare Reaktion muss weiter ohne globale SceneTree-Suchen und ohne verdeckte Logik im Setup-Glue folgen.
 - Naechster Schritt: eine minimale Zielposition als Daten an die Unit-Ebene haengen.
 
-### TASK_025 â€“ Move-Target als Daten
+### TASK_025 – Move-Target als Daten
 - Status: implementiert
 - Stand: `UnitRuntimeStatus` und `TestUnit` koennen jetzt optional eine `target_position` als reinen Datenwert halten; bei einem `UnitCommand` mit Zielposition wird dieser Wert in den Runtime-Status der Unit uebernommen.
 - Offene Punkte: noch keine autoritative Bewegung, keine Navigation und keine sichtbare Reaktion in der Szene.
 - Risiken: die Zielposition ist bewusst nur vorbereitende Datenhaltung; spaetere Bewegung darf weiterhin nur ueber `SimulationRoot` committen.
 - Naechster Schritt: einen minimalen autoritativen Move-Pfad im `SimulationRoot` ergaenzen.
 
-### TASK_026 Ã¢â‚¬â€œ minimaler Move im SimulationRoot
+### TASK_026 â€“ minimaler Move im SimulationRoot
 - Status: implementiert
 - Stand: `SimulationRoot` kann jetzt einen minimalen `move_to_position`-Command ueber direkte `UnitRegistry`-Referenz verarbeiten und eine `TestUnit` als `Node2D` in kleinen Schritten pro Physics-Tick Richtung `target_position` bewegen.
 - Offene Punkte: keine Navigation, keine Kollisionslogik, kein Pathfinding, keine Formationen und keine Abschlusslogik bei Zielerreichung.
 - Risiken: die Bewegung ist bewusst nur ein sehr kleiner Testpfad; spaetere echte Fortbewegung darf nicht durch versteckte Nebenlogik ausserhalb von `SimulationRoot` wachsen.
 - Naechster Schritt: den ersten sichtbaren Commander -> FTL -> Unit-Flow ueber diesen Move-Pfad integrieren.
 
-### TASK_027 Ã¢â‚¬â€œ erster sichtbarer Commander -> FTL -> Unit-Flow
+### TASK_027 â€“ erster sichtbarer Commander -> FTL -> Unit-Flow
 - Status: implementiert
 - Stand: ein kleiner `MissionCommandFlowDriver` erzeugt jetzt einen `CommanderCommand`, leitet ihn ueber `RuntimeLeader.command(...)` und `EventRouter` in den bestehenden `CommandToFTLTaskTranslator`, laesst den resultierenden `FTLTask` im `RuntimeLeader` in einen `UnitCommand` uebergehen und enqueued diesen anschliessend in `SimulationRoot`; in der Testszene reagiert `UnitAlpha` dadurch sichtbar mit Bewegung Richtung Zielmarker.
 - Offene Punkte: keine Formation, keine Taktiklogik, keine Mehrfachverteilung ueber den Commander-Pfad und keine Missionsmechanik.
 - Risiken: der sichtbare Flow ist bewusst ein einzelner Happy Path fuer `move`; spaetere Kommandotypen und Team-Flows muessen explizit und separat folgen.
 - Naechster Schritt: nach Batch-Abschluss Godot-Start und Integrationsstand erneut pruefen, bevor weitere sichtbare Systeme folgen.
 
-### TASK_028 â€“ minimales LOS-System
+### TASK_028 – minimales LOS-System
 - Status: implementiert
 - Stand: `LineOfSightSystem` unter `res://scripts/core/los_system.gd` liefert jetzt einen sehr kleinen geometriebasierten Sichtliniennachweis zwischen zwei Punkten, einer `Node2D` und einer Zielposition oder zwei `Node2D`-Referenzen auf Basis einer einfachen Distanzgrenze.
 - Offene Punkte: keine Hindernispruefung, keine Raycasts, keine Performance-Optimierung und keine Kopplung an spaetere Combat- oder FOW-Systeme.
 - Risiken: der Sichtkontakt ist bewusst nur ein Distanz- und Referenznachweis; spaetere echte Deckungs- oder Blockerlogik muss explizit und separat folgen.
 - Naechster Schritt: eine minimale Fog-of-War-Sichtbarkeit auf diesem LOS-Nachweis aufbauen.
 
-### TASK_029 â€“ minimales Fog of War
+### TASK_029 – minimales Fog of War
 - Status: implementiert
 - Stand: `FogOfWarSystem` unter `res://scripts/core/fog_of_war_system.gd` verwaltet jetzt einen kleinen booleschen Sichtbarkeitszustand pro `team_id` und `target_id` und kann diesen direkt aus dem bestehenden `LineOfSightSystem` aktualisieren.
 - Offene Punkte: keine Darstellung, keine Shader, keine Mehrbeobachter-Aggregation und kein finales FOW-System.
 - Risiken: das System ist bewusst nur ein datenbasierter Sichtbarkeitscontainer; spaetere echte FOW-Darstellung oder Kartenlogik muss separat und explizit darauf aufsetzen.
 - Naechster Schritt: einen minimalen Treffer-/Damage-Pfad auf dem bestehenden Test- und Simulationsaufbau ergaenzen.
 
-### TASK_030 â€“ minimales Treffer-/Damage-Modell
+### TASK_030 – minimales Treffer-/Damage-Modell
 - Status: implementiert
 - Stand: `DamageModel` unter `res://scripts/core/damage_model.gd` liefert jetzt einen kleinen datenbasierten Treffer- und Schadenspfad; `SimulationRoot` kann `damage`-Effects minimal autoritativ anwenden und `TestUnit` haelt dafuer einfache Health- und Hit-Daten.
 - Offene Punkte: keine Waffenlogik, keine Projektilsimulation, keine Ballistik und noch keine Down-/Bleedout-Zustaende.
 - Risiken: der Pfad ist bewusst klein und testorientiert; spaetere Combat-Erweiterungen muessen weiterhin ueber `SimulationRoot` laufen und sollten diesen Utility-Charakter nicht zu einem grossen Framework aufblasen.
 - Naechster Schritt: den minimalen Zustandsfluss `fit -> down -> bleedout` auf dem neuen Damage-Pfad ergaenzen.
 
-### TASK_031 â€“ Down-/Bleedout-ZustÃ¤nde
+### TASK_031 – Down-/Bleedout-Zustände
 - Status: implementiert
-- Stand: `UnitVitalStatus` unter `res://scripts/npc/unit_vital_status.gd` formalisiert jetzt die minimalen ZustÃ¤nde `fit`, `down` und `bleedout`; `TestUnit` wechselt bei tÃ¶dlichem Schaden von `fit` nach `down`, und `SimulationRoot` kann diesen Zustand Ã¼ber einen kleinen `bleedout`-Effect weiter nach `bleedout` schieben.
-- Offene Punkte: keine Revive-Mechanik, keine SanitÃ¤tslogik, keine Evakuierung und keine komplexen Down-State-Regeln.
-- Risiken: der Zustandsfluss ist bewusst nur ein sehr kleiner Testpfad; spÃ¤tere Combat- und Support-Systeme mÃ¼ssen diese MinimalzustÃ¤nde explizit erweitern statt sie implizit zu Ã¼berladen.
-- Naechster Schritt: einen minimalen Friendly-Fire-Fall im bestehenden Damage-Pfad berÃ¼cksichtigen.
-### TASK_032 â€“ Friendly Fire
+- Stand: `UnitVitalStatus` unter `res://scripts/npc/unit_vital_status.gd` formalisiert jetzt die minimalen Zustände `fit`, `down` und `bleedout`; `TestUnit` wechselt bei tödlichem Schaden von `fit` nach `down`, und `SimulationRoot` kann diesen Zustand über einen kleinen `bleedout`-Effect weiter nach `bleedout` schieben.
+- Offene Punkte: keine Revive-Mechanik, keine Sanitätslogik, keine Evakuierung und keine komplexen Down-State-Regeln.
+- Risiken: der Zustandsfluss ist bewusst nur ein sehr kleiner Testpfad; spätere Combat- und Support-Systeme müssen diese Minimalzustände explizit erweitern statt sie implizit zu überladen.
+- Naechster Schritt: einen minimalen Friendly-Fire-Fall im bestehenden Damage-Pfad berücksichtigen.
+### TASK_032 – Friendly Fire
 - Status: implementiert
 - Stand: `SimulationRoot` beruecksichtigt jetzt bei `damage`-Effects einen minimalen Friendly-Fire-Fall auf Basis von `attacker_team_id`, Ziel-`team_id` und `allow_friendly_fire`; gleiche Teams koennen damit gezielt blockiert oder als erlaubter Friendly-Fire-Treffer im Hit-Kontext markiert werden.
 - Offene Punkte: keine komplexe Teamlogik, keine Projektile, keine Deckungs- oder Identifikationsregeln und keine weitergehende Combat-Auswertung.
 - Risiken: der Pfad bleibt bewusst klein und regelbasiert; spaetere echte Kampf- oder Teammechaniken muessen diesen Minimalfall explizit erweitern statt ihn still zu verkomplizieren.
 - Naechster Schritt: Batch abschliessen, Godot-Start pruefen und danach erst mit Meta-Layer oder erweiterten Taktiksystemen weitermachen.
-### Minimal Combat Loop Test (Phase 6 â€“ Zwischen-Implementierung)
+### Minimal Combat Loop Test (Phase 6 – Zwischen-Implementierung)
 - Status: implementiert
 - Stand: die Missions-Testszene enthaelt jetzt zwei Gegner-`TestUnit`-Instanzen mit eigener Team-ID; ein kleiner `MissionCombatLoopDriver` prueft direkten LOS-Kontakt zwischen Friendly- und Enemy-Units, enqueued darauf basierend minimale `damage`- und `bleedout`-Effects in `SimulationRoot` und markiert den Fight als beendet, sobald alle Gegner nicht mehr `fit` sind.
 - Offene Punkte: keine Gegen-KI, keine Waffenvielfalt, keine Deckungslogik, keine Respawn- oder Eliminierungsmechanik und keine komplexe Team-Auswertung.
 - Risiken: der Combat-Loop ist bewusst ein kleiner Integrationspfad fuer die Testszene; spaetere echte Combat-Systeme muessen den Glue-Code explizit ersetzen, statt ihn still auszubauen.
 - Naechster Schritt: bei Bedarf den symmetrischen Gegnerpfad oder eine spaetere Eliminierungsstufe in eigenen Tasks aufbauen, ohne die autoritative Rolle von `SimulationRoot` aufzuweichen.
 
-### Minimal Combat Control Behavior (Phase 6 â€“ Zwischen-Implementierung)
+### Minimal Combat Control Behavior (Phase 6 – Zwischen-Implementierung)
 - Status: implementiert
 - Stand: `UnitCommand`, `UnitRuntimeStatus` und `TestUnit` tragen jetzt einen kleinen datenbasierten Feuerstatus mit `fire_at_will` und `hold_fire`; `engage_area` fuehrt auf einen expliziten `engaging`-Zustand, waehrend `move_to_position` als `pending_move` mit `hold_fire` erhalten bleibt. `RuntimeLeader` leitet diesen Status minimal aus dem aktuellen FTL-Task ab, und der bestehende `MissionCombatLoopDriver` erlaubt Angriffe nur noch bei `fire_at_will` plus engage-/holding-aehnlichem Zustand.
 - Offene Punkte: keine groessere Combat-Logik, keine Rules-of-Engagement-Varianten, keine komplexe Zielwahl und keine Gegner-Ausweitung ueber den bestehenden Testpfad hinaus.
-- Risiken: die Steuerung bleibt bewusst testpfadbezogen; spaetere echte Kampfsteuerung sollte diese Minimalregeln explizit ablÃ¶sen statt sie still zu verkomplizieren.
+- Risiken: die Steuerung bleibt bewusst testpfadbezogen; spaetere echte Kampfsteuerung sollte diese Minimalregeln explizit ablösen statt sie still zu verkomplizieren.
 - Naechster Schritt: bei Bedarf spaeter weitere Commander-/FTL-Befehlstypen mit klarer Feuerregel abbilden und nur dann eine komplexere Zielwahl ergaenzen, wenn dafuer ein eigener Task vorliegt.
-### TASK_033 â€“ Minimal Meta Layer (Heimatbasis + FOB)
+### TASK_033 – Minimal Meta Layer (Heimatbasis + FOB)
 - Status: implementiert
 - Stand: ein kleiner menuegetriebener Meta-Layer startet jetzt ueber `res://scenes/meta/meta_layer_test.tscn`; ein `HomebaseTestScreen` zeigt die verfuegbaren Friendly-TestUnits und erlaubt eine einfache Teamzusammenstellung, ein `FOBTestScreen` zeigt das uebertragene Team und startet daraus die bestehende Missions-Testszene. Die Auswahl wird ueber einen schlanken `MetaLayerFlow` ohne Autoload oder neue grosse Szenenarchitektur an die Missionsszene weitergereicht.
 - Offene Punkte: keine Persistenz, keine Skill-/Loadout-/Soziallogik, keine Reise- oder Meta-Simulation und kein Rueckweg aus der Mission in den Meta-Layer.
 - Risiken: der Datenfluss ist bewusst klein und screen-getrieben; spaetere echte Meta-Systeme muessen diesen Testpfad explizit erweitern statt ihn still zu einer grossen UI- oder Persistenzschicht auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere Meta-Funktionen wie Respawn-/Transferlogik oder einfache Missionsauswertung anhaengen.
-### TASK_034 â€“ Minimal Mission Return Flow (FOB-Rueckfluss)
+### TASK_034 – Minimal Mission Return Flow (FOB-Rueckfluss)
 - Status: implementiert
 - Stand: der bestehende `MetaLayerFlow` bindet jetzt das Missionsende aus dem `MissionCombatLoopDriver` direkt an den Meta-Layer an, sammelt den minimalen Teamzustand der eingesetzten Friendly-Units ein und zeigt daraus einen kleinen Debrief-Screen mit Ergebnis und Rueckgabeoptionen. Die FOB kann den letzten Missionsausgang samt Teamzustand anzeigen, und sowohl der Rueckweg Debrief -> FOB als auch Debrief -> Homebase sind minimal moeglich.
 - Offene Punkte: keine Persistenz, keine Nachsorge-/Heilungslogik, keine Kampagnenauswertung und kein Rueckfluss tieferer Missionsmetriken.
 - Risiken: der Rueckfluss ist bewusst klein und screen-getrieben; spaetere echte Meta- oder Kampagnenlogik sollte diesen Glue-Code explizit erweitern statt ihn still zu einer grossen Ergebnisarchitektur auszubauen.
 - Naechster Schritt: spaeter bei Bedarf nur in eigenen Tasks weitere Meta-Rueckfluesse wie Respawn-/Zeitlogik oder einfache Ergebnisfolgen anhaengen.
 
-### TASK_035 â€“ Minimal Tactical Order Behavior
+### TASK_035 – Minimal Tactical Order Behavior
 - Status: implementiert
 - Stand: `RuntimeLeader` leitet jetzt fuer `defend`, `move` und `flank` kleine taktische Unterschiede in `UnitCommand` und `UnitRuntimeStatus` ab: `defend`/`hold` bleibt in Position, traegt erhoehten `cover_score` und darf feuern, `move` bleibt bei `hold_fire`, und `flank` bekommt einen seitlichen Zieloffset sowie einen kleinen `attack_bonus`. `SimulationRoot` beruecksichtigt diese Minimalwerte im bestehenden Damage-Pfad, und die Missions-Testszene zeigt jetzt drei parallele Friendly-Orders mit unterscheidbarem Verhalten.
 - Offene Punkte: keine komplexe Deckungsarchitektur, keine echte Taktik-KI, keine Formation, keine Navigation und keine ausgebaute Zielpriorisierung ueber den kleinen Testpfad hinaus.
 - Risiken: die Unterschiede bleiben bewusst daten- und testszenenbasiert; spaetere echte Taktiksysteme sollten diese Minimalableitungen explizit ersetzen statt sie still weiter aufzublasen.
 - Naechster Schritt: spaeter nur bei eigenem Task feinere Deckungs-, Zielwahl- oder Rollenregeln ergaenzen und dabei die autoritative Rolle von `SimulationRoot` beibehalten.
 
-### Minimal Tactical Readability (Phase 6/7 â€“ Zwischen-Implementierung)
+### Minimal Tactical Readability (Phase 6/7 – Zwischen-Implementierung)
 - Status: implementiert
 - Stand: `TestUnit` zeigt in der Missions-Testszene jetzt kleine direkt an die Unit geheftete Status- und Event-Texte fuer `MOVE`, `DEFEND`, `FLANK`, `ENGAGE`, `DOWN` und `BLEEDOUT` sowie `HF` / `FAW` und sichtbaren LOS-Kontakt. `MissionCombatLoopDriver` erzeugt zusaetzlich eine kleine Kontaktlinie, eine kompakte Event-Anzeige, einen klaren Siegerhinweis und ein leicht entschleunigtes Angriffstempo, damit Treffer, Down/Bleedout und Combat-Ende beobachtbarer bleiben.
 - Offene Punkte: keine groessere HUD-/Debug-Architektur, keine Politur, keine Animationen und keine komplexe Zeitsteuerung.
 - Risiken: die Lesbarkeitshilfen bleiben bewusst testszenenbezogen; spaetere echte UI- oder Debug-Systeme sollten diesen kleinen Pfad explizit ersetzen statt ihn still zu einer grossen Overlay-Schicht auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere gezielte Beobachtbarkeit wie einfache Threat-/Objective-Hinweise ergaenzen, ohne die Szene in eine Debug-Framework-Struktur zu ziehen.
 
-### Minimal Tactical Input UI (Phase 6/7 â€“ Zwischen-Implementierung)
+### Minimal Tactical Input UI (Phase 6/7 – Zwischen-Implementierung)
 - Status: implementiert
 - Stand: die Missions-Testszene startet jetzt neutral ohne automatische Initial-Orders; drei kleine Unit-gebundene `MissionCommandFlowDriver` koennen wiederholt genutzt werden, und ein schlanker `MissionTacticalSandboxController` ergaenzt Hotkeys plus vier kleine Buttons fuer `move`, `defend`, `flank` und `take`. Die finalen Tasten sind jetzt klar: `LMB = Zielmarker setzen`, `1 = move`, `2 = defend`, `3 = flank`, `4 = take`, `Q/E = Fireteam ALL/BLUE/GOLD`, `R/F = Phase APPROACH/ASSAULT/HOLD`. Linksklick setzt den bestehenden Zielmarker direkt ueber die Canvas-/World-Koordinaten um; UI-Klicks werden ignoriert und freie Klicks auf den sichtbaren Weltbereich begrenzt. Friendly-Units nutzen in der Testszene `astronautA_SW`, Enemy-Units `astronautB_SW` statt Polygon-Placeholdern.
 - Offene Punkte: die Fireteam- und Phase-Umschaltung bleibt bewusst szenenlokal; es gibt keine grosse Commander-UI, keine Auswahlarchitektur und noch keine tiefere Phase-Wirkung im Combat-Loop.
 - Risiken: der UI-Pfad darf keine Gameplay-Wahrheit uebernehmen; er bleibt ein leichter Command-Ausloeser fuer den bestehenden Commander -> FTL -> Unit -> SimulationRoot-Flow. Spaetere echte Commander- oder HUD-Systeme sollten diesen kleinen Szenen-Controller explizit ersetzen statt ihn still auszubauen.
 - Naechster Schritt: nur bei eigenem Task gezielt weiter verfeinern, etwa Marker-/Objective-Lesbarkeit oder spaetere echte Fireteam-/Phasenwirkung, ohne neue UI- oder Input-Architektur aufzubauen.
 
-### Iso Map V2 Layout (Phase 5/6 â€“ Zwischen-Implementierung)
+### Iso Map V2 Layout (Phase 5/6 – Zwischen-Implementierung)
 - Status: implementiert
 - Stand: die Missions-Testszene nutzt weiter `res://scenes/maps/iso_map_v2_layout.tscn`, aber die Bodenform wurde jetzt wieder explizit zu einer klaren grossen Iso-Raute aufgebaut statt zu einer asymmetrischen Freiform. Die sichtbare Bodenbasis besteht weiterhin ausschliesslich aus wiederholten `terrain_SW.png`-Kacheln; es gibt keine Gebaeude, keine Cliff-Stufen und keine zweite Hoehe. Die Richtungs-Konvention bleibt fuer diesen Pfad verbindlich: obere Kante = `N`, untere Kante = `S`, linke Kante = `W`, rechte Kante = `E`, obere linke Ecke = `NW`, obere rechte Ecke = `NE`, untere linke Ecke = `SW`, untere rechte Ecke = `SE`. `terrain_SW.png` bleibt unveraendert die Referenzkachel fuer `SW` = unten links / southwest; es wurde nichts frei gedreht. Friendly- und Enemy-Spawn sowie `objective_point` wurden in dieser klaren Rautenflaeche weiter auseinander und weniger direkt achsig gesetzt, damit die Karte ruhiger lesbar und als Testflaeche laenger beobachtbar bleibt. `MissionTestSetup` liest die Marker weiterhin direkt aus der Map-Szene und richtet Friendlies, Enemies und den Zielmarker daran aus.
 - Offene Punkte: die Map ist weiterhin nur Struktur und Marker, keine Gameplay-Wahrheit; es gibt noch keine Terrain-Metadaten fuer `walkable`, `blocks_los`, `cover` oder `orientation`, keine Hindernis- oder Hoehenlogik und keine spaetere Fireteam-Flanknutzung der optionalen Flank-Anker.
 - Risiken: die Karte verbessert Iso-Lesbarkeit, Spacing und Beobachtungszeit, aber LOS und Combat bleiben auf dem bestehenden Slice weiter rein systemseitig und nicht terrainbasiert. Spaetere Terrain-Daten oder feineres Encounter-Tuning sollten explizit als eigene Daten- bzw. Balancing-Tasks folgen, statt still in die Szene hineinzuwachsen.
 - Naechster Schritt: nur bei eigenem Task gezielt weitere Terrain-Daten oder eine spaetere feine Layout-Iteration ergaenzen, ohne ein grosses Tile-/Registry-System vorzuziehen.
 
-### TASK_036 â€“ Respawn-Logik
+### TASK_036 – Respawn-Logik
 - Status: implementiert
 - Stand: `UnitVitalStatus` kennt jetzt den Zustand `respawning`; `TestUnit` hat eine `respawn(spawn_position)`-Methode, die eine Unit von `down`/`bleedout` zurueck auf `fit` setzt, Health auf Maximum zuruecksetzt und die Unit an die uebergebene Spawn-Position verschiebt. `SimulationRoot` verarbeitet jetzt einen `respawn`-Effect autoritativ. Ein neuer `RespawnManager` unter `res://scripts/core/respawn_manager.gd` verwaltet timerbasierte Respawns pro Unit mit konfigurierbarem Spawn-Typ (Rover: 30s, FOB: 150s, Homebase: 270s). `MissionCombatLoopDriver` fordert automatisch Respawns fuer eliminierte Units an und setzt den Bleedout-Tracker bei erfolgreichem Respawn zurueck. Friendlies und Enemies koennen jetzt beide bleedouten und respawnen.
 - Offene Punkte: keine Respawn-Limitierung, keine Respawn-Warteschlange, keine sichtbare Timer-Anzeige und keine differenzierte Spawn-Punkt-Auswahl.
 - Risiken: der Respawn-Pfad ist bewusst klein und timerbasiert; spaetere echte Respawn-Mechaniken (begrenzte Leben, Sanitaeter, Evakuierung) muessen diesen Minimalpfad explizit erweitern.
 - Naechster Schritt: bei Bedarf spaeter Respawn-Timer-Anzeige oder differenzierte Spawn-Punkte in eigenen Tasks ergaenzen.
 
-### TASK_037 â€“ Rover/Frachter Respawn-Punkte
+### TASK_037 – Rover/Frachter Respawn-Punkte
 - Status: implementiert
 - Stand: `RespawnManager` unterstuetzt jetzt drei Spawn-Typen mit den V1-Zeitwerten: `rover` (30s), `fob` (150s) und `homebase` (270s). Spawn-Positionen werden pro `team_id` gesetzt und von `MissionTestSetup` aus den bestehenden Map-Markern (`spawn_alpha`, `spawn_bravo`) automatisch uebernommen. Die Missions-Testszene nutzt standardmaessig `rover`-Respawn fuer schnelle Testzyklen.
 - Offene Punkte: keine sichtbaren Spawn-Punkt-Marker in der Szene, keine Fahrzeug-Darstellung, keine Spawn-Punkt-Auswahl durch den Spieler und keine unterschiedlichen Spawn-Punkte pro Typ.
 - Risiken: die Spawn-Punkte sind bewusst nur Positionsdaten ohne eigene Nodes oder Darstellung; spaetere Rover-/Frachter-Mechaniken muessen als eigene sichtbare Szenenelemente folgen.
 - Naechster Schritt: spaeter bei eigenem Task sichtbare Spawn-Punkt-Marker oder Fahrzeug-Stubs in der Missionsszene ergaenzen.
 
-### Symmetrischer Gegner-Kampfpfad (Phase 6/7 â€“ Zwischen-Implementierung)
+### Symmetrischer Gegner-Kampfpfad (Phase 6/7 – Zwischen-Implementierung)
 - Status: implementiert
 - Stand: `MissionCombatLoopDriver` erlaubt jetzt bidirektionalen Kampf; Enemies koennen Friendlies angreifen, wenn sie `fit` sind und LOS-Kontakt haben. Friendlies koennen ebenfalls downed und bleedout werden, mit anschliessendem Respawn ueber den `RespawnManager`.
 - Offene Punkte: keine echte Gegner-KI, keine Positionierung, keine Deckungssuche und keine Gegner-Befehlskette.
 - Risiken: der Gegnerpfad ist bewusst nur ein symmetrischer Angriffspfad ohne eigene taktische Logik; spaetere Gegner-KI muss explizit und separat folgen.
 
-### TASK_106 â€“ Dropship-LZ, Insertion und verzoegerte Aktivierung
+### TASK_106 – Dropship-LZ, Insertion und verzoegerte Aktivierung
 - Status: implementiert
 - Stand: `MissionTestSetup` kann Friendly-Units jetzt standardmaessig bis zur Insertion aus `UnitRegistry`/`FTLRegistry` fernhalten (`defer_friendly_runtime_activation = true`) und blendet sie bis zum Einflug aus. `MissionTacticalSandboxController` registriert Units erst beim Deboarding autoritativ in `UnitRegistry`, bindet sie an `RuntimeLeader`/`FTLRegistry` und startet fuer das frisch eingeflogene Fireteam den aktiven Phase-Plan erst ab diesem Aktivierungszeitpunkt. Direkte Commands, Ad-hoc-Orders, Default-Behavior und Cover-Hold-Ausgaben sind vor Insertion fuer nicht aktive Fireteams gesperrt. `MissionCombatLoopDriver` verarbeitet nur Units, die in `UnitRegistry` aktiv sind, damit nicht eingeflogene Teams nicht vorzeitig am Gefecht teilnehmen.
 - Offene Punkte: keine eigene Insertion-Warteschlange fuer mehrere zeitversetzte Transporter und keine erweiterte Missionsanzeige mit explizitem Aktivierungs-Timer pro Fireteam.
 - Risiken: der Aktivierungspfad ist bewusst auf den bestehenden Dropship-Sequencer im Tactical-Sandbox-Controller begrenzt; spaetere echte Multi-Transport- oder Netzwerk-Synchronisierung sollte diesen Pfad explizit erweitern.
 - Naechster Schritt: TASK_107 (LoadoutModifierResolver + initiale Missions-Effects) auf den jetzt zeitlich korrekten Insertion-Aktivierungszeitpunkt aufsetzen.
 
-### TASK_107 â€“ LoadoutModifierResolver und initiale Missions-Effects
+### TASK_107 – LoadoutModifierResolver und initiale Missions-Effects
 - Status: implementiert
 - Stand: Neuer `LoadoutModifierResolver` uebersetzt FOB-`member_loadouts` (`weapon_1`, `weapon_2`, `armor`) in `UnitLoadoutModifiers` pro Unit inklusive Alias-Normalisierung (`rail_gun`/`sonderwaffe` -> `special`) und fester Formeln fuer Waffen und Armor. `MissionTestSetup` baut die Modifikator-Dictionaries beim Missionsaufbau und enqueued fuer bereits aktive Friendlies initiale `apply_loadout_modifiers`-Effects. Fuer verzoegert eingeflogene Friendlies enqueued der `MissionTacticalSandboxController` denselben Effekt beim Runtime-Insert. `SimulationRoot` verarbeitet den neuen autoritativen Effect-Typ und delegiert an `TestUnit.apply_loadout_modifiers(...)`; `TestUnit` integriert die Modifikatoren in Hit-/Speed-/Damage-Taken-Effekte sowie in den effektiven Cover-Score.
 - Offene Punkte: keine tiefe Distanzklassenlogik im Combat-Loop (range_class ist vorerst Datenvertrag) und keine gestaffelte Waffen-Slot-Gewichtung ueber den eingefuehrten Secondary-Weight hinaus.
 - Risiken: die additive Formel ist bewusst klein und datengetrieben; spaetere Balancing-Runden sollten die Faktoren explizit feinjustieren statt implizit in Einzelpfade einzugreifen.
 - Naechster Schritt: Folge-Tasks koennen `range_class` und weitere Loadout-Effekte gezielt im Combat-Resolver auswerten.
 
-### TASK_108 â€“ PatrolEditorTool und Pre-Contact-Patrol
+### TASK_108 – PatrolEditorTool und Pre-Contact-Patrol
 - Status: implementiert
 - Stand: `TerrainMapData` traegt jetzt einen Patrol-Datenvertrag (`patrol_paths`) als Dictionary `spawn_id -> waypoint[]` mit JSON-Load/Save. Der interne `MapEditor` hat ein kleines `Patrol`-Tool mit Spawn-Auswahl, sichtbarer Reihenfolge/Overlay, Hinzufuegen per Klick, Verschieben per Drag und Entfernen via `Ctrl+Klick`; Speicherung laeuft ueber die bestehende Map-JSON-Pipeline. `MissionTestSetup` uebergibt Patrol-Pfade aus der geladenen Karten-JSON an den `EnemyWaveController`. `MissionCombatLoopDriver` nutzt diese Pfade fuer pre-contact Bewegung: Enemies folgen Waypoints, bis `enemy_should_hold_position` erstmals Kontaktlage meldet, danach greifen wieder die bestehenden reaktiven Combat-Pfade.
 - Offene Punkte: kein separates Patrol-Tempo pro Segment und keine erweiterten Patrol-Modi (pause/look-at), nur zyklischer Waypoint-Follow.
 - Risiken: Patrol-Follow bleibt bewusst klein und nutzt den bestehenden `move_to_position`-Commandpfad; spaetere KI-Ausbauten sollten diesen Hook gezielt ersetzen statt parallel eine zweite Bewegungslogik zu bauen.
 - Naechster Schritt: bei Bedarf spaetere Awareness-/Stealth-Tasks auf den vorhandenen pre-contact Patrol-Zustand aufsetzen.
 
-### TASK_102 â€“ Ad-hoc-Orders und Return-to-Plan
+### TASK_102 – Ad-hoc-Orders und Return-to-Plan
 - Status: implementiert
 - Stand: Ein neuer `AdHocOrderController` verwaltet laufende Sofortbefehle pro Fireteam (`flank`, `disengage`, `fall_back`, `focus_fire`, `hold_till_last_man`) ausserhalb der geplanten `FireteamOrderPlan`-Wegpunkte. Der `TacticalInputController` kann diese Befehle nur bei aktivem Kontakt ausloesen, unterbricht dabei laufende Plan-Ausfuehrung, visualisiert Ad-hoc-Orders als getrennten Overlay-Pfad und fuehrt nach Abschluss oder manuellem `Return to Plan` wieder zum naechsten pending-Wegpunkt zurueck.
 - Offene Punkte: kein separates Suppression-System, keine dedizierte Beschuss-Heuristik ausser Kontaktstatus und keine komplexe Priorisierungslogik zwischen mehreren gleichzeitig konkurrierenden Sofortbefehlen.
 - Risiken: die Gefechtsfreigabe basiert aktuell bewusst auf dem bestehenden Kontaktzustand pro Unit; spaetere feinere Trigger (z. B. suppressive fire ohne direkten Kontakt) muessen explizit in eigenen Tasks folgen.
 - Naechster Schritt: TASK_103 fuer inter-fireteam Koordination ueber EventRouter und erweiterten Return-to-Plan-Glue umsetzen.
 
-### TASK_103 â€“ Suppression, Interruption und Return-to-Plan
+### TASK_103 – Suppression, Interruption und Return-to-Plan
 - Status: implementiert
 - Stand: `TacticalInputController` fuehrt jetzt einen laufenden Suppression-Container pro Fireteam mit Treffer-/Nahmiss-Zuwachs und trait-/leadership-abhaengigem Decay. Bei aktiver Suppression werden Fireteams in den Status `interrupted` ueberfuehrt, erhalten temporaere Malus-Werte (`move_speed_factor`, `attack_bonus`, `semi_disciplined` Fire-Discipline) und priorisieren Cover-Halten gegenueber Wegpunkt-Fortschritt; `hold_till_last_man` bleibt von Suppression ausgenommen. Nach Stabilisierung erfolgt automatisch ein Ruecksprung auf den naechsten `pending`-Wegpunkt, und ein manueller Return-to-Plan ist ueber ein neues `FireteamStatusPanel` verfuegbar.
 - Offene Punkte: keine tiefe Morale-/Panik-Kaskade, keine separate Ballistik-/Munitionslogik und keine ausgebauten Mehrstufen-Reaktionen jenseits des aktuellen Suppression-Slices.
 - Risiken: Suppression basiert aktuell auf Kontakt plus Health-Deltas im Testszenen-Controller; spaetere echte Gefechtsinstrumentierung sollte diese Trigger explizit in Runtime-/Combat-Systeme ueberfuehren, statt sie still im UI-nahen Glue wachsen zu lassen.
 - Naechster Schritt: falls noetig, inter-fireteam Koordination ueber dedizierte EventRouter-Consumer weiter ausbauen (z. B. flankierende Entlastungsreaktionen).
 
-### TASK_104 â€“ Inter-Fireteam-Koordination und Leader-initiiertes Flankieren
+### TASK_104 – Inter-Fireteam-Koordination und Leader-initiiertes Flankieren
 - Status: implementiert
 - Stand: Ein neuer `FireteamCoordinationManager` erkennt enge Zielraeume auf Plan-/Fireteam-Ebene und erzeugt Bounding-Zuweisungen, bei denen das Fireteam mit hoeherem `leadership` zuerst vorrueckt und das andere in Cover/Hold bleibt. `TacticalInputController` integriert diese Koordination in den aktiven Phasenlauf, rotiert Rollen nach `fireteam_ready_to_advance` und behandelt Ad-hoc-Unterbrechungen als temporaere Pause mit Rueckkehr in den Koordinationsfluss. Zusaetzlich kann ein aggressiver/reckless Leader mit `leadership > 0.7` bei aktivem Kontakt und verfuegbarem Terrainfenster autonom einen Ad-hoc-`flank` ausloesen. Alle Koordinations-/Flank-Ereignisse werden ueber erweiterte `EventRouter`-Signale kommuniziert.
 - Offene Punkte: keine globale Multi-Fireteam-KI, keine persistente Koordinationshistorie und keine tiefere Gruppen-Taktik ueber den Bounding-Slice hinaus.
 - Risiken: Die aktuelle Koordination bleibt bewusst leichtgewichtig und testszenenlokal; spaetere komplexere Team-Taktik sollte den Signalvertrag explizit weiterfuehren statt den Controller still zu ueberladen.
 - Naechster Schritt: Falls notwendig, in Folge-Tasks dedizierte EventRouter-Consumer fuer Entlastungs-/Unterstuetzungsreaktionen zwischen Fireteams ausbauen.
 
-### TASK_105 â€“ Leader-Nachfolge, Lead-Rueckgabe und UI-Synchronisierung
+### TASK_105 – Leader-Nachfolge, Lead-Rueckgabe und UI-Synchronisierung
 - Status: implementiert
 - Stand: `MissionCombatLoopDriver` verwaltet jetzt pro Fireteam Original-Lead, Acting-Lead und Mitgliederliste. Faellt der urspruengliche Lead aus, uebernimmt automatisch das fitte Mitglied mit dem hoechsten `leadership`, bei Gleichstand entscheidet `toughness`. Sobald der Original-Lead durch Respawn oder spaetere Insertion wieder `fit` ist, geht die Fuehrung in derselben Mission automatisch an ihn zurueck. `TacticalInputController` bindet Lead-Anzeigen und Verhaltensableitungen an den jeweils aktuellen Acting-Lead; dadurch wechseln Lead-Stern, Ad-hoc-/Koordinationsentscheidungen und Fireteam-Karten synchron mit.
 - Offene Punkte: keine dauerhafte Meta-Persistenz der Missions-Nachfolge ausserhalb der laufenden Mission und keine separate manuelle Lead-Uebersteuerung.
@@ -10552,7 +10552,7 @@
 - Status: implementiert
 - Stand: ein neuer `EnemyWaveController` unter `res://scripts/tests/enemy_wave_controller.gd` staffelt Enemy-Units jetzt in konfigurierbare Wellen mit `wave_count`, `units_per_wave`, `wave_delay_seconds` und `first_wave_delay_seconds`. Noch nicht gestartete Units bleiben unsichtbar und aus dem `UnitRegistry` abgemeldet; beim Wellenstart werden sie an ihre Spawn-Position gesetzt, sichtbar, wieder registriert und vom bestehenden Enemy-Vormarsch uebernommen. Ein kleines Szenenlabel zeigt `WAVE x/y`, und der `MissionCombatLoopDriver` laesst Elimination-Sieg erst nach letzter Welle und ohne ausstehende Enemy-Respawns zu.
 - Offene Punkte: keine dynamische Wellenzusammenstellung, keine verschiedenen Gegnertypen, keine Spawn-Richtungswahl und kein eigener Reinforcement-UI-Flow ausser der kleinen Szenenlesbarkeit.
-- Risiken: der Wave-Controller bleibt bewusst ein leichter Testszenen-Node; spaetere Missions- oder Encounter-Systeme sollten ihn explizit ablÃ¶sen oder erweitern statt Wellenlogik verteilt ueber Setup, Combat-Driver und Szene zu verstecken.
+- Risiken: der Wave-Controller bleibt bewusst ein leichter Testszenen-Node; spaetere Missions- oder Encounter-Systeme sollten ihn explizit ablösen oder erweitern statt Wellenlogik verteilt ueber Setup, Combat-Driver und Szene zu verstecken.
 - Naechster Schritt: individuelle Skill-Werte an Units haengen, bevor diese das Gameplay beeinflussen.
 
 ### TASK_046 - Unit-Skill-Werte
@@ -10622,7 +10622,7 @@
 - Status: implementiert
 - Stand: `TerrainPathfinder` unter `res://scripts/terrain/terrain_pathfinder.gd` fuehrt jetzt eine kleine A*-Suche auf dem Iso-Grid aus und beruecksichtigt `walkable`, Hoehenunterschiede sowie vorbereitete Surface-Kosten. `SimulationRoot` nutzt die `TerrainRegistry` jetzt optional fuer `move_to_position`: wenn Terrain-Daten vorhanden sind, wird ein Wegpunktpfad aufgebaut und tile-basiert abgegangen; ohne Registry bleibt der bisherige Geradlinien-Fallback erhalten. `MissionTestSetup` markiert einige Tiles als nicht begehbar, damit der Pfad sichtbar um die Blocker fuehrt.
 - Offene Punkte: keine lokale Kollisionsvermeidung zwischen Units, keine Pfad-Neuberechnung bei dynamischen Aenderungen und keine feinere Optimierung ueber den kleinen 64-Tile-Testfall hinaus.
-- Risiken: der Pfad wird bewusst klein und command-lokal gespeichert; spaetere groeÃŸere Karten oder dynamische Hindernisse sollten einen expliziten Recompute-Pfad bekommen statt diese V1-Logik still zu ueberladen.
+- Risiken: der Pfad wird bewusst klein und command-lokal gespeichert; spaetere groeßere Karten oder dynamische Hindernisse sollten einen expliziten Recompute-Pfad bekommen statt diese V1-Logik still zu ueberladen.
 - Naechster Schritt: Sichtlinien an die Terrain-Tiles binden.
 
 ### TASK_056 - LOS ueber Terrain-Tiles
@@ -10635,11 +10635,11 @@
 
 #### Tile-Katalog (`data/terrain_tile_catalog.json`)
 9 Eintraege: `ground_flat`, 4 gerade Mauern (`wall_straight_se/sw/ne/nw`), 4 Ecken (`wall_corner_se/sw/ne/nw`).
-Wand-Tiles haben kein eigenes `texture_path` â€” der Boden zeigt `terrain_SW.png`, die Mauer wird als Overlay daruebergelegt.
+Wand-Tiles haben kein eigenes `texture_path` — der Boden zeigt `terrain_SW.png`, die Mauer wird als Overlay daruebergelegt.
 
 #### Namenskonvention
-- **Gerade Mauern**: `wall_straight_XX` â€” XX ist die Laufrichtung der Mauer (SE = Mauer laeuft von NW nach SE).
-- **Ecken**: `wall_corner_XX` â€” XX ist die Grid-Richtung, `display_name` zeigt die visuelle Position:
+- **Gerade Mauern**: `wall_straight_XX` — XX ist die Laufrichtung der Mauer (SE = Mauer laeuft von NW nach SE).
+- **Ecken**: `wall_corner_XX` — XX ist die Grid-Richtung, `display_name` zeigt die visuelle Position:
   - `wall_corner_se` = "Ecke Ost" (rechts)
   - `wall_corner_sw` = "Ecke Sued" (unten)
   - `wall_corner_ne` = "Ecke Nord" (oben)
@@ -10654,16 +10654,16 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 
 #### Sprite-Platzierung
 - Alle Sprites: `centered = false`, Position = `world_position - KENNEY_DIAMOND_CENTER`
-- `KENNEY_DIAMOND_CENTER = Vector2(256, 315)` â€” Diamant-Mitte aller Kenney 512x512-Sprites
-- `WallContainer` hat `y_sort_enabled = true` und `z_index = -13` â€” suedlichere Mauern ueberdecken noerdlichere korrekt
+- `KENNEY_DIAMOND_CENTER = Vector2(256, 315)` — Diamant-Mitte aller Kenney 512x512-Sprites
+- `WallContainer` hat `y_sort_enabled = true` und `z_index = -13` — suedlichere Mauern ueberdecken noerdlichere korrekt
 
-#### Tile-Datenfelder â€” aktuelle Semantik und Grenzen
+#### Tile-Datenfelder — aktuelle Semantik und Grenzen
 
 | Feld | Typ | Aktuell | Gameplay-Wirkung |
 |------|-----|---------|-----------------|
 | `surface_type` | String | Pro Tile, nicht pro Objekt | Beeinflusst Bewegungsgeschwindigkeit und Pfadkosten (`road`=1.4x, `sand`=0.6x, `rock`=0.8x) |
-| `walkable` | bool | Ganzes Tile blockiert | Pathfinder lehnt Tile komplett ab â€” keine Richtungsinformation |
-| `blocks_los` | bool | Ganzes Tile blockiert | LOS-System prueft pro Tile â€” keine Richtungsinformation |
+| `walkable` | bool | Ganzes Tile blockiert | Pathfinder lehnt Tile komplett ab — keine Richtungsinformation |
+| `blocks_los` | bool | Ganzes Tile blockiert | LOS-System prueft pro Tile — keine Richtungsinformation |
 | `cover_value` | int 0-100 | Pro Tile | Combat: -0.35 Hit-Chance fuer Ziel, +0.05 fuer Angreifer, -0.2 Schaden (max 80) |
 | `height_level` | int 0-2 | Terrainhoehe (Gelaende) | Pathfinding: max 1 Level Differenz bei Cliff, +0.5 Kosten pro Level. Combat: +0.1 Accuracy-Bonus pro Level ueber Ziel |
 | `object_height` | int 0-3 | Objekthoehe (Mauer, Fels) | LOS: Blocker-Hoehe = `height_level + object_height`. Pathfinding: nicht verwendet |
@@ -10779,7 +10779,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 
 ### Fix - Cliff/Wall Overlay Separation und Corner-Replacement
 - Status: implementiert
-- Stand: Wall-Tiles (blocks_los) bekommen nur noch Wall-Overlays, keine Cliff-Overlays. Cliff-Kanten werden nicht zu Wall-Nachbarn gezeichnet. Corner-Pieces ersetzen die beiden geraden Panels (Wall und Cliff) statt sich darÃ¼berzustapeln. Drag-Painting funktioniert jetzt ohne vorherige Tile-Selektion (Guard von `_has_selected_tile()` auf `_has_selected_type()` geaendert).
+- Stand: Wall-Tiles (blocks_los) bekommen nur noch Wall-Overlays, keine Cliff-Overlays. Cliff-Kanten werden nicht zu Wall-Nachbarn gezeichnet. Corner-Pieces ersetzen die beiden geraden Panels (Wall und Cliff) statt sich darüberzustapeln. Drag-Painting funktioniert jetzt ohne vorherige Tile-Selektion (Guard von `_has_selected_tile()` auf `_has_selected_type()` geaendert).
 - Offene Punkte: Wall-/Cliff-Corner-Zuordnung (welches Corner-Piece an welcher Ecke) muss visuell geprueft und ggf. korrigiert werden.
 - Naechster Schritt: Wall-Richtungsmapping anhand der tatsaechlichen Sprite-Orientierung verifizieren und ggf. korrigieren.
 
@@ -10809,7 +10809,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: die Zuordnung bleibt an die Kenney-Sprite-Semantik und die aktuelle Iso-Richtungsdefinition gebunden; spaetere Asset-Wechsel muessen diese Mapping-Schicht explizit neu pruefen.
 - Naechster Schritt: nur bei Bedarf weitere Corner-/Offset-Korrekturen auf Basis konkreter visueller Problemfaelle ergaenzen.
 
-### TASK_069 â€“ Map-Editor: Auswahl, Save As und Workflow-Polish
+### TASK_069 – Map-Editor: Auswahl, Save As und Workflow-Polish
 - Status: implementiert
 - Stand: Der Editor merkt sich die zuletzt gewaehlten Surface- und Kanten-Typen auch ohne aktive Tile-Selektion. `Escape` hebt die aktuelle Palette-Auswahl auf. Ein neuer `Select`-Button neben `Brush` schaltet in einen Auswahlmodus mit Ctrl+LMB-Multiselection und gemeinsamer Outline. `Ctrl+Save` oeffnet `Save As`, `New` oeffnet jetzt einen Groessen-Dialog fuer neue Karten (Default 32x32), und `maps/Test_mission_32x32.json` dient als neue 32x32-Vorlage. Die vier Wand-Ecktypen sind in der Palette jetzt eindeutig als `Mauer Ecke ...` benannt.
 - Offene Punkte: keine Drag-Selection, keine Massenoperationen auf bestehende Mehrfachauswahl und kein Multi-Tile-Undo ueber den gesamten Brush-Radius.
@@ -10893,11 +10893,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Die Operator-Pools werden jetzt explizit getrennt gehalten; spaetere Persistenz oder Kampagnenlogik muss diese Trennung bewusst uebernehmen, statt wieder still dieselbe Liste fuer Homebase und FOB zu teilen.
 - Naechster Schritt: Falls gewuenscht, spaeter gezielt einen expliziten Ruecktransfer- oder Homebase-Reintegration-Task einfuehren, ohne den aktuellen Meta-State-Pfad wieder aufzuweichen.
 
-### TASK_080 â€“ UI-Polish: Header, Loadout, Lead-Star und Drop-Panel-Styling
+### TASK_080 – UI-Polish: Header, Loadout, Lead-Star und Drop-Panel-Styling
 - Status: implementiert
 - Stand: Die FOB-Oberflaeche wurde in mehreren Bereichen visuell ueberarbeitet:
   - **Nav-Buttons** (Homebase, FOB, Mission) auf ein Drittel der urspruenglichen Hoehe reduziert (custom_minimum_size 16px, font_size 8).
-  - **Respawn-Anchor-Panel** auf doppelte Breite vergroessert (90 â†’ 180px).
+  - **Respawn-Anchor-Panel** auf doppelte Breite vergroessert (90 → 180px).
   - **Loadout-Drop-Panel** an den oberen Rand des Loadout-Bereichs verschoben, sodass der Drop-Bereich sofort sichtbar ist.
   - **Dropship-Drop-Panel** visuell an das Loadout-Drop-Panel angeglichen (gleiche Margins und Schriftgroesse).
   - **Loadout pro NPC**: Jedes Fireteam-Mitglied erhaelt jetzt einen Armor-Dropdown (Light/Medium/Heavy) und zwei separate Waffen-Slots (Maschinenpistole, Sturmgewehr, Sonderwaffe). Die fruehere "Mischung"-Option wurde entfernt; das Datenmodell nutzt `weapon_1` und `weapon_2` statt eines einzelnen `weapon`-Felds.
@@ -10906,7 +10906,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Die Erweiterung auf `weapon_1`/`weapon_2` ist abwaertskompatibel; bestehende Daten mit einem einzelnen `weapon`-Feld werden beim Lesen automatisch auf `weapon_1` gemappt.
 - Naechster Schritt: Weitere UI-Verfeinerungen oder Gameplay-Logik koennen auf dieser Grundlage aufbauen, ohne die bestehende Architektur zu veraendern.
 
-### TASK_081 â€“ Meta-Layer: UI-Harmonisierung fuer FOB, Homebase und Loadout
+### TASK_081 – Meta-Layer: UI-Harmonisierung fuer FOB, Homebase und Loadout
 - Status: implementiert
 - Stand: Homebase und FOB nutzen jetzt dieselben kompakten Header-Proportionen. Der FOB zeigt einen verdichteten Missionsbrief mit stabil rechts sitzendem `Start Mission`, waehrend Missionsname, Map und Slot-Kontext explizit aus `res://scripts/meta/meta_layer_flow.gd` kommen. In `res://scripts/meta/fob_screen.gd` wurde die Charaktereinsicht zu einem schliessbaren Overlay ausgebaut, das per Doppelklick auf kompakte NPC-Karten geoeffnet wird und Portrait, Rolle, Status, Skills, Traits, Bio sowie Loadout-Hinweise aus dem bestehenden Meta-State rendert. NPC-Karten und Charakterboegen zeigen dabei konsistente Meta-Orte an: Homebase fuer Roster/Transfer, FOB fuer Pool/Loadout/Respawn und Rover fuer Wait-Zone, Boarding und bereits verladenen Zustand. Der Loadout-Bereich arbeitet jetzt pro Fireteam-Mitglied mit kompakter NPC-Karte, Lead-Stern sowie direkten Selektoren fuer Armor, Slot 1 und Slot 2; derselbe mitgliedsbezogene Block wird auch im Respawn-Fenster gerendert.
 
@@ -10917,83 +10917,83 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Die Mission-Kontextdaten und die neuen Homebase-Transferdauern werden aktuell bewusst noch klein und fest aus dem bestehenden Testpfad gespeist; falls spaeter mehrere Missionen oder unterschiedliche Flieger dynamisch waehlbar werden, sollte daraus ein expliziter kleiner Datenvertrag werden statt weiterer UI-String-Glue. Die Homebase-Transportanzeige bleibt ein Meta-Orchestrierungspfad in `MetaLayerFlow` und ist keine tiefergehende Transport- oder Kampagnen-Simulation.
 - Naechster Schritt: Falls gewuenscht, spaeter gezielt Ruecktransfers, mehrere unterschiedliche Flieger oder eine kleine Karten-/Debrief-Sicht auf laufende Homebase-Transfers ergaenzen, ohne den aktuellen kleinen Meta-Flow zu einer grossen Persistenz- oder Transportarchitektur aufzublasen.
 
-### TASK_082 â€“ Gemeinsamer Terrain-Renderer fuer Editor und Mission
+### TASK_082 – Gemeinsamer Terrain-Renderer fuer Editor und Mission
 - Status: implementiert
 - Stand: Mit `res://scripts/terrain/terrain_map_renderer.gd` existiert jetzt ein kleiner gemeinsamer Renderpfad fuer JSON-basierte TerrainMapData. Der Editor nutzt diesen Renderer fuer den kompletten Kartenaufbau aus Tile-, Cliff- und Objekt-/Wall-Overlays, statt den Full-Rebuild weiterhin nur lokal in `map_editor.gd` zu halten. Die Missions-Testszene rendert dieselbe JSON-Karte jetzt ebenfalls ueber diesen Pfad; `MissionTestSetup` registriert die Tiles weiter in der `TerrainRegistry`, laesst die sichtbare Karte aber nicht mehr aus vorplatzierten Boden-Sprites plus Modulate entstehen. Zusaetzlich traegt `TerrainMapData` jetzt einen kleinen Marker-Datenvertrag, und die zentrale 32x32-Testmap speichert `spawn_alpha`, `spawn_bravo`, `objective_point` sowie die beiden Flank-Anker direkt in derselben JSON-Datei. `MissionTestSetup` uebernimmt diese Markerpositionen in die vorhandenen Szenen-Marker, sodass bestehende NodePath-Pfade weiter funktionieren, und die read-only Meta-Map zeigt dieselben Markerkoordinaten ebenfalls aus der Map-Datei an. `res://scenes/maps/iso_map_v2_layout.tscn` bleibt damit auf Render-Container plus Fallback-Marker reduziert. In einer spaeteren Recovery-Nachpflege speichert `TerrainMapData` zusaetzlich `mission_slot_count` direkt in der JSON, der Map-Editor bietet dafuer nun ein kleines Map-Settings-Panel samt Marker-Zuweisung fuer die festen Missionsmarker, und `MetaLayerFlow` kann die Missions-Slot-Kapazitaet bei Bedarf direkt aus der Map-Datei aufloesen statt nur aus statischen Missionsdefinitionen zu lesen.
 - Offene Punkte: Die laufenden Editor-Einzelupdates fuer geaenderte Tiles nutzen weiterhin ihre bestehenden lokalen Update-Helfer; der gemeinsame Pfad ist aktuell der gemeinsame Full-Rebuild und der Runtime-Aufbau. Die offen gebliebenen Marker-Themen sind inzwischen explizit als `TASK_115` ausgelagert, statt weiter als unscharfer Restpunkt in `TASK_082` zu bleiben.
 - Risiken: Die Missionsmarker werden weiter aus der Map-Datei in Szenen-Marker gespiegelt, solange andere Testpfade noch NodePaths auf diese Marker erwarten. `mission_slot_count` ist bewusst nur ein kleiner Map-Metadatenvertrag; spaetere Missions- oder Kampagnenlogik sollte diesen Wert explizit weiterreichen statt erneut separate Slot-Quellen einzufuehren.
 - Naechster Schritt: Bei weiterem Marker-Bedarf gezielt `TASK_115` bearbeiten und erst danach groessere Terrain-Funktionen wie mehrere Missionskarten oder graphischere Meta-Map-Vorschauen darauf aufbauen.
 
-### TASK_085 â€“ Charakterbogen Combat-Integration (get_combat_effects)
+### TASK_085 – Charakterbogen Combat-Integration (get_combat_effects)
 - Status: implementiert
 - Stand: `TestUnit` bietet jetzt `get_combat_effects() -> Dictionary`, das die combat_effects-Werte (`speed_multiplier`, `hit_modifier`, `evasion_modifier`, `damage_taken_multiplier`) direkt aus dem Charakterbogen-Bundle zurueckgibt, mit sicheren Defaults bei leerem Bundle.
 - Offene Punkte: keine.
 - Risiken: Rein additiv; bestehende Einzelgetter bleiben weiter verfuegbar.
 - Naechster Schritt: Consumers koennen `get_combat_effects()` statt der Einzelmethoden nutzen.
 
-### TASK_086 â€“ Waffenmodell (WeaponData)
+### TASK_086 – Waffenmodell (WeaponData)
 - Status: implementiert
 - Stand: Neues `scripts/core/weapon_data.gd` als statische Waffen-Registry mit drei Typen: Maschinenpistole (smg, weapon_gun_*, schnell, niedrig), Sturmgewehr (rifle, weapon_rifle_*, balanciert), Schienenkanone (rail_gun, weapon_rifle_* in 2x, langsam, hoch). `TestUnit` traegt `weapon_1_id`/`weapon_2_id` als Exports und liefert `get_active_weapon_id()`. `MissionCombatLoopDriver` nutzt aktive Waffe des Angreifers fuer damage/hit_chance/ticks statt globaler Konstanten. In `fob_screen.gd` wurde "Sonderwaffe" zu "Schienenkanone" umbenannt und weapon-ID `special` zu `rail_gun` migriert (abwaertskompatibel).
 - Offene Punkte: keine (Loadout-Pipeline durch TASK_087 geschlossen).
 - Risiken: Globale combat-Exports (`damage_per_hit`, `base_hit_chance`, `ticks_between_attacks`) auf `MissionCombatLoopDriver` bleiben als Fallback-Defaults erhalten, werden aber im normalen Pfad nicht mehr genutzt.
 - Naechster Schritt: keiner.
 
-### TASK_087 â€“ Loadout-Pipeline und Waffen-Sprites
+### TASK_087 – Loadout-Pipeline und Waffen-Sprites
 - Status: implementiert
 - Stand: `meta_layer_flow.gd` liest per `_build_fob_member_loadouts()` die `member_loadouts` und `lead_unit_id` aus allen Fireteam-Definitionen der FOB-UI, baut ein flaches `{unit_id: {weapon_1, weapon_2, armor, is_fireteam_lead}}` Dictionary und uebergibt es via `mission_setup.set("member_loadouts", ...)` an `MissionTestSetup`. `mission_test_setup.gd` hat neue Property `member_loadouts: Dictionary` und ruft nach dem Roster-Preset `_apply_fob_loadout_override()` auf, das `weapon_1_id`, `weapon_2_id`, `armor` und `is_fireteam_lead` via `apply_identity_config()` auf die Unit setzt. Nur Friendlies erhalten Overrides; Enemies bleiben unberuehrt. Ohne FOB-Daten greifen die Roster-Defaults. `test_unit.gd` rendert jetzt zusaetzlich ein `WeaponVisual`-`Sprite2D` als Child der bestehenden `Visual`-Sprite, leitet die Richtung aus der aktuellen Unit-Textur ab (Fallback `SE`), nutzt `WeaponData.get_asset_path()` und `WeaponData.get_sprite_scale()` fuer Textur und Skalierung und setzt kleine Kenney-kompatible Offsets pro Iso-Richtung. Dadurch ist die Schienenkanone visuell doppelt so gross wie das Sturmgewehr.
 - Offene Punkte: keine.
 - Risiken: keine.
 - Naechster Schritt: keiner.
 
-### TASK_088 â€“ Leadership-Bonus auf Fireteam-Mitglieder
+### TASK_088 – Leadership-Bonus auf Fireteam-Mitglieder
 - Status: implementiert
-- Stand: Leadership-Bonus-System mit automatischer Lead-Nachfolge implementiert. `test_unit.gd` hat `is_fireteam_lead`-Export, `_leadership_bonus`-Feld, `apply_leadership_bonus()`, `clear_leadership_bonus()`, `get_leadership_hit_modifier()`. Der Bonus fliesst ueber `get_combat_effects()` und `_extract_unit_hit_modifier()` in SimulationRoot in die Trefferberechnung ein. `mission_combat_loop_driver.gd` verwaltet pro Tick Fireteam-Leads: wenn Original-Lead down â†’ Unit mit hoechstem Leadership uebernimmt automatisch; wenn Original-Lead respawnt â†’ uebernimmt sofort zurueck. Bonus = `leadership * 0.15` auf alle Fireteam-Mitglieder (nicht Lead selbst).
+- Stand: Leadership-Bonus-System mit automatischer Lead-Nachfolge implementiert. `test_unit.gd` hat `is_fireteam_lead`-Export, `_leadership_bonus`-Feld, `apply_leadership_bonus()`, `clear_leadership_bonus()`, `get_leadership_hit_modifier()`. Der Bonus fliesst ueber `get_combat_effects()` und `_extract_unit_hit_modifier()` in SimulationRoot in die Trefferberechnung ein. `mission_combat_loop_driver.gd` verwaltet pro Tick Fireteam-Leads: wenn Original-Lead down → Unit mit hoechstem Leadership uebernimmt automatisch; wenn Original-Lead respawnt → uebernimmt sofort zurueck. Bonus = `leadership * 0.15` auf alle Fireteam-Mitglieder (nicht Lead selbst).
 - Offene Punkte: keine (durch TASK_087 wird `is_fireteam_lead` jetzt aus `lead_unit_id` der FOB-Daten gesetzt).
 - Risiken: keine
 - Naechster Schritt: keiner.
 
-### TASK_089 â€“ Enemy Cover-Seeking
+### TASK_089 – Enemy Cover-Seeking
 - Status: implementiert
 - Stand: `TerrainRegistry` um `get_walkable_cover_tiles_in_radius(world_center, radius)` erweitert. `_build_enemy_reposition_target()` in `mission_combat_loop_driver.gd` sucht jetzt Cover-Tiles im Reposition-Radius, filtert nach Mindestabstand, sortiert nach Cover-Score absteigend und waehlt das beste Tile. Fallback auf bisherige Zufalls-Reposition wenn keine Cover-Tiles vorhanden. Cooldown bleibt erhalten.
 - Offene Punkte: keine
 - Risiken: keine
 - Naechster Schritt: TASK_090 differenzierte Enemy-Typen.
 
-### TASK_090 â€“ Differenzierte Enemy-Typen
+### TASK_090 – Differenzierte Enemy-Typen
 - Status: implementiert
 - Stand: 6 Enemy-Archetypen (Standard, Scout, Heavy, Sniper, Medic, Officer) als `ENEMY_ARCHETYPES`-Array in `unit_roster_presets.gd` definiert. Jeder Archetyp hat eigene Skills, Waffe und Traits. `get_preset()` fuer `team_bravo` waehlt Archetyp per Unit-ID-Hash automatisch. Lookup-Funktionen `get_enemy_archetype_for_unit()` und `get_enemy_archetype_by_id()` ergaenzt. Friendly-Roster bleibt unberuehrt.
 - Offene Punkte: keine
 - Risiken: keine
 - Naechster Schritt: TASK_091 Awareness/Detection Delay.
 
-### TASK_091 â€“ Awareness: Detection-Delay
+### TASK_091 – Awareness: Detection-Delay
 - Status: implementiert
 - Stand: Detection-Delay basierend auf dem `awareness`-Wert einer Unit implementiert. `_detection_progress`-Dictionary in `mission_combat_loop_driver.gd` trackt pro Attacker-Target-Paar verbleibende Detection-Ticks. Formel: `(1.0 - awareness) * MAX_DETECTION_DELAY_TICKS` (15 Ticks). awareness=1.0 erkennt sofort, awareness=0.0 braucht 15 Ticks. Timer wird pro Tick dekrementiert und bei LOS-Verlust zurueckgesetzt. `get_awareness()` in `test_unit.gd` ergaenzt.
 - Offene Punkte: keine
 - Risiken: keine
 - Naechster Schritt: TASK_092 Stealth/Sichtreichweite.
 
-### TASK_092 â€“ Stealth: Reduzierte Sichtreichweite
+### TASK_092 – Stealth: Reduzierte Sichtreichweite
 - Status: implementiert
 - Stand: `_get_effective_range(target)` in `mission_combat_loop_driver.gd` berechnet effektive Sichtreichweite basierend auf dem `stealth`-Wert des Ziels. Formel: `contact_range * (1.0 - stealth * 0.5)`. stealth=0.0 ergibt volle Reichweite, stealth=1.0 halbiert sie. Alle drei LOS-Checks verwenden jetzt die effektive Reichweite. `get_stealth()` in `test_unit.gd` ergaenzt.
 - Offene Punkte: keine
 - Risiken: keine
 - Naechster Schritt: TASK_093 Discipline/Hold-Fire.
 
-### TASK_093 â€“ Discipline: Hold-Fire-Disziplinbrueche
+### TASK_093 – Discipline: Hold-Fire-Disziplinbrueche
 - Status: implementiert
-- Stand: `_check_discipline_break(unit)` in `mission_combat_loop_driver.gd` wuerfelt pro Tick bei Hold-Fire ob Unit den Befehl bricht. Formel: `DISCIPLINE_BREAK_BASE_CHANCE (0.08) * (1.0 - discipline)`. discipline=1.0 â†’ 0% Bruch, discipline=0.0 â†’ 8% pro Tick. Cooldown (`DISCIPLINE_BREAK_COOLDOWN_TICKS=10`) verhindert Dauerfeuer. Bruch wird als Event sichtbar. `get_discipline()` in `test_unit.gd` ergaenzt.
+- Stand: `_check_discipline_break(unit)` in `mission_combat_loop_driver.gd` wuerfelt pro Tick bei Hold-Fire ob Unit den Befehl bricht. Formel: `DISCIPLINE_BREAK_BASE_CHANCE (0.08) * (1.0 - discipline)`. discipline=1.0 → 0% Bruch, discipline=0.0 → 8% pro Tick. Cooldown (`DISCIPLINE_BREAK_COOLDOWN_TICKS=10`) verhindert Dauerfeuer. Bruch wird als Event sichtbar. `get_discipline()` in `test_unit.gd` ergaenzt.
 - Offene Punkte: keine
 - Risiken: keine
 - Naechster Schritt: TASK_094 Recognition/Friendly-Fire.
 
-### TASK_094 â€“ Recognition: Friendly-Fire-Verwechslung
+### TASK_094 – Recognition: Friendly-Fire-Verwechslung
 - Status: implementiert
-- Stand: `_check_misidentification(attacker, attacker_id)` in `mission_combat_loop_driver.gd` wuerfelt pro Tick ob ein Friendly sein Ziel verwechselt. Formel: `MISIDENTIFICATION_BASE_CHANCE (0.03) * (1.0 - recognition)`. recognition=1.0 â†’ 0% Verwechslung, recognition=0.0 â†’ 3% pro Tick. Naechste eigene Unit wird als Ziel gewaehlt, Effect mit `allow_friendly_fire: true` gesendet. Cooldown (`MISIDENTIFICATION_COOLDOWN_TICKS=15`) verhindert Dauerfeuer auf Eigene. Nur Friendlies koennen verwechseln, Enemies nie.
+- Stand: `_check_misidentification(attacker, attacker_id)` in `mission_combat_loop_driver.gd` wuerfelt pro Tick ob ein Friendly sein Ziel verwechselt. Formel: `MISIDENTIFICATION_BASE_CHANCE (0.03) * (1.0 - recognition)`. recognition=1.0 → 0% Verwechslung, recognition=0.0 → 3% pro Tick. Naechste eigene Unit wird als Ziel gewaehlt, Effect mit `allow_friendly_fire: true` gesendet. Cooldown (`MISIDENTIFICATION_COOLDOWN_TICKS=15`) verhindert Dauerfeuer auf Eigene. Nur Friendlies koennen verwechseln, Enemies nie.
 - Offene Punkte: keine
 - Risiken: keine
 
-### TASK_095 â€“ Combat Medic Support
+### TASK_095 – Combat Medic Support
 - Status: implementiert
 - Stand: `SimulationRoot` verarbeitet `heal`-Effects autoritativ ueber `_apply_heal_effect()`. `TestUnit` unterstuetzt dafuer `apply_heal(amount, heal_context)` und kann dadurch einen `down`-Zustand wieder nach `fit` anheben, solange der Heal vor einem `bleedout` greift. Combat-Medics brauchen nun zusaetzlich ein im Waffenslot ausgeruestetes `medictool`, das im FOB-Dropdown und Resolver-Pfad als eigener Slot-Gegenstand gefuehrt wird, genau 2 Kartenfelder Heal-Reichweite nutzt und visuell als rot eingefaerbtes Pistolenmodell auftaucht. `mission_combat_loop_driver.gd` erkennt Combat-Medics ueber `role_id`/`role_name`, waehlt bevorzugt `down`-Allies und danach den am staerksten verletzten `fit`-Ally in Reichweite, und laeuft fuer dringende Ziele ausserhalb der Heal-Reichweite aktiv an. Heal-/Patch-Events bleiben sichtbar; `scripts/tests/medic_support_verifier.gd` deckt jetzt Revive-vor-Bleedout, 2-Felder-Reichweite, Tool-Zwang, Dropdown-Support, Anlauf, Priorisierung und Cooldown ab.
 - Offene Punkte: keine groessere Support-Architektur, keine echte Revive-Animation und keine allgemeine Verbrauchs- oder Nachschubkette jenseits des slotgebundenen `medictool`.
@@ -11015,7 +11015,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Lasso-Auswahl bleibt reine UI-/Planungsschicht. Spaetere Gameplay-Systeme muessen weiter Commands/Effects verwenden und duerfen Selection nicht als Simulation-Wahrheit behandeln.
 - Lokale Pruefung: `task_098_verifier.gd` und `git diff --check` laufen gruen.
 
-### TASK_099 â€“ Wegpunktplanung und Order-Visualisierung
+### TASK_099 – Wegpunktplanung und Order-Visualisierung
 - Status: implementiert
 - Stand: Der `TacticalInputController` haelt jetzt pro Fireteam und Phase echte `FireteamOrderPlan`-Daten auf Basis der Task-97-Modelle. Rechtsklick setzt Wegpunkte fuer alle aktuell ausgewaehlten Fireteams, ein kontextsensitives Kurzmenue erlaubt direkt `move`, `defend`, `engage`, `flank` und `take`, und Wegpunkte koennen nachtraeglich per Drag verschoben oder per Delete entfernt werden. Ein schlanker `FireteamOrderVisualizer` rendert die Plaene rein lesend als Linien und Symbolmarker in der Missionsszene; beim Planen werden keine Commands an SimulationRoot oder Flow-Driver gesendet.
 - Offene Punkte: keine Phasen-Ausfuehrung, keine Ad-hoc-Orders, keine Pathfinding-Auswertung entlang der Wegpunkte und keine ausgebaute Kontextmenue-/Polish-Schicht ueber den kurzen Missions-Testpfad hinaus.
@@ -11023,14 +11023,14 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Lokale Pruefung: `task_099_verifier.gd` und `git diff --check` laufen gruen.
 - Naechster Schritt: Task 100 kann auf diesem Slice aufsetzen, um einen globalen Phase-Controller und die tatsaechliche Plan-Ausfuehrung einzufuehren.
 
-### TASK_100 â€“ PhaseController und globale Plan-Ausfuehrung
+### TASK_100 – PhaseController und globale Plan-Ausfuehrung
 - Status: implementiert
 - Stand: Eine eigene `PhaseController`-Instanz verwaltet jetzt globale Missionsphasen getrennt vom UI-Bearbeitungskontext. Phase 0 bleibt Pre-Mission, Phase 1 existiert immer, `+ Phase` erweitert den globalen Phasenraum, und `Next Phase` ist der einzige globale Startpfad. Beim Weiterschalten startet der `TacticalInputController` alle Fireteam-Plaene der neuen Phase gleichzeitig, aktiviert Wegpunkte pro Fireteam nacheinander und erzeugt jeden Laufzeitbefehl weiter ueber `MissionCommandFlowDriver` -> Commander/FTL -> Unit -> `SimulationRoot.enqueue_command()`.
 - Offene Punkte: keine Ad-hoc-Befehle, keine Suppression, keine Gegner-Phasen und keine ausgebaute Resume-/Interrupt-Logik fuer spaetere Task-101+-Verhaltensresolver.
 - Risiken: Die Wegpunkt-Fertigmeldung haengt aktuell an einem schlanken Zielradius plus optionaler Haltezeit auf Fireteam-Ankerbasis. Falls spaeter echte Formations-/Suppression-/Kontaktlogik hinzukommt, muss diese Fertigbedingung bewusst erweitert werden statt still implizit zu kippen.
 - Naechster Schritt: Task 101 kann jetzt auf dem globalen Phase- und Ausfuehrungsrahmen aufsetzen, um Standardverhalten und Resolver pro Fireteam sauber einzuschieben.
 
-### TASK_101 â€“ FireteamBehaviorResolver und Standardverhalten
+### TASK_101 – FireteamBehaviorResolver und Standardverhalten
 - Status: implementiert
 - Stand: `FireteamBehaviorResolver` leitet nun aus dem aktuellen Fireteam-Leader ein `FireteamBehaviorProfile` ab und mappt Traits, Leadership und Toughness auf Advance-Style, Cover-Prioritaet, Fire-Discipline, Cohesion und Suppression. Der `TacticalInputController` berechnet diese Profile zur Laufzeit fuer geplante Orders und Standard-Fallbacks, nutzt sie fuer leadergesteuertes `flank` mit konkreter Zielverfeinerung und sendet beim Start eines Flankierens `flank_initiated` ueber den `EventRouter`. Fireteams ohne aktive Orders fallen bei Phasenstart und nach Planende auf `hold_position` zurueck; `cautious` sucht bei Kontakt lokal Deckung.
 - Offene Punkte: keine Suppression-Logik, keine Resume-/Interrupt-State-Machine und noch keine inter-fireteam Koordination ueber den Router jenseits des Flank-Startsignals.
@@ -11341,7 +11341,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 
 ### Strategic Review - UI-Assets und Multiplayer-Vorbereitung
 - Status: dokumentiert
-- Stand: `docs/reviews/strategic_review_ui_assets_multiplayer_2026_05_03.md` sammelt Code-Review-Befunde, Optimierungs- und Designvorschlaege, externe Godot-/Forum-/UI-/Asset-Recherche sowie lokale Asset-Vorschlaege aus `C:\Users\bjoer\Pictures\SternenbÃ¼rger`.
+- Stand: `docs/reviews/strategic_review_ui_assets_multiplayer_2026_05_03.md` sammelt Code-Review-Befunde, Optimierungs- und Designvorschlaege, externe Godot-/Forum-/UI-/Asset-Recherche sowie lokale Asset-Vorschlaege aus `C:\Users\bjoer\Pictures\Sternenbürger`.
 - Stand: Neue geplante Tasks `TASK_161` bis `TASK_170` bereiten Runtime-Grenzen, Combat-Authority, Editor-Schnitt, UI-Theme, lokale Asset-Kuratierung, Multiplayer-Command-Vertrag, Session/Lobby, Snapshot-Replikation, Zwei-Client-Smoke und Warnungs-/Performance-Gates vor.
 - Offene Punkte: `TASK_161` bis `TASK_170` sind umgesetzt. Die manuellen Sichtpruefungen fuer Editor, Mission, UI und zwei lokale Multiplayer-Instanzen bleiben als Playtest-/Abnahme-Schritt offen.
 - Risiken: Der Review darf nicht als Freigabe fuer einen Grossumbau gelesen werden. Jede Empfehlung ist als kleiner Task-Slice auszufuehren und muss die bestehende SimulationRoot-/UI-Trennung respektieren.
