@@ -1,5 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### CPU/HUD R8: geprueft, Mainintegration folgt, 2026-11-08
+- Volle DefaultMove-Zwischenprojektion nur in zwei synchronen Finalisierern
+  ausgelassen; Contextmenue/Fehler bleiben sofort. Kontaktproduktion/Framing
+  behalten ihre alte Zwischengrenze. Kein Gameplay-/Qualitaetsabbau.
+- RED27/5 ->GREEN32/0; Review-P244/2 ->46/0 korrigiert. Finale Matrix93/93,
+  errors0, erneutes unabhängiges Review ohne Blocker.
+- Echter verbundener Clientplaner plus direkter nativer Testeinstieg betroffen;
+  kein allgemeiner Singleplayer-Buttongewinn. Komponentenpaar3->2 volle
+  Orderprojektionen; normale90-s-Nachlaeufe je68/0, Max106.893/99.451ms
+  gegen96.395ms Baseline. Keine allgemeine Leistungsabnahme.
+- Paket docs/qa/cpu_hud_r8_20261108/REPORT.md. Main-Smoke/Push folgen;
+  danach dieser Performancepass beendet, keine neue Ursachenrunde.
+
+
 ### CPU/Fog R7: auf Main integriert und gepusht, 2026-11-08
 - Doppelte Reichweitenrechnung im Punkt-/Terrain-LOS-Pfad entfernt. Voller
   Terrainguard bleibt, Nullregistry lokal geprueft; kein Cache/Qualitaetsabbau.

@@ -128,3 +128,16 @@ Komponenten. Der Command-Batch-Nachbar prueft echte oeffentliche Move-/GO-
 Commands, ihren Physics-Commit, aktuelle sichtbare Karten und frische Details.
 Normales Spielen, native Bilder, Framezeiten und Mainintegration sind separate
 Nachweise im QA-Paket; ein Komponententest ist keine visuelle Gesamtabnahme.
+
+
+## Synchrone Wegpunktfinalisierung R8, 08.11.2026
+Der verbundene Client-Planungseinstieg und der direkte Wegpunkt-Testeinstieg
+koennen die reine DefaultMove-Zwischenprojektion auslassen, wenn derselbe
+synchrone Aufruf anschliessend den finalen Typ vollstaendig darstellt.
+Kontaktmeldungserzeugung und First-Contact-Framing bleiben an der bisherigen
+Zwischengrenze durch refresh_contact_overlay erhalten. So enthaelt die finale
+Orderpublikation bereits die neu produzierten Kommunikationsereignisse.
+Contextmenue-Erstellung behält ihre sofortige volle Vorschau als Default.
+Leere und spaet ungueltige Ziele behalten ihre Fehlerprojektion. Alle finalen
+Legacy-/3D-Quellfelder, Planungspublikation und Feedback bleiben synchron;
+kein Cache, kein neuer Scheduler und kein verschobener Gameplaycommit.

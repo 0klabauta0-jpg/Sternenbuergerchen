@@ -3674,7 +3674,7 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 
 func _plan_connected_client_fireteam_command(command_type: String, display_text: String, target_position: Vector2) -> bool:
 	var phase_index: int = _get_live_order_phase_index()
-	var waypoint_refs: Array = _create_waypoints_for_selected_fireteams(target_position, true, false)
+	var waypoint_refs: Array = _create_waypoints_for_selected_fireteams(target_position, true, false, false)
 	if waypoint_refs.is_empty():
 		_last_command_text = "%s FAILED" % display_text
 		_update_ui()
@@ -31713,7 +31713,7 @@ func _try_open_waypoint_menu_at_position(screen_position: Vector2, append_mode: 
 	return true
 
 
-func _create_waypoints_for_selected_fireteams(world_position: Vector2, replace_existing_next_order: bool = false, snap_to_tile_center: bool = true) -> Array:
+func _create_waypoints_for_selected_fireteams(world_position: Vector2, replace_existing_next_order: bool = false, snap_to_tile_center: bool = true, refresh_visuals: bool = true) -> Array:
 	var waypoint_targets: Array = []
 	var snapped_world_position: Vector2 = _snap_planning_position_to_tile_center(world_position) if snap_to_tile_center else world_position
 	if replace_existing_next_order:
@@ -31723,7 +31723,14 @@ func _create_waypoints_for_selected_fireteams(world_position: Vector2, replace_e
 		if waypoint_target.is_empty():
 			continue
 		waypoint_targets.append(waypoint_target)
-	_refresh_order_visuals()
+	# Immediate menu previews keep their refresh. Synchronous finalizers publish
+	# the complete command below; failures still retain the original refresh.
+	if refresh_visuals or waypoint_targets.is_empty():
+		_refresh_order_visuals()
+	else:
+		# Keep contact-report production and first-contact framing before the
+		# final order payload consumes those events, as in the original pass.
+		refresh_contact_overlay()
 	return waypoint_targets
 
 
@@ -31797,11 +31804,14 @@ func _remove_empty_multi_fireteam_plans() -> void:
 
 
 func issue_right_click_command_for_test(world_position: Vector2, command_type: String, append_mode: bool = false) -> bool:
-	var waypoint_targets: Array = _create_waypoints_for_selected_fireteams(world_position, not append_mode, false)
+	var waypoint_targets: Array = _create_waypoints_for_selected_fireteams(world_position, not append_mode, false, false)
 	if waypoint_targets.is_empty():
 		return false
 	_waypoint_menu_append_mode = append_mode
-	return _set_waypoint_command_for_targets(waypoint_targets, command_type)
+	var applied: bool = _set_waypoint_command_for_targets(waypoint_targets, command_type)
+	if not applied:
+		_refresh_order_visuals()
+	return applied
 
 
 func issue_right_drag_area_command_for_test(start_world_position: Vector2, end_world_position: Vector2, command_type: String, append_mode: bool = false) -> bool:
