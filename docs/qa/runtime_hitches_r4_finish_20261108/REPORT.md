@@ -4,7 +4,9 @@ Stand08.11.2026. Fortsetzung von `task/runtime-hitches-r4-20261107` auf
 Checkpoint `3345fc573f566cd0927397092eebab8fbde7d524`, bewusst noch nicht
 integrierter Task; Mainbasis `3b12b2878b42d1be0a7a2e8e925cf13835ff1d78`.
 Produktcode `14a7e9188` bleibt unveraendert. Das alte QA-Paket wird erhalten.
-Die aktuelle Main-/Pushquittung steht nach Integration in `main_receipt.json`.
+Main ist integriert; der getestete Commit `be695f8857cbd9259bba2feb0f0c4c9a5a26068a`
+ist normal gepusht und per Remote-HEAD verifiziert. Die aktuelle
+[Main-/Pushquittung](main_receipt.json) enthaelt den frischen Smoke.
 
 ## Problem, Ursache und Aenderung
 
@@ -112,4 +114,29 @@ echter Roster vor/nach jedem Lauf, Exit/Marker/Fehler- und Sourceguards.
 Gesamtmatrix `finish_regression_final/20261108T132946Z-6552dd9f`:75/75.
 Neue Quelle privat parsergeprueft; GPU70/0 und normale Wiederholungen je68/0.
 Nur Root startet Engines seriell. Messfenster ohne parallele eigene Audits.
-Main-Smoke und Remote-HEAD werden gesondert in `main_receipt.json` belegt.
+Frischer privater90-s-Main-Smoke auf `be695f885`:
+`finish_main_smoke/20261108T134551Z-1794cf72`,68/0, Exit0/errors0,
+stabile Quellen, Profilcanary und Roster gruen.898 Frames, P50=104.518ms,
+P95=135.038ms, P99=156.784ms, Max195.515ms;845/647/0 Frames ueber
+50/100/250ms, Sim/Wand0.997376. Alle Quellen entsprechen exakt dem
+geprueften normalen B-Lauf. Originalbild geoeffnet; native Mission und
+menschliche Einheiten erhalten. Fremdlast bleibt Leistungsgrenze.
+
+Main-Smoke-Originale stehen mit Streamingreadback in `main_smoke_raw.zip`;
+die Quittung enthaelt Marker-/Exit-/Source-/Profil-/Rosternachweise und
+Quellcommit. Autorisierter normaler Push auf `origin/main`, exakter
+Remote-HEAD `be695f8857cbd9259bba2feb0f0c4c9a5a26068a` bestaetigt.
+Dieser anschliessende Receiptnachtrag entsteht auf
+`codex/r4-main-receipt-20261108`, aendert nur Doku/Evidence/Git-Byteattribute
+und wird ebenfalls per Fast-forward integriert, normal gepusht und danach
+separat gegen den finalen Remote-HEAD geprueft. Kein Produktdelta nach Smoke.
+
+Beim Wechsel vom Task auf das damalige Main und anschliessenden Fast-forward
+hat Git die drei nun eingecheckten eigenen Fortsetzungstasks sowie elf alte
+QA-Dateien neu angelegt. Deren SHA256 und Groessen bleiben identisch,
+mtime_ns aendert sich erwartbar. Diese Metadatenabweichung ist in der
+Mainquittung explizit erhalten; keine Restaurierung oder Zeitstempelkorrektur.
+Alle anderen1996 Startdateien, alle447 alten Rohdateien, die urspruenglich
+geschuetzten1415 Dateien,502 Roster und der echte Spielerroster bleiben
+auch einschliesslich der geschuetzten mtimes unveraendert. Der uncommittete
+GPU-Diagnoseinhalt wurde unveraendert uebernommen und ist jetzt eingecheckt.

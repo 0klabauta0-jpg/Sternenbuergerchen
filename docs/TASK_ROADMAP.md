@@ -3,7 +3,8 @@
 ### R4-Fortsetzung 08.11.2026
 GPUdiagnose70/0, Gesamtmatrix75/75, zwei normale90-s-Vollbildlaeufe je68/0.
 Fortsetzung unter ausdruecklich gewaehlter Fremdlast; kein isolierter
-Leistungsnachweis. Mainintegration mit frischem Smoke ist der naechste Schritt.
+Leistungsnachweis. Main integriert; frischer90-s-Smoke68/0, getesteter
+Maincommit be695f885 gepusht und Remote verifiziert. Receiptnachtrag nur Doku.
 Details: docs/qa/runtime_hitches_r4_finish_20261108/REPORT.md.
 
 

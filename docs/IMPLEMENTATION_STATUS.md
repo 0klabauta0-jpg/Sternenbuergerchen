@@ -1,6 +1,6 @@
 # IMPLEMENTATION_STATUS
 
-### R4-Fortsetzung: GPU und Vollbild abgeschlossen, Integration folgt, 2026-11-08
+### R4-Fortsetzung: auf Main integriert und gepusht, 2026-11-08
 - Uncommitteten Diagnosestand erhalten und privat parser-/nativ geprueft:
   GPU70/0,850 passende Pre/Post-Grenzen; Displayfacts167-254us bestaetigen
   keine Ursache des alten359-ms-Peaks. Kein neuer spekulativer Produktpatch.
@@ -9,8 +9,11 @@
 - Nutzer waehlt Tests unter laufender Fremdlast (SteelDivision2/GPU100%);
   keine isolierte Leistungs-/Ruckelfreiheitsabnahme. Native Sicht geprueft.
 - Neues Paket docs/qa/runtime_hitches_r4_finish_20261108/REPORT.md;
-  Altbelege, fremde WIP und Roster unveraendert. Main-Smoke/Remotequittung
-  wird nach Fast-forward separat im neuen Paket dokumentiert.
+  Altbelegbytes, fremde WIP und Roster erhalten. Main-Smoke68/0 auf
+  be695f885, Exit0/errors0, P99=156.784ms/Max195.515ms unter Fremdlast.
+  Getesteter Main gepusht und Remote identisch; main_receipt.json belegt
+  Source-/Rosterschutz und checkoutbedingte mtime-Aenderungen eigener QA.
+  Nachfolgender Receiptcommit aendert nur Doku/Evidence.
 
 
 ### R4: gepruefter Arbeitsstand, Main noch offen, 2026-11-08

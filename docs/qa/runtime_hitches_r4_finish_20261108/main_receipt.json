@@ -1,0 +1,1827 @@
+{
+  "schema": "sternenbuergerchen.r4_finish.main_receipt.v1",
+  "tested_main_commit": "be695f8857cbd9259bba2feb0f0c4c9a5a26068a",
+  "source_product_commit": "14a7e9188a0bad8227105ce6ee3d8273adc157a5",
+  "main_smoke": {
+    "schema": "sternenbuergerchen.runtime_hitches_r4_20261107.v1",
+    "checks": [
+      {
+        "name": "runtime_hitches_r4_20261107_native_capture",
+        "passed": true,
+        "exit_code": 0,
+        "timed_out": false,
+        "error_count": 0,
+        "isolation_verified": true,
+        "user_dir": "C:\\Users\\bjoer\\AppData\\Roaming\\SB-Codex-Review2-32fcbd0dc52f4c5a9abefb0a6b5f3d82\\SternenBuergerchen_UI_Zielbild_Normal_QA",
+        "project": "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\32fcbd0dc52f4c5a9abefb0a6b5f3d82\\project",
+        "log": "C:\\dev\\SternenBuergerchen\\output\\runtime_hitches_r4_20261107\\finish_main_smoke\\20261108T134551Z-1794cf72\\runtime_hitches_r4_20261107_native_capture.log",
+        "argv": [
+          "godot_console.exe",
+          "--path",
+          "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\32fcbd0dc52f4c5a9abefb0a6b5f3d82\\project",
+          "--fullscreen",
+          "--rendering-method",
+          "forward_plus",
+          "--rendering-driver",
+          "vulkan",
+          "--script",
+          "C:\\dev\\SternenBuergerchen\\.godot\\review2_isolation\\32fcbd0dc52f4c5a9abefb0a6b5f3d82\\project\\scripts\\tests\\runtime_hitches_r4_20261107_native_capture.gd",
+          "--",
+          "--evidence-output=C:/dev/SternenBuergerchen/output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke.json",
+          "--profile-seconds=90",
+          "--startup-timeout-seconds=260",
+          "--ui-size=3440x1440"
+        ],
+        "immutable_input_records": [
+          {
+            "path": "output/grafik_20261101/pass06_environment_before_capture.json",
+            "sha256": "b99cb71f2b807e52c7990ec857d0e01cc4915f1f71adcf870721184d3c909610"
+          }
+        ],
+        "roster_before": {
+          "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+          "length": 221299,
+          "mtime_ns": 1793820794249246900
+        },
+        "roster_after": {
+          "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+          "length": 221299,
+          "mtime_ns": 1793820794249246900
+        },
+        "source_inputs_before": {
+          "data/npc_unit_visual_mapping.json": "a7d133cdc510b71eedf4d3e7fdd08d68dc49252d0377ff9e56315bfcb6c70159",
+          "scripts/core/fog_of_war_system.gd": "544b976ad1f76ea430bbc5b160be107e947366a41a8ccb6ef7d0dc92cdb5b822",
+          "scripts/core/los_system.gd": "7450e41a38a3b577a9fbec166a64959b7754209322697d13e407a63fbc181e3e",
+          "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+          "scripts/meta/homebase_operations_presenter.gd": "c888208292fad054250ffe8e999de362102965927634a78147fd764e12958f41",
+          "scripts/meta/homebase_screen.gd": "d970699cd605269de7b4360ad071bec55ab436f46b869f9ea93bafe1a711bd5d",
+          "scripts/meta/meta_ui_skin.gd": "64dbb2ee42cf81db94b96dd29a99d69517c3b92bcece703085e9e499e8254540",
+          "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+          "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+          "scripts/tactical/fireteam_movement_controller.gd": "9b7f2774579ba452434669b6b65e6888fdd478067c68107183f2c9d61da2bfaa",
+          "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+          "scripts/tactical/periodic_hud_projection_queue.gd": "cabe261aaf2b83dbd77454eeca6f0d21608bd4f8f0add1b1d4b6ecfa4f73d98f",
+          "scripts/terrain/frontier_gm01_layout.gd": "7827ae90a46d842c19e0fee730f75bc840988feb02abaeb434ffd84d1d470d8f",
+          "scripts/terrain/frontier_reference_dressing.gd": "b67d0a1756c82d44394ab518960125a8b60d8496c06d4342afc0ad568b1cd91a",
+          "scripts/terrain/terrain_map_3d_view.gd": "fb9905172a9115c6458a90c3fdb896895c0576978bd999a6567c7711458b60f2",
+          "scripts/terrain/terrain_registry.gd": "1aa3b96e1010298d050d1aade5b27c40ddb560dccd17ac4ad1d74223d37974b7",
+          "scripts/terrain/weapon_fire_feedback_layer.gd": "3087b4abdcc92c93a3449187bab623899b2d520e78f161194d77a329be75db84",
+          "scripts/terrain/weapon_fire_feedback_pulse.gd": "35a6d435284e19844277fb8e57b7db1e6fde81b524d2dc25e7a6fd9a4161ab04",
+          "scripts/tests/hud_architecture_20261106_native_capture.gd": "769d5e2c6359e2471a34b2f48fe8b3b72514cca613a8fa771efc18bdadbc2644",
+          "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+          "scripts/tests/mission_tactical_sandbox_controller.gd": "b247162e46edaca4e5696c9d96242384aca102ff03cb8f2e2c84c103627cddaf",
+          "scripts/tests/mission_test_setup.gd": "64da64da090566e3bc06da06eb6a754161a943033b191d3572c218dc98bd2aaf",
+          "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+          "scripts/tests/playtest_20261105_motion_order_capture.gd": "d116b56adcd8006eb2ae06a7111842aabc7b9008639b7541f2332d025b3b95fa",
+          "scripts/tests/reference_polish_r3_20261106_native_capture.gd": "cd0bb300b1e8d717c466b9780b17304b587e1f3bad55d3c5c8cab094499aefe8",
+          "scripts/tests/run_runtime_hitches_r4_20261107.py": "5a835d283312e50f28259dd40066b5fee8a68d054363e0775cbbf581c1310740",
+          "scripts/tests/runtime_hitches_r4_20261107_native_capture.gd": "6b987e9c33a866b751c40a82f7bb3275fe8162ac83aa9fe7073bff8716aa7832",
+          "scripts/tests/runtime_hitches_r4_20261107_strategic_source_oracle.json": "f7d3e591d2c30c2d5e798979fc829f0a1935793d57cf90b75c11a8362c81a13d",
+          "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+          "scripts/ui/mission_a5_hud_layout.gd": "5342a804244cc97df59a30a1f8d4837e79a93cd0bd2e25a39ec27c2544f6a9ed",
+          "scripts/ui/native_ui_icons.gd": "4450b9f91586d95112d615c11fde6c8e77f2fe1a6bd951c6917d7161f8de276e",
+          "scripts/ui/reference_panel_frame.gd": "4b5c7b51f17356443d8e1bfa7ed49f72a47a33456bf149320e546c34e6cb30ce",
+          "scripts/ui/tactical_ui_theme.gd": "87df9617a029fb292f4aa808b10422c3be082b22714112111960a603fc533729"
+        },
+        "source_inputs_after": {
+          "data/npc_unit_visual_mapping.json": "a7d133cdc510b71eedf4d3e7fdd08d68dc49252d0377ff9e56315bfcb6c70159",
+          "scripts/core/fog_of_war_system.gd": "544b976ad1f76ea430bbc5b160be107e947366a41a8ccb6ef7d0dc92cdb5b822",
+          "scripts/core/los_system.gd": "7450e41a38a3b577a9fbec166a64959b7754209322697d13e407a63fbc181e3e",
+          "scripts/core/simulation_root.gd": "6d42caddf414f2e303ad34b66447fcd54bfe5de170ac058c0b69a4cfd7f940bc",
+          "scripts/meta/homebase_operations_presenter.gd": "c888208292fad054250ffe8e999de362102965927634a78147fd764e12958f41",
+          "scripts/meta/homebase_screen.gd": "d970699cd605269de7b4360ad071bec55ab436f46b869f9ea93bafe1a711bd5d",
+          "scripts/meta/meta_ui_skin.gd": "64dbb2ee42cf81db94b96dd29a99d69517c3b92bcece703085e9e499e8254540",
+          "scripts/mission/mission_interaction_door_runtime_collision_los.gd": "2b2592007033d09a5b24ea6b9be06a149f9f534282772a0d686ad3d37cd7f368",
+          "scripts/mission/mission_interaction_object_reaction.gd": "bc2a144191e93e5df128571389b0ddb01af9d8d914fb30af00a4b5b01681ed25",
+          "scripts/tactical/fireteam_movement_controller.gd": "9b7f2774579ba452434669b6b65e6888fdd478067c68107183f2c9d61da2bfaa",
+          "scripts/tactical/mission_hud_read_model.gd": "7fc4e05a8c505132a4da7b78f8aa71af68ff0a4faa7272c3731443f856f830ff",
+          "scripts/tactical/periodic_hud_projection_queue.gd": "cabe261aaf2b83dbd77454eeca6f0d21608bd4f8f0add1b1d4b6ecfa4f73d98f",
+          "scripts/terrain/frontier_gm01_layout.gd": "7827ae90a46d842c19e0fee730f75bc840988feb02abaeb434ffd84d1d470d8f",
+          "scripts/terrain/frontier_reference_dressing.gd": "b67d0a1756c82d44394ab518960125a8b60d8496c06d4342afc0ad568b1cd91a",
+          "scripts/terrain/terrain_map_3d_view.gd": "fb9905172a9115c6458a90c3fdb896895c0576978bd999a6567c7711458b60f2",
+          "scripts/terrain/terrain_registry.gd": "1aa3b96e1010298d050d1aade5b27c40ddb560dccd17ac4ad1d74223d37974b7",
+          "scripts/terrain/weapon_fire_feedback_layer.gd": "3087b4abdcc92c93a3449187bab623899b2d520e78f161194d77a329be75db84",
+          "scripts/terrain/weapon_fire_feedback_pulse.gd": "35a6d435284e19844277fb8e57b7db1e6fde81b524d2dc25e7a6fd9a4161ab04",
+          "scripts/tests/hud_architecture_20261106_native_capture.gd": "769d5e2c6359e2471a34b2f48fe8b3b72514cca613a8fa771efc18bdadbc2644",
+          "scripts/tests/mission_combat_loop_driver.gd": "1c7ff89738c05f965c1c191af5ca2ab42763c087f05a83b40df5126e8ecb6ca1",
+          "scripts/tests/mission_tactical_sandbox_controller.gd": "b247162e46edaca4e5696c9d96242384aca102ff03cb8f2e2c84c103627cddaf",
+          "scripts/tests/mission_test_setup.gd": "64da64da090566e3bc06da06eb6a754161a943033b191d3572c218dc98bd2aaf",
+          "scripts/tests/playtest_20261105_fullscreen_performance_capture.gd": "99b3526b39376872155387bc7c1b2c8f53d011f4eb5f63aed6b5e7cb46902ce4",
+          "scripts/tests/playtest_20261105_motion_order_capture.gd": "d116b56adcd8006eb2ae06a7111842aabc7b9008639b7541f2332d025b3b95fa",
+          "scripts/tests/reference_polish_r3_20261106_native_capture.gd": "cd0bb300b1e8d717c466b9780b17304b587e1f3bad55d3c5c8cab094499aefe8",
+          "scripts/tests/run_runtime_hitches_r4_20261107.py": "5a835d283312e50f28259dd40066b5fee8a68d054363e0775cbbf581c1310740",
+          "scripts/tests/runtime_hitches_r4_20261107_native_capture.gd": "6b987e9c33a866b751c40a82f7bb3275fe8162ac83aa9fe7073bff8716aa7832",
+          "scripts/tests/runtime_hitches_r4_20261107_strategic_source_oracle.json": "f7d3e591d2c30c2d5e798979fc829f0a1935793d57cf90b75c11a8362c81a13d",
+          "scripts/tests/ui_zielbild_normal_capture.gd": "e9211182c151d18e032180e12985d4c50b5748c7dbaaf30a327fc40decd8a000",
+          "scripts/ui/mission_a5_hud_layout.gd": "5342a804244cc97df59a30a1f8d4837e79a93cd0bd2e25a39ec27c2544f6a9ed",
+          "scripts/ui/native_ui_icons.gd": "4450b9f91586d95112d615c11fde6c8e77f2fe1a6bd951c6917d7161f8de276e",
+          "scripts/ui/reference_panel_frame.gd": "4b5c7b51f17356443d8e1bfa7ed49f72a47a33456bf149320e546c34e6cb30ce",
+          "scripts/ui/tactical_ui_theme.gd": "87df9617a029fb292f4aa808b10422c3be082b22714112111960a603fc533729"
+        },
+        "source_inputs_stable": true,
+        "baseline_runtime": null
+      }
+    ],
+    "source_project_sha256": "ec3bd33afa7a10083b652a832c04614661eee0e4f216b046158c24c598c9c232",
+    "protected_roster": {
+      "sha256": "de5861ded01505754788bda9be7c69e4e93757fd5152762a34ddedaecdd643dd",
+      "length": 221299,
+      "mtime_ns": 1793820794249246900
+    },
+    "summary": {
+      "selected": 1,
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "summary": {
+    "path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke_performance.json",
+    "sha256": "25df6fb76c59f096eb608bf2d989880f367bf98d989d8b6c2e9fa597a05d11c7",
+    "duration_usec": 90086418,
+    "frames": 898,
+    "frametime_usec": {
+      "count": 898,
+      "max": 195515,
+      "mean": 100305.154788419,
+      "p50": 104518,
+      "p90": 117689,
+      "p95": 135038,
+      "p99": 156784
+    },
+    "hitch_counts": {
+      "over_100ms": 647,
+      "over_250ms": 0,
+      "over_33ms": 863,
+      "over_50ms": 845
+    },
+    "simulation_ticks": 5391,
+    "simulation_seconds_per_wall_second": 0.997375653231101,
+    "backlog_frame_maxima": {
+      "nav_pending": 0,
+      "command_queue": 7,
+      "effect_queue": 0,
+      "ticks_since_previous_frame": 8
+    },
+    "physics_tick_samples": 5392,
+    "physics_tick_cost_usec": {
+      "p50": 2383,
+      "p95": 13750,
+      "p99": 15379,
+      "max": 37606
+    },
+    "probe_usec": {
+      "count": 898,
+      "max": 387,
+      "mean": 121.287305122494,
+      "p50": 112,
+      "p90": 152,
+      "p95": 164,
+      "p99": 198
+    },
+    "camera_before": {
+      "projection": 1,
+      "size": 22.0,
+      "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (23.29305, 22.01533, 28.05867)]"
+    },
+    "camera_after": {
+      "projection": 1,
+      "size": 22.0,
+      "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (23.29305, 22.01533, 28.05867)]"
+    },
+    "display_samples": [
+      {
+        "content_scale_size": "(3440, 1440)",
+        "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+        "display": "Windows",
+        "display_server_window_mode": 3,
+        "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "max_physics_steps_per_frame": 8,
+        "physics_ticks_per_second": 60,
+        "renderer": "forward_plus",
+        "rendering_driver": "vulkan",
+        "root_size": "(3440, 1440)",
+        "screen_index": 0,
+        "screen_refresh_rate": 240.085006713867,
+        "screen_size": "(3440, 1440)",
+        "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+        "time_scale": 1.0,
+        "viewport_size": "(3440.0, 1440.0)",
+        "vsync_mode": 1,
+        "window_has_focus": true,
+        "window_mode": 3,
+        "window_size": "(3440, 1440)"
+      },
+      {
+        "content_scale_size": "(3440, 1440)",
+        "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+        "display": "Windows",
+        "display_server_window_mode": 3,
+        "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "max_physics_steps_per_frame": 8,
+        "physics_ticks_per_second": 60,
+        "renderer": "forward_plus",
+        "rendering_driver": "vulkan",
+        "root_size": "(3440, 1440)",
+        "screen_index": 0,
+        "screen_refresh_rate": 240.085006713867,
+        "screen_size": "(3440, 1440)",
+        "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+        "time_scale": 1.0,
+        "viewport_size": "(3440.0, 1440.0)",
+        "vsync_mode": 1,
+        "window_has_focus": true,
+        "window_mode": 3,
+        "window_size": "(3440, 1440)"
+      },
+      {
+        "content_scale_size": "(3440, 1440)",
+        "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+        "display": "Windows",
+        "display_server_window_mode": 3,
+        "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "max_physics_steps_per_frame": 8,
+        "physics_ticks_per_second": 60,
+        "renderer": "forward_plus",
+        "rendering_driver": "vulkan",
+        "root_size": "(3440, 1440)",
+        "screen_index": 0,
+        "screen_refresh_rate": 240.085006713867,
+        "screen_size": "(3440, 1440)",
+        "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+        "time_scale": 1.0,
+        "viewport_size": "(3440.0, 1440.0)",
+        "vsync_mode": 1,
+        "window_has_focus": true,
+        "window_mode": 3,
+        "window_size": "(3440, 1440)"
+      },
+      {
+        "content_scale_size": "(3440, 1440)",
+        "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+        "display": "Windows",
+        "display_server_window_mode": 3,
+        "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "max_physics_steps_per_frame": 8,
+        "physics_ticks_per_second": 60,
+        "renderer": "forward_plus",
+        "rendering_driver": "vulkan",
+        "root_size": "(3440, 1440)",
+        "screen_index": 0,
+        "screen_refresh_rate": 240.085006713867,
+        "screen_size": "(3440, 1440)",
+        "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+        "time_scale": 1.0,
+        "viewport_size": "(3440.0, 1440.0)",
+        "vsync_mode": 1,
+        "window_has_focus": true,
+        "window_mode": 3,
+        "window_size": "(3440, 1440)"
+      },
+      {
+        "content_scale_size": "(3440, 1440)",
+        "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+        "display": "Windows",
+        "display_server_window_mode": 3,
+        "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "max_physics_steps_per_frame": 8,
+        "physics_ticks_per_second": 60,
+        "renderer": "forward_plus",
+        "rendering_driver": "vulkan",
+        "root_size": "(3440, 1440)",
+        "screen_index": 0,
+        "screen_refresh_rate": 240.085006713867,
+        "screen_size": "(3440, 1440)",
+        "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+        "time_scale": 1.0,
+        "viewport_size": "(3440.0, 1440.0)",
+        "vsync_mode": 1,
+        "window_has_focus": true,
+        "window_mode": 3,
+        "window_size": "(3440, 1440)"
+      },
+      {
+        "content_scale_size": "(3440, 1440)",
+        "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+        "display": "Windows",
+        "display_server_window_mode": 3,
+        "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "max_physics_steps_per_frame": 8,
+        "physics_ticks_per_second": 60,
+        "renderer": "forward_plus",
+        "rendering_driver": "vulkan",
+        "root_size": "(3440, 1440)",
+        "screen_index": 0,
+        "screen_refresh_rate": 240.085006713867,
+        "screen_size": "(3440, 1440)",
+        "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+        "time_scale": 1.0,
+        "viewport_size": "(3440.0, 1440.0)",
+        "vsync_mode": 1,
+        "window_has_focus": true,
+        "window_mode": 3,
+        "window_size": "(3440, 1440)"
+      },
+      {
+        "content_scale_size": "(3440, 1440)",
+        "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+        "display": "Windows",
+        "display_server_window_mode": 3,
+        "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "max_physics_steps_per_frame": 8,
+        "physics_ticks_per_second": 60,
+        "renderer": "forward_plus",
+        "rendering_driver": "vulkan",
+        "root_size": "(3440, 1440)",
+        "screen_index": 0,
+        "screen_refresh_rate": 240.085006713867,
+        "screen_size": "(3440, 1440)",
+        "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+        "time_scale": 1.0,
+        "viewport_size": "(3440.0, 1440.0)",
+        "vsync_mode": 1,
+        "window_has_focus": true,
+        "window_mode": 3,
+        "window_size": "(3440, 1440)"
+      },
+      {
+        "content_scale_size": "(3440, 1440)",
+        "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+        "display": "Windows",
+        "display_server_window_mode": 3,
+        "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "max_physics_steps_per_frame": 8,
+        "physics_ticks_per_second": 60,
+        "renderer": "forward_plus",
+        "rendering_driver": "vulkan",
+        "root_size": "(3440, 1440)",
+        "screen_index": 0,
+        "screen_refresh_rate": 240.085006713867,
+        "screen_size": "(3440, 1440)",
+        "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+        "time_scale": 1.0,
+        "viewport_size": "(3440.0, 1440.0)",
+        "vsync_mode": 1,
+        "window_has_focus": true,
+        "window_mode": 3,
+        "window_size": "(3440, 1440)"
+      },
+      {
+        "content_scale_size": "(3440, 1440)",
+        "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+        "display": "Windows",
+        "display_server_window_mode": 3,
+        "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "max_physics_steps_per_frame": 8,
+        "physics_ticks_per_second": 60,
+        "renderer": "forward_plus",
+        "rendering_driver": "vulkan",
+        "root_size": "(3440, 1440)",
+        "screen_index": 0,
+        "screen_refresh_rate": 240.085006713867,
+        "screen_size": "(3440, 1440)",
+        "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+        "time_scale": 1.0,
+        "viewport_size": "(3440.0, 1440.0)",
+        "vsync_mode": 1,
+        "window_has_focus": true,
+        "window_mode": 3,
+        "window_size": "(3440, 1440)"
+      },
+      {
+        "content_scale_size": "(3440, 1440)",
+        "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+        "display": "Windows",
+        "display_server_window_mode": 3,
+        "gpu": "NVIDIA GeForce RTX 4070 Ti SUPER",
+        "max_physics_steps_per_frame": 8,
+        "physics_ticks_per_second": 60,
+        "renderer": "forward_plus",
+        "rendering_driver": "vulkan",
+        "root_size": "(3440, 1440)",
+        "screen_index": 0,
+        "screen_refresh_rate": 240.085006713867,
+        "screen_size": "(3440, 1440)",
+        "screen_usable_rect": "[P: (2560, 0), S: (3440, 1410)]",
+        "time_scale": 1.0,
+        "viewport_size": "(3440.0, 1440.0)",
+        "vsync_mode": 1,
+        "window_has_focus": true,
+        "window_mode": 3,
+        "window_size": "(3440, 1440)"
+      }
+    ],
+    "scope": {
+      "forced_arrival": false,
+      "forced_unloading": false,
+      "gpu_frame_time": "unavailable",
+      "private_simulation_state_writes": false,
+      "route": "normal Move+GO every 12 wall seconds, alternating authored insertion and validated short path",
+      "synthetic_fixture": false,
+      "time_acceleration": false,
+      "warmup_seconds": 3
+    },
+    "actions": [
+      {
+        "elapsed_usec": 12017612,
+        "move_accepted": true,
+        "go_accepted": true,
+        "move_usec": 39595,
+        "go_usec": 42236,
+        "paired_public_calls_usec": 81831
+      },
+      {
+        "elapsed_usec": 24085119,
+        "move_accepted": true,
+        "go_accepted": true,
+        "move_usec": 38032,
+        "go_usec": 35114,
+        "paired_public_calls_usec": 73146
+      },
+      {
+        "elapsed_usec": 36005323,
+        "move_accepted": true,
+        "go_accepted": true,
+        "move_usec": 34875,
+        "go_usec": 41688,
+        "paired_public_calls_usec": 76563
+      },
+      {
+        "elapsed_usec": 48103088,
+        "move_accepted": true,
+        "go_accepted": true,
+        "move_usec": 29932,
+        "go_usec": 54511,
+        "paired_public_calls_usec": 84443
+      },
+      {
+        "elapsed_usec": 60078060,
+        "move_accepted": true,
+        "go_accepted": true,
+        "move_usec": 36528,
+        "go_usec": 42479,
+        "paired_public_calls_usec": 79007
+      },
+      {
+        "elapsed_usec": 72102640,
+        "move_accepted": true,
+        "go_accepted": true,
+        "move_usec": 33272,
+        "go_usec": 61472,
+        "paired_public_calls_usec": 94744
+      },
+      {
+        "elapsed_usec": 84001411,
+        "move_accepted": true,
+        "go_accepted": true,
+        "move_usec": 32284,
+        "go_usec": 42729,
+        "paired_public_calls_usec": 75013
+      }
+    ],
+    "largest_frames": [
+      {
+        "elapsed_usec": 12213127,
+        "frame_usec": 195515,
+        "tick": 2410,
+        "ticks_since_previous_frame": 8,
+        "controller_usec": 15313,
+        "controller_scopes_usec": {
+          "execution_updates_usec": 1303,
+          "feedback_and_security_usec": 14006,
+          "hud_heavy_usec": 0,
+          "hud_light_usec": 14006,
+          "ui_refresh_usec": 0
+        },
+        "simulation_usec": 1871,
+        "terrain_usec": 5714,
+        "fog_owner": {
+          "advance_usec": 4989,
+          "enabled": true,
+          "last_work": {
+            "candidate_scan_pending": false,
+            "candidate_scan_processed": 1058,
+            "candidate_tile_count": 187,
+            "completed": false,
+            "full_scan": false,
+            "processed_in_slice": 0,
+            "processed_tile_count": 0,
+            "slice_duration_usec": 4917,
+            "visibility_revision": 53
+          },
+          "pending_age_msec": 175,
+          "read_only": true,
+          "sets_gameplay_truth": false,
+          "sync_usec": 5689,
+          "total_usec": 10681,
+          "visibility_pending": true,
+          "work_budget_tiles": 512
+        },
+        "nav_pending": 0,
+        "unit_count": 11
+      },
+      {
+        "elapsed_usec": 60257781,
+        "frame_usec": 179721,
+        "tick": 5287,
+        "ticks_since_previous_frame": 8,
+        "controller_usec": 13625,
+        "controller_scopes_usec": {
+          "execution_updates_usec": 1300,
+          "feedback_and_security_usec": 12293,
+          "hud_heavy_usec": 27,
+          "hud_light_usec": 12293,
+          "ui_refresh_usec": 27
+        },
+        "simulation_usec": 2211,
+        "terrain_usec": 4767,
+        "fog_owner": {
+          "advance_usec": 2,
+          "enabled": true,
+          "last_work": {
+            "completed": true,
+            "duration_usec": 183620,
+            "full_scan": false,
+            "processed_in_slice": 186,
+            "processed_tile_count": 186,
+            "slice_duration_usec": 11861,
+            "visibility_revision": 206
+          },
+          "pending_age_msec": 0,
+          "read_only": true,
+          "sets_gameplay_truth": false,
+          "sync_usec": 5734,
+          "total_usec": 5739,
+          "visibility_pending": false,
+          "work_budget_tiles": 512
+        },
+        "nav_pending": 0,
+        "unit_count": 11
+      },
+      {
+        "elapsed_usec": 24779216,
+        "frame_usec": 171991,
+        "tick": 3159,
+        "ticks_since_previous_frame": 7,
+        "controller_usec": 57688,
+        "controller_scopes_usec": {
+          "execution_updates_usec": 57647,
+          "feedback_and_security_usec": 20,
+          "hud_heavy_usec": 18,
+          "hud_light_usec": 20,
+          "ui_refresh_usec": 18
+        },
+        "simulation_usec": 12633,
+        "terrain_usec": 5302,
+        "fog_owner": {
+          "advance_usec": 19144,
+          "enabled": true,
+          "last_work": {
+            "completed": true,
+            "duration_usec": 194183,
+            "full_scan": false,
+            "processed_in_slice": 186,
+            "processed_tile_count": 186,
+            "slice_duration_usec": 8132,
+            "visibility_revision": 95
+          },
+          "pending_age_msec": 2,
+          "read_only": true,
+          "sets_gameplay_truth": false,
+          "sync_usec": 2696,
+          "total_usec": 21843,
+          "visibility_pending": true,
+          "work_budget_tiles": 512
+        },
+        "nav_pending": 0,
+        "unit_count": 11
+      },
+      {
+        "elapsed_usec": 12954701,
+        "frame_usec": 170096,
+        "tick": 2454,
+        "ticks_since_previous_frame": 8,
+        "controller_usec": 57110,
+        "controller_scopes_usec": {
+          "execution_updates_usec": 43092,
+          "feedback_and_security_usec": 14015,
+          "hud_heavy_usec": 0,
+          "hud_light_usec": 14015,
+          "ui_refresh_usec": 0
+        },
+        "simulation_usec": 11242,
+        "terrain_usec": 6152,
+        "fog_owner": {
+          "advance_usec": 6883,
+          "enabled": true,
+          "last_work": {
+            "candidate_scan_pending": false,
+            "candidate_scan_processed": 1058,
+            "candidate_tile_count": 186,
+            "completed": false,
+            "full_scan": false,
+            "processed_in_slice": 0,
+            "processed_tile_count": 0,
+            "slice_duration_usec": 6819,
+            "visibility_revision": 56
+          },
+          "pending_age_msec": 88,
+          "read_only": true,
+          "sets_gameplay_truth": false,
+          "sync_usec": 6315,
+          "total_usec": 13200,
+          "visibility_pending": true,
+          "work_budget_tiles": 512
+        },
+        "nav_pending": 0,
+        "unit_count": 11
+      },
+      {
+        "elapsed_usec": 36170139,
+        "frame_usec": 164816,
+        "tick": 3842,
+        "ticks_since_previous_frame": 8,
+        "controller_usec": 14511,
+        "controller_scopes_usec": {
+          "execution_updates_usec": 1549,
+          "feedback_and_security_usec": 12959,
+          "hud_heavy_usec": 0,
+          "hud_light_usec": 12959,
+          "ui_refresh_usec": 0
+        },
+        "simulation_usec": 1732,
+        "terrain_usec": 5220,
+        "fog_owner": {
+          "advance_usec": 1,
+          "enabled": true,
+          "last_work": {
+            "completed": true,
+            "duration_usec": 154348,
+            "full_scan": false,
+            "processed_in_slice": 186,
+            "processed_tile_count": 186,
+            "slice_duration_usec": 11467,
+            "visibility_revision": 134
+          },
+          "pending_age_msec": 0,
+          "read_only": true,
+          "sets_gameplay_truth": false,
+          "sync_usec": 5385,
+          "total_usec": 5388,
+          "visibility_pending": false,
+          "work_budget_tiles": 512
+        },
+        "nav_pending": 0,
+        "unit_count": 11
+      },
+      {
+        "elapsed_usec": 72265042,
+        "frame_usec": 162402,
+        "tick": 6008,
+        "ticks_since_previous_frame": 8,
+        "controller_usec": 12347,
+        "controller_scopes_usec": {
+          "execution_updates_usec": 1403,
+          "feedback_and_security_usec": 10941,
+          "hud_heavy_usec": 0,
+          "hud_light_usec": 10941,
+          "ui_refresh_usec": 0
+        },
+        "simulation_usec": 2060,
+        "terrain_usec": 3223,
+        "fog_owner": {
+          "advance_usec": 2,
+          "enabled": true,
+          "last_work": {
+            "completed": true,
+            "duration_usec": 233229,
+            "full_scan": false,
+            "processed_in_slice": 186,
+            "processed_tile_count": 186,
+            "slice_duration_usec": 7769,
+            "visibility_revision": 240
+          },
+          "pending_age_msec": 0,
+          "read_only": true,
+          "sets_gameplay_truth": false,
+          "sync_usec": 4746,
+          "total_usec": 4750,
+          "visibility_pending": false,
+          "work_budget_tiles": 512
+        },
+        "nav_pending": 0,
+        "unit_count": 11
+      },
+      {
+        "elapsed_usec": 22112848,
+        "frame_usec": 158139,
+        "tick": 3001,
+        "ticks_since_previous_frame": 8,
+        "controller_usec": 1412,
+        "controller_scopes_usec": {
+          "execution_updates_usec": 1403,
+          "feedback_and_security_usec": 5,
+          "hud_heavy_usec": 0,
+          "hud_light_usec": 5,
+          "ui_refresh_usec": 0
+        },
+        "simulation_usec": 3089,
+        "terrain_usec": 9342,
+        "fog_owner": {
+          "advance_usec": 8754,
+          "enabled": true,
+          "last_work": {
+            "candidate_scan_pending": true,
+            "candidate_scan_processed": 2048,
+            "candidate_tile_count": 2116,
+            "completed": false,
+            "full_scan": false,
+            "processed_in_slice": 0,
+            "processed_tile_count": 0,
+            "slice_duration_usec": 8702,
+            "visibility_revision": 83
+          },
+          "pending_age_msec": 102,
+          "read_only": true,
+          "sets_gameplay_truth": false,
+          "sync_usec": 4380,
+          "total_usec": 13137,
+          "visibility_pending": true,
+          "work_budget_tiles": 512
+        },
+        "nav_pending": 0,
+        "unit_count": 11
+      },
+      {
+        "elapsed_usec": 1691325,
+        "frame_usec": 158069,
+        "tick": 1783,
+        "ticks_since_previous_frame": 8,
+        "controller_usec": 13786,
+        "controller_scopes_usec": {
+          "execution_updates_usec": 1408,
+          "feedback_and_security_usec": 12374,
+          "hud_heavy_usec": 0,
+          "hud_light_usec": 12374,
+          "ui_refresh_usec": 0
+        },
+        "simulation_usec": 3021,
+        "terrain_usec": 4682,
+        "fog_owner": {
+          "advance_usec": 8874,
+          "enabled": true,
+          "last_work": {
+            "candidate_scan_pending": true,
+            "candidate_scan_processed": 2048,
+            "candidate_tile_count": 2116,
+            "completed": false,
+            "full_scan": false,
+            "processed_in_slice": 0,
+            "processed_tile_count": 0,
+            "slice_duration_usec": 8813,
+            "visibility_revision": 19
+          },
+          "pending_age_msec": 85,
+          "read_only": true,
+          "sets_gameplay_truth": false,
+          "sync_usec": 5955,
+          "total_usec": 14831,
+          "visibility_pending": true,
+          "work_budget_tiles": 512
+        },
+        "nav_pending": 0,
+        "unit_count": 11
+      },
+      {
+        "elapsed_usec": 5264199,
+        "frame_usec": 156784,
+        "tick": 1998,
+        "ticks_since_previous_frame": 8,
+        "controller_usec": 13397,
+        "controller_scopes_usec": {
+          "execution_updates_usec": 1100,
+          "feedback_and_security_usec": 12294,
+          "hud_heavy_usec": 0,
+          "hud_light_usec": 12294,
+          "ui_refresh_usec": 0
+        },
+        "simulation_usec": 11932,
+        "terrain_usec": 4879,
+        "fog_owner": {
+          "advance_usec": 640,
+          "enabled": true,
+          "last_work": {
+            "candidate_scan_pending": false,
+            "candidate_scan_processed": 2116,
+            "candidate_tile_count": 198,
+            "completed": false,
+            "full_scan": false,
+            "processed_in_slice": 0,
+            "processed_tile_count": 0,
+            "slice_duration_usec": 573,
+            "visibility_revision": 31
+          },
+          "pending_age_msec": 185,
+          "read_only": true,
+          "sets_gameplay_truth": false,
+          "sync_usec": 6965,
+          "total_usec": 7608,
+          "visibility_pending": true,
+          "work_budget_tiles": 512
+        },
+        "nav_pending": 0,
+        "unit_count": 11
+      },
+      {
+        "elapsed_usec": 26203356,
+        "frame_usec": 156587,
+        "tick": 3244,
+        "ticks_since_previous_frame": 8,
+        "controller_usec": 21993,
+        "controller_scopes_usec": {
+          "execution_updates_usec": 1151,
+          "feedback_and_security_usec": 20838,
+          "hud_heavy_usec": 0,
+          "hud_light_usec": 20838,
+          "ui_refresh_usec": 0
+        },
+        "simulation_usec": 2321,
+        "terrain_usec": 4078,
+        "fog_owner": {
+          "advance_usec": 8745,
+          "enabled": true,
+          "last_work": {
+            "candidate_scan_pending": true,
+            "candidate_scan_processed": 2048,
+            "candidate_tile_count": 3174,
+            "completed": false,
+            "full_scan": false,
+            "processed_in_slice": 0,
+            "processed_tile_count": 0,
+            "slice_duration_usec": 8693,
+            "visibility_revision": 99
+          },
+          "pending_age_msec": 74,
+          "read_only": true,
+          "sets_gameplay_truth": false,
+          "sync_usec": 4983,
+          "total_usec": 13730,
+          "visibility_pending": true,
+          "work_budget_tiles": 512
+        },
+        "nav_pending": 0,
+        "unit_count": 11
+      }
+    ],
+    "nested_scopes_are_not_additive": true,
+    "scope_monitors_may_be_previous_invocation": true,
+    "gpu_frame_time_available": false,
+    "projection_facts": {
+      "available": true,
+      "path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke.json",
+      "sha256": "50da0aafe4417d13b7796cc5cfc6cd11b477a09d2a98813ed35f64eebe283903",
+      "window_start_usec": 51735744,
+      "window_duration_usec": 90086418,
+      "samples_filtered_by_start_time": 306,
+      "phases": {
+        "primary_secondary": {
+          "samples": 76,
+          "max_cost_usec": 44523,
+          "p95_cost_usec": 39248,
+          "max_age_at_start_msec": 179
+        },
+        "craft": {
+          "samples": 77,
+          "max_cost_usec": 12297,
+          "p95_cost_usec": 11191,
+          "max_age_at_start_msec": 307
+        },
+        "world_status": {
+          "samples": 77,
+          "max_cost_usec": 17961,
+          "p95_cost_usec": 15740,
+          "max_age_at_start_msec": 418
+        },
+        "cards": {
+          "samples": 76,
+          "max_cost_usec": 14274,
+          "p95_cost_usec": 11567,
+          "max_age_at_start_msec": 536
+        }
+      },
+      "max_jobs_in_one_engine_frame": 1,
+      "max_pending_keys_lifetime": 4,
+      "lifetime_age_is_not_window_age": true,
+      "command_receipts": {
+        "enabled": true,
+        "inflight_count": 0,
+        "invocation_count": 7,
+        "nested_scopes_not_additive": true,
+        "read_only": true,
+        "receipt_limit": 8,
+        "receipts": [
+          {
+            "accepted": true,
+            "already_active_fireteam_count": 1,
+            "blocked_fireteam_count": 0,
+            "command": "go",
+            "complete": true,
+            "continued_fireteam_count": 0,
+            "finished_process_frame": 442,
+            "finished_usec": 63835369,
+            "invocation_id": 1,
+            "issued_fireteam_count": 0,
+            "light_ui_projection_build_calls": {
+              "_build_fireteam_status_text": 1,
+              "_build_mission_combat_hud_density_snapshot": 2,
+              "_build_mission_combat_hud_detail_tooltip_text": 1,
+              "_build_native_player_readout_context": 1,
+              "_build_release_candidate_firefight_decision_line_snapshot": 1,
+              "_build_selected_fireteam_live_decision_detail_tooltip": 1
+            },
+            "light_ui_projection_scopes_usec": {},
+            "light_ui_scopes_usec": {
+              "mission_panels_usec": 5522,
+              "panel_dropship_usec": 1110,
+              "panel_event_log_usec": 626,
+              "panel_fireteam_phase_usec": 1297,
+              "panel_identity_usec": 2170,
+              "panel_nav_identity_usec": 2489,
+              "panel_nav_timer_usec": 15,
+              "panel_team_chip_usec": 304,
+              "primary_block_labels_usec": 64,
+              "primary_command_decision_usec": 1005,
+              "primary_command_door_usec": 715,
+              "primary_command_feedback_usec": 2316,
+              "primary_command_route_usec": 1,
+              "primary_command_target_waypoint_usec": 595,
+              "primary_fireteam_status_usec": 4952,
+              "primary_fireteam_tooltips_usec": 1186,
+              "primary_hotkey_usec": 5,
+              "primary_labels_usec": 10914,
+              "runtime_surfaces_usec": 0,
+              "secondary_labels_usec": 0,
+              "shared_station_route_snapshot_usec": 2391
+            },
+            "nested_scope_counts": {
+              "feedback_button_state_usec": 1,
+              "feedback_light_ui_usec": 1,
+              "feedback_native_layout_usec": 1
+            },
+            "nested_scopes_usec": {
+              "feedback_button_state_usec": 4933,
+              "feedback_light_ui_usec": 16932,
+              "feedback_native_layout_usec": 1144
+            },
+            "outcome": "accepted",
+            "phase_index": 1,
+            "process_frame": 442,
+            "scopes_usec": {
+              "command_feedback_usec": 23026,
+              "coordination_usec": 1,
+              "decision_summary_usec": 1859,
+              "execution_loop_usec": 885,
+              "feedback_bubbles_usec": 3725,
+              "guards_and_handoffs_usec": 41,
+              "order_visuals_usec": 12128,
+              "planning_publication_and_callbacks_usec": 543
+            },
+            "selected_fireteam_count": 1,
+            "started_usec": 63793141,
+            "total_usec": 42228
+          },
+          {
+            "accepted": true,
+            "already_active_fireteam_count": 1,
+            "blocked_fireteam_count": 0,
+            "command": "go",
+            "complete": true,
+            "continued_fireteam_count": 0,
+            "finished_process_frame": 550,
+            "finished_usec": 75894151,
+            "invocation_id": 2,
+            "issued_fireteam_count": 0,
+            "light_ui_projection_build_calls": {
+              "_build_fireteam_status_text": 1,
+              "_build_mission_combat_hud_density_snapshot": 2,
+              "_build_mission_combat_hud_detail_tooltip_text": 1,
+              "_build_native_player_readout_context": 1,
+              "_build_release_candidate_firefight_decision_line_snapshot": 1,
+              "_build_selected_fireteam_live_decision_detail_tooltip": 1
+            },
+            "light_ui_projection_scopes_usec": {},
+            "light_ui_scopes_usec": {
+              "mission_panels_usec": 5135,
+              "panel_dropship_usec": 910,
+              "panel_event_log_usec": 533,
+              "panel_fireteam_phase_usec": 1272,
+              "panel_identity_usec": 2117,
+              "panel_nav_identity_usec": 2420,
+              "panel_nav_timer_usec": 13,
+              "panel_team_chip_usec": 290,
+              "primary_block_labels_usec": 61,
+              "primary_command_decision_usec": 924,
+              "primary_command_door_usec": 624,
+              "primary_command_feedback_usec": 2135,
+              "primary_command_route_usec": 1,
+              "primary_command_target_waypoint_usec": 586,
+              "primary_fireteam_status_usec": 4625,
+              "primary_fireteam_tooltips_usec": 1213,
+              "primary_hotkey_usec": 5,
+              "primary_labels_usec": 10231,
+              "runtime_surfaces_usec": 0,
+              "secondary_labels_usec": 0,
+              "shared_station_route_snapshot_usec": 2192
+            },
+            "nested_scope_counts": {
+              "feedback_button_state_usec": 1,
+              "feedback_light_ui_usec": 1,
+              "feedback_native_layout_usec": 1
+            },
+            "nested_scopes_usec": {
+              "feedback_button_state_usec": 3713,
+              "feedback_light_ui_usec": 15915,
+              "feedback_native_layout_usec": 1003
+            },
+            "outcome": "accepted",
+            "phase_index": 1,
+            "process_frame": 550,
+            "scopes_usec": {
+              "command_feedback_usec": 20649,
+              "coordination_usec": 1,
+              "decision_summary_usec": 1279,
+              "execution_loop_usec": 956,
+              "feedback_bubbles_usec": 2540,
+              "guards_and_handoffs_usec": 75,
+              "order_visuals_usec": 9144,
+              "planning_publication_and_callbacks_usec": 448
+            },
+            "selected_fireteam_count": 1,
+            "started_usec": 75859045,
+            "total_usec": 35106
+          },
+          {
+            "accepted": true,
+            "already_active_fireteam_count": 0,
+            "blocked_fireteam_count": 0,
+            "command": "go",
+            "complete": true,
+            "continued_fireteam_count": 0,
+            "finished_process_frame": 666,
+            "finished_usec": 87817781,
+            "invocation_id": 3,
+            "issued_fireteam_count": 1,
+            "light_ui_projection_build_calls": {
+              "_build_fireteam_status_text": 1,
+              "_build_mission_combat_hud_density_snapshot": 2,
+              "_build_mission_combat_hud_detail_tooltip_text": 1,
+              "_build_native_player_readout_context": 1,
+              "_build_release_candidate_firefight_decision_line_snapshot": 1,
+              "_build_selected_fireteam_live_decision_detail_tooltip": 1
+            },
+            "light_ui_projection_scopes_usec": {},
+            "light_ui_scopes_usec": {
+              "mission_panels_usec": 5338,
+              "panel_dropship_usec": 944,
+              "panel_event_log_usec": 552,
+              "panel_fireteam_phase_usec": 1403,
+              "panel_identity_usec": 2121,
+              "panel_nav_identity_usec": 2439,
+              "panel_nav_timer_usec": 17,
+              "panel_team_chip_usec": 301,
+              "primary_block_labels_usec": 56,
+              "primary_command_decision_usec": 832,
+              "primary_command_door_usec": 591,
+              "primary_command_feedback_usec": 1949,
+              "primary_command_route_usec": 1,
+              "primary_command_target_waypoint_usec": 525,
+              "primary_fireteam_status_usec": 4509,
+              "primary_fireteam_tooltips_usec": 1149,
+              "primary_hotkey_usec": 5,
+              "primary_labels_usec": 9801,
+              "runtime_surfaces_usec": 0,
+              "secondary_labels_usec": 0,
+              "shared_station_route_snapshot_usec": 2133
+            },
+            "nested_scope_counts": {
+              "activation_issue_waypoint_usec": 1,
+              "activation_profile_and_plan_commit_usec": 1,
+              "activation_resolve_profile_usec": 1,
+              "feedback_button_state_usec": 1,
+              "feedback_light_ui_usec": 1,
+              "feedback_native_layout_usec": 1,
+              "movement_recent_trace_and_flow_mirror_usec": 1,
+              "movement_start_and_arguments_usec": 1
+            },
+            "nested_scopes_usec": {
+              "activation_issue_waypoint_usec": 4315,
+              "activation_profile_and_plan_commit_usec": 31,
+              "activation_resolve_profile_usec": 1119,
+              "feedback_button_state_usec": 3978,
+              "feedback_light_ui_usec": 15755,
+              "feedback_native_layout_usec": 1053,
+              "movement_recent_trace_and_flow_mirror_usec": 3385,
+              "movement_start_and_arguments_usec": 858
+            },
+            "outcome": "accepted",
+            "phase_index": 1,
+            "process_frame": 666,
+            "scopes_usec": {
+              "command_feedback_usec": 20801,
+              "coordination_usec": 50,
+              "decision_summary_usec": 1446,
+              "execution_loop_usec": 5490,
+              "feedback_bubbles_usec": 2766,
+              "guards_and_handoffs_usec": 61,
+              "order_visuals_usec": 10453,
+              "planning_publication_and_callbacks_usec": 596
+            },
+            "selected_fireteam_count": 1,
+            "started_usec": 87776103,
+            "total_usec": 41678
+          },
+          {
+            "accepted": true,
+            "already_active_fireteam_count": 0,
+            "blocked_fireteam_count": 0,
+            "command": "go",
+            "complete": true,
+            "continued_fireteam_count": 0,
+            "finished_process_frame": 782,
+            "finished_usec": 99923401,
+            "invocation_id": 4,
+            "issued_fireteam_count": 1,
+            "light_ui_projection_build_calls": {
+              "_build_fireteam_status_text": 1,
+              "_build_mission_combat_hud_density_snapshot": 2,
+              "_build_mission_combat_hud_detail_tooltip_text": 1,
+              "_build_native_player_readout_context": 1,
+              "_build_release_candidate_firefight_decision_line_snapshot": 1,
+              "_build_selected_fireteam_live_decision_detail_tooltip": 1
+            },
+            "light_ui_projection_scopes_usec": {},
+            "light_ui_scopes_usec": {
+              "mission_panels_usec": 5396,
+              "panel_dropship_usec": 1143,
+              "panel_event_log_usec": 592,
+              "panel_fireteam_phase_usec": 1193,
+              "panel_identity_usec": 2161,
+              "panel_nav_identity_usec": 2468,
+              "panel_nav_timer_usec": 13,
+              "panel_team_chip_usec": 294,
+              "primary_block_labels_usec": 59,
+              "primary_command_decision_usec": 779,
+              "primary_command_door_usec": 572,
+              "primary_command_feedback_usec": 1847,
+              "primary_command_route_usec": 0,
+              "primary_command_target_waypoint_usec": 496,
+              "primary_fireteam_status_usec": 4848,
+              "primary_fireteam_tooltips_usec": 1024,
+              "primary_hotkey_usec": 6,
+              "primary_labels_usec": 9943,
+              "runtime_surfaces_usec": 0,
+              "secondary_labels_usec": 0,
+              "shared_station_route_snapshot_usec": 2159
+            },
+            "nested_scope_counts": {
+              "activation_issue_waypoint_usec": 1,
+              "activation_profile_and_plan_commit_usec": 1,
+              "activation_resolve_profile_usec": 1,
+              "feedback_button_state_usec": 1,
+              "feedback_light_ui_usec": 1,
+              "feedback_native_layout_usec": 1,
+              "movement_recent_trace_and_flow_mirror_usec": 1,
+              "movement_start_and_arguments_usec": 1
+            },
+            "nested_scopes_usec": {
+              "activation_issue_waypoint_usec": 20555,
+              "activation_profile_and_plan_commit_usec": 20,
+              "activation_resolve_profile_usec": 1001,
+              "feedback_button_state_usec": 3806,
+              "feedback_light_ui_usec": 15800,
+              "feedback_native_layout_usec": 985,
+              "movement_recent_trace_and_flow_mirror_usec": 3081,
+              "movement_start_and_arguments_usec": 17425
+            },
+            "outcome": "accepted",
+            "phase_index": 1,
+            "process_frame": 782,
+            "scopes_usec": {
+              "command_feedback_usec": 20607,
+              "coordination_usec": 56,
+              "decision_summary_usec": 1161,
+              "execution_loop_usec": 21598,
+              "feedback_bubbles_usec": 2665,
+              "guards_and_handoffs_usec": 40,
+              "order_visuals_usec": 7925,
+              "planning_publication_and_callbacks_usec": 437
+            },
+            "selected_fireteam_count": 1,
+            "started_usec": 99868898,
+            "total_usec": 54503
+          },
+          {
+            "accepted": true,
+            "already_active_fireteam_count": 0,
+            "blocked_fireteam_count": 0,
+            "command": "go",
+            "complete": true,
+            "continued_fireteam_count": 0,
+            "finished_process_frame": 896,
+            "finished_usec": 111892942,
+            "invocation_id": 5,
+            "issued_fireteam_count": 1,
+            "light_ui_projection_build_calls": {
+              "_build_fireteam_status_text": 1,
+              "_build_mission_combat_hud_density_snapshot": 2,
+              "_build_mission_combat_hud_detail_tooltip_text": 1,
+              "_build_native_player_readout_context": 1,
+              "_build_release_candidate_firefight_decision_line_snapshot": 1,
+              "_build_selected_fireteam_live_decision_detail_tooltip": 1
+            },
+            "light_ui_projection_scopes_usec": {},
+            "light_ui_scopes_usec": {
+              "mission_panels_usec": 5435,
+              "panel_dropship_usec": 890,
+              "panel_event_log_usec": 588,
+              "panel_fireteam_phase_usec": 1706,
+              "panel_identity_usec": 1941,
+              "panel_nav_identity_usec": 2251,
+              "panel_nav_timer_usec": 21,
+              "panel_team_chip_usec": 289,
+              "primary_block_labels_usec": 60,
+              "primary_command_decision_usec": 1079,
+              "primary_command_door_usec": 599,
+              "primary_command_feedback_usec": 2186,
+              "primary_command_route_usec": 0,
+              "primary_command_target_waypoint_usec": 508,
+              "primary_fireteam_status_usec": 4465,
+              "primary_fireteam_tooltips_usec": 984,
+              "primary_hotkey_usec": 5,
+              "primary_labels_usec": 9776,
+              "runtime_surfaces_usec": 0,
+              "secondary_labels_usec": 0,
+              "shared_station_route_snapshot_usec": 2076
+            },
+            "nested_scope_counts": {
+              "activation_issue_waypoint_usec": 1,
+              "activation_profile_and_plan_commit_usec": 1,
+              "activation_resolve_profile_usec": 1,
+              "feedback_button_state_usec": 1,
+              "feedback_light_ui_usec": 1,
+              "feedback_native_layout_usec": 1,
+              "movement_recent_trace_and_flow_mirror_usec": 1,
+              "movement_start_and_arguments_usec": 1
+            },
+            "nested_scopes_usec": {
+              "activation_issue_waypoint_usec": 4529,
+              "activation_profile_and_plan_commit_usec": 23,
+              "activation_resolve_profile_usec": 1331,
+              "feedback_button_state_usec": 4176,
+              "feedback_light_ui_usec": 15642,
+              "feedback_native_layout_usec": 1014,
+              "movement_recent_trace_and_flow_mirror_usec": 3539,
+              "movement_start_and_arguments_usec": 930
+            },
+            "outcome": "accepted",
+            "phase_index": 1,
+            "process_frame": 896,
+            "scopes_usec": {
+              "command_feedback_usec": 20846,
+              "coordination_usec": 38,
+              "decision_summary_usec": 1454,
+              "execution_loop_usec": 5906,
+              "feedback_bubbles_usec": 3047,
+              "guards_and_handoffs_usec": 41,
+              "order_visuals_usec": 10553,
+              "planning_publication_and_callbacks_usec": 573
+            },
+            "selected_fireteam_count": 1,
+            "started_usec": 111850471,
+            "total_usec": 42471
+          },
+          {
+            "accepted": true,
+            "already_active_fireteam_count": 0,
+            "blocked_fireteam_count": 0,
+            "command": "go",
+            "complete": true,
+            "continued_fireteam_count": 0,
+            "finished_process_frame": 1010,
+            "finished_usec": 123933283,
+            "invocation_id": 6,
+            "issued_fireteam_count": 1,
+            "light_ui_projection_build_calls": {
+              "_build_fireteam_status_text": 1,
+              "_build_mission_combat_hud_density_snapshot": 2,
+              "_build_mission_combat_hud_detail_tooltip_text": 1,
+              "_build_native_player_readout_context": 1,
+              "_build_release_candidate_firefight_decision_line_snapshot": 1,
+              "_build_selected_fireteam_live_decision_detail_tooltip": 1
+            },
+            "light_ui_projection_scopes_usec": {},
+            "light_ui_scopes_usec": {
+              "mission_panels_usec": 5495,
+              "panel_dropship_usec": 960,
+              "panel_event_log_usec": 518,
+              "panel_fireteam_phase_usec": 1568,
+              "panel_identity_usec": 2128,
+              "panel_nav_identity_usec": 2449,
+              "panel_nav_timer_usec": 15,
+              "panel_team_chip_usec": 306,
+              "primary_block_labels_usec": 79,
+              "primary_command_decision_usec": 1334,
+              "primary_command_door_usec": 648,
+              "primary_command_feedback_usec": 2644,
+              "primary_command_route_usec": 0,
+              "primary_command_target_waypoint_usec": 662,
+              "primary_fireteam_status_usec": 5688,
+              "primary_fireteam_tooltips_usec": 1147,
+              "primary_hotkey_usec": 5,
+              "primary_labels_usec": 11760,
+              "runtime_surfaces_usec": 0,
+              "secondary_labels_usec": 0,
+              "shared_station_route_snapshot_usec": 2197
+            },
+            "nested_scope_counts": {
+              "activation_issue_waypoint_usec": 1,
+              "activation_profile_and_plan_commit_usec": 1,
+              "activation_resolve_profile_usec": 1,
+              "feedback_button_state_usec": 1,
+              "feedback_light_ui_usec": 1,
+              "feedback_native_layout_usec": 1,
+              "movement_recent_trace_and_flow_mirror_usec": 1,
+              "movement_start_and_arguments_usec": 1
+            },
+            "nested_scopes_usec": {
+              "activation_issue_waypoint_usec": 24002,
+              "activation_profile_and_plan_commit_usec": 27,
+              "activation_resolve_profile_usec": 1149,
+              "feedback_button_state_usec": 4195,
+              "feedback_light_ui_usec": 17791,
+              "feedback_native_layout_usec": 988,
+              "movement_recent_trace_and_flow_mirror_usec": 3524,
+              "movement_start_and_arguments_usec": 20412
+            },
+            "outcome": "accepted",
+            "phase_index": 1,
+            "process_frame": 1010,
+            "scopes_usec": {
+              "command_feedback_usec": 22991,
+              "coordination_usec": 71,
+              "decision_summary_usec": 1301,
+              "execution_loop_usec": 25208,
+              "feedback_bubbles_usec": 2747,
+              "guards_and_handoffs_usec": 56,
+              "order_visuals_usec": 8631,
+              "planning_publication_and_callbacks_usec": 443
+            },
+            "selected_fireteam_count": 1,
+            "started_usec": 123871820,
+            "total_usec": 61463
+          },
+          {
+            "accepted": true,
+            "already_active_fireteam_count": 0,
+            "blocked_fireteam_count": 0,
+            "command": "go",
+            "complete": true,
+            "continued_fireteam_count": 0,
+            "finished_process_frame": 1155,
+            "finished_usec": 135812287,
+            "invocation_id": 7,
+            "issued_fireteam_count": 1,
+            "light_ui_projection_build_calls": {
+              "_build_fireteam_status_text": 1,
+              "_build_mission_combat_hud_density_snapshot": 2,
+              "_build_mission_combat_hud_detail_tooltip_text": 1,
+              "_build_native_player_readout_context": 1,
+              "_build_release_candidate_firefight_decision_line_snapshot": 1,
+              "_build_selected_fireteam_live_decision_detail_tooltip": 1
+            },
+            "light_ui_projection_scopes_usec": {},
+            "light_ui_scopes_usec": {
+              "mission_panels_usec": 5402,
+              "panel_dropship_usec": 999,
+              "panel_event_log_usec": 492,
+              "panel_fireteam_phase_usec": 1491,
+              "panel_identity_usec": 1975,
+              "panel_nav_identity_usec": 2420,
+              "panel_nav_timer_usec": 14,
+              "panel_team_chip_usec": 431,
+              "primary_block_labels_usec": 59,
+              "primary_command_decision_usec": 1226,
+              "primary_command_door_usec": 666,
+              "primary_command_feedback_usec": 2455,
+              "primary_command_route_usec": 0,
+              "primary_command_target_waypoint_usec": 563,
+              "primary_fireteam_status_usec": 4807,
+              "primary_fireteam_tooltips_usec": 1186,
+              "primary_hotkey_usec": 6,
+              "primary_labels_usec": 10432,
+              "runtime_surfaces_usec": 0,
+              "secondary_labels_usec": 0,
+              "shared_station_route_snapshot_usec": 1919
+            },
+            "nested_scope_counts": {
+              "activation_issue_waypoint_usec": 1,
+              "activation_profile_and_plan_commit_usec": 1,
+              "activation_resolve_profile_usec": 1,
+              "feedback_button_state_usec": 1,
+              "feedback_light_ui_usec": 1,
+              "feedback_native_layout_usec": 1,
+              "movement_recent_trace_and_flow_mirror_usec": 1,
+              "movement_start_and_arguments_usec": 1
+            },
+            "nested_scopes_usec": {
+              "activation_issue_waypoint_usec": 4731,
+              "activation_profile_and_plan_commit_usec": 24,
+              "activation_resolve_profile_usec": 1065,
+              "feedback_button_state_usec": 4077,
+              "feedback_light_ui_usec": 16303,
+              "feedback_native_layout_usec": 1080,
+              "movement_recent_trace_and_flow_mirror_usec": 3771,
+              "movement_start_and_arguments_usec": 891
+            },
+            "outcome": "accepted",
+            "phase_index": 1,
+            "process_frame": 1155,
+            "scopes_usec": {
+              "command_feedback_usec": 21474,
+              "coordination_usec": 38,
+              "decision_summary_usec": 1676,
+              "execution_loop_usec": 5844,
+              "feedback_bubbles_usec": 2865,
+              "guards_and_handoffs_usec": 47,
+              "order_visuals_usec": 10301,
+              "planning_publication_and_callbacks_usec": 455
+            },
+            "selected_fireteam_count": 1,
+            "started_usec": 135769570,
+            "total_usec": 42717
+          }
+        ]
+      },
+      "camera_audit": {
+        "actor_writes": false,
+        "changed_only_before_warmup": false,
+        "comparison_camera": {
+          "projection": 1,
+          "size": 22.0,
+          "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (23.29305, 22.01533, 28.05867)]"
+        },
+        "comparison_requested": false,
+        "measured_camera_stable": true,
+        "post_measurement_camera": {
+          "projection": 1,
+          "size": 22.0,
+          "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (23.29305, 22.01533, 28.05867)]"
+        },
+        "product_camera_before_measurement": {
+          "projection": 1,
+          "size": 22.0,
+          "transform": "[X: (0.707107, 0.0, -0.707107), Y: (-0.480594, 0.733525, -0.480594), Z: (0.51868, 0.679663, 0.51868), O: (23.29305, 22.01533, 28.05867)]"
+        },
+        "product_camera_restored_after_measurement": false,
+        "quality_changes": false,
+        "requested_size": 22.0,
+        "simulation_writes": false
+      },
+      "external_manager_work_not_in_controller_process": true
+    }
+  },
+  "raw_archive": {
+    "path": "main_smoke_raw.zip",
+    "size": 1312486,
+    "sha256": "61391b1b1c60579b18291250009dd050deea60b2569e3262870c002f22d76994",
+    "mtime_ns": 1794145835567487500,
+    "streamed_readback_verified": true
+  },
+  "raw_entries": [
+    {
+      "original_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke.json",
+      "archive_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke.json",
+      "size": 300531,
+      "sha256": "50da0aafe4417d13b7796cc5cfc6cd11b477a09d2a98813ed35f64eebe283903",
+      "mtime_ns": 1794145703601983700
+    },
+    {
+      "original_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke_camera_audit.json",
+      "archive_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke_camera_audit.json",
+      "size": 459,
+      "sha256": "ea15810b3a8d52767a927ccdd782be2ecfe32ca1ab526468ccfe6b46fed5afb0",
+      "mtime_ns": 1794145695040485900
+    },
+    {
+      "original_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke_motion.json",
+      "archive_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke_motion.json",
+      "size": 5091159,
+      "sha256": "4ad650f548aa76985f89522dfb78c60a63a8258a0e92be4ce61ac4c43b92bd32",
+      "mtime_ns": 1794145695033487100
+    },
+    {
+      "original_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke_performance.json",
+      "archive_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/main_smoke_performance.json",
+      "size": 33907977,
+      "sha256": "25df6fb76c59f096eb608bf2d989880f367bf98d989d8b6c2e9fa597a05d11c7",
+      "mtime_ns": 1794145694848486400
+    },
+    {
+      "original_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/report.json",
+      "archive_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/report.json",
+      "size": 10892,
+      "sha256": "9e7259a52b76bb1896d5a67a35026a23fcaddf7375a9a5b8be8782b644d49a3d",
+      "mtime_ns": 1794145704536984700
+    },
+    {
+      "original_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/runtime_hitches_r4_20261107_native_capture.log",
+      "archive_path": "output/runtime_hitches_r4_20261107/finish_main_smoke/20261108T134551Z-1794cf72/runtime_hitches_r4_20261107_native_capture.log",
+      "size": 82343,
+      "sha256": "094ea8444cb84b23c867b88bffbf692db3ea15ee42d2db52bdee87fd5b713812",
+      "mtime_ns": 1794145703958483700
+    }
+  ],
+  "native_image": {
+    "path": "captures/main_smoke/06_go_movement.png",
+    "size": 5854611,
+    "sha256": "1ea16c068699238235d218eb05ea397585d73abd9d74fd1353d0fd9b82c3c05d",
+    "mtime_ns": 1794145835631983800
+  },
+  "tested_main_push": {
+    "passed": true,
+    "remote_head": "be695f8857cbd9259bba2feb0f0c4c9a5a26068a"
+  },
+  "preservation": {
+    "schema": "sternenbuergerchen.runtime_hitches_r4.preservation.v1",
+    "groups": {
+      "preserved_untracked": {
+        "count": 1415,
+        "baseline": "output/runtime_hitches_r4_20261107/preserved_untracked.json",
+        "baseline_sha256": "57ea94867070e046ff6ea3ce7a5d68c23f37db15a9396231391ec8c45aeb6cc0"
+      },
+      "preserved_rosters": {
+        "count": 502,
+        "baseline": "output/runtime_hitches_r4_20261107/preserved_rosters.json",
+        "baseline_sha256": "22bc1ecf4cf9ed45b0d04ba83afb98e1a87be0ea7754790f0237b6d1a7d8417e"
+      },
+      "actual_player_roster": {
+        "count": 1,
+        "path": "C:\\Users\\bjoer\\AppData\\Roaming\\Godot\\app_userdata\\Sternenbuergerchen\\profiles\\local_player\\roster_v1.json",
+        "baseline_sha256": "29624ceee0b439f58023aea5840200669d95d01632fd929be0d9b7d50d9210d0"
+      }
+    },
+    "passed": true,
+    "errors": [],
+    "policy": "Compare only SHA256, size and mtime_ns. Never restore or delete."
+  },
+  "additional_start_files": 1999,
+  "checkout_metadata": {
+    "untracked_start_drift": [
+      {
+        "path": "docs/tasks/RUNTIME_HITCHES_R4_2026_11_08_NEW_CHAT_HANDOFF.md",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/tasks/RUNTIME_HITCHES_R4_2026_11_08_NEW_CHAT_HANDOFF.md",
+          "size": 13242,
+          "sha256": "2ff7a8dd620898d57963d52eed40d190b7a2054a3393389ee10898efae7f5e34",
+          "mtime_ns": 1794143934224465000
+        },
+        "actual": {
+          "size": 13242,
+          "sha256": "2ff7a8dd620898d57963d52eed40d190b7a2054a3393389ee10898efae7f5e34",
+          "mtime_ns": 1794145541316988100
+        }
+      },
+      {
+        "path": "docs/tasks/RUNTIME_HITCHES_R4_2026_11_08_finish_gpu_main.md",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/tasks/RUNTIME_HITCHES_R4_2026_11_08_finish_gpu_main.md",
+          "size": 2840,
+          "sha256": "5fac463d8ed52f59ddafa157ba1f46353353fd0e85669dace443004e22daa2ec",
+          "mtime_ns": 1794141562717968000
+        },
+        "actual": {
+          "size": 2840,
+          "sha256": "5fac463d8ed52f59ddafa157ba1f46353353fd0e85669dace443004e22daa2ec",
+          "mtime_ns": 1794145541317486300
+        }
+      },
+      {
+        "path": "docs/tasks/RUNTIME_HITCHES_R4_2026_11_08_frame_boundaries.md",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/tasks/RUNTIME_HITCHES_R4_2026_11_08_frame_boundaries.md",
+          "size": 7100,
+          "sha256": "c9c94139a4a63a7b7ad496eaec22f60459eba849c96c617bed63d6c0e06e3b67",
+          "mtime_ns": 1794142610412470500
+        },
+        "actual": {
+          "size": 7100,
+          "sha256": "c9c94139a4a63a7b7ad496eaec22f60459eba849c96c617bed63d6c0e06e3b67",
+          "mtime_ns": 1794145541317985300
+        }
+      }
+    ],
+    "sealed_metadata_drift": [
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/manifest.json",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/manifest.json",
+          "size": 205545,
+          "sha256": "cece6be7fe9bfaa2ac5181a88874591f0f36608aae3f52c53b747586c33d5ca1",
+          "mtime_ns": 1794136017518468400
+        },
+        "actual": {
+          "size": 205545,
+          "sha256": "cece6be7fe9bfaa2ac5181a88874591f0f36608aae3f52c53b747586c33d5ca1",
+          "mtime_ns": 1794145541109484400
+        }
+      },
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/preservation_report.json",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/preservation_report.json",
+          "size": 1050,
+          "sha256": "57029eb5190ad95c1aa3ca2fbaf8d05469dd507bc0f563c6ec0a1a10f1e8173c",
+          "mtime_ns": 1794136004806966100
+        },
+        "actual": {
+          "size": 1050,
+          "sha256": "57029eb5190ad95c1aa3ca2fbaf8d05469dd507bc0f563c6ec0a1a10f1e8173c",
+          "mtime_ns": 1794145541109985500
+        }
+      },
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/raw_evidence.zip",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/raw_evidence.zip",
+          "size": 18430590,
+          "sha256": "191e885b985200ee65e783cf46fe39b63a1a2afa184c6500159edce8a3d29bb7",
+          "mtime_ns": 1794136012368967100
+        },
+        "actual": {
+          "size": 18430590,
+          "sha256": "191e885b985200ee65e783cf46fe39b63a1a2afa184c6500159edce8a3d29bb7",
+          "mtime_ns": 1794145541179985900
+        }
+      },
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/REPORT.md",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/REPORT.md",
+          "size": 11315,
+          "sha256": "592f6f7006e466944a3f64f92153b2b9a322269357eec0757001202a52676d5d",
+          "mtime_ns": 1794135959016466600
+        },
+        "actual": {
+          "size": 11315,
+          "sha256": "592f6f7006e466944a3f64f92153b2b9a322269357eec0757001202a52676d5d",
+          "mtime_ns": 1794145541036484000
+        }
+      },
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/source_binding.json",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/source_binding.json",
+          "size": 542870,
+          "sha256": "72ab1b4d51ee610fbec23fe3749892ea232a2a4ef9f3eff5485ad548cac67112",
+          "mtime_ns": 1794136007958965900
+        },
+        "actual": {
+          "size": 542870,
+          "sha256": "72ab1b4d51ee610fbec23fe3749892ea232a2a4ef9f3eff5485ad548cac67112",
+          "mtime_ns": 1794145541182484200
+        }
+      },
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/captures/nearest_native_after_a/20261108T102412Z-11f8a409/after_a_captures/02_homebase.png",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/captures/nearest_native_after_a/20261108T102412Z-11f8a409/after_a_captures/02_homebase.png",
+          "size": 1728304,
+          "sha256": "03fbcb325797576e5757dc96d38caeb691ae13600eca24808003b791d33b400a",
+          "mtime_ns": 1794136013204967400
+        },
+        "actual": {
+          "size": 1728304,
+          "sha256": "03fbcb325797576e5757dc96d38caeb691ae13600eca24808003b791d33b400a",
+          "mtime_ns": 1794145541096484900
+        }
+      },
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/captures/nearest_native_after_a/20261108T102412Z-11f8a409/after_a_captures/06_go_movement.png",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/captures/nearest_native_after_a/20261108T102412Z-11f8a409/after_a_captures/06_go_movement.png",
+          "size": 5853677,
+          "sha256": "59f44fdfdf4b817e3e46f7be8ec7a133378df3a974b076e76b6c3a8d0d4c9391",
+          "mtime_ns": 1794136013186468200
+        },
+        "actual": {
+          "size": 5853677,
+          "sha256": "59f44fdfdf4b817e3e46f7be8ec7a133378df3a974b076e76b6c3a8d0d4c9391",
+          "mtime_ns": 1794145541108485400
+        }
+      },
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/captures/final_side_combat/20261107T112418Z-dc934ac4/side_captures/r4_actual_down_side_90.png",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/captures/final_side_combat/20261107T112418Z-dc934ac4/side_captures/r4_actual_down_side_90.png",
+          "size": 5516384,
+          "sha256": "5c0dce9c8dba324e34534bb4ad00bf5f4f50a98d345346534c392d215b6ee0c1",
+          "mtime_ns": 1794136013162466400
+        },
+        "actual": {
+          "size": 5516384,
+          "sha256": "5c0dce9c8dba324e34534bb4ad00bf5f4f50a98d345346534c392d215b6ee0c1",
+          "mtime_ns": 1794145541089485000
+        }
+      },
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/captures/final_actual_combat/20261107T111243Z-3a6f5ee9/combat_captures/r4_actual_fire_000ms.png",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/captures/final_actual_combat/20261107T111243Z-3a6f5ee9/combat_captures/r4_actual_fire_000ms.png",
+          "size": 5904124,
+          "sha256": "d3191ce63d713fdc5ea6ad5dac3948f2cb261bcbd80f59fa18c70f348aec4950",
+          "mtime_ns": 1794136013093966100
+        },
+        "actual": {
+          "size": 5904124,
+          "sha256": "d3191ce63d713fdc5ea6ad5dac3948f2cb261bcbd80f59fa18c70f348aec4950",
+          "mtime_ns": 1794145541050485400
+        }
+      },
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/captures/final_actual_combat/20261107T111243Z-3a6f5ee9/combat_captures/r4_actual_fire_120ms.png",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/captures/final_actual_combat/20261107T111243Z-3a6f5ee9/combat_captures/r4_actual_fire_120ms.png",
+          "size": 5900667,
+          "sha256": "ee7bad5254a7dcb3d5290492a11ee054e94e6fec7c012f9befac885a1dd6188b",
+          "mtime_ns": 1794136013115966700
+        },
+        "actual": {
+          "size": 5900667,
+          "sha256": "ee7bad5254a7dcb3d5290492a11ee054e94e6fec7c012f9befac885a1dd6188b",
+          "mtime_ns": 1794145541062484400
+        }
+      },
+      {
+        "path": "docs/qa/runtime_hitches_r4_20261107/captures/final_actual_combat/20261107T111243Z-3a6f5ee9/combat_captures/r4_actual_fire_900ms.png",
+        "fields": [
+          "mtime_ns"
+        ],
+        "expected": {
+          "path": "docs/qa/runtime_hitches_r4_20261107/captures/final_actual_combat/20261107T111243Z-3a6f5ee9/combat_captures/r4_actual_fire_900ms.png",
+          "size": 5898359,
+          "sha256": "1131624a1a464fbfbbf4bb5b22b8ccd341001c5bf195e9ac0c94ce133f4f24df",
+          "mtime_ns": 1794136013139466500
+        },
+        "actual": {
+          "size": 5898359,
+          "sha256": "1131624a1a464fbfbbf4bb5b22b8ccd341001c5bf195e9ac0c94ce133f4f24df",
+          "mtime_ns": 1794145541073983500
+        }
+      }
+    ],
+    "all_original_bytes_preserved": true,
+    "reason": "Authorized checkout from task to historical main then fast-forward recreates newly tracked own task/QA files; no restoration or timestamp rewrite performed."
+  },
+  "old_raw_count": 447,
+  "old_raw_exact_preserved": true,
+  "scope": "Fresh native main90s smoke under user-authorized external GPU load. Follow-up receipt commit changes documentation/evidence only; final remote HEAD verified separately after its normal push.",
+  "performance_acceptance": false
+}

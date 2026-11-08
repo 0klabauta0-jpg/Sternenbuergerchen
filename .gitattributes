@@ -30,3 +30,6 @@ docs/qa/reference_polish_r3_20261106/** -text whitespace=blank-at-eol,blank-at-e
 
 # R4 raw diagnostics and native captures are byte-hashed evidence.
 docs/qa/runtime_hitches_r4_20261107/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# R4 continuation keeps diagnostic, receipt and native capture bytes exact.
+docs/qa/runtime_hitches_r4_finish_20261108/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
