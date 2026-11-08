@@ -2,7 +2,9 @@
 
 08.11.2026. Basis Main33bc504c4; Arbeitsbranch codex/cpu-hud-r5-20261108.
 Bewusste Fortsetzung des integrierten R4 statt des aelteren Integrationszweigs.
-Main-Smoke und Push werden nach Integration separat in main_receipt.json belegt.
+Main ist integriert. Der getestete Commit
+`a29a1262a8ad1427a0a704c38a096783eec4fc48` wurde normal gepusht und der
+exakte Remote-HEAD bestaetigt. [Mainquittung](main_receipt.json).
 
 ## Ergebnis / Problem / Ursachen
 
@@ -111,7 +113,24 @@ Startdateien werden einschliesslich SHA256/Groesse/mtime geprueft. Alte QA-
 Pakete und fremde WIP bleiben erhalten. Kein Reset/Clean/Stash/Restore.
 Package-PASS ist Bytes-/Quellen-/Guard-/Schutzbeleg, keine Leistungsfreigabe.
 
-Implementierung ausschliesslich im Taskbranch. Nach kontrolliertem Fast-forward
-folgen frischer privater nativer Main-Smoke, normaler Push und exakter
-Remotevergleich. Die abschliessende Receipt entsteht auf einem separaten
-Branch; kein Produktdelta nach dem Main-Smoke. Keine EXE-/WAN-/Releaseaussage.
+Implementierung ausschliesslich im Taskbranch; kontrollierter Fast-forward
+auf Main. Frischer privater nativer90-s-Main-Smoke:
+`cpu_hud_r5_main_smoke/20261108T144552Z-a07b5290`,68/0, Exit0/errors0,
+Source-/Canary-/Rosterguards gruen. Alle2359 gebundenen Sourcehashes stimmen,
+alle23 alten R4-QA-Dateien sind bytegleich. Auch der gesamte urspruengliche
+und zusaetzliche2154-Dateien-Schutz bleibt einschliesslich mtimes gruen.
+
+Main:2635 Frames, P50=33.895ms, P95=70.589ms, P99=93.238ms, Max167.485ms;
+659/19/0 Frames ueber50/100/250ms, Sim/Wand1.000230. Primaere HUD-P95
+36.939ms, Max40.633ms,84 Samples. Das liegt ebenfalls unter dem Vorlauf,
+zeigt aber die Streuung: Die16–18% der beiden Tasknachlaeufe sind keine feste
+Garantie. Quellen, Qualitaet und Gameplay bleiben gleich; Fremdlast bleibt.
+
+Originalbild des Main-Smokes geoeffnet, in `captures/main_smoke.png` erhalten.
+Sechs Original-JSON-/Logdateien mit Streamingreadback in `main_smoke_raw.zip`.
+Die Quittung enthaelt die gepruefte Mainquelle und den bestaetigten ersten
+Remote-HEAD. Der anschliessende Nachtrag entsteht auf
+`codex/cpu-hud-r5-main-receipt-20261108`, aendert nur Doku/Evidence und wird
+ebenfalls per Fast-forward integriert, normal gepusht und danach gegen den
+finalen Remote-HEAD geprueft. Kein Produktdelta nach Main-Smoke.
+Keine EXE-/WAN-/Releaseaussage.

@@ -3,7 +3,8 @@
 ### CPU/HUD R5 08.11.2026
 Drei belegte Aufbereitungsredundanzen behoben;83/83 Gates und zweimal
 normal90s je68/0. Primaere HUD-P95 40.494 ->33.098/33.945ms unter
-unverringerter Qualitaet/Gameplay. Main-Smoke/Push folgen; Fremdlast begrenzt
+unverringerter Qualitaet/Gameplay. Main integriert, frischer90-s-Smoke68/0,
+getesteter Commit a29a1262a gepusht/remote verifiziert. Fremdlast begrenzt
 Gesamtleistungsannahmen. docs/qa/cpu_hud_r5_20261108/REPORT.md.
 
 

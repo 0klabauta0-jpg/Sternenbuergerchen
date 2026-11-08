@@ -1,6 +1,6 @@
 # IMPLEMENTATION_STATUS
 
-### CPU/HUD R5: geprueft, Mainintegration folgt, 2026-11-08
+### CPU/HUD R5: auf Main integriert und gepusht, 2026-11-08
 - Wiederholtes Bootargumentparsen, verworfene Status-Fallbackformatierung und
   erneutes JSONparsen identischer Szenariobytes reduziert. Runtime-/Mapdaten
   bleiben frisch; Datei weiter je Abfrage gelesen,1Eintrag/1MiB Textcache.
@@ -10,8 +10,11 @@
   109.544 auf89.123/96.916ms, Spitzen bis169.312ms bleiben.
 - Gleiche Qualitaet/11 Units/7MoveGO/1x; Fremdlast autorisiert, kein isolierter
   FPS-/Ruckelfreiheitsnachweis. Unabhaengiges Sourcereview ohne Blocker.
-- Neues Paket docs/qa/cpu_hud_r5_20261108/REPORT.md. Mainintegration,
-  frischer privater Main-Smoke und Remotequittung sind der naechste Schritt.
+- Neues Paket docs/qa/cpu_hud_r5_20261108/REPORT.md. Main integriert;
+  frischer90-s-Main-Smoke68/0 auf a29a1262a: HUD-P95=36.939ms,
+  Frame-P99=93.238ms/Max167.485ms. Getesteter Main normal gepusht und
+  exakter Remote-HEAD bestaetigt; main_receipt.json und rawZIP enthalten
+  Source-/Profil-/Roster-/Altbelegschutz. Receiptnachtrag nur Doku/Evidence.
 
 
 ### R4-Fortsetzung: auf Main integriert und gepusht, 2026-11-08
