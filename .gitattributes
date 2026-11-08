@@ -27,3 +27,6 @@ docs/qa/hud_architecture_20261106/** -text whitespace=blank-at-eol,blank-at-eof,
 
 # R3 source bindings, raw diagnostics and fullscreen captures keep exact bytes.
 docs/qa/reference_polish_r3_20261106/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# R4 raw diagnostics and native captures are byte-hashed evidence.
+docs/qa/runtime_hitches_r4_20261107/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

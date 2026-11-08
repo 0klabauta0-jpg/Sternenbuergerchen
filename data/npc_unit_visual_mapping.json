@@ -229,11 +229,17 @@
 	"visual_loadouts": {
 		"standard_rifle": {
 			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
-			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb"
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+			"blaster_attachment": {"inherit_defaults": true, "visual_rotation_degrees": [0.0, 0.0, 0.0]},
+			"muzzle_mesh_local_position": [0.0, 0.0795, -0.37],
+			"muzzle_provenance": "blaster-a GLB primary mesh negative-Z front-face center"
 		},
 		"compact_blaster": {
 			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
-			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb"
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+			"blaster_attachment": {"inherit_defaults": true, "visual_rotation_degrees": [0.0, 0.0, 0.0]},
+			"muzzle_mesh_local_position": [0.0, 0.0825, -0.655],
+			"muzzle_provenance": "blaster-f GLB primary mesh negative-Z barrel front"
 		},
 		"medictool_blaster": {
 			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
@@ -314,11 +320,11 @@
 	"animation_combat_cases": {
 		"standShoot": {
 			"base_animation": "shoot",
-			"upper_body_pose_animation": "",
-			"pose_track_scope": "imported_clip",
+			"upper_body_pose_animation": "shoot",
+			"pose_track_scope": "shoot_upper_body",
 			"stance": "standing",
 			"motion": "stationary",
-			"source": "imported_clip"
+			"source": "imported_base_plus_imported_shoot_upper_body"
 		},
 		"walkShoot": {
 			"base_animation": "walk",

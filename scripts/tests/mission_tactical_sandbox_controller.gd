@@ -28,6 +28,7 @@ const MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT: GDScript = preload("res://scripts/
 const MISSION_FIRETEAM_RUNTIME_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_fireteam_runtime_state.gd")
 const MISSION_RUNTIME_INDEX_SCRIPT: GDScript = preload("res://scripts/tactical/mission_runtime_index.gd")
 const MISSION_HUD_READ_MODEL_SCRIPT: GDScript = preload("res://scripts/tactical/mission_hud_read_model.gd")
+const PERIODIC_HUD_PROJECTION_QUEUE_SCRIPT: GDScript = preload("res://scripts/tactical/periodic_hud_projection_queue.gd")
 const AIR_ASSET_STATUS_SCRIPT: GDScript = preload("res://scripts/mission/air_asset_status.gd")
 const AIR_ASSET_THREAT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/combat/air_asset_threat_resolver.gd")
 const MISSION_COMMAND_INPUT_GUARD_SCRIPT: GDScript = preload("res://scripts/mission/mission_command_input_guard.gd")
@@ -607,11 +608,24 @@ var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
 var _runtime_hud_heavy_refresh_time_remaining: float = 0.0
 var _runtime_hud_command_refresh_pending: bool = false
+var _periodic_hud_projection_queue = PERIODIC_HUD_PROJECTION_QUEUE_SCRIPT.new()
+var _periodic_hud_last_work_frame: int = -1
+var _periodic_hud_deferred_generation: int = -1
+var _periodic_hud_phase_samples: Array[Dictionary] = []
+var _periodic_hud_phase_sample_cursor: int = 0
+var _periodic_hud_phase_sample_overwrite_count: int = 0
+var _periodic_hud_sync_supersede_count: int = 0
+var _periodic_hud_stale_deferred_skip_count: int = 0
+var _periodic_hud_manager_fallback_count: int = 0
+var _periodic_hud_last_request_external: bool = false
 var _fireteam_security_refresh_time_remaining: float = 0.0
 var _fireteam_security_visuals_pending: bool = false
 var _mission_visible_frame_timing_debug_enabled: bool = false
 var _mission_visible_frame_timing_debug_snapshot: Dictionary = {}
 var _mission_ui_refresh_timing_debug_snapshot: Dictionary = {}
+var _command_commit_timing_debug_receipts: Array[Dictionary] = []
+var _command_commit_timing_debug_stack: Array[Dictionary] = []
+var _command_commit_timing_debug_sequence: int = 0
 var _mission_ui_refresh_timing_debug_invocation_count: int = 0
 var _hud_projection_debug_calls: Dictionary = {}
 var _hud_projection_debug_scopes_usec: Dictionary = {}
@@ -839,11 +853,16 @@ func _process(delta: float) -> void:
 	var heavy_refresh_due: bool = command_refresh_due or _runtime_hud_heavy_refresh_time_remaining <= 0.0
 	if heavy_refresh_due:
 		_runtime_hud_heavy_refresh_time_remaining = RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS
-	_update_ui(heavy_refresh_due, command_refresh_due)
+		_request_periodic_hud_projection(command_refresh_due)
+	else:
+		_update_ui(false, false)
 	if profile_enabled:
 		scopes_usec["ui_refresh_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scopes_usec["hud_heavy_usec"] = scopes_usec["ui_refresh_usec"] if heavy_refresh_due else 0
 		_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, true)
+		if heavy_refresh_due:
+			_mission_visible_frame_timing_debug_snapshot["periodic_hud_request_only"] = _periodic_hud_last_request_external
+			_mission_visible_frame_timing_debug_snapshot["periodic_hud_work_timing_owner"] = "UpdateManager.refresh_hud" if _periodic_hud_last_request_external else "controller_synchronous_manager_fallback"
 
 
 func _advance_mission_dropship_runtime_feedback_timer(delta: float) -> void:
@@ -1511,19 +1530,27 @@ func advance_to_next_phase() -> bool:
 
 
 func execute_selected_fireteam_orders() -> bool:
+	var timing: Dictionary = _begin_command_commit_timing_debug()
+	var scope_started_usec: int = _command_commit_timing_clock(timing)
 	if preview_mode:
 		_last_command_text = "PREVIEW MODE"
 		_update_ui()
+		_record_command_commit_timing_scope(timing, "guards_and_handoffs_usec", scope_started_usec)
+		_finish_command_commit_timing_debug(timing, false, "preview_mode")
 		return false
 	if not _can_issue_local_commands():
 		_last_command_text = "OBSERVER MODE"
 		_record_fireteamleader_feedback_for_selected_fireteams("go", "blocked", "observer")
 		_refresh_order_visuals()
 		_update_ui()
+		_record_command_commit_timing_scope(timing, "guards_and_handoffs_usec", scope_started_usec)
+		_finish_command_commit_timing_debug(timing, false, "observer_mode")
 		return false
 	if _selected_fireteam_ids.is_empty():
 		_last_command_text = "NO FIRETEAM SELECTED"
 		_update_ui()
+		_record_command_commit_timing_scope(timing, "guards_and_handoffs_usec", scope_started_usec)
+		_finish_command_commit_timing_debug(timing, false, "no_fireteam_selected")
 		return false
 	var inactive_fireteams: PackedStringArray = []
 	for fireteam_id_variant in _selected_fireteam_ids:
@@ -1535,18 +1562,28 @@ func execute_selected_fireteam_orders() -> bool:
 		_record_fireteamleader_feedback_for_selected_fireteams("go", "blocked", "inactive")
 		_refresh_order_visuals()
 		_update_ui()
+		_record_command_commit_timing_scope(timing, "guards_and_handoffs_usec", scope_started_usec)
+		_finish_command_commit_timing_debug(timing, false, "inactive_fireteams")
 		return false
 	var network_interaction_handoff: Dictionary = _try_submit_connected_client_mission_interaction()
 	if bool(network_interaction_handoff.get("handled", false)):
-		return bool(network_interaction_handoff.get("accepted", false))
+		var interaction_accepted: bool = bool(network_interaction_handoff.get("accepted", false))
+		_record_command_commit_timing_scope(timing, "guards_and_handoffs_usec", scope_started_usec)
+		_finish_command_commit_timing_debug(timing, interaction_accepted, "network_interaction_handoff")
+		return interaction_accepted
 	var network_fireteam_handoff: Dictionary = _try_submit_connected_client_fireteam_orders()
 	if bool(network_fireteam_handoff.get("handled", false)):
-		return bool(network_fireteam_handoff.get("accepted", false))
+		var fireteam_accepted: bool = bool(network_fireteam_handoff.get("accepted", false))
+		_record_command_commit_timing_scope(timing, "guards_and_handoffs_usec", scope_started_usec)
+		_finish_command_commit_timing_debug(timing, fireteam_accepted, "network_fireteam_handoff")
+		return fireteam_accepted
 	var target_phase_index: int = _get_live_order_phase_index()
 	var issued_fireteams: PackedStringArray = []
 	var already_active_fireteams: PackedStringArray = []
 	var continued_fireteams: PackedStringArray = []
 	var blocked_fireteams: PackedStringArray = []
+	_record_command_commit_timing_scope(timing, "guards_and_handoffs_usec", scope_started_usec)
+	scope_started_usec = _command_commit_timing_clock(timing)
 	for fireteam_id_variant in _selected_fireteam_ids:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if _area_defense_execution_by_fireteam.has(fireteam_id):
@@ -1604,14 +1641,27 @@ func execute_selected_fireteam_orders() -> bool:
 		plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_PENDING
 		if _activate_next_waypoint_for_plan(plan, fireteam_id, next_waypoint_index):
 			issued_fireteams.append(fireteam_id.to_upper())
+	_record_command_commit_timing_scope(timing, "execution_loop_usec", scope_started_usec)
+	if not timing.is_empty():
+		timing["phase_index"] = target_phase_index
+		timing["issued_fireteam_count"] = issued_fireteams.size()
+		timing["continued_fireteam_count"] = continued_fireteams.size()
+		timing["already_active_fireteam_count"] = already_active_fireteams.size()
+		timing["blocked_fireteam_count"] = blocked_fireteams.size()
 	if issued_fireteams.is_empty() and already_active_fireteams.is_empty() and continued_fireteams.is_empty() and blocked_fireteams.is_empty():
+		scope_started_usec = _command_commit_timing_clock(timing)
 		_last_command_text = "NO ORDERS TO EXECUTE"
 		_record_fireteamleader_feedback_for_selected_fireteams("go", "blocked", "no_orders")
 		_refresh_order_visuals()
 		_update_ui()
+		_record_command_commit_timing_scope(timing, "no_orders_feedback_usec", scope_started_usec)
+		_finish_command_commit_timing_debug(timing, false, "no_orders")
 		return false
+	scope_started_usec = _command_commit_timing_clock(timing)
 	if not issued_fireteams.is_empty():
 		_apply_fireteam_coordination_for_phase(target_phase_index)
+	_record_command_commit_timing_scope(timing, "coordination_usec", scope_started_usec)
+	scope_started_usec = _command_commit_timing_clock(timing)
 	var go_bits: PackedStringArray = []
 	if not issued_fireteams.is_empty():
 		go_bits.append("GO %s" % ", ".join(issued_fireteams))
@@ -1625,14 +1675,23 @@ func execute_selected_fireteam_orders() -> bool:
 	var go_decision_text: String = _build_go_result_decision_summary(issued_fireteams, continued_fireteams, already_active_fireteams)
 	if not go_decision_text.is_empty():
 		_last_command_text = go_decision_text
+	_record_command_commit_timing_scope(timing, "decision_summary_usec", scope_started_usec)
+	scope_started_usec = _command_commit_timing_clock(timing)
 	_record_fireteamleader_feedback_for_fireteam_ids(issued_fireteams, "go", "accepted", "issued")
 	_record_fireteamleader_feedback_for_fireteam_ids(continued_fireteams, "go", "running", "continued")
 	_record_fireteamleader_feedback_for_fireteam_ids(blocked_fireteams, "go", "blocked", "suppressed")
 	_record_fireteamleader_feedback_for_fireteam_ids(already_active_fireteams, "go", "running", "already_active")
-	_refresh_button_state()
+	_record_command_commit_timing_scope(timing, "feedback_bubbles_usec", scope_started_usec)
+	scope_started_usec = _command_commit_timing_clock(timing)
 	_refresh_order_visuals()
+	_record_command_commit_timing_scope(timing, "order_visuals_usec", scope_started_usec)
+	scope_started_usec = _command_commit_timing_clock(timing)
 	_refresh_order_command_feedback()
+	_record_command_commit_timing_scope(timing, "command_feedback_usec", scope_started_usec)
+	scope_started_usec = _command_commit_timing_clock(timing)
 	_emit_planning_state_changed()
+	_record_command_commit_timing_scope(timing, "planning_publication_and_callbacks_usec", scope_started_usec)
+	_finish_command_commit_timing_debug(timing, true, "accepted")
 	return true
 
 
@@ -4051,21 +4110,166 @@ func _refresh_order_command_feedback() -> void:
 	# Orders have already been committed/published by the caller. Show the
 	# current command immediately; merge derived full HUD work into its existing
 	# 350-ms cadence, including Move then GO in the same input frame.
+	var timing: Dictionary = _active_command_commit_timing_debug()
+	var scope_started_usec: int = _command_commit_timing_clock(timing)
 	_runtime_hud_command_refresh_pending = true
 	_refresh_button_state()
+	_record_command_commit_timing_scope(timing, "feedback_button_state_usec", scope_started_usec, true)
+	scope_started_usec = _command_commit_timing_clock(timing)
 	_update_ui(false, false)
+	_record_command_commit_timing_scope(timing, "feedback_light_ui_usec", scope_started_usec, true)
+	if not timing.is_empty() and _mission_visible_frame_timing_debug_enabled:
+		# Retain only already measured diagnostics before a later heavy pass
+		# replaces the last UI receipt. No additional gameplay source is queried.
+		timing["light_ui_scopes_usec"] = Dictionary(_mission_ui_refresh_timing_debug_snapshot.get("scopes_usec", {})).duplicate()
+		timing["light_ui_projection_scopes_usec"] = _hud_projection_debug_scopes_usec.duplicate()
+		timing["light_ui_projection_build_calls"] = _hud_projection_debug_calls.duplicate()
+	scope_started_usec = _command_commit_timing_clock(timing)
 	_apply_native_a5_hud_layout()
+	_record_command_commit_timing_scope(timing, "feedback_native_layout_usec", scope_started_usec, true)
+
+
+func _exit_tree() -> void:
+	_periodic_hud_projection_queue.cancel()
+	_periodic_hud_deferred_generation = -1
+
+
+func _cancel_periodic_hud_projection() -> void:
+	if _periodic_hud_projection_queue.has_pending() or _periodic_hud_projection_queue.has_inflight():
+		_periodic_hud_sync_supersede_count += 1
+	_periodic_hud_projection_queue.cancel()
+	_periodic_hud_deferred_generation = -1
+	_periodic_hud_last_work_frame = Engine.get_process_frames()
+
+
+func _request_periodic_hud_projection(force_refresh: bool) -> void:
+	_periodic_hud_last_request_external = false
+	if not is_inside_tree():
+		return
+	var manager := get_node_or_null("../UpdateManager")
+	if manager == null or not manager.has_method("mark_hud_dirty"):
+		_periodic_hud_manager_fallback_count += 1
+		_update_ui(true, force_refresh or _runtime_hud_command_refresh_pending or _periodic_hud_projection_queue.requires_force_refresh())
+		return
+	_periodic_hud_projection_queue.request(force_refresh or _runtime_hud_command_refresh_pending, Time.get_ticks_msec())
+	_periodic_hud_last_request_external = true
+	# Force is now owned by the four bounded job tickets. A later command sets
+	# this flag anew; old phase completion never clears that newer request.
+	_runtime_hud_command_refresh_pending = false
+	var generation: int = _periodic_hud_projection_queue.get_generation()
+	if _periodic_hud_projection_queue.has_inflight():
+		_defer_periodic_hud_projection_registration(generation)
+	else:
+		_register_periodic_hud_projection(generation)
+
+
+func _defer_periodic_hud_projection_registration(generation: int) -> void:
+	if _periodic_hud_deferred_generation == generation:
+		return
+	_periodic_hud_deferred_generation = generation
+	call_deferred("_register_periodic_hud_projection", generation)
+
+
+func _register_periodic_hud_projection(generation: int) -> void:
+	if generation != _periodic_hud_projection_queue.get_generation():
+		_periodic_hud_stale_deferred_skip_count += 1
+		return
+	if _periodic_hud_deferred_generation == generation:
+		_periodic_hud_deferred_generation = -1
+	if not is_inside_tree() or not _periodic_hud_projection_queue.has_pending():
+		return
+	var manager := get_node_or_null("../UpdateManager")
+	if manager == null or not manager.has_method("mark_hud_dirty"):
+		_periodic_hud_manager_fallback_count += 1
+		_update_ui(true, _periodic_hud_projection_queue.requires_force_refresh() or _runtime_hud_command_refresh_pending)
+		return
+	manager.call("mark_hud_dirty", self)
+
+
+func refresh_hud() -> void:
+	# UpdateManager erases its dirty key before calling us. Deferred registration
+	# and this frame boundary prevent a same-frame batch from draining all jobs.
+	if not is_inside_tree() or not _periodic_hud_projection_queue.has_pending():
+		return
+	var frame: int = Engine.get_process_frames()
+	if frame == _periodic_hud_last_work_frame:
+		_defer_periodic_hud_projection_registration(_periodic_hud_projection_queue.get_generation())
+		return
+	var work_started_msec: int = Time.get_ticks_msec()
+	var ticket: Dictionary = _periodic_hud_projection_queue.take(work_started_msec)
+	if ticket.is_empty():
+		return
+	_periodic_hud_last_work_frame = frame
+	var started_usec: int = Time.get_ticks_usec() if _mission_visible_frame_timing_debug_enabled else 0
+	var key: String = String(ticket["key"])
+	var force_refresh: bool = bool(ticket["force"])
+	if key == "primary_secondary":
+		_update_ui_projection(true, force_refresh, true)
+		if _mission_visible_frame_timing_debug_enabled:
+			_mission_ui_refresh_timing_debug_snapshot["timing_owner"] = "UpdateManager.refresh_hud"
+			_mission_ui_refresh_timing_debug_snapshot["periodic_phase_key"] = key
+			_mission_ui_refresh_timing_debug_snapshot["engine_frame"] = frame
+	else:
+		_record_mission_hud_light_read_state()
+		if _mission_hud_read_model != null:
+			_mission_hud_read_model.call("begin_projection_pass")
+		_refresh_runtime_mission_hud_surfaces_for_phase(force_refresh, key)
+		if is_instance_valid(_mission_hud_read_model):
+			_mission_hud_read_model.call("end_projection_pass")
+	var completed: bool = _periodic_hud_projection_queue.complete(ticket, Time.get_ticks_msec())
+	if _mission_visible_frame_timing_debug_enabled:
+		var sample: Dictionary = {
+			"engine_frame": frame, "start_usec": started_usec, "finish_usec": Time.get_ticks_usec(),
+			"enqueued_msec": ticket["enqueued_msec"],
+			"age_at_start_msec": maxi(0, work_started_msec - int(ticket["enqueued_msec"])),
+			"key": key, "force": force_refresh, "epoch": ticket["generation"],
+			"ticket_id": ticket["ticket_id"], "sync_superseded_result": not completed,
+			"timing_owner": "UpdateManager.refresh_hud",
+		}
+		if _periodic_hud_phase_samples.size() < 2048:
+			_periodic_hud_phase_samples.append(sample)
+		else:
+			_periodic_hud_phase_samples[_periodic_hud_phase_sample_cursor] = sample
+			_periodic_hud_phase_sample_cursor = (_periodic_hud_phase_sample_cursor + 1) % 2048
+			_periodic_hud_phase_sample_overwrite_count += 1
+	if _periodic_hud_projection_queue.has_pending():
+		_defer_periodic_hud_projection_registration(_periodic_hud_projection_queue.get_generation())
+
+
+func get_periodic_hud_projection_queue_debug_snapshot() -> Dictionary:
+	var snapshot: Dictionary = _periodic_hud_projection_queue.get_debug_snapshot(Time.get_ticks_msec())
+	snapshot["enabled"] = _mission_visible_frame_timing_debug_enabled
+	snapshot["last_phase_frame"] = _periodic_hud_last_work_frame
+	snapshot["sync_supersede_count"] = _periodic_hud_sync_supersede_count
+	snapshot["stale_deferred_skip_count"] = _periodic_hud_stale_deferred_skip_count
+	snapshot["manager_absent_fallback_count"] = _periodic_hud_manager_fallback_count
+	snapshot["phase_sample_limit"] = 2048
+	snapshot["phase_sample_overwrite_count"] = _periodic_hud_phase_sample_overwrite_count
+	snapshot["phase_samples"] = []
+	if _mission_visible_frame_timing_debug_enabled:
+		var samples: Array = _periodic_hud_phase_samples.slice(_periodic_hud_phase_sample_cursor)
+		if _periodic_hud_phase_sample_cursor > 0:
+			samples.append_array(_periodic_hud_phase_samples.slice(0, _periodic_hud_phase_sample_cursor))
+		snapshot["phase_samples"] = samples.duplicate(true)
+	snapshot["timing_owner"] = "UpdateManager.refresh_hud"
+	snapshot["included_in_controller_process_walltime"] = false
+	return snapshot
 
 
 func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool = true) -> void:
+	if include_heavy_surfaces:
+		# Supersede only older work BEFORE projecting: requests raised by this
+		# synchronous pass or its callbacks must survive its return.
+		force_heavy_surfaces = force_heavy_surfaces or _runtime_hud_command_refresh_pending or _periodic_hud_projection_queue.requires_force_refresh()
+		_cancel_periodic_hud_projection()
+		_runtime_hud_command_refresh_pending = false
+	_update_ui_projection(include_heavy_surfaces, force_heavy_surfaces)
+
+
+func _update_ui_projection(include_heavy_surfaces: bool, force_heavy_surfaces: bool, skip_runtime_surfaces: bool = false) -> void:
 	if _mission_visible_frame_timing_debug_enabled:
 		_hud_projection_debug_calls.clear()
 		_hud_projection_debug_scopes_usec.clear()
-	if include_heavy_surfaces:
-		# A transport/security refresh may arrive before the command cadence.
-		# It must consume the pending force request rather than silently drop it.
-		force_heavy_surfaces = force_heavy_surfaces or _runtime_hud_command_refresh_pending
-		_runtime_hud_command_refresh_pending = false
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
@@ -4200,7 +4404,8 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		if projection_read_model != null:
 			projection_read_model.call("end_projection_pass")
 		return
-	_refresh_runtime_mission_hud_surfaces(force_heavy_surfaces)
+	if not skip_runtime_surfaces:
+		_refresh_runtime_mission_hud_surfaces(force_heavy_surfaces)
 	if profile_enabled:
 		scopes_usec["runtime_surfaces_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -4334,90 +4539,102 @@ func _refresh_tactical_event_log_panel() -> Dictionary:
 
 
 func _refresh_runtime_mission_hud_surfaces(force_refresh: bool = true) -> void:
+	_refresh_runtime_mission_hud_surfaces_for_phase(force_refresh, "")
+
+
+func _refresh_runtime_mission_hud_surfaces_for_phase(force_refresh: bool, phase_key: String) -> void:
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
 	var scope_started_usec: int = 0
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
-	var craft_controls_signature: String = _build_periodic_craft_controls_signature()
-	if force_refresh or craft_controls_signature != _last_periodic_craft_controls_signature:
-		_last_periodic_craft_controls_signature = craft_controls_signature
-		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "craft_controls")
-		var craft_summary_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
-		_refresh_mission_control_craft_summary()
+	if phase_key.is_empty() or phase_key == "craft":
+		var craft_controls_signature: String = _build_periodic_craft_controls_signature()
+		if force_refresh or craft_controls_signature != _last_periodic_craft_controls_signature:
+			_last_periodic_craft_controls_signature = craft_controls_signature
+			_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "craft_controls")
+			var craft_summary_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+			_refresh_mission_control_craft_summary()
+			if profile_enabled:
+				scopes_usec["craft_summary_usec"] = Time.get_ticks_usec() - craft_summary_started_usec
+			var craft_evacuation_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+			_refresh_mission_evacuation_button()
+			if profile_enabled:
+				scopes_usec["craft_evacuation_usec"] = Time.get_ticks_usec() - craft_evacuation_started_usec
+			var craft_button_styles_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+			_refresh_dynamic_button_styles()
+			if profile_enabled:
+				scopes_usec["craft_button_styles_usec"] = Time.get_ticks_usec() - craft_button_styles_started_usec
+			var craft_button_labels_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+			_apply_drop_light_hud_button_labels()
+			if profile_enabled:
+				scopes_usec["craft_button_labels_usec"] = Time.get_ticks_usec() - craft_button_labels_started_usec
+			var craft_hierarchy_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+			_apply_command_hierarchy_metadata()
+			if profile_enabled:
+				scopes_usec["craft_hierarchy_usec"] = Time.get_ticks_usec() - craft_hierarchy_started_usec
+			var craft_layout_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+			_enforce_drop_light_fixed_hud_layout()
+			if profile_enabled:
+				scopes_usec["craft_layout_usec"] = Time.get_ticks_usec() - craft_layout_started_usec
+		else:
+			_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "craft_controls")
 		if profile_enabled:
-			scopes_usec["craft_summary_usec"] = Time.get_ticks_usec() - craft_summary_started_usec
-		var craft_evacuation_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
-		_refresh_mission_evacuation_button()
+			scopes_usec["craft_controls_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
+	if phase_key.is_empty() or phase_key == "world_status":
+		_refresh_world_overlays()
 		if profile_enabled:
-			scopes_usec["craft_evacuation_usec"] = Time.get_ticks_usec() - craft_evacuation_started_usec
-		var craft_button_styles_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
-		_refresh_dynamic_button_styles()
+			scopes_usec["world_overlays_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
+		_sync_primary_3d_mission_status_visuals()
+		_suppress_legacy_2d_readability_overlays(true)
 		if profile_enabled:
-			scopes_usec["craft_button_styles_usec"] = Time.get_ticks_usec() - craft_button_styles_started_usec
-		var craft_button_labels_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
-		_apply_drop_light_hud_button_labels()
+			scopes_usec["primary_status_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
+	if phase_key.is_empty() or phase_key == "cards":
+		var fireteam_cards_signature: String = _build_periodic_fireteam_cards_signature()
+		if force_refresh or fireteam_cards_signature != _last_periodic_fireteam_cards_signature:
+			_last_periodic_fireteam_cards_signature = fireteam_cards_signature
+			_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "fireteam_card_group")
+			var cards_part_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+			_refresh_ad_hoc_panel_visibility()
+			if profile_enabled:
+				scopes_usec["ad_hoc_panel_usec"] = Time.get_ticks_usec() - cards_part_started_usec
+				cards_part_started_usec = Time.get_ticks_usec()
+			var selected_card_row := get_node_or_null(FIRETEAM_SELECTED_CARDS_ROW_PATH) as Control
+			var hidden_a5_member_cards: bool = bool(get_meta("native_a5_legacy_setup_complete", false)) and selected_card_row != null and not selected_card_row.is_visible_in_tree()
+			# A5 presents identities in mini cards. Explicit diagnostics still call
+			# the existing selected-card builder directly when its hidden data is needed.
+			if not hidden_a5_member_cards:
+				_refresh_selected_fireteam_cards()
+			if profile_enabled:
+				scopes_usec["selected_member_cards_usec"] = Time.get_ticks_usec() - cards_part_started_usec
+				cards_part_started_usec = Time.get_ticks_usec()
+			_refresh_fireteam_mini_cards()
+			if profile_enabled:
+				scopes_usec["fireteam_mini_cards_usec"] = Time.get_ticks_usec() - cards_part_started_usec
+				cards_part_started_usec = Time.get_ticks_usec()
+			if _character_overlay_open:
+				_update_character_overlay()
+			if profile_enabled:
+				scopes_usec["character_overlay_usec"] = Time.get_ticks_usec() - cards_part_started_usec
+		else:
+			_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "fireteam_card_group")
 		if profile_enabled:
-			scopes_usec["craft_button_labels_usec"] = Time.get_ticks_usec() - craft_button_labels_started_usec
-		var craft_hierarchy_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
-		_apply_command_hierarchy_metadata()
-		if profile_enabled:
-			scopes_usec["craft_hierarchy_usec"] = Time.get_ticks_usec() - craft_hierarchy_started_usec
-		var craft_layout_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
-		_enforce_drop_light_fixed_hud_layout()
-		if profile_enabled:
-			scopes_usec["craft_layout_usec"] = Time.get_ticks_usec() - craft_layout_started_usec
-	else:
-		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "craft_controls")
-	if profile_enabled:
-		scopes_usec["craft_controls_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_refresh_world_overlays()
-	if profile_enabled:
-		scopes_usec["world_overlays_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_sync_primary_3d_mission_status_visuals()
-	_suppress_legacy_2d_readability_overlays(true)
-	if profile_enabled:
-		scopes_usec["primary_status_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	var fireteam_cards_signature: String = _build_periodic_fireteam_cards_signature()
-	if force_refresh or fireteam_cards_signature != _last_periodic_fireteam_cards_signature:
-		_last_periodic_fireteam_cards_signature = fireteam_cards_signature
-		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "fireteam_card_group")
-		var cards_part_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
-		_refresh_ad_hoc_panel_visibility()
-		if profile_enabled:
-			scopes_usec["ad_hoc_panel_usec"] = Time.get_ticks_usec() - cards_part_started_usec
-			cards_part_started_usec = Time.get_ticks_usec()
-		var selected_card_row := get_node_or_null(FIRETEAM_SELECTED_CARDS_ROW_PATH) as Control
-		var hidden_a5_member_cards: bool = bool(get_meta("native_a5_legacy_setup_complete", false)) and selected_card_row != null and not selected_card_row.is_visible_in_tree()
-		# A5 presents identities in mini cards. Explicit diagnostics still call
-		# the existing selected-card builder directly when its hidden data is needed.
-		if not hidden_a5_member_cards:
-			_refresh_selected_fireteam_cards()
-		if profile_enabled:
-			scopes_usec["selected_member_cards_usec"] = Time.get_ticks_usec() - cards_part_started_usec
-			cards_part_started_usec = Time.get_ticks_usec()
-		_refresh_fireteam_mini_cards()
-		if profile_enabled:
-			scopes_usec["fireteam_mini_cards_usec"] = Time.get_ticks_usec() - cards_part_started_usec
-			cards_part_started_usec = Time.get_ticks_usec()
-		if _character_overlay_open:
-			_update_character_overlay()
-		if profile_enabled:
-			scopes_usec["character_overlay_usec"] = Time.get_ticks_usec() - cards_part_started_usec
-	else:
-		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "fireteam_card_group")
-	if profile_enabled:
-		scopes_usec["fireteam_cards_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
+			scopes_usec["fireteam_cards_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
 	if not _tactical_ui_visible:
 		set_tactical_ui_visible(false)
 	if profile_enabled:
 		scopes_usec["visibility_usec"] = Time.get_ticks_usec() - scope_started_usec
 		_record_mission_runtime_surface_timing_snapshot(refresh_started_usec, scopes_usec)
+
+	if profile_enabled:
+		_mission_runtime_surface_timing_debug_snapshot["engine_frame"] = Engine.get_process_frames()
+		_mission_runtime_surface_timing_debug_snapshot["timing_owner"] = "controller_synchronous_update_ui" if phase_key.is_empty() else "UpdateManager.refresh_hud"
+		_mission_runtime_surface_timing_debug_snapshot["periodic_phase_key"] = phase_key
 
 
 func _ensure_ad_hoc_panel() -> Control:
@@ -5045,15 +5262,15 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	card.custom_minimum_size = Vector2(metrics.card_width, int(metrics.portrait_height) + int(metrics.body_font_size) * 3 + 32)
 	card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	card.set_meta("native_a5_portrait_team_card", true)
-	card.add_theme_stylebox_override("panel", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
+	TACTICAL_UI_THEME_SCRIPT._override_stylebox(card, "panel", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
 		TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_SELECTED if selected else TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL,
 		TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected else TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER, 6, 4 if selected else 1))
 	var margin := card.get_node("Margin") as MarginContainer
 	for side in ["margin_left", "margin_right"]:
-		margin.add_theme_constant_override(side, 10)
+		TACTICAL_UI_THEME_SCRIPT._override_constant(margin, side, 10)
 	for side in ["margin_top", "margin_bottom"]:
-		margin.add_theme_constant_override(side, 5)
-	box.add_theme_constant_override("separation", 4)
+		TACTICAL_UI_THEME_SCRIPT._override_constant(margin, side, 5)
+	TACTICAL_UI_THEME_SCRIPT._override_constant(box, "separation", 4)
 	for child in box.get_children():
 		if child is Control:
 			(child as Control).visible = child.name in ["HeaderRow", "FireteamMemberPortraitStrip", "StageLabel"]
@@ -5063,10 +5280,10 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	var title := header.get_node("TitleEdit") as LineEdit
 	title.custom_minimum_size = Vector2(0, 24)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title.add_theme_font_size_override("font_size", int(metrics.heading_font_size))
-	title.add_theme_color_override("font_uneditable_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
-	title.add_theme_stylebox_override("normal", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0))
-	title.add_theme_stylebox_override("read_only", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0))
+	TACTICAL_UI_THEME_SCRIPT._override_font_size(title, "font_size", int(metrics.heading_font_size))
+	TACTICAL_UI_THEME_SCRIPT._override_color(title, "font_uneditable_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED if selected else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
+	TACTICAL_UI_THEME_SCRIPT._override_stylebox(title, "normal", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0))
+	TACTICAL_UI_THEME_SCRIPT._override_stylebox(title, "read_only", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(Color.TRANSPARENT, Color.TRANSPARENT, 0, 0))
 	var count := header.get_node_or_null("A5MemberCount") as Label
 	if count == null:
 		count = Label.new()
@@ -5086,8 +5303,8 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 		header.move_child(selected_marker, 0)
 	selected_marker.text = "◆"
 	selected_marker.visible = selected
-	selected_marker.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED)
-	selected_marker.add_theme_font_size_override("font_size", int(metrics.body_font_size))
+	TACTICAL_UI_THEME_SCRIPT._override_color(selected_marker, "font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER_SELECTED)
+	TACTICAL_UI_THEME_SCRIPT._override_font_size(selected_marker, "font_size", int(metrics.body_font_size))
 	var snapshot: Dictionary = card.get_meta("mission_fireteam_status_card_snapshot", {})
 	var status := card.get_node("Margin/VBox/StageLabel") as Label
 	status.text = _native_a5_team_status(snapshot, inactive)
@@ -5095,8 +5312,10 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	status.max_lines_visible = 1
 	status.clip_text = true
 	status.autowrap_mode = TextServer.AUTOWRAP_OFF
-	TACTICAL_UI_THEME_SCRIPT.style_label(status, false, int(metrics.body_font_size))
-	status.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_WARNING if int(snapshot.get("contact_count", 0)) > 0 else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
+	# Project the final warning/text color directly; a normal-color intermediate
+	# would invalidate this label twice on every unchanged contact refresh.
+	TACTICAL_UI_THEME_SCRIPT._override_font_size(status, "font_size", int(metrics.body_font_size))
+	TACTICAL_UI_THEME_SCRIPT._override_color(status, "font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_WARNING if int(snapshot.get("contact_count", 0)) > 0 else TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT)
 	var legacy_tooltip := card.tooltip_text
 	card.tooltip_text = "%s\n%s\n\n%s\n%s\nPortrait doppelklicken: Charakter ansehen" % [
 		_get_fireteam_display_label(fireteam_id), String(card.get_meta("mission_fireteam_lead_summary", "")), String(snapshot.get("tooltip_text", "")), legacy_tooltip]
@@ -5155,17 +5374,17 @@ func _resize_native_a5_fireteam_card(card: Control) -> void:
 	card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	var margin := card.get_node_or_null("Margin") as MarginContainer
 	if margin != null:
-		margin.add_theme_constant_override("margin_left", 10)
-		margin.add_theme_constant_override("margin_right", 10)
+		TACTICAL_UI_THEME_SCRIPT._override_constant(margin, "margin_left", 10)
+		TACTICAL_UI_THEME_SCRIPT._override_constant(margin, "margin_right", 10)
 	var title := card.get_node_or_null("Margin/VBox/HeaderRow/TitleEdit") as LineEdit
 	if title != null:
-		title.add_theme_font_size_override("font_size", int(metrics.heading_font_size))
+		TACTICAL_UI_THEME_SCRIPT._override_font_size(title, "font_size", int(metrics.heading_font_size))
 	var occupancy := card.get_node_or_null("Margin/VBox/HeaderRow/A5MemberCount") as Label
 	if occupancy != null:
-		occupancy.add_theme_font_size_override("font_size", int(metrics.body_font_size) + 2)
+		TACTICAL_UI_THEME_SCRIPT._override_font_size(occupancy, "font_size", int(metrics.body_font_size) + 2)
 	var status := card.get_node_or_null("Margin/VBox/StageLabel") as Label
 	if status != null:
-		status.add_theme_font_size_override("font_size", int(metrics.body_font_size))
+		TACTICAL_UI_THEME_SCRIPT._override_font_size(status, "font_size", int(metrics.body_font_size))
 	if strip != null:
 		var edge: float = floorf((float(metrics.card_width) - 20.0 - float(maxi(0, count - 1)) * 4.0) / maxf(1.0, float(count)))
 		strip.custom_minimum_size.y = float(metrics.portrait_height)
@@ -5484,6 +5703,87 @@ func set_mission_visible_frame_timing_debug_enabled(enabled: bool) -> void:
 		_fireteam_security_refresh_timing_debug_snapshot.clear()
 		_fireteam_security_refresh_timing_totals.clear()
 		_fireteam_security_refresh_timing_count = 0
+		_command_commit_timing_debug_receipts.clear()
+		_command_commit_timing_debug_stack.clear()
+		_command_commit_timing_debug_sequence = 0
+		_periodic_hud_phase_samples.clear()
+		_periodic_hud_phase_sample_cursor = 0
+		_periodic_hud_phase_sample_overwrite_count = 0
+
+
+func _begin_command_commit_timing_debug() -> Dictionary:
+	if not _mission_visible_frame_timing_debug_enabled:
+		return {}
+	_command_commit_timing_debug_sequence += 1
+	var receipt: Dictionary = {
+		"invocation_id": _command_commit_timing_debug_sequence,
+		"command": "go",
+		"started_usec": Time.get_ticks_usec(),
+		"process_frame": Engine.get_process_frames(),
+		"selected_fireteam_count": _selected_fireteam_ids.size(),
+		"outcome": "running",
+		"complete": false,
+		"scopes_usec": {},
+		"nested_scopes_usec": {},
+		"nested_scope_counts": {},
+	}
+	_command_commit_timing_debug_stack.append(receipt)
+	return receipt
+
+
+func _active_command_commit_timing_debug() -> Dictionary:
+	if not _mission_visible_frame_timing_debug_enabled or _command_commit_timing_debug_stack.is_empty():
+		return {}
+	return _command_commit_timing_debug_stack.back()
+
+
+func _command_commit_timing_clock(receipt: Dictionary) -> int:
+	return Time.get_ticks_usec() if _mission_visible_frame_timing_debug_enabled and not receipt.is_empty() else 0
+
+
+func _record_command_commit_timing_scope(receipt: Dictionary, scope_name: String, started_usec: int, nested: bool = false) -> void:
+	if not _mission_visible_frame_timing_debug_enabled or receipt.is_empty():
+		return
+	var scopes: Dictionary = receipt["nested_scopes_usec" if nested else "scopes_usec"]
+	scopes[scope_name] = int(scopes.get(scope_name, 0)) + Time.get_ticks_usec() - started_usec
+	if nested:
+		var counts: Dictionary = receipt["nested_scope_counts"]
+		counts[scope_name] = int(counts.get(scope_name, 0)) + 1
+
+
+func _finish_command_commit_timing_debug(receipt: Dictionary, accepted: bool, outcome: String) -> void:
+	if not _mission_visible_frame_timing_debug_enabled or receipt.is_empty():
+		return
+	var finished_usec: int = Time.get_ticks_usec()
+	receipt["finished_usec"] = finished_usec
+	receipt["total_usec"] = finished_usec - int(receipt["started_usec"])
+	receipt["finished_process_frame"] = Engine.get_process_frames()
+	receipt["accepted"] = accepted
+	receipt["outcome"] = outcome
+	receipt["complete"] = true
+	# Only scalar timing/count data lives here, never gameplay/readout sources.
+	# The stack permits a synchronous callback to enter its own independent GO.
+	for index in range(_command_commit_timing_debug_stack.size() - 1, -1, -1):
+		if int(_command_commit_timing_debug_stack[index]["invocation_id"]) == int(receipt["invocation_id"]):
+			_command_commit_timing_debug_stack.remove_at(index)
+			break
+	_command_commit_timing_debug_receipts.append(receipt)
+	while _command_commit_timing_debug_receipts.size() > 8:
+		_command_commit_timing_debug_receipts.remove_at(0)
+
+
+func get_command_commit_timing_debug_snapshot() -> Dictionary:
+	if not _mission_visible_frame_timing_debug_enabled:
+		return {}
+	return {
+		"enabled": true,
+		"receipt_limit": 8,
+		"invocation_count": _command_commit_timing_debug_sequence,
+		"receipts": _command_commit_timing_debug_receipts.duplicate(true),
+		"inflight_count": _command_commit_timing_debug_stack.size(),
+		"nested_scopes_not_additive": true,
+		"read_only": true,
+	}
 
 
 func get_mission_visible_frame_timing_debug_snapshot() -> Dictionary:
@@ -5616,6 +5916,7 @@ func _is_selected_member_card_unit(unit: Node, selected_cards_fireteam_id: Strin
 func _apply_fireteam_mini_card_leader_portrait(card: Control, lead) -> void:
 	if card == null:
 		return
+	var native_a5_style: bool = bool(card.get_meta("native_a5_portrait_team_card", false))
 	var header_row := card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
 	if header_row == null:
 		return
@@ -5629,6 +5930,7 @@ func _apply_fireteam_mini_card_leader_portrait(card: Control, lead) -> void:
 		portrait_rect = TextureRect.new()
 		portrait_rect.name = "LeaderPortraitRect"
 		portrait_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		portrait_rect.visible = not native_a5_style
 		# Identity is carried by the full member row below the team name. Keep
 		# this existing leader marker compact rather than duplicating a large face.
 		portrait_rect.custom_minimum_size = Vector2(24.0, 24.0)
@@ -5647,11 +5949,10 @@ func _apply_fireteam_mini_card_leader_portrait(card: Control, lead) -> void:
 	var lead_id: String = String(lead.call("get_unit_id")).strip_edges() if lead.has_method("get_unit_id") else String(lead.name).strip_edges()
 	var portrait_signature: String = "%s|%s|%s" % [lead_id, portrait_id, portrait_path]
 	if String(portrait_rect.get_meta("mission_fireteam_leader_portrait_signature", "")) == portrait_signature:
-		portrait_rect.visible = true
+		portrait_rect.visible = not native_a5_style
 		return
 	portrait_rect.texture = _load_portrait_identity_texture(portrait_id, portrait_path)
 	portrait_rect.modulate = Color.WHITE if portrait_rect.texture != null else Color(0.36, 0.39, 0.44, 1.0)
-	portrait_rect.visible = true
 	portrait_rect.set_meta("mission_fireteam_leader_portrait", true)
 	portrait_rect.set_meta("mission_fireteam_leader_portrait_signature", portrait_signature)
 	portrait_rect.visible = false # Member portraits carry identity in A5, without a duplicate tiny face.
@@ -5701,11 +6002,13 @@ func _apply_fireteam_mini_card_status_context(card: Control, fireteam_id: String
 
 
 func _apply_fireteam_mini_status_summary(card: Control, status_snapshot: Dictionary) -> void:
+	var native_a5_style: bool = bool(card.get_meta("native_a5_portrait_team_card", false))
 	var stage_label := card.get_node_or_null("Margin/VBox/StageLabel") as Label
 	var member_label := card.get_node_or_null("Margin/VBox/MemberLabel") as Label
 	if stage_label != null:
-		stage_label.text = String(status_snapshot.get("primary_text", "")).strip_edges()
-		stage_label.visible = not stage_label.text.is_empty()
+		if not native_a5_style:
+			stage_label.text = String(status_snapshot.get("primary_text", "")).strip_edges()
+			stage_label.visible = not stage_label.text.is_empty()
 		stage_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 		stage_label.set_meta("mission_fireteam_status_secondary", true)
 		stage_label.set_meta("mission_fireteam_visible_primary_status", true)
@@ -5715,7 +6018,8 @@ func _apply_fireteam_mini_status_summary(card: Control, status_snapshot: Diction
 	if member_label != null:
 		var lead_summary: String = String(card.get_meta("mission_fireteam_lead_summary", "")).strip_edges()
 		member_label.text = _compact_fireteam_mini_identity_text(lead_summary, int(status_snapshot.get("member_count", 0)))
-		member_label.visible = not member_label.text.is_empty()
+		if not native_a5_style:
+			member_label.visible = not member_label.text.is_empty()
 		member_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 		member_label.set_meta("mission_fireteam_status_primary", true)
 		member_label.set_meta("mission_fireteam_visible_identity_summary", true)
@@ -5812,6 +6116,7 @@ func _get_fireteam_mini_header_status_row(card: Control) -> HBoxContainer:
 func _apply_fireteam_mini_suppression_indicator(card: Control, status_snapshot: Dictionary) -> void:
 	if card == null:
 		return
+	var native_a5_style: bool = bool(card.get_meta("native_a5_portrait_team_card", false))
 	var suppression_context: Dictionary = Dictionary(status_snapshot.get("suppression", {}))
 	var value: float = maxf(float(suppression_context.get("value", 0.0)), 0.0)
 	var threshold: float = maxf(float(suppression_context.get("threshold", 1.0)), 1.0)
@@ -5823,6 +6128,7 @@ func _apply_fireteam_mini_suppression_indicator(card: Control, status_snapshot: 
 		bar.show_percentage = false
 		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bar.z_index = 6
+		bar.visible = not native_a5_style
 	var bar_host := card.get_node_or_null("Margin/VBox") as VBoxContainer
 	if bar_host != null and bar.get_parent() != bar_host:
 		if bar.get_parent() != null:
@@ -5843,7 +6149,7 @@ func _apply_fireteam_mini_suppression_indicator(card: Control, status_snapshot: 
 	bar.offset_bottom = 0.0
 	bar.custom_minimum_size = Vector2(0.0, 6.0)
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bar.visible = true
+	bar.visible = not native_a5_style
 	bar.max_value = threshold
 	bar.value = clampf(value, 0.0, threshold)
 	bar.tooltip_text = "SUPP = Suppression. Steigt unter Beschuss; bei vollem Balken ist das Fireteam gepinnt."
@@ -6105,6 +6411,7 @@ func _build_fireteam_mini_member_portrait_signature(units: Array) -> String:
 
 
 func _apply_fireteam_mini_readiness_footer(card: Control, status_snapshot: Dictionary) -> void:
+	var native_a5_style: bool = bool(card.get_meta("native_a5_portrait_team_card", false))
 	var row_host := card.get_node_or_null("Margin/VBox") as VBoxContainer
 	if row_host == null:
 		return
@@ -6114,11 +6421,12 @@ func _apply_fireteam_mini_readiness_footer(card: Control, status_snapshot: Dicti
 		footer.name = "ReadinessFooterLabel"
 		footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		footer.add_theme_font_size_override("font_size", 8)
+		footer.visible = not native_a5_style
 		row_host.add_child(footer)
 	var readiness_state: String = String(status_snapshot.get("readiness_state", "unavailable")).strip_edges().to_lower()
 	var readiness_label: String = _format_fireteam_visible_readiness_text(readiness_state)
 	footer.text = readiness_label
-	footer.visible = readiness_state != "unavailable" and not readiness_label.is_empty()
+	footer.visible = not native_a5_style and readiness_state != "unavailable" and not readiness_label.is_empty()
 	footer.modulate = Color(0.78, 0.88, 0.94, 0.95)
 	footer.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 	footer.set_meta("mission_fireteam_readiness_footer", true)
@@ -10201,6 +10509,7 @@ func _get_release_first_exchange_fire_visual_event_dicts() -> Array:
 		var event: Dictionary = Dictionary(event_variant)
 		if String(event.get("event_id", "")).strip_edges() == persisted_event_id:
 			return _select_connected_first_contact_fire_visual_events(fire_events, _selected_fireteam_ids, _is_connected_multiplayer_hud_session())
+	persisted_fire_event["presentation_history_only"] = true
 	fire_events.append(persisted_fire_event)
 	return _select_connected_first_contact_fire_visual_events(fire_events, _selected_fireteam_ids, _is_connected_multiplayer_hud_session())
 
@@ -14835,7 +15144,8 @@ func _apply_primary_mission_interaction_semantics(interaction_snapshot: Dictiona
 	button.set_meta("command_hierarchy_context", "door_interaction" if is_door else "mission_interaction")
 	button.set_meta("command_hierarchy_label", "Breach" if is_door else String(snapshot.get("display_token", "USE")).strip_edges().to_upper())
 	button.set_meta("door_interaction_shortcut", String(snapshot.get("shortcut", "")))
-	META_UI_SKIN_SCRIPT.style_tactical_button(button, not button.disabled)
+	if not _native_a5_owns_interaction_button_presentation(button):
+		META_UI_SKIN_SCRIPT.style_tactical_button(button, not button.disabled)
 
 
 func _get_primary_mission_interaction_help_id(interaction_feedback: Dictionary) -> String:
@@ -15982,6 +16292,11 @@ func _apply_drop_light_hud_button_labels() -> void:
 
 func _native_a5_owns_primary_command_presentation(button: Button) -> bool:
 	return bool(get_meta("native_a5_legacy_setup_complete", false)) and NATIVE_A5_HUD_LAYOUT_SCRIPT.LABELS.has(String(button.name))
+
+
+func _native_a5_owns_interaction_button_presentation(button: Button) -> bool:
+	return button != null and bool(get_meta("native_a5_legacy_setup_complete", false)) \
+		and String(button.name) == "DoorBreachButton" and bool(button.get_meta("native_a5_layout", false))
 
 
 func _get_command_matrix_player_tooltip(path: String, fallback: String) -> String:
@@ -17735,6 +18050,10 @@ func _apply_door_authority_button_affordance(button: Button, severity: String) -
 	button.set_meta("door_authority_affordance_style_id", style_id)
 	button.set_meta("door_authority_affordance_tone", tone)
 	button.set_meta("door_authority_affordance_visual_weight", visual_weight)
+	# Keep the complete authority receipt; the existing native context presenter
+	# owns the final colors and modulation instead of resetting them afterward.
+	if _native_a5_owns_interaction_button_presentation(button):
+		return
 	button.self_modulate = modulate_color
 	if use_font_override:
 		button.add_theme_color_override("font_color", font_color)
@@ -17935,6 +18254,8 @@ func _refresh_dynamic_button_styles() -> void:
 
 
 func _apply_dynamic_button_base_style(button: Button, is_active: bool) -> void:
+	if _native_a5_owns_interaction_button_presentation(button):
+		return
 	if button != null and bool(get_meta("native_a5_legacy_setup_complete", false)):
 		var button_name: String = String(button.name)
 		if NATIVE_A5_HUD_LAYOUT_SCRIPT.FIRST.has(button_name) or NATIVE_A5_HUD_LAYOUT_SCRIPT.SECOND.has(button_name):
@@ -25926,7 +26247,10 @@ func get_frontier_probe_playfeel_next_interaction_snapshot() -> Dictionary:
 
 
 func _build_frontier_probe_debrief_handoff_feel_snapshot() -> Dictionary:
-	var next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
+	return _build_frontier_probe_debrief_handoff_feel_snapshot_from_next_interaction(_build_frontier_probe_playfeel_next_interaction_snapshot())
+
+
+func _build_frontier_probe_debrief_handoff_feel_snapshot_from_next_interaction(next_interaction: Dictionary) -> Dictionary:
 	var scenario_active: bool = bool(next_interaction.get("scenario_active", false))
 	var next_id: String = String(next_interaction.get("next_interaction_id", "")).strip_edges()
 	var route_complete: bool = bool(next_interaction.get("route_complete", false))
@@ -26026,7 +26350,7 @@ func _build_frontier_probe_one_screen_playability_readout() -> Dictionary:
 	var route_tokens: PackedStringArray = PackedStringArray(["LZ", "AA", "COM 18s", "CARGO"])
 	var route_text: String = " -> ".join(Array(route_tokens))
 	var next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
-	var handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
+	var handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot_from_next_interaction(next_interaction)
 	var next_token: String = _get_frontier_probe_one_screen_next_token(next_interaction, handoff)
 	var one_screen_line: String = ""
 	if scenario_active and not route_text.is_empty():
@@ -31118,25 +31442,42 @@ func _refresh_order_visuals() -> void:
 		_sync_primary_3d_order_visuals()
 		refresh_contact_overlay()
 		return
+	# Share only this synchronous projection's fresh owner reads. The hidden 2D
+	# compatibility consumer and primary 3D consumer retain the same full data.
+	var sources: Dictionary = _build_order_visual_sources()
 	if visualizer is CanvasItem:
 		_primary_view_bridge.call("hide_canvas_item_when_primary", get_parent(), visualizer as CanvasItem)
 	visualizer.call("set_phase_index", _get_live_order_phase_index())
 	visualizer.call("set_selected_fireteam_ids", _selected_fireteam_ids)
 	if visualizer.has_method("set_fireteam_anchor_dicts"):
-		visualizer.call("set_fireteam_anchor_dicts", _build_fireteam_anchor_visualization_entries())
-	visualizer.call("set_plan_dicts", _serialize_order_plans())
+		visualizer.call("set_fireteam_anchor_dicts", sources["fireteam_anchors"])
+	visualizer.call("set_plan_dicts", sources["plan_dicts"])
 	if visualizer.has_method("set_waypoint_intent_preview_entries"):
-		visualizer.call("set_waypoint_intent_preview_entries", _build_waypoint_intent_preview_entries())
+		visualizer.call("set_waypoint_intent_preview_entries", sources["waypoint_intent_preview_entries"])
 	if visualizer.has_method("set_area_order_dicts"):
-		visualizer.call("set_area_order_dicts", _serialize_area_orders())
-	visualizer.call("set_ad_hoc_order_dicts", _build_ad_hoc_visualization_entries())
+		visualizer.call("set_area_order_dicts", sources["area_order_dicts"])
+	visualizer.call("set_ad_hoc_order_dicts", sources["ad_hoc_order_dicts"])
 	if visualizer.has_method("set_security_overlay_enabled"):
 		visualizer.call("set_security_overlay_enabled", _fire_sector_overlay_enabled)
-	visualizer.call("set_security_dicts", get_fireteam_security_snapshot())
+	visualizer.call("set_security_dicts", sources["security_dicts"])
 	if visualizer.has_method("set_movement_state_dicts"):
-		visualizer.call("set_movement_state_dicts", get_fireteam_movement_snapshot())
-	_sync_primary_3d_order_visuals()
+		visualizer.call("set_movement_state_dicts", sources["movement_state_dicts"])
+	_sync_primary_3d_order_visuals_from_sources(sources)
 	refresh_contact_overlay()
+
+
+func _build_order_visual_sources() -> Dictionary:
+	var anchors: Array = _build_fireteam_anchor_visualization_entries()
+	var plans: Array = _serialize_order_plans()
+	return {
+		"fireteam_anchors": anchors,
+		"plan_dicts": plans,
+		"waypoint_intent_preview_entries": _build_waypoint_intent_preview_entries_from_sources(plans, anchors),
+		"area_order_dicts": _serialize_area_orders(),
+		"ad_hoc_order_dicts": _build_ad_hoc_visualization_entries(),
+		"security_dicts": get_fireteam_security_snapshot(),
+		"movement_state_dicts": get_fireteam_movement_snapshot(),
+	}
 
 
 func refresh_contact_overlay() -> void:
@@ -31213,6 +31554,12 @@ func _focus_connected_first_contact_world(contact_snapshot: Array) -> Dictionary
 func _sync_primary_3d_order_visuals() -> void:
 	if _get_primary_3d_view() == null:
 		return
+	_sync_primary_3d_order_visuals_from_sources(_build_order_visual_sources())
+
+
+func _sync_primary_3d_order_visuals_from_sources(sources: Dictionary) -> void:
+	if _get_primary_3d_view() == null:
+		return
 	var world_label_density_mode: String = _get_release_firefight_world_label_density_mode()
 	_primary_view_bridge.call(
 		"sync_order_visual_payload",
@@ -31270,14 +31617,14 @@ func _sync_primary_3d_order_visuals() -> void:
 			"los_debug_overlay_enabled": _los_debug_overlay_enabled,
 			"los_debug_sample_limit": 24,
 			"contact_density_heatmap_enabled": _contact_density_heatmap_enabled,
-			"fireteam_anchors": _build_fireteam_anchor_visualization_entries(),
-			"plan_dicts": _serialize_order_plans(),
-			"waypoint_intent_preview_entries": _build_waypoint_intent_preview_entries(),
-			"area_order_dicts": _serialize_area_orders(),
+			"fireteam_anchors": sources.get("fireteam_anchors", []),
+			"plan_dicts": sources.get("plan_dicts", []),
+			"waypoint_intent_preview_entries": sources.get("waypoint_intent_preview_entries", []),
+			"area_order_dicts": sources.get("area_order_dicts", []),
 			"multi_fireteam_plan_dicts": _serialize_multi_fireteam_plans(),
-			"ad_hoc_order_dicts": _build_ad_hoc_visualization_entries(),
-			"security_dicts": get_fireteam_security_snapshot(),
-			"movement_state_dicts": get_fireteam_movement_snapshot(),
+			"ad_hoc_order_dicts": sources.get("ad_hoc_order_dicts", []),
+			"security_dicts": sources.get("security_dicts", []),
+			"movement_state_dicts": sources.get("movement_state_dicts", []),
 			"enemy_security_dicts": get_enemy_security_snapshot(),
 			"enemy_tactics_dicts": get_enemy_team_tactics_snapshot(),
 			"fire_event_dicts": _get_release_first_exchange_fire_visual_event_dicts(),
@@ -31681,11 +32028,17 @@ func _build_fireteam_anchor_visualization_entries() -> Array:
 func _build_waypoint_intent_preview_entries() -> Array:
 	if _waypoint_intent_preview_resolver == null:
 		return []
+	return _build_waypoint_intent_preview_entries_from_sources(_serialize_order_plans(), _build_fireteam_anchor_visualization_entries())
+
+
+func _build_waypoint_intent_preview_entries_from_sources(plans: Array, anchors: Array) -> Array:
+	if _waypoint_intent_preview_resolver == null:
+		return []
 	var entries: Array = Array(
 		_waypoint_intent_preview_resolver.call(
 			"build_preview_entries",
-			_serialize_order_plans(),
-			_build_fireteam_anchor_visualization_entries(),
+			plans,
+			anchors,
 			{
 				"phase_index": _get_live_order_phase_index(),
 				"selected_fireteam_ids": _selected_fireteam_ids,
@@ -33745,7 +34098,11 @@ func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index:
 	plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_ACTIVE
 	var waypoint = plan.waypoints[waypoint_index]
 	waypoint.status = FIRETEAM_WAYPOINT_SCRIPT.STATUS_ACTIVE
+	var timing: Dictionary = _active_command_commit_timing_debug()
+	var scope_started_usec: int = _command_commit_timing_clock(timing)
 	var behavior_profile = _resolve_fireteam_behavior_profile(fireteam_id, String(waypoint.command_type), waypoint.target_position)
+	_record_command_commit_timing_scope(timing, "activation_resolve_profile_usec", scope_started_usec, true)
+	scope_started_usec = _command_commit_timing_clock(timing)
 	if behavior_profile != null:
 		var metadata: Dictionary = Dictionary(behavior_profile.metadata).duplicate(true)
 		metadata["origin"] = "planned_order"
@@ -33764,7 +34121,11 @@ func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index:
 		"resolved_target_position": resolved_target_position,
 		"started_msec": Time.get_ticks_msec(),
 	}
-	return _issue_waypoint_for_fireteam(fireteam_id, waypoint, int(plan.phase), behavior_profile)
+	_record_command_commit_timing_scope(timing, "activation_profile_and_plan_commit_usec", scope_started_usec, true)
+	scope_started_usec = _command_commit_timing_clock(timing)
+	var issued: bool = _issue_waypoint_for_fireteam(fireteam_id, waypoint, int(plan.phase), behavior_profile)
+	_record_command_commit_timing_scope(timing, "activation_issue_waypoint_usec", scope_started_usec, true)
+	return issued
 
 
 func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: int, behavior_profile = null) -> bool:
@@ -33786,6 +34147,8 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 			_record_mission_tactical_behavior_path_failure(fireteam_id, command_type, "missing_controller_or_simulation_root")
 			return false
 	elif _fireteam_movement_controller != null and simulation_root != null:
+		var timing: Dictionary = _active_command_commit_timing_debug()
+		var scope_started_usec: int = _command_commit_timing_clock(timing)
 		var movement_result: Dictionary = Dictionary(
 			_fireteam_movement_controller.call(
 				"start_execution",
@@ -33800,11 +34163,14 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 				_get_terrain_registry()
 			)
 		)
+		_record_command_commit_timing_scope(timing, "movement_start_and_arguments_usec", scope_started_usec, true)
 		if bool(movement_result.get("started", false)):
+			scope_started_usec = _command_commit_timing_clock(timing)
 			_record_recent_movement_trace(fireteam_id, Dictionary(movement_result.get("movement_state", {})), "started")
 			_mirror_flow_driver_order_for_fireteam(fireteam_id, target_position, command_type, phase_index)
 			if command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_FLANK:
 				_notify_flank_initiated(fireteam_id, waypoint.target_position, target_position, behavior_profile)
+			_record_command_commit_timing_scope(timing, "movement_recent_trace_and_flow_mirror_usec", scope_started_usec, true)
 			return true
 		_fireteam_movement_controller.call("reset_fireteam", fireteam_id)
 		if requires_mission_tactical_path:

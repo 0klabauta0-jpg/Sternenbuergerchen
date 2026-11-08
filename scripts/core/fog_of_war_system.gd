@@ -650,12 +650,16 @@ func _evaluate_tile_visibility(tile_data, mode: String, observer_states: Diction
 			los_blocked_count += 1
 			continue
 		if los_system != null:
-			if los_system.has_method("has_line_of_sight_between_points") and not bool(los_system.call("has_line_of_sight_between_points", observer_position, target_position, sight_range_world, terrain_registry)):
-				los_blocked_count += 1
-				continue
-			if los_system.has_method("has_line_of_sight_with_terrain") and not bool(los_system.call("has_line_of_sight_with_terrain", observer_position, target_position, terrain_registry, sight_range_world)):
-				los_blocked_count += 1
-				continue
+			# The complete point API already includes terrain occlusion. Match
+			# _observer_can_see_tile: use the terrain API only as a fallback.
+			if los_system.has_method("has_line_of_sight_between_points"):
+				if not bool(los_system.call("has_line_of_sight_between_points", observer_position, target_position, sight_range_world, terrain_registry)):
+					los_blocked_count += 1
+					continue
+			elif los_system.has_method("has_line_of_sight_with_terrain"):
+				if not bool(los_system.call("has_line_of_sight_with_terrain", observer_position, target_position, terrain_registry, sight_range_world)):
+					los_blocked_count += 1
+					continue
 		return {"visible": true, "checked_tile_count": checked_tile_count, "los_blocked_count": los_blocked_count}
 	return {"visible": false, "checked_tile_count": checked_tile_count, "los_blocked_count": los_blocked_count}
 

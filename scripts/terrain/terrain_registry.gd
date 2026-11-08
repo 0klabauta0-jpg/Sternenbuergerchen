@@ -272,10 +272,11 @@ func get_nearest_walkable_grid(world_pos: Vector2) -> Variant:
 	var nearest_distance: float = INF
 	for tile_data in _tiles.values():
 		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
-		if not is_walkable(grid_position):
-			continue
 		var distance_to_tile: float = world_pos.distance_squared_to(tile_data.world_position)
 		if not _is_nearest_candidate_better(distance_to_tile, grid_position, nearest_distance, nearest_grid):
+			continue
+		# Read live walkability only when this candidate can replace the winner.
+		if not is_walkable(grid_position):
 			continue
 
 		nearest_distance = distance_to_tile

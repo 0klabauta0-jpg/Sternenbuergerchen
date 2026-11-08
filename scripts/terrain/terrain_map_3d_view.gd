@@ -29,6 +29,8 @@ const NETWORK_PREVIEW_ROOT_NAME: String = "NetworkPreviewRoot3D"
 const SELECTION_ROOT_NAME: String = "SelectionRoot3D"
 const UNIT_ROOT_NAME: String = "UnitRoot3D"
 const ORDER_ROOT_NAME: String = "OrderRoot3D"
+const WEAPON_FIRE_FEEDBACK_ROOT_NAME: String = "WeaponFireFeedbackRoot3D"
+const WEAPON_FIRE_FEEDBACK_LAYER: GDScript = preload("res://scripts/terrain/weapon_fire_feedback_layer.gd")
 const CONTACT_ROOT_NAME: String = "ContactRoot3D"
 const CONTACT_DENSITY_ROOT_NAME: String = "ContactDensityRoot3D"
 const DROP_ROOT_NAME: String = "DropRoot3D"
@@ -870,6 +872,7 @@ var _network_preview_root: Node3D = null
 var _selection_root: Node3D = null
 var _unit_root: Node3D = null
 var _order_root: Node3D = null
+var _weapon_fire_feedback_root: Node3D = null
 var _contact_root: Node3D = null
 var _contact_density_root: Node3D = null
 var _drop_root: Node3D = null
@@ -903,6 +906,8 @@ var _unit_proxy_active_fire_event_by_unit_id: Dictionary = {}
 var _unit_proxy_contacts_by_fireteam_id: Dictionary = {}
 var _unit_proxy_contact_direction_by_unit_id: Dictionary = {}
 var _unit_proxy_fire_event_index_signature: String = ""
+var _unit_proxy_fire_event_feed_signature: String = ""
+var _unit_proxy_fire_event_feed_revision: int = 0
 var _unit_proxy_contact_index_revision: int = -1
 var _unit_proxy_rebuild_count: int = 0
 var _unit_proxy_badge_rebuild_count: int = 0
@@ -1630,16 +1635,20 @@ func get_selected_grid_positions() -> Array:
 
 func set_order_visual_payload(order_payload: Dictionary) -> void:
 	_order_payload_apply_count += 1
+	# Transient source feedback consumes the full bounded authority feed even
+	# when the smaller trace/text signature below has not changed.
+	if _weapon_fire_feedback_root != null:
+		_weapon_fire_feedback_root.call("ingest", Array(order_payload.get("fire_event_dicts", [])))
 	var previous_insertion_residue_declutter_active: bool = _is_release_firefight_insertion_residue_declutter_active()
 	var previous_marker_scale_world_noise_active: bool = _is_release_first_exchange_combat_marker_scale_world_noise_active()
 	var previous_fire_lane_readability_active: bool = _is_release_first_exchange_fire_lane_readability_active()
 	var next_signature: String = _build_order_visual_signature(order_payload)
+	_order_payload = order_payload.duplicate(true)
+	_update_unit_proxy_fire_event_feed_revision(Array(_order_payload.get("fire_event_dicts", [])))
 	if next_signature == _order_visual_signature:
-		_order_payload = order_payload.duplicate(true)
 		_refresh_tile_grid_materials_for_release_polish()
 		return
 	_order_visual_signature = next_signature
-	_order_payload = order_payload.duplicate(true)
 	_rebuild_dynamic_relevant_index()
 	_dynamic_sources_dirty = true
 	if previous_marker_scale_world_noise_active != _is_release_first_exchange_combat_marker_scale_world_noise_active() or previous_fire_lane_readability_active != _is_release_first_exchange_fire_lane_readability_active():
@@ -2000,7 +2009,7 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	var unchanged_terrain: bool = same_context and old_knowledge == new_knowledge
 	var next_revision: int = int(normalized_state.get("visibility_revision", 0))
 	var same_revision: bool = next_revision == int(_fog_of_war_state.get("visibility_revision", 0))
-	if next_signature == _fog_of_war_state_signature and unchanged_terrain and same_revision:
+	if next_signature == _fog_of_war_state_signature and unchanged_terrain and same_revision and normalized_state == _fog_of_war_state:
 		return
 	var work_started_usec: int = Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
 	var can_apply_overlay_delta: bool = _can_apply_fow_overlay_delta(normalized_state)
@@ -2009,6 +2018,8 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	var previous_drop_admission_signature: String = _build_drop_fow_admission_signature()
 	_fog_of_war_state_signature = next_signature
 	_apply_fog_of_war_visual_state(normalized_state)
+	if _weapon_fire_feedback_root != null:
+		_weapon_fire_feedback_root.call("refresh_visibility")
 	# Contact-only updates keep the existing terrain slots and pending cursor.
 	if unchanged_terrain and (same_revision or same_overlay):
 		if same_overlay:
@@ -2020,9 +2031,11 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 			_apply_pending_fow_snapshot_changes(old_knowledge, new_knowledge)
 		else:
 			_rebuild_fog_of_war_visuals()
-	_rebuild_contact_visuals()
 	_fow_contact_visibility_refresh_count += 1
-	if previous_dynamic_visibility_signature != _build_fow_dynamic_visibility_signature(normalized_state):
+	# Fresh timestamps/revisions still publish above, but do not change marker
+	# geometry. Terrain knowledge also controls dynamic admission by position.
+	if not unchanged_terrain or previous_dynamic_visibility_signature != _build_fow_dynamic_visibility_signature(normalized_state):
+		_rebuild_contact_visuals()
 		_rebuild_order_visuals()
 	else:
 		_fow_order_rebuild_skip_count += 1
@@ -3695,6 +3708,11 @@ func _ensure_nodes() -> void:
 	_selection_root = _ensure_node3d(_world_root, SELECTION_ROOT_NAME)
 	_unit_root = _ensure_node3d(_world_root, UNIT_ROOT_NAME)
 	_order_root = _ensure_node3d(_world_root, ORDER_ROOT_NAME)
+	if _weapon_fire_feedback_root == null:
+		_weapon_fire_feedback_root = WEAPON_FIRE_FEEDBACK_LAYER.new() as Node3D
+		_weapon_fire_feedback_root.name = WEAPON_FIRE_FEEDBACK_ROOT_NAME
+		_world_root.add_child(_weapon_fire_feedback_root)
+	_weapon_fire_feedback_root.call("set_context", self, _terrain_map_data)
 	_contact_density_root = _ensure_node3d(_world_root, CONTACT_DENSITY_ROOT_NAME)
 	_contact_root = _ensure_node3d(_world_root, CONTACT_ROOT_NAME)
 	_drop_root = _ensure_node3d(_world_root, DROP_ROOT_NAME)
@@ -6049,12 +6067,9 @@ func _build_fog_of_war_visual_signature(fog_of_war_state: Dictionary) -> String:
 		if typeof(contact_variant) != TYPE_DICTIONARY:
 			continue
 		var contact: Dictionary = Dictionary(contact_variant)
-		var contact_part: String = "%s:%s:%d" % [
-			String(contact.get("target_id", "")),
-			_format_fow_position(contact.get("last_known_position", null)),
-			int(contact.get("last_seen_tick", 0)),
-		]
-		parts.append(contact_part)
+		# Keep the complete normalized source fresh, including detection/team
+		# changes and exact coordinates rather than a rounded display position.
+		parts.append(var_to_bytes(contact).hex_encode())
 	return "|".join(parts)
 
 
@@ -6069,12 +6084,11 @@ func _build_fow_dynamic_visibility_signature(fog_of_war_state: Dictionary) -> St
 	for contact_variant in Array(fog_of_war_state.get("last_known_contacts", [])):
 		if typeof(contact_variant) != TYPE_DICTIONARY:
 			continue
-		var contact: Dictionary = Dictionary(contact_variant)
-		parts.append("%s:%s:%d" % [
-			String(contact.get("target_id", "")),
-			_format_fow_position(contact.get("last_known_position", null)),
-			int(contact.get("last_seen_tick", 0)),
-		])
+		var contact: Dictionary = Dictionary(contact_variant).duplicate()
+		# Timestamp freshness is not consumed by geometry or admission. Preserve
+		# every other normalized field so state/position changes still rebuild.
+		contact.erase("last_seen_tick")
+		parts.append(var_to_bytes(contact).hex_encode())
 	return "|".join(parts)
 
 
@@ -8779,6 +8793,57 @@ func _emit_weapon_fire_sfx_from_fire_event(fire_event: Dictionary, weapon_id: St
 	return result
 
 
+func get_weapon_fire_feedback_snapshot() -> Dictionary:
+	if _weapon_fire_feedback_root == null:
+		return {"active_pulse_count": 0, "entries": [], "read_only": true, "creates_fire_event": false}
+	return _weapon_fire_feedback_root.call("get_snapshot")
+
+
+func _fow_allows_weapon_fire_source(fire_event: Dictionary) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	if not _fog_of_war_team_id.is_empty() and String(fire_event.get("attacker_team_id", "")) == _fog_of_war_team_id:
+		return true
+	var source_id: String = String(fire_event.get("attacker_unit_id", ""))
+	if _fow_is_target_currently_visible(source_id) or _fow_is_event_currently_visible(String(fire_event.get("event_id", ""))):
+		return true
+	var proxy: Node3D = _unit_proxies_by_id.get(source_id) as Node3D
+	if is_instance_valid(proxy):
+		# A moving live source is admitted at its current rendered location,
+		# never indefinitely by the event's old launch cell.
+		return _fow_is_world_position_currently_visible(_position_3d_to_world(proxy.global_position))
+	return _fow_is_world_position_currently_visible(fire_event.get("attacker_position", null))
+
+
+func _build_weapon_fire_feedback_anchor(fire_event: Dictionary) -> Dictionary:
+	if typeof(fire_event.get("attacker_position")) != TYPE_VECTOR2 or typeof(fire_event.get("target_position")) != TYPE_VECTOR2:
+		return {}
+	var source: Vector2 = Vector2(fire_event.attacker_position)
+	var target: Vector2 = Vector2(fire_event.target_position)
+	var direction: Vector2 = (target - source).normalized()
+	if direction.is_zero_approx():
+		direction = Vector2.RIGHT
+	var weapon_id: String = WEAPON_DATA_SCRIPT.call("normalize_weapon_id", String(fire_event.get("weapon_id", "rifle")))
+	var catalog: Dictionary = _get_weapon_fire_vfx_entry(weapon_id)
+	var result: Dictionary = {"kind": "catalog_fallback", "muzzle_position": _world_to_surface_3d_position(source + direction * float(catalog.get("barrel_offset_world", 28.0)), 0.92), "source_position": _world_to_surface_3d_position(source, 1.22), "texture": _get_weapon_fire_vfx_texture(String(catalog.get("path", ""))), "muzzle_node": null, "source_node": null, "aim_direction": (_world_to_3d_position(target, 0.0) - _world_to_3d_position(source, 0.0)).normalized()}
+	var id: String = String(fire_event.get("attacker_unit_id", ""))
+	var proxy: Node3D = _unit_proxies_by_id.get(id) as Node3D
+	if not is_instance_valid(proxy):
+		return result
+	result.source_node = proxy
+	result.source_position = proxy.global_position + Vector3.UP * 1.22
+	var runtime: Dictionary = _get_unit_proxy_runtime(id, proxy)
+	var weapon: Node3D = runtime.get("weapon_node") as Node3D
+	if not is_instance_valid(weapon):
+		return result
+	var muzzle: Variant = weapon.get_meta("unit_muzzle_socket", null)
+	if is_instance_valid(muzzle):
+		result.kind = "weapon_mesh_muzzle"
+		result.muzzle_node = muzzle
+		result.muzzle_position = (muzzle as Node3D).global_position
+	return result
+
+
 func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var event_id: String = String(fire_event.get("event_id", "")).strip_edges()
 	if event_id.is_empty():
@@ -8971,11 +9036,10 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		_add_texture_card(_order_root, texture, _world_to_surface_3d_position(muzzle_position, 0.92), "WeaponFireMuzzle_%s" % _sanitize_node_name(event_id), pixel_size, Vector2.ZERO, Color(1.0, 0.95, 0.62, 0.92))
 	# Extra source feedback requires source visibility. A visible target alone
 	# can retain the existing shot lane without revealing an unknown shooter.
-	var readable_source_allowed: bool = not _is_fog_of_war_visual_filter_active() or (not _fog_of_war_team_id.is_empty() and String(fire_event.get("attacker_team_id", "")) == _fog_of_war_team_id) or _fow_is_target_currently_visible(String(fire_event.get("attacker_unit_id", ""))) or _fow_is_world_position_currently_visible(attacker_position) or _fow_is_event_currently_visible(event_id)
+	var readable_source_allowed: bool = _fow_allows_weapon_fire_source(fire_event)
 	var readable_pulse: Node3D = null
-	if readable_source_allowed:
-		var pulse_script: GDScript = preload("res://scripts/terrain/weapon_fire_feedback_pulse.gd")
-		readable_pulse = pulse_script.call("add_for_event", self, _order_root, event_id, texture, _world_to_surface_3d_position(muzzle_position, 0.92), _world_to_surface_3d_position(attacker_position, 1.22)) as Node3D
+	if readable_source_allowed and _weapon_fire_feedback_root != null:
+		readable_pulse = _weapon_fire_feedback_root.call("get_pulse", fire_event) as Node3D
 	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.84), _world_to_surface_3d_position(muzzle_tip_position, 0.84), WEAPON_FIRE_MUZZLE_FLASH_COLOR, "WeaponFireMuzzleFlash_%s" % _sanitize_node_name(event_id), muzzle_flash_width)
 	var muzzle_perp: Vector2 = Vector2(-normalized_direction.y, normalized_direction.x)
 	var muzzle_cross_a: Vector2 = muzzle_position - muzzle_perp * WEAPON_FIRE_MUZZLE_FLARE_CROSS_WORLD
@@ -11420,15 +11484,29 @@ func _get_surface_type_for_world_position(world_position: Vector2) -> String:
 	return surface_type
 
 
+func _update_unit_proxy_fire_event_feed_revision(fire_events: Array) -> void:
+	# Serialize the bounded pose input only when a payload arrives, never in
+	# the per-frame index lookup or the smaller heavy trace/text signature.
+	var entries: Array = []
+	for event_variant in WEAPON_FIRE_FEEDBACK_LAYER.select_current_source_events(fire_events):
+		var event: Dictionary = Dictionary(event_variant)
+		entries.append([
+			String(event.get("event_id", "")), String(event.get("attacker_unit_id", "")),
+			int(event.get("tick", 0)), String(event.get("target_unit_id", "")),
+			event.get("attacker_position", Vector2.ZERO), event.get("target_position", Vector2.ZERO),
+			String(event.get("weapon_id", "")),
+		])
+	var signature: String = var_to_str(entries)
+	if signature != _unit_proxy_fire_event_feed_signature:
+		_unit_proxy_fire_event_feed_signature = signature
+		_unit_proxy_fire_event_feed_revision += 1
+
+
 func _ensure_unit_proxy_payload_indexes() -> void:
-	var fire_event_signature: String = "%s|%s" % [_order_visual_signature, _fog_of_war_state_signature]
+	var fire_event_signature: String = "%d|%s" % [_unit_proxy_fire_event_feed_revision, _fog_of_war_state_signature]
 	if fire_event_signature != _unit_proxy_fire_event_index_signature:
 		_unit_proxy_active_fire_event_by_unit_id.clear()
-		var fire_events: Array = Array(_order_payload.get("fire_event_dicts", []))
-		for index in range(fire_events.size() - 1, -1, -1):
-			var fire_event_variant: Variant = fire_events[index]
-			if typeof(fire_event_variant) != TYPE_DICTIONARY:
-				continue
+		for fire_event_variant in WEAPON_FIRE_FEEDBACK_LAYER.select_current_source_events(Array(_order_payload.get("fire_event_dicts", []))):
 			var fire_event: Dictionary = Dictionary(fire_event_variant)
 			var attacker_unit_id: String = String(fire_event.get("attacker_unit_id", "")).strip_edges()
 			if attacker_unit_id.is_empty() or _unit_proxy_active_fire_event_by_unit_id.has(attacker_unit_id):
@@ -12408,8 +12486,6 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 			root.set_meta("unit_body_visual_kind", "animated_model")
 			if not unit_visual_entry.is_empty():
 				root.set_meta("uses_animated_character_model", true)
-				if _get_unit_team_id(unit) != "team_alpha":
-					_add_unit_body_readability_core(root, unit)
 
 	if not bool(root.get_meta("uses_kenney_model", false)) and _uses_strict_3d_asset_mapping():
 		_add_runtime_missing_asset_marker(
@@ -12442,7 +12518,7 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 		root.add_child(body)
 		root.set_meta("unit_body_visual_visible", true)
 		root.set_meta("unit_body_visual_kind", "fallback_capsule")
-	if _get_unit_team_id(unit) != "team_alpha" and root.get_node_or_null("UnitBodyReadabilityCore") == null:
+	if _get_unit_team_id(unit) != "team_alpha" and not bool(root.get_meta("uses_kenney_model", false)) and root.get_node_or_null("UnitBodyReadabilityCore") == null:
 		_add_unit_body_readability_core(root, unit)
 		if String(root.get_meta("unit_body_visual_kind", "")).strip_edges().is_empty():
 			root.set_meta("unit_body_visual_kind", "hostile_readability_core")
@@ -13225,6 +13301,32 @@ func _attach_unit_helmet(proxy_root: Node3D, model_root: Node3D, model_instance:
 	return true
 
 
+func _find_unit_weapon_primary_mesh(node: Node) -> MeshInstance3D:
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		return node as MeshInstance3D
+	for child in node.get_children():
+		var found: MeshInstance3D = _find_unit_weapon_primary_mesh(child)
+		if found != null:
+			return found
+	return null
+
+
+func _setup_unit_weapon_muzzle(weapon: Node3D, entry: Dictionary) -> void:
+	if not entry.has("muzzle_mesh_local_position"):
+		return
+	# Resolve only at attachment construction. The marker remains on the real
+	# primary mesh, inheriting its existing pivot, aim and skeleton transforms.
+	var primary_mesh: MeshInstance3D = _find_unit_weapon_primary_mesh(weapon)
+	if primary_mesh == null:
+		return
+	var muzzle := Marker3D.new()
+	muzzle.name = "MuzzleSocket"
+	muzzle.position = _get_vector3_from_variant(entry.muzzle_mesh_local_position, Vector3.ZERO)
+	primary_mesh.add_child(muzzle)
+	weapon.set_meta("unit_muzzle_socket", muzzle)
+	weapon.set_meta("unit_muzzle_provenance", String(entry.get("muzzle_provenance", "")))
+
+
 func _attach_unit_blaster(proxy_root: Node3D, model_root: Node3D, _model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
 	var blaster_path: String = _get_unit_blaster_path(unit_visual_entry)
 	if blaster_path.is_empty():
@@ -13252,6 +13354,7 @@ func _attach_unit_blaster(proxy_root: Node3D, model_root: Node3D, _model_instanc
 	if not _apply_unit_blaster_material(blaster_instance, attachment_entry):
 		_mark_unit_visual_loadout_error(proxy_root, unit_visual_entry)
 		return false
+	_setup_unit_weapon_muzzle(blaster_instance, unit_visual_entry)
 	var socket_name: String = String(attachment_entry.get("socket_name", "RightHandSocket")).strip_edges()
 	var socket: Node3D = _find_unit_visual_socket(model_root, socket_name)
 	if socket != null:
@@ -14969,7 +15072,11 @@ func _get_unit_helmet_attachment_entry(unit_visual_entry: Dictionary) -> Diction
 
 func _get_unit_blaster_attachment_entry(unit_visual_entry: Dictionary) -> Dictionary:
 	if unit_visual_entry.has("blaster_attachment"):
-		return Dictionary(unit_visual_entry.get("blaster_attachment", {}))
+		var attachment: Dictionary = Dictionary(unit_visual_entry.get("blaster_attachment", {}))
+		if bool(attachment.get("inherit_defaults", false)):
+			var defaults: Dictionary = Dictionary(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("blaster_attachment", {}))
+			return _merge_unit_visual_entry(defaults, attachment)
+		return attachment
 	return Dictionary(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("blaster_attachment", {}))
 
 

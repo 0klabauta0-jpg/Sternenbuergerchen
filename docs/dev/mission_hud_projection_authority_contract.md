@@ -53,6 +53,23 @@ Rekursive Produzenten duerfen keine kontextabhaengigen Fallbacks in diesen
 Cache legen. Ein neuer Command-Refresh im selben Frame bekommt einen neuen
 Lesevorgang. Ausserhalb des Passes wird direkt gelesen.
 
+Periodisch faellige schwere HUDarbeit wird ueber vier reine Jobkeys an den
+vorhandenen UpdateManager uebergeben: Primary+Secondary/Matrix, Craft,
+World/Status und Cards. Pro Renderframe laeuft hoechstens ein solcher Job.
+Jeder Job liest innerhalb seines eigenen synchronen ReadModel-Passes frisch;
+zwischen Frames bleiben nur Scheduling-/Force-/Generation-/Zeitmetadaten.
+Wiederholte Anforderungen coalescen ohne Enqueuezeit oder Reihenfolge zu
+erneuern; Reentry darf neu angeforderte Arbeit nicht als alte Completion
+verbrauchen. Die350ms-Light-/1s-Heavyfaelligkeit bleibt bestehen.
+
+Explizites `_update_ui(bool,bool)` bleibt synchron. Lightfeedback laesst
+angeforderte schwere Jobs bestehen. Ein expliziter Fullpass entwertet aeltere
+Jobgenerationen vor seiner Arbeit; neue Requests waehrend dieses Passes
+bleiben erhalten. Fehlender UpdateManager nutzt in einer aktiven Szene den
+bisherigen synchronen Fullpfad, Sceneexit/detached meldet keine neuen Jobs an.
+Externe Manager-Phasentimings sind keine Controller-_process-Walltime und
+werden in der nativen Diagnose getrennt gefuehrt.
+
 Die Live-Commandmatrix fuehrt ihre bestehenden Anzeige-Contracts einmal
 vorwaerts mit den bereits vorhandenen RAW-Texten aus. Sie liest dafuer keine
 anderen Panels rueckwaerts neu. Leere Inputs bleiben leer und blockiert. Alte

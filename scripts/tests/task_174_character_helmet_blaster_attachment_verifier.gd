@@ -125,6 +125,7 @@ func _test_live_socket_helmet_and_blaster_attachments() -> void:
 		_assert(_visual_close_to_parent_socket(unit_root, proxy_name, "HelmetVisual_", 0.05), "%s helmet stays on HeadSocket instead of under terrain" % proxy_name)
 		_assert(_visual_close_to_parent_socket(unit_root, proxy_name, "BlasterVisual_", 0.05), "%s blaster stays on RightHandSocket" % proxy_name)
 		_assert(_blaster_has_textured_material(unit_root, proxy_name), "%s blaster uses the shared texture instead of plain white" % proxy_name)
+		_assert(_blaster_has_actual_lowered_idle_pose(unit_root, proxy_name), "%s orientation sample uses the actual lowered weapon and playing idle clip" % proxy_name)
 		_assert(_blaster_idle_hold_orientation_matches(unit_root, proxy_name), "%s blaster barrel points down and magazine points back" % proxy_name)
 		_assert(_proxy_animation_source_is_real_motion(unit_root, proxy_name, "idle"), "%s idle uses the Idle animation, not the targeting pose" % proxy_name)
 		_assert(_proxy_animation_source_is_real_motion(unit_root, proxy_name, "walk"), "%s walk uses the Walk animation, not the targeting pose" % proxy_name)
@@ -171,14 +172,38 @@ func _blaster_has_textured_material(unit_root: Node, proxy_name: String) -> bool
 func _blaster_idle_hold_orientation_matches(unit_root: Node, proxy_name: String) -> bool:
 	var proxy := unit_root.get_node_or_null(proxy_name) as Node3D if unit_root != null else null
 	var visual := _proxy_visual(unit_root, proxy_name, "BlasterVisual_") as Node3D
-	if proxy == null or visual == null:
+	var mesh := _first_blaster_mesh(visual)
+	if proxy == null or visual == null or mesh == null or not _blaster_has_actual_lowered_idle_pose(unit_root, proxy_name):
 		return false
-	var barrel_direction: Vector3 = (visual.global_transform.basis * Vector3(0.0, 0.0, -1.0)).normalized()
-	var magazine_direction: Vector3 = (visual.global_transform.basis * Vector3(0.0, 1.0, 0.0)).normalized()
-	var npc_back: Vector3 = (proxy.global_transform.basis * Vector3(0.0, 0.0, 1.0)).normalized()
+	# Original GLB vertices place the muzzle at the primary mesh's -Z end and
+	# the magazine predominantly along -Y. A weapon-root axis misses the asset
+	# child transform; the imported unit-facing contract uses proxy -X as front.
+	var barrel_direction: Vector3 = (mesh.global_transform.basis * Vector3(0.0, 0.0, -1.0)).normalized()
+	var magazine_direction: Vector3 = (mesh.global_transform.basis * Vector3(0.0, -1.0, 0.0)).normalized()
+	var npc_back: Vector3 = (proxy.global_transform.basis * Vector3(1.0, 0.0, 0.0)).normalized()
 	npc_back.y = 0.0
 	npc_back = npc_back.normalized()
+	print("TASK174_IDLE_MESH_AXES " + JSON.stringify({"proxy": proxy_name, "mesh": String(mesh.name), "weapon_posture": visual.get_meta("unit_weapon_posture_applied", ""), "barrel_down_dot": barrel_direction.dot(Vector3.DOWN), "magazine_back_dot": magazine_direction.dot(npc_back), "barrel_direction": barrel_direction, "magazine_direction": magazine_direction, "canonical_back": npc_back}))
 	return barrel_direction.dot(Vector3.DOWN) >= 0.85 and magazine_direction.dot(npc_back) >= 0.70
+
+
+func _blaster_has_actual_lowered_idle_pose(unit_root: Node, proxy_name: String) -> bool:
+	var proxy := unit_root.get_node_or_null(proxy_name) if unit_root != null else null
+	var visual := _proxy_visual(unit_root, proxy_name, "BlasterVisual_") as Node3D
+	var player := _find_animation_player(proxy) if proxy != null else null
+	return visual != null and player != null and String(visual.get_meta("unit_weapon_posture_applied", "")) == "lowered" and player.is_playing() and String(player.current_animation).to_lower() == "idle"
+
+
+func _first_blaster_mesh(node: Node) -> MeshInstance3D:
+	if node == null:
+		return null
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		return node as MeshInstance3D
+	for child in node.get_children():
+		var found := _first_blaster_mesh(child)
+		if found != null:
+			return found
+	return null
 
 
 func _node_has_textured_material(node: Node) -> bool:

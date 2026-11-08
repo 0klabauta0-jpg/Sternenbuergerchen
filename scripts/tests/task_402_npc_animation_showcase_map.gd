@@ -24,8 +24,8 @@ const EXPECTED_ANIMATIONS: PackedStringArray = [
 const EXPECTED_COMBAT_CASES: Dictionary = {
 	"standShoot": {
 		"base_animation": "shoot",
-		"upper_body_pose_animation": "",
-		"pose_track_scope": "imported_clip",
+		"upper_body_pose_animation": "shoot",
+		"pose_track_scope": "shoot_upper_body",
 	},
 	"walkShoot": {
 		"base_animation": "walk",

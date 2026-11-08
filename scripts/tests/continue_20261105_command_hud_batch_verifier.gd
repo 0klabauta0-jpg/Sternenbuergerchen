@@ -49,6 +49,8 @@ func _run() -> void:
 	# Freeze only automatic scheduling of this UI/runtime owner. Its actual
 	# _process method is called below; SimulationRoot still gets real physics ticks.
 	controller.set_process(false)
+	var manager: Node = scene.get_node("UpdateManager")
+	manager.set_process(false)
 	controller.call("_set_selected_fireteams", PackedStringArray([fireteam_id]), false)
 	controller.call("_update_ui")
 	_check(not bool(controller.get("preview_mode")) and bool(controller.call("_can_issue_local_commands")), "Fixture uses the existing authorized live-command path")
@@ -91,8 +93,12 @@ func _run() -> void:
 	var hidden_member_ids := _card_instance_ids(hidden_members)
 	_check(not hidden_members.is_visible_in_tree(), "A5 uses the visible portrait team cards while the legacy member strip is hidden")
 	controller.call("_process", float(CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS) + 0.001)
+	_check(_heavy_calls(_guard(controller)) == _heavy_calls(before_flush), "Periodic heavy due enqueues without a synchronous heavy surface traversal")
+	_check(_periodic_pending_keys(controller).size() == 4, "The coalesced command refresh retains all four pending presentation phases")
+	var flush_render_frames: int = await _drain_periodic_hud(manager, controller)
+	_check(flush_render_frames == 4 and _periodic_pending_keys(controller).is_empty(), "The real Manager completes all four phases within four distinct renderframes")
 	var flushed: Dictionary = _guard(controller)
-	_check(_heavy_calls(flushed) == _heavy_calls(before_flush) + 1, "One actual owner process step flushes the coalesced HUD work exactly once")
+	_check(_heavy_calls(flushed) == _heavy_calls(before_flush) + 1, "One completed periodic cycle flushes the coalesced HUD work exactly once")
 	_check(int(flushed.get("craft_controls_apply_count", 0)) == int(before_flush.get("craft_controls_apply_count", 0)) + 1 and int(flushed.get("fireteam_card_group_apply_count", 0)) == int(before_flush.get("fireteam_card_group_apply_count", 0)) + 1, "The pending flush forces both craft and fireteam surface groups")
 	_check(not _pending(controller), "The coalesced full refresh clears pending")
 	_check(compact_order.text == "Auftrag: Bewegen" and compact_feedback.text == "Ausführung läuft", "The delayed full refresh retains the actual Move and latest GO state")
@@ -105,6 +111,9 @@ func _run() -> void:
 	var quiet: Dictionary = _guard(controller)
 	_check(_heavy_calls(quiet) == _heavy_calls(flushed) and not _pending(controller), "Quiescent light process steps schedule no repeated command full refresh")
 	controller.call("_process", float(CONTROLLER.RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS))
+	_check(_heavy_calls(_guard(controller)) == _heavy_calls(quiet) and _periodic_pending_keys(controller).size() == 4, "Ordinary heavy cadence enqueues its unforced phases without synchronous work")
+	var periodic_render_frames: int = await _drain_periodic_hud(manager, controller)
+	_check(periodic_render_frames == 4 and _periodic_pending_keys(controller).is_empty(), "Ordinary periodic work completes before its unchanged-state guard is assessed")
 	var periodic: Dictionary = _guard(controller)
 	_check(int(periodic.get("craft_controls_apply_count", 0)) == int(quiet.get("craft_controls_apply_count", 0)) and int(periodic.get("craft_controls_skip_count", 0)) == int(quiet.get("craft_controls_skip_count", 0)) + 1, "The ordinary periodic heavy pass uses its unchanged-state guard instead of forcing a rebuild")
 	_check(not _pending(controller), "Quiescent periodic work does not restore command pending state")
@@ -118,11 +127,27 @@ func _run() -> void:
 	controller.call("_process", float(CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS) + 0.001)
 	_check(int(_guard(controller).get("craft_controls_apply_count", 0)) == int(interleave_after.get("craft_controls_apply_count", 0)), "Cadence after an interleaved full pass does not force the same command twice")
 	_test_details_are_current(scene, controller, simulation, fireteam_id, target + Vector2(64.0, 0.0))
-	print("COMMAND_HUD_BATCH_FACTS " + JSON.stringify({"cadence_seconds": CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS, "before": before, "after_commands": after_commands, "before_flush": before_flush, "flushed": flushed, "quiet": quiet, "periodic": periodic, "synthetic_owner_process": true, "actor_writes": false}))
+	print("COMMAND_HUD_BATCH_FACTS " + JSON.stringify({"cadence_seconds": CONTROLLER.CARD_REFRESH_INTERVAL_SECONDS, "before": before, "after_commands": after_commands, "before_flush": before_flush, "flushed": flushed, "quiet": quiet, "periodic": periodic, "flush_render_frames": flush_render_frames, "periodic_render_frames": periodic_render_frames, "synthetic_owner_process": true, "synthetic_manager_hud_drain": true, "actor_writes": false}))
 	scene.queue_free()
 	for _frame in range(2):
 		await process_frame
 	_finish()
+
+
+func _periodic_pending_keys(controller: Node) -> Array:
+	var snapshot: Dictionary = controller.call("get_periodic_hud_projection_queue_debug_snapshot")
+	return Array(snapshot.get("pending_keys", []))
+
+
+func _drain_periodic_hud(manager: Node, controller: Node) -> int:
+	var used: int = 0
+	while not _periodic_pending_keys(controller).is_empty() and used < 4:
+		await process_frame
+		used += 1
+		# Exercise the existing manager's actual HUD batch. The AI queue and real
+		# SimulationRoot clock/commands are not patched by this component fixture.
+		manager.call("_process_batch", manager.get("_hud_dirty"), manager.get("_hud_dirty_order"), "refresh_hud")
+	return used
 
 
 func _test_details_are_current(scene: Node, controller: Node, simulation: Node, fireteam_id: String, target: Vector2) -> void:
