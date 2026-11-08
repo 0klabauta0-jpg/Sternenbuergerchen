@@ -1,6 +1,6 @@
 # IMPLEMENTATION_STATUS
 
-### CPU/HUD R6: geprueft, Mainintegration folgt, 2026-11-08
+### CPU/HUD R6: auf Main integriert und gepusht, 2026-11-08
 - Use-State-Lesekette teilt frische Projektionen nur im vorhandenen synchronen
   ReadModel-Pass:7/27 Kontextaufbauten proLight/Full auf1; keine neue Runtime-
   Autoritaet. Direct-/Recursive-/Endpass-/Frame-/Revisiongrenzen erhalten.
@@ -11,8 +11,10 @@
   FPS-/Commandkostengewinn. Unveraenderte Qualitaet/11Units/7MoveGO/1x.
 - GPUzusatz70/0,936 Pre/Post-Matches; mediane KartenGPU73.386ms unter
   autorisierter Fremdlast. Keine alleinige Ursache aller langen Frames belegt.
-- Neues Paket docs/qa/cpu_hud_r6_20261108/REPORT.md. Mainintegration,
-  frischer privater Main-Smoke/Push/Remotequittung sind noch der naechste Schritt.
+- Neues Paket docs/qa/cpu_hud_r6_20261108/REPORT.md. Main integriert;
+  frischer privater90-s-Main-Smoke68/0, errors0: HUD-P95 26.626ms,
+  Gesamtmax136.247ms. Getesteter Commit32d6a708d gepusht/remote verifiziert.
+  Nachtrag nur Doku/Belege; Quellen2362/2362 und alte QA34/34 bytegleich.
 
 
 ### CPU/HUD R5: auf Main integriert und gepusht, 2026-11-08

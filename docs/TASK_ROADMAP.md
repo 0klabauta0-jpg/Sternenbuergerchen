@@ -4,7 +4,9 @@
 Use-State-Kontextaufbauten7/27 ->1 je synchronem HUDpass;91/91 Gates und
 zwei normale90-s-Nachlaeufe je68/0. Primaere HUD-P95 niedriger, gesamte
 Spitzen bis196ms bleiben. GPUdiagnose70/0 getrennt; keine Gesamtleistungs-
-freigabe unter Fremdlast. Main-Smoke/Push folgen. docs/qa/cpu_hud_r6_20261108/REPORT.md.
+freigabe unter Fremdlast. Main integriert, frischer90-s-Smoke68/0,
+getesteter Commit32d6a708d gepusht/remote verifiziert.
+docs/qa/cpu_hud_r6_20261108/REPORT.md.
 
 
 ### CPU/HUD R5 08.11.2026

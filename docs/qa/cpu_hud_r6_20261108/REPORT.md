@@ -1,8 +1,9 @@
 # CPU/HUD R6: weniger wiederholte Use-State-Aufbereitung
 
 08.11.2026. Basis Main320e3b57e; Branch codex/cpu-hud-r6-20261108,
-bewusste Fortsetzung des integrierten R5. Main-Smoke/Push werden nach
-Fast-forward separat in main_receipt.json belegt.
+bewusste Fortsetzung des integrierten R5. Per Fast-forward auf Main integriert;
+getesteter Commit32d6a708d65e16f1ce99b98a4943dcb8bb4f74b0 gepusht und
+exakt remote verifiziert. [Main-Quittung](main_receipt.json).
 
 ## Ergebnis / Ursache / Aenderung
 
@@ -133,6 +134,18 @@ Startdateien bleiben einschliesslich SHA256/Groesse/mtime geprueft. Alte
 QA-Pakete und fremde WIP bleiben. Kein Reset/Clean/Stash/Restore.
 Paket-PASS ist Bytes-/Quellen-/Guard-/Schutzbeleg, keine Leistungsfreigabe.
 
-Implementierung im Taskbranch. Kontrollierter Fast-forward, frischer privater
-nativer Main-Smoke, normaler Push und exakter Remotevergleich folgen mit
-separater Receipt; kein Produktdelta nach Main-Smoke. Kein EXE-/WANumfang.
+Implementierung im Taskbranch, danach kontrollierter Fast-forward auf Main.
+Frischer privater nativer90-s-Main-Smoke20261108T182549Z-45dfd237:68/0,
+Exit0/errors0;2751 Frames, p50/p95/p99=32.270/68.505/90.934ms,
+Max136.247ms. Primaere HUD-P95=26.626ms, Max29.620ms,86 Samples.
+Tatsaechliche Aufnahme geoeffnet: Mission/HUD/Figuren erhalten.
+Der schnellere Gesamtlauf ist bei schwankender Fremdlast kein kontrollierter
+Leistungsbeweis und widerlegt die196.071-ms-Nachlaufspitze nicht.
+
+2362 gebundene Quellen stimmen per SHA256 mit dem geprueften Stand ueberein;
+34 alte QA-Dateien sind bytegleich mit Basis Main320e3b57e. Alle Schutzchecks
+weiter gruen. Getesteter Maincommit32d6a708d65e16f1ce99b98a4943dcb8bb4f74b0
+normal gepusht und exakt gegen refs/heads/main verifiziert. Dieser Nachtrag
+enthaelt nur Doku/Belege, kein Produktdelta nach Main-Smoke. Abschluss-HEAD
+wird nach dem Nachtrag erneut remote geprueft. Kein EXE-/WANumfang.
+[Main-Rohdaten](main_smoke_raw.zip), [Mainaufnahme](captures/main_smoke.png).
