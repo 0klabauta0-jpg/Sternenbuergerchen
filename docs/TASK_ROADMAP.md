@@ -3,8 +3,9 @@
 ### CPU/HUD R8 08.11.2026
 Synchrone Wegpunktfinalisierung3->2 volle Projektionen je Move/GO-Paar;
 Kontaktproduktion/Menue/Fehlergrenzen erhalten. Finale93/93 und zweimal
-normal90s je68/0; kein gesamter FPSgewinn. Main-Smoke/Push folgen,
-danach Performancepass beendet. docs/qa/cpu_hud_r8_20261108/REPORT.md.
+normal90s je68/0; kein gesamter FPSgewinn. Main integriert, frischer
+90-s-Smoke68/0, getesteter Commit6c2bec574 gepusht/remote verifiziert.
+Performancepass beendet. docs/qa/cpu_hud_r8_20261108/REPORT.md.
 
 
 ### CPU/Fog R7 08.11.2026

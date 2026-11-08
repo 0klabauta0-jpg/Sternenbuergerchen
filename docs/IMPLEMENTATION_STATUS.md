@@ -1,6 +1,6 @@
 # IMPLEMENTATION_STATUS
 
-### CPU/HUD R8: geprueft, Mainintegration folgt, 2026-11-08
+### CPU/HUD R8: auf Main integriert und gepusht, 2026-11-08
 - Volle DefaultMove-Zwischenprojektion nur in zwei synchronen Finalisierern
   ausgelassen; Contextmenue/Fehler bleiben sofort. Kontaktproduktion/Framing
   behalten ihre alte Zwischengrenze. Kein Gameplay-/Qualitaetsabbau.
@@ -10,8 +10,10 @@
   kein allgemeiner Singleplayer-Buttongewinn. Komponentenpaar3->2 volle
   Orderprojektionen; normale90-s-Nachlaeufe je68/0, Max106.893/99.451ms
   gegen96.395ms Baseline. Keine allgemeine Leistungsabnahme.
-- Paket docs/qa/cpu_hud_r8_20261108/REPORT.md. Main-Smoke/Push folgen;
-  danach dieser Performancepass beendet, keine neue Ursachenrunde.
+- Paket docs/qa/cpu_hud_r8_20261108/REPORT.md. Main integriert; frischer
+  privater90-s-Smoke68/0/errors0: Max92.624ms/P9941.349ms. Getesteter
+  Commit6c2bec574 gepusht und exakt remote verifiziert. Quellen2370/2370,
+  AltQA56/56 bytegleich, Schutz gruen. Performancepass beendet.
 
 
 ### CPU/Fog R7: auf Main integriert und gepusht, 2026-11-08

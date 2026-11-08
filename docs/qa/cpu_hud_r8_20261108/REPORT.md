@@ -2,7 +2,9 @@
 
 08.11.2026; Basis Main5ac0642fddd36e79604efb883602dbdc655abaa1,
 Branch codex/cpu-hud-r8-20261108. Bewusste Fortsetzung des integrierten R7.
-Mainintegration/Main-Smoke/Push/Remote folgen separat mit Receipt.
+Per Fast-forward auf Main integriert; getesteter Commit
+6c2bec574f9ebd4f5bc3e2cfb0134b380bd20a3f gepusht und exakt remote
+verifiziert. [Main-Quittung](main_receipt.json).
 
 ## Problem / Ursache / Korrektur
 
@@ -120,7 +122,19 @@ GPUstand separat bytegleich mit Basiscommit gebunden. Fremde WIP, Altbelege,
 fehlgeschlagene/abgebrochene Versuche erhalten. Kein Reset/Clean/Stash/Restore.
 Packagerpruefung ist Bytes-/Quellen-/Guard-/Schutznachweis, kein Performance-PASS.
 
-Taskbranch geprueft. Kontrollierter Mainfastforward, frischer privater nativer
-90-s-Main-Smoke, normaler Push und exakter Remotevergleich folgen mit
-separater Receipt. Danach nur dokumentarischer Nachtrag, kein Produktdelta.
-Kein neuer EXE-/WAN-/KIumfang und keine weitere Performanceuntersuchung.
+Taskbranch geprueft, kontrollierter Mainfastforward. Frischer privater nativer
+90-s-Main-Smoke20261108T214906Z-e55c8d5c:68/0, Exit0/errors0.
+6635 Frames, P50/P95/P99=10.505/31.652/41.349ms, Max92.624ms,
+21 Frames >50ms,0 >100ms/250ms, Sim/Wand1.000162. Primaere HUD-P9518.754ms.
+Aufnahme geoeffnet: Mission/HUD/Figuren erhalten. Kein allgemeiner FPS- oder
+Ruckelfreiheitsnachweis; die schlechteren normalen Nachlaeufe bleiben erhalten.
+
+2370 gebundene Quellen stimmen bytegleich,56 alte QA-Dateien bytegleich zur
+Basis5ac0642fd, GPUstand erhalten. Alle Prepush-Schutzchecks gruen.
+Getesteter Commit
+6c2bec574f9ebd4f5bc3e2cfb0134b380bd20a3f
+normal gepusht und refs/heads/main exakt verifiziert. Dieser Nachtrag nur
+Doku/Belege, kein Produktdelta nach Main-Smoke. Nach Nachtrag erneuter Push
+und exakter Remote-HEAD-Abgleich. Keine neue Performanceuntersuchung oder
+weitere Spieltests; dieser Performancepass ist beendet. Kein EXE-/WAN-/KIumfang.
+[Main-Rohdaten](main_smoke_raw.zip), [Mainaufnahme](captures/main_smoke.png).
