@@ -2,7 +2,9 @@
 
 08.11.2026; Basis Maind77a37422d0f3227fff1e4550310d28fdc3297fa.
 Branch codex/cpu-hud-r7-20261108, bewusste Fortsetzung des integrierten R6.
-Mainintegration, frischer Main-Smoke, Push und Remotequittung folgen separat.
+Per Fast-forward auf Main integriert; getesteter Commit
+bf56f0276b6b28f013ae27e562dd4b78f8574063 normal gepusht und exakt remote
+verifiziert. [Main-Quittung](main_receipt.json).
 
 ## Problem / Ursache / Aenderung
 
@@ -109,6 +111,17 @@ Fremde WIP, alte QA-Pakete und gescheiterte Versuche erhalten. Kein Reset,
 Clean, Stash oder Restore. Paket-PASS belegt Bytes/Quelle/Guards/Schutz;
 kein Leistungs- oder Release-PASS. Kein EXE-/WAN-/KIumfang.
 
-Taskbranch geprueft; Mainfastforward, frischer privater nativer90-s-Smoke,
-normaler Push und exakter Remotevergleich folgen mit separater Receipt.
-Kein Produktdelta nach Main-Smoke; Abschlussnachtrag nur Doku/Belege.
+Taskbranch geprueft, kontrollierter Mainfastforward. Frischer privater nativer
+90-s-Main-Smoke20261108T201507Z-920be1c0 besteht68/0, Exit0/errors0.
+1851 Frames, P50/P95/P99=43.431/111.809/152.205ms, Max176.016ms,
+Sim/Wand0.996363. Primaere HUD-P9526.867ms, Max31.981ms. Aufnahme geoeffnet:
+Mission/HUD/Figuren erhalten. Lange Frames weiter vorhanden; keine gesamte
+Leistungsabnahme oder feste Grenze behauptet.
+
+2366 gebundene Quellen bytegleich,45 alte QA-Dateien bytegleich mit Basis
+Maind77a37422, alle Schutzchecks gruen. Getesteter Maincommit
+bf56f0276b6b28f013ae27e562dd4b78f8574063
+normal gepusht und refs/heads/main exakt geprueft. Dieser Nachtrag enthaelt
+nur Doku/Belege, kein Produktdelta nach Main-Smoke. Abschluss-HEAD wird nach
+dem Nachtrag nochmals remote geprueft.
+[Main-Rohdaten](main_smoke_raw.zip), [Mainaufnahme](captures/main_smoke.png).
