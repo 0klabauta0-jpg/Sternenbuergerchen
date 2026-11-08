@@ -29176,6 +29176,14 @@ func get_mission_interaction_point_binding_snapshot() -> Dictionary:
 
 
 func get_mission_interaction_runtime_use_state_snapshot() -> Dictionary:
+	# Repeated route/feedback/visual readers share only this synchronous HUD pass.
+	# ReadModel keeps direct, recursive, revision and frame-expiry reads fresh.
+	if _mission_hud_read_model != null:
+		return Dictionary(_mission_hud_read_model.call("project", "interaction_runtime_use_state", Callable(self, "_build_mission_interaction_runtime_use_state_snapshot_uncached")))
+	return _build_mission_interaction_runtime_use_state_snapshot_uncached()
+
+
+func _build_mission_interaction_runtime_use_state_snapshot_uncached() -> Dictionary:
 	var terrain_map_data = _get_active_mission_terrain_map_data_for_readability()
 	var binding_snapshot: Dictionary = get_mission_interaction_point_binding_snapshot()
 	var runtime_context: Dictionary = _build_mission_interaction_runtime_use_context_for_readability()

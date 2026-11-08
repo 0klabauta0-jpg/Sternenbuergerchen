@@ -1,5 +1,20 @@
 # IMPLEMENTATION_STATUS
 
+### CPU/HUD R6: geprueft, Mainintegration folgt, 2026-11-08
+- Use-State-Lesekette teilt frische Projektionen nur im vorhandenen synchronen
+  ReadModel-Pass:7/27 Kontextaufbauten proLight/Full auf1; keine neue Runtime-
+  Autoritaet. Direct-/Recursive-/Endpass-/Frame-/Revisiongrenzen erhalten.
+- RED17/3 ->GREEN20/0; finale Default/Frontierfixtures je26/0 mit vollen
+  Payload-/UI-/Owneroracles. Gesamtmatrix91/91 errors0, unabhaengiger Review.
+- Normale90-s-Laeufe je68/0: HUD-P95 32.499 ->26.825/28.643ms. Gesamt-
+  Spitzen165.340 ->196.071/168.971ms, P99 leicht schlechter; kein gesamter
+  FPS-/Commandkostengewinn. Unveraenderte Qualitaet/11Units/7MoveGO/1x.
+- GPUzusatz70/0,936 Pre/Post-Matches; mediane KartenGPU73.386ms unter
+  autorisierter Fremdlast. Keine alleinige Ursache aller langen Frames belegt.
+- Neues Paket docs/qa/cpu_hud_r6_20261108/REPORT.md. Mainintegration,
+  frischer privater Main-Smoke/Push/Remotequittung sind noch der naechste Schritt.
+
+
 ### CPU/HUD R5: auf Main integriert und gepusht, 2026-11-08
 - Wiederholtes Bootargumentparsen, verworfene Status-Fallbackformatierung und
   erneutes JSONparsen identischer Szenariobytes reduziert. Runtime-/Mapdaten

@@ -38,3 +38,6 @@ docs/qa/runtime_hitches_r4_finish_20261108/** -text whitespace=blank-at-eol,blan
 docs/qa/cpu_hud_r5_20261108/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 scripts/tests/cpu_hud_r5_20261108_* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 docs/tasks/CPU_HUD_R5_2026_11_08.md -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+
+# CPU/HUD R6 evidence keeps original hashed bytes.
+docs/qa/cpu_hud_r6_20261108/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

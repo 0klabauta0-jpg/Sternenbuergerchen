@@ -53,6 +53,17 @@ Rekursive Produzenten duerfen keine kontextabhaengigen Fallbacks in diesen
 Cache legen. Ein neuer Command-Refresh im selben Frame bekommt einen neuen
 Lesevorgang. Ausserhalb des Passes wird direkt gelesen.
 
+Auch reine Interaktions-Use-State-Projektionen duerfen in diesem bestehenden
+synchronen Pass geteilt werden. Ihre alte Producerkette bleibt unveraendert;
+pro Lese-Generation wird sie nur einmal fuer wiederholte Top-Level-Abfragen
+aufgebaut. Rueckgaben bleiben tief defensiv kopiert. Rekursive Producer lesen
+weiter direkt, selbst wenn ein Top-Level-Eintrag existiert. Passende, Frame-
+oder Revisionswechsel verwerfen alle Werte; ein waehrend des Produzierens
+entwerteter Pass darf nicht durch die alte Completion neu gefuellt werden.
+Objective-Gate und Use-Intent werden dadurch nicht gecacht. Neue Commands
+behalten ihre synchronen Feedback-/Publikationsgrenzen. Zwischen Jobs oder
+Frames verbleiben keine solchen Runtime-Snapshots.
+
 Periodisch faellige schwere HUDarbeit wird ueber vier reine Jobkeys an den
 vorhandenen UpdateManager uebergeben: Primary+Secondary/Matrix, Craft,
 World/Status und Cards. Pro Renderframe laeuft hoechstens ein solcher Job.

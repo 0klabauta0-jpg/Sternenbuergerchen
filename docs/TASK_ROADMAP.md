@@ -1,5 +1,12 @@
 # TASK_ROADMAP
 
+### CPU/HUD R6 08.11.2026
+Use-State-Kontextaufbauten7/27 ->1 je synchronem HUDpass;91/91 Gates und
+zwei normale90-s-Nachlaeufe je68/0. Primaere HUD-P95 niedriger, gesamte
+Spitzen bis196ms bleiben. GPUdiagnose70/0 getrennt; keine Gesamtleistungs-
+freigabe unter Fremdlast. Main-Smoke/Push folgen. docs/qa/cpu_hud_r6_20261108/REPORT.md.
+
+
 ### CPU/HUD R5 08.11.2026
 Drei belegte Aufbereitungsredundanzen behoben;83/83 Gates und zweimal
 normal90s je68/0. Primaere HUD-P95 40.494 ->33.098/33.945ms unter
