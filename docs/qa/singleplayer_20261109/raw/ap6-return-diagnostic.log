@@ -1,0 +1,262 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Explicit singleplayer Use slice validates without unrelated AA/cargo/PvP objectives
+PASS: Explicit enemy-free Use scenario validates through real scenario loader
+PASS: Enemy-free opt-in cannot hide configured combat waves
+PASS: Historical scenario still rejects an absent enemy roster
+PASS: Historical slice requirements remain enforced without explicit opt-in
+PASS: Satellite scenario is real authored content
+PASS: Trading visit is a separate authored scenario
+PASS: satellite_crash_site loader validates: []
+PASS: satellite_crash_site needs no invented enemy roster
+PASS: satellite_crash_site is a native authored hex map
+PASS: satellite_crash_site slice references actual markers and explicit Use gates
+PASS: satellite_crash_site interaction bindings validate
+PASS: satellite_crash_site contains real satellite_data interaction
+PASS: satellite_crash_site satellite_data has a reachable use point from LZ
+PASS: satellite_crash_site contains real ship_return interaction
+PASS: satellite_crash_site ship_return has a reachable use point from LZ
+PASS: trade_outpost loader validates: []
+PASS: trade_outpost needs no invented enemy roster
+PASS: trade_outpost is a native authored hex map
+PASS: trade_outpost slice references actual markers and explicit Use gates
+PASS: trade_outpost interaction bindings validate
+PASS: trade_outpost contains real trade_service interaction
+PASS: trade_outpost trade_service has a reachable use point from LZ
+PASS: Real combat driver loads satellite runtime gates
+PASS: Captured objective and no enemies cannot win on load
+PASS: Ship-return Use is blocked until satellite recovery
+PASS: Partial recovery Use cannot complete the job
+PASS: Recovered data still requires return to ship
+PASS: Recovery confirms only the matching real step
+PASS: Completed recovery and ship-return Uses satisfy real victory gate
+PASS: Campaign proof exposes exactly the two completed required steps
+PASS: A fresh sortie resets previous objective completion
+PASS: Trade visit does not become an elimination auto-win
+PASS: Using trader service cannot debrief before actual return
+PASS: Actual scenario setup disables fallback enemy slots for explicit peaceful recovery
+PASS: Readiness expects no disabled fallback enemies in the peaceful scenario
+PASS: Actual mission scene remains unresolved before real Use
+PASS: Authored terrain and salvage use mapped native assets without magenta fallback blockers
+PASS: Actual scenario activates a selectable recovery fireteam
+PASS: Real controller rejects return Use before recovery
+PASS: Real move/GO starts the recovery approach
+PASS: Use becomes available after actual simulated approach
+PASS: Real GO accepts the timed recovery Use
+PASS: Actual timed Use execution produces verified recovery state
+PASS: Actual recovery still requires physical ship return
+PASS: Physical return makes ship-return Use available
+PASS: Real GO accepts the return console Use
+RETURN_DIAGNOSTIC:{
+"execution": {
+"ft1": {
+"hold_elapsed": 0.0,
+"phase": 1,
+"resolved_target_position": Vector2(1581.1693, 585.41534),
+"started_msec": 42795,
+"waypoint_index": 0
+}
+},
+"intent": {
+"accepted": true,
+"action_label": "OPERATE",
+"blocked_reason": "",
+"command_type": "take",
+"creates_order_intent": true,
+"duration_seconds": 2.0,
+"feedback_line": "COMPUTER bereit | OPERATE | FT1 96m",
+"fireteam_id": "ft1",
+"gate_id": "return_to_ship",
+"interaction_id": "ship_return",
+"interaction_radius_world": 96.0,
+"interaction_type": "computer",
+"last_command_text": "USE COMPUTER -> TAKE",
+"phase": 1,
+"required_order": "operate",
+"required_state": "crew_returned",
+"requires_go": true,
+"runtime_authority": "SimulationRoot via MissionTacticalSandboxController GO path",
+"scenario_truth_read_only": true,
+"schema": "sternenbuergerchen.mission_interaction_use_intent.v1",
+"step_id": "return_to_ship",
+"target_position": Vector2(1581.1693, 585.41534),
+"ui_sets_gameplay_truth": false,
+"waypoint_id": "wp_0004"
+},
+"interactions": {
+"complete_count": 1,
+"in_progress_count": 0,
+"interaction_count": 1,
+"interaction_states": {
+"satellite_data": {
+"active_team_id": "team_alpha",
+"command_type": "take",
+"complete": true,
+"duration_seconds": 3.0,
+"fireteam_id": "ft1",
+"gate_id": "secure_satellite",
+"hold_seconds": 3.0,
+"interaction_type": "computer",
+"progress": 1.0,
+"read_only": true,
+"required_state": "satellite_secured",
+"state": "complete",
+"step_id": "secure_satellite",
+"team_id": "team_alpha",
+"ui_sets_gameplay_truth": false,
+"updated_msec": 28650
+}
+},
+"read_only": true,
+"runtime_authority": "MissionCombatLoopDriver",
+"schema": "sternenbuergerchen.mission_interaction_runtime_progress.v1",
+"ui_sets_gameplay_truth": false
+},
+"movement": [{
+"advance_style": "bounding",
+"bound_count": 2,
+"bound_distance": 0.0,
+"bound_index": 2,
+"bound_origin_position": Vector2(1581.1693, 585.41534),
+"bound_target_position": Vector2(1581.1693, 585.41534),
+"command_revision": 0,
+"command_type": "take",
+"completed_stage_count": 5,
+"contact_cover_assignment_count": 0,
+"contact_cover_decision_active": false,
+"contact_cover_decision_mode": "",
+"contact_cover_decisions": [],
+"contact_cover_fire_now_count": 0,
+"contact_halt_active": false,
+"contact_halt_context": {},
+"contact_halt_issued_count": 0,
+"contact_halt_unit_ids": PackedStringArray(),
+"contact_stability": 0.6502433333333334,
+"covering_unit_ids": PackedStringArray("unit_charlie"),
+"current_anchor_origin_position": Vector2(1581.1693, 585.41534),
+"current_anchor_target_position": Vector2(1581.1693, 585.41534),
+"current_covering_unit_ids": PackedStringArray("unit_charlie"),
+"current_moving_unit_ids": PackedStringArray("unit_alpha", "unit_bravo"),
+"current_navigation_context_debug": [],
+"current_target_positions": {
+"unit_alpha": Vector2(1438.1101, 614.6396),
+"unit_bravo": Vector2(1553.7739, 636.22375),
+"unit_charlie": Vector2(1610.4012, 482.14148)
+},
+"current_target_spacing_adjustment_count": 0,
+"current_target_spacing_conflict_count": 0,
+"current_target_spacing_debug": [],
+"current_target_spacing_min_distance": 117.66051,
+"current_target_spacing_unresolved_count": 0,
+"current_walkable_target_adjustment_count": 0,
+"doctrine_style": "bounding",
+"effective_style": "bounding",
+"engage_doctrine": {},
+"execution_cohesion": 0.6815072000000001,
+"execution_fire_discipline": 0.593,
+"execution_hint": "No single execution risk dominates this order.",
+"execution_label": "STEADY",
+"execution_reason": "balanced_execution",
+"final_target_position": Vector2(1581.1693, 585.41534),
+"fire_rule": "",
+"fireteam_id": "ft1",
+"formation_leader_slot": "unit_4",
+"formation_parallel_spacing_world": 110.0,
+"formation_preset_key": "take:normal",
+"formation_scatter_factor": 0.96,
+"formation_slot_source": "fireteam_formation_tuning_2026-05-17T08-46-56-746Z_05",
+"formation_slot_spacing_world": 110.0,
+"group_count": 2,
+"group_count_for_anchor": 2,
+"group_cycle": [PackedStringArray("unit_charlie"), PackedStringArray("unit_alpha", "unit_bravo")],
+"group_index": 2,
+"groups_issued_for_anchor": 2,
+"initiative": 0.698,
+"leader_unit_id": "unit_alpha",
+"local_avoidance_command_opt_in": true,
+"map_readability": {
+"advance_style": "bounding",
+"bound_count": 2,
+"bound_distance": 0.0,
+"bound_index": 2,
+"bound_origin_position": Vector2(1581.1693, 585.41534),
+"bound_target_position": Vector2(1581.1693, 585.41534),
+"covering_unit_ids": PackedStringArray("unit_charlie"),
+"group_count": 2,
+"group_cycle": [PackedStringArray("unit_charlie"), PackedStringArray("unit_alpha", "unit_bravo")],
+"group_index": 2,
+"movement_sequence": PackedStringArray(),
+"moving_unit_ids": PackedStringArray("unit_alpha", "unit_bravo"),
+"multi_tile_bound": false,
+"status_line": "BND 2/2 G2/2 | 2 move | CHARLIE covers",
+"style_code": "BND"
+},
+"move_speed_multiplier": 1.00752,
+"move_stance_sight_range_factor": 0.8,
+"move_stance_speed_multiplier": 0.65,
+"movement_sequence": PackedStringArray(),
+"moving_unit_ids": PackedStringArray("unit_alpha", "unit_bravo"),
+"multi_tile_bound": false,
+"order_fidelity": 0.6706003333333335,
+"order_target_offset": Vector2(0, 0),
+"origin_anchor_position": Vector2(1442.1794, 576.23914),
+"phase": 1,
+"progress_anchor_position": Vector2(1581.1693, 585.41534),
+"raw_style": "rush",
+"reaction_delay_seconds": 0.25419705600000003,
+"readability_status_line": "BND 2/2 G2/2 | 2 move | CHARLIE covers",
+"requested_target_position": Vector2(1581.1693, 585.41534),
+"simplified_due_to_losses": false,
+"stage_index": 5,
+"style_code": "BND",
+"tactical_stance": "normal",
+"take_doctrine": {
+"advance_mode": "normal_bounding_clear",
+"area_control_required": true,
+"buddy_teams": true,
+"doctrine_id": "take_control_v1",
+"engagement_range_factor": 0.7,
+"engagement_range_policy": "optimal_range_area_control",
+"target_policy": "optimal_range_area_control"
+}
+}],
+"plans": [{
+"active_waypoint_index": 0,
+"fireteam_id": "ft1",
+"metadata": {},
+"phase": 1,
+"plan_id": "plan_ft1_p1",
+"status": "active",
+"waypoints": [{
+"command_type": "take",
+"hold_duration_seconds": 2.0,
+"metadata": {
+"created_phase": 1,
+"door_runtime_hook": false,
+"door_runtime_producer": "",
+"door_runtime_state_target": "crew_returned",
+"duration_seconds": 2.0,
+"feedback_line": "COMPUTER bereit | OPERATE | FT1 96m",
+"gate_id": "return_to_ship",
+"interaction_id": "ship_return",
+"interaction_type": "computer",
+"required_order": "operate",
+"required_state": "crew_returned",
+"required_team": "team_alpha",
+"source": "mission_interaction_use_intent",
+"step_id": "return_to_ship"
+},
+"status": "active",
+"target_position": Vector2(1581.1693, 585.41534),
+"waypoint_id": "wp_0004"
+}]
+}]
+}
+ERROR: FAIL: Actual simulated round trip plus timed ship-return Use completes both objectives
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:210)
+       [1] _test_mission_setup_no_fake_enemies (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:174)
+       [2] _wait_step (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:193)
+SATELLITE_RECOVERY: 47 passed, 1 failed

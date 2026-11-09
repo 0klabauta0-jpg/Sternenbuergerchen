@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Fixture distinguishes authored return pad from remote crash site
+FAIL: Return progress rejects absent actual job craft
+FAIL: Normal screen LZ choice rejects a tile away from authored pad
+PASS: Rejected LZ leaves concrete player feedback
+PASS: Normal screen LZ choice accepts authored landing pad
+PASS: Accepted LZ snaps to saved real return pad center
+FAIL: Runtime drop gate also rejects injected remote LZ
+FAIL: Real job craft starts flight to authored pad
+FAIL: Actual matching job craft is physically parked at real return pad
+FAIL: Another parked ship cannot satisfy immutable job craft binding
+FAIL: Physically parked matching craft at wrong pad cannot complete return
+PASS: Runtime return completion accepts only actual matching parked craft at authored pad
+FAIL: Second craft waits while the single authored remote pad is occupied
+PASS: Matching parked craft starts real outbound
+FAIL: Already outbound craft cannot satisfy stale return Use
+FAIL: Independent waiting craft can land once the first outbound clears the pad
+ACTUAL_CRAFT_RETURN_BINDING_RESULTS passed=6 failed=10

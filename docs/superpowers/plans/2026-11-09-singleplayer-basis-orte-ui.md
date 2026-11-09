@@ -10,9 +10,13 @@
 
 **Spec:** [Playtest, Zielbild und Grenzen](../../tasks/SINGLEPLAYER_PLAYTEST_2026_11_09_basis_orte_ui.md).
 
-Status: **Planentwurf, nicht umgesetzt.** Die vorgeschlagenen neuen Dateinamen und Schnittstellen
-sind Planentscheidungen. Bestehende Pfade wurden auf main ed77c1058 geprüft; die alte
-Integrationsbasis muss vor Produktcode zuerst angeglichen werden.
+Status: **AP0–AP7 implementiert; AP8 technisch bestanden, native Abnahme offen.**
+Echter Zweiausflugslauf nach Reviewfixes60/60. Produktstand6d0e463fe:
+20 fokussierte Gates und6 Transport-/Interaktionsregressionen bestanden.
+[QA-Abschluss](../../qa/singleplayer_20261109/README.md). Frischer Taskbranch ab
+geprueftem Main ed77c1058; gemeinsamer Integrationsbranch unveraendert.
+Direkte lokale Mainintegration anschliessend autorisiert, kein Push/Release.
+Offene Checkboxen betreffen verbleibende native/inhaltliche Abnahme.
 
 ## Globale Grenzen
 
@@ -24,7 +28,7 @@ Integrationsbasis muss vor Produktcode zuerst angeglichen werden.
 - Keine Savegame-Migration erforderlich; frische Testprofile verwenden und normale Nutzerdaten erhalten.
 - Drei Startorte insgesamt sind Planannahme: Basis, Satelliten-Absturzstelle, Handelsaußenposten.
 - Sichtbares Einsteigen, weitere Außenposten und vollständige Bau-/Lagerwirtschaft sind Ausbau.
-- Umsetzung AP0–AP8 am 09.11.2026 ausdrücklich autorisiert: Spielcode, lokale Prüfungen und lokale Commits; kein Push, keine Mainintegration, kein Release.
+- Umsetzung AP0–AP8 autorisiert: Spielcode, lokale Pruefungen, lokale Commits und anschliessend direkte lokale Mainintegration. Kein Push/Release. Seit PC-Nutzungsanweisung nur Hintergrund/Headless ohne Fokus-/Eingabeuebernahme.
 
 ## Review-Fokus
 
@@ -64,18 +68,18 @@ docs/dev/singleplayer_locations_jobs_contract.md und docs/dev/homebase_map_servi
 **Schnittstelle:** Noch keine Produkt-API. Verbindliche IDs, Besitzer und Statusübergänge
 werden hier festgelegt; AP4 konkretisiert sie in prüfbaren Datenhelfern.
 
-- [ ] Vor Umsetzung aktuellen Git-/Worktreezustand erneut prüfen; Integrationsbasis kontrolliert auf
+- [x] Vor Umsetzung aktuellen Git-/Worktreezustand erneut prüfen; Integrationsbasis kontrolliert auf
   den benötigten, getesteten Hauptstand bringen; frischen task/-Branch verwenden.
-- [ ] Änderungsbefunde gegen diesen Stand prüfen; vorhandene neue Basis und Owner erhalten.
-- [ ] Die Spezifikation als Task-Akzeptanz übernehmen; neue Navigation und Wegfall des regulären
+- [x] Änderungsbefunde gegen diesen Stand prüfen; vorhandene neue Basis und Owner erhalten.
+- [x] Die Spezifikation als Task-Akzeptanz übernehmen; neue Navigation und Wegfall des regulären
   Erweiterte-Werkzeuge-Wegs festhalten; historische UI-first-Aussage im Brief korrigieren.
 - [ ] „Cutlist“ am echten Personalbildschirm zuordnen. Bis dahin kein benanntes Element blind löschen.
-- [ ] Rangbegriff klären: bestehender Rollen-/Fähigkeitsbadge versus echter Dienstgrad.
+- [x] Rangbegriff klären: bestehender Rollen-/Fähigkeitsbadge versus echter Dienstgrad.
   Bei echtem Dienstgrad Datenfeld und Sortierschlüssel beschreiben; kein Beförderungssystem ableiten.
-- [ ] Minimalhandel festlegen: genau ein festes Kaufangebot und eine Betankungsaktion,
+- [x] Minimalhandel festlegen: genau ein festes Kaufangebot und eine Betankungsaktion,
   begrenzte Credits/Mengen, bestehende Ausrüstungs-/Item-ID wiederverwenden; Werte in Daten,
   kein Produktions-/Lieferkettenmodell. Diese Empfehlung ist kein bereits bestätigtes Balancing.
-- [ ] Als kleinste Fuel-Regel feste datenbasierte Kosten je Ortsverbindung vorsehen:
+- [x] Als kleinste Fuel-Regel feste datenbasierte Kosten je Ortsverbindung vorsehen:
   genau einmal bei autorisiertem Abflug abbuchen, bei Ablehnung/erneuter Anfrage keine zweite
   Abbuchung. AP7 ergänzt diesen Anschluss an AP5; Startwerte müssen den Test-Rundflug erlauben.
   Kein kontinuierliches Verbrauchsmodell und keine neue Notfall-/Strandingmechanik.
@@ -96,15 +100,15 @@ bestehend playtest_20261105_homebase_operations_verifier.gd.
 request_operation(operation: String, payload: Dictionary = {}) -> Dictionary
 weiterverwenden. Navigationszustand bleibt Darstellungszustand.
 
-- [ ] Verifier zuerst um sichtbare Wege, echte Buttonaktionen, Rücknavigation und FOB-Blockade ergänzen;
+- [x] Verifier zuerst um sichtbare Wege, echte Buttonaktionen, Rücknavigation und FOB-Blockade ergänzen;
   aktueller OperationsReturnButton ist vorhanden und darf nicht als fehlender Callback diagnostiziert werden.
-- [ ] Links Basis erkunden, Personal, Trupp & Ausrüstung, Smart Mobile, Karte und Einsatz & Abflug
+- [x] Links Basis erkunden, Personal, Trupp & Ausrüstung, Smart Mobile, Karte und Einsatz & Abflug
   als klare Ziele entwerfen. Noch nicht implementierte Ziele bis AP4 ehrlich sperren.
-- [ ] Erweiterte Werkzeuge aus dem regulären Einzelspielerweg entfernen; benötigte Funktionen erhalten.
+- [x] Erweiterte Werkzeuge aus dem regulären Einzelspielerweg entfernen; benötigte Funktionen erhalten.
   Gemeinsame Backend-/Kompatibilitätspfade nicht pauschal löschen.
-- [ ] FOB sichtbar durchstreichen und deaktivieren; programmatische normale Eintrittsroute ebenfalls sperren.
+- [x] FOB sichtbar durchstreichen und deaktivieren; programmatische normale Eintrittsroute ebenfalls sperren.
   Interne bestehende Transport-/Multiplayerverträge nicht beiläufig ändern.
-- [ ] Rechten Bereich auf Auswahl, wichtigste Werte und nächste Aktion reduzieren;
+- [x] Rechten Bereich auf Auswahl, wichtigste Werte und nächste Aktion reduzieren;
   Details aufklappen/Charakterbogen. Kontrast und Zustandsicons verbessern.
 - [ ] Verifier und echte native Klickfolge prüfen, inklusive Zurück/Escape und wiederholtem Ansichtswechsel.
 
@@ -129,20 +133,20 @@ task_233_portrait_identity_catalog_and_roster_presentation.gd.
 Fireteam-Payloads verwenden. Alle Änderungen über request_operation() an vorhandene
 Zuweisungs-/Loadout-/Boardingowner delegieren; kein eigener Mitgliedschaftscache als Wahrheit.
 
-- [ ] Regressionen für Person → neuen Trupp, Wechsel, Entfernen bis leer, Pilotfreigabe,
+- [x] Regressionen für Person → neuen Trupp, Wechsel, Entfernen bis leer, Pilotfreigabe,
   voller Trupp und busy/transit Reject anlegen; zweite freie Gruppe muss bearbeitbar bleiben.
-- [ ] Kompakte Personenzeilen mit stabiler Unit-ID, Name, Rolle/Badge und knapper Ausrüstung bauen;
+- [x] Kompakte Personenzeilen mit stabiler Unit-ID, Name, Rolle/Badge und knapper Ausrüstung bauen;
   in Personalansicht nur Personenbezug. Kleinere Listenporträts, Detailportrait darf größer bleiben.
-- [ ] Bestehende Sortiermetriken Name/XP/Leader/Tutor/Pilot wiederverwenden;
+- [x] Bestehende Sortiermetriken Name/XP/Leader/Tutor/Pilot wiederverwenden;
   Rangsortierung entsprechend AP0, mit stabilen Name-/ID-Ties.
-- [ ] Doppelklick über vorhandenen card_open_requested-/Charakterbogenpfad verbinden;
+- [x] Doppelklick über vorhandenen card_open_requested-/Charakterbogenpfad verbinden;
   normaler Klick wählt aus, Drag öffnet nicht versehentlich den Bogen.
-- [ ] Personen auf Truppplätze, Mitglieder zurück/zwischen Gruppen und komplette Fireteams
+- [x] Personen auf Truppplätze, Mitglieder zurück/zwischen Gruppen und komplette Fireteams
   auf reale Schiffskarten ziehen. Ungültige Ziele zeigen einen knappen konkreten Grund.
-- [ ] 2D-Ausrüstungsslots für gewählte Person und Trupp darstellen; Slot-Drops validieren
+- [x] 2D-Ausrüstungsslots für gewählte Person und Trupp darstellen; Slot-Drops validieren
   echte Item-/Loadout-IDs. Bestehende Gesichter/Identitäten erhalten, Rollenkennzeichen als
   Overlay/Uniformvariante ergänzen; keine Neuwürfelung des Rosters.
-- [ ] Bestehende Last-/Transit-/Kapazitätsgates und Layoutchecks erneut ausführen.
+- [x] Bestehende Last-/Transit-/Kapazitätsgates und Layoutchecks erneut ausführen.
 
 **Abnahme:** Funktioniert ohne Legacyansicht. Keine doppelten Mitglieder, verlorenen Piloten,
 stummen Rejects oder frei erfundenen Bestände. Vollständige Lagerbegrenzung erst im späteren Ausbau.
@@ -162,16 +166,16 @@ request_terminal(id: String) -> bool, terminal_open_requested(id: String),
 get_exploration_snapshot() -> Dictionary erhalten. Neue Terminal-IDs jobs/refuel über die
 gleiche Signalbrücke; tatsächliches Refuel erst AP7, zuvor ausdrücklich gesperrt.
 
-- [ ] Vorhandene Basiskarte erweitern, zwei Gebäude erhalten, zwei benachbarte Pads mit stabilen
+- [x] Vorhandene Basiskarte erweitern, zwei Gebäude erhalten, zwei benachbarte Pads mit stabilen
   IDs, Servicepunkt, Wege und freie spätere Bauflächen authorieren; Felsen weiter nach außen.
-- [ ] Gebäude in einsehbarer Cutaway-/Ohne-Dach-Ansicht zeigen.
+- [x] Gebäude in einsehbarer Cutaway-/Ohne-Dach-Ansicht zeigen.
   Gleichzeitig gespeicherte Fußböden, Eingänge und Begehbarkeit authorieren;
   kein Ableiten von Navigation/LOS/Kollision aus bloßer Modelloptik.
-- [ ] Verbindung von Commanderstart zu beiden Innenräumen, allen Terminals und beiden Pads
+- [x] Verbindung von Commanderstart zu beiden Innenräumen, allen Terminals und beiden Pads
   prüfen; Außenwände bleiben Hindernisse. Keine globale Spielpause.
-- [ ] Interaktionen an tatsächliche Nähe und bestehende Commands binden;
+- [x] Interaktionen an tatsächliche Nähe und bestehende Commands binden;
   gleiche Personal-/Planungs-/Jobansichten wie linke Navigation öffnen.
-- [ ] Präplatzierte Testgebäude/Pad-Footprints datenbasiert halten, ohne jetzt ein Bausystem zu erfinden.
+- [x] Präplatzierte Testgebäude/Pad-Footprints datenbasiert halten, ohne jetzt ein Bausystem zu erfinden.
 - [ ] Gezielt Bewegungs-/Aktivierungs-/Inputfokus-/Blocker-/Navprüfungen ausführen;
   native Vorher-/Nachherbilder aus gleichem Blickwinkel prüfen.
 
@@ -217,17 +221,17 @@ task_538_homebase_to_mission_launch_handoff_smoke.gd.
 - Bestehender Aircraft-/Transportowner behält laufende Flugphasen und Payloads.
   Campaign-State referenziert Craft-/Ort-/Job-IDs und übernimmt keinen zweiten Transitstatus.
 
-- [ ] Tests für Annahme ohne Flug, ungültigen Ort, Auftragswechsel, mehrere Jobs am gleichen Ort,
+- [x] Tests für Annahme ohne Flug, ungültigen Ort, Auftragswechsel, mehrere Jobs am gleichen Ort,
   Handel ohne Kampfauftrag und Abbruch anlegen.
-- [ ] Den langlebigen Campaign-State einschließlich Commandhandlern tatsächlich implementieren;
+- [x] Den langlebigen Campaign-State einschließlich Commandhandlern tatsächlich implementieren;
   Ansichtswechsel, Erkundungs-Deaktivierung und Missionsinstanzwechsel erhalten Annahme,
   Zielzuordnung und Abschlussbelege. AP5–AP7 konsumieren denselben Owner.
-- [ ] Orts-/Jobdefinitionen getrennt laden und Referenzen validieren.
-- [ ] Smart Mobile als kompakte Auftragsliste mit Details, Annehmen, Status und „Auf Karte zeigen“ bauen.
-- [ ] Separate Regionalkarte mit Basis/Absturzstelle/Handelsposten und sichtbarem Zielort herstellen.
+- [x] Orts-/Jobdefinitionen getrennt laden und Referenzen validieren.
+- [x] Smart Mobile als kompakte Auftragsliste mit Details, Annehmen, Status und „Auf Karte zeigen“ bauen.
+- [x] Separate Regionalkarte mit Basis/Absturzstelle/Handelsposten und sichtbarem Zielort herstellen.
   Keine vorhandene taktische Karte als Regionalkarte umbenennen.
-- [ ] Planung und Abflug aus derselben Auswahl speisen; Missionsauswahl zeigt Auftrag plus Ort.
-- [ ] Über den bestehenden Start-/Handoffpfad mit einer vorhandenen Mission prüfen, bevor neue Inhalte folgen.
+- [x] Planung und Abflug aus derselben Auswahl speisen; Missionsauswahl zeigt Auftrag plus Ort.
+- [x] Über den bestehenden Start-/Handoffpfad mit einer vorhandenen Mission prüfen, bevor neue Inhalte folgen.
 
 **Abnahme:** In allen Ansichten ist erkennbar, welcher Auftrag wohin führt. Annahme ist keine Reise;
 ein Ortswechsel startet keine fremde Mission und ein Handelsposten braucht keinen Kampfauftrag.
@@ -250,15 +254,15 @@ Padbelegung bindet landing_pad_id → craft_id. Reise speichert destination_loca
 optional job_id; interne to_mission-/to_homebase-Phasen werden gezielt adaptiert,
 ohne den äußeren Ort durch eine zweite UI-Reisewahrheit zu ersetzen.
 
-- [ ] Tests für tatsächliches Schiff/Pad, leeres Schiff, falsche Payload, parallele Crafts,
+- [x] Tests für tatsächliches Schiff/Pad, leeres Schiff, falsche Payload, parallele Crafts,
   Auswahlwechsel während Transit und Rückkehr ins korrekte Pad anlegen.
-- [ ] Statischen Cutlass-Prop im relevanten Spielerweg durch Projektion des tatsächlichen Craftzustands ersetzen.
-- [ ] Einsatz & Abflug aus einer passenden Kamera auf Schiff und Pad darstellen,
+- [x] Statischen Cutlass-Prop im relevanten Spielerweg durch Projektion des tatsächlichen Craftzustands ersetzen.
+- [x] Einsatz & Abflug aus einer passenden Kamera auf Schiff und Pad darstellen,
   bei Bedarf als getaktete/dirty aktualisierte Vorschau; keine erfundene Liveaufnahme.
-- [ ] Pilot, Trupp, Boarding, Zielort, Auftrag und nächste Aktion kompakt zusammenführen.
-- [ ] Start/Abbruch/Rückflug an den vorhandenen Transporthübergang anschließen;
+- [x] Pilot, Trupp, Boarding, Zielort, Auftrag und nächste Aktion kompakt zusammenführen.
+- [x] Start/Abbruch/Rückflug an den vorhandenen Transporthübergang anschließen;
   pro Craft unabhängig, ohne FOB-Zwang.
-- [ ] Fuel-Anzeige bis AP7 ausdrücklich als noch nicht verfügbare Mechanik behandeln;
+- [x] Fuel-Anzeige bis AP7 ausdrücklich als noch nicht verfügbare Mechanik behandeln;
   keine Dekozahl als Reisevoraussetzung verwenden.
 
 **Abnahme:** Richtiger realer Craft, richtige Payload und richtiger Ort; kein Schiffs-/Teamklon.
@@ -275,15 +279,15 @@ bestehender Missionsinteraktions-/Debriefadapter nur wenn nötig.
 **Schnittstellen:** location_id=satellite_crash; job_id=satellite_recovery.
 Bestehende MissionInteractionPointBinding-/Use-/Runtimeprogress-Verträge nutzen.
 
-- [ ] Kleine authorierte Hexkarte mit Absturzstelle, tatsächlichem Interaktionsziel, erreichbarer
+- [x] Kleine authorierte Hexkarte mit Absturzstelle, tatsächlichem Interaktionsziel, erreichbarer
   Landezone und Rückkehrmöglichkeit erstellen. Neue Modellarbeit nur bei fehlenden passenden Assets.
-- [ ] Vorgeschlagener erster Objectiveablauf: Satellit finden → Daten/Bergungsgut sichern →
+- [x] Vorgeschlagener erster Objectiveablauf: Satellit finden → Daten/Bergungsgut sichern →
   Schiff erreichen → zurückkehren. Diese konkrete Bergungsvariante ist Planempfehlung.
-- [ ] Erfolg und Fehlschlag an echte Runtime-/Scenario-Gates binden;
+- [x] Erfolg und Fehlschlag an echte Runtime-/Scenario-Gates binden;
   Nähe oder UI-Klick allein darf keinen Abschluss setzen.
-- [ ] Einmaligen Abschluss-/Belohnungsbeleg mit stabiler Job-/Abschluss-ID erzeugen;
+- [x] Einmaligen Abschluss-/Belohnungsbeleg mit stabiler Job-/Abschluss-ID erzeugen;
   AP7 konsumiert ihn ohne Doppelgutschrift.
-- [ ] Start, Fortschritt, Abbruch, erneutes Anzeigen des Ergebnisses und Rückkehr prüfen.
+- [x] Start, Fortschritt, Abbruch, erneutes Anzeigen des Ergebnisses und Rückkehr prüfen.
 
 **Abnahme:** Von der Basis angenommener Auftrag kann am richtigen Ort tatsächlich abgeschlossen werden;
 kein bloßes Kartenbild und kein bedingungsloser Erfolg beim Laden.
@@ -306,24 +310,24 @@ Autorisierte Anwendung nur durch SimulationRoot/zugeordneten Runtime-Owner.
 get_supply_snapshot() -> Dictionary liest bestätigte Werte.
 Belohnungen konsumieren AP6-Abschluss-ID genau einmal.
 
-- [ ] Negativ-/Wiederholtests zuerst: zu wenig Credits, ungültige Menge, volles Fuel,
+- [x] Negativ-/Wiederholtests zuerst: zu wenig Credits, ungültige Menge, volles Fuel,
   unbekanntes Angebot, bereits bearbeitete request_id, doppelte Abschlussbelohnung,
   Wechsel zur/von der Erkundungsansicht.
-- [ ] Minimalen autoritativen, lebenszyklusfesten State und atomare Buchung implementieren;
+- [x] Minimalen autoritativen, lebenszyklusfesten State und atomare Buchung implementieren;
   keine negativen Werte und kein UI-eigener Kontostand.
-- [ ] Ein endliches festes Kaufangebot und eine Betankungsleistung definieren;
+- [x] Ein endliches festes Kaufangebot und eine Betankungsleistung definieren;
   keine vollständige Inventar-/Loadout-Sperrlogik oder Wirtschaftssimulation daraus machen.
-- [ ] Kleine Händlerkarte mit erreichbarem Landepad und Handels-/Serviceinteraktion authorieren.
+- [x] Kleine Händlerkarte mit erreichbarem Landepad und Handels-/Serviceinteraktion authorieren.
   Bestehende Station-Assets wiederverwenden; neue Karte ausdrücklich hex_axial_v1,
   Legacy-square8-Karten nicht still umdeuten.
-- [ ] Basis-Tankpunkt an denselben echten Fuel-/Servicezustand anschließen;
+- [x] Basis-Tankpunkt an denselben echten Fuel-/Servicezustand anschließen;
   gemeinsame Bestände/Transaktionen über beide Ansichten konsistent anzeigen.
-- [ ] Für den Testlauf ausreichend Starttreibstoff und erreichbare Rückkehr sicherstellen;
+- [x] Für den Testlauf ausreichend Starttreibstoff und erreichbare Rückkehr sicherstellen;
   keine neue Stranding-/Fuel-Notfallmechanik ohne gesonderten Auftrag.
-- [ ] Die in AP0 definierte feste Route-Fuelabbuchung an den autorisierten AP5-Abflug hängen:
+- [x] Die in AP0 definierte feste Route-Fuelabbuchung an den autorisierten AP5-Abflug hängen:
   Ablehnung und wiederholte Request-ID verbrauchen nichts zusätzlich; unzureichendes Fuel
   blockiert vor Abflug mit konkretem Grund. Kein laufender Verbrauch im Visual-/UI-Tick.
-- [ ] Satellitenbelohnung → reale Kauf-/Betankungsaktion → Rückkehr prüfen.
+- [x] Satellitenbelohnung → reale Kauf-/Betankungsaktion → Rückkehr prüfen.
 
 **Abnahme:** Ein nachweisbarer Kauf und eine Betankung verändern bestätigte Werte genau einmal.
 Der Ort ist auch ohne Kampfauftrag besuchbar. Vollständige Lager-/Bauwirtschaft bleibt Folgearbeit.

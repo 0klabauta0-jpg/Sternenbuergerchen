@@ -1,0 +1,30 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_1115 Connected Parallel Dropship Drop Deboard Return Playthrough ===
+PASS: Host and two clients connect for full parallel Dropship playthrough
+PASS: Fixture exposes separate Blue and Gold payloads
+PASS: Blue client sends its LZ
+PASS: Gold client sends its LZ
+PASS: Host commits both independent LZs
+PASS: Both clients clear LZ Pending through authoritative snapshots
+PASS: Blue client requests its Drop
+PASS: Gold client requests its Drop
+PASS: Host starts two independent live Drop sequences
+PASS: Peer 0 sees no stale embarked payload after Deboarding
+PASS: Peer 0 converges on all Blue and Gold deployed units
+PASS: Peer 0 keeps both craft payloads empty after separate unload
+PASS: Peer 0 sees both Dropships independently returning to FOB
+PASS: Peer 1 sees no stale embarked payload after Deboarding
+PASS: Peer 1 converges on all Blue and Gold deployed units
+PASS: Peer 1 keeps both craft payloads empty after separate unload
+PASS: Peer 1 sees both Dropships independently returning to FOB
+PASS: Peer 2 sees no stale embarked payload after Deboarding
+PASS: Peer 2 converges on all Blue and Gold deployed units
+PASS: Peer 2 keeps both craft payloads empty after separate unload
+PASS: Peer 2 sees both Dropships independently returning to FOB
+PASS: Blue client keeps local Blue craft and Fireteam focus
+PASS: Gold client keeps local Gold craft and Fireteam focus
+PASS: Client snapshot application leaves no local command queue work
+PASS: Client snapshot application creates no additional local effect queue work
+=== RESULTS: 25 passed, 0 failed ===

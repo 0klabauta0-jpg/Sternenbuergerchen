@@ -1,0 +1,42 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_354 Homebase Direct Loadout Regression Matrix ===
+  PASS: UI dropdown selected alpha armor
+  PASS: UI dropdown selected alpha primary
+  PASS: UI dropdown selected alpha secondary
+  PASS: UI dropdown changed non-payload fireteam
+  PASS: Homebase Direct drop state is launch-ready
+  PASS: Drop state selected_unit_ids stay payload-only
+  PASS: Drop state keeps full Homebase team separately
+  PASS: Drop state exports payload member loadouts
+  PASS: Drop state excludes non-embarked edited loadout
+  PASS: UI dropdown path exports alpha heavy/rocket/none
+  PASS: Medic profile default remains smg/medictool without player action
+  PASS: Selected definitions include payload fireteam
+  PASS: Selected definitions exclude non-payload fireteam
+  PASS: UI dropdown selected alpha armor
+  PASS: UI dropdown selected alpha primary
+  PASS: UI dropdown selected alpha secondary
+  PASS: UI dropdown changed non-payload fireteam
+  PASS: Homebase Direct launch creates MissionSetup
+  PASS: Planning source is Homebase Direct
+  PASS: MissionSetup selected units are payload-only
+  PASS: MissionSetup member_loadouts exclude non-embarked unit
+  PASS: MissionSetup receives UI-selected alpha weapons
+  PASS: MissionSetup receives medic profile defaults
+  PASS: MissionSetup modifiers resolve alpha Homebase loadout
+  PASS: MissionSetup modifiers resolve medic default loadout
+  PASS: Heavy rocket loadout weighs more than medic default
+  PASS: UI dropdown selected alpha armor
+  PASS: UI dropdown selected alpha primary
+  PASS: UI dropdown selected alpha secondary
+  PASS: UI dropdown changed non-payload fireteam
+  PASS: FOB launch creates MissionSetup
+  PASS: FOB launch keeps FOB payload source
+  PASS: FOB launch uses FOB selected units
+  PASS: FOB member_loadouts reach MissionSetup
+  PASS: FOB loadout remains the active fallback payload
+  PASS: Homebase Direct loadouts do not leak into FOB launch
+=== RESULTS: 36 passed, 0 failed ===
+TASK_354: ALL PASSED

@@ -1,0 +1,12 @@
+{
+	"current_scene": "MainMenu",
+	"frame_count": 225034,
+	"inputs": {
+		"key_press": 2,
+		"mouse_motion": 189,
+		"mouse_press": 0
+	},
+	"max_frame_delta_seconds": 0.143958,
+	"profile": "C:/Users/bjoer/.codex/worktrees/singleplayer-playtest-plan-20261109/SternenBuergerchen/.superpowers/sdd/2026-11-09-singleplayer-basis-orte-ui/native-profile/AppData/Godot/app_userdata/Sternenbuergerchen",
+	"window_size": "(1280, 720)"
+}

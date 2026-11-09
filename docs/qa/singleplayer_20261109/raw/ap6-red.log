@@ -1,0 +1,21 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+ERROR: FAIL: Explicit singleplayer Use slice validates without unrelated AA/cargo/PvP objectives
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:136)
+       [1] _test_opt_in_validation (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:37)
+       [2] _run (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:22)
+PASS: Historical slice requirements remain enforced without explicit opt-in
+ERROR: FAIL: Satellite scenario is real authored content
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:136)
+       [1] _run (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:23)
+ERROR: FAIL: Trading visit is a separate authored scenario
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:136)
+       [1] _run (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:24)
+SATELLITE_RECOVERY: 1 passed, 3 failed

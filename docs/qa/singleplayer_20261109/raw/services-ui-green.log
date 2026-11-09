@@ -1,0 +1,30 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Service controls can be instantiated
+PASS: Real finite supply owner configures
+PASS: Compact service panel fits bounded mission overlay height: (190.0, 401.0)
+PASS: Landed trade craft exposes one real purchase
+PASS: Landed craft exposes finite refuel action
+PASS: Visible credits read confirmed owner snapshot
+PASS: Rapid double purchase debits exactly fifty credits
+PASS: Rapid double purchase grants exactly one existing item
+PASS: Purchase carries actual craft ID
+PASS: Purchase remains locked until acknowledgement debounce
+PASS: Acknowledged purchase permits an intentional next action
+PASS: Intentional second purchase uses new request ID
+PASS: Acknowledged next action uses a distinct real request ID
+PASS: Rapid double refuel adds ten fuel once
+PASS: Refuel debits confirmed data price exactly once
+PASS: Homebase offers refuel without inventing a trade service
+PASS: Unknown craft cannot become selected service target
+PASS: Actual busy context blocks service actions
+PASS: Unavailable service displays concrete reason
+PASS: Finite offer sells out and disables purchase
+PASS: Programmatic sold-out click cannot debit or mint goods
+PASS: Insufficient real credits disable both paid actions
+PASS: Programmatic unpaid refuel cannot change owner
+PASS: Full real tank disables refuel with concrete capacity reason
+PASS: Unbound command bridge cannot claim working services
+PASS: Hidden service panel has no continuous polling
+SERVICES_UI_RESULTS passed=26 failed=0

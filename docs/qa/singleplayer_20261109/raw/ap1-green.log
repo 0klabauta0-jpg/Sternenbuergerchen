@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Navigation exposes destination base
+PASS: Navigation exposes destination personnel
+PASS: Navigation exposes destination squad
+PASS: Navigation exposes destination jobs
+PASS: Navigation exposes destination map
+PASS: Navigation exposes destination mission
+PASS: Normal bridge cannot enter legacy workbench
+PASS: FOB cannot be entered through normal operation
+PASS: Actual navigation button selects personnel
+PASS: Repeated navigation keeps new operations visible
+PASS: Actual navigation button selects mission
+PASS: Repeated navigation keeps new operations visible
+PASS: Actual navigation button selects squad
+PASS: Repeated navigation keeps new operations visible
+PASS: Actual navigation button selects personnel
+PASS: Repeated navigation keeps new operations visible
+PASS: Actual navigation button selects mission
+PASS: Repeated navigation keeps new operations visible
+PASS: Actual navigation button selects squad
+PASS: Repeated navigation keeps new operations visible
+PASS: Actual navigation button selects personnel
+PASS: Repeated navigation keeps new operations visible
+PASS: Actual navigation button selects mission
+PASS: Repeated navigation keeps new operations visible
+PASS: Actual navigation button selects squad
+PASS: Repeated navigation keeps new operations visible
+PASS: Operations has visible back action
+PASS: Back action returns to squad
+PASS: Primary departure action fits 1280x720
+PASS: FOB visibly disabled
+NAVIGATION_20261109: 30 passed, 0 failed

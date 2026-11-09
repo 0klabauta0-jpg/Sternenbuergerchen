@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Actual scenario exposes two independent fireteams: true
+PASS: First real craft starts map flight: true
+PASS: Second craft respects actual pad capacity while legacy parallel flight remains free: true
+PASS: Campaign craft stays landed while another waits for the single authored pad
+PASS: Parked campaign craft retains its real authored pad position
+PASS: Only landed craft crew deploys; waiting payload is preserved
+PASS: Actually parked craft exposes explicit return
+PASS: Parked craft explicit return accepts
+PASS: Return begins actual outbound at pad before meta transit
+PASS: One return leaves the other craft independently waiting
+PASS: No instantaneous return to homebase before visible flight
+PASS: Only map-edge outbound completion requests meta return
+PASS: Waiting craft can use the pad after first craft clears outbound
+PASS: Second independent craft lands and remains parked
+PASS: Second parked craft remains independently returnable
+PASS: Second explicit return also uses visible outbound
+PASS: Sequential pad visits do not duplicate or lose deployed unit IDs
+PASS: Actual scenario exposes two independent fireteams: false
+PASS: First real craft starts map flight: false
+PASS: Second craft respects actual pad capacity while legacy parallel flight remains free: false
+PASS: Legacy combat primary and parallel craft still auto-return after unloading
+CAMPAIGN_LANDED_CRAFT_RESULTS passed=21 failed=0

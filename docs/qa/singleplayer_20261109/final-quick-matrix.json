@@ -1,0 +1,189 @@
+{
+  "source_commit": "6d0e463fe621b07c910104ac125d93cb48cc73b4",
+  "godot_version": "4.6.2.stable.official.71f334935",
+  "scope": "20 focused UI/domain/pad/owner gates; real-time loop and connected-neighbors recorded separately",
+  "failed_gates": 0,
+  "gates": [
+    {
+      "script": "playtest_20261109_navigation_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Primary departure action fits 1280x720\nPASS: FOB visibly disabled\nNAVIGATION_20261109: 30 passed, 0 failed",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_navigation_verifier.log",
+      "passed_assertions": 30,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_personnel_dragdrop_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Tankservice remains reachable through regular navigation from personnel\nPASS: Actual tankservice button opens bound service page\nPERSONNEL_DRAGDROP_20261109: 45 passed, 0 failed",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_personnel_dragdrop_verifier.log",
+      "passed_assertions": 45,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_base_interior_pad_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Actual wall rejects a runtime movement request\nPASS: Deactivation stops only base movement without global pause\nBASE_INTERIOR_PAD: 138 passed, 0 failed",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_base_interior_pad_verifier.log",
+      "passed_assertions": 138,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_job_location_flow_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Recovery without return-to-ship proof cannot complete\nPASS: Incomplete objectives mint no receipt\nCAMPAIGN_RESULTS passed=33 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_job_location_flow_verifier.log",
+      "passed_assertions": 33,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_trade_refuel_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Insufficient credits never consume stock or mint items\nPASS: Insufficient credits never add fuel\nSUPPLY_RESULTS passed=41 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_trade_refuel_verifier.log",
+      "passed_assertions": 41,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_campaign_authority_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "\n[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors\nCAMPAIGN_AUTHORITY: PASS",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_campaign_authority_verifier.log",
+      "passed_assertions": null,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_departure_validation_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Busy craft cannot purchase through service owner\nPASS: Rejected busy purchase changes no balance\nDEPARTURE_VALIDATION_RESULTS passed=15 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_departure_validation_verifier.log",
+      "passed_assertions": 15,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_campaign_views_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "\n[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors\nCAMPAIGN_VIEWS failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_campaign_views_verifier.log",
+      "passed_assertions": null,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_singleplayer_runtime_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "\n[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors\nSINGLEPLAYER_RUNTIME failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_singleplayer_runtime_verifier.log",
+      "passed_assertions": null,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_pad_departure_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Returned actual craft model restores without clone\nPASS: Hidden projection disables existing viewport branch\nPAD_DEPARTURE_RESULTS passed=33 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_pad_departure_verifier.log",
+      "passed_assertions": 33,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_pad_preview_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Base exploration restores commander and interactive mode\nPASS: Closing flightdeck disables existing viewport\nPAD_PREVIEW_RESULTS passed=10 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_pad_preview_verifier.log",
+      "passed_assertions": 10,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_services_ui_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Unbound command bridge cannot claim working services\nPASS: Hidden service panel has no continuous polling\nSERVICES_UI_RESULTS passed=26 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_services_ui_verifier.log",
+      "passed_assertions": 26,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_layout_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "\n[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors\nLAYOUT_RESULTS passed=69 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_layout_verifier.log",
+      "passed_assertions": 69,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_roundtrip_fuel_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "\n[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors\nROUNDTRIP_FUEL_RESULTS passed=9 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_roundtrip_fuel_verifier.log",
+      "passed_assertions": 9,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_aborted_visit_return_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "\n[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors\nABORTED_VISIT_RETURN closed=true failed=true no_reward=true",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_aborted_visit_return_verifier.log",
+      "passed_assertions": null,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_actual_craft_return_binding_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Already outbound craft cannot satisfy stale return Use\nPASS: Independent waiting craft can land once the first outbound clears the pad\nACTUAL_CRAFT_RETURN_BINDING_RESULTS passed=16 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_actual_craft_return_binding_verifier.log",
+      "passed_assertions": 16,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_interaction_arrival_hold_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Contact interruption cannot consume receipt\nPASS: Moved out-of-range crew cannot complete using stale receipt\nINTERACTION_ARRIVAL_HOLD_RESULTS passed=10 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_interaction_arrival_hold_verifier.log",
+      "passed_assertions": 10,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261109_campaign_landed_craft_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Second craft respects actual pad capacity while legacy parallel flight remains free: false\nPASS: Legacy combat primary and parallel craft still auto-return after unloading\nCAMPAIGN_LANDED_CRAFT_RESULTS passed=21 failed=0",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261109_campaign_landed_craft_verifier.log",
+      "passed_assertions": 21,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261105_homebase_operations_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Hidden presenter does not poll\n=== RESULTS: 63 passed, 0 failed ===\nHOMEBASE_OPERATIONS_VERIFY_PASS",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261105_homebase_operations_verifier.log",
+      "passed_assertions": 63,
+      "failed_assertions": 0
+    },
+    {
+      "script": "playtest_20261105_explorable_homebase_verifier",
+      "exit_code": 0,
+      "error_scan": false,
+      "result_tail": "PASS: Inactive base rejects terminal signals\nPASS: Resume preserves ephemeral Commander identity\nEXPLORABLE_HOMEBASE: 26 passed, 0 failed",
+      "log": "docs\\qa\\singleplayer_20261109\\raw\\final-playtest_20261105_explorable_homebase_verifier.log",
+      "passed_assertions": 26,
+      "failed_assertions": 0
+    }
+  ],
+  "aggregation_note": "Initial wrapper regex falsely matched the passed number before failed=0; corrected by parsing result layouts on unchanged Godot run logs. Every Godot process exited 0."
+}

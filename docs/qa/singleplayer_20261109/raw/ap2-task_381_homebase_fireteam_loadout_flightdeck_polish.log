@@ -1,0 +1,27 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_381 Homebase Fireteam Loadout Flightdeck Polish Verifier ===
+  PASS: #10 renders one inline loadout row per fireteam member
+  PASS: #10 exposes armor, primary and secondary dropdowns per member
+  PASS: #10 inline loadout dropdown stays compact
+  PASS: #10 inline loadout dropdown stays compact
+  PASS: #10 inline loadout dropdown stays compact
+  PASS: #10 inline loadout dropdown stays compact
+  PASS: #10 inline loadout dropdown stays compact
+  PASS: #10 inline loadout dropdown stays compact
+  PASS: #10 inline loadout dropdown stays compact
+  PASS: #10 inline loadout dropdown stays compact
+  PASS: #10 inline loadout dropdown stays compact
+  PASS: #10 primary dropdown can select sniper
+  PASS: Homebase export uses the changed inline loadout
+  PASS: Flightdeck shipcard accepts fireteam drag payloads
+  PASS: Dropping onto a shipcard boards that fireteam
+  PASS: Shipcard drop selects the target craft for direct staging
+  PASS: Character popup opens from a compact card request
+  PASS: Homebase character popup uses the editor-style two-column sheet
+  PASS: Character popup keeps values and context in separate columns
+  PASS: Compact contextual help is capped at the narrower manual-test width
+  PASS: Detail contextual help is capped at the narrower manual-test width
+=== RESULTS: 21 passed, 0 failed ===
+TASK_381: ALL PASSED

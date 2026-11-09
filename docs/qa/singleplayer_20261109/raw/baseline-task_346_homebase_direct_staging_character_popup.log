@@ -1,0 +1,29 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_346 Homebase Direct Staging Character Popup Verifier ===
+  PASS: Homebase layout no longer exposes a fixed character_sheet rect
+  PASS: Homebase layout no longer exposes a fixed #13 LOADOUT rect
+  FAIL: Homebase shows #10 FIRETEAMS in the fixed layout
+  PASS: Homebase retires the visible #13 LOADOUT window
+  FAIL: Homebase keeps Flightdeck as fixed staging target
+  PASS: Fixed right character sheet starts hidden
+  PASS: Character popup starts closed outside the numbered window grid
+  PASS: Homebase Fireteams reuses the FOB drop panel contract
+  PASS: Homebase Loadout controls have moved into Fireteams
+  PASS: #10 renders direct fireteam cards
+  PASS: #10 renders compact loadout rows for the staged fireteam
+  PASS: Flightdeck folds direct dropship staging into shipcards
+  PASS: Homebase direct staging exports a FOB-like drop_ship_staged state
+  PASS: Homebase direct drop state exports embarked unit ids
+  PASS: Double-click/open request shows the character sheet popup
+  PASS: Opening the popup does not re-enable the fixed InfoPanel
+  PASS: Popup does not move #10 FIRETEAMS
+  PASS: Popup does not re-enable retired #13 LOADOUT
+  PASS: Popup does not move Flightdeck
+  PASS: Character sheet popup is closable
+  PASS: res://scripts/meta/homebase_screen.gd contains no absolute user asset path
+  PASS: res://scripts/meta/meta_layer_flow.gd contains no absolute user asset path
+  PASS: res://scripts/meta/drop_light_layout_contract.gd contains no absolute user asset path
+=== RESULTS: 21 passed, 2 failed ===
+TASK_346: FAILED

@@ -1,0 +1,37 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Persistent campaign owner exists
+PASS: Definitions load and validate
+PASS: Initial destination is homebase
+PASS: Job accepts
+PASS: Acceptance never launches or selects destination
+PASS: Unknown destination rejected
+PASS: Wrong job/location rejected
+PASS: Accepted job and location selected
+PASS: Trading destination needs no combat job
+PASS: Switching to trade clears selected combat job
+PASS: Job selection restores
+PASS: Inactive job cannot complete
+PASS: Authorized departure binds exact craft and job
+PASS: Confirmed departure activates job
+PASS: UI payload cannot forge runtime proof
+PASS: Unrelated scenario cannot complete selected job
+PASS: Runtime success creates completion receipt
+PASS: Repeat request replays receipt
+PASS: Reused request with altered payload rejected
+PASS: Exactly one completion exists
+PASS: Snapshots cannot mutate owner
+PASS: Multiple jobs may share a location
+PASS: Second co-located job accepts independently
+PASS: Accepted job can be explicitly abandoned
+PASS: Abandonment yields no reward receipt
+PASS: Acceptance builder preserves explicit command operation
+PASS: Unknown command cannot be built
+PASS: Missing request ID cannot be built
+PASS: Owner enforces request ID even without builder
+PASS: Malformed non-finite region position rejected
+PASS: Duplicate landing pad IDs rejected
+PASS: Recovery without return-to-ship proof cannot complete
+PASS: Incomplete objectives mint no receipt
+CAMPAIGN_RESULTS passed=33 failed=0

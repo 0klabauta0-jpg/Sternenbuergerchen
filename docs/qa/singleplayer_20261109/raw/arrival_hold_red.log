@@ -1,0 +1,9 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Actual formed three-person team begins move/GO to computer
+PASS: Real Use becomes available within authored radius
+PASS: Real three-person Use and GO start
+FAIL: Timed Use completes after genuine arrival even when movement execution retires
+FAIL: Same-waypoint hold retains genuine movement arrival receipt
+INTERACTION_ARRIVAL_HOLD_RESULTS passed=3 failed=2

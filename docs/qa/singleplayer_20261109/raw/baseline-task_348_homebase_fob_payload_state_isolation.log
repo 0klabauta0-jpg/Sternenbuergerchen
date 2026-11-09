@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_348 Homebase FOB Payload State Isolation ===
+  PASS: Default payload sync uses FOB source
+  PASS: Default sync keeps FOB embarked units
+  PASS: Default sync does not leak Homebase Direct units
+  PASS: Default sync keeps the FOB craft card
+  PASS: FOB start records FOB as payload source
+  PASS: FOB start keeps FOB embarked units
+  PASS: FOB start ignores stale Homebase Direct payload
+  PASS: FOB start keeps the FOB dropship
+  PASS: Homebase start records Homebase Direct as payload source
+  PASS: Homebase start keeps Homebase Direct embarked units
+  PASS: Homebase start keeps the direct staging status line
+  FAIL: Homebase launch-ready fallback records FOB as payload source when no Direct payload exists
+  FAIL: Homebase fallback keeps FOB embarked units
+  FAIL: Homebase fallback starts the mission with FOB-selected units
+  PASS: Queued but unboarded Homebase Direct payload blocks FOB fallback
+  PASS: Queued Homebase Direct payload does not import FOB embarked units
+  PASS: Queued Homebase Direct payload does not start a FOB mission
+=== RESULTS: 14 passed, 3 failed ===
+TASK_348: FAILED

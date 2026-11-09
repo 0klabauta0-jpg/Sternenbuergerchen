@@ -1,0 +1,128 @@
+{
+  "source_commit": "6d0e463fe621b07c910104ac125d93cb48cc73b4",
+  "godot_version": "4.6.2.stable.official.71f334935",
+  "mode": "headless",
+  "private_appdata": true,
+  "tests": [
+    {
+      "script": "scripts/tests/task_1115_connected_parallel_dropship_drop_deboard_return_playthrough.gd",
+      "exit": 0,
+      "timed_out": false,
+      "duration_seconds": 38.888,
+      "resultcounts": {
+        "failed": 0,
+        "passed": 25,
+        "source": "RESULTS"
+      },
+      "errorScan": {
+        "warnings": [],
+        "error_count": 0,
+        "warning_count": 0,
+        "errors": []
+      },
+      "passed": true,
+      "log": "docs/qa/singleplayer_20261109/raw/final-task_1115_connected_parallel_dropship_drop_deboard_return_playthrough.log"
+    },
+    {
+      "script": "scripts/tests/task_678_mission_interaction_runtime_progress.gd",
+      "exit": 0,
+      "timed_out": false,
+      "duration_seconds": 15.478,
+      "resultcounts": {
+        "failed": 0,
+        "passed": 28,
+        "source": "RESULTS"
+      },
+      "errorScan": {
+        "warnings": [],
+        "error_count": 0,
+        "warning_count": 0,
+        "errors": []
+      },
+      "passed": true,
+      "log": "docs/qa/singleplayer_20261109/raw/final-task_678_mission_interaction_runtime_progress.log"
+    },
+    {
+      "script": "scripts/tests/task_518_mission_scenario_runtime_gates.gd",
+      "exit": 0,
+      "timed_out": false,
+      "duration_seconds": 1.407,
+      "resultcounts": {
+        "failed": 0,
+        "passed": 28,
+        "source": "RESULTS"
+      },
+      "errorScan": {
+        "warnings": [],
+        "error_count": 0,
+        "warning_count": 0,
+        "errors": []
+      },
+      "passed": true,
+      "log": "docs/qa/singleplayer_20261109/raw/final-task_518_mission_scenario_runtime_gates.log"
+    },
+    {
+      "script": "scripts/tests/task_674_mission_interaction_point_bindings.gd",
+      "exit": 0,
+      "timed_out": false,
+      "duration_seconds": 15.662,
+      "resultcounts": {
+        "failed": 0,
+        "passed": 31,
+        "source": "RESULTS"
+      },
+      "errorScan": {
+        "warnings": [],
+        "error_count": 0,
+        "warning_count": 0,
+        "errors": []
+      },
+      "passed": true,
+      "log": "docs/qa/singleplayer_20261109/raw/final-task_674_mission_interaction_point_bindings.log"
+    },
+    {
+      "script": "scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd",
+      "exit": 0,
+      "timed_out": false,
+      "duration_seconds": 24.271,
+      "resultcounts": {
+        "failed": 0,
+        "passed": 30,
+        "source": "RESULTS"
+      },
+      "errorScan": {
+        "warnings": [],
+        "error_count": 0,
+        "warning_count": 0,
+        "errors": []
+      },
+      "passed": true,
+      "log": "docs/qa/singleplayer_20261109/raw/final-task_538_homebase_to_mission_launch_handoff_smoke.log"
+    },
+    {
+      "script": "scripts/tests/task_586_debrief_return_homebase_handoff.gd",
+      "exit": 0,
+      "timed_out": false,
+      "duration_seconds": 11.312,
+      "resultcounts": {
+        "failed": 0,
+        "passed": 37,
+        "source": "RESULTS"
+      },
+      "errorScan": {
+        "warnings": [],
+        "error_count": 0,
+        "warning_count": 0,
+        "errors": []
+      },
+      "passed": true,
+      "log": "docs/qa/singleplayer_20261109/raw/final-task_586_debrief_return_homebase_handoff.log"
+    }
+  ],
+  "summary": {
+    "failed": 0,
+    "passed": 6,
+    "complete": true
+  },
+  "final_source_commit": "6d0e463fe621b07c910104ac125d93cb48cc73b4"
+}

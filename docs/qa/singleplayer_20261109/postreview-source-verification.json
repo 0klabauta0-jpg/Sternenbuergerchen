@@ -1,0 +1,44 @@
+{
+  "verified_commit": "6d0e463fe621b07c910104ac125d93cb48cc73b4",
+  "test_start_head": "e6b4bd92c1d4defcb0da0d99122f7773b34daf20",
+  "source_hashes_match": true,
+  "scope": "Six recorded runtime/test source files; commit metadata changed during run, file bytes did not.",
+  "checks": [
+    {
+      "recorded_sha256": "78CB2602BC2184BEE6CD9166934397051494A090998B476344CE58D0C09580EB",
+      "actual_sha256": "78CB2602BC2184BEE6CD9166934397051494A090998B476344CE58D0C09580EB",
+      "matches": true,
+      "path": "scripts/core/singleplayer_supply_state.gd"
+    },
+    {
+      "recorded_sha256": "7A8D533037EDEFB59EF6331B0312112B83DD03FE1439155604EE9A35005EAD31",
+      "actual_sha256": "7A8D533037EDEFB59EF6331B0312112B83DD03FE1439155604EE9A35005EAD31",
+      "matches": true,
+      "path": "scripts/meta/meta_layer_flow.gd"
+    },
+    {
+      "recorded_sha256": "7395376981472005AF226E5CD19D72145F8C1851C8D3DEF6CB59469454302891",
+      "actual_sha256": "7395376981472005AF226E5CD19D72145F8C1851C8D3DEF6CB59469454302891",
+      "matches": true,
+      "path": "scripts/tests/mission_combat_loop_driver.gd"
+    },
+    {
+      "recorded_sha256": "8B8ABA444C5EF66BF9D0F7563B1FEE6AE6D0C3A258FB56720E75B5C714F3FFEB",
+      "actual_sha256": "8B8ABA444C5EF66BF9D0F7563B1FEE6AE6D0C3A258FB56720E75B5C714F3FFEB",
+      "matches": true,
+      "path": "scripts/tests/mission_tactical_sandbox_controller.gd"
+    },
+    {
+      "recorded_sha256": "92008225FB2D472CCBB72E7A0F4C6D3E11DD2E9E59EB4FD22AF2E1BC8B6D32AF",
+      "actual_sha256": "92008225FB2D472CCBB72E7A0F4C6D3E11DD2E9E59EB4FD22AF2E1BC8B6D32AF",
+      "matches": true,
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd"
+    },
+    {
+      "recorded_sha256": "A9B460BE1323D21052C73CA6717FB595DF0EC9BA5A092FD310EDF3DFEDD3119B",
+      "actual_sha256": "A9B460BE1323D21052C73CA6717FB595DF0EC9BA5A092FD310EDF3DFEDD3119B",
+      "matches": true,
+      "path": "scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd"
+    }
+  ]
+}

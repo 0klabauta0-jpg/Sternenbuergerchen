@@ -1,0 +1,39 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Persistent supply owner exists
+PASS: Supply definitions configure
+PASS: Starter values allow complete test round trip
+PASS: Zero quantity rejected
+PASS: Excess stock or insufficient funds rejected
+PASS: Unknown offer rejected
+PASS: Owner denies shop away from trading service
+PASS: One real item bought
+PASS: Credits and actual item quantity atomically change
+PASS: Duplicate click replays receipt
+PASS: Replay changes no balances
+PASS: Same request ID cannot buy different quantity
+PASS: Infinite refuel rejected
+WARNING: `NaN` ("Not a Number") found in argument passed to JSON.stringify(). `NaN` cannot be represented in JSON, so the value has been replaced with `null`. This warning will not be printed for any later NaN occurrences.
+   at: _stringify (core/io/json.cpp:86)
+   GDScript backtrace (most recent call first):
+       [0] apply_command (res://scripts/core/singleplayer_supply_state.gd:63)
+       [1] _apply (res://scripts/tests/playtest_20261109_trade_refuel_verifier.gd:57)
+       [2] _run (res://scripts/tests/playtest_20261109_trade_refuel_verifier.gd:32)
+PASS: NaN refuel rejected
+PASS: Unknown craft rejected
+PASS: In-flight craft cannot refuel
+PASS: Rejected departure consumes no fuel
+PASS: Authorized flight charges fixed route cost
+PASS: Flight actually consumes fuel
+PASS: Repeated departure charges once
+PASS: No second departure debit
+PASS: Other craft fuel stays independent
+PASS: Same supply supports homebase refuel
+PASS: Overcapacity refuel rejects atomically
+PASS: UI cannot invent reward
+PASS: Verified campaign reward credits
+PASS: Repeated completion receipt accepted idempotently
+PASS: Completion reward credits exactly once
+PASS: Returned snapshot cannot mutate owner
+SUPPLY_RESULTS passed=29 failed=0

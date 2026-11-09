@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_388 Homebase Fireteam Roster Shipcard Polish Verifier ===
+  PASS: #10 fireteam cards hide loadout/member/debug helper text
+  PASS: #10 Assign/Clear buttons are not visible
+  PASS: #10 keeps compact inline loadout dropdowns for the four operators
+  PASS: Both Dropship cards keep their own visible payload panel
+  PASS: Each Dropship keeps the fireteam card dropped onto it
+  PASS: Boarded fireteam cards do not jump back to #10 when another Dropship receives a payload
+  PASS: Snapshot stores Direct payloads per Dropship
+  PASS: Each Dropship exposes its own passenger count at a glance
+  PASS: Assigned Dropship pilot is rendered as a drag source
+  PASS: Available Operators accepts assigned-pilot drag payloads
+  PASS: Dropping pilot back to Available Operators emits the pilot-cleared signal
+  PASS: Pilot card leaves the Dropship after drag-back
+  PASS: Pilot appears again in Available Operators after drag-back
+  PASS: Available Operators exposes Pilot high sorting
+  PASS: Roster sort snapshot records Pilot high mode
+  PASS: Pilot high sorting places the strongest visible pilot score first
+  FAIL: Mission slots count five operators plus one assigned pilot
+  FAIL: Dropship card exposes enabled Send after boarding
+  PASS: Dropship Send launches the direct Mission payload
+=== RESULTS: 17 passed, 2 failed ===
+TASK_388: FAILED

@@ -1,0 +1,45 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Operations reuses existing XP sorting
+PASS: Most experienced fixture person is first in confirmed projection
+PASS: Equal XP and name use stable real ID tie-break
+PASS: Unknown roster ordering rejected
+PASS: Role badge ordering is available without invented ranks
+PASS: Sorting reorders cached rows without rebuilding controls
+PASS: Operations person row is a real drag source
+PASS: Dragged person uses stable real unit ID
+PASS: Single click does not open character sheet
+PASS: Double click opens existing character sheet path
+PASS: New group has a visible creation button in Operations
+PASS: New group is immediately selectable
+PASS: Empty new-team slot accepts real person drag
+PASS: Drop moves person into new group
+PASS: Move never duplicates membership
+PASS: Roster has an explicit person return drop area
+PASS: Dropping back removes last member from group
+PASS: Full team rejects fifth member concretely
+PASS: Three visible equipment slots accept validated loadout items
+PASS: Equipment drawer has a visible available-item entry
+PASS: A different real heavy armor choice is visibly draggable
+PASS: Real gear choice remains reachable inside 1280x720
+PASS: Palette fixture starts with a different confirmed armor
+PASS: Visible source produces the real validated heavy item payload
+PASS: Actual visible choice drop changes confirmed member armor
+PASS: Unknown item cannot overwrite confirmed gear
+PASS: Real craft projection is a fireteam drop target
+PASS: Fireteam drop boards real craft payload
+PASS: Operations projects bound campaign snapshot
+PASS: Departure rejects resource-owner failure before transport dispatch
+PASS: Rejected departure leaves craft at base
+PASS: Boarding member remains protected
+PASS: Independent free group stays editable
+PASS: Assigned pilot cannot silently become team member
+PASS: Existing pilot release operation succeeds
+PASS: Released pilot is available for independent team
+PASS: Transit craft rejects payload removal
+PASS: Transit payload rejects equipment changes
+PASS: Independent free group stays editable during another craft transit
+PASS: Original identities and portraits are preserved
+PASS: Personnel contains no craft backdrop
+PERSONNEL_DRAGDROP_20261109: 41 passed, 0 failed

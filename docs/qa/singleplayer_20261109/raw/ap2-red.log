@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: Operations reuses existing XP sorting
+PASS: Unknown roster ordering rejected
+FAIL: Role badge ordering is available without invented ranks
+FAIL: Operations person row is a real drag source
+PASS: New group is immediately selectable
+FAIL: Team slot implements native drag/drop target
+FAIL: Drop moves person into new group
+PASS: Move never duplicates membership
+FAIL: Roster has an explicit person return drop area
+PASS: Full team rejects fifth member concretely
+FAIL: Three visible equipment slots accept validated loadout items
+FAIL: Real craft projection is a fireteam drop target
+FAIL: Boarding member remains protected
+PASS: Independent free group stays editable
+PASS: Original identities and portraits are preserved
+FAIL: Personnel contains no craft backdrop
+PERSONNEL_DRAGDROP_20261109: 6 passed, 10 failed

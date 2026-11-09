@@ -1,0 +1,157 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Explicit singleplayer Use slice validates without unrelated AA/cargo/PvP objectives
+PASS: Explicit enemy-free Use scenario validates through real scenario loader
+PASS: Enemy-free opt-in cannot hide configured combat waves
+PASS: Historical scenario still rejects an absent enemy roster
+PASS: Historical slice requirements remain enforced without explicit opt-in
+PASS: Satellite scenario is real authored content
+PASS: Trading visit is a separate authored scenario
+PASS: satellite_crash_site loader validates: []
+PASS: satellite_crash_site needs no invented enemy roster
+PASS: satellite_crash_site is a native authored hex map
+PASS: satellite_crash_site slice references actual markers and explicit Use gates
+PASS: satellite_crash_site interaction bindings validate
+PASS: satellite_crash_site contains real satellite_data interaction
+PASS: satellite_crash_site satellite_data has a reachable use point from LZ
+PASS: satellite_crash_site contains real ship_return interaction
+PASS: satellite_crash_site ship_return has a reachable use point from LZ
+PASS: trade_outpost loader validates: []
+PASS: trade_outpost needs no invented enemy roster
+PASS: trade_outpost is a native authored hex map
+PASS: trade_outpost slice references actual markers and explicit Use gates
+PASS: trade_outpost interaction bindings validate
+PASS: trade_outpost contains real trade_service interaction
+PASS: trade_outpost trade_service has a reachable use point from LZ
+PASS: Real combat driver loads satellite runtime gates
+PASS: Captured objective and no enemies cannot win on load
+PASS: Ship-return Use is blocked until satellite recovery
+PASS: Partial recovery Use cannot complete the job
+PASS: Recovered data still requires return to ship
+PASS: Recovery confirms only the matching real step
+PASS: Completed recovery and ship-return Uses satisfy real victory gate
+PASS: Campaign proof exposes exactly the two completed required steps
+PASS: A fresh sortie resets previous objective completion
+PASS: Trade visit does not become an elimination auto-win
+PASS: Using trader service cannot debrief before actual return
+PASS: Actual scenario setup disables fallback enemy slots for explicit peaceful recovery
+PASS: Readiness expects no disabled fallback enemies in the peaceful scenario
+PASS: Actual mission scene remains unresolved before real Use
+PASS: Authored terrain and salvage use mapped native assets without magenta fallback blockers
+PASS: Actual scenario activates a selectable recovery fireteam
+PASS: Real controller rejects return Use before recovery
+PASS: Real move/GO starts the recovery approach
+PASS: Use becomes available after actual simulated approach
+PASS: Real GO accepts the timed recovery Use
+USE_DIAGNOSTIC:{
+"execution": {
+"ft1": {
+"hold_elapsed": 0.8669799999999995,
+"phase": 1,
+"resolved_target_position": Vector2(2116.595, 797.7025),
+"started_msec": 13895,
+"waypoint_index": 0
+}
+},
+"intent": {
+"accepted": true,
+"action_label": "TAKE",
+"blocked_reason": "",
+"command_type": "take",
+"creates_order_intent": true,
+"duration_seconds": 3.0,
+"feedback_line": "COMPUTER bereit | TAKE | FT1 95m",
+"fireteam_id": "ft1",
+"gate_id": "secure_satellite",
+"interaction_id": "satellite_data",
+"interaction_radius_world": 96.0,
+"interaction_type": "computer",
+"last_command_text": "USE COMPUTER -> TAKE",
+"phase": 1,
+"required_order": "take",
+"required_state": "satellite_secured",
+"requires_go": true,
+"runtime_authority": "SimulationRoot via MissionTacticalSandboxController GO path",
+"scenario_truth_read_only": true,
+"schema": "sternenbuergerchen.mission_interaction_use_intent.v1",
+"step_id": "secure_satellite",
+"target_position": Vector2(2116.595, 797.7025),
+"ui_sets_gameplay_truth": false,
+"waypoint_id": "wp_0002"
+},
+"interactions": {
+"complete_count": 0,
+"in_progress_count": 1,
+"interaction_count": 1,
+"interaction_states": {
+"satellite_data": {
+"active_team_id": "team_alpha",
+"command_type": "take",
+"complete": false,
+"duration_seconds": 3.0,
+"fireteam_id": "ft1",
+"gate_id": "secure_satellite",
+"hold_seconds": 0.8669799999999995,
+"interaction_type": "computer",
+"progress": 0.28899333333333316,
+"read_only": true,
+"required_state": "satellite_secured",
+"state": "operating",
+"step_id": "secure_satellite",
+"team_id": "team_alpha",
+"ui_sets_gameplay_truth": false,
+"updated_msec": 22088
+}
+},
+"read_only": true,
+"runtime_authority": "MissionCombatLoopDriver",
+"schema": "sternenbuergerchen.mission_interaction_runtime_progress.v1",
+"ui_sets_gameplay_truth": false
+},
+"movement": [],
+"plans": [{
+"active_waypoint_index": 0,
+"fireteam_id": "ft1",
+"metadata": {},
+"phase": 1,
+"plan_id": "plan_ft1_p1",
+"status": "active",
+"waypoints": [{
+"command_type": "take",
+"hold_duration_seconds": 3.0,
+"metadata": {
+"created_phase": 1,
+"door_runtime_hook": false,
+"door_runtime_producer": "",
+"door_runtime_state_target": "satellite_secured",
+"duration_seconds": 3.0,
+"feedback_line": "COMPUTER bereit | TAKE | FT1 95m",
+"gate_id": "secure_satellite",
+"interaction_id": "satellite_data",
+"interaction_type": "computer",
+"required_order": "take",
+"required_state": "satellite_secured",
+"required_team": "team_alpha",
+"source": "mission_interaction_use_intent",
+"step_id": "secure_satellite"
+},
+"status": "active",
+"target_position": Vector2(2116.595, 797.7025),
+"waypoint_id": "wp_0002"
+}]
+}],
+"positions": {
+"unit_alpha": Vector2(2037.9248, 920.71063),
+"unit_bravo": Vector2(2133.9722, 852.7482),
+"unit_charlie": Vector2(2068.1326, 721.87537)
+}
+}
+ERROR: FAIL: Actual timed Use execution produces verified recovery state
+   at: push_error (core/variant/variant_utility.cpp:1024)
+   GDScript backtrace (most recent call first):
+       [0] _expect (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:217)
+       [1] _test_mission_setup_no_fake_enemies (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:160)
+       [2] _wait_step (res://scripts/tests/playtest_20261109_satellite_recovery_verifier.gd:193)
+PASS: Actual recovery still requires physical ship return
+SATELLITE_RECOVERY: 44 passed, 1 failed

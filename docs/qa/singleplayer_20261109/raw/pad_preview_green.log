@@ -1,0 +1,14 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Existing explorer exposes bounded craft-pad preview mode
+PASS: Preview focuses actual projected ship
+PASS: Preview rejects commander movement commands
+PASS: Preview rejects world terminal commands
+PASS: Commander is hidden in flightdeck camera
+PASS: Preview disables local movement simulation
+PASS: Pad preview never permanently renders its viewport
+PASS: Unchanged preview polling reuses scene and actual craft visual
+PASS: Base exploration restores commander and interactive mode
+PASS: Closing flightdeck disables existing viewport
+PAD_PREVIEW_RESULTS passed=10 failed=0

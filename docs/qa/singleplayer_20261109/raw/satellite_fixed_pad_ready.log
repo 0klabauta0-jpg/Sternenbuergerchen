@@ -1,0 +1,57 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Explicit singleplayer Use slice validates without unrelated AA/cargo/PvP objectives
+PASS: Explicit enemy-free Use scenario validates through real scenario loader
+PASS: Enemy-free opt-in cannot hide configured combat waves
+PASS: Historical scenario still rejects an absent enemy roster
+PASS: Historical slice requirements remain enforced without explicit opt-in
+PASS: Satellite scenario is real authored content
+PASS: Trading visit is a separate authored scenario
+PASS: satellite_crash_site loader validates: []
+PASS: satellite_crash_site needs no invented enemy roster
+PASS: satellite_crash_site is a native authored hex map
+PASS: satellite_crash_site slice references actual markers and explicit Use gates
+PASS: satellite_crash_site native catalog visuals have no missing map mappings
+PASS: satellite_crash_site interaction bindings validate
+PASS: satellite_crash_site contains real satellite_data interaction
+PASS: satellite_crash_site satellite_data has a reachable use point from LZ
+PASS: satellite_crash_site contains real ship_return interaction
+PASS: satellite_crash_site ship_return has a reachable use point from LZ
+PASS: trade_outpost loader validates: []
+PASS: trade_outpost needs no invented enemy roster
+PASS: trade_outpost is a native authored hex map
+PASS: trade_outpost slice references actual markers and explicit Use gates
+PASS: trade_outpost native catalog visuals have no missing map mappings
+PASS: trade_outpost interaction bindings validate
+PASS: trade_outpost contains real trade_service interaction
+PASS: trade_outpost trade_service has a reachable use point from LZ
+PASS: Real combat driver loads satellite runtime gates
+PASS: Captured objective and no enemies cannot win on load
+PASS: Ship-return Use is blocked until satellite recovery
+PASS: Partial recovery Use cannot complete the job
+PASS: Recovered data still requires return to ship
+PASS: Recovery confirms only the matching real step
+PASS: Completed recovery and ship-return Uses satisfy real victory gate
+PASS: Campaign proof exposes exactly the two completed required steps
+PASS: A fresh sortie resets previous objective completion
+PASS: Trade visit does not become an elimination auto-win
+PASS: Using trader service cannot debrief before actual return
+PASS: Actual scenario setup disables fallback enemy slots for explicit peaceful recovery
+PASS: Readiness expects no disabled fallback enemies in the peaceful scenario
+PASS: Actual mission scene remains unresolved before real Use
+PASS: Authored terrain and salvage use mapped native assets without magenta fallback blockers
+PASS: Actual scenario activates a selectable recovery fireteam
+PASS: Actual recovery craft starts its authored pad approach
+PASS: Real recovery crew deploys from matching craft parked at authored return pad
+PASS: Actual post-drop activation finishes before player movement command
+PASS: Real controller rejects return Use before recovery
+PASS: Real move/GO starts the recovery approach
+PASS: Use becomes available after actual simulated approach
+PASS: Real GO accepts the timed recovery Use
+PASS: Actual timed Use execution produces verified recovery state
+PASS: Actual recovery still requires physical ship return
+PASS: Physical return makes ship-return Use available
+PASS: Real GO accepts the return console Use
+PASS: Actual simulated round trip plus timed ship-return Use completes both objectives
+SATELLITE_RECOVERY: 53 passed, 0 failed

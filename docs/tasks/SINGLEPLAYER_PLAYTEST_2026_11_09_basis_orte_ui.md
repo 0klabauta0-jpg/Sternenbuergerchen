@@ -1,7 +1,10 @@
 # Einzelspieler: Heimatbasis, Personal, Aufträge und erste Orte
 
-Stand: 09.11.2026. Status: **Playtest-Zusammenfassung und Planentwurf; keine Spielimplementierung.**
+Stand: 09.11.2026. Status: **Implementierung AP0–AP7 lokal geprueft; AP8 technisch bestanden, native Bedien-/Gestaltungsabnahme offen.**
 Quelle: Nutzerdiktat in diesem Chat, anschließend ausdrücklicher Auftrag zur Zusammenfassung und Planung.
+Danach autorisierte der Nutzer Umsetzung, lokale Commits und direkte lokale
+Mainintegration, weiterhin ohne Push. Die spaetere PC-Nutzungsanweisung begrenzt
+weitere Tests auf Hintergrund/Headless. Nachweis: [QA](../qa/singleplayer_20261109/README.md).
 
 ## Ziel / Problem
 
@@ -186,8 +189,10 @@ Keine Zusage, dass vorhandene Savegames migriert werden; keine Löschung normale
 
 Die konkreten Arbeitspakete, Dateipfade und Prüfungen stehen im
 [Umsetzungsplan](../superpowers/plans/2026-11-09-singleplayer-basis-orte-ui.md).
-Heute wurden nur Quellcode und Dokumentation gelesen und diese Planungsdateien geschrieben.
-Keine Engine-/Laufzeitprüfungen; keine Behauptung, dass Playtestbefunde behoben seien.
+Die urspruengliche Planungsphase enthielt keine Spielcodeaenderung. Die danach
+autorisierte Umsetzung wurde mit Godot 4.6.2 geprueft, inklusive echtem
+Zweiausflugslauf 60/60, 20 fokussierten Gates und sechs Transportregressionen.
+Native OS-Bedienung, Grafikurteil und allgemeine Leistung bleiben getrennt offen.
 
 ## Risiken / offene Punkte
 
@@ -201,9 +206,9 @@ Keine Engine-/Laufzeitprüfungen; keine Behauptung, dass Playtestbefunde behoben
 
 ## Git- und Quellenstand
 
-Planungsbranch: task/singleplayer-playtest-plan-20261109, ab integration/core-foundation.
-Die untersuchte Main-Basis liegt 91 Commits vor integration/core-foundation (0 nur auf Integration).
-Die Planungs-Worktree ist deshalb **keine aktuelle Implementierungsbasis**. Vor Umsetzung den
-aktuellen Hauptstand kontrolliert in die Integrationsbasis übernehmen und die betroffenen Pfade
-erneut prüfen; kein Implementieren gegen den alten Code allein aufgrund dieser Planungsbranch.
-Keine Spielcodeänderung, kein Commit und kein Push in diesem Planungsauftrag.
+Der urspruengliche Planungsbranch basierte auf integration/core-foundation.
+Umgesetzt wurde auf dem frischen task/singleplayer-loop-20261109 ab main
+ed77c1058, damit die 91 neueren Maincommits erhalten bleiben. Produktstand nach
+Reviewfixes: 6d0e463fe. Direkte lokale Mainintegration anschliessend vom Nutzer
+autorisiert; weiterhin kein Push/Release. Der gemeinsame Integrationsbranch bleibt
+unveraendert. Exakte Pruef- und Integrationsbelege stehen im QA-Paket.

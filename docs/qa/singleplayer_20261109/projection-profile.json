@@ -1,0 +1,10 @@
+{
+	"hidden_world_rendering_disabled": true,
+	"maximum_usec": 43681,
+	"mean_usec": 35571.48,
+	"new_roster_rows": 0,
+	"p95_usec": 39538,
+	"samples": 100,
+	"scope": "Headless synchronous warmed Operations refresh sample, current machine load; not native frame/FPS acceptance",
+	"shared_viewport_preserved": true
+}

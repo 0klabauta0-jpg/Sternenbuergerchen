@@ -1,0 +1,65 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+SINGLEPLAYER_LOOP_BEGIN time_scale=1.0 user_data=C:/Users/bjoer/.codex/worktrees/singleplayer-playtest-plan-20261109/SternenBuergerchen/.superpowers/sdd/2026-11-09-singleplayer-basis-orte-ui/private-loop-profile/Godot/app_userdata/Sternenbuergerchen
+PASS: Actual Flow has long-lived campaign runtime
+PASS: Normal bootstrap has actual craft and team payload
+PASS: Normal initial payload contains three real crew identities
+PASS: Accept job through real operation bridge
+PASS: Acceptance alone starts no mission
+PASS: Select the distinct satellite location
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places LZ on saved reachable pad
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: Actual satellite scene cannot win on load
+PASS: satellite_data actual move GO accepts
+PASS: satellite_data becomes usable after real simulated approach
+PASS: satellite_data real Use intent accepts
+PASS: satellite_data Use GO accepts
+PASS: satellite_data actual timed Use commits required runtime step
+PASS: Recovered data still requires physical ship return
+PASS: ship_return actual move GO accepts
+PASS: ship_return becomes usable after real simulated approach
+PASS: ship_return real Use intent accepts
+PASS: ship_return Use GO accepts
+PASS: ship_return actual timed Use commits required runtime step
+PASS: Real mission result completes accepted campaign job
+PASS: Runtime reward credits exactly one data-defined payment
+PASS: Exactly one campaign completion receipt
+PASS: Actual reverse transit restores original craft to homebase
+PASS: First actual round trip consumes outbound and reverse route fuel once
+PASS: Viewing result/homebase again cannot duplicate reward
+PASS: First return preserves all original identities and portraits
+PASS: Second sortie selects trade location without combat job
+PASS: trade_outpost_visit launches actual boarded craft
+PASS: trade_outpost_visit actual mission instance exists
+PASS: trade_outpost_visit actual outbound transit reaches waiting craft
+PASS: trade_outpost_visit actual map click places LZ on saved reachable pad
+PASS: trade_outpost_visit real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario trade_outpost_visit
+PASS: Landing alone cannot grant trader use proof
+PASS: trade_service actual move GO accepts
+PASS: trade_service becomes usable after real simulated approach
+PASS: trade_service real Use intent accepts
+PASS: trade_service Use GO accepts
+PASS: trade_service actual timed Use commits required runtime step
+PASS: Actual landed craft and completed trader Use enable service
+PASS: Real bound service UI offers purchase and refuel after Use
+PASS: Real service double-clicks debit one purchase and one ten-unit refuel
+PASS: Second sortie grants one real purchased item
+PASS: Confirmed actual craft gains exactly ten fuel
+PASS: Real visit return command accepts after service
+PASS: Actual reverse transit restores original craft to homebase
+PASS: Two true round trips plus refuel preserve authored fuel accounting
+PASS: Trade sortie cannot repeat satellite receipt or reward
+PASS: Second return loses no original crew or identity
+PASS: Second return retains exactly one membership for unit_alpha
+PASS: Second return retains exactly one membership for unit_bravo
+PASS: Second return retains exactly one membership for unit_charlie
+PASS: Second return preserves actual assigned pilot
+PASS: Peaceful second sortie leaves no stale selected combat job
+PASS: Both sorties reuse original craft and original pad without clone
+SINGLEPLAYER_LOOP_RESULTS passed=60 failed=0
