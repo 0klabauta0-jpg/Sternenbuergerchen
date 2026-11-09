@@ -1,0 +1,29 @@
+{
+  "initial_credits": 500,
+  "initial_fuel": 60.0,
+  "fuel_capacity": 100.0,
+  "fuel_price_per_unit": 2,
+  "offers": {
+    "medictool_supply": {
+      "id": "medictool_supply",
+      "item_id": "medictool",
+      "name": "Sanitaetswerkzeug",
+      "unit_price": 50,
+      "stock": 4,
+      "location_ids": ["trade_outpost"]
+    }
+  },
+  "service_locations": {
+    "homebase": ["refuel"],
+    "trade_outpost": ["trade", "refuel"],
+    "satellite_crash": []
+  },
+  "route_fuel_costs": {
+    "homebase>satellite_crash": 12.0,
+    "satellite_crash>homebase": 12.0,
+    "homebase>trade_outpost": 8.0,
+    "trade_outpost>homebase": 8.0,
+    "satellite_crash>trade_outpost": 10.0,
+    "trade_outpost>satellite_crash": 10.0
+  }
+}

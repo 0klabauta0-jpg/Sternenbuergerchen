@@ -1,0 +1,11 @@
+{
+  "satellite_recovery": {
+    "id": "satellite_recovery",
+    "title": "Satellitendaten bergen",
+    "description": "An der Absturzstelle die Satellitendaten sichern und mit dem Trupp zum Schiff zurueckkehren.",
+    "location_id": "satellite_crash",
+    "scenario_id": "satellite_recovery",
+    "required_step_ids": ["secure_satellite", "return_to_ship"],
+    "reward": {"credits": 150}
+  }
+}

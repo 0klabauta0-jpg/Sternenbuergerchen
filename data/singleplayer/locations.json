@@ -1,0 +1,5 @@
+{
+  "homebase": {"id": "homebase", "name": "Heimatbasis", "region_position": [0.2, 0.65], "map_file_path": "res://maps/homebase_frontier_exploration.json", "scenario_file_path": "", "landing_pad_ids": ["homebase_pad_01", "homebase_pad_02"], "services": ["personnel", "jobs", "refuel"]},
+  "satellite_crash": {"id": "satellite_crash", "name": "Satelliten-Absturzstelle", "region_position": [0.7, 0.25], "map_file_path": "res://maps/satellite_crash_site.json", "scenario_file_path": "res://data/mission_scenarios/satellite_recovery.json", "landing_pad_ids": ["satellite_pad_01"], "services": []},
+  "trade_outpost": {"id": "trade_outpost", "name": "Handelsaussenposten", "region_position": [0.8, 0.75], "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_visit.json", "landing_pad_ids": ["trade_pad_01"], "services": ["trade", "refuel"]}
+}
