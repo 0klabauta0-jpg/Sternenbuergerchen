@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### Einzelspieler Basis/Orte/UI — 09.11.2026, Umsetzung begonnen
+AP0–AP8 auf task/singleplayer-loop-20261109, aktuelle Basis main ed77c1058.
+Gemeinsamer Integrationsbranch bleibt unveraendert (91 Commits aelter).
+Plan: docs/superpowers/plans/2026-11-09-singleplayer-basis-orte-ui.md.
+Contracts fuer langlebige Kampagne, Orte/Jobs, echte Pads und atomare Services
+festgelegt. Umsetzung und technische/native Abnahme noch offen. Lokale Commits
+autorisiert; kein Push, keine Mainintegration und kein Release.
+
 ### CPU/HUD R8: auf Main integriert und gepusht, 2026-11-08
 - Volle DefaultMove-Zwischenprojektion nur in zwei synchronen Finalisierern
   ausgelassen; Contextmenue/Fehler bleiben sofort. Kontaktproduktion/Framing

@@ -7,6 +7,18 @@ den bestehenden Meta-/Aircraft-/Runtime-Owners. Die Basis besitzt nur ihren
 lokalen Commander und ihre Erkundungsdarstellung.
 
 ## Primaerer Ablauf
+Zielrevision 09.11.2026: Der regulaere Einzelspielerweg verwendet ausschliesslich
+die Operationsseiten. Erweiterte Werkzeuge gehoert nicht mehr zur normalen
+Navigation; benoetigte Funktionen werden im neuen Weg bedienbar gemacht.
+FOB bleibt sichtbar gesperrt und auch ueber regulaere programmatische
+Navigation nicht aktivierbar. Zielnavigation: Basis erkunden, Personal,
+Trupp & Ausruestung, Smart Mobile, Karte, Einsatz & Abflug. Neue Ziele bleiben
+bis zur echten Anbindung deaktiviert. Diese Zielrevision ersetzt die folgenden
+historischen Aussagen ueber grosse Portraets und Erweiterte Werkzeuge.
+Kompakte Personalzeilen behalten Identitaeten; Rang bedeutet vorhandene
+Rollen-/Faehigkeitsbadges, keinen erfundenen Dienstgrad. Der unklare Begriff
+Cutlist rechtfertigt kein blindes Loeschen eines benannten Controls.
+
 Die Heimatbasis startet bei Trupp & Ausruestung. Links Personal mit grossen
 Portraets, mittig ein waehlbarer Trupp mit vier gut erkennbaren Plaetzen,
 daneben genau ein fokussiertes Mitglied mit Ruestung, Primaer- und

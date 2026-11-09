@@ -1,0 +1,38 @@
+# Einzelspieler: Orte und Auftraege
+
+Stand: 09.11.2026. Implementierungsvertrag fuer AP4–AP8, kein Nachweis fertiger Features.
+
+## Besitzer und Lebenszyklus
+
+SimulationRoot verarbeitet autorisierte Kampagnencommands. Ein langlebiger
+SingleplayerCampaignState bleibt ausserhalb der deaktivierbaren Erkundung und
+der austauschbaren Mission. MetaLayerFlow bindet diesen Owner und orchestriert
+Szenen; UI und Presenter senden nur Commands und lesen Snapshots.
+Aircraft-/Transportowner behalten Payload, Boarding und Flugphasen pro craft_id.
+Campaign referenziert Craft-/Ort-/Job-IDs, simuliert keinen zweiten Transit.
+
+## Daten und Zustaende
+
+- location_id: homebase, satellite_crash, trade_outpost; jeweils Name,
+  Regionposition, map_file_path, scenario_file_path, landing_pad_ids, services.
+- job_id: satellite_recovery, getrennt von location_id. Mehrere Jobs duerfen
+  denselben Ort referenzieren. Job enthaelt Titel, Objectivebezug und Belohnung.
+- Status: offered -> accepted -> active -> completed oder failed.
+- Annahme startet keinen Flug. Zielwahl startet keine Mission. Handelsbesuch
+  braucht keinen Kampfauftrag. completed besitzt eine stabile Abschluss-ID.
+- Abschluss nur mit bestaetigtem Runtime-/Scenariobeleg, niemals durch
+  Szenenladen, Naehe, Kartenwahl oder UI-Button allein.
+- Abbruch/Fehlschlag vergibt keine Erfolgsbelohnung; Ergebnis erneut anzeigen
+  erzeugt keinen zweiten Abschlussbeleg.
+
+## Bruecke und Pruefung
+
+get_operations_snapshot()/request_operation(operation, payload) bleiben die
+UI-Bruecke. accept_job und select_destination delegieren an den autoritativen
+Commandpfad. Snapshot zeigt accepted_job_ids, selected_job_id,
+selected_location_id, bestaetigten Jobstatus und Completionbelege.
+Unbekannte IDs, Ort/Job-Widerspruch und unzulaessige Uebergaenge werden mit
+konkretem Grund abgelehnt. Tests pruefen Annahme ohne Flug, Wechsel, mehrere
+Jobs am selben Ort, Handelsbesuch, Abbruch und Erhalt bei Szenenwechsel.
+
+Kein Savegame-Migrationsauftrag; isolierte Profile, normale Nutzerdaten erhalten.
