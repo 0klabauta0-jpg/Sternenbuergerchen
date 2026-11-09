@@ -1,5 +1,8 @@
 extends Control
 
+const GAME_START_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/game_start_contract.gd")
+const CAMPAIGN_CHECKPOINT_STORE_PATH: String = "res://scripts/meta/campaign_checkpoint_store.gd"
+
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 
 const BACKGROUND_PATH: String = "res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg"
@@ -57,6 +60,11 @@ const TEAM_EDITOR_METRIC_GROUP_CONFIG: Dictionary = {
 @onready var _bubble_mode_option: OptionButton = get_node_or_null("SettingsPanel/SettingsMargin/SettingsVBox/BubbleModeOptionButton") as OptionButton
 @onready var _thought_hold_label: Label = get_node_or_null("SettingsPanel/SettingsMargin/SettingsVBox/ThoughtHoldLabel") as Label
 @onready var _status_label: Label = get_node("MenuRail/MenuMargin/MenuVBox/StatusLabel")
+
+var _campaign_button: Button
+var _campaign_dialog: ConfirmationDialog
+var _campaign_continue_button: Button
+var _campaign_replace_dialog: ConfirmationDialog
 
 var _settings_config_path: String = COMIC_BUBBLE_SETTINGS_SCRIPT.CONFIG_PATH
 var _comic_bubble_settings: Dictionary = {}
@@ -163,6 +171,7 @@ func _ready() -> void:
 	_ensure_start_roster_button()
 	_ensure_mission_save_load_buttons()
 	_apply_release_first_play_polish()
+	_ensure_campaign_entry()
 	_ensure_contextual_help_ui()
 	ensure_start_roster_exists()
 	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
@@ -1106,10 +1115,11 @@ func _apply_release_first_play_polish() -> void:
 		return
 	_singleplayer_button.custom_minimum_size = Vector2(360.0, 76.0)
 	_singleplayer_button.focus_mode = Control.FOCUS_ALL
-	_singleplayer_button.tooltip_text = "Startet die vorbereitete Singleplayer-Sortie."
+	_singleplayer_button.text = "Skirmish"
+	_singleplayer_button.tooltip_text = "Freier Einzelspieler: Sortie mit deinem Skirmish-Team vorbereiten."
 	_singleplayer_button.set_meta("release_first_play_style_id", RELEASE_FIRST_PLAY_STYLE_ID)
 	_singleplayer_button.set_meta("release_priority", "primary")
-	_singleplayer_button.set_meta("release_action_hint", "Startet die vorbereitete Singleplayer-Sortie.")
+	_singleplayer_button.set_meta("release_action_hint", "Freier Einzelspieler: Sortie mit deinem Skirmish-Team vorbereiten.")
 	TACTICAL_UI_THEME_SCRIPT.style_command_button(_singleplayer_button, "accent")
 	_singleplayer_button.add_theme_font_size_override("font_size", 20)
 	_singleplayer_button.call_deferred("grab_focus")
@@ -1217,7 +1227,7 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 		header_label.name = "TeamLibraryHeaderLabel"
 		header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header_row.add_child(header_label)
-	header_label.text = "Deine Teams"
+	header_label.text = "Skirmish-Teambibliothek"
 	header_label.add_theme_font_size_override("font_size", 20)
 	_team_library_activate_button = header_row.get_node_or_null("TeamLibraryActivateButton") as Button
 	if _team_library_activate_button == null:
@@ -1318,7 +1328,7 @@ func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
 		_team_editor_title_label.name = "TeamEditorHeaderLabel"
 		_team_editor_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		header_row.add_child(_team_editor_title_label)
-	_team_editor_title_label.text = "Team-Editor"
+	_team_editor_title_label.text = "Skirmish-Team-Editor"
 	_team_editor_title_label.add_theme_font_size_override("font_size", 26)
 	_team_editor_title_label.clip_text = true
 	_team_editor_title_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -1578,14 +1588,14 @@ func _ensure_team_editor_view_button(parent: HBoxContainer, view_mode: String, l
 func _refresh_start_roster_button() -> void:
 	if _new_roster_button == null:
 		return
-	_new_roster_button.text = "Team neu bestaetigen" if _start_roster_reset_confirmation_pending else "Neues Team generieren"
+	_new_roster_button.text = "Team neu bestaetigen" if _start_roster_reset_confirmation_pending else "Neues Skirmish-Team"
 	_new_roster_button.tooltip_text = "Ersetzt das Startteam erst nach Bestaetigung." if _start_roster_reset_confirmation_pending else "Automatisch ein neues Startteam generieren."
 
 
 func _refresh_team_editor_toggle() -> void:
 	if _team_editor_toggle_button == null:
 		return
-	_team_editor_toggle_button.text = "Team-Editor" if _team_editor_open else "Team selbst erstellen"
+	_team_editor_toggle_button.text = "Skirmish-Team-Editor" if _team_editor_open else "Skirmish-Team erstellen"
 	_team_editor_toggle_button.tooltip_text = "Geoeffnetes Team-Editor-Fenster anzeigen." if _team_editor_open else "Eigenes Rookie-Team im grossen Team-Editor bearbeiten."
 
 
@@ -1611,7 +1621,7 @@ func _open_team_editor_for_path(entry_path: String = "") -> void:
 	_set_team_editor_open(true)
 	_refresh_team_library()
 	_refresh_team_editor()
-	_status_label.text = "Team-Editor"
+	_status_label.text = "Skirmish-Team-Editor"
 	_play_ui_sfx("click", "team_editor_open")
 
 
@@ -1898,7 +1908,7 @@ func _refresh_team_editor() -> void:
 	var editor: Dictionary = _get_normalized_team_editor(false)
 	var identity: Dictionary = Dictionary(TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", roster))
 	if _team_editor_title_label != null:
-		_team_editor_title_label.text = "Team-Editor | %s" % String(identity.get("team_name", "Team"))
+		_team_editor_title_label.text = "Skirmish-Team-Editor | %s" % String(identity.get("team_name", "Team"))
 	if _team_editor_name_edit != null:
 		_team_editor_name_edit.text = String(identity.get("team_name", ""))
 	if _team_editor_summary_label != null:
@@ -3187,6 +3197,7 @@ func _ensure_contextual_help_ui() -> void:
 
 
 func _register_main_menu_help_ids() -> void:
+	_connect_help_control(_campaign_button, "main_menu.campaign")
 	_connect_help_control(_singleplayer_button, "main_menu.primary_routes")
 	_connect_help_control(_multiplayer_button, "main_menu.primary_routes")
 	_connect_help_control(_editor_button, "main_menu.primary_routes")
@@ -3711,17 +3722,101 @@ func _on_mission_load_pressed() -> void:
 	_refresh_mission_save_load_buttons()
 
 
+func _ensure_campaign_entry() -> void:
+	var menu_buttons: VBoxContainer = _singleplayer_button.get_parent() as VBoxContainer
+	_campaign_button = Button.new()
+	_campaign_button.name = "CampaignButton"
+	_campaign_button.text = "Kampagne"
+	_campaign_button.custom_minimum_size = Vector2(360.0, 60.0)
+	_campaign_button.tooltip_text = "Einfuehrung mit zwei NPCs und eigenem Kampagnenstand."
+	_campaign_button.set_meta("help_id", "main_menu.campaign")
+	TACTICAL_UI_THEME_SCRIPT.style_command_button(_campaign_button, "accent")
+	menu_buttons.add_child(_campaign_button)
+	menu_buttons.move_child(_campaign_button, _singleplayer_button.get_index())
+	_campaign_button.pressed.connect(_on_campaign_pressed)
+	_campaign_dialog = ConfirmationDialog.new()
+	_campaign_dialog.name = "CampaignStartDialog"
+	_campaign_dialog.title = "Kampagne"
+	_campaign_dialog.dialog_text = "Einfuehrung mit Pilot und einem Leader.\nFortsetzen laedt den letzten sicheren Basis-Meilenstein.\nUnterbrochene Ausfluege werden von dort erneut begonnen."
+	_campaign_dialog.ok_button_text = "Neue Kampagne"
+	_campaign_dialog.cancel_button_text = "Zurueck"
+	add_child(_campaign_dialog)
+	_campaign_continue_button = _campaign_dialog.add_button("Fortsetzen", false, "continue")
+	_campaign_continue_button.name = "CampaignContinueButton"
+	_campaign_dialog.custom_action.connect(_on_campaign_dialog_action)
+	_campaign_dialog.confirmed.connect(_on_campaign_new_pressed)
+	_campaign_replace_dialog = ConfirmationDialog.new()
+	_campaign_replace_dialog.name = "CampaignReplaceDialog"
+	_campaign_replace_dialog.title = "Kampagne ersetzen?"
+	_campaign_replace_dialog.dialog_text = "Der vorhandene Kampagnenstand wird durch eine neue Kampagne ersetzt."
+	_campaign_replace_dialog.ok_button_text = "Kampagne ersetzen"
+	_campaign_replace_dialog.cancel_button_text = "Abbrechen"
+	add_child(_campaign_replace_dialog)
+	_campaign_replace_dialog.confirmed.connect(_start_campaign.bind("new"))
+
+
+func _load_campaign_checkpoint() -> Dictionary:
+	if not ResourceLoader.exists(CAMPAIGN_CHECKPOINT_STORE_PATH):
+		return {"ok": false, "reason": "checkpoint_store_unavailable"}
+	var store: GDScript = load(CAMPAIGN_CHECKPOINT_STORE_PATH)
+	return store.load_checkpoint()
+
+
+func _campaign_checkpoint_exists() -> bool:
+	# Even an invalid existing file must not be replaced without consent.
+	return FileAccess.file_exists("user://campaigns/introduction/checkpoint_v1.json") or bool(_load_campaign_checkpoint().get("ok", false))
+
+
+func _on_campaign_pressed() -> void:
+	_campaign_continue_button.disabled = not bool(_load_campaign_checkpoint().get("ok", false))
+	_campaign_dialog.popup_centered(Vector2i(620, 240))
+
+
+func _on_campaign_dialog_action(action: StringName) -> void:
+	if action == &"continue":
+		_on_campaign_continue_pressed()
+
+
+func _on_campaign_continue_pressed() -> void:
+	# Revalidate on activation: the file may have changed while the dialog was open.
+	if not bool(_load_campaign_checkpoint().get("ok", false)):
+		_campaign_continue_button.disabled = true
+		_status_label.text = "Kein gueltiger Kampagnenstand vorhanden"
+		return
+	_campaign_dialog.hide()
+	_start_campaign("continue")
+
+
+func _on_campaign_new_pressed() -> void:
+	_campaign_dialog.hide()
+	if _campaign_checkpoint_exists():
+		_campaign_replace_dialog.popup_centered(Vector2i(560, 180))
+		return
+	_start_campaign("new")
+
+
+func _start_campaign(action: String) -> void:
+	_campaign_dialog.hide()
+	_campaign_replace_dialog.hide()
+	GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "campaign", action)
+	_play_ui_sfx("confirm", "campaign")
+	_change_scene(SINGLEPLAYER_SCENE_PATH)
+
+
 func _on_singleplayer_pressed() -> void:
+	GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "skirmish")
 	_play_ui_sfx("confirm", "singleplayer")
 	_change_scene(SINGLEPLAYER_SCENE_PATH)
 
 
 func _on_multiplayer_pressed() -> void:
+	GAME_START_CONTRACT_SCRIPT.clear_start(get_tree())
 	_play_ui_sfx("confirm", "multiplayer")
 	_change_scene(MULTIPLAYER_SCENE_PATH)
 
 
 func _on_editor_pressed() -> void:
+	GAME_START_CONTRACT_SCRIPT.clear_start(get_tree())
 	_play_ui_sfx("confirm", "editor")
 	_change_scene(EDITOR_SCENE_PATH)
 
@@ -3740,7 +3835,7 @@ func _on_new_roster_pressed() -> void:
 
 func _on_team_editor_toggle_pressed() -> void:
 	toggle_team_editor()
-	_status_label.text = "Team-Editor" if _team_editor_open else "Ready"
+	_status_label.text = "Skirmish-Team-Editor" if _team_editor_open else "Ready"
 	_play_ui_sfx("switch", "team_editor_toggle")
 
 
