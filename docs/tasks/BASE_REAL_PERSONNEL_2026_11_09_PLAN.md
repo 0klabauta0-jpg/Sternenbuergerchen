@@ -48,8 +48,8 @@
 
 ### Task 4: Integration und lokaler Testbuild
 
-- [ ] Breiter Branchreview, Befunde beheben, gezielte Kampagnen-/Skirmish-/Basischecks.
-- [ ] Task/Contracts/Status und begrenzte QA-Belege aktualisieren, eigene Dateien committen.
+- [x] Breiter Branchreview, Befunde beheben, gezielte Kampagnen-/Skirmish-/Basischecks.
+- [x] Task/Contracts/Status und begrenzte QA-Belege aktualisieren, eigene Dateien committen.
 - [ ] Autorisierte lokale Mainintegration in isoliertem Worktree, ohne fremde Orbit-WIP.
 - [ ] Aktuelle Main-EXE exportieren und headless Paket-/Startpruefung, kein Push.
 

@@ -1,5 +1,23 @@
 # IMPLEMENTATION_STATUS
 
+### Echte Basis-NPCs, Tueren und Kampagnenbesatzung — 10.11.2026
+Kampagne zeigt genau die beiden echten Rosterpersonen ohne zusaetzlichen
+Commander. Weltaktionen fuer Bewegung, Ein-/Aussteigen, Ausruestung und
+Bett/Wecken verwenden Runtime-/Operationsowner; Ansichtwechsel stoppen keine
+beauftragten Basiswege. Beide Personen koennen am Bodeneinsatz teilnehmen;
+auch der Leader darf tatsaechlich fliegen, wenn er den Pilotenplatz besetzt.
+Keine neue Absturz- oder Heilungsbalance. Fehlgeschlagene Extraktion fuehrt
+ohne fingierte Heimkehr zum Debrief und expliziten letzten sicheren Checkpoint.
+
+Originalraumquellen unveraendert, moeblierte Tueroeffnungs-Ableitungen mit
+statischer Feinnavigation:14 Routen/1452 Verbindungen,64 Animationsposen,
+Originalraum22/0. Basisruntime39/0, Weltbedienbruecke9/0, Kampagne97/0 mit
+zwei echten Leader-Pilotenrundfluegen und zweimal Continue, Ausfallpfad56/0,
+Skirmish60/0. Unabhaengiges Review und gezielte Nachpruefung ohne verbleibende
+Critical/Important-Befunde. Native Sicht-/Bedienabnahme bleibt getrennt;
+aelteres TASK503-HUD-Gate9/1 ist offen und nicht gegen Baseline nachgewiesen.
+QA: docs/qa/base_real_personnel_20261109/README.md. Lokaler Abschluss, kein Push.
+
 ### Heimatbasis: Originalraeume wiederhergestellt — 09.11.2026
 Nutzerkorrektur nach Playtest: Kampagne wieder36x28 statt22x24, beide
 erhaltenen moeblierten Cutaway-GLBs sichtbar, keine kahlen Ersatzwaende.
