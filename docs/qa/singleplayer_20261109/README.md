@@ -171,3 +171,19 @@ Produktquellen geprueft. Kein zweites Review oder native Freigabe wird behauptet
    spaetere lokale Mainintegration erlaubt. Push und Release bleiben ausgenommen.
 10. Nach der PC-Nutzungsanweisung keine weiteren sichtbaren Testfenster,
     Fokuswechsel oder Maus-/Tastatureingaben. Native Abnahme bleibt offen.
+
+## Lokale Mainintegration
+
+Auf ausdruecklichen Nutzerauftrag per Fast-forward von ed77c1058 auf739cc7b65
+uebernommen, ohne Push. Frischer kompletter Main-Headless-Smoke60/60, Exit0,
+null Fehler/Leaks; HEAD und alle sechs erfassten Main-Quellhashes vor/nach identisch.
+Drei weitere Main-Smokes fuer Views, Roundtrip-Fuel und reale Craftbindung
+bestanden.52 geaenderte Produktdateien stimmen inhaltlich mit dem Taskstand
+ueberein; sechs Checkout-Zeilenendendifferenzen sind separat dokumentiert.
+792 vorhandene untracked Text-/Code-/Konfigurationsdateien blieben bytegleich;
+keine Stash-/Reset-/Cleanaktion und keine fremde Datei ersetzt.
+Der anschliessende Belegcommit aendert nur QA/Dokumentation und wird ebenfalls
+lokal nach Main uebernommen. Details: [Integrationsbeleg](main_receipt.json),
+[Main-Lauf](raw/main-singleplayer-loop.log), [Quellbeleg](raw/main-loop-tested-sources.json).
+Native OS-/Stil-/Performanceabnahme bleibt offen. Die bereits vorhandene
+Nutzer-EXE wurde weder ersetzt noch beendet; keine EXE-Erstellung.

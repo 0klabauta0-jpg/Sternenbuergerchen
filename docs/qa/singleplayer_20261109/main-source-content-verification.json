@@ -1,0 +1,14 @@
+{
+  "files_compared": 52,
+  "actual_content_drift": [],
+  "eol_only_checkout_differences": [
+    "data/mission_scenarios/satellite_recovery.json",
+    "data/mission_scenarios/trade_outpost_visit.json",
+    "maps/homebase_frontier_exploration.json",
+    "maps/satellite_crash_site.json",
+    "maps/trade_outpost.json",
+    "scripts/meta/meta_layer_flow.gd"
+  ],
+  "main_tested_commit": "739cc7b6569c44e88bb9a09ffaa1955dc316007f",
+  "scope": "All changed product source files; newline-normalized text comparison only where raw hashes differ. Main full loop already tested actual main checkout bytes."
+}

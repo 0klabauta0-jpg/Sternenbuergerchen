@@ -1,0 +1,20 @@
+[
+  {
+    "errors": false,
+    "exit": 0,
+    "tail": "[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors\nCAMPAIGN_VIEWS failed=0",
+    "script": "playtest_20261109_campaign_views_verifier"
+  },
+  {
+    "errors": false,
+    "exit": 0,
+    "tail": "[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors\nROUNDTRIP_FUEL_RESULTS passed=9 failed=0",
+    "script": "playtest_20261109_roundtrip_fuel_verifier"
+  },
+  {
+    "errors": false,
+    "exit": 0,
+    "tail": "PASS: Independent waiting craft can land once the first outbound clears the pad\nACTUAL_CRAFT_RETURN_BINDING_RESULTS passed=16 failed=0",
+    "script": "playtest_20261109_actual_craft_return_binding_verifier"
+  }
+]

@@ -1,0 +1,65 @@
+{
+  "source_project": "C:\\dev\\SternenBuergerchen",
+  "script": "res://scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd",
+  "head_before": "739cc7b6569c44e88bb9a09ffaa1955dc316007f",
+  "head_after": "739cc7b6569c44e88bb9a09ffaa1955dc316007f",
+  "private_appdata": "C:\\Users\\bjoer\\.codex\\worktrees\\singleplayer-playtest-plan-20261109\\SternenBuergerchen\\.scratch\\main-loop-8940b941817e400e9230cad8196bb5b9",
+  "godot_exit": 0,
+  "result_lines": [
+    "SINGLEPLAYER_LOOP_RESULTS passed=60 failed=0"
+  ],
+  "error_lines": [],
+  "sources_before": [
+    {
+      "path": "scripts/core/singleplayer_supply_state.gd",
+      "sha256": "78CB2602BC2184BEE6CD9166934397051494A090998B476344CE58D0C09580EB"
+    },
+    {
+      "path": "scripts/meta/meta_layer_flow.gd",
+      "sha256": "56E574EF4F3C0ADC3FA7F7DA4C6065C2CB08178E9B7F9C9E88DC8DEF369EAF28"
+    },
+    {
+      "path": "scripts/tests/mission_combat_loop_driver.gd",
+      "sha256": "7395376981472005AF226E5CD19D72145F8C1851C8D3DEF6CB59469454302891"
+    },
+    {
+      "path": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "sha256": "8B8ABA444C5EF66BF9D0F7563B1FEE6AE6D0C3A258FB56720E75B5C714F3FFEB"
+    },
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "sha256": "92008225FB2D472CCBB72E7A0F4C6D3E11DD2E9E59EB4FD22AF2E1BC8B6D32AF"
+    },
+    {
+      "path": "scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd",
+      "sha256": "A9B460BE1323D21052C73CA6717FB595DF0EC9BA5A092FD310EDF3DFEDD3119B"
+    }
+  ],
+  "sources_after": [
+    {
+      "path": "scripts/core/singleplayer_supply_state.gd",
+      "sha256": "78CB2602BC2184BEE6CD9166934397051494A090998B476344CE58D0C09580EB"
+    },
+    {
+      "path": "scripts/meta/meta_layer_flow.gd",
+      "sha256": "56E574EF4F3C0ADC3FA7F7DA4C6065C2CB08178E9B7F9C9E88DC8DEF369EAF28"
+    },
+    {
+      "path": "scripts/tests/mission_combat_loop_driver.gd",
+      "sha256": "7395376981472005AF226E5CD19D72145F8C1851C8D3DEF6CB59469454302891"
+    },
+    {
+      "path": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "sha256": "8B8ABA444C5EF66BF9D0F7563B1FEE6AE6D0C3A258FB56720E75B5C714F3FFEB"
+    },
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "sha256": "92008225FB2D472CCBB72E7A0F4C6D3E11DD2E9E59EB4FD22AF2E1BC8B6D32AF"
+    },
+    {
+      "path": "scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd",
+      "sha256": "A9B460BE1323D21052C73CA6717FB595DF0EC9BA5A092FD310EDF3DFEDD3119B"
+    }
+  ],
+  "source_drift_paths": []
+}

@@ -68,8 +68,9 @@ docs/dev/singleplayer_locations_jobs_contract.md und docs/dev/homebase_map_servi
 **Schnittstelle:** Noch keine Produkt-API. Verbindliche IDs, Besitzer und Statusübergänge
 werden hier festgelegt; AP4 konkretisiert sie in prüfbaren Datenhelfern.
 
-- [x] Vor Umsetzung aktuellen Git-/Worktreezustand erneut prüfen; Integrationsbasis kontrolliert auf
-  den benötigten, getesteten Hauptstand bringen; frischen task/-Branch verwenden.
+- [x] Git-/Worktreezustand und Integrationsdrift geprueft; frischen task/-Branch
+  ab aktuellem geprueftem main ed77c1058 verwendet. Der andernorts ausgecheckte,
+  91 Commits aeltere Integrationsbranch bleibt gemaess dokumentierter Entscheidung erhalten.
 - [x] Änderungsbefunde gegen diesen Stand prüfen; vorhandene neue Basis und Owner erhalten.
 - [x] Die Spezifikation als Task-Akzeptanz übernehmen; neue Navigation und Wegfall des regulären
   Erweiterte-Werkzeuge-Wegs festhalten; historische UI-first-Aussage im Brief korrigieren.
@@ -339,17 +340,17 @@ QA-Bericht docs/qa/singleplayer_20261109/README.md mit Rohbelegen;
 Task-/Contract-/Statusdokumente aktualisieren.
 Kein HTML erforderlich; falls später gewünscht, Workbench-Vertrag beachten.
 
-- [ ] Technische Einzelgates der veränderten Pfade zusammen ausführen; vorhandene Source-/Ownerregressionen erhalten.
+- [x] Technische Einzelgates der veränderten Pfade zusammen ausführen; vorhandene Source-/Ownerregressionen erhalten.
 - [ ] In frischem isolierten Profil regulär starten: Basis erkunden → Personal sortieren/Details →
   neuen Trupp per Drag besetzen → ausrüsten → Auftrag annehmen → Ort auf Karte →
   boarden/abfliegen → Satellitenziel → Rückkehr → Handel/Refuel → zurück.
-- [ ] Zweiten Ausflug im selben Lauf prüfen; keine hängenbleibenden Payloads, alten Aufträge,
+- [x] Zweiten Ausflug im selben Lauf prüfen; keine hängenbleibenden Payloads, alten Aufträge,
   doppelten Belohnungen oder verlorenen Personen.
 - [ ] Native Screenshots und echte Eingaben bei 1280×720, 1920×1080 und 3440×1440 prüfen:
   Scroll, Text, Dropdowns, Doppelklick, Dragziele, Rückwege, Welt-/UI-Fokus und Basisinnenräume.
 - [ ] Normale Erkundungs-/Abflugroute kurz profilieren: keine versteckten Vollrebuilds,
   kein unnötiger dauerhaft rendernder Zweitviewport; Ergebnisse statt FPS-Versprechen dokumentieren.
-- [ ] Unabhängiges Code-/Scope-Review. Technisch bestanden, nativ gesehen und vom Nutzer
+- [x] Unabhängiges Code-/Scope-Review. Technisch bestanden, nativ gesehen und vom Nutzer
   gestalterisch angenommen ausdrücklich getrennt berichten.
 - [ ] Aktuellen Branch, lokale Änderungen sowie Commit-/Pushstatus korrekt nennen.
   Integration/Push/Build erst im Rahmen eines dafür autorisierten Folgeauftrags.

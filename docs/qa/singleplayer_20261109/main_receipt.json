@@ -1,0 +1,32 @@
+{
+  "main_before": "ed77c105854bf11b3abfd2c90e32a99bcf62f753",
+  "merged_and_tested_main": "739cc7b6569c44e88bb9a09ffaa1955dc316007f",
+  "product_commit": "6d0e463fe621b07c910104ac125d93cb48cc73b4",
+  "merge_mode": "fast-forward",
+  "full_loop": {
+    "passed": 60,
+    "exit": 0,
+    "source_receipt": "raw/main-loop-tested-sources.json",
+    "errors": 0,
+    "failed": 0,
+    "log": "raw/main-singleplayer-loop.log",
+    "leaks": 0
+  },
+  "quick_smokes": "main-quick-smoke.json",
+  "product_source_comparison": "main-source-content-verification.json",
+  "compared_product_source_files": 52,
+  "actual_source_content_drift": 0,
+  "checkout_eol_differences": [
+    "data/mission_scenarios/satellite_recovery.json",
+    "data/mission_scenarios/trade_outpost_visit.json",
+    "maps/homebase_frontier_exploration.json",
+    "maps/satellite_crash_site.json",
+    "maps/trade_outpost.json",
+    "scripts/meta/meta_layer_flow.gd"
+  ],
+  "preexisting_untracked_text_files_verified": 792,
+  "preexisting_text_byte_drift": 0,
+  "pushed": false,
+  "native_input_acceptance": "open; user requires usable PC, all main checks headless",
+  "documentation_followup": "Receipt commit contains QA/docs only, then local fast-forward to main"
+}
