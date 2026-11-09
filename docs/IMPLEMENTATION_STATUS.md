@@ -5,7 +5,7 @@ Eigener Menueeinstieg mit genau zwei NPCs (Pilot und Leader), kompakter
 22x24-Basis und drei gefuehrten Etappen: Vorbereitung, Satellitenbergung,
 Handel/Betankung mit Heimkehr. Skirmish behaelt das Menue-Team; MP-Einstieg
 bleibt getrennt. Atomare Basis-Checkpoints, echtes Fortsetzen, Popup-/Hoverhilfe.
-Echter Kampagnen-Zweiausflug77/0 inklusive beider Checkpoint-Neuladungen,
+Echter Kampagnen-Zweiausflug77/0, frisch auf Main78/0 inklusive beider Checkpoint-Neuladungen,
 Skirmish-Zweiausflug60/0 und15 fokussierte Gates; ein alter Formations-
 Teardownfehler identisch auf Mainbasis, separat ausgewiesen. Native Bedienung,
 Lernerfolg und neue MP-Abnahme bleiben offen. Nur Hintergrund/Headless, kein Push.

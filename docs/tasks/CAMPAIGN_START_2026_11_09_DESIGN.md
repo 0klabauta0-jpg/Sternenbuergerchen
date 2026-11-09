@@ -1,6 +1,6 @@
 # Kampagnenstart und Skirmish — Entwurf vom 09.11.2026
 
-Status: Konkreter Entwurf am 09.11.2026 vom Nutzer mit „Ja, so umsetzen“ freigegeben; Implementierung und technische Pruefung laufen. Umsetzung siehe `docs/superpowers/plans/2026-11-09-campaign-onboarding.md`.
+Status: Konkreter Entwurf am 09.11.2026 vom Nutzer mit „Ja, so umsetzen“ freigegeben, implementiert und lokal in Main integriert. Frischer Main-Lauf78/0, Skirmish60/0; native Bedienung/Lernerfolg noch offen. Umsetzung siehe `docs/superpowers/plans/2026-11-09-campaign-onboarding.md`, Nachweise in `docs/qa/campaign_intro_20261109/README.md`.
 
 ## Ziel und Ursache
 

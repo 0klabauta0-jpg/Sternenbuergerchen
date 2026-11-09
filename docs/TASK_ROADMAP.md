@@ -3,7 +3,7 @@
 ### Kampagnenstart / Skirmish — 09.11.2026
 Freigegebene Einfuehrung implementiert: genau zwei NPCs, kleine Basis,
 Vorbereitung -> Satellit -> Handel/Tanken/Heimkehr, getrennte Modi und
-Basis-Checkpoints mit Fortsetzen. Kampagne77/0, Skirmish60/0;15 gezielte
+Basis-Checkpoints mit Fortsetzen. Main-Kampagne78/0, Skirmish60/0;15 gezielte
 Gates mit separat belegtem altem Formations-Teardownfehler. Native Abnahme
 bleibt Nutzeraufgabe. docs/qa/campaign_intro_20261109/README.md.
 

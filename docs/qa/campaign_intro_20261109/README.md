@@ -38,4 +38,6 @@ Abschliessendes unabhaengiges Sourcereview: [final-review.md](raw/final-review.m
 
 Speichern erfolgt an sicheren Basis-Meilensteinen. Ein unterbrochener Ausflug faellt beim Fortsetzen auf den letzten Basisstand zurueck; keine Wiederaufnahme mitten im Gefecht. Tests liefen ausschliesslich headless mit privaten Profilen und niedriger Prioritaet, ohne Vordergrundfenster oder Fokuswechsel. Kein Push.
 
-Lokale Mainintegration, frischer Main-Lauf und zugehoeriger EXE-Export werden nach Abschluss separat belegt.
+Lokal in Main integriert, ohne Push. Frischer kompletter Main-Lauf auf Produktcommit `ff1d46d69ab44759e8b7e4adc291e18f5d8ecb9e`: **78/78**, Exit 0, zwei Heimkehren und beide Checkpoint-Neuladungen, einschliesslich zusaetzlichem Endassert fuer die tatsaechlich ausgeuebte transiente GO-Sperre. [Main-Log](raw/main-campaign-final.log), [Main-Nachweis](main_receipt.json). Alle 30 geaenderten Produkt-/Verifierdateien blieben waehrend des Laufs bytegleich; Main getrackt sauber, 3026 vorher unversionierte Pfade weiterhin vorhanden, Exportkonfiguration unveraendert.
+
+Dieser Nachtrag veraendert nur Dokumentation/Evidence. Der anschliessende EXE-Export erhaelt einen eigenen Buildbericht ausserhalb des Repositorys; native Bedienung bleibt Nutzerabnahme.

@@ -1,0 +1,140 @@
+{
+  "tested_main_commit": "ff1d46d69ab44759e8b7e4adc291e18f5d8ecb9e",
+  "campaign_passed": 78,
+  "campaign_failed": 0,
+  "actual_returns": 2,
+  "headless": true,
+  "private_profile": true,
+  "time_scale": 1,
+  "boarding_fixture_advanced": true,
+  "product_hashes_unchanged": true,
+  "product_file_count": 30,
+  "source_hashes": [
+    {
+      "path": "data/contextual_help_catalog.json",
+      "sha256": "82382968BC2B7AE0097ED60DE01799D6EC4A66FC50DE55B2F120BA5F608F3AA6"
+    },
+    {
+      "path": "maps/campaign_intro_base.json",
+      "sha256": "14A2E1528EFCD7DE3274ADE735B89D77F8F9A06625B7C26A58D549D0659A77BE"
+    },
+    {
+      "path": "scripts/core/campaign_onboarding_state.gd",
+      "sha256": "ADA3645344B17EDCFD3B1B7859A46CB17E70CA59CE08134ECE691D2B4DAD42FA"
+    },
+    {
+      "path": "scripts/core/simulation_root.gd",
+      "sha256": "D510354A4C1D1C9E1133A381B27078495B4C80ED46323ED486D4E277D844F9D2"
+    },
+    {
+      "path": "scripts/core/singleplayer_campaign_state.gd",
+      "sha256": "4ADE05C0D4F953CADC52603B918AEC96F49004813884115680A64BFD54FE4493"
+    },
+    {
+      "path": "scripts/core/singleplayer_supply_state.gd",
+      "sha256": "4E45BFA0CA7F6A899DF6C6B974E7C1132C8B952B6034B26A2B75901805EB7560"
+    },
+    {
+      "path": "scripts/meta/campaign_checkpoint_store.gd",
+      "sha256": "1F1F1B35128454CCF559EA091A2484062F1D6536691AD664A9F5F26C977B2F79"
+    },
+    {
+      "path": "scripts/meta/campaign_start_configuration.gd",
+      "sha256": "D979E495490FEB050816A7F828A4E8DB4F1D85CCBC3AF4DB473250D688D288E7"
+    },
+    {
+      "path": "scripts/meta/campaign_tutorial_presenter.gd",
+      "sha256": "C0CCD239BE5D1000A4FB57E1B7A04624879F90A002B3BEAFB6A489A6A3FEAB89"
+    },
+    {
+      "path": "scripts/meta/explorable_homebase.gd",
+      "sha256": "A0EE871EBF2C84E0B40553DD19F649825CC236A99B453CB1E3EDC8488A96627D"
+    },
+    {
+      "path": "scripts/meta/game_start_contract.gd",
+      "sha256": "19505F9E77A43A581C1A2AE3B1E0FA58226D2CC7E856C7BA394E5F4841AC2CAE"
+    },
+    {
+      "path": "scripts/meta/meta_layer_flow.gd",
+      "sha256": "0867D3AE27C43AA6C18103AD736409BF854165967B9D08C252F2ACC1ADDD5370"
+    },
+    {
+      "path": "scripts/meta/singleplayer_job_board_presenter.gd",
+      "sha256": "70CB4E5B0442E3E78215C1A3E19B2DD0E59545AB6A3FE7FEE1C9FA721ED7752E"
+    },
+    {
+      "path": "scripts/meta/singleplayer_region_map_presenter.gd",
+      "sha256": "9044637E1D9F711B019AB5739D76A66B43C681A02B0EF513A597CA8EC5384DC5"
+    },
+    {
+      "path": "scripts/meta/singleplayer_runtime_adapter.gd",
+      "sha256": "4ABAF38D0428177717CF1FA87F2FB6C09646A990A17A740200415F7A50FDDE46"
+    },
+    {
+      "path": "scripts/mission/singleplayer_campaign_command_contract.gd",
+      "sha256": "C28E11E2B96BFB739346B76B4EE96EF560D9E34DFE8639CFC04653A7908B5912"
+    },
+    {
+      "path": "scripts/tactical/fireteam_movement_controller.gd",
+      "sha256": "6BB5B35E90605842E8BDAC8495059DB722D6442337743267D11A8D7E588E9824"
+    },
+    {
+      "path": "scripts/tests/campaign_base_map_test.gd",
+      "sha256": "87E76D23B098BA0F6EB6F75FA99AE1FA8D2CDC6A84D4168099DC9953B9E8C606"
+    },
+    {
+      "path": "scripts/tests/campaign_intro_loop_smoke.gd",
+      "sha256": "B25359AD80D2507B092EBA4ECC27B026AEC693FE1BF5CBE0CC93B7A60B1F3823"
+    },
+    {
+      "path": "scripts/tests/campaign_menu_start_test.gd",
+      "sha256": "C6BCB5235919776DAA57F3F91F84CF4FD36E780202DF8D840F7EF342C3908EC1"
+    },
+    {
+      "path": "scripts/tests/campaign_mission_handoff_test.gd",
+      "sha256": "CF2B44414B03864D6FB33D6394A4FE4FA642513F1A5945E9918FD275B08ABAD7"
+    },
+    {
+      "path": "scripts/tests/campaign_onboarding_state_test.gd",
+      "sha256": "9DD71A446DD6B8051FBCCC719DAC3BFE664CF97A0C2B0A4091A3B36BAB91DDEC"
+    },
+    {
+      "path": "scripts/tests/campaign_preparation_continue_test.gd",
+      "sha256": "551B57F1403B8239D8ECDBFB07D03A8A2F1AD721E3A46BCBAB1D27C9D39CC694"
+    },
+    {
+      "path": "scripts/tests/campaign_retry_boundary_test.gd",
+      "sha256": "E2E5B193044E3E2944D35721FCB58E9FB286618E3BC54F028BDD731BC2034EE9"
+    },
+    {
+      "path": "scripts/tests/campaign_single_leader_formation_test.gd",
+      "sha256": "E9187573F666EB4A2E1019B256A7BDE4561E2CF818EF269F696C568137F4FD75"
+    },
+    {
+      "path": "scripts/tests/campaign_start_integration_test.gd",
+      "sha256": "C6694628F85A4131294F6AAEA6990FD9A409920B5B1F090BF8D374B4A5117DEE"
+    },
+    {
+      "path": "scripts/tests/campaign_tutorial_presenter_test.gd",
+      "sha256": "F018505323446C8B94B667713E649625EFA95C893203CE4D41835372E3F5CE09"
+    },
+    {
+      "path": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "sha256": "6BE9279FF1103E2F09C32AACD56FB58C354E0DFC99EA9D3C33BC780A961BF5ED"
+    },
+    {
+      "path": "scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd",
+      "sha256": "BFEDD28F329827A42FD72D7643F8AE2F7F2CB94ED0A1F09E7BC0A5D2A5466E44"
+    },
+    {
+      "path": "scripts/ui/main_menu_screen.gd",
+      "sha256": "5953F52E663A6113A63807F6F7C295993EE0312F6BE9394076B2D4E929ECA9FC"
+    }
+  ],
+  "tracked_main_clean": true,
+  "preexisting_untracked_count": 3026,
+  "preserved_untracked_paths": 3026,
+  "main_preset_sha256": "A297F5FAE7513DEF5FE2FB946303766D725E63942B66BB64C1F056CA5BEA1018",
+  "push": false,
+  "visible_launch": false
+}
