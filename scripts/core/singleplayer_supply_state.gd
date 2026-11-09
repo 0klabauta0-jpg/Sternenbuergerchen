@@ -189,3 +189,62 @@ func _valid_positive_integer(value: Variant) -> bool:
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
+
+func export_state() -> Dictionary:
+	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision}
+
+func restore_state(data: Dictionary) -> Dictionary:
+	var fresh = get_script().new()
+	if not fresh.configure().get("ok", false):
+		return _reject("invalid_supply_data", "Aktuelle Versorgungsdaten fehlen")
+	if data.get("schema_version") != 1 or not _valid_nonnegative_integer(data.get("credits")) or not _valid_nonnegative_integer(data.get("revision")):
+		return _reject("invalid_supply_state", "Versorgungsstand ungueltig")
+	for field in ["definitions", "item_quantities", "fuel_by_craft_id", "stock_by_offer_id", "requests", "reward_receipts"]:
+		if typeof(data.get(field)) != TYPE_DICTIONARY:
+			return _reject("invalid_supply_state", "Versorgungsfelder fehlen")
+	if JSON.stringify(data.definitions, "", true) != JSON.stringify(fresh._definitions, "", true):
+		return _reject("stale_supply_definitions", "Versorgungsdefinition geaendert")
+	var items: Array = []
+	for offer in fresh._definitions.offers.values():
+		items.append(String(offer.item_id))
+	for item_id in data.item_quantities:
+		if not items.has(String(item_id)) or not _valid_nonnegative_integer(data.item_quantities[item_id]):
+			return _reject("invalid_inventory", "Inventar ungueltig")
+	if data.stock_by_offer_id.size() != fresh._stock_by_offer_id.size():
+		return _reject("invalid_stock", "Angebotsbestand ungueltig")
+	for offer_id in fresh._stock_by_offer_id:
+		if not _valid_nonnegative_integer(data.stock_by_offer_id.get(offer_id)) or float(data.stock_by_offer_id[offer_id]) > float(fresh._stock_by_offer_id[offer_id]):
+			return _reject("invalid_stock", "Angebotsbestand ungueltig")
+	for craft_id in data.fuel_by_craft_id:
+		if typeof(craft_id) != TYPE_STRING or String(craft_id).is_empty() or not _valid_nonnegative_number(data.fuel_by_craft_id[craft_id]) or float(data.fuel_by_craft_id[craft_id]) > float(fresh._definitions.fuel_capacity):
+			return _reject("invalid_fuel", "Treibstoff ungueltig")
+	var campaign = load("res://scripts/core/singleplayer_campaign_state.gd").new()
+	campaign.configure()
+	var jobs: Dictionary = campaign.get_campaign_snapshot().jobs
+	for receipt_id in data.reward_receipts:
+		var receipt: Variant = data.reward_receipts[receipt_id]
+		if typeof(receipt) != TYPE_DICTIONARY or not jobs.has(receipt.get("job_id", "")):
+			return _reject("invalid_reward_receipt", "Belohnungsbeleg ungueltig")
+		var job: Dictionary = jobs[receipt.job_id]
+		if receipt_id != String(receipt.job_id) + ":completed" or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or receipt.get("scenario_id") != job.scenario_id or JSON.stringify(JSON.parse_string(JSON.stringify(receipt.get("reward"))), "", true) != JSON.stringify(JSON.parse_string(JSON.stringify(job.reward)), "", true):
+			return _reject("invalid_reward_receipt", "Belohnungsbeleg widerspricht Auftrag")
+	for request_id in data.requests:
+		var request: Variant = data.requests[request_id]
+		if typeof(request_id) != TYPE_STRING or String(request_id).strip_edges().is_empty() or typeof(request) != TYPE_DICTIONARY or typeof(request.get("signature")) != TYPE_STRING or typeof(request.get("result")) != TYPE_DICTIONARY or request.result.get("ok") != true:
+			return _reject("invalid_requests", "Anfragebelege ungueltig")
+		var signature: Variant = JSON.parse_string(request.signature)
+		if typeof(signature) != TYPE_DICTIONARY or typeof(signature.get("payload")) != TYPE_DICTIONARY or typeof(signature.get("operation")) != TYPE_STRING or not COMMANDS.validate_command(COMMANDS.build_command(signature.operation, signature.payload, request_id)) or request.result.get("request_id") != request_id or request.result.get("operation") != signature.operation:
+			return _reject("invalid_requests", "Anfragebeleg widerspricht Signatur")
+	_definitions = fresh._definitions.duplicate(true)
+	_credits = int(data.credits)
+	_item_quantities = data.item_quantities.duplicate(true)
+	_fuel_by_craft_id = data.fuel_by_craft_id.duplicate(true)
+	_stock_by_offer_id = data.stock_by_offer_id.duplicate(true)
+	for item_id in _item_quantities:
+		_item_quantities[item_id] = int(_item_quantities[item_id])
+	for offer_id in _stock_by_offer_id:
+		_stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id])
+	_requests = data.requests.duplicate(true)
+	_reward_receipts = data.reward_receipts.duplicate(true)
+	_revision = int(data.revision)
+	return {"ok":true}

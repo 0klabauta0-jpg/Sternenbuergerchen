@@ -80,6 +80,7 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"activate_job": result = _activate(payload, authority_context)
 		"complete_job": result = _complete(payload, authority_context)
 		"fail_job": result = _fail(payload, authority_context)
+		"retry_failed_job": result = _retry_failed(payload)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
 	if bool(result.get("ok", false)):
 		result["request_id"] = request_id
@@ -194,3 +195,99 @@ func _fail(payload: Dictionary, context: Dictionary) -> Dictionary:
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
+
+func _retry_failed(payload: Dictionary) -> Dictionary:
+	var job_id := String(payload.get("job_id", ""))
+	if not _jobs.has(job_id) or String(_jobs[job_id].status) != "failed" or _completion_receipts.has(job_id + ":completed"):
+		return _reject("job_not_failed", "Nur fehlgeschlagene Auftraege erneut annehmen")
+	_jobs[job_id].status = "accepted"
+	_jobs[job_id].erase("craft_id")
+	for craft_id in _departures_by_craft_id.keys():
+		if String(_departures_by_craft_id[craft_id].get("job_id", "")) == job_id:
+			_departures_by_craft_id.erase(craft_id)
+	_revision += 1
+	return {"ok":true,"job_id":job_id,"message":"Auftrag erneut angenommen"}
+
+func export_state() -> Dictionary:
+	var state := get_campaign_snapshot()
+	state["schema_version"] = 1
+	state["requests"] = _requests.duplicate(true)
+	return state
+
+func restore_state(data: Dictionary) -> Dictionary:
+	# Rebuild definitions from current content, never trust persisted mission/reward definitions.
+	var fresh = get_script().new()
+	if not fresh.configure().get("ok", false):
+		return _reject("invalid_definitions", "Aktuelle Auftragsdaten fehlen")
+	var result: Dictionary = fresh._validate_saved_state(data)
+	if not result.ok:
+		return result
+	_locations = fresh._locations.duplicate(true)
+	_jobs = fresh._jobs.duplicate(true)
+	for job_id in _jobs:
+		_jobs[job_id].status = String(data.jobs[job_id].status)
+		if data.jobs[job_id].has("craft_id"):
+			_jobs[job_id]["craft_id"] = String(data.jobs[job_id].craft_id)
+	_selected_location_id = String(data.selected_location_id)
+	_selected_job_id = String(data.selected_job_id)
+	_departures_by_craft_id = data.departures_by_craft_id.duplicate(true)
+	_completion_receipts = data.completion_receipts.duplicate(true)
+	_requests = data.requests.duplicate(true)
+	_revision = int(data.revision)
+	return {"ok":true}
+
+func _validate_saved_state(data: Dictionary) -> Dictionary:
+	if data.get("schema_version") != 1 or not _saved_integer(data.get("revision")):
+		return _reject("invalid_campaign_state", "Kampagnenstand ungueltig")
+	for field in ["locations", "jobs", "departures_by_craft_id", "completion_receipts", "requests"]:
+		if typeof(data.get(field)) != TYPE_DICTIONARY:
+			return _reject("invalid_campaign_state", "Kampagnenfelder fehlen")
+	if JSON.stringify(data.locations, "", true) != JSON.stringify(_locations, "", true) or data.jobs.size() != _jobs.size() or not _locations.has(data.get("selected_location_id", "")):
+		return _reject("stale_campaign_definitions", "Ortsdaten geaendert")
+	for job_id in _jobs:
+		if typeof(data.jobs.get(job_id)) != TYPE_DICTIONARY:
+			return _reject("invalid_job_state", "Auftrag fehlt")
+		var saved: Dictionary = data.jobs[job_id].duplicate(true)
+		if String(saved.get("status", "")) not in ["offered", "accepted", "active", "completed", "failed"]:
+			return _reject("invalid_job_status", "Auftragsstatus ungueltig")
+		var status := String(saved.status)
+		saved["status"] = "offered"
+		saved.erase("craft_id")
+		if JSON.stringify(JSON.parse_string(JSON.stringify(saved)), "", true) != JSON.stringify(JSON.parse_string(JSON.stringify(_jobs[job_id])), "", true):
+			return _reject("stale_job_definition", "Auftragsdefinition geaendert")
+		var receipt_id := String(job_id) + ":completed"
+		if (status == "completed") != data.completion_receipts.has(receipt_id):
+			return _reject("invalid_completion_receipt", "Auftragsbeleg fehlt")
+	for receipt_id in data.completion_receipts:
+		var receipt: Variant = data.completion_receipts[receipt_id]
+		if typeof(receipt) != TYPE_DICTIONARY or not _jobs.has(receipt.get("job_id", "")):
+			return _reject("invalid_completion_receipt", "Auftragsbeleg ungueltig")
+		var job: Dictionary = _jobs[receipt.job_id]
+		if String(receipt_id) != String(receipt.job_id) + ":completed" or receipt.get("completion_id") != receipt_id or receipt.get("runtime_verified") != true or receipt.get("scenario_id") != job.scenario_id or not _saved_equal(receipt.get("reward"), job.reward):
+			return _reject("invalid_completion_receipt", "Auftragsbeleg widerspricht Daten")
+	for craft_id in data.departures_by_craft_id:
+		var departure: Variant = data.departures_by_craft_id[craft_id]
+		if typeof(departure) != TYPE_DICTIONARY or departure.get("craft_id") != craft_id or not _locations.has(departure.get("origin_location_id", "")) or not _locations.has(departure.get("destination_location_id", "")):
+			return _reject("invalid_saved_departure", "Abflugstand ungueltig")
+		if not Array(_locations[departure.origin_location_id].landing_pad_ids).has(departure.get("landing_pad_id", "")) or departure.origin_location_id == departure.destination_location_id:
+			return _reject("invalid_saved_departure", "Abflugpad ungueltig")
+		var departure_job := String(departure.get("job_id", ""))
+		if not departure_job.is_empty() and (not _jobs.has(departure_job) or String(data.jobs[departure_job].location_id) != String(departure.destination_location_id)):
+			return _reject("invalid_saved_departure", "Abflugstand ungueltig")
+	var selected := String(data.get("selected_job_id", ""))
+	if not selected.is_empty() and (not _jobs.has(selected) or String(data.jobs[selected].status) not in ["accepted", "active"] or String(data.jobs[selected].location_id) != String(data.selected_location_id)):
+		return _reject("invalid_selected_job", "Auftragsauswahl ungueltig")
+	for request_id in data.requests:
+		var request: Variant = data.requests[request_id]
+		if typeof(request_id) != TYPE_STRING or String(request_id).strip_edges().is_empty() or typeof(request) != TYPE_DICTIONARY or typeof(request.get("signature")) != TYPE_STRING or typeof(request.get("result")) != TYPE_DICTIONARY or request.result.get("ok") != true:
+			return _reject("invalid_requests", "Anfragebelege ungueltig")
+		var signature: Variant = JSON.parse_string(request.signature)
+		if typeof(signature) != TYPE_DICTIONARY or typeof(signature.get("payload")) != TYPE_DICTIONARY or typeof(signature.get("operation")) != TYPE_STRING or not COMMANDS.validate_command(COMMANDS.build_command(signature.operation, signature.payload, request_id)) or request.result.get("request_id") != request_id or request.result.get("operation") != signature.operation:
+			return _reject("invalid_requests", "Anfragebeleg widerspricht Signatur")
+	return {"ok":true}
+
+func _saved_integer(value: Variant) -> bool:
+	return typeof(value) in [TYPE_INT, TYPE_FLOAT] and is_finite(float(value)) and float(value) >= 0 and float(value) == floor(float(value)) and float(value) <= 2147483647
+
+func _saved_equal(a: Variant, b: Variant) -> bool:
+	return JSON.stringify(JSON.parse_string(JSON.stringify(a)), "", true) == JSON.stringify(JSON.parse_string(JSON.stringify(b)), "", true)
