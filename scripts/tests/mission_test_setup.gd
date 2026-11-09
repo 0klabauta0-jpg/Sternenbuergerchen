@@ -229,6 +229,13 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 			unit_id = _get_selected_unit_id_for_friendly_slot(friendly_slot_index, unit_id)
 			friendly_slot_index += 1
 		elif unit_team_id != team_id:
+			# Explicit peaceful singleplayer scenarios own zero enemy slots.
+			# Historical scenarios retain their preplaced fallback roster.
+			if _mission_scenario != null and bool(_mission_scenario.call("is_noncombat_singleplayer")):
+				unit.process_mode = Node.PROCESS_MODE_DISABLED
+				if unit is CanvasItem:
+					unit.visible = false
+				continue
 			unit_id = _get_scenario_enemy_id_for_slot(enemy_assignment_slot_index, unit_id)
 			enemy_assignment_slot_index += 1
 
@@ -453,6 +460,8 @@ func get_expected_unit_presence_snapshot() -> Dictionary:
 		elif unit_team_id == "team_unused":
 			inactive_friendly_unit_ids.append(unit_id)
 		else:
+			if _mission_scenario != null and bool(_mission_scenario.call("is_noncombat_singleplayer")):
+				continue
 			enemy_unit_ids.append(unit_id)
 	friendly_unit_ids.sort()
 	inactive_friendly_unit_ids.sort()

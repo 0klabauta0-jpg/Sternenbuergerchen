@@ -421,7 +421,7 @@ func request_mission_evacuation() -> Dictionary:
 func configure_scenario_runtime_gates_from_file(path: String) -> bool:
 	if _mission_scenario_runtime_gates == null:
 		return false
-	_mission_interaction_runtime_states.clear()
+	_reset_scenario_gate_inputs()
 	var scenario: Dictionary = {}
 	if not path.strip_edges().is_empty() and FileAccess.file_exists(path):
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -442,7 +442,7 @@ func configure_scenario_runtime_gates_from_file(path: String) -> bool:
 func configure_scenario_runtime_gates(slice: Dictionary) -> bool:
 	if _mission_scenario_runtime_gates == null:
 		return false
-	_mission_interaction_runtime_states.clear()
+	_reset_scenario_gate_inputs()
 	_configure_mission_interaction_door_runtime_bindings({"vertical_slice": slice})
 	_mission_scenario_runtime_gates.call("configure_from_slice", slice)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
@@ -453,6 +453,16 @@ func configure_scenario_runtime_gates(slice: Dictionary) -> bool:
 	if _runs_local_authority:
 		_sync_objective_countdown_state()
 	return bool(_mission_scenario_runtime_gates.call("is_configured"))
+
+
+func _reset_scenario_gate_inputs() -> void:
+	# A newly configured scenario must not re-import the previous sortie's
+	# completion inputs into its freshly reset gate evaluator.
+	_mission_interaction_runtime_states.clear()
+	_mission_scenario_runtime_step_states.clear()
+	_mission_scenario_completed_step_ids.clear()
+	_mission_scenario_cargo_state = ""
+	_mission_scenario_cargo_hold_seconds = 0.0
 
 
 func get_mission_scenario_runtime_gate_snapshot() -> Dictionary:

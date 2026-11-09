@@ -5,6 +5,7 @@ const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const MISSION_INTERACTION_POINT_BINDING_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_point_binding.gd")
+const SLICE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_vertical_slice_contract.gd")
 
 const CONTRACT_VERSION: int = 1
 const DEFAULT_CAPTURE_RADIUS: float = 80.0
@@ -195,6 +196,10 @@ func validate() -> Dictionary:
 	_validate_tactical_authoring(terrain_map_data, errors)
 	_validate_briefing(errors)
 	_validate_interaction_points(terrain_map_data, errors)
+	if String(vertical_slice.get("scenario_kind", "")) in ["singleplayer_job", "singleplayer_visit"]:
+		var slice_validation: Dictionary = SLICE_CONTRACT_SCRIPT.validate_slice(SLICE_CONTRACT_SCRIPT.normalize_slice(vertical_slice), terrain_map_data)
+		for issue in slice_validation.errors:
+			errors.append(String(issue))
 
 	return {
 		"valid": errors.is_empty(),
@@ -379,11 +384,19 @@ func _validate_objective(terrain_map_data, errors: PackedStringArray) -> void:
 		errors.append("objective.capture_radius must be > 0")
 
 
+func is_noncombat_singleplayer() -> bool:
+	return String(vertical_slice.get("scenario_kind", "")) in ["singleplayer_job", "singleplayer_visit"] \
+		and enemy_groups.is_empty() and int(wave_config.get("wave_count", -1)) == 0 \
+		and not Array(vertical_slice.get("flow_steps", [])).is_empty() \
+		and not Array(vertical_slice.get("interaction_points", [])).is_empty()
+
+
 func _validate_enemy_groups(terrain_map_data, errors: PackedStringArray) -> PackedStringArray:
 	var result: PackedStringArray = PackedStringArray()
 	var seen: Dictionary = {}
 	if enemy_groups.is_empty():
-		errors.append("enemy_groups needs at least one group")
+		if not is_noncombat_singleplayer():
+			errors.append("enemy_groups needs at least one group")
 		return result
 
 	for group_index in range(enemy_groups.size()):

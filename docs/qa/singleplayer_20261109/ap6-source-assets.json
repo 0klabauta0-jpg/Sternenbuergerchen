@@ -1,0 +1,51 @@
+[
+  {
+    "map": "maps/satellite_crash_site.json",
+    "sha256": "13b2bf393fcd7ca8c73d8a2a731da0be6c2c2b4e67ef0ae826e816c0d8733f2f",
+    "status": "existing unchanged native catalog model, authored arrangement candidate",
+    "type_id": "spacekit_rock_large_a",
+    "model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_largeA.glb"
+  },
+  {
+    "map": "maps/satellite_crash_site.json",
+    "sha256": "db27a561b66fabda45a6ce2bcf41d650852e89e15bb9f63b68133ad1293aed8b",
+    "status": "existing unchanged native catalog model, authored arrangement candidate",
+    "type_id": "spacekit_satellite_dish",
+    "model_path": "res://Assets/kenney_space-kit/Models/GLTF format/satelliteDish.glb"
+  },
+  {
+    "map": "maps/satellite_crash_site.json",
+    "sha256": "143dd36b2c427e3201110967a18fd836bc7aa8002dbf3e44efa42c75fbb44ae5",
+    "status": "existing unchanged native catalog model, authored arrangement candidate",
+    "type_id": "spacekit_satellite_dish_detailed",
+    "model_path": "res://Assets/kenney_space-kit/Models/GLTF format/satelliteDish_detailed.glb"
+  },
+  {
+    "map": "maps/satellite_crash_site.json",
+    "sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0",
+    "status": "existing unchanged native catalog model, authored arrangement candidate",
+    "type_id": "station_container_wide",
+    "model_path": "res://Assets/curated/kenney/space_station/models/container-wide.glb"
+  },
+  {
+    "map": "maps/trade_outpost.json",
+    "sha256": "13b2bf393fcd7ca8c73d8a2a731da0be6c2c2b4e67ef0ae826e816c0d8733f2f",
+    "status": "existing unchanged native catalog model, authored arrangement candidate",
+    "type_id": "spacekit_rock_large_a",
+    "model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_largeA.glb"
+  },
+  {
+    "map": "maps/trade_outpost.json",
+    "sha256": "dede29d81fd122c484af3e0dbf566f34893ed0f3c80182586feb19b23c33c0b7",
+    "status": "existing unchanged native catalog model, authored arrangement candidate",
+    "type_id": "station_computer",
+    "model_path": "res://Assets/curated/kenney/space_station/models/computer.glb"
+  },
+  {
+    "map": "maps/trade_outpost.json",
+    "sha256": "3bed318d187ce26b816b7f84b706ecb57cffef94ab1bb8266ca91aa35073e6f0",
+    "status": "existing unchanged native catalog model, authored arrangement candidate",
+    "type_id": "station_container_wide",
+    "model_path": "res://Assets/curated/kenney/space_station/models/container-wide.glb"
+  }
+]

@@ -32,6 +32,7 @@ static func normalize_slice(value: Variant) -> Dictionary:
 	var raw: Dictionary = Dictionary(value)
 	var result: Dictionary = {
 		"contract_version": maxi(int(raw.get("contract_version", CONTRACT_VERSION)), CONTRACT_VERSION),
+		"scenario_kind": String(raw.get("scenario_kind", "frontier_slice")).strip_edges(),
 		"play_modes": _normalize_string_array(raw.get("play_modes", [])),
 		"team_slots": _normalize_team_slots(raw.get("team_slots", [])),
 		"flow_steps": _normalize_flow_steps(raw.get("flow_steps", [])),
@@ -48,7 +49,12 @@ static func validate_slice(slice: Dictionary, terrain_map_data = null) -> Dictio
 		return {"valid": false, "errors": errors}
 
 	var play_modes: PackedStringArray = PackedStringArray(slice.get("play_modes", PackedStringArray()))
-	for required_mode in REQUIRED_PLAY_MODES:
+	var kind: String = String(slice.get("scenario_kind", "frontier_slice"))
+	var singleplayer_use: bool = kind in ["singleplayer_job", "singleplayer_visit"]
+	if kind not in ["frontier_slice", "singleplayer_job", "singleplayer_visit"]:
+		errors.append("vertical_slice.scenario_kind is not supported: %s" % kind)
+	var required_modes: PackedStringArray = PackedStringArray(["singleplayer"]) if singleplayer_use else REQUIRED_PLAY_MODES
+	for required_mode in required_modes:
 		if not play_modes.has(required_mode):
 			errors.append("vertical_slice.play_modes missing %s" % required_mode)
 
@@ -63,7 +69,7 @@ static func validate_slice(slice: Dictionary, terrain_map_data = null) -> Dictio
 		_validate_marker_reference("vertical_slice.team_slots[%s].spawn_marker_id" % team_id, String(team_slot.get("spawn_marker_id", "")), terrain_map_data, errors)
 	if not team_ids.has("team_alpha"):
 		errors.append("vertical_slice.team_slots missing team_alpha")
-	if not team_ids.has("team_bravo"):
+	if not singleplayer_use and not team_ids.has("team_bravo"):
 		errors.append("vertical_slice.team_slots missing team_bravo")
 
 	var objective_types: PackedStringArray = PackedStringArray()
@@ -80,9 +86,12 @@ static func validate_slice(slice: Dictionary, terrain_map_data = null) -> Dictio
 		_validate_marker_reference("vertical_slice.flow_steps[%s].target_marker_id" % step_id, String(step.get("target_marker_id", "")), terrain_map_data, errors)
 		if float(step.get("min_hold_seconds", 0.0)) < 0.0:
 			errors.append("vertical_slice.flow_steps[%s].min_hold_seconds must be >= 0" % step_id)
-	for required_type in REQUIRED_OBJECTIVE_TYPES:
-		if not objective_types.has(required_type):
-			errors.append("vertical_slice.flow_steps missing %s" % required_type)
+	if not singleplayer_use:
+		for required_type in REQUIRED_OBJECTIVE_TYPES:
+			if not objective_types.has(required_type):
+				errors.append("vertical_slice.flow_steps missing %s" % required_type)
+	else:
+		_validate_singleplayer_use_steps(slice, errors)
 
 	var interaction_validation: Dictionary = Dictionary(MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("validate_bindings", Array(slice.get("interaction_points", [])), terrain_map_data))
 	for error_variant in PackedStringArray(interaction_validation.get("errors", PackedStringArray())):
@@ -92,6 +101,26 @@ static func validate_slice(slice: Dictionary, terrain_map_data = null) -> Dictio
 		"valid": errors.is_empty(),
 		"errors": errors,
 	}
+
+
+static func _validate_singleplayer_use_steps(slice: Dictionary, errors: PackedStringArray) -> void:
+	var steps: Array = Array(slice.get("flow_steps", []))
+	var ids: Dictionary = {}
+	if steps.is_empty():
+		errors.append("singleplayer slice requires explicit runtime steps")
+	for step in steps:
+		var id: String = String(step.get("step_id", ""))
+		if ids.has(id):
+			errors.append("singleplayer slice has duplicate step_id: %s" % id)
+		ids[id] = true
+		if String(step.get("required_state", "")).is_empty():
+			errors.append("singleplayer step %s requires an explicit completion state" % id)
+	for step in steps:
+		var required: String = String(step.get("requires_step_id", ""))
+		if not required.is_empty() and (not ids.has(required) or required == String(step.get("step_id", ""))):
+			errors.append("singleplayer step has invalid dependency: %s" % required)
+	if Array(slice.get("interaction_points", [])).is_empty():
+		errors.append("singleplayer slice requires explicit Use bindings")
 
 
 static func get_step_by_type(slice: Dictionary, objective_type: String) -> Dictionary:

@@ -1,0 +1,5856 @@
+{
+  "map_name": "satellite_crash_site",
+  "grid_topology": "hex_axial_v1",
+  "grid_size": {
+    "x": 22,
+    "y": 18
+  },
+  "grid_origin": {
+    "x": 1536,
+    "y": 64
+  },
+  "tile_size": {
+    "half_width": 64,
+    "half_height": 32
+  },
+  "terrain_visual_theme_id": "frontier_illustrated_v1",
+  "mission_slot_count": 4,
+  "markers": {
+    "spawn_alpha": {
+      "x": 1726.3181157357553,
+      "y": 768.8409421321223,
+      "marker_type_id": "spawn_alpha",
+      "name": "Landepad / Schiff",
+      "placement_context": "editor_only",
+      "symbol": "circle"
+    },
+    "spawn_bravo": {
+      "x": 2360.041238209143,
+      "y": 1251.9793808954284,
+      "marker_type_id": "spawn_bravo",
+      "name": "Unbenutzter Szenarioanker",
+      "placement_context": "editor_only",
+      "symbol": "circle"
+    },
+    "objective_point": {
+      "x": 2116.5949932623676,
+      "y": 797.7025033688162,
+      "marker_type_id": "objective_point",
+      "name": "Satellitendaten sichern",
+      "placement_context": "editor_only",
+      "symbol": "circle"
+    },
+    "satellite_data": {
+      "x": 2116.5949932623676,
+      "y": 797.7025033688162,
+      "marker_type_id": "interaction_computer",
+      "name": "Satellitendaten bergen",
+      "placement_context": "editor_only",
+      "symbol": "circle"
+    },
+    "ship_return": {
+      "x": 1726.3181157357553,
+      "y": 768.8409421321223,
+      "marker_type_id": "interaction_hold_zone",
+      "name": "Zum Schiff zurückkehren",
+      "placement_context": "editor_only",
+      "symbol": "circle"
+    }
+  },
+  "patrol_paths": {},
+  "enemy_team_configs": {},
+  "tiles": [
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 0
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 29
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 58
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 87
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 116
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 145
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 174
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 203
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 232
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 261
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 290
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 319
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 348
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 377
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 406
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 435
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 464
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 0,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 493
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 29
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 1,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 522
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 58
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 2,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 551
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 87
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 3,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 580
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 116
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 4,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 609
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 145
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 5,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 638
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 174
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 6,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 667
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 203
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 7,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 696
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 232
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 8,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 725
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 261
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 9,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 754
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 290
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 10,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 783
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 319
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 11,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 812
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 348
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 12,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 841
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 377
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_satellite_dish",
+      "object_rotation_degrees": 220
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_satellite_dish_detailed",
+      "object_rotation_degrees": 125
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 13,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 870
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 406
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "station_container_wide",
+      "object_rotation_degrees": 37
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 14,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 899
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 435
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 15,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 928
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 464
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 16,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 957
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 493
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 17,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 986
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 522
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 18,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 1015
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 551
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 19,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 1044
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 580
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "road",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": false,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "ground",
+      "type_id": "ground_flat",
+      "walkable": true
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 20,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 1073
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 0
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 609
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 1
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 638
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 2
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 667
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 3
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 696
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 4
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 725
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 5
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 754
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 6
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 783
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 7
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 812
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 8
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 841
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 9
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 870
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 10
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 899
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 11
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 928
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 12
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 957
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 13
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 986
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 14
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 1015
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 15
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 1044
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 16
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 1073
+    },
+    {
+      "blocks_los": true,
+      "cover_value": 0,
+      "edge_type": "none",
+      "grid_position": {
+        "x": 21,
+        "y": 17
+      },
+      "height_level": 0,
+      "object_height": 0,
+      "surface_type": "rock",
+      "type_id": "ground_flat",
+      "walkable": false,
+      "object_type_id": "spacekit_rock_large_a",
+      "object_scale": 0.8,
+      "object_rotation_degrees": 1102
+    }
+  ],
+  "singleplayer_site": {
+    "landing_pads": [
+      {
+        "id": "satellite_pad_01",
+        "marker_id": "ship_return",
+        "grid": [
+          7,
+          11
+        ]
+      }
+    ],
+    "visual_status": "authored candidate reusing existing native catalog assets; no user style approval",
+    "location_id": "satellite_crash"
+  }
+}
