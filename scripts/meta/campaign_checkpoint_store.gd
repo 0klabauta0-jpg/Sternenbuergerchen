@@ -18,7 +18,7 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 	if String(leader.get("roster_role_category", "")) != "operator" or String(pilot.get("roster_role_category", "")) != "pilot" or not _positive_number(leader.get("skill_leadership", Dictionary(leader.get("skill_values", {})).get("leadership", 0))) or not _positive_number(pilot.get("dropship_piloting")):
 		return {"ok":false,"reason":"invalid_campaign_roles"}
 	var craft: Dictionary = payload.craft
-	if typeof(craft.get("definition")) != TYPE_DICTIONARY or String(craft.definition.get("craft_id", "")).is_empty() or craft.get("pilot_id", "") != pilot.unit_id or craft.definition.get("craft_type") != "dropship":
+	if typeof(craft.get("definition")) != TYPE_DICTIONARY or String(craft.definition.get("craft_id", "")).is_empty() or typeof(craft.get("pilot_id")) != TYPE_STRING or not String(craft.pilot_id) in ["", String(pilot.unit_id)] or craft.definition.get("craft_type") != "dropship":
 		return {"ok":false,"reason":"invalid_campaign_craft"}
 	for field in ["staged_unit_ids", "staged_fireteam_ids", "fireteam_definitions"]:
 		if craft.has(field) and typeof(craft[field]) != TYPE_ARRAY:
@@ -27,15 +27,41 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		if craft.has(field) and typeof(craft[field]) != TYPE_DICTIONARY:
 			return {"ok":false,"reason":"invalid_craft_field"}
 	for unit_id in craft.get("staged_unit_ids", []):
-		if typeof(unit_id) != TYPE_STRING or not ids.has(unit_id) or unit_id == craft.pilot_id:
+		if typeof(unit_id) != TYPE_STRING or not ids.has(unit_id) or unit_id == pilot.unit_id:
 			return {"ok":false,"reason":"invalid_staged_unit"}
 	for unit_id in craft.get("member_loadouts", {}):
 		if not ids.has(unit_id) or typeof(craft.member_loadouts[unit_id]) != TYPE_DICTIONARY:
 			return {"ok":false,"reason":"invalid_saved_loadout"}
 	var fireteam_ids: Array = []
 	for definition in craft.get("fireteam_definitions", []):
-		if typeof(definition) != TYPE_DICTIONARY or typeof(definition.get("id")) != TYPE_STRING or String(definition.id).is_empty() or fireteam_ids.has(definition.id) or not ids.has(definition.get("lead_unit_id", "")) or definition.lead_unit_id == craft.pilot_id:
+		if typeof(definition) != TYPE_DICTIONARY or typeof(definition.get("id")) != TYPE_STRING or String(definition.id).is_empty() or fireteam_ids.has(definition.id) or typeof(definition.get("lead_unit_id")) != TYPE_STRING:
 			return {"ok":false,"reason":"invalid_saved_fireteam"}
+		var lead_id: String = definition.lead_unit_id
+		if not lead_id.is_empty() and (not ids.has(lead_id) or lead_id == pilot.unit_id):
+			return {"ok":false,"reason":"invalid_saved_fireteam_lead"}
+		var member_ids: Array = []
+		for field in ["member_unit_ids", "members"]:
+			if not definition.has(field):
+				continue
+			if typeof(definition[field]) not in [TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY]:
+				return {"ok":false,"reason":"invalid_saved_fireteam_members"}
+			var seen: Array = []
+			for member in definition[field]:
+				var member_id: Variant = member.get("unit_id", member.get("id", "")) if typeof(member) == TYPE_DICTIONARY else member
+				if typeof(member_id) != TYPE_STRING or not ids.has(member_id) or member_id == pilot.unit_id or seen.has(member_id):
+					return {"ok":false,"reason":"invalid_saved_fireteam_member"}
+				seen.append(member_id)
+				if not member_ids.has(member_id):
+					member_ids.append(member_id)
+		if typeof(definition.get("member_loadouts", {})) != TYPE_DICTIONARY:
+			return {"ok":false,"reason":"invalid_saved_fireteam_loadouts"}
+		for member_id in definition.get("member_loadouts", {}):
+			if not ids.has(member_id) or member_id == pilot.unit_id or typeof(definition.member_loadouts[member_id]) != TYPE_DICTIONARY:
+				return {"ok":false,"reason":"invalid_saved_fireteam_loadout"}
+			if not member_ids.has(member_id):
+				member_ids.append(member_id)
+		if lead_id.is_empty() and not member_ids.is_empty():
+			return {"ok":false,"reason":"missing_saved_fireteam_lead"}
 		fireteam_ids.append(definition.id)
 	for fireteam_id in craft.get("staged_fireteam_ids", []):
 		if not fireteam_ids.has(fireteam_id):

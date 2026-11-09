@@ -83,6 +83,40 @@ func _initialize() -> void:
 	bad.roster[0].unit_id = "pilot"
 	check(not store.save_checkpoint(bad, checkpoint).ok, "duplicate identities rejected")
 	check(store.load_checkpoint(checkpoint).ok, "invalid save keeps old checkpoint")
+	var preparation: Dictionary = payload.duplicate(true)
+	preparation.craft.pilot_id = ""
+	preparation.craft.staged_unit_ids = []
+	preparation.craft.staged_fireteam_ids = []
+	preparation.craft.fireteam_definitions = [{"id":"ft1","lead_unit_id":"leader","member_unit_ids":["leader"],"member_loadouts":{"leader":{}}},{"id":"ft2","lead_unit_id":"","member_unit_ids":[],"member_loadouts":{}}]
+	check(store.save_checkpoint(preparation, checkpoint).ok, "unassigned pilot and empty fireteam preparation saves")
+	var preparation_loaded: Dictionary = store.load_checkpoint(checkpoint)
+	check(preparation_loaded.ok and preparation_loaded.get("payload", {}).get("craft", {}).get("pilot_id", "wrong") == "", "unassigned pilot preparation roundtrip")
+	check(preparation_loaded.ok and preparation_loaded.get("payload", {}).get("craft", {}).get("fireteam_definitions", []).size() == 2, "empty fireteam retained on roundtrip")
+	preparation.craft.fireteam_definitions[0].member_unit_ids = PackedStringArray(["leader"])
+	preparation.craft.fireteam_definitions[1].member_unit_ids = PackedStringArray()
+	check(store.save_checkpoint(preparation, checkpoint).ok, "native packed fireteam members save")
+	check(store.load_checkpoint(checkpoint).ok, "packed fireteam members JSON roundtrip")
+	bad = preparation.duplicate(true)
+	bad.craft.fireteam_definitions[1].member_unit_ids = ["pilot"]
+	check(not store.validate_payload(bad).ok, "qualified pilot cannot join empty fireteam")
+	bad = preparation.duplicate(true)
+	bad.craft.staged_unit_ids = ["pilot"]
+	check(not store.validate_payload(bad).ok, "qualified pilot cannot stage when unassigned")
+	bad = preparation.duplicate(true)
+	bad.craft.fireteam_definitions[1].member_unit_ids = ["foreign"]
+	check(not store.validate_payload(bad).ok, "empty team rejects foreign member")
+	bad = preparation.duplicate(true)
+	bad.craft.fireteam_definitions[1].member_loadouts = {"foreign":{}}
+	check(not store.validate_payload(bad).ok, "empty team rejects foreign loadout")
+	bad = preparation.duplicate(true)
+	bad.craft.fireteam_definitions[1].member_unit_ids = ["leader"]
+	check(not store.validate_payload(bad).ok, "nonempty team requires leader")
+	bad = preparation.duplicate(true)
+	bad.craft.fireteam_definitions[1].id = "ft1"
+	check(not store.validate_payload(bad).ok, "empty team rejects duplicate identity")
+	bad = preparation.duplicate(true)
+	bad.craft.pilot_id = "leader"
+	check(not store.validate_payload(bad).ok, "unqualified assigned pilot rejected")
 	var dep := {"craft_id":"campaign_craft","origin_location_id":"homebase","destination_location_id":"satellite_crash","landing_pad_id":"homebase_pad_01","job_id":"satellite_recovery"}
 	check(campaign.apply_command(contract.build_command("bind_departure", dep, "dep"), {"departure_authorized":true}).ok, "bind real departure")
 	check(campaign.apply_command(contract.build_command("activate_job", {"job_id":"satellite_recovery","craft_id":"campaign_craft"}, "act"), {"departure_authorized":true}).ok, "activate departed satellite")
