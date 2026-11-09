@@ -14,6 +14,7 @@ const AVATAR_SCRIPT: GDScript = preload("res://scripts/meta/homebase_commander_a
 const FLIGHT_VISUAL_SCRIPT: GDScript = preload("res://scripts/terrain/mission_flight_visual.gd")
 const HEX_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const PAD_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_outpost_pad.gd")
+const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const INTERACTION_RADIUS: float = 1.8
 
 var _active: bool = false
@@ -36,6 +37,7 @@ var _terminals: Array[Dictionary] = []
 var _terminal_labels: Dictionary = {}
 var _layout: Dictionary = {}
 var _asset_sources: Array[Dictionary] = []
+var _refuel_service_available: bool = false
 var _map_bounds: Rect2
 var _map_data
 var _hint: Label
@@ -49,6 +51,138 @@ var _command_sequence: int = 0
 var _drone_model: Node3D
 var _drone_helper: Node3D
 var _cutaway_wall_visual_count: int = 0
+var _authored_stage: Node3D
+var _transport_projection: Array = []
+var _transport_signature: String = ""
+var _craft_visuals: Dictionary = {}
+var _focused_craft_id: String = ""
+var _pad_preview: bool = false
+var _preview_surface_size: Vector2 = Vector2.ZERO
+
+
+func set_pad_preview(active: bool, craft_id: String = "") -> void:
+	if not active:
+		set_active(false)
+		return
+	if _pad_preview and _active and _initialized:
+		if _focused_craft_id != craft_id:
+			focus_craft_pad(craft_id)
+		if size != _preview_surface_size:
+			_preview_surface_size = size
+			_view.call("_resize_subviewport")
+			_view.call("_request_viewport_redraw")
+			_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		return
+	set_active(true)
+	_pad_preview = true
+	_preview_surface_size = size
+	_clear_keyboard_input()
+	_sim.call("clear_queues")
+	_sim.set_physics_process(false)
+	_runtime.process_mode = Node.PROCESS_MODE_DISABLED
+	_model.visible = false
+	_host.release_focus()
+	_host.focus_mode = Control.FOCUS_NONE
+	_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	get_node("ExplorationHelp").visible = false
+	get_node("ExitExploration").visible = false
+	if _drone_helper != null:
+		_drone_helper.call("set_operating_visual", false)
+	set_process(false)
+	set_physics_process(false)
+	set_process_unhandled_key_input(false)
+	focus_craft_pad(craft_id)
+	_view.call("_request_viewport_redraw")
+	_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
+func set_transport_snapshot(snapshot: Dictionary) -> void:
+	# Presentation cache only. Actual membership, pad occupancy and phase arrive
+	# from the runtime adapter; this scene never creates or moves a real craft.
+	_refuel_service_available = not Dictionary(snapshot.get("supply", {})).is_empty()
+	for terminal in _terminals:
+		if String(terminal.get("id", "")) == "refuel":
+			terminal["enabled"] = _refuel_service_available
+	var crafts: Array = Array(snapshot.get("crafts", [])).duplicate(true)
+	var signature: String = JSON.stringify(crafts, "", true)
+	if signature == _transport_signature:
+		return
+	_transport_signature = signature
+	_transport_projection = crafts
+	if _initialized:
+		_update_craft_projection()
+
+
+func focus_craft_pad(craft_id: String) -> bool:
+	if not _initialized or not _craft_visuals.has(craft_id):
+		return false
+	var entry: Dictionary = _craft_visuals[craft_id]
+	var pad: Dictionary = _pad_definition(String(entry.landing_pad_id))
+	if pad.is_empty():
+		return false
+	_focused_craft_id = craft_id
+	_view.call("focus_world_position", _world_at_grid(pad.grid))
+	_view.call("_request_viewport_redraw")
+	if _pad_preview:
+		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	return true
+
+
+func _pad_definition(pad_id: String) -> Dictionary:
+	for pad in Array(_layout.get("landing_pads", [])):
+		if String(pad.get("id", "")) == pad_id:
+			return Dictionary(pad)
+	return {}
+
+
+func _update_craft_projection() -> void:
+	if _authored_stage == null:
+		return
+	var present: Dictionary = {}
+	var occupied_pads: Dictionary = {}
+	for craft in _transport_projection:
+		var craft_id: String = String(craft.get("craft_id", ""))
+		var pad_id: String = String(craft.get("landing_pad_id", ""))
+		var pad: Dictionary = _pad_definition(pad_id)
+		if craft_id.is_empty() or pad.is_empty() or not bool(craft.get("visible_on_pad", false)) or String(craft.get("location_id", "")) != "homebase" or bool(craft.get("busy", false)) or occupied_pads.has(pad_id):
+			continue
+		present[craft_id] = true
+		occupied_pads[pad_id] = craft_id
+		var identity: Dictionary = SHIP_VISUALS.get_ui_identity(craft)
+		var model_path: String = String(identity.get("model_path", ""))
+		if _craft_visuals.has(craft_id):
+			var previous: Dictionary = _craft_visuals[craft_id]
+			if String(previous.model_path) == model_path and String(previous.landing_pad_id) == pad_id:
+				continue
+			(previous.node as Node3D).queue_free()
+		var owner := Node3D.new()
+		owner.name = "ActualCraft_" + craft_id.validate_node_name()
+		owner.set_meta("craft_id", craft_id)
+		owner.set_meta("landing_pad_id", pad_id)
+		owner.position = _plane_position(pad.plane)
+		_authored_stage.add_child(owner)
+		if not model_path.is_empty() and ResourceLoader.exists(model_path):
+			var model: Node3D = _load_visual({"id": craft_id, "path": model_path, "scale": float(identity.get("scale", 1.0)), "source_status": "real craft projected at assigned runtime pad"})
+			if model != null:
+				owner.add_child(model)
+				model.rotation_degrees.y = float(identity.get("root_rotation_y_degrees", 0.0))
+		var label := Label3D.new()
+		label.text = SHIP_VISUALS.get_ui_display_name(craft) + " · " + craft_id
+		label.font_size = 38
+		label.pixel_size = 0.005
+		label.position = Vector3(0.0, 1.65, 0.0)
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		owner.add_child(label)
+		_craft_visuals[craft_id] = {"node": owner, "landing_pad_id": pad_id, "model_path": model_path}
+	for craft_id in _craft_visuals.keys():
+		if not present.has(craft_id):
+			(_craft_visuals[craft_id].node as Node3D).queue_free()
+			_craft_visuals.erase(craft_id)
+	if not _craft_visuals.has(_focused_craft_id):
+		_focused_craft_id = ""
+	_view.call("_request_viewport_redraw")
+	if _pad_preview:
+		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 func _ready() -> void:
@@ -75,6 +209,7 @@ func _ready() -> void:
 
 
 func set_active(active: bool) -> void:
+	_pad_preview = false
 	_active = active
 	if not is_node_ready():
 		return
@@ -83,6 +218,13 @@ func set_active(active: bool) -> void:
 		_initialize_runtime()
 	if _runtime != null:
 		_runtime.process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
+		_sim.set_physics_process(active)
+		if _model != null:
+			_model.visible = true
+	_host.focus_mode = Control.FOCUS_ALL
+	_host.mouse_filter = Control.MOUSE_FILTER_STOP
+	get_node("ExplorationHelp").visible = true
+	get_node("ExitExploration").visible = true
 	_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if active else SubViewport.UPDATE_DISABLED
 	if _drone_helper != null:
 		_drone_helper.call("set_operating_visual", active)
@@ -149,10 +291,15 @@ func _initialize_runtime() -> void:
 	_view.call("focus_world_position", _avatar.position)
 	var world: Node3D = _view.get_node("ViewportContainer/SubViewport/WorldRoot") as Node3D
 	var stage := Node3D.new()
+	_authored_stage = stage
 	stage.name = "HomebaseAuthoredVisuals"
 	world.add_child(stage)
 	for asset_variant in Array(_layout.get("assets", [])):
 		var asset: Dictionary = Dictionary(asset_variant)
+		# Historical authored prop remains in source data for traceability, but
+		# only real craft definitions may instantiate a ship on an occupied pad.
+		if String(asset.get("id", "")) == "cutlass_01":
+			continue
 		var visual: Node3D = _load_visual(asset)
 		if visual != null:
 			stage.add_child(visual)
@@ -192,6 +339,7 @@ func _initialize_runtime() -> void:
 	_view.call("set_external_terrain_object_visuals", footprint_visuals)
 	_previous_position = _avatar.position
 	_initialized = true
+	_update_craft_projection()
 	_update_avatar_visual()
 
 
@@ -230,7 +378,7 @@ func _plane_position(raw_plane: Variant) -> Vector3:
 
 
 func request_walk_to(world_position: Vector2) -> bool:
-	if not _active or not _initialized or not is_visible_in_tree():
+	if _pad_preview or not _active or not _initialized or not is_visible_in_tree():
 		return false
 	var grid: Vector2i = _terrain.call("world_to_grid", world_position)
 	if not bool(_terrain.call("is_walkable", grid)):
@@ -247,7 +395,7 @@ func request_walk_to(world_position: Vector2) -> bool:
 
 
 func request_terminal(id: String) -> bool:
-	if not _active or not _initialized or not is_visible_in_tree():
+	if _pad_preview or not _active or not _initialized or not is_visible_in_tree():
 		return false
 	for terminal in _terminals:
 		if String(terminal["id"]) == id and bool(terminal.get("enabled", true)) and _terminal_distance(terminal) <= INTERACTION_RADIUS:
@@ -332,7 +480,7 @@ func _clear_keyboard_input() -> void:
 
 
 func _process(delta: float) -> void:
-	if not _active or not _initialized:
+	if _pad_preview or not _active or not _initialized:
 		return
 	_update_avatar_visual()
 	_update_nearby_terminal()
@@ -348,6 +496,7 @@ func _update_avatar_visual() -> void:
 	var moving: bool = _avatar.position.distance_squared_to(_previous_position) > 0.00001
 	_model.position = position_3d
 	if moving:
+		_focused_craft_id = ""
 		_model.rotation.y = atan2(displacement.x, displacement.z)
 		_view.call("focus_world_position", _avatar.position)
 	if moving != _walking and _player != null:
@@ -362,6 +511,8 @@ func _update_avatar_visual() -> void:
 func _build_terminals(stage: Node3D) -> void:
 	for raw_terminal in Array(_layout.get("terminals", [])):
 		var terminal: Dictionary = Dictionary(raw_terminal).duplicate(true)
+		if String(terminal.get("id", "")) == "refuel":
+			terminal["enabled"] = _refuel_service_available
 		terminal["world_position"] = _world_at_grid(terminal["grid"])
 		_terminals.append(terminal)
 		var position_3d: Vector3 = _view.call("_world_to_surface_3d_position", terminal["world_position"], 0.0)
@@ -534,12 +685,18 @@ func _build_overlay() -> void:
 
 
 func get_exploration_snapshot() -> Dictionary:
+	var projected_crafts: Array = []
+	for craft_id in _craft_visuals:
+		var entry: Dictionary = _craft_visuals[craft_id]
+		projected_crafts.append({"craft_id": String(craft_id), "landing_pad_id": String(entry.landing_pad_id), "model_path": String(entry.model_path), "visual_instance_id": (entry.node as Node3D).get_instance_id()})
 	var result: Dictionary = {
 		"initialized": _initialized, "active": _active,
+		"preview_mode": _pad_preview,
 		"map_path": MAP_PATH, "movement_owner": "SimulationRoot",
 		"owns_roster": false, "owns_transport": false, "owns_inventory": false,
 		"ephemeral_commander": true, "read_only": true,
 		"tree_paused": get_tree().paused if is_inside_tree() else false,
+		"projected_crafts": projected_crafts, "focused_craft_id": _focused_craft_id,
 	}
 	if not _initialized:
 		return result

@@ -135,6 +135,10 @@ const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 }
 
 var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
+var _singleplayer_runtime: Node
+var _active_singleplayer_identity: Dictionary = {}
+var _singleplayer_services: Control
+var _singleplayer_services_elapsed: float = 0.0
 var _all_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
 var _selected_unit_ids: PackedStringArray = []
 var _homebase_staged_unit_ids: PackedStringArray = []
@@ -202,6 +206,22 @@ func _ready() -> void:
 	META_UI_SKIN_SCRIPT.apply_meta_navigation(self)
 	_connect_navigation_buttons()
 	_ensure_homebase_aircraft_locations()
+	_singleplayer_runtime = load("res://scripts/meta/singleplayer_runtime_adapter.gd").new()
+	_singleplayer_runtime.name = "SingleplayerRuntime"
+	add_child(_singleplayer_runtime)
+	_singleplayer_runtime.call("configure", self, homebase_screen)
+	var service_layer := CanvasLayer.new()
+	service_layer.name = "SingleplayerServiceLayer"
+	service_layer.layer = 80
+	add_child(service_layer)
+	_singleplayer_services = load("res://scripts/meta/singleplayer_services_presenter.gd").new()
+	_singleplayer_services.name = "MissionServices"
+	service_layer.add_child(_singleplayer_services)
+	_singleplayer_services.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_singleplayer_services.position = Vector2(get_viewport().get_visible_rect().size.x - 350, 80)
+	_singleplayer_services.size = Vector2(330, 510)
+	_singleplayer_services.call("configure", Callable(_singleplayer_runtime, "get_snapshot"), Callable(_singleplayer_runtime, "request_operation"))
+	_singleplayer_services.hide()
 	_ensure_meta_nav_timer_labels()
 
 	if not homebase_screen.selection_changed.is_connected(_on_homebase_selection_changed):
@@ -264,6 +284,10 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	_refresh_meta_mission_timer_labels()
+	_singleplayer_services_elapsed += _delta
+	if _singleplayer_services_elapsed >= 0.25:
+		_singleplayer_services_elapsed = 0.0
+		_refresh_singleplayer_services()
 
 
 func set_transport_refresh_timing_debug_enabled(enabled: bool) -> void:
@@ -3752,6 +3776,8 @@ func _on_homebase_team_confirmed(selected_unit_ids: PackedStringArray) -> void:
 
 
 func _on_homebase_mission_start_requested() -> void:
+	if _active_mission == null and _singleplayer_runtime != null and not bool(_singleplayer_runtime.call("is_campaign_mission")):
+		_active_singleplayer_identity.clear()
 	var had_preview_deployed_payload: bool = _has_preview_deployed_mission_payload()
 	var requested_direct_craft_id: String = _consume_homebase_direct_mission_craft_id()
 	_sync_homebase_direct_staging_from_screen()
@@ -3763,6 +3789,13 @@ func _on_homebase_mission_start_requested() -> void:
 	)
 	if not _has_mission_start_payload():
 		return
+	if _singleplayer_runtime != null and bool(_singleplayer_runtime.call("is_campaign_mission")):
+		var departure: Dictionary = _singleplayer_runtime.call("authorize_departure", requested_direct_craft_id)
+		if not bool(departure.get("ok", false)):
+			_get_homebase_screen().set_meta("singleplayer_departure_error", departure)
+			return
+		if _active_mission == null:
+			_active_singleplayer_identity = {"craft_id": requested_direct_craft_id, "job_id": String(Dictionary(departure.get("departure", {})).get("job_id", "")), "scenario_id": String(_get_selected_mission_definition().get("scenario_file_path", "")).get_file().get_basename()}
 	if payload_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
 		_begin_homebase_direct_mission_transfer_from_planning()
 		_sync_homebase_direct_mission_drop_transport_fields()
@@ -3782,6 +3815,8 @@ func _on_homebase_aircraft_add_requested(base_craft_type: String) -> void:
 	var aircraft_definition := _build_homebase_aircraft_definition(normalized_craft_type, _get_next_homebase_aircraft_index(normalized_craft_type))
 	_homebase_aircraft_definitions.append(aircraft_definition)
 	_aircraft_location_by_craft[String(aircraft_definition.get("craft_id", "")).strip_edges()] = "homebase"
+	if _singleplayer_runtime != null:
+		_singleplayer_runtime.call("sync_crafts")
 	_refresh_homebase_screen()
 
 
@@ -3806,6 +3841,8 @@ func _on_homebase_aircraft_remove_requested(craft_id: String) -> void:
 		remaining_aircraft.append(craft_def)
 	_homebase_aircraft_definitions = remaining_aircraft
 	_aircraft_location_by_craft.erase(normalized_craft_id)
+	if _singleplayer_runtime != null:
+		_singleplayer_runtime.call("sync_crafts")
 	_selected_aircraft_cargo_by_craft.erase(normalized_craft_id)
 	_loaded_aircraft_cargo_by_craft.erase(normalized_craft_id)
 	_refresh_homebase_screen()
@@ -4128,6 +4165,8 @@ func _connect_mission_end(mission_instance: Node) -> void:
 func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	if _active_mission == null:
 		return
+	if _singleplayer_runtime != null:
+		_singleplayer_runtime.call("record_mission_result", mission_result, _active_singleplayer_identity.duplicate(true))
 
 	_last_mission_result = _build_mission_result(_active_mission, mission_result)
 	_last_mission_result = _apply_air_asset_recovery_from_mission_result(_last_mission_result)
@@ -4553,6 +4592,10 @@ func _begin_mission_craft_transfer(craft_id: String, phase: String, duration_sec
 	var normalized_phase: String = phase.strip_edges().to_lower()
 	if normalized_craft_id.is_empty() or normalized_phase.is_empty():
 		return
+	if normalized_phase == "to_homebase" and _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
+		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", normalized_craft_id)
+		if not bool(return_gate.get("ok", false)):
+			return
 	var normalized_source: String = payload_source.strip_edges().to_lower()
 	if normalized_source.is_empty():
 		normalized_source = MISSION_DROP_SOURCE_FOB
@@ -4582,6 +4625,7 @@ func _complete_mission_craft_transfer(entry: Dictionary) -> void:
 			_aircraft_location_by_craft[craft_id] = "fob"
 		"to_homebase":
 			_aircraft_location_by_craft[craft_id] = "homebase"
+			call_deferred("_finish_singleplayer_visit_if_returned")
 
 
 func _get_mission_craft_transfer_default_duration(phase: String) -> float:
@@ -5172,8 +5216,14 @@ func _build_mission_craft_transfer_entry(craft_id: String, phase: String, durati
 	var normalized_source: String = payload_source.strip_edges().to_lower()
 	if normalized_source.is_empty():
 		normalized_source = MISSION_DROP_SOURCE_FOB
+	var departure: Dictionary = {}
+	if _singleplayer_runtime != null:
+		departure = Dictionary(_singleplayer_runtime.call("get_snapshot").get("campaign", {}).get("departures_by_craft_id", {}).get(craft_id, {}))
 	return {
 		"transfer_id": "mission_craft_%d" % _transfer_sequence,
+		"destination_location_id": "homebase" if phase == "to_homebase" else String(departure.get("destination_location_id", "")),
+		"job_id": String(departure.get("job_id", "")),
+		"origin_pad_id": String(departure.get("landing_pad_id", "")),
 		"craft_id": craft_id,
 		"phase": phase,
 		"payload_source": normalized_source,
@@ -5708,6 +5758,13 @@ func _build_release_normal_click_guard_check(check_id: String, passed: bool, mes
 
 
 func _show_fob() -> void:
+	# FOB remains an internal transport compatibility surface. Regular
+	# singleplayer navigation always returns to the Operations homebase.
+	_show_homebase()
+	return
+
+
+func _show_fob_internal() -> void:
 	_current_meta_view = "fob"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
@@ -5825,7 +5882,10 @@ func _refresh_navigation_state() -> void:
 		if button == null:
 			continue
 		var view_name: String = String(pair["view"])
-		button.disabled = _current_meta_view == view_name or (view_name == "map" and not _can_open_mission_from_navigation())
+		button.disabled = view_name == "fob" or _current_meta_view == view_name or (view_name == "map" and not _can_open_mission_from_navigation())
+		if view_name == "fob":
+			button.text = "F̶O̶B̶ — gesperrt"
+			button.tooltip_text = "FOB ist im Einzelspieler vorerst gesperrt"
 		if button.disabled:
 			META_UI_SKIN_SCRIPT.style_primary_button(button)
 		else:
@@ -7128,3 +7188,53 @@ func _get_selected_mission_definition() -> Dictionary:
 			"slot_count": _resolve_mission_slot_count({"map_file_path": DEFAULT_META_MAP_PATH}),
 		}
 	return _build_resolved_mission_definition(Dictionary(_mission_catalog[0]))
+
+
+func get_singleplayer_snapshot() -> Dictionary:
+	return _singleplayer_runtime.call("get_snapshot") if _singleplayer_runtime != null else {}
+
+
+func _refresh_singleplayer_services() -> void:
+	if _singleplayer_services == null or _singleplayer_runtime == null:
+		return
+	var snapshot: Dictionary = _singleplayer_runtime.call("get_snapshot")
+	var has_remote_service: bool = false
+	for context in Dictionary(snapshot.get("service_contexts_by_craft_id", {})).values():
+		if String(context.get("location_id", "")) == "trade_outpost":
+			has_remote_service = true
+	_singleplayer_services.visible = _current_meta_view == "mission" and has_remote_service
+	if _singleplayer_services.visible:
+		_singleplayer_services.position = Vector2(get_viewport().get_visible_rect().size.x - 350, 80)
+		_singleplayer_services.call("refresh", snapshot)
+
+
+func _request_singleplayer_return(craft_id: String) -> Dictionary:
+	if _active_mission == null:
+		return {"ok": false, "reason": "no_active_visit", "message": "Kein laufender Ortsbesuch"}
+	var controller: Node = _active_mission.get_node_or_null("TacticalController")
+	if controller == null:
+		return {"ok": false, "reason": "controller_unavailable", "message": "Flugsteuerung nicht bereit"}
+	var card: Dictionary = controller.call("_find_mission_dropship_card_entry", craft_id)
+	if not bool(controller.call("_can_request_mission_dropship_return", card)):
+		return {"ok": false, "reason": "return_blocked", "message": "Trupp und Schiff fuer Rueckflug vorbereiten"}
+	var fuel_gate: Dictionary = _singleplayer_runtime.call("authorize_return", craft_id)
+	if not bool(fuel_gate.get("ok", false)):
+		return fuel_gate
+	controller.call("_on_mission_dropship_return_pressed", craft_id)
+	return {"ok": true, "message": "Rueckflug angefordert"}
+
+
+func _finish_singleplayer_visit_if_returned() -> void:
+	if _active_mission == null or String(_active_singleplayer_identity.get("scenario_id", "")) != "trade_outpost_visit":
+		return
+	for location in _aircraft_location_by_craft.values():
+		if String(location) == "mission":
+			return
+	if not _pending_mission_craft_transfers.is_empty():
+		return
+	_release_active_mission()
+	_active_singleplayer_identity.clear()
+	_mission_planning_state = DEFAULT_MISSION_PLANNING_STATE.duplicate(true)
+	_reset_active_mission_timer()
+	_refresh_homebase_screen()
+	_show_homebase()

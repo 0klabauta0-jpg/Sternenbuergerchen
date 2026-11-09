@@ -9149,7 +9149,7 @@ func get_operations_snapshot() -> Dictionary:
 
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
-	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel"]:
+	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase"]:
 		if not _singleplayer_command_handler.is_valid():
 			return _operations_rejected("singleplayer_unavailable", "Diese Funktion ist noch nicht verfügbar")
 		var result: Dictionary = _singleplayer_command_handler.call(operation, payload.duplicate(true))
@@ -9171,7 +9171,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			_roster_sort_mode = sort_mode
 		"navigate":
 			var mode: String = String(payload.get("mode", "squad"))
-			if not ["base", "personnel", "squad", "mission"].has(mode):
+			if not ["base", "personnel", "squad", "mission", "jobs", "map", "services"].has(mode) or (mode in ["jobs", "map", "services"] and not _singleplayer_command_handler.is_valid()):
 				return _operations_rejected("invalid_mode", "Ansicht nicht verfügbar")
 			_operations_mode = mode
 			_sync_operations_visibility()

@@ -54,7 +54,14 @@ func _run() -> void:
 		_expect(bool(screen.get("_character_sheet_open")), "Double click opens existing character sheet path")
 		screen.set("_character_sheet_open", false)
 		screen.call("_update_character_sheet_visibility")
-	screen.call("request_operation", "add_fireteam")
+	var create_team: Button
+	for button in operations.find_children("*", "Button", true, false):
+		if String(button.text) == "Neuer Trupp":
+			create_team = button
+			break
+	_expect(create_team != null and create_team.is_visible_in_tree(), "New group has a visible creation button in Operations")
+	if create_team != null:
+		create_team.pressed.emit()
 	var new_id: String = String(screen.call("get_operations_snapshot").get("focused_fireteam_id", ""))
 	_expect(not new_id.is_empty() and new_id != "ft1", "New group is immediately selectable")
 	var slots: Array = operations.get("_slots")
@@ -82,11 +89,38 @@ func _run() -> void:
 	_expect(equipment.has("armor") and equipment.has("weapon_1") and equipment.has("weapon_2"), "Three visible equipment slots accept validated loadout items")
 	if equipment.has("armor"):
 		screen.call("request_operation", "focus_unit", {"unit_id": "unit_alpha"})
+		root.size = Vector2i(1280, 720)
+		root.content_scale_size = Vector2i(1280, 720)
+		for frame in range(4):
+			await process_frame
 		var armor: Control = equipment.armor
-		armor.call("_drop_data", Vector2.ZERO, {"type": "homebase_loadout_item", "key": "armor", "item_id": "heavy"})
-		_expect(String(Dictionary(_person(screen.call("get_operations_snapshot"), "unit_alpha").get("loadout", {})).get("armor", "")) == "heavy", "Equipment drop commits existing member loadout")
+		var palette_toggle: Button = operations.find_child("EquipmentPaletteToggle", true, false)
+		_expect(palette_toggle != null and palette_toggle.is_visible_in_tree(), "Equipment drawer has a visible available-item entry")
+		if palette_toggle != null:
+			palette_toggle.pressed.emit()
+			var heavy_source: Control = operations.find_child("EquipmentChoice_armor_heavy", true, false)
+			_expect(heavy_source != null and heavy_source.is_visible_in_tree(), "A different real heavy armor choice is visibly draggable")
+			if heavy_source != null:
+				var ancestor: Node = heavy_source.get_parent()
+				while ancestor != null and not ancestor is ScrollContainer:
+					ancestor = ancestor.get_parent()
+				if ancestor is ScrollContainer:
+					ancestor.ensure_control_visible(heavy_source)
+				for frame in range(3):
+					await process_frame
+				_expect(Rect2(Vector2.ZERO, Vector2(1280, 720)).encloses(heavy_source.get_global_rect()), "Real gear choice remains reachable inside 1280x720")
+				var before_armor: String = String(Dictionary(_person(screen.call("get_operations_snapshot"), "unit_alpha").get("loadout", {})).get("armor", ""))
+				_expect(before_armor != "heavy", "Palette fixture starts with a different confirmed armor")
+				var preview := Label.new()
+				preview.text = "Schwer"
+				heavy_source.force_drag(heavy_source.call("get_drag_payload"), preview)
+				var real_payload: Variant = heavy_source.call("_get_drag_data", Vector2.ZERO)
+				_expect(typeof(real_payload) == TYPE_DICTIONARY and String(real_payload.get("item_id", "")) == "heavy", "Visible source produces the real validated heavy item payload")
+				armor.call("_drop_data", Vector2.ZERO, real_payload)
+				root.gui_cancel_drag()
+				_expect(String(Dictionary(_person(screen.call("get_operations_snapshot"), "unit_alpha").get("loadout", {})).get("armor", "")) == "heavy", "Actual visible choice drop changes confirmed member armor")
 		armor.call("_drop_data", Vector2.ZERO, {"type": "homebase_loadout_item", "key": "armor", "item_id": "invented"})
-		_expect(String(Dictionary(_person(screen.call("get_operations_snapshot"), "unit_alpha").get("loadout", {})).get("armor", "")) == "heavy", "Unknown item cannot overwrite confirmed gear")
+		_expect(String(Dictionary(_person(screen.call("get_operations_snapshot"), "unit_alpha").get("loadout", {})).get("armor", "")) != "invented", "Unknown item cannot overwrite confirmed gear")
 	var craft_target: Control = operations.get("_craft_drop_target")
 	_expect(craft_target != null, "Real craft projection is a fireteam drop target")
 	if craft_target != null:
@@ -112,8 +146,33 @@ func _run() -> void:
 	_expect(not bool(Dictionary(screen.call("get_operations_snapshot").get("presentation", {})).get("reference_stage_visible", true)), "Personnel contains no craft backdrop")
 	screen.queue_free()
 	await process_frame
+	await _test_bound_navigation()
 	print("PERSONNEL_DRAGDROP_20261109: %d passed, %d failed" % [passed, failed])
 	quit(1 if failed else 0)
+
+func _test_bound_navigation() -> void:
+	var flow: Node = load("res://scenes/meta/meta_layer_test.tscn").instantiate()
+	root.add_child(flow)
+	await process_frame
+	var screen: Control = flow.get_node("HomebaseScreen")
+	screen.call("request_operation", "navigate", {"mode": "mission"})
+	for frame in range(4):
+		await process_frame
+	var operations: Control = screen.get_node("OperationsRoot")
+	var launch: Button = operations.find_child("StartMission", true, false)
+	var services: Button = operations.find_child("OpenBaseServices", true, false)
+	var viewport_rect := Rect2(Vector2.ZERO, Vector2(1280, 720))
+	_expect(launch != null and launch.is_visible_in_tree() and viewport_rect.encloses(launch.get_global_rect()), "Runtime-bound 1280x720 flightdeck keeps actual departure button inside viewport")
+	_expect(services != null and services.is_visible_in_tree() and viewport_rect.encloses(services.get_global_rect()), "Runtime-bound tankservice entry fits viewport without extending flight footer")
+	screen.call("request_operation", "navigate", {"mode": "personnel"})
+	for frame in range(4):
+		await process_frame
+	_expect(services != null and services.is_visible_in_tree() and viewport_rect.encloses(services.get_global_rect()), "Tankservice remains reachable through regular navigation from personnel")
+	if services != null:
+		services.pressed.emit()
+		_expect(String(screen.call("get_operations_snapshot").get("mode", "")) == "services", "Actual tankservice button opens bound service page")
+	flow.queue_free()
+	await process_frame
 
 func _person(snapshot: Dictionary, id: String) -> Dictionary:
 	for person in Array(snapshot.get("roster", [])):

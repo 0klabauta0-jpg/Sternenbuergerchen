@@ -13,6 +13,7 @@ const MUTED := Color("a8c0ca")
 const CYAN := Color("29e1e7")
 const GOLD := Color("ffd348")
 const REFRESH_SECONDS: float = 0.25
+const EQUIPMENT_LABELS: Dictionary = {"light": "Leicht", "medium": "Mittel", "heavy": "Schwer", "rifle": "Sturmgewehr", "smg": "Maschinenpistole", "sniper": "Scharfschützengewehr", "rail_gun": "Railgun", "rocket_launcher": "Raketenwerfer", "medictool": "Sanitätsgerät", "none": "Keine"}
 const REFERENCE_STAGE_PATH := "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png"
 
 var _screen: WeakRef
@@ -34,6 +35,13 @@ var _roster_return_target: PanelContainer
 var _team_drag_source: PanelContainer
 var _craft_drop_target: PanelContainer
 var _equipment_slots: Dictionary = {}
+var _equipment_palette: VBoxContainer
+var _equipment_palette_toggle: Button
+var _equipment_palette_flow: HFlowContainer
+var _equipment_palette_tabs: Dictionary = {}
+var _equipment_palette_chips: Dictionary = {}
+var _equipment_palette_options: Dictionary = {}
+var _equipment_palette_key: String = "armor"
 var _team_selector: OptionButton
 var _team_title: Label
 var _team_note: Label
@@ -67,6 +75,9 @@ var _stage_name: Label
 var _stage_caption: Label
 var _workflow: HBoxContainer
 var _workflow_labels: Dictionary = {}
+var _job_board: Control
+var _region_map: Control
+var _services_view: Control
 
 
 func configure(screen: Control) -> void:
@@ -186,6 +197,10 @@ func _build() -> void:
 	nav_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	nav.add_child(nav_spacer)
 	var detail_button: Button = _button("Charakterdetails", false)
+	var refuel := _button("Tankservice", false)
+	refuel.name = "OpenBaseServices"
+	nav.add_child(refuel)
+	refuel.pressed.connect(func(): _act("navigate", {"mode": "services"}))
 	nav.add_child(detail_button)
 	detail_button.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
 	_workspace = Control.new()
@@ -205,6 +220,22 @@ func _build() -> void:
 	_base.call("set_active", false)
 	_base.connect("terminal_open_requested", _terminal_requested)
 	_base.connect("exploration_exit_requested", func(): _act("navigate", {"mode": "squad"}))
+	_job_board = load("res://scripts/meta/singleplayer_job_board_presenter.gd").new()
+	_workspace.add_child(_job_board)
+	_job_board.call("configure", _owner_screen() if _owner_screen() != null else get_parent())
+	_job_board.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_job_board.hide()
+	_region_map = load("res://scripts/meta/singleplayer_region_map_presenter.gd").new()
+	_workspace.add_child(_region_map)
+	_region_map.call("configure", _owner_screen() if _owner_screen() != null else get_parent())
+	_region_map.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_region_map.hide()
+	_services_view = load("res://scripts/meta/singleplayer_services_presenter.gd").new()
+	_services_view.name = "BaseServices"
+	_workspace.add_child(_services_view)
+	_services_view.call("configure", _singleplayer_snapshot, _singleplayer_request)
+	_services_view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_services_view.hide()
 	_feedback = _label("", 15, GOLD)
 	_feedback.custom_minimum_size.y = 24
 	outer.add_child(_feedback)
@@ -342,12 +373,80 @@ func _build_equipment() -> void:
 		selector.item_selected.connect(func(index: int): _act("loadout", {"unit_id": _focused_id, "key": key, "value": String(selector.get_item_metadata(index))}))
 		slot.call("forward_drag_from", selector)
 		_selectors[key] = selector
+	_build_equipment_palette(list)
 	_remove_member = _button("Aus Trupp entfernen", false)
 	list.add_child(_remove_member)
 	_remove_member.pressed.connect(func(): _act("remove", {"unit_id": _focused_id}))
 	_focused_details = _button("Charakter ansehen", false)
 	list.add_child(_focused_details)
 	_focused_details.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
+
+
+func _build_equipment_palette(parent: Control) -> void:
+	_equipment_palette_toggle = _button("Ausrüstung ziehen ▸", false)
+	_equipment_palette_toggle.name = "EquipmentPaletteToggle"
+	_equipment_palette_toggle.custom_minimum_size.y = 36
+	_equipment_palette_toggle.tooltip_text = "Ausrüstungsoptionen zum Ziehen öffnen"
+	parent.add_child(_equipment_palette_toggle)
+	_equipment_palette = VBoxContainer.new()
+	_equipment_palette.name = "EquipmentPalette"
+	_equipment_palette.visible = false
+	parent.add_child(_equipment_palette)
+	_equipment_palette_toggle.pressed.connect(func():
+		_equipment_palette.visible = not _equipment_palette.visible
+		_equipment_palette_toggle.text = "Ausrüstung ziehen ▾" if _equipment_palette.visible else "Ausrüstung ziehen ▸"
+		_update_equipment_palette())
+	var tabs := HBoxContainer.new()
+	_equipment_palette.add_child(tabs)
+	for spec: Dictionary in [{"id": "armor", "label": "Rüstung"}, {"id": "weapon_1", "label": "Primär"}, {"id": "weapon_2", "label": "Sekundär"}]:
+		var key: String = String(spec.id)
+		var button: Button = _button(String(spec.label), false)
+		button.custom_minimum_size.y = 32
+		button.add_theme_font_size_override("font_size", 14)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tabs.add_child(button)
+		_equipment_palette_tabs[key] = button
+		button.pressed.connect(func():
+			_equipment_palette_key = key
+			_update_equipment_palette())
+	_equipment_palette_flow = HFlowContainer.new()
+	_equipment_palette_flow.name = "EquipmentChoices"
+	_equipment_palette_flow.add_theme_constant_override("h_separation", 6)
+	_equipment_palette_flow.add_theme_constant_override("v_separation", 6)
+	_equipment_palette.add_child(_equipment_palette_flow)
+	_equipment_palette.add_child(_label("Auf einen passenden Ausrüstungsslot ziehen.", 13, MUTED))
+
+
+func _update_equipment_palette() -> void:
+	if _equipment_palette == null or not _equipment_palette.visible:
+		return
+	for key in _equipment_palette_tabs:
+		(_equipment_palette_tabs[key] as Button).disabled = String(key) == _equipment_palette_key
+	var live: Dictionary = {}
+	for option: Dictionary in Array(_equipment_palette_options.get(_equipment_palette_key, [])):
+		var item_id: String = String(option.get("id", ""))
+		if item_id.is_empty():
+			continue
+		var cache_key: String = _equipment_palette_key + ":" + item_id
+		var label: String = String(EQUIPMENT_LABELS.get(item_id, option.get("label", item_id)))
+		live[cache_key] = true
+		if not _equipment_palette_chips.has(cache_key):
+			var chip: PanelContainer = DRAG_SURFACE.new()
+			chip.name = "EquipmentChoice_" + _equipment_palette_key + "_" + item_id.validate_node_name()
+			chip.custom_minimum_size = Vector2(86, 34)
+			chip.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+			chip.add_theme_stylebox_override("panel", _style(Color("17424c"), CYAN))
+			_equipment_palette_flow.add_child(chip)
+			var caption: Label = _label(label, 14, CREAM)
+			caption.autowrap_mode = TextServer.AUTOWRAP_OFF
+			caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			chip.add_child(caption)
+			_equipment_palette_chips[cache_key] = chip
+		var source: PanelContainer = _equipment_palette_chips[cache_key]
+		source.tooltip_text = label + " auf den passenden Slot ziehen"
+		source.set("drag_payload", {"type": "homebase_loadout_item", "key": _equipment_palette_key, "item_id": item_id, "label": label})
+	for key in _equipment_palette_chips:
+		(_equipment_palette_chips[key] as Control).visible = live.has(key)
 
 
 func _build_flightdeck() -> void:
@@ -545,6 +644,22 @@ func refresh() -> void:
 	var mode: String = String(snapshot.get("mode", "squad"))
 	var changed_mode: bool = mode != _mode
 	_mode = mode
+	var campaign_ready: bool = not Dictionary(snapshot.get("singleplayer", {})).is_empty()
+	for key in ["jobs", "map"]:
+		_nav[key].disabled = not campaign_ready
+		_nav[key].tooltip_text = "" if campaign_ready else "Noch nicht verfügbar"
+	if _job_board != null:
+		_job_board.visible = _mode == "jobs"
+		if _job_board.visible:
+			_job_board.call("refresh")
+	if _region_map != null:
+		_region_map.visible = _mode == "map"
+		if _region_map.visible:
+			_region_map.call("refresh")
+	if _services_view != null:
+		_services_view.visible = _mode == "services"
+		if _services_view.visible:
+			_services_view.call("refresh", snapshot.get("singleplayer", {}))
 	var focused: Dictionary = Dictionary(snapshot.get("focused_unit", {}))
 	_focused_id = String(focused.get("id", ""))
 	_fireteam_id = String(snapshot.get("focused_fireteam_id", ""))
@@ -563,7 +678,7 @@ func refresh() -> void:
 	_update_flight(Dictionary(snapshot.get("selected_craft", {})), snapshot)
 	if changed_mode:
 		_layout_columns()
-		_base.call("set_active", _mode == "base" and is_visible_in_tree())
+	_update_base_surface(snapshot)
 
 
 func _update_roster(roster: Array) -> void:
@@ -663,6 +778,7 @@ func _update_team(team: Dictionary, teams: Array) -> void:
 
 
 func _update_equipment(unit: Dictionary, options: Dictionary) -> void:
+	_equipment_palette_options = options.duplicate(true)
 	_set_portrait(_focused_portrait, unit)
 	_focused_name.text = String(unit.get("name", "Mitglied auswählen"))
 	_focused_role.text = String(unit.get("role", ""))
@@ -675,6 +791,7 @@ func _update_equipment(unit: Dictionary, options: Dictionary) -> void:
 		(_equipment_slots[key] as PanelContainer).set("drag_payload", {"type": "homebase_loadout_item", "key": key, "item_id": String(loadout.get(key, "")), "label": "%s: %s" % [key, String(loadout.get(key, ""))]} if not unit.is_empty() else {})
 	_remove_member.disabled = not bool(unit.get("can_remove", false))
 	_focused_details.disabled = unit.is_empty()
+	_update_equipment_palette()
 
 
 func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
@@ -696,6 +813,15 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	_unboard.visible = bool(craft.get("has_payload", false))
 	_start.disabled = not bool(craft.get("can_start", false))
 	_start.tooltip_text = String(craft.get("next_step", ""))
+	var campaign: Dictionary = Dictionary(snapshot.get("singleplayer", {})).get("campaign", {})
+	_mission_selector.visible = campaign.is_empty()
+	if not campaign.is_empty():
+		var location: Dictionary = Dictionary(campaign.get("locations", {})).get(String(campaign.get("selected_location_id", "")), {})
+		var job: Dictionary = Dictionary(campaign.get("jobs", {})).get(String(campaign.get("selected_job_id", "")), {})
+		_mission_name.text = "%s\n%s" % [String(location.get("name", "Zielort wählen")), String(job.get("title", "Ortsbesuch ohne Auftrag"))]
+		if String(campaign.get("selected_location_id", "homebase")) == "homebase":
+			_start.disabled = true
+			_start.tooltip_text = "Zielort auf der Regionalkarte wählen"
 
 
 static func _craft_status_key(craft: Dictionary) -> String:
@@ -727,13 +853,12 @@ func _set_texture(rect: TextureRect, path: String) -> void:
 
 func _set_options(selector: OptionButton, options: Array, selected: String) -> void:
 	var stable_options: Array = []
-	var equipment_labels: Dictionary = {"light": "Leicht", "medium": "Mittel", "heavy": "Schwer", "rifle": "Sturmgewehr", "smg": "Maschinenpistole", "sniper": "Scharfschützengewehr", "rail_gun": "Railgun", "rocket_launcher": "Raketenwerfer", "medictool": "Sanitätsgerät", "none": "Keine"}
 	for option_variant in options:
 		var option: Dictionary = Dictionary(option_variant)
 		var id: String = String(option.get("id", ""))
 		var label: String = String(option.get("label", option.get("name", "")))
 		if _selectors.values().has(selector):
-			label = String(equipment_labels.get(id, label))
+			label = String(EQUIPMENT_LABELS.get(id, label))
 		stable_options.append({"id": id, "label": label})
 	var signature: String = JSON.stringify(stable_options)
 	if String(_option_signatures.get(selector.get_instance_id(), "")) != signature:
@@ -762,7 +887,7 @@ func _layout_columns() -> void:
 		var equipment_width: float = available.x - roster_width - gap
 		rects["roster"] = Rect2(0, 0, roster_width, available.y)
 		rects["equipment"] = Rect2(roster_width + gap, 0, equipment_width, available.y)
-	elif _mode == "base":
+	elif _mode in ["base", "jobs", "map", "services"]:
 		pass
 	elif narrow and _mode == "squad":
 		var usable: float = maxf(available.x - gap * 2.0, 0.0)
@@ -812,8 +937,40 @@ func _layout_columns() -> void:
 
 
 func _terminal_requested(id: String) -> void:
-	var target: String = "personnel" if id == "personnel" else ("squad" if id == "team" else "mission")
+	var target: String = "personnel" if id == "personnel" else ("squad" if id == "team" else ("jobs" if id == "jobs" else ("services" if id == "refuel" else "mission")))
 	_act("navigate", {"mode": target})
+
+
+func _singleplayer_snapshot() -> Dictionary:
+	var screen: Control = _owner_screen()
+	return Dictionary(screen.call("get_operations_snapshot").get("singleplayer", {})) if screen != null else {}
+
+
+func _singleplayer_request(operation: String, payload: Dictionary = {}) -> Dictionary:
+	var screen: Control = _owner_screen()
+	return screen.call("request_operation", operation, payload) if screen != null else {"ok": false}
+
+
+func _update_base_surface(snapshot: Dictionary) -> void:
+	if _base == null:
+		return
+	var runtime: Dictionary = snapshot.get("singleplayer", {})
+	if runtime.is_empty():
+		_base.call("set_active", _mode == "base" and is_visible_in_tree())
+		return
+	_base.call("set_transport_snapshot", runtime)
+	if _mode == "mission" and is_visible_in_tree():
+		if _reference_stage != null:
+			_base.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+			_base.position = _reference_stage.position
+			_base.size = _reference_stage.size
+			_reference_stage.hide()
+		_base.call("set_pad_preview", true, _craft_id)
+	elif _mode == "base" and is_visible_in_tree():
+		_base.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_base.call("set_active", true)
+	else:
+		_base.call("set_active", false)
 
 
 func get_presentation_snapshot() -> Dictionary:
