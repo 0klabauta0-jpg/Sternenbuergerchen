@@ -60,9 +60,11 @@ Ausfall-/Checkpoint-Szenarien bestehen56/0. Der fehlgeschlagene Ausflug wird
 ausgewertet, aber nicht gespeichert; die sichtbare Weiter-Aktion laedt den
 letzten sicheren Basisstand. Details und RED/GREEN-Belege: [CASUALTY.md](CASUALTY.md).
 Die gezielte Review-Nachpruefung hat den Fix freigegeben; keine verbleibenden
-Critical/Important-Befunde im geprueften Umfang. Der gitgebundene Export-/Paket-
-und Startnachweis wird im neuen Buildordner unter
-`C:/dev/SternenBuergerchen-builds/` abgelegt.
+Critical/Important-Befunde im geprueften Umfang. Die lokale Mainintegration ist erfolgt. Export-/Paket- und Startnachweis:
+`C:/dev/SternenBuergerchen-builds/2026-11-10-base-personnel-main/`. Paketgate
+PASS ohne Warnungen, Release-EXE headless Exit0. Weltbedienprobe aus dem PCK
+9/0 mit Entwicklungsengine und deren lokalen Entwicklungsbibliotheken. Der
+Release-EXE wird keine vollstaendige native Gameplayabnahme zugeschrieben.
 
 Ein zusaetzlich ausgefuehrter aelterer Task503-HUD-Prueffall bleibt bei9/1
 (read-only Roster bei eingeschifftem FT1). Er verwendet den Skirmish-Standardpfad;

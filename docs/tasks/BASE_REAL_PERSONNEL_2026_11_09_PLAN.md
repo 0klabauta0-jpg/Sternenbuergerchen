@@ -50,9 +50,13 @@
 
 - [x] Breiter Branchreview, Befunde beheben, gezielte Kampagnen-/Skirmish-/Basischecks.
 - [x] Task/Contracts/Status und begrenzte QA-Belege aktualisieren, eigene Dateien committen.
-- [ ] Autorisierte lokale Mainintegration in isoliertem Worktree, ohne fremde Orbit-WIP.
-- [ ] Aktuelle Main-EXE exportieren und headless Paket-/Startpruefung, kein Push.
+- [x] Autorisierte lokale Mainintegration in isoliertem Worktree, ohne fremde Orbit-WIP.
+- [x] Aktuelle Main-EXE exportieren und headless Paket-/Startpruefung, kein Push.
 
 ## Schnittstellen / Dateibesitz
 
 Task1 besitzt Karten, neue Basis-Navigations-/Geometriehelfer und zugehoerige Tests; kleine View-Aenderungen nur abstimmen. Task2 besitzt Missions-/Airtransportpfade und Pilotentests. Task3 besitzt ExplorableHomebase, Presenter, neue Basisruntime und Saveintegration. Gemeinsame SimulationRoot/MetaLayerFlow-Aenderungen vorab abstimmen; keine konkurrierenden Komplettumbauten.
+
+## Abschlussbeleg
+
+Lokal in Main integriert, kein Push. Export-, Paket- und Startbelege einschliesslich gitgebundener Provenienz: C:/dev/SternenBuergerchen-builds/2026-11-10-base-personnel-main/. PCK-Weltbedienprobe9/0 mit Entwicklungsengine und ihren lokalen Entwicklungsbibliotheken; echte Release-EXE startet headless mit Exit0. Native Sicht-/Bedienabnahme und offenes TASK503-HUD-Gate sind im QA-Bericht getrennt ausgewiesen.
