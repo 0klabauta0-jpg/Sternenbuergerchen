@@ -28,4 +28,3 @@ func _run() -> void:
 func _check(value: bool, label: String) -> void:
 	if not value: failed += 1
 	print("PASS: " if value else "FAIL: ", label)
-

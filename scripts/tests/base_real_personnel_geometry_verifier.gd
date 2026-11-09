@@ -82,7 +82,3 @@ func clear_segment(a:Vector3,b:Vector3)->bool:
  query.motion=b-a
  var result=space.cast_motion(query)
  return result[0]>=.99999
-
-
-
-

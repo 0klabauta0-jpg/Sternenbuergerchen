@@ -34,8 +34,3 @@ for name,cuts in {
  bpy.ops.wm.save_as_mainfile(filepath=os.path.join(out,'source',name+'.blend'))
  bpy.ops.export_scene.gltf(filepath=os.path.join(out,name+'.glb'),export_format='GLB',export_animations=False)
  print('OUTPUT',name,'parts',len(meshes),'cuts',changed,'faces',len(o.data.polygons))
-
-
-
-
-

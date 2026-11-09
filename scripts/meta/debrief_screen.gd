@@ -773,11 +773,14 @@ func _apply_player_readout_texts() -> void:
 			award_parts.append("%d %s" % [int(award_data[pair[0]]), pair[1]])
 	award.text = "Bestätigte Folgen: " + (" · ".join(award_parts) if not award_parts.is_empty() else "Einzelheiten im Originalbericht") if confirmed else ""
 	_native_review_confirmation.text = "Laut Einsatzbericht bereits übernommen." if confirmed else "Keine bestätigten Entwicklungsfolgen gemeldet."
+	var checkpoint_retry := bool(_mission_result.get("campaign_checkpoint_retry_required", false))
+	if checkpoint_retry:
+		_native_review_confirmation.text = "Heimkehr nicht moeglich: Pilot oder Besatzung nicht boardingfaehig. Fortsetzen laedt den letzten sicheren Basis-Checkpoint mit dessen Personal und Ressourcen; dieser Ausflug wird nicht gespeichert."
 	for pair in [["ReturnToFOBButton", "Zur FOB"], ["ReturnToHomebaseButton", "Zur Heimatbasis"]]:
 		var button := vbox.get_node("ButtonRow/" + pair[0]) as Button
 		if not button.has_meta("debrief_original_text"):
 			button.set_meta("debrief_original_text", button.text)
-		button.text = pair[1]
+		button.text = "Letzten sicheren Checkpoint fortsetzen" if checkpoint_retry else pair[1]
 
 
 func _player_ftl_feedback() -> String:

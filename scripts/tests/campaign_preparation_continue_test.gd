@@ -11,7 +11,10 @@ func _run() -> void:
 	await process_frame
 	var screen: Control = flow.get_node("HomebaseScreen")
 	var craft: String = String(flow.get_meta("singleplayer_bootstrap_craft_id"))
-	_check(screen.call("request_operation", "unboard", {"craft_id": craft, "fireteam_id": "ft1"}).get("ok", false), "Unboard campaign leader for preparation")
+	# People now deliberately start outside; preparation must not depend on
+	# the retired automatic boarding bootstrap.
+	var unboard: Dictionary = screen.call("request_operation", "unboard", {"craft_id": craft, "fireteam_id": "ft1"})
+	_check(not bool(unboard.get("ok", false)) and String(unboard.get("reason", "")) == "not_aboard", "New campaign begins outside without automatic boarding")
 	_check(screen.call("request_operation", "add_fireteam", {}).get("ok", false), "Create a second preparation group")
 	_check(screen.call("request_operation", "assign", {"unit_id": "campaign_leader", "fireteam_id": "ft2"}).get("ok", false), "Move leader into second real group")
 	_check(screen.call("request_operation", "loadout", {"unit_id": "campaign_leader", "fireteam_id": "ft2", "key": "weapon_1", "value": "smg"}).get("ok", false), "Change actual campaign loadout")

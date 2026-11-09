@@ -70,11 +70,3 @@ func nearest(p:Vector2,walk:Dictionary)->Array:
   var a=NAV.plane_at_grid(g);var d=Vector2(a.x,a.z).distance_squared_to(p)
   if d<distance:distance=d;best=g
  return [best.x,best.y]
-
-
-
-
-
-
-
-

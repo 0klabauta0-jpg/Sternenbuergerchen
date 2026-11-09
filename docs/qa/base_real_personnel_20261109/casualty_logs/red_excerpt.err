@@ -1,0 +1,29 @@
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+FAIL: Terminal casualty result releases combat instead of waiting forever
+FAIL: No impossible pending boarding retry
+FAIL: Casualty debrief is visible
+FAIL: Impossible extraction requires explicit checkpoint retry and no success
+FAIL: Both original casualties and existing medical progression reach debrief
+FAIL: Existing owner records failed job
+SCRIPT ERROR: Stack overflow. Check for infinite recursion in your script.
+   at: TacticalInputController.get_local_command_team_id (res://scripts/tests/mission_tactical_sandbox_controller.gd:12627)
+   GDScript backtrace (most recent call first):
+       [0] _ensure_mission_runtime_read_models (res://scripts/tests/mission_tactical_sandbox_controller.gd:19979)
+       [1] _get_fireteam_units (res://scripts/tests/mission_tactical_sandbox_controller.gd:20130)
+       [2] _resolve_fireteam_leader_for_behavior (res://scripts/tests/mission_tactical_sandbox_controller.gd:20184)
+       [3] _is_unit_current_fireteam_lead (res://scripts/tests/mission_tactical_sandbox_controller.gd:20211)
+       [4] _resolve_fireteam_leader_for_behavior (res://scripts/tests/mission_tactical_sandbox_controller.gd:20198)
+       [5] _is_unit_current_fireteam_lead (res://scripts/tests/mission_tactical_sandbox_controller.gd:20211)
+       [6] _get_selection_anchor_for_fireteam (res://scripts/tests/mission_tactical_sandbox_controller.gd:20631)
+       [7] _resolve_fireteam_leader_for_behavior (res://scripts/tests/mission_tactical_sandbox_controller.gd:20198)
+       [8] _is_unit_current_fireteam_lead (res://scripts/tests/mission_tactical_sandbox_controller.gd:20211)
+       [9] _get_selection_anchor_for_fireteam (res://scripts/tests/mission_tactical_sandbox_controller.gd:20631)
+       [10] _resolve_fireteam_leader_for_behavior (res://scripts/tests/mission_tactical_sandbox_controller.gd:20198)
+       [11] _is_unit_current_fireteam_lead (res://scripts/tests/mission_tactical_sandbox_controller.gd:20211)
+       [12] _get_selection_anchor_for_fireteam (res://scripts/tests/mission_tactical_sandbox_controller.gd:20631)
+       [13] _resolve_fireteam_leader_for_behavior (res://scripts/tests/mission_tactical_sandbox_controller.gd:20198)
+       [14] _is_unit_current_fireteam_lead (res://scripts/tests/mission_tactical_sandbox_controller.gd:20211)
+[Excerpt ends here; repeated recursive stack/engine underflow output omitted. Full raw log remains .scratch/casualty-red2.err. Test process was stopped after the six expected regression failures.]

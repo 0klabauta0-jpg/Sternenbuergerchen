@@ -133,6 +133,10 @@ func _run() -> void:
 	if not await _wait_homebase():
 		await _finish()
 		return
+	_verify_final_state(initial)
+	await _finish()
+
+func _verify_final_state(initial: Dictionary) -> void:
 	_flow.call("_show_homebase")
 	var final: Dictionary = _flow.call("get_singleplayer_snapshot")
 	var final_fuel_balanced: bool = float(final.supply.fuel_by_craft_id[_craft_id]) == float(initial.supply.fuel_by_craft_id[_craft_id]) - 24.0 - 16.0 + 10.0
@@ -150,7 +154,6 @@ func _run() -> void:
 	_check(String(Dictionary(final_operations.get("selected_craft", {})).get("pilot_id", "")) == _pilot_id, "Second return preserves actual assigned pilot")
 	_check(String(final.campaign.get("selected_job_id", "")) == "", "Peaceful second sortie leaves no stale selected combat job")
 	_check(Array(final.crafts).size() == Array(initial.crafts).size() and String(_craft(final).get("landing_pad_id", "")) == String(_craft(initial).get("landing_pad_id", "")), "Both sorties reuse original craft and original pad without clone")
-	await _finish()
 
 func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	_screen.call("request_operation", "craft", {"craft_id": _craft_id})

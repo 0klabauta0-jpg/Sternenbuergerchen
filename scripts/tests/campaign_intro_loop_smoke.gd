@@ -28,7 +28,12 @@ func _all_crew_deployed(controller: Node) -> bool:
 	return super._all_crew_deployed(controller)
 
 func _wait_homebase() -> bool:
-	if not await super._wait_homebase():
+	var ready: bool = await _wait(func():
+		var current: Dictionary = _flow.call("get_singleplayer_snapshot")
+		var craft: Dictionary = _craft(current)
+		return String(craft.get("location_id", "")) == "homebase" and not bool(craft.get("busy", true)), 35000, "Actual reverse transit restores original craft to homebase")
+	if not ready:
+		_dump("homebase_return")
 		return false
 	_return_number += 1
 	_flow.call("_show_homebase")
@@ -62,7 +67,11 @@ func _finish() -> void:
 		_check(_insertion_guard_checked, "Actual transient insertion guard was exercised")
 	_check(FileAccess.get_file_as_bytes(ROSTER.get_save_path()) == _skirmish_bytes, "Campaign never writes the menu-built Skirmish team")
 	print("CAMPAIGN_INTRO_LOOP returns=%d" % _return_number)
-	await super._finish()
+	if is_instance_valid(_flow):
+		_flow.queue_free()
+	await process_frame
+	print("SINGLEPLAYER_LOOP_RESULTS passed=%d failed=%d" % [_passed, _failed])
+	quit(1 if _failed else 0)
 
 func _prepare_initial_base() -> bool:
 	var operations: Dictionary = _screen.call("get_operations_snapshot")

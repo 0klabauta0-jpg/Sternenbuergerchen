@@ -28,23 +28,23 @@
 
 ### Task 1: Originalraeume navigierbar machen
 
-- [ ] Unabhaengige Geometriepruefung mit Koerperabstand, echte Eingangsrouten und Bett-/Terminal-Arbeitspunkte spezifizieren.
-- [ ] Statische feinere Basis-Laufdaten/-Navigation implementieren, physische Groesse beibehalten; keine per-frame Meshsuche.
-- [ ] Geometrie-/Simulationsweg-Verifier und Kostenmessung ausfuehren.
-- [ ] Originalmodelle/Terminals an passenden Raumarbeitsplaetzen erhalten, Review.
+- [x] Unabhaengige Geometriepruefung mit Koerperabstand, echte Eingangsrouten und Bett-/Terminal-Arbeitspunkte spezifizieren.
+- [x] Statische feinere Basis-Laufdaten/-Navigation implementieren, physische Groesse beibehalten; keine per-frame Meshsuche.
+- [x] Geometrie-/Simulationsweg-Verifier und Kostenmessung ausfuehren.
+- [x] Originalmodelle/Terminals an passenden Raumarbeitsplaetzen erhalten, Review.
 
 ### Task 2: Beide echten NPCs im Einsatz
 
-- [ ] Vorhandene Pilot-/Deployment-Owner untersuchen und regressionsfaehigen Szenariotest schreiben.
-- [ ] Pilot nach Landung aus-/wieder einsteigen lassen, Rueckflug guardet tatsaechliche Pilotanwesenheit.
-- [ ] Identitaeten, Rollen, Payload, Einzelpersonen-/Truppbindung und bisherigen Kampagnenloop pruefen; Review.
+- [x] Vorhandene Pilot-/Deployment-Owner untersuchen und regressionsfaehigen Szenariotest schreiben.
+- [x] Pilot nach Landung aus-/wieder einsteigen lassen, Rueckflug guardet tatsaechliche Pilotanwesenheit.
+- [x] Identitaeten, Rollen, Payload, Einzelpersonen-/Truppbindung und bisherigen Kampagnenloop pruefen; Review.
 
 ### Task 3: Autoritative Basisaktionen und Weltbedienung
 
-- [ ] SimulationRoot-gebundene Basisruntime mit Roster-IDs, Position, Bewegungsabsicht, Bettbelegung/Wecken und Snapshots anbinden.
-- [ ] Aktionsbruecke fuer bestehendes Ausruesten, Boarding/Unboarding und Details anbinden; neue Basisaktionen ueber denselben Ownerpfad.
-- [ ] Kampagnenbasis durch echte Personenprojektionen ersetzen; Auswahl, kleine Aktionsleiste und entfernte Terminal-Ankunft anbinden.
-- [ ] Sichere Checkpointfelder migrieren/persistieren und Wechsel zwischen Ansichten pruefen; Review.
+- [x] SimulationRoot-gebundene Basisruntime mit Roster-IDs, Position, Bewegungsabsicht, Bettbelegung/Wecken und Snapshots anbinden.
+- [x] Aktionsbruecke fuer bestehendes Ausruesten, Boarding/Unboarding und Details anbinden; neue Basisaktionen ueber denselben Ownerpfad.
+- [x] Kampagnenbasis durch echte Personenprojektionen ersetzen; Auswahl, kleine Aktionsleiste und entfernte Terminal-Ankunft anbinden.
+- [x] Sichere Checkpointfelder migrieren/persistieren und Wechsel zwischen Ansichten pruefen; Review.
 
 ### Task 4: Integration und lokaler Testbuild
 

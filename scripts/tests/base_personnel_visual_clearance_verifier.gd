@@ -36,4 +36,3 @@ func run():
  FileAccess.open("res://docs/qa/base_real_personnel_20261109/posed-visual-clearance.json",FileAccess.WRITE).store_string(JSON.stringify(evidence,"\t"))
  print("BASE_POSED_CLEARANCE ok=",passed," samples=",samples.size())
  quit(0 if passed else 1)
-

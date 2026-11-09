@@ -4037,11 +4037,24 @@ func _on_fob_transport_craft_pilot_cleared(craft_id: String) -> void:
 
 
 func _on_debrief_return_to_fob_requested() -> void:
+	if _continue_campaign_after_failed_extraction():
+		return
 	_show_fob()
 
 
 func _on_debrief_return_to_homebase_requested() -> void:
+	if _continue_campaign_after_failed_extraction():
+		return
 	_show_homebase()
+
+
+func _continue_campaign_after_failed_extraction() -> bool:
+	if not is_campaign_start() or not bool(_last_mission_result.get("campaign_checkpoint_retry_required", false)):
+		return false
+	# This is an explicit rollback, never a physical arrival or a fresh save.
+	load("res://scripts/meta/game_start_contract.gd").request_start(get_tree(), "campaign", "continue")
+	get_tree().change_scene_to_file("res://scenes/meta/meta_layer_test.tscn")
+	return true
 
 
 func _start_mission() -> void:
@@ -4241,13 +4254,26 @@ func _connect_mission_end(mission_instance: Node) -> void:
 func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	if _active_mission == null:
 		return
+	var resolved_result: Dictionary = mission_result.duplicate(true)
+	var failed_extraction := false
 	if is_campaign_start():
 		var crew_boarding: Dictionary = _active_mission.get_node("TacticalController").call("request_campaign_crew_boarding", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(crew_boarding.get("ok", false)):
-			_pending_campaign_mission_result = mission_result.duplicate(true)
-			_get_homebase_screen().set_meta("singleplayer_departure_error", crew_boarding)
-			return
-	if _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
+			if String(crew_boarding.get("reason", "")) in ["pilot_unavailable", "crew_unavailable"]:
+				# A terminal casualty cannot walk/board. Finish the existing result
+				# lifecycle without authorizing a ghost flight or rewarding extraction.
+				failed_extraction = true
+				resolved_result["original_mission_result"] = mission_result.duplicate(true)
+				resolved_result["result"] = "defeat"
+				resolved_result["mission_outcome"] = "defeat"
+				resolved_result["winning_team_id"] = ""
+				resolved_result["campaign_checkpoint_retry_required"] = true
+				resolved_result["extraction_failure"] = crew_boarding.duplicate(true)
+			else:
+				_pending_campaign_mission_result = mission_result.duplicate(true)
+				_get_homebase_screen().set_meta("singleplayer_departure_error", crew_boarding)
+				return
+	if not failed_extraction and _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
 		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(return_gate.get("ok", false)):
 			# Preserve the actual scene and its confirmed result if a transport
@@ -4256,12 +4282,15 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 			return
 	_pending_campaign_mission_result.clear()
 	if _singleplayer_runtime != null:
-		_singleplayer_runtime.call("record_mission_result", mission_result, _active_singleplayer_identity.duplicate(true))
+		_singleplayer_runtime.call("record_mission_result", resolved_result, _active_singleplayer_identity.duplicate(true))
 
-	_last_mission_result = _build_mission_result(_active_mission, mission_result)
+	_last_mission_result = _build_mission_result(_active_mission, resolved_result)
 	_last_mission_result = _apply_air_asset_recovery_from_mission_result(_last_mission_result)
-	_return_homebase_direct_craft_after_mission()
+	if not failed_extraction:
+		_return_homebase_direct_craft_after_mission()
 	_last_mission_result = _apply_mission_progression_to_roster(_last_mission_result)
+	if failed_extraction:
+		_last_mission_result["progression_save_ok"] = false
 	var fob_screen = _get_fob_screen()
 	if fob_screen != null:
 		fob_screen.set_last_mission_result(_last_mission_result)
@@ -4356,7 +4385,9 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 	var air_asset_status: Dictionary = _extract_air_asset_status_from_mission(mission_instance)
 	if not air_asset_status.is_empty():
 		merged_result["air_asset_status"] = air_asset_status
-	var mini_aar_debrief: Dictionary = _extract_mini_aar_debrief_from_mission(mission_instance)
+	# The optional live AAR snapshot assumes a fit tactical selection anchor.
+	# Terminal casualties already have authoritative team/tactical result data.
+	var mini_aar_debrief: Dictionary = {} if bool(merged_result.get("campaign_checkpoint_retry_required", false)) else _extract_mini_aar_debrief_from_mission(mission_instance)
 	if not mini_aar_debrief.is_empty():
 		merged_result["mini_aar_debrief"] = mini_aar_debrief
 	return merged_result
