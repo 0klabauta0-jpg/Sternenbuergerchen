@@ -137,23 +137,35 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	var compact_options := options.duplicate()
 	compact_options["compact_sheet"] = true
 	compact_options["show_badge_progress"] = false
-	_add_identity_block(sheet, model, profile, compact_options)
+	_add_compact_identity_overview(sheet, model, profile, compact_options)
 	_add_post_mission_award_alert(sheet, model, profile, options)
-	_add_value_rows(sheet, [
-		{"label": "Startrolle", "value_text": String(model.get("start_role_text", "Im Profil nicht belegt")), "help_id": "character_sheet.role_category"},
-		{"label": "Aktuelle Aufgabe", "value_text": String(model.get("current_assignment_text", "Im Profil nicht belegt")), "help_id": "character_sheet.fireteam_assignment"},
-	], profile, options)
 	var suitability: Array = Array(model.get("suitability_rows", []))
-	var top_rows: Array = []
-	for row_variant in suitability.slice(0, 2):
-		var row: Dictionary = Dictionary(row_variant).duplicate()
-		row.erase("detail_text")
-		top_rows.append(row)
-	_add_value_section(sheet, "BERECHNETE EIGNUNG · WERT / SCHWELLE", top_rows, profile, options)
-	_add_trait_section(sheet, String(model.get("trait_text", "Keine Eigenschaften hinterlegt.")), Array(model.get("trait_rows", [])))
-	var why := _add_foldout(sheet, "suitability", "Warum diese Eignung?")
+	var suitability_host := _overview_section(sheet, "STÄRKSTE EIGNUNG · WERT / SCHWELLE", "CharacterSuitabilityOverview")
+	var primary: Dictionary = Dictionary(suitability[0]) if not suitability.is_empty() else {}
+	_overview_label(suitability_host, "PrimarySuitability", "%s · %s" % [String(primary.get("label", "Noch offen")), String(primary.get("value_text", "—"))], 16)
+	_overview_label(suitability_host, "PrimarySuitabilityReason", String(model.get("primary_suitability_reason", "Noch keine Eignung berechnet.")), 13)
+	_overview_label(suitability_host, "CharacterDerivationGuide", "Eigenschaften wirken auf die gespeicherten Kernwerte. Werte, Verhalten, Fahrzeuge und Rollen-/Ausrüstungskontext fließen in die Eignung ein.", 13, true)
+	var social := HBoxContainer.new()
+	social.name = "CharacterTraitsAndRelationships"
+	social.add_theme_constant_override("separation", 10)
+	sheet.add_child(social)
+	var traits := _overview_section(social, "EIGENSCHAFTEN & WIRKUNG", "CharacterTraitOverview")
+	(traits.get_parent() as Control).size_flags_stretch_ratio = 0.92
+	_add_overview_traits(traits, model)
+	var relationships := _overview_section(social, "ZUSAMMENARBEIT", "CharacterRelationshipOverview")
+	for row: Dictionary in Array(model.get("relationship_overview_rows", [])):
+		_add_overview_relationship(relationships, row)
+	if Array(model.get("relationship_overview_rows", [])).is_empty():
+		_overview_label(relationships, "NoKnownRelationships", String(model.get("relationship_empty_text", "Noch keine Beziehung bekannt.")), 14)
+	else:
+		_overview_label(relationships, "RelationshipSource", "Gespeicherte Affinität · −1 bis +1", 12, true)
+	var why := _add_foldout(sheet, "suitability", "Alle Eignungen & genaue Herleitung")
 	_add_value_rows(why, suitability, profile, options)
 	_add_text_section(why, "ROLLE / LOADOUT:", "Die Startrolle ist gespeichert. Die aktuelle Aufgabe kommt aus der Zuteilung. Eignung ist eine Berechnung; sie ändert weder Rolle noch Aufgabe.")
+	var all_relationships: Array = Array(model.get("relationship_entries", []))
+	if all_relationships.size() > 2:
+		var relationship_details := _add_foldout(sheet, "relationships", "Alle %d Beziehungen" % all_relationships.size())
+		_add_value_rows(relationship_details, all_relationships, profile, options)
 	var values := _add_foldout(sheet, "values", "Werte & Zusammenhänge")
 	_add_text_section(values, "WERTE:", "Gezeigt werden wirksame Profilwerte. Eigenschaften sind bereits berücksichtigt. Frühere Basiswerte und spätere Vorgaben sind nicht vollständig protokolliert.")
 	_add_bar_section(values, "KERNWERTE (0,00 - 1,00):", Array(model.get("core_rows", [])), profile, options)
@@ -169,6 +181,80 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	if not bool(options.get("hide_short_description", false)):
 		var background := _add_foldout(sheet, "background", "Hintergrund")
 		_add_text_section(background, "KURZBESCHREIBUNG:", String(model.get("short_description", "Keine Angaben hinterlegt.")))
+
+
+static func _overview_label(host: Control, node_name: String, value: String, font_size: int, muted: bool = false) -> Label:
+	var label := Label.new()
+	label.name = node_name
+	label.text = value
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	META_UI_SKIN_SCRIPT.style_body_label(label, font_size)
+	if muted:
+		label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_TEXT_MUTED)
+	host.add_child(label)
+	return label
+
+
+static func _overview_section(host: Control, title: String, node_name: String) -> VBoxContainer:
+	var panel := PanelContainer.new()
+	panel.name = node_name
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var style: StyleBoxFlat = TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(TACTICAL_UI_THEME_SCRIPT.COLOR_PANEL_ALT, TACTICAL_UI_THEME_SCRIPT.COLOR_BORDER, 4, 1, Vector4(10, 8, 10, 8))
+	panel.add_theme_stylebox_override("panel", style)
+	host.add_child(panel)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 5)
+	panel.add_child(column)
+	var heading := _overview_label(column, node_name + "Heading", title, 13, true)
+	heading.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT)
+	return column
+
+
+static func _add_compact_identity_overview(host: VBoxContainer, model: Dictionary, profile, options: Dictionary) -> void:
+	var row := HBoxContainer.new()
+	row.name = "CharacterIdentityOverview"
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 14)
+	host.add_child(row)
+	var portrait := TextureRect.new()
+	portrait.name = "PortraitRect"
+	PORTRAIT_IDENTITY_CATALOG_SCRIPT.apply_texture_rect_contract(portrait, "character_sheet")
+	portrait.texture = _load_portrait_texture(String(profile.portrait_id), String(profile.portrait_path)) if profile != null else null
+	portrait.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	_set_help_id(portrait, "character_sheet.portrait")
+	row.add_child(portrait)
+	var facts := VBoxContainer.new()
+	facts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	facts.add_theme_constant_override("separation", 3)
+	row.add_child(facts)
+	_overview_label(facts, "CharacterIdentityName", String(model.get("name", "Unbekannte Person")), 22)
+	_overview_label(facts, "CharacterStartRole", "Startrolle: " + String(model.get("start_role_text", "Im Profil nicht belegt")), 14)
+	_overview_label(facts, "CharacterAssignment", "Aufgabe: " + String(model.get("current_assignment_text", "Im Profil nicht belegt")), 14)
+	_overview_label(facts, "CharacterStatus", "Status: " + String(model.get("overview_status_text", "Im Profil nicht belegt")), 14, true)
+	_add_badge_row(facts, profile, options)
+
+
+static func _add_overview_traits(host: VBoxContainer, model: Dictionary) -> void:
+	var rows: Array = Array(model.get("trait_rows", []))
+	if rows.is_empty():
+		_overview_label(host, "NoKnownTraits", String(model.get("trait_text", "Keine Eigenschaften hinterlegt.")), 14)
+	for row: Dictionary in rows:
+		var id: String = _sanitize_node_fragment(String(row.get("trait_id", row.get("label", "trait"))))
+		var label := _overview_label(host, "TraitLabel_" + id, String(row.get("label", "Eigenschaft")), 14)
+		_set_help_id(label, String(row.get("help_id", "character_sheet.traits")))
+		label.tooltip_text = String(row.get("detail_text", ""))
+		if not label.tooltip_text.is_empty():
+			_overview_label(host, "TraitDetail_" + id, label.tooltip_text, 13, true)
+
+
+static func _add_overview_relationship(host: VBoxContainer, row: Dictionary) -> void:
+	var id: String = _sanitize_node_fragment(String(row.get("target_unit_id", "person")))
+	var label := _overview_label(host, "Relationship_" + id, "%s · %s" % [String(row.get("label", "Person")), String(row.get("value_text", ""))], 14)
+	_set_help_id(label, "character_sheet.relationship_links")
+	label.set_meta("target_unit_id", row.get("target_unit_id", ""))
+	label.set_meta("affinity", row.get("affinity", 0.0))
+	_overview_label(host, "RelationshipReason_" + id, String(row.get("detail_text", "")), 13, true)
 
 
 static func _add_foldout(host: VBoxContainer, key: String, title: String) -> VBoxContainer:

@@ -1,0 +1,7 @@
+{
+  "script": "campaign_launch_actionability_verifier.gd",
+  "exit_code": 1,
+  "errors": 2,
+  "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\detail-overlay-clean-red\\campaign_launch_actionability_verifier.log",
+  "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\detail-overlay-clean-red\\campaign_launch_actionability_verifier"
+}

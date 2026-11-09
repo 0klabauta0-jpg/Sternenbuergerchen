@@ -1,0 +1,51 @@
+[
+  {
+    "script": "character_detail_hierarchy_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-final\\character_detail_hierarchy_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-final\\character_detail_hierarchy_verifier"
+  },
+  {
+    "script": "character_sheet_compact_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-final\\character_sheet_compact_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-final\\character_sheet_compact_verifier"
+  },
+  {
+    "script": "task_235_character_sheet_roster_gameplay_expansion.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-final\\task_235_character_sheet_roster_gameplay_expansion.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-final\\task_235_character_sheet_roster_gameplay_expansion"
+  },
+  {
+    "script": "task_236_fireteam_relationship_affinity_and_cohesion.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-final\\task_236_fireteam_relationship_affinity_and_cohesion.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-final\\task_236_fireteam_relationship_affinity_and_cohesion"
+  },
+  {
+    "script": "task_207_npc_rank_skill_badge_derivation.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-final\\task_207_npc_rank_skill_badge_derivation.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-final\\task_207_npc_rank_skill_badge_derivation"
+  },
+  {
+    "script": "bugfix_character_team_editor_usability_pass.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-final\\bugfix_character_team_editor_usability_pass.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-final\\bugfix_character_team_editor_usability_pass"
+  },
+  {
+    "script": "task_265_character_sheet_loadout_help_content_pass.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-final\\task_265_character_sheet_loadout_help_content_pass.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-final\\task_265_character_sheet_loadout_help_content_pass"
+  }
+]

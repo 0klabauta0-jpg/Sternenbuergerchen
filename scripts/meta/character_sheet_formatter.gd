@@ -217,12 +217,19 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 		if short_description.strip_edges().is_empty():
 			short_description = "Keine Kurzbeschreibung hinterlegt."
 	short_description = COPY.stock_biography(short_description, profile)
+	var suitability_rows: Array = _build_suitability_rows(profile)
+	var relationship_entries: Array = _build_relationship_entries(profile, options)
 
 	return {
 		"name": _optional_text(String(profile.display_name), "Unbekannte Person"),
 		"start_role_text": _start_role_text(profile),
 		"current_assignment_text": _optional_text(String(options.get("current_assignment_text", "")), "Im Profil nicht belegt"),
-		"suitability_rows": _build_suitability_rows(profile),
+		"suitability_rows": suitability_rows,
+		"primary_suitability_reason": String(suitability_rows[0].get("reason", "")) if not suitability_rows.is_empty() else "Noch keine Eignung berechnet.",
+		"relationship_entries": relationship_entries,
+		"relationship_overview_rows": _relationship_highlights(relationship_entries),
+		"relationship_empty_text": "Noch keine Beziehung bekannt.",
+		"overview_status_text": format_status_text(String(options.get("status_text", profile.availability_status))),
 		"pilot_explanation": _build_pilot_explanation(profile),
 		"trait_text": trait_text,
 		"trait_rows": _build_trait_rows(profile),
@@ -283,7 +290,7 @@ static func _build_suitability_rows(profile) -> Array:
 		var key: String = String(badge.get("badge_key", ""))
 		if key == "enemy":
 			continue
-		rows.append({"label": COPY.label(key), "value_text": "%s / %s" % [COPY.decimal(float(badge.get("score", 0.0))), COPY.decimal(NPC_RANK_BADGE_RESOLVER_SCRIPT.MIN_SCORE)], "help_id": String(badge.get("help_id", "character_sheet.role")), "detail_text": _build_pilot_explanation(profile) if key == "pilot" else "Berechnete Eignung aus aktuellen Profilwerten und vorhandenem Rollen-/Ausrüstungskontext. Keine automatische Zuteilung."})
+		rows.append({"label": COPY.label(key), "value_text": "%s / %s" % [COPY.decimal(float(badge.get("score", 0.0))), COPY.decimal(NPC_RANK_BADGE_RESOLVER_SCRIPT.MIN_SCORE)], "badge_key": key, "reason": String(badge.get("reason", "")), "help_id": String(badge.get("help_id", "character_sheet.role")), "detail_text": _build_pilot_explanation(profile) if key == "pilot" else "%s\n%s" % [String(badge.get("reason", "")), String(badge.get("detail_text", ""))]})
 	return rows
 
 
@@ -351,19 +358,69 @@ static func _build_status_rows(profile, options: Dictionary = {}) -> Array:
 	]
 
 
-static func _build_relationship_rows(profile, _options: Dictionary = {}) -> Array:
-	var profile_data: Dictionary = Dictionary(profile.call("to_dict")) if profile != null and profile.has_method("to_dict") else {}
-	var summary: Dictionary = Dictionary(ROSTER_RELATIONSHIP_MODEL_SCRIPT.call("summarize_unit_relationships_without_text", profile_data))
-	var best_link: Dictionary = Dictionary(summary.get("best_link", {}))
-	var worst_link: Dictionary = Dictionary(summary.get("worst_link", {}))
+static func _build_relationship_entries(profile, options: Dictionary = {}) -> Array:
+	var data: Dictionary = profile.call("to_dict") if profile != null and profile.has_method("to_dict") else {}
+	var names: Dictionary = {}
+	for id in Dictionary(options.get("roster_names_by_id", {})):
+		names[ROSTER_RELATIONSHIP_MODEL_SCRIPT.normalize_unit_id(String(id))] = String(options.roster_names_by_id[id]).strip_edges()
+	# Normalization owns identity, signs, duplicate targets and ordering. Keep
+	# custom stored prose verbatim rather than deriving reasons from traits.
+	var reasons: Dictionary = {}
+	for raw: Dictionary in Array(data.get("relationship_links", [])):
+		var id: String = ROSTER_RELATIONSHIP_MODEL_SCRIPT.normalize_unit_id(String(raw.get("target_unit_id", raw.get("unit_id", ""))))
+		if not reasons.has(id):
+			reasons[id] = String(raw.get("reason", ""))
+	var entries: Array = []
+	for link: Dictionary in ROSTER_RELATIONSHIP_MODEL_SCRIPT.normalize_links_for_unit(data):
+		var id: String = String(link.target_unit_id)
+		var name_text: String = String(names.get(id, ""))
+		if name_text.is_empty():
+			name_text = String(link.get("target_name", ""))
+			if name_text.is_empty() or name_text.to_lower() == id:
+				name_text = "Person ohne hinterlegten Namen"
+		var tags: PackedStringArray = []
+		for tag in PackedStringArray(link.get("tags", [])):
+			tags.append(COPY.label(tag))
+		var value: float = float(link.affinity)
+		entries.append({"label": name_text, "value_text": COPY.signed_decimal(value) + (" · " + ", ".join(tags) if not tags.is_empty() else ""), "detail_text": COPY.relationship_reason(String(reasons.get(id, link.get("reason", "")))), "help_id": "character_sheet.relationship_links", "target_unit_id": id, "affinity": value})
+	return entries
+
+
+static func _relationship_highlights(entries: Array) -> Array:
+	var highlights: Array = []
+	for sign_value in [1.0, -1.0]:
+		for entry: Dictionary in entries:
+			if float(entry.affinity) * sign_value > 0.0:
+				highlights.append(entry.duplicate(true))
+				break
+	for entry: Dictionary in entries:
+		if highlights.size() >= 2:
+			break
+		if not highlights.any(func(highlight: Dictionary): return highlight.target_unit_id == entry.target_unit_id):
+			highlights.append(entry.duplicate(true))
+	return highlights
+
+
+static func _build_relationship_rows(profile, options: Dictionary = {}) -> Array:
+	var entries: Array = _build_relationship_entries(profile, options)
+	var best: Dictionary = {}
+	var worst: Dictionary = {}
+	for entry: Dictionary in entries:
+		if float(entry.affinity) > 0.0 and best.is_empty():
+			best = entry
+		if float(entry.affinity) < 0.0 and worst.is_empty():
+			worst = entry
 	var relationship_summary: String = String(profile.relationship_summary_text)
-	if relationship_summary.strip_edges().is_empty() and not profile_data.is_empty():
-		relationship_summary = String(ROSTER_RELATIONSHIP_MODEL_SCRIPT.call("build_unit_relationship_summary_text", profile_data))
+	if relationship_summary.strip_edges().is_empty():
+		relationship_summary = "%d gespeicherte Beziehungen" % entries.size() if not entries.is_empty() else "Noch keine Beziehung bekannt."
+	var names: PackedStringArray = []
+	for entry: Dictionary in entries:
+		names.append("%s %s" % [entry.label, COPY.signed_decimal(float(entry.affinity))])
 	return [
 		{"label": "Teamfit", "value_text": _optional_text(relationship_summary, "Noch keine Beziehungsauswertung."), "help_id": "character_sheet.teamfit"},
-		{"label": "Gute Zusammenarbeit", "value_text": _format_relationship_link_summary(best_link, "Noch keine"), "help_id": "character_sheet.best_fit"},
-		{"label": "Spannungen", "value_text": _format_relationship_link_summary(worst_link, "Noch keine"), "help_id": "character_sheet.tension"},
-		{"label": "Beziehungen", "value_text": _format_relationship_links(Array(profile.relationship_links)), "help_id": "character_sheet.relationship_links"},
+		{"label": "Gute Zusammenarbeit", "value_text": "%s %s" % [best.label, best.value_text] if not best.is_empty() else "Noch keine", "detail_text": String(best.get("detail_text", "")), "help_id": "character_sheet.best_fit"},
+		{"label": "Spannungen", "value_text": "%s %s" % [worst.label, worst.value_text] if not worst.is_empty() else "Noch keine", "detail_text": String(worst.get("detail_text", "")), "help_id": "character_sheet.tension"},
+		{"label": "Beziehungen", "value_text": "; ".join(names) if not names.is_empty() else "Noch keine Beziehung bekannt.", "help_id": "character_sheet.relationship_links"},
 	]
 
 

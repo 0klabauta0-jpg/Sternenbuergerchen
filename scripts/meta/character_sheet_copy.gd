@@ -17,6 +17,8 @@ const LABELS := {
 	"coordinator": "Koordination", "infiltrator": "Infiltration", "insertion_pilot": "Anflug",
 	"transport_pilot": "Personentransport", "cargo_runner": "Frachttransport", "route_master": "Routenführung",
 	"interceptor": "Abfangen", "strike_pilot": "Luftangriff", "escort_pilot": "Geleitschutz",
+	"friend": "Freundschaft", "rival": "Rivalität", "trusts": "Vertrauen", "avoids": "Meidet",
+	"mentor": "Mentor", "tension": "Spannung",
 }
 const TEXT := {
 	"Fireteam Leader": "Truppführer", "Field Captain": "Truppführer", "Combat Medic": "Sanitäter",
@@ -45,6 +47,16 @@ static func text(value: String) -> String:
 
 static func decimal(value: float) -> String:
 	return ("%.2f" % value).replace(".", ",")
+
+static func signed_decimal(value: float) -> String:
+	return ("%+.2f" % value).replace(".", ",").replace("-", "−")
+
+static func relationship_reason(value: String) -> String:
+	return String({
+		"start_roster_same_fireteam": "Startbeziehung: gleicher Trupp.",
+		"start_roster_leadership_routine": "Startbeziehung: gemeinsame Führungsroutine.",
+		"start_roster_personality_friction": "Startbeziehung: persönliche Reibung.",
+	}.get(value, value)) if not value.is_empty() else "Kein Grund hinterlegt."
 
 static func armor(armor_id: String) -> String:
 	return String({"light": "Leichte Rüstung", "medium": "Mittlere Rüstung", "heavy": "Schwere Rüstung"}.get(armor_id, armor_id))

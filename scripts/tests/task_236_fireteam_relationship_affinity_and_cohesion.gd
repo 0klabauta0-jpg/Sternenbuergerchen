@@ -94,8 +94,8 @@ func _test_character_sheet_relationship_rows() -> void:
 	units = ROSTER_RELATIONSHIP_MODEL_SCRIPT.call("apply_relationships_to_units", units, [tense_pair], false)
 	var profile = META_UNIT_PROFILE_SCRIPT.new(Dictionary(units[0]))
 	var model: Dictionary = Dictionary(CHARACTER_SHEET_FORMATTER_SCRIPT.call("build_sheet_view_model", profile))
-	_assert(_rows_contain(Array(model.get("relationship_rows", [])), "Best Fit", "Partner"), "Character sheet shows best relationship")
-	_assert(_rows_contain(Array(model.get("relationship_rows", [])), "Tension", "Rival"), "Character sheet shows worst relationship")
+	_assert(_rows_contain(Array(model.get("relationship_rows", [])), "Gute Zusammenarbeit", "Partner"), "Character sheet shows best relationship")
+	_assert(_rows_contain(Array(model.get("relationship_rows", [])), "Spannungen", "Rival"), "Character sheet shows worst relationship")
 
 
 func _test_fob_fireteam_card_teamfit_label() -> void:

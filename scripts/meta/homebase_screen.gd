@@ -5907,12 +5907,16 @@ func _update_character_sheet() -> void:
 	var current_assignment_text: String = _build_homebase_fireteam_text(_focused_unit_id)
 	if not assigned_craft_id.is_empty():
 		current_assignment_text = "Pilot · %s" % FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_display_name(_get_aircraft_definition_by_id(assigned_craft_id))
+	var roster_names_by_id: Dictionary = {}
+	for known_id in _profiles_by_id:
+		roster_names_by_id[String(known_id)] = _build_display_name(String(known_id))
 	CHARACTER_SHEET_VIEW_SCRIPT.render(
 		content_host,
 		profile,
 		{
 			"status_text": _build_sheet_status_text(_focused_unit_id),
 			"current_assignment_text": current_assignment_text,
+			"roster_names_by_id": roster_names_by_id,
 			"fireteam_text": _build_homebase_fireteam_text(_focused_unit_id),
 			"post_mission_skill_delta": post_mission_delta,
 			"post_mission_skill_delta_text": _format_post_mission_skill_delta_text(post_mission_delta),

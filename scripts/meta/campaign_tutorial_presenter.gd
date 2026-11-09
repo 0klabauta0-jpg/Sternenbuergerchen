@@ -127,6 +127,13 @@ func refresh() -> void:
 	if String(snapshot.get("mode", "")) != "campaign":
 		visible = false
 		return
+	var homebase: Node = _flow.get_node_or_null("HomebaseScreen") if is_instance_valid(_flow) else null
+	var detail_popup: Control = homebase.get_node_or_null("CharacterSheetPopup") if homebase != null else null
+	if (detail_popup != null and detail_popup.is_visible_in_tree()) or (is_instance_valid(_flow) and String(_flow.get("_current_meta_view")) == "star_map"):
+		# These views already carry their own instructions. Keep the global
+		# floating guidance clear of identity, map headings and close actions.
+		visible = false
+		return
 	visible = true
 	var onboarding: Dictionary = snapshot.get("onboarding", {})
 	var checkpoint: Dictionary = _flow.get_meta("campaign_checkpoint_result", {}) if is_instance_valid(_flow) else {}

@@ -189,6 +189,15 @@ const FIRST_NAMES: PackedStringArray = [
 	"Yasmin", "Tomas", "Rhea", "Jaro", "Mina", "Orin", "Vera", "Elias", "Kira", "Nolan",
 	"Seren", "Marek", "Ilya", "Rina", "Anton", "Livia", "Noor", "Bela", "Sena", "Arun",
 ]
+## Author choices for these fictional generator tokens only. This table is
+## never applied to saved/custom full names or used to infer a real identity.
+const AUTHORED_FIRST_NAME_GROUPS: Dictionary = {
+	"Anja": "female", "Leona": "female", "Talia": "female", "Sabine": "female", "Yasmin": "female",
+	"Rhea": "female", "Mina": "female", "Vera": "female", "Kira": "female", "Rina": "female", "Livia": "female",
+	"Milo": "male", "Darius": "male", "Kenzo": "male", "Idris": "male", "Pavel": "male", "Tomas": "male",
+	"Jaro": "male", "Orin": "male", "Elias": "male", "Nolan": "male", "Marek": "male", "Anton": "male", "Arun": "male",
+	"Nika": "unspecified", "Seren": "unspecified", "Ilya": "unspecified", "Noor": "unspecified", "Bela": "unspecified", "Sena": "unspecified",
+}
 const LAST_NAMES: PackedStringArray = [
 	"Voss", "Saren", "Rhee", "Holt", "Mercer", "Vale", "Orlov", "Kane", "Sol", "Dorn",
 	"Arendt", "Ibarra", "Novak", "Kade", "Wren", "Kovac", "Moss", "Rask", "Lenn", "Brix",
@@ -217,11 +226,12 @@ static func generate_start_roster(seed: String = DEFAULT_SEED, roster_size: int 
 	var portrait_entries: Array = _build_portrait_assignment_pool(normalized_seed, normalized_size, role_plan)
 	var used_names: Dictionary = {}
 	var used_callsigns: Dictionary = {}
+	var used_portraits: Dictionary = {}
 	var units: Array = []
 	for index in range(normalized_size):
 		var role_category: String = String(role_plan[index])
 		var fireteam_id: String = _fireteam_for_index(index, normalized_size)
-		var identity: Dictionary = _build_identity(index, role_category, fireteam_id, normalized_seed, rng, portrait_entries, used_names, used_callsigns)
+		var identity: Dictionary = _build_identity(index, role_category, fireteam_id, normalized_seed, rng, portrait_entries, used_names, used_callsigns, used_portraits)
 		var profile = META_UNIT_PROFILE_BUILDER_SCRIPT.call("build_from_identity_config", identity)
 		var profile_data: Dictionary = Dictionary(profile.call("to_dict")) if profile != null and profile.has_method("to_dict") else identity.duplicate(true)
 		profile_data["roster_role_category"] = role_category
@@ -449,7 +459,11 @@ static func validate_roster(roster: Dictionary) -> Dictionary:
 	}
 
 
-static func _build_identity(index: int, role_category: String, fireteam_id: String, seed: String, rng: RandomNumberGenerator, portrait_entries: Array, used_names: Dictionary, used_callsigns: Dictionary) -> Dictionary:
+static func get_authored_first_name_group(first_name: String) -> String:
+	return String(AUTHORED_FIRST_NAME_GROUPS.get(first_name, "unspecified"))
+
+
+static func _build_identity(index: int, role_category: String, fireteam_id: String, seed: String, rng: RandomNumberGenerator, portrait_entries: Array, used_names: Dictionary, used_callsigns: Dictionary, used_portraits: Dictionary) -> Dictionary:
 	var template: Dictionary = Dictionary(ROLE_TEMPLATES.get(role_category, ROLE_TEMPLATES.get("shooter", {})))
 	var first_name: String = String(FIRST_NAMES[int(rng.randi_range(0, FIRST_NAMES.size() - 1))])
 	var last_name: String = String(LAST_NAMES[int(rng.randi_range(0, LAST_NAMES.size() - 1))])
@@ -476,6 +490,9 @@ static func _build_identity(index: int, role_category: String, fireteam_id: Stri
 	identity["fireteam_id"] = fireteam_id
 	identity["is_fireteam_lead"] = role_category == "leader"
 	var portrait_entry: Dictionary = Dictionary(portrait_entries[index]) if index < portrait_entries.size() else {}
+	portrait_entry = PORTRAIT_IDENTITY_CATALOG_SCRIPT.select_generated_entry(portrait_entry, get_authored_first_name_group(first_name), used_portraits)
+	if not portrait_entry.is_empty():
+		used_portraits[String(portrait_entry.id)] = true
 	identity["portrait_id"] = String(portrait_entry.get("id", "")).strip_edges()
 	identity["portrait_path"] = String(portrait_entry.get("path", "")).strip_edges()
 	identity["homeworld"] = String(HOMEWORLDS[int(rng.randi_range(0, HOMEWORLDS.size() - 1))])

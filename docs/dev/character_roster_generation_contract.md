@@ -46,6 +46,27 @@ Der Generator muss diese Startkategorien abdecken:
 
 Der Mix ist bewusst nicht perfekt. Jede erzeugte Runde hat Staerken und Luecken, damit Teamzusammenstellung interessant bleibt.
 
+### Autorisierte Namen-/Portraitzuordnung
+
+Neue synthetische Figuren verwenden die ausdruecklichen
+`AUTHORED_FIRST_NAME_GROUPS` des Generators und `presentation_group` des
+Portraitkatalogs. Die Portraitgruppen stammen aus archivierten Bildvorgaben;
+`presentation_source` nennt Prompt, SHA-256 und Quadrant. Die dokumentiert
+uneindeutige Vorlage `char_portrait_019` bleibt `unspecified`.
+
+Die bereits gezogenen Namen und die RNG-Abfolge bleiben erhalten. Nur das
+Portrait wird deterministisch passend zugeordnet, solange moeglich ohne
+Wiederholung. Ist eine passende Gruppe erschoepft, folgt ausdruecklich
+unbestimmte Darstellung, danach passende Wiederverwendung mit Diagnose;
+keine gegenteilige Zuordnung nur fuer Einzigartigkeit. Unbekannte Namen sind
+unbestimmt. Diese Zuordnung gilt nur bei Neuerzeugung, nicht als Klassifikation
+oder automatische Korrektur gespeicherter/custom Personen.
+
+Der Standard Anja Voss und damit neue Kampagnen verwenden explizit
+`char_portrait_004` (dokumentierte Commanderfrau). Bestehende gespeicherte
+Kampagnen werden nicht nachtraeglich umgeschrieben; ihre Portraitauswahl hat
+keinen gesonderten Herkunftsnachweis. Kleine Kartenlayouts bleiben erhalten.
+
 ## Fireteam-Vorschlaege
 Der Generator liefert erste Fireteam-Vorschlaege:
 - jedes Roster-Mitglied erscheint genau einmal

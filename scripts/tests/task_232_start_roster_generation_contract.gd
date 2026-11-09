@@ -123,7 +123,7 @@ func _test_main_menu_first_start_and_new_team_boundary() -> void:
 	_assert(bool(snapshot.get("valid", false)) and bool(snapshot.get("has_roster", false)), "Main menu creates first-start roster in memory")
 	_assert(int(snapshot.get("roster_size", 0)) == 24, "Main menu first-start roster uses default size")
 	_assert(bool(snapshot.get("new_roster_button_visible", false)), "Main menu exposes New Team button")
-	_assert(String(snapshot.get("new_roster_button_text", "")).contains("Neues Team"), "New Team button starts as generate action")
+	_assert(String(snapshot.get("new_roster_button_text", "")).contains("Neues Skirmish-Team"), "New Team button identifies its existing Skirmish generation scope")
 	var prompt: Dictionary = Dictionary(main_menu.call("request_new_start_roster"))
 	snapshot = Dictionary(main_menu.call("get_start_roster_snapshot"))
 	_assert(bool(prompt.get("requires_confirmation", false)), "New Team request requires confirmation when roster exists")

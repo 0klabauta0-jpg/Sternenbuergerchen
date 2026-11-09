@@ -151,6 +151,57 @@ static func build_deterministic_assignment(seed: String, count: int, role_catego
 	return result
 
 
+## Authored fictional-art metadata only. Unknown/custom identity data is never
+## classified through a name, appearance guess or the fallback portrait.
+static func get_presentation_group(portrait_id: String = "", portrait_path: String = "", catalog_path: String = CATALOG_PATH) -> String:
+	var catalog: Dictionary = load_catalog(catalog_path)
+	var by_id: Dictionary = catalog.get("entries_by_id", {})
+	if by_id.has(portrait_id):
+		return String(by_id[portrait_id].presentation_group)
+	var legacy: Dictionary = catalog.get("entries_by_legacy_path", {})
+	if legacy.has(portrait_path):
+		return String(legacy[portrait_path].presentation_group)
+	for entry: Dictionary in catalog.get("entries", []):
+		if not portrait_path.is_empty() and String(entry.path) == portrait_path:
+			return String(entry.presentation_group)
+	return "unspecified"
+
+
+## Used only while creating a new synthetic identity. No RNG draws and no
+## mutation of existing profiles. Preserve uniqueness while supply permits;
+## exhaustion uses unspecified art, then explicit compatible reuse, never an
+## opposite authored group. The returned diagnostic describes that boundary.
+static func select_generated_entry(preferred: Dictionary, presentation_group: String, used_ids: Dictionary, catalog_path: String = CATALOG_PATH) -> Dictionary:
+	var pool: Array = get_candidate_entries(PackedStringArray(), catalog_path)
+	if pool.is_empty():
+		return {}
+	var required: String = presentation_group if presentation_group in ["male", "female"] else "unspecified"
+	var preferred_id: String = String(preferred.get("id", ""))
+	var offset: int = 0
+	for index in pool.size():
+		if String(pool[index].id) == preferred_id:
+			offset = index
+			if (required == "unspecified" or String(pool[index].presentation_group) == required) and not used_ids.has(preferred_id):
+				return Dictionary(pool[index]).duplicate(true)
+			break
+	var fallback: Dictionary = {}
+	var reusable: Dictionary = {}
+	for step in pool.size():
+		var entry: Dictionary = pool[(offset + step) % pool.size()]
+		var group: String = String(entry.presentation_group)
+		if required == "unspecified" or group == required:
+			if not used_ids.has(entry.id):
+				return entry.duplicate(true)
+			if reusable.is_empty():
+				reusable = entry
+		elif group == "unspecified" and not used_ids.has(entry.id) and fallback.is_empty():
+			fallback = entry
+	var selected: Dictionary = fallback.duplicate(true) if not fallback.is_empty() else reusable.duplicate(true)
+	if not selected.is_empty():
+		selected["assignment_diagnostic"] = "compatible_pool_exhausted_unspecified" if not fallback.is_empty() else "compatible_pool_exhausted_reuse"
+	return selected
+
+
 static func resolve_path(portrait_id: String = "", portrait_path: String = "", catalog_path: String = CATALOG_PATH) -> String:
 	# Resolution only reads the snapshot; avoid copying all 42 entries per face.
 	var loaded: Dictionary = _default_catalog_cache if catalog_path == CATALOG_PATH and not _default_catalog_cache.is_empty() else load_catalog(catalog_path)
@@ -208,6 +259,8 @@ static func _normalize_entry(source_entry: Dictionary) -> Dictionary:
 	entry["height"] = int(entry.get("height", 0))
 	entry["bytes"] = int(entry.get("bytes", 0))
 	entry["candidate"] = bool(entry.get("candidate", true))
+	var presentation: String = String(entry.get("presentation_group", "unspecified"))
+	entry["presentation_group"] = presentation if presentation in ["male", "female", "unspecified"] else "unspecified"
 	entry["duplicate_group"] = String(entry.get("duplicate_group", "")).strip_edges()
 	entry["tags"] = _coerce_string_array(entry.get("tags", []))
 	var legacy_paths: PackedStringArray = PackedStringArray()

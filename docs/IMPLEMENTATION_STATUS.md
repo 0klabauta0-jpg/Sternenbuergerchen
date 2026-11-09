@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### Grosser Charakterbogen / Portraitkonsistenz — 10.11.2026
+Nur grosser Detailbogen: obere Identitaets-/Aufgaben-/Statusflaeche genutzt,
+Eigenschaften und benannte echte Beziehungen vor aufklappbaren Details.
+Kleine Portrait-/Rangkarten und Editor erhalten. Standard-Anja/neue Kampagne
+Portrait004; neue Generierung aus dokumentierten Praesentationsgruppen ohne
+RNG-/Namens-/Werteaenderung. Gespeicherte/custom Identitaeten nicht migriert.
+Fuenf frische Gates152/25/41/23/321, alle0Fehler; unabhaengige Reviews gruen.
+QA `docs/qa/character_detail_20261110/README.md`. Noch kein Mainmerge/Push/Export;
+Nutzer verlangt erst Abschluss des anderen Basis-/Orte-/UI-Chats und dann
+gemeinsamen geprueften/gepushten Main vor der EXE.
+
+
 ### Mondbasis / Quantum / kompakte deutsche UI — 09.11.2026
 Eigener Taskbranch `task/orbit-quantum-travel-20261109` auf Main `b548b5556`.
 Abheben ohne Ortswahl, Mond-/Planetenorbit, 3-s-Quantum mit Abbruch/Neustart,

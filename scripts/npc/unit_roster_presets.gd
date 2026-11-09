@@ -8,7 +8,8 @@ const FRIENDLY_ROSTER: Array = [
 	{
 		"unit_id": "unit_alpha",
 		"display_name": "Anja Voss",
-		"portrait_path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_22_42.png",
+		"portrait_id": "char_portrait_004",
+		"portrait_path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_004.tres",
 		"callsign": "ROOK",
 		"role_name": "Field Captain",
 		"specialty_text": "Small-unit command and breach timing",

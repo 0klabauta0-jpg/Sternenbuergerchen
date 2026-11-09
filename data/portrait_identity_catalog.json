@@ -59,7 +59,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_a_prompt.json",
+        "prompt_sha256": "84f1582cccc343508e402a10aba64abbab1a177d081beb0c23bcc9974cc10511",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_002",
@@ -86,7 +93,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_a_prompt.json",
+        "prompt_sha256": "84f1582cccc343508e402a10aba64abbab1a177d081beb0c23bcc9974cc10511",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_003",
@@ -113,7 +127,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_a_prompt.json",
+        "prompt_sha256": "84f1582cccc343508e402a10aba64abbab1a177d081beb0c23bcc9974cc10511",
+        "quadrant": "lower_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_004",
@@ -140,7 +161,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_a_prompt.json",
+        "prompt_sha256": "84f1582cccc343508e402a10aba64abbab1a177d081beb0c23bcc9974cc10511",
+        "quadrant": "lower_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_005",
@@ -167,7 +195,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_b_prompt.json",
+        "prompt_sha256": "a10fe7216b5f8f9a3ffd5670e89051afe682bc4446ab88a27d52c5fcbd9101eb",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_006",
@@ -194,7 +229,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_b_prompt.json",
+        "prompt_sha256": "a10fe7216b5f8f9a3ffd5670e89051afe682bc4446ab88a27d52c5fcbd9101eb",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_007",
@@ -221,7 +263,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_b_prompt.json",
+        "prompt_sha256": "a10fe7216b5f8f9a3ffd5670e89051afe682bc4446ab88a27d52c5fcbd9101eb",
+        "quadrant": "lower_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_008",
@@ -248,7 +297,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_b_prompt.json",
+        "prompt_sha256": "a10fe7216b5f8f9a3ffd5670e89051afe682bc4446ab88a27d52c5fcbd9101eb",
+        "quadrant": "lower_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_009",
@@ -276,7 +332,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_c_prompt.json",
+        "prompt_sha256": "7a8c502b10bd9d18aa4ebb038dc06a7ec73bec2dc75190bdf285999aad02ac4b",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_010",
@@ -303,7 +366,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_c_prompt.json",
+        "prompt_sha256": "7a8c502b10bd9d18aa4ebb038dc06a7ec73bec2dc75190bdf285999aad02ac4b",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_011",
@@ -330,7 +400,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_c_prompt.json",
+        "prompt_sha256": "7a8c502b10bd9d18aa4ebb038dc06a7ec73bec2dc75190bdf285999aad02ac4b",
+        "quadrant": "lower_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_012",
@@ -357,7 +434,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_c_prompt.json",
+        "prompt_sha256": "7a8c502b10bd9d18aa4ebb038dc06a7ec73bec2dc75190bdf285999aad02ac4b",
+        "quadrant": "lower_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_013",
@@ -384,7 +468,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_d_prompt.json",
+        "prompt_sha256": "124d1ba8115c1a797c1d38717f5a73b0ffba994af2cbbf561c5c05e5c8e2bd28",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_014",
@@ -411,7 +502,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_d_prompt.json",
+        "prompt_sha256": "124d1ba8115c1a797c1d38717f5a73b0ffba994af2cbbf561c5c05e5c8e2bd28",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_015",
@@ -438,7 +536,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_d_prompt.json",
+        "prompt_sha256": "124d1ba8115c1a797c1d38717f5a73b0ffba994af2cbbf561c5c05e5c8e2bd28",
+        "quadrant": "lower_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_016",
@@ -465,7 +570,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_d_prompt.json",
+        "prompt_sha256": "124d1ba8115c1a797c1d38717f5a73b0ffba994af2cbbf561c5c05e5c8e2bd28",
+        "quadrant": "lower_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_017",
@@ -492,7 +604,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_e_prompt.json",
+        "prompt_sha256": "a70fcc96a7f2eb8a7b10eab583920eb13603689b5d813e82b8da4e8aa9ebee9e",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_018",
@@ -519,7 +638,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_e_prompt.json",
+        "prompt_sha256": "a70fcc96a7f2eb8a7b10eab583920eb13603689b5d813e82b8da4e8aa9ebee9e",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_019",
@@ -546,7 +672,15 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "unspecified",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_e_prompt.json",
+        "prompt_sha256": "a70fcc96a7f2eb8a7b10eab583920eb13603689b5d813e82b8da4e8aa9ebee9e",
+        "quadrant": "lower_left",
+        "policy": "authored_synthetic_character_intent",
+        "review_note": "Manifest sheet e lower-left review records androgynous presentation; intentionally unspecified."
+      }
     },
     {
       "id": "char_portrait_020",
@@ -573,7 +707,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_e_prompt.json",
+        "prompt_sha256": "a70fcc96a7f2eb8a7b10eab583920eb13603689b5d813e82b8da4e8aa9ebee9e",
+        "quadrant": "lower_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_021",
@@ -600,7 +741,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_f_prompt.json",
+        "prompt_sha256": "4afadc45b3a5437398c5b3e435377a17fa17841c49a37f5c9f77dacac5c30c55",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_022",
@@ -627,7 +775,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_f_prompt.json",
+        "prompt_sha256": "4afadc45b3a5437398c5b3e435377a17fa17841c49a37f5c9f77dacac5c30c55",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_023",
@@ -654,7 +809,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_f_prompt.json",
+        "prompt_sha256": "4afadc45b3a5437398c5b3e435377a17fa17841c49a37f5c9f77dacac5c30c55",
+        "quadrant": "lower_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_024",
@@ -681,7 +843,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_f_prompt.json",
+        "prompt_sha256": "4afadc45b3a5437398c5b3e435377a17fa17841c49a37f5c9f77dacac5c30c55",
+        "quadrant": "lower_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_025",
@@ -708,7 +877,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_g_prompt.json",
+        "prompt_sha256": "3b08810f153316515dfe8aa704329d819518aac8d74d0fcc0b938544865a41d0",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_026",
@@ -735,7 +911,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_g_prompt.json",
+        "prompt_sha256": "3b08810f153316515dfe8aa704329d819518aac8d74d0fcc0b938544865a41d0",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_027",
@@ -762,7 +945,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_g_prompt.json",
+        "prompt_sha256": "3b08810f153316515dfe8aa704329d819518aac8d74d0fcc0b938544865a41d0",
+        "quadrant": "lower_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_028",
@@ -789,7 +979,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_g_prompt.json",
+        "prompt_sha256": "3b08810f153316515dfe8aa704329d819518aac8d74d0fcc0b938544865a41d0",
+        "quadrant": "lower_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_029",
@@ -816,7 +1013,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_h_prompt.json",
+        "prompt_sha256": "ab54d6c3b7367861d3a42fa213b0e1ce1039b7018f5c9d5cd3dc096e464a8a28",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_030",
@@ -843,7 +1047,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_h_prompt.json",
+        "prompt_sha256": "ab54d6c3b7367861d3a42fa213b0e1ce1039b7018f5c9d5cd3dc096e464a8a28",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_031",
@@ -870,7 +1081,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_h_prompt.json",
+        "prompt_sha256": "ab54d6c3b7367861d3a42fa213b0e1ce1039b7018f5c9d5cd3dc096e464a8a28",
+        "quadrant": "lower_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_032",
@@ -897,7 +1115,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_h_prompt.json",
+        "prompt_sha256": "ab54d6c3b7367861d3a42fa213b0e1ce1039b7018f5c9d5cd3dc096e464a8a28",
+        "quadrant": "lower_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_033",
@@ -924,7 +1149,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_i_prompt.json",
+        "prompt_sha256": "f011e998bfdbfa99984aa29175016b1bacf1eb24d34ff41ecde3e73a930a5e0f",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_034",
@@ -951,7 +1183,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_i_prompt.json",
+        "prompt_sha256": "f011e998bfdbfa99984aa29175016b1bacf1eb24d34ff41ecde3e73a930a5e0f",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_035",
@@ -978,7 +1217,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_i_prompt.json",
+        "prompt_sha256": "f011e998bfdbfa99984aa29175016b1bacf1eb24d34ff41ecde3e73a930a5e0f",
+        "quadrant": "lower_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_036",
@@ -1005,7 +1251,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_i_prompt.json",
+        "prompt_sha256": "f011e998bfdbfa99984aa29175016b1bacf1eb24d34ff41ecde3e73a930a5e0f",
+        "quadrant": "lower_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_037",
@@ -1032,7 +1285,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_j_prompt.json",
+        "prompt_sha256": "03e54bac5e0a34012e5da3621733f8712b9eb0cc80b90d89349c5dfc15cf1150",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_038",
@@ -1059,7 +1319,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_j_prompt.json",
+        "prompt_sha256": "03e54bac5e0a34012e5da3621733f8712b9eb0cc80b90d89349c5dfc15cf1150",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_039",
@@ -1086,7 +1353,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_j_prompt.json",
+        "prompt_sha256": "03e54bac5e0a34012e5da3621733f8712b9eb0cc80b90d89349c5dfc15cf1150",
+        "quadrant": "lower_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_040",
@@ -1113,7 +1387,14 @@
         627,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_j_prompt.json",
+        "prompt_sha256": "03e54bac5e0a34012e5da3621733f8712b9eb0cc80b90d89349c5dfc15cf1150",
+        "quadrant": "lower_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_041",
@@ -1140,7 +1421,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "female",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_k_prompt.json",
+        "prompt_sha256": "23dabee4f0761147cd38f9bb581cd9367b0e0daa0bd8653170b7d82cf0ac1baf",
+        "quadrant": "upper_left",
+        "policy": "authored_synthetic_character_intent"
+      }
     },
     {
       "id": "char_portrait_042",
@@ -1167,7 +1455,14 @@
         0,
         627,
         627
-      ]
+      ],
+      "presentation_group": "male",
+      "presentation_source": {
+        "prompt_path": "res://art/portraits_20261105/atlas_k_prompt.json",
+        "prompt_sha256": "23dabee4f0761147cd38f9bb581cd9367b0e0daa0bd8653170b7d82cf0ac1baf",
+        "quadrant": "upper_right",
+        "policy": "authored_synthetic_character_intent"
+      }
     }
   ],
   "art_revision": "frontier_20261105",

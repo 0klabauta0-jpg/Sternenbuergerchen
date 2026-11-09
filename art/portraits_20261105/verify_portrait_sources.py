@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import copy
+import re
 from pathlib import Path
 
 from PIL import Image
@@ -29,7 +31,13 @@ def main() -> None:
     baseline = read(ART / "catalog_before_refresh.json")
     catalog = read(ROOT / "data/portrait_identity_catalog.json")
     prepared = read(ART / "catalog_prepared.json")
-    assert catalog == prepared, "Active catalog differs from reviewed prepared catalog"
+    # Identity metadata may extend the immutable reviewed art catalog. Every
+    # original asset/ID/tag/region field must still match the archived receipt.
+    reviewed_fields = copy.deepcopy(catalog)
+    for entry in reviewed_fields["entries"]:
+        entry.pop("presentation_group", None)
+        entry.pop("presentation_source", None)
+    assert reviewed_fields == prepared, "Reviewed portrait asset fields changed"
     assert len(manifest["sheets"]) == 11 and len(manifest["faces"]) == 44
     assert len(catalog["entries"]) == len(baseline["entries"]) == 42
     assert sha(ART / "catalog_before_refresh.json") == manifest["baseline_catalog_sha256"]
@@ -68,10 +76,32 @@ def main() -> None:
         assert local(old["path"]).is_file()
         assert new["path"] == faces[new["id"]]["path"]
         assert new["region"] == faces[new["id"]]["region"]
+        face = faces[new["id"]]
+        sheet = sheets[face["sheet_path"]]
+        source = new["presentation_source"]
+        assert source["prompt_path"] == sheet["prompt_path"]
+        assert source["prompt_sha256"] == sheet["prompt_sha256"]
+        assert source["quadrant"] == face["quadrant"]
+        assert source["policy"] == "authored_synthetic_character_intent"
+        prompt = read(local(sheet["prompt_path"]))
+        quadrant_index = manifest["quadrant_order"].index(face["quadrant"])
+        if "subjects" in prompt:
+            authored_word = prompt["subjects"][quadrant_index].split(" ", 1)[0]
+        else:
+            subjects = re.findall(r"(?:Upper left|Upper right|Lower left|Lower right):\s*(?:mature )?(man|woman)\b", prompt["prompt"])
+            assert len(subjects) == 4
+            authored_word = subjects[quadrant_index]
+        assert authored_word in ("man", "woman")
+        expected_group = "male" if authored_word == "man" else "female"
+        if new["id"] == "char_portrait_019":
+            assert "androgynous" in sheet["visual_review"]
+            assert "review_note" in source
+            expected_group = "unspecified"
+        assert new["presentation_group"] == expected_group
     assert len([face for face in manifest["faces"] if not face["assigned"]]) == 2
     product_text = json.dumps(catalog)
     assert "C:/Users" not in product_text and "C:\\\\Users" not in product_text
-    print("PORTRAIT_SOURCE_VERIFY_PASS: 11 original PNGs, 44 exact quadrants, 42 unchanged IDs/tags, 2 reserves, receipts/hashes/project paths checked.")
+    print("PORTRAIT_SOURCE_VERIFY_PASS: 11 original PNGs, 44 exact quadrants, 42 unchanged IDs/tags and authored presentation groups, 2 reserves, receipts/hashes/project paths checked.")
 
 
 if __name__ == "__main__":

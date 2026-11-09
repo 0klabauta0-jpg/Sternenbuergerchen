@@ -1,0 +1,7 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+CHARACTER_IDENTITY_CONSISTENCY passed=7 failed=3
+FAIL: Stock Anja uses explicit authored woman commander portrait ID and path
+FAIL: New campaign receives corrected same-identity stock portrait
+FAIL: Authored presentation and synthetic name metadata are available

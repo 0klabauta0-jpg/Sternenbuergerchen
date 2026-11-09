@@ -1,0 +1,6 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+DETAIL_RECTS (1280, 720) popup=[P: (528.0, 32.0), S: (736.0, 656.0)] header=[P: (542.0, 86.0), S: (700.0, 138.0)] relationships=[P: (882.0, 369.0), S: (360.0, 172.0)] reason=[P: (552.0, 291.0), S: (680.0, 18.0)]
+DETAIL_RECTS (1920, 1080) popup=[P: (1168.0, 32.0), S: (736.0, 760.0)] header=[P: (1182.0, 86.0), S: (708.0, 138.0)] relationships=[P: (1526.0, 369.0), S: (364.0, 172.0)] reason=[P: (1192.0, 291.0), S: (688.0, 18.0)]
+CHARACTER_DETAIL_HIERARCHY passed=25 failed=0

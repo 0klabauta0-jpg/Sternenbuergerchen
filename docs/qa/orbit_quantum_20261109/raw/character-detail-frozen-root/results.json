@@ -1,0 +1,37 @@
+[
+  {
+    "script": "character_identity_consistency_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-frozen-root\\character_identity_consistency_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-frozen-root\\character_identity_consistency_verifier"
+  },
+  {
+    "script": "character_detail_hierarchy_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-frozen-root\\character_detail_hierarchy_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-frozen-root\\character_detail_hierarchy_verifier"
+  },
+  {
+    "script": "campaign_launch_actionability_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-frozen-root\\campaign_launch_actionability_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-frozen-root\\campaign_launch_actionability_verifier"
+  },
+  {
+    "script": "task_236_fireteam_relationship_affinity_and_cohesion.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-frozen-root\\task_236_fireteam_relationship_affinity_and_cohesion.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-frozen-root\\task_236_fireteam_relationship_affinity_and_cohesion"
+  },
+  {
+    "script": "task_232_start_roster_generation_contract.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character-detail-frozen-root\\task_232_start_roster_generation_contract.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character-detail-frozen-root\\task_232_start_roster_generation_contract"
+  }
+]
