@@ -13584,9 +13584,33 @@ func _can_request_mission_dropship_return(card: Dictionary) -> bool:
 	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
 	if craft_id.is_empty():
 		return false
+	if _is_parked_campaign_dropship(craft_id):
+		return true
 	if _has_live_drop_sequence_for_craft(craft_id):
 		return false
 	return String(card.get("state", "")).strip_edges().to_lower() == "waiting"
+
+
+func _should_keep_campaign_dropship_landed() -> bool:
+	# Explicit content opt-in only. A peaceful filename or an absent enemy is
+	# not permission to change legacy combat or connected multiplayer transport.
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer if is_inside_tree() else null
+	if peer != null and not peer is OfflineMultiplayerPeer and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED:
+		return false
+	var setup: Node = get_node_or_null("../MissionSetup")
+	if setup == null:
+		return false
+	var scenario: Variant = setup.get("_mission_scenario")
+	return scenario != null and scenario.has_method("is_noncombat_singleplayer") and bool(scenario.call("is_noncombat_singleplayer"))
+
+
+func _is_parked_campaign_dropship(craft_id: String) -> bool:
+	if not _should_keep_campaign_dropship_landed():
+		return false
+	if _is_active_drop_sequence_for_craft(craft_id):
+		return _drop_sequence_phase == DROP_SEQUENCE_COMPLETE and _drop_sequence_position.is_equal_approx(_drop_sequence_lz_position)
+	var sequence: Dictionary = Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {}))
+	return String(sequence.get("phase", "")) == DROP_SEQUENCE_COMPLETE and _coerce_vector2_value(sequence.get("position", Vector2.ZERO), Vector2.ZERO).is_equal_approx(_coerce_vector2_value(sequence.get("lz_position", Vector2.ZERO), Vector2.ZERO))
 
 
 func _can_request_mission_dropship_card_lz(card: Dictionary) -> bool:
@@ -13900,6 +13924,20 @@ func _apply_selected_mission_dropship_return(craft_id: String) -> bool:
 	var selected_card: Dictionary = _find_mission_dropship_card_entry(normalized_craft_id)
 	if selected_card.is_empty() or not _can_request_mission_dropship_return(selected_card):
 		return false
+	if _is_parked_campaign_dropship(normalized_craft_id):
+		_select_mission_dropship_craft(normalized_craft_id, false)
+		if _is_active_drop_sequence_for_craft(normalized_craft_id):
+			_begin_drop_sequence_outbound()
+		else:
+			var sequence: Dictionary = Dictionary(_parallel_drop_sequences_by_craft[normalized_craft_id]).duplicate(true)
+			_begin_drop_sequence_outbound_for_sequence(sequence)
+			_parallel_drop_sequences_by_craft[normalized_craft_id] = sequence
+			_update_mission_dropship_card_fields(normalized_craft_id, _build_drop_sequence_card_fields(sequence))
+			_store_selected_mission_dropship_plan()
+			_emit_planning_state_changed()
+			_update_ui()
+			_refresh_world_overlays()
+		return true
 	_select_mission_dropship_craft(normalized_craft_id, false)
 	_drop_ship_requested = false
 	_drop_ship_staged = false
@@ -29479,6 +29517,7 @@ func create_selected_mission_interaction_use_intent(interaction_id: String = "")
 		"required_order": String(interaction_feedback.get("required_order", "")).strip_edges().to_lower(),
 		"duration_seconds": maxf(float(interaction_feedback.get("duration_seconds", 0.0)), 0.0),
 		"step_id": String(interaction_feedback.get("step_id", "")).strip_edges(),
+		"interaction_radius_world": maxf(float(interaction_feedback.get("radius_world", 0.0)), 0.0),
 		"gate_id": String(interaction_feedback.get("gate_id", interaction_feedback.get("step_id", ""))).strip_edges(),
 		"required_state": String(interaction_feedback.get("required_state", "")).strip_edges(),
 		"interaction_type": String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower(),
@@ -32597,6 +32636,8 @@ func _is_active_waypoint_ready_for_go_continue(fireteam_id: String, execution_st
 func _is_phase_waypoint_target_reached(fireteam_id: String, resolved_target_position: Vector2, movement_result: Dictionary, execution_state: Dictionary = {}, movement_was_active: bool = false) -> bool:
 	if bool(movement_result.get("contact_halt", false)):
 		return false
+	if execution_state.has("interaction_arrival_receipt"):
+		return _is_interaction_arrival_receipt_valid(fireteam_id, resolved_target_position, execution_state)
 	if bool(movement_result.get("finished", false)):
 		return true
 	var movement_state: Dictionary = Dictionary(movement_result.get("movement_state", {})).duplicate(true)
@@ -32612,6 +32653,28 @@ func _is_phase_waypoint_target_reached(fireteam_id: String, resolved_target_posi
 	if _is_fireteam_center_near_position(fireteam_id, resolved_target_position, PHASE_WAYPOINT_SOFT_CENTER_REACHED_RADIUS):
 		return true
 	return false
+
+
+func _is_interaction_arrival_receipt_valid(fireteam_id: String, target: Vector2, execution_state: Dictionary) -> bool:
+	var receipt: Dictionary = Dictionary(execution_state.get("interaction_arrival_receipt", {}))
+	if receipt.is_empty() or bool(execution_state.get("contact_halt_active", false)):
+		return false
+	if String(receipt.get("waypoint_id", "")) != String(execution_state.get("interaction_waypoint_id", "")) or not Vector2(receipt.get("target_position", Vector2.INF)).is_equal_approx(target):
+		return false
+	var radius: float = float(execution_state.get("interaction_hold_radius", 0.0))
+	var anchor: Variant = _resolve_fireteam_visual_anchor_position(fireteam_id)
+	if radius <= 0.0 or typeof(anchor) != TYPE_VECTOR2 or Vector2(anchor).distance_to(Vector2(execution_state.get("interaction_marker_position", target))) > radius:
+		return false
+	var member_positions: Dictionary = Dictionary(receipt.get("member_positions", {}))
+	var checked_count: int = 0
+	for unit in _get_fireteam_units(fireteam_id, true):
+		if not unit is Node2D or (unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id"))
+		if not member_positions.has(unit_id) or (unit as Node2D).global_position.distance_to(Vector2(member_positions[unit_id])) > PHASE_WAYPOINT_SOFT_MEMBER_REACHED_RADIUS:
+			return false
+		checked_count += 1
+	return checked_count > 0
 
 
 func _is_phase_waypoint_soft_completion_allowed(execution_state: Dictionary) -> bool:
@@ -34144,6 +34207,11 @@ func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index:
 		"resolved_target_position": resolved_target_position,
 		"started_msec": Time.get_ticks_msec(),
 	}
+	if String(Dictionary(waypoint.metadata).get("source", "")) == "mission_interaction_use_intent":
+		var interaction_state: Dictionary = _phase_execution_by_fireteam[fireteam_id]
+		interaction_state["interaction_waypoint_id"] = String(waypoint.waypoint_id)
+		interaction_state["interaction_hold_radius"] = float(Dictionary(waypoint.metadata).get("interaction_radius_world", 0.0))
+		interaction_state["interaction_marker_position"] = waypoint.target_position
 	_record_command_commit_timing_scope(timing, "activation_profile_and_plan_commit_usec", scope_started_usec, true)
 	scope_started_usec = _command_commit_timing_clock(timing)
 	var issued: bool = _issue_waypoint_for_fireteam(fireteam_id, waypoint, int(plan.phase), behavior_profile)
@@ -34724,6 +34792,7 @@ func _update_active_phase_execution(delta: float) -> void:
 			execution_state["contact_halt_active"] = true
 			execution_state["contact_halt_context"] = next_halt_context
 			execution_state["hold_elapsed"] = 0.0
+			execution_state.erase("interaction_arrival_receipt")
 			_phase_execution_by_fireteam[fireteam_id] = execution_state
 			if not was_contact_halted or previous_halt_target != next_halt_target:
 				did_change = true
@@ -34733,11 +34802,27 @@ func _update_active_phase_execution(delta: float) -> void:
 			execution_state.erase("contact_halt_context")
 		if anchor == null or typeof(resolved_target_position) != TYPE_VECTOR2:
 			continue
+		if execution_state.has("interaction_arrival_receipt") and not _is_interaction_arrival_receipt_valid(String(fireteam_id), resolved_target_position, execution_state):
+			execution_state.erase("interaction_arrival_receipt")
+			execution_state["hold_elapsed"] = 0.0
+			_phase_execution_by_fireteam[fireteam_id] = execution_state
+			if not had_movement_execution:
+				continue
 		var waypoint_target_reached: bool = _is_phase_waypoint_target_reached(String(fireteam_id), resolved_target_position, movement_result, execution_state, had_movement_execution)
 		if had_movement_execution and not waypoint_target_reached:
 			continue
 		if not had_movement_execution and not waypoint_target_reached:
 			continue
+		if bool(movement_result.get("finished", false)) and waypoint_target_reached and execution_state.has("interaction_waypoint_id"):
+			var member_positions: Dictionary = {}
+			for member in _get_fireteam_units(String(fireteam_id), true):
+				if member is Node2D and member.has_method("get_unit_id"):
+					member_positions[String(member.call("get_unit_id"))] = (member as Node2D).global_position
+			execution_state["interaction_arrival_receipt"] = {"waypoint_id": String(waypoint.waypoint_id), "target_position": resolved_target_position, "member_positions": member_positions}
+			if not _is_interaction_arrival_receipt_valid(String(fireteam_id), resolved_target_position, execution_state):
+				execution_state.erase("interaction_arrival_receipt")
+				_phase_execution_by_fireteam[fireteam_id] = execution_state
+				continue
 		execution_state["hold_elapsed"] = float(execution_state.get("hold_elapsed", 0.0)) + delta
 		var required_hold: float = maxf(float(waypoint.hold_duration_seconds), 0.0)
 		var interaction_progress_complete: bool = required_hold <= 0.0 or float(execution_state.get("hold_elapsed", 0.0)) + 0.001 >= required_hold
@@ -35841,7 +35926,8 @@ func _update_primary_drop_sequence(delta: float) -> void:
 				_emit_planning_state_changed()
 				_update_ui()
 		DROP_SEQUENCE_COMPLETE:
-			_begin_drop_sequence_outbound()
+			if not _should_keep_campaign_dropship_landed():
+				_begin_drop_sequence_outbound()
 		DROP_SEQUENCE_OUTBOUND:
 			var exit_position: Vector2 = _get_drop_sequence_exit_position()
 			_drop_sequence_position = _drop_sequence_position.move_toward(exit_position, DROP_SHIP_SPEED * delta)
@@ -35960,6 +36046,8 @@ func _update_drop_sequence_dict(sequence: Dictionary, delta: float) -> bool:
 				_last_command_text = "Trupp ab"
 			return true
 		DROP_SEQUENCE_COMPLETE:
+			if _should_keep_campaign_dropship_landed():
+				return false
 			_begin_drop_sequence_outbound_for_sequence(sequence)
 			return true
 		DROP_SEQUENCE_OUTBOUND:
