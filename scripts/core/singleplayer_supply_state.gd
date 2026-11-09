@@ -151,6 +151,12 @@ func preview_route_fuel(payload: Dictionary, context: Dictionary = {}) -> Dictio
 	var fuel: float = float(_fuel_by_craft_id[craft_id])
 	if fuel + 0.00001 < cost:
 		return _reject("insufficient_fuel", "Treibstoff reicht fuer diese Strecke nicht")
+	if bool(context.get("require_return_reserve", false)):
+		var reverse: String = String(payload.get("destination_location_id", "")) + ">" + String(payload.get("origin_location_id", ""))
+		if not routes.has(reverse):
+			return _reject("return_route_unavailable", "Fuer dieses Ziel fehlt eine bestaetigte Rueckflugstrecke")
+		if fuel + 0.00001 < cost + float(routes[reverse]):
+			return _reject("insufficient_return_fuel", "Treibstoff muss fuer Hin- und Rueckflug reichen; zuerst auftanken")
 	return {"ok": true, "craft_id": craft_id, "fuel_cost": cost, "message": "Routentreibstoff gebucht"}
 
 func _reward(payload: Dictionary, context: Dictionary) -> Dictionary:

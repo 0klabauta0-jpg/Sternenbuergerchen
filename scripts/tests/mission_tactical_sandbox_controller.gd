@@ -3558,6 +3558,13 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 		_update_ui()
 		return false
 	var candidate_lz_position: Vector2 = Vector2(tile_context.get("world_position", _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position))))) if not tile_context.is_empty() else _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))
+	var campaign_pad: Variant = _get_authored_campaign_pad_position()
+	if typeof(campaign_pad) == TYPE_VECTOR2:
+		if not candidate_lz_position.is_equal_approx(Vector2(campaign_pad)):
+			_last_command_text = "LZ BLOCKIERT: Das markierte Landepad dieses Ortes auswaehlen"
+			_update_ui()
+			return false
+		candidate_lz_position = Vector2(campaign_pad)
 	if not tile_context.is_empty():
 		_set_selected_tile_context(tile_context, "", false, false)
 	if _should_route_dropship_command_through_network_authority():
@@ -13611,6 +13618,41 @@ func _is_parked_campaign_dropship(craft_id: String) -> bool:
 		return _drop_sequence_phase == DROP_SEQUENCE_COMPLETE and _drop_sequence_position.is_equal_approx(_drop_sequence_lz_position)
 	var sequence: Dictionary = Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {}))
 	return String(sequence.get("phase", "")) == DROP_SEQUENCE_COMPLETE and _coerce_vector2_value(sequence.get("position", Vector2.ZERO), Vector2.ZERO).is_equal_approx(_coerce_vector2_value(sequence.get("lz_position", Vector2.ZERO), Vector2.ZERO))
+
+
+func _get_authored_campaign_pad_position() -> Variant:
+	if not _should_keep_campaign_dropship_landed():
+		return null
+	var map = _get_active_mission_terrain_map_data_for_readability()
+	if map == null or not bool(map.call("has_marker", "spawn_alpha")):
+		return null
+	return Vector2(map.call("get_marker_position", "spawn_alpha"))
+
+
+func _is_authored_campaign_pad_occupied(craft_id: String) -> bool:
+	if typeof(_get_authored_campaign_pad_position()) != TYPE_VECTOR2:
+		return false
+	# These locations author one pad. Existing live sequences already describe
+	# its use; keep a second craft waiting until the first clears its map flight.
+	if _is_drop_sequence_active() and _drop_sequence_craft_id != craft_id:
+		return true
+	for id in _parallel_drop_sequences_by_craft:
+		if String(id) != craft_id and _is_drop_sequence_dict_active(Dictionary(_parallel_drop_sequences_by_craft[id])):
+			return true
+	return false
+
+
+func is_campaign_return_craft_at_authored_pad(craft_id: String) -> bool:
+	if not _is_parked_campaign_dropship(craft_id):
+		return false
+	var map = _get_active_mission_terrain_map_data_for_readability()
+	if map == null or not bool(map.call("has_marker", "ship_return")):
+		return false
+	var return_position: Vector2 = map.call("get_marker_position", "ship_return")
+	if _is_active_drop_sequence_for_craft(craft_id):
+		return _drop_sequence_position.is_equal_approx(return_position) and _drop_sequence_lz_position.is_equal_approx(return_position)
+	var sequence: Dictionary = Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {}))
+	return _coerce_vector2_value(sequence.get("position", Vector2.INF), Vector2.INF).is_equal_approx(return_position) and _coerce_vector2_value(sequence.get("lz_position", Vector2.INF), Vector2.INF).is_equal_approx(return_position)
 
 
 func _can_request_mission_dropship_card_lz(card: Dictionary) -> bool:
@@ -35797,6 +35839,14 @@ func _maybe_bootstrap_live_drop() -> void:
 
 
 func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
+	var campaign_pad: Variant = _get_authored_campaign_pad_position()
+	if typeof(campaign_pad) == TYPE_VECTOR2:
+		if not _has_lz_position or not _lz_position.is_equal_approx(Vector2(campaign_pad)):
+			_last_command_text = "DROP BLOCKIERT: Das markierte Landepad dieses Ortes verwenden"
+			return false
+		if _is_authored_campaign_pad_occupied(_mission_drop_craft_id):
+			_last_command_text = "DROP BLOCKIERT: Landepad belegt; ersten Rueckflug abwarten"
+			return false
 	if _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
 		_handoff_active_drop_sequence_to_card()
 	if _has_live_drop_sequence_for_craft(_mission_drop_craft_id):

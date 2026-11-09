@@ -119,6 +119,7 @@ func _test_runtime_gate_sequence() -> void:
 
 func _test_mission_setup_no_fake_enemies() -> void:
 	var scene: Node = MISSION.instantiate()
+	scene.set_meta("singleplayer_mission_identity", {"craft_id": "satellite_fixture_ship", "job_id": "satellite_recovery", "scenario_id": "satellite_recovery"})
 	var setup: Node = scene.get_node("MissionSetup")
 	setup.set("map_file_path", "res://maps/satellite_crash_site.json")
 	setup.set("scenario_file_path", SATELLITE)
@@ -150,6 +151,24 @@ func _test_mission_setup_no_fake_enemies() -> void:
 	var ids: PackedStringArray = controller.call("_get_available_fireteam_ids")
 	_expect(not ids.is_empty(), "Actual scenario activates a selectable recovery fireteam")
 	if not ids.is_empty():
+		var landing_map = MAP.load_from_file("res://maps/satellite_crash_site.json")
+		var landing_position: Vector2 = landing_map.get_marker_position("ship_return")
+		var landing_state: Dictionary = controller.call("get_planning_state")
+		landing_state.merge({"mission_drop_source": "homebase_direct", "mission_drop_craft_id": "satellite_fixture_ship", "mission_drop_state": "waiting", "drop_ship_staged": true, "embarked_unit_ids": ["unit_alpha", "unit_bravo", "unit_charlie"], "deployed_unit_ids": [], "has_lz_position": true, "lz_position": landing_position, "selected_fireteams": [ids[0]], "mission_drop_cards": [{"craft_id": "satellite_fixture_ship", "display_name": "Satellite Fixture Ship", "payload_source": "homebase_direct", "state": "waiting", "passenger_count": 3, "embarked_unit_ids": ["unit_alpha", "unit_bravo", "unit_charlie"], "boarded_fireteam_ids": [ids[0]], "has_lz_position": true, "lz_position": landing_position, "approach_angle": "NW"}]}, true)
+		controller.call("set_planning_state", landing_state)
+		controller.call("_select_mission_dropship_craft", "satellite_fixture_ship", false)
+		controller.call("_set_selected_fireteams", PackedStringArray([ids[0]]), false)
+		_expect(bool(controller.call("_try_start_drop_sequence", true)), "Actual recovery craft starts its authored pad approach")
+		for stage in range(7):
+			controller.call("_update_drop_sequence", 30.0)
+			await physics_frame
+		_expect(bool(controller.call("is_campaign_return_craft_at_authored_pad", "satellite_fixture_ship")), "Real recovery crew deploys from matching craft parked at authored return pad")
+		var deployment_deadline: int = Time.get_ticks_msec() + 10000
+		while Time.get_ticks_msec() < deployment_deadline:
+			if Dictionary(controller.get("_runtime_activation_pending_fireteam_ids")).is_empty() and Dictionary(controller.get("_post_drop_security_pending_fireteam_ids")).is_empty():
+				break
+			await process_frame
+		_expect(Dictionary(controller.get("_runtime_activation_pending_fireteam_ids")).is_empty(), "Actual post-drop activation finishes before player movement command")
 		controller.call("_set_selected_fireteams", PackedStringArray([ids[0]]), false)
 		_expect(not bool(controller.call("create_selected_mission_interaction_use_intent", "ship_return").get("accepted", true)), "Real controller rejects return Use before recovery")
 		var map = MAP.load_from_file("res://maps/satellite_crash_site.json")
@@ -159,6 +178,8 @@ func _test_mission_setup_no_fake_enemies() -> void:
 		await _wait_usable(controller, "satellite_data", 60000)
 		var intent: Dictionary = controller.call("create_selected_mission_interaction_use_intent", "satellite_data")
 		_expect(bool(intent.get("accepted", false)), "Use becomes available after actual simulated approach")
+		if not bool(intent.get("accepted", false)):
+			print("APPROACH_DIAGNOSTIC:", var_to_str({"positions": _positions(scene), "intent": intent, "pending_activation": controller.get("_runtime_activation_pending_fireteam_ids"), "pending_security": controller.get("_post_drop_security_pending_fireteam_ids"), "plans": controller.call("_serialize_order_plans"), "execution": controller.get("_phase_execution_by_fireteam"), "movement": controller.call("get_fireteam_movement_snapshot")}))
 		if bool(intent.get("accepted", false)):
 			_expect(bool(controller.call("execute_selected_fireteam_orders")), "Real GO accepts the timed recovery Use")
 			await _wait_step(scene.get_node("CombatLoopDriver"), "secure_satellite", 60000)

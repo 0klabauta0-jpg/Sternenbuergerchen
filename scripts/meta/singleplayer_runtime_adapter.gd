@@ -195,7 +195,7 @@ func validate_departure(craft_id: String) -> Dictionary:
 	var campaign_gate: Dictionary = _campaign.validate_departure(departure, {"departure_authorized": true})
 	if not campaign_gate.get("ok", false):
 		return campaign_gate
-	var fuel_gate: Dictionary = _supply.preview_route_fuel(departure, {"departure_authorized": true})
+	var fuel_gate: Dictionary = _supply.preview_route_fuel(departure, {"departure_authorized": true, "require_return_reserve": true})
 	if not fuel_gate.get("ok", false):
 		return fuel_gate
 	return {"ok": true, "departure": departure}
@@ -206,7 +206,7 @@ func authorize_departure(craft_id: String) -> Dictionary:
 		return validation
 	var departure: Dictionary = validation.departure
 	var token: String = "departure:%s:%d" % [craft_id, int(_flow.get("_transfer_sequence")) + 1]
-	var fuel: Dictionary = _commit("singleplayer_supply", "consume_route_fuel", departure, token + ":fuel", {"departure_authorized": true})
+	var fuel: Dictionary = _commit("singleplayer_supply", "consume_route_fuel", departure, token + ":fuel", {"departure_authorized": true, "require_return_reserve": true})
 	if not fuel.get("ok", false):
 		return fuel
 	var bound: Dictionary = _commit("singleplayer_campaign", "bind_departure", departure, token, {"departure_authorized": true})

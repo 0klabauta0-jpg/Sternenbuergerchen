@@ -31,6 +31,12 @@ zusaetzlich. Unzureichendes Fuel sperrt den Abflug mit Grund. Kein Verbrauch
 im UI-/Visualtick. Startwerte erlauben den Test-Rundflug; kein neues
 Notfall-/Strandingmodell. Basis und Handelsort lesen denselben Servicezustand.
 
+Vor dem Abflug muss Fuel fuer die feste Hin- und Rueckstrecke vorhanden sein.
+Die reine Vorpruefung reserviert dies als Mindestbudget, bucht aber weiterhin
+nur die jeweilige tatsaechliche Strecke einmal ab. Zu wenig Rueckflugbudget
+lehnt vor jeder Flug-/Auftragsmutation ab. Ein unerwartet abgelehnter Rueckflug
+darf die einzige aktive Missionsinstanz nicht verwerfen.
+
 Pruefung: gespeicherte Topologie hex_axial_v1, Inhalts-/Erreichbarkeitsorakel,
 echte Craft-/Pad-ID, Busy/Payloadgates, Negativ- und Wiederholtransaktionen,
 zweiter Ausflug. Technische und native Nachweise bleiben getrennt.

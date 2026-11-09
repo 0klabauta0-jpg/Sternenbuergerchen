@@ -800,6 +800,8 @@ func update_mission_interaction_runtime_progress(payload: Dictionary) -> Diction
 	var duration_seconds: float = maxf(float(payload.get("duration_seconds", 0.0)), 0.0)
 	var hold_seconds: float = clampf(maxf(float(payload.get("hold_seconds", 0.0)), 0.0), 0.0, duration_seconds if duration_seconds > 0.0 else INF)
 	var complete: bool = bool(payload.get("complete", false)) or (duration_seconds <= 0.0 and bool(payload.get("can_complete_zero_duration", false))) or (duration_seconds > 0.0 and hold_seconds + 0.001 >= duration_seconds)
+	if complete and (interaction_id == "ship_return" or String(payload.get("step_id", "")) == "return_to_ship") and not _has_actual_campaign_return_craft():
+		return {"accepted": false, "complete": false, "reason": "return_craft_not_at_authored_pad"}
 	var progress: float = 1.0 if complete else clampf(float(payload.get("progress", 0.0)), 0.0, 1.0)
 	if duration_seconds > 0.0:
 		progress = 1.0 if complete else clampf(hold_seconds / duration_seconds, 0.0, 1.0)
@@ -838,6 +840,24 @@ func update_mission_interaction_runtime_progress(payload: Dictionary) -> Diction
 		_apply_in_progress_mission_interaction_state(state)
 	_refresh_mission_interaction_door_runtime_overrides()
 	return state.duplicate(true)
+
+
+func _has_actual_campaign_return_craft() -> bool:
+	var mission: Node = get_parent()
+	var setup: Node = mission.get_node_or_null("MissionSetup") if mission != null else null
+	# Isolated generic gate/contract drivers have no scene to project. Actual
+	# peaceful mission scenes must prove their bound craft's physical presence.
+	if setup == null:
+		return true
+	var scenario: Variant = setup.get("_mission_scenario")
+	if scenario == null or not scenario.has_method("is_noncombat_singleplayer") or not bool(scenario.call("is_noncombat_singleplayer")):
+		return true
+	var identity: Dictionary = Dictionary(mission.get_meta("singleplayer_mission_identity", {}))
+	var craft_id: String = String(identity.get("craft_id", ""))
+	if craft_id.is_empty() or String(identity.get("job_id", "")).is_empty() or String(identity.get("scenario_id", "")) != String(scenario.get("scenario_id")):
+		return false
+	var controller: Node = mission.get_node_or_null("TacticalController")
+	return controller != null and controller.has_method("is_campaign_return_craft_at_authored_pad") and bool(controller.call("is_campaign_return_craft_at_authored_pad", craft_id))
 
 
 func set_mission_scenario_runtime_step_state(step_id: String, state: String) -> void:

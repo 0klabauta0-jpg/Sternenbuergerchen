@@ -4050,6 +4050,7 @@ func _start_or_update_active_mission() -> void:
 
 
 func _configure_mission_instance(mission_instance: Node, selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray, preview_mode: bool) -> void:
+	mission_instance.set_meta("singleplayer_mission_identity", _active_singleplayer_identity.duplicate(true) if not preview_mode else {})
 	if selected_unit_ids.is_empty():
 		selected_unit_ids = _selected_unit_ids.duplicate()
 	if selected_fireteam_ids.is_empty():
@@ -4165,6 +4166,13 @@ func _connect_mission_end(mission_instance: Node) -> void:
 func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	if _active_mission == null:
 		return
+	if _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
+		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", String(_active_singleplayer_identity.get("craft_id", "")))
+		if not bool(return_gate.get("ok", false)):
+			# Preserve the actual scene and its confirmed result if a transport
+			# invariant fails; never orphan a remote craft by releasing its world.
+			_get_homebase_screen().set_meta("singleplayer_departure_error", return_gate)
+			return
 	if _singleplayer_runtime != null:
 		_singleplayer_runtime.call("record_mission_result", mission_result, _active_singleplayer_identity.duplicate(true))
 
@@ -7225,13 +7233,15 @@ func _request_singleplayer_return(craft_id: String) -> Dictionary:
 
 
 func _finish_singleplayer_visit_if_returned() -> void:
-	if _active_mission == null or String(_active_singleplayer_identity.get("scenario_id", "")) != "trade_outpost_visit":
+	if _active_mission == null or _active_singleplayer_identity.is_empty():
 		return
 	for location in _aircraft_location_by_craft.values():
 		if String(location) == "mission":
 			return
 	if not _pending_mission_craft_transfers.is_empty():
 		return
+	if not String(_active_singleplayer_identity.get("job_id", "")).is_empty():
+		_singleplayer_runtime.call("record_mission_result", {"result": "aborted", "reason": "craft_returned_without_objective_completion"}, _active_singleplayer_identity.duplicate(true))
 	_release_active_mission()
 	_active_singleplayer_identity.clear()
 	_mission_planning_state = DEFAULT_MISSION_PLANNING_STATE.duplicate(true)

@@ -24,6 +24,16 @@ Campaign referenziert Craft-/Ort-/Job-IDs, simuliert keinen zweiten Transit.
   Szenenladen, Naehe, Kartenwahl oder UI-Button allein.
 - Abbruch/Fehlschlag vergibt keine Erfolgsbelohnung; Ergebnis erneut anzeigen
   erzeugt keinen zweiten Abschlussbeleg.
+- Die beiden neuen friedlichen Einzelspielerorte verwenden das gespeicherte
+  Landepad. LZ-Klick und Runtime-Drop validieren dieselbe gespeicherte Position;
+  ein belegtes Pad bleibt fuer ein zweites Schiff gesperrt, dessen Vorbereitung
+  und Wartezustand bleiben unabhaengig. Legacy-/verbundene freie LZ bleiben erhalten.
+- Rueckkehr am Schiff bestaetigt nur das tatsaechlich geparkte Schiff des aktiven
+  Auftrags. MissionSetup erhaelt dessen unveraenderliche Craft-/Job-/Szenario-IDs
+  vom Runtime-Handoff. Ein fehlendes, fremdes oder abgeflogenes Schiff kann keinen
+  crew_returned-Beleg erzeugen. Frueher expliziter Rueckflug bleibt moeglich;
+  nach tatsaechlicher Heimkehr ohne Abschluss wird der Auftrag fehlgeschlagen
+  und die verlassene Instanz geschlossen, ohne Belohnung.
 
 ## Bruecke und Pruefung
 

@@ -37,7 +37,7 @@ func _test_campaign_and_legacy(scenario_path: String, map_path: String, should_p
 	var second_ids: Array = _unit_ids(second_units)
 	var map = load("res://scripts/terrain/terrain_map_data.gd").load_from_file(map_path)
 	var first_lz: Vector2 = map.get_marker_position("spawn_alpha")
-	var second_lz: Vector2 = first_lz + Vector2(96.0, 0.0)
+	var second_lz: Vector2 = first_lz if should_park else first_lz + Vector2(96.0, 0.0)
 	var state: Dictionary = controller.call("get_planning_state")
 	state.merge({"mission_drop_source": "homebase_direct", "mission_drop_craft_id": "craft_a", "mission_drop_state": "waiting", "drop_ship_staged": true, "embarked_unit_ids": first_ids + second_ids, "deployed_unit_ids": [], "has_lz_position": true, "lz_position": first_lz, "selected_fireteams": [teams[0]], "mission_drop_cards": [_card("craft_a", String(teams[0]), first_ids, first_lz), _card("craft_b", String(teams[1]), second_ids, second_lz)]}, true)
 	controller.call("set_planning_state", state)
@@ -46,7 +46,7 @@ func _test_campaign_and_legacy(scenario_path: String, map_path: String, should_p
 	_check(bool(controller.call("_try_start_drop_sequence", true)), "First real craft starts map flight: " + str(should_park))
 	controller.call("_select_mission_dropship_craft", "craft_b", false)
 	controller.call("_set_selected_fireteams", PackedStringArray([teams[1]]), false)
-	_check(bool(controller.call("_try_start_drop_sequence", true)), "Second real craft starts independent map flight: " + str(should_park))
+	_check(bool(controller.call("_try_start_drop_sequence", true)) == not should_park, "Second craft respects actual pad capacity while legacy parallel flight remains free: " + str(should_park))
 	for tick in range(7):
 		controller.call("_update_drop_sequence", 30.0)
 		await physics_frame
@@ -54,22 +54,29 @@ func _test_campaign_and_legacy(scenario_path: String, map_path: String, should_p
 	var second: Dictionary = _find_card(controller, "craft_b")
 	var deployed_before: Array = Array(Dictionary(controller.call("get_planning_state")).get("deployed_unit_ids", []))
 	if should_park:
-		_check(first.get("state") == "complete" and second.get("state") == "complete", "Both campaign craft remain landed after real crew deployment")
-		_check(Vector2(first.get("dropship_position", Vector2.ZERO)).is_equal_approx(first_lz) and Vector2(second.get("dropship_position", Vector2.ZERO)).is_equal_approx(second_lz), "Parked primary and parallel craft retain actual pad positions")
-		_check(Array(first.get("embarked_unit_ids", [])).is_empty() and Array(second.get("embarked_unit_ids", [])).is_empty() and deployed_before.size() == first_ids.size() + second_ids.size(), "Crew deploys once without cloned payload")
-		_check(bool(controller.call("_can_request_mission_dropship_return", first)) and bool(controller.call("_can_request_mission_dropship_return", second)), "Both actually parked craft expose explicit return")
-		if String(first.get("state", "")) == "complete" and String(second.get("state", "")) == "complete":
-			_check(bool(controller.call("_apply_selected_mission_dropship_return", "craft_a")), "Parallel craft explicit return accepts")
+		_check(first.get("state") == "complete" and second.get("state") == "waiting", "Campaign craft stays landed while another waits for the single authored pad")
+		_check(Vector2(first.get("dropship_position", Vector2.ZERO)).is_equal_approx(first_lz), "Parked campaign craft retains its real authored pad position")
+		_check(Array(first.get("embarked_unit_ids", [])).is_empty() and Array(second.get("embarked_unit_ids", [])) == second_ids and deployed_before.size() == first_ids.size(), "Only landed craft crew deploys; waiting payload is preserved")
+		_check(bool(controller.call("_can_request_mission_dropship_return", first)), "Actually parked craft exposes explicit return")
+		if String(first.get("state", "")) == "complete" and String(second.get("state", "")) == "waiting":
+			_check(bool(controller.call("_apply_selected_mission_dropship_return", "craft_a")), "Parked craft explicit return accepts")
 			var returning: Dictionary = _find_card(controller, "craft_a")
 			_check(returning.get("state") == "outbound" and Vector2(returning.get("dropship_position", Vector2.ZERO)).is_equal_approx(first_lz), "Return begins actual outbound at pad before meta transit")
-			_check(_find_card(controller, "craft_b").get("state") == "complete", "One return does not send the other parked craft")
+			_check(_find_card(controller, "craft_b").get("state") == "waiting", "One return leaves the other craft independently waiting")
 			controller.call("_update_drop_sequence", 0.001)
 			_check(_find_card(controller, "craft_a").get("state") == "outbound", "No instantaneous return to homebase before visible flight")
 			controller.call("_update_drop_sequence", 30.0)
 			_check(String(_find_card(controller, "craft_a").get("state", "")) == "to_homebase", "Only map-edge outbound completion requests meta return")
-			_check(bool(controller.call("_apply_selected_mission_dropship_return", "craft_b")), "Primary parked craft remains independently returnable")
-			_check(_find_card(controller, "craft_b").get("state") == "outbound", "Primary explicit return also uses visible outbound")
-			_check(Array(Dictionary(controller.call("get_planning_state")).get("deployed_unit_ids", [])).size() == deployed_before.size(), "Return initiation does not duplicate or lose deployed unit IDs")
+			controller.call("_select_mission_dropship_craft", "craft_b", false)
+			controller.call("_set_selected_fireteams", PackedStringArray([teams[1]]), false)
+			_check(bool(controller.call("_try_start_drop_sequence", true)), "Waiting craft can use the pad after first craft clears outbound")
+			for tick in range(7):
+				controller.call("_update_drop_sequence", 30.0)
+				await physics_frame
+			_check(_find_card(controller, "craft_b").get("state") == "complete", "Second independent craft lands and remains parked")
+			_check(bool(controller.call("_apply_selected_mission_dropship_return", "craft_b")), "Second parked craft remains independently returnable")
+			_check(_find_card(controller, "craft_b").get("state") == "outbound", "Second explicit return also uses visible outbound")
+			_check(Array(Dictionary(controller.call("get_planning_state")).get("deployed_unit_ids", [])).size() == first_ids.size() + second_ids.size(), "Sequential pad visits do not duplicate or lose deployed unit IDs")
 	else:
 		_check(String(first.get("state", "")).begins_with("to_") and String(second.get("state", "")).begins_with("to_"), "Legacy combat primary and parallel craft still auto-return after unloading")
 	mission.queue_free()
