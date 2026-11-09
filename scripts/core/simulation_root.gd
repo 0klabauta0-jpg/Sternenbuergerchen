@@ -2,6 +2,33 @@ class_name SimulationRoot
 extends Node
 
 signal tick_processed(tick: int)
+signal singleplayer_command_committed(command: Dictionary, result: Dictionary)
+
+var _singleplayer_campaign_owner: RefCounted
+var _singleplayer_supply_owner: RefCounted
+
+
+func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted) -> void:
+	_singleplayer_campaign_owner = campaign
+	_singleplayer_supply_owner = supply
+
+
+func request_singleplayer_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
+	# Only the owning runtime adapter supplies authority_context. UI payload is
+	# never interpreted as runtime evidence, service location or departure proof.
+	var owner: RefCounted
+	match String(command.get("contract_category", "")):
+		"singleplayer_campaign":
+			owner = _singleplayer_campaign_owner
+		"singleplayer_supply":
+			owner = _singleplayer_supply_owner
+		_:
+			return {"ok": false, "reason": "unknown_singleplayer_contract"}
+	if owner == null:
+		return {"ok": false, "reason": "singleplayer_owner_unavailable"}
+	var result: Dictionary = owner.call("apply_command", command.duplicate(true), authority_context.duplicate(true))
+	singleplayer_command_committed.emit(command.duplicate(true), result.duplicate(true))
+	return result
 signal damage_effect_resolved(result: Dictionary)
 signal fire_rule_committed(state: Dictionary)
 signal dropship_command_committed(command: Dictionary)
@@ -1702,6 +1729,10 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 
 	if delta < 0.0:
 		push_warning("SimulationRoot received a negative physics delta while applying a command.")
+		return
+	if String(cmd.get("contract_category", "")) in ["singleplayer_campaign", "singleplayer_supply"]:
+		# Queued UI-origin requests cannot inject a trusted runtime context.
+		request_singleplayer_command(cmd)
 		return
 	if String(cmd.get("contract_category", "")).strip_edges().to_lower() == "commander_intent":
 		commander_intent_committed.emit(cmd.duplicate(true))

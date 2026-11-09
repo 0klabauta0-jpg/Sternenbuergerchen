@@ -116,6 +116,17 @@ func _select(payload: Dictionary) -> Dictionary:
 	return {"ok": true, "location_id": location_id, "job_id": job_id, "message": "Zielort ausgewaehlt"}
 
 func _bind_departure(payload: Dictionary, context: Dictionary) -> Dictionary:
+	var validation: Dictionary = validate_departure(payload, context)
+	if not bool(validation.get("ok", false)):
+		return validation
+	var departure: Dictionary = validation.departure
+	_departures_by_craft_id[String(departure.craft_id)] = departure.duplicate(true)
+	_revision += 1
+	return validation
+
+func validate_departure(payload: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
+	# Used by the synchronous runtime transaction before either owner commits.
+	var context: Dictionary = authority_context
 	if not bool(context.get("departure_authorized", false)):
 		return _reject("departure_not_authorized", "Abflug nicht bestaetigt")
 	var craft_id: String = String(payload.get("craft_id", ""))
@@ -130,9 +141,7 @@ func _bind_departure(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not job_id.is_empty():
 		if not _jobs.has(job_id) or not String(_jobs[job_id].status) in ["accepted", "active"] or String(_jobs[job_id].location_id) != destination:
 			return _reject("job_location_mismatch", "Auftrag passt nicht zum Abflugziel")
-	_departures_by_craft_id[craft_id] = {"craft_id": craft_id, "origin_location_id": origin, "destination_location_id": destination, "landing_pad_id": pad_id, "job_id": job_id}
-	_revision += 1
-	return {"ok": true, "departure": _departures_by_craft_id[craft_id].duplicate(true)}
+	return {"ok": true, "departure": {"craft_id": craft_id, "origin_location_id": origin, "destination_location_id": destination, "landing_pad_id": pad_id, "job_id": job_id}}
 
 func _activate(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var job_id: String = String(payload.get("job_id", ""))

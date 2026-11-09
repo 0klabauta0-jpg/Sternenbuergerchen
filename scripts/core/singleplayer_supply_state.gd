@@ -87,6 +87,8 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var offer: Dictionary = Dictionary(Dictionary(_definitions.get("offers", {})).get(offer_id, {}))
 	if offer.is_empty():
 		return _reject("unknown_offer", "Angebot unbekannt")
+	if bool(context.get("craft_busy", true)):
+		return _reject("craft_busy", "Handel erst nach der Landung am Serviceort")
 	if not _has_service(location_id, "trade") or not Array(offer.get("location_ids", [])).has(location_id):
 		return _reject("trade_unavailable", "Handel nur am Handelsservice")
 	if not _valid_positive_integer(payload.get("quantity")):
@@ -126,6 +128,16 @@ func _refuel(payload: Dictionary, context: Dictionary) -> Dictionary:
 	return {"ok": true, "craft_id": craft_id, "amount": amount, "cost": int(cost), "message": "Betankung bestaetigt"}
 
 func _consume_route(payload: Dictionary, context: Dictionary) -> Dictionary:
+	var validation: Dictionary = preview_route_fuel(payload, context)
+	if not bool(validation.get("ok", false)):
+		return validation
+	var craft_id: String = String(validation.craft_id)
+	_fuel_by_craft_id[craft_id] = maxf(float(_fuel_by_craft_id[craft_id]) - float(validation.fuel_cost), 0.0)
+	_revision += 1
+	return validation
+
+func preview_route_fuel(payload: Dictionary, context: Dictionary = {}) -> Dictionary:
+	# Pure gate shared with the commit path, so later validation cannot differ.
 	if not bool(context.get("departure_authorized", false)):
 		return _reject("departure_not_authorized", "Abflug nicht bestaetigt")
 	var craft_id: String = String(payload.get("craft_id", ""))
@@ -139,8 +151,6 @@ func _consume_route(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var fuel: float = float(_fuel_by_craft_id[craft_id])
 	if fuel + 0.00001 < cost:
 		return _reject("insufficient_fuel", "Treibstoff reicht fuer diese Strecke nicht")
-	_fuel_by_craft_id[craft_id] = maxf(fuel - cost, 0.0)
-	_revision += 1
 	return {"ok": true, "craft_id": craft_id, "fuel_cost": cost, "message": "Routentreibstoff gebucht"}
 
 func _reward(payload: Dictionary, context: Dictionary) -> Dictionary:
