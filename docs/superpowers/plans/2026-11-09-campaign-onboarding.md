@@ -43,4 +43,3 @@ Interfaces: consume entry before roster load; configure_campaign_start(new/conti
 - [x] Add milestone saves and continue; verify two home milestones survive reload without overwriting local_player.
 - [x] Add contextual popup/focus help, run catalog checks and real full-loop test at time_scale 1 with private profiles.
 - [x] Review complete diff, fix confirmed defects, update implementation/QA docs, commit; integrate tested result locally into Main without push, der separate EXE-Auftrag folgt nach dem dokumentierten Main-Smoke.
-
