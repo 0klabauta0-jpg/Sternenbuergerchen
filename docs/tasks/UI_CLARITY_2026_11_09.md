@@ -32,6 +32,12 @@ vergeben; Biografie ist kein Beleg fuer eine durch Werte verursachte Berufswahl.
   kurzer Ueberblick, aufklappbare Details, deutsche Eigenschaften/Effekte.
   Piloteneignung erklaert dieselben echten Faktoren wie der bestehende Resolver.
 
+Nutzerpraezisierung: Der Umbau betrifft die grosse Detailkarte mit den vielen
+Werten. Kleine Portraitkarten mit Rang-/Pilotensymbolen sollen erhalten
+bleiben. Die tatsaechliche Pad-/Schiffsvorschau muss nach der gemeinsamen
+Mainintegration mit der neuen Basisgeometrie nochmals im Verbund geprueft
+werden; ein statisches Hintergrundbild ist dafuer kein Nachweis.
+
 Keine neue Generierung, Wertebalance oder nachtraeglich erfundene Karriere.
 Gespeichert sind effektive Werte; historische Vor-Trait-Basiswerte werden nicht
 rekonstruiert. Teameditor bleibt editierbar. Interne IDs/Debugtexte/Quellnamen

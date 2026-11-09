@@ -111,6 +111,11 @@ niedrige Prioritaet. `git diff --check`. Native Gestaltungsabnahme getrennt.
 Transportphasen und Ergebnis-/Heimkehrpfad muessen an der Orbitgrenze getrennt
 werden, ohne zweite Craft-/Fuel-Wahrheit. Intro verlangt weiterhin Satellit
 und reale Heimkehr vor Handel. Nur Basischeckpoint, kein Fortsetzen im Orbit.
-Keine Mainintegration und kein Push. Fuer den aktuellen Nutzerplaytest wird
-nach gruenen Pruefungen ein eigener Kandidatenbuild erstellt; die laufende
-alte EXE und vorhandene Builds werden nicht ersetzt.
+Aktuelle Nutzersteuerung vom 10.11.2026 ersetzt die fruehere Exportgrenze:
+**Noch keine EXE erstellen.** Erst den Abschluss des Chats
+`Einzelspieler: Basis, Orte und UI — Umsetzungsplan For agen…`
+(`01a1c1d2-5f36-72d0-8c82-570dd6bd95d2`) abwarten, beide Arbeitsstaende
+integrieren, Konflikte loesen, gemeinsam pruefen, auf Main committen und
+pushen. Erst aus diesem gemeinsamen Main wird die neue EXE erstellt.
+Unser gepruefter Produktcommit ist `7011ce4b2`. Bisher kein Export erfolgt;
+nur separate Exportcheckouts wurden vorbereitet.
