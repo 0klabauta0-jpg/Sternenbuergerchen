@@ -28,12 +28,16 @@ func _run() -> void:
 	_expect(int(render.get("missing_map_asset_mapping_count", -1)) == 0, "Authored building footprints do not spawn magenta missing-asset cubes")
 	_expect(bool(first.get("initialized", false)) and bool(first.get("active", false)), "Active base initializes its isolated runtime")
 	_expect(String(first.get("map_path", "")).contains("homebase_frontier_exploration.json"), "Base reads its saved authored map")
-	_expect(first.get("map_grid_size", Vector2i.ZERO) == Vector2i(24, 20), "Saved base preserves bounded 24x20 topology")
+	var grid_size: Vector2i = first.get("map_grid_size", Vector2i.ZERO)
+	_expect(grid_size.x * grid_size.y > 480 and Array(first.get("interiors", [])).size() == 2, "Expanded base contains two authored interiors beyond the old yard")
 	_expect(int(first.get("registered_unit_count", 0)) == 1, "Exactly one ephemeral Commander belongs to local UnitRegistry")
 	_expect(String(first.get("movement_owner", "")) == "SimulationRoot", "Existing SimulationRoot owns avatar movement")
 	_expect(not bool(first.get("owns_roster", true)) and not bool(first.get("owns_transport", true)), "Exploration owns no roster or transport truth")
 	var terminals: Array = first.get("terminals", [])
-	_expect(terminals.size() == 4, "Four existing meta destinations have world consoles")
+	var terminal_ids: Array = []
+	for terminal in terminals:
+		terminal_ids.append(String(terminal.id))
+	_expect(terminal_ids.has("personnel") and terminal_ids.has("team") and terminal_ids.has("flightdeck") and terminal_ids.has("mission"), "Existing meta destinations retain real world consoles")
 	_expect(bool(base.call("request_terminal", "personnel")) and _terminal_events == ["personnel"], "Nearby real console emits existing personnel destination exactly once")
 	_expect(bool(Dictionary(first.get("service_drone", {})).get("decorative", false)) and not bool(Dictionary(first.get("service_drone", {})).get("runtime_unit", true)), "Service drone is an authored visual without another runtime unit")
 	var start: Vector2 = first.get("avatar_position", Vector2.ZERO)

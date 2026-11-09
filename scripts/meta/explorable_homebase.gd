@@ -13,7 +13,7 @@ const SIM_SCRIPT: GDScript = preload("res://scripts/core/simulation_root.gd")
 const AVATAR_SCRIPT: GDScript = preload("res://scripts/meta/homebase_commander_avatar.gd")
 const FLIGHT_VISUAL_SCRIPT: GDScript = preload("res://scripts/terrain/mission_flight_visual.gd")
 const HEX_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
-const CLOSED_BUILDING_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_closed_buildings.gd")
+const PAD_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_outpost_pad.gd")
 const INTERACTION_RADIUS: float = 1.8
 
 var _active: bool = false
@@ -48,6 +48,7 @@ var _movement_command_count: int = 0
 var _command_sequence: int = 0
 var _drone_model: Node3D
 var _drone_helper: Node3D
+var _cutaway_wall_visual_count: int = 0
 
 
 func _ready() -> void:
@@ -157,11 +158,13 @@ func _initialize_runtime() -> void:
 			stage.add_child(visual)
 			visual.position = _plane_position(asset.get("plane", [0.0, 0.0]))
 			if String(asset.get("id", "")) in ["habitat_cutaway_01", "freihafen_hall_01"]:
-				var shell: Node3D = CLOSED_BUILDING_SCRIPT.new()
-				shell.name = "ClosedExterior_" + String(asset["id"])
-				stage.add_child(shell)
-				shell.call("build", _visual_bounds(visual), String(asset["id"]) == "freihafen_hall_01")
+				# The original single-mesh sources remain unchanged. Their opaque
+				# shells cannot define a door or navigation. The stored room facts
+				# below drive a separate roofless visual candidate instead.
 				visual.visible = false
+	_build_authored_interiors(stage)
+	_build_landing_pads(stage)
+	_build_boundary_rocks(stage)
 	var avatar_visual: Dictionary = Dictionary(_layout.get("avatar_visual", {}))
 	_model = _load_visual(avatar_visual)
 	if _model != null:
@@ -247,7 +250,7 @@ func request_terminal(id: String) -> bool:
 	if not _active or not _initialized or not is_visible_in_tree():
 		return false
 	for terminal in _terminals:
-		if String(terminal["id"]) == id and _terminal_distance(terminal) <= INTERACTION_RADIUS:
+		if String(terminal["id"]) == id and bool(terminal.get("enabled", true)) and _terminal_distance(terminal) <= INTERACTION_RADIUS:
 			_stop_avatar()
 			terminal_open_requested.emit(id)
 			return true
@@ -376,6 +379,69 @@ func _build_terminals(stage: Node3D) -> void:
 		_terminal_labels[String(terminal["id"])] = label
 
 
+func _build_authored_interiors(stage: Node3D) -> void:
+	# Read authoring facts only: this builder never mutates a terrain tile.
+	for raw_room in Array(_layout.get("interiors", [])):
+		var room: Dictionary = Dictionary(raw_room)
+		var owner := Node3D.new()
+		owner.name = "Cutaway_" + String(room["id"])
+		owner.set_meta("visual_status", String(room.get("visual_status", "candidate")))
+		stage.add_child(owner)
+		for raw_floor in Array(room.get("floor_grids", [])):
+			var point: Vector3 = _view.call("_world_to_3d_position", _world_at_grid(raw_floor), 0.0)
+			_hex_column(owner, point, 0.025, Color("777f72"), -0.025)
+		for raw_wall in Array(room.get("wall_grids", [])):
+			var point: Vector3 = _view.call("_world_to_3d_position", _world_at_grid(raw_wall), 0.0)
+			_hex_column(owner, point, 1.35, Color("cfc8ae"), 0.0)
+			_hex_column(owner, point, 0.10, Color("376b75"), 1.35)
+			_cutaway_wall_visual_count += 1
+		var door: Vector3 = _view.call("_world_to_3d_position", _world_at_grid(room["door_grid"]), 0.0)
+		_box(owner, Vector3(1.12, 0.16, 0.18), door + Vector3(0.0, 1.53, 0.0), Color("376b75"))
+		for side in [-1.0, 1.0]:
+			_box(owner, Vector3(0.10, 1.52, 0.18), door + Vector3(side * 0.54, 0.76, 0.0), Color("376b75"))
+
+
+func _hex_column(parent: Node3D, point: Vector3, height: float, color: Color, bottom: float) -> void:
+	var mesh := CylinderMesh.new()
+	mesh.radial_segments = 6
+	mesh.rings = 1
+	mesh.top_radius = 0.58
+	mesh.bottom_radius = 0.58
+	mesh.height = height
+	var visual := MeshInstance3D.new()
+	visual.mesh = mesh
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = 0.92
+	visual.material_override = material
+	visual.position = point + Vector3(0.0, bottom + height * 0.5, 0.0)
+	parent.add_child(visual)
+
+
+func _build_landing_pads(stage: Node3D) -> void:
+	for raw_pad in Array(_layout.get("landing_pads", [])):
+		var pad: Dictionary = Dictionary(raw_pad)
+		var visual: Node3D = PAD_SCRIPT.new()
+		visual.name = String(pad["id"])
+		visual.set_meta("landing_pad_id", String(pad["id"]))
+		stage.add_child(visual)
+		var center: Array = Array(pad["plane"])
+		var pad_size: Array = Array(pad["size"])
+		visual.call("build", Vector2(float(center[0]), float(center[1])), Vector2(float(pad_size[0]), float(pad_size[1])), String(pad["designation"]))
+		# Deck top coincides with authored ground height; no hidden visual step.
+		visual.position.y = float(pad.get("surface_y", 0.0)) - PAD_SCRIPT.DECK_HEIGHT
+
+
+func _build_boundary_rocks(stage: Node3D) -> void:
+	var size_value: Vector2i = _map_data.get_grid_size()
+	for tile in _map_data.get_tiles():
+		var grid: Vector2i = tile.grid_position
+		if grid.x != 0 and grid.y != 0 and grid.x != size_value.x - 1 and grid.y != size_value.y - 1:
+			continue
+		var point: Vector3 = _view.call("_world_to_3d_position", tile.world_position, 0.0)
+		_hex_column(stage, point, 0.45 + float(posmod(grid.x + grid.y, 3)) * 0.15, Color("777c6b"), 0.0)
+
+
 func _terminal_distance(terminal: Dictionary) -> float:
 	var avatar_plane: Vector3 = _view.call("_world_to_3d_position", _avatar.position, 0.0)
 	var terminal_plane: Vector3 = _view.call("_world_to_3d_position", terminal["world_position"], 0.0)
@@ -388,7 +454,7 @@ func _update_nearby_terminal() -> void:
 	var distance_value: float = INTERACTION_RADIUS
 	for terminal in _terminals:
 		var distance_candidate: float = _terminal_distance(terminal)
-		if distance_candidate <= distance_value:
+		if bool(terminal.get("enabled", true)) and distance_candidate <= distance_value:
 			distance_value = distance_candidate
 			nearest = String(terminal["id"])
 			title = String(terminal["title"])
@@ -484,8 +550,12 @@ func get_exploration_snapshot() -> Dictionary:
 		"simulation_ticks": int(_sim.get("tick_counter")),
 		"movement_command_count": _movement_command_count,
 		"terminals": _terminals.duplicate(true), "nearby_terminal": _nearby_terminal,
+		"interiors": Array(_layout.get("interiors", [])).duplicate(true),
+		"landing_pads": Array(_layout.get("landing_pads", [])).duplicate(true),
+		"expansion_areas": Array(_layout.get("expansion_areas", [])).duplicate(true),
+		"cutaway_wall_visual_count": _cutaway_wall_visual_count,
 		"initial_walk_target": _world_at_grid(_layout.get("initial_walk_target_grid", [9, 11])),
-		"blocked_test_position": _world_at_grid([11, 9]), "distant_terminal_id": "flightdeck",
+		"blocked_test_position": _world_at_grid(_layout.get("blocked_test_grid", [11, 9])), "distant_terminal_id": "flightdeck",
 		"asset_sources": _asset_sources.duplicate(true),
 		"service_drone": {"decorative": true, "runtime_unit": false, "model_local_position": _drone_model.position, "model_local_rotation": _drone_model.rotation, "exhaust": _drone_helper.call("get_visual_snapshot")},
 		"viewport_size": _viewport.size, "world_focus": _host.has_focus(),
