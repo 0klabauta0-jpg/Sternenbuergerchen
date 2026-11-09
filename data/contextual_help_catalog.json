@@ -121,14 +121,14 @@
       "screen_id": "main_menu",
       "area_id": "primary_routes",
       "status": "draft",
-      "title": "Start and Routes",
+      "title": "Kampagne und Skirmish",
       "compact_lines": [
-        "Choose the next game area without changing saved roster or mission state.",
-        "Settings and editor routes stay in the shell until you confirm a handoff."
+        "Kampagne fuehrt mit eigenem Stand durch die Einfuehrung.",
+        "Skirmish nutzt dein frei bearbeitetes Team; Multiplayer oeffnet Host/Join."
       ],
       "detail_lines": [
-        "Route buttons expose screen metadata for tests; gameplay state changes only in owned systems.",
-        "New roster creation needs an explicit confirmation before existing roster data is replaced."
+        "Teameditor und Teambibliothek gehoeren zu Skirmish. Eine neue Kampagne veraendert dieses Team nicht.",
+        "Fortsetzen laedt einen sicheren Basis-Meilenstein. Ein vorhandener Kampagnenstand wird nur nach Bestaetigung ersetzt."
       ],
       "target_audience": "new_player",
       "manual_review": true
@@ -3107,6 +3107,142 @@
       ],
       "target_audience": "advanced",
       "manual_review": false
+    },
+    {
+      "help_id": "main_menu.campaign",
+      "screen_id": "main_menu",
+      "area_id": "campaign",
+      "status": "draft",
+      "title": "Kampagne starten",
+      "compact_lines": [
+        "Einfuehrung mit Pilot und einem Leader; eigener Kampagnenstand.",
+        "Fortsetzen laedt den letzten sicheren Basis-Meilenstein."
+      ],
+      "detail_lines": [
+        "Neue Kampagne ersetzt einen vorhandenen Stand erst nach Bestaetigung.",
+        "Unterbrochene Ausfluege beginnen erneut am letzten Basis-Meilenstein; dein Skirmish-Team bleibt getrennt."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "campaign.job",
+      "screen_id": "campaign",
+      "area_id": "job",
+      "status": "draft",
+      "title": "Auftrag und Ziel",
+      "compact_lines": [
+        "Satellitenauftrag in der Basis annehmen.",
+        "Im Smart Mobile das passende Ziel waehlen."
+      ],
+      "detail_lines": [
+        "Erst die bestaetigte Bereitschaft startet den Satellitenschritt.",
+        "Ein abgebrochener Einsatz kann wiederholt werden; Anzeigen oder Hilfeklicks erteilen keine Belohnung."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "campaign.boarding",
+      "screen_id": "campaign",
+      "area_id": "boarding",
+      "status": "draft",
+      "title": "Basis und Boarding",
+      "compact_lines": [
+        "Pilot und Leader pruefen; Leader einem Trupp zuordnen.",
+        "Ausruestung, Pilot und Boarding fuer den Satellitenflug vorbereiten."
+      ],
+      "detail_lines": [
+        "Satellitenauftrag annehmen und das Ziel im Smart Mobile waehlen.",
+        "Nur echte Runtime-Bereitschaft schaltet die naechste Etappe frei. Hinweise schliessen veraendert keinen Fortschritt."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "campaign.movement",
+      "screen_id": "campaign",
+      "area_id": "movement",
+      "status": "draft",
+      "title": "Landen, Bewegung und GO",
+      "compact_lines": [
+        "Am Satelliten landen und Leader absetzen.",
+        "Trupp waehlen, Ziel setzen und GO bestaetigen."
+      ],
+      "detail_lines": [
+        "Zum Satelliten gehen und dort Use ausfuehren.",
+        "Danach zum Schiff zurueckkehren und heimfliegen. Der Echtzeiteinsatz laeuft waehrend der Hilfe weiter."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "campaign.use",
+      "screen_id": "campaign",
+      "area_id": "use",
+      "status": "draft",
+      "title": "Interaktion mit Use",
+      "compact_lines": [
+        "Leader zum Satelliten oder Haendler bewegen.",
+        "Das passende Objekt waehlen und Use ausfuehren."
+      ],
+      "detail_lines": [
+        "Die Interaktion benoetigt die passende Naehe und einen verfuegbaren Trupp. Beachte den sichtbaren Sperrgrund.",
+        "Am Satelliten wird die Bergung bestaetigt; beim Haendler oeffnet sich der Handel."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "campaign.trade",
+      "screen_id": "campaign",
+      "area_id": "trade",
+      "status": "draft",
+      "title": "Kaufen und Tanken",
+      "compact_lines": [
+        "Handelsposten anfliegen, landen und Haendler mit Use erreichen.",
+        "Einen verfuegbaren Gegenstand kaufen und Treibstoff nachfuellen."
+      ],
+      "detail_lines": [
+        "Kauf und Tanken muessen erfolgreich bestaetigt sein; nur das Handelsfenster zu oeffnen reicht nicht.",
+        "Nach beiden Aktionen zum Schiff und zur Heimatbasis zurueckkehren. Vorgezogene Aktionen ersetzen die aktuelle Aufgabe nicht."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "campaign.return",
+      "screen_id": "campaign",
+      "area_id": "return",
+      "status": "draft",
+      "title": "Zur Heimatbasis zurueck",
+      "compact_lines": [
+        "Leader und Pilot zum Schiff bringen und Boarding abschliessen.",
+        "Heimatbasis als Ziel waehlen und heimfliegen."
+      ],
+      "detail_lines": [
+        "Eine bestaetigte Heimkehr schliesst die Etappe ab und speichert einen sicheren Basis-Meilenstein.",
+        "Bei Unterbrechung wird dieser konsistente Basisstand geladen. Eine Ergebnisanzeige erteilt keine zweite Belohnung."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "campaign.complete",
+      "screen_id": "campaign",
+      "area_id": "complete",
+      "status": "draft",
+      "title": "Einfuehrung abgeschlossen",
+      "compact_lines": [
+        "Beide Rundfluege sind abgeschlossen.",
+        "Die vorhandenen Orte bleiben frei besuchbar."
+      ],
+      "detail_lines": [
+        "Dein Kampagnenstand bleibt vom Skirmish-Team getrennt. Weitere Kapitel gehoeren noch nicht zu dieser Einfuehrung.",
+        "Hilfe erneut oeffnen oder Hinweise ausblenden veraendert keinen Gameplay-Fortschritt."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
     }
   ]
 }
