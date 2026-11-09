@@ -1,0 +1,214 @@
+extends RefCounted
+## Authoritative travel position and phase. Presentation reads snapshots; only
+## SimulationRoot's runtime adapter may confirm lifecycle changes or advance time.
+
+const DEFINITION_PATH := "res://data/singleplayer/star_system.json"
+const TRUSTED_OPERATIONS := ["launch_to_orbit", "advance", "begin_approach", "finish_approach", "enter_orbit", "land_homebase"]
+const MAX_ADVANCE_SECONDS: float = 60.0
+
+var _definition: Dictionary = {}
+var _phase: String = "grounded"
+var _craft_id: String = ""
+var _orbit_id: String = ""
+var _position := Vector2(0.25, 0.62)
+var _origin_position := Vector2(0.25, 0.62)
+var _target_orbit_id: String = ""
+var _elapsed_seconds: float = 0.0
+var _progress: float = 0.0
+var _location_id: String = "homebase"
+var _revision: int = 0
+var _requests: Dictionary = {}
+
+func configure() -> Dictionary:
+	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(DEFINITION_PATH))
+	if typeof(raw) != TYPE_DICTIONARY or not _valid_definition(raw):
+		return _reject("invalid_system", "Sternsystem ist nicht verfuegbar")
+	_definition = Dictionary(raw).duplicate(true)
+	_phase = "grounded"
+	_craft_id = ""
+	_orbit_id = ""
+	_position = _orbit_position("moon_orbit")
+	_origin_position = _position
+	_target_orbit_id = ""
+	_elapsed_seconds = 0.0
+	_progress = 0.0
+	_location_id = "homebase"
+	_revision = 0
+	_requests.clear()
+	return {"ok": true}
+
+func is_quantum_active() -> bool:
+	return _phase == "quantum"
+
+func get_snapshot() -> Dictionary:
+	return {"phase": _phase, "craft_id": _craft_id, "orbit_id": _orbit_id,
+		"position": [_position.x, _position.y], "origin_position": [_origin_position.x, _origin_position.y],
+		"target_orbit_id": _target_orbit_id, "progress": _progress, "elapsed_seconds": _elapsed_seconds,
+		"duration_seconds": float(_definition.get("jump_duration_seconds", 3.0)),
+		"location_id": _location_id, "revision": _revision,
+		"bodies": Dictionary(_definition.get("bodies", {})).duplicate(true),
+		"orbits": Dictionary(_definition.get("orbits", {})).duplicate(true),
+		"location_orbits": Dictionary(_definition.get("location_orbits", {})).duplicate(true)}
+
+func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
+	if _definition.is_empty() or typeof(command.get("contract_category")) != TYPE_STRING or command.get("contract_category") != "singleplayer_space_travel" or typeof(command.get("operation")) != TYPE_STRING or typeof(command.get("payload")) != TYPE_DICTIONARY or typeof(command.get("request_id", "")) != TYPE_STRING:
+		return _reject("invalid_command", "Reiseauftrag ungueltig")
+	var operation: String = command.operation
+	if operation in TRUSTED_OPERATIONS and (typeof(authority_context.get("runtime_authorized")) != TYPE_BOOL or not bool(authority_context.get("runtime_authorized", false))):
+		return _reject("runtime_authority_required", "Reisezustand braucht bestaetigte Laufzeitdaten")
+	var payload: Dictionary = command.payload
+	if operation == "advance" and not _valid_delta(payload):
+		return _reject("invalid_delta", "Reisezeit ausserhalb des erlaubten Bereichs")
+	var request_id: String = String(command.get("request_id", "")).strip_edges()
+	var signature: String = "" if request_id.is_empty() else JSON.stringify({"operation": operation, "payload": payload}, "", true)
+	if not request_id.is_empty() and _requests.has(request_id):
+		if String(_requests[request_id].signature) != signature:
+			return _reject("request_id_conflict", "Anfrage-ID bereits anders verwendet")
+		var replay: Dictionary = Dictionary(_requests[request_id].result).duplicate(true)
+		replay["replayed"] = true
+		return replay
+	if operation != "advance":
+		if typeof(payload.get("craft_id")) != TYPE_STRING or String(payload.craft_id).strip_edges().is_empty():
+			return _reject("invalid_craft", "Schiff fehlt")
+		if operation != "launch_to_orbit" and String(payload.craft_id) != _craft_id:
+			return _reject("craft_mismatch", "Dieses Schiff ist nicht auf der aktiven Reise")
+	var result: Dictionary
+	match operation:
+		"launch_to_orbit": result = _launch(payload)
+		"start_quantum": result = _start_quantum(payload)
+		"abort_quantum": result = _abort_quantum()
+		"advance": result = _advance(payload)
+		"begin_approach": result = _begin_approach(payload)
+		"finish_approach":
+			if _phase != "approach":
+				return _reject("approach_not_active", "Kein laufender Anflug")
+			_phase = "surface"
+			_revision += 1
+			result = {"ok": true}
+		"enter_orbit": result = _enter_orbit()
+		"land_homebase": result = _land_homebase()
+		_: result = _reject("unknown_operation", "Reiseaktion unbekannt")
+	if bool(result.get("ok", false)):
+		result["phase"] = _phase
+		result["revision"] = _revision
+		# Runtime ticks omit request IDs; explicit IDs retain retry semantics.
+		if not request_id.is_empty():
+			_requests[request_id] = {"signature": signature, "result": result.duplicate(true)}
+	return result
+
+func _launch(payload: Dictionary) -> Dictionary:
+	if _phase != "grounded":
+		return _reject("trip_active", "Ein Schiff ist bereits im Weltraum")
+	_craft_id = String(payload.craft_id)
+	_arrive("moon_orbit")
+	return {"ok": true}
+
+func _start_quantum(payload: Dictionary) -> Dictionary:
+	if _phase not in ["orbit", "stopped"]:
+		return _reject("quantum_unavailable", "Sprung erst im Orbit oder nach Abbruch starten")
+	if typeof(payload.get("target_orbit_id")) != TYPE_STRING or not Dictionary(_definition.orbits).has(payload.target_orbit_id):
+		return _reject("unknown_orbit", "Zielorbit unbekannt")
+	var target: String = payload.target_orbit_id
+	if target == _orbit_id:
+		return _reject("already_in_orbit", "Schiff ist bereits in diesem Orbit")
+	_origin_position = _position
+	_target_orbit_id = target
+	_orbit_id = ""
+	_location_id = ""
+	_elapsed_seconds = 0.0
+	_progress = 0.0
+	_phase = "quantum"
+	_revision += 1
+	return {"ok": true}
+
+func _abort_quantum() -> Dictionary:
+	if _phase != "quantum":
+		return _reject("quantum_not_active", "Kein laufender Quantum-Sprung")
+	_phase = "stopped"
+	_orbit_id = ""
+	_revision += 1
+	return {"ok": true}
+
+func _advance(payload: Dictionary) -> Dictionary:
+	var delta: float = float(payload.delta_seconds)
+	if _phase != "quantum" or delta == 0.0:
+		return {"ok": true, "advanced": false}
+	var duration: float = float(_definition.jump_duration_seconds)
+	_elapsed_seconds = minf(duration, _elapsed_seconds + delta)
+	_progress = clampf(_elapsed_seconds / duration, 0.0, 1.0)
+	_position = _origin_position.lerp(_orbit_position(_target_orbit_id), _progress)
+	_revision += 1
+	if _progress >= 1.0:
+		_arrive(_target_orbit_id)
+	return {"ok": true, "advanced": true}
+
+func _valid_delta(payload: Dictionary) -> bool:
+	if typeof(payload.get("delta_seconds")) not in [TYPE_FLOAT, TYPE_INT]:
+		return false
+	var delta: float = float(payload.delta_seconds)
+	return is_finite(delta) and delta >= 0.0 and delta <= MAX_ADVANCE_SECONDS
+
+func _begin_approach(payload: Dictionary) -> Dictionary:
+	if _phase != "orbit":
+		return _reject("orbit_required", "Zuerst den Zielorbit erreichen")
+	if typeof(payload.get("location_id")) != TYPE_STRING or not Dictionary(_definition.location_orbits).has(payload.location_id) or payload.location_id == "homebase":
+		return _reject("unknown_location", "Zielort unbekannt; Mondbasis separat landen")
+	if String(_definition.location_orbits[payload.location_id]) != _orbit_id:
+		return _reject("wrong_orbit", "Dieser Ort liegt an einem anderen Himmelskoerper")
+	_location_id = String(payload.location_id)
+	_phase = "approach"
+	_revision += 1
+	return {"ok": true}
+
+func _enter_orbit() -> Dictionary:
+	if _phase not in ["surface", "approach"]:
+		return _reject("surface_exit_required", "Kein bestaetigter Ortsabflug")
+	var orbit: String = String(_definition.location_orbits.get(_location_id, ""))
+	if orbit.is_empty():
+		return _reject("location_unbound", "Ortsorbit fehlt")
+	_arrive(orbit)
+	return {"ok": true}
+
+func _land_homebase() -> Dictionary:
+	if _phase != "orbit" or _orbit_id != "moon_orbit":
+		return _reject("moon_orbit_required", "Zuerst den Mondorbit erreichen")
+	_phase = "grounded"
+	_location_id = "homebase"
+	_orbit_id = ""
+	_target_orbit_id = ""
+	_origin_position = _position
+	_elapsed_seconds = 0.0
+	_progress = 0.0
+	_revision += 1
+	return {"ok": true}
+
+func _arrive(orbit: String) -> void:
+	_phase = "orbit"
+	_orbit_id = orbit
+	_position = _orbit_position(orbit)
+	_location_id = ""
+	_revision += 1
+
+func _orbit_position(orbit: String) -> Vector2:
+	var point: Array = _definition.orbits[orbit].position
+	return Vector2(float(point[0]), float(point[1]))
+
+func _valid_definition(data: Dictionary) -> bool:
+	if typeof(data.get("bodies")) != TYPE_DICTIONARY or typeof(data.get("orbits")) != TYPE_DICTIONARY or typeof(data.get("location_orbits")) != TYPE_DICTIONARY or typeof(data.get("jump_duration_seconds")) not in [TYPE_FLOAT, TYPE_INT]:
+		return false
+	var duration: float = float(data.jump_duration_seconds)
+	if not is_finite(duration) or duration <= 0.0 or duration > MAX_ADVANCE_SECONDS:
+		return false
+	for orbit in ["moon_orbit", "planet_orbit"]:
+		if typeof(data.orbits.get(orbit)) != TYPE_DICTIONARY:
+			return false
+		var point: Variant = data.orbits[orbit].get("position")
+		if typeof(point) != TYPE_ARRAY or point.size() != 2:
+			return false
+		for value in point:
+			if typeof(value) not in [TYPE_FLOAT, TYPE_INT] or not is_finite(float(value)) or float(value) < 0.0 or float(value) > 1.0:
+				return false
+	return data.bodies.has("moon") and data.bodies.has("planet") and data.location_orbits.get("homebase") == "moon_orbit" and data.location_orbits.get("satellite_crash") == "planet_orbit" and data.location_orbits.get("trade_outpost") == "planet_orbit"
+
+func _reject(reason: String, message: String) -> Dictionary:
+	return {"ok": false, "reason": reason, "message": message}

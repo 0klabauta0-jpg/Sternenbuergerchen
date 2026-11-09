@@ -1,0 +1,1256 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_265 Character Sheet Loadout Help Content Pass ===
+  PASS: Contextual help catalog parses
+  PASS: Catalog help_id is unique: main_menu.primary_routes
+  PASS: main_menu.primary_routes title fits compact rule
+  PASS: main_menu.primary_routes compact line fits
+  PASS: main_menu.primary_routes compact line fits
+  PASS: main_menu.primary_routes detail line fits
+  PASS: main_menu.primary_routes detail line fits
+  PASS: Catalog help_id is unique: team_editor.identity
+  PASS: team_editor.identity title fits compact rule
+  PASS: team_editor.identity compact line fits
+  PASS: team_editor.identity compact line fits
+  PASS: team_editor.identity detail line fits
+  PASS: team_editor.identity detail line fits
+  PASS: Catalog help_id is unique: team_editor.team_name
+  PASS: team_editor.team_name title fits compact rule
+  PASS: team_editor.team_name compact line fits
+  PASS: team_editor.team_name compact line fits
+  PASS: team_editor.team_name detail line fits
+  PASS: Catalog help_id is unique: team_editor.symbol
+  PASS: team_editor.symbol title fits compact rule
+  PASS: team_editor.symbol compact line fits
+  PASS: team_editor.symbol compact line fits
+  PASS: team_editor.symbol detail line fits
+  PASS: Catalog help_id is unique: team_editor.budget
+  PASS: team_editor.budget title fits compact rule
+  PASS: team_editor.budget compact line fits
+  PASS: team_editor.budget compact line fits
+  PASS: team_editor.budget detail line fits
+  PASS: team_editor.budget detail line fits
+  PASS: team_editor.budget detail line fits
+  PASS: Catalog help_id is unique: team_editor.stat.tactics
+  PASS: team_editor.stat.tactics title fits compact rule
+  PASS: team_editor.stat.tactics compact line fits
+  PASS: team_editor.stat.tactics compact line fits
+  PASS: team_editor.stat.tactics detail line fits
+  PASS: team_editor.stat.tactics detail line fits
+  PASS: Catalog help_id is unique: team_editor.stat.medical
+  PASS: team_editor.stat.medical title fits compact rule
+  PASS: team_editor.stat.medical compact line fits
+  PASS: team_editor.stat.medical compact line fits
+  PASS: team_editor.stat.medical detail line fits
+  PASS: team_editor.stat.medical detail line fits
+  PASS: Catalog help_id is unique: team_editor.stat.engineering
+  PASS: team_editor.stat.engineering title fits compact rule
+  PASS: team_editor.stat.engineering compact line fits
+  PASS: team_editor.stat.engineering compact line fits
+  PASS: team_editor.stat.engineering detail line fits
+  PASS: team_editor.stat.engineering detail line fits
+  PASS: Catalog help_id is unique: team_editor.stat.piloting
+  PASS: team_editor.stat.piloting title fits compact rule
+  PASS: team_editor.stat.piloting compact line fits
+  PASS: team_editor.stat.piloting compact line fits
+  PASS: team_editor.stat.piloting detail line fits
+  PASS: team_editor.stat.piloting detail line fits
+  PASS: Catalog help_id is unique: team_editor.stat.discipline
+  PASS: team_editor.stat.discipline title fits compact rule
+  PASS: team_editor.stat.discipline compact line fits
+  PASS: team_editor.stat.discipline compact line fits
+  PASS: team_editor.stat.discipline detail line fits
+  PASS: team_editor.stat.discipline detail line fits
+  PASS: Catalog help_id is unique: team_editor.stat.recon
+  PASS: team_editor.stat.recon title fits compact rule
+  PASS: team_editor.stat.recon compact line fits
+  PASS: team_editor.stat.recon compact line fits
+  PASS: team_editor.stat.recon detail line fits
+  PASS: team_editor.stat.recon detail line fits
+  PASS: Catalog help_id is unique: team_editor.stat.lock
+  PASS: team_editor.stat.lock title fits compact rule
+  PASS: team_editor.stat.lock compact line fits
+  PASS: team_editor.stat.lock compact line fits
+  PASS: team_editor.stat.lock detail line fits
+  PASS: team_editor.stat.lock detail line fits
+  PASS: team_editor.stat.lock detail line fits
+  PASS: Catalog help_id is unique: settings.contextual_help_mode
+  PASS: settings.contextual_help_mode title fits compact rule
+  PASS: settings.contextual_help_mode compact line fits
+  PASS: settings.contextual_help_mode compact line fits
+  PASS: settings.contextual_help_mode detail line fits
+  PASS: Catalog help_id is unique: settings.fog_of_war_mode
+  PASS: settings.fog_of_war_mode title fits compact rule
+  PASS: settings.fog_of_war_mode compact line fits
+  PASS: settings.fog_of_war_mode compact line fits
+  PASS: settings.fog_of_war_mode detail line fits
+  PASS: Catalog help_id is unique: shell.global_help_button
+  PASS: shell.global_help_button title fits compact rule
+  PASS: shell.global_help_button compact line fits
+  PASS: shell.global_help_button compact line fits
+  PASS: shell.global_help_button detail line fits
+  PASS: Catalog help_id is unique: homebase.roster
+  PASS: homebase.roster title fits compact rule
+  PASS: homebase.roster compact line fits
+  PASS: homebase.roster compact line fits
+  PASS: homebase.roster detail line fits
+  PASS: Catalog help_id is unique: homebase.transfer_team
+  PASS: homebase.transfer_team title fits compact rule
+  PASS: homebase.transfer_team compact line fits
+  PASS: homebase.transfer_team compact line fits
+  PASS: homebase.transfer_team detail line fits
+  PASS: Catalog help_id is unique: homebase.fireteams
+  PASS: homebase.fireteams title fits compact rule
+  PASS: homebase.fireteams compact line fits
+  PASS: homebase.fireteams compact line fits
+  PASS: homebase.fireteams detail line fits
+  PASS: Catalog help_id is unique: homebase.loadout
+  PASS: homebase.loadout title fits compact rule
+  PASS: homebase.loadout compact line fits
+  PASS: homebase.loadout compact line fits
+  PASS: homebase.loadout detail line fits
+  PASS: Catalog help_id is unique: homebase.flightdeck
+  PASS: homebase.flightdeck title fits compact rule
+  PASS: homebase.flightdeck compact line fits
+  PASS: homebase.flightdeck compact line fits
+  PASS: homebase.flightdeck detail line fits
+  PASS: Catalog help_id is unique: homebase.character_popup
+  PASS: homebase.character_popup title fits compact rule
+  PASS: homebase.character_popup compact line fits
+  PASS: homebase.character_popup compact line fits
+  PASS: homebase.character_popup detail line fits
+  PASS: Catalog help_id is unique: fob.fireteams
+  PASS: fob.fireteams title fits compact rule
+  PASS: fob.fireteams compact line fits
+  PASS: fob.fireteams compact line fits
+  PASS: fob.fireteams detail line fits
+  PASS: Catalog help_id is unique: fob.flightdeck
+  PASS: fob.flightdeck title fits compact rule
+  PASS: fob.flightdeck compact line fits
+  PASS: fob.flightdeck compact line fits
+  PASS: fob.flightdeck detail line fits
+  PASS: fob.flightdeck detail line fits
+  PASS: Catalog help_id is unique: loadout.weight
+  PASS: loadout.weight title fits compact rule
+  PASS: loadout.weight has compact help
+  PASS: loadout.weight compact line fits
+  PASS: loadout.weight compact line fits
+  PASS: loadout.weight detail line fits
+  PASS: Catalog help_id is unique: character_sheet.core_values
+  PASS: character_sheet.core_values title fits compact rule
+  PASS: character_sheet.core_values has compact help
+  PASS: character_sheet.core_values compact line fits
+  PASS: character_sheet.core_values detail line fits
+  PASS: Catalog help_id is unique: character_sheet.skill_group_budget
+  PASS: character_sheet.skill_group_budget title fits compact rule
+  PASS: character_sheet.skill_group_budget compact line fits
+  PASS: character_sheet.skill_group_budget detail line fits
+  PASS: Catalog help_id is unique: character_sheet.value_lock
+  PASS: character_sheet.value_lock title fits compact rule
+  PASS: character_sheet.value_lock compact line fits
+  PASS: character_sheet.value_lock detail line fits
+  PASS: Catalog help_id is unique: mission_hud.command_matrix
+  PASS: mission_hud.command_matrix title fits compact rule
+  PASS: mission_hud.command_matrix compact line fits
+  PASS: mission_hud.command_matrix compact line fits
+  PASS: mission_hud.command_matrix detail line fits
+  PASS: Catalog help_id is unique: mission_hud.mission_control
+  PASS: mission_hud.mission_control title fits compact rule
+  PASS: mission_hud.mission_control compact line fits
+  PASS: mission_hud.mission_control compact line fits
+  PASS: mission_hud.mission_control detail line fits
+  PASS: Catalog help_id is unique: map_editor.height_tool
+  PASS: map_editor.height_tool title fits compact rule
+  PASS: map_editor.height_tool compact line fits
+  PASS: map_editor.height_tool compact line fits
+  PASS: map_editor.height_tool detail line fits
+  PASS: Catalog help_id is unique: map_editor.save_load
+  PASS: map_editor.save_load title fits compact rule
+  PASS: map_editor.save_load compact line fits
+  PASS: map_editor.save_load compact line fits
+  PASS: map_editor.save_load detail line fits
+  PASS: Catalog help_id is unique: map_editor.tactical_profile
+  PASS: map_editor.tactical_profile title fits compact rule
+  PASS: map_editor.tactical_profile compact line fits
+  PASS: map_editor.tactical_profile compact line fits
+  PASS: map_editor.tactical_profile detail line fits
+  PASS: map_editor.tactical_profile detail line fits
+  PASS: Catalog help_id is unique: multiplayer_lobby.host_join
+  PASS: multiplayer_lobby.host_join title fits compact rule
+  PASS: multiplayer_lobby.host_join compact line fits
+  PASS: multiplayer_lobby.host_join compact line fits
+  PASS: multiplayer_lobby.host_join detail line fits
+  PASS: Catalog help_id is unique: debrief.character_updates
+  PASS: debrief.character_updates title fits compact rule
+  PASS: debrief.character_updates compact line fits
+  PASS: debrief.character_updates compact line fits
+  PASS: debrief.character_updates detail line fits
+  PASS: Catalog help_id is unique: character_sheet.identity
+  PASS: character_sheet.identity title fits compact rule
+  PASS: character_sheet.identity has compact help
+  PASS: character_sheet.identity compact line fits
+  PASS: character_sheet.identity detail line fits
+  PASS: Catalog help_id is unique: character_sheet.name
+  PASS: character_sheet.name title fits compact rule
+  PASS: character_sheet.name has compact help
+  PASS: character_sheet.name compact line fits
+  PASS: character_sheet.name detail line fits
+  PASS: Catalog help_id is unique: character_sheet.portrait
+  PASS: character_sheet.portrait title fits compact rule
+  PASS: character_sheet.portrait has compact help
+  PASS: character_sheet.portrait compact line fits
+  PASS: character_sheet.portrait detail line fits
+  PASS: Catalog help_id is unique: character_sheet.role_loadout
+  PASS: character_sheet.role_loadout title fits compact rule
+  PASS: character_sheet.role_loadout has compact help
+  PASS: character_sheet.role_loadout compact line fits
+  PASS: character_sheet.role_loadout detail line fits
+  PASS: Catalog help_id is unique: character_sheet.role
+  PASS: character_sheet.role title fits compact rule
+  PASS: character_sheet.role has compact help
+  PASS: character_sheet.role compact line fits
+  PASS: character_sheet.role detail line fits
+  PASS: Catalog help_id is unique: character_sheet.role_category
+  PASS: character_sheet.role_category title fits compact rule
+  PASS: character_sheet.role_category compact line fits
+  PASS: character_sheet.role_category detail line fits
+  PASS: Catalog help_id is unique: character_sheet.fireteam_assignment
+  PASS: character_sheet.fireteam_assignment title fits compact rule
+  PASS: character_sheet.fireteam_assignment has compact help
+  PASS: character_sheet.fireteam_assignment compact line fits
+  PASS: character_sheet.fireteam_assignment detail line fits
+  PASS: Catalog help_id is unique: character_sheet.rank_badges
+  PASS: character_sheet.rank_badges title fits compact rule
+  PASS: character_sheet.rank_badges has compact help
+  PASS: character_sheet.rank_badges compact line fits
+  PASS: character_sheet.rank_badges detail line fits
+  PASS: Catalog help_id is unique: character_sheet.rank_badge.shooter
+  PASS: character_sheet.rank_badge.shooter title fits compact rule
+  PASS: character_sheet.rank_badge.shooter compact line fits
+  PASS: character_sheet.rank_badge.shooter detail line fits
+  PASS: Catalog help_id is unique: character_sheet.rank_badge.leader
+  PASS: character_sheet.rank_badge.leader title fits compact rule
+  PASS: character_sheet.rank_badge.leader compact line fits
+  PASS: character_sheet.rank_badge.leader detail line fits
+  PASS: Catalog help_id is unique: character_sheet.rank_badge.pilot
+  PASS: character_sheet.rank_badge.pilot title fits compact rule
+  PASS: character_sheet.rank_badge.pilot compact line fits
+  PASS: character_sheet.rank_badge.pilot detail line fits
+  PASS: Catalog help_id is unique: character_sheet.rank_badge.medic
+  PASS: character_sheet.rank_badge.medic title fits compact rule
+  PASS: character_sheet.rank_badge.medic compact line fits
+  PASS: character_sheet.rank_badge.medic detail line fits
+  PASS: Catalog help_id is unique: character_sheet.rank_badge.heavy
+  PASS: character_sheet.rank_badge.heavy title fits compact rule
+  PASS: character_sheet.rank_badge.heavy compact line fits
+  PASS: character_sheet.rank_badge.heavy detail line fits
+  PASS: Catalog help_id is unique: character_sheet.rank_badge.engineer
+  PASS: character_sheet.rank_badge.engineer title fits compact rule
+  PASS: character_sheet.rank_badge.engineer compact line fits
+  PASS: character_sheet.rank_badge.engineer detail line fits
+  PASS: Catalog help_id is unique: character_sheet.rank_badge.enemy
+  PASS: character_sheet.rank_badge.enemy title fits compact rule
+  PASS: character_sheet.rank_badge.enemy compact line fits
+  PASS: character_sheet.rank_badge.enemy detail line fits
+  PASS: Catalog help_id is unique: character_sheet.traits
+  PASS: character_sheet.traits title fits compact rule
+  PASS: character_sheet.traits has compact help
+  PASS: character_sheet.traits compact line fits
+  PASS: character_sheet.traits detail line fits
+  PASS: Catalog help_id is unique: character_sheet.trait.aggressive
+  PASS: character_sheet.trait.aggressive title fits compact rule
+  PASS: character_sheet.trait.aggressive has compact help
+  PASS: character_sheet.trait.aggressive compact line fits
+  PASS: character_sheet.trait.aggressive detail line fits
+  PASS: Catalog help_id is unique: character_sheet.trait.cautious
+  PASS: character_sheet.trait.cautious title fits compact rule
+  PASS: character_sheet.trait.cautious has compact help
+  PASS: character_sheet.trait.cautious compact line fits
+  PASS: character_sheet.trait.cautious detail line fits
+  PASS: Catalog help_id is unique: character_sheet.trait.steady
+  PASS: character_sheet.trait.steady title fits compact rule
+  PASS: character_sheet.trait.steady has compact help
+  PASS: character_sheet.trait.steady compact line fits
+  PASS: character_sheet.trait.steady detail line fits
+  PASS: Catalog help_id is unique: character_sheet.trait.reckless
+  PASS: character_sheet.trait.reckless title fits compact rule
+  PASS: character_sheet.trait.reckless has compact help
+  PASS: character_sheet.trait.reckless compact line fits
+  PASS: character_sheet.trait.reckless detail line fits
+  PASS: Catalog help_id is unique: character_sheet.trait.calm
+  PASS: character_sheet.trait.calm title fits compact rule
+  PASS: character_sheet.trait.calm has compact help
+  PASS: character_sheet.trait.calm compact line fits
+  PASS: character_sheet.trait.calm detail line fits
+  PASS: Catalog help_id is unique: character_sheet.status_recovery
+  PASS: character_sheet.status_recovery title fits compact rule
+  PASS: character_sheet.status_recovery has compact help
+  PASS: character_sheet.status_recovery compact line fits
+  PASS: character_sheet.status_recovery detail line fits
+  PASS: Catalog help_id is unique: character_sheet.status
+  PASS: character_sheet.status title fits compact rule
+  PASS: character_sheet.status has compact help
+  PASS: character_sheet.status compact line fits
+  PASS: character_sheet.status detail line fits
+  PASS: Catalog help_id is unique: character_sheet.recovery
+  PASS: character_sheet.recovery title fits compact rule
+  PASS: character_sheet.recovery has compact help
+  PASS: character_sheet.recovery compact line fits
+  PASS: character_sheet.recovery detail line fits
+  PASS: Catalog help_id is unique: character_sheet.morale
+  PASS: character_sheet.morale title fits compact rule
+  PASS: character_sheet.morale has compact help
+  PASS: character_sheet.morale compact line fits
+  PASS: character_sheet.morale detail line fits
+  PASS: Catalog help_id is unique: character_sheet.frustration
+  PASS: character_sheet.frustration title fits compact rule
+  PASS: character_sheet.frustration has compact help
+  PASS: character_sheet.frustration compact line fits
+  PASS: character_sheet.frustration detail line fits
+  PASS: Catalog help_id is unique: character_sheet.teamfit
+  PASS: character_sheet.teamfit title fits compact rule
+  PASS: character_sheet.teamfit has compact help
+  PASS: character_sheet.teamfit compact line fits
+  PASS: character_sheet.teamfit detail line fits
+  PASS: Catalog help_id is unique: character_sheet.best_fit
+  PASS: character_sheet.best_fit title fits compact rule
+  PASS: character_sheet.best_fit compact line fits
+  PASS: character_sheet.best_fit detail line fits
+  PASS: Catalog help_id is unique: character_sheet.tension
+  PASS: character_sheet.tension title fits compact rule
+  PASS: character_sheet.tension compact line fits
+  PASS: character_sheet.tension detail line fits
+  PASS: Catalog help_id is unique: character_sheet.relationship_links
+  PASS: character_sheet.relationship_links title fits compact rule
+  PASS: character_sheet.relationship_links compact line fits
+  PASS: character_sheet.relationship_links detail line fits
+  PASS: Catalog help_id is unique: character_sheet.progression
+  PASS: character_sheet.progression title fits compact rule
+  PASS: character_sheet.progression has compact help
+  PASS: character_sheet.progression compact line fits
+  PASS: character_sheet.progression detail line fits
+  PASS: Catalog help_id is unique: character_sheet.xp
+  PASS: character_sheet.xp title fits compact rule
+  PASS: character_sheet.xp has compact help
+  PASS: character_sheet.xp compact line fits
+  PASS: character_sheet.xp detail line fits
+  PASS: Catalog help_id is unique: character_sheet.missions
+  PASS: character_sheet.missions title fits compact rule
+  PASS: character_sheet.missions compact line fits
+  PASS: character_sheet.missions detail line fits
+  PASS: Catalog help_id is unique: character_sheet.ftl_tactical_impact
+  PASS: character_sheet.ftl_tactical_impact title fits compact rule
+  PASS: character_sheet.ftl_tactical_impact compact line fits
+  PASS: character_sheet.ftl_tactical_impact detail line fits
+  PASS: Catalog help_id is unique: character_sheet.core.accuracy
+  PASS: character_sheet.core.accuracy title fits compact rule
+  PASS: character_sheet.core.accuracy has compact help
+  PASS: character_sheet.core.accuracy compact line fits
+  PASS: character_sheet.core.accuracy detail line fits
+  PASS: Catalog help_id is unique: character_sheet.core.speed
+  PASS: character_sheet.core.speed title fits compact rule
+  PASS: character_sheet.core.speed has compact help
+  PASS: character_sheet.core.speed compact line fits
+  PASS: character_sheet.core.speed detail line fits
+  PASS: Catalog help_id is unique: character_sheet.core.toughness
+  PASS: character_sheet.core.toughness title fits compact rule
+  PASS: character_sheet.core.toughness has compact help
+  PASS: character_sheet.core.toughness compact line fits
+  PASS: character_sheet.core.toughness detail line fits
+  PASS: Catalog help_id is unique: character_sheet.core.awareness
+  PASS: character_sheet.core.awareness title fits compact rule
+  PASS: character_sheet.core.awareness compact line fits
+  PASS: character_sheet.core.awareness detail line fits
+  PASS: Catalog help_id is unique: character_sheet.core.recognition
+  PASS: character_sheet.core.recognition title fits compact rule
+  PASS: character_sheet.core.recognition compact line fits
+  PASS: character_sheet.core.recognition detail line fits
+  PASS: Catalog help_id is unique: character_sheet.core.stealth
+  PASS: character_sheet.core.stealth title fits compact rule
+  PASS: character_sheet.core.stealth compact line fits
+  PASS: character_sheet.core.stealth detail line fits
+  PASS: Catalog help_id is unique: character_sheet.core.discipline
+  PASS: character_sheet.core.discipline title fits compact rule
+  PASS: character_sheet.core.discipline compact line fits
+  PASS: character_sheet.core.discipline detail line fits
+  PASS: Catalog help_id is unique: character_sheet.core.leadership
+  PASS: character_sheet.core.leadership title fits compact rule
+  PASS: character_sheet.core.leadership has compact help
+  PASS: character_sheet.core.leadership compact line fits
+  PASS: character_sheet.core.leadership detail line fits
+  PASS: Catalog help_id is unique: character_sheet.communication
+  PASS: character_sheet.communication title fits compact rule
+  PASS: character_sheet.communication has compact help
+  PASS: character_sheet.communication compact line fits
+  PASS: character_sheet.communication detail line fits
+  PASS: Catalog help_id is unique: character_sheet.platform_skills
+  PASS: character_sheet.platform_skills title fits compact rule
+  PASS: character_sheet.platform_skills has compact help
+  PASS: character_sheet.platform_skills compact line fits
+  PASS: character_sheet.platform_skills detail line fits
+  PASS: Catalog help_id is unique: character_sheet.derived_badges
+  PASS: character_sheet.derived_badges title fits compact rule
+  PASS: character_sheet.derived_badges has compact help
+  PASS: character_sheet.derived_badges compact line fits
+  PASS: character_sheet.derived_badges detail line fits
+  PASS: Catalog help_id is unique: character_sheet.behavior_profile
+  PASS: character_sheet.behavior_profile title fits compact rule
+  PASS: character_sheet.behavior_profile has compact help
+  PASS: character_sheet.behavior_profile compact line fits
+  PASS: character_sheet.behavior_profile detail line fits
+  PASS: Catalog help_id is unique: character_sheet.last_mission
+  PASS: character_sheet.last_mission title fits compact rule
+  PASS: character_sheet.last_mission compact line fits
+  PASS: character_sheet.last_mission detail line fits
+  PASS: Catalog help_id is unique: character_sheet.fireteam_history
+  PASS: character_sheet.fireteam_history title fits compact rule
+  PASS: character_sheet.fireteam_history compact line fits
+  PASS: character_sheet.fireteam_history detail line fits
+  PASS: Catalog help_id is unique: character_sheet.method_tags
+  PASS: character_sheet.method_tags title fits compact rule
+  PASS: character_sheet.method_tags compact line fits
+  PASS: character_sheet.method_tags detail line fits
+  PASS: Catalog help_id is unique: character_sheet.function_scores
+  PASS: character_sheet.function_scores title fits compact rule
+  PASS: character_sheet.function_scores compact line fits
+  PASS: character_sheet.function_scores detail line fits
+  PASS: Catalog help_id is unique: character_sheet.primary_specialty
+  PASS: character_sheet.primary_specialty title fits compact rule
+  PASS: character_sheet.primary_specialty compact line fits
+  PASS: character_sheet.primary_specialty detail line fits
+  PASS: Catalog help_id is unique: character_sheet.secondary_specialty
+  PASS: character_sheet.secondary_specialty title fits compact rule
+  PASS: character_sheet.secondary_specialty compact line fits
+  PASS: character_sheet.secondary_specialty detail line fits
+  PASS: Catalog help_id is unique: character_sheet.speech_quality
+  PASS: character_sheet.speech_quality title fits compact rule
+  PASS: character_sheet.speech_quality compact line fits
+  PASS: character_sheet.speech_quality detail line fits
+  PASS: Catalog help_id is unique: character_sheet.speech_quantity
+  PASS: character_sheet.speech_quantity title fits compact rule
+  PASS: character_sheet.speech_quantity compact line fits
+  PASS: character_sheet.speech_quantity detail line fits
+  PASS: Catalog help_id is unique: character_sheet.initiative
+  PASS: character_sheet.initiative title fits compact rule
+  PASS: character_sheet.initiative compact line fits
+  PASS: character_sheet.initiative detail line fits
+  PASS: Catalog help_id is unique: character_sheet.order_fidelity
+  PASS: character_sheet.order_fidelity title fits compact rule
+  PASS: character_sheet.order_fidelity compact line fits
+  PASS: character_sheet.order_fidelity detail line fits
+  PASS: Catalog help_id is unique: character_sheet.signature_control
+  PASS: character_sheet.signature_control title fits compact rule
+  PASS: character_sheet.signature_control compact line fits
+  PASS: character_sheet.signature_control detail line fits
+  PASS: Catalog help_id is unique: character_sheet.contact_stability
+  PASS: character_sheet.contact_stability title fits compact rule
+  PASS: character_sheet.contact_stability compact line fits
+  PASS: character_sheet.contact_stability detail line fits
+  PASS: Catalog help_id is unique: character_sheet.autonomy
+  PASS: character_sheet.autonomy title fits compact rule
+  PASS: character_sheet.autonomy compact line fits
+  PASS: character_sheet.autonomy detail line fits
+  PASS: Catalog help_id is unique: character_sheet.platform.ground_vehicle_handling
+  PASS: character_sheet.platform.ground_vehicle_handling title fits compact rule
+  PASS: character_sheet.platform.ground_vehicle_handling compact line fits
+  PASS: character_sheet.platform.ground_vehicle_handling detail line fits
+  PASS: Catalog help_id is unique: character_sheet.platform.dropship_piloting
+  PASS: character_sheet.platform.dropship_piloting title fits compact rule
+  PASS: character_sheet.platform.dropship_piloting compact line fits
+  PASS: character_sheet.platform.dropship_piloting detail line fits
+  PASS: Catalog help_id is unique: character_sheet.platform.freighter_piloting
+  PASS: character_sheet.platform.freighter_piloting title fits compact rule
+  PASS: character_sheet.platform.freighter_piloting compact line fits
+  PASS: character_sheet.platform.freighter_piloting detail line fits
+  PASS: Catalog help_id is unique: character_sheet.platform.fighter_piloting
+  PASS: character_sheet.platform.fighter_piloting title fits compact rule
+  PASS: character_sheet.platform.fighter_piloting compact line fits
+  PASS: character_sheet.platform.fighter_piloting detail line fits
+  PASS: Catalog help_id is unique: character_sheet.loadout_summary
+  PASS: character_sheet.loadout_summary title fits compact rule
+  PASS: character_sheet.loadout_summary has compact help
+  PASS: character_sheet.loadout_summary compact line fits
+  PASS: character_sheet.loadout_summary detail line fits
+  PASS: Catalog help_id is unique: loadout.armor
+  PASS: loadout.armor title fits compact rule
+  PASS: loadout.armor has compact help
+  PASS: loadout.armor compact line fits
+  PASS: loadout.armor compact line fits
+  PASS: loadout.armor detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon_slot
+  PASS: loadout.weapon_slot title fits compact rule
+  PASS: loadout.weapon_slot has compact help
+  PASS: loadout.weapon_slot compact line fits
+  PASS: loadout.weapon_slot compact line fits
+  PASS: loadout.weapon_slot detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon.smg
+  PASS: loadout.weapon.smg title fits compact rule
+  PASS: loadout.weapon.smg has compact help
+  PASS: loadout.weapon.smg compact line fits
+  PASS: loadout.weapon.smg compact line fits
+  PASS: loadout.weapon.smg detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon.rifle
+  PASS: loadout.weapon.rifle title fits compact rule
+  PASS: loadout.weapon.rifle has compact help
+  PASS: loadout.weapon.rifle compact line fits
+  PASS: loadout.weapon.rifle compact line fits
+  PASS: loadout.weapon.rifle detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon.sniper
+  PASS: loadout.weapon.sniper title fits compact rule
+  PASS: loadout.weapon.sniper has compact help
+  PASS: loadout.weapon.sniper compact line fits
+  PASS: loadout.weapon.sniper compact line fits
+  PASS: loadout.weapon.sniper detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon.rocket_launcher
+  PASS: loadout.weapon.rocket_launcher title fits compact rule
+  PASS: loadout.weapon.rocket_launcher has compact help
+  PASS: loadout.weapon.rocket_launcher compact line fits
+  PASS: loadout.weapon.rocket_launcher compact line fits
+  PASS: loadout.weapon.rocket_launcher detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon.medictool
+  PASS: loadout.weapon.medictool title fits compact rule
+  PASS: loadout.weapon.medictool has compact help
+  PASS: loadout.weapon.medictool compact line fits
+  PASS: loadout.weapon.medictool compact line fits
+  PASS: loadout.weapon.medictool detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon.none
+  PASS: loadout.weapon.none title fits compact rule
+  PASS: loadout.weapon.none has compact help
+  PASS: loadout.weapon.none compact line fits
+  PASS: loadout.weapon.none compact line fits
+  PASS: loadout.weapon.none detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon.lmg
+  PASS: loadout.weapon.lmg title fits compact rule
+  PASS: loadout.weapon.lmg has compact help
+  PASS: loadout.weapon.lmg compact line fits
+  PASS: loadout.weapon.lmg compact line fits
+  PASS: loadout.weapon.lmg detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon_visual_only
+  PASS: loadout.weapon_visual_only title fits compact rule
+  PASS: loadout.weapon_visual_only has compact help
+  PASS: loadout.weapon_visual_only compact line fits
+  PASS: loadout.weapon_visual_only compact line fits
+  PASS: loadout.weapon_visual_only detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon_preview
+  PASS: loadout.weapon_preview title fits compact rule
+  PASS: loadout.weapon_preview has compact help
+  PASS: loadout.weapon_preview compact line fits
+  PASS: loadout.weapon_preview compact line fits
+  PASS: loadout.weapon_preview detail line fits
+  PASS: Catalog help_id is unique: loadout.weapon_none
+  PASS: loadout.weapon_none title fits compact rule
+  PASS: loadout.weapon_none has compact help
+  PASS: loadout.weapon_none compact line fits
+  PASS: loadout.weapon_none compact line fits
+  PASS: loadout.weapon_none detail line fits
+  PASS: Catalog help_id is unique: loadout.disabled_reason
+  PASS: loadout.disabled_reason title fits compact rule
+  PASS: loadout.disabled_reason has compact help
+  PASS: loadout.disabled_reason compact line fits
+  PASS: loadout.disabled_reason compact line fits
+  PASS: loadout.disabled_reason detail line fits
+  PASS: Catalog help_id is unique: loadout.clear_selection
+  PASS: loadout.clear_selection title fits compact rule
+  PASS: loadout.clear_selection has compact help
+  PASS: loadout.clear_selection compact line fits
+  PASS: loadout.clear_selection compact line fits
+  PASS: loadout.clear_selection detail line fits
+  PASS: Catalog help_id is unique: loadout.member_row
+  PASS: loadout.member_row title fits compact rule
+  PASS: loadout.member_row has compact help
+  PASS: loadout.member_row compact line fits
+  PASS: loadout.member_row compact line fits
+  PASS: loadout.member_row detail line fits
+  PASS: Catalog help_id is unique: loadout.empty_team_default
+  PASS: loadout.empty_team_default title fits compact rule
+  PASS: loadout.empty_team_default has compact help
+  PASS: loadout.empty_team_default compact line fits
+  PASS: loadout.empty_team_default compact line fits
+  PASS: loadout.empty_team_default detail line fits
+  PASS: Catalog help_id is unique: settings.display
+  PASS: settings.display title fits compact rule
+  PASS: settings.display compact line fits
+  PASS: settings.display compact line fits
+  PASS: settings.display detail line fits
+  PASS: Catalog help_id is unique: settings.audio
+  PASS: settings.audio title fits compact rule
+  PASS: settings.audio compact line fits
+  PASS: settings.audio compact line fits
+  PASS: settings.audio detail line fits
+  PASS: Catalog help_id is unique: settings.input
+  PASS: settings.input title fits compact rule
+  PASS: settings.input compact line fits
+  PASS: settings.input compact line fits
+  PASS: settings.input detail line fits
+  PASS: Catalog help_id is unique: settings.gameplay
+  PASS: settings.gameplay title fits compact rule
+  PASS: settings.gameplay compact line fits
+  PASS: settings.gameplay compact line fits
+  PASS: settings.gameplay detail line fits
+  PASS: Catalog help_id is unique: settings.fog_of_war.off
+  PASS: settings.fog_of_war.off title fits compact rule
+  PASS: settings.fog_of_war.off compact line fits
+  PASS: settings.fog_of_war.off compact line fits
+  PASS: settings.fog_of_war.off detail line fits
+  PASS: Catalog help_id is unique: settings.fog_of_war.known_terrain
+  PASS: settings.fog_of_war.known_terrain title fits compact rule
+  PASS: settings.fog_of_war.known_terrain compact line fits
+  PASS: settings.fog_of_war.known_terrain compact line fits
+  PASS: settings.fog_of_war.known_terrain detail line fits
+  PASS: Catalog help_id is unique: settings.fog_of_war.unexplored_blackout
+  PASS: settings.fog_of_war.unexplored_blackout title fits compact rule
+  PASS: settings.fog_of_war.unexplored_blackout compact line fits
+  PASS: settings.fog_of_war.unexplored_blackout compact line fits
+  PASS: settings.fog_of_war.unexplored_blackout detail line fits
+  PASS: Catalog help_id is unique: multiplayer.host
+  PASS: multiplayer.host title fits compact rule
+  PASS: multiplayer.host compact line fits
+  PASS: multiplayer.host compact line fits
+  PASS: multiplayer.host detail line fits
+  PASS: Catalog help_id is unique: multiplayer.join
+  PASS: multiplayer.join title fits compact rule
+  PASS: multiplayer.join compact line fits
+  PASS: multiplayer.join compact line fits
+  PASS: multiplayer.join detail line fits
+  PASS: Catalog help_id is unique: multiplayer.ready
+  PASS: multiplayer.ready title fits compact rule
+  PASS: multiplayer.ready compact line fits
+  PASS: multiplayer.ready compact line fits
+  PASS: multiplayer.ready detail line fits
+  PASS: Catalog help_id is unique: multiplayer.player_name
+  PASS: multiplayer.player_name title fits compact rule
+  PASS: multiplayer.player_name compact line fits
+  PASS: multiplayer.player_name compact line fits
+  PASS: multiplayer.player_name detail line fits
+  PASS: Catalog help_id is unique: multiplayer.player_roster
+  PASS: multiplayer.player_roster title fits compact rule
+  PASS: multiplayer.player_roster compact line fits
+  PASS: multiplayer.player_roster compact line fits
+  PASS: multiplayer.player_roster detail line fits
+  PASS: multiplayer.player_roster detail line fits
+  PASS: Catalog help_id is unique: multiplayer.player_team
+  PASS: multiplayer.player_team title fits compact rule
+  PASS: multiplayer.player_team compact line fits
+  PASS: multiplayer.player_team compact line fits
+  PASS: multiplayer.player_team detail line fits
+  PASS: Catalog help_id is unique: multiplayer.team_mode
+  PASS: multiplayer.team_mode title fits compact rule
+  PASS: multiplayer.team_mode compact line fits
+  PASS: multiplayer.team_mode compact line fits
+  PASS: multiplayer.team_mode detail line fits
+  PASS: Catalog help_id is unique: multiplayer.map_select
+  PASS: multiplayer.map_select title fits compact rule
+  PASS: multiplayer.map_select compact line fits
+  PASS: multiplayer.map_select compact line fits
+  PASS: multiplayer.map_select detail line fits
+  PASS: Catalog help_id is unique: multiplayer.connection_mode
+  PASS: multiplayer.connection_mode title fits compact rule
+  PASS: multiplayer.connection_mode compact line fits
+  PASS: multiplayer.connection_mode compact line fits
+  PASS: multiplayer.connection_mode detail line fits
+  PASS: multiplayer.connection_mode detail line fits
+  PASS: Catalog help_id is unique: multiplayer.start
+  PASS: multiplayer.start title fits compact rule
+  PASS: multiplayer.start compact line fits
+  PASS: multiplayer.start compact line fits
+  PASS: multiplayer.start detail line fits
+  PASS: Catalog help_id is unique: multiplayer.disconnect
+  PASS: multiplayer.disconnect title fits compact rule
+  PASS: multiplayer.disconnect compact line fits
+  PASS: multiplayer.disconnect compact line fits
+  PASS: multiplayer.disconnect detail line fits
+  PASS: Catalog help_id is unique: multiplayer.map_download
+  PASS: multiplayer.map_download title fits compact rule
+  PASS: multiplayer.map_download compact line fits
+  PASS: multiplayer.map_download compact line fits
+  PASS: multiplayer.map_download detail line fits
+  PASS: Catalog help_id is unique: multiplayer.roster_ownership
+  PASS: multiplayer.roster_ownership title fits compact rule
+  PASS: multiplayer.roster_ownership compact line fits
+  PASS: multiplayer.roster_ownership compact line fits
+  PASS: multiplayer.roster_ownership detail line fits
+  PASS: Catalog help_id is unique: editor.tile_palette
+  PASS: editor.tile_palette title fits compact rule
+  PASS: editor.tile_palette compact line fits
+  PASS: editor.tile_palette compact line fits
+  PASS: editor.tile_palette detail line fits
+  PASS: Catalog help_id is unique: editor.brush_size
+  PASS: editor.brush_size title fits compact rule
+  PASS: editor.brush_size compact line fits
+  PASS: editor.brush_size compact line fits
+  PASS: editor.brush_size detail line fits
+  PASS: Catalog help_id is unique: editor.height_tool
+  PASS: editor.height_tool title fits compact rule
+  PASS: editor.height_tool compact line fits
+  PASS: editor.height_tool compact line fits
+  PASS: editor.height_tool detail line fits
+  PASS: Catalog help_id is unique: editor.edge.slope
+  PASS: editor.edge.slope title fits compact rule
+  PASS: editor.edge.slope compact line fits
+  PASS: editor.edge.slope compact line fits
+  PASS: editor.edge.slope detail line fits
+  PASS: Catalog help_id is unique: editor.edge.cliff
+  PASS: editor.edge.cliff title fits compact rule
+  PASS: editor.edge.cliff compact line fits
+  PASS: editor.edge.cliff compact line fits
+  PASS: editor.edge.cliff detail line fits
+  PASS: Catalog help_id is unique: editor.surface
+  PASS: editor.surface title fits compact rule
+  PASS: editor.surface compact line fits
+  PASS: editor.surface compact line fits
+  PASS: editor.surface detail line fits
+  PASS: Catalog help_id is unique: editor.object
+  PASS: editor.object title fits compact rule
+  PASS: editor.object compact line fits
+  PASS: editor.object compact line fits
+  PASS: editor.object detail line fits
+  PASS: Catalog help_id is unique: editor.save
+  PASS: editor.save title fits compact rule
+  PASS: editor.save compact line fits
+  PASS: editor.save compact line fits
+  PASS: editor.save detail line fits
+  PASS: Catalog help_id is unique: editor.load
+  PASS: editor.load title fits compact rule
+  PASS: editor.load compact line fits
+  PASS: editor.load compact line fits
+  PASS: editor.load detail line fits
+  PASS: Catalog help_id is unique: editor.save_as
+  PASS: editor.save_as title fits compact rule
+  PASS: editor.save_as compact line fits
+  PASS: editor.save_as compact line fits
+  PASS: editor.save_as detail line fits
+  PASS: Catalog help_id is unique: editor.playtest
+  PASS: editor.playtest title fits compact rule
+  PASS: editor.playtest compact line fits
+  PASS: editor.playtest compact line fits
+  PASS: editor.playtest detail line fits
+  PASS: Catalog help_id is unique: editor.back
+  PASS: editor.back title fits compact rule
+  PASS: editor.back compact line fits
+  PASS: editor.back compact line fits
+  PASS: editor.back detail line fits
+  PASS: Catalog help_id is unique: mission.command_matrix
+  PASS: mission.command_matrix title fits compact rule
+  PASS: mission.command_matrix compact line fits
+  PASS: mission.command_matrix compact line fits
+  PASS: mission.command_matrix detail line fits
+  PASS: Catalog help_id is unique: mission.selected_fireteam
+  PASS: mission.selected_fireteam title fits compact rule
+  PASS: mission.selected_fireteam compact line fits
+  PASS: mission.selected_fireteam compact line fits
+  PASS: mission.selected_fireteam detail line fits
+  PASS: Catalog help_id is unique: mission.mission_control
+  PASS: mission.mission_control title fits compact rule
+  PASS: mission.mission_control compact line fits
+  PASS: mission.mission_control compact line fits
+  PASS: mission.mission_control detail line fits
+  PASS: Catalog help_id is unique: mission.command.move
+  PASS: mission.command.move title fits compact rule
+  PASS: mission.command.move compact line fits
+  PASS: mission.command.move compact line fits
+  PASS: mission.command.move detail line fits
+  PASS: Catalog help_id is unique: mission.command.defend
+  PASS: mission.command.defend title fits compact rule
+  PASS: mission.command.defend compact line fits
+  PASS: mission.command.defend compact line fits
+  PASS: mission.command.defend detail line fits
+  PASS: Catalog help_id is unique: mission.command.hold
+  PASS: mission.command.hold title fits compact rule
+  PASS: mission.command.hold compact line fits
+  PASS: mission.command.hold compact line fits
+  PASS: mission.command.hold detail line fits
+  PASS: Catalog help_id is unique: mission.command.flank
+  PASS: mission.command.flank title fits compact rule
+  PASS: mission.command.flank compact line fits
+  PASS: mission.command.flank compact line fits
+  PASS: mission.command.flank detail line fits
+  PASS: Catalog help_id is unique: mission.command.take
+  PASS: mission.command.take title fits compact rule
+  PASS: mission.command.take compact line fits
+  PASS: mission.command.take compact line fits
+  PASS: mission.command.take detail line fits
+  PASS: Catalog help_id is unique: mission.command.attack_area
+  PASS: mission.command.attack_area title fits compact rule
+  PASS: mission.command.attack_area compact line fits
+  PASS: mission.command.attack_area compact line fits
+  PASS: mission.command.attack_area detail line fits
+  PASS: Catalog help_id is unique: mission.command.defend_area
+  PASS: mission.command.defend_area title fits compact rule
+  PASS: mission.command.defend_area compact line fits
+  PASS: mission.command.defend_area compact line fits
+  PASS: mission.command.defend_area detail line fits
+  PASS: Catalog help_id is unique: mission.command.area_order
+  PASS: mission.command.area_order title fits compact rule
+  PASS: mission.command.area_order compact line fits
+  PASS: mission.command.area_order compact line fits
+  PASS: mission.command.area_order detail line fits
+  PASS: Catalog help_id is unique: mission.command.go_plan
+  PASS: mission.command.go_plan title fits compact rule
+  PASS: mission.command.go_plan compact line fits
+  PASS: mission.command.go_plan compact line fits
+  PASS: mission.command.go_plan detail line fits
+  PASS: Catalog help_id is unique: mission.command.stance
+  PASS: mission.command.stance title fits compact rule
+  PASS: mission.command.stance compact line fits
+  PASS: mission.command.stance compact line fits
+  PASS: mission.command.stance detail line fits
+  PASS: Catalog help_id is unique: mission.command.advance_style
+  PASS: mission.command.advance_style title fits compact rule
+  PASS: mission.command.advance_style compact line fits
+  PASS: mission.command.advance_style compact line fits
+  PASS: mission.command.advance_style detail line fits
+  PASS: Catalog help_id is unique: mission.command.overwatch
+  PASS: mission.command.overwatch title fits compact rule
+  PASS: mission.command.overwatch compact line fits
+  PASS: mission.command.overwatch compact line fits
+  PASS: mission.command.overwatch detail line fits
+  PASS: Catalog help_id is unique: mission.command.security
+  PASS: mission.command.security title fits compact rule
+  PASS: mission.command.security compact line fits
+  PASS: mission.command.security compact line fits
+  PASS: mission.command.security detail line fits
+  PASS: Catalog help_id is unique: mission.command.medic_adjacent
+  PASS: mission.command.medic_adjacent title fits compact rule
+  PASS: mission.command.medic_adjacent compact line fits
+  PASS: mission.command.medic_adjacent compact line fits
+  PASS: mission.command.medic_adjacent detail line fits
+  PASS: Catalog help_id is unique: mission.command.set_lz
+  PASS: mission.command.set_lz title fits compact rule
+  PASS: mission.command.set_lz compact line fits
+  PASS: mission.command.set_lz compact line fits
+  PASS: mission.command.set_lz detail line fits
+  PASS: Catalog help_id is unique: mission.command.call_dropship
+  PASS: mission.command.call_dropship title fits compact rule
+  PASS: mission.command.call_dropship compact line fits
+  PASS: mission.command.call_dropship compact line fits
+  PASS: mission.command.call_dropship detail line fits
+  PASS: Catalog help_id is unique: mission.command.approach
+  PASS: mission.command.approach title fits compact rule
+  PASS: mission.command.approach compact line fits
+  PASS: mission.command.approach compact line fits
+  PASS: mission.command.approach detail line fits
+  PASS: Catalog help_id is unique: mission.command.clear_target
+  PASS: mission.command.clear_target title fits compact rule
+  PASS: mission.command.clear_target compact line fits
+  PASS: mission.command.clear_target compact line fits
+  PASS: mission.command.clear_target detail line fits
+  PASS: Catalog help_id is unique: mission.command.roe_fire_rules
+  PASS: mission.command.roe_fire_rules title fits compact rule
+  PASS: mission.command.roe_fire_rules compact line fits
+  PASS: mission.command.roe_fire_rules compact line fits
+  PASS: mission.command.roe_fire_rules detail line fits
+  PASS: Catalog help_id is unique: mission.rule.tempo
+  PASS: mission.rule.tempo title fits compact rule
+  PASS: mission.rule.tempo compact line fits
+  PASS: mission.rule.tempo compact line fits
+  PASS: mission.rule.tempo detail line fits
+  PASS: Catalog help_id is unique: mission.rule.tempo_cautious
+  PASS: mission.rule.tempo_cautious title fits compact rule
+  PASS: mission.rule.tempo_cautious compact line fits
+  PASS: mission.rule.tempo_cautious compact line fits
+  PASS: mission.rule.tempo_cautious detail line fits
+  PASS: Catalog help_id is unique: mission.rule.tempo_normal
+  PASS: mission.rule.tempo_normal title fits compact rule
+  PASS: mission.rule.tempo_normal compact line fits
+  PASS: mission.rule.tempo_normal compact line fits
+  PASS: mission.rule.tempo_normal detail line fits
+  PASS: Catalog help_id is unique: mission.rule.tempo_rapid
+  PASS: mission.rule.tempo_rapid title fits compact rule
+  PASS: mission.rule.tempo_rapid compact line fits
+  PASS: mission.rule.tempo_rapid compact line fits
+  PASS: mission.rule.tempo_rapid detail line fits
+  PASS: Catalog help_id is unique: mission.rule.fire_rule
+  PASS: mission.rule.fire_rule title fits compact rule
+  PASS: mission.rule.fire_rule compact line fits
+  PASS: mission.rule.fire_rule compact line fits
+  PASS: mission.rule.fire_rule detail line fits
+  PASS: Catalog help_id is unique: mission.rule.fire_rule_hold
+  PASS: mission.rule.fire_rule_hold title fits compact rule
+  PASS: mission.rule.fire_rule_hold compact line fits
+  PASS: mission.rule.fire_rule_hold compact line fits
+  PASS: mission.rule.fire_rule_hold detail line fits
+  PASS: Catalog help_id is unique: mission.rule.fire_rule_return
+  PASS: mission.rule.fire_rule_return title fits compact rule
+  PASS: mission.rule.fire_rule_return compact line fits
+  PASS: mission.rule.fire_rule_return compact line fits
+  PASS: mission.rule.fire_rule_return detail line fits
+  PASS: Catalog help_id is unique: mission.rule.fire_rule_free
+  PASS: mission.rule.fire_rule_free title fits compact rule
+  PASS: mission.rule.fire_rule_free compact line fits
+  PASS: mission.rule.fire_rule_free compact line fits
+  PASS: mission.rule.fire_rule_free detail line fits
+  PASS: Catalog help_id is unique: mission.rule.fire_rule_suppress
+  PASS: mission.rule.fire_rule_suppress title fits compact rule
+  PASS: mission.rule.fire_rule_suppress compact line fits
+  PASS: mission.rule.fire_rule_suppress compact line fits
+  PASS: mission.rule.fire_rule_suppress detail line fits
+  PASS: Catalog help_id is unique: mission.rule.contact_response
+  PASS: mission.rule.contact_response title fits compact rule
+  PASS: mission.rule.contact_response compact line fits
+  PASS: mission.rule.contact_response compact line fits
+  PASS: mission.rule.contact_response detail line fits
+  PASS: Catalog help_id is unique: mission.rule.cover_priority
+  PASS: mission.rule.cover_priority title fits compact rule
+  PASS: mission.rule.cover_priority compact line fits
+  PASS: mission.rule.cover_priority compact line fits
+  PASS: mission.rule.cover_priority detail line fits
+  PASS: Catalog help_id is unique: mission.rule.security_mode
+  PASS: mission.rule.security_mode title fits compact rule
+  PASS: mission.rule.security_mode compact line fits
+  PASS: mission.rule.security_mode compact line fits
+  PASS: mission.rule.security_mode detail line fits
+  PASS: Catalog help_id is unique: mission.command.group.goal
+  PASS: mission.command.group.goal title fits compact rule
+  PASS: mission.command.group.goal compact line fits
+  PASS: mission.command.group.goal compact line fits
+  PASS: mission.command.group.goal detail line fits
+  PASS: Catalog help_id is unique: mission.command.group.rule
+  PASS: mission.command.group.rule title fits compact rule
+  PASS: mission.command.group.rule compact line fits
+  PASS: mission.command.group.rule compact line fits
+  PASS: mission.command.group.rule detail line fits
+  PASS: Catalog help_id is unique: mission.command.group.plan
+  PASS: mission.command.group.plan title fits compact rule
+  PASS: mission.command.group.plan compact line fits
+  PASS: mission.command.group.plan compact line fits
+  PASS: mission.command.group.plan detail line fits
+  PASS: Catalog help_id is unique: mission.command.group.air_lz
+  PASS: mission.command.group.air_lz title fits compact rule
+  PASS: mission.command.group.air_lz compact line fits
+  PASS: mission.command.group.air_lz compact line fits
+  PASS: mission.command.group.air_lz detail line fits
+  PASS: Catalog help_id is unique: mission.command.group.breakout
+  PASS: mission.command.group.breakout title fits compact rule
+  PASS: mission.command.group.breakout compact line fits
+  PASS: mission.command.group.breakout compact line fits
+  PASS: mission.command.group.breakout detail line fits
+  PASS: Catalog help_id is unique: main_menu.campaign
+  PASS: main_menu.campaign title fits compact rule
+  PASS: main_menu.campaign compact line fits
+  PASS: main_menu.campaign compact line fits
+  PASS: main_menu.campaign detail line fits
+  PASS: main_menu.campaign detail line fits
+  PASS: Catalog help_id is unique: campaign.job
+  PASS: campaign.job title fits compact rule
+  PASS: campaign.job compact line fits
+  PASS: campaign.job compact line fits
+  PASS: campaign.job detail line fits
+  PASS: campaign.job detail line fits
+  PASS: Catalog help_id is unique: campaign.boarding
+  PASS: campaign.boarding title fits compact rule
+  PASS: campaign.boarding compact line fits
+  PASS: campaign.boarding compact line fits
+  PASS: campaign.boarding detail line fits
+  PASS: campaign.boarding detail line fits
+  PASS: Catalog help_id is unique: campaign.movement
+  PASS: campaign.movement title fits compact rule
+  PASS: campaign.movement compact line fits
+  PASS: campaign.movement compact line fits
+  PASS: campaign.movement detail line fits
+  PASS: campaign.movement detail line fits
+  PASS: Catalog help_id is unique: campaign.use
+  PASS: campaign.use title fits compact rule
+  PASS: campaign.use compact line fits
+  PASS: campaign.use compact line fits
+  PASS: campaign.use detail line fits
+  PASS: campaign.use detail line fits
+  PASS: Catalog help_id is unique: campaign.trade
+  PASS: campaign.trade title fits compact rule
+  PASS: campaign.trade compact line fits
+  PASS: campaign.trade compact line fits
+  PASS: campaign.trade detail line fits
+  PASS: campaign.trade detail line fits
+  PASS: Catalog help_id is unique: campaign.return
+  PASS: campaign.return title fits compact rule
+  PASS: campaign.return compact line fits
+  PASS: campaign.return compact line fits
+  PASS: campaign.return detail line fits
+  PASS: campaign.return detail line fits
+  PASS: Catalog help_id is unique: campaign.complete
+  PASS: campaign.complete title fits compact rule
+  PASS: campaign.complete compact line fits
+  PASS: campaign.complete compact line fits
+  PASS: campaign.complete detail line fits
+  PASS: campaign.complete detail line fits
+  PASS: Catalog help_id is unique: character_sheet.post_mission_skill_delta
+  PASS: character_sheet.post_mission_skill_delta title fits compact rule
+  PASS: character_sheet.post_mission_skill_delta compact line fits
+  PASS: character_sheet.post_mission_skill_delta detail line fits
+  PASS: Catalog contains character_sheet.identity
+  PASS: character_sheet.identity is ready help copy
+  PASS: Catalog contains character_sheet.name
+  PASS: character_sheet.name is ready help copy
+  PASS: Catalog contains character_sheet.portrait
+  PASS: character_sheet.portrait is ready help copy
+  PASS: Catalog contains character_sheet.role_loadout
+  PASS: character_sheet.role_loadout is ready help copy
+  PASS: Catalog contains character_sheet.role
+  PASS: character_sheet.role is ready help copy
+  PASS: Catalog contains character_sheet.fireteam_assignment
+  PASS: character_sheet.fireteam_assignment is ready help copy
+  PASS: Catalog contains character_sheet.rank_badges
+  PASS: character_sheet.rank_badges is ready help copy
+  PASS: Catalog contains character_sheet.traits
+  PASS: character_sheet.traits is ready help copy
+  PASS: Catalog contains character_sheet.trait.aggressive
+  PASS: character_sheet.trait.aggressive is ready help copy
+  PASS: Catalog contains character_sheet.trait.cautious
+  PASS: character_sheet.trait.cautious is ready help copy
+  PASS: Catalog contains character_sheet.trait.steady
+  PASS: character_sheet.trait.steady is ready help copy
+  PASS: Catalog contains character_sheet.trait.reckless
+  PASS: character_sheet.trait.reckless is ready help copy
+  PASS: Catalog contains character_sheet.trait.calm
+  PASS: character_sheet.trait.calm is ready help copy
+  PASS: Catalog contains character_sheet.status_recovery
+  PASS: character_sheet.status_recovery is ready help copy
+  PASS: Catalog contains character_sheet.status
+  PASS: character_sheet.status is ready help copy
+  PASS: Catalog contains character_sheet.recovery
+  PASS: character_sheet.recovery is ready help copy
+  PASS: Catalog contains character_sheet.morale
+  PASS: character_sheet.morale is ready help copy
+  PASS: Catalog contains character_sheet.frustration
+  PASS: character_sheet.frustration is ready help copy
+  PASS: Catalog contains character_sheet.teamfit
+  PASS: character_sheet.teamfit is ready help copy
+  PASS: Catalog contains character_sheet.progression
+  PASS: character_sheet.progression is ready help copy
+  PASS: Catalog contains character_sheet.xp
+  PASS: character_sheet.xp is ready help copy
+  PASS: Catalog contains character_sheet.core_values
+  PASS: character_sheet.core_values is ready help copy
+  PASS: Catalog contains character_sheet.core.accuracy
+  PASS: character_sheet.core.accuracy is ready help copy
+  PASS: Catalog contains character_sheet.core.speed
+  PASS: character_sheet.core.speed is ready help copy
+  PASS: Catalog contains character_sheet.core.toughness
+  PASS: character_sheet.core.toughness is ready help copy
+  PASS: Catalog contains character_sheet.core.leadership
+  PASS: character_sheet.core.leadership is ready help copy
+  PASS: Catalog contains character_sheet.communication
+  PASS: character_sheet.communication is ready help copy
+  PASS: Catalog contains character_sheet.platform_skills
+  PASS: character_sheet.platform_skills is ready help copy
+  PASS: Catalog contains character_sheet.derived_badges
+  PASS: character_sheet.derived_badges is ready help copy
+  PASS: Catalog contains character_sheet.behavior_profile
+  PASS: character_sheet.behavior_profile is ready help copy
+  PASS: Catalog contains character_sheet.loadout_summary
+  PASS: character_sheet.loadout_summary is ready help copy
+  PASS: Catalog contains loadout.member_row
+  PASS: loadout.member_row is ready help copy
+  PASS: Catalog contains loadout.armor
+  PASS: loadout.armor is ready help copy
+  PASS: Catalog contains loadout.weapon_slot
+  PASS: loadout.weapon_slot is ready help copy
+  PASS: Catalog contains loadout.weapon.smg
+  PASS: loadout.weapon.smg is ready help copy
+  PASS: Catalog contains loadout.weapon.rifle
+  PASS: loadout.weapon.rifle is ready help copy
+  PASS: Catalog contains loadout.weapon.sniper
+  PASS: loadout.weapon.sniper is ready help copy
+  PASS: Catalog contains loadout.weapon.rocket_launcher
+  PASS: loadout.weapon.rocket_launcher is ready help copy
+  PASS: Catalog contains loadout.weapon.medictool
+  PASS: loadout.weapon.medictool is ready help copy
+  PASS: Catalog contains loadout.weapon.none
+  PASS: loadout.weapon.none is ready help copy
+  PASS: Catalog contains loadout.weapon.lmg
+  PASS: LMG is marked planned until WeaponData exists
+  PASS: Catalog contains loadout.weapon_visual_only
+  PASS: loadout.weapon_visual_only is ready help copy
+  PASS: Catalog contains loadout.weight
+  PASS: loadout.weight is ready help copy
+  PASS: Catalog contains loadout.weapon_preview
+  PASS: loadout.weapon_preview is ready help copy
+  PASS: Catalog contains loadout.weapon_none
+  PASS: loadout.weapon_none is ready help copy
+  PASS: Catalog contains loadout.disabled_reason
+  PASS: loadout.disabled_reason is ready help copy
+  PASS: Catalog contains loadout.clear_selection
+  PASS: loadout.clear_selection is ready help copy
+  PASS: Catalog contains loadout.empty_team_default
+  PASS: loadout.empty_team_default is ready help copy
+  PASS: Visual-only copy names WeaponData boundary
+  PASS: None copy forbids hidden fallback
+  PASS: role_loadout_rows row Startrolle carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.role_category
+  PASS: role_loadout_rows row Aktuelle Aufgabe carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.fireteam_assignment
+  PASS: role_loadout_rows row Berechnete Eignung carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.role
+  PASS: role_loadout_rows row Trupp carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.fireteam_assignment
+  PASS: role_loadout_rows row Ausrüstung carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.loadout_summary
+  PASS: status_rows row Status carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.status
+  PASS: status_rows row Erholung carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.recovery
+  PASS: status_rows row Moral carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.morale
+  PASS: status_rows row Frustration carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.frustration
+  PASS: relationship_rows row Teamfit carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.teamfit
+  PASS: relationship_rows row Gute Zusammenarbeit carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.best_fit
+  PASS: relationship_rows row Spannungen carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.tension
+  PASS: relationship_rows row Beziehungen carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.relationship_links
+  PASS: progress_rows row XP carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.xp
+  PASS: progress_rows row Einsätze carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.missions
+  PASS: progress_rows row Führungswirkung carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.ftl_tactical_impact
+  PASS: progress_rows row Letzter Einsatz carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.last_mission
+  PASS: progress_rows row Truppverlauf carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.fireteam_history
+  PASS: core_rows row Treffsicherheit carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.core.accuracy
+  PASS: core_rows row Tempo carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.core.speed
+  PASS: core_rows row Belastbarkeit carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.core.toughness
+  PASS: core_rows row Wahrnehmung carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.core.awareness
+  PASS: core_rows row Erkennen carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.core.recognition
+  PASS: core_rows row Tarnung carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.core.stealth
+  PASS: core_rows row Disziplin carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.core.discipline
+  PASS: core_rows row Führung carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.core.leadership
+  PASS: communication_rows row Meldequalität carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.speech_quality
+  PASS: communication_rows row Sprechhäufigkeit carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.speech_quantity
+  PASS: behavior_rows row Initiative carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.initiative
+  PASS: behavior_rows row Befehlstreue carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.order_fidelity
+  PASS: behavior_rows row Unauffälligkeit carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.signature_control
+  PASS: behavior_rows row Ruhe im Kontakt carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.contact_stability
+  PASS: behavior_rows row Selbstständigkeit carries help_id
+  PASS: Catalog contains formatter row help_id character_sheet.autonomy
+  PASS: Trait row Gelassen carries help_id
+  PASS: Catalog contains trait help_id character_sheet.trait.calm
+  PASS: Trait row Ruhig carries help_id
+  PASS: Catalog contains trait help_id character_sheet.trait.steady
+  PASS: Loadout row uses loadout help_id
+  PASS: Morale row uses morale help_id
+  PASS: Frustration row uses frustration help_id
+  PASS: Rendered character sheet carries character_sheet.identity
+  PASS: Rendered character sheet carries character_sheet.name
+  PASS: Rendered character sheet carries character_sheet.portrait
+  PASS: Rendered character sheet carries character_sheet.traits
+  PASS: Rendered character sheet carries character_sheet.trait.calm
+  PASS: Rendered character sheet carries character_sheet.trait.steady
+  PASS: Rendered character sheet carries character_sheet.role_loadout
+  PASS: Rendered character sheet carries character_sheet.loadout_summary
+  PASS: Rendered character sheet carries character_sheet.status_recovery
+  PASS: Rendered character sheet carries character_sheet.teamfit
+  PASS: Rendered character sheet carries character_sheet.progression
+  PASS: Rendered character sheet carries character_sheet.core_values
+  PASS: Rendered character sheet carries character_sheet.core.accuracy
+  PASS: Rendered character sheet carries character_sheet.core.speed
+  PASS: Rendered character sheet carries character_sheet.core.leadership
+  PASS: Rendered help_id has catalog entry: character_sheet.identity
+  PASS: Rendered help_id has catalog entry: character_sheet.portrait
+  PASS: Rendered help_id has catalog entry: character_sheet.name
+  PASS: Rendered help_id has catalog entry: character_sheet.rank_badges
+  PASS: Rendered help_id has catalog entry: character_sheet.rank_badge.leader
+  PASS: Rendered help_id has catalog entry: character_sheet.rank_badge.shooter
+  PASS: Rendered help_id has catalog entry: character_sheet.rank_badge.engineer
+  PASS: Rendered help_id has catalog entry: character_sheet.traits
+  PASS: Rendered help_id has catalog entry: character_sheet.trait.calm
+  PASS: Rendered help_id has catalog entry: character_sheet.trait.steady
+  PASS: Rendered help_id has catalog entry: character_sheet.role_loadout
+  PASS: Rendered help_id has catalog entry: character_sheet.role_category
+  PASS: Rendered help_id has catalog entry: character_sheet.fireteam_assignment
+  PASS: Rendered help_id has catalog entry: character_sheet.role
+  PASS: Rendered help_id has catalog entry: character_sheet.loadout_summary
+  PASS: Rendered help_id has catalog entry: character_sheet.status_recovery
+  PASS: Rendered help_id has catalog entry: character_sheet.status
+  PASS: Rendered help_id has catalog entry: character_sheet.recovery
+  PASS: Rendered help_id has catalog entry: character_sheet.morale
+  PASS: Rendered help_id has catalog entry: character_sheet.value_lock
+  PASS: Rendered help_id has catalog entry: character_sheet.frustration
+  PASS: Rendered help_id has catalog entry: character_sheet.teamfit
+  PASS: Rendered help_id has catalog entry: character_sheet.best_fit
+  PASS: Rendered help_id has catalog entry: character_sheet.tension
+  PASS: Rendered help_id has catalog entry: character_sheet.relationship_links
+  PASS: Rendered help_id has catalog entry: character_sheet.progression
+  PASS: Rendered help_id has catalog entry: character_sheet.xp
+  PASS: Rendered help_id has catalog entry: character_sheet.missions
+  PASS: Rendered help_id has catalog entry: character_sheet.ftl_tactical_impact
+  PASS: Rendered help_id has catalog entry: character_sheet.last_mission
+  PASS: Rendered help_id has catalog entry: character_sheet.fireteam_history
+  PASS: Rendered help_id has catalog entry: character_sheet.core_values
+  PASS: Rendered help_id has catalog entry: character_sheet.core.accuracy
+  PASS: Rendered help_id has catalog entry: character_sheet.core.speed
+  PASS: Rendered help_id has catalog entry: character_sheet.core.toughness
+  PASS: Rendered help_id has catalog entry: character_sheet.core.awareness
+  PASS: Rendered help_id has catalog entry: character_sheet.core.recognition
+  PASS: Rendered help_id has catalog entry: character_sheet.core.stealth
+  PASS: Rendered help_id has catalog entry: character_sheet.core.discipline
+  PASS: Rendered help_id has catalog entry: character_sheet.core.leadership
+  PASS: Rendered help_id has catalog entry: character_sheet.communication
+  PASS: Rendered help_id has catalog entry: character_sheet.speech_quality
+  PASS: Rendered help_id has catalog entry: character_sheet.speech_quantity
+  PASS: Rendered help_id has catalog entry: character_sheet.platform_skills
+  PASS: Rendered help_id has catalog entry: character_sheet.platform.ground_vehicle_handling
+  PASS: Rendered help_id has catalog entry: character_sheet.platform.dropship_piloting
+  PASS: Rendered help_id has catalog entry: character_sheet.platform.freighter_piloting
+  PASS: Rendered help_id has catalog entry: character_sheet.platform.fighter_piloting
+  PASS: Rendered help_id has catalog entry: character_sheet.derived_badges
+  PASS: Rendered help_id has catalog entry: character_sheet.method_tags
+  PASS: Rendered help_id has catalog entry: character_sheet.function_scores
+  PASS: Rendered help_id has catalog entry: character_sheet.primary_specialty
+  PASS: Rendered help_id has catalog entry: character_sheet.secondary_specialty
+  PASS: Rendered help_id has catalog entry: character_sheet.behavior_profile
+  PASS: Rendered help_id has catalog entry: character_sheet.initiative
+  PASS: Rendered help_id has catalog entry: character_sheet.order_fidelity
+  PASS: Rendered help_id has catalog entry: character_sheet.signature_control
+  PASS: Rendered help_id has catalog entry: character_sheet.contact_stability
+  PASS: Rendered help_id has catalog entry: character_sheet.autonomy
+  PASS: FOB loadout UI carries loadout.member_row
+  PASS: FOB loadout UI carries loadout.armor
+  PASS: FOB loadout UI carries loadout.weapon_slot
+  PASS: FOB loadout UI carries loadout.weight
+  PASS: FOB loadout UI carries loadout.weapon_preview
+  PASS: FOB loadout UI carries loadout.weapon_none
+  PASS: FOB loadout UI carries loadout.empty_team_default
+  PASS: FOB help_id has catalog entry: loadout.clear_selection
+  PASS: FOB help_id has catalog entry: loadout.weight
+  PASS: FOB help_id has catalog entry: loadout.empty_team_default
+  PASS: FOB help_id has catalog entry: fob.fireteams
+  PASS: FOB help_id has catalog entry: loadout.member_row
+  PASS: FOB help_id has catalog entry: character_sheet.rank_badge.leader
+  PASS: FOB help_id has catalog entry: character_sheet.rank_badge.shooter
+  PASS: FOB help_id has catalog entry: loadout.armor
+  PASS: FOB help_id has catalog entry: loadout.weapon_slot
+  PASS: FOB help_id has catalog entry: loadout.weapon_preview
+  PASS: FOB help_id has catalog entry: loadout.weapon_none
+  PASS: FOB help_id has catalog entry: character_sheet.rank_badge.medic
+  PASS: None preview uses empty-slot help_id
+  PASS: None preview keeps clear empty-slot tooltip
+  PASS: Character/loadout help copy doc exists
+  PASS: Copy doc covers Character Sheet IDs
+  PASS: Copy doc covers Loadout IDs
+  PASS: Copy doc covers Source Rules
+  PASS: Copy doc covers Copy Rules
+  PASS: Copy doc covers WeaponData
+  PASS: Copy doc covers LoadoutModifierResolver
+  PASS: TASK_265 is marked implemented
+  PASS: TASK_265 checklist is complete
+=== RESULTS: 1250 passed, 0 failed ===
+ALL TESTS PASSED

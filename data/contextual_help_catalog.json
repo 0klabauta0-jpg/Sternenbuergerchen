@@ -373,13 +373,13 @@
       "screen_id": "homebase",
       "area_id": "roster",
       "status": "draft",
-      "title": "Roster",
+      "title": "Personal",
       "compact_lines": [
-        "Shows available crew and their current assignment state.",
-        "Selecting a character updates detail panels without duplicating roster truth."
+        "Zeigt verfügbare Einsatzkräfte und ihre aktuelle Zuordnung.",
+        "Eine Person auswählen, um Rolle, Ausrüstung und Bereitschaft zu prüfen."
       ],
       "detail_lines": [
-        "Roster data comes from the player roster store and meta profile builder."
+        "Die Personen bleiben Teil deiner Besatzung, wenn du zwischen Basis, Trupp und Schiff wechselst."
       ],
       "target_audience": "new_player",
       "manual_review": true
@@ -389,13 +389,13 @@
       "screen_id": "homebase",
       "area_id": "transfer_team",
       "status": "draft",
-      "title": "Transfer Team",
+      "title": "Trupp verlegen",
       "compact_lines": [
-        "Stages crew for movement toward the FOB or mission chain.",
-        "A staged card is not final mission truth until the transfer flow confirms it."
+        "Bereitet den Trupp für den Transport zum nächsten Ort vor.",
+        "Während des Transports zeigen die Karten den Fortschritt."
       ],
       "detail_lines": [
-        "The help must stay read-only because transfer state belongs to the existing meta flow."
+        "Erst nach der bestätigten Ankunft ist der Trupp am Ziel verfügbar."
       ],
       "target_audience": "returning_player",
       "manual_review": true
@@ -405,13 +405,13 @@
       "screen_id": "homebase",
       "area_id": "fireteams",
       "status": "ready",
-      "title": "Fireteams",
+      "title": "Trupps",
       "compact_lines": [
-        "Builds Homebase fireteams and shows each member loadout inline.",
-        "These controls edit staging data, not simulation runtime truth."
+        "Trupps an der Heimatbasis zusammenstellen und die Ausrüstung ihrer Mitglieder prüfen.",
+        "Eine Einsatzkraft auf die gewünschte Truppkarte ziehen."
       ],
       "detail_lines": [
-        "Member dropdowns write the same loadout state used by #13 and mission export."
+        "Die gewählte Ausrüstung bleibt beim Einschiffen und im Einsatz erhalten."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -421,13 +421,13 @@
       "screen_id": "homebase",
       "area_id": "loadout",
       "status": "ready",
-      "title": "Loadout",
+      "title": "Ausrüstung",
       "compact_lines": [
-        "Detail editor for the focused fireteam loadout.",
-        "The same armor and weapon choices also appear compactly in #10."
+        "Rüstung und Waffen des ausgewählten Trupps prüfen.",
+        "Die Ausrüstung jedes Mitglieds erscheint auch direkt auf der Truppkarte."
       ],
       "detail_lines": [
-        "The panel shares member loadout state with Homebase fireteam cards and export payloads."
+        "Die Ausrüstung gehört zur Person und begleitet sie beim Flug zum Einsatzort."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -437,13 +437,13 @@
       "screen_id": "homebase",
       "area_id": "flightdeck",
       "status": "ready",
-      "title": "Flightdeck",
+      "title": "Flugdeck",
       "compact_lines": [
-        "Boards fireteams onto the selected dropship from Homebase.",
-        "Shipcards accept fireteam drops when their craft can stage."
+        "Pilot auswählen und den Trupp in das gewählte Landungsschiff einsteigen lassen.",
+        "Zum Einschiffen die Truppkarte auf das bereitstehende Schiff ziehen."
       ],
       "detail_lines": [
-        "Boarding uses the existing direct staging payload and does not create a second dropship state."
+        "Vor dem Abheben müssen Pilot und Trupp bereit sein. Bei einer Sternkartenreise wählst du den Zielort später im Planetenorbit."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -453,13 +453,13 @@
       "screen_id": "homebase",
       "area_id": "character_popup",
       "status": "ready",
-      "title": "Character Popup",
+      "title": "Charakterbogen",
       "compact_lines": [
-        "Opens the focused character sheet outside the numbered windows.",
-        "Use it for inspection while keeping #10, #13 and Flightdeck visible."
+        "Öffnet den Charakterbogen der ausgewählten Person.",
+        "Rolle, Werte und Ausrüstung prüfen, während die übrige Basisansicht erreichbar bleibt."
       ],
       "detail_lines": [
-        "The popup renders the shared two-column sheet and remains read-only in Homebase."
+        "Der Charakterbogen zeigt dieselbe Person wie die Personal- und Truppkarten."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -518,14 +518,12 @@
       "screen_id": "character_sheet",
       "area_id": "core_values",
       "status": "ready",
-      "title": "Core Values",
+      "title": "Kernwerte",
       "compact_lines": [
-        "Main 0.00 to 1.00 values used by character and mission systems.",
-        "In the team editor, bars can be dragged or changed with plus/minus."
+        "Wirksame Profilwerte von 0 bis 1."
       ],
       "detail_lines": [
-        "Core rows come from MetaUnitProfile skill_values and character-bundle derivation.",
-        "Edits write back through the roster editor; mission runtime does not read UI state as truth."
+        "Im Teameditor sind die Balken änderbar. Der Charakterbogen liest dieselben gespeicherten Werte."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -535,15 +533,12 @@
       "screen_id": "character_sheet",
       "area_id": "skill_group_budget",
       "status": "ready",
-      "title": "Group Budget",
+      "title": "Gruppenbudget",
       "compact_lines": [
-        "Shows the point budget for one editable value group.",
-        "Raising one unlocked bar can pull points from other unlocked bars."
+        "Punkte für eine Gruppe veränderbarer Werte."
       ],
       "detail_lines": [
-        "One 0.05 step equals one editor point in the visible budget row.",
-        "Lowering a value frees points into the budget.",
-        "Locked bars keep their current value; if there are not enough movable points, the dragged bar snaps back to its maximum affordable value."
+        "Ein Schritt von 0,05 entspricht einem Punkt. Erhöhen nimmt Punkte von anderen ungesperrten Werten; Sperren bleiben erhalten."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -553,14 +548,12 @@
       "screen_id": "character_sheet",
       "area_id": "value_lock",
       "status": "ready",
-      "title": "Value Lock",
+      "title": "Wert sperren",
       "compact_lines": [
-        "Locks this one character value during budget edits.",
-        "The visible value remains unchanged until unlocked."
+        "Bewahrt diesen Wert beim Umverteilen der Punkte."
       ],
       "detail_lines": [
-        "Use this before lowering or raising nearby values when you want this exact row preserved.",
-        "The lock is stored in the team editor data and does not create gameplay authority."
+        "Die Sperre gehört zum Teameditor. Erst nach dem Entsperren lässt sich dieser Wert wieder verändern."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -683,13 +676,12 @@
       "screen_id": "character_sheet",
       "area_id": "identity",
       "status": "ready",
-      "title": "Identity",
+      "title": "Identität",
       "compact_lines": [
-        "Name, portrait and callsign identify the same roster unit across screens.",
-        "Changing focus must not create a new character record."
+        "Name, Porträt und Rufname gehören immer zur selben Person."
       ],
       "detail_lines": [
-        "Identity values come from MetaUnitProfile and roster generation or saved roster data."
+        "Fokussieren oder Öffnen des Bogens erzeugt keinen neuen Charakter."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -699,13 +691,12 @@
       "screen_id": "character_sheet",
       "area_id": "name",
       "status": "ready",
-      "title": "Character Name",
+      "title": "Charaktername",
       "compact_lines": [
-        "Roster display name for this NPC.",
-        "Editing it changes identity text, not stats or role."
+        "Anzeigename dieser Person im Team."
       ],
       "detail_lines": [
-        "The name stays attached to the same stable unit ID across Homebase, FOB and Mission views."
+        "Eine Namensänderung verändert weder ihre Werte noch ihre Rolle oder Zuteilung."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -715,13 +706,12 @@
       "screen_id": "character_sheet",
       "area_id": "portrait",
       "status": "ready",
-      "title": "Portrait",
+      "title": "Porträt",
       "compact_lines": [
-        "Visual portrait used for this NPC's cards and sheets.",
-        "It helps recognition but does not affect gameplay values."
+        "Bild zur Wiedererkennung auf Karten und Charakterbogen."
       ],
       "detail_lines": [
-        "Portrait changes use the existing portrait catalog and keep the same character record."
+        "Das Porträt hat keinen Einfluss auf Spielwerte. Ein Bildwechsel erhält die Identität."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -731,13 +721,12 @@
       "screen_id": "character_sheet",
       "area_id": "role_loadout",
       "status": "ready",
-      "title": "Role and Loadout",
+      "title": "Aufgabe und Ausrüstung",
       "compact_lines": [
-        "Shows role, fireteam and the currently staged equipment summary.",
-        "Loadout text is read from the active profile or FOB member loadout."
+        "Startrolle, aktuelle Aufgabe und berechnete Eignung sind getrennt."
       ],
       "detail_lines": [
-        "The sheet displays loadout state; weapon and weight rules stay in WeaponData and the resolver."
+        "Die Ausrüstung kommt aus dem aktuellen Profil oder der bestehenden Truppvorbereitung."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -747,13 +736,12 @@
       "screen_id": "character_sheet",
       "area_id": "role",
       "status": "ready",
-      "title": "Role",
+      "title": "Berechnete Eignung",
       "compact_lines": [
-        "Primary job label for reading the character quickly.",
-        "Role can influence badges and suggested duties, not direct UI truth."
+        "Eignung aus aktuellen Werten und vorhandenem Rollen-/Ausrüstungskontext."
       ],
       "detail_lines": [
-        "Role labels are built from roster identity and character-bundle derivation."
+        "Ein hoher Eignungswert weist niemanden automatisch einem Trupp oder Schiff zu."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -763,13 +751,12 @@
       "screen_id": "character_sheet",
       "area_id": "role_category",
       "status": "ready",
-      "title": "Role Category",
+      "title": "Startrolle",
       "compact_lines": [
-        "Broad roster grouping used for scanability and assignment hints.",
-        "It is not a hidden stat and does not replace skill values."
+        "Gespeicherte Ausgangsrolle dieser Person."
       ],
       "detail_lines": [
-        "Category comes from MetaUnitProfile roster_role_category when present."
+        "Die Startrolle ist keine bestätigte Berufslaufbahn und keine aktuelle Zuteilung."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -779,13 +766,12 @@
       "screen_id": "character_sheet",
       "area_id": "fireteam_assignment",
       "status": "ready",
-      "title": "Fireteam",
+      "title": "Aktuelle Aufgabe und Trupp",
       "compact_lines": [
-        "Shows the current fireteam assignment or UNASSIGNED.",
-        "Moving the character between teams changes staging, not sheet-local state."
+        "Die Zuteilung kommt aus der aktuellen Vorbereitung."
       ],
       "detail_lines": [
-        "Fireteam text is supplied by Homebase or FOB context and preserves stable unit IDs."
+        "Fehlt dieser Kontext, meldet der Bogen dies ausdrücklich. Eignung ersetzt keine Zuteilung."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -795,14 +781,12 @@
       "screen_id": "character_sheet",
       "area_id": "rank_badges",
       "status": "ready",
-      "title": "Badges",
+      "title": "Eignungsabzeichen",
       "compact_lines": [
-        "Small badges summarize derived role fit from the current profile values.",
-        "Grey badges show reachable fits that are not strong enough yet."
+        "Abzeichen fassen die berechnete Eignung zusammen."
       ],
       "detail_lines": [
-        "Badges are derived by NPCRankBadgeResolver from core values, communication, behavior, platform values and small loadout context.",
-        "Hover a single badge for the exact score source and threshold formula."
+        "Graue Abzeichen sind noch offen. Zu Beginn kann die vorhandene Startbegrenzung nur das stärkste Abzeichen aktivieren."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -812,14 +796,12 @@
       "screen_id": "character_sheet",
       "area_id": "rank_badge.shooter",
       "status": "ready",
-      "title": "Shooter Badge",
+      "title": "Schützeneignung",
       "compact_lines": [
-        "Shooter comes mainly from Accuracy, Awareness, Recognition and weapon context.",
-        "It explains fighting fit, not a locked class."
+        "Treffsicherheit, Wahrnehmung, Erkennen und Waffenkontext wirken zusammen."
       ],
       "detail_lines": [
-        "The current threshold is 0.52 and the score blends Accuracy, Awareness, Recognition, Discipline and Order Fidelity.",
-        "Rifle, SMG and sniper loadouts are context bonuses, not a separate class truth."
+        "Schwelle 0,52. Auch Disziplin, Befehlstreue, Ruhe im Kontakt und Tempo fließen in den bestehenden Wert ein."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -829,14 +811,12 @@
       "screen_id": "character_sheet",
       "area_id": "rank_badge.leader",
       "status": "ready",
-      "title": "Leader Badge",
+      "title": "Führungseignung",
       "compact_lines": [
-        "Leader comes mainly from Leadership, Speech Quality, Order Fidelity and Autonomy.",
-        "Use it when choosing Fireteam Leaders."
+        "Führung, Meldequalität, Befehlstreue und Selbstständigkeit sind wichtig."
       ],
       "detail_lines": [
-        "The current threshold is 0.52 and the fireteam lead flag is only a small context bonus.",
-        "Raise Leadership, Speech Quality, Recognition, Discipline, Order Fidelity or Autonomy."
+        "Schwelle 0,52. Erkennen, Disziplin und vorhandener Führungskontext ergänzen die Berechnung."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -846,14 +826,12 @@
       "screen_id": "character_sheet",
       "area_id": "rank_badge.pilot",
       "status": "ready",
-      "title": "Pilot Badge",
+      "title": "Piloteneignung",
       "compact_lines": [
-        "Pilot comes from platform value plus calm situational and communication values.",
-        "Dropship, freighter, fighter and vehicle handling are checked."
+        "Bester Fahrzeugwert, Wahrnehmung, Disziplin und Kommunikation zählen."
       ],
       "detail_lines": [
-        "The current threshold is 0.52 and the best platform value is blended with Awareness and Discipline.",
-        "Speech Quality, Contact Stability and Initiative also matter for flight fit."
+        "Schwelle 0,52. Erkennen, Initiative, Ruhe im Kontakt und Pilotenkontext fließen ebenfalls ein; keine automatische Schiffszuteilung."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -863,13 +841,12 @@
       "screen_id": "character_sheet",
       "area_id": "rank_badge.medic",
       "status": "ready",
-      "title": "Medic Badge",
+      "title": "Sanitätseignung",
       "compact_lines": [
-        "Medic comes from Discipline, Recognition, Speech Quality and Stability.",
-        "Medictool and old role text are only context bonuses."
+        "Disziplin, Erkennen, Meldequalität und Ruhe im Kontakt zählen."
       ],
       "detail_lines": [
-        "The current threshold is 0.52 and the score also reads Awareness, Order Fidelity and Contact Stability."
+        "Schwelle 0,52. Wahrnehmung, Befehlstreue und vorhandene Sanitätsausrüstung oder Rollenhinweise ergänzen den Wert."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -879,13 +856,12 @@
       "screen_id": "character_sheet",
       "area_id": "rank_badge.heavy",
       "status": "ready",
-      "title": "Heavy Badge",
+      "title": "Eignung für schwere Waffen",
       "compact_lines": [
-        "Heavy comes from Toughness, Contact Stability, Discipline and Accuracy.",
-        "It marks heavier fighting equipment."
+        "Belastbarkeit, Ruhe im Kontakt, Disziplin und Treffsicherheit zählen."
       ],
       "detail_lines": [
-        "The current threshold is 0.52; rail gun, rocket launcher, panzerfaust and heavy armor are context bonuses."
+        "Schwelle 0,52. Schwere Waffen, Rüstung und vorhandener Rollenkontext ergänzen die Berechnung."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -895,13 +871,12 @@
       "screen_id": "character_sheet",
       "area_id": "rank_badge.engineer",
       "status": "ready",
-      "title": "Engineer Badge",
+      "title": "Technikeignung",
       "compact_lines": [
-        "Engineer comes from Recognition, Discipline, Awareness and Order Fidelity.",
-        "It marks technical or repair fit."
+        "Erkennen, Disziplin, Wahrnehmung und Befehlstreue zählen."
       ],
       "detail_lines": [
-        "The current threshold is 0.52; tech role words and engineer trait tags are only context bonuses."
+        "Schwelle 0,52. Kommunikation, Verhalten und vorhandener Technikkontext ergänzen die Berechnung."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -911,13 +886,12 @@
       "screen_id": "character_sheet",
       "area_id": "rank_badge.enemy",
       "status": "ready",
-      "title": "Enemy Badge",
+      "title": "Gegnerkennzeichnung",
       "compact_lines": [
-        "Enemy comes from team or faction context.",
-        "It is a readability tag for opposing units."
+        "Kennzeichnet die gegnerische Team- oder Fraktionszugehörigkeit."
       ],
       "detail_lines": [
-        "Team Bravo or enemy team_id can mark the unit as hostile."
+        "Diese Kennzeichnung ist eine Zuordnung, keine aus persönlichen Fähigkeiten berechnete Rolle."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -927,13 +901,12 @@
       "screen_id": "character_sheet",
       "area_id": "traits",
       "status": "ready",
-      "title": "Traits",
+      "title": "Eigenschaften",
       "compact_lines": [
-        "Traits are notable character tags from the roster profile.",
-        "They explain tendencies but are not free-form balance formulas."
+        "Eigenschaften verändern einzelne Werte oder beschreiben Tendenzen."
       ],
       "detail_lines": [
-        "Trait names come from UnitTrait data or stored trait tags on the profile."
+        "Bekannte Wirkungen sind bereits in den wirksamen Profilwerten berücksichtigt. Sie werden beim Anzeigen nicht erneut angewandt."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -943,13 +916,12 @@
       "screen_id": "character_sheet",
       "area_id": "trait.aggressive",
       "status": "ready",
-      "title": "Trait: Aggressive",
+      "title": "Aggressiv",
       "compact_lines": [
-        "Aggressive favors accuracy but reduces toughness.",
-        "Expect a more forceful combat tendency."
+        "Mehr Treffsicherheit bei geringerer Belastbarkeit."
       ],
       "detail_lines": [
-        "Current UnitTrait modifiers: Accuracy +0.10 and Toughness -0.10 before derived summaries."
+        "Bekannte Grundwirkung: Treffsicherheit +0,10; Belastbarkeit -0,10. Wirksame Werte bleiben auf 0 bis 1 begrenzt."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -959,13 +931,12 @@
       "screen_id": "character_sheet",
       "area_id": "trait.cautious",
       "status": "ready",
-      "title": "Trait: Cautious",
+      "title": "Vorsichtig",
       "compact_lines": [
-        "Cautious trades speed and accuracy for toughness.",
-        "Good for safer, less reckless profiles."
+        "Mehr Belastbarkeit bei weniger Tempo und Treffsicherheit."
       ],
       "detail_lines": [
-        "Current UnitTrait modifiers: Accuracy -0.05, Toughness +0.10 and Speed -0.10."
+        "Bekannte Grundwirkung: Treffsicherheit -0,05; Belastbarkeit +0,10; Tempo -0,10."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -975,13 +946,12 @@
       "screen_id": "character_sheet",
       "area_id": "trait.steady",
       "status": "ready",
-      "title": "Trait: Steady",
+      "title": "Ruhig",
       "compact_lines": [
-        "Steady gives a small accuracy and speed lift.",
-        "Useful for reliable generalists."
+        "Etwas mehr Treffsicherheit und Tempo."
       ],
       "detail_lines": [
-        "Current UnitTrait modifiers: Accuracy +0.05 and Speed +0.05."
+        "Bekannte Grundwirkung: Treffsicherheit +0,05; Tempo +0,05."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -991,13 +961,12 @@
       "screen_id": "character_sheet",
       "area_id": "trait.reckless",
       "status": "ready",
-      "title": "Trait: Reckless",
+      "title": "Waghalsig",
       "compact_lines": [
-        "Reckless boosts speed but lowers toughness.",
-        "Fast profiles can become harder to keep safe."
+        "Mehr Tempo bei geringerer Belastbarkeit."
       ],
       "detail_lines": [
-        "Current UnitTrait modifiers: Speed +0.15 and Toughness -0.15."
+        "Bekannte Grundwirkung: Tempo +0,15; Belastbarkeit -0,15."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1007,13 +976,12 @@
       "screen_id": "character_sheet",
       "area_id": "trait.calm",
       "status": "ready",
-      "title": "Trait: Calm",
+      "title": "Gelassen",
       "compact_lines": [
-        "Calm improves leadership and accuracy.",
-        "Strong candidate trait for future fireteam leads."
+        "Verbessert Führung und Treffsicherheit."
       ],
       "detail_lines": [
-        "Current UnitTrait modifiers: Leadership +0.15 and Accuracy +0.05."
+        "Bekannte Grundwirkung: Führung +0,15; Treffsicherheit +0,05."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -1023,13 +991,12 @@
       "screen_id": "character_sheet",
       "area_id": "status_recovery",
       "status": "ready",
-      "title": "Status and Recovery",
+      "title": "Status und Erholung",
       "compact_lines": [
-        "Shows availability, injury or recovery state for the character.",
-        "Recovery text is read from profile state and does not heal by itself."
+        "Zeigt Einsatzbereitschaft, Verletzung oder Erholungszustand."
       ],
       "detail_lines": [
-        "Follow-up systems may make recovery actionable; the sheet remains read-only."
+        "Die Anzeige heilt niemanden und verändert keine Erholungszeiten."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -1041,11 +1008,10 @@
       "status": "ready",
       "title": "Status",
       "compact_lines": [
-        "Current availability or screen-specific status text.",
-        "Use it to see whether the character is active, staged or recovering."
+        "Aktuelle Einsatzbereitschaft oder Status aus dem geöffneten Bereich."
       ],
       "detail_lines": [
-        "Status text is passed in by the owning screen and mirrors existing meta state."
+        "Der Bogen liest den vorhandenen Zustand; er bestätigt selbst keine Einsatzbereitschaft."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -1055,13 +1021,12 @@
       "screen_id": "character_sheet",
       "area_id": "recovery",
       "status": "ready",
-      "title": "Recovery",
+      "title": "Erholung",
       "compact_lines": [
-        "Shows medbay or downtime state when the unit is not fully ready.",
-        "Remaining turns or days are display values from the profile."
+        "Verletzung oder Ausfallzeit aus dem Profil."
       ],
       "detail_lines": [
-        "The character sheet does not advance timers; recovery logic belongs to meta progression."
+        "Verbleibende Tage oder Runden sind gespeicherte Angaben. Der Charakterbogen lässt keine Zeit verstreichen."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1071,13 +1036,12 @@
       "screen_id": "character_sheet",
       "area_id": "morale",
       "status": "ready",
-      "title": "Morale",
+      "title": "Moral",
       "compact_lines": [
-        "Morale summarizes how well the character is holding up after missions.",
-        "Higher values are generally better for future team feel."
+        "Gespeicherter Moralwert nach den Einsätzen."
       ],
       "detail_lines": [
-        "The number is stored in progression data; this help does not define final balance effects."
+        "Die Anzeige erklärt den aktuellen Wert und verspricht keine zusätzliche, noch nicht umgesetzte Spielwirkung."
       ],
       "target_audience": "returning_player",
       "manual_review": true
@@ -1089,11 +1053,10 @@
       "status": "ready",
       "title": "Frustration",
       "compact_lines": [
-        "Frustration tracks pressure or bad mission experience.",
-        "Lower values are usually easier to manage."
+        "Gespeicherter Druck durch belastende Erfahrungen."
       ],
       "detail_lines": [
-        "The value is progression data and should be explained by future morale rules when finalized."
+        "Weniger Frustration ist günstiger. Änderungen kommen aus den bestehenden Entwicklungsregeln."
       ],
       "target_audience": "returning_player",
       "manual_review": true
@@ -1103,13 +1066,12 @@
       "screen_id": "character_sheet",
       "area_id": "teamfit",
       "status": "ready",
-      "title": "Teamfit",
+      "title": "Zusammenarbeit",
       "compact_lines": [
-        "Summarizes relationship fit with other roster members.",
-        "Use it as a staging hint, not as a hidden command override."
+        "Bekannte Beziehungen zu anderen Personen im Team."
       ],
       "detail_lines": [
-        "Teamfit text is built from relationship links and the roster relationship model."
+        "Diese Hinweise unterstützen die Zusammenstellung; sie ersetzen keine Befehle oder Zuteilungen."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1119,13 +1081,12 @@
       "screen_id": "character_sheet",
       "area_id": "best_fit",
       "status": "ready",
-      "title": "Best Fit",
+      "title": "Gute Zusammenarbeit",
       "compact_lines": [
-        "Shows the strongest positive known relationship link.",
-        "A good fit is a planning clue for future cohesion decisions."
+        "Stärkste bekannte positive Beziehung."
       ],
       "detail_lines": [
-        "Best Fit is summarized from relationship link affinity data when available."
+        "Der Hinweis fasst gespeicherte Beziehungswerte zusammen und ist keine automatische Teamwahl."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1135,13 +1096,12 @@
       "screen_id": "character_sheet",
       "area_id": "tension",
       "status": "ready",
-      "title": "Tension",
+      "title": "Spannungen",
       "compact_lines": [
-        "Shows the strongest negative known relationship link.",
-        "Use it to avoid rough team combinations when possible."
+        "Stärkste bekannte negative Beziehung."
       ],
       "detail_lines": [
-        "Tension is read from relationship link affinity data and is not recalculated in UI."
+        "Der Hinweis kommt aus gespeicherten Beziehungswerten und hilft bei der Teamplanung."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1151,13 +1111,12 @@
       "screen_id": "character_sheet",
       "area_id": "relationship_links",
       "status": "ready",
-      "title": "Relationship Links",
+      "title": "Beziehungen",
       "compact_lines": [
-        "Lists a small set of known links to other roster members.",
-        "Longer relationship simulation remains outside this screen."
+        "Kompakte Auswahl bekannter Verbindungen zu anderen Personen."
       ],
       "detail_lines": [
-        "Links come from stored relationship data and are shortened for compact UI."
+        "Die Anzeige kürzt vorhandene Beziehungsdaten; sie berechnet keine neue Beziehungssimulation."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1167,13 +1126,12 @@
       "screen_id": "character_sheet",
       "area_id": "progression",
       "status": "ready",
-      "title": "Progress",
+      "title": "Entwicklung",
       "compact_lines": [
-        "Shows XP, mission history and recent team history.",
-        "Progress is applied by mission results, not by this panel."
+        "Erfahrung, Einsatzgeschichte und Truppverlauf."
       ],
       "detail_lines": [
-        "Progress rows read from MetaUnitProfile progression and history arrays."
+        "Zuwächse kommen aus bestätigten Einsatzergebnissen, nicht aus dem Öffnen dieses Bogens."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -1183,13 +1141,12 @@
       "screen_id": "character_sheet",
       "area_id": "xp",
       "status": "ready",
-      "title": "XP",
+      "title": "Erfahrung",
       "compact_lines": [
-        "Experience gained from resolved mission outcomes.",
-        "Current help avoids promising a final leveling formula."
+        "Erfahrung aus bestätigten Einsatzergebnissen."
       ],
       "detail_lines": [
-        "XP is stored in progression data after mission/debrief flow applies results."
+        "Die Zahl wird in der vorhandenen Entwicklung gespeichert; die Anzeige vergibt keine Erfahrung."
       ],
       "target_audience": "new_player",
       "manual_review": true
@@ -1199,13 +1156,12 @@
       "screen_id": "character_sheet",
       "area_id": "missions",
       "status": "ready",
-      "title": "Missions",
+      "title": "Einsätze",
       "compact_lines": [
-        "Count of completed or recorded missions for this character.",
-        "It helps separate rookies from veterans at a glance."
+        "Anzahl abgeschlossener oder erfasster Einsätze."
       ],
       "detail_lines": [
-        "Mission count comes from progression data or mission history length."
+        "Die Anzahl kommt aus der Entwicklung oder der gespeicherten Einsatzgeschichte."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -1215,14 +1171,12 @@
       "screen_id": "character_sheet",
       "area_id": "ftl_tactical_impact",
       "status": "ready",
-      "title": "FTL Impact",
+      "title": "Führungswirkung",
       "compact_lines": [
-        "Shows how a fireteam leader affects plan quality, communication and breakouts.",
-        "It summarizes tactical progression without exposing private history."
+        "Einfluss der Truppführung auf Planung, Kommunikation und Ausbruchentscheidungen."
       ],
       "detail_lines": [
-        "The value is derived from Leadership, Tactical Sense, Communication, Discipline, Initiative and Team Cohesion.",
-        "Mission outcomes can improve it slowly, while frustration or poor cohesion can slow progress."
+        "Der bestehende Führungswert liest Führung, Taktik, Kommunikation, Disziplin, Initiative und Zusammenhalt."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1232,13 +1186,12 @@
       "screen_id": "character_sheet",
       "area_id": "core.accuracy",
       "status": "ready",
-      "title": "Accuracy",
+      "title": "Treffsicherheit",
       "compact_lines": [
-        "How reliable the character is with aimed combat tasks.",
-        "Used as a character value, not recalculated by the sheet."
+        "Zuverlässigkeit bei gezielten Kampfhandlungen."
       ],
       "detail_lines": [
-        "Accuracy comes from skill_values and may feed combat effects through existing resolvers."
+        "Der wirksame Profilwert beeinflusst die Trefferchance über die bestehenden Kampfregeln."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -1248,13 +1201,12 @@
       "screen_id": "character_sheet",
       "area_id": "core.speed",
       "status": "ready",
-      "title": "Speed",
+      "title": "Tempo",
       "compact_lines": [
-        "How quickly the character tends to move or act.",
-        "Loadout weight can later modify movement through the resolver."
+        "Geschwindigkeit bei Bewegung und Ausführung."
       ],
       "detail_lines": [
-        "Speed is stored as a profile skill; movement modifiers come from existing loadout logic."
+        "Ausrüstungsgewicht und vorhandene Bewegungsregeln können die tatsächlich erreichte Bewegung beeinflussen."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -1264,13 +1216,12 @@
       "screen_id": "character_sheet",
       "area_id": "core.toughness",
       "status": "ready",
-      "title": "Toughness",
+      "title": "Belastbarkeit",
       "compact_lines": [
-        "How well the character handles pressure and harm.",
-        "Shown as profile data, not as a new health formula."
+        "Widerstandsfähigkeit unter Druck und bei Schaden."
       ],
       "detail_lines": [
-        "Toughness can be used by combat and recovery systems through their own contracts."
+        "Der gespeicherte Wert fließt in die vorhandenen Kampf- und Verhaltensberechnungen ein."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -1280,13 +1231,12 @@
       "screen_id": "character_sheet",
       "area_id": "core.awareness",
       "status": "ready",
-      "title": "Awareness",
+      "title": "Wahrnehmung",
       "compact_lines": [
-        "How well the character notices battlefield context.",
-        "Useful for reading scouts, guards and overwatch roles."
+        "Erfassen der Umgebung und der Lage."
       ],
       "detail_lines": [
-        "Awareness is part of profile skill values and may feed perception-related resolvers."
+        "Der Wert fließt unter anderem in Initiative, Aufklärung, Fahrzeugwerte und Einsatzeignung ein."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1296,13 +1246,12 @@
       "screen_id": "character_sheet",
       "area_id": "core.recognition",
       "status": "ready",
-      "title": "Recognition",
+      "title": "Erkennen",
       "compact_lines": [
-        "How well the character identifies contacts and friend-or-foe cues.",
-        "It helps explain cautious or reliable combat reads."
+        "Kontakte und Freund-Feind-Hinweise richtig einordnen."
       ],
       "detail_lines": [
-        "Recognition comes from skill values and should follow perception contracts when expanded."
+        "Der Wert unterstützt Befehlstreue, Selbstständigkeit, Koordination und Fahrzeugwerte."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1312,13 +1261,12 @@
       "screen_id": "character_sheet",
       "area_id": "core.stealth",
       "status": "ready",
-      "title": "Stealth",
+      "title": "Tarnung",
       "compact_lines": [
-        "How quietly or subtly the character can operate.",
-        "Useful for scouts and concealed approaches."
+        "Unauffälliges und verdecktes Vorgehen."
       ],
       "detail_lines": [
-        "Stealth is profile data and may affect concealment through existing mission rules."
+        "Der Wert fließt in Unauffälligkeit, leise Arbeitsweise, Aufklärung und Infiltration ein."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1328,13 +1276,12 @@
       "screen_id": "character_sheet",
       "area_id": "core.discipline",
       "status": "ready",
-      "title": "Discipline",
+      "title": "Disziplin",
       "compact_lines": [
-        "How reliably the character follows orders under stress.",
-        "Higher discipline supports steadier behavior in planned actions."
+        "Verlässliche Ausführung unter Belastung."
       ],
       "detail_lines": [
-        "Discipline is a profile value; command behavior effects belong to tactical resolvers."
+        "Der Wert unterstützt Befehlstreue, Ruhe im Kontakt und mehrere Fahrzeug- und Einsatzberechnungen."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1344,13 +1291,12 @@
       "screen_id": "character_sheet",
       "area_id": "core.leadership",
       "status": "ready",
-      "title": "Leadership",
+      "title": "Führung",
       "compact_lines": [
-        "How well the character supports team command and coordination.",
-        "It is useful when choosing fireteam leads."
+        "Fähigkeit zur Koordination eines Trupps."
       ],
       "detail_lines": [
-        "Leadership comes from profile skills and feeds existing leader/teamfit derivation."
+        "Der Wert fließt in Kommunikation, Initiative, Selbstständigkeit, Koordination und Führungseignung ein."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -1360,13 +1306,12 @@
       "screen_id": "character_sheet",
       "area_id": "communication",
       "status": "ready",
-      "title": "Communication",
+      "title": "Kommunikation",
       "compact_lines": [
-        "Shows speech quality and quantity style values.",
-        "These values explain feedback tone, not direct mission truth."
+        "Meldequalität und Sprechhäufigkeit aus dem Profil."
       ],
       "detail_lines": [
-        "Communication rows are read from MetaUnitProfile communication_values."
+        "Ohne gespeicherte Vorgabe leitet das bestehende Profilmodell diese Werte aus Kernwerten, Rolle und Eigenschaften ab."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1376,14 +1321,12 @@
       "screen_id": "character_sheet",
       "area_id": "platform_skills",
       "status": "ready",
-      "title": "Platform Skills",
+      "title": "Fahrzeuge",
       "compact_lines": [
-        "Vehicle and craft skills are derived from core values and behavior profile.",
-        "They help choose pilots, drivers or craft crew."
+        "Eignungswerte für Bodenfahrzeuge, Landefähre, Frachter und Jäger."
       ],
       "detail_lines": [
-        "Platform rows read explicit platform_values; otherwise UnitProfileMath derives them from core, communication and behavior values.",
-        "Flightdeck assignment still reads saved roster data and does not accept UI-only truth."
+        "Gespeicherte Fahrzeugwerte können Vorgaben sein. Ohne Vorgabe erfolgt die Ableitung aus Kernwerten, Kommunikation und Verhalten."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1393,13 +1336,12 @@
       "screen_id": "character_sheet",
       "area_id": "derived_badges",
       "status": "ready",
-      "title": "Derived Values",
+      "title": "Abgeleitete Werte",
       "compact_lines": [
-        "Summaries derived from methods, functions and specialties.",
-        "They help scan fit without replacing the detailed rows."
+        "Arbeitsweise, Einsatzeignung und Spezialisierung."
       ],
       "detail_lines": [
-        "Derived text is built by the profile formatter and rank badge resolver."
+        "Die Zusammenfassungen zeigen vorhandene Profilberechnungen und ändern weder Aufgabe noch Rolle."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1409,13 +1351,12 @@
       "screen_id": "character_sheet",
       "area_id": "behavior_profile",
       "status": "ready",
-      "title": "Behavior Profile",
+      "title": "Verhalten",
       "compact_lines": [
-        "Behavior axes describe tendencies such as initiative and order fidelity.",
-        "They are hints for future tactical behavior, not UI commands."
+        "Initiative, Befehlstreue, Unauffälligkeit, Ruhe und Selbstständigkeit."
       ],
       "detail_lines": [
-        "Behavior rows come from profile behavior_axes and character-bundle derivation."
+        "Die Werte stammen aus dem vorhandenen Profilmodell oder einer gespeicherten Vorgabe."
       ],
       "target_audience": "advanced",
       "manual_review": true
@@ -1425,13 +1366,12 @@
       "screen_id": "character_sheet",
       "area_id": "last_mission",
       "status": "ready",
-      "title": "Last Mission",
+      "title": "Letzter Einsatz",
       "compact_lines": [
-        "Shows the latest recorded mission result for this character.",
-        "It is a history readout, not an active mission control."
+        "Letztes gespeichertes Einsatzergebnis dieser Person."
       ],
       "detail_lines": [
-        "Last mission text is read from the profile mission_history array."
+        "Ein Eintrag beschreibt die Vergangenheit und steuert keinen laufenden Einsatz."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1441,13 +1381,12 @@
       "screen_id": "character_sheet",
       "area_id": "fireteam_history",
       "status": "ready",
-      "title": "Fireteam History",
+      "title": "Truppverlauf",
       "compact_lines": [
-        "Shows the latest known fireteam history entry.",
-        "It helps explain past assignment context."
+        "Letzter gespeicherter Eintrag zur Truppzugehörigkeit."
       ],
       "detail_lines": [
-        "History comes from MetaUnitProfile fireteam_history and is shortened for the sheet."
+        "Der Bogen zeigt einen gekürzten Verlauf und nimmt keine neue Zuteilung vor."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1457,13 +1396,12 @@
       "screen_id": "character_sheet",
       "area_id": "method_tags",
       "status": "ready",
-      "title": "Method Tags",
+      "title": "Arbeitsweise",
       "compact_lines": [
-        "Summarizes how this character tends to approach tasks.",
-        "Tags are scan hints and do not issue orders."
+        "Zusammenfassung von leiser, schneller, beständiger oder führender Arbeitsweise."
       ],
       "detail_lines": [
-        "Method tags are formatted from method_scores or stored method summary text."
+        "Die bestehenden Werte lesen Kernwerte und Kommunikation. Eigenschaften wirken über ihre Auswirkungen auf Profilwerte."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1473,16 +1411,12 @@
       "screen_id": "character_sheet",
       "area_id": "function_scores",
       "status": "ready",
-      "title": "Function Scores",
+      "title": "Einsatzeignung",
       "compact_lines": [
-        "Shows derived fit for functions such as scout or coordinator.",
-        "Use it as assignment guidance, not a hard class lock."
+        "Berechnete Eignung für Funktionen wie Aufklärung oder Koordination."
       ],
       "detail_lines": [
-        "Function scores are built from profile function_scores and character-bundle derivation.",
-        "Overwatch reads Accuracy, Awareness, Discipline and Recognition.",
-        "Coordinator reads Leadership, Speech Quality, Recognition and Discipline.",
-        "Pilot functions read platform skill plus awareness, discipline, recognition or communication."
+        "Die Funktionswerte lesen Kernwerte, Kommunikation und passende Fahrzeugwerte; sie erteilen keine Aufgabe."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1492,13 +1426,12 @@
       "screen_id": "character_sheet",
       "area_id": "primary_specialty",
       "status": "ready",
-      "title": "Primary Specialty",
+      "title": "Spezialisierung",
       "compact_lines": [
-        "Best readable specialty for this character.",
-        "It helps choose roles without hiding the underlying values."
+        "Beste vorhandene Kombination aus Funktion und Arbeitsweise."
       ],
       "detail_lines": [
-        "Primary specialty is read from the profile or character bundle."
+        "Der gespeicherte Rollenrahmen begrenzt die Auswahl. Die genaue Kombination folgt den bestehenden Mindestregeln."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -1508,13 +1441,12 @@
       "screen_id": "character_sheet",
       "area_id": "secondary_specialty",
       "status": "ready",
-      "title": "Secondary Specialty",
+      "title": "Weitere Stärke",
       "compact_lines": [
-        "Secondary fit or backup specialty when one is known.",
-        "Empty values mean no strong secondary has been recorded."
+        "Zweite ausreichend starke Kombination, sofern vorhanden."
       ],
       "detail_lines": [
-        "Secondary specialty is display data from MetaUnitProfile."
+        "Ein leerer Wert bedeutet, dass keine passende zweite Stärke gespeichert ist."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1524,13 +1456,12 @@
       "screen_id": "character_sheet",
       "area_id": "speech_quality",
       "status": "ready",
-      "title": "Speech Quality",
+      "title": "Meldequalität",
       "compact_lines": [
-        "How clear or useful the character's communication tends to be.",
-        "Useful for reading command feedback style."
+        "Klarheit und Nutzbarkeit von Meldungen."
       ],
       "detail_lines": [
-        "Speech quality comes from profile communication_values."
+        "Ohne Vorgabe aus Führung, Erkennen und Rollenanteilen abgeleitet; wirkt auf Kommunikation und mehrere Eignungen."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1540,13 +1471,12 @@
       "screen_id": "character_sheet",
       "area_id": "speech_quantity",
       "status": "ready",
-      "title": "Speech Quantity",
+      "title": "Sprechhäufigkeit",
       "compact_lines": [
-        "How often the character tends to communicate.",
-        "More speech is not always better; it describes style."
+        "Wie häufig die Person kommuniziert."
       ],
       "detail_lines": [
-        "Speech quantity comes from profile communication_values."
+        "Mehr ist nicht immer besser: Weniger Sprechen kann eine leise Arbeitsweise unterstützen."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1558,11 +1488,10 @@
       "status": "ready",
       "title": "Initiative",
       "compact_lines": [
-        "Tendency to act without waiting for perfect certainty.",
-        "This describes behavior style, not a direct command."
+        "Tendenz, zügig und selbstständig zu reagieren."
       ],
       "detail_lines": [
-        "Initiative is read from behavior_axes and may inform later behavior resolvers."
+        "Ohne Vorgabe aus Tempo, Wahrnehmung und Führung abgeleitet. Initiative bleibt Teil der bestehenden Befehlsregeln."
       ],
       "target_audience": "advanced",
       "manual_review": true
@@ -1572,13 +1501,12 @@
       "screen_id": "character_sheet",
       "area_id": "order_fidelity",
       "status": "ready",
-      "title": "Order Fidelity",
+      "title": "Befehlstreue",
       "compact_lines": [
-        "How closely the character tends to follow assigned orders.",
-        "Useful when choosing steady fireteam members."
+        "Verlässlichkeit bei der Umsetzung zugeteilter Befehle."
       ],
       "detail_lines": [
-        "Order fidelity is read from behavior_axes and does not override commands in UI."
+        "Ohne Vorgabe aus Disziplin, Erkennen und Meldequalität abgeleitet."
       ],
       "target_audience": "advanced",
       "manual_review": true
@@ -1588,13 +1516,12 @@
       "screen_id": "character_sheet",
       "area_id": "signature_control",
       "status": "ready",
-      "title": "Signature Control",
+      "title": "Unauffälligkeit",
       "compact_lines": [
-        "Tendency to keep noise and exposure under control.",
-        "Helpful for stealth or careful movement reads."
+        "Kontrolle über Lärm und eigene Erkennbarkeit."
       ],
       "detail_lines": [
-        "Signature control is a behavior axis and not a separate visibility formula here."
+        "Ohne Vorgabe aus Tarnung, Disziplin und geringer Sprechhäufigkeit abgeleitet."
       ],
       "target_audience": "advanced",
       "manual_review": true
@@ -1604,13 +1531,12 @@
       "screen_id": "character_sheet",
       "area_id": "contact_stability",
       "status": "ready",
-      "title": "Contact Stability",
+      "title": "Ruhe im Kontakt",
       "compact_lines": [
-        "How steady the character tends to be after contact.",
-        "Useful for reading pressure behavior."
+        "Stabilität bei Feindkontakt und unter Druck."
       ],
       "detail_lines": [
-        "Contact stability is read from behavior_axes and may support later tactical logic."
+        "Ohne Vorgabe aus Belastbarkeit, Disziplin und Wahrnehmung abgeleitet."
       ],
       "target_audience": "advanced",
       "manual_review": true
@@ -1620,13 +1546,12 @@
       "screen_id": "character_sheet",
       "area_id": "autonomy",
       "status": "ready",
-      "title": "Autonomy",
+      "title": "Selbstständigkeit",
       "compact_lines": [
-        "How independently the character tends to operate.",
-        "High autonomy is a behavior tendency, not permission to ignore authority."
+        "Fähigkeit zum eigenständigen Handeln im vorgegebenen Rahmen."
       ],
       "detail_lines": [
-        "Autonomy comes from behavior_axes and must stay below command authority contracts."
+        "Ohne Vorgabe aus Erkennen, Führung und Disziplin abgeleitet; ersetzt keine Befehlsautorität."
       ],
       "target_audience": "advanced",
       "manual_review": true
@@ -1636,13 +1561,12 @@
       "screen_id": "character_sheet",
       "area_id": "platform.ground_vehicle_handling",
       "status": "ready",
-      "title": "Ground Vehicle",
+      "title": "Bodenfahrzeuge",
       "compact_lines": [
-        "Fit for operating ground vehicles.",
-        "Derived from speed, recognition, awareness, discipline and behavior axes."
+        "Eignung zum Steuern von Bodenfahrzeugen."
       ],
       "detail_lines": [
-        "Without override, ground vehicle handling derives from speed, recognition, awareness, discipline, initiative, stability and autonomy."
+        "Ohne Vorgabe aus Tempo, Erkennen, Wahrnehmung, Disziplin, Initiative, Ruhe im Kontakt und Selbstständigkeit abgeleitet."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1652,14 +1576,12 @@
       "screen_id": "character_sheet",
       "area_id": "platform.dropship_piloting",
       "status": "ready",
-      "title": "Dropship Piloting",
+      "title": "Landefähre steuern",
       "compact_lines": [
-        "Fit for dropship pilot assignments.",
-        "Derived from flight-relevant core, communication and behavior values."
+        "Wert für die vorhandenen Landefährenaufgaben."
       ],
       "detail_lines": [
-        "Without override, dropship piloting derives from awareness, recognition, discipline, speed, speech quality and order fidelity.",
-        "Stability and autonomy also affect the derived value."
+        "Ohne Vorgabe aus Wahrnehmung, Erkennen, Disziplin, Tempo, Meldequalität, Befehlstreue, Ruhe und Selbstständigkeit abgeleitet."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1669,14 +1591,12 @@
       "screen_id": "character_sheet",
       "area_id": "platform.freighter_piloting",
       "status": "ready",
-      "title": "Freighter Piloting",
+      "title": "Frachter steuern",
       "compact_lines": [
-        "Fit for freighter or cargo craft assignments.",
-        "Derived from steady transport and route-control values."
+        "Wert für Fracht- und Transportaufgaben."
       ],
       "detail_lines": [
-        "Without override, freighter piloting derives from toughness, recognition, discipline, speech quality and order fidelity.",
-        "Stability and autonomy also affect the derived value."
+        "Ohne Vorgabe aus Belastbarkeit, Erkennen, Disziplin, Meldequalität, Befehlstreue, Ruhe und Selbstständigkeit abgeleitet."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1686,14 +1606,12 @@
       "screen_id": "character_sheet",
       "area_id": "platform.fighter_piloting",
       "status": "ready",
-      "title": "Fighter Piloting",
+      "title": "Jäger steuern",
       "compact_lines": [
-        "Fit for fighter craft assignments when those assets are used.",
-        "Derived from speed, accuracy, awareness and behavior axes."
+        "Wert für Jägeraufgaben, soweit solche Einheiten verwendet werden."
       ],
       "detail_lines": [
-        "Without override, fighter piloting derives from speed, accuracy, awareness, discipline, initiative and order fidelity.",
-        "Stability and autonomy also affect the derived value."
+        "Ohne Vorgabe aus Tempo, Treffsicherheit, Wahrnehmung, Disziplin, Initiative, Befehlstreue, Ruhe und Selbstständigkeit abgeleitet."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1703,13 +1621,12 @@
       "screen_id": "character_sheet",
       "area_id": "loadout_summary",
       "status": "ready",
-      "title": "Loadout Summary",
+      "title": "Ausrüstung",
       "compact_lines": [
-        "Shows armor and both weapon slots for the focused character.",
-        "FOB member loadout overrides profile text when editing a team."
+        "Rüstung und beide Waffenplätze der ausgewählten Person."
       ],
       "detail_lines": [
-        "Weapon names are resolved through WeaponData; weight comes from LoadoutModifierResolver."
+        "Die Anzeige liest die vorbereitete Ausrüstung. Waffen- und Gewichtsregeln bleiben bei den vorhandenen Besitzern."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -3133,7 +3050,7 @@
       "title": "Auftrag und Ziel",
       "compact_lines": [
         "Satellitenauftrag in der Basis annehmen.",
-        "Im Smart Mobile das passende Ziel waehlen."
+        "Im Mobilgerät den Auftrag prüfen; den Zielort nach dem Sprung im Planetenorbit wählen."
       ],
       "detail_lines": [
         "Erst die bestaetigte Bereitschaft startet den Satellitenschritt.",
@@ -3147,14 +3064,14 @@
       "screen_id": "campaign",
       "area_id": "boarding",
       "status": "draft",
-      "title": "Basis und Boarding",
+      "title": "Basis und Einschiffen",
       "compact_lines": [
-        "Pilot und Leader pruefen; Leader einem Trupp zuordnen.",
-        "Ausruestung, Pilot und Boarding fuer den Satellitenflug vorbereiten."
+        "Pilot und Truppführer prüfen; den Truppführer einem Trupp zuordnen.",
+        "Ausrüstung, Pilot und Einschiffen für den Satellitenflug vorbereiten."
       ],
       "detail_lines": [
-        "Satellitenauftrag annehmen und das Ziel im Smart Mobile waehlen.",
-        "Nur echte Runtime-Bereitschaft schaltet die naechste Etappe frei. Hinweise schliessen veraendert keinen Fortschritt."
+        "Satellitenauftrag im Mobilgerät annehmen und zum Mondorbit abheben.",
+        "Erst wenn Pilot und Trupp bereit sind, beginnt die nächste Etappe. Hinweise zu schließen verändert den Fortschritt nicht."
       ],
       "target_audience": "new_player",
       "manual_review": true
@@ -3164,14 +3081,14 @@
       "screen_id": "campaign",
       "area_id": "movement",
       "status": "draft",
-      "title": "Landen, Bewegung und GO",
+      "title": "Landen und Befehle ausführen",
       "compact_lines": [
-        "Am Satelliten landen und Leader absetzen.",
-        "Trupp waehlen, Ziel setzen und GO bestaetigen."
+        "An der Satellitenstelle landen und den Truppführer absetzen.",
+        "Trupp wählen, Ziel setzen und den geplanten Befehl ausführen."
       ],
       "detail_lines": [
-        "Zum Satelliten gehen und dort Use ausfuehren.",
-        "Danach zum Schiff zurueckkehren und heimfliegen. Der Echtzeiteinsatz laeuft waehrend der Hilfe weiter."
+        "Zum Satelliten gehen und dort die Interaktion ausführen.",
+        "Danach zum Schiff zurückkehren und heimfliegen. Der Echtzeiteinsatz läuft während der Hilfe weiter."
       ],
       "target_audience": "new_player",
       "manual_review": true
@@ -3181,10 +3098,10 @@
       "screen_id": "campaign",
       "area_id": "use",
       "status": "draft",
-      "title": "Interaktion mit Use",
+      "title": "Objekte benutzen",
       "compact_lines": [
-        "Leader zum Satelliten oder Haendler bewegen.",
-        "Das passende Objekt waehlen und Use ausfuehren."
+        "Den Truppführer zum Satelliten oder Händler bewegen.",
+        "Das passende Objekt wählen und die Interaktion ausführen."
       ],
       "detail_lines": [
         "Die Interaktion benoetigt die passende Naehe und einen verfuegbaren Trupp. Beachte den sichtbaren Sperrgrund.",
@@ -3200,7 +3117,7 @@
       "status": "draft",
       "title": "Kaufen und Tanken",
       "compact_lines": [
-        "Handelsposten anfliegen, landen und Haendler mit Use erreichen.",
+        "Handelsposten anfliegen, landen und mit dem Händler interagieren.",
         "Einen verfuegbaren Gegenstand kaufen und Treibstoff nachfuellen."
       ],
       "detail_lines": [
@@ -3217,8 +3134,8 @@
       "status": "draft",
       "title": "Zur Heimatbasis zurueck",
       "compact_lines": [
-        "Leader und Pilot zum Schiff bringen und Boarding abschliessen.",
-        "Heimatbasis als Ziel waehlen und heimfliegen."
+        "Truppführer und Pilot zum Schiff bringen und einsteigen lassen.",
+        "Zum Planetenorbit abheben, zum Mond springen und an der Mondbasis landen."
       ],
       "detail_lines": [
         "Eine bestaetigte Heimkehr schliesst die Etappe ab und speichert einen sicheren Basis-Meilenstein.",
@@ -3232,17 +3149,32 @@
       "screen_id": "campaign",
       "area_id": "complete",
       "status": "draft",
-      "title": "Einfuehrung abgeschlossen",
+      "title": "Einführung abgeschlossen",
       "compact_lines": [
         "Beide Rundfluege sind abgeschlossen.",
         "Die vorhandenen Orte bleiben frei besuchbar."
       ],
       "detail_lines": [
-        "Dein Kampagnenstand bleibt vom Skirmish-Team getrennt. Weitere Kapitel gehoeren noch nicht zu dieser Einfuehrung.",
-        "Hilfe erneut oeffnen oder Hinweise ausblenden veraendert keinen Gameplay-Fortschritt."
+        "Dein Kampagnenstand bleibt vom Team für freie Gefechte getrennt. Weitere Kapitel gehören noch nicht zu dieser Einführung.",
+        "Hilfe erneut zu öffnen oder Hinweise auszublenden verändert den Spielfortschritt nicht."
       ],
       "target_audience": "new_player",
       "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.post_mission_skill_delta",
+      "screen_id": "character_sheet",
+      "area_id": "post_mission_skill_delta",
+      "status": "ready",
+      "title": "Letzter Zuwachs",
+      "compact_lines": [
+        "Bestätigter Zuwachs aus dem letzten Einsatzergebnis."
+      ],
+      "detail_lines": [
+        "Die Anzeige vergibt keine weiteren Punkte. Erfahrung und Wertzuwächse kommen aus der vorhandenen Ergebnisverarbeitung."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
     }
   ]
 }

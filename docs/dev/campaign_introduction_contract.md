@@ -14,13 +14,20 @@ Eine neue Kampagne besitzt genau zwei NPCs: `campaign_leader` als einsatzfaehige
 
 | Etappe | Reale Voraussetzung | Freischaltung |
 | --- | --- | --- |
-| Basis vorbereiten | Satellitenauftrag angenommen, Satellitenort ausgewaehlt, Pilot zugewiesen, Leader als Payload fertig geboardet | Satellitenflug |
+| Basis vorbereiten | Satellitenauftrag angenommen, Pilot zugewiesen, Leader als Payload fertig geboardet | Abheben in den Mondorbit |
 | Satellit bergen | Bestehende Szenariogates `secure_satellite` und `return_to_ship`, bestaetigter Auftragserfolg, reale Heimkehr | Handelsort |
 | Versorgung sichern | Echter Handelsflug, Haendler-Use, erfolgreicher Kauf, erfolgreiche Betankung und reale Heimkehr | Einfuehrung abgeschlossen, vorhandene Orte frei besuchbar |
 
 Ein Popup schliessen, ein Panel oeffnen oder einen Ortsnamen waehlen ist kein Missionsabschluss. Fehlschlag bleibt wiederholbar ueber `Erneut annehmen`; vergangene Ergebnis-/Command-Belege duerfen weder Wiederholung blockieren noch erneut Fuel, Waren oder Belohnungen erzeugen.
 
 Basisdarstellung verwendet `maps/campaign_intro_base.json`: kompakter Ausschnitt mit einem Gebaeude, den notwendigen Terminals und einem Pad. Skirmish behaelt die bestehende Basis. Satelliten- und Handelsort laden weiterhin ihre eigenen Karten und Szenarien. Ort, Auftrag, Karte, Szenario und Startmodus sind getrennte Begriffe.
+
+Seit dem freigegebenen Orbitauftrag vom 09.11.2026 liegt die Heimatbasis auf
+dem Mond und beide Aussenziele auf einem Planeten. Abheben startet noch keine
+Mission. Mondorbit -> kurzer abbrechbarer Quantum -> Planetenorbit -> Zielwahl
+-> ausdruecklicher Anflug folgt `orbit_quantum_travel_contract.md`. Die reale
+Heimkehr verlangt den Rueckweg in den Mondorbit und Landung an der Basis.
+Auftrags-/Versorgungsbelege und die Reihenfolge der Einfuehrung bleiben erhalten.
 
 ## Autoritaet und Hilfe
 

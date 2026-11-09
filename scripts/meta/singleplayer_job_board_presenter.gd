@@ -3,6 +3,8 @@ extends PanelContainer
 
 var _screen: WeakRef
 var _content: VBoxContainer
+var _device: PanelContainer
+var _actions: HFlowContainer
 var _jobs: OptionButton
 var _details: Label
 var _accept: Button
@@ -14,38 +16,66 @@ var _signature: String = ""
 func configure(screen: Control) -> void:
 	_screen = weakref(screen)
 	name = "JobBoard"
+	add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(scroll)
+	var alignment := HBoxContainer.new()
+	alignment.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(alignment)
+	_device = PanelContainer.new()
+	_device.name = "MobileDevice"
+	_device.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_device.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("102f3b")
+	style.border_color = Color("2b5361")
+	style.set_border_width_all(1)
+	style.set_content_margin_all(14)
+	_device.add_theme_stylebox_override("panel", style)
+	alignment.add_child(_device)
 	_content = VBoxContainer.new()
 	_content.name = "Content"
 	_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_content.add_theme_constant_override("separation", 16)
-	scroll.add_child(_content)
+	_content.add_theme_constant_override("separation", 10)
+	_device.add_child(_content)
 	var heading := Label.new()
-	heading.text = "SMART MOBILE  /  Aufträge"
-	heading.add_theme_font_size_override("font_size", 28)
+	heading.text = "MOBILGERÄT · AUFTRÄGE"
+	heading.add_theme_font_size_override("font_size", 22)
 	_content.add_child(heading)
 	_jobs = OptionButton.new()
-	_jobs.custom_minimum_size.y = 46
+	_jobs.custom_minimum_size.y = 40
+	_jobs.fit_to_longest_item = false
 	_content.add_child(_jobs)
 	_jobs.item_selected.connect(func(index: int): _job_id = String(_jobs.get_item_metadata(index)); refresh())
 	_details = Label.new()
 	_details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_details.custom_minimum_size.y = 130
 	_content.add_child(_details)
+	_actions = HFlowContainer.new()
+	_actions.name = "JobActions"
+	_actions.add_theme_constant_override("h_separation", 8)
+	_actions.add_theme_constant_override("v_separation", 8)
+	_content.add_child(_actions)
 	_accept = _button("AcceptJob", "Auftrag annehmen")
 	_accept.pressed.connect(func(): _request("accept_job", {"job_id": _job_id}))
 	_show_map = _button("ShowOnMap", "Auf Karte zeigen")
 	_show_map.pressed.connect(_show_selected_on_map)
 	_abandon = _button("AbandonJob", "Auftrag abbrechen")
 	_abandon.pressed.connect(func(): _request("abandon_job", {"job_id": _job_id}))
+	resized.connect(_layout_device)
+	_layout_device()
+
+func _layout_device() -> void:
+	if _device != null:
+		_device.custom_minimum_size.x = clampf(size.x, 280.0, 640.0)
 
 func _button(node_name: String, text: String) -> Button:
 	var button := Button.new()
 	button.name = node_name
 	button.text = text
-	button.custom_minimum_size.y = 46
-	_content.add_child(button)
+	button.custom_minimum_size.y = 40
+	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_actions.add_child(button)
 	return button
 
 func _request(operation: String, payload: Dictionary) -> Dictionary:
@@ -89,7 +119,7 @@ func refresh() -> void:
 	var locations: Dictionary = campaign.get("locations", {})
 	var location: Dictionary = locations.get(String(job.get("location_id", "")), {})
 	var labels := {"offered": "Angeboten", "accepted": "Angenommen", "active": "Im Einsatz", "completed": "Abgeschlossen", "failed": "Abgebrochen / fehlgeschlagen"}
-	_details.text = "%s\nZielort: %s\nStatus: %s\nBelohnung: %d Credits\n\nDaten sichern, anschließend zum Schiff zurückkehren. Annahme startet keinen Flug." % [String(job.get("title", "Keine Aufträge")), String(location.get("name", "—")), String(labels.get(status, status)), int(Dictionary(job.get("reward", {})).get("credits", 0))]
+	_details.text = "%s\nZielort: %s\nStatus: %s\nBelohnung: %d Kredite\n\nDaten sichern, anschließend zum Schiff zurückkehren. Annahme startet keinen Flug." % [String(job.get("title", "Keine Aufträge")), String(location.get("name", "—")), String(labels.get(status, status)), int(Dictionary(job.get("reward", {})).get("credits", 0))]
 	var screen: Control = _screen.get_ref()
 	var campaign_mode := String(Dictionary(screen.call("get_operations_snapshot").get("singleplayer", {})).get("mode", "")) == "campaign"
 	_accept.disabled = (status != "offered" and not (campaign_mode and status == "failed")) or job.is_empty()

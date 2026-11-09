@@ -58,12 +58,12 @@ func _test_rank_badges_expose_dynamic_help_details() -> void:
 	var shooter_badge: Dictionary = _find_badge(badges, "shooter")
 	_assert(not shooter_badge.is_empty(), "Shooter badge can be derived from weapon and Accuracy")
 	_assert(String(shooter_badge.get("help_id", "")) == "character_sheet.rank_badge.shooter", "Shooter badge exposes a granular help id")
-	_assert(String(shooter_badge.get("reason", "")).contains("Accuracy"), "Shooter badge reason explains the source value")
-	_assert(String(shooter_badge.get("detail_text", "")).contains("0.52"), "Shooter badge detail exposes the threshold formula")
+	_assert(String(shooter_badge.get("reason", "")).contains("Treffsicherheit"), "Shooter badge reason explains the source value")
+	_assert(String(shooter_badge.get("detail_text", "")).contains("0,52"), "Shooter badge detail exposes the threshold formula")
 	var badge_control := TextureRect.new()
 	NPC_RANK_BADGE_RESOLVER_SCRIPT.call("apply_badge_help_metadata", badge_control, shooter_badge)
 	_assert(String(badge_control.get_meta("help_id", "")) == "character_sheet.rank_badge.shooter", "Badge controls carry the granular contextual help id")
-	_assert(String(badge_control.tooltip_text).contains("Accuracy"), "Badge native tooltip keeps the composition text for FOB/Homebase")
+	_assert(String(badge_control.tooltip_text).contains("Treffsicherheit"), "Badge native tooltip keeps the composition text for FOB/Homebase")
 	badge_control.free()
 	var stale_badge_profile: Dictionary = {
 		"role_name": "Old Label",
@@ -93,7 +93,7 @@ func _test_rank_badges_expose_dynamic_help_details() -> void:
 		"platform_values": {"dropship_piloting": 0.12},
 	}
 	var next_requirements: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_next_badge_requirements", rookie_profile, 2))
-	_assert(not next_requirements.is_empty() and String(Dictionary(next_requirements[0]).get("requirement_text", "")).contains("Noetig"), "Rank badge resolver exposes next-rank requirements for greyed badges")
+	_assert(not next_requirements.is_empty() and String(Dictionary(next_requirements[0]).get("requirement_text", "")).contains("Nötig"), "Rank badge resolver exposes next-rank requirements for greyed badges")
 	var platform_low: Dictionary = Dictionary(UNIT_PROFILE_MATH_SCRIPT.call("build_character_bundle", {
 		"role_id": "security_guard",
 		"skill_accuracy": 0.30,
@@ -118,7 +118,7 @@ func _test_rank_badges_expose_dynamic_help_details() -> void:
 	CHARACTER_SHEET_VIEW_SCRIPT.call("render", host, META_UNIT_PROFILE_SCRIPT.new(rookie_profile), {"show_badge_progress": true})
 	var locked_badge := _find_node_with_meta(host, "rank_badge_locked") as TextureRect
 	_assert(locked_badge != null and bool(locked_badge.get_meta("rank_badge_locked", false)), "Character sheet greys out rank badge icons when no rank is reached")
-	_assert(locked_badge != null and String(locked_badge.tooltip_text).contains("Noetig"), "Greyed badge hover tooltip explains what the next rank needs")
+	_assert(locked_badge != null and String(locked_badge.tooltip_text).contains("Nötig"), "Greyed badge hover tooltip explains what the next rank needs")
 	_assert(host.find_child("RankBadgeGrid", true, false) is GridContainer, "Character sheet renders role rings as a badge grid")
 	_assert(host.find_child("RankBadgeLabel_pilot", true, false) is Label, "Character sheet labels each badge below the icon")
 	_assert(_count_nodes_with_meta(host, "rank_badge_progress_candidate") >= 6, "Character sheet can show all role-ring possibilities as progress badges")
@@ -274,7 +274,7 @@ func _test_team_editor_character_identity_and_metric_persistence() -> void:
 		await _wait_frames(2)
 	_assert(is_equal_approx(_unit_skill_value(menu, selected_unit_id, "accuracy"), accuracy_after_edit), "Locked character metric keeps its value when pressed")
 	_assert(menu.find_child("DerivedDependencyGuide", true, false) != null, "Character sheet shows a visual dependency guide for derived values")
-	var derived_detail := menu.find_child("DerivedDetail_method_tags", true, false) as Label
+	var derived_detail := menu.find_child("DerivedDetail_arbeitsweise", true, false) as Label
 	_assert(derived_detail != null and derived_detail.custom_minimum_size.x >= 220.0 and derived_detail.autowrap_mode == TextServer.AUTOWRAP_WORD_SMART, "Derived values show readable formula/detail text without one-letter wrapping")
 	menu.queue_free()
 	await _wait_frames(2)

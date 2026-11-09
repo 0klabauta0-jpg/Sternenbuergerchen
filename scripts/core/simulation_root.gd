@@ -7,12 +7,14 @@ signal singleplayer_command_committed(command: Dictionary, result: Dictionary)
 var _singleplayer_campaign_owner: RefCounted
 var _singleplayer_supply_owner: RefCounted
 var _campaign_onboarding_owner: RefCounted
+var _singleplayer_space_travel_owner: RefCounted
 
 
-func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onboarding: RefCounted = null) -> void:
+func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onboarding: RefCounted = null, travel: RefCounted = null) -> void:
 	_singleplayer_campaign_owner = campaign
 	_singleplayer_supply_owner = supply
 	_campaign_onboarding_owner = onboarding
+	_singleplayer_space_travel_owner = travel
 
 
 func request_singleplayer_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
@@ -26,6 +28,8 @@ func request_singleplayer_command(command: Dictionary, authority_context: Dictio
 			owner = _singleplayer_supply_owner
 		"campaign_onboarding":
 			owner = _campaign_onboarding_owner
+		"singleplayer_space_travel":
+			owner = _singleplayer_space_travel_owner
 		_:
 			return {"ok": false, "reason": "unknown_singleplayer_contract"}
 	if owner == null:
@@ -1734,7 +1738,7 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 	if delta < 0.0:
 		push_warning("SimulationRoot received a negative physics delta while applying a command.")
 		return
-	if String(cmd.get("contract_category", "")) in ["singleplayer_campaign", "singleplayer_supply", "campaign_onboarding"]:
+	if String(cmd.get("contract_category", "")) in ["singleplayer_campaign", "singleplayer_supply", "campaign_onboarding", "singleplayer_space_travel"]:
 		# Queued UI-origin requests cannot inject a trusted runtime context.
 		request_singleplayer_command(cmd)
 		return

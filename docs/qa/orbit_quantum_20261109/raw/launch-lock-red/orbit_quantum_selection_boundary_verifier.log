@@ -1,0 +1,8 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+ORBIT_QUANTUM_SELECTION_BOUNDARY passed=4 failed=4
+FAIL: Immediately after takeoff the existing homebase craft snapshot is busy
+FAIL: Stale homebase command cannot unboard a crew already in orbit
+FAIL: Stale homebase command cannot clear an airborne pilot
+FAIL: Airborne payload and pilot retain their real prelaunch identities

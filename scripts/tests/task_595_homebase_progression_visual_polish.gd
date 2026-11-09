@@ -117,7 +117,7 @@ func _test_homebase_progression_highlight_row() -> void:
 	_assert(value_row != null, "Character Sheet creates highlighted value row")
 	_assert(highlight_row != null and String(highlight_row.get_meta("style_id", "")) == "homebase_progression_delta_v1", "Highlight row carries stable style id meta")
 	_assert(value_label != null and value_label.text.contains("XP +"), "Highlight value shows XP delta")
-	_assert(_labels_contain(labels, "MISSION GAIN | Last Award:"), "Highlight label includes badge and Last Award")
+	_assert(_labels_contain(labels, "EINSATZGEWINN | Letzter Zuwachs:"), "Highlight label includes badge and Last Award")
 	_assert(_labels_contain(labels, "XP +"), "Highlight labels include XP delta")
 	homebase.queue_free()
 	await _wait_frames(2)

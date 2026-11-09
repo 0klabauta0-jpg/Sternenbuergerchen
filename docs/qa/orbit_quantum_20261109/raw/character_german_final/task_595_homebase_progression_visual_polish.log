@@ -1,0 +1,39 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_595 Homebase Progression Visual Polish ===
+  PASS: TASK_595 task file exists
+  PASS: TASK_595 task file names the polish
+  PASS: Implementation status tracks TASK_595
+  PASS: Implementation status names TASK_596 follow-up
+  PASS: Roadmap marks TASK_595 implemented
+  PASS: Roadmap names TASK_596 follow-up
+  PASS: Review workbench tracks TASK_595
+  PASS: Review workbench names TASK_596 follow-up
+  PASS: Mission feedback contract documents TASK_595
+  PASS: Formatter marks post-mission award style key
+  PASS: Formatter emits stable style id
+  PASS: Formatter emits mission gain badge
+  PASS: Formatter keeps resolver source visible
+  PASS: Character sheet view names the highlight row
+  PASS: Character sheet view owns highlight stylebox
+  PASS: Homebase snapshot exposes visual polish flag
+  PASS: TASK_594 verifier remains available
+  PASS: Generated roster has enough operators for Homebase visual polish
+  PASS: Resolver award summary feeds visual polish
+  PASS: Homebase instantiates for visual polish
+  PASS: Awarded operator card remains reachable
+  PASS: Awarded operator card opens Character Sheet
+  PASS: Homebase bridge schema remains stable
+  PASS: Homebase snapshot reports highlight style id
+  PASS: Homebase snapshot reports mission gain badge
+  PASS: Homebase snapshot reports visual polish ready
+  PASS: Visual style check passes
+  PASS: Character Sheet creates highlight row node
+  PASS: Character Sheet creates highlighted value row
+  PASS: Highlight row carries stable style id meta
+  PASS: Highlight value shows XP delta
+  PASS: Highlight label includes badge and Last Award
+  PASS: Highlight labels include XP delta
+=== RESULTS: 33 passed, 0 failed ===
+TASK_595: ALL PASSED

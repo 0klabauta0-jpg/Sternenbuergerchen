@@ -33,12 +33,30 @@ func _run() -> void:
 	var region = screen.find_child("RegionMap", true, false)
 	_check(region != null and region.is_visible_in_tree(), "Separate regional view renders")
 	if region != null:
-		var trade = region.get_node_or_null("Content/Locations/trade_outpost")
+		var trade = region.find_child("TradeDestination", true, false)
 		_check(trade != null, "Trade has an independent location target")
 		if trade != null:
+			_check(trade.disabled, "Grounded preview postpones destination selection until planet orbit")
+		var craft: Dictionary = screen.get_operations_snapshot().get("selected_craft", {})
+		var craft_id: String = String(craft.get("id", ""))
+		screen.call("_debug_advance_homebase_direct_boarding", 30.0)
+		var launch: Dictionary = screen.request_operation("start", {"craft_id": craft_id})
+		_check(bool(launch.get("ok", false)), "Actual Flightdeck start reaches moon orbit")
+		var jump: Dictionary = screen.request_operation("space_start_quantum", {"craft_id": craft_id, "target_orbit_id": "planet_orbit"})
+		_check(bool(jump.get("ok", false)), "Actual quantum starts toward planet orbit")
+		var deadline := Time.get_ticks_msec() + 5000
+		while String(flow.get_singleplayer_snapshot().space_travel.orbit_id) != "planet_orbit" and Time.get_ticks_msec() < deadline:
+			await process_frame
+		_check(String(flow.get_singleplayer_snapshot().space_travel.orbit_id) == "planet_orbit", "Actual quantum reaches planet without loading an Ortskarte")
+		var star_map: Control = flow.get("_star_map_screen")
+		star_map.call("refresh")
+		trade = star_map.find_child("TradeDestination", true, false)
+		_check(trade != null and not trade.disabled, "Trade target becomes usable at planet orbit")
+		if trade != null and not trade.disabled:
 			trade.pressed.emit()
 		var snap: Dictionary = flow.get_singleplayer_snapshot().campaign
 		_check(snap.selected_location_id == "trade_outpost" and snap.selected_job_id == "", "Trade target clears combat job and causes no flight")
+		_check(flow.get("_active_mission") == null, "Planet location selection waits for explicit approach")
 	flow.queue_free()
 	await process_frame
 	print("CAMPAIGN_VIEWS failed=", failures)

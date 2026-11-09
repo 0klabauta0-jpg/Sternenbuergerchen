@@ -1,0 +1,38 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_594 Post Mission Skill Delta Homebase Bridge ===
+  PASS: TASK_594 task file exists
+  PASS: TASK_594 task file names the bridge
+  PASS: Implementation status tracks TASK_594
+  PASS: Implementation status names TASK_595 follow-up
+  PASS: Roadmap marks TASK_594 implemented
+  PASS: Roadmap names TASK_595 follow-up
+  PASS: Review workbench tracks TASK_594
+  PASS: Review workbench names TASK_595 follow-up
+  PASS: Mission feedback contract documents TASK_594
+  PASS: Homebase exposes skill delta snapshot
+  PASS: Homebase snapshot exposes stable schema
+  PASS: Character sheet formatter exposes Last Award row
+  PASS: Character sheet row has stable help id
+  PASS: MetaLayerFlow forwards award summary to Homebase
+  PASS: TASK_593 verifier remains available
+  PASS: Generated roster has enough operators for Homebase bridge
+  PASS: Resolver award summary feeds the Homebase bridge
+  PASS: Homebase instantiates for post-mission skill delta bridge
+  PASS: Awarded operator card remains reachable in Homebase
+  PASS: Awarded operator card opens Character Sheet
+  PASS: Homebase bridge snapshot reports stable schema
+  PASS: Homebase bridge snapshot reports task id
+  PASS: Homebase bridge gate passes
+  PASS: Homebase bridge keeps resolver authority visible
+  PASS: Homebase bridge is read-only
+  PASS: Homebase bridge does not set gameplay truth
+  PASS: Homebase bridge indexes unit awards
+  PASS: Focused delta text contains XP gain
+  PASS: Character sheet delta visibility is reported
+  PASS: Character sheet displays Last Award row
+  PASS: Character sheet displays XP delta text
+  PASS: Read-only check passes
+=== RESULTS: 32 passed, 0 failed ===
+TASK_594: ALL PASSED

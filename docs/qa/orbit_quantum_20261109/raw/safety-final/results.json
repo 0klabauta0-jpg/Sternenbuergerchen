@@ -1,0 +1,7 @@
+{
+  "script": "orbit_quantum_safety_verifier.gd",
+  "exit_code": 0,
+  "errors": 0,
+  "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\safety-final\\orbit_quantum_safety_verifier.log",
+  "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\safety-final\\orbit_quantum_safety_verifier"
+}

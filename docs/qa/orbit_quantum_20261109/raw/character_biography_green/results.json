@@ -1,0 +1,23 @@
+[
+  {
+    "script": "character_sheet_compact_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character_biography_green\\character_sheet_compact_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character_biography_green\\character_sheet_compact_verifier"
+  },
+  {
+    "script": "task_235_character_sheet_roster_gameplay_expansion.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character_biography_green\\task_235_character_sheet_roster_gameplay_expansion.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character_biography_green\\task_235_character_sheet_roster_gameplay_expansion"
+  },
+  {
+    "script": "bugfix_character_team_editor_usability_pass.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\character_biography_green\\bugfix_character_team_editor_usability_pass.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\character_biography_green\\bugfix_character_team_editor_usability_pass"
+  }
+]

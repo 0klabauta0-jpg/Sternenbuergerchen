@@ -1,5 +1,21 @@
 # IMPLEMENTATION_STATUS
 
+### Mondbasis / Quantum / kompakte deutsche UI — 09.11.2026
+Eigener Taskbranch `task/orbit-quantum-travel-20261109` auf Main `b548b5556`.
+Abheben ohne Ortswahl, Mond-/Planetenorbit, 3-s-Quantum mit Abbruch/Neustart,
+bewusster spaeter Kartenanflug und Rueckreise mit echter Heimatlandung.
+Cursor-Zoom/Pan, Glut/Glut I,3inaktive Zukunftsbereiche; eigene schematische
+Sternkarte nach Nutzerreferenz. Reale Pad-/Weltraumvorschau, sichtbarer
+Abflug-Sperrgrund, kompaktere deutsche Mobilgeraet-/Charakteransichten und
+nachvollziehbare Startrolle/Aufgabe/Eignung bei unveraenderten Scores.
+Echte Kampagne124/0 mit beiden Checkpoint-Neuladungen, freier Loop104/0,
+Finalmatrix16/16 und weitere gezielte UI-/Domainregressionen gruen.
+Kamera18/0 und Sternkarten-UI91/0; unabhaengiger Review ohne Restblocker.
+QA: `docs/qa/orbit_quantum_20261109/README.md`. Keine Mainintegration,
+kein Push; eigener Kandidatenbuild zur Nutzerpruefung. Native Gestaltung,
+allgemeine Performance/MP und spaetere Raumkaempfe bleiben getrennt.
+
+
 ### Kampagnenstart und Skirmish — 09.11.2026, technisch geprueft
 Eigener Menueeinstieg mit genau zwei NPCs (Pilot und Leader), kompakter
 22x24-Basis und drei gefuehrten Etappen: Vorbereitung, Satellitenbergung,

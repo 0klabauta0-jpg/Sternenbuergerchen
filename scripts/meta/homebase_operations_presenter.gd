@@ -14,7 +14,7 @@ const CYAN := Color("29e1e7")
 const GOLD := Color("ffd348")
 const REFRESH_SECONDS: float = 0.25
 const EQUIPMENT_LABELS: Dictionary = {"light": "Leicht", "medium": "Mittel", "heavy": "Schwer", "rifle": "Sturmgewehr", "smg": "Maschinenpistole", "sniper": "Scharfschützengewehr", "rail_gun": "Railgun", "rocket_launcher": "Raketenwerfer", "medictool": "Sanitätsgerät", "none": "Keine"}
-const REFERENCE_STAGE_PATH := "res://Assets/curated/main_menu/frontier_outpost_main_20261101.png"
+const SHIP_BACKDROP_SCRIPT: GDScript = preload("res://scripts/meta/ship_context_backdrop.gd")
 
 var _screen: WeakRef
 var _built: bool = false
@@ -61,6 +61,7 @@ var _progress: ProgressBar
 var _board: Button
 var _unboard: Button
 var _start: Button
+var _launch_reason: Label
 var _mission_selector: OptionButton
 var _mission_name: Label
 var _feedback: Label
@@ -73,6 +74,8 @@ var _reference_stage: PanelContainer
 var _stage_content: Control
 var _stage_name: Label
 var _stage_caption: Label
+var _ship_backdrop: Control
+var _ship_preview_context: Dictionary = {}
 var _workflow: HBoxContainer
 var _workflow_labels: Dictionary = {}
 var _job_board: Control
@@ -175,7 +178,7 @@ func _build() -> void:
 	nav.custom_minimum_size.x = 166
 	nav.add_theme_constant_override("separation", 8)
 	body.add_child(nav)
-	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "jobs", "label": "Smart Mobile"}, {"id": "map", "label": "Karte"}, {"id": "mission", "label": "Einsatz &\nAbflug"}]:
+	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "jobs", "label": "Smart Mobile"}, {"id": "map", "label": "Sternkarte"}, {"id": "mission", "label": "Einsatz &\nAbflug"}]:
 		var key: String = String(item.id)
 		var button: Button = _button(String(item.label), false)
 		button.name = "Navigate_" + key
@@ -485,7 +488,7 @@ func _build_flightdeck() -> void:
 	_progress.show_percentage = false
 	pilot.add_child(_progress)
 	_board = _button("Boarding starten", false)
-	_board.custom_minimum_size.y = 52
+	_board.custom_minimum_size.y = 44
 	actions.add_child(_board)
 	_board.pressed.connect(func(): _act("board", {"fireteam_id": _fireteam_id, "craft_id": _craft_id}))
 	_unboard = _button("Trupp zurückholen", false)
@@ -493,9 +496,13 @@ func _build_flightdeck() -> void:
 	_unboard.pressed.connect(func(): _act("unboard", {"fireteam_id": _fireteam_id, "craft_id": _craft_id}))
 	_start = _button("Einsatz starten  ›", true)
 	_start.name = "StartMission"
-	_start.custom_minimum_size.y = 64
+	_start.custom_minimum_size.y = 48
 	actions.add_child(_start)
 	_start.pressed.connect(func(): _act("start", {"craft_id": _craft_id}))
+	_launch_reason = _label("Abflugbereitschaft wird geprüft …", 13, GOLD)
+	_launch_reason.name = "LaunchReadiness"
+	_launch_reason.custom_minimum_size.y = 32
+	actions.add_child(_launch_reason)
 	_build_reference_stage()
 
 
@@ -515,23 +522,16 @@ func _build_reference_stage() -> void:
 	_reference_stage.clip_contents = true
 	_reference_stage.add_theme_stylebox_override("panel", _style(Color("0a2935"), Color("2e7b8a")))
 	_reference_stage.set_meta("visual_only", true)
-	_reference_stage.set_meta("source_resource", REFERENCE_STAGE_PATH)
-	_reference_stage.set_meta("image_status", "static_native_capture")
+	_reference_stage.set_meta("source_resource", "res://scripts/meta/ship_context_backdrop.gd")
+	_reference_stage.set_meta("image_status", "runtime_snapshot_projection")
 	_workspace.add_child(_reference_stage)
 	_stage_content = Control.new()
 	_stage_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_reference_stage.add_child(_stage_content)
-	var background := _portrait(Vector2.ZERO)
-	background.name = "BaseImage"
-	background.texture = load(REFERENCE_STAGE_PATH) as Texture2D
-	background.modulate = Color(0.56, 0.62, 0.64, 1.0)
-	_stage_content.add_child(background)
-	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var shade := ColorRect.new()
-	shade.color = Color(0.01, 0.08, 0.11, 0.18)
-	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_stage_content.add_child(shade)
-	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_ship_backdrop = SHIP_BACKDROP_SCRIPT.new()
+	_ship_backdrop.name = "ShipContextBackdrop"
+	_stage_content.add_child(_ship_backdrop)
+	_ship_backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_stage_name = _label("Heimatbasis", 28, CREAM)
 	_stage_name.name = "SelectedCraftName"
 	THEME.style_section_heading(_stage_name, 30)
@@ -540,7 +540,7 @@ func _build_reference_stage() -> void:
 	_craft_image.name = "SelectedCraftPreview"
 	_craft_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_stage_content.add_child(_craft_image)
-	_stage_caption = _label("Basisansicht · Schiffsvorschau", 15, CREAM)
+	_stage_caption = _label("Schiffsposition wird gelesen …", 15, CREAM)
 	_stage_caption.name = "StageCaption"
 	_stage_content.add_child(_stage_caption)
 	_reference_stage.resized.connect(_layout_reference_stage)
@@ -553,12 +553,12 @@ func _layout_reference_stage() -> void:
 	var area: Vector2 = _stage_content.size
 	_stage_name.position = Vector2(16, 12)
 	_stage_name.size = Vector2(maxf(area.x - 32, 0), 42)
-	var preview_width: float = minf(maxf(area.x - 32, 0), 840.0)
-	var preview_height: float = maxf(minf(area.y * 0.73, area.y - 84), 0.0)
+	var preview_width: float = minf(maxf(area.x - 48, 0), 320.0)
+	var preview_height: float = maxf(minf(area.y * 0.55, area.y - 92), 0.0)
 	_craft_image.position = Vector2((area.x - preview_width) * 0.5, 58 + maxf((area.y - 84 - preview_height) * 0.5, 0.0))
 	_craft_image.size = Vector2(preview_width, preview_height)
-	_stage_caption.position = Vector2(16, maxf(area.y - 30, 0))
-	_stage_caption.size = Vector2(maxf(area.x - 32, 0), 24)
+	_stage_caption.position = Vector2(16, maxf(area.y - 48, 0))
+	_stage_caption.size = Vector2(maxf(area.x - 32, 0), 42)
 
 
 func _person_row(parent: Control, id: String, with_assign: bool) -> Dictionary:
@@ -813,15 +813,31 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	_unboard.visible = bool(craft.get("has_payload", false))
 	_start.disabled = not bool(craft.get("can_start", false))
 	_start.tooltip_text = String(craft.get("next_step", ""))
-	var campaign: Dictionary = Dictionary(snapshot.get("singleplayer", {})).get("campaign", {})
-	_mission_selector.visible = campaign.is_empty()
-	if not campaign.is_empty():
-		var location: Dictionary = Dictionary(campaign.get("locations", {})).get(String(campaign.get("selected_location_id", "")), {})
-		var job: Dictionary = Dictionary(campaign.get("jobs", {})).get(String(campaign.get("selected_job_id", "")), {})
-		_mission_name.text = "%s\n%s" % [String(location.get("name", "Zielort wählen")), String(job.get("title", "Ortsbesuch ohne Auftrag"))]
-		if String(campaign.get("selected_location_id", "homebase")) == "homebase":
-			_start.disabled = true
-			_start.tooltip_text = "Zielort auf der Regionalkarte wählen"
+	var space_route: bool = bool(Dictionary(Dictionary(snapshot.get("singleplayer", {})).get("space_travel", {})).get("enabled", false))
+	var launch_message: String = String(craft.get("next_step", "Schiff vorbereiten"))
+	if space_route:
+		var readiness: Dictionary = Dictionary(Dictionary(snapshot.get("singleplayer", {})).get("space_launch_readiness_by_craft_id", {})).get(_craft_id, {})
+		_start.disabled = _start.disabled or not bool(readiness.get("ok", false))
+		if not bool(readiness.get("ok", false)):
+			launch_message = String(readiness.get("message", "Abflugbereitschaft wird geprüft …"))
+		elif not _start.disabled:
+			launch_message = "Bereit zum Abheben in den Mondorbit."
+	_launch_reason.text = launch_message
+	_launch_reason.add_theme_color_override("font_color", GOLD if _start.disabled else CYAN)
+	_start.tooltip_text = launch_message
+	_start.text = "Abheben · Mondorbit  ›" if space_route else "Einsatz starten  ›"
+	# A location catalogue also exists in ordinary Skirmish. Only the active
+	# orbital-route projection changes its selector and launch requirements.
+	_mission_selector.visible = not space_route
+	_mission_name.text = "Mondbasis → Mondorbit\nZielort nach dem Quantum-Sprung im Planetenorbit wählen." if space_route else "Einsatz"
+
+
+func get_launch_action_rects() -> Array[Rect2]:
+	var result: Array[Rect2] = []
+	for control in [_start, _board, _unboard, _launch_reason]:
+		if control != null and control.is_visible_in_tree():
+			result.append(control.get_global_rect())
+	return result
 
 
 static func _craft_status_key(craft: Dictionary) -> String:
@@ -895,7 +911,11 @@ func _layout_columns() -> void:
 		var squad_width: float = usable * 0.30
 		rects["roster"] = Rect2(0, 0, roster_width, available.y)
 		rects["squad"] = Rect2(roster_width + gap, 0, squad_width, available.y)
-		rects["equipment"] = Rect2(roster_width + squad_width + gap * 2.0, 0, usable * 0.38, available.y)
+		var right_x: float = roster_width + squad_width + gap * 2.0
+		var preview_height: float = minf(220.0, available.y * 0.38)
+		var equipment_height: float = maxf(available.y - preview_height - gap, 0.0)
+		rects["equipment"] = Rect2(right_x, 0, usable * 0.38, equipment_height)
+		scene_rect = Rect2(right_x, equipment_height + gap, usable * 0.38, preview_height)
 	else:
 		var start_x: float = 0.0
 		if _mode != "mission":
@@ -933,7 +953,7 @@ func _layout_columns() -> void:
 		if _focused_name.get_theme_font_size("font_size") != identity_size:
 			_focused_name.add_theme_font_size_override("font_size", identity_size)
 	if _base != null:
-		_base.visible = _mode == "base"
+		_base.visible = _mode == "base" or (String(_ship_preview_context.get("kind", "")) == "base_pad" and scene_rect.has_area())
 
 
 func _terminal_requested(id: String) -> void:
@@ -959,18 +979,50 @@ func _update_base_surface(snapshot: Dictionary) -> void:
 		_base.call("set_active", _mode == "base" and is_visible_in_tree())
 		return
 	_base.call("set_transport_snapshot", runtime)
-	if _mode == "mission" and is_visible_in_tree():
-		if _reference_stage != null:
-			_base.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-			_base.position = _reference_stage.position
-			_base.size = _reference_stage.size
-			_reference_stage.hide()
-		_base.call("set_pad_preview", true, _craft_id)
-	elif _mode == "base" and is_visible_in_tree():
+	_ship_preview_context = _project_ship_context(runtime)
+	var caption: String = String(_ship_preview_context.get("caption", ""))
+	_stage_caption.text = caption
+	_ship_backdrop.call("set_context", _ship_preview_context)
+	_craft_image.visible = String(_ship_preview_context.get("kind", "")) == "space"
+	var has_preview: bool = _mode in ["squad", "mission"] and _reference_stage.size.x > 0 and _reference_stage.size.y > 0 and is_visible_in_tree()
+	if _mode == "base" and is_visible_in_tree():
+		_reference_stage.hide()
 		_base.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_base.call("set_active", true)
+	elif has_preview and String(_ship_preview_context.get("kind", "")) == "base_pad":
+		_base.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+		_base.position = _reference_stage.position
+		_base.size = _reference_stage.size
+		_reference_stage.hide()
+		_base.call("set_pad_preview", true, _craft_id)
 	else:
 		_base.call("set_active", false)
+		_reference_stage.visible = has_preview
+
+
+func _project_ship_context(runtime: Dictionary) -> Dictionary:
+	var craft: Dictionary = {}
+	for entry in Array(runtime.get("crafts", [])):
+		if String(entry.get("craft_id", "")) == _craft_id:
+			craft = entry
+			break
+	var travel: Dictionary = runtime.get("space_travel", {})
+	var phase: String = String(travel.get("phase", "grounded"))
+	if String(travel.get("craft_id", "")) == _craft_id and phase in ["orbit", "quantum", "stopped", "approach"]:
+		var context: Dictionary = travel.duplicate(true)
+		context["kind"] = "space"
+		var orbit: String = String(travel.get("orbit_id", ""))
+		match phase:
+			"orbit": context["caption"] = "Im Weltraum · " + ("Mondorbit" if orbit == "moon_orbit" else "Planetenorbit")
+			"quantum": context["caption"] = "Quantum-Sprung → %s · %d %%" % ["Mondorbit" if String(travel.get("target_orbit_id", "")) == "moon_orbit" else "Planetenorbit", roundi(float(travel.get("progress", 0.0)) * 100)]
+			"stopped": context["caption"] = "Im Weltraum · Sprung abgebrochen, Position gehalten"
+			"approach": context["caption"] = "Ortsanflug · Planetenorbit wird verlassen"
+		return context
+	if not craft.is_empty() and bool(craft.get("visible_on_pad", false)) and String(craft.get("location_id", "")) == "homebase" and not bool(craft.get("busy", false)):
+		return {"kind": "base_pad", "phase": "grounded", "craft_id": _craft_id, "landing_pad_id": String(craft.get("landing_pad_id", "")), "caption": "Mondbasis · Schiff auf seinem Landepad"}
+	var location_id: String = String(craft.get("location_id", ""))
+	var location: Dictionary = Dictionary(Dictionary(runtime.get("campaign", {})).get("locations", {})).get(location_id, {})
+	return {"kind": "location", "phase": phase if String(travel.get("craft_id", "")) == _craft_id else "", "craft_id": _craft_id, "caption": "Schiff am Zielort · " + String(location.get("name", "Position wird bestaetigt"))}
 
 
 func get_presentation_snapshot() -> Dictionary:
@@ -1017,8 +1069,12 @@ func get_presentation_snapshot() -> Dictionary:
 		"ship_preview_path": String(_craft_image.get_meta("rendered_path", "")),
 		"reference_stage_visible": _reference_stage != null and _reference_stage.is_visible_in_tree(),
 		"reference_stage_rect": _reference_stage.get_global_rect() if _reference_stage != null else Rect2(),
-		"reference_stage_source": REFERENCE_STAGE_PATH,
-		"reference_stage_kind": "static_native_capture",
+		"reference_stage_source": "res://scripts/meta/ship_context_backdrop.gd",
+		"reference_stage_kind": String(_ship_preview_context.get("kind", "unavailable")),
+		"ship_preview_phase": String(_ship_preview_context.get("phase", "")),
+		"ship_preview_caption": _stage_caption.text,
+		"ship_preview_visible": (_base.is_visible_in_tree() and _mode != "base") or _reference_stage.is_visible_in_tree(),
+		"ship_preview_rect": _base.get_global_rect() if _base.is_visible_in_tree() and _mode != "base" else _reference_stage.get_global_rect(),
 		"base": _base.call("get_exploration_snapshot") if _base != null else {}}
 
 

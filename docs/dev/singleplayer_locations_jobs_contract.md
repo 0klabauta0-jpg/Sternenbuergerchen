@@ -10,6 +10,10 @@ der austauschbaren Mission. MetaLayerFlow bindet diesen Owner und orchestriert
 Szenen; UI und Presenter senden nur Commands und lesen Snapshots.
 Aircraft-/Transportowner behalten Payload, Boarding und Flugphasen pro craft_id.
 Campaign referenziert Craft-/Ort-/Job-IDs, simuliert keinen zweiten Transit.
+Die zusaetzliche Orbit-/Quantum-Reise folgt `orbit_quantum_travel_contract.md`:
+ein SimulationRoot-gebundener Reiseowner besitzt nur Orbitposition und
+Reisephase. Abheben ist vom ortsgebundenen Missionsanflug getrennt. Erst der
+ausdrueckliche Anflug bindet Ort/Job und startet die zugehoerige Karteninstanz.
 
 ## Daten und Zustaende
 

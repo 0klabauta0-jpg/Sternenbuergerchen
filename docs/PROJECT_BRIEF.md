@@ -13,7 +13,7 @@ SternenBuergerchen
 Commander-gesteuertes Echtzeit-Taktikspiel mit FTL-Hierarchie, menügetriebenem Meta-Layer und taktischem Einsatz als Kern des Spiels.
 
 ## Core Loop
-Heimatbasis erkunden / Personal -> Trupp und Ausruestung -> Auftrag annehmen / Zielort waehlen -> Dropship -> Einsatz oder Ortsbesuch -> Rueckkehr und Ergebnis -> Skillentwicklung
+Mondbasis erkunden / Personal -> Trupp und Ausruestung -> Auftrag annehmen -> Abheben / Mondorbit -> Sternkarte / Quantum zum Planetenorbit -> Zielort und Anflug -> Einsatz oder Ortsbesuch -> Rueckorbit / Heimflug / Landung -> Ergebnis und Skillentwicklung
 
 ## Harte Designentscheidungen
 - Spieler ist Commander

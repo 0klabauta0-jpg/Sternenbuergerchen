@@ -2035,7 +2035,7 @@ func get_native_r2_layout_snapshot() -> Dictionary:
 		"roster": Rect2i(16, work_top, roster_width, work_height),
 		"fireteams": Rect2i(32 + roster_width, work_top, team_width, team_height),
 		"flightdeck": Rect2i(48 + roster_width + team_width, work_top, usable_width - roster_width - team_width, transport_height),
-		"character_popup": Rect2i(viewport_size.x - mini(808, viewport_size.x - 32) - 16, 32, mini(808, viewport_size.x - 32), mini(840, viewport_size.y - 64)),
+		"character_popup": Rect2i(viewport_size.x - mini(736, viewport_size.x - 32) - 16, 32, mini(736, viewport_size.x - 32), mini(760, viewport_size.y - 64)),
 		"briefing_details_open": _r2_briefing_details_open,
 		"ui_sets_gameplay_truth": false,
 	}
@@ -2693,7 +2693,7 @@ func _ensure_character_sheet_popup() -> void:
 
 	var close_button := Button.new()
 	close_button.name = "ClosePopupButton"
-	close_button.text = "Close"
+	close_button.text = "Schließen"
 	close_button.custom_minimum_size = Vector2(72.0, 32.0)
 	META_UI_SKIN_SCRIPT.style_secondary_button(close_button)
 	if not close_button.pressed.is_connected(_on_close_sheet_button_pressed):
@@ -5903,15 +5903,21 @@ func _update_character_sheet() -> void:
 		return
 	var profile = _profiles_by_id.get(_focused_unit_id, null)
 	var post_mission_delta: Dictionary = _get_post_mission_skill_delta_for_unit(_focused_unit_id)
+	var assigned_craft_id: String = _find_assigned_craft_for_unit(_focused_unit_id)
+	var current_assignment_text: String = _build_homebase_fireteam_text(_focused_unit_id)
+	if not assigned_craft_id.is_empty():
+		current_assignment_text = "Pilot · %s" % FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_display_name(_get_aircraft_definition_by_id(assigned_craft_id))
 	CHARACTER_SHEET_VIEW_SCRIPT.render(
 		content_host,
 		profile,
 		{
 			"status_text": _build_sheet_status_text(_focused_unit_id),
+			"current_assignment_text": current_assignment_text,
 			"fireteam_text": _build_homebase_fireteam_text(_focused_unit_id),
 			"post_mission_skill_delta": post_mission_delta,
 			"post_mission_skill_delta_text": _format_post_mission_skill_delta_text(post_mission_delta),
 			"editable_metrics": false,
+			"compact_read_only": true,
 			"two_column_layout": true,
 			"show_badge_progress": true,
 			"hide_loadout_dropdowns": true,
@@ -8061,16 +8067,16 @@ func _populate_mission_selector(selector: OptionButton) -> void:
 func _build_sheet_status_text(unit_id: String) -> String:
 	var assigned_craft_id: String = _find_assigned_craft_for_unit(unit_id)
 	if not assigned_craft_id.is_empty():
-		return "Loc: Homebase / Flight Deck | Status: assigned pilot for %s" % _build_craft_display_name(assigned_craft_id)
+		return "%s · Pilot von %s" % [_build_homebase_location_text(unit_id), FRONTIER_SHIP_VISUALS_SCRIPT.get_ui_display_name(_get_aircraft_definition_by_id(assigned_craft_id))]
 
 	var transit_entry: Dictionary = _find_transfer_entry_for_unit(unit_id)
 	if not transit_entry.is_empty():
-		return "Loc: Transit Lane / FOB Approach | Status: eta %s" % _build_transfer_eta_text(transit_entry)
+		return "Unterwegs · Ankunft in %s" % _build_transfer_eta_text(transit_entry)
 
 	if _selected_unit_ids.has(unit_id):
-		return "Loc: Homebase / Transfer Window | Status: staged for FOB transfer"
+		return "%s · Für den Einsatz vorbereitet" % _build_homebase_location_text(unit_id)
 
-	return "Loc: Homebase / Roster | Status: available"
+	return "Mondbasis · Verfügbar"
 
 
 func _build_homebase_fireteam_text(unit_id: String) -> String:
@@ -8086,16 +8092,22 @@ func _get_selected_fireteam_id_for_unit(unit_id: String) -> String:
 
 func _build_homebase_location_text(unit_id: String) -> String:
 	var assigned_craft_id: String = _find_assigned_craft_for_unit(unit_id)
-	if not assigned_craft_id.is_empty():
-		return "Loc: Homebase / Flight Deck / %s" % _build_craft_display_name(assigned_craft_id)
+	var craft_id: String = assigned_craft_id if not assigned_craft_id.is_empty() else _operations_payload_craft_for_team(_get_fireteam_id_for_unit(unit_id))
+	if not craft_id.is_empty():
+		var location: String = _get_aircraft_location(craft_id)
+		if location == "starmap":
+			return "Weltraum · An Bord"
+		if location == "mission":
+			return "Einsatzort · An Bord"
+		return "Mondbasis · Landepad"
 
 	var transit_entry: Dictionary = _find_transfer_entry_for_unit(unit_id)
 	if not transit_entry.is_empty():
-		return "Loc: Transit To FOB / ETA %s" % _build_transfer_eta_text(transit_entry)
+		return "Unterwegs · Ankunft in %s" % _build_transfer_eta_text(transit_entry)
 
 	if _selected_unit_ids.has(unit_id):
-		return "Loc: Homebase / Transfer Window"
-	return "Loc: Homebase / Roster"
+		return "Mondbasis · Einsatzvorbereitung"
+	return "Mondbasis · Personal"
 
 
 func _build_roster_card_secondary_text(unit_id: String, profile) -> String:
@@ -8104,7 +8116,7 @@ func _build_roster_card_secondary_text(unit_id: String, profile) -> String:
 		status_text = String(profile.status_text).strip_edges()
 		if status_text.is_empty():
 			status_text = String(profile.availability_status).strip_edges()
-	status_text = status_text.capitalize() if not status_text.is_empty() else "Active"
+	status_text = CHARACTER_SHEET_FORMATTER_SCRIPT.format_status_text(status_text) if not status_text.is_empty() else "Einsatzbereit"
 	var location_text: String = _build_homebase_location_text(unit_id)
 	return "%s | %s" % [status_text, location_text]
 
@@ -9027,7 +9039,7 @@ func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 	var busy: bool = in_transit or not pilot_craft.is_empty() or not payload_craft.is_empty()
 	var role_id: String = String(unit_data.get("roster_role_category", unit_data.get("role_id", "")))
 	var role_names: Dictionary = {"leader": "Truppführung", "medic": "Sanität", "engineer": "Technik", "pilot": "Pilot", "shooter": "Schütze", "heavy_support": "Unterstützung", "scout_sniper": "Aufklärung"}
-	var role: String = String(role_names.get(role_id, String(profile.role_name) if profile != null else String(unit_data.get("role_name", "Operator"))))
+	var role: String = String(role_names.get(role_id, CHARACTER_SHEET_FORMATTER_SCRIPT.format_role_name(String(profile.role_name) if profile != null else String(unit_data.get("role_name", "Operator")))))
 	var status: String = "Bereit"
 	if in_transit:
 		status = "Unterwegs"
@@ -9149,7 +9161,7 @@ func get_operations_snapshot() -> Dictionary:
 
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
-	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase"]:
+	if operation.begins_with("space_") or operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase"]:
 		if not _singleplayer_command_handler.is_valid():
 			return _operations_rejected("singleplayer_unavailable", "Diese Funktion ist noch nicht verfügbar")
 		var result: Dictionary = _singleplayer_command_handler.call(operation, payload.duplicate(true))

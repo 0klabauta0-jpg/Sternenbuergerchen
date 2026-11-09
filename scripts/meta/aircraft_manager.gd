@@ -39,7 +39,7 @@ func build_default_aircraft_definitions() -> Array:
 			"craft_id": "dropship_template",
 			"craft_type": "dropship",
 			"display_name": "Dropship",
-			"summary": "Single-pilot shuttle for the FOB corridor.",
+			"summary": "Landungsschiff für einen Piloten und den Trupptransport.",
 			"texture_path": DEFAULT_DROPSHIP_TEXTURE_PATH,
 			"supports_cargo": false,
 			"cargo_options": [],
@@ -48,11 +48,11 @@ func build_default_aircraft_definitions() -> Array:
 			"craft_id": "craft_cargoB_template",
 			"craft_type": "craft_cargoB",
 			"display_name": "Frachter",
-			"summary": "Cargo freighter for Rover-sized payloads.",
+			"summary": "Frachttransporter für Ladung bis zur Größe eines Bodenfahrzeugs.",
 			"texture_path": DEFAULT_CARGO_TEXTURE_PATH,
 			"supports_cargo": true,
 			"cargo_options": [
-				{"cargo_id": "", "display_name": "No Cargo"},
+				{"cargo_id": "", "display_name": "Keine Fracht"},
 				{"cargo_id": "rover", "display_name": "Rover"},
 			],
 		},
@@ -417,18 +417,18 @@ func build_homebase_direct_staging_block_text(block_reason: String, craft_def: D
 		"":
 			return ""
 		"no_homebase_craft":
-			return "Add a dropship shipcard to the Homebase Flightdeck."
+			return "Ein Landungsschiff am Flugdeck der Heimatbasis bereitstellen."
 		"not_dropship":
-			return "%s cannot board fireteams. Select a dropship." % String(craft_def.get("display_name", craft_id)).strip_edges()
+			return "%s kann keine Trupps aufnehmen. Ein Landungsschiff auswählen." % String(craft_def.get("display_name", craft_id)).strip_edges()
 		"air_asset_unavailable":
-			return "%s is unavailable for recovery." % String(craft_def.get("display_name", craft_id)).strip_edges()
+			return "%s ist während der Instandsetzung nicht verfügbar." % String(craft_def.get("display_name", craft_id)).strip_edges()
 		"craft_in_transit":
-			return "%s is already in transit." % String(craft_def.get("display_name", craft_id)).strip_edges()
+			return "%s ist bereits unterwegs." % String(craft_def.get("display_name", craft_id)).strip_edges()
 		"craft_busy":
-			return "%s is busy on the Flightdeck." % String(craft_def.get("display_name", craft_id)).strip_edges()
+			return "%s wird am Flugdeck vorbereitet." % String(craft_def.get("display_name", craft_id)).strip_edges()
 		"not_at_homebase":
-			return "%s is not parked at Homebase." % String(craft_def.get("display_name", craft_id)).strip_edges()
-	return "Selected craft cannot stage a direct mission payload."
+			return "%s steht nicht an der Heimatbasis." % String(craft_def.get("display_name", craft_id)).strip_edges()
+	return "Das ausgewählte Schiff kann keinen Trupp für den direkten Abflug aufnehmen."
 
 
 func build_aircraft_status_text(
@@ -443,30 +443,31 @@ func build_aircraft_status_text(
 	var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
 	if bool(craft_def.get("air_asset_unavailable", false)):
 		var meta_state: String = String(craft_def.get("air_asset_meta_status", "")).strip_edges()
-		var label: String = "replacement pending" if meta_state == "destroyed_replacement_pending" else "repairing"
-		return "%s %s. ETA %ds. Pilot state: %s." % [craft_name, label, int(craft_def.get("air_asset_recovery_eta_seconds", 0)), String(craft_def.get("pilot_recovery_state", "pilot_safe_homebase"))]
+		var label: String = "wartet auf Ersatz" if meta_state == "destroyed_replacement_pending" else "wird repariert"
+		var pilot_state: String = "Pilot wird versorgt" if String(craft_def.get("pilot_recovery_state", "pilot_safe_homebase")) == "pilot_injured_recovering" else "Pilot sicher an der Heimatbasis"
+		return "%s %s. Bereit in %d s. %s." % [craft_name, label, int(craft_def.get("air_asset_recovery_eta_seconds", 0)), pilot_state]
 	if is_craft_in_transit(craft_id):
 		if bool(craft_def.get("mission_transit_to_map", false)):
-			return "%s is currently inbound to the mission map." % craft_name
+			return "%s fliegt zum Einsatzort." % craft_name
 		if bool(craft_def.get("mission_transit_to_homebase", false)):
-			return "%s is currently returning to Homebase." % craft_name
+			return "%s kehrt zur Heimatbasis zurück." % craft_name
 		if bool(craft_def.get("mission_transit_to_fob", false)):
-			return "%s is currently returning to FOB." % craft_name
-		return "%s is currently in transit between Homebase and FOB." % craft_name
+			return "%s kehrt zur vorgeschobenen Basis zurück." % craft_name
+		return "%s fliegt zwischen Heimatbasis und vorgeschobener Basis." % craft_name
 	if has_active_cargo_load_for_craft(craft_id):
-		return "%s is currently loading %s at Homebase." % [craft_name, build_cargo_display_name(craft_def, get_selected_cargo_id(craft_id))]
+		return "%s lädt %s an der Heimatbasis." % [craft_name, build_cargo_display_name(craft_def, get_selected_cargo_id(craft_id))]
 	if has_active_pilot_transfer_for_craft(craft_id):
-		return "%s is currently inbound to FOB." % craft_name
+		return "%s fliegt zur vorgeschobenen Basis." % craft_name
 	var loaded_cargo_id: String = get_loaded_cargo_id(craft_id)
 	if not loaded_cargo_id.is_empty():
-		return "%s ready with %s onboard." % [craft_name, build_cargo_display_name(craft_def, loaded_cargo_id)]
+		return "%s ist mit %s an Bord bereit." % [craft_name, build_cargo_display_name(craft_def, loaded_cargo_id)]
 	if not assigned_pilot_id.strip_edges().is_empty():
-		return "%s ready. Pilot %s can launch the ship immediately." % [craft_name, assigned_pilot_display_name]
+		return "%s ist bereit. Pilot %s kann abheben." % [craft_name, assigned_pilot_display_name]
 	if craft_supports_cargo(craft_def):
 		var selected_cargo_id: String = get_selected_cargo_id(craft_id)
 		if not selected_cargo_id.is_empty():
-			return "%s idle at Homebase. Selected cargo: %s." % [craft_name, build_cargo_display_name(craft_def, selected_cargo_id)]
-	return "%s idle at Homebase. Assign a pilot to start a solo transfer." % craft_name
+			return "%s steht an der Heimatbasis. Gewählte Fracht: %s." % [craft_name, build_cargo_display_name(craft_def, selected_cargo_id)]
+	return "%s steht an der Heimatbasis. Für den Abflug einen Piloten zuweisen." % craft_name
 
 
 func get_contract_snapshot() -> Dictionary:

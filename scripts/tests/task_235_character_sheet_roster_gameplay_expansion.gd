@@ -50,7 +50,7 @@ func _test_sheet_formatter_blocks_and_fallbacks() -> void:
 	var model: Dictionary = Dictionary(CHARACTER_SHEET_FORMATTER_SCRIPT.call("build_sheet_view_model", profile, {"fireteam_text": "BLUE"}))
 	for key in ["role_loadout_rows", "status_rows", "relationship_rows", "progress_rows"]:
 		_assert(not Array(model.get(key, [])).is_empty(), "Sheet formatter emits %s" % key)
-	_assert(_rows_contain(Array(model.get("status_rows", [])), "Recovery", "recovering"), "Sheet status rows include recovery")
+	_assert(_rows_contain(Array(model.get("status_rows", [])), "Erholung", "In Erholung"), "Sheet status rows include recovery")
 	_assert(_rows_contain(Array(model.get("relationship_rows", [])), "Teamfit", "trusts"), "Sheet relationship rows include teamfit summary")
 	_assert(_rows_contain(Array(model.get("progress_rows", [])), "XP", "12"), "Sheet progress rows include XP")
 
@@ -63,8 +63,8 @@ func _test_sheet_formatter_blocks_and_fallbacks() -> void:
 		"skill_values": {"accuracy": 0.4, "speed": 0.4, "leadership": 0.4, "toughness": 0.4},
 	})
 	var fallback_model: Dictionary = Dictionary(CHARACTER_SHEET_FORMATTER_SCRIPT.call("build_sheet_view_model", fallback_profile))
-	_assert(_rows_contain(Array(fallback_model.get("relationship_rows", [])), "Links", "none"), "Missing relationship data falls back cleanly")
-	_assert(_rows_contain(Array(fallback_model.get("progress_rows", [])), "Last Mission", "none"), "Missing mission history falls back cleanly")
+	_assert(_rows_contain(Array(fallback_model.get("relationship_rows", [])), "Beziehungen", "Noch keine"), "Missing relationship data falls back cleanly")
+	_assert(_rows_contain(Array(fallback_model.get("progress_rows", [])), "Letzter Einsatz", "Noch keine"), "Missing mission history falls back cleanly")
 
 
 func _test_character_sheet_view_sections() -> void:
@@ -74,7 +74,7 @@ func _test_character_sheet_view_sections() -> void:
 	CHARACTER_SHEET_VIEW_SCRIPT.call("render", host, profile, {"status_text": "recovering in medbay", "fireteam_text": "BLUE"})
 	await process_frame
 	var labels: PackedStringArray = _collect_label_texts(host)
-	for required_header in ["ROLLE / LOADOUT:", "STATUS / RECOVERY:", "TEAMFIT:", "PROGRESS:", "KERNWERTE"]:
+	for required_header in ["AUFGABE & EIGNUNG", "STATUS & ERHOLUNG", "ZUSAMMENARBEIT", "ENTWICKLUNG", "KERNWERTE"]:
 		_assert(_any_label_contains(labels, required_header), "Character sheet renders section %s" % required_header)
 	var portrait_rect := host.find_child("PortraitRect", true, false) as TextureRect
 	_assert(portrait_rect != null and portrait_rect.texture != null, "Character sheet portrait fallback/load remains stable")
@@ -96,9 +96,9 @@ func _test_homebase_roster_scanability_with_30_profiles() -> void:
 	var first_card := roster_list.get_child(0) as Control
 	_assert(first_card.custom_minimum_size.y <= 76.0, "Compact roster card keeps bounded height")
 	var first_detail := first_card.get_node("Margin/HBox/TextVBox/DataBLabel") as Label
-	_assert(first_detail.text.contains("Loc:") and first_detail.text.contains("Active"), "Roster compact card combines status and location")
-	var sheet_labels: PackedStringArray = _collect_label_texts(screen.get_node("Panel/Margin/VBox/ContentRow/InfoPanel"))
-	_assert(_any_label_contains(sheet_labels, "STATUS / RECOVERY:"), "Homebase character sheet uses expanded gameplay sections")
+	_assert(first_detail.text.contains("Mondbasis") and first_detail.text.contains("Einsatzbereit"), "Roster compact card combines confirmed status and actual location")
+	var sheet_labels: PackedStringArray = _collect_label_texts(screen.get_node("CharacterSheetPopup"))
+	_assert(_any_label_contains(sheet_labels, "STATUS & ERHOLUNG") and screen.find_child("CharacterSheetToggle_history", true, false) != null, "Homebase popup preserves gameplay sections behind the compact details action")
 	screen.queue_free()
 	await process_frame
 

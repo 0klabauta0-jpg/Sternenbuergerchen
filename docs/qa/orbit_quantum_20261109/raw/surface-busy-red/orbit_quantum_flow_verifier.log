@@ -1,0 +1,30 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Real campaign accepts satellite job before departure
+PASS: Boarded craft can lift off without a selected planetary location
+PASS: Actual launch reaches moon orbit
+PASS: Liftoff starts neither mission scene nor timer
+PASS: Liftoff does not activate accepted job
+PASS: Orbit departure does not charge an unselected route
+PASS: Orbit cannot write a home checkpoint
+PASS: Planet click starts actual quantum
+PASS: Actual quantum abort accepts
+PASS: Abort keeps reached position while real frames continue
+PASS: Midflight position cannot enter an orbital location
+PASS: Same target restarts from stopped position
+PASS: Restart origin equals actual abort position
+PASS: Short restarted jump arrives in planet orbit
+PASS: Tutorial trade lock is enforced at planetary approach
+PASS: Orbit permits selection of accepted satellite location
+PASS: Location selection alone does not load its map
+PASS: Explicit approach authorizes real location
+PASS: Visible approach phase precedes map instantiation
+PASS: Repeated approach cannot launch twice
+PASS: Approach eventually loads actual mission
+PASS: Approach uses the exact existing satellite map
+PASS: Approach retains existing recovery scenario
+PASS: Repeated approach charges outbound route exactly once
+PASS: Actual orbital map handoff completes
+ORBIT_QUANTUM_FLOW passed=25 failed=1
+FAIL: Completed local handoff does not leave a surface craft locked as Quantum-busy

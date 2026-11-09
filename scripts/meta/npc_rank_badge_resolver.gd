@@ -7,13 +7,13 @@ const START_PROFILE_BADGE_CAP: int = 1
 const MIN_SCORE: float = 0.52
 
 const BADGE_DEFINITIONS: Dictionary = {
-	"medic": {"badge_id": "badge_role_medic", "label": "Medic", "priority": 10},
-	"leader": {"badge_id": "badge_role_ftl", "label": "Leader", "priority": 20},
-	"heavy": {"badge_id": "badge_role_heavy", "label": "Heavy", "priority": 30},
+	"medic": {"badge_id": "badge_role_medic", "label": "Sanität", "priority": 10},
+	"leader": {"badge_id": "badge_role_ftl", "label": "Führung", "priority": 20},
+	"heavy": {"badge_id": "badge_role_heavy", "label": "Schwere Waffen", "priority": 30},
 	"pilot": {"badge_id": "badge_role_pilot", "label": "Pilot", "priority": 40},
-	"engineer": {"badge_id": "badge_role_engineer", "label": "Engineer", "priority": 50},
-	"shooter": {"badge_id": "badge_role_rifle", "label": "Shooter", "priority": 60},
-	"enemy": {"badge_id": "badge_role_enemy", "label": "Enemy", "priority": 90},
+	"engineer": {"badge_id": "badge_role_engineer", "label": "Technik", "priority": 50},
+	"shooter": {"badge_id": "badge_role_rifle", "label": "Schütze", "priority": 60},
+	"enemy": {"badge_id": "badge_role_enemy", "label": "Gegner", "priority": 90},
 }
 
 const HEAVY_WEAPONS: PackedStringArray = ["rail_gun", "rocket_launcher", "panzerfaust"]
@@ -31,13 +31,13 @@ const BADGE_HELP_IDS: Dictionary = {
 }
 
 const BADGE_FORMULAS: Dictionary = {
-	"medic": "Threshold 0.52. Fit reads Discipline, Awareness, Recognition, Speech Quality, Order Fidelity, Contact Stability and small medic context hints.",
-	"leader": "Threshold 0.52. Fit reads Leadership, Speech Quality, Recognition, Discipline, Order Fidelity, Autonomy and a small FTL/context hint.",
-	"heavy": "Threshold 0.52. Fit reads Toughness, Contact Stability, Discipline, Accuracy, Order Fidelity and small heavy loadout/context hints.",
-	"pilot": "Threshold 0.52. Fit reads best platform value plus Awareness, Recognition, Discipline, Speech Quality, Initiative and Contact Stability.",
-	"engineer": "Threshold 0.52. Fit reads Discipline, Recognition, Awareness, Speech Quality, Order Fidelity, Autonomy, Contact Stability and tech context hints.",
-	"shooter": "Threshold 0.52. Fit reads Accuracy, Awareness, Recognition, Discipline, Order Fidelity, Contact Stability, Speed and weapon context.",
-	"enemy": "Source: profile team_id marks the unit as Team Bravo or enemy.",
+	"medic": "Schwelle 0,52. Disziplin, Wahrnehmung, Erkennen, Meldequalität, Befehlstreue, Ruhe im Kontakt und kleiner Sanitätskontext.",
+	"leader": "Schwelle 0,52. Führung, Meldequalität, Erkennen, Disziplin, Befehlstreue, Selbstständigkeit und kleiner Führungskontext.",
+	"heavy": "Schwelle 0,52. Belastbarkeit, Ruhe im Kontakt, Disziplin, Treffsicherheit, Befehlstreue und schwerer Ausrüstungs-/Rollenkontext.",
+	"pilot": "Schwelle 0,52. Bester Fahrzeugwert, Wahrnehmung, Erkennen, Disziplin, Meldequalität, Initiative, Ruhe im Kontakt und Pilotenkontext.",
+	"engineer": "Schwelle 0,52. Disziplin, Erkennen, Wahrnehmung, Meldequalität, Befehlstreue, Selbstständigkeit, Ruhe im Kontakt und Technikkontext.",
+	"shooter": "Schwelle 0,52. Treffsicherheit, Wahrnehmung, Erkennen, Disziplin, Befehlstreue, Ruhe im Kontakt, Tempo und Waffenkontext.",
+	"enemy": "Die Team- oder Fraktionszugehörigkeit kennzeichnet diese Person als Gegner.",
 }
 
 
@@ -136,7 +136,7 @@ static func format_badge_tooltip(badge: Dictionary) -> String:
 	var reason: String = String(badge.get("reason", "")).strip_edges()
 	var detail: String = String(badge.get("detail_text", badge.get("formula_text", ""))).strip_edges()
 	var requirement: String = String(badge.get("requirement_text", "")).strip_edges()
-	var score_text: String = "Score %.2f" % float(badge.get("score", 0.0))
+	var score_text: String = "Eignung %.2f" % float(badge.get("score", 0.0))
 	var lines: PackedStringArray = PackedStringArray()
 	lines.append("%s: %s" % [_optional_text(label, "Badge"), score_text])
 	if not reason.is_empty():
@@ -221,8 +221,8 @@ static func _apply_start_profile_badge_cap(result: Array, data: Dictionary) -> v
 		if achieved_count <= START_PROFILE_BADGE_CAP:
 			continue
 		badge["achieved"] = false
-		badge["requirement_text"] = "Start-Tradeoff: Zu Beginn ist nur der staerkste Rollenring aktiv; weitere Ringe brauchen klareren Fokus oder Entwicklung."
-		badge["reason"] = "%s Fit %.2f ist nah dran, bleibt wegen Start-Tradeoff aber offen." % [String(badge.get("label", "Badge")), float(badge.get("score", 0.0))]
+		badge["requirement_text"] = "Startbegrenzung: Zu Beginn ist nur die stärkste Eignung aktiv; weitere brauchen klareren Fokus oder Entwicklung."
+		badge["reason"] = "%s: Eignung %.2f; wegen der Startbegrenzung noch offen." % [String(badge.get("label", "Badge")), float(badge.get("score", 0.0))]
 		result[index] = _hydrate_badge(badge)
 
 
@@ -231,21 +231,21 @@ static func _requirement_for(badge_key: String, data: Dictionary, score: float) 
 		return "Erreicht: %s" % _reason_for(badge_key, data)
 	match badge_key:
 		"leader":
-			return "Noetig: Fit %.2f/%.2f; Leadership %.2f, Speech %.2f, Order %.2f, Autonomy %.2f." % [score, MIN_SCORE, _score_value(data, "leadership"), _communication_value(data, "speech_quality"), _behavior_value(data, "order_fidelity"), _behavior_value(data, "autonomy")]
+			return "Nötig: Eignung %.2f/%.2f; Führung %.2f, Meldequalität %.2f, Befehlstreue %.2f, Selbstständigkeit %.2f." % [score, MIN_SCORE, _score_value(data, "leadership"), _communication_value(data, "speech_quality"), _behavior_value(data, "order_fidelity"), _behavior_value(data, "autonomy")]
 		"pilot":
-			return "Noetig: Fit %.2f/%.2f; Plattform %.2f, Awareness %.2f, Discipline %.2f, Speech %.2f." % [score, MIN_SCORE, _best_platform_value(data), _score_value(data, "awareness"), _score_value(data, "discipline"), _communication_value(data, "speech_quality")]
+			return "Nötig: Eignung %.2f/%.2f; Fahrzeugwert %.2f, Wahrnehmung %.2f, Disziplin %.2f, Meldequalität %.2f." % [score, MIN_SCORE, _best_platform_value(data), _score_value(data, "awareness"), _score_value(data, "discipline"), _communication_value(data, "speech_quality")]
 		"shooter":
-			return "Noetig: Fit %.2f/%.2f; Accuracy %.2f, Awareness %.2f, Recognition %.2f, Order %.2f." % [score, MIN_SCORE, _score_value(data, "accuracy"), _score_value(data, "awareness"), _score_value(data, "recognition"), _behavior_value(data, "order_fidelity")]
+			return "Nötig: Eignung %.2f/%.2f; Treffsicherheit %.2f, Wahrnehmung %.2f, Erkennen %.2f, Befehlstreue %.2f." % [score, MIN_SCORE, _score_value(data, "accuracy"), _score_value(data, "awareness"), _score_value(data, "recognition"), _behavior_value(data, "order_fidelity")]
 		"medic":
-			return "Noetig: Fit %.2f/%.2f; Discipline %.2f, Recognition %.2f, Speech %.2f, Stability %.2f." % [score, MIN_SCORE, _score_value(data, "discipline"), _score_value(data, "recognition"), _communication_value(data, "speech_quality"), _behavior_value(data, "contact_stability")]
+			return "Nötig: Eignung %.2f/%.2f; Disziplin %.2f, Erkennen %.2f, Meldequalität %.2f, Ruhe im Kontakt %.2f." % [score, MIN_SCORE, _score_value(data, "discipline"), _score_value(data, "recognition"), _communication_value(data, "speech_quality"), _behavior_value(data, "contact_stability")]
 		"heavy":
-			return "Noetig: Fit %.2f/%.2f; Toughness %.2f, Stability %.2f, Accuracy %.2f, Discipline %.2f." % [score, MIN_SCORE, _score_value(data, "toughness"), _behavior_value(data, "contact_stability"), _score_value(data, "accuracy"), _score_value(data, "discipline")]
+			return "Nötig: Eignung %.2f/%.2f; Belastbarkeit %.2f, Ruhe im Kontakt %.2f, Treffsicherheit %.2f, Disziplin %.2f." % [score, MIN_SCORE, _score_value(data, "toughness"), _behavior_value(data, "contact_stability"), _score_value(data, "accuracy"), _score_value(data, "discipline")]
 		"engineer":
-			return "Noetig: Fit %.2f/%.2f; Recognition %.2f, Discipline %.2f, Awareness %.2f, Order %.2f." % [score, MIN_SCORE, _score_value(data, "recognition"), _score_value(data, "discipline"), _score_value(data, "awareness"), _behavior_value(data, "order_fidelity")]
+			return "Nötig: Eignung %.2f/%.2f; Erkennen %.2f, Disziplin %.2f, Wahrnehmung %.2f, Befehlstreue %.2f." % [score, MIN_SCORE, _score_value(data, "recognition"), _score_value(data, "discipline"), _score_value(data, "awareness"), _behavior_value(data, "order_fidelity")]
 		"enemy":
-			return "Noetig: Gegner-Teamkontext."
+			return "Nötig: Gegnerzugehörigkeit."
 		_:
-			return "Noetig: passender Rollen-, Trait- oder Skill-Kontext."
+			return "Nötig: passende Rollen, Eigenschaften oder Werte."
 
 
 static func _hydrate_badge(candidate: Dictionary) -> Dictionary:
@@ -325,22 +325,31 @@ static func _score_heavy(data: Dictionary) -> float:
 
 
 static func _score_pilot(data: Dictionary) -> float:
-	var role_text: String = _role_text(data)
-	var best_platform: float = _best_platform_value(data)
-	var score: float = clampf(
-		(best_platform * 0.35)
-		+ (_score_value(data, "awareness") * 0.14)
-		+ (_score_value(data, "recognition") * 0.12)
-		+ (_score_value(data, "discipline") * 0.12)
-		+ (_communication_value(data, "speech_quality") * 0.12)
-		+ (_behavior_value(data, "contact_stability") * 0.08)
-		+ (_behavior_value(data, "initiative") * 0.07),
-		0.0,
-		1.0
-	)
-	if role_text.contains("pilot"):
-		score += 0.08
-	return clampf(score, 0.0, 1.0)
+	return float(_pilot_score_breakdown(data).score)
+
+
+## Read-only explanation from the same factors used by the live badge score.
+## A suitability score does not assign a pilot or explain a person's career.
+static func get_pilot_score_breakdown(profile_or_data: Variant) -> Dictionary:
+	return _pilot_score_breakdown(_profile_to_dictionary(profile_or_data))
+
+
+static func _pilot_score_breakdown(data: Dictionary) -> Dictionary:
+	var factors: Array = [
+		{"value_key": "best_platform", "value": _best_platform_value(data), "weight": 0.35},
+		{"value_key": "awareness", "value": _score_value(data, "awareness"), "weight": 0.14},
+		{"value_key": "recognition", "value": _score_value(data, "recognition"), "weight": 0.12},
+		{"value_key": "discipline", "value": _score_value(data, "discipline"), "weight": 0.12},
+		{"value_key": "speech_quality", "value": _communication_value(data, "speech_quality"), "weight": 0.12},
+		{"value_key": "contact_stability", "value": _behavior_value(data, "contact_stability"), "weight": 0.08},
+		{"value_key": "initiative", "value": _behavior_value(data, "initiative"), "weight": 0.07},
+	]
+	var sum: float = 0.0
+	for factor: Dictionary in factors:
+		factor["contribution"] = float(factor.value) * float(factor.weight)
+		sum += float(factor.contribution)
+	var role_bonus: float = 0.08 if _role_text(data).contains("pilot") else 0.0
+	return {"score": clampf(clampf(sum, 0.0, 1.0) + role_bonus, 0.0, 1.0), "threshold": MIN_SCORE, "factors": factors, "role_bonus": role_bonus}
 
 
 static func _score_engineer(data: Dictionary) -> float:
@@ -400,19 +409,19 @@ static func _score_enemy(data: Dictionary) -> float:
 static func _reason_for(badge_key: String, data: Dictionary) -> String:
 	match badge_key:
 		"medic":
-			return "Medic fit reads Discipline %.2f, Recognition %.2f, Speech %.2f and Stability %.2f." % [_score_value(data, "discipline"), _score_value(data, "recognition"), _communication_value(data, "speech_quality"), _behavior_value(data, "contact_stability")]
+			return "Sanitätseignung: Disziplin %.2f, Erkennen %.2f, Meldequalität %.2f und Ruhe im Kontakt %.2f." % [_score_value(data, "discipline"), _score_value(data, "recognition"), _communication_value(data, "speech_quality"), _behavior_value(data, "contact_stability")]
 		"leader":
-			return "Leader fit reads Leadership %.2f, Speech %.2f, Order %.2f and Autonomy %.2f." % [_score_value(data, "leadership"), _communication_value(data, "speech_quality"), _behavior_value(data, "order_fidelity"), _behavior_value(data, "autonomy")]
+			return "Führungseignung: Führung %.2f, Meldequalität %.2f, Befehlstreue %.2f und Selbstständigkeit %.2f." % [_score_value(data, "leadership"), _communication_value(data, "speech_quality"), _behavior_value(data, "order_fidelity"), _behavior_value(data, "autonomy")]
 		"heavy":
-			return "Heavy fit reads Toughness %.2f, Stability %.2f, Accuracy %.2f and Discipline %.2f." % [_score_value(data, "toughness"), _behavior_value(data, "contact_stability"), _score_value(data, "accuracy"), _score_value(data, "discipline")]
+			return "Eignung für schwere Waffen: Belastbarkeit %.2f, Ruhe im Kontakt %.2f, Treffsicherheit %.2f und Disziplin %.2f." % [_score_value(data, "toughness"), _behavior_value(data, "contact_stability"), _score_value(data, "accuracy"), _score_value(data, "discipline")]
 		"pilot":
-			return "Pilot fit reads best platform %.2f, Awareness %.2f, Discipline %.2f and Speech %.2f." % [_best_platform_value(data), _score_value(data, "awareness"), _score_value(data, "discipline"), _communication_value(data, "speech_quality")]
+			return "Piloteneignung: bester Fahrzeugwert %.2f, Wahrnehmung %.2f, Disziplin %.2f und Meldequalität %.2f." % [_best_platform_value(data), _score_value(data, "awareness"), _score_value(data, "discipline"), _communication_value(data, "speech_quality")]
 		"engineer":
-			return "Engineer fit reads Recognition %.2f, Discipline %.2f, Awareness %.2f and Order %.2f." % [_score_value(data, "recognition"), _score_value(data, "discipline"), _score_value(data, "awareness"), _behavior_value(data, "order_fidelity")]
+			return "Technikeignung: Erkennen %.2f, Disziplin %.2f, Wahrnehmung %.2f und Befehlstreue %.2f." % [_score_value(data, "recognition"), _score_value(data, "discipline"), _score_value(data, "awareness"), _behavior_value(data, "order_fidelity")]
 		"shooter":
-			return "Shooter fit reads Accuracy %.2f, Awareness %.2f, Recognition %.2f and Order %.2f." % [_score_value(data, "accuracy"), _score_value(data, "awareness"), _score_value(data, "recognition"), _behavior_value(data, "order_fidelity")]
+			return "Schützeneignung: Treffsicherheit %.2f, Wahrnehmung %.2f, Erkennen %.2f und Befehlstreue %.2f." % [_score_value(data, "accuracy"), _score_value(data, "awareness"), _score_value(data, "recognition"), _behavior_value(data, "order_fidelity")]
 		"enemy":
-			return "Enemy badge is set by team_id or faction context."
+			return "Gegnerkennzeichnung aus Team- oder Fraktionszugehörigkeit."
 		_:
 			return String(data.get("unit_id", "npc"))
 
@@ -483,7 +492,7 @@ static func _is_start_profile(data: Dictionary) -> bool:
 static func _badge_compact_lines(badge: Dictionary) -> PackedStringArray:
 	var lines: PackedStringArray = PackedStringArray()
 	var label: String = String(badge.get("label", "Badge")).strip_edges()
-	lines.append("%s badge score %.2f." % [_optional_text(label, "Badge"), float(badge.get("score", 0.0))])
+	lines.append("%s: Eignung %.2f." % [_optional_text(label, "Badge"), float(badge.get("score", 0.0))])
 	var reason: String = String(badge.get("reason", "")).strip_edges()
 	if not reason.is_empty():
 		lines.append(reason)

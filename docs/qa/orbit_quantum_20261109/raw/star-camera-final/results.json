@@ -1,0 +1,16 @@
+[
+  {
+    "script": "star_map_camera_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\star-camera-final\\star_map_camera_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\star-camera-final\\star_map_camera_verifier"
+  },
+  {
+    "script": "star_map_ui_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen\\docs\\qa\\orbit_quantum_20261109\\raw\\star-camera-final\\star_map_ui_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen\\output\\orbit_quantum_20261109\\profiles\\star-camera-final\\star_map_ui_verifier"
+  }
+]

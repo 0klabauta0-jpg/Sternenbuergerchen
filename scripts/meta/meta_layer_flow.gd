@@ -142,6 +142,9 @@ var _campaign_tutorial: Control
 var _active_singleplayer_identity: Dictionary = {}
 var _singleplayer_services: Control
 var _singleplayer_services_elapsed: float = 0.0
+var _star_map_screen: Control
+var _space_approach_remaining: float = 0.0
+var _space_approach_craft_id: String = ""
 var _all_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
 var _selected_unit_ids: PackedStringArray = []
 var _homebase_staged_unit_ids: PackedStringArray = []
@@ -241,6 +244,16 @@ func _ready() -> void:
 	_singleplayer_services.size = Vector2(330, 510)
 	_singleplayer_services.call("configure", Callable(_singleplayer_runtime, "get_snapshot"), Callable(_singleplayer_runtime, "request_operation"))
 	_singleplayer_services.hide()
+	var star_layer := CanvasLayer.new()
+	star_layer.name = "StarMapLayer"
+	star_layer.layer = 90
+	add_child(star_layer)
+	_star_map_screen = load("res://scripts/ui/star_map_screen.gd").new()
+	_star_map_screen.name = "StarMapScreen"
+	star_layer.add_child(_star_map_screen)
+	_star_map_screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_star_map_screen.call("configure", Callable(_singleplayer_runtime, "get_snapshot"), Callable(_singleplayer_runtime, "request_operation"))
+	_star_map_screen.hide()
 	_ensure_meta_nav_timer_labels()
 
 	if not homebase_screen.selection_changed.is_connected(_on_homebase_selection_changed):
@@ -302,6 +315,12 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	if _singleplayer_runtime != null:
+		_singleplayer_runtime.call("advance_space_travel", _delta)
+	if _space_approach_remaining > 0.0:
+		_space_approach_remaining = maxf(0.0, _space_approach_remaining - _delta)
+		if _space_approach_remaining <= 0.0:
+			_finish_space_approach()
 	_refresh_meta_mission_timer_labels()
 	_singleplayer_services_elapsed += _delta
 	if _singleplayer_services_elapsed >= 0.25:
@@ -3774,6 +3793,10 @@ func _on_homebase_fireteam_context_changed(selected_unit_ids: PackedStringArray,
 
 
 func _on_homebase_mission_selection_changed(mission_id: String) -> void:
+	if _singleplayer_runtime != null:
+		var travel: Dictionary = _singleplayer_runtime.call("get_space_travel_snapshot")
+		if String(travel.get("phase", "grounded")) in ["quantum", "stopped", "approach", "surface"]:
+			return
 	var normalized_mission_id: String = mission_id.strip_edges()
 	if normalized_mission_id.is_empty() or not _is_known_mission_id(normalized_mission_id):
 		return
@@ -3816,12 +3839,13 @@ func _on_homebase_mission_start_requested() -> void:
 	if not _has_mission_start_payload():
 		return
 	if _singleplayer_runtime != null and bool(_singleplayer_runtime.call("is_campaign_mission")):
-		var departure: Dictionary = _singleplayer_runtime.call("authorize_departure", requested_direct_craft_id)
-		if not bool(departure.get("ok", false)):
-			_get_homebase_screen().set_meta("singleplayer_departure_error", departure)
+		var launch: Dictionary = _singleplayer_runtime.call("launch_to_moon_orbit", requested_direct_craft_id)
+		if not bool(launch.get("ok", false)):
+			_get_homebase_screen().set_meta("singleplayer_departure_error", launch)
 			return
-		if _active_mission == null:
-			_active_singleplayer_identity = {"craft_id": requested_direct_craft_id, "job_id": String(Dictionary(departure.get("departure", {})).get("job_id", "")), "scenario_id": String(_get_selected_mission_definition().get("scenario_file_path", "")).get_file().get_basename()}
+		_last_mission_result.clear()
+		_show_star_map()
+		return
 	if payload_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
 		_begin_homebase_direct_mission_transfer_from_planning()
 		_sync_homebase_direct_mission_drop_transport_fields()
@@ -4228,7 +4252,10 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	_reset_active_mission_timer()
 	_ensure_transport_timer_state()
 	_refresh_map_screen()
-	_show_debrief()
+	if _has_space_route_in_progress():
+		_show_star_map()
+	else:
+		_show_debrief()
 
 
 func _return_homebase_direct_craft_after_mission() -> void:
@@ -4643,6 +4670,15 @@ func _begin_mission_craft_transfer(craft_id: String, phase: String, duration_sec
 		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", normalized_craft_id)
 		if not bool(return_gate.get("ok", false)):
 			return
+		var travel: Dictionary = _singleplayer_runtime.call("get_space_travel_snapshot")
+		if String(travel.get("craft_id", "")) == normalized_craft_id and String(travel.get("phase", "")) == "surface":
+			var orbit: Dictionary = _singleplayer_runtime.call("enter_space_orbit", normalized_craft_id)
+			if not bool(orbit.get("ok", false)):
+				return
+			_remove_pending_mission_craft_transfer(normalized_craft_id)
+			_aircraft_location_by_craft[normalized_craft_id] = "starmap"
+			call_deferred("_finish_space_surface_departure", normalized_craft_id)
+			return
 	var normalized_source: String = payload_source.strip_edges().to_lower()
 	if normalized_source.is_empty():
 		normalized_source = MISSION_DROP_SOURCE_FOB
@@ -4884,6 +4920,8 @@ func _seed_singleplayer_bootstrap_homebase_payload() -> void:
 
 
 func _ensure_singleplayer_visible_homebase_actionability() -> void:
+	if _singleplayer_runtime != null and String(Dictionary(_singleplayer_runtime.call("get_space_travel_snapshot")).get("phase", "grounded")) != "grounded":
+		return
 	if is_campaign_start():
 		return
 	if not bool(get_meta("singleplayer_bootstrap_enabled", false)) or _active_mission != null or not _last_mission_result.is_empty():
@@ -5387,7 +5425,7 @@ func _build_transport_craft_states() -> Array:
 				craft_location = "mission"
 		elif craft_location == "mission":
 			mission_phase = "waiting"
-		elif craft_location != "fob" and craft_location != "transit":
+		elif craft_location not in ["fob", "transit", "starmap"]:
 			craft_location = "homebase"
 		var recovery_state: Dictionary = Dictionary(_air_asset_recovery_by_craft.get(craft_id, {})).duplicate(true)
 		var recovery_patch: Dictionary = {}
@@ -5433,7 +5471,7 @@ func _build_transport_craft_states() -> Array:
 			"summary": String(craft_def.get("summary", "")).strip_edges(),
 			"texture_path": String(craft_def.get("texture_path", "")).strip_edges(),
 			"location": craft_location,
-			"visible_in_homebase": craft_location == "homebase" or recovery_active or (mission_phase == "to_mission" and is_homebase_direct_mission_transfer),
+			"visible_in_homebase": craft_location in ["homebase", "starmap"] or recovery_active or (mission_phase == "to_mission" and is_homebase_direct_mission_transfer),
 			"visible_in_fob": craft_location == "fob" or recovery_active or (mission_phase == "to_mission" and not is_homebase_direct_mission_transfer) or (craft_location == "transit" and not pilot_transfer_entry.is_empty()),
 			"is_in_transit": is_in_transit,
 			"pilot_unit_id": pilot_unit_id,
@@ -5675,7 +5713,12 @@ func _build_fob_profile_unit_subset(transport_craft_states: Array) -> Array:
 	return result
 
 
-func _show_homebase() -> void:
+func _show_homebase(allow_remote_operations: bool = false) -> void:
+	if _has_space_route_in_progress() and not allow_remote_operations:
+		_show_star_map()
+		return
+	if _star_map_screen != null:
+		_star_map_screen.hide()
 	_current_meta_view = "homebase"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
@@ -5867,6 +5910,8 @@ func _show_map() -> void:
 
 
 func _show_mission() -> void:
+	if _star_map_screen != null:
+		_star_map_screen.hide()
 	_current_meta_view = "mission"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
@@ -5883,6 +5928,9 @@ func _show_mission() -> void:
 
 
 func _start_or_show_live_mission_from_nav() -> void:
+	if _has_space_route_in_progress() or (_singleplayer_runtime != null and bool(_singleplayer_runtime.call("is_campaign_mission")) and _active_mission == null):
+		_show_star_map()
+		return
 	if not _is_homebase_direct_mission_drop_source():
 		_sync_fob_dropship_state_into_mission_planning(false, MISSION_DROP_SOURCE_FOB)
 	if _active_mission == null:
@@ -5900,6 +5948,8 @@ func _can_open_mission_from_navigation() -> bool:
 
 
 func _show_debrief() -> void:
+	if _star_map_screen != null:
+		_star_map_screen.hide()
 	_current_meta_view = "debrief"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
@@ -7249,6 +7299,78 @@ func _get_selected_mission_definition() -> Dictionary:
 
 func get_singleplayer_snapshot() -> Dictionary:
 	return _singleplayer_runtime.call("get_snapshot") if _singleplayer_runtime != null else {}
+
+
+func _has_space_route_in_progress() -> bool:
+	if _singleplayer_runtime == null:
+		return false
+	var travel: Dictionary = _singleplayer_runtime.call("get_space_travel_snapshot")
+	return String(travel.get("phase", "grounded")) in ["orbit", "quantum", "stopped", "approach"]
+
+
+func _show_star_map() -> void:
+	_current_meta_view = "star_map"
+	for screen in [_get_homebase_screen(), _get_fob_screen(), _get_debrief_screen()]:
+		if screen != null:
+			screen.hide()
+	if _star_map_screen != null:
+		_star_map_screen.show()
+		_star_map_screen.call("refresh")
+	_sync_mission_host_visibility()
+	_set_navigation_visible(false)
+
+
+func _begin_space_approach(craft_id: String, departure: Dictionary) -> void:
+	_space_approach_craft_id = craft_id
+	_space_approach_remaining = 0.65
+	_active_singleplayer_identity = {"craft_id": craft_id, "job_id": String(departure.get("job_id", "")), "scenario_id": String(_get_selected_mission_definition().get("scenario_file_path", "")).get_file().get_basename()}
+	_show_star_map()
+
+
+func _finish_space_approach() -> void:
+	var craft_id := _space_approach_craft_id
+	_space_approach_craft_id = ""
+	if craft_id.is_empty() or _active_mission != null:
+		return
+	var travel: Dictionary = _singleplayer_runtime.call("get_space_travel_snapshot")
+	if String(travel.get("phase", "")) != "approach" or String(travel.get("craft_id", "")) != craft_id:
+		return
+	# This transfer is the local handoff from orbit to the existing map landing
+	# path; the inter-orbit travel has already happened on the star map.
+	_begin_mission_craft_transfer(craft_id, "to_mission", 1.0, MISSION_DROP_SOURCE_HOMEBASE_DIRECT)
+	_aircraft_location_by_craft[craft_id] = "starmap"
+	_sync_homebase_direct_mission_drop_transport_fields()
+	_singleplayer_runtime.call("finish_space_approach", craft_id)
+	_last_mission_result.clear()
+	_begin_active_mission_timer()
+	_start_or_update_active_mission()
+	_ensure_transport_timer_state()
+
+
+func _finish_space_surface_departure(craft_id: String) -> void:
+	if not _has_space_route_in_progress():
+		return
+	if _active_mission != null:
+		# Explicit retreat is resolved only after the real ship left its map.
+		if not String(_active_singleplayer_identity.get("job_id", "")).is_empty():
+			_singleplayer_runtime.call("record_mission_result", {"result": "aborted", "reason": "craft_left_without_objective_completion"}, _active_singleplayer_identity.duplicate(true))
+		_release_active_mission()
+		_reset_active_mission_timer()
+	_aircraft_location_by_craft[craft_id] = "starmap"
+	_show_star_map()
+
+
+func _finish_space_home_landing(craft_id: String) -> void:
+	_aircraft_location_by_craft[craft_id] = "homebase"
+	_remove_pending_mission_craft_transfer(craft_id)
+	if _active_mission != null:
+		_release_active_mission()
+	_active_singleplayer_identity.clear()
+	_mission_planning_state = DEFAULT_MISSION_PLANNING_STATE.duplicate(true)
+	_reset_active_mission_timer()
+	_refresh_homebase_screen()
+	_show_homebase()
+	_singleplayer_runtime.call("observe_campaign_progress")
 
 
 func is_campaign_start() -> bool:

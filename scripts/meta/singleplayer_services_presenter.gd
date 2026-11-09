@@ -2,6 +2,7 @@ extends PanelContainer
 ## Compact read-only service view; transactions are committed by the bound owner.
 
 const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const OFFER_ID := "medictool_supply"
 const DEBOUNCE_SECONDS := 0.35
 
@@ -49,7 +50,7 @@ func _build() -> void:
 	var heading: Label = _label("Versorgung", 21)
 	THEME.style_section_heading(heading, 23)
 	content.add_child(heading)
-	_credits = _label("Credits: —", 18)
+	_credits = _label("Kredite: —", 18)
 	_credits.name = "SupplyCredits"
 	content.add_child(_credits)
 	_items = _label("Bestand: —", 14)
@@ -68,7 +69,7 @@ func _build() -> void:
 	_buy.pressed.connect(func(): _submit("buy"))
 	var fuel_row := HBoxContainer.new()
 	content.add_child(fuel_row)
-	var amount_label: Label = _label("Fuelmenge", 14)
+	var amount_label: Label = _label("Tankmenge", 14)
 	amount_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	amount_label.custom_minimum_size.x = 80.0
 	fuel_row.add_child(amount_label)
@@ -79,7 +80,8 @@ func _build() -> void:
 	_amount.step = 1.0
 	_amount.value = 10.0
 	_amount.get_line_edit().add_theme_font_size_override("font_size", 15)
-	_amount.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_amount.custom_minimum_size.x = 110
+	_amount.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	fuel_row.add_child(_amount)
 	_amount.value_changed.connect(func(_value: float): refresh())
 	_refuel = _button("Auftanken", "RefuelCraft")
@@ -108,17 +110,20 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		ids.append(String(craft.get("craft_id", craft.get("id", ""))))
 	if not ids.has(_selected_craft_id):
 		_selected_craft_id = ids[0] if not ids.is_empty() else ""
-	var signature: String = JSON.stringify(ids)
+	var labels: Array[String] = []
+	for craft: Dictionary in crafts:
+		labels.append(SHIP_VISUALS.get_ui_display_name(craft))
+	var signature: String = JSON.stringify([ids, labels])
 	if String(_craft_selector.get_meta("craft_signature", "")) != signature:
 		_craft_selector.clear()
-		for id: String in ids:
-			_craft_selector.add_item(id)
-			_craft_selector.set_item_metadata(_craft_selector.item_count - 1, id)
+		for index in range(ids.size()):
+			_craft_selector.add_item(labels[index])
+			_craft_selector.set_item_metadata(_craft_selector.item_count - 1, ids[index])
 		_craft_selector.set_meta("craft_signature", signature)
 	if ids.has(_selected_craft_id):
 		_craft_selector.select(ids.find(_selected_craft_id))
 	_craft_selector.disabled = ids.is_empty() or not _pending.is_empty()
-	_credits.text = "Credits: %d" % int(supply.get("credits", 0)) if not supply.is_empty() else "Credits: —"
+	_credits.text = "Kredite: %d" % int(supply.get("credits", 0)) if not supply.is_empty() else "Kredite: —"
 	var quantities: Dictionary = Dictionary(supply.get("item_quantities", {}))
 	_items.text = "Sanitätswerkzeug: %d" % int(quantities.get("medictool", 0)) if not supply.is_empty() else "Bestand: —"
 	var fuel_values: Dictionary = Dictionary(supply.get("fuel_by_craft_id", {}))
@@ -130,7 +135,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	var context: Dictionary = Dictionary(contexts.get(_selected_craft_id, {}))
 	var location: String = String(context.get("location_id", ""))
 	var available: bool = not context.is_empty() and not bool(context.get("craft_busy", true)) and _command_handler.is_valid()
-	var unavailable_reason: String = "Service erst nach Landung am passenden Serviceort"
+	var unavailable_reason: String = "Versorgung erst nach Landung am passenden Versorgungsort"
 	if _selected_craft_id.is_empty():
 		unavailable_reason = "Kein reales Schiff verfügbar"
 	elif not _command_handler.is_valid():
@@ -147,7 +152,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	elif stock <= 0:
 		buy_reason = "Angebot ausverkauft"
 	elif int(supply.get("credits", 0)) < price:
-		buy_reason = "Credits reichen für den Kauf nicht"
+		buy_reason = "Kredite reichen für den Kauf nicht"
 	_buy.disabled = not buy_reason.is_empty() or _pending.has("buy")
 	_buy.tooltip_text = buy_reason if not buy_reason.is_empty() else "Ein Sanitätswerkzeug kaufen"
 	var amount: float = _amount.value
@@ -157,13 +162,13 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	if not available:
 		fuel_reason = unavailable_reason
 	elif not location in ["homebase", "trade_outpost"]:
-		fuel_reason = "An diesem Ort gibt es keinen Tankservice"
+		fuel_reason = "An diesem Ort gibt es keine Tankstelle"
 	elif not has_fuel:
-		fuel_reason = "Schiff ist nicht für Fuel registriert"
+		fuel_reason = "Schiff hat keinen registrierten Treibstofftank"
 	elif amount > capacity - fuel:
 		fuel_reason = "Nur %s Treibstoff bis zum vollen Tank möglich" % str(maxf(capacity - fuel, 0.0))
 	elif cost > float(supply.get("credits", 0)):
-		fuel_reason = "Credits reichen für diese Tankmenge nicht"
+		fuel_reason = "Kredite reichen für diese Tankmenge nicht"
 	_refuel.disabled = not fuel_reason.is_empty() or _pending.has("refuel")
 	_refuel.tooltip_text = fuel_reason if not fuel_reason.is_empty() else "Bestätigten Schiffstank auffüllen"
 	_amount.editable = not _pending.has("refuel")
@@ -172,14 +177,16 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		if String(entry.get("craft_id", entry.get("id", ""))) == _selected_craft_id:
 			craft = entry
 	_return.visible = not craft.is_empty() and String(craft.get("location_id", "homebase")) != "homebase"
+	var space: Dictionary = _snapshot.get("space_travel", {})
+	_return.text = "Zum Planetenorbit abheben" if String(space.get("phase", "")) == "surface" and String(space.get("craft_id", "")) == _selected_craft_id else "Zur Heimatbasis"
 	_return.disabled = bool(craft.get("busy", true)) or not available or _pending.has("return_homebase")
-	_return.tooltip_text = "Rückflug erst nach bestätigter Landung am Serviceort" if _return.disabled else "Rückflug für dieses Schiff anfordern"
+	_return.tooltip_text = "Rückflug erst nach bestätigter Landung am Versorgungsort" if _return.disabled else "Rückflug für dieses Schiff anfordern"
 	if not available:
 		_feedback.text = unavailable_reason
 	elif not buy_reason.is_empty() and not fuel_reason.is_empty():
 		_feedback.text = buy_reason + " · " + fuel_reason
 	elif _feedback.text == unavailable_reason:
-		_feedback.text = "Service bereit"
+		_feedback.text = "Versorgung bereit"
 
 func set_selected_craft(craft_id: String) -> bool:
 	if not _pending.is_empty():
@@ -247,6 +254,6 @@ func _button(value: String, node_name: String) -> Button:
 	button.name = node_name
 	button.text = value
 	button.custom_minimum_size.y = 42
-	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	button.add_theme_font_size_override("font_size", 15)
 	return button

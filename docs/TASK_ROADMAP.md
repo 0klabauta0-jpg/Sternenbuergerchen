@@ -1,5 +1,15 @@
 # TASK_ROADMAP
 
+### Orbitreise und UI-Klarheit — 09.11.2026
+Freigegebene Mondbasis-/Quantum-Reise samt Rueckweg auf eigenem Taskbranch
+implementiert und technisch geprueft. Kamera mit Cursor-Zoom/Pan und Raum fuer
+spaetere Begegnungen; drei Zukunftsmarker sind noch keine Gameplayorte.
+Pad-/Weltraumvorschau, deutscher kompakter Charakterbogen und sichtbarer
+Abflugweg ohne FOB. Kampagne124/0, freier Loop104/0, Matrix16/16; Kamera18/0,
+Sternkarten-UI91/0. QA `docs/qa/orbit_quantum_20261109/README.md`.
+Nutzerpruefung am eigenen Kandidatenbuild; kein Mainmerge oder Push.
+
+
 ### Kampagnenstart / Skirmish — 09.11.2026
 Freigegebene Einfuehrung implementiert: genau zwei NPCs, kleine Basis,
 Vorbereitung -> Satellit -> Handel/Tanken/Heimkehr, getrennte Modi und

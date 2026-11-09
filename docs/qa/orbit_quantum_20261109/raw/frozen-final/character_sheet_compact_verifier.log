@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Saved pilot category remains visible even with weak pilot suitability
+PASS: Actual assignment is supplied independently of suitability
+PASS: Strong operator suitability fabricates neither a pilot career nor an assignment
+PASS: Visible core stat uses German copy
+PASS: Trait explanation retains its exact signed effect in German
+PASS: Stock generated biography displays saved German facts without inventing a career
+PASS: Translating stock display text preserves the saved biography and profile
+PASS: Custom prose and surrounding whitespace remain verbatim in display and profile
+PASS: Known preset biography uses actual saved role instead of untranslated stock history
+PASS: Existing score owner exposes actual pilot inputs
+PASS: Breakdown retains exact existing weighted score and role-context bonus
+PASS: Saved role context is disclosed separately from measured inputs
+PASS: Breakdown exposes all seven factors and existing badge threshold
+PASS: Read-only sheet fits the compact content width
+PASS: Secondary stat details begin collapsed
+PASS: Values action reveals the real read-only stat bars
+PASS: Details action keeps its intrinsic width
+PASS: Trait effect remains accessible on hover
+PASS: Rendering and revealing details mutate no profile or assignment data
+CHARACTER_SHEET_COMPACT passed=19 failed=0

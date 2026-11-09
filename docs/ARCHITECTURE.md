@@ -20,6 +20,7 @@ Simulation, Darstellung und UI strikt trennen.
 - Runtime-Komponenten wie `RuntimeLeader`, CombatLoop, Navigation und Taktikcontroller besitzen nur ihren klaren Laufzeitbereich.
 - Registries wie `UnitRegistry`, `FTLRegistry` und `TerrainRegistry` sind Lookup- und Index-Schichten. Sie ersetzen breite SceneTree-Suchen, sollen aber keine versteckte zweite Gameplay-Autoritaet werden.
 - Contract-/Data-Helper normalisieren Werte fuer mehrere Schichten. Wenn UI und Simulation denselben Wert brauchen, zuerst einen gemeinsamen Contract/Snapshot suchen oder schaffen.
+- Die Einzelspieler-Orbitreise besitzt einen eigenen SimulationRoot-gebundenen `SingleplayerSpaceTravelState` fuer Reisephase/Position. Payload, Fuel, Mission und Auftraege verbleiben bei ihren bisherigen Ownern; `orbit_quantum_travel_contract.md` trennt Abheben von Missionsanflug.
 - UI, HUD, Editor und 2.5D/3D-Visuals sind Leseschichten. Sie duerfen Commands ausloesen und Feedback zeigen, aber keinen dauerhaften Parallel-State fuer Mission, Units, Fireteams, Loadouts, Transport oder Combat fuehren.
 - Performance-Hotpaths nutzen Dirty-Flags, Batch-Updates, Caches oder `UpdateManager`; sichtbare Progressanzeigen duerfen getaktet werden, ohne Simulation-State zu verlangsamen.
 

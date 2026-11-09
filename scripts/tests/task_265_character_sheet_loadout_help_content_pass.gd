@@ -131,8 +131,8 @@ func _test_formatter_help_ids(catalog: Dictionary) -> void:
 		var trait_help_id: String = String(trait_row.get("help_id", ""))
 		_assert(not trait_help_id.is_empty(), "Trait row %s carries help_id" % String(trait_row.get("label", "")))
 		_assert(catalog_ids.has(trait_help_id), "Catalog contains trait help_id %s" % trait_help_id)
-	_assert(_rows_contain_help_id(Array(model.get("role_loadout_rows", [])), "Loadout", "character_sheet.loadout_summary"), "Loadout row uses loadout help_id")
-	_assert(_rows_contain_help_id(Array(model.get("status_rows", [])), "Morale", "character_sheet.morale"), "Morale row uses morale help_id")
+	_assert(_rows_contain_help_id(Array(model.get("role_loadout_rows", [])), "Ausrüstung", "character_sheet.loadout_summary"), "Loadout row uses loadout help_id")
+	_assert(_rows_contain_help_id(Array(model.get("status_rows", [])), "Moral", "character_sheet.morale"), "Morale row uses morale help_id")
 	_assert(_rows_contain_help_id(Array(model.get("status_rows", [])), "Frustration", "character_sheet.frustration"), "Frustration row uses frustration help_id")
 
 
