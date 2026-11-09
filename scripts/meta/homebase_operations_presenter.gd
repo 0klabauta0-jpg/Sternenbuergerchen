@@ -135,9 +135,10 @@ func _build() -> void:
 	THEME.style_section_heading(title, 30)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
-	var tools: Button = _button("Erweiterte Werkzeuge", false)
-	header.add_child(tools)
-	tools.pressed.connect(func(): _act("legacy"))
+	var back: Button = _button("‹ Zur Truppansicht", false)
+	back.name = "OperationsBack"
+	header.add_child(back)
+	back.pressed.connect(func(): _act("navigate", {"mode": "squad"}))
 	_workflow = HBoxContainer.new()
 	_workflow.name = "PreparationSequence"
 	_workflow.add_theme_constant_override("separation", 24)
@@ -154,17 +155,26 @@ func _build() -> void:
 	outer.add_child(body)
 	var nav := VBoxContainer.new()
 	nav.custom_minimum_size.x = 166
-	nav.add_theme_constant_override("separation", 10)
+	nav.add_theme_constant_override("separation", 8)
 	body.add_child(nav)
-	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "mission", "label": "Einsatz &\nAbflug"}]:
+	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "jobs", "label": "Smart Mobile"}, {"id": "map", "label": "Karte"}, {"id": "mission", "label": "Einsatz &\nAbflug"}]:
 		var key: String = String(item.id)
 		var button: Button = _button(String(item.label), false)
 		button.name = "Navigate_" + key
-		button.custom_minimum_size.y = 66
+		button.custom_minimum_size.y = 46
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		nav.add_child(button)
 		button.pressed.connect(func(): _act("navigate", {"mode": key}))
+		button.disabled = key in ["jobs", "map"]
+		if button.disabled:
+			button.tooltip_text = "Noch nicht verfügbar"
 		_nav[key] = button
+	var fob: Button = _button("F̶O̶B̶ · gesperrt", false)
+	fob.name = "Navigate_fob"
+	fob.disabled = true
+	fob.custom_minimum_size.y = 46
+	fob.tooltip_text = "FOB ist im Einzelspieler vorübergehend gesperrt"
+	nav.add_child(fob)
 	var nav_spacer := Control.new()
 	nav_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	nav.add_child(nav_spacer)

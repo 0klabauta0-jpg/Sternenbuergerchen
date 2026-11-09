@@ -102,8 +102,8 @@ func _run() -> void:
 	screen.call("request_operation", "navigate", {"mode": "squad"})
 	exploration = Dictionary(Dictionary(screen.call("get_operations_snapshot").get("presentation", {})).get("base", {}))
 	_assert(not bool(exploration.get("active", true)), "Leaving base deactivates its runtime branch")
-	screen.call("request_operation", "legacy", {})
-	_assert(screen.get_node("Panel").visible, "Advanced tools preserve old panels and NodePaths")
+	_assert(not bool(screen.call("request_operation", "legacy", {}).get("ok", true)), "Normal operations reject obsolete advanced tools entry")
+	_assert(not screen.get_node("Panel").visible, "Legacy panels and NodePaths remain hidden in normal play")
 	screen.call("request_operation", "navigate", {"mode": "squad"})
 	_assert(not screen.get_node("Panel").visible, "Primary navigation returns from legacy tools")
 	var original_window_size: Vector2i = root.size

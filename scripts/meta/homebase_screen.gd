@@ -9133,9 +9133,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			_operations_mode = mode
 			_sync_operations_visibility()
 		"legacy":
-			_operations_mode = "legacy"
-			_rebuild_ui()
-			_sync_operations_visibility()
+			return _operations_rejected("legacy_disabled", "Bitte die Operationsnavigation verwenden")
 		"focus_unit", "details":
 			if not _profiles_by_id.has(unit_id):
 				return _operations_rejected("unknown_unit", "Person nicht verfügbar")
