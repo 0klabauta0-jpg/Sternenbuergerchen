@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Campaign exposes read-only departure validation
+PASS: Valid departure preflights
+PASS: Campaign preview never binds craft or changes revision
+PASS: Unknown origin pad rejects before fuel debit
+PASS: Job/destination mismatch rejects before debit
+PASS: Read-only validation preserves authorization requirement
+PASS: Rejected previews also preserve exact campaign snapshot
+PASS: Supply exposes read-only route fuel validation
+PASS: Preview reports authored route cost
+PASS: Fuel preview never changes credits, balances or revision
+PASS: Unknown route rejects in preview
+PASS: Fuel preview requires authorized departure
+PASS: Insufficient fuel rejects before any command
+PASS: Busy craft cannot purchase through service owner
+PASS: Rejected busy purchase changes no balance
+DEPARTURE_VALIDATION_RESULTS passed=15 failed=0

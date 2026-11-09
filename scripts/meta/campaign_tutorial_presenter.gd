@@ -21,6 +21,7 @@ var _service = HELP_SERVICE.new()
 var _popup: Control
 var _strip: PanelContainer
 var _guidance: Label
+var _checkpoint_label: Label
 var _title: Label
 var _help_button: Button
 var _hide_button: Button
@@ -82,6 +83,10 @@ func _build_ui() -> void:
 	_guidance.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_guidance.add_theme_font_size_override("font_size", 13)
 	rows.add_child(_guidance)
+	_checkpoint_label = Label.new()
+	_checkpoint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_checkpoint_label.add_theme_font_size_override("font_size", 11)
+	rows.add_child(_checkpoint_label)
 	_popup = HELP_POPUP.new()
 	_popup.name = "CampaignContextHelp"
 	add_child(_popup)
@@ -118,7 +123,8 @@ func refresh() -> void:
 		return
 	visible = true
 	var onboarding: Dictionary = snapshot.get("onboarding", {})
-	var signature := JSON.stringify(onboarding)
+	var checkpoint: Dictionary = _flow.get_meta("campaign_checkpoint_result", {}) if is_instance_valid(_flow) else {}
+	var signature := JSON.stringify({"onboarding": onboarding, "checkpoint_ok": checkpoint.get("ok", true), "has_checkpoint": not checkpoint.is_empty()})
 	if signature == _signature:
 		return
 	_signature = signature
@@ -128,6 +134,7 @@ func refresh() -> void:
 	_help_id = String(step[0])
 	_title.text = "Kampagne: Einfuehrung abgeschlossen" if int(onboarding.get("stage_index", 0)) >= 3 else "Kampagne: Etappe %d / 3" % (int(onboarding.get("stage_index", 0)) + 1)
 	_guidance.text = String(step[1])
+	_checkpoint_label.text = "Speichert an Basis-Meilensteinen." if checkpoint.is_empty() else ("Basisstand gespeichert." if bool(checkpoint.get("ok", false)) else "Speichern fehlgeschlagen. Der letzte Basisstand bleibt erhalten.")
 	_service.register_control(_guidance, _help_id)
 	_service.register_control(_help_button, _help_id)
 	_guidance.visible = not _hints_hidden

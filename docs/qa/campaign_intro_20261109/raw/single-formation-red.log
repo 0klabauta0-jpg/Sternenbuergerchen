@@ -1,0 +1,8 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+FAIL: take singleton uses exact anchor { "campaign_leader": (2234.595, 883.7025) }
+FAIL: move singleton uses exact anchor { "campaign_leader": (2159.595, 915.7025) }
+FAIL: operate singleton uses exact anchor { "campaign_leader": (2159.595, 915.7025) }
+FAIL: defend singleton uses exact anchor { "campaign_leader": (2116.595, 861.7025) }
+SINGLE_LEADER_FORMATION failed=4
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors

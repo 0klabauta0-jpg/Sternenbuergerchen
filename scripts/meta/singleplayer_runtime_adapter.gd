@@ -11,6 +11,9 @@ var _screen: Control
 var _simulation: Node
 var _campaign: RefCounted
 var _supply: RefCounted
+var _onboarding: RefCounted
+var _campaign_mode := false
+var _request_session := str(Time.get_unix_time_from_system()) + ":" + str(randi())
 var _sequence: int = 0
 var _pad_by_craft: Dictionary = {}
 var _departure_token_by_craft: Dictionary = {}
@@ -21,6 +24,10 @@ func configure(flow: Node, screen: Control) -> void:
 	_screen = screen
 	_campaign = CAMPAIGN.new()
 	_supply = SUPPLY.new()
+	_campaign_mode = bool(_flow.call("is_campaign_start"))
+	if _campaign_mode:
+		_onboarding = load("res://scripts/core/campaign_onboarding_state.gd").new()
+		_onboarding.configure()
 	var campaign_result: Dictionary = _campaign.configure()
 	var supply_result: Dictionary = _supply.configure(Array(_flow.get("_homebase_aircraft_definitions")))
 	if not campaign_result.get("ok", false) or not supply_result.get("ok", false):
@@ -31,11 +38,17 @@ func configure(flow: Node, screen: Control) -> void:
 	add_child(_simulation)
 	# Synchronous meta commands have no movement/combat tick workload.
 	_simulation.set_physics_process(false)
-	_simulation.configure_singleplayer_owners(_campaign, _supply)
+	_simulation.configure_singleplayer_owners(_campaign, _supply, _onboarding)
+	if _campaign_mode:
+		var checkpoint: Dictionary = Dictionary(_flow.get("_campaign_start").get("checkpoint"))
+		if not checkpoint.is_empty():
+			_campaign.restore_state(checkpoint.campaign)
+			_supply.restore_state(checkpoint.supply)
+			_onboarding.restore_state(checkpoint.onboarding)
 	sync_crafts()
 	if _screen.has_method("configure_singleplayer_bridge"):
 		_screen.call("configure_singleplayer_bridge", get_snapshot, request_operation)
-	var catalog: Array = Array(_flow.get("_mission_catalog")).duplicate(true)
+	var catalog: Array = [] if _campaign_mode else Array(_flow.get("_mission_catalog")).duplicate(true)
 	for entry in [
 		{"mission_id": "satellite_recovery", "mission_name": "Satellitenbergung", "map_file_path": "res://maps/satellite_crash_site.json", "scenario_file_path": "res://data/mission_scenarios/satellite_recovery.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"},
 		{"mission_id": "trade_outpost_visit", "mission_name": "Handelsaußenposten besuchen", "map_file_path": "res://maps/trade_outpost.json", "scenario_file_path": "res://data/mission_scenarios/trade_outpost_visit.json", "slot_count": 4, "time_limit_seconds": 1200.0, "win_condition": "objective_capture"}]:
@@ -47,7 +60,7 @@ func _request_id(prefix: String, payload: Dictionary) -> String:
 	if not supplied.is_empty():
 		return supplied
 	_sequence += 1
-	return "%s:%d" % [prefix, _sequence]
+	return "%s:%s:%d" % [prefix, _request_session, _sequence]
 
 func _commit(category: String, operation: String, payload: Dictionary, request_id: String, context: Dictionary = {}) -> Dictionary:
 	return _simulation.request_singleplayer_command({"contract_category": category, "operation": operation, "payload": payload, "request_id": request_id}, context)
@@ -69,7 +82,7 @@ func get_snapshot() -> Dictionary:
 		var context: Dictionary = _service_context(id)
 		if not context.is_empty():
 			service_contexts[id] = context
-	return {"campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot"}
+	return {"campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}}
 
 func sync_crafts() -> void:
 	# Lifecycle event only, called when real craft definitions change. Read paths
@@ -103,6 +116,16 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 	var data: Dictionary = payload.duplicate(true)
 	var request_id: String = _request_id(operation, data)
 	data.erase("request_id")
+	if _campaign_mode:
+		var gate: Dictionary = _campaign_operation_gate(operation, data)
+		if not bool(gate.get("ok", false)):
+			return gate
+		if operation == "accept_job" and String(Dictionary(_campaign.get_campaign_snapshot().jobs.get(String(data.get("job_id", "")), {})).get("status", "")) == "failed":
+			if _flow.get("_active_mission") != null or _has_active_transit():
+				return _reject("retry_requires_home", "Erst zur Basis zurueckkehren, dann Auftrag erneut annehmen")
+			for location in Dictionary(_flow.get("_aircraft_location_by_craft")).values():
+				if String(location) != "homebase":
+					return _reject("retry_requires_home", "Erst zur Basis zurueckkehren, dann Auftrag erneut annehmen")
 	if operation in ["accept_job", "select_destination", "abandon_job"]:
 		if operation == "select_destination" and _has_active_transit():
 			return _reject("craft_in_transit", "Zielwechsel erst nach dem laufenden Flug")
@@ -114,6 +137,8 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 				if setup != null and String(setup.get("map_file_path")) != String(requested_location.map_file_path):
 					return _reject("mission_location_active", "Vor dem Ortswechsel zuerst den laufenden Ausflug beenden")
 		var campaign_operation: String = "fail_job" if operation == "abandon_job" else operation
+		if _campaign_mode and operation == "accept_job" and String(Dictionary(_campaign.get_campaign_snapshot().jobs.get(String(data.get("job_id", "")), {})).get("status", "")) == "failed":
+			campaign_operation = "retry_failed_job"
 		var result: Dictionary = _commit("singleplayer_campaign", campaign_operation, data, request_id, {"mission_aborted": operation == "abandon_job"})
 		if result.get("ok", false) and operation == "select_destination":
 			var location_id: String = String(data.get("location_id", ""))
@@ -125,7 +150,10 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		var context: Dictionary = _service_context(craft_id)
 		if context.is_empty():
 			return _reject("service_unavailable", "Schiff und Trupp muessen am Serviceort bereit sein")
-		return _commit("singleplayer_supply", operation, data, request_id, context)
+		var result: Dictionary = _commit("singleplayer_supply", operation, data, request_id, context)
+		if result.get("ok", false) and _campaign_mode and String(context.get("location_id", "")) == "trade_outpost":
+			_observe({"trade_used": true, "bought": operation == "buy", "refueled": operation == "refuel"})
+		return result
 	if operation == "prepare_departure":
 		if not is_campaign_mission():
 			return {"ok": true}
@@ -173,8 +201,20 @@ func _service_context(craft_id: String) -> Dictionary:
 	return {}
 
 func validate_departure(craft_id: String) -> Dictionary:
+	if _campaign_mode:
+		observe_campaign_progress()
+		var stage: int = int(_onboarding.get_snapshot().stage_index)
+		if stage == 0:
+			return _reject("preparation_incomplete", "Zuerst Satellitenauftrag annehmen, Ziel waehlen und Boarding abschliessen")
 	var selected: Dictionary = _campaign.get_campaign_snapshot()
 	var destination: String = String(selected.selected_location_id)
+	if _campaign_mode:
+		var gate: Dictionary = _campaign_operation_gate("select_destination", {"location_id": destination})
+		if not gate.ok:
+			return gate
+		var expected_id := "satellite_recovery" if destination == "satellite_crash" else "trade_outpost_visit"
+		if String(_flow.get("_selected_mission_id")) != expected_id:
+			return _reject("campaign_map_mismatch", "Zielort erneut auf der Regionalkarte auswaehlen")
 	if destination == "homebase":
 		return _reject("destination_missing", "Zielort auf der Regionalkarte waehlen")
 	var pad: String = _home_pad_for(craft_id)
@@ -205,7 +245,7 @@ func authorize_departure(craft_id: String) -> Dictionary:
 	if not validation.get("ok", false):
 		return validation
 	var departure: Dictionary = validation.departure
-	var token: String = "departure:%s:%d" % [craft_id, int(_flow.get("_transfer_sequence")) + 1]
+	var token: String = "departure:%s:%s:%d" % [_request_session, craft_id, int(_flow.get("_transfer_sequence")) + 1]
 	var fuel: Dictionary = _commit("singleplayer_supply", "consume_route_fuel", departure, token + ":fuel", {"departure_authorized": true, "require_return_reserve": true})
 	if not fuel.get("ok", false):
 		return fuel
@@ -245,7 +285,7 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 	return result
 
 func is_campaign_mission() -> bool:
-	return String(_flow.get("_selected_mission_id")) in ["satellite_recovery", "trade_outpost_visit"]
+	return _campaign_mode or String(_flow.get("_selected_mission_id")) in ["satellite_recovery", "trade_outpost_visit"]
 
 func record_mission_result(result: Dictionary, authoritative_mission_identity: Dictionary = {}) -> void:
 	var selected: Dictionary = _campaign.get_campaign_snapshot()
@@ -259,10 +299,50 @@ func record_mission_result(result: Dictionary, authoritative_mission_identity: D
 	var evidence: Dictionary = result.duplicate(true)
 	evidence["scenario_id"] = scenario_id
 	var operation: String = "complete_job" if String(result.get("result", "")) == "victory" else "fail_job"
-	var committed: Dictionary = _commit("singleplayer_campaign", operation, {"job_id": job_id, "craft_id": craft_id}, "result:" + String(job_id), {"runtime_evidence": evidence})
+	var committed: Dictionary = _commit("singleplayer_campaign", operation, {"job_id": job_id, "craft_id": craft_id}, "result:" + String(job_id) + ":" + String(_departure_token_by_craft.get(craft_id, "")), {"runtime_evidence": evidence})
 	var receipt: Dictionary = committed.get("completion_receipt", {})
 	if not receipt.is_empty():
 		_commit("singleplayer_supply", "apply_reward", {"completion_id": receipt.completion_id}, "reward:" + String(receipt.completion_id), {"completion_receipt": receipt})
+
+func _campaign_operation_gate(operation: String, payload: Dictionary) -> Dictionary:
+	var stage: int = int(_onboarding.get_snapshot().stage_index)
+	if operation == "select_destination":
+		var location: String = String(payload.get("location_id", ""))
+		if stage < 2 and location == "trade_outpost":
+			return _reject("tutorial_locked", "Zuerst den Satelliten bergen und zur Basis zurueckkehren")
+		if stage == 2 and location == "satellite_crash":
+			return _reject("tutorial_locked", "Jetzt Versorgung am Handelsposten sichern")
+		if stage < 2 and location == "satellite_crash" and String(payload.get("job_id", "")) != "satellite_recovery" and String(_campaign.get_campaign_snapshot().selected_job_id) != "satellite_recovery":
+			return _reject("job_required", "Zuerst den Satellitenauftrag im Smart Mobile annehmen")
+	return {"ok": true}
+
+func _observe(evidence: Dictionary) -> void:
+	if _onboarding != null:
+		_commit("campaign_onboarding", "observe", {}, "", {"runtime_evidence": evidence})
+
+func observe_campaign_progress() -> void:
+	if not _campaign_mode:
+		return
+	var campaign: Dictionary = _campaign.get_campaign_snapshot()
+	var at_home := _flow.get("_active_mission") == null and not _has_active_transit()
+	for location in Dictionary(_flow.get("_aircraft_location_by_craft")).values():
+		at_home = at_home and String(location) == "homebase"
+	var selected_craft: Dictionary = _screen.call("get_operations_snapshot").get("selected_craft", {})
+	var craft_id: String = String(selected_craft.get("id", ""))
+	var ready := not craft_id.is_empty() and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id)) and not String(_screen.call("_get_assigned_pilot_id", craft_id)).is_empty()
+	var job: Dictionary = Dictionary(campaign.jobs.get("satellite_recovery", {}))
+	var service := _service_context(craft_id)
+	var departure: Dictionary = Dictionary(campaign.departures_by_craft_id.get(craft_id, {}))
+	_observe({"base_ready": at_home and ready and String(job.get("status", "")) == "accepted" and String(campaign.selected_location_id) == "satellite_crash", "satellite_completed": String(job.get("status", "")) == "completed", "satellite_home": at_home, "trade_departed": not at_home and String(departure.get("destination_location_id", "")) == "trade_outpost", "trade_used": String(service.get("location_id", "")) == "trade_outpost", "trade_home": at_home})
+
+func export_campaign_checkpoint() -> Dictionary:
+	if not _campaign_mode:
+		return {}
+	var state: Dictionary = _campaign.export_state()
+	state["departures_by_craft_id"] = {}
+	state["selected_location_id"] = "homebase"
+	state["selected_job_id"] = ""
+	return {"schema_version": 1, "campaign": state, "supply": _supply.export_state(), "onboarding": _onboarding.export_state()}
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}

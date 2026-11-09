@@ -1523,7 +1523,9 @@ func _build_formation_targets(anchor_position: Vector2, member_records: Array, l
 			if not direction.is_zero_approx():
 				forward = direction.normalized()
 	var lateral: Vector2 = forward.orthogonal()
-	var workbench_targets: Dictionary = _build_workbench_formation_targets(anchor_position, member_records, leader_unit_id, lateral, forward, state)
+	# A lone operator has no formation mates. Use the existing zero-offset
+	# singleton slot instead of a four-member preset's displaced unit_1 slot.
+	var workbench_targets: Dictionary = _build_workbench_formation_targets(anchor_position, member_records, leader_unit_id, lateral, forward, state) if member_records.size() > 1 else {}
 	if not workbench_targets.is_empty():
 		return workbench_targets
 	var slot_spacing: float = _resolve_formation_slot_spacing(state)

@@ -5,6 +5,8 @@ signal terminal_open_requested(id: String)
 signal exploration_exit_requested
 
 const MAP_PATH: String = "res://maps/homebase_frontier_exploration.json"
+const CAMPAIGN_MAP_PATH: String = "res://maps/campaign_intro_base.json"
+var _map_path: String = MAP_PATH
 const MAP_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 const TERRAIN_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
@@ -97,6 +99,8 @@ func set_pad_preview(active: bool, craft_id: String = "") -> void:
 
 
 func set_transport_snapshot(snapshot: Dictionary) -> void:
+	if not _initialized:
+		_map_path = CAMPAIGN_MAP_PATH if String(snapshot.get("mode", "")) == "campaign" else MAP_PATH
 	# Presentation cache only. Actual membership, pad occupancy and phase arrive
 	# from the runtime adapter; this scene never creates or moves a real craft.
 	_refuel_service_available = not Dictionary(snapshot.get("supply", {})).is_empty()
@@ -246,9 +250,9 @@ func _on_visibility_changed() -> void:
 
 
 func _initialize_runtime() -> void:
-	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MAP_PATH))
+	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_map_path))
 	_layout = Dictionary(raw.get("homebase_exploration", {}))
-	_map_data = MAP_SCRIPT.load_from_file(MAP_PATH)
+	_map_data = MAP_SCRIPT.load_from_file(_map_path)
 	_runtime = Node.new()
 	_runtime.name = "HomebaseRuntime"
 	_viewport.add_child(_runtime)
@@ -692,7 +696,7 @@ func get_exploration_snapshot() -> Dictionary:
 	var result: Dictionary = {
 		"initialized": _initialized, "active": _active,
 		"preview_mode": _pad_preview,
-		"map_path": MAP_PATH, "movement_owner": "SimulationRoot",
+		"map_path": _map_path, "movement_owner": "SimulationRoot",
 		"owns_roster": false, "owns_transport": false, "owns_inventory": false,
 		"ephemeral_commander": true, "read_only": true,
 		"tree_paused": get_tree().paused if is_inside_tree() else false,

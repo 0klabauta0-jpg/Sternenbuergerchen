@@ -1,5 +1,17 @@
 # IMPLEMENTATION_STATUS
 
+### Kampagnenstart und Skirmish — 09.11.2026, technisch geprueft
+Eigener Menueeinstieg mit genau zwei NPCs (Pilot und Leader), kompakter
+22x24-Basis und drei gefuehrten Etappen: Vorbereitung, Satellitenbergung,
+Handel/Betankung mit Heimkehr. Skirmish behaelt das Menue-Team; MP-Einstieg
+bleibt getrennt. Atomare Basis-Checkpoints, echtes Fortsetzen, Popup-/Hoverhilfe.
+Echter Kampagnen-Zweiausflug77/0 inklusive beider Checkpoint-Neuladungen,
+Skirmish-Zweiausflug60/0 und15 fokussierte Gates; ein alter Formations-
+Teardownfehler identisch auf Mainbasis, separat ausgewiesen. Native Bedienung,
+Lernerfolg und neue MP-Abnahme bleiben offen. Nur Hintergrund/Headless, kein Push.
+Vertrag: docs/dev/campaign_introduction_contract.md.
+QA: docs/qa/campaign_intro_20261109/README.md.
+
 ### Einzelspieler Basis/Orte/UI — 09.11.2026, technisch geprueft
 AP0–AP7 implementiert, AP8 echter1x-Zweiausflug60/60 nach Reviewfixes.
 Aktuelle Produktquellen6d0e463fe:20 fokussierte Gates und6 betroffene

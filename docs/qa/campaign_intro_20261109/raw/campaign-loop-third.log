@@ -1,0 +1,431 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Existing menu-built Skirmish team fixture is nonempty
+SINGLEPLAYER_LOOP_BEGIN time_scale=1.0 user_data=C:/Users/bjoer/.codex/worktrees/singleplayer-playtest-plan-20261109/SternenBuergerchen/.scratch/campaign-loop-third/Godot/app_userdata/Sternenbuergerchen
+PASS: Actual Flow has long-lived campaign runtime
+PASS: Normal bootstrap has actual craft and team payload
+PASS: Initial payload contains the expected real crew identities
+PASS: Accept job through real operation bridge
+PASS: Acceptance alone starts no mission
+PASS: Select the distinct satellite location
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places LZ on saved reachable pad
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: Actual satellite scene cannot win on load
+PASS: satellite_data actual move GO accepts
+PASS: satellite_data becomes usable after real simulated approach
+PASS: satellite_data real Use intent accepts
+PASS: satellite_data Use GO accepts
+FAIL: TIMEOUT satellite_data actual timed Use commits required runtime step
+SINGLEPLAYER_LOOP_DIAGNOSTIC:{
+"deployed_ids": {
+"campaign_leader": true
+},
+"execution": {
+"ft1": {
+"hold_elapsed": 0.41560988359788475,
+"interaction_hold_radius": 96.0,
+"interaction_marker_position": Vector2(2116.595, 797.7025),
+"interaction_waypoint_id": "wp_0002",
+"phase": 1,
+"resolved_target_position": Vector2(2116.595, 797.7025),
+"started_msec": 38322,
+"waypoint_index": 0
+}
+},
+"flow_view": "mission",
+"interactions": {
+"complete_count": 0,
+"in_progress_count": 1,
+"interaction_count": 1,
+"interaction_states": {
+"satellite_data": {
+"active_team_id": "team_alpha",
+"command_type": "take",
+"complete": false,
+"duration_seconds": 3.0,
+"fireteam_id": "ft1",
+"gate_id": "secure_satellite",
+"hold_seconds": 0.41560988359788475,
+"interaction_type": "computer",
+"progress": 0.13853662786596158,
+"read_only": true,
+"required_state": "satellite_secured",
+"state": "operating",
+"step_id": "secure_satellite",
+"team_id": "team_alpha",
+"ui_sets_gameplay_truth": false,
+"updated_msec": 43053
+}
+},
+"read_only": true,
+"runtime_authority": "MissionCombatLoopDriver",
+"schema": "sternenbuergerchen.mission_interaction_runtime_progress.v1",
+"ui_sets_gameplay_truth": false
+},
+"last_command": "FT1 MOVE E 1F N Walk",
+"movement": [],
+"operations": {
+"busy": true,
+"can_board": false,
+"can_start": false,
+"can_unboard": false,
+"has_payload": true,
+"id": "dropship_1",
+"name": "Cutlass 1",
+"next_step": "Rückkehr abwarten",
+"passenger_count": 1,
+"payload_fireteam_ids": ["ft1"],
+"pilot_id": "campaign_pilot",
+"pilot_name": "Tomas Ibarra",
+"pilot_options": [{
+"id": "",
+"label": "Pilot auswählen"
+}, {
+"id": "campaign_pilot",
+"label": "Tomas Ibarra"
+}],
+"progress": 0.0,
+"status": "Unterwegs",
+"texture_path": "res://Assets/curated/ui_native_r4/cutlass_ref03_preview.png"
+},
+"planning": {
+"active_phase_index": 0,
+"air_asset_status": {
+"asset_id": "dropship_1",
+"asset_type": "dropship",
+"crashed": false,
+"damage_state": false,
+"destroyed": false,
+"display_name": "Dropship 1",
+"enemy_at_pressure": 0.0,
+"integrity": 100,
+"integrity_ratio": 1.0,
+"last_event_id": "",
+"last_reason": "",
+"locked_by_unit_id": "",
+"lz_secure_level": 0.0,
+"max_integrity": 100,
+"metadata": {
+"source": "MissionTacticalSandboxController",
+"visual_only": false
+},
+"position": Vector2(-1075.9244, -669.4641),
+"recovering": false,
+"risk": 0.0,
+"runtime_authority": "SimulationRoot",
+"sfx_events": [],
+"state": "intact",
+"terminal_state": false,
+"threat_weapon_id": "",
+"ui_sets_gameplay_truth": false,
+"unavailable": false,
+"vfx_events": [],
+"warning_state": false,
+"warning_visible": false
+},
+"approach_angle": "NW",
+"area_orders": [],
+"deployed_unit_ids": ["campaign_leader"],
+"deployed_unit_positions": {
+"campaign_leader": Vector2(1682.3181, 786.84094)
+},
+"drop_ship_requested": true,
+"drop_ship_staged": true,
+"embarked_unit_ids": [],
+"fire_rules": {},
+"has_lz_position": true,
+"has_selected_tile": true,
+"lz_position": Vector2(1726.3181, 768.84094),
+"meta_transfer_routes": [],
+"mission_drop_cards": [{
+"approach_angle": "NW",
+"boarded_fireteam_ids": ["ft1"],
+"card_feedback_text": "Trupp ab",
+"craft_id": "dropship_1",
+"display_name": "Dropship 1",
+"drop_sequence_position": Vector2(1726.3181, 768.84094),
+"drop_ship_requested": true,
+"drop_ship_staged": true,
+"dropship_position": Vector2(1726.3181, 768.84094),
+"embarked_unit_ids": [],
+"eta_seconds": 0,
+"has_embarked_payload": true,
+"has_lz_position": true,
+"lz_label": "LZ1 Dropship 1",
+"lz_name": "LZ1 Dropship 1",
+"lz_position": Vector2(1726.3181, 768.84094),
+"passenger_count": 0,
+"payload_source": "homebase_direct",
+"pilot_display_name": "Tomas Ibarra",
+"pilot_portrait_path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_014.tres",
+"pilot_text": "Pilot: Tomas Ibarra",
+"pilot_unit_id": "campaign_pilot",
+"progress": 100.0,
+"queued_fireteam_ids": ["ft1"],
+"state": "complete",
+"status_line": "",
+"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png",
+"title_text": "#19 Dropship 1"
+}],
+"mission_drop_craft_id": "dropship_1",
+"mission_drop_display_name": "Dropship 1",
+"mission_drop_eta_seconds": 0,
+"mission_drop_passenger_count": 0,
+"mission_drop_pilot_display_name": "Tomas Ibarra",
+"mission_drop_pilot_portrait_path": "res://Assets/curated/portraits/frontier_20261105/portraits/char_portrait_014.tres",
+"mission_drop_pilot_text": "Pilot: Tomas Ibarra",
+"mission_drop_pilot_unit_id": "campaign_pilot",
+"mission_drop_progress": 100.0,
+"mission_drop_return_requested": false,
+"mission_drop_source": "homebase_direct",
+"mission_drop_state": "waiting",
+"mission_drop_status_line": "",
+"mission_drop_texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png",
+"mission_drop_title_text": "#19 Dropship 1",
+"multi_fireteam_plans": [],
+"order_plans": [{
+"active_waypoint_index": 0,
+"fireteam_id": "ft1",
+"metadata": {},
+"phase": 1,
+"plan_id": "plan_ft1_p1",
+"status": "active",
+"waypoints": [{
+"command_type": "take",
+"hold_duration_seconds": 3.0,
+"metadata": {
+"created_phase": 1,
+"door_runtime_hook": false,
+"door_runtime_producer": "",
+"door_runtime_state_target": "satellite_secured",
+"duration_seconds": 3.0,
+"feedback_line": "COMPUTER bereit | TAKE | FT1 94m",
+"gate_id": "secure_satellite",
+"interaction_id": "satellite_data",
+"interaction_radius_world": 96.0,
+"interaction_type": "computer",
+"required_order": "take",
+"required_state": "satellite_secured",
+"required_team": "team_alpha",
+"source": "mission_interaction_use_intent",
+"step_id": "secure_satellite"
+},
+"status": "active",
+"target_position": Vector2(2116.595, 797.7025),
+"waypoint_id": "wp_0002"
+}]
+}],
+"phase_count": 2,
+"phase_states": [{
+"display_name": "P0 PRE",
+"is_editable": false,
+"metadata": {
+"is_premission": true
+},
+"phase_index": 0,
+"started_tick": 0,
+"status": "active"
+}, {
+"display_name": "P1",
+"is_editable": true,
+"metadata": {
+"is_premission": false
+},
+"phase_index": 1,
+"status": "pending"
+}],
+"selected_fireteam": "ALL",
+"selected_fireteams": ["ft1"],
+"selected_phase": "P1",
+"selected_phase_index": 1,
+"selected_tile": {
+"grid_position": Vector2i(7, 11),
+"grid_text": "G7,11",
+"grid_x": 7,
+"grid_y": 11,
+"has_selected_tile": true,
+"world_position": Vector2(1726.3181, 768.84094),
+"world_text": "1726, 769"
+},
+"selected_tile_grid_position": Vector2i(7, 11),
+"selected_tile_world_position": Vector2(1726.3181, 768.84094),
+"tactical_stance_sync": {
+"revision": 0,
+"stances": {},
+"version": 1
+},
+"tactical_stances": {}
+},
+"plans": [{
+"active_waypoint_index": 0,
+"fireteam_id": "ft1",
+"metadata": {},
+"phase": 1,
+"plan_id": "plan_ft1_p1",
+"status": "active",
+"waypoints": [{
+"command_type": "take",
+"hold_duration_seconds": 3.0,
+"metadata": {
+"created_phase": 1,
+"door_runtime_hook": false,
+"door_runtime_producer": "",
+"door_runtime_state_target": "satellite_secured",
+"duration_seconds": 3.0,
+"feedback_line": "COMPUTER bereit | TAKE | FT1 94m",
+"gate_id": "secure_satellite",
+"interaction_id": "satellite_data",
+"interaction_radius_world": 96.0,
+"interaction_type": "computer",
+"required_order": "take",
+"required_state": "satellite_secured",
+"required_team": "team_alpha",
+"source": "mission_interaction_use_intent",
+"step_id": "secure_satellite"
+},
+"status": "active",
+"target_position": Vector2(2116.595, 797.7025),
+"waypoint_id": "wp_0002"
+}]
+}],
+"runtime": {
+"campaign": {
+"accepted_job_ids": ["satellite_recovery"],
+"completion_receipts": {},
+"departures_by_craft_id": {
+"dropship_1": {
+"craft_id": "dropship_1",
+"destination_location_id": "satellite_crash",
+"job_id": "satellite_recovery",
+"landing_pad_id": "homebase_pad_01",
+"origin_location_id": "homebase"
+}
+},
+"jobs": {
+"satellite_recovery": {
+"craft_id": "dropship_1",
+"description": "An der Absturzstelle die Satellitendaten sichern und mit dem Trupp zum Schiff zurueckkehren.",
+"id": "satellite_recovery",
+"location_id": "satellite_crash",
+"required_step_ids": ["secure_satellite", "return_to_ship"],
+"reward": {
+"credits": 150
+},
+"scenario_id": "satellite_recovery",
+"status": "active",
+"title": "Satellitendaten bergen"
+}
+},
+"locations": {
+"homebase": {
+"id": "homebase",
+"landing_pad_ids": ["homebase_pad_01", "homebase_pad_02"],
+"map_file_path": "res://maps/homebase_frontier_exploration.json",
+"name": "Heimatbasis",
+"region_position": [0.2, 0.65],
+"scenario_file_path": "",
+"services": ["personnel", "jobs", "refuel"]
+},
+"satellite_crash": {
+"id": "satellite_crash",
+"landing_pad_ids": ["satellite_pad_01"],
+"map_file_path": "res://maps/satellite_crash_site.json",
+"name": "Satelliten-Absturzstelle",
+"region_position": [0.7, 0.25],
+"scenario_file_path": "res://data/mission_scenarios/satellite_recovery.json",
+"services": []
+},
+"trade_outpost": {
+"id": "trade_outpost",
+"landing_pad_ids": ["trade_pad_01"],
+"map_file_path": "res://maps/trade_outpost.json",
+"name": "Handelsaussenposten",
+"region_position": [0.8, 0.75],
+"scenario_file_path": "res://data/mission_scenarios/trade_outpost_visit.json",
+"services": ["trade", "refuel"]
+}
+},
+"revision": 4,
+"selected_job_id": "satellite_recovery",
+"selected_location_id": "satellite_crash"
+},
+"crafts": [{
+"busy": false,
+"cargo_options": [],
+"craft_id": "dropship_1",
+"craft_type": "dropship",
+"departure": {
+"craft_id": "dropship_1",
+"destination_location_id": "satellite_crash",
+"job_id": "satellite_recovery",
+"landing_pad_id": "homebase_pad_01",
+"origin_location_id": "homebase"
+},
+"display_name": "Dropship 1",
+"landing_pad_id": "homebase_pad_01",
+"location_id": "satellite_crash",
+"summary": "Single-pilot shuttle for the FOB corridor.",
+"supports_cargo": false,
+"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png",
+"visible_on_pad": false
+}],
+"mode": "campaign",
+"onboarding": {
+"completed": false,
+"facts": {},
+"next_step_id": "satellite_completed",
+"revision": 1,
+"stage_index": 1
+},
+"runtime_authority": "SimulationRoot",
+"service_contexts_by_craft_id": {},
+"supply": {
+"credits": 500,
+"fuel_by_craft_id": {
+"dropship_1": 48.0
+},
+"fuel_capacity": 100.0,
+"fuel_price_per_unit": 2.0,
+"item_quantities": {},
+"offers": {
+"medictool_supply": {
+"id": "medictool_supply",
+"item_id": "medictool",
+"location_ids": ["trade_outpost"],
+"name": "Sanitaetswerkzeug",
+"stock": 4.0,
+"unit_price": 50.0
+}
+},
+"revision": 1,
+"reward_completion_ids": [],
+"route_fuel_costs": {
+"homebase>satellite_crash": 12.0,
+"homebase>trade_outpost": 8.0,
+"satellite_crash>homebase": 12.0,
+"satellite_crash>trade_outpost": 10.0,
+"trade_outpost>homebase": 8.0,
+"trade_outpost>satellite_crash": 10.0
+},
+"stock_by_offer_id": {
+"medictool_supply": 4
+}
+}
+},
+"scene_tree_paused": false,
+"simulation_tick": 4253,
+"stage": "use_execution_satellite_data"
+}
+PASS: Campaign never writes the menu-built Skirmish team
+CAMPAIGN_INTRO_LOOP returns=0
+SINGLEPLAYER_LOOP_RESULTS passed=20 failed=1

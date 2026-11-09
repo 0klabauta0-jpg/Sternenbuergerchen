@@ -1,0 +1,20 @@
+{
+  "git_head": "7daec05d4c561583d85c54c72ceaf726fd848f9f",
+  "tracked_changes": [
+    "scripts/meta/campaign_tutorial_presenter.gd",
+    "scripts/meta/explorable_homebase.gd",
+    "scripts/meta/meta_layer_flow.gd",
+    "scripts/meta/singleplayer_job_board_presenter.gd",
+    "scripts/meta/singleplayer_region_map_presenter.gd",
+    "scripts/meta/singleplayer_runtime_adapter.gd",
+    "scripts/tactical/fireteam_movement_controller.gd",
+    "scripts/tests/mission_tactical_sandbox_controller.gd",
+    "scripts/tests/playtest_20261109_singleplayer_loop_smoke.gd",
+    "scripts/ui/main_menu_screen.gd"
+  ],
+  "engine": "4.6.2",
+  "visible_launch": false,
+  "private_profiles": true,
+  "fourth_loop": "77/0",
+  "main_integration": "pending"
+}

@@ -1,0 +1,78 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/campaign_mission_handoff_test.gd:7)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/campaign_mission_handoff_test.gd:7)
+PASS: Campaign handoff loads actual scenario resource
+PASS: Campaign mission has real scenario gates
+PASS: Actual campaign leader profile crosses mission boundary
+HANDOFF_DIAGNOSTIC:{
+"configs": [{
+"age_years": 34,
+"biography_text": "Former dock security lead who rebuilt a scattered relief squad into a disciplined boarding cell.",
+"callsign": "ROOK",
+"display_name": "Anja Voss",
+"fireteam_id": "ft1",
+"homeworld": "Bastion-7",
+"loadout_summary": "Command carbine, breaching charges, uplink slate",
+"portrait_path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_22_42.png",
+"role_id": "section_lead",
+"role_name": "Fireteam Leader",
+"roster_role_category": "operator",
+"short_description": "Former dock security lead who rebuilt a scattered relief squad into a disciplined boarding cell.",
+"skill_accuracy": 0.6,
+"skill_leadership": 0.7,
+"skill_speed": 0.4,
+"skill_toughness": 0.5,
+"specialty_text": "Small-unit command and breach timing",
+"team_id": "team_alpha",
+"trait_ids": ["calm", "steady"],
+"unit_id": "campaign_leader"
+}],
+"gates": {
+"all_gates_complete": false,
+"completed_step_ids": PackedStringArray(),
+"configured": true,
+"countdown": {},
+"gates": [{
+"blocked_by_step_id": "",
+"complete": false,
+"enemy_group_id": "",
+"hold_elapsed_seconds": 0.0,
+"hold_required_seconds": 3.0,
+"objective_type": "interaction_use",
+"operator_team_id": "",
+"progress": 0.0,
+"required_state": "satellite_secured",
+"requires_step_id": "",
+"status": "pending",
+"step_id": "secure_satellite",
+"target_marker_id": "satellite_data"
+}, {
+"blocked_by_step_id": "secure_satellite",
+"complete": false,
+"enemy_group_id": "",
+"hold_elapsed_seconds": 0.0,
+"hold_required_seconds": 2.0,
+"objective_type": "interaction_use",
+"operator_team_id": "",
+"progress": 0.0,
+"required_state": "crew_returned",
+"requires_step_id": "secure_satellite",
+"status": "blocked",
+"step_id": "return_to_ship",
+"target_marker_id": "ship_return"
+}],
+"runtime_authority": "MissionScenarioRuntimeGates",
+"ui_sets_gameplay_truth": false
+},
+"scenario_path": "res://data/mission_scenarios/satellite_recovery.json",
+"setup_ready": true
+}
+CAMPAIGN_HANDOFF failed=0

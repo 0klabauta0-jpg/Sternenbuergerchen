@@ -20,6 +20,7 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	_configure_entry()
 	print("SINGLEPLAYER_LOOP_BEGIN time_scale=", Engine.time_scale, " user_data=", OS.get_user_data_dir())
 	_flow = FLOW.instantiate()
 	root.add_child(_flow)
@@ -45,7 +46,7 @@ func _run() -> void:
 			for member: Dictionary in Array(team.get("members", [])):
 				_crew_ids.append(String(member.id))
 	_identity_before = _identity(operations)
-	_check(_crew_ids.size() == 3, "Normal initial payload contains three real crew identities")
+	_check(_crew_ids.size() == _expected_crew_count(), "Initial payload contains the expected real crew identities")
 	_check(_screen.call("request_operation", "accept_job", {"job_id": "satellite_recovery", "request_id": "loop:accept"}).get("ok", false), "Accept job through real operation bridge")
 	_check(_flow.get("_active_mission") == null, "Acceptance alone starts no mission")
 	_check(_screen.call("request_operation", "select_destination", {"location_id": "satellite_crash", "job_id": "satellite_recovery", "request_id": "loop:satellite"}).get("ok", false), "Select the distinct satellite location")
@@ -186,6 +187,12 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	_check(String(mission.get_node("MissionSetup").get("scenario_file_path")).get_file().get_basename() == scenario_id, "Selected location loads exact intended scenario " + scenario_id)
 	return true
 
+func _configure_entry() -> void:
+	pass
+
+func _expected_crew_count() -> int:
+	return 3
+
 func _move_and_use(mission: Node, interaction: String, step: String, map_path: String) -> bool:
 	if not is_instance_valid(mission):
 		return _check(false, interaction + " mission still exists before command")
@@ -247,7 +254,7 @@ func _all_crew_deployed(controller: Node) -> bool:
 	for id: String in _crew_ids:
 		if not deployed.has(id):
 			return false
-	return not _crew_ids.is_empty()
+	return not _crew_ids.is_empty() and bool(controller.call("_fireteam_deploy_effects_are_applied", _team_id)) and not Dictionary(controller.get("_runtime_activation_pending_fireteam_ids")).has(_team_id) and not Dictionary(controller.get("_post_drop_security_pending_fireteam_ids")).has(_team_id)
 
 func _campaign() -> Dictionary:
 	return Dictionary(_flow.call("get_singleplayer_snapshot").get("campaign", {}))

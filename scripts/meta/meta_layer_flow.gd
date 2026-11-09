@@ -136,6 +136,9 @@ const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 
 var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
 var _singleplayer_runtime: Node
+var _game_start_request: Dictionary = {}
+var _campaign_start: RefCounted
+var _campaign_tutorial: Control
 var _active_singleplayer_identity: Dictionary = {}
 var _singleplayer_services: Control
 var _singleplayer_services_elapsed: float = 0.0
@@ -201,7 +204,15 @@ func _ready() -> void:
 		push_warning("MetaLayerFlow requires HomebaseScreen, FOBScreen and DebriefScreen children.")
 		return
 
-	_load_persistent_player_roster()
+	_game_start_request = load("res://scripts/meta/game_start_contract.gd").consume_start(get_tree())
+	if is_campaign_start():
+		_campaign_start = load("res://scripts/meta/campaign_start_configuration.gd").new()
+		_campaign_start.call("configure", self, _game_start_request)
+		if not String(_campaign_start.get("error_message")).is_empty():
+			call_deferred("_campaign_load_failed")
+			return
+	else:
+		_load_persistent_player_roster()
 	_ensure_singleplayer_release_start_bootstrap()
 	META_UI_SKIN_SCRIPT.apply_meta_navigation(self)
 	_connect_navigation_buttons()
@@ -210,6 +221,14 @@ func _ready() -> void:
 	_singleplayer_runtime.name = "SingleplayerRuntime"
 	add_child(_singleplayer_runtime)
 	_singleplayer_runtime.call("configure", self, homebase_screen)
+	if is_campaign_start():
+		_campaign_tutorial = load("res://scripts/meta/campaign_tutorial_presenter.gd").new()
+		var tutorial_layer := CanvasLayer.new()
+		tutorial_layer.name = "CampaignTutorialLayer"
+		tutorial_layer.layer = 110
+		add_child(tutorial_layer)
+		tutorial_layer.add_child(_campaign_tutorial)
+		_campaign_tutorial.call("configure", _singleplayer_runtime, self)
 	var service_layer := CanvasLayer.new()
 	service_layer.name = "SingleplayerServiceLayer"
 	service_layer.layer = 80
@@ -288,6 +307,13 @@ func _process(_delta: float) -> void:
 	if _singleplayer_services_elapsed >= 0.25:
 		_singleplayer_services_elapsed = 0.0
 		_refresh_singleplayer_services()
+		if is_campaign_start() and _singleplayer_runtime != null:
+			_singleplayer_runtime.call("observe_campaign_progress")
+			var saved: Dictionary = _campaign_start.call("save_home_checkpoint", self, _singleplayer_runtime)
+			if bool(saved.get("ok", false)) or String(saved.get("reason", "")) not in ["away_from_checkpoint", "preparation_in_progress"]:
+				set_meta("campaign_checkpoint_result", saved)
+			if _campaign_tutorial != null:
+				_campaign_tutorial.call("refresh")
 
 
 func set_transport_refresh_timing_debug_enabled(enabled: bool) -> void:
@@ -4070,6 +4096,13 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 			if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
 				mission_setup.set("selected_fireteam_definitions", Array(fob_screen.call("get_fireteam_definitions")).duplicate(true))
 		var planning_unit_configs: Array = Array(_mission_planning_state.get("selected_team_unit_configs", []))
+		if is_campaign_start():
+			# Homebase Direct bypasses the legacy FOB roster presenter. Pass the
+			# authoritative campaign profiles rather than its unknown-ID fallback.
+			planning_unit_configs = []
+			for unit: Dictionary in _all_team_units:
+				if selected_unit_ids.has(String(unit.get("unit_id", ""))):
+					planning_unit_configs.append(unit.duplicate(true))
 		if not planning_unit_configs.is_empty():
 			mission_setup.set("selected_team_unit_configs", planning_unit_configs.duplicate(true))
 		else:
@@ -4363,6 +4396,12 @@ func _apply_mission_progression_to_roster(mission_result: Dictionary) -> Diction
 	updated_roster = Dictionary(personnel_result.get("updated_roster", updated_roster)).duplicate(true)
 	result["personnel_events"] = Array(personnel_result.get("events", [])).duplicate(true)
 	result["personnel_notifications"] = PackedStringArray(personnel_result.get("notifications", PackedStringArray()))
+	if is_campaign_start():
+		# Campaign persistence is one coherent home checkpoint, never local_player.
+		result["progression_save_ok"] = true
+		result["progression_save_path"] = "user://campaigns/introduction/checkpoint_v1.json"
+		_replace_roster_units(Array(updated_roster.get("units", [])))
+		return result
 	var save_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("save_roster", updated_roster, PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID))
 	result["progression_save_ok"] = bool(save_result.get("ok", false))
 	result["progression_save_path"] = String(save_result.get("path", ""))
@@ -4371,14 +4410,14 @@ func _apply_mission_progression_to_roster(mission_result: Dictionary) -> Diction
 
 
 func _build_progression_roster_payload() -> Dictionary:
-	var load_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("load_roster", PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID))
+	var load_result: Dictionary = {} if is_campaign_start() else Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("load_roster", PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID))
 	var roster: Dictionary = Dictionary(load_result.get("roster", {})).duplicate(true) if bool(load_result.get("ok", false)) else {}
 	if roster.is_empty():
 		roster = {
 			"schema_version": 1,
 			"generator_id": "meta_layer_progression_runtime",
 			"seed": "meta_layer_runtime",
-			"player_profile_id": PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID,
+			"player_profile_id": "campaign_introduction" if is_campaign_start() else PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID,
 			"units": _all_team_units.duplicate(true),
 			"relationship_pairs": [],
 			"fireteam_suggestions": [],
@@ -4763,6 +4802,8 @@ func _load_persistent_player_roster() -> void:
 
 
 func _ensure_singleplayer_release_start_bootstrap() -> void:
+	if is_campaign_start():
+		return
 	_ensure_singleplayer_release_default_mission_selection()
 	_ensure_singleplayer_release_homebase_direct_drop_source()
 	_ensure_singleplayer_bootstrap_roster_floor()
@@ -4837,12 +4878,14 @@ func _seed_singleplayer_bootstrap_homebase_payload() -> void:
 		"seed_homebase_direct_launch_payload",
 		bootstrap_craft_id,
 		PackedStringArray([payload_fireteam_id]),
-		true
+		not is_campaign_start()
 	)
 	set_meta("singleplayer_bootstrap_payload_seeded", true)
 
 
 func _ensure_singleplayer_visible_homebase_actionability() -> void:
+	if is_campaign_start():
+		return
 	if not bool(get_meta("singleplayer_bootstrap_enabled", false)) or _active_mission != null or not _last_mission_result.is_empty():
 		return
 	var homebase_screen = _get_homebase_screen()
@@ -4874,6 +4917,8 @@ func _ensure_singleplayer_visible_homebase_actionability() -> void:
 
 
 func _schedule_singleplayer_visible_homebase_actionability_guard() -> void:
+	if is_campaign_start():
+		return
 	if not bool(get_meta("singleplayer_bootstrap_enabled", false)) or not _last_mission_result.is_empty():
 		return
 	if _active_mission != null or _active_mission_started_at_msec > 0:
@@ -4996,6 +5041,8 @@ func get_singleplayer_start_bootstrap_snapshot() -> Dictionary:
 
 
 func _ensure_singleplayer_bootstrap_roster_floor() -> void:
+	if is_campaign_start():
+		return
 	var fallback_roster: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
 	if _all_team_units.is_empty() or _available_team_units.is_empty():
 		_all_team_units = fallback_roster.duplicate(true)
@@ -5070,6 +5117,8 @@ func _get_singleplayer_bootstrap_payload_fireteam_id() -> String:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges()
 		if not fireteam_id.is_empty():
 			return fireteam_id
+	if is_campaign_start():
+		return ""
 	return SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID
 
 
@@ -7200,6 +7249,16 @@ func _get_selected_mission_definition() -> Dictionary:
 
 func get_singleplayer_snapshot() -> Dictionary:
 	return _singleplayer_runtime.call("get_snapshot") if _singleplayer_runtime != null else {}
+
+
+func is_campaign_start() -> bool:
+	return String(_game_start_request.get("mode", "skirmish")) == "campaign"
+
+
+func _campaign_load_failed() -> void:
+	push_warning("Kampagnenstand ungueltig; kein neuer Stand wird angelegt.")
+	get_tree().root.set_meta("campaign_start_error", "Kampagnenstand konnte nicht geladen werden. Vorhandener Stand bleibt erhalten.")
+	get_tree().change_scene_to_file("res://scenes/ui/main_menu.tscn")
 
 
 func _refresh_singleplayer_services() -> void:

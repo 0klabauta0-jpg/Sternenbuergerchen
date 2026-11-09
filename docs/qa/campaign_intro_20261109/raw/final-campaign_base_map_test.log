@@ -1,0 +1,13 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Mini base loads valid native hex data
+PASS: Compact base has one room and one pad
+PASS: Commander can reach terminal personnel
+PASS: Commander can reach terminal team
+PASS: Commander can reach terminal flightdeck
+PASS: Commander can reach terminal mission
+PASS: Commander can reach terminal jobs
+PASS: Commander can reach terminal refuel
+PASS: Real campaign pad identity is reachable
+CAMPAIGN_BASE failed=0

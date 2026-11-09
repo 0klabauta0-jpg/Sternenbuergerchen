@@ -1,5 +1,12 @@
 # TASK_ROADMAP
 
+### Kampagnenstart / Skirmish — 09.11.2026
+Freigegebene Einfuehrung implementiert: genau zwei NPCs, kleine Basis,
+Vorbereitung -> Satellit -> Handel/Tanken/Heimkehr, getrennte Modi und
+Basis-Checkpoints mit Fortsetzen. Kampagne77/0, Skirmish60/0;15 gezielte
+Gates mit separat belegtem altem Formations-Teardownfehler. Native Abnahme
+bleibt Nutzeraufgabe. docs/qa/campaign_intro_20261109/README.md.
+
 ### Einzelspieler Basis/Orte/UI — 09.11.2026, technisch geprueft
 AP0–AP7 implementiert, AP8 echter1x-Zweiausflug60/60 nach Reviewfixes.
 Aktuelle Produktquellen6d0e463fe:20 fokussierte Gates und6 betroffene

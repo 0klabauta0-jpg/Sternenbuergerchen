@@ -1556,7 +1556,7 @@ func execute_selected_fireteam_orders() -> bool:
 	var inactive_fireteams: PackedStringArray = []
 	for fireteam_id_variant in _selected_fireteam_ids:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
-		if not _is_fireteam_runtime_active(fireteam_id):
+		if not _is_fireteam_runtime_active(fireteam_id) or _runtime_activation_pending_fireteam_ids.has(fireteam_id) or _post_drop_security_pending_fireteam_ids.has(fireteam_id):
 			inactive_fireteams.append(fireteam_id.to_upper())
 	if not inactive_fireteams.is_empty():
 		_last_command_text = "WAIT FOR INSERTION: %s" % ", ".join(inactive_fireteams)

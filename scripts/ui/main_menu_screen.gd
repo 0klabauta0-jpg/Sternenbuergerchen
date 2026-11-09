@@ -183,6 +183,9 @@ func _ready() -> void:
 	if viewport != null and not viewport.size_changed.is_connected(_layout_native_shell_windows):
 		viewport.size_changed.connect(_layout_native_shell_windows)
 	_layout_native_shell_windows()
+	if get_tree().root.has_meta("campaign_start_error"):
+		_status_label.text = String(get_tree().root.get_meta("campaign_start_error"))
+		get_tree().root.remove_meta("campaign_start_error")
 	call_deferred("_apply_release_deeplink")
 
 

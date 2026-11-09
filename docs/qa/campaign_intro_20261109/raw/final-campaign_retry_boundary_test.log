@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/campaign_retry_boundary_test.gd:7)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/campaign_retry_boundary_test.gd:7)
+PASS: Fixture uses actual authorized departure binding
+PASS: Abandon records failed mission without erasing return binding
+PASS: Retry while away is rejected
+PASS: Rejected retry retains original route identity
+PASS: Craft can still authorize its original reverse route
+PASS: Failed job can be retried after actual home boundary
+PASS: Retry returns same job to accepted state
+CAMPAIGN_RETRY failed=0

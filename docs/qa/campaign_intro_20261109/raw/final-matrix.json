@@ -1,0 +1,137 @@
+[
+  {
+    "case": "campaign_start_integration_test",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [
+      "CAMPAIGN_START_RESULTS passed=11 failed=0"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/premerge3-campaign_start_integration_test.log"
+  },
+  {
+    "case": "campaign_retry_boundary_test",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [
+      "PASS: Abandon records failed mission without erasing return binding",
+      "PASS: Failed job can be retried after actual home boundary",
+      "CAMPAIGN_RETRY failed=0"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-campaign_retry_boundary_test.log"
+  },
+  {
+    "case": "campaign_mission_handoff_test",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [
+      "CAMPAIGN_HANDOFF failed=0"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-campaign_mission_handoff_test.log"
+  },
+  {
+    "case": "campaign_single_leader_formation_test",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [
+      "SINGLE_LEADER_FORMATION failed=0"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-campaign_single_leader_formation_test.log"
+  },
+  {
+    "case": "campaign_base_map_test",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [
+      "CAMPAIGN_BASE failed=0"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-campaign_base_map_test.log"
+  },
+  {
+    "case": "campaign_onboarding_state_test",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/premerge3-campaign_onboarding_state_test.log"
+  },
+  {
+    "case": "campaign_menu_start_test",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-campaign_menu_start_test.log"
+  },
+  {
+    "case": "campaign_tutorial_presenter_test",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-campaign_tutorial_presenter_test.log"
+  },
+  {
+    "case": "playtest_20261109_job_location_flow_verifier",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [
+      "CAMPAIGN_RESULTS passed=33 failed=0"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-playtest_20261109_job_location_flow_verifier.log"
+  },
+  {
+    "case": "playtest_20261109_trade_refuel_verifier",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [
+      "SUPPLY_RESULTS passed=41 failed=0"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-playtest_20261109_trade_refuel_verifier.log"
+  },
+  {
+    "case": "playtest_20261109_departure_validation_verifier",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [
+      "DEPARTURE_VALIDATION_RESULTS passed=15 failed=0"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-playtest_20261109_departure_validation_verifier.log"
+  },
+  {
+    "case": "playtest_20261109_campaign_authority_verifier",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [
+      "CAMPAIGN_AUTHORITY: PASS"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-playtest_20261109_campaign_authority_verifier.log"
+  },
+  {
+    "case": "frontier_hex_movement_verifier",
+    "exit_code": 0,
+    "error_count": 0,
+    "results": [
+      "FRONTIER_HEX_MOVEMENT {\"engine\":{\"build\":\"official\",\"hash\":\"71f334935c000924d403448e698df4441130df18\",\"hex\":263682,\"major\":4,\"minor\":6,\"patch\":2,\"status\":\"stable\",\"string\":\"4.6.2-stable (official)\",\"timestamp\":0},\"failed\":0,\"passed\":25,\"samples\":[{\"avoidance\":false,\"direction\":[1,0],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":false,\"direction\":[1,-1],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":false,\"direction\":[0,-1],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":false,\"direction\":[-1,0],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":false,\"direction\":[-1,1],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":false,\"direction\":[0,1],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":true,\"direction\":[1,0],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":true,\"direction\":[1,-1],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":true,\"direction\":[0,-1],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":true,\"direction\":[-1,0],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":true,\"direction\":[-1,1],\"seconds\":1.8,\"ticks\":108},{\"avoidance\":true,\"direction\":[0,1],\"seconds\":1.8,\"ticks\":108}],\"synthetic_fixture\":true,\"tick_spread\":0}"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-frontier_hex_movement_verifier.log"
+  },
+  {
+    "case": "formation_offsets_verifier",
+    "exit_code": 0,
+    "error_count": 1,
+    "results": [
+      "=== RESULTS: 7 passed, 0 failed ==="
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/final-formation_offsets_verifier.log",
+    "baseline_equivalent": true,
+    "disposition": "7/0 assertions; identical pre-existing ObjectDB/resource teardown diagnostics on unchanged Main6bf",
+    "baseline_log": ".superpowers/sdd/2026-11-09-campaign-onboarding/baseline-formation_offsets_verifier.log"
+  },
+  {
+    "case": "campaign_preparation_continue_test",
+    "exit_code": 0,
+    "error_count": 0,
+    "checks": 10,
+    "results": [
+      "CAMPAIGN_PREPARATION failed=0"
+    ],
+    "log": ".superpowers/sdd/2026-11-09-campaign-onboarding/premerge3-campaign_preparation_continue_test.log"
+  }
+]

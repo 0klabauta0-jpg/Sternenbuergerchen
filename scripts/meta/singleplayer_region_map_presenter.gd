@@ -35,7 +35,9 @@ func configure(screen: Control) -> void:
 	refresh()
 
 func refresh() -> void:
-	var campaign: Dictionary = _screen.get_ref().call("get_operations_snapshot").get("singleplayer", {}).get("campaign", {})
+	var runtime: Dictionary = _screen.get_ref().call("get_operations_snapshot").get("singleplayer", {})
+	var campaign: Dictionary = runtime.get("campaign", {})
+	var stage: int = int(Dictionary(runtime.get("onboarding", {})).get("stage_index", 3))
 	var locations: Dictionary = campaign.get("locations", {})
 	for id in locations:
 		var location: Dictionary = locations[id]
@@ -51,6 +53,9 @@ func refresh() -> void:
 			_buttons[id] = button
 		var button: Button = _buttons[id]
 		button.text = ("◆ " if String(campaign.get("selected_location_id", "")) == id else "◇ ") + String(location.name)
+		var locked: bool = String(runtime.get("mode", "")) == "campaign" and ((stage < 2 and id == "trade_outpost") or (stage == 2 and id == "satellite_crash"))
+		button.disabled = locked
+		button.tooltip_text = ("Erst Satellit bergen und heimkehren." if stage < 2 else "Jetzt Versorgung am Handelsposten sichern.") if locked else "Diesen Ort als Ziel waehlen. Der Flug startet erst am Flightdeck."
 	_position_buttons()
 	var selected: Dictionary = locations.get(String(campaign.get("selected_location_id", "")), {})
 	var job: Dictionary = Dictionary(campaign.get("jobs", {})).get(String(campaign.get("selected_job_id", "")), {})
@@ -64,6 +69,12 @@ func _select(location_id: String) -> void:
 	var job: Dictionary = Dictionary(campaign.get("jobs", {})).get(selected_job, {})
 	if String(job.get("location_id", "")) == location_id and String(job.get("status", "")) in ["accepted", "active"]:
 		job_id = selected_job
+	if job_id.is_empty():
+		for id in Dictionary(campaign.get("jobs", {})):
+			var accepted: Dictionary = campaign.jobs[id]
+			if String(accepted.get("location_id", "")) == location_id and String(accepted.get("status", "")) == "accepted":
+				job_id = String(id)
+				break
 	screen.call("request_operation", "select_destination", {"location_id": location_id, "job_id": job_id})
 	refresh()
 
