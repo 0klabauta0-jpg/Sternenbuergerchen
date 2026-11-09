@@ -14193,7 +14193,7 @@
           12.117500026226045,
           7.472499973773956
         ],
-        "source_status": "unchanged source retained; replaced in base by authored roofless room candidate"
+        "source_status": "restored original furnished cutaway GLB; unchanged mesh/material source"
       },
       {
         "id": "freihafen_hall_01",
@@ -14210,7 +14210,7 @@
           24.107499999999998,
           7.431249947547912
         ],
-        "source_status": "unchanged source retained; replaced in base by authored roofless room candidate"
+        "source_status": "restored original furnished cutaway GLB; unchanged mesh/material source"
       },
       {
         "id": "utility_fuel_01",
@@ -14314,7 +14314,7 @@
           9,
           7
         ],
-        "visual_status": "authored roofless candidate; unchanged GLB retained as provenance, no user visual approval",
+        "visual_status": "original furnished cutaway GLB restored; existing authored navigation retained; native visual/path alignment requires manual acceptance",
         "floor_grids": [
           [
             7,
@@ -14527,7 +14527,7 @@
           24,
           7
         ],
-        "visual_status": "authored roofless candidate; unchanged GLB retained as provenance, no user visual approval",
+        "visual_status": "original furnished cutaway GLB restored; existing authored navigation retained; native visual/path alignment requires manual acceptance",
         "floor_grids": [
           [
             21,

@@ -2,6 +2,13 @@
 
 Stand: 09.11.2026. Zielvertrag fuer AP3/AP5/AP7; native Abnahme ist gesondert.
 
+Nutzerkorrektur nach dem Kampagnen-Playtest: Die Heimatbasis bleibt36x28 gross,
+auch bei kleinem Startpersonal. Beide moeblierten Original-Cutaway-GLBs werden
+wieder sichtbar eingesetzt; kahle Ersatzwaende sind kein freigegebener
+Basisstil. Vereinfachungen fuer den Handelsposten gelten nur dort. Die
+gespeicherten Navigationsfakten bleiben getrennt vom sichtbaren Mesh; ein
+Pathfinder-PASS belegt keine native Passung von Tueren/Moebeln und Laufwegen.
+
 TerrainMapData/TerrainRegistry besitzen Hexfelder, Boeden, Tueren, Aussenwaende,
 Begehbarkeit und LOS. Cutaway-Darstellung liest gespeicherte Daten, aendert
 keine Kollisions-/Navigationswahrheit. Beide Gebaeude besitzen erreichbare

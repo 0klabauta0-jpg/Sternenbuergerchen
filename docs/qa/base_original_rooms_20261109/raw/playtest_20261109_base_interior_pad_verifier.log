@@ -1,0 +1,143 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Two authored interiors have independent navigation records
+PASS: Two real landing footprints are authored
+PASS: Base uses the shared axial topology
+PASS: Base offers more authored space than the old yard
+PASS: habitat_cutaway_01 interior and door connect to Commander start
+PASS: habitat_cutaway_01 runtime route enters through authored doorway
+PASS: habitat_cutaway_01 exterior wall blocks movement at [6.0, 4.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [6.0, 5.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [6.0, 6.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [6.0, 7.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [6.0, 8.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [6.0, 9.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [6.0, 10.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [7.0, 4.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [7.0, 10.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [8.0, 4.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [8.0, 10.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [9.0, 4.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [10.0, 4.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [10.0, 10.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [11.0, 4.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [11.0, 10.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [12.0, 4.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [12.0, 5.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [12.0, 6.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [12.0, 7.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [12.0, 8.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [12.0, 9.0]
+PASS: habitat_cutaway_01 exterior wall blocks movement at [12.0, 10.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [7.0, 5.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [7.0, 6.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [7.0, 7.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [7.0, 8.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [7.0, 9.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [8.0, 5.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [8.0, 6.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [8.0, 7.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [8.0, 8.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [8.0, 9.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [9.0, 5.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [9.0, 6.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [9.0, 7.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [9.0, 8.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [9.0, 9.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [9.0, 10.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [10.0, 5.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [10.0, 6.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [10.0, 7.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [10.0, 8.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [10.0, 9.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [11.0, 5.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [11.0, 6.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [11.0, 7.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [11.0, 8.0]
+PASS: habitat_cutaway_01 stored floor is walkable at [11.0, 9.0]
+PASS: freihafen_hall_01 interior and door connect to Commander start
+PASS: freihafen_hall_01 runtime route enters through authored doorway
+PASS: freihafen_hall_01 exterior wall blocks movement at [20.0, 4.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [20.0, 5.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [20.0, 6.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [20.0, 7.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [20.0, 8.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [20.0, 9.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [20.0, 10.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [21.0, 4.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [21.0, 10.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [22.0, 4.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [22.0, 10.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [23.0, 4.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [23.0, 10.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [24.0, 4.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [25.0, 4.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [25.0, 10.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [26.0, 4.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [26.0, 10.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [27.0, 4.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [27.0, 10.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [28.0, 4.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [28.0, 5.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [28.0, 6.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [28.0, 7.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [28.0, 8.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [28.0, 9.0]
+PASS: freihafen_hall_01 exterior wall blocks movement at [28.0, 10.0]
+PASS: freihafen_hall_01 stored floor is walkable at [21.0, 5.0]
+PASS: freihafen_hall_01 stored floor is walkable at [21.0, 6.0]
+PASS: freihafen_hall_01 stored floor is walkable at [21.0, 7.0]
+PASS: freihafen_hall_01 stored floor is walkable at [21.0, 8.0]
+PASS: freihafen_hall_01 stored floor is walkable at [21.0, 9.0]
+PASS: freihafen_hall_01 stored floor is walkable at [22.0, 5.0]
+PASS: freihafen_hall_01 stored floor is walkable at [22.0, 6.0]
+PASS: freihafen_hall_01 stored floor is walkable at [22.0, 7.0]
+PASS: freihafen_hall_01 stored floor is walkable at [22.0, 8.0]
+PASS: freihafen_hall_01 stored floor is walkable at [22.0, 9.0]
+PASS: freihafen_hall_01 stored floor is walkable at [23.0, 5.0]
+PASS: freihafen_hall_01 stored floor is walkable at [23.0, 6.0]
+PASS: freihafen_hall_01 stored floor is walkable at [23.0, 7.0]
+PASS: freihafen_hall_01 stored floor is walkable at [23.0, 8.0]
+PASS: freihafen_hall_01 stored floor is walkable at [23.0, 9.0]
+PASS: freihafen_hall_01 stored floor is walkable at [24.0, 5.0]
+PASS: freihafen_hall_01 stored floor is walkable at [24.0, 6.0]
+PASS: freihafen_hall_01 stored floor is walkable at [24.0, 7.0]
+PASS: freihafen_hall_01 stored floor is walkable at [24.0, 8.0]
+PASS: freihafen_hall_01 stored floor is walkable at [24.0, 9.0]
+PASS: freihafen_hall_01 stored floor is walkable at [24.0, 10.0]
+PASS: freihafen_hall_01 stored floor is walkable at [25.0, 5.0]
+PASS: freihafen_hall_01 stored floor is walkable at [25.0, 6.0]
+PASS: freihafen_hall_01 stored floor is walkable at [25.0, 7.0]
+PASS: freihafen_hall_01 stored floor is walkable at [25.0, 8.0]
+PASS: freihafen_hall_01 stored floor is walkable at [25.0, 9.0]
+PASS: freihafen_hall_01 stored floor is walkable at [26.0, 5.0]
+PASS: freihafen_hall_01 stored floor is walkable at [26.0, 6.0]
+PASS: freihafen_hall_01 stored floor is walkable at [26.0, 7.0]
+PASS: freihafen_hall_01 stored floor is walkable at [26.0, 8.0]
+PASS: freihafen_hall_01 stored floor is walkable at [26.0, 9.0]
+PASS: freihafen_hall_01 stored floor is walkable at [27.0, 5.0]
+PASS: freihafen_hall_01 stored floor is walkable at [27.0, 6.0]
+PASS: freihafen_hall_01 stored floor is walkable at [27.0, 7.0]
+PASS: freihafen_hall_01 stored floor is walkable at [27.0, 8.0]
+PASS: freihafen_hall_01 stored floor is walkable at [27.0, 9.0]
+PASS: homebase_pad_01 pad approach is reachable
+PASS: homebase_pad_02 pad approach is reachable
+PASS: Pad identities remain stable for the real craft projection
+PASS: personnel terminal is on reachable authored ground
+PASS: team terminal is on reachable authored ground
+PASS: flightdeck terminal is on reachable authored ground
+PASS: mission terminal is on reachable authored ground
+PASS: jobs terminal is on reachable authored ground
+PASS: refuel terminal is on reachable authored ground
+PASS: Future construction retains an authored free footprint
+PASS: Runtime exposes both pad identities without owning transport
+PASS: Runtime exposes the authored interior/navigation records
+PASS: Runtime does not replace furnished source buildings with bare walls
+PASS: Runtime restores both furnished source building models
+PASS: Pad display introduces no second craft owner
+PASS: Real runtime accepts a walk into the first room
+PASS: SimulationRoot actually moves Commander through the door onto interior floor
+PASS: Actual wall rejects a runtime movement request
+PASS: Deactivation stops only base movement without global pause
+BASE_INTERIOR_PAD: 139 passed, 0 failed

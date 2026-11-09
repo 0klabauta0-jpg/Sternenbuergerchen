@@ -1,8 +1,16 @@
 # IMPLEMENTATION_STATUS
 
+### Heimatbasis: Originalraeume wiederhergestellt — 09.11.2026
+Nutzerkorrektur nach Playtest: Kampagne wieder36x28 statt22x24, beide
+erhaltenen moeblierten Cutaway-GLBs sichtbar, keine kahlen Ersatzwaende.
+Handelsposten und Gameplay-/Save-Owner unveraendert. Basis16/0, Karte9/0,
+Innenraum-/Tuer-/Commander-Laufen139/0, Kampagnenstart11/0, Fortsetzen10/0.
+Originalmeshes unveraendert; neue native Stil-/Geometriepassung nicht abgenommen.
+QA: docs/qa/base_original_rooms_20261109/README.md. Kein Push.
+
 ### Kampagnenstart und Skirmish — 09.11.2026, technisch geprueft
-Eigener Menueeinstieg mit genau zwei NPCs (Pilot und Leader), kompakter
-22x24-Basis und drei gefuehrten Etappen: Vorbereitung, Satellitenbergung,
+Eigener Menueeinstieg mit genau zwei NPCs (Pilot und Leader), groesserer
+36x28-Basis und drei gefuehrten Etappen: Vorbereitung, Satellitenbergung,
 Handel/Betankung mit Heimkehr. Skirmish behaelt das Menue-Team; MP-Einstieg
 bleibt getrennt. Atomare Basis-Checkpoints, echtes Fortsetzen, Popup-/Hoverhilfe.
 Echter Kampagnen-Zweiausflug77/0, frisch auf Main78/0 inklusive beider Checkpoint-Neuladungen,

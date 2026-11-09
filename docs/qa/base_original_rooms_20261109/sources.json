@@ -1,0 +1,17 @@
+[
+  {
+    "path": "Assets/curated/frontier_illustrated_20261101/structures_pass04/habitat_cutaway_01.glb",
+    "sha256": "6524CD513B1D474DBA4A855EF1DAD32EC4539513ACB46BF73CD1B44463A2D50F",
+    "status": "unchanged existing source"
+  },
+  {
+    "path": "Assets/curated/frontier_illustrated_20261101/structures_pass04/freihafen_hall_01.glb",
+    "sha256": "CC17A4CEBC805A3F165EECD0E3BEF95B7A92E851DC592FB8867B92597A894508",
+    "status": "unchanged existing source"
+  },
+  {
+    "path": "docs/reports/assets/grafik-2026-11-01/engine_pass07_paths/after/cutaway.png",
+    "sha256": "A41205018D618C2F89C62FFB2B0DF2CA52A6D0846F814F23845CD7B1A2AE40E5",
+    "status": "unchanged existing source"
+  }
+]

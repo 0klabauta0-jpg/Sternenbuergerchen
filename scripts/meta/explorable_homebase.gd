@@ -39,6 +39,8 @@ var _terminals: Array[Dictionary] = []
 var _terminal_labels: Dictionary = {}
 var _layout: Dictionary = {}
 var _asset_sources: Array[Dictionary] = []
+var _structure_visual_nodes: Dictionary = {}
+var _structure_visual_records: Dictionary = {}
 var _refuel_service_available: bool = false
 var _map_bounds: Rect2
 var _map_data
@@ -309,11 +311,11 @@ func _initialize_runtime() -> void:
 			stage.add_child(visual)
 			visual.position = _plane_position(asset.get("plane", [0.0, 0.0]))
 			if String(asset.get("id", "")) in ["habitat_cutaway_01", "freihafen_hall_01"]:
-				# The original single-mesh sources remain unchanged. Their opaque
-				# shells cannot define a door or navigation. The stored room facts
-				# below drive a separate roofless visual candidate instead.
-				visual.visible = false
-	_build_authored_interiors(stage)
+				# Furnished cutaway sources are the user's base target. Navigation
+				# remains in MapData; source meshes are never replaced or rewritten.
+				var id: String = String(asset.id)
+				_structure_visual_nodes[id] = visual
+				_structure_visual_records[id] = {"source_path": String(asset.path), "actual_sha256": String(_asset_sources.back().get("actual_sha256", ""))}
 	_build_landing_pads(stage)
 	_build_boundary_rocks(stage)
 	var avatar_visual: Dictionary = Dictionary(_layout.get("avatar_visual", {}))
@@ -715,10 +717,23 @@ func get_exploration_snapshot() -> Dictionary:
 		"landing_pads": Array(_layout.get("landing_pads", [])).duplicate(true),
 		"expansion_areas": Array(_layout.get("expansion_areas", [])).duplicate(true),
 		"cutaway_wall_visual_count": _cutaway_wall_visual_count,
+		"structure_visuals": _get_structure_visual_snapshot(),
 		"initial_walk_target": _world_at_grid(_layout.get("initial_walk_target_grid", [9, 11])),
 		"blocked_test_position": _world_at_grid(_layout.get("blocked_test_grid", [11, 9])), "distant_terminal_id": "flightdeck",
 		"asset_sources": _asset_sources.duplicate(true),
 		"service_drone": {"decorative": true, "runtime_unit": false, "model_local_position": _drone_model.position, "model_local_rotation": _drone_model.rotation, "exhaust": _drone_helper.call("get_visual_snapshot")},
 		"viewport_size": _viewport.size, "world_focus": _host.has_focus(),
 	}, true)
+	return result
+
+
+func _get_structure_visual_snapshot() -> Dictionary:
+	var result: Dictionary = {}
+	for id in _structure_visual_nodes:
+		var visual: Node3D = _structure_visual_nodes[id]
+		if is_instance_valid(visual):
+			var record: Dictionary = Dictionary(_structure_visual_records[id]).duplicate(true)
+			record["visible"] = visual.visible
+			record["route"] = "original_furnished_cutaway_glb"
+			result[id] = record
 	return result

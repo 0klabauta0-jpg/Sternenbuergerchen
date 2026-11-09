@@ -59,7 +59,8 @@ func _run() -> void:
 	var snapshot: Dictionary = base.call("get_exploration_snapshot")
 	_expect(Array(snapshot.get("landing_pads", [])).size() == 2, "Runtime exposes both pad identities without owning transport")
 	_expect(Array(snapshot.get("interiors", [])).size() == 2, "Runtime exposes the authored interior/navigation records")
-	_expect(int(snapshot.get("cutaway_wall_visual_count", 0)) > 0, "Runtime builds visible roofless boundary walls")
+	_expect(int(snapshot.get("cutaway_wall_visual_count", -1)) == 0, "Runtime does not replace furnished source buildings with bare walls")
+	_expect(Dictionary(snapshot.get("structure_visuals", {})).size() == 2, "Runtime restores both furnished source building models")
 	_expect(not bool(snapshot.get("owns_transport", true)), "Pad display introduces no second craft owner")
 	var first_room: Dictionary = interiors[0]
 	var destination: Vector2 = registry.grid_to_world(_grid(first_room.interior_grid))

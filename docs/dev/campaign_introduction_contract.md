@@ -20,7 +20,9 @@ Eine neue Kampagne besitzt genau zwei NPCs: `campaign_leader` als einsatzfaehige
 
 Ein Popup schliessen, ein Panel oeffnen oder einen Ortsnamen waehlen ist kein Missionsabschluss. Fehlschlag bleibt wiederholbar ueber `Erneut annehmen`; vergangene Ergebnis-/Command-Belege duerfen weder Wiederholung blockieren noch erneut Fuel, Waren oder Belohnungen erzeugen.
 
-Basisdarstellung verwendet `maps/campaign_intro_base.json`: kompakter Ausschnitt mit einem Gebaeude, den notwendigen Terminals und einem Pad. Skirmish behaelt die bestehende Basis. Satelliten- und Handelsort laden weiterhin ihre eigenen Karten und Szenarien. Ort, Auftrag, Karte, Szenario und Startmodus sind getrennte Begriffe.
+Basisdarstellung verwendet `maps/campaign_intro_base.json`: nach Nutzerkorrektur wieder die groessere36x28-Heimatbasis mit beiden vorhandenen moeblierten Cutaway-Gebaeuden und beiden stabilen Pad-Flaechen. Der Startumfang bleibt klein (zwei NPCs und ein reales Schiff); die Karte wird deshalb nicht verkleinert. Skirmish behaelt dieselbe grosse Basisgrundlage. Satelliten- und Handelsort laden weiterhin ihre eigenen Karten und Szenarien. Ort, Auftrag, Karte, Szenario und Startmodus sind getrennte Begriffe.
+
+Die vereinfachte Behandlung des Handelspostens ist keine Gestaltungsvorgabe fuer die Heimatbasis. Die erhaltenen `structures_pass04`-GLBs bleiben unveraendert; kahle Ersatzwaende werden dort nicht an ihrer Stelle aufgebaut. Vorlage und Nachweis: `docs/tasks/BASE_ORIGINAL_ROOMS_2026_11_09.md`.
 
 ## Autoritaet und Hilfe
 

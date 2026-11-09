@@ -34,7 +34,7 @@ func _run() -> void:
 		print("SAVE_RESULT:", saved)
 	var base: Control = screen.get("_operations_presenter").get("_base")
 	base.call("set_transport_snapshot", state)
-	_check(String(base.get("_map_path")) == "res://maps/campaign_intro_base.json", "Campaign presents separate compact base map")
+	_check(String(base.get("_map_path")) == "res://maps/campaign_intro_base.json", "Campaign uses its full-size homebase map")
 	_check(Array(flow.get("_mission_catalog")).size() == 2, "Campaign offers only its two authored external scenarios")
 	flow.queue_free()
 	await process_frame

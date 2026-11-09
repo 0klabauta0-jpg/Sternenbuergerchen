@@ -1,0 +1,20 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+FAIL: campaign retains the larger base map
+FAIL: campaign retains both authored building areas
+FAIL: campaign retains stable landing footprints
+FAIL: campaign renders no bare replacement walls
+FAIL: campaign shows furnished source habitat_cutaway_01
+FAIL: campaign uses original unchanged GLB habitat_cutaway_01
+FAIL: campaign shows furnished source freihafen_hall_01
+FAIL: campaign uses original unchanged GLB freihafen_hall_01
+PASS: skirmish retains the larger base map
+PASS: skirmish retains both authored building areas
+PASS: skirmish retains stable landing footprints
+FAIL: skirmish renders no bare replacement walls
+FAIL: skirmish shows furnished source habitat_cutaway_01
+FAIL: skirmish uses original unchanged GLB habitat_cutaway_01
+FAIL: skirmish shows furnished source freihafen_hall_01
+FAIL: skirmish uses original unchanged GLB freihafen_hall_01
+BASE_ORIGINAL_ROOMS passed=3 failed=13
