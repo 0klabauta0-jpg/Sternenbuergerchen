@@ -4,6 +4,8 @@ extends Control
 const PORTRAITS: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const BASE_SCENE: PackedScene = preload("res://scenes/meta/explorable_homebase.tscn")
 const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+const DRAG_SURFACE: GDScript = preload("res://scripts/meta/operations_drag_surface.gd")
+const BADGES: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const INK := Color("08232e")
 const PANEL := Color("102f3b")
 const CREAM := Color("f4f2e9")
@@ -27,6 +29,11 @@ var _selectors: Dictionary = {}
 var _workspace: Control
 var _roster_list: VBoxContainer
 var _search: LineEdit
+var _sort_selector: OptionButton
+var _roster_return_target: PanelContainer
+var _team_drag_source: PanelContainer
+var _craft_drop_target: PanelContainer
+var _equipment_slots: Dictionary = {}
 var _team_selector: OptionButton
 var _team_title: Label
 var _team_note: Label
@@ -244,6 +251,17 @@ func _build_roster() -> void:
 	_search.custom_minimum_size.y = 40
 	content.add_child(_search)
 	_search.text_changed.connect(func(_value: String): _filter_rows())
+	_sort_selector = _option(content, "PersonnelSort")
+	_sort_selector.item_selected.connect(func(index: int): _act("sort_roster", {"sort_mode": String(_sort_selector.get_item_metadata(index))}))
+	_roster_return_target = DRAG_SURFACE.new()
+	_roster_return_target.name = "ReturnPersonToRoster"
+	_roster_return_target.set("accepted_type", "homebase_unit_card")
+	_roster_return_target.custom_minimum_size.y = 34
+	_roster_return_target.tooltip_text = "Truppmitglied hierher ziehen, um es aus dem Trupp zu lösen"
+	_roster_return_target.add_theme_stylebox_override("panel", _style(PANEL, CYAN))
+	content.add_child(_roster_return_target)
+	_roster_return_target.add_child(_label("‹ Person zurück ins Personal", 14, CYAN))
+	_roster_return_target.connect("payload_dropped", func(data: Dictionary): _act("remove", {"unit_id": String(data.unit_id)}))
 	_roster_list = _scroll(content)
 
 
@@ -251,8 +269,16 @@ func _build_squad() -> void:
 	var content: VBoxContainer = _column("squad", "Trupp")
 	_team_selector = _option(content, "TeamSelector")
 	_team_selector.item_selected.connect(func(index: int): _act("focus_fireteam", {"fireteam_id": String(_team_selector.get_item_metadata(index))}))
-	_team_title = _label("0 / 4", 18, GOLD)
-	content.add_child(_team_title)
+	_team_drag_source = DRAG_SURFACE.new()
+	_team_drag_source.name = "DragFocusedFireteam"
+	_team_drag_source.set("accepted_type", "homebase_unit_card")
+	_team_drag_source.tooltip_text = "Person hier zuweisen · Trupp von hier ins Schiff ziehen"
+	_team_drag_source.add_theme_stylebox_override("panel", _style(PANEL, CYAN))
+	content.add_child(_team_drag_source)
+	_team_title = _label("0 / 4", 16, GOLD)
+	_team_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_team_drag_source.add_child(_team_title)
+	_team_drag_source.connect("payload_dropped", func(data: Dictionary): _act("assign", {"unit_id": String(data.unit_id), "fireteam_id": _fireteam_id}))
 	var list: VBoxContainer = _scroll(content)
 	for index in range(4):
 		var slot: Dictionary = _person_row(list, "slot_%d" % index, false)
@@ -296,15 +322,25 @@ func _build_equipment() -> void:
 	identity_text.add_child(_focused_status)
 	for spec in [{"id": "armor", "label": "Rüstung"}, {"id": "weapon_1", "label": "Primär"}, {"id": "weapon_2", "label": "Sekundär"}]:
 		var key: String = String(spec.id)
+		var slot: PanelContainer = DRAG_SURFACE.new()
+		slot.name = "EquipmentSlot_" + key
+		slot.set("accepted_type", "homebase_loadout_item")
+		slot.set("equipment_key", key)
+		slot.tooltip_text = "Ausrüstung wählen oder passendes Ausrüstungsteil hierher ziehen"
+		slot.add_theme_stylebox_override("panel", _style(PANEL, CYAN))
+		list.add_child(slot)
+		_equipment_slots[key] = slot
+		slot.connect("payload_dropped", func(data: Dictionary): _act("loadout", {"unit_id": _focused_id, "key": key, "value": String(data.get("item_id", ""))}))
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
-		list.add_child(row)
+		slot.add_child(row)
 		var field: Label = _label(String(spec.label), 16, MUTED)
 		field.custom_minimum_size.x = 76
 		field.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		row.add_child(field)
 		var selector: OptionButton = _option(row, key.capitalize() + "Selector")
 		selector.item_selected.connect(func(index: int): _act("loadout", {"unit_id": _focused_id, "key": key, "value": String(selector.get_item_metadata(index))}))
+		slot.call("forward_drag_from", selector)
 		_selectors[key] = selector
 	_remove_member = _button("Aus Trupp entfernen", false)
 	list.add_child(_remove_member)
@@ -329,7 +365,14 @@ func _build_flightdeck() -> void:
 	_mission_selector = _option(mission, "MissionSelector")
 	_mission_selector.item_selected.connect(func(index: int): _act("mission", {"mission_id": String(_mission_selector.get_item_metadata(index))}))
 	mission.add_child(_label("Schiff", 16, MUTED))
-	_craft_selector = _option(mission, "CraftSelector")
+	_craft_drop_target = DRAG_SURFACE.new()
+	_craft_drop_target.name = "CraftFireteamDropTarget"
+	_craft_drop_target.set("accepted_type", "fob_fireteam_card")
+	_craft_drop_target.tooltip_text = "Kompletten Trupp hierher auf das ausgewählte Schiff ziehen"
+	mission.add_child(_craft_drop_target)
+	_craft_drop_target.connect("payload_dropped", func(data: Dictionary): _act("board", {"fireteam_id": String(data.get("fireteam_id", "")), "craft_id": _craft_id}))
+	_craft_selector = _option(_craft_drop_target, "CraftSelector")
+	_craft_drop_target.call("forward_drag_from", _craft_selector)
 	_craft_selector.item_selected.connect(func(index: int): _act("craft", {"craft_id": String(_craft_selector.get_item_metadata(index))}))
 	pilot.add_child(_label("Pilot", 16, MUTED))
 	_pilot_selector = _option(pilot, "PilotSelector")
@@ -420,12 +463,13 @@ func _layout_reference_stage() -> void:
 
 
 func _person_row(parent: Control, id: String, with_assign: bool) -> Dictionary:
-	var panel := PanelContainer.new()
+	var panel: PanelContainer = DRAG_SURFACE.new()
 	panel.name = "Person_" + id.validate_node_name()
 	panel.custom_minimum_size.y = 112
 	panel.add_theme_stylebox_override("panel", _style(Color("163743"), Color("28515e")))
 	parent.add_child(panel)
 	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.add_theme_constant_override("separation", 9)
 	panel.add_child(row)
 	var portrait: TextureRect = _portrait(Vector2(96, 96))
@@ -433,6 +477,7 @@ func _person_row(parent: Control, id: String, with_assign: bool) -> Dictionary:
 	row.add_child(portrait)
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.mouse_filter = Control.MOUSE_FILTER_PASS
 	text.custom_minimum_size.x = 100.0
 	text.add_theme_constant_override("separation", 3)
 	row.add_child(text)
@@ -444,6 +489,9 @@ func _person_row(parent: Control, id: String, with_assign: bool) -> Dictionary:
 	focus.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	focus.clip_text = true
 	text.add_child(focus)
+	panel.call("forward_drag_from", focus)
+	focus.gui_input.connect(func(event: InputEvent): _person_input(event, panel))
+	panel.gui_input.connect(func(event: InputEvent): _person_input(event, panel, true))
 	var role: Label = _label("", 15, MUTED)
 	role.autowrap_mode = TextServer.AUTOWRAP_OFF
 	role.clip_text = true
@@ -454,13 +502,32 @@ func _person_row(parent: Control, id: String, with_assign: bool) -> Dictionary:
 	status.clip_text = true
 	status.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	text.add_child(status)
+	var badge := TextureRect.new()
+	badge.custom_minimum_size = Vector2(20, 20)
+	badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	badge.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(badge)
 	var action: Button
 	if with_assign:
 		action = _button("+", false)
 		action.custom_minimum_size = Vector2(40, 42)
 		action.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(action)
-	return {"root": panel, "portrait": portrait, "focus": focus, "role": role, "status": status, "assign": action, "unit_id": ""}
+	if not with_assign:
+		panel.set("accepted_type", "homebase_unit_card")
+		panel.connect("payload_dropped", func(data: Dictionary): _act("assign", {"unit_id": String(data.unit_id), "fireteam_id": _fireteam_id}))
+	return {"root": panel, "portrait": portrait, "focus": focus, "role": role, "status": status, "badge": badge, "assign": action, "unit_id": ""}
+
+
+func _person_input(event: InputEvent, panel: PanelContainer, allow_single: bool = false) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		var id: String = String(Dictionary(panel.get("drag_payload")).get("unit_id", ""))
+		if not id.is_empty() and event.double_click:
+			_act("details", {"unit_id": id})
+			panel.accept_event()
+		elif not id.is_empty() and allow_single:
+			_act("focus_unit", {"unit_id": id})
 
 
 func _slot_pressed(index: int) -> void:
@@ -488,6 +555,7 @@ func refresh() -> void:
 		for key in _workflow_labels:
 			(_workflow_labels[key] as Label).add_theme_color_override("font_color", GOLD if key == _mode else MUTED)
 		_workflow.visible = _mode != "base"
+	_set_options(_sort_selector, Array(snapshot.get("roster_sort_options", [])), String(snapshot.get("roster_sort_mode", "name_asc")))
 	_update_roster(Array(snapshot.get("roster", [])))
 	var team: Dictionary = Dictionary(snapshot.get("focused_fireteam", {}))
 	_update_team(team, Array(snapshot.get("fireteams", [])))
@@ -516,6 +584,8 @@ func _update_roster(roster: Array) -> void:
 			assign.pressed.connect(func(): _act("assign", {"unit_id": id}))
 		var item: Dictionary = Dictionary(_rows[id])
 		_fill_person(item, unit)
+		if (item.root as Control).get_index() != live.size() - 1:
+			_roster_list.move_child(item.root, live.size() - 1)
 		var action: Button = item.assign
 		action.disabled = not bool(unit.get("can_assign", false))
 		action.text = "✓" if String(unit.get("fireteam_id", "")) == _fireteam_id else "+"
@@ -541,7 +611,7 @@ func _fill_person(row: Dictionary, unit: Dictionary) -> void:
 	var panel: PanelContainer = row.root
 	var wide: bool = _workspace.size.x > 2200.0
 	var compact_slot: bool = row.assign == null and size.x < 1600.0
-	var portrait_edge: float = 64.0 if compact_slot else (112.0 if wide else 96.0)
+	var portrait_edge: float = 52.0 if row.assign != null else (64.0 if compact_slot else 72.0)
 	var style_signature: String = "%s:%s" % [wide, compact_slot]
 	if String(panel.get_meta("operations_row_style", "")) != style_signature:
 		portrait.custom_minimum_size = Vector2(portrait_edge, portrait_edge)
@@ -559,9 +629,19 @@ func _fill_person(row: Dictionary, unit: Dictionary) -> void:
 	role.text = String(unit.get("role", "Personal zuweisen"))
 	role.tooltip_text = role.text
 	var status: Label = row.status
-	status.text = String(unit.get("status", ""))
+	var loadout: Dictionary = Dictionary(unit.get("loadout", {}))
+	status.text = "%s · %s / %s" % [String(unit.get("status", "")), String(loadout.get("armor", "")), String(loadout.get("weapon_1", ""))] if not unit.is_empty() else ""
 	status.tooltip_text = status.text
-	panel.custom_minimum_size.y = 58.0 if unit.is_empty() else (80.0 if compact_slot else (128.0 if wide else 112.0))
+	panel.tooltip_text = "%s · %s" % [String(unit.get("name", "Freier Platz")), status.text]
+	panel.custom_minimum_size.y = 58.0 if unit.is_empty() else 80.0
+	panel.set("drag_payload", {"type": "homebase_unit_card", "unit_id": String(unit.get("id", "")), "source_context": "operations", "label": String(unit.get("name", ""))} if not unit.is_empty() else {})
+	var badges: Array = Array(unit.get("badges", []))
+	var badge: TextureRect = row.badge
+	badge.visible = not badges.is_empty()
+	if not badges.is_empty():
+		var badge_data: Dictionary = Dictionary(badges[0])
+		_set_texture(badge, BADGES.get_badge_asset_path(String(badge_data.get("badge_id", ""))))
+		badge.tooltip_text = BADGES.format_badge_tooltip(badge_data)
 	var selected: bool = not unit.is_empty() and String(unit.get("id", "")) == _focused_id
 	if not panel.has_meta("operations_selected") or bool(panel.get_meta("operations_selected")) != selected:
 		panel.add_theme_stylebox_override("panel", _style(Color("173d49"), GOLD if selected else Color("28515e")))
@@ -572,11 +652,12 @@ func _update_team(team: Dictionary, teams: Array) -> void:
 	_set_options(_team_selector, teams, _fireteam_id)
 	var members: Array = Array(team.get("members", []))
 	_team_title.text = "%d / 4 Mitglieder" % members.size()
+	_team_drag_source.set("drag_payload", {"type": "fob_fireteam_card", "fireteam_id": _fireteam_id, "label": String(team.get("label", _fireteam_id))} if not team.is_empty() else {})
 	for index in range(4):
 		var unit: Dictionary = Dictionary(members[index]) if index < members.size() else {}
 		_slots[index]["unit_id"] = String(unit.get("id", ""))
 		_fill_person(_slots[index], unit)
-	_team_note.text = "Trupp an Bord · zum Bearbeiten zurückholen" if bool(team.get("busy", false)) else "Personal auswählen und zuweisen."
+	_team_note.text = "Trupp an Bord · zum Bearbeiten zurückholen" if bool(team.get("busy", false)) else "Person auf einen Platz ziehen · Trupp ins Schiff ziehen."
 	if members.size() > 4:
 		_team_note.text = "%d weitere Mitglieder in den Charakterdetails/Werkzeugen." % (members.size() - 4)
 
@@ -591,6 +672,7 @@ func _update_equipment(unit: Dictionary, options: Dictionary) -> void:
 		var selector: OptionButton = _selectors[key]
 		_set_options(selector, Array(options.get(key, [])), String(loadout.get(key, "")))
 		selector.disabled = not bool(unit.get("can_edit", false))
+		(_equipment_slots[key] as PanelContainer).set("drag_payload", {"type": "homebase_loadout_item", "key": key, "item_id": String(loadout.get(key, "")), "label": "%s: %s" % [key, String(loadout.get(key, ""))]} if not unit.is_empty() else {})
 	_remove_member.disabled = not bool(unit.get("can_remove", false))
 	_focused_details.disabled = unit.is_empty()
 
@@ -676,13 +758,10 @@ func _layout_columns() -> void:
 	var rects: Dictionary = {}
 	var scene_rect := Rect2()
 	if _mode == "personnel":
-		var roster_width: float = available.x * (0.50 if narrow else 0.28)
-		var equipment_width: float = available.x - roster_width - gap if narrow else clampf(available.x * 0.28, 340.0, 680.0)
+		var roster_width: float = available.x * (0.50 if narrow else 0.48)
+		var equipment_width: float = available.x - roster_width - gap
 		rects["roster"] = Rect2(0, 0, roster_width, available.y)
 		rects["equipment"] = Rect2(roster_width + gap, 0, equipment_width, available.y)
-		if not narrow:
-			var scene_x: float = roster_width + equipment_width + gap * 2.0
-			scene_rect = Rect2(scene_x, 0, maxf(available.x - scene_x, 0), available.y)
 	elif _mode == "base":
 		pass
 	elif narrow and _mode == "squad":

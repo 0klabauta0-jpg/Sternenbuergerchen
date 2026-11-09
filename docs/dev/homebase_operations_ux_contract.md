@@ -19,14 +19,16 @@ Kompakte Personalzeilen behalten Identitaeten; Rang bedeutet vorhandene
 Rollen-/Faehigkeitsbadges, keinen erfundenen Dienstgrad. Der unklare Begriff
 Cutlist rechtfertigt kein blindes Loeschen eines benannten Controls.
 
-Die Heimatbasis startet bei Trupp & Ausruestung. Links Personal mit grossen
-Portraets, mittig ein waehlbarer Trupp mit vier gut erkennbaren Plaetzen,
+Die Heimatbasis startet bei Trupp & Ausruestung. Links kompakte Personenzeilen
+mit erhaltenen Gesichtern, Rollen-/Faehigkeitsabzeichen und Ausruestungskurztext;
+mittig ein waehlbarer Trupp mit vier gut erkennbaren Plaetzen,
 daneben genau ein fokussiertes Mitglied mit Ruestung, Primaer- und
 Sekundaerwaffe. Rechts stehen reales Schiff, Pilot, Boardingfortschritt und
-die naechste gueltige Aktion. Die volle Personnel-/Creator-/Cargo-/Fachansicht
-bleibt ueber Details oder Erweiterte Werkzeuge erreichbar.
+die naechste gueltige Aktion. Der vorhandene Charakterbogen bleibt ueber Details
+und Doppelklick erreichbar. Die alte Werkzeugansicht ist kein regulaerer Weg.
 
-Navigation: Basis erkunden, Personal, Trupp & Ausruestung, Einsatz & Abflug.
+Navigation: Basis erkunden, Personal, Trupp & Ausruestung, Smart Mobile, Karte,
+Einsatz & Abflug; neue noch ungebundene Ziele bleiben ehrlich gesperrt.
 Die normale Mission startet direkt aus der Heimatbasis; kein primaerer FOB-Link.
 Die Bildsprache folgt den bestaetigten Originalen menu_heimatbasis und
 menu_fob_loadout; deren Beispielnamen/-werte werden nicht als Spielwerte kopiert.
@@ -45,6 +47,14 @@ Die Controls werden einmal gebaut, Personenreihen nach Unit-ID wiederverwendet.
 Aktive Ansichten aktualisieren hoechstens alle 0.25 Sekunden oder nach Aktion;
 versteckte Presenter pollen nicht. Keine SceneTree-Vollscans im Updatepfad.
 Alte NodePaths/Callbacks bleiben fuer Details und Regressionen bestehen.
+
+Sortierung verwendet vorhandene Name-/XP-/Leader-/Tutor-/Pilotmetriken und
+vorhandene Rollen-/Faehigkeitsabzeichen, mit stabilen Name-/Unit-ID-Ties.
+Personen, Teamkopf, Schiffsauswahl und Ausruestungsslots bieten echte native
+Drag-/Dropadapter. Sie speichern nur angezeigte IDs, reichen Payloads an
+request_operation weiter und zeigen dessen konkrete Ablehnung. Das Zurueckfeld
+im Personal loest Mitglieder aus dem Trupp. Ein voller oder transportgebundener
+Trupp bleibt gesperrt, ein zweiter freier Trupp bleibt bedienbar.
 
 ## Begehbare Basis
 Die existierende ExplorableHomebase wird als echte Szene eingebettet.

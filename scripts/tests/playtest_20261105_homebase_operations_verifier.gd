@@ -118,7 +118,7 @@ func _run() -> void:
 	_assert(is_equal_approx(screen.size.x, 1280.0), "Narrow regression uses actual 1280 root layout")
 	_assert(_visible_column_count(columns) == 3 and not bool(Dictionary(columns.get("flight", {})).get("visible", true)), "Narrow squad uses three preparation columns and moves flight to its navigation page")
 	_assert(float(display.get("roster_minimum_name_width", 0.0)) >= 100.0, "1280 roster preserves at least 100px for person name")
-	_assert(float(display.get("roster_minimum_portrait_width", 0.0)) >= 96.0 and float(display.get("roster_minimum_assign_width", 0.0)) >= 40.0, "1280 roster preserves portrait and assignment sizes")
+	_assert(float(display.get("roster_minimum_portrait_width", 0.0)) >= 48.0 and float(display.get("roster_minimum_portrait_width", 0.0)) <= 64.0 and float(display.get("roster_minimum_assign_width", 0.0)) >= 40.0, "1280 roster uses compact portraits and preserves assignment targets")
 	_assert(float(display.get("roster_minimum_row_width", 0.0)) >= 270.0 and bool(display.get("roster_role_status_single_line", false)), "1280 roster has full row width and never wraps role or status by letter")
 	var mission_nav: Rect2 = Rect2(display.get("mission_navigation_rect", Rect2()))
 	_assert(bool(display.get("mission_navigation_visible", false)) and Rect2(Vector2.ZERO, screen.size).encloses(mission_nav), "Narrow flight navigation remains fully visible")

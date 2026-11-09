@@ -5,6 +5,7 @@ const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui
 const FRONTIER_SHIP_VISUALS_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const OPERATIONS_PRESENTER_SCRIPT: GDScript = preload("res://scripts/meta/homebase_operations_presenter.gd")
 const PORTRAIT_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
+const OPERATIONS_BADGES: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
@@ -72,6 +73,7 @@ const HOMEBASE_RELEASE_CTA_MIN_HEIGHT := 88.0
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE := 12
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT := 198.0
 const HOMEBASE_ROSTER_SORT_OPTIONS: Array = [
+	{"id": "badge", "label": "Rolle / Abzeichen"},
 	{"id": HOMEBASE_ROSTER_SORT_LEADER_DESC, "label": "Leader high"},
 	{"id": HOMEBASE_ROSTER_SORT_LEADER_ASC, "label": "Leader low"},
 	{"id": HOMEBASE_ROSTER_SORT_TUTOR_DESC, "label": "Tutor high"},
@@ -117,6 +119,8 @@ var _selected_briefing_loadout_recommendation: Dictionary = {}
 var _briefing_loadout_apply_count: int = 0
 var _briefing_loadout_feedback_text: String = ""
 var _roster_sort_mode: String = HOMEBASE_ROSTER_SORT_NAME_ASC
+var _singleplayer_snapshot_provider: Callable
+var _singleplayer_command_handler: Callable
 var _profiles_by_id: Dictionary = {}
 var _focused_unit_id: String = ""
 var _roster_cards_by_unit_id: Dictionary = {}
@@ -2996,6 +3000,12 @@ func get_homebase_roster_sort_snapshot() -> Dictionary:
 func _compare_homebase_roster_card_specs(left_variant: Variant, right_variant: Variant) -> bool:
 	var left: Dictionary = Dictionary(left_variant)
 	var right: Dictionary = Dictionary(right_variant)
+	if _roster_sort_mode == "badge":
+		var left_badge: int = int(Dictionary(left.get("sort_metrics", {})).get("badge_priority", 999))
+		var right_badge: int = int(Dictionary(right.get("sort_metrics", {})).get("badge_priority", 999))
+		if left_badge != right_badge:
+			return left_badge < right_badge
+		return _compare_homebase_roster_names(left, right)
 	var sort_key := "sort_name"
 	var descending := false
 	match _roster_sort_mode:
@@ -3041,7 +3051,9 @@ func _compare_homebase_roster_names(left: Dictionary, right: Dictionary) -> bool
 func _build_homebase_roster_sort_metrics(unit_id: String, profile) -> Dictionary:
 	var unit_data: Dictionary = _get_available_unit_data(unit_id)
 	var display_name: String = _build_display_name(unit_id).to_lower()
+	var badges: Array = OPERATIONS_BADGES.get_badges_for_profile(profile)
 	return {
+		"badge_priority": int(Dictionary(badges[0]).get("priority", 999)) if not badges.is_empty() else 999,
 		"leader_score": _get_homebase_profile_metric(profile, unit_data, ["leadership"], ["skill_leadership", "leadership"], 0.0),
 		"tutor_score": _get_homebase_tutor_sort_score(profile, unit_data),
 		"pilot_score": _get_homebase_pilot_sort_score(profile, unit_data),
@@ -9029,12 +9041,21 @@ func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 	var target_busy: bool = not _operations_payload_craft_for_team(_focused_fireteam_id).is_empty()
 	var capacity_available: bool = _selected_unit_ids.has(id) or _selected_unit_ids.size() < _get_team_capacity()
 	return {"id": id, "name": _build_display_name(id), "role": role, "status": status,
+		"badges": OPERATIONS_BADGES.get_badges_for_profile(profile),
+		"sort_metrics": _build_homebase_roster_sort_metrics(id, profile),
 		"portrait_id": String(profile.portrait_id) if profile != null else String(unit_data.get("portrait_id", "")),
 		"portrait_path": String(profile.portrait_path) if profile != null else String(unit_data.get("portrait_path", "")),
 		"fireteam_id": fireteam_id, "busy": busy, "in_transit": in_transit,
 		"can_assign": not busy and not target_busy and fireteam_id != _focused_fireteam_id and focused_members.size() < 4 and capacity_available,
 		"can_remove": not busy and not fireteam_id.is_empty(),
 		"can_edit": not busy and not fireteam_id.is_empty(), "loadout": _get_member_loadout(id)}
+
+
+func configure_singleplayer_bridge(snapshot_provider: Callable, command_handler: Callable) -> void:
+	_singleplayer_snapshot_provider = snapshot_provider
+	_singleplayer_command_handler = command_handler
+	if _operations_presenter != null:
+		_operations_presenter.call("refresh")
 
 
 func get_operations_snapshot() -> Dictionary:
@@ -9045,6 +9066,10 @@ func get_operations_snapshot() -> Dictionary:
 		var unit: Dictionary = _operations_unit_entry(Dictionary(unit_variant))
 		roster.append(unit)
 		by_id[String(unit.get("id", ""))] = unit
+	roster.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return _compare_homebase_roster_card_specs(
+			{"unit_id": a.id, "sort_name": a.name, "sort_metrics": a.sort_metrics},
+			{"unit_id": b.id, "sort_name": b.name, "sort_metrics": b.sort_metrics}))
 	var fireteams: Array = []
 	var focused_team: Dictionary = {}
 	for definition_variant in _fireteam_definitions:
@@ -9113,6 +9138,8 @@ func get_operations_snapshot() -> Dictionary:
 		var mission: Dictionary = Dictionary(mission_variant)
 		missions.append({"id": String(mission.get("id", mission.get("mission_id", ""))), "label": String(mission.get("display_name", mission.get("mission_name", mission.get("name", "Einsatz"))))})
 	return {"mode": _operations_mode, "roster": roster, "fireteams": fireteams,
+		"singleplayer": _singleplayer_snapshot_provider.call() if _singleplayer_snapshot_provider.is_valid() else {},
+		"roster_sort_mode": _roster_sort_mode, "roster_sort_options": HOMEBASE_ROSTER_SORT_OPTIONS,
 		"focused_fireteam_id": _focused_fireteam_id, "focused_fireteam": focused_team,
 		"focused_unit": Dictionary(by_id.get(_focused_unit_id, {})).duplicate(true),
 		"crafts": crafts, "selected_craft": selected_craft, "missions": missions,
@@ -9122,10 +9149,26 @@ func get_operations_snapshot() -> Dictionary:
 
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel"]:
+		if not _singleplayer_command_handler.is_valid():
+			return _operations_rejected("singleplayer_unavailable", "Diese Funktion ist noch nicht verfügbar")
+		var result: Dictionary = _singleplayer_command_handler.call(operation, payload.duplicate(true))
+		if _operations_presenter != null:
+			_operations_presenter.call("refresh")
+		return result
 	var unit_id: String = String(payload.get("unit_id", _focused_unit_id)).strip_edges()
 	var team_id: String = _normalize_fireteam_id(String(payload.get("fireteam_id", _focused_fireteam_id)))
 	var craft_id: String = String(payload.get("craft_id", _get_selected_aircraft_id())).strip_edges()
 	match operation:
+		"sort_roster":
+			var sort_mode: String = String(payload.get("sort_mode", ""))
+			var valid: bool = false
+			for option: Dictionary in HOMEBASE_ROSTER_SORT_OPTIONS:
+				if String(option.id) == sort_mode:
+					valid = true
+			if not valid:
+				return _operations_rejected("invalid_sort", "Sortierung nicht verfügbar")
+			_roster_sort_mode = sort_mode
 		"navigate":
 			var mode: String = String(payload.get("mode", "squad"))
 			if not ["base", "personnel", "squad", "mission"].has(mode):
@@ -9211,6 +9254,10 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			else:
 				if _get_assigned_pilot_id(craft_id).is_empty() or not _has_homebase_direct_launch_payload_for_craft(craft_id) or not _can_send_craft(_get_aircraft_definition_by_id(craft_id), craft_id):
 					return _operations_rejected("launch_blocked", "Pilot, Trupp und Boarding prüfen")
+				if _singleplayer_command_handler.is_valid():
+					var departure: Dictionary = _singleplayer_command_handler.call("prepare_departure", {"craft_id": craft_id})
+					if not bool(departure.get("ok", false)):
+						return departure
 				_on_shipcard_dispatch_target_toggled(true, craft_id)
 				_on_send_pilot_button_pressed(craft_id)
 		"mission":
