@@ -53,6 +53,34 @@ Integrationsbranch, normaler Push mit exaktem Remote-HEAD-Beleg. Danach Export
 aus getrackt sauberem identischem Main und Start-/Ablaufprobe der echten EXE
 mit privatem APPDATA; unveraenderte laufende Builds/persoenliche Profile.
 
+## Rein lesende Vorpruefung der fertigen Zwischencommits
+
+Eigener Stand03807239a gegen Personalwelt c9d84f58d und Verlustfix aec4e3f34:
+Die drei ersten Naehte oben sind im Code bestaetigt. Keine fremde WIP wurde
+geaendert oder vor Abschluss des anderen Chats integriert. aec behebt den
+vorherigen endlosen Boardingversuch bei toter Besatzung; diesen ueberholten
+Befund nicht erneut implementieren.
+
+Kombinierter Pruefplan:
+- Pilot zugewiesen, aber draussen: bereits Mondabflug verweigert; Fuel,
+  Auftrag, Missions-/Reisephase bleiben unveraendert.
+- Reale `base_board`-Commands und tatsaechliche Ankunft fuer beide Personen;
+  naechste Sortie, alternativer Pilot und beide Checkpoint-Neuladungen.
+- Pilot am Boden: Rueckflug gesperrt, Naehe allein reicht nicht; erst echter
+  Embark-Effekt erlaubt den Versorgungs-Rueckflugbutton.
+- Padpreview waehrend laufender Basisbewegung und wiederholter Ansichtswechsel:
+  keine Nullmodellfehler, kein Stoppen/Leeren der gemeinsamen Simulation.
+- Echte Orbit-Hinreise plus terminaler Personalausfall: Debrief und beide
+  Retrycallbacks erhalten. Zusaetzlich beschaedigtes Schiff pruefen: der alte
+  AirAsset-Recoveryhelper darf keinen physischen Ort `homebase` vortaeuschen,
+  waehrend der Reiseowner `surface` ist; kein neuer Checkpoint durch Serviceticks.
+
+Vorhandene Kampagnen-/Skirmish-Loops aus beiden Staenden zusammenfuehren.
+Skirmish braucht keine kuenstliche BasePersonnelRuntime; diese ist derzeit nur
+an die Kampagne gebunden. Onboarding `get_operations_snapshot(false)` erhalten,
+damit der gemeinsame Snapshotpfad nicht rekursiv wird. Nach dem endgueltigen
+Abschluss alle Aussagen gegen dessen tatsaechlichen Commit erneut pruefen.
+
 ## Risiken / offene Punkte
 
 Abschluss des anderen Chats steht noch aus. Keine eigene oder andere EXE
