@@ -3149,11 +3149,12 @@
       "status": "draft",
       "title": "Basis und Boarding",
       "compact_lines": [
-        "Pilot und Leader pruefen; Leader einem Trupp zuordnen.",
+        "In der Basis einen der beiden NPCs anklicken oder in der Personenliste waehlen.",
         "Ausruestung, Pilot und Boarding fuer den Satellitenflug vorbereiten."
       ],
       "detail_lines": [
-        "Satellitenauftrag annehmen und das Ziel im Smart Mobile waehlen.",
+        "Aktionsleiste: ausruesten, ein-/aussteigen, Bett aufsuchen und aufwecken. Es gibt keine zusaetzliche Commanderfigur.",
+        "Satellitenauftrag annehmen, Ziel im Smart Mobile waehlen und beide zum Schiff schicken. Ein Terminalklick fuehrt zum Bedienpunkt.",
         "Nur echte Runtime-Bereitschaft schaltet die naechste Etappe frei. Hinweise schliessen veraendert keinen Fortschritt."
       ],
       "target_audience": "new_player",
@@ -3166,12 +3167,12 @@
       "status": "draft",
       "title": "Landen, Bewegung und GO",
       "compact_lines": [
-        "Am Satelliten landen und Leader absetzen.",
+        "Am Satelliten landen; beide echten NPCs duerfen aussteigen und mitmachen.",
         "Trupp waehlen, Ziel setzen und GO bestaetigen."
       ],
       "detail_lines": [
         "Zum Satelliten gehen und dort Use ausfuehren.",
-        "Danach zum Schiff zurueckkehren und heimfliegen. Der Echtzeiteinsatz laeuft waehrend der Hilfe weiter."
+        "Vor dem Heimflug beide zum Schiff zurueckbringen und einsteigen lassen. Auch ein anderer NPC darf den Pilotenplatz uebernehmen; ohne echte Besatzung kein Flug. Der Echtzeiteinsatz laeuft waehrend der Hilfe weiter."
       ],
       "target_audience": "new_player",
       "manual_review": true

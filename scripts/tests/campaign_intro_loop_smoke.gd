@@ -22,6 +22,9 @@ func _all_crew_deployed(controller: Node) -> bool:
 		var accepted: bool = controller.call("execute_selected_fireteam_orders")
 		_check(not accepted and String(controller.get("_last_command_text")).begins_with("WAIT FOR INSERTION"), "GO is held until actual deploy effects and automatic insertion security finish")
 		_insertion_guard_checked = true
+	var pilot: Node = controller.call("_find_friendly_unit_by_id", "campaign_pilot")
+	if not Dictionary(controller.get("_deployed_unit_ids")).has("campaign_pilot") or pilot == null or bool(pilot.get_meta("dropship_embarked", true)):
+		return false
 	return super._all_crew_deployed(controller)
 
 func _wait_homebase() -> bool:
@@ -60,3 +63,40 @@ func _finish() -> void:
 	_check(FileAccess.get_file_as_bytes(ROSTER.get_save_path()) == _skirmish_bytes, "Campaign never writes the menu-built Skirmish team")
 	print("CAMPAIGN_INTRO_LOOP returns=%d" % _return_number)
 	await super._finish()
+
+func _prepare_initial_base() -> bool:
+	var operations: Dictionary = _screen.call("get_operations_snapshot")
+	var craft: Dictionary = operations.get("selected_craft", {})
+	_craft_id = String(craft.get("id", ""))
+	for team: Dictionary in Array(operations.get("fireteams", [])):
+		if not Array(team.get("members", [])).is_empty():
+			_team_id = String(team.id)
+			break
+	_configure_base_equipment()
+	return await _board_actual_base_crew()
+
+func _board_actual_base_crew() -> bool:
+	var boarding: Dictionary = _screen.call("request_operation", "base_board", {"craft_id": _craft_id, "fireteam_id": _team_id, "whole_fireteam": true})
+	if not _check(bool(boarding.get("ok", false)), "Both base people receive real boarding walk"):
+		print("BASE_BOARD_RESULT:", boarding)
+		return false
+	var personnel: Node = _runtime.call("get_base_personnel_runtime")
+	return await _wait(func(): return bool(personnel.call("is_pilot_aboard", _craft_id)), 60000, "Base pilot reaches actual craft before launch")
+
+func _prepare_visit_return(mission: Node) -> bool:
+	var controller: Node = mission.get_node("TacticalController")
+	if bool(controller.call("get_campaign_pilot_flight_guard", _craft_id).ok): return true
+	var map = MAP.load_from_file("res://maps/trade_outpost.json")
+	var ship: Vector2 = map.get_marker_position("ship_return")
+	controller.call("_create_waypoints_for_selected_fireteams", ship, true)
+	if not _check(bool(controller.call("execute_selected_fireteam_orders")), "Actual crew receives ship return walk"): return false
+	if not await _wait(func():
+		for id in ["campaign_leader", "campaign_pilot"]:
+			var unit: Node2D = controller.call("_find_friendly_unit_by_id", id)
+			if unit == null or unit.global_position.distance_to(ship) > 128.0: return false
+		return true, 45000, "Actual crew returns to ship before boarding"): return false
+	controller.call("request_campaign_crew_boarding", _craft_id)
+	return await _wait(func(): return bool(controller.call("get_campaign_pilot_flight_guard", _craft_id).ok), 3000, "Actual pilot commits boarding before reverse flight")
+
+func _configure_base_equipment() -> void:
+	pass

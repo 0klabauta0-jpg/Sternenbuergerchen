@@ -5,14 +5,14 @@ const HELP_POPUP = preload("res://scripts/ui/contextual_help_popup.gd")
 const SETTINGS = preload("res://scripts/ui/game_settings_contract.gd")
 const THEME = preload("res://scripts/ui/tactical_ui_theme.gd")
 const STEPS := {
-	"base_ready": ["campaign.boarding", "Basis vorbereiten: Pilot und Leader kennenlernen, Trupp/Ausruestung pruefen. Satellitenauftrag annehmen, Ziel im Smart Mobile waehlen und Boarding vorbereiten."],
-	"satellite_completed": ["campaign.movement", "Satellit bergen: abfliegen, landen und Leader absetzen. Trupp waehlen, Bewegungsziel setzen, GO bestaetigen; am Satelliten Use ausfuehren. Danach zum Schiff zurueck."],
+	"base_ready": ["campaign.boarding", "Basis vorbereiten: einen der beiden NPCs anklicken; Ausruestung, Ein-/Aussteigen und Betten stehen in der Aktionsleiste. Satellitenauftrag annehmen, Ziel waehlen und beide zum Schiff schicken."],
+	"satellite_completed": ["campaign.movement", "Satellit bergen: abfliegen, landen und beide NPCs absetzen. Trupp waehlen, Bewegungsziel setzen, GO bestaetigen; am Satelliten Use ausfuehren. Danach zum Schiff zurueck."],
 	"satellite_home": ["campaign.return", "Bergung bestaetigt: Leader und Pilot fuer den Heimflug bereitstellen und zur Heimatbasis zurueckkehren. Erst die Heimkehr schaltet den Versorgungsauftrag frei."],
 	"trade_departed": ["campaign.trade", "Versorgung sichern: den Handelsposten im Smart Mobile waehlen. Pilot/Leader an Bord nehmen und zum Handelsposten fliegen."],
 	"trade_used": ["campaign.use", "Am Handelsposten landen, Leader absetzen und zum Haendler bewegen. Use oeffnet den echten Handel."],
 	"bought": ["campaign.trade", "Beim Haendler einen passenden verfuegbaren Gegenstand kaufen. Ein bestaetigter Kauf zaehlt; das Oeffnen des Handels allein reicht nicht."],
 	"refueled": ["campaign.trade", "Treibstoff beim Haendler nachfuellen. Die erfolgreiche Tankaktion wird bestaetigt; bei fehlenden Mitteln den sichtbaren Sperrgrund pruefen."],
-	"trade_home": ["campaign.return", "Kauf und Tanken sind bestaetigt. Zum Schiff zurueckkehren, einsteigen und zur Heimatbasis fliegen, um die Einfuehrung abzuschliessen."],
+	"trade_home": ["campaign.return", "Kauf und Tanken sind bestaetigt. Beide zum Schiff zurueckbringen und einsteigen lassen. Eine echte Person muss den Pilotenplatz besetzen; dann zur Heimatbasis fliegen."],
 	"completed": ["campaign.complete", "Einfuehrung abgeschlossen. Die vorhandenen Orte bleiben frei besuchbar. Dein Stand wird an sicheren Basis-Meilensteinen gespeichert."]
 }
 var _runtime: Node

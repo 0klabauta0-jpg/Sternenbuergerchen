@@ -13,12 +13,35 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 			if unit.has(field) and typeof(unit[field]) != TYPE_DICTIONARY:
 				return {"ok":false,"reason":"invalid_roster_field"}
 		ids.append(unit.unit_id)
+	if payload.has("base_personnel"):
+		if typeof(payload.craft.get("definition")) != TYPE_DICTIONARY:
+			return {"ok":false,"reason":"invalid_campaign_craft"}
+		var base: Variant = payload.base_personnel
+		if typeof(base) != TYPE_DICTIONARY or base.get("version") != 1 or typeof(base.get("units")) != TYPE_DICTIONARY or base.units.size() != 2:
+			return {"ok":false,"reason":"invalid_base_personnel"}
+		var occupied: Array = []
+		for id in base.units:
+			if not ids.has(id) or typeof(base.units[id]) != TYPE_DICTIONARY:
+				return {"ok":false,"reason":"invalid_base_identity"}
+			var unit: Dictionary = base.units[id]
+			if typeof(unit.get("position")) != TYPE_ARRAY or unit.position.size() != 2 or not String(unit.get("status", "")) in ["outside","sleeping","aboard"]:
+				return {"ok":false,"reason":"invalid_base_position"}
+			for number in unit.position:
+				if typeof(number) not in [TYPE_INT, TYPE_FLOAT] or not is_finite(float(number)):
+					return {"ok":false,"reason":"invalid_base_position"}
+			if unit.status == "sleeping":
+				var bed := String(unit.get("bed_id", ""))
+				if bed.is_empty() or occupied.has(bed):
+					return {"ok":false,"reason":"invalid_base_bed"}
+				occupied.append(bed)
+			if unit.status == "aboard" and String(unit.get("craft_id", "")) != String(payload.craft.get("definition", {}).get("craft_id", "")):
+				return {"ok":false,"reason":"invalid_base_craft"}
 	var leader: Dictionary = payload.roster[0]
 	var pilot: Dictionary = payload.roster[1]
 	if String(leader.get("roster_role_category", "")) != "operator" or String(pilot.get("roster_role_category", "")) != "pilot" or not _positive_number(leader.get("skill_leadership", Dictionary(leader.get("skill_values", {})).get("leadership", 0))) or not _positive_number(pilot.get("dropship_piloting")):
 		return {"ok":false,"reason":"invalid_campaign_roles"}
 	var craft: Dictionary = payload.craft
-	if typeof(craft.get("definition")) != TYPE_DICTIONARY or String(craft.definition.get("craft_id", "")).is_empty() or typeof(craft.get("pilot_id")) != TYPE_STRING or not String(craft.pilot_id) in ["", String(pilot.unit_id)] or craft.definition.get("craft_type") != "dropship":
+	if typeof(craft.get("definition")) != TYPE_DICTIONARY or String(craft.definition.get("craft_id", "")).is_empty() or typeof(craft.get("pilot_id")) != TYPE_STRING or not String(craft.pilot_id) in ([""] + ids) or craft.definition.get("craft_type") != "dropship":
 		return {"ok":false,"reason":"invalid_campaign_craft"}
 	for field in ["staged_unit_ids", "staged_fireteam_ids", "fireteam_definitions"]:
 		if craft.has(field) and typeof(craft[field]) != TYPE_ARRAY:
@@ -27,7 +50,7 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		if craft.has(field) and typeof(craft[field]) != TYPE_DICTIONARY:
 			return {"ok":false,"reason":"invalid_craft_field"}
 	for unit_id in craft.get("staged_unit_ids", []):
-		if typeof(unit_id) != TYPE_STRING or not ids.has(unit_id) or unit_id == pilot.unit_id:
+		if typeof(unit_id) != TYPE_STRING or not ids.has(unit_id):
 			return {"ok":false,"reason":"invalid_staged_unit"}
 	for unit_id in craft.get("member_loadouts", {}):
 		if not ids.has(unit_id) or typeof(craft.member_loadouts[unit_id]) != TYPE_DICTIONARY:
@@ -37,7 +60,7 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		if typeof(definition) != TYPE_DICTIONARY or typeof(definition.get("id")) != TYPE_STRING or String(definition.id).is_empty() or fireteam_ids.has(definition.id) or typeof(definition.get("lead_unit_id")) != TYPE_STRING:
 			return {"ok":false,"reason":"invalid_saved_fireteam"}
 		var lead_id: String = definition.lead_unit_id
-		if not lead_id.is_empty() and (not ids.has(lead_id) or lead_id == pilot.unit_id):
+		if not lead_id.is_empty() and (not ids.has(lead_id)):
 			return {"ok":false,"reason":"invalid_saved_fireteam_lead"}
 		var member_ids: Array = []
 		for field in ["member_unit_ids", "members"]:
@@ -48,7 +71,7 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 			var seen: Array = []
 			for member in definition[field]:
 				var member_id: Variant = member.get("unit_id", member.get("id", "")) if typeof(member) == TYPE_DICTIONARY else member
-				if typeof(member_id) != TYPE_STRING or not ids.has(member_id) or member_id == pilot.unit_id or seen.has(member_id):
+				if typeof(member_id) != TYPE_STRING or not ids.has(member_id) or seen.has(member_id):
 					return {"ok":false,"reason":"invalid_saved_fireteam_member"}
 				seen.append(member_id)
 				if not member_ids.has(member_id):
@@ -56,7 +79,7 @@ static func validate_payload(payload: Dictionary) -> Dictionary:
 		if typeof(definition.get("member_loadouts", {})) != TYPE_DICTIONARY:
 			return {"ok":false,"reason":"invalid_saved_fireteam_loadouts"}
 		for member_id in definition.get("member_loadouts", {}):
-			if not ids.has(member_id) or member_id == pilot.unit_id or typeof(definition.member_loadouts[member_id]) != TYPE_DICTIONARY:
+			if not ids.has(member_id) or typeof(definition.member_loadouts[member_id]) != TYPE_DICTIONARY:
 				return {"ok":false,"reason":"invalid_saved_fireteam_loadout"}
 			if not member_ids.has(member_id):
 				member_ids.append(member_id)

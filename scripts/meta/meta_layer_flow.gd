@@ -154,6 +154,7 @@ var _mission_catalog: Array = HOMEBASE_MISSION_CATALOG.duplicate(true)
 var _selected_mission_id: String = SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID
 var _selected_mission_map_path: String = DEFAULT_META_MAP_PATH
 var _homebase_aircraft_definitions: Array = []
+var _pending_campaign_mission_result: Dictionary = {}
 var _assigned_aircraft_pilot_by_craft: Dictionary = {}
 var _aircraft_location_by_craft: Dictionary = {}
 var _selected_aircraft_cargo_by_craft: Dictionary = {}
@@ -307,6 +308,8 @@ func _process(_delta: float) -> void:
 	if _singleplayer_services_elapsed >= 0.25:
 		_singleplayer_services_elapsed = 0.0
 		_refresh_singleplayer_services()
+		if not _pending_campaign_mission_result.is_empty():
+			_on_mission_combat_resolved(_pending_campaign_mission_result.duplicate(true))
 		if is_campaign_start() and _singleplayer_runtime != null:
 			_singleplayer_runtime.call("observe_campaign_progress")
 			var saved: Dictionary = _campaign_start.call("save_home_checkpoint", self, _singleplayer_runtime)
@@ -4081,6 +4084,37 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		selected_unit_ids = _selected_unit_ids.duplicate()
 	if selected_fireteam_ids.is_empty():
 		selected_fireteam_ids = _selected_fireteam_ids.duplicate()
+	var mission_planning: Dictionary = _include_campaign_pilot_in_departing_payload(_mission_planning_state)
+	if is_campaign_start() and not selected_unit_ids.is_empty():
+		selected_unit_ids = selected_unit_ids.duplicate()
+		selected_fireteam_ids = selected_fireteam_ids.duplicate()
+		# Temporary sortie membership preserves the homebase fireteam assignment.
+		var pilot_id: String = String(mission_planning.get("mission_drop_pilot_unit_id", ""))
+		if pilot_id.is_empty():
+			pilot_id = String(_assigned_aircraft_pilot_by_craft.get(String(mission_planning.get("mission_drop_craft_id", "")), ""))
+		if pilot_id.is_empty() and _assigned_aircraft_pilot_by_craft.size() == 1:
+			pilot_id = String(_assigned_aircraft_pilot_by_craft.values()[0])
+		if not pilot_id.is_empty() and not selected_unit_ids.has(pilot_id):
+			selected_unit_ids.append(pilot_id)
+			selected_fireteam_ids.append(String(selected_fireteam_ids[0]) if not selected_fireteam_ids.is_empty() else "ft1")
+		for id_variant in Array(mission_planning.get("embarked_unit_ids", [])):
+			var id: String = String(id_variant)
+			if selected_unit_ids.has(id) or not _is_known_roster_unit(id): continue
+			selected_unit_ids.append(id)
+			selected_fireteam_ids.append(String(selected_fireteam_ids[0]) if not selected_fireteam_ids.is_empty() else "ft1")
+		mission_instance.set_meta("campaign_ground_pilot_id", pilot_id)
+		for card: Dictionary in Array(mission_planning.get("mission_drop_cards", [])):
+			if String(card.get("pilot_unit_id", "")) != pilot_id:
+				continue
+			var payload: Array = Array(card.get("embarked_unit_ids", [])).duplicate()
+			if not payload.has(pilot_id): payload.append(pilot_id)
+			card["embarked_unit_ids"] = payload
+			card["passenger_count"] = payload.size()
+		var embarked: Array = Array(mission_planning.get("embarked_unit_ids", [])).duplicate()
+		if not pilot_id.is_empty() and not embarked.has(pilot_id): embarked.append(pilot_id)
+		mission_planning["embarked_unit_ids"] = embarked
+	if is_campaign_start() and not preview_mode:
+		_mission_planning_state = mission_planning.duplicate(true)
 	_configure_mission_overlay_nodes(mission_instance, preview_mode)
 	var selected_mission: Dictionary = _get_selected_mission_definition()
 
@@ -4117,6 +4151,14 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		mission_setup.set("fog_of_war_mode", String(gameplay_settings.get("fog_of_war_mode", "known_terrain")))
 
 		var planning_member_loadouts: Dictionary = Dictionary(_mission_planning_state.get("member_loadouts", {})).duplicate(true)
+		if is_campaign_start():
+			var homebase_loadout_owner: Node = _get_homebase_screen()
+			for id in selected_unit_ids:
+				planning_member_loadouts[id] = Dictionary(homebase_loadout_owner.call("_get_member_loadout", id)).duplicate(true)
+		if is_campaign_start():
+			mission_planning["member_loadouts"] = planning_member_loadouts.duplicate(true)
+			if not preview_mode:
+				_mission_planning_state["member_loadouts"] = planning_member_loadouts.duplicate(true)
 		if not planning_member_loadouts.is_empty():
 			mission_setup.set("member_loadouts", planning_member_loadouts)
 		else:
@@ -4130,7 +4172,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 	if tactical_controller != null:
 		tactical_controller.set("preview_mode", preview_mode)
 		if tactical_controller.has_method("set_planning_state"):
-			tactical_controller.call("set_planning_state", _mission_planning_state)
+			tactical_controller.call("set_planning_state", mission_planning)
 
 	var command_flow_driver = mission_instance.get_node_or_null("CommandFlowDriver")
 	if command_flow_driver != null and not selected_unit_ids.is_empty():
@@ -4199,6 +4241,12 @@ func _connect_mission_end(mission_instance: Node) -> void:
 func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	if _active_mission == null:
 		return
+	if is_campaign_start():
+		var crew_boarding: Dictionary = _active_mission.get_node("TacticalController").call("request_campaign_crew_boarding", String(_active_singleplayer_identity.get("craft_id", "")))
+		if not bool(crew_boarding.get("ok", false)):
+			_pending_campaign_mission_result = mission_result.duplicate(true)
+			_get_homebase_screen().set_meta("singleplayer_departure_error", crew_boarding)
+			return
 	if _singleplayer_runtime != null and not _active_singleplayer_identity.is_empty():
 		var return_gate: Dictionary = _singleplayer_runtime.call("authorize_return", String(_active_singleplayer_identity.get("craft_id", "")))
 		if not bool(return_gate.get("ok", false)):
@@ -4206,6 +4254,7 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 			# invariant fails; never orphan a remote craft by releasing its world.
 			_get_homebase_screen().set_meta("singleplayer_departure_error", return_gate)
 			return
+	_pending_campaign_mission_result.clear()
 	if _singleplayer_runtime != null:
 		_singleplayer_runtime.call("record_mission_result", mission_result, _active_singleplayer_identity.duplicate(true))
 
@@ -4250,11 +4299,18 @@ func _return_homebase_direct_craft_after_mission() -> void:
 
 
 func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -> Dictionary:
+	var result_unit_ids: PackedStringArray = _selected_unit_ids.duplicate()
+	var result_fireteam_ids: PackedStringArray = _selected_fireteam_ids.duplicate()
+	if is_campaign_start():
+		var setup: Node = mission_instance.get_node_or_null("MissionSetup")
+		if setup != null:
+			result_unit_ids = PackedStringArray(setup.get("selected_team_unit_ids"))
+			result_fireteam_ids = PackedStringArray(setup.get("selected_team_fireteam_ids"))
 	var team_states: Array = []
-	var friendly_slot_count: int = mini(_selected_unit_ids.size(), FRIENDLY_NODE_NAMES.size())
+	var friendly_slot_count: int = mini(result_unit_ids.size(), FRIENDLY_NODE_NAMES.size())
 	for slot_index in range(friendly_slot_count):
 		var node_name: String = String(FRIENDLY_NODE_NAMES[slot_index])
-		var requested_unit_id: String = String(_selected_unit_ids[slot_index])
+		var requested_unit_id: String = String(result_unit_ids[slot_index])
 
 		var unit = mission_instance.get_node_or_null(node_name)
 		if unit == null:
@@ -4294,8 +4350,8 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 			"duration_seconds": 0.0,
 		}
 
-	merged_result["selected_unit_ids"] = _selected_unit_ids.duplicate()
-	merged_result["selected_fireteam_ids"] = _selected_fireteam_ids.duplicate()
+	merged_result["selected_unit_ids"] = result_unit_ids.duplicate()
+	merged_result["selected_fireteam_ids"] = result_fireteam_ids.duplicate()
 	merged_result["team_states"] = team_states
 	var air_asset_status: Dictionary = _extract_air_asset_status_from_mission(mission_instance)
 	if not air_asset_status.is_empty():
@@ -4464,6 +4520,7 @@ func _replace_units_by_id(source_units: Array, units_by_id: Dictionary) -> Array
 
 
 func _release_active_mission() -> void:
+	_pending_campaign_mission_result.clear()
 	if _active_mission == null:
 		return
 
@@ -4865,6 +4922,27 @@ func _ensure_singleplayer_release_homebase_direct_drop_source() -> bool:
 
 
 func _seed_singleplayer_bootstrap_homebase_payload() -> void:
+	# Campaign people begin outside. Boarding is an explicit physical walk to
+	# the actual ship, unlike the ready-to-launch Skirmish convenience setup.
+	if is_campaign_start():
+		# A coherent home checkpoint may contain already boarded crew. Restore
+		# the existing payload owner too, rather than only hiding their visuals.
+		var saved_units: Dictionary = Dictionary(_campaign_start.get("checkpoint").get("base_personnel", {})).get("units", {})
+		var saved_craft: String = String(get_meta("singleplayer_bootstrap_craft_id", ""))
+		var campaign_screen: Node = _get_homebase_screen()
+		if campaign_screen != null and not saved_craft.is_empty():
+			var boarded_teams := PackedStringArray()
+			for team_id: String in _homebase_staged_fireteam_ids:
+				var members: PackedStringArray = campaign_screen.call("_get_member_unit_ids_for_fireteam", team_id)
+				var all_aboard: bool = not members.is_empty()
+				for id: String in members:
+					var person: Dictionary = saved_units.get(id, {})
+					all_aboard = all_aboard and String(person.get("status", "")) == "aboard" and String(person.get("craft_id", "")) == saved_craft
+				if all_aboard:
+					boarded_teams.append(team_id)
+			if not boarded_teams.is_empty():
+				campaign_screen.call("seed_homebase_direct_launch_payload", saved_craft, boarded_teams, true)
+		return
 	var homebase_screen = _get_homebase_screen()
 	if homebase_screen == null or not homebase_screen.has_method("seed_homebase_direct_launch_payload"):
 		return
@@ -6129,6 +6207,7 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 			_homebase_staged_fireteam_ids = _selected_fireteam_ids.duplicate()
 	if applied_source != MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
 		drop_state = _apply_selected_mission_drop_card_override(drop_state)
+	drop_state = _include_campaign_pilot_in_departing_payload(drop_state)
 	_mission_planning_state["embarked_unit_ids"] = Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", []))))
 	_mission_planning_state["drop_queued_fireteam_ids"] = Array(PackedStringArray(Array(drop_state.get("queued_fireteam_ids", []))))
 	_mission_planning_state["drop_ship_staged"] = bool(drop_state.get("drop_ship_staged", false))
@@ -6156,6 +6235,30 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 		_mission_planning_state["deployed_unit_positions"] = {}
 	if not _mission_planning_state.has("mission_drop_return_requested"):
 		_mission_planning_state["mission_drop_return_requested"] = false
+
+
+func _include_campaign_pilot_in_departing_payload(state: Dictionary) -> Dictionary:
+	if not is_campaign_start(): return state
+	var result: Dictionary = state.duplicate(true)
+	for card: Dictionary in Array(result.get("mission_drop_cards", [])):
+		var pilot_id: String = String(card.get("pilot_unit_id", ""))
+		if pilot_id.is_empty() or not String(card.get("state", "")) in ["to_mission", "waiting"]: continue
+		if Array(_mission_planning_state.get("deployed_unit_ids", [])).has(pilot_id): continue
+		var payload: Array = Array(card.get("embarked_unit_ids", [])).duplicate()
+		if not payload.has(pilot_id): payload.append(pilot_id)
+		if _singleplayer_runtime != null:
+			var personnel: Node = _singleplayer_runtime.call("get_base_personnel_runtime")
+			if personnel != null:
+				for person: Dictionary in Array(personnel.call("get_snapshot").get("units", [])):
+					var id: String = String(person.get("unit_id", ""))
+					if String(person.get("status", "")) == "aboard" and String(person.get("craft_id", "")) == String(card.get("craft_id", "")) and not payload.has(id):
+						payload.append(id)
+		card["embarked_unit_ids"] = payload
+		card["passenger_count"] = payload.size()
+		if String(card.get("craft_id", "")) == String(result.get("mission_drop_craft_id", "")):
+			result["embarked_unit_ids"] = payload.duplicate()
+			result["mission_drop_passenger_count"] = payload.size()
+	return result
 
 
 func _sync_mission_setup_contract_fields(drop_state: Dictionary, applied_source: String, fob_screen) -> void:
@@ -6963,6 +7066,13 @@ func _on_mission_planning_state_changed(planning_state: Dictionary) -> void:
 	for key_variant in planning_state.keys():
 		var key: String = String(key_variant)
 		_mission_planning_state[key] = planning_state[key_variant]
+	if is_campaign_start() and _active_mission != null:
+		var setup: Node = _active_mission.get_node_or_null("MissionSetup")
+		var actual_ids: PackedStringArray = PackedStringArray(setup.get("selected_team_unit_ids")) if setup != null else PackedStringArray()
+		for card: Dictionary in Array(_mission_planning_state.get("mission_drop_cards", [])):
+			var pilot_id: String = String(card.get("pilot_unit_id", ""))
+			if actual_ids.has(pilot_id):
+				_assigned_aircraft_pilot_by_craft[String(card.get("craft_id", ""))] = pilot_id
 	var fob_screen = _get_fob_screen()
 	var handled_mission_return: bool = _apply_mission_drop_card_return_requests(_mission_planning_state, fob_screen)
 	if bool(_mission_planning_state.get("mission_drop_return_requested", false)):
@@ -7284,6 +7394,10 @@ func _request_singleplayer_return(craft_id: String) -> Dictionary:
 	var card: Dictionary = controller.call("_find_mission_dropship_card_entry", craft_id)
 	if not bool(controller.call("_can_request_mission_dropship_return", card)):
 		return {"ok": false, "reason": "return_blocked", "message": "Trupp und Schiff fuer Rueckflug vorbereiten"}
+	if is_campaign_start():
+		var boarding: Dictionary = controller.call("request_campaign_crew_boarding", craft_id)
+		if not bool(boarding.get("ok", false)):
+			return boarding
 	var fuel_gate: Dictionary = _singleplayer_runtime.call("authorize_return", craft_id)
 	if not bool(fuel_gate.get("ok", false)):
 		return fuel_gate

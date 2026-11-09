@@ -1,5 +1,5 @@
 extends Control
-## Local explorable place. Existing Meta owners receive terminal signals only.
+## Base presentation. Real personnel state and actions remain with runtime owners.
 
 signal terminal_open_requested(id: String)
 signal exploration_exit_requested
@@ -18,6 +18,227 @@ const HEX_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 const PAD_SCRIPT: GDScript = preload("res://scripts/terrain/frontier_outpost_pad.gd")
 const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const INTERACTION_RADIUS: float = 1.8
+const BASE_NAV: GDScript = preload("res://scripts/meta/base_interior_navigation.gd")
+
+var _personnel_owner: WeakRef
+var _personnel_command: Callable
+var _selected_person_id: String = ""
+var _person_visuals: Dictionary = {}
+var _person_panel: VBoxContainer
+var _person_selector: OptionButton
+var _person_state: Label
+var _person_feedback: Label
+var _person_buttons: Dictionary = {}
+var _personnel_ui_elapsed: float = 0.0
+var _navigation_data
+var _navigation_graph: RefCounted
+
+
+func _personnel_runtime() -> Node:
+	return _personnel_owner.get_ref() if _personnel_owner != null else null
+
+
+func configure_personnel_runtime(owner: Node, command: Callable) -> void:
+	_personnel_command = command
+	if owner == _personnel_runtime():
+		return
+	var previous: Node = _personnel_runtime()
+	if previous != null and previous.is_connected("terminal_ready", _personnel_terminal_ready):
+		previous.disconnect("terminal_ready", _personnel_terminal_ready)
+	_personnel_owner = weakref(owner) if owner != null else null
+	if owner != null:
+		owner.connect("terminal_ready", _personnel_terminal_ready)
+
+
+func _personnel_terminal_ready(unit_id: String, terminal_id: String) -> void:
+	# Arrival is an authoritative runtime event, even if another view is open.
+	_select_person(unit_id)
+	terminal_open_requested.emit(terminal_id)
+
+
+func _personnel_action(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if not _personnel_command.is_valid() or _selected_person_id.is_empty():
+		return {"ok": false, "reason": "no_person", "message": "Zuerst eine Person auswählen"}
+	var data: Dictionary = payload.duplicate(true)
+	data["unit_id"] = _selected_person_id
+	if not data.has("craft_id") and not _transport_projection.is_empty():
+		data["craft_id"] = String(_transport_projection[0].get("craft_id", ""))
+	var result: Dictionary = _personnel_command.call(operation, data)
+	if _person_feedback != null:
+		_person_feedback.text = String(result.get("message", ""))
+	return result
+
+
+func _build_personnel_visuals(stage: Node3D) -> void:
+	for person: Dictionary in _personnel_runtime().call("get_snapshot").get("units", []):
+		var id: String = String(person.unit_id)
+		var visual: Node3D = _load_visual(Dictionary(_layout.get("avatar_visual", {})))
+		if visual == null:
+			continue
+		visual.name = "RosterPerson_" + id.validate_node_name()
+		visual.set_meta("unit_id", id)
+		stage.add_child(visual)
+		var players: Array[Node] = visual.find_children("*", "AnimationPlayer", true, false)
+		var player: AnimationPlayer = players[0] as AnimationPlayer if not players.is_empty() else null
+		var idle: String = ""
+		var walk: String = ""
+		if player != null:
+			for clip in player.get_animation_list():
+				if String(clip).to_lower().ends_with("idle"):
+					idle = String(clip)
+				if String(clip).to_lower().ends_with("walk"):
+					walk = String(clip)
+			if not idle.is_empty():
+				player.play(idle)
+		var label := Label3D.new()
+		label.text = String(person.get("name", person.get("display_name", id)))
+		label.font_size = 30
+		label.pixel_size = 0.003
+		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		label.position.y = 0.85
+		var marker := Node3D.new()
+		stage.add_child(marker)
+		marker.add_child(label)
+		_person_visuals[id] = {"model": visual, "marker": marker, "label": label, "player": player, "idle": idle, "walk": walk, "previous": Vector2.INF, "moving": false}
+	if _person_visuals.has(_selected_person_id):
+		_model = _person_visuals[_selected_person_id].model
+
+
+func _select_person(id: String) -> bool:
+	var owner: Node = _personnel_runtime()
+	if owner == null or owner.call("get_actor", id) == null:
+		return false
+	_selected_person_id = id
+	_avatar = owner.call("get_actor", id)
+	if _person_visuals.has(id):
+		_model = _person_visuals[id].model
+	if _personnel_command.is_valid():
+		_personnel_command.call("focus_unit", {"unit_id": id})
+	_update_personnel_controls()
+	return true
+
+
+func _select_person_at(point: Vector2) -> bool:
+	var nearest: String = ""
+	var distance: float = 30.0
+	for id: String in _person_visuals:
+		var entry: Dictionary = _person_visuals[id]
+		if not (entry.model as Node3D).visible:
+			continue
+		var actor: Node2D = _personnel_runtime().call("get_actor", id)
+		var screen: Vector2 = _view.call("world_to_screen_position", actor.position)
+		var candidate: float = screen.distance_to(point)
+		if candidate < distance:
+			nearest = id
+			distance = candidate
+	return _select_person(nearest) if not nearest.is_empty() else false
+
+
+func _build_personnel_controls() -> void:
+	_person_panel = VBoxContainer.new()
+	_person_panel.name = "BasePersonnelActions"
+	add_child(_person_panel)
+	_person_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_person_panel.offset_left = 24.0
+	_person_panel.offset_right = 424.0
+	_person_panel.offset_top = -254.0
+	_person_panel.offset_bottom = -24.0
+	_person_selector = OptionButton.new()
+	_person_selector.tooltip_text = "Person auswählen – auch Besatzung an Bord"
+	_person_selector.item_selected.connect(func(index: int): _select_person(String(_person_selector.get_item_metadata(index))))
+	_person_panel.add_child(_person_selector)
+	_person_state = Label.new()
+	_person_panel.add_child(_person_state)
+	var actions := GridContainer.new()
+	actions.columns = 3
+	_person_panel.add_child(actions)
+	for spec: Array in [["base_board", "Einsteigen"], ["base_unboard", "Aussteigen"], ["equipment", "Ausrüsten"], ["base_sleep", "Schlafen"], ["base_wake", "Aufwecken"], ["details", "Details"], ["pilot", "Pilot übernehmen"], ["base_cancel", "Abbrechen"]]:
+		var operation: String = String(spec[0])
+		var button := Button.new()
+		button.text = String(spec[1])
+		var tips: Dictionary = {"base_board":"Zum Schiff gehen und bestaetigt einsteigen. Truppmitglieder verwenden den bestehenden Trupp-Payload.", "base_unboard":"Das verfuegbare Schiff verlassen. Die Pilotenplatzzuweisung bleibt erhalten.", "equipment":"Vorhandene Personalausruestung fuer diese Person oeffnen.", "base_sleep":"Ein freies Bett reservieren und zu Fuss aufsuchen. Fuehrt keine Sofortheilung aus.", "base_wake":"Aufwecken und Bett freigeben.", "details":"Das vorhandene Charakterblatt dieser Person oeffnen.", "pilot":"Dieser Person den Pilotenplatz zuweisen. Eine Truppperson zuerst im Truppmenue freigeben.", "base_cancel":"Den laufenden Basisweg abbrechen und die Bettreservierung freigeben."}
+		button.tooltip_text = String(tips.get(operation, ""))
+		button.custom_minimum_size = Vector2(128, 36)
+		button.pressed.connect(func():
+			if operation == "equipment":
+				_personnel_action("focus_unit")
+				_personnel_action("navigate", {"mode": "personnel"})
+			else:
+				_personnel_action(operation))
+		actions.add_child(button)
+		_person_buttons[operation] = button
+	_person_feedback = Label.new()
+	_person_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_person_feedback.custom_minimum_size.x = 390
+	_person_panel.add_child(_person_feedback)
+	_hint.text = "NPC anklicken · Rechtsklick Ziel · E Konsole"
+	_update_personnel_controls()
+
+
+func _update_personnel_controls() -> void:
+	if _person_panel == null or _personnel_runtime() == null:
+		return
+	_person_panel.visible = _active and not _pad_preview
+	var units: Array = _personnel_runtime().call("get_snapshot").get("units", [])
+	if _person_selector.item_count != units.size():
+		_person_selector.clear()
+		for person: Dictionary in units:
+			_person_selector.add_item(String(person.get("name", person.get("display_name", person.unit_id))))
+			_person_selector.set_item_metadata(_person_selector.item_count - 1, String(person.unit_id))
+	for index in units.size():
+		var person: Dictionary = units[index]
+		if String(person.unit_id) != _selected_person_id:
+			continue
+		_person_selector.select(index)
+		var status: String = String(person.get("status", "outside"))
+		var labels: Dictionary = {"outside": "In der Basis", "moving": "Unterwegs", "sleeping": "Schläft", "aboard": "An Bord", "boarding": "Geht zum Schiff", "away": "Im Einsatz"}
+		_person_state.text = String(labels.get(status, status))
+		(_person_buttons.base_board as Button).disabled = status in ["aboard", "sleeping", "away"]
+		(_person_buttons.base_unboard as Button).disabled = status != "aboard"
+		(_person_buttons.base_wake as Button).disabled = status != "sleeping"
+		(_person_buttons.base_sleep as Button).disabled = status in ["aboard", "sleeping", "away"]
+
+
+func _update_personnel_visuals() -> void:
+	var units: Array = _personnel_runtime().call("get_snapshot").get("units", [])
+	for person: Dictionary in units:
+		var id: String = String(person.unit_id)
+		if not _person_visuals.has(id):
+			continue
+		var entry: Dictionary = _person_visuals[id]
+		var model: Node3D = entry.model
+		var actor: Node2D = _personnel_runtime().call("get_actor", id)
+		var status: String = String(person.get("status", "outside"))
+		model.visible = status not in ["aboard", "away"] and not _pad_preview
+		(entry.marker as Node3D).visible = model.visible
+		var plane: Vector3 = _view.call("_world_to_3d_position", actor.position, 0.0)
+		var position_3d: Vector3 = plane + Vector3.UP * BASE_NAV.standing_y(plane)
+		var sleeping_rotation: float = model.rotation.y
+		if status == "sleeping":
+			for bed: Dictionary in _layout.get("beds", []):
+				if String(bed.id) == String(person.get("bed_id", "")) and bed.has("sleep_plane"):
+					position_3d = _plane_position(bed.sleep_plane) + Vector3.UP * float(bed.get("sleep_y", 0.4))
+					sleeping_rotation = float(bed.get("rotation_y", 0.0))
+		var previous: Vector2 = entry.previous
+		var moving: bool = previous.is_finite() and actor.position.distance_squared_to(previous) > 0.00001
+		var displacement: Vector3 = position_3d - model.position
+		model.position = position_3d
+		model.rotation.z = PI * 0.5 if status == "sleeping" else 0.0
+		if status == "sleeping":
+			model.rotation.y = sleeping_rotation
+		if moving:
+			model.rotation.y = atan2(displacement.x, displacement.z)
+			if id == _selected_person_id:
+				_view.call("focus_world_position", actor.position)
+		(entry.marker as Node3D).position = position_3d
+		(entry.label as Label3D).modulate = Color("ffe08b") if id == _selected_person_id else Color("eaf2df")
+		if moving != bool(entry.moving) and entry.player != null:
+			var clip: String = String(entry.walk if moving else entry.idle)
+			if not clip.is_empty():
+				(entry.player as AnimationPlayer).play(clip, 0.15)
+		entry.moving = moving
+		entry.previous = actor.position
+	_view.call("_request_viewport_redraw")
 
 var _active: bool = false
 var _initialized: bool = false
@@ -81,10 +302,14 @@ func set_pad_preview(active: bool, craft_id: String = "") -> void:
 	_pad_preview = true
 	_preview_surface_size = size
 	_clear_keyboard_input()
-	_sim.call("clear_queues")
-	_sim.set_physics_process(false)
+	if _personnel_runtime() == null:
+		_sim.call("clear_queues")
+		_sim.set_physics_process(false)
 	_runtime.process_mode = Node.PROCESS_MODE_DISABLED
 	_model.visible = false
+	for entry: Dictionary in _person_visuals.values():
+		(entry.model as Node3D).hide()
+		(entry.marker as Node3D).hide()
 	_host.release_focus()
 	_host.focus_mode = Control.FOCUS_NONE
 	_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -224,7 +449,8 @@ func set_active(active: bool) -> void:
 		_initialize_runtime()
 	if _runtime != null:
 		_runtime.process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
-		_sim.set_physics_process(active)
+		if _personnel_runtime() == null:
+			_sim.set_physics_process(active)
 		if _model != null:
 			_model.visible = true
 	_host.focus_mode = Control.FOCUS_ALL
@@ -236,7 +462,7 @@ func set_active(active: bool) -> void:
 		_drone_helper.call("set_operating_visual", active)
 	if not active:
 		_clear_keyboard_input()
-		if _sim != null:
+		if _sim != null and _personnel_runtime() == null:
 			_sim.call("clear_queues")
 	set_process(active)
 	set_physics_process(active)
@@ -252,39 +478,56 @@ func _on_visibility_changed() -> void:
 
 
 func _initialize_runtime() -> void:
-	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(_map_path))
-	_layout = Dictionary(raw.get("homebase_exploration", {}))
+	_layout = BASE_NAV.layout(_map_path)
 	_map_data = MAP_SCRIPT.load_from_file(_map_path)
+	var personnel: Node = _personnel_runtime()
+	# The campaign owner already loaded its fine movement map. The view only
+	# needs coarse render extents and borrows that owner's registry below.
+	_navigation_data = BASE_NAV.load_map(_map_path) if personnel == null else _map_data
 	_runtime = Node.new()
 	_runtime.name = "HomebaseRuntime"
 	_viewport.add_child(_runtime)
-	_terrain = TERRAIN_SCRIPT.new()
-	_terrain.name = "TerrainRegistry"
-	_runtime.add_child(_terrain)
-	var tile_size: Dictionary = _map_data.get_tile_size()
-	_terrain.call("configure_iso_grid", _map_data.get_grid_origin(), tile_size["half_width"], tile_size["half_height"], _map_data.get_grid_topology())
+	if personnel != null:
+		_terrain = personnel.call("get_terrain_registry")
+		_units = personnel.call("get_unit_registry")
+		_sim = personnel.call("get_simulation_root")
+	else:
+		_terrain = TERRAIN_SCRIPT.new()
+		_terrain.name = "TerrainRegistry"
+		_runtime.add_child(_terrain)
+		var tile_size: Dictionary = _navigation_data.get_tile_size()
+		_terrain.call("configure_iso_grid", _navigation_data.get_grid_origin(), tile_size["half_width"], tile_size["half_height"], _navigation_data.get_grid_topology())
 	var first: bool = true
-	for tile in _map_data.get_tiles():
-		_terrain.call("register_tile", tile)
+	for tile in _navigation_data.get_tiles():
+		if personnel == null:
+			_terrain.call("register_tile", tile)
 		if first:
 			_map_bounds = Rect2(tile.world_position, Vector2.ZERO)
 			first = false
 		else:
 			_map_bounds = _map_bounds.expand(tile.world_position)
-	_units = UNITS_SCRIPT.new()
-	_units.name = "UnitRegistry"
-	_runtime.add_child(_units)
-	_sim = SIM_SCRIPT.new()
-	_sim.name = "SimulationRoot"
-	_sim.set("unit_registry_path", NodePath("../UnitRegistry"))
-	_sim.set("terrain_registry_path", NodePath("../TerrainRegistry"))
-	_runtime.add_child(_sim)
-	_avatar = AVATAR_SCRIPT.new()
-	_avatar.name = "CommanderAvatar"
-	_runtime.add_child(_avatar)
-	_avatar.position = _world_at_grid(_layout.get("avatar_spawn_grid", [7, 11]))
-	_units.call("register_unit", AVATAR_SCRIPT.UNIT_ID, _avatar)
-	_sim.call("register_known_unit", AVATAR_SCRIPT.UNIT_ID, _avatar)
+	if personnel == null:
+		_navigation_graph = BASE_NAV.new()
+		_navigation_graph.call("configure_graph", _terrain)
+		_units = UNITS_SCRIPT.new()
+		_units.name = "UnitRegistry"
+		_runtime.add_child(_units)
+		_sim = SIM_SCRIPT.new()
+		_sim.name = "SimulationRoot"
+		_sim.set("unit_registry_path", NodePath("../UnitRegistry"))
+		_sim.set("terrain_registry_path", NodePath("../TerrainRegistry"))
+		_runtime.add_child(_sim)
+		_avatar = AVATAR_SCRIPT.new()
+		_avatar.name = "CommanderAvatar"
+		_runtime.add_child(_avatar)
+		_avatar.position = _world_at_grid(_layout.get("avatar_spawn_grid", [7, 11]))
+		_units.call("register_unit", AVATAR_SCRIPT.UNIT_ID, _avatar)
+		_sim.call("register_known_unit", AVATAR_SCRIPT.UNIT_ID, _avatar)
+	else:
+		var people: Array = personnel.call("get_snapshot").get("units", [])
+		if not people.is_empty():
+			_selected_person_id = String(people[0].unit_id)
+			_avatar = personnel.call("get_actor", _selected_person_id)
 	_view = VIEW_SCRIPT.new()
 	_view.name = "Primary3DView"
 	_runtime.add_child(_view)
@@ -315,11 +558,11 @@ func _initialize_runtime() -> void:
 				# remains in MapData; source meshes are never replaced or rewritten.
 				var id: String = String(asset.id)
 				_structure_visual_nodes[id] = visual
-				_structure_visual_records[id] = {"source_path": String(asset.path), "actual_sha256": String(_asset_sources.back().get("actual_sha256", ""))}
+				_structure_visual_records[id] = {"source_path": String(asset.path), "actual_sha256": String(_asset_sources.back().get("actual_sha256", "")), "route": String(asset.get("visual_route", "original_furnished_cutaway_glb")), "original_path": String(asset.get("original_path", asset.path))}
 	_build_landing_pads(stage)
 	_build_boundary_rocks(stage)
 	var avatar_visual: Dictionary = Dictionary(_layout.get("avatar_visual", {}))
-	_model = _load_visual(avatar_visual)
+	_model = _load_visual(avatar_visual) if personnel == null else null
 	if _model != null:
 		_model.name = "CommanderVisual"
 		stage.add_child(_model)
@@ -345,6 +588,9 @@ func _initialize_runtime() -> void:
 	_view.call("set_external_terrain_object_visuals", footprint_visuals)
 	_previous_position = _avatar.position
 	_initialized = true
+	if personnel != null:
+		_build_personnel_visuals(stage)
+		_build_personnel_controls()
 	_update_craft_projection()
 	_update_avatar_visual()
 
@@ -386,13 +632,23 @@ func _plane_position(raw_plane: Variant) -> Vector3:
 func request_walk_to(world_position: Vector2) -> bool:
 	if _pad_preview or not _active or not _initialized or not is_visible_in_tree():
 		return false
+	if _personnel_runtime() != null:
+		var result: Dictionary = _personnel_action("base_move", {"target_position": world_position})
+		if bool(result.get("ok", false)):
+			_movement_command_count += 1
+		return bool(result.get("ok", false))
 	var grid: Vector2i = _terrain.call("world_to_grid", world_position)
 	if not bool(_terrain.call("is_walkable", grid)):
+		return false
+	var target: Vector2 = _terrain.call("grid_to_world", grid)
+	var path: Array = _navigation_graph.call("find_world_path", _avatar.position, target)
+	if path.is_empty():
 		return false
 	_command_sequence += 1
 	_sim.call("enqueue_command", {
 		"type": "move_to_position", "unit_id": AVATAR_SCRIPT.UNIT_ID,
-		"target_position": _terrain.call("grid_to_world", grid),
+		"target_position": target, "path": path,
+		"navigation_path_terrain_revision": _terrain.call("get_revision"),
 		"command_token": "homebase_walk_%d" % _command_sequence,
 		"requeue_until_target": true,
 	})
@@ -403,6 +659,8 @@ func request_walk_to(world_position: Vector2) -> bool:
 func request_terminal(id: String) -> bool:
 	if _pad_preview or not _active or not _initialized or not is_visible_in_tree():
 		return false
+	if _personnel_runtime() != null:
+		return bool(_personnel_action("base_terminal", {"terminal_id": id}).get("ok", false))
 	for terminal in _terminals:
 		if String(terminal["id"]) == id and bool(terminal.get("enabled", true)) and _terminal_distance(terminal) <= INTERACTION_RADIUS:
 			_stop_avatar()
@@ -413,6 +671,9 @@ func request_terminal(id: String) -> bool:
 
 func _stop_avatar() -> void:
 	if _sim == null:
+		return
+	if _personnel_runtime() != null:
+		_personnel_action("base_cancel")
 		return
 	_command_sequence += 1
 	_sim.call("enqueue_command", {"type": "hold_position", "unit_id": AVATAR_SCRIPT.UNIT_ID, "command_token": "homebase_hold_%d" % _command_sequence})
@@ -425,14 +686,19 @@ func _on_world_gui_input(event: InputEvent) -> void:
 		_host.grab_focus()
 		if event.button_index == MOUSE_BUTTON_RIGHT:
 			var local: Vector2 = event.position * Vector2(_viewport.size) / _host.size.max(Vector2.ONE)
-			var target: Variant = _view.call("screen_to_world_position", local)
+			var target: Variant = _view.call("screen_to_world_plane_position", local)
 			if typeof(target) == TYPE_VECTOR2:
+				var plane: Vector3 = _view.call("_world_to_3d_position", Vector2(target), 0.0)
+				target = _view.call("screen_to_world_plane_position", local, BASE_NAV.standing_y(plane))
 				request_walk_to(Vector2(target))
 			_host.accept_event()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			_view.call("zoom_camera", 1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1.0)
 			_host.accept_event()
 		elif event.button_index == MOUSE_BUTTON_LEFT:
+			if _select_person_at(event.position):
+				_host.accept_event()
+				return
 			for terminal in _terminals:
 				var point: Vector2 = _view.call("world_to_screen_position", terminal["world_position"])
 				if point.distance_to(event.position) <= 38.0:
@@ -489,12 +755,19 @@ func _process(delta: float) -> void:
 	if _pad_preview or not _active or not _initialized:
 		return
 	_update_avatar_visual()
+	_personnel_ui_elapsed -= delta
+	if _personnel_runtime() != null and _personnel_ui_elapsed <= 0.0:
+		_personnel_ui_elapsed = 0.2
+		_update_personnel_controls()
 	_update_nearby_terminal()
 	if _drone_helper != null and bool(_drone_helper.call("advance_visual", delta)):
 		_view.call("_request_viewport_redraw")
 
 
 func _update_avatar_visual() -> void:
+	if _personnel_runtime() != null:
+		_update_personnel_visuals()
+		return
 	if _model == null:
 		return
 	var position_3d: Vector3 = _view.call("_world_to_surface_3d_position", _avatar.position, 0.006)
@@ -522,13 +795,12 @@ func _build_terminals(stage: Node3D) -> void:
 		terminal["world_position"] = _world_at_grid(terminal["grid"])
 		_terminals.append(terminal)
 		var position_3d: Vector3 = _view.call("_world_to_surface_3d_position", terminal["world_position"], 0.0)
-		var pedestal: MeshInstance3D = _box(stage, Vector3(0.24, 0.48, 0.20), position_3d + Vector3(0.33, 0.24, 0.0), Color("cbd4c5"))
-		pedestal.name = "Terminal_" + String(terminal["id"])
-		_box(stage, Vector3(0.25, 0.15, 0.025), position_3d + Vector3(0.33, 0.52, 0.10), Color("2ac6c7"))
+		# The furnished rooms already have desks and monitors. Mark their usable
+		# approach points instead of intersecting them with extra console boxes.
 		var label := Label3D.new()
 		label.text = String(terminal["title"])
-		label.font_size = 48
-		label.pixel_size = 0.006
+		label.font_size = 32
+		label.pixel_size = 0.004
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		label.modulate = Color("eaf2df")
 		label.position = position_3d + Vector3(0.0, 0.95, 0.0)
@@ -700,7 +972,9 @@ func get_exploration_snapshot() -> Dictionary:
 		"preview_mode": _pad_preview,
 		"map_path": _map_path, "movement_owner": "SimulationRoot",
 		"owns_roster": false, "owns_transport": false, "owns_inventory": false,
-		"ephemeral_commander": true, "read_only": true,
+		"ephemeral_commander": _personnel_runtime() == null, "read_only": true,
+		"selected_person_id": _selected_person_id,
+		"personnel": _personnel_runtime().call("get_snapshot") if _personnel_runtime() != null else {},
 		"tree_paused": get_tree().paused if is_inside_tree() else false,
 		"projected_crafts": projected_crafts, "focused_craft_id": _focused_craft_id,
 	}
@@ -734,6 +1008,5 @@ func _get_structure_visual_snapshot() -> Dictionary:
 		if is_instance_valid(visual):
 			var record: Dictionary = Dictionary(_structure_visual_records[id]).duplicate(true)
 			record["visible"] = visual.visible
-			record["route"] = "original_furnished_cutaway_glb"
 			result[id] = record
 	return result

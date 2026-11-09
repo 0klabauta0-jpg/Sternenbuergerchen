@@ -10,6 +10,8 @@ Das Hauptmenue trennt **Kampagne**, **Skirmish** und **Multiplayer**. Der Teamed
 
 Eine neue Kampagne besitzt genau zwei NPCs: `campaign_leader` als einsatzfaehigen Leader und `campaign_pilot` als getrennten Dropship-Piloten. Ein einziger Leader darf einen realen Fireteam-Einsatz ausfuehren. Automatische Alt-Bootstrap-Auffuellung darf kein weiteres Personal erzeugen. Profile kommen beim Missions-Handoff aus dem Kampagnenroster; die umgangene FOB-Anzeige ist keine Profilquelle.
 
+Nutzerpraezisierung vom 09./10.11.: Es gibt keine zusaetzliche Commanderfigur in der Kampagnenbasis. Die beiden echten Rosterpersonen sind dort auswaehlbar. Beide duerfen nach der Landung aussteigen und am Bodeneinsatz teilnehmen. Vor jedem tatsaechlichen Flug muss die aktuell zugewiesene, lebende Person wirklich am Pilotenplatz sein. Auch ein anderer echter NPC darf diesen Platz uebernehmen; seine eigenen Flugfaehigkeiten bleiben massgeblich. Dieser Schritt fuehrt keine neue zufaellige Absturzmechanik ein. Eine Rollenbezeichnung oder unsichtbare Ersatzperson ersetzt keine physische Anwesenheit.
+
 ## Orte und Reihenfolge
 
 | Etappe | Reale Voraussetzung | Freischaltung |
@@ -22,7 +24,7 @@ Ein Popup schliessen, ein Panel oeffnen oder einen Ortsnamen waehlen ist kein Mi
 
 Basisdarstellung verwendet `maps/campaign_intro_base.json`: nach Nutzerkorrektur wieder die groessere36x28-Heimatbasis mit beiden vorhandenen moeblierten Cutaway-Gebaeuden und beiden stabilen Pad-Flaechen. Der Startumfang bleibt klein (zwei NPCs und ein reales Schiff); die Karte wird deshalb nicht verkleinert. Skirmish behaelt dieselbe grosse Basisgrundlage. Satelliten- und Handelsort laden weiterhin ihre eigenen Karten und Szenarien. Ort, Auftrag, Karte, Szenario und Startmodus sind getrennte Begriffe.
 
-Die vereinfachte Behandlung des Handelspostens ist keine Gestaltungsvorgabe fuer die Heimatbasis. Die erhaltenen `structures_pass04`-GLBs bleiben unveraendert; kahle Ersatzwaende werden dort nicht an ihrer Stelle aufgebaut. Vorlage und Nachweis: `docs/tasks/BASE_ORIGINAL_ROOMS_2026_11_09.md`.
+Die vereinfachte Behandlung des Handelspostens ist keine Gestaltungsvorgabe fuer die Heimatbasis. Die erhaltenen `structures_pass04`-Quellen bleiben unveraendert. Fuer tatsaechlich betretbare Schlafraeume duerfen nachvollziehbare Modellableitungen ausschliesslich fehlende Tueroeffnungen ergaenzen; Einrichtung, Materialstil und Raumaufteilung bleiben erhalten. Kahle Ersatzwaende sind kein Basisstil. Quelle: `docs/tasks/BASE_ORIGINAL_ROOMS_2026_11_09.md`; Durchgangs-/Personenauftrag: `docs/tasks/BASE_REAL_PERSONNEL_2026_11_09_DESIGN.md`.
 
 ## Autoritaet und Hilfe
 
@@ -33,6 +35,8 @@ Kleine aktuelle Anleitung, schliessbare Ersthinweise, wieder aufrufbare Hilfe un
 ## Checkpoint
 
 Nur ein konsistenter Stand an der Heimatbasis wird in `user://campaigns/introduction/checkpoint_v1.json` geschrieben. Roster, Fireteam-/Mitgliederausruestung, Pilot, Craft, Ressourcen, Auftragsstatus, Fortschritt und Belege werden zusammen validiert und ueber eine temporaere Datei ersetzt. Kein Speichern waehrend Mission oder Transport. `Fortsetzen` stellt den letzten Basis-Meilenstein her; abgebrochene Ausfluege werden dadurch auf diesen Stand zurueckgesetzt. Keine Wiederaufnahme mitten im Gefecht versprochen.
+
+Optionale `base_personnel`-Felder speichern echte Basisposition, Bettbelegung/Schlaf und bestaetigte Anwesenheit an Bord. Laufende Wege werden beim Laden nicht blind erneut ausgeloest. Aeltere gueltige Checkpoints ohne diese Felder bleiben ladbar und stellen die beiden Personen an freien Startpositionen dar. Gespeichertes Boarding wird auch im bestehenden Payloadowner wiederhergestellt, nicht nur durch ausgeblendete Figuren behauptet.
 
 Ungueltige/veraltete Staende werden vor Mutation abgelehnt. `Neue Kampagne` ersetzt einen vorhandenen Stand nur nach Menuebestaetigung. Save-/Ladefehler duerfen keinen Skirmish-Fallback oder stillen Kampagnenneustart ausloesen.
 

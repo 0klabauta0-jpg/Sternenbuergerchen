@@ -120,6 +120,7 @@ var _briefing_loadout_apply_count: int = 0
 var _briefing_loadout_feedback_text: String = ""
 var _roster_sort_mode: String = HOMEBASE_ROSTER_SORT_NAME_ASC
 var _singleplayer_snapshot_provider: Callable
+var _base_personnel_runtime: WeakRef
 var _singleplayer_command_handler: Callable
 var _profiles_by_id: Dictionary = {}
 var _focused_unit_id: String = ""
@@ -6930,6 +6931,16 @@ func _normalize_member_loadout_dictionary(member_loadouts: Dictionary, default_a
 func _sync_homebase_member_loadouts_into_fireteam_definitions() -> void:
 	var existing_cache: Dictionary = _normalize_member_loadout_dictionary(_member_loadout_by_unit_id)
 	var next_cache: Dictionary = {}
+	# Campaign pilots can equip while outside without joining a fireteam.
+	# Keep their existing canonical loadout through ordinary team refreshes.
+	if has_meta("campaign_base_map_path"):
+		var personnel: Node = get_base_personnel_runtime()
+		for unit_id in existing_cache:
+			# A boarded person may be absent from a transient UI profile cache.
+			# Before runtime binding, this cache comes from validated checkpoint
+			# data; afterwards the actual roster registry validates the identity.
+			if personnel == null or personnel.call("get_actor", unit_id) != null:
+				next_cache[unit_id] = existing_cache[unit_id]
 	for definition_index in range(_fireteam_definitions.size()):
 		if typeof(_fireteam_definitions[definition_index]) != TYPE_DICTIONARY:
 			continue
@@ -9025,6 +9036,12 @@ func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 	var pilot_craft: String = _find_assigned_craft_for_unit(id)
 	var in_transit: bool = not _find_transfer_entry_for_unit(id).is_empty()
 	var busy: bool = in_transit or not pilot_craft.is_empty() or not payload_craft.is_empty()
+	var base_runtime: Node = get_base_personnel_runtime()
+	var outside_campaign: bool = false
+	if base_runtime != null and not in_transit and payload_craft.is_empty():
+		for person: Dictionary in base_runtime.call("get_snapshot").get("units", []):
+			if String(person.unit_id) == id:
+				outside_campaign = String(person.status) == "outside"
 	var role_id: String = String(unit_data.get("roster_role_category", unit_data.get("role_id", "")))
 	var role_names: Dictionary = {"leader": "Truppführung", "medic": "Sanität", "engineer": "Technik", "pilot": "Pilot", "shooter": "Schütze", "heavy_support": "Unterstützung", "scout_sniper": "Aufklärung"}
 	var role: String = String(role_names.get(role_id, String(profile.role_name) if profile != null else String(unit_data.get("role_name", "Operator"))))
@@ -9048,7 +9065,7 @@ func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 		"fireteam_id": fireteam_id, "busy": busy, "in_transit": in_transit,
 		"can_assign": not busy and not target_busy and fireteam_id != _focused_fireteam_id and focused_members.size() < 4 and capacity_available,
 		"can_remove": not busy and not fireteam_id.is_empty(),
-		"can_edit": not busy and not fireteam_id.is_empty(), "loadout": _get_member_loadout(id)}
+		"can_edit": (not busy and not fireteam_id.is_empty()) or outside_campaign, "loadout": _get_member_loadout(id)}
 
 
 func configure_singleplayer_bridge(snapshot_provider: Callable, command_handler: Callable) -> void:
@@ -9058,7 +9075,15 @@ func configure_singleplayer_bridge(snapshot_provider: Callable, command_handler:
 		_operations_presenter.call("refresh")
 
 
-func get_operations_snapshot() -> Dictionary:
+func configure_base_personnel_bridge(runtime: Node) -> void:
+	_base_personnel_runtime = weakref(runtime)
+
+
+func get_base_personnel_runtime() -> Node:
+	return _base_personnel_runtime.get_ref() if _base_personnel_runtime != null else null
+
+
+func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 	# Read-only projection: never sanitize, seed, advance timers or change owners.
 	var roster: Array = []
 	var by_id: Dictionary = {}
@@ -9096,6 +9121,10 @@ func get_operations_snapshot() -> Dictionary:
 		var gate: Dictionary = _build_homebase_direct_staging_craft_gate_for_craft(id)
 		var boarded: bool = not payload_teams.is_empty() and _are_homebase_payload_fireteams_boarded(payload_teams)
 		var can_start: bool = not busy and not pilot_id.is_empty() and _can_send_craft(definition, id) and _has_homebase_direct_launch_payload_for_craft(id)
+		var base_runtime: Node = get_base_personnel_runtime()
+		var pilot_present: bool = base_runtime == null or bool(base_runtime.call("is_pilot_aboard", id))
+		if not pilot_present:
+			can_start = false
 		var pilots: Array = [{"id": "", "label": "Pilot auswählen"}]
 		for unit_variant in roster:
 			var unit: Dictionary = Dictionary(unit_variant)
@@ -9115,6 +9144,9 @@ func get_operations_snapshot() -> Dictionary:
 		elif not payload_teams.is_empty() and not boarded:
 			status = "Boarding läuft"
 			next_step = "Boarding abwarten"
+		elif not pilot_present:
+			status = "Pilot nicht an Bord"
+			next_step = "Pilot zum Schiff schicken"
 		elif can_start:
 			next_step = "Einsatz starten"
 		var craft: Dictionary = {"id": id, "name": String(definition.get("display_name", "Dropship")),
@@ -9123,7 +9155,7 @@ func get_operations_snapshot() -> Dictionary:
 			"busy": busy, "status": status, "progress": progress, "next_step": next_step,
 			"has_payload": not payload_teams.is_empty(), "payload_fireteam_ids": Array(payload_teams),
 			"passenger_count": payload_ids.size(), "can_start": can_start,
-			"can_board": not busy and bool(gate.get("can_stage", false)) and not Array(focused_team.get("members", [])).is_empty() and not bool(focused_team.get("busy", false)),
+			"can_board": not busy and bool(gate.get("can_stage", false)) and not Array(focused_team.get("members", [])).is_empty() and (not bool(focused_team.get("busy", false)) or (payload_teams.has(_focused_fireteam_id) and not pilot_present)),
 			"can_unboard": not busy and payload_teams.has(_focused_fireteam_id)}
 		var preview: Texture2D = _get_aircraft_texture(definition)
 		craft["texture_path"] = preview.resource_path if preview != null else ""
@@ -9138,17 +9170,45 @@ func get_operations_snapshot() -> Dictionary:
 		var mission: Dictionary = Dictionary(mission_variant)
 		missions.append({"id": String(mission.get("id", mission.get("mission_id", ""))), "label": String(mission.get("display_name", mission.get("mission_name", mission.get("name", "Einsatz"))))})
 	return {"mode": _operations_mode, "roster": roster, "fireteams": fireteams,
-		"singleplayer": _singleplayer_snapshot_provider.call() if _singleplayer_snapshot_provider.is_valid() else {},
+		"singleplayer": _singleplayer_snapshot_provider.call() if include_runtime and _singleplayer_snapshot_provider.is_valid() else {},
 		"roster_sort_mode": _roster_sort_mode, "roster_sort_options": HOMEBASE_ROSTER_SORT_OPTIONS,
 		"focused_fireteam_id": _focused_fireteam_id, "focused_fireteam": focused_team,
 		"focused_unit": Dictionary(by_id.get(_focused_unit_id, {})).duplicate(true),
 		"crafts": crafts, "selected_craft": selected_craft, "missions": missions,
 		"mission_id": _selected_mission_id, "mission_name": _selected_mission_name,
 		"loadout_options": {"armor": LOADOUT_CONTRACT_SCRIPT.get_compact_armor_options(), "weapon_1": LOADOUT_CONTRACT_SCRIPT.get_homebase_primary_weapon_options(), "weapon_2": LOADOUT_CONTRACT_SCRIPT.get_homebase_secondary_weapon_options()},
-		"presentation": _operations_presenter.call("get_presentation_snapshot") if _operations_presenter != null else {}}
+		"presentation": _operations_presenter.call("get_presentation_snapshot") if include_runtime and _operations_presenter != null else {}}
 
 
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	# World and menu actions share one command bridge. Only the runtime may
+	# commit boarding after the real person has reached the ship access point.
+	var runtime: Node = get_base_personnel_runtime()
+	if operation.begins_with("base_") or (runtime != null and operation in ["board", "unboard"]):
+		if not _singleplayer_command_handler.is_valid():
+			return _operations_rejected("base_unavailable", "Basis noch nicht bereit")
+		var data: Dictionary = payload.duplicate(true)
+		if operation in ["board", "unboard"]:
+			data["whole_fireteam"] = true
+		if not data.has("unit_id"):
+			data["unit_id"] = _focused_unit_id
+		if not data.has("fireteam_id"):
+			data["fireteam_id"] = _focused_fireteam_id
+		if not data.has("craft_id"):
+			data["craft_id"] = _get_selected_aircraft_id()
+		return _singleplayer_command_handler.call("base_" + operation if not operation.begins_with("base_") else operation, data)
+	return _request_operation_from_base(operation, payload)
+
+
+func _request_operation_from_base(operation: String, payload: Dictionary = {}) -> Dictionary:
+	var base_runtime: Node = get_base_personnel_runtime()
+	if base_runtime != null:
+		var gate_payload: Dictionary = payload.duplicate(true)
+		if not gate_payload.has("unit_id"):
+			gate_payload["unit_id"] = _focused_unit_id
+		var gate: Dictionary = base_runtime.call("validate_operation", operation, gate_payload)
+		if not bool(gate.get("ok", false)):
+			return gate
 	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase"]:
 		if not _singleplayer_command_handler.is_valid():
 			return _operations_rejected("singleplayer_unavailable", "Diese Funktion ist noch nicht verfügbar")
@@ -9194,7 +9254,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			if not _profiles_by_id.has(unit_id):
 				return _operations_rejected("unknown_unit", "Person nicht verfügbar")
 			var unit: Dictionary = _operations_unit_entry(_get_available_unit_data(unit_id))
-			if bool(unit.get("busy", true)):
+			if bool(unit.get("busy", true)) and not (operation == "loadout" and bool(unit.get("can_edit", false))):
 				return _operations_rejected("unit_busy", "Kraft ist an Bord, zugewiesen oder unterwegs")
 			_focused_unit_id = unit_id
 			if operation == "assign":

@@ -6,6 +6,7 @@ const SIM = preload("res://scripts/core/simulation_root.gd")
 const CAMPAIGN = preload("res://scripts/core/singleplayer_campaign_state.gd")
 const SUPPLY = preload("res://scripts/core/singleplayer_supply_state.gd")
 
+var _base_personnel: Node
 var _flow: Node
 var _screen: Control
 var _simulation: Node
@@ -45,6 +46,12 @@ func configure(flow: Node, screen: Control) -> void:
 			_campaign.restore_state(checkpoint.campaign)
 			_supply.restore_state(checkpoint.supply)
 			_onboarding.restore_state(checkpoint.onboarding)
+	if _campaign_mode:
+		_base_personnel = load("res://scripts/core/base_personnel_runtime.gd").new()
+		_base_personnel.name = "BasePersonnelRuntime"
+		add_child(_base_personnel)
+		_base_personnel.configure(_flow, _screen, _simulation, Dictionary(_flow.get("_campaign_start").get("checkpoint")))
+		_screen.call("configure_base_personnel_bridge", _base_personnel)
 	sync_crafts()
 	if _screen.has_method("configure_singleplayer_bridge"):
 		_screen.call("configure_singleplayer_bridge", get_snapshot, request_operation)
@@ -82,7 +89,7 @@ func get_snapshot() -> Dictionary:
 		var context: Dictionary = _service_context(id)
 		if not context.is_empty():
 			service_contexts[id] = context
-	return {"campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}}
+	return {"campaign": campaign, "supply": _supply.get_supply_snapshot(), "crafts": crafts, "service_contexts_by_craft_id": service_contexts, "runtime_authority": "SimulationRoot", "mode": "campaign" if _campaign_mode else "skirmish", "base_personnel": _base_personnel.get_snapshot() if _base_personnel != null else {}, "onboarding": _onboarding.get_snapshot() if _onboarding != null else {}}
 
 func sync_crafts() -> void:
 	# Lifecycle event only, called when real craft definitions change. Read paths
@@ -110,7 +117,12 @@ func sync_crafts() -> void:
 func _home_pad_for(craft_id: String) -> String:
 	return String(_pad_by_craft.get(craft_id, ""))
 
+func get_base_personnel_runtime() -> Node:
+	return _base_personnel
+
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
+	if operation.begins_with("base_"):
+		return _base_personnel.request_operation(operation, payload) if _base_personnel != null else _reject("base_unavailable", "Basisaktion nur in Kampagne")
 	if _simulation == null:
 		return _reject("runtime_unavailable", "Kampagne noch nicht bereit")
 	var data: Dictionary = payload.duplicate(true)
@@ -201,6 +213,8 @@ func _service_context(craft_id: String) -> Dictionary:
 	return {}
 
 func validate_departure(craft_id: String) -> Dictionary:
+	if _base_personnel != null and not _base_personnel.is_pilot_aboard(craft_id):
+		return _reject("pilot_not_aboard", "Zugewiesener Pilot muss tatsaechlich im Schiff sein")
 	if _campaign_mode:
 		observe_campaign_progress()
 		var stage: int = int(_onboarding.get_snapshot().stage_index)
@@ -271,6 +285,14 @@ func authorize_return(craft_id: String, request_id: String = "") -> Dictionary:
 	# the same fixed-route cost model instead of inventing distance-based fuel.
 	if location != "mission" and String(transfer.get("phase", "")) != "to_mission":
 		return _reject("craft_not_remote", "Schiff ist nicht im Ausflug")
+	if _campaign_mode and location == "mission":
+		var mission: Node = _flow.get("_active_mission")
+		var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
+		if controller == null:
+			return _reject("pilot_presence_unknown", "Pilotanwesenheit ist nicht bestaetigt")
+		var pilot_guard: Dictionary = controller.call("get_campaign_pilot_flight_guard", craft_id)
+		if not bool(pilot_guard.get("ok", false)):
+			return pilot_guard
 	var route := {"craft_id": craft_id, "origin_location_id": String(binding.destination_location_id), "destination_location_id": "homebase"}
 	var outward_token: String = String(_departure_token_by_craft.get(craft_id, ""))
 	if outward_token.is_empty():
@@ -327,7 +349,7 @@ func observe_campaign_progress() -> void:
 	var at_home := _flow.get("_active_mission") == null and not _has_active_transit()
 	for location in Dictionary(_flow.get("_aircraft_location_by_craft")).values():
 		at_home = at_home and String(location) == "homebase"
-	var selected_craft: Dictionary = _screen.call("get_operations_snapshot").get("selected_craft", {})
+	var selected_craft: Dictionary = _screen.call("get_operations_snapshot", false).get("selected_craft", {})
 	var craft_id: String = String(selected_craft.get("id", ""))
 	var ready := not craft_id.is_empty() and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id)) and not String(_screen.call("_get_assigned_pilot_id", craft_id)).is_empty()
 	var job: Dictionary = Dictionary(campaign.jobs.get("satellite_recovery", {}))
@@ -342,7 +364,7 @@ func export_campaign_checkpoint() -> Dictionary:
 	state["departures_by_craft_id"] = {}
 	state["selected_location_id"] = "homebase"
 	state["selected_job_id"] = ""
-	return {"schema_version": 1, "campaign": state, "supply": _supply.export_state(), "onboarding": _onboarding.export_state()}
+	return {"schema_version": 1, "campaign": state, "supply": _supply.export_state(), "onboarding": _onboarding.export_state(), "base_personnel": _base_personnel.export_state() if _base_personnel != null else {}}
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}

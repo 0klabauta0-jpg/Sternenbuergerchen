@@ -98,10 +98,10 @@ func _initialize() -> void:
 	check(store.load_checkpoint(checkpoint).ok, "packed fireteam members JSON roundtrip")
 	bad = preparation.duplicate(true)
 	bad.craft.fireteam_definitions[1].member_unit_ids = ["pilot"]
-	check(not store.validate_payload(bad).ok, "qualified pilot cannot join empty fireteam")
+	check(not store.validate_payload(bad).ok, "nonempty pilot team still requires a leader")
 	bad = preparation.duplicate(true)
 	bad.craft.staged_unit_ids = ["pilot"]
-	check(not store.validate_payload(bad).ok, "qualified pilot cannot stage when unassigned")
+	check(store.validate_payload(bad).ok, "unassigned pilot may stage as real ground crew")
 	bad = preparation.duplicate(true)
 	bad.craft.fireteam_definitions[1].member_unit_ids = ["foreign"]
 	check(not store.validate_payload(bad).ok, "empty team rejects foreign member")
@@ -116,7 +116,7 @@ func _initialize() -> void:
 	check(not store.validate_payload(bad).ok, "empty team rejects duplicate identity")
 	bad = preparation.duplicate(true)
 	bad.craft.pilot_id = "leader"
-	check(not store.validate_payload(bad).ok, "unqualified assigned pilot rejected")
+	check(store.validate_payload(bad).ok, "any roster person may pilot while preserving permanent fireteam identity")
 	var dep := {"craft_id":"campaign_craft","origin_location_id":"homebase","destination_location_id":"satellite_crash","landing_pad_id":"homebase_pad_01","job_id":"satellite_recovery"}
 	check(campaign.apply_command(contract.build_command("bind_departure", dep, "dep"), {"departure_authorized":true}).ok, "bind real departure")
 	check(campaign.apply_command(contract.build_command("activate_job", {"job_id":"satellite_recovery","craft_id":"campaign_craft"}, "act"), {"departure_authorized":true}).ok, "activate departed satellite")

@@ -30,6 +30,9 @@ func _run() -> void:
 	if not _check(_runtime != null, "Actual Flow has long-lived campaign runtime"):
 		await _finish()
 		return
+	if not await _prepare_initial_base():
+		await _finish()
+		return
 	var initial: Dictionary = _flow.call("get_singleplayer_snapshot")
 	var operations: Dictionary = _screen.call("get_operations_snapshot")
 	var craft: Dictionary = Dictionary(operations.get("selected_craft", {}))
@@ -56,7 +59,8 @@ func _run() -> void:
 	var mission: Node = _flow.get("_active_mission")
 	var controller: Node = mission.get_node("TacticalController")
 	var driver: Node = mission.get_node("CombatLoopDriver")
-	_check(not bool(driver.call("_is_victory_condition_met")), "Actual satellite scene cannot win on load")
+	var victory_on_load: bool = bool(driver.call("_is_victory_condition_met"))
+	_check(not victory_on_load, "Actual satellite scene cannot win on load")
 	controller.call("_set_selected_fireteams", PackedStringArray([_team_id]), false)
 	if not await _move_and_use(mission, "satellite_data", "secure_satellite", "res://maps/satellite_crash_site.json"):
 		await _finish()
@@ -117,6 +121,9 @@ func _run() -> void:
 	_check(int(Dictionary(paid.item_quantities).get("medictool", 0)) == int(Dictionary(service_supply.item_quantities).get("medictool", 0)) + 1, "Second sortie grants one real purchased item")
 	_check(float(paid.fuel_by_craft_id[_craft_id]) == float(service_supply.fuel_by_craft_id[_craft_id]) + 10.0, "Confirmed actual craft gains exactly ten fuel")
 	services.queue_free()
+	if not await _prepare_visit_return(mission):
+		await _finish()
+		return
 	var return_result: Dictionary = _screen.call("request_operation", "return_homebase", {"craft_id": _craft_id, "request_id": "loop:trade-return"})
 	if not _check(bool(return_result.get("ok", false)), "Real visit return command accepts after service"):
 		print("RETURN_RESULT:", return_result)
@@ -128,7 +135,8 @@ func _run() -> void:
 		return
 	_flow.call("_show_homebase")
 	var final: Dictionary = _flow.call("get_singleplayer_snapshot")
-	_check(float(final.supply.fuel_by_craft_id[_craft_id]) == float(initial.supply.fuel_by_craft_id[_craft_id]) - 24.0 - 16.0 + 10.0, "Two true round trips plus refuel preserve authored fuel accounting")
+	var final_fuel_balanced: bool = float(final.supply.fuel_by_craft_id[_craft_id]) == float(initial.supply.fuel_by_craft_id[_craft_id]) - 24.0 - 16.0 + 10.0
+	_check(final_fuel_balanced, "Two true round trips plus refuel preserve authored fuel accounting")
 	_check(Dictionary(final.campaign.completion_receipts).size() == 1 and int(final.supply.credits) == int(initial.supply.credits) + 150 - 70, "Trade sortie cannot repeat satellite receipt or reward")
 	_check(_identity(_screen.call("get_operations_snapshot")) == _identity_before, "Second return loses no original crew or identity")
 	var final_operations: Dictionary = _screen.call("get_operations_snapshot")
@@ -184,7 +192,17 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 	if not await _wait(func(): return _all_crew_deployed(controller) and int(mission.get_node("SimulationRoot").call("get_tick")) > 0, 30000, scenario_id + " real landing unloads all original crew into authoritative simulation"):
 		_dump("actual_landing")
 		return false
+	_on_actual_landed(controller)
 	_check(String(mission.get_node("MissionSetup").get("scenario_file_path")).get_file().get_basename() == scenario_id, "Selected location loads exact intended scenario " + scenario_id)
+	return true
+
+func _on_actual_landed(_controller: Node) -> void:
+	pass
+
+func _prepare_initial_base() -> bool:
+	return true
+
+func _prepare_visit_return(_mission: Node) -> bool:
 	return true
 
 func _configure_entry() -> void:

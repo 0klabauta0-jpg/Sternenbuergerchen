@@ -1,0 +1,159 @@
+{
+	"body_bottom": 0.22,
+	"body_height": 0.65,
+	"body_radius": 0.18,
+	"checked_neighbor_edges": 1452,
+	"failures": [],
+	"graph": {
+		"build_ms": 50.246,
+		"points": 13821,
+		"terrain_revision": 16129
+	},
+	"init_ms": 624.045,
+	"mesh_oracle": "fresh imported GLB trimesh physics; capsule cast_motion and overlap",
+	"ok": true,
+	"path_ms": [
+		0.055,
+		0.04,
+		0.187,
+		0.239,
+		0.03,
+		0.328,
+		0.159,
+		0.235,
+		0.04,
+		0.175,
+		0.031,
+		0.039,
+		0.157,
+		0.514
+	],
+	"routes": [
+		{
+			"end_plane": "(12.5, 0.0, 7.794229)",
+			"grid": [
+				32.0,
+				36.0
+			],
+			"id": "habitat_cutaway_01_door",
+			"length": 9
+		},
+		{
+			"end_plane": "(12.375, 0.0, 6.278684)",
+			"grid": [
+				35.0,
+				29.0
+			],
+			"id": "habitat_cutaway_01_interior",
+			"length": 15
+		},
+		{
+			"end_plane": "(27.25, 0.0, 7.794229)",
+			"grid": [
+				91.0,
+				36.0
+			],
+			"id": "freihafen_hall_01_door",
+			"length": 56
+		},
+		{
+			"end_plane": "(27.375, 0.0, 6.278684)",
+			"grid": [
+				95.0,
+				29.0
+			],
+			"id": "freihafen_hall_01_interior",
+			"length": 60
+		},
+		{
+			"end_plane": "(11.75, 0.0, 6.495191)",
+			"grid": [
+				32.0,
+				30.0
+			],
+			"id": "personnel",
+			"length": 15
+		},
+		{
+			"end_plane": "(25.75, 0.0, 5.629165)",
+			"grid": [
+				90.0,
+				26.0
+			],
+			"id": "team",
+			"length": 61
+		},
+		{
+			"end_plane": "(21.5, 0.0, 14.72243)",
+			"grid": [
+				52.0,
+				68.0
+			],
+			"id": "flightdeck",
+			"length": 45
+		},
+		{
+			"end_plane": "(29.125, 0.0, 6.711697)",
+			"grid": [
+				101.0,
+				31.0
+			],
+			"id": "mission",
+			"length": 68
+		},
+		{
+			"end_plane": "(12.75, 0.0, 6.062178)",
+			"grid": [
+				37.0,
+				28.0
+			],
+			"id": "jobs",
+			"length": 16
+		},
+		{
+			"end_plane": "(25.0, 0.0, 12.12436)",
+			"grid": [
+				72.0,
+				56.0
+			],
+			"id": "refuel",
+			"length": 53
+		},
+		{
+			"end_plane": "(11.5, 0.0, 6.062178)",
+			"grid": [
+				32.0,
+				28.0
+			],
+			"id": "habitat_bed_01",
+			"length": 17
+		},
+		{
+			"end_plane": "(12.0, 0.0, 6.062178)",
+			"grid": [
+				34.0,
+				28.0
+			],
+			"id": "habitat_bed_02",
+			"length": 16
+		},
+		{
+			"end_plane": "(22.0, 0.0, 15.58846)",
+			"grid": [
+				52.0,
+				72.0
+			],
+			"id": "homebase_pad_01",
+			"length": 49
+		},
+		{
+			"end_plane": "(33.0, 0.0, 15.58846)",
+			"grid": [
+				96.0,
+				72.0
+			],
+			"id": "homebase_pad_02",
+			"length": 93
+		}
+	]
+}

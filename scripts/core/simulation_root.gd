@@ -1,6 +1,16 @@
 class_name SimulationRoot
 extends Node
 
+var _base_personnel_owner: Node
+
+func configure_base_personnel(owner: Node) -> void:
+	_base_personnel_owner = owner
+
+func request_base_personnel_command(operation: String, payload: Dictionary) -> Dictionary:
+	if not is_instance_valid(_base_personnel_owner):
+		return {"ok":false,"reason":"base_personnel_unavailable"}
+	return _base_personnel_owner.call("apply_operation", operation, payload.duplicate(true))
+
 signal tick_processed(tick: int)
 signal singleplayer_command_committed(command: Dictionary, result: Dictionary)
 
@@ -3702,6 +3712,7 @@ func _apply_dropship_embark_unit_effect(effect: Dictionary) -> void:
 	if unit == null:
 		push_warning("SimulationRoot could not resolve the target unit for a dropship embark effect.")
 		return
+	unit.set_meta("dropship_embarked", true)
 	_apply_dropship_position_and_visibility(unit, effect, false)
 
 
@@ -3714,6 +3725,7 @@ func _apply_dropship_deploy_unit_effect(effect: Dictionary) -> void:
 	if unit == null:
 		push_warning("SimulationRoot could not resolve the target unit for a dropship deploy effect.")
 		return
+	unit.set_meta("dropship_embarked", false)
 	_apply_dropship_runtime_activation(unit_id, unit, effect)
 	_apply_dropship_position_and_visibility(unit, effect, true)
 	var runtime_status: String = String(effect.get("runtime_status", "")).strip_edges()

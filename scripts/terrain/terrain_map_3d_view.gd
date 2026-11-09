@@ -2277,6 +2277,17 @@ func screen_to_world_position(screen_position: Vector2):
 	return _position_3d_to_world(Vector3(hit))
 
 
+func screen_to_world_plane_position(screen_position: Vector2, plane_height: float = 0.0):
+	# Fine navigation callers need the actual pointer intersection rather than
+	# the coarse render tile centre. Existing tactical picking stays unchanged.
+	_ensure_nodes()
+	if _camera == null or _subviewport == null:
+		return null
+	var point: Vector2 = _screen_to_viewport_position(screen_position)
+	var hit: Variant = Plane(Vector3.UP, plane_height).intersects_ray(_camera.project_ray_origin(point), _camera.project_ray_normal(point))
+	return _position_3d_to_world(Vector3(hit)) if typeof(hit) == TYPE_VECTOR3 else null
+
+
 func screen_to_grid_position(screen_position: Vector2):
 	_ensure_nodes()
 	if _camera == null or _terrain_map_data == null:

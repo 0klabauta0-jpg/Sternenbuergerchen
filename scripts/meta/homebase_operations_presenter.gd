@@ -954,6 +954,9 @@ func _singleplayer_request(operation: String, payload: Dictionary = {}) -> Dicti
 func _update_base_surface(snapshot: Dictionary) -> void:
 	if _base == null:
 		return
+	var screen: Control = _owner_screen()
+	if screen != null and screen.has_method("get_base_personnel_runtime"):
+		_base.call("configure_personnel_runtime", screen.call("get_base_personnel_runtime"), Callable(screen, "request_operation"))
 	var runtime: Dictionary = snapshot.get("singleplayer", {})
 	if runtime.is_empty():
 		_base.call("set_active", _mode == "base" and is_visible_in_tree())

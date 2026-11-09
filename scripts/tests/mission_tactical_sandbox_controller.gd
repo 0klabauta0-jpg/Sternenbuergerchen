@@ -13052,8 +13052,8 @@ func _refresh_mission_dropship_panel() -> void:
 				"progress_value": _build_mission_dropship_progress_value(card),
 				"primary_action": {
 					"visible": _can_request_mission_dropship_return(card),
-					"text": "FOB",
-					"tooltip_text": "Return this dropship to FOB.",
+					"text": "Heim" if get_parent().has_meta("campaign_ground_pilot_id") else "FOB",
+					"tooltip_text": "Am Schiff einsteigen; nach bestaetigtem Boarding Heimflug starten." if get_parent().has_meta("campaign_ground_pilot_id") else "Return this dropship to FOB.",
 					"disabled": _is_network_dropship_command_pending(craft_id) or not _can_request_mission_dropship_return(card),
 					"square_size": 42.0,
 					"ready_style": true,
@@ -13071,6 +13071,7 @@ func _refresh_mission_dropship_panel() -> void:
 			card_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 			NATIVE_A5_DROPSHIP_SCRIPT.style_details_card(card_panel)
 			_restore_mission_dropship_action_button_mouse_filters(card_panel)
+		_refresh_campaign_pilot_selector(card_panel, card)
 	for removed_card in existing_cards.values():
 		panel.remove_child(removed_card)
 		removed_card.queue_free()
@@ -13587,6 +13588,128 @@ func _build_mission_dropship_passenger_chip(unit_id: String) -> Control:
 	return chip
 
 
+# Campaign pilot is a real sortie member. Assignment alone never authorizes flight.
+func get_campaign_pilot_flight_guard(craft_id: String) -> Dictionary:
+	if not get_parent().has_meta("campaign_ground_pilot_id"):
+		return {"ok": true}
+	var card: Dictionary = _find_mission_dropship_card_entry(craft_id)
+	var pilot_id: String = String(card.get("pilot_unit_id", ""))
+	if pilot_id.is_empty():
+		return {"ok": false, "reason": "pilot_presence_unknown", "message": "Zugewiesener Pilot fehlt am Schiff"}
+	var pilot = _get_campaign_sortie_unit(pilot_id)
+	if pilot == null or not pilot.has_method("get_health") or int(pilot.call("get_health")) <= 0:
+		return {"ok": false, "reason": "pilot_unavailable", "message": "Pilot ist nicht flugfaehig"}
+	if _deployed_unit_ids.has(pilot_id) or not bool(pilot.get_meta("dropship_embarked", false)):
+		return {"ok": false, "reason": "pilot_not_aboard", "message": "Pilot muss zum Schiff zurueck und wieder einsteigen"}
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	for effect: Dictionary in Array(simulation.get("effects_queue")) if simulation != null else []:
+		if String(effect.get("unit_id", "")) == pilot_id and String(effect.get("effect_type", "")) in ["dropship_deploy_unit", "dropship_embark_unit"]:
+			return {"ok": false, "reason": "pilot_boarding_pending", "message": "Pilot steigt ein"}
+	return {"ok": true, "pilot_unit_id": pilot_id}
+
+
+func _get_campaign_sortie_unit(unit_id: String) -> Node:
+	var simulation: Node = get_node_or_null("../SimulationRoot")
+	if simulation != null:
+		var unit: Node = simulation.call("_resolve_known_unit", unit_id)
+		if unit != null: return unit
+	return null
+
+
+func _get_campaign_sortie_units() -> Array:
+	var result: Array = []
+	var setup: Node = get_node_or_null("../MissionSetup")
+	if setup == null: return result
+	for id in PackedStringArray(setup.get("selected_team_unit_ids")):
+		var unit = _get_campaign_sortie_unit(String(id))
+		if unit != null: result.append(unit)
+	return result
+
+
+func assign_campaign_pilot(craft_id: String, unit_id: String) -> Dictionary:
+	if not get_parent().has_meta("campaign_ground_pilot_id") or not _is_parked_campaign_dropship(craft_id):
+		return {"ok": false, "reason": "craft_not_landed"}
+	var unit = _get_campaign_sortie_unit(unit_id)
+	var setup: Node = get_node_or_null("../MissionSetup")
+	if setup == null or not PackedStringArray(setup.get("selected_team_unit_ids")).has(unit_id) or unit == null or int(unit.call("get_health")) <= 0:
+		return {"ok": false, "reason": "unknown_pilot", "message": "Nur eine reale einsatzfaehige Person kann den Pilotenposten uebernehmen"}
+	_update_mission_dropship_card_fields(craft_id, {"pilot_unit_id": unit_id, "pilot_display_name": String(unit.call("get_display_name")), "pilot_portrait_path": String(unit.call("get_portrait_path")), "pilot_text": "Pilot: " + String(unit.call("get_display_name"))})
+	if craft_id == _mission_drop_craft_id:
+		_mission_drop_pilot_unit_id = unit_id
+		_mission_drop_pilot_display_name = String(unit.call("get_display_name"))
+		_mission_drop_pilot_portrait_path = String(unit.call("get_portrait_path"))
+		_mission_drop_pilot_text = "Pilot: " + _mission_drop_pilot_display_name
+	_store_selected_mission_dropship_plan()
+	_emit_planning_state_changed()
+	_refresh_mission_dropship_panel()
+	return {"ok": true, "pilot_unit_id": unit_id}
+
+
+func _refresh_campaign_pilot_selector(card_panel: Control, card: Dictionary) -> void:
+	if not get_parent().has_meta("campaign_ground_pilot_id"): return
+	var host: Node = card_panel.get_node("MarginContainer/VBox")
+	var selector := host.get_node_or_null("CampaignPilotSeat") as OptionButton
+	if selector == null:
+		selector = OptionButton.new()
+		selector.name = "CampaignPilotSeat"
+		selector.tooltip_text = "Pilotenposten: Jede reale Person kann ihn uebernehmen; vor Abflug wieder einsteigen."
+		host.add_child(selector)
+		selector.item_selected.connect(func(index: int): assign_campaign_pilot(String(card.get("craft_id", "")), String(selector.get_item_metadata(index))))
+	var assigned_id: String = String(card.get("pilot_unit_id", ""))
+	var candidates: Array = _get_campaign_sortie_units()
+	var signature: String = assigned_id + ":" + str(candidates.size())
+	if String(selector.get_meta("pilot_signature", "")) != signature:
+		selector.clear()
+		for unit in candidates:
+			if unit == null or not unit.has_method("get_unit_id"): continue
+			var id: String = String(unit.call("get_unit_id"))
+			selector.add_item("Pilot: " + String(unit.call("get_display_name")))
+			selector.set_item_metadata(selector.item_count - 1, id)
+			if id == assigned_id: selector.select(selector.item_count - 1)
+		selector.set_meta("pilot_signature", signature)
+	selector.disabled = not _is_parked_campaign_dropship(String(card.get("craft_id", "")))
+	selector.mouse_filter = Control.MOUSE_FILTER_STOP
+
+
+func request_campaign_crew_boarding(craft_id: String) -> Dictionary:
+	if not get_parent().has_meta("campaign_ground_pilot_id"): return {"ok": true}
+	var pilot_id: String = String(_find_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
+	var flight_guard: Dictionary = get_campaign_pilot_flight_guard(craft_id)
+	if String(flight_guard.get("reason", "")) == "pilot_unavailable": return flight_guard
+	var has_ground_crew := false
+	for unit in _get_campaign_sortie_units():
+		has_ground_crew = has_ground_crew or _deployed_unit_ids.has(String(unit.call("get_unit_id")))
+	if bool(flight_guard.get("ok", false)) and not has_ground_crew: return flight_guard
+	if not _is_parked_campaign_dropship(craft_id):
+		return {"ok": false, "reason": "craft_not_landed", "message": "Schiff muss zum Einsteigen gelandet sein"}
+	var ship_position: Vector2 = _drop_sequence_position if _is_active_drop_sequence_for_craft(craft_id) else _coerce_vector2_value(Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {})).get("position", Vector2.INF), Vector2.INF)
+	var crew: Array = []
+	for unit in _get_campaign_sortie_units():
+		if unit == null or not unit.has_method("get_unit_id"): continue
+		var id: String = String(unit.call("get_unit_id"))
+		if not _deployed_unit_ids.has(id): continue
+		if not unit is Node2D or int(unit.call("get_health")) <= 0:
+			return {"ok": false, "reason": "crew_unavailable", "message": "Bodenteam ist nicht boardingbereit"}
+		if (unit as Node2D).global_position.distance_to(ship_position) > 128.0:
+			return {"ok": false, "reason": "pilot_not_at_ship" if id == pilot_id else "crew_not_at_ship", "message": "Alle Bodenpersonen muessen zuerst zum Schiff zuruecklaufen"}
+		crew.append(unit)
+	if crew.is_empty(): return flight_guard
+	# Validate the whole group before any mutation. SimulationRoot commits presence.
+	for unit in crew:
+		var id: String = String(unit.call("get_unit_id"))
+		_enqueue_dropship_embark_effect(unit, id, ship_position)
+		_deployed_unit_ids.erase(id)
+		_deployed_unit_positions.erase(id)
+		_embarked_unit_ids[id] = true
+		if _is_active_drop_sequence_for_craft(craft_id):
+			_drop_sequence_embarked_unit_ids[id] = true
+	_mission_drop_passenger_count = _embarked_unit_ids.size()
+	_store_active_drop_sequence_card()
+	_store_selected_mission_dropship_plan()
+	_emit_planning_state_changed()
+	return {"ok": false, "reason": "pilot_boarding_pending", "message": "Team steigt ein; Pilot uebernimmt seinen Posten"}
+
+
 func _can_request_mission_dropship_return(card: Dictionary) -> bool:
 	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
 	if craft_id.is_empty():
@@ -13604,6 +13727,8 @@ func _should_keep_campaign_dropship_landed() -> bool:
 	var peer: MultiplayerPeer = multiplayer.multiplayer_peer if is_inside_tree() else null
 	if peer != null and not peer is OfflineMultiplayerPeer and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED:
 		return false
+	if get_parent().has_meta("campaign_ground_pilot_id"):
+		return true
 	var setup: Node = get_node_or_null("../MissionSetup")
 	if setup == null:
 		return false
@@ -13963,6 +14088,11 @@ func _on_mission_dropship_return_pressed(craft_id: String) -> void:
 
 func _apply_selected_mission_dropship_return(craft_id: String) -> bool:
 	var normalized_craft_id: String = craft_id.strip_edges()
+	var boarding: Dictionary = request_campaign_crew_boarding(normalized_craft_id)
+	if not bool(boarding.get("ok", false)):
+		_last_command_text = String(boarding.get("message", "Pilot fehlt"))
+		_set_mission_dropship_card_feedback(normalized_craft_id, _last_command_text)
+		return false
 	var selected_card: Dictionary = _find_mission_dropship_card_entry(normalized_craft_id)
 	if selected_card.is_empty() or not _can_request_mission_dropship_return(selected_card):
 		return false
@@ -34293,7 +34423,8 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 				_get_fireteam_units(fireteam_id, true),
 				_resolve_fireteam_leader_for_behavior(fireteam_id),
 				simulation_root,
-				_get_terrain_registry()
+				_get_terrain_registry(),
+				{"center_partial_formation": get_parent().has_meta("campaign_ground_pilot_id")}
 			)
 		)
 		_record_command_commit_timing_scope(timing, "movement_start_and_arguments_usec", scope_started_usec, true)

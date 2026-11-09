@@ -157,7 +157,8 @@ func start_execution(
 	units: Array,
 	leader,
 	simulation_root,
-	terrain_registry = null
+	terrain_registry = null,
+	execution_options: Dictionary = {}
 ) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty() or simulation_root == null:
@@ -192,6 +193,7 @@ func start_execution(
 	var formation_preset_key: String = _resolve_workbench_formation_preset_key(normalized_command_type, tactical_stance)
 	var formation_preset: Dictionary = _get_workbench_formation_preset(normalized_command_type, tactical_stance)
 	var state: Dictionary = {
+		"center_partial_formation": bool(execution_options.get("center_partial_formation", false)),
 		"fireteam_id": normalized_fireteam_id,
 		"execution_id": _next_execution_id(normalized_fireteam_id),
 		"phase": phase_index,
@@ -1559,6 +1561,13 @@ func _build_workbench_formation_targets(anchor_position: Vector2, member_records
 		var slot: Dictionary = Dictionary(slots_by_unit_id.get(slot_key, {}))
 		var offset: Vector2 = lateral * float(slot.get("lateral", 0.0)) + forward * float(slot.get("forward", 0.0))
 		targets[unit_id] = anchor_position + offset
+	# A campaign sortie may contain fewer real members than the authored
+	# four-slot formation. Its occupied slots must still surround the Use anchor.
+	if bool(state.get("center_partial_formation", false)) and targets.size() < slots_by_unit_id.size():
+		var center := Vector2.ZERO
+		for position in targets.values(): center += Vector2(position)
+		center /= float(targets.size())
+		for id in targets: targets[id] = Vector2(targets[id]) + anchor_position - center
 	return targets
 
 

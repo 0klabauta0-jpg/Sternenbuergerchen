@@ -16,11 +16,35 @@ Innenflaechen und Tueren. Zwei benachbarte Pads haben stabile IDs
 homebase_pad_01 und homebase_pad_02. Commanderstart, Innenraeume, Terminals,
 Pads und Servicepunkt sind zusammenhaengend erreichbar; Waende bleiben gesperrt.
 
+Fuer die beiden eingerichteten Basisgebaeude gibt es gesonderte statische,
+feinere Laufdaten bei unveraenderter physischer Kartenausdehnung. Das grobe
+Kartenraster darf keine schmalen Tueren oder Moebelgaenge verdeckt ersetzen.
+Unabhaengige Mesh-/Koerperabstandschecks pruefen die realen sichtbaren Modelle,
+zusaetzlich zur Simulationsbewegung. Im Runtime-Hotpath gibt es keine Meshsuche.
+
 Padbelegung bildet landing_pad_id auf tatsaechliche craft_id ab. Kein statischer
 Schiffsprop ersetzt eine reale Belegung. Terminalinteraktion setzt wirkliche
 Naehe voraus und oeffnet dieselben Operationsseiten wie die linke Navigation.
 Versteckte Erkundung deaktiviert nur ihren lokalen Branch und Viewport.
 Keine globale Pause, kein dauerhaft rendernder Zweitviewport bei anderer Seite.
+
+In der Kampagne besitzt ein SimulationRoot-gebundener Basisowner Positionen und
+laufende Basisaktionen der beiden echten Roster-IDs. Die Ansicht projiziert sie;
+Ansichtwechsel stoppen ihre angeforderten Wege nicht. Auswahl per Figur oder
+Personenliste umfasst auch Besatzung an Bord. Ein-/Aussteigen und Ausruestung
+verwenden denselben bestehenden Operations-/Transport-/Loadoutpfad wie das
+Menue. Pilotenplatzzuweisung und physische Anwesenheit sind getrennte Fakten.
+
+Ein entfernter Terminalklick kann einen Weg zum passenden Bedienpunkt
+anfordern. Erst nach bestaetigter Ankunft oeffnet die vorhandene Ansicht einmal.
+Beim blossen Vorbeigehen wird nur die Interaktionsmoeglichkeit angeboten.
+Originalmonitore/Arbeitstische werden genutzt; keine zusaetzlichen Standkonsolen
+ueberschneiden Waende oder Moebel.
+
+Schlafen reserviert ein freies Bett, fuehrt die Person zu dessen Zugang und
+legt sie erst nach Ankunft hin. Aufwecken und Abbrechen geben die Reservierung
+frei. Es gibt in dieser Fassung keine neue Heilungs-/Muedigkeitsbalance;
+medizinischer Recovery-State bleibt beim bisherigen Owner.
 
 ## Minimalhandel und Fuel
 
