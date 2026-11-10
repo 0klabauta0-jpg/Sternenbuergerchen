@@ -40,11 +40,24 @@ func _run()->void:
     var card_ids:Array=services.get("_cards").get_children().map(func(node:Node):return node.get_instance_id())
     for i in 8:services.refresh()
     check(services.get("_cards").get_children().map(func(node:Node):return node.get_instance_id())==card_ids,"unchanged snapshots preserve service cards")
+    if section=="ship":
+     check(not services.get("_buy").is_visible_in_tree() and not services.get("_sell").is_visible_in_tree(),"home tankservice contains no shop buy or sell actions")
+     for button:Button in services.get("_tool_buttons").values():check(not button.is_visible_in_tree(),"home tankservice hides tool purchases")
+     check(services.get("_refuel").size.x<services.get("_ship_panel").size.x*.8,"refuel uses a compact action button")
+     var display:Dictionary=services.get("_snapshot").duplicate(true)
+     display.service_contexts_by_craft_id[String(services.get("_selected_craft_id"))]={"location_id":"trade_outpost","craft_busy":false}
+     services.refresh(display)
+     check(services.get("_buy").is_visible_in_tree(),"trade-post projection retains the existing purchase controls")
+     services.refresh()
    if section=="jobs":
     var board:Node=presenter.get("_job_board")
     check(board.get("_job_cards").get_child_count()==1,"Smart Mobile initially shows only the unlocked satellite mission")
     check(board.get("_details").get_global_rect().size.x>=250,"selected mission retains readable detail column")
     check(root.get_visible_rect().encloses(board.get("_accept").get_global_rect()),"first mission acceptance is visible without scrolling")
+    check(String(board.get("_details").text).contains("Glut (Planet)") and String(board.get("_objectives").text).contains("Absturzstelle finden"),"body destination and actual objective are distinct in briefing")
+   if section=="inventory":
+    check(presenter.get("_focused_portrait").is_visible_in_tree(),"original portrait is restored beside inventory character name")
+    check(drawer.size.x>=800,"equipment drawer is wider for the enlarged figure and slots")
    if DisplayServer.get_name()!="headless":
     await RenderingServer.frame_post_draw
     DirAccess.make_dir_recursive_absolute("C:/dev/SternenBuergerchen/output/base_management_visuals_20261110")

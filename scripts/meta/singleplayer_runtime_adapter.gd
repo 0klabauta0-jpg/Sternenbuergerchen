@@ -398,6 +398,7 @@ func is_campaign_mission() -> bool:
 	return _campaign_mode or _space_route_requested or String(_flow.get("_selected_mission_id")) in ["satellite_recovery", "trade_outpost_visit"]
 
 func record_mission_result(result: Dictionary, authoritative_mission_identity: Dictionary = {}) -> void:
+	_recover_secured_campaign_chips()
 	var selected: Dictionary = _campaign.get_campaign_snapshot()
 	var craft_id: String = String(authoritative_mission_identity.get("craft_id", ""))
 	var binding: Dictionary = Dictionary(selected.departures_by_craft_id.get(craft_id, {}))
@@ -415,8 +416,12 @@ func record_mission_result(result: Dictionary, authoritative_mission_identity: D
 		for step in Array(job.required_step_ids):
 			if not Array(gates.get("completed_step_ids",[])).has(step): return
 		if bool(job.get("home_upload",false)):
-			var granted := _campaign_cargo(craft_id,"satellite_chip" if job_id == "satellite_recovery" else "outpost_chip",1,"chip:"+job_id)
-			if not bool(granted.get("ok",false)): return
+			var item_id:String="satellite_chip" if job_id=="satellite_recovery" else "outpost_chip"
+			# Existing saves/result integrations may still recover directly into cargo.
+			# A chip already picked up by the real leader must never be granted twice.
+			if _find_campaign_chip_container(item_id,craft_id).is_empty():
+				var granted := _campaign_cargo(craft_id,item_id,1,"chip:"+job_id)
+				if not bool(granted.get("ok",false)): return
 		if job_id == "outpost_recovery":
 			var granted := _campaign_cargo(craft_id,"c_benit_crate",1,"load:"+job_id)
 			if not bool(granted.get("ok",false)): return
@@ -452,6 +457,7 @@ func _observe(evidence: Dictionary) -> void:
 func observe_campaign_progress() -> void:
 	if not _campaign_mode:
 		return
+	_recover_secured_campaign_chips()
 	var campaign: Dictionary = _campaign.get_campaign_snapshot()
 	var at_home := _flow.get("_active_mission") == null and not _has_active_transit()
 	for location in Dictionary(_flow.get("_aircraft_location_by_craft")).values():
@@ -698,6 +704,39 @@ func _finish_space_encounter_result() -> void:
 func _campaign_cargo(craft_id: String, item_id: String, amount: int, receipt_id: String) -> Dictionary:
 	return _commit("singleplayer_supply","campaign_cargo",{"container_id":"craft:"+craft_id,"item_id":item_id,"amount":amount},"campaign-cargo:"+receipt_id,{"campaign_authorized":true})
 
+func _find_campaign_chip_container(item_id:String,craft_id:String)->String:
+	var inventory:Dictionary=_supply.get_supply_snapshot().get("inventory",{})
+	var preferred:String="craft:"+craft_id
+	if int(Dictionary(Dictionary(inventory.get(preferred,{})).get("items",{})).get(item_id,0))>0:return preferred
+	for id:String in inventory:
+		if int(Dictionary(inventory[id].get("items",{})).get(item_id,0))>0:return id
+	return ""
+
+func _recover_secured_campaign_chips()->void:
+	if not _campaign_mode:return
+	var campaign:Dictionary=_campaign.get_campaign_snapshot()
+	for spec:Array in [["satellite_recovery","satellite_data","secure_satellite","satellite_chip"],["outpost_chip_recovery","outpost_chip","secure_outpost_chip","outpost_chip"]]:
+		var job:Dictionary=campaign.jobs.get(spec[0],{})
+		if String(job.get("status",""))!="active":continue
+		var craft_id:String=String(job.get("craft_id",""))
+		if craft_id.is_empty() or not _find_campaign_chip_container(spec[3],craft_id).is_empty():continue
+		var binding:Dictionary=campaign.departures_by_craft_id.get(craft_id,{})
+		if String(binding.get("job_id",""))!=String(spec[0]):continue
+		var mission:Node=_flow.call("get_mission_for_craft",craft_id)
+		var driver:Node=mission.get_node_or_null("CombatLoopDriver") if mission!=null else null
+		var controller:Node=mission.get_node_or_null("TacticalController") if mission!=null else null
+		if driver==null or controller==null:continue
+		var gates:Dictionary=driver.call("get_mission_scenario_runtime_gate_snapshot")
+		if not Array(gates.get("completed_step_ids",[])).has(spec[2]):continue
+		var state:Dictionary=Dictionary(driver.call("get_mission_interaction_runtime_states")).get(spec[1],{})
+		if not bool(state.get("complete",false)) or String(state.get("step_id",""))!=String(spec[2]):continue
+		var lead:Node=controller.call("get_current_fireteam_lead_unit",String(state.get("fireteam_id","")))
+		if lead==null or not lead.has_method("get_unit_id"):continue
+		var container:String="unit:"+String(lead.call("get_unit_id"))+":backpack"
+		var token:String=String(_departure_token_by_craft.get(craft_id,""))
+		if token.is_empty():continue
+		_commit("singleplayer_supply","campaign_cargo",{"container_id":container,"item_id":String(spec[3]),"amount":1},"chip-pickup:"+token+":"+String(spec[0]),{"campaign_authorized":true})
+
 func _all_at_home() -> bool:
 	if not _travel.all_grounded() or _has_active_transit(): return false
 	for value in Dictionary(_flow.get("_aircraft_location_by_craft")).values():
@@ -724,7 +763,9 @@ func _request_campaign_action(operation: String, payload: Dictionary, request_id
 		if String(job.get("status","")) != "pending_upload": return _reject("no_chip","Kein geborgener Chip zum Hochladen")
 		craft_id = String(job.get("craft_id",craft_id))
 		var item_id := "satellite_chip" if job_id == "satellite_recovery" else "outpost_chip"
-		var cargo := _campaign_cargo(craft_id,item_id,-1,"upload:"+job_id)
+		var container:String=_find_campaign_chip_container(item_id,craft_id)
+		if container.is_empty():return _reject("missing_cargo","Geborgener Datenträger fehlt in Rucksack, Schiff oder Basislager")
+		var cargo := _commit("singleplayer_supply","campaign_cargo",{"container_id":container,"item_id":item_id,"amount":-1},"campaign-cargo:upload:"+job_id,{"campaign_authorized":true})
 		if not bool(cargo.get("ok",false)): return cargo
 		var result := _commit("singleplayer_campaign","upload_job",{"job_id":job_id},"upload:"+job_id,{"at_home":true})
 		if bool(result.get("ok",false)):

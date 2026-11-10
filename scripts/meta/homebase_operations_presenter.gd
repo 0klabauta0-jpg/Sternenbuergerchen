@@ -1143,14 +1143,14 @@ func is_workspace_flyout_open()->bool:
 func _layout_workspace_flyout()->void:
 	if _flyout_scrim==null:return
 	_flyout_scrim.visible=_right_flyout_active;_flyout_close.visible=_right_flyout_active
-	_focused_portrait.visible=not (_right_flyout_active and _flyout_kind=="inventory")
+	_focused_portrait.visible=true
 	for node:Control in [_services_view,_job_board,_columns.equipment]:node.z_index=0
 	if not _right_flyout_active:
 		for node:Control in [_services_view,_job_board]:node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		return
 	var panel:=_workspace_flyout_panel()
 	var width:float=minf(_workspace.size.x,clampf(_workspace.size.x*.72,720,1040))
-	if _flyout_kind=="inventory":width=minf(_workspace.size.x,560)
+	if _flyout_kind=="inventory":width=minf(_workspace.size.x,840)
 	for column:Control in _columns.values():column.visible=column==panel
 	_reference_stage.hide()
 	panel.z_index=2;panel.set_anchors_preset(Control.PRESET_TOP_LEFT);panel.size=Vector2(width,_workspace.size.y)

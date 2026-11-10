@@ -9,7 +9,7 @@ var _signature:String=""
 
 func _ready()->void:
 	name="PersonnelBodyPreview"
-	custom_minimum_size=Vector2(90,150)
+	custom_minimum_size=Vector2(180,300)
 	stretch=true
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
 	_view=SubViewport.new();_view.size=Vector2i(320,480);_view.own_world_3d=true;_view.transparent_bg=true

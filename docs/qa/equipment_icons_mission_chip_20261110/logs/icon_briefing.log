@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+PASS: menu item uses illustrated atlas: armor_light
+PASS: item stays within its own square cell: armor_light
+PASS: menu item uses illustrated atlas: rifle
+PASS: item stays within its own square cell: rifle
+PASS: menu item uses illustrated atlas: pistol
+PASS: item stays within its own square cell: pistol
+PASS: menu item uses illustrated atlas: medictool
+PASS: item stays within its own square cell: medictool
+PASS: menu item uses illustrated atlas: mining_tool
+PASS: item stays within its own square cell: mining_tool
+PASS: menu item uses illustrated atlas: satellite_chip
+PASS: item stays within its own square cell: satellite_chip
+PASS: menu item uses illustrated atlas: outpost_chip
+PASS: item stays within its own square cell: outpost_chip
+PASS: rifle and pistol have distinct illustrations
+PASS: yellow mining tool has its own illustration
+PASS: unchanged item reuses cached texture identity
+PASS: briefing resolves actual star-system body
+PASS: finding location and recovering data are separate objectives
+MENU_ICONS_BRIEFING checks=19 failures=0
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors

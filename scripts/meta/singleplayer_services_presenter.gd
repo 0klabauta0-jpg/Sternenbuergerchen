@@ -4,6 +4,7 @@ extends PanelContainer
 const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
 const SKIN=preload("res://scripts/ui/base_management_skin.gd")
+const MENU_ICONS=preload("res://scripts/ui/menu_equipment_icons.gd")
 const OFFER_ID := "medictool_supply"
 const DEBOUNCE_SECONDS := 0.35
 
@@ -144,6 +145,8 @@ func _build() -> void:
 		var path:String=String(paths.get(blueprint,"res://Assets/curated/ui/campaign_inventory/chip.svg"))
 		if String(action[0])=="campaign_build_pad":path="res://Assets/kenney_space-kit/Isometric/platform_center_SE.png"
 		if ResourceLoader.exists(path):icon.texture=load(path)
+		var menu_item:String={"light_armor":"armor_light","mining_tool":"mining_tool","assault_rifle":"rifle"}.get(blueprint,"satellite_chip")
+		if String(action[0])!="campaign_build_pad":icon.texture=MENU_ICONS.get_icon(menu_item)
 		var state:=_label("",15);state.custom_minimum_size.y=42;body.add_child(state)
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(button);SKIN.button(button,true)
 		if String(action[0])=="campaign_fabricate":button.text="Herstellen"
@@ -282,11 +285,16 @@ func _apply_section() -> void:
 	_ship_panel.visible=ship
 	_eyebrow.text={"all":"SC-06  /  VERSORGUNG","ship":"SC-06  /  TRANSPORT","build":"BAU-02  /  INFRASTRUKTUR","workshop":"WB-03  /  FERTIGUNG","data":"DT-05  /  INFORMATION"}.get(_section,"")
 	_heading.text = {"all":"Versorgung", "build":"Basis · Bauen", "workshop":"Werkstatt · Blueprints", "data":"Datenterminal · Hochladen", "ship":"Schiff · Versorgung"}.get(_section,"Versorgung")
-	_section_note.text = {"all":"", "build":"Vorhandener Ausbau: zweites Landepad. Weitere Gebäude sind noch nicht freigeschaltet.", "workshop":"Blueprint auswählen und herstellen. Fertige Waffen und Rüstung liegen anschließend im Basislager.", "data":"Geborgene Missionsdaten nach der Landung hier hochladen. Erst dadurch wird der Auftrag abgeschlossen.", "ship":"Pilot, Besatzung und Ausrüstung über Flugdeck / Trupp verwalten. Austauschbare Schiffskomponenten sind als Ausbau geplant."}.get(_section, "")
+	_section_note.text = {"all":"", "build":"Vorhandener Ausbau: zweites Landepad. Weitere Gebäude sind noch nicht freigeschaltet.", "workshop":"Blueprint auswählen und herstellen. Fertige Waffen und Rüstung liegen anschließend im Basislager.", "data":"Geborgene Missionsdaten nach der Landung hier hochladen. Erst dadurch wird der Auftrag abgeschlossen.", "ship":"Schiff auswählen und Treibstoff ergänzen. Besatzung und Fracht im Flugdeck verwalten."}.get(_section, "")
 	_section_note.visible = not _section_note.text.is_empty()
 	for control in [_craft_selector,_fuel,_buy,_sell,_amount.get_parent(),_refuel,_return]+_tool_buttons.values():
 		control.visible = ship
-	_items.visible = ship or _section == "workshop"
+	var trade_context:Dictionary=Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
+	var trading:bool=String(trade_context.get("location_id","")) in ["trade_outpost","satellite_crash"]
+	for control in [_buy,_sell]+_tool_buttons.values():control.visible=ship and trading
+	_items.visible = ship and trading
+	_refuel.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	_refuel.custom_minimum_size.x=180
 	_return.visible = false
 	if ship:
 		for craft:Dictionary in _snapshot.get("crafts",[]):
@@ -315,7 +323,7 @@ func _apply_section() -> void:
 			for id:String in ["satellite_recovery","outpost_chip_recovery"]:
 				var job:Dictionary=jobs.get(id,{})
 				if String(job.get("status",""))=="failed":
-					_section_note.text="Auftrag fehlgeschlagen: %s. Kein Chip zum Hochladen vorhanden. Im Smart Mobile den Auftrag erneut annehmen und die Daten am Einsatzort bergen; anschließend zum Schiff zurückbringen und heimkehren."%String(job.get("title",id))
+					_section_note.text="Auftrag fehlgeschlagen: %s. Kein freigegebener Upload vorhanden. Im Smart Mobile den Auftrag erneut annehmen und die Daten am Einsatzort bergen; anschließend zum Schiff zurückbringen und heimkehren."%String(job.get("title",id))
 					break
 				if String(job.get("status",""))=="completed":
 					_section_note.text="%s: Daten bereits hochgeladen und Belohnung erhalten. Keine weiteren Missionsdaten zum Hochladen vorhanden."%String(job.get("title",id))

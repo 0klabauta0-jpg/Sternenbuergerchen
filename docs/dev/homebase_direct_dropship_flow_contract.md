@@ -97,8 +97,9 @@ nachfolgenden bisherigen Send-Vertrag.
   Öffnen animiert nur die UI-Position/Deckkraft, keine Simulation oder Ladung.
 - Tankservice ist Unterpunkt des Flugdecks, kein zweiter Schiff-Eintrag in der
   Basisverwaltung. Derselbe vorhandene Serviceowner bleibt zuständig.
-- Kleine Figur in bestehender Idle-Pose mit Porträt daneben. Rüstung/Primär/
-  Sekundär liegen seitlich, ohne die Figur zu überdecken. Bestand bleibt frei
+- Ursprüngliches Porträt neben dem Namen erhalten. Größere Figur in bestehender
+  Idle-Pose: 180×300 im breiten Ausrüstungsfenster, responsive kleiner in engen
+  Spalten. Rüstung/Primär/Sekundär liegen seitlich, ohne die Figur zu überdecken. Bestand bleibt frei
   und wird nicht erneut um bereits getragene Gegenstände verringert.
 - Smart Mobile projiziert die vorhandenen autoritativen `locked`-Flags. Verborgene
   spätere Missionen bleiben auch gegen direkte Commands gesperrt. Anfangs nur
@@ -106,3 +107,20 @@ nachfolgenden bisherigen Send-Vertrag.
 - Unveränderliche Auftraggeber-Inhaltsidentität kommt aus job_issuers.json über
   den Jobcontract. Satellitendaten: Fragwürdige Geschäftsleute. Kein Rufstand in
   UI/Saves hinzugefügt; Rufskala und Wirkung bleiben als Zukunftsplanung offen.
+
+## Satellitendatenträger und Menü-Illustrationen — 10.11.2026
+- Bestätigtes Sichern erzeugt genau einen bekannten Questgegenstand im Rucksack
+  des tatsächlichen aktuellen Truppführers. Trusted Adapter liest dafür die
+  bestätigten Runtime-Gates und Use-Zustände, nicht UI-Text oder Clientpayloads.
+  Der existierende SimulationRoot/SupplyOwner verarbeitet den Item-Command.
+- Der Abschluss-/Rücktransportpfad erzeugt keinen zweiten Chip, wenn der
+  geborgene Gegenstand bereits vorhanden ist. Bestehende Schiffsfracht bleibt
+  als Legacy-Pfad unterstützt. Upload zuhause verbraucht genau den vorhandenen
+  Gegenstand aus Rucksack, Fracht oder Basislager, ohne neue Items zu erfinden.
+- Charakterdetails auf der Map lesen den vorhandenen Rucksackbestand und zeigen
+  den Datenträger als Item mit Icon; sie besitzen keine zweite Inventarwahrheit.
+- Menüicons kommen aus einem eigenen illustrierten Atlas. Weltmodelle,
+  Waffenwerte und Kartenvisuals werden dadurch nicht ersetzt. Langwaffe,
+  Pistole, Sanitätsgerät, gelbes Hand-Mining-Tool und Datenträger bleiben erkennbar.
+- Heimat-Tankservice zeigt keine Handelskäufe oder Verkäufe. Vorhandene
+  Handelsfunktionen bleiben am tatsächlichen Handelsposten verfügbar.

@@ -29,9 +29,9 @@ func _run()->void:
  check(popup.is_visible_in_tree(),"actual NPC details opened")
  check(String(preview.get_meta("preview_unit_id",""))=="campaign_leader","full-body preview uses actual selected actor")
  check(bool(preview.get_meta("preview_uses_existing_model",false)),"full-body preview uses existing map character model")
- check(preview.size.y<=150,"body preview is half the previous height")
+ check(preview.size.y>=240 and preview.size.y<=300,"body preview is enlarged to 240-300px with responsive sizing")
  check(bool(preview.get_meta("preview_idle_pose",false)),"preview freezes existing idle pose rather than showing the bind pose")
- check(panel.get("_face_preview").texture!=null,"actual identity portrait appears beside the small body")
+ check(popup.find_child("PortraitRect",true,false).texture!=null,"original identity portrait is retained beside the name")
  for key:String in ["armor","weapon_1","weapon_2"]:
   check(not preview.get_global_rect().intersects(panel.get("_slots").get_node("InventorySlot_"+key).get_global_rect()),"equipment slot does not cover the figure: "+key)
  var before:Dictionary=screen.get_personnel_inventory_view("campaign_leader").inventory.duplicate(true)

@@ -1,0 +1,92 @@
+{
+  "atlas_grid": [
+    3,
+    2
+  ],
+  "files": [
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/details_1280.png",
+      "sha256": "66dafbcbfe138926515562709efcdf3abf74b6bc34dcc49e46e2eaf82751bdcb"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/details_1920.png",
+      "sha256": "3cd17ab48d27a714605d2665d28ce612bf7f98ce3fd0aa02b4ae5e06c41a0e5c"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/details_3440.png",
+      "sha256": "1242961b93de30a124f42df41e7d51d01664a8dcb9ce5e1105d2a443b0e1ac3a"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/inventory_1280.png",
+      "sha256": "50388e673ecfe794211e5feb8b488ff492a84a61ef65c8e7b21bd96c7a91d8db"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/inventory_1920.png",
+      "sha256": "055d83733f8268e673c28a1c2514301c6b317d05b7a8755da19f494af3e31502"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/jobs_1280.png",
+      "sha256": "a7b037a6d1abc05767d0328efb1a0456e5030e065491ef869205cc1f93049f01"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/jobs_1920.png",
+      "sha256": "43638326ba02958eabbfea877e1452d3c364ff6d4899ed334f9c30129443f21d"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/satellite_carried_on_map.png",
+      "sha256": "61b70760e4d87bb2846a9b7bf0d058352310767c8fe73919b2c887d906abe549"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/ship_1280.png",
+      "sha256": "3b55377c73d8d1dc2f7d2f2fbc862645884e139e7a01cc75d75720579d721e31"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/ship_1920.png",
+      "sha256": "c5b01e6252d4cd949d8e375058220ac38441446f108f17a187c542a73ca124c4"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/workshop_1280.png",
+      "sha256": "5de711f9337411fae14a96ad2b985fddbffbbed6c09c7aa01f60c656eaceb24b"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/images/workshop_1920.png",
+      "sha256": "0a64a0d017df01d071a294e7ad4370d58b014967a564b115decf4b102922902a"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/reference/input_medical_tool.png",
+      "sha256": "f97587870de1439818679ebb0bc6a4efbf62cbfba3cdf121cc931618ed37d886"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/reference/input_pistol.png",
+      "sha256": "fd7ff3e8bf484e212dabc9cb4da4e4363acfb15aa4ed00cc59ecc5b2c4836a73"
+    },
+    {
+      "path": "docs/qa/equipment_icons_mission_chip_20261110/reference/input_rifle.png",
+      "sha256": "d2b0d05d45ee5c4717b958f214233f9c07eecc087a34c5f4f0968e379f1e45e0"
+    },
+    {
+      "path": "Assets/curated/ui/menu_equipment_20261110/icons_01.png",
+      "sha256": "610c67f66d3e6b4094f7669cff4245a52e38eabe9664be3dfe0f1c5bde7ccd67"
+    },
+    {
+      "status": "existing reference model, unchanged",
+      "sha256": "266ffd12306a2afc2638e9a479687adf738fc3cd9e938ce8e3195ccb312a6b31",
+      "path": "Assets/kenney_space-kit/Models/GLTF format/weapon_rifle.glb"
+    },
+    {
+      "status": "existing reference model, unchanged",
+      "sha256": "f8e0edea00355789f9fac087e40c7a710468cf6a6c1c22a86426d44883f438b5",
+      "path": "Assets/kenney_space-kit/Models/GLTF format/weapon_gun.glb"
+    },
+    {
+      "status": "existing reference model, unchanged",
+      "sha256": "7df4457ed864bc0714fc33059ac56d198304092093b1e78dc407b6c829945a4f",
+      "path": "Assets/used/npc/blaster_kit/models/blaster-b.glb"
+    }
+  ],
+  "cell_size": [
+    512,
+    512
+  ],
+  "tool": "image_gen.imagegen"
+}

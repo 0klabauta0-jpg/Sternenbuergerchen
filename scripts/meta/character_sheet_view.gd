@@ -138,6 +138,7 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	compact_options["compact_sheet"] = true
 	compact_options["show_badge_progress"] = false
 	_add_compact_identity_overview(sheet, model, profile, compact_options)
+	_add_carried_inventory(sheet,options)
 	_add_post_mission_award_alert(sheet, model, profile, options)
 	var suitability: Array = Array(model.get("suitability_rows", []))
 	var overview:=HBoxContainer.new();overview.add_theme_constant_override("separation",10);sheet.add_child(overview)
@@ -205,6 +206,17 @@ static func _add_derivation_tree(host:VBoxContainer,model:Dictionary,profile,opt
 	_overview_label(specialty,"SpecialtyInputs","└  Rollenrahmen + Einsatzeignung + Arbeitsweise",15,true)
 	var rows:Array=Array(model.get("derived_rows",[]))
 	if rows.size()>2:_add_value_rows(specialty,rows.slice(2),profile,options,"ABGELEITET:")
+
+static func _add_carried_inventory(host:VBoxContainer,options:Dictionary)->void:
+	var items:Dictionary=options.get("carried_items",{})
+	if items.is_empty():return
+	var section:=_overview_section(host,"RUCKSACK · MITGEFÜHRTE GEGENSTÄNDE","CarriedInventory")
+	for item:String in items:
+		var row:=HBoxContainer.new();section.add_child(row)
+		var icon:=TextureRect.new();icon.name="CarriedInventoryItem_"+item;icon.custom_minimum_size=Vector2(72,72);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.texture=load("res://scripts/ui/menu_equipment_icons.gd").get_icon(item);row.add_child(icon)
+		var labels:Dictionary={"satellite_chip":"Satellitendatenträger","outpost_chip":"Außenposten-Datenträger","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit"}
+		_overview_label(row,"CarriedInventoryLabel_"+item,"%s × %d"%[String(labels.get(item,item)),int(items[item])],16)
 
 
 static func _apply_compact_readability(node: Node) -> void:

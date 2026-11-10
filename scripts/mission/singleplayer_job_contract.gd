@@ -1,6 +1,18 @@
 extends RefCounted
 ## Pure definition normalization; status is held only in CampaignState.
 static var _issuer_catalog:Dictionary={}
+static var _briefings:Dictionary={}
+static var _bodies:Dictionary={}
+
+static func get_briefing(job_id:String)->Dictionary:
+	if _briefings.is_empty():
+		var raw:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/job_briefings.json"))
+		if typeof(raw)==TYPE_DICTIONARY:_briefings=raw
+		var system:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/star_system.json"))
+		if typeof(system)==TYPE_DICTIONARY:_bodies=system.get("bodies",{})
+	var result:Dictionary=Dictionary(_briefings.get(job_id,{})).duplicate(true)
+	result["body_name"]=String(Dictionary(_bodies.get(String(result.get("body_id","")),{})).get("name",""))
+	return result
 
 static func get_issuer_for_job(job_id:String)->Dictionary:
 	if _issuer_catalog.is_empty():

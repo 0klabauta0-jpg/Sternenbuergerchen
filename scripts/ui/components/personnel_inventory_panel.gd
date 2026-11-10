@@ -4,6 +4,7 @@ signal operation_requested(operation: String, payload: Dictionary)
 const SURFACE = preload("res://scripts/meta/operations_drag_surface.gd")
 const ITEMS = preload("res://scripts/mission/inventory_transfer_contract.gd")
 const SKIN=preload("res://scripts/ui/base_management_skin.gd")
+const MENU_ICONS=preload("res://scripts/ui/menu_equipment_icons.gd")
 const LABELS := {"armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","none":"Leer"}
 var _rest: CheckButton
 var _signature := ""
@@ -13,7 +14,6 @@ var _selection: Dictionary = {}
 var _slots: Control
 var _body_preview:Control
 var _body_frame:Panel
-var _face_preview:TextureRect
 var _containers: HFlowContainer
 var _selected: Label
 var _amount: SpinBox
@@ -29,10 +29,9 @@ func _ready() -> void:
 	_rest=CheckButton.new(); _rest.name="AutomaticRest"; _rest.text="Automatisch ruhen"; add_child(_rest)
 	_rest.tooltip_text="Bei Leerlauf an der Basis ein Bett aufsuchen. Ausschalten, um die Person stehen zu lassen."
 	_rest.toggled.connect(func(enabled:bool): operation_requested.emit("base_auto_rest",{"unit_id":_unit_id,"enabled":enabled}))
-	_slots=Control.new();_slots.name="EquipmentBody";_slots.custom_minimum_size=Vector2(340,180);add_child(_slots)
+	_slots=Control.new();_slots.name="EquipmentBody";_slots.custom_minimum_size=Vector2(360,320);add_child(_slots)
 	_body_frame=Panel.new();_body_frame.mouse_filter=Control.MOUSE_FILTER_IGNORE;SKIN.panel(_body_frame,true);_slots.add_child(_body_frame)
 	_body_preview=preload("res://scripts/ui/components/personnel_body_preview.gd").new();_slots.add_child(_body_preview)
-	_face_preview=TextureRect.new();_face_preview.name="EquipmentIdentityPortrait";_face_preview.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;_face_preview.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;_face_preview.mouse_filter=Control.MOUSE_FILTER_IGNORE;_slots.add_child(_face_preview)
 	_slots.resized.connect(_layout_body_slots)
 	_containers=HFlowContainer.new(); add_child(_containers)
 	_containers.add_theme_constant_override("h_separation",12)
@@ -66,13 +65,12 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 	if signature==_signature: return
 	_signature=signature
 	for child in _slots.get_children():
-		if child!=_body_preview and child!=_body_frame and child!=_face_preview:
+		if child!=_body_preview and child!=_body_frame:
 			_slots.remove_child(child);child.queue_free()
 	for child in _containers.get_children():
 		_containers.remove_child(child);child.queue_free()
 	_target.clear(); _bodies.clear()
 	var loadout: Dictionary=unit.get("loadout",{})
-	_face_preview.texture=load("res://scripts/meta/portrait_identity_catalog.gd").load_texture(String(unit.get("portrait_id","")),String(unit.get("portrait_path","")))
 	_body_preview.call("update_actor",actor,loadout)
 	for spec in [["armor","Rüstung"],["weapon_1","Primär"],["weapon_2","Sekundär"]]:
 		var key: String=spec[0]
@@ -81,9 +79,8 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		slot.add_theme_stylebox_override("panel",SKIN.box(SKIN.CARD,4))
 		slot.accepted_type="inventory_item"; slot.custom_minimum_size=Vector2(130,66); _slots.add_child(slot)
 		var slot_body:=HBoxContainer.new(); slot_body.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot.add_child(slot_body)
-		var icon:=TextureRect.new(); icon.texture=_item_icon(item); icon.custom_minimum_size=Vector2(32,42); icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; icon.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(icon)
-		var item_label:String=String({"armor_light":"Leicht","armor_medium":"Mittel","armor_heavy":"Schwer"}.get(item,LABELS.get(item,item))) if key=="armor" else String(LABELS.get(item,item))
-		var label:=Label.new(); label.text=spec[1]+"\n"+item_label;label.custom_minimum_size.x=100;label.add_theme_font_size_override("font_size",14);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(label)
+		var icon:=TextureRect.new(); icon.texture=_item_icon(item); icon.custom_minimum_size=Vector2(72,72); icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; icon.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(icon)
+		var label:=Label.new(); label.text=spec[1]+"\n"+String(LABELS.get(item,item));label.custom_minimum_size.x=130;label.add_theme_font_size_override("font_size",16);label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(label)
 		slot.payload_dropped.connect(func(data:Dictionary): _wear(data,key))
 	_layout_body_slots()
 	for spec in [["base:homebase","Basislager"],["craft:"+craft_id,"Schiffsfracht"],["unit:"+_unit_id+":backpack","Rucksack"]]:
@@ -114,15 +111,21 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 
 func _layout_body_slots()->void:
 	if _body_preview==null:return
-	var width:float=maxf(_slots.size.x,340)
-	_body_frame.size=Vector2(width,180)
-	_face_preview.position=Vector2(12,48);_face_preview.size=Vector2(64,64)
-	_body_preview.position=Vector2(78,14);_body_preview.size=Vector2(90,150)
+	var width:float=maxf(_slots.size.x,360)
+	var wide:bool=width>=520
+	_body_frame.size=Vector2(width,320)
+	var body_size:=Vector2(180,300) if wide else Vector2(130,240)
+	_body_preview.custom_minimum_size=body_size;_body_preview.position=Vector2(32,10);_body_preview.size=body_size
 	for key:String in ["armor","weapon_1","weapon_2"]:
 		var slot:=_slots.get_node_or_null("InventorySlot_"+key) as Control
 		if slot==null:continue
-		slot.custom_minimum_size=Vector2(160,50);slot.size=Vector2(160,50)
-		slot.position=Vector2(maxf(width-slot.size.x-8,172),8+54*["armor","weapon_1","weapon_2"].find(key))
+		var slot_width:float=248 if wide else maxf(width-194,160)
+		slot.custom_minimum_size=Vector2(slot_width,88);slot.size=Vector2(slot_width,88)
+		slot.position=Vector2(248 if wide else 182,16+96*["armor","weapon_1","weapon_2"].find(key))
+		var icon:TextureRect=slot.get_child(0).get_child(0)
+		icon.custom_minimum_size=Vector2(72,72) if wide else Vector2(48,48)
+		var label:Label=slot.get_child(0).get_child(1)
+		label.custom_minimum_size.x=130 if wide else 100;label.add_theme_font_size_override("font_size",16 if wide else 14)
 
 func update_rest_snapshot(person: Dictionary) -> void:
 	_rest.visible=not person.is_empty()
@@ -135,6 +138,8 @@ func _wear(data: Dictionary, slot: String) -> void:
 
 
 func _item_icon(item: String) -> Texture2D:
+	var illustrated:=MENU_ICONS.get_icon(item)
+	if illustrated!=null:return illustrated
 	if item in ["armor_light","armor_medium","armor_heavy"]: return load("res://Assets/curated/ui/campaign_inventory/"+item+".svg")
 	if item.ends_with("_benit"): return load("res://Assets/curated/ui/campaign_inventory/benit.svg")
 	if item.ends_with("_chip") or item.ends_with("_crate"): return load("res://Assets/curated/ui/campaign_inventory/chip.svg")

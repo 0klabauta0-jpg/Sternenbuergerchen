@@ -2,6 +2,7 @@ extends PanelContainer
 ## Cached presentation over the real Operations command bridge.
 const SKIN=preload("res://scripts/ui/base_management_skin.gd")
 const JOBS=preload("res://scripts/mission/singleplayer_job_contract.gd")
+const MENU_ICONS=preload("res://scripts/ui/menu_equipment_icons.gd")
 
 var _screen: WeakRef
 var _content: VBoxContainer
@@ -18,6 +19,7 @@ var _job_cards:VBoxContainer
 var _body:GridContainer
 var _card_buttons:Dictionary={}
 var _visible_job_ids:PackedStringArray=PackedStringArray()
+var _objectives:Label
 
 func configure(screen: Control) -> void:
 	_screen = weakref(screen)
@@ -54,6 +56,7 @@ func configure(screen: Control) -> void:
 	_jobs.fit_to_longest_item = false
 	selector_column.add_child(_jobs)
 	_job_cards=VBoxContainer.new();_job_cards.add_theme_constant_override("separation",8);selector_column.add_child(_job_cards)
+	_objectives=Label.new();SKIN.label(_objectives,16);selector_column.add_child(_objectives)
 	_jobs.item_selected.connect(func(index: int): _job_id = String(_jobs.get_item_metadata(index)); refresh())
 	_details = Label.new()
 	_details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -129,7 +132,7 @@ func refresh() -> void:
 			_jobs.add_item(String(jobs[id].title))
 			_jobs.set_item_metadata(_jobs.item_count - 1, id)
 			var card:=Button.new();card.text=String(jobs[id].title);card.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;card.custom_minimum_size=Vector2(230,66);SKIN.button(card);_job_cards.add_child(card)
-			card.alignment=HORIZONTAL_ALIGNMENT_LEFT;card.icon=load("res://Assets/curated/ui/campaign_inventory/chip.svg");card.expand_icon=true;card.add_theme_constant_override("icon_max_width",28)
+			card.alignment=HORIZONTAL_ALIGNMENT_LEFT;card.icon=MENU_ICONS.get_icon("satellite_chip");card.expand_icon=true;card.add_theme_constant_override("icon_max_width",48)
 			var target_id:String=String(id)
 			card.pressed.connect(func():_job_id=target_id;refresh())
 			_card_buttons[target_id]=card
@@ -148,6 +151,14 @@ func refresh() -> void:
 	_details.text = "Zielort: %s\nStatus: %s\nBelohnung: %d Kredite\n\n%s" % [String(location.get("name", "—")), "Vorherigen Auftrag abschließen" if bool(job.get("locked",false)) else String(labels.get(status, status)), int(Dictionary(job.get("reward", {})).get("credits", 0)),String(job.get("description","Annahme startet keinen Flug."))]
 	var issuer:Dictionary=JOBS.get_issuer_for_job(_job_id)
 	if not issuer.is_empty():_details.text="Auftraggeber: %s\n\n%s"%[String(issuer.display_name),_details.text]
+	var briefing:Dictionary=JOBS.get_briefing(_job_id)
+	var body_name:String=String(briefing.get("body_name",""))
+	if not body_name.is_empty():
+		_details.text="Himmelskörper: %s (%s)\nEinsatzgebiet: %s\n\nStatus: %s\nBelohnung: %d Kredite"%[body_name,String(briefing.get("body_kind","")),String(briefing.get("site_label",location.get("name","—"))),String(labels.get(status,status)),int(Dictionary(job.get("reward",{})).get("credits",0))]
+		if not issuer.is_empty():_details.text+="\n\nAuftraggeber:\n"+String(issuer.display_name)
+	var objectives:PackedStringArray=PackedStringArray()
+	for objective:String in briefing.get("objectives",[]):objectives.append("• "+objective)
+	_objectives.text="ZIELE\n\n"+"\n".join(objectives) if not objectives.is_empty() else ""
 	var screen: Control = _screen.get_ref()
 	var campaign_mode := String(Dictionary(screen.call("get_operations_snapshot").get("singleplayer", {})).get("mode", "")) == "campaign"
 	_accept.disabled = (status != "offered" and not (campaign_mode and status == "failed")) or job.is_empty() or (campaign_mode and bool(job.get("locked",false)))

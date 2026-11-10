@@ -7895,6 +7895,14 @@ func _update_character_overlay() -> void:
 		render_options["two_column_layout"] = true
 		render_options["show_badge_progress"] = true
 		render_options["hide_loadout_dropdowns"] = true
+		var ancestor:Node=get_parent()
+		while ancestor!=null:
+			if ancestor.has_method("get_singleplayer_snapshot"):
+				var snapshot:Dictionary=ancestor.call("get_singleplayer_snapshot")
+				var inventory:Dictionary=Dictionary(snapshot.get("supply",{})).get("inventory",{})
+				render_options["carried_items"]=Dictionary(inventory.get("unit:"+_character_overlay_unit_id+":backpack",{})).get("items",{})
+				break
+			ancestor=ancestor.get_parent()
 	CHARACTER_SHEET_VIEW_SCRIPT.render(host, profile, render_options)
 	if unit != null and character_overlay_dev_editor_enabled:
 		_append_character_overlay_dev_editor(host, unit)
