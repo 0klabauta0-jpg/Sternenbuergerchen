@@ -41,3 +41,8 @@ Default-Roster vor den Laeufen gepinnt. Kein Test gegen produktives user://.
 Frische Paketprobe isoliert von losen Quellressourcen. Refs vor Push erneut
 lesen; konkurrierenden Mainfortschritt integrieren statt ueberschreiben.
 Eigene Testmetadaten im Integrationsworktree von fremdem WIP trennen.
+
+## Ergebnis
+Maincode b8d3cdc77: Import0Fehler,26/26 Gates, Paketprobe750/0.
+Produktidentitaet zum freigegebenen Task und WIP-Erhalt nachgewiesen.
+Nachweis: docs/qa/altlasten_main_integration_20261110/README.md.

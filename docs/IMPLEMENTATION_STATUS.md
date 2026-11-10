@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### Altlastenbereinigung auf Main integriert — 10.11.2026
+Freigegebenen Task c21f89c23 auf Mainbasis fbb7f52be konfliktfrei integriert,
+Maincode b8d3cdc77 frisch geprueft: Import0Fehler,26/26 isolierte Gates und
+neuer echter Portraet-Testexport750/0. Produktbaeume exakt gepruefter Task;
+keine weitere Produktaenderung. Original-Checkout/WIP getrennt: Index/staged
+Diff und252 ungetrackte Quellen erhalten, neuere parallele Edits nicht
+zurueckgesetzt. Bekannte drei Altgates bleiben separat baselinebelegt.
+QA: docs/qa/altlasten_main_integration_20261110/README.md. Kein Spieleexport.
+
 ### Altlastenbereinigung abgeschlossen — 10.11.2026
 Fuenf getrennte Schritte auf Taskbranch/Mainbasis fbb7f52be: gemeinsamer
 LOS-Lesepfad, Runtime-Loadoutowner, tote Controls entfernt,803-Zeilen-

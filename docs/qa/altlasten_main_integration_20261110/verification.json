@@ -1,0 +1,287 @@
+{
+  "tested_main_commit": "b8d3cdc777d9c88f3d0b3b355ba5678b6067ca08",
+  "previous_main": "fbb7f52be6a04f266605e4fe7e7ab0eefc4c61cb",
+  "reviewed_task_commit": "c21f89c23b1117c8ce0fa616e590f7d17e5311b6",
+  "engine": "4.6.2.stable.official.71f334935",
+  "summary": {
+    "selected": 26,
+    "passed": 26,
+    "failed": 0
+  },
+  "import_exit_code": 0,
+  "import_error_count": 0,
+  "all_user_dirs_unique": true,
+  "default_roster_preserved": true,
+  "checks": [
+    {
+      "name": "los",
+      "script": "res://scripts/tests/altlasten_los_runtime_verifier.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "ALTLASTEN_LOS passed=28 failed=0"
+    },
+    {
+      "name": "loadout_owner",
+      "script": "res://scripts/tests/altlasten_personnel_loadout_owner_verifier.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "PERSONNEL_LOADOUT_OWNER passed=13 failed=0"
+    },
+    {
+      "name": "input",
+      "script": "res://scripts/tests/task_1185_tactical_input_ownership.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 114 passed, 0 failed ==="
+    },
+    {
+      "name": "diagnostics",
+      "script": "res://scripts/tests/altlasten_diagnostics_parity_verifier.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "ALTLASTEN_DIAGNOSTICS_PARITY passed=42 failed=0"
+    },
+    {
+      "name": "wall_los",
+      "script": "res://scripts/tests/task_456_wall_segment_los_and_tile_truth_inspector.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 24 passed, 0 failed ==="
+    },
+    {
+      "name": "door_runtime",
+      "script": "res://scripts/tests/hud_architecture_20261106_door_runtime_authority_verifier.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 85 passed, 0 failed ==="
+    },
+    {
+      "name": "hud_projection",
+      "script": "res://scripts/tests/hud_architecture_20261106_live_projection_verifier.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "HUD_LIVE_PROJECTION_VERIFY_PASS"
+    },
+    {
+      "name": "hud_hotpath",
+      "script": "res://scripts/tests/task_1043_mission_hud_hotpath_event_log_guard.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 14 passed, 0 failed ==="
+    },
+    {
+      "name": "hud_light",
+      "script": "res://scripts/tests/task_1153_mission_hud_light_path_snapshot_consolidation.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 40 passed, 0 failed ==="
+    },
+    {
+      "name": "recapture",
+      "script": "res://scripts/tests/task_1174_mission_release_recapture_extraction.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 17 passed, 0 failed ==="
+    },
+    {
+      "name": "report_1008",
+      "script": "res://scripts/tests/task_1008_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 70 passed, 0 failed ==="
+    },
+    {
+      "name": "report_1042",
+      "script": "res://scripts/tests/task_1042_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 94 passed, 0 failed ==="
+    },
+    {
+      "name": "inventory",
+      "script": "res://scripts/tests/playtest_20261110_inventory_transfer_verifier.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "INVENTORY failures=0"
+    },
+    {
+      "name": "inventory_runtime",
+      "script": "res://scripts/tests/playtest_20261110_inventory_runtime_verifier.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "INVENTORY_RUNTIME failures=0"
+    },
+    {
+      "name": "continue",
+      "script": "res://scripts/tests/campaign_preparation_continue_test.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "CAMPAIGN_PREPARATION failed=0"
+    },
+    {
+      "name": "world_ui",
+      "script": "res://scripts/tests/base_personnel_world_ui_test.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "BASE_PERSONNEL_WORLD_UI passed=9 failed=0"
+    },
+    {
+      "name": "profile_defaults",
+      "script": "res://scripts/tests/task_352_homebase_loadout_defaults_preserve_unit_profiles.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 14 passed, 0 failed ==="
+    },
+    {
+      "name": "loadout_matrix",
+      "script": "res://scripts/tests/task_354_homebase_direct_loadout_regression_matrix.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 36 passed, 0 failed ==="
+    },
+    {
+      "name": "recommendation",
+      "script": "res://scripts/tests/task_533_recommended_loadout_selection_bridge.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 30 passed, 0 failed ==="
+    },
+    {
+      "name": "portraits_atlas",
+      "script": "res://scripts/tests/playtest_20261105_portrait_atlas_verifier.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 872 passed, 0 failed ==="
+    },
+    {
+      "name": "portraits_consumers",
+      "script": "res://scripts/tests/playtest_20261105_portrait_consumers_and_return_verifier.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "PORTRAIT_CONSUMERS_RETURN:"
+    },
+    {
+      "name": "portraits_catalog",
+      "script": "res://scripts/tests/task_233_portrait_identity_catalog_and_roster_presentation.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 491 passed, 0 failed ==="
+    },
+    {
+      "name": "roster_save",
+      "script": "res://scripts/tests/task_234_persistent_player_roster_save_and_reset.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 42 passed, 0 failed ==="
+    },
+    {
+      "name": "character_editor",
+      "script": "res://scripts/tests/bugfix_character_team_editor_usability_pass.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 103 passed, 0 failed ==="
+    },
+    {
+      "name": "export_hygiene",
+      "script": "res://scripts/tests/task_511_export_runtime_package_hygiene.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "=== RESULTS: 27 passed, 0 failed ==="
+    },
+    {
+      "name": "identity_consistency",
+      "script": "res://scripts/tests/character_identity_consistency_verifier.gd",
+      "passed": true,
+      "exit_code": 0,
+      "error_count": 0,
+      "isolated": true,
+      "roster_unchanged": true,
+      "result_line": "CHARACTER_IDENTITY_CONSISTENCY passed=152 failed=0"
+    }
+  ],
+  "known_baseline_reference": "docs/qa/altlasten_20261110/baseline_failures.json",
+  "product_tree_objects": {
+    "scripts": "64172007129f91c6762a2f27e04bc6febed1958c",
+    "data": "a74de55ad22fb7129814c9c5495202ef4f2311cb",
+    "scenes": "a5da4b5c63bd52fc6464f3981603ae769e3ce1fa",
+    "Assets": "50b0c93f458a12fc906ad91852634ebbfd092a44",
+    "shaders": "085ff8e856553b45a33387ec9b394c895d343524",
+    "maps": "adf0333f586cf85401f0bcf499ae399e0174e666",
+    "project.godot": "33131cff5d4ee219ad7433ff5308236dcd1033e7"
+  }
+}

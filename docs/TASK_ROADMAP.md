@@ -1,5 +1,11 @@
 # TASK_ROADMAP
 
+### Altlasten — Mainintegration10.11.2026
+Fuenf gepruefte Schritte unveraendert nach Main uebernommen. Main b8d3cdc77:
+frischer Import,26/26 Gates und isolierter Produktionsfilter-PCK750/0.
+Laufende Kampagnen-/Skirmisharbeiten im Original-Checkout bleiben getrennt
+erhalten. QA docs/qa/altlasten_main_integration_20261110/README.md.
+
 ### Playtestplan AP0–AP10 und automatische NPC-Ruhe — Mainintegration10.11.2026
 Gepruefter Produktstand401c4a049 auf Mainbasis046b6d91a, ohne neue Produktcode-
 Aenderung zur Fast-forward-Integration. Physisches Wiedereinsteigen, Planmodus,

@@ -1,0 +1,67 @@
+{
+  "head": "b8d3cdc777d9c88f3d0b3b355ba5678b6067ca08",
+  "passed": 750,
+  "structural_failures": [],
+  "compatibility_failures": [],
+  "alias_count": 42,
+  "retained_count": 57,
+  "excluded_import_payload_count": 42,
+  "source_input_guard": {
+    "count": 264,
+    "changed": []
+  },
+  "source_consumer_hashes": [
+    {
+      "consumer": "fob",
+      "source": "scripts/meta/fob_screen.gd",
+      "source_sha256_match": true,
+      "method_sha256_match": true
+    },
+    {
+      "consumer": "tactical",
+      "source": "scripts/tests/mission_tactical_sandbox_controller.gd",
+      "source_sha256_match": true,
+      "method_sha256_match": true
+    },
+    {
+      "consumer": "menu",
+      "source": "scripts/ui/main_menu_screen.gd",
+      "source_sha256_match": true,
+      "method_sha256_match": true
+    },
+    {
+      "consumer": "emblem",
+      "source": "scripts/meta/start_roster_generator.gd",
+      "source_sha256_match": true,
+      "method_sha256_match": true
+    }
+  ],
+  "catalog_contract_hashes": {
+    "catalog_sha256": true,
+    "catalog_script_sha256": true,
+    "export_contract_sha256": true
+  },
+  "stage_logs": {
+    "import": {
+      "lines": 138,
+      "errors_leaks": [],
+      "warnings": []
+    },
+    "export": {
+      "lines": 253,
+      "errors_leaks": [],
+      "warnings": []
+    },
+    "run": {
+      "lines": 3,
+      "errors_leaks": [],
+      "warnings": []
+    }
+  },
+  "new_git_status_entries": [],
+  "removed_git_status_entries": [],
+  "isolated_loose_files": [],
+  "package_sha256": "43fa09f831b7c9c5b428feb99fa783e9ae4a1d14376cf17674c37d362dad14c5",
+  "package_bytes": 74869976,
+  "limitation": "Standalone portrait package. Consumer bodies are exact automatic source extracts, not full instantiated scenes. Actual Godot exporter starts with all 99 original PNGs plus their import metadata/cache and applies recorded export filters."
+}
