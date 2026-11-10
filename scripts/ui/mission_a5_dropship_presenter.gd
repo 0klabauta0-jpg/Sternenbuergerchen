@@ -68,7 +68,7 @@ static func ensure(controller: Node) -> Control:
 		actions.name = "Actions"
 		actions.add_theme_constant_override("separation", 4)
 		box.add_child(actions)
-		for action in ["set_lz", "drop"]:
+		for action in ["set_lz", "drop", "board", "return"]:
 			var button := Button.new()
 			button.name = action
 			button.custom_minimum_size = Vector2(0, 30)
@@ -208,21 +208,32 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	_set_readout_minimum_height(title, text_width)
 	_set_readout_minimum_height(status, text_width)
 	title.tooltip_text = title.text
-	for action in ["set_lz", "drop"]:
+	var landed: bool = not selected_card.is_empty() and bool(controller.call("_is_parked_campaign_dropship", craft_id))
+	for action in ["set_lz", "drop", "board", "return"]:
 		var button := card.get_node("Contents/Actions/" + action) as Button
+		var method: String = {"set_lz":"_on_mission_dropship_card_set_lz_pressed", "drop":"_on_mission_dropship_card_drop_pressed", "board":"_on_campaign_extraction_pressed", "return":"_on_mission_dropship_return_pressed"}[action]
 		var allowed := false
 		if not selected_card.is_empty():
-			allowed = bool(controller.call("_can_request_mission_dropship_card_lz" if action == "set_lz" else "_can_request_mission_dropship_card_drop", selected_card))
+			match action:
+				"set_lz": allowed = bool(controller.call("_can_request_mission_dropship_card_lz", selected_card))
+				"drop": allowed = bool(controller.call("_can_request_mission_dropship_card_drop", selected_card))
+				"board": allowed = landed
+				"return": allowed = bool(controller.call("_can_request_mission_dropship_return", selected_card)) and (not landed or bool(controller.call("get_campaign_pilot_flight_guard", craft_id).get("ok", false)))
 		button.disabled = pending or not allowed
-		button.text = "Landezone wählen" if action == "set_lz" else "Landen"
-		button.tooltip_text = "Kein Dropship im Einsatz" if selected_card.is_empty() else String(controller.call("_build_mission_dropship_card_lz_tooltip" if action == "set_lz" else "_build_mission_dropship_card_drop_tooltip", selected_card))
+		button.text = {"set_lz":"Landezone waehlen", "drop":"Landen", "board":"Einsteigen", "return":"Abheben"}[action]
+		if action == "set_lz": button.text = "Landezone waehlen"
+		button.tooltip_text = "Alle Bodenpersonen muessen zum Schiff. Einsteigen wird nach Ankunft bestaetigt." if action == "board" else ("Pilot und Besatzung muessen an Bord sein." if action == "return" else "Landezone und Anflug des ausgewaehlten Schiffs")
 		button.set_meta("mission_dropship_craft_id", craft_id)
-		var callback := Callable(controller, "_on_mission_dropship_card_set_lz_pressed" if action == "set_lz" else "_on_mission_dropship_card_drop_pressed").bind(craft_id)
+		var callback := Callable(controller, method).bind(craft_id)
 		if not button.pressed.is_connected(callback):
 			for connection in button.get_signal_connection_list("pressed"):
 				button.pressed.disconnect(connection.callable)
 			button.pressed.connect(callback)
-		button.visible = action == "set_lz" or (not selected_card.is_empty() and bool(selected_card.get("has_lz_position", false)) and bool(selected_card.get("has_embarked_payload", false)))
+		match action:
+			"set_lz": button.visible = not landed
+			"drop": button.visible = not landed and bool(selected_card.get("has_lz_position", false)) and bool(selected_card.get("has_embarked_payload", false))
+			"board": button.visible = landed
+			"return": button.visible = allowed or landed
 	_style_primary_action(card, int(hud_layout.body_font_size))
 	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
 	feedback.text = "" if selected_card.is_empty() else String(controller.call("_get_mission_dropship_card_feedback_text", selected_card))
@@ -255,7 +266,7 @@ static func _apply_readable_geometry(panel: VBoxContainer, rect: Rect2i, metrics
 	THEME.style_label(feedback, false, font_size - 1)
 	var actions := card.get_node("Contents/Actions") as HBoxContainer
 	actions.add_theme_constant_override("separation", 8)
-	for action in ["set_lz", "drop"]:
+	for action in ["set_lz", "drop", "board", "return"]:
 		var button := actions.get_node(NodePath(action)) as Button
 		button.custom_minimum_size = Vector2(0, 48 if font_size >= 18 else (44 if font_size >= 16 else 40))
 		button.add_theme_font_size_override("font_size", font_size - 1)

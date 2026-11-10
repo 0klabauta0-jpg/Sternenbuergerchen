@@ -74,6 +74,7 @@ static func _build_entry(interaction: Dictionary, next_interaction_id: String, i
 		"duration_seconds": duration_seconds,
 		"world_position": Vector2(interaction.get("marker_position", Vector2.ZERO)),
 		"short_label": short_label,
+		"player_label": _player_label(interaction, status, progress),
 		"label": _build_detail_label(short_label, interaction),
 		"is_next": is_next,
 		"can_use_now": bool(interaction.get("can_use_now", false)),
@@ -167,3 +168,10 @@ static func _build_summary(entries: Array, next_interaction_id: String) -> Strin
 	if not next_interaction_id.is_empty():
 		return "NEXT %s not visible" % next_interaction_id
 	return "%d interaction visuals" % entries.size()
+
+
+static func _player_label(interaction: Dictionary, status: String, progress: float) -> String:
+	var title := String(interaction.get("display_name", interaction.get("interaction_id", "Interaktion")))
+	var state: String = {"complete":"Erledigt", "usable":"Bereit", "blocked":"Noch gesperrt", "out_of_range":"Trupp heranfuehren", "interrupted":"Unterbrochen"}.get(status, "Ziel auswaehlen")
+	if status == "in_progress": state = "Laeuft: %d %%" % roundi(progress * 100)
+	return title + " · " + state

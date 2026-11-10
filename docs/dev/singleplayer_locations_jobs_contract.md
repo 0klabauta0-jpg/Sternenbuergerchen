@@ -50,3 +50,13 @@ konkretem Grund abgelehnt. Tests pruefen Annahme ohne Flug, Wechsel, mehrere
 Jobs am selben Ort, Handelsbesuch, Abbruch und Erhalt bei Szenenwechsel.
 
 Kein Savegame-Migrationsauftrag; isolierte Profile, normale Nutzerdaten erhalten.
+
+## Playtestrevision 10.11.2026: sichtbarer Rueckweg
+
+Die kompakte gelandete Schiffskarte bietet Einsteigen und Abheben direkt an.
+Einsteigen beauftragt den bestehenden Truppweg zum tatsaechlichen geparkten
+Schiff; die autoritative Boardingpruefung bleibt erhalten. Abheben verlangt
+bestaetigte Anwesenheit des Piloten und die vorhandenen Transportgates.
+Weltklick am gelandeten Schiff setzt denselben Craftfokus wie die Schiffskarte.
+Spielertexte verwenden benannte Interaktionen statt COM/BLOCKED/NEXT; rohe
+Diagnosefelder bleiben fuer bestehende Snapshots erhalten.

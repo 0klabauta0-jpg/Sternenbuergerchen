@@ -11084,7 +11084,7 @@ func _add_mission_interaction_visual_state_visuals() -> void:
 			tone = "unknown"
 		var color: Color = _get_mission_interaction_visual_state_color(tone)
 		var state_id: String = String(state.get("id", state.get("interaction_id", "interaction_state_%d" % _mission_interaction_visual_state_count))).strip_edges()
-		var short_label: String = String(state.get("short_label", state.get("label", state_id))).strip_edges()
+		var short_label: String = String(state.get("player_label", state.get("short_label", state.get("label", state_id)))).strip_edges()
 		if short_label.is_empty():
 			short_label = state_id
 		_add_marker3d(

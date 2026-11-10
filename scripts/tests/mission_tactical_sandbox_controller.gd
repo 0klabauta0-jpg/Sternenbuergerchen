@@ -807,6 +807,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_advance_campaign_extraction(delta)
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var frame_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
@@ -939,6 +940,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 
 			if _is_pointer_over_control(mouse_button_event.position):
+				return
+
+			if select_landed_craft_at_screen_position(mouse_button_event.position):
+				get_viewport().set_input_as_handled()
 				return
 
 			if _try_begin_waypoint_drag(mouse_button_event.position):
@@ -37139,3 +37144,71 @@ func _maybe_start_active_phase_for_fireteam(fireteam_id: String) -> bool:
 		_post_drop_security_pending_fireteam_ids.erase(fireteam_id)
 		return true
 	return _apply_default_fireteam_behavior(fireteam_id, active_phase_index)
+
+
+# Pending user extraction intent only; positions and boarding remain runtime-owned.
+var _campaign_extraction_craft_id: String = ""
+var _campaign_extraction_poll: float = 0.0
+var _campaign_extraction_elapsed: float = 0.0
+
+func select_landed_craft_at_screen_position(screen_position: Vector2) -> bool:
+	var view = _get_primary_3d_view()
+	if view == null or not view.has_method("world_to_screen_position"):
+		return false
+	for card: Dictionary in _get_mission_dropship_card_entries():
+		var craft_id := String(card.get("craft_id", ""))
+		if not _is_parked_campaign_dropship(craft_id): continue
+		var position: Vector2 = _campaign_landed_craft_position(craft_id)
+		if not position.is_finite(): continue
+		var screen: Vector2 = view.call("world_to_screen_position", position)
+		if screen.distance_to(screen_position) <= 56.0:
+			return select_mission_dropship_craft(craft_id)
+	return false
+
+func _campaign_landed_craft_position(craft_id: String) -> Vector2:
+	if _is_active_drop_sequence_for_craft(craft_id): return _drop_sequence_position
+	return _coerce_vector2_value(Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {})).get("position", Vector2.INF), Vector2.INF)
+
+func request_campaign_extraction(craft_id: String) -> Dictionary:
+	if not get_parent().has_meta("campaign_ground_pilot_id") or not _is_parked_campaign_dropship(craft_id):
+		return {"ok": false, "reason": "craft_not_landed", "message": "Schiff muss zum Einsteigen gelandet sein"}
+	var teams := PackedStringArray()
+	for unit in _get_campaign_sortie_units():
+		var id := String(unit.call("get_unit_id"))
+		if int(unit.call("get_health")) <= 0:
+			return {"ok": false, "reason": "crew_unavailable", "message": "Eine Bodenperson ist nicht einsatzfaehig"}
+		if _deployed_unit_ids.has(id):
+			var team := String(unit.call("get_fireteam_id"))
+			if not teams.has(team): teams.append(team)
+	if not teams.is_empty():
+		_set_selected_fireteams(teams, false)
+		_create_waypoints_for_selected_fireteams(_campaign_landed_craft_position(craft_id), true)
+		if not execute_selected_fireteam_orders():
+			return {"ok": false, "reason": "movement_blocked", "message": "Rueckweg zum Schiff ist noch nicht bereit"}
+	_campaign_extraction_craft_id = craft_id
+	_campaign_extraction_poll = 0.0
+	_campaign_extraction_elapsed = 0.0
+	_set_mission_dropship_card_feedback(craft_id, "Trupp geht zum Schiff und steigt ein")
+	return {"ok": true, "pending": true, "message": "Trupp geht zum Schiff und steigt ein"}
+
+func _on_campaign_extraction_pressed(craft_id: String) -> void:
+	var result := request_campaign_extraction(craft_id)
+	_last_command_text = String(result.get("message", "Einsteigen nicht moeglich"))
+	_set_mission_dropship_card_feedback(craft_id, _last_command_text)
+	_refresh_mission_dropship_panel()
+
+func _advance_campaign_extraction(delta: float) -> void:
+	if _campaign_extraction_craft_id.is_empty(): return
+	_campaign_extraction_elapsed += delta
+	_campaign_extraction_poll -= delta
+	if _campaign_extraction_poll > 0.0: return
+	_campaign_extraction_poll = 0.25
+	var craft_id := _campaign_extraction_craft_id
+	var result := request_campaign_crew_boarding(craft_id)
+	var reason := String(result.get("reason", ""))
+	if bool(result.get("ok", false)):
+		_campaign_extraction_craft_id = ""
+		_set_mission_dropship_card_feedback(craft_id, "Alle an Bord. Rueckflug ist bereit.")
+	elif reason not in ["pilot_not_at_ship", "crew_not_at_ship", "pilot_boarding_pending"] or _campaign_extraction_elapsed > 180.0:
+		_campaign_extraction_craft_id = ""
+		_set_mission_dropship_card_feedback(craft_id, String(result.get("message", "Rueckweg unterbrochen")))
