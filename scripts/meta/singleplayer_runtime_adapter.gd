@@ -550,6 +550,7 @@ func get_world_checkpoint_guard() -> Dictionary:
 	return {"ok":true}
 
 func _field_inventory_context(unit_id: String,craft_id: String) -> Dictionary:
+	if String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,""))!="mission": return {}
 	var mission: Node=_flow.call("get_mission_for_craft",craft_id)
 	if mission==null: return {}
 	var controller: Node=mission.get_node("TacticalController")

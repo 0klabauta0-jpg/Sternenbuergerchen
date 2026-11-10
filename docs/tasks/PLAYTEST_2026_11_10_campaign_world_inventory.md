@@ -224,3 +224,14 @@ NPC anklicken und im Menue weiter bedienen. Pro NPC sichtbarer Schalter
 Automatisch ruhen an/aus; ausgeschaltet bleibt die Person am manuell gewaehlten
 Platz. Einstellung im Basischeckpoint erhalten. Vorhandene Beduerfnisse pruefen;
 keine neue Hunger-/Fatigue-/Heilungswahrheit in UI oder BaseActor erfinden.
+
+
+## Technischer Abschluss des Taskstands
+
+AP0–AP10 und beide NPC-Ruhekorrekturen sind im isolierten Taskbranch umgesetzt.
+Abnahme, native Referenzvergleiche, finale gezielte Tests und Reviewkorrekturen:
+[Abschlussbericht](../qa/playtest_20261110_acceptance/README.md).
+Die Sourcebasis ist 046b6d91a plus die vorangegangenen eigenen AP-Commits;
+Fortsetzung in separater lokaler Git-Kopie nach fehlerhafter Worktree-Registrierung.
+Weder Integration noch Export. Persoenliche Stilabnahme, Mehrschiff-Weltcheckpoint
+und der dokumentierte Sekundaerwaffe-Ablegen-Minor bleiben ausdruecklich offen.

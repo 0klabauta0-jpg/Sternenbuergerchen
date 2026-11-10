@@ -37282,9 +37282,18 @@ const FIELD_LANDING = preload("res://scripts/mission/field_landing_contract.gd")
 func _campaign_occupied_landing_positions() -> Array:
 	var result: Array = []
 	for card: Dictionary in _get_mission_dropship_card_entries():
-		var id := String(card.get("craft_id", ""))
-		if id != _mission_drop_craft_id and _is_parked_campaign_dropship(id):
-			result.append(_campaign_landed_craft_position(id))
+		var id:=String(card.get("craft_id",""))
+		if id==_mission_drop_craft_id: continue
+		if _is_parked_campaign_dropship(id):
+			result.append(_campaign_landed_craft_position(id)); continue
+		# Reserve an accepted field footprint before touchdown, including a
+		# waiting craft's selected site. Outbound/home cards release the site.
+		var sequence: Dictionary=Dictionary(_parallel_drop_sequences_by_craft.get(id,{}))
+		if _is_active_drop_sequence_for_craft(id): sequence={"phase":_drop_sequence_phase,"lz_position":_drop_sequence_lz_position}
+		var phase:=String(sequence.get("phase",card.get("state","")))
+		if phase in ["outbound","to_homebase","homebase","starmap","ready"]: continue
+		var position: Variant=sequence.get("lz_position",card.get("lz_position"))
+		if typeof(position)==TYPE_VECTOR2 and (not sequence.is_empty() or bool(card.get("has_lz_position",false))): result.append(Vector2(position))
 	return result
 
 func _validate_campaign_field_lz(position: Vector2) -> Dictionary:
@@ -37302,3 +37311,31 @@ func _resolve_campaign_field_lz() -> Dictionary:
 	return FIELD_LANDING.resolve(_get_terrain_registry(), _lz_position, _mission_drop_craft_id + str(_lz_position), skill,0.5, _campaign_occupied_landing_positions())
 
 const FLIGHT_MOTION = preload("res://scripts/terrain/mission_flight_visual.gd")
+
+func retire_location_craft_visit(craft_id: String, unit_ids: PackedStringArray) -> void:
+	# Called only after the travel owner commits this craft's surface exit.
+	# Reuse embark effects so departed actors cannot keep simulating in place.
+	var position:=_campaign_landed_craft_position(craft_id)
+	if not position.is_finite(): position=Vector2.ZERO
+	var teams: PackedStringArray=[]
+	for id in unit_ids:
+		var unit: Node=_find_friendly_unit_by_id(id)
+		if unit!=null:
+			var team:=String(unit.call("get_fireteam_id"))
+			if not teams.has(team): teams.append(team)
+			if _deployed_unit_ids.has(id): _enqueue_dropship_embark_effect(unit,id,position)
+		_deployed_unit_ids.erase(id); _deployed_unit_positions.erase(id); _embarked_unit_ids.erase(id)
+	for team in teams:
+		_clear_fireteam_runtime_execution_for_post_drop(team)
+		for key in _order_plans_by_key.keys():
+			if String(key).begins_with(team+"|"): _order_plans_by_key.erase(key)
+	_parallel_drop_sequences_by_craft.erase(craft_id)
+	_field_landing_by_craft.erase(craft_id)
+	if _drop_sequence_craft_id==craft_id: _clear_drop_sequence_context()
+	for card: Dictionary in _mission_drop_cards:
+		if String(card.get("craft_id",""))==craft_id:
+			card.state="ready"; card.has_lz_position=false; card.drop_ship_requested=false
+			card.embarked_unit_ids=[]; card.boarded_fireteam_ids=[]; card.queued_fireteam_ids=[]
+	if _mission_drop_craft_id==craft_id:
+		_mission_drop_state="ready"; _has_lz_position=false; _drop_ship_requested=false; _mission_drop_passenger_count=0
+	_refresh_world_overlays()

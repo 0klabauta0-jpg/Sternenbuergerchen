@@ -247,7 +247,7 @@ func _ready() -> void:
 	service_layer.add_child(_singleplayer_services)
 	_singleplayer_services.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	_singleplayer_services.position = Vector2(get_viewport().get_visible_rect().size.x - 350, 80)
-	_singleplayer_services.size = Vector2(330, 510)
+	_singleplayer_services.size = Vector2(330, 0)
 	_singleplayer_services.call("configure", Callable(_singleplayer_runtime, "get_snapshot"), Callable(_singleplayer_runtime, "request_operation"))
 	_singleplayer_services.hide()
 	var star_layer := CanvasLayer.new()
@@ -4140,7 +4140,7 @@ func _start_or_update_active_mission() -> void:
 
 
 func _configure_mission_instance(mission_instance: Node, selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray, preview_mode: bool) -> void:
-	mission_instance.set_meta("singleplayer_mission_identity", _active_singleplayer_identity.duplicate(true) if not preview_mode else {})
+	_bind_location_visit(mission_instance, _active_singleplayer_identity.duplicate(true) if not preview_mode else {})
 	if selected_unit_ids.is_empty():
 		selected_unit_ids = _selected_unit_ids.duplicate()
 	if selected_fireteam_ids.is_empty():
@@ -4386,6 +4386,8 @@ func _return_homebase_direct_craft_after_mission() -> void:
 	var cards: Array = _mission_planning_state.get("mission_drop_cards", [])
 	var selected_craft_id := String(_mission_planning_state.get("mission_drop_craft_id", ""))
 	for craft_id in _build_homebase_direct_mission_sync_craft_ids(cards):
+		var result_craft:=String(_active_singleplayer_identity.get("craft_id",""))
+		if not result_craft.is_empty() and String(craft_id)!=result_craft: continue
 		var transfer := _find_pending_mission_craft_transfer(craft_id)
 		var card := _find_mission_drop_card_in_planning_state(craft_id)
 		var source := String(card.get("payload_source", "")).strip_edges().to_lower()
@@ -5084,6 +5086,8 @@ func _seed_singleplayer_bootstrap_homebase_payload() -> void:
 
 
 func _ensure_singleplayer_visible_homebase_actionability() -> void:
+	# Startup recovery must never rebuild an established multi-place roster.
+	if not _location_contexts.is_empty(): return
 	if _singleplayer_runtime != null and String(Dictionary(_singleplayer_runtime.call("get_space_travel_snapshot")).get("phase", "grounded")) != "grounded":
 		return
 	if is_campaign_start():
@@ -5119,6 +5123,7 @@ func _ensure_singleplayer_visible_homebase_actionability() -> void:
 
 
 func _schedule_singleplayer_visible_homebase_actionability_guard() -> void:
+	if not _location_contexts.is_empty(): return
 	if is_campaign_start():
 		return
 	if not bool(get_meta("singleplayer_bootstrap_enabled", false)) or not _last_mission_result.is_empty():
@@ -7544,7 +7549,7 @@ func _begin_space_approach(craft_id: String, departure: Dictionary) -> void:
 			card["drop_ship_requested"]=false; card["has_lz_position"]=false
 			card["lz_position"]=Vector2.ZERO; card["drop_sequence_position"]=Vector2.ZERO
 			card["state"]="to_mission"; card["progress"]=0.0
-	_space_approaches[craft_id]={"remaining":0.65,"planning":visit_planning,"mission":_get_selected_mission_definition().duplicate(true),"mission_id":_selected_mission_id,"units":_selected_unit_ids.duplicate(),"teams":_selected_fireteam_ids.duplicate(),"identity":{"craft_id":craft_id,"job_id":String(departure.get("job_id","")),"scenario_id":String(_get_selected_mission_definition().get("scenario_file_path","")).get_file().get_basename(),"location_id":String(departure.get("destination_location_id",""))}}
+	_space_approaches[craft_id]={"remaining":0.65,"planning":visit_planning,"mission":_get_selected_mission_definition().duplicate(true),"mission_id":_selected_mission_id,"units":_selected_unit_ids.duplicate(),"teams":_selected_fireteam_ids.duplicate(),"identity":{"craft_id":craft_id,"job_id":String(departure.get("job_id","")),"scenario_id":String(_get_selected_mission_definition().get("scenario_file_path","")).get_file().get_basename(),"location_id":String(departure.get("destination_location_id","")),"departure_token":String(Dictionary(_singleplayer_runtime.get("_departure_token_by_craft")).get(craft_id,"")),"unit_ids":Array(_selected_unit_ids),"fireteam_ids":Array(_selected_fireteam_ids)}}
 	_show_star_map()
 
 func _finish_space_approach(craft_id: String = "") -> void:
@@ -7577,6 +7582,8 @@ func _finish_space_surface_departure(craft_id: String) -> void:
 		var identity: Dictionary=Dictionary(instance.get_meta("singleplayer_mission_identity",{}))
 		if String(identity.get("craft_id",""))==craft_id and not String(identity.get("job_id","")).is_empty():
 			_singleplayer_runtime.call("record_mission_result",{"result":"aborted","reason":"craft_left_without_objective_completion"},identity)
+		var visit: Dictionary=Dictionary(Dictionary(instance.get_meta("singleplayer_visit_identities",{})).get(craft_id,{}))
+		instance.get_node("TacticalController").call("retire_location_craft_visit",craft_id,PackedStringArray(visit.get("unit_ids",[])))
 		_remember_location(instance)
 	_aircraft_location_by_craft[craft_id]="starmap"
 	if instance==_active_mission:
@@ -7586,6 +7593,7 @@ func _finish_space_surface_departure(craft_id: String) -> void:
 
 
 func _finish_space_home_landing(craft_id: String) -> void:
+	_restore_returning_visit_membership(craft_id)
 	_aircraft_location_by_craft[craft_id] = "homebase"
 	_remove_pending_mission_craft_transfer(craft_id)
 	if _active_mission != null and _active_mission==get_mission_for_craft(craft_id):
@@ -7618,8 +7626,8 @@ func _refresh_singleplayer_services() -> void:
 			has_remote_service = true
 	_singleplayer_services.visible = _current_meta_view == "mission" and has_remote_service
 	if _singleplayer_services.visible:
-		_singleplayer_services.position = Vector2(get_viewport().get_visible_rect().size.x - 350, 80)
 		_singleplayer_services.call("refresh", snapshot)
+		_singleplayer_services.call("fit_to_viewport")
 
 
 func _request_singleplayer_return(craft_id: String) -> Dictionary:
@@ -7736,9 +7744,11 @@ func _run_location_callback(instance: Node, callback: Callable, payload: Diction
 
 func _admit_existing_location(instance: Node) -> void:
 	var incoming: Dictionary=_planning_for_location(_mission_planning_state,String(instance.get_meta("location_id","")))
+	var incoming_identity:=_active_singleplayer_identity.duplicate(true)
 	var incoming_units:=_selected_unit_ids.duplicate()
 	var incoming_teams:=_selected_fireteam_ids.duplicate()
 	_enter_location_context(instance)
+	_bind_location_visit(instance,incoming_identity)
 	var setup: Node=instance.get_node("MissionSetup")
 	var ids:=PackedStringArray(setup.get("selected_team_unit_ids"))
 	var teams:=PackedStringArray(setup.get("selected_team_fireteam_ids"))
@@ -7752,9 +7762,9 @@ func _admit_existing_location(instance: Node) -> void:
 	setup.set("selected_team_unit_configs",configs)
 	var loadouts: Dictionary=Dictionary(setup.get("member_loadouts")).duplicate(true)
 	for id in incoming_units:
-		if not loadouts.has(id): loadouts[id]=_get_homebase_screen().call("_get_member_loadout",id)
+		loadouts[id]=_get_homebase_screen().call("_get_member_loadout",id)
 	setup.set("member_loadouts",loadouts)
-	setup.call("apply_runtime_selection_contract",true)
+	setup.call("apply_runtime_selection_contract",true,incoming_units)
 	var controller: Node=instance.get_node("TacticalController")
 	var merged: Dictionary=controller.call("get_planning_state")
 	var cards: Array=Array(merged.get("mission_drop_cards",[])).duplicate(true)
@@ -7785,3 +7795,41 @@ func _planning_for_location(planning: Dictionary, location_id: String) -> Dictio
 		if String(_craft_location_runtime.get(active_id,""))!=location_id:
 			result["mission_drop_craft_id"]=String(cards[0].get("craft_id",""))
 	return result
+
+func _bind_location_visit(instance: Node, identity: Dictionary) -> void:
+	if identity.is_empty():
+		instance.set_meta("singleplayer_mission_identity",{}); return
+	var previous: Dictionary=instance.get_meta("singleplayer_mission_identity",{})
+	var visits: Dictionary=Dictionary(instance.get_meta("singleplayer_visit_identities",{})).duplicate(true)
+	var id:=String(identity.get("craft_id",""))
+	var old_visit: Dictionary=Dictionary(visits.get(id,previous if String(previous.get("craft_id",""))==id else {}))
+	visits[id]=identity.duplicate(true); instance.set_meta("singleplayer_visit_identities",visits)
+	# Current content has one job per place. A casual visitor does not acquire
+	# another craft's job; a fresh job departure binds its own checks/results.
+	if not String(identity.get("job_id","")).is_empty() or String(previous.get("job_id","")).is_empty():
+		_active_singleplayer_identity=identity.duplicate(true)
+		instance.set_meta("singleplayer_mission_identity",identity.duplicate(true))
+		var fresh_job:=not String(identity.get("job_id","")).is_empty() and not previous.is_empty() and old_visit!=identity
+		if fresh_job:
+			_pending_campaign_mission_result.clear()
+			var setup: Node=instance.get_node_or_null("MissionSetup")
+			var driver: Node=instance.get_node_or_null("CombatLoopDriver")
+			if setup!=null and driver!=null: driver.call("reset_for_location_job",String(setup.get("scenario_file_path")))
+
+func _restore_returning_visit_membership(craft_id: String) -> void:
+	var instance: Node=get_mission_for_craft(craft_id)
+	if instance==null: return
+	var visit: Dictionary=Dictionary(Dictionary(instance.get_meta("singleplayer_visit_identities",{})).get(craft_id,{}))
+	var ids: Array=visit.get("unit_ids",[]); var teams: Array=visit.get("fireteam_ids",[])
+	var pilot:=String(_assigned_aircraft_pilot_by_craft.get(craft_id,""))
+	var profiles: Array=[]
+	for index in ids.size():
+		var id:=String(ids[index])
+		if id==pilot or _homebase_staged_unit_ids.has(id): continue
+		var profile: Dictionary={}
+		for unit: Dictionary in _all_team_units:
+			if String(unit.get("unit_id",""))==id: profile=unit; break
+		if profile.is_empty(): continue
+		profiles.append(profile.duplicate(true)); _homebase_staged_unit_ids.append(id)
+		_homebase_staged_fireteam_ids.append(String(teams[index]) if index<teams.size() else "ft1")
+	_available_team_units=_merge_missing_units_by_id(_available_team_units,profiles)

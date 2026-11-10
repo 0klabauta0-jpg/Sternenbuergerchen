@@ -23,6 +23,7 @@ var _amount: SpinBox
 var _refuel: Button
 var _return: Button
 var _feedback: Label
+var _availability_feedback:=false
 
 func configure(snapshot_provider: Callable, command_handler: Callable) -> void:
 	_snapshot_provider = snapshot_provider
@@ -194,11 +195,11 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_return.disabled = bool(craft.get("busy", true)) or not available or _pending.has("return_homebase")
 	_return.tooltip_text = "Rückflug erst nach bestätigter Landung am Versorgungsort" if _return.disabled else "Rückflug für dieses Schiff anfordern"
 	if not available:
-		_feedback.text = unavailable_reason
+		_feedback.text = unavailable_reason; _availability_feedback=true
 	elif not buy_reason.is_empty() and not fuel_reason.is_empty():
-		_feedback.text = buy_reason + " · " + fuel_reason
-	elif _feedback.text == unavailable_reason:
-		_feedback.text = "Versorgung bereit"
+		_feedback.text = buy_reason + " · " + fuel_reason; _availability_feedback=true
+	elif _availability_feedback:
+		_feedback.text = "Versorgung bereit"; _availability_feedback=false
 
 func set_selected_craft(craft_id: String) -> bool:
 	if not _pending.is_empty():
@@ -232,6 +233,7 @@ func _submit(operation: String, offer_id: String=OFFER_ID) -> void:
 	var result: Dictionary = _command_handler.call(operation, payload)
 	pending["result"] = result.duplicate(true)
 	_feedback.text = String(result.get("message", result.get("reason", "Anfrage gesendet")))
+	_availability_feedback=false
 	refresh()
 	get_tree().create_timer(DEBOUNCE_SECONDS).timeout.connect(_acknowledgement_delay_elapsed.bind(operation, request_id), CONNECT_ONE_SHOT)
 
@@ -269,3 +271,10 @@ func _button(value: String, node_name: String) -> Button:
 	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	button.add_theme_font_size_override("font_size", 15)
 	return button
+
+func fit_to_viewport() -> void:
+	# Wrapped labels can transiently report thousands of pixels before their
+	# first layout. Refit after text updates instead of retaining that height.
+	var viewport:=get_viewport_rect()
+	size=Vector2(330,0)
+	position=Vector2(maxf(viewport.size.x-size.x-20,16),196)

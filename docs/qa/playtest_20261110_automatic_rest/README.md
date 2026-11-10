@@ -3,10 +3,12 @@
 Auf Taskbasis 274f142c2 im isolierten Checkout playtest-rest-resources-20261110.
 
 RED: automatic_rest_verifier brach am fehlenden Runtime-Owner-Verhalten ab.
-GREEN: automatic_rest_verifier 15 Assertions, null Fehler; echte Wege zu zwei
+GREEN: automatic_rest_verifier 19 Assertions, null Fehler; echte Wege zu zwei
 unterschiedlichen Betten, kein Teleport, manuelle Bewegung/Ausruestung wecken,
 beide echten CheckButtons steuern denselben NPC-Zustand, deaktiviert bleibt er
-stehen, Save und echtes Continue erhalten die Einstellung. Isoliertes APPDATA.
+stehen, Save und echtes Continue erhalten die Einstellung. Beide schlafenden Personen
+stehen nach Boardingauftrag auf, geben Betten frei und werden nach dem echten
+Weg im flugbereiten Transportpayload bestaetigt. Isoliertes APPDATA.
 Zwei komplette reale Kampagnen-Ausfluege mit Wiedereinsteigen und Continue:
 152 Assertions, null Fehler, keine Engine-/Scriptfehler.
 

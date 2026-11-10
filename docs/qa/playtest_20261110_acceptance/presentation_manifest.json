@@ -1,11 +1,13 @@
 {
-  "status": "task-source candidate; user style acceptance open",
+  "status": "implemented task-source candidate; native captures opened; personal style acceptance open",
   "references": "docs/reports/assets/playtest-2026-11-10/manifest.json",
   "sha256": {
     "shaders/terrain/frontier_ground.gdshader": "b60fef78ab33566425a2b1a31975245942109e733c47000f4859adc73f6f7ce3",
     "scripts/terrain/frontier_place_props.gd": "02e19fad8aae2139011a8fb0b88c9d5dc3d852155bff0db2054a06cdc85b9384",
     "scripts/terrain/location_resource_visuals.gd": "2e01151e1a10ab465ea79220f1ab8a0496486d248151e5ea766e695682df8ce8",
-    "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf"
+    "Assets/curated/frontier_illustrated_20261101/ships_pass05_astra_ultra/refinement_03/cutlass_01.glb": "21484195affa66a1bc503f34b20ae561312057e46e077250e8a772b6881e6daf",
+    "scripts\\meta\\singleplayer_services_presenter.gd": "5c6ea36a4a053c84479a105922fc722eaebedc7969093a6f3db02706ca65a7e1",
+    "scripts\\meta\\meta_layer_flow.gd": "f9f67212d597087b4a915c7b4538eefe757c73938bcde936743f11ef7e461f36"
   },
   "camera": {
     "satellite_trade": 22,
@@ -18,5 +20,17 @@
     "scripts/terrain/location_resource_visuals.gd"
   ],
   "prior_native": "C:/dev/SternenBuergerchen/output/playtest_20261110/native-world-before-dressing",
-  "current_native": "output/playtest_20261110/native-world and native-resources"
+  "current_native": "output/playtest_20261110/native-world and native-resources",
+  "native_images_sha256": {
+    "base_sleep.png": "a4df1a1fc8564cb3d64896fbc7cfa4dcdf2fc9596ac2bdf29dea56f69f5a4dce",
+    "inventory_1280.png": "9712a7e921eaff48dea36da15893ceefb3e66e737797536761dbcaac408b751f",
+    "star_map.png": "0ac6e4ce14884845d8fee58674cc9bf70ca416adeac781ef8ddf3d9953b08e66",
+    "satellite_core.png": "93ff688821f33f880b471b81878ac9b53567c41fd895b8c4013d9e4cfd6d65ac",
+    "trade_core.png": "bda8b6d8ac2b1ac54918e1bdc461e8f3eb78ff55f918142450c8a9446f209797",
+    "mining.png": "9f2968e6e185089be34bbe742907b6f71b6c44960c1e9dfe23e7102f4635d051",
+    "salvage.png": "c987d5be80ed5ff54f8e6403e736e8e4e52ed3ec40928f8b36794047de6bb51f",
+    "service_1280x720.png": "04d41cab5f53dab7c555300c912b7c233cb01472fe29aa06d9ccf4c809c957ad",
+    "service_1920x1080.png": "c020c287dca0dc60d6de5dd1e31281bfd2b2187e5f9182e76a77ad13d4e16f53",
+    "service_3440x1440.png": "a3c60b67e74cb11949b6fdc2c9e8396ae5831f1da48dd05059ee847d53c86e11"
+  }
 }

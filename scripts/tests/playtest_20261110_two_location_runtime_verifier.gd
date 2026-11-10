@@ -83,6 +83,24 @@ func _run() -> void:
 		await _wait(func(): return String(_runtime.call("get_space_travel_snapshot",craft_a).orbit_id)=="moon_orbit",10000,"A independently reaches moon")
 		_check(_screen.call("request_operation","space_land_homebase",{"craft_id":craft_a}).get("ok",false),"A independently lands home")
 		_check(is_instance_valid(b) and String(_flow.get("_aircraft_location_by_craft").get(craft_b,""))=="mission","home arrival cannot remove B")
+	if OS.get_cmdline_user_args().has("revisit"):
+		_screen.call("request_operation","craft",{"craft_id":craft_a})
+		if Array(_screen.call("get_operations_snapshot").selected_craft.get("payload_fireteam_ids",[])).has(team_a):
+			_check(_screen.call("request_operation","unboard",{"craft_id":craft_a,"fireteam_id":team_a}).get("ok",false),"returning crew leaves payload before changing gear")
+		else: _check(true,"returned crew is already outside its home payload")
+		var unit_id:=String(positions.keys()[0])
+		var equipped: Dictionary=_screen.call("request_operation","inventory_equip",{"craft_id":craft_a,"unit_id":unit_id,"source_container_id":"base:homebase","slot":"armor","item_id":"armor_heavy"})
+		_check(equipped.get("ok",false),"home owner equips a different finite armor before revisit")
+		_check(_screen.call("request_operation","accept_job",{"job_id":"satellite_recovery"}).get("ok",false),"failed satellite departure can be accepted anew")
+		_check(_screen.call("request_operation","select_destination",{"craft_id":craft_a,"location_id":"satellite_crash","job_id":"satellite_recovery"}).get("ok",false),"returner selects retained location for fresh job visit")
+		if await _route(craft_a,team_a,"satellite_crash"):
+			var revisited: Node=_flow.call("get_mission_for_craft",craft_a)
+			_check(revisited==a,"revisit keeps same world instance and its other visitor")
+			_check(revisited.get_node("MissionSetup").get("member_loadouts")[unit_id].armor=="heavy","retained setup reads new authoritative armor")
+			var actor: Node=revisited.get_node("TacticalController").call("_find_friendly_unit_by_id",unit_id)
+			_check(String(actor.get("armor_id"))=="heavy" if actor.get("armor_id")!=null else String(actor.call("get_armor_id"))=="heavy","actual returning actor uses newly equipped armor")
+			_check(String(revisited.get_meta("singleplayer_mission_identity").craft_id)==craft_a,"fresh job checks bind its actual returning craft")
+			_check(String(_runtime.call("get_space_travel_snapshot",craft_b).phase)=="surface","fresh job admission keeps B at original place")
 	print("TWO_LOCATION_RUNTIME completed=",_failed==0)
 	await _finish()
 
@@ -92,7 +110,8 @@ func _route(craft: String, team: String, location: String) -> bool:
 	var current: Dictionary=_screen.call("get_operations_snapshot").selected_craft
 	if not Array(current.get("payload_fireteam_ids",[])).has(team):
 		var boarding: Dictionary=_screen.call("request_operation","board",{"craft_id":craft,"fireteam_id":team})
-		if not _check(boarding.get("ok",false),"independent boarding "+craft): print(boarding); return false
+		if not _check(boarding.get("ok",false),"independent boarding "+craft):
+			print("REVISIT_BOARD ",boarding," members=",_screen.call("_get_member_unit_ids_for_fireteam",team)," payload=",_screen.call("_operations_payload_craft_for_team",team)," gate=",_screen.call("_build_homebase_direct_staging_craft_gate_for_craft",craft)); return false
 	_screen.call("_debug_advance_homebase_direct_boarding",30.0)
 	var started: Dictionary=_screen.call("request_operation","start",{"craft_id":craft})
 	if not _check(started.get("ok",false),"independent normal launch "+craft): print(started); return false

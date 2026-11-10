@@ -360,7 +360,7 @@ func get_unit_loadout_modifiers_dict(unit_id: String) -> Dictionary:
 	return Dictionary(unit_loadout_modifiers_by_unit_id.get(normalized_unit_id, {})).duplicate(true)
 
 
-func apply_runtime_selection_contract(preserve_existing: bool = false) -> void:
+func apply_runtime_selection_contract(preserve_existing: bool = false, refresh_existing_ids: PackedStringArray = PackedStringArray()) -> void:
 	if not _is_initialized:
 		return
 	var runtime_leader = get_node_or_null(runtime_leader_path)
@@ -390,7 +390,12 @@ func apply_runtime_selection_contract(preserve_existing: bool = false) -> void:
 			continue
 		var fallback_unit_id: String = String(unit.call("get_unit_id")).strip_edges()
 		var unit_id: String = _get_selected_unit_id_for_friendly_slot(slot_index, fallback_unit_id)
-		if preserve_existing and fallback_unit_id==unit_id and unit_registry.has_method("has_unit") and bool(unit_registry.call("has_unit",unit_id)): continue
+		if preserve_existing and fallback_unit_id==unit_id and unit_registry.has_method("has_unit") and bool(unit_registry.call("has_unit",unit_id)):
+			if refresh_existing_ids.has(unit_id):
+				_apply_fob_loadout_override(unit,unit_id,team_id)
+				if unit.has_method("set_fireteam_id"): unit.call("set_fireteam_id",_get_fireteam_id_for_friendly_slot(slot_index,unit_id,team_id))
+				_enqueue_initial_loadout_effect(simulation_root,unit_id)
+			continue
 		_apply_unit_identity_preset(unit, unit_id, team_id)
 		_apply_fob_loadout_override(unit, unit_id, team_id)
 		if use_2_5d_primary_view:

@@ -1,6 +1,7 @@
-extends "res://scripts/tests/campaign_intro_loop_smoke.gd"
+extends "res://scripts/tests/playtest_20261110_extraction_loop.gd"
 var _resource_checked:=false
 func _configure_base_equipment() -> void:
+	super._configure_base_equipment()
 	for item in ["mining_tool","salvage_tool"]:
 		var result: Dictionary=_screen.call("request_operation","inventory_transfer",{"unit_id":"campaign_leader","craft_id":_craft_id,"source_container_id":"base:homebase","destination_container_id":"unit:campaign_leader:backpack","item_id":item,"amount":1})
 		_check(result.get("ok",false),"actual base menu packs finite "+item)
@@ -46,6 +47,7 @@ func _resource_use(mission: Node,id: String) -> bool:
 	_check(int(supply.get_supply_snapshot().inventory["unit:campaign_leader:backpack"].items.get(site.item_id,0))==int(site.quantity),"yield reaches actual miner backpack "+id)
 	if OS.get_cmdline_user_args().has("native_probe"):
 		var view: Node=mission.get_node("Primary3DView"); view.call("focus_world_position",target)
+		await create_timer(.35).timeout
 		for frame in 12: await process_frame
 		var path:=ProjectSettings.globalize_path("res://output/playtest_20261110/native-resources"); DirAccess.make_dir_recursive_absolute(path)
 		root.get_texture().get_image().save_png(path+"/"+id+".png")

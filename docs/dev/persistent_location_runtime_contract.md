@@ -66,3 +66,24 @@ Zweite Besucher sehen denselben Restbestand. Zwei-Personen-Startkampagne bleibt
 unveraendert; Mehrtrupppruefung verwendet ein isoliertes groesseres Team.
 
 Implementierungsnachtrag AP8: Registry location_runtime_registry.gd liefert ausschliesslich Node-Lookup. Die bestehenden Szenen/SimulationRoots besitzen lokale Wahrheit; MetaLayerFlow bindet Lifecyclecallbacks an die Quellszene und liest Planungsstate direkt aus deren Controller. Kontextdaten besitzen nur ausstehende Ergebnisbehandlung und Identitaetsprojektion. Verborgene HUD-Arbeit/SubViewport-Rendering ist deaktiviert. Kein neuer Doppel-Physikowner. Mehrschiff-Checkpoint auch bei vollstaendiger Heimkehr gesperrt, solange dessen Serializer nur ein Schiff erhalten kann. Belege: docs/qa/playtest_20261110_multi_location/README.md.
+
+## Verfeinerung aus Gesamtreview
+
+Ein Ort behaelt getrennte Besuchsbelege je craft_id: Auftrags-/Szenarioidentitaet,
+Abflugtoken und die vom bestehenden Transportowner bestaetigten Personen-/Truppids.
+Aktueller Inhalt hat einen Auftragskontext je Ort. Ein neuer auftragsgebundener
+Besuch bindet eigene Rueckkehr-/Ergebnispruefungen und frische Auftragsgates; ein
+beiläufiger zweiter Besucher uebernimmt diesen Auftrag nicht. Endliche Ressourcen,
+Bewohner, Positionen und lokale Simulation werden dabei nicht neu aufgebaut.
+
+Eingehende Personen erhalten ihre aktuelle bestaetigte Basisausruestung auch an
+bereits registrierten Actors. Bereits anwesende Personen behalten ihren Zustand.
+Nach bestaetigtem Oberflaechenaustritt entfernt der bestehende Embark-Effekt nur
+diese Besatzung aus der lokalen Simulation und loest nur ihre Flug-/Wegkontexte.
+Bei Heimkehr werden ihre echten Gruppenids aus dem Abflugbeleg wieder im
+bestehenden Basisowner eingetragen. Startup-Reparaturen greifen in einer bereits
+begonnenen Mehrortwelt nicht mehr. Ein Auftragsergebnis startet nur den Rueckweg
+seines eigenen Schiffs, nicht aller anderen Besucher.
+
+Eine akzeptierte Landezone reserviert ihre Flaeche bereits waehrend Warten,
+Anflug, Landung und Entladen. Nach Oberflaechenaustritt ist sie wieder frei.

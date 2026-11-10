@@ -24,7 +24,8 @@ func _run() -> void:
 	while Time.get_ticks_msec()<deadline and not people.get_snapshot().units.all(func(person:Dictionary):return person.status=="sleeping"):
 		await process_frame
 	check(people.get_snapshot().units.all(func(person:Dictionary):return person.status=="sleeping"),"both people physically reach beds and sleep")
-	var outfit: Dictionary=screen.call("request_operation","inventory_equip",{"unit_id":"campaign_pilot","craft_id":"campaign_cutlass","source_container_id":"base:homebase","item_id":"armor_heavy","slot":"armor"})
+	var actual_craft:=String(screen.call("get_operations_snapshot").selected_craft.id)
+	var outfit: Dictionary=screen.call("request_operation","inventory_equip",{"unit_id":"campaign_pilot","craft_id":actual_craft,"source_container_id":"base:homebase","item_id":"armor_heavy","slot":"armor"})
 	check(outfit.get("ok",false) and people._states.campaign_pilot.status=="outside","successful finite equipment wakes sleeping person")
 	people.request_operation("base_sleep",{"unit_id":"campaign_pilot"})
 	deadline=Time.get_ticks_msec()+15000
@@ -61,5 +62,17 @@ func _run() -> void:
 	var resumed: Node=load("res://scenes/meta/meta_layer_test.tscn").instantiate(); root.add_child(resumed); await process_frame
 	var restored: Node=resumed.get("_singleplayer_runtime").call("get_base_personnel_runtime")
 	check(restored._states.campaign_leader.auto_rest_enabled==false,"actual Continue restores personal auto-rest switch")
+	var resumed_screen: Node=resumed.get_node("HomebaseScreen")
+	for id in ["campaign_leader","campaign_pilot"]: restored.request_operation("base_sleep",{"unit_id":id})
+	deadline=Time.get_ticks_msec()+60000
+	while Time.get_ticks_msec()<deadline and not restored.get_snapshot().units.all(func(person:Dictionary):return person.status=="sleeping"): await process_frame
+	check(restored.get_snapshot().units.all(func(person:Dictionary):return person.status=="sleeping"),"both people can sleep explicitly with automation disabled")
+	var ship:=String(resumed_screen.call("get_operations_snapshot").selected_craft.id)
+	var boarded: Dictionary=resumed_screen.call("request_operation","base_board",{"craft_id":ship,"fireteam_id":"ft1","whole_fireteam":true})
+	check(boarded.get("ok",false) and restored.get_snapshot().bed_occupants.is_empty(),"boarding wakes both sleepers and releases their actual beds")
+	deadline=Time.get_ticks_msec()+60000
+	while Time.get_ticks_msec()<deadline and not restored.get_snapshot().units.all(func(person:Dictionary):return person.status=="aboard"): await process_frame
+	check(restored.get_snapshot().units.all(func(person:Dictionary):return person.status=="aboard"),"both sleepers physically walk and commit boarding")
+	check(restored.is_pilot_aboard(ship) and resumed_screen.call("_has_homebase_direct_launch_payload_for_craft",ship),"sleeping crew reaches existing flight-ready transport payload")
 	resumed.queue_free(); await process_frame
 	print("AUTOMATIC_REST failed=",failed); quit(1 if failed else 0)

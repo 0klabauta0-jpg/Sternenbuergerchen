@@ -5676,3 +5676,10 @@ func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:
 		var value_dict: Dictionary = value
 		return Vector2(float(value_dict.get("x", fallback.x)), float(value_dict.get("y", fallback.y)))
 	return fallback
+
+func reset_for_location_job(scenario_path: String) -> void:
+	# Reset only job execution, never the retained world, its units or Supply.
+	_combat_finished=false; _winning_team_id=""; _mission_result.clear()
+	_mission_result_condition_override=""; _resolved_without_seen_friendly=false
+	_has_seen_active_friendly_units=false; _mission_started_at_msec=Time.get_ticks_msec()
+	configure_scenario_runtime_gates_from_file(scenario_path)
