@@ -2,7 +2,8 @@
 
 Stand: 09.11.2026. Zielvertrag fuer AP3/AP5/AP7; native Abnahme ist gesondert.
 
-Nutzerkorrektur nach dem Kampagnen-Playtest: Die Heimatbasis bleibt36x28 gross,
+Nutzerkorrektur nach dem Kampagnen-Playtest: Der erhaltene Basiskern war36x28 gross; seit der Playtestrevision10.11.
+liegt er auf einer96x98-Ortskarte,
 auch bei kleinem Startpersonal. Beide moeblierten Original-Cutaway-GLBs werden
 wieder sichtbar eingesetzt; kahle Ersatzwaende sind kein freigegebener
 Basisstil. Vereinfachungen fuer den Handelsposten gelten nur dort. Die
@@ -71,3 +72,14 @@ darf die einzige aktive Missionsinstanz nicht verwerfen.
 Pruefung: gespeicherte Topologie hex_axial_v1, Inhalts-/Erreichbarkeitsorakel,
 echte Craft-/Pad-ID, Busy/Payloadgates, Negativ- und Wiederholtransaktionen,
 zweiter Ausflug. Technische und native Nachweise bleiben getrennt.
+
+## Erweiterte Landschaft, 10.11.2026
+
+Vier gespeicherte Karten inklusive campaign_intro_base besitzen9408 Hexfelder.
+Signierte axiale Koordinaten erweitern den Boden um die unveraenderten
+Basis-/Ortsanker; Hexview und Registry leiten Grenzen aus echten Zellen ab.
+Bestehende Raeume und Innenraumclearance bleiben an gleicher Position.
+Die feinere Basisnavigation deckt denselben erweiterten Raum ab. Kein Ring
+von Ersatzbloecken begrenzt den alten Ausschnitt. Natuerliche Gesteinsgruppen
+besitzen gespeicherte Bewegungs-/LOS-Sperren; dekorative Models erzeugen keine
+unsichtbaren Spielregeln. Basisstartkamera bleibt auf den kleinen Kern gezoomt.

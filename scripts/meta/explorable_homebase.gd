@@ -442,6 +442,7 @@ func _ready() -> void:
 
 
 func set_active(active: bool) -> void:
+	var was_preview: bool = _pad_preview
 	_pad_preview = false
 	_active = active
 	if not is_node_ready():
@@ -449,6 +450,9 @@ func set_active(active: bool) -> void:
 	visible = active
 	if active and not _initialized:
 		_initialize_runtime()
+	if active and was_preview and _view != null:
+		_view.set("_camera_size", 26.0)
+		_view.call("focus_world_position", _world_at_grid([68,52]))
 	if _runtime != null:
 		_runtime.process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
 		if _personnel_runtime() == null:
@@ -562,7 +566,7 @@ func _initialize_runtime() -> void:
 				_structure_visual_nodes[id] = visual
 				_structure_visual_records[id] = {"source_path": String(asset.path), "actual_sha256": String(_asset_sources.back().get("actual_sha256", "")), "route": String(asset.get("visual_route", "original_furnished_cutaway_glb")), "original_path": String(asset.get("original_path", asset.path))}
 	_build_landing_pads(stage)
-	_build_boundary_rocks(stage)
+	# Natural authored geology replaces the former decorative block fence.
 	var avatar_visual: Dictionary = Dictionary(_layout.get("avatar_visual", {}))
 	_model = _load_visual(avatar_visual) if personnel == null else null
 	if _model != null:
@@ -585,7 +589,7 @@ func _initialize_runtime() -> void:
 	# through the real buildings and parked ship. Navigation facts stay intact.
 	var footprint_visuals: Dictionary = {}
 	for tile in _map_data.get_tiles():
-		if not bool(tile.walkable):
+		if not bool(tile.walkable) and String(tile.object_type_id).is_empty():
 			footprint_visuals[Vector2i(tile.grid_position)] = stage
 	_view.call("set_external_terrain_object_visuals", footprint_visuals)
 	_previous_position = _avatar.position

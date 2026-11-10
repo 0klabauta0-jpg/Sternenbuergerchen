@@ -11,7 +11,7 @@ func _run() -> void:
 	var layout: Dictionary = raw.homebase_exploration
 	var map = MAP.load_from_file(file)
 	_check(not map.has_load_issue() and map.get_grid_topology() == "hex_axial_v1", "Mini base loads valid native hex data")
-	_check(raw.grid_size.x == 36 and raw.grid_size.y == 28 and layout.interiors.size() == 2 and layout.landing_pads.size() == 2, "Campaign retains larger base, both building areas and both pads")
+	_check(raw.grid_size.x >= 96 and raw.grid_size.y >= 98 and layout.interiors.size() == 2 and layout.landing_pads.size() == 2, "Campaign retains larger base, both building areas and both pads")
 	var registry = REGISTRY.new()
 	root.add_child(registry)
 	var sizes: Dictionary = map.get_tile_size()

@@ -221,13 +221,13 @@ func _dismiss_popup() -> void:
 func _layout() -> void:
 	if _strip == null:
 		return
-	_strip.position = Vector2(16, 82)
+	_strip.position = Vector2(210, 88)
 	_strip.size.x = maxf(300, minf(560, get_viewport_rect().size.x - 640))
 	_guidance.custom_minimum_size.x = maxf(260, _strip.size.x - 24)
 	_strip.reset_size()
 	for protected in _launch_action_rects():
 		if _strip.get_global_rect().intersects(protected):
-			_strip.position = Vector2(16, 82)
+			_strip.position = Vector2(210, 88)
 			break
 	if _popup_host.visible:
 		_place_popup_host()

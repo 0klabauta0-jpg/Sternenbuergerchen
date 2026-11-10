@@ -20,6 +20,7 @@ var _markers: Dictionary = {}
 var _patrol_paths: Dictionary = {}
 var _enemy_team_configs: Dictionary = {}
 var _tiles: Array = []
+var _tiles_by_grid: Dictionary = {}
 var _load_issue_message: String = ""
 
 
@@ -105,6 +106,8 @@ static func load_from_file(path: String) -> TerrainMapData:
 				continue
 
 			terrain_map_data._tiles.append(tile_data)
+			if not terrain_map_data._tiles_by_grid.has(tile_data.grid_position):
+				terrain_map_data._tiles_by_grid[tile_data.grid_position] = tile_data
 
 	return terrain_map_data
 
@@ -168,6 +171,8 @@ static func create_empty(
 				}
 			)
 			terrain_map_data._tiles.append(tile_data)
+			if not terrain_map_data._tiles_by_grid.has(tile_data.grid_position):
+				terrain_map_data._tiles_by_grid[tile_data.grid_position] = tile_data
 
 	return terrain_map_data
 
@@ -258,14 +263,9 @@ func get_load_issue_message() -> String:
 
 
 func get_tile_at_grid(grid_position: Vector2i):
-	for tile_data in _tiles:
-		if tile_data == null:
-			continue
-
-		if tile_data.grid_position == grid_position:
-			return tile_data
-
-	return null
+	# Authored map positions are fixed after load/create. Tile state remains the
+	# same referenced object; this index owns no gameplay mutations.
+	return _tiles_by_grid.get(grid_position)
 
 
 func get_map_name() -> String:
