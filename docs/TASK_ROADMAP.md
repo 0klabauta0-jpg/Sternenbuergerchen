@@ -1,5 +1,11 @@
 # TASK_ROADMAP
 
+### Personal-/Basis-UI nach Main — 10.11.2026
+Beauftragte Integration der fünf Taskcommits5df2d3b6f bis2ea460017 auf Main1e3cca237,
+ohne Produktkonflikte/weitere Codeänderung. Frischer nativer Ausflug102/0,
+Basisfenster111/0, Compact25/0, drei Skirmishstarts209/0.
+QA: docs/qa/personnel_ui_main_integration_20261110/README.md. Keine neue EXE.
+
 ### Gemeinsame Charakterkarte, Ausrüstung und Auftragsdetails — 10.11.2026
 Task/shared-personnel-equipment-view-20261110 auf e004843e7, Mainbasis1e3cca237.
 Größere Figur mit seitlichen Slots/Linien, Porträt/Rollen/echte Badges und

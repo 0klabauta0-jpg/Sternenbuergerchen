@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### Personal-/Basis-UI: Mainintegration — 10.11.2026
+Beauftragte Fast-forward-Integration der fünf Taskcommits5df2d3b6f bis2ea460017
+auf Main1e3cca237. Produktbaum identisch zu2ea460017; nur Integrationsdokumentation
+ergänzt. Frischer nativer tatsächlicher Satellitenausflug102/0 ohne Enginefehler,
+Basisfenster111/0, Compact25/0, drei Skirmishstarts209/0.
+QA: docs/qa/personnel_ui_main_integration_20261110/README.md.
+Kein EXE-/Paketschritt; Nutzerstände und Teams bleiben erhalten.
+
 ### Gemeinsame Charakterkarte, Ausrüstung und Auftragsdetails — 10.11.2026
 Task/shared-personnel-equipment-view-20261110 auf e004843e7, Mainbasis1e3cca237.
 Porträt/Name/Rollen/Badges, größere Figur, seitliche Ausrüstung mit Linien und
