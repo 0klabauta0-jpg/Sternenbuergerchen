@@ -1,5 +1,18 @@
 # IMPLEMENTATION_STATUS
 
+### Playtestplan: Basis, Inventar und langlebige Orte — Mainintegration10.11.2026
+Gepruefter Produktstand401c4a049 auf Mainbasis046b6d91a, ohne neue Produktcode-
+Aenderung zur Fast-forward-Integration. Physisches Wiedereinsteigen, Planmodus,
+freie sichere Landung, grosse gemischte Karten, endliches Inventar, Planetorte,
+unabhaengige Reisen/gemeinsame Ortswelten, Mining/Salvage und ausschaltbares
+Auto-Ruhen pro NPC einschliesslich manueller Prioritaet und Checkpoint.
+Vorige native Nachweise175/0 und62/0, Mehrort-Wiederbesuch61/0, Basisruhe19/0;
+17 gezielte Quellgates. Frische Integrationspruefung und Git-/Push-Nachweis in
+`docs/qa/playtest_main_integration_20261110/README.md`.
+Stilfreigabe, Mehrschiff-Save und dokumentierter UI-Minor bleiben offen.
+Keine neue EXE/PCK und keine allgemeine Performance-/Releasefreigabe.
+
+
 ### Kampagnenersatz-Absturz: Quellfix geprueft, neue EXE offen — 10.11.2026
 Auf Mainbasis ee0591cfedb4d28a01788defdcf23d98439d49ad im Taskbranch
 task/campaign-replace-crash-20261110. Tatsaechliche alte r01-EXE reproduziert

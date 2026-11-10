@@ -1,5 +1,18 @@
 # TASK_ROADMAP
 
+### Playtestplan AP0–AP10 und automatische NPC-Ruhe — Mainintegration10.11.2026
+Gepruefter Produktstand401c4a049 auf Mainbasis046b6d91a, ohne neue Produktcode-
+Aenderung zur Fast-forward-Integration. Physisches Wiedereinsteigen, Planmodus,
+freie sichere Landung, grosse gemischte Karten, endliches Inventar, Planetorte,
+unabhaengige Reisen/gemeinsame Ortswelten, Mining/Salvage und ausschaltbares
+Auto-Ruhen pro NPC einschliesslich manueller Prioritaet und Checkpoint.
+Vorige native Nachweise175/0 und62/0, Mehrort-Wiederbesuch61/0, Basisruhe19/0;
+17 gezielte Quellgates. Frische Integrationspruefung und Git-/Push-Nachweis in
+`docs/qa/playtest_main_integration_20261110/README.md`.
+Stilfreigabe, Mehrschiff-Save und dokumentierter UI-Minor bleiben offen.
+Keine neue EXE/PCK und keine allgemeine Performance-/Releasefreigabe.
+
+
 ### Gemeinsamer Basis-/Orbit-/Charakterabschluss — 10.11.2026
 Beide fertigen Arbeiten im Integrationsbranch zusammengefuehrt und geprueft:
 Kampagne152/0, Skirmish105/0, Verlustfaelle159/0 und gezielte UI-/Ownergates.
