@@ -1,5 +1,20 @@
 # IMPLEMENTATION_STATUS
 
+### Flugdeck, nutzbare Basis und Datenfeedback — 10.11.2026
+Taskbranch auf Main b92808399. Kompaktes Flugdeck mit realer Padvorschau,
+Padwahl, Pilot-Anwesenheit und Trupp absetzen an Basis/Missionsort. Pilot darf
+FT-Mitglied bleiben; physische Crewpräsenz bleibt Abflugvoraussetzung.
+Basisviewport-/Panankerfehler korrigiert. Direkte Zugänge zu vorhandenem Bauen,
+Werkstatt, endlichem Lager und Datenterminal; tatsächliche UI-Upload-/Craft-
+Commands. Sichtbarer Datenfortschritt/-abschluss und Annäherungs-Use.
+Echter erster Ausflug inklusive dualer Pilotenrolle, erneutem Absetzen,
+Button-Upload/Herstellung und Basischeckpoint70/0; Pilot28/0, native Layout40/0,
+Verwaltung15/0, Mausdaten17/0, Inventar28/0 und gezielte Nachbarn grün.
+Vier identische alte Basistestabweichungen auf Main/Task separat belegt.
+QA: docs/qa/flugdeck_basis_data_20261110/README.md. Kein Main-/EXE-Abschluss.
+Schiffskomponenten zusätzlich geplant, noch nicht implementiert:
+docs/tasks/SHIP_COMPONENTS_2026_11_10_PLAN.md.
+
 ### Playtest-Nachtrag: Mainintegration — 10.11.2026
 Task256923431 konfliktfrei auf Main80938bf7b integriert (Merge37e51225c).
 Produktbaum identisch mit geprüftem Task, danach nur Integrationsdokumentation.

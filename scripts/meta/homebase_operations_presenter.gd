@@ -56,9 +56,13 @@ var _focused_status: Label
 var _identity_row: BoxContainer
 var _focused_details: Button
 var _remove_member: Button
+var _pad_selector: OptionButton
+var _selected_pad_id: String = ""
+var _flight_actions: HBoxContainer
 var _craft_selector: OptionButton
 var _craft_image: TextureRect
 var _pilot_selector: OptionButton
+var _pilot_status: Label
 var _craft_status: Label
 var _payload_label: Label
 var _progress: ProgressBar
@@ -85,6 +89,7 @@ var _workflow: HBoxContainer
 var _workflow_labels: Dictionary = {}
 var _job_board: Control
 var _region_map: Control
+var _base_management_bar: HFlowContainer
 var _services_view: Control
 
 
@@ -169,7 +174,7 @@ func _build() -> void:
 	_workflow.name = "PreparationSequence"
 	_workflow.add_theme_constant_override("separation", 24)
 	outer.add_child(_workflow)
-	for entry in [{"id": "personnel", "label": "01  PERSONAL"}, {"id": "squad", "label": "02  TRUPP & AUSRÜSTUNG"}, {"id": "mission", "label": "03  EINSATZ & ABFLUG"}]:
+	for entry in [{"id": "personnel", "label": "01  PERSONAL"}, {"id": "squad", "label": "02  TRUPP & AUSRÜSTUNG"}, {"id": "mission", "label": "03  FLUGDECK"}]:
 		var step: Label = _label(String(entry.label), 16, MUTED)
 		THEME.style_section_heading(step, 18)
 		step.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -183,7 +188,7 @@ func _build() -> void:
 	nav.custom_minimum_size.x = 166
 	nav.add_theme_constant_override("separation", 8)
 	body.add_child(nav)
-	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "map", "label": "Sternkarte"}, {"id": "mission", "label": "Einsatz &\nAbflug"}, {"id": "jobs", "label": "Smart Mobile"}]:
+	for item in [{"id": "base", "label": "Basis erkunden"}, {"id": "personnel", "label": "Personal"}, {"id": "squad", "label": "Trupp &\nAusrüstung"}, {"id": "mission", "label": "Flugdeck"}, {"id": "map", "label": "Sternkarte"}, {"id": "jobs", "label": "Smart Mobile"}]:
 		var key: String = String(item.id)
 		var button: Button = _button(String(item.label), false)
 		button.name = "Navigate_" + key
@@ -202,7 +207,7 @@ func _build() -> void:
 	var refuel := _button("Tankservice", false)
 	refuel.name = "OpenBaseServices"
 	nav.add_child(refuel)
-	refuel.pressed.connect(func(): _act("navigate", {"mode": "services"}))
+	refuel.pressed.connect(func(): _open_base_management("ship"))
 	nav.add_child(detail_button)
 	detail_button.pressed.connect(func(): _act("details", {"unit_id": _focused_id}))
 	nav.move_child(_nav.jobs,nav.get_child_count()-1)
@@ -239,6 +244,18 @@ func _build() -> void:
 	_services_view.call("configure", _singleplayer_snapshot, _singleplayer_request)
 	_services_view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_services_view.hide()
+	_base_management_bar = HFlowContainer.new()
+	_base_management_bar.name = "BaseManagementActions"
+	_base_management_bar.position = Vector2(16, 16)
+	_base_management_bar.add_theme_constant_override("h_separation", 8)
+	_workspace.add_child(_base_management_bar)
+	for entry in [["Bauen", "build"], ["Werkstatt / Blueprints", "workshop"], ["Lager & Ausrüstung", "inventory"], ["Datenterminal / Hochladen", "data"], ["Schiff", "ship"]]:
+		var action := _button(String(entry[0]), false)
+		action.add_theme_font_size_override("font_size", 15)
+		_base_management_bar.add_child(action)
+		action.pressed.connect(_open_base_management.bind(String(entry[1])))
+	_base_management_bar.hide()
+
 	_feedback = _label("", 15, GOLD)
 	_feedback.custom_minimum_size.y = 24
 	outer.add_child(_feedback)
@@ -465,56 +482,76 @@ func _update_equipment_palette() -> void:
 
 
 func _build_flightdeck() -> void:
-	var content: VBoxContainer = _column("flight", "Flugdeck · Einsatz & Abflug")
-	var groups := HBoxContainer.new()
-	groups.name = "FlightdeckGroups"
-	groups.add_theme_constant_override("separation", 16)
-	groups.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	content.add_child(groups)
-	var mission: VBoxContainer = _flight_group(groups, "Selection")
-	var pilot: VBoxContainer = _flight_group(groups, "Readiness")
-	var actions: VBoxContainer = _flight_group(groups, "Actions")
-	_mission_name = _label("Einsatz", 20, CREAM)
-	mission.add_child(_mission_name)
-	_mission_selector = _option(mission, "MissionSelector")
-	_mission_selector.item_selected.connect(func(index: int): _act("mission", {"mission_id": String(_mission_selector.get_item_metadata(index))}))
-	mission.add_child(_label("Schiff", 16, MUTED))
+	var content: VBoxContainer = _column("flight", "Flugdeck")
+	content.add_theme_constant_override("separation", 5)
+	var selection := HBoxContainer.new()
+	selection.name = "FlightdeckSelection"
+	selection.add_theme_constant_override("separation", 10)
+	content.add_child(selection)
+	_pad_selector = _option(selection, "PadSelector")
+	_pad_selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_pad_selector.item_selected.connect(_pad_selected)
 	_craft_drop_target = DRAG_SURFACE.new()
 	_craft_drop_target.name = "CraftFireteamDropTarget"
+	_craft_drop_target.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_craft_drop_target.set("accepted_type", "fob_fireteam_card")
-	_craft_drop_target.tooltip_text = "Kompletten Trupp hierher auf das ausgewählte Schiff ziehen"
-	mission.add_child(_craft_drop_target)
+	_craft_drop_target.tooltip_text = "Kompletten Trupp auf das ausgewählte Schiff ziehen"
+	selection.add_child(_craft_drop_target)
 	_craft_drop_target.connect("payload_dropped", func(data: Dictionary): _act("board", {"fireteam_id": String(data.get("fireteam_id", "")), "craft_id": _craft_id}))
 	_craft_selector = _option(_craft_drop_target, "CraftSelector")
 	_craft_drop_target.call("forward_drag_from", _craft_selector)
-	_craft_selector.item_selected.connect(func(index: int): _act("craft", {"craft_id": String(_craft_selector.get_item_metadata(index))}))
-	pilot.add_child(_label("Pilot", 16, MUTED))
+	_craft_selector.item_selected.connect(func(index: int):
+		_pad_selector.set_meta("empty_pad_focus", false)
+		_act("craft", {"craft_id": String(_craft_selector.get_item_metadata(index))}))
+	var pilot_row := HBoxContainer.new()
+	pilot_row.name = "FlightdeckReadiness"
+	pilot_row.add_theme_constant_override("separation", 10)
+	content.add_child(pilot_row)
+	var pilot := VBoxContainer.new()
+	pilot.custom_minimum_size.x = 180
+	pilot_row.add_child(pilot)
 	_pilot_selector = _option(pilot, "PilotSelector")
+	_pilot_selector.custom_minimum_size.x = 180
 	_pilot_selector.item_selected.connect(func(index: int): _act("pilot", {"unit_id": String(_pilot_selector.get_item_metadata(index)), "craft_id": _craft_id}))
-	_craft_status = _label("Kein Schiff verfügbar", 19, THEME.status_color("neutral"))
-	pilot.add_child(_craft_status)
-	_payload_label = _label("", 16, CREAM)
-	pilot.add_child(_payload_label)
+	_pilot_status = _label("Nicht an Bord", 14, GOLD)
+	pilot.add_child(_pilot_status)
+	var status := VBoxContainer.new()
+	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pilot_row.add_child(status)
+	_craft_status = _label("Kein Schiff verfügbar", 16, THEME.status_color("neutral"))
+	status.add_child(_craft_status)
+	_payload_label = _label("", 14, CREAM)
+	status.add_child(_payload_label)
 	_progress = ProgressBar.new()
-	_progress.custom_minimum_size.y = 18
+	_progress.custom_minimum_size.y = 6
 	_progress.show_percentage = false
-	pilot.add_child(_progress)
+	status.add_child(_progress)
+	_mission_name = _label("", 14, MUTED)
+	content.add_child(_mission_name)
+	_mission_selector = _option(content, "MissionSelector")
+	_mission_selector.item_selected.connect(func(index: int): _act("mission", {"mission_id": String(_mission_selector.get_item_metadata(index))}))
+	_flight_actions = HBoxContainer.new()
+	_flight_actions.name = "FlightdeckActions"
+	_flight_actions.add_theme_constant_override("separation", 8)
+	content.add_child(_flight_actions)
 	_board = _button("Boarding starten", false)
-	_board.custom_minimum_size.y = 44
-	actions.add_child(_board)
+	_flight_actions.add_child(_board)
 	_board.pressed.connect(func(): _act("board", {"fireteam_id": _fireteam_id, "craft_id": _craft_id}))
-	_unboard = _button("Trupp zurückholen", false)
-	actions.add_child(_unboard)
+	_unboard = _button("Trupp absetzen", false)
+	_flight_actions.add_child(_unboard)
 	_unboard.pressed.connect(func(): _act("unboard", {"fireteam_id": _fireteam_id, "craft_id": _craft_id}))
-	_start = _button("Einsatz starten  ›", true)
+	_start = _button("Abheben · Mondorbit", true)
 	_start.name = "StartMission"
-	_start.custom_minimum_size.y = 48
-	actions.add_child(_start)
+	_flight_actions.add_child(_start)
 	_start.pressed.connect(func(): _act("start", {"craft_id": _craft_id}))
+	for button in [_board, _unboard, _start]:
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.custom_minimum_size = Vector2(0, 40)
+		button.add_theme_font_size_override("font_size", 15)
+		button.clip_text = true
 	_launch_reason = _label("Abflugbereitschaft wird geprüft …", 13, GOLD)
 	_launch_reason.name = "LaunchReadiness"
-	_launch_reason.custom_minimum_size.y = 32
-	actions.add_child(_launch_reason)
+	content.add_child(_launch_reason)
 	_build_reference_stage()
 
 
@@ -656,6 +693,7 @@ func refresh() -> void:
 	var mode: String = String(snapshot.get("mode", "squad"))
 	var changed_mode: bool = mode != _mode
 	_mode = mode
+	_base_management_bar.visible = _mode == "base"
 	var campaign_ready: bool = not Dictionary(snapshot.get("singleplayer", {})).is_empty()
 	for key in ["jobs", "map"]:
 		_nav[key].disabled = not campaign_ready
@@ -700,6 +738,7 @@ func refresh() -> void:
 	if bool(screen.get("_character_sheet_open")):
 		screen.call("_update_character_inventory", snapshot)
 	_update_flight(Dictionary(snapshot.get("selected_craft", {})), snapshot)
+	_update_pad_options(snapshot)
 	if changed_mode:
 		_layout_columns()
 	_update_base_surface(snapshot)
@@ -827,13 +866,15 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	_set_options(_mission_selector, Array(snapshot.get("missions", [])), String(snapshot.get("mission_id", "")))
 	_set_options(_pilot_selector, Array(craft.get("pilot_options", [])), String(craft.get("pilot_id", "")))
 	_pilot_selector.disabled = bool(craft.get("busy", false)) or craft.is_empty()
+	_pilot_status.text = "An Bord" if bool(craft.get("pilot_aboard", false)) else "Nicht an Bord"
+	_pilot_status.add_theme_color_override("font_color", CYAN if bool(craft.get("pilot_aboard", false)) else GOLD)
 	_set_texture(_craft_image, String(craft.get("texture_path", "")))
 	_stage_name.text = String(craft.get("name", "Heimatbasis"))
 	_craft_status.text = String(craft.get("status", "Kein Schiff verfügbar"))
 	var status_color: Color = THEME.status_color(_craft_status_key(craft))
 	if _craft_status.get_theme_color("font_color") != status_color:
 		_craft_status.add_theme_color_override("font_color", status_color)
-	_payload_label.text = "%d Kräfte an Bord / im Boarding" % int(craft.get("passenger_count", 0))
+	_payload_label.text = "%d / %d Kräfte an Bord" % [int(craft.get("aboard_count",0)),int(craft.get("passenger_count", 0))]
 	_progress.value = float(craft.get("progress", 0.0))
 	_board.disabled = not bool(craft.get("can_board", false))
 	_unboard.disabled = not bool(craft.get("can_unboard", false))
@@ -852,16 +893,63 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 	_launch_reason.text = launch_message
 	_launch_reason.add_theme_color_override("font_color", GOLD if _start.disabled else CYAN)
 	_start.tooltip_text = launch_message
-	_start.text = "Abheben · Mondorbit  ›" if space_route else "Einsatz starten  ›"
+	_start.text = "Abheben · Mondorbit" if space_route else "Einsatz starten  ›"
 	# A location catalogue also exists in ordinary Skirmish. Only the active
 	# orbital-route projection changes its selector and launch requirements.
 	_mission_selector.visible = not space_route
-	_mission_name.text = "Mondbasis → Mondorbit\nZielort nach dem Quantum-Sprung im Planetenorbit wählen." if space_route else "Einsatz"
+	_mission_name.visible = not space_route
+	_mission_name.text = "Einsatz"
+
+
+func _update_pad_options(snapshot: Dictionary) -> void:
+	if String(_craft_selector.get_meta("pad_craft", _craft_id)) != _craft_id:
+		_pad_selector.set_meta("empty_pad_focus", false)
+	var runtime: Dictionary = snapshot.get("singleplayer", {})
+	var pads: Array = []
+	for pad: Dictionary in runtime.get("base_personnel", {}).get("layout", {}).get("landing_pads", []):
+		if bool(pad.get("built", true)):
+			pads.append({"id":String(pad.id), "label":"Flugdeck %d" % (pads.size() + 1)})
+	var selected_craft_pad := ""
+	for craft: Dictionary in runtime.get("crafts", []):
+		if String(craft.get("craft_id", "")) == _craft_id:
+			selected_craft_pad = String(craft.get("landing_pad_id", ""))
+	if not _pad_selector.has_meta("empty_pad_focus") or not bool(_pad_selector.get_meta("empty_pad_focus")):
+		_selected_pad_id = selected_craft_pad
+	if not pads.any(func(pad:Dictionary): return String(pad.id) == _selected_pad_id):
+		_selected_pad_id = String(pads[0].id) if not pads.is_empty() else ""
+	_set_options(_pad_selector, pads, _selected_pad_id)
+	_pad_selector.visible = not pads.is_empty()
+	_pad_selector.disabled = pads.size() < 2
+	var empty_pad: bool = bool(_pad_selector.get_meta("empty_pad_focus", false))
+	_craft_selector.disabled = empty_pad
+	if empty_pad:
+		_pilot_selector.disabled = true
+		_board.disabled = true
+		_unboard.hide()
+		_start.disabled = true
+		_craft_status.text = "Landepad frei"
+		_payload_label.text = "Kein Schiff auf diesem Flugdeck"
+		_launch_reason.text = "Schiff über die Auswahl rechts wählen."
+		_craft_selector.disabled = false
+	# A craft selection is explicit and ends a previous empty-pad inspection.
+	_craft_selector.set_meta("pad_craft", _craft_id)
+
+
+func _pad_selected(index: int) -> void:
+	_selected_pad_id = String(_pad_selector.get_item_metadata(index))
+	var runtime: Dictionary = _singleplayer_snapshot()
+	for craft: Dictionary in runtime.get("crafts", []):
+		if String(craft.get("landing_pad_id", "")) == _selected_pad_id:
+			_pad_selector.set_meta("empty_pad_focus", false)
+			_act("craft", {"craft_id":String(craft.craft_id)})
+			return
+	_pad_selector.set_meta("empty_pad_focus", true)
+	refresh()
 
 
 func get_launch_action_rects() -> Array[Rect2]:
 	var result: Array[Rect2] = []
-	for control in [_start, _board, _unboard, _launch_reason]+_nav.values():
+	for control in [_start, _board, _unboard, _launch_reason, _base_management_bar]+_nav.values():
 		if control != null and control.is_visible_in_tree():
 			result.append(control.get_global_rect())
 	return result
@@ -921,6 +1009,7 @@ func _layout_columns() -> void:
 	if _workspace == null or _columns.size() != 4:
 		return
 	var available: Vector2 = _workspace.size
+	if _base_management_bar != null: _base_management_bar.size.x = maxf(available.x - 190, 0)
 	var gap: float = 12.0
 	var narrow: bool = available.x < 1450.0 and size.x < 1600.0
 	var rects: Dictionary = {}
@@ -949,12 +1038,15 @@ func _layout_columns() -> void:
 		rects["squad"] = Rect2(start_x, 0, squad_width, available.y)
 		start_x += squad_width + gap
 		var right_width: float = maxf(available.x - start_x, 0.0)
-		var footer_height: float = minf(248.0, available.y)
+		var footer_height: float = minf(250.0, available.y)
 		var top_height: float = maxf(available.y - footer_height - gap, 0.0)
-		var equipment_width: float = clampf(right_width * 0.43, 300.0, 620.0)
-		rects["equipment"] = Rect2(start_x, 0, equipment_width, top_height)
+		var equipment_width: float = clampf(right_width * 0.38, 300.0, 520.0)
+		rects["equipment"] = Rect2(start_x, 0, equipment_width, available.y)
 		scene_rect = Rect2(start_x + equipment_width + gap, 0, maxf(right_width - equipment_width - gap, 0.0), top_height)
-		rects["flight"] = Rect2(start_x, top_height + gap, right_width, footer_height)
+		rects["flight"] = Rect2(scene_rect.position.x, top_height + gap, scene_rect.size.x, footer_height)
+	for control in [_squad_craft_selector, _squad_craft_image, _squad_craft_caption]:
+		control.visible = _mode != "mission"
+	_pilot_selector.custom_minimum_size.x = 160.0 if narrow else 200.0
 	for key in _columns:
 		var panel: Control = _columns[key]
 		panel.visible = rects.has(key)
@@ -977,6 +1069,14 @@ func _layout_columns() -> void:
 		var identity_size: int = 30 if available.x > 2200.0 else (23 if narrow else 26)
 		if _focused_name.get_theme_font_size("font_size") != identity_size:
 			_focused_name.add_theme_font_size_override("font_size", identity_size)
+
+
+func _open_base_management(section: String) -> void:
+	if section == "inventory":
+		_act("navigate", {"mode":"squad"})
+		return
+	_act("navigate", {"mode":"services"})
+	_services_view.call("set_section", section)
 
 
 func _terminal_requested(id: String) -> void:
@@ -1028,7 +1128,7 @@ func _layout_base_surface() -> void:
 		_base.position = _preview_layout_rect.position
 		_base.size = _preview_layout_rect.size
 		_reference_stage.hide()
-		_base.call("set_pad_preview", true, _craft_id)
+		_base.call("set_pad_preview", true, _craft_id, _selected_pad_id)
 	else:
 		_base.call("set_active", false)
 		_reference_stage.visible = has_preview
@@ -1040,6 +1140,8 @@ func _project_ship_context(runtime: Dictionary) -> Dictionary:
 		if String(entry.get("craft_id", "")) == _craft_id:
 			craft = entry
 			break
+	if not _selected_pad_id.is_empty() and String(craft.get("landing_pad_id", "")) != _selected_pad_id:
+		return {"kind":"base_pad", "phase":"grounded", "caption":"Flugdeck · freies Landepad", "landing_pad_id":_selected_pad_id}
 	var travel: Dictionary = runtime.get("space_travel", {})
 	var phase: String = String(travel.get("phase", "grounded"))
 	if String(travel.get("craft_id", "")) == _craft_id and phase in ["orbit", "quantum", "stopped", "approach"]:

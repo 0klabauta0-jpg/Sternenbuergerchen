@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: satellite semantic action
+PASS: loot/crate semantic action
+PASS: overlapping targets resolve deterministically
+PASS: far geometry is not clickable
+SATELLITE_NEIGHBOR { "original_position": (1861.826, 2333.087), "original_grid": (19, 38), "target_walkable": true, "replacement_grid": (19, 38), "replacement_position": (1861.826, 2333.087), "blocked_grid": <null>, "blocked_position": <null>, "blocker_reason": "" } distance=71.5541763305664
+PASS: actual projected satellite hover identifies correct target
+PASS: actual cursor advertises the real data action
+PASS: hover never completes objective or submits gameplay
+MOUSE_USE { "schema": "sternenbuergerchen.mission_interaction_use_intent.v1", "runtime_authority": "SimulationRoot via MissionTacticalSandboxController GO path", "accepted": true, "blocked_reason": "", "creates_order_intent": true, "requires_go": true, "scenario_truth_read_only": true, "ui_sets_gameplay_truth": false, "interaction_id": "satellite_data", "feedback_line": "COMPUTER bereit | TAKE | FT1 75m", "action_label": "TAKE", "fireteam_id": "ft1", "command_type": "take", "interaction_type": "computer", "required_order": "take", "duration_seconds": 3.0, "interaction_radius_world": 96.0, "step_id": "secure_satellite", "gate_id": "secure_satellite", "required_state": "secure_satellite_done", "target_position": (1797.826, 2301.087), "waypoint_id": "wp_0001", "phase": 1, "last_command_text": "USE COMPUTER -> TAKE" }
+PASS: context rightclick queues existing actual Use intent
+PASS: queued Use still requires GO and real duration
+PASS: visible panel confirms prepared data action
+PASS: real GO accepts actual mouse Use
+PASS: mouse-created action really secures satellite after timed hold
+PASS: visible panel confirms actual success after the cursor leaves
+PASS: completed data explains required home upload
+PASS: hidden live mission clears hints and cannot accept contextual rightclick
+PASS: hidden mission cannot consume another view rightclick
+PASS: deselection clears intelligent cursor
+SATELLITE_MOUSE_USE checks=17 failures=0

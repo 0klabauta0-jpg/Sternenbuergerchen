@@ -230,7 +230,7 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 				"board": allowed = landed
 				"return": allowed = bool(controller.call("_can_request_mission_dropship_return", selected_card)) and (not landed or bool(controller.call("get_campaign_pilot_flight_guard", craft_id).get("ok", false)))
 		button.disabled = pending or not allowed
-		button.text = {"set_lz":"Landezone waehlen", "drop":"Landen", "board":"Einsteigen", "return":"Abheben"}[action]
+		button.text = {"set_lz":"Landezone waehlen", "drop":"Trupp absetzen" if landed else "Landen", "board":"Einsteigen", "return":"Abheben"}[action]
 		if action == "set_lz": button.text = "Landezone waehlen"
 		button.tooltip_text = "Alle Bodenpersonen muessen zum Schiff. Einsteigen wird nach Ankunft bestaetigt." if action == "board" else ("Pilot und Besatzung muessen an Bord sein." if action == "return" else "Landezone und Anflug des ausgewaehlten Schiffs")
 		button.set_meta("mission_dropship_craft_id", craft_id)
@@ -241,7 +241,7 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 			button.pressed.connect(callback)
 		match action:
 			"set_lz": button.visible = not landed
-			"drop": button.visible = not landed and bool(selected_card.get("has_lz_position", false)) and bool(selected_card.get("has_embarked_payload", false))
+			"drop": button.visible = landed or (bool(selected_card.get("has_lz_position", false)) and bool(selected_card.get("has_embarked_payload", false)))
 			"board": button.visible = landed
 			"return": button.visible = allowed or landed
 	var approach_row := card.get_node("Contents/ApproachRow") as Control
@@ -250,6 +250,7 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 	_style_primary_action(card, int(hud_layout.body_font_size))
 	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
 	feedback.text = "" if selected_card.is_empty() else String(controller.call("_get_mission_dropship_card_feedback_text", selected_card))
+	if feedback.text == "Trupp ab": feedback.text = "Trupp abgesetzt"
 	feedback.visible = not feedback.text.is_empty() and feedback.text != "Trupp ab"
 	if not selected_card.is_empty():
 		controller.call("_apply_mission_dropship_card_feedback_style", feedback, controller.call("_get_mission_dropship_card_feedback_tone", selected_card))

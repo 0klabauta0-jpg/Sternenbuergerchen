@@ -3934,7 +3934,8 @@ func _on_homebase_aircraft_pilot_assigned(craft_id: String, pilot_unit_id: Strin
 		_assigned_aircraft_pilot_by_craft.erase(assigned_craft_id)
 
 	_assigned_aircraft_pilot_by_craft[normalized_craft_id] = normalized_pilot_id
-	_homebase_staged_unit_ids = _remove_unit_ids_from_list(_homebase_staged_unit_ids, PackedStringArray([normalized_pilot_id]))
+	if _singleplayer_runtime == null:
+		_homebase_staged_unit_ids = _remove_unit_ids_from_list(_homebase_staged_unit_ids, PackedStringArray([normalized_pilot_id]))
 	_refresh_homebase_screen()
 
 
@@ -5778,7 +5779,7 @@ func _filter_available_homebase_unit_ids(unit_ids: PackedStringArray) -> PackedS
 		var unit_id: String = String(unit_id_variant).strip_edges()
 		if unit_id.is_empty() or not available_lookup.has(unit_id) or filtered_unit_ids.has(unit_id):
 			continue
-		if _is_unit_assigned_to_aircraft(unit_id):
+		if _is_unit_assigned_to_aircraft(unit_id) and _singleplayer_runtime == null:
 			continue
 		filtered_unit_ids.append(unit_id)
 	return filtered_unit_ids
@@ -7639,14 +7640,14 @@ func _campaign_load_failed() -> void:
 
 
 func _refresh_singleplayer_services() -> void:
-	if _campaign_tutorial!=null: _campaign_tutorial.visible=not bool(get_node("HomebaseScreen").get("_character_sheet_open"))
+	if _campaign_tutorial!=null: _campaign_tutorial.visible=not bool(get_node("HomebaseScreen").get("_character_sheet_open")) and String(get_node("HomebaseScreen").get("_operations_mode")) != "services"
 	if _singleplayer_services == null or _singleplayer_runtime == null: return
 	var snapshot: Dictionary = _singleplayer_runtime.call("get_snapshot")
 	var presenter: Node=get_node("HomebaseScreen").get("_operations_presenter")
 	var base: Node=presenter.get("_base") if presenter!=null else null
 	if base!=null and not base.is_connected("world_selection_changed",_on_base_world_selection_changed): base.connect("world_selection_changed",_on_base_world_selection_changed)
 	var selected_ship := String(base.call("get_selected_world_craft_id")) if base!=null else ""
-	var at_home := _current_meta_view == "homebase" and presenter!=null and (String(presenter.get("_mode"))=="services" or (String(presenter.get("_mode"))=="base" and not selected_ship.is_empty()))
+	var at_home := _current_meta_view == "homebase" and presenter!=null and (String(presenter.get("_mode"))=="base" and not selected_ship.is_empty())
 	if at_home and String(presenter.get("_mode"))=="base" and not selected_ship.is_empty(): _singleplayer_services.set("_selected_craft_id",selected_ship)
 	var remote := _current_meta_view == "mission" and not Dictionary(snapshot.get("service_contexts_by_craft_id",{})).is_empty()
 	_singleplayer_services.visible = at_home or remote

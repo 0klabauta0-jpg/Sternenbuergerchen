@@ -459,7 +459,7 @@ func observe_campaign_progress() -> void:
 	var selected_craft: Dictionary = _screen.call("get_operations_snapshot", false).get("selected_craft", {})
 	var craft_id: String = String(selected_craft.get("id", ""))
 	var ready := not craft_id.is_empty() and bool(_screen.call("_has_homebase_direct_launch_payload_for_craft", craft_id)) and not String(_screen.call("_get_assigned_pilot_id", craft_id)).is_empty()
-	ready = ready and (_base_personnel == null or _base_personnel.is_pilot_aboard(craft_id))
+	ready = ready and (_base_personnel == null or (_base_personnel.is_pilot_aboard(craft_id) and bool(_base_personnel.get_payload_presence(craft_id).all_aboard)))
 	var job: Dictionary = Dictionary(campaign.jobs.get("satellite_recovery", {}))
 	var service := _service_context(craft_id)
 	var departure: Dictionary = Dictionary(campaign.departures_by_craft_id.get(craft_id, {}))
@@ -486,6 +486,8 @@ func validate_space_launch(craft_id: String, observe_progress: bool = true) -> D
 		return _reject("trip_active", "Den laufenden Ausflug zuerst beenden")
 	if _base_personnel != null and not _base_personnel.is_pilot_aboard(craft_id):
 		return _reject("pilot_not_aboard", "Zugewiesene Person muss tatsächlich am Pilotenplatz an Bord sein")
+	if _base_personnel != null and not bool(_base_personnel.get_payload_presence(craft_id).all_aboard):
+		return _reject("crew_not_aboard", "Alle zugewiesenen Truppmitglieder müssen tatsächlich an Bord sein")
 	if _home_pad_for(craft_id).is_empty() or String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id, "")) != "homebase" or not Dictionary(_flow.call("_find_pending_mission_craft_transfer", craft_id)).is_empty():
 		return _reject("craft_unavailable", "Schiff muss auf seinem Startpad bereitstehen")
 	var definition: Dictionary = _flow.call("_find_homebase_aircraft_definition", craft_id)

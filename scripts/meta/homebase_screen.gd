@@ -2954,7 +2954,7 @@ func _render_roster() -> void:
 			continue
 		if _selected_unit_ids.has(unit_id):
 			continue
-		if _is_unit_assigned_to_aircraft(unit_id):
+		if _is_unit_assigned_to_aircraft(unit_id) and get_base_personnel_runtime() == null:
 			continue
 
 		var profile = _profiles_by_id.get(unit_id, null)
@@ -6500,7 +6500,7 @@ func _add_unit_to_team(unit_id: String) -> bool:
 		_update_team_summary()
 		return false
 
-	if _is_unit_assigned_to_aircraft(unit_id):
+	if _is_unit_assigned_to_aircraft(unit_id) and get_base_personnel_runtime() == null:
 		_team_feedback_text = "%s is assigned to the flight deck." % _build_display_name(unit_id)
 		_update_team_summary()
 		return false
@@ -6592,7 +6592,7 @@ func _normalize_selected_unit_ids(selected_unit_ids: PackedStringArray) -> Packe
 	var normalized_selection: PackedStringArray = []
 	for selected_unit_id in selected_unit_ids:
 		var unit_id: String = String(selected_unit_id).strip_edges()
-		if unit_id.is_empty() or not available_lookup.has(unit_id) or normalized_selection.has(unit_id) or _is_unit_assigned_to_aircraft(unit_id):
+		if unit_id.is_empty() or not available_lookup.has(unit_id) or normalized_selection.has(unit_id) or (_is_unit_assigned_to_aircraft(unit_id) and get_base_personnel_runtime() == null):
 			continue
 
 		normalized_selection.append(unit_id)
@@ -9078,6 +9078,12 @@ func _operations_craft_busy(craft_id: String) -> bool:
 	return _is_craft_in_transit(craft_id) or _has_active_pilot_transfer_for_craft(craft_id) or _has_active_cargo_load_for_craft(craft_id) or _get_aircraft_location(craft_id) != "homebase"
 
 
+func _can_join_boarded_team_as_pilot(unit_id: String, fireteam_id: String) -> bool:
+	if get_base_personnel_runtime() == null: return false
+	var craft_id := _operations_payload_craft_for_team(fireteam_id)
+	return not craft_id.is_empty() and craft_id == _find_assigned_craft_for_unit(unit_id) and not _operations_craft_busy(craft_id)
+
+
 func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 	var id: String = String(unit_data.get("unit_id", "")).strip_edges()
 	var profile = _profiles_by_id.get(id, null)
@@ -9085,8 +9091,15 @@ func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 	var payload_craft: String = _operations_payload_craft_for_team(fireteam_id)
 	var pilot_craft: String = _find_assigned_craft_for_unit(id)
 	var in_transit: bool = not _find_transfer_entry_for_unit(id).is_empty()
-	var busy: bool = in_transit or not pilot_craft.is_empty() or not payload_craft.is_empty()
 	var base_runtime: Node = get_base_personnel_runtime()
+	var physically_busy: bool = false
+	var physical_status: String = ""
+	if base_runtime != null:
+		for person: Dictionary in base_runtime.call("get_snapshot").get("units", []):
+			if String(person.unit_id) == id:
+				physical_status = String(person.status)
+				physically_busy = physical_status in ["aboard", "away", "boarding"]
+	var busy: bool = in_transit or not payload_craft.is_empty() or physically_busy or (not pilot_craft.is_empty() and (base_runtime == null or _operations_craft_busy(pilot_craft)))
 	var outside_campaign: bool = false
 	if base_runtime != null and not in_transit and payload_craft.is_empty():
 		for person: Dictionary in base_runtime.call("get_snapshot").get("units", []):
@@ -9099,13 +9112,14 @@ func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 	if in_transit:
 		status = "Unterwegs"
 	elif not payload_craft.is_empty():
-		status = "An Bord" if _are_homebase_payload_fireteams_boarded(PackedStringArray([fireteam_id])) else "Boarding"
+		status = ("An Bord" if physical_status == "aboard" else ("Boarding" if physical_status in ["moving", "boarding"] else "Nicht an Bord")) if base_runtime != null else ("An Bord" if _are_homebase_payload_fireteams_boarded(PackedStringArray([fireteam_id])) else "Boarding")
 	elif not pilot_craft.is_empty():
-		status = "Pilot zugewiesen"
+		status = "An Bord · Pilot" if base_runtime != null and bool(base_runtime.call("is_pilot_aboard", pilot_craft)) else "Nicht an Bord · Pilot"
 	elif not fireteam_id.is_empty():
 		status = "Im Trupp · %s" % _get_fireteam_label(fireteam_id)
 	var focused_members: PackedStringArray = _get_member_unit_ids_for_fireteam(_focused_fireteam_id)
-	var target_busy: bool = not _operations_payload_craft_for_team(_focused_fireteam_id).is_empty()
+	var target_craft: String = _operations_payload_craft_for_team(_focused_fireteam_id)
+	var target_busy: bool = not target_craft.is_empty() and not _can_join_boarded_team_as_pilot(id, _focused_fireteam_id)
 	var capacity_available: bool = _selected_unit_ids.has(id) or _selected_unit_ids.size() < _get_team_capacity()
 	return {"id": id, "name": _build_display_name(id), "role": role, "status": status,
 		"badges": OPERATIONS_BADGES.get_badges_for_profile(profile),
@@ -9173,12 +9187,13 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 		var can_start: bool = not busy and not pilot_id.is_empty() and _can_send_craft(definition, id) and _has_homebase_direct_launch_payload_for_craft(id)
 		var base_runtime: Node = get_base_personnel_runtime()
 		var pilot_present: bool = base_runtime == null or bool(base_runtime.call("is_pilot_aboard", id))
-		if not pilot_present:
+		var presence:Dictionary = base_runtime.call("get_payload_presence",id) if base_runtime != null else {"aboard_count":payload_ids.size(),"all_aboard":boarded}
+		if not pilot_present or not bool(presence.all_aboard):
 			can_start = false
 		var pilots: Array = [{"id": "", "label": "Pilot auswählen"}]
 		for unit_variant in roster:
 			var unit: Dictionary = Dictionary(unit_variant)
-			if String(unit.id) == pilot_id or (not bool(unit.busy) and String(unit.fireteam_id).is_empty() and not _selected_unit_ids.has(String(unit.id))):
+			if String(unit.id) == pilot_id or ((not bool(unit.busy) or (base_runtime != null and _operations_payload_craft_for_team(String(unit.fireteam_id)) == id)) and (base_runtime != null or (String(unit.fireteam_id).is_empty() and not _selected_unit_ids.has(String(unit.id))))):
 				pilots.append({"id": String(unit.id), "label": String(unit.name)})
 		var progress: float = _get_homebase_direct_boarding_progress_ratio_for_craft(id) * 100.0
 		var status: String = "Bereit" if can_start else "Vorbereitung"
@@ -9200,11 +9215,11 @@ func get_operations_snapshot(include_runtime: bool = true) -> Dictionary:
 		elif can_start:
 			next_step = "Einsatz starten"
 		var craft: Dictionary = {"id": id, "name": String(definition.get("display_name", "Dropship")),
-			"texture_path": String(definition.get("texture_path", "")), "pilot_id": pilot_id,
+			"texture_path": String(definition.get("texture_path", "")), "pilot_id": pilot_id, "pilot_aboard": pilot_present and not pilot_id.is_empty(),
 			"pilot_name": _build_display_name(pilot_id) if not pilot_id.is_empty() else "", "pilot_options": pilots,
 			"busy": busy, "status": status, "progress": progress, "next_step": next_step,
 			"has_payload": not payload_teams.is_empty(), "payload_fireteam_ids": Array(payload_teams),
-			"passenger_count": payload_ids.size(), "can_start": can_start,
+			"passenger_count": payload_ids.size(), "aboard_count":int(presence.aboard_count), "can_start": can_start,
 			"can_board": not busy and bool(gate.get("can_stage", false)) and not Array(focused_team.get("members", [])).is_empty() and (not bool(focused_team.get("busy", false)) or (payload_teams.has(_focused_fireteam_id) and not pilot_present)),
 			"can_unboard": not busy and payload_teams.has(_focused_fireteam_id)}
 		var preview: Texture2D = _get_aircraft_texture(definition)
@@ -9266,7 +9281,7 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 		var gate: Dictionary = base_runtime.call("validate_operation", operation, gate_payload)
 		if not bool(gate.get("ok", false)):
 			return gate
-	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase", "inventory_transfer", "inventory_equip", "focus_location"]:
+	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase", "inventory_transfer", "inventory_equip", "focus_location", "sell", "campaign_upload", "campaign_recruit", "campaign_load_crate", "campaign_build_pad", "campaign_fabricate"]:
 		if not _singleplayer_command_handler.is_valid():
 			return _operations_rejected("singleplayer_unavailable", "Diese Funktion ist noch nicht verfügbar")
 		var result: Dictionary = _singleplayer_command_handler.call(operation, payload.duplicate(true))
@@ -9315,7 +9330,7 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 				return _operations_rejected("unit_busy", "Kraft ist an Bord, zugewiesen oder unterwegs")
 			_focused_unit_id = unit_id
 			if operation == "assign":
-				if _get_fireteam_definition(team_id).is_empty() or not _operations_payload_craft_for_team(team_id).is_empty():
+				if _get_fireteam_definition(team_id).is_empty() or (not _operations_payload_craft_for_team(team_id).is_empty() and not _can_join_boarded_team_as_pilot(unit_id, team_id)):
 					return _operations_rejected("team_busy", "Trupp ist nicht für die Vorbereitung verfügbar")
 				if _get_member_unit_ids_for_fireteam(team_id).size() >= 4 and String(unit.get("fireteam_id", "")) != team_id:
 					return _operations_rejected("team_full", "Vier Truppplätze sind belegt")
@@ -9358,9 +9373,12 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 			if operation == "pilot":
 				if unit_id.is_empty():
 					_on_clear_pilot_button_pressed(craft_id)
-				elif not _profiles_by_id.has(unit_id) or _selected_unit_ids.has(unit_id) or not _find_transfer_entry_for_unit(unit_id).is_empty():
+				elif not _profiles_by_id.has(unit_id) or (_selected_unit_ids.has(unit_id) and get_base_personnel_runtime() == null) or not _find_transfer_entry_for_unit(unit_id).is_empty():
 					return _operations_rejected("pilot_busy", "Pilot ist nicht verfügbar")
 				else:
+					var member_payload: String = _operations_payload_craft_for_team(_get_fireteam_id_for_unit(unit_id))
+					if not member_payload.is_empty() and member_payload != craft_id:
+						return _operations_rejected("pilot_busy", "Person ist auf einem anderen Schiff")
 					var previous: String = _find_assigned_craft_for_unit(unit_id)
 					if not previous.is_empty() and previous != craft_id and _operations_craft_busy(previous):
 						return _operations_rejected("pilot_busy", "Pilot ist unterwegs")

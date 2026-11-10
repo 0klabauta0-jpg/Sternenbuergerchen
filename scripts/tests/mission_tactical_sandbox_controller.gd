@@ -13722,6 +13722,41 @@ func request_campaign_crew_boarding(craft_id: String) -> Dictionary:
 	return {"ok": false, "reason": "pilot_boarding_pending", "message": "Team steigt ein; Pilot uebernimmt seinen Posten"}
 
 
+func _can_deploy_parked_campaign_crew(craft_id: String) -> bool:
+	if not _can_issue_local_commands() or preview_mode or not _is_parked_campaign_dropship(craft_id): return false
+	var identity:Dictionary=get_parent().get_meta("singleplayer_mission_identity",{})
+	if String(identity.get("craft_id",_mission_drop_craft_id)) != craft_id: return false
+	for unit in _get_campaign_sortie_units():
+		if unit != null and _embarked_unit_ids.has(String(unit.call("get_unit_id"))) and int(unit.call("get_health")) > 0:
+			return true
+	return false
+
+
+func request_campaign_crew_deployment(craft_id: String) -> Dictionary:
+	if not _can_deploy_parked_campaign_crew(craft_id):
+		return {"ok":false,"reason":"deployment_unavailable","message":"Absetzen braucht ein gelandetes Schiff mit Kräften an Bord"}
+	var crew:Array=[]
+	var embarked:Dictionary={}
+	for unit in _get_campaign_sortie_units():
+		if unit == null or not _embarked_unit_ids.has(String(unit.call("get_unit_id"))) or int(unit.call("get_health")) <= 0: continue
+		crew.append(unit); embarked[String(unit.call("get_unit_id"))]=true
+	var card:=_find_mission_dropship_card_entry(craft_id)
+	var sequence:Dictionary={"units":crew,"unit_index":0,"embarked_unit_ids":embarked,"lz_position":_campaign_landed_craft_position(craft_id),"approach_angle":String(card.get("approach_angle","NW"))}
+	# Use the existing SimulationRoot deploy effects and presence bookkeeping.
+	for i in crew.size(): _deploy_next_embarked_unit_for_sequence(sequence)
+	if _is_active_drop_sequence_for_craft(craft_id):
+		for unit in crew: _drop_sequence_embarked_unit_ids.erase(String(unit.call("get_unit_id")))
+		_store_active_drop_sequence_card()
+	elif _parallel_drop_sequences_by_craft.has(craft_id):
+		var remaining:Dictionary=Dictionary(_parallel_drop_sequences_by_craft[craft_id].get("embarked_unit_ids",{}))
+		for unit in crew: remaining.erase(String(unit.call("get_unit_id")))
+		_parallel_drop_sequences_by_craft[craft_id]["embarked_unit_ids"]=remaining
+	_mission_drop_passenger_count=_embarked_unit_ids.size()
+	_store_selected_mission_dropship_plan()
+	_emit_planning_state_changed()
+	return {"ok":true,"message":"Trupp abgesetzt"}
+
+
 func _can_request_mission_dropship_return(card: Dictionary) -> bool:
 	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
 	if craft_id.is_empty():
@@ -13794,6 +13829,8 @@ func _can_request_mission_dropship_card_lz(card: Dictionary) -> bool:
 
 
 func _can_request_mission_dropship_card_drop(card: Dictionary) -> bool:
+	if _is_parked_campaign_dropship(String(card.get("craft_id", ""))):
+		return _can_deploy_parked_campaign_crew(String(card.get("craft_id", "")))
 	if not _can_request_mission_dropship_card_lz(card):
 		return false
 	if not bool(card.get("has_lz_position", false)):
@@ -14073,6 +14110,11 @@ func _on_mission_dropship_card_drop_pressed(craft_id: String) -> void:
 	if normalized_craft_id.is_empty():
 		return
 	if not _select_mission_dropship_craft(normalized_craft_id, false):
+		return
+	if _is_parked_campaign_dropship(normalized_craft_id):
+		var result:=request_campaign_crew_deployment(normalized_craft_id)
+		_set_mission_dropship_card_feedback(normalized_craft_id,String(result.get("message","")))
+		_update_ui()
 		return
 	_request_selected_mission_dropship_drop(true)
 
@@ -29664,7 +29706,7 @@ func create_selected_mission_interaction_door_use_breach_command_hook(interactio
 	return result
 
 
-func create_selected_mission_interaction_use_intent(interaction_id: String = "") -> Dictionary:
+func create_selected_mission_interaction_use_intent(interaction_id: String = "", allow_approach: bool = false) -> Dictionary:
 	if not _can_issue_local_commands():
 		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "observer_mode"))
 	if preview_mode:
@@ -29675,7 +29717,8 @@ func create_selected_mission_interaction_use_intent(interaction_id: String = "")
 	var interaction_feedback: Dictionary = _resolve_mission_interaction_feedback_for_intent(feedback_snapshot, interaction_id)
 	if interaction_feedback.is_empty():
 		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "no_interaction_feedback", {"feedback": feedback_snapshot}))
-	if not bool(interaction_feedback.get("can_prompt_use", false)) or String(interaction_feedback.get("status", "")).strip_edges().to_lower() != "usable":
+	var approach_allowed: bool = allow_approach and String(interaction_feedback.get("status", "")) == "out_of_range" and String(interaction_feedback.get("interaction_type", "")) == "computer"
+	if not approach_allowed and (not bool(interaction_feedback.get("can_prompt_use", false)) or String(interaction_feedback.get("status", "")).strip_edges().to_lower() != "usable"):
 		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "interaction_not_usable", {"interaction_feedback": interaction_feedback}))
 	if not bool(interaction_feedback.get("has_marker_position", false)) or typeof(interaction_feedback.get("marker_position", null)) != TYPE_VECTOR2:
 		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "missing_marker_position", {"interaction_feedback": interaction_feedback}))
@@ -34339,6 +34382,12 @@ func _update_active_phase_execution(delta: float) -> void:
 			if not _try_start_stationary_interaction(String(fireteam_id),waypoint,phase_index,execution_state): continue
 			execution_state.erase("campaign_return_gather")
 			_phase_execution_by_fireteam[fireteam_id] = execution_state
+		# An explicit Use may begin outside the interaction radius. Once its real
+		# residents arrive, stop the approach and run the same timed stationary
+		# interaction as a Use issued from an adjacent field.
+		if String(Dictionary(waypoint.metadata).get("source", "")) == "mission_interaction_use_intent" and Dictionary(execution_state.get("interaction_arrival_receipt", {})).is_empty():
+			if _try_start_stationary_interaction(String(fireteam_id), waypoint, phase_index, execution_state):
+				_phase_execution_by_fireteam[fireteam_id] = execution_state
 		var anchor := _get_selection_anchor_for_fireteam(String(fireteam_id))
 		var resolved_target_position: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
 		_ensure_fireteam_movement_controller()
