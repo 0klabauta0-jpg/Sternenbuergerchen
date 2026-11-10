@@ -1,6 +1,6 @@
 extends SceneTree
 
-const ControllerScript := preload("res://scripts/tests/mission_tactical_sandbox_controller.gd")
+const MISSION_SCENE := preload("res://scenes/tests/mission_reactivity_test.tscn")
 
 const TASK_PATH := "res://docs/tasks/TASK_1042_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest.md"
 const STATUS_PATH := "res://docs/IMPLEMENTATION_STATUS.md"
@@ -31,7 +31,7 @@ func _run_tests() -> void:
 	_test_nonempty_trace_with_explicit_false_still_needs_trace()
 	_test_failed_trace_reports_regression()
 	_test_good_trace_passes_integrated_playtest()
-	_test_controller_exports_integrated_playtest()
+	await _test_controller_exports_integrated_playtest()
 	_test_integrated_playtest_roundtrip()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
@@ -50,6 +50,7 @@ func _test_docs_and_static_hooks() -> void:
 	var clarity_contract_text: String = _read_text(CLARITY_CONTRACT_PATH)
 	var service_text: String = _read_text(SERVICE_PATH)
 	var controller_text: String = _read_text(CONTROLLER_PATH)
+	var feedback_source_text: String = _read_text("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_1042 task file exists")
 	_assert(FileAccess.file_exists(SERVICE_PATH), "TASK_1042 integrated playtest service exists")
 	_assert(task_text.contains("TASK_1042 - Release First Decision Loop Two Player Loop Scenario First Contact Integrated Playtest"), "Task names TASK_1042")
@@ -69,9 +70,9 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(service_text.contains("\"sets_multiplayer_truth\": false"), "First-contact integrated playtest creates no multiplayer truth")
 	_assert(controller_text.contains("RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_INTEGRATED_PLAYTEST_SCRIPT"), "Controller preloads TASK_1042 service")
 	_assert(controller_text.contains("get_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_snapshot"), "Controller exposes TASK_1042 snapshot")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_line"), "Command feedback exports TASK_1042 line")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_status"), "Command feedback exports TASK_1042 status")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_gate"), "Command feedback exports TASK_1042 gate")
+	_assert(feedback_source_text.contains("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_line"), "Command feedback exports TASK_1042 line")
+	_assert(feedback_source_text.contains("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_status"), "Command feedback exports TASK_1042 status")
+	_assert(feedback_source_text.contains("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_gate"), "Command feedback exports TASK_1042 gate")
 
 
 func _test_missing_source_blocks() -> void:
@@ -154,10 +155,17 @@ func _test_good_trace_passes_integrated_playtest() -> void:
 
 
 func _test_controller_exports_integrated_playtest() -> void:
-	var controller := ControllerScript.new()
-	if not controller.has_method("get_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_snapshot"):
+	# The complete report reads mission siblings and parent metadata. Use the
+	# real scene boundary rather than a detached controller with no owners.
+	var scene := MISSION_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(12):
+		await process_frame
+	var controller: Node = scene.get_node_or_null("TacticalController")
+	if controller == null or not controller.has_method("get_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_snapshot"):
 		_assert(false, "Controller exposes TASK_1042 snapshot")
-		controller.queue_free()
+		scene.queue_free()
+		await process_frame
 		return
 	var trace_needed_snapshot: Dictionary = controller.get_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_snapshot(_source_acceptance_slice(), {})
 	var snapshot: Dictionary = controller.get_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_snapshot(_source_acceptance_slice(), _good_trace())
@@ -178,7 +186,9 @@ func _test_controller_exports_integrated_playtest() -> void:
 	_assert(String(embedded_snapshot.get("status", "")) == String(feedback.get("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_status", "")), "Command feedback TASK_1042 status matches embedded snapshot")
 	_assert(String(embedded_snapshot.get("gate", "")) == String(feedback.get("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_gate", "")), "Command feedback TASK_1042 gate matches embedded snapshot")
 	_assert(_snapshot_is_read_only(embedded_snapshot), "Embedded TASK_1042 command feedback snapshot remains read-only")
-	controller.queue_free()
+	scene.queue_free()
+	for _frame in range(3):
+		await process_frame
 
 
 func _test_integrated_playtest_roundtrip() -> void:

@@ -4925,7 +4925,8 @@ func _refresh_homebase_screen() -> void:
 	if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
 		fireteam_definitions = Array(fob_screen.call("get_fireteam_definitions")).duplicate(true)
 	homebase_screen.setup_roster(_available_team_units, _homebase_staged_unit_ids)
-	homebase_screen.set_fireteam_context(_homebase_staged_fireteam_ids, fireteam_definitions)
+	# This is a presentation refresh, not a request to equip old FOB exports.
+	homebase_screen.set_fireteam_context(_homebase_staged_fireteam_ids, fireteam_definitions, false)
 	var selected_mission: Dictionary = _get_selected_mission_definition()
 	homebase_screen.set_mission_context(
 		_mission_catalog,

@@ -1,0 +1,126 @@
+{
+  "final_package": {
+    "backend": "exporter",
+    "catalog_script_sha256": "6d2e23780a65f05d2ce9b7b6b3ed3154c302eb63a9fb1a716c263d400d2465f4",
+    "catalog_sha256": "11e86d9b54224b5ec00349b85ce3eac744afcd713f22df7df4c821123ea8a9a3",
+    "compatibility_failures": [],
+    "expected_compatibility_failures": 0,
+    "export_contract_sha256": "a625d1542dc1ed527180f749d323e6406ff3c4fe1a5e9c44dd15efe119778f3e",
+    "export_filter_source": "production",
+    "failures": [],
+    "limitation": "Standalone portrait package. Consumer bodies are exact automatic source extracts, not full instantiated scenes. Actual Godot exporter starts with all 99 original PNGs plus their import metadata/cache and applies recorded export filters.",
+    "passed": 750,
+    "phase": "final",
+    "resource_root": "",
+    "source_consumers": [
+      {
+        "consumer": "fob",
+        "method": "_load_portrait_texture",
+        "method_sha256": "8315acc6691f3aa53b7b6d424a2983876be48f30a30562c347dd58e4f48f7801",
+        "source": "scripts/meta/fob_screen.gd",
+        "source_sha256": "c500e5ee893df24dde4917685012a9dcb7e57656cf2b27828225901497cfd556"
+      },
+      {
+        "consumer": "tactical",
+        "method": "_load_portrait_texture",
+        "method_sha256": "5f953c8e464f4967a6bd5fe505ee861a28420ce63ca3a821dd1cc9cb54a5e129",
+        "source": "scripts/tests/mission_tactical_sandbox_controller.gd",
+        "source_sha256": "837e6c6754ebcbff4a729e5ad27beab79c5f81ef78b9cc43cedac055fad25e3c"
+      },
+      {
+        "consumer": "menu",
+        "method": "_load_res_texture",
+        "method_sha256": "c65beb19632e94ddc11d5ee7baf4650aba40e674dfb280bf80eab16dd0a9073e",
+        "source": "scripts/ui/main_menu_screen.gd",
+        "source_sha256": "c5f8b203d28f9f912e46010fba65447c0a04a728ac15d4a19eb63f311ed03782"
+      },
+      {
+        "consumer": "emblem",
+        "method": "_resolve_team_emblem",
+        "method_sha256": "57b5dd63e872dff0a721238ab6b1735402d0c87f10602a49450cb458648e96b2",
+        "source": "scripts/meta/start_roster_generator.gd",
+        "source_sha256": "58c770b6c2992370378baeeb77fe0f762f2ce85d57c155105d8dcf1329671eb6"
+      }
+    ]
+  },
+  "source_gates": [
+    {
+      "name": "playtest_20261105_portrait_atlas_verifier",
+      "passed": true,
+      "errors": 0,
+      "counts": [
+        "=== RESULTS: 872 passed, 0 failed ==="
+      ],
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\altlasten-fuenf-schritte-20261110\\SternenBuergerchen\\.godot\\altlasten\\portrait-source-gates\\20261110T133014Z-c0e7e6e3\\playtest_20261105_portrait_atlas_verifier.log"
+    },
+    {
+      "name": "playtest_20261105_portrait_consumers_and_return_verifier",
+      "passed": true,
+      "errors": 0,
+      "counts": [
+        "PORTRAIT_CONSUMERS_RETURN: 8 passed, 0 failed"
+      ],
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\altlasten-fuenf-schritte-20261110\\SternenBuergerchen\\.godot\\altlasten\\portrait-source-gates\\20261110T133014Z-c0e7e6e3\\playtest_20261105_portrait_consumers_and_return_verifier.log"
+    },
+    {
+      "name": "task_233_portrait_identity_catalog_and_roster_presentation",
+      "passed": true,
+      "errors": 0,
+      "counts": [
+        "=== RESULTS: 491 passed, 0 failed ==="
+      ],
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\altlasten-fuenf-schritte-20261110\\SternenBuergerchen\\.godot\\altlasten\\portrait-source-gates\\20261110T133014Z-c0e7e6e3\\task_233_portrait_identity_catalog_and_roster_presentation.log"
+    },
+    {
+      "name": "task_234_persistent_player_roster_save_and_reset",
+      "passed": true,
+      "errors": 0,
+      "counts": [
+        "=== RESULTS: 42 passed, 0 failed ==="
+      ],
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\altlasten-fuenf-schritte-20261110\\SternenBuergerchen\\.godot\\altlasten\\portrait-source-gates\\20261110T133014Z-c0e7e6e3\\task_234_persistent_player_roster_save_and_reset.log"
+    },
+    {
+      "name": "bugfix_character_team_editor_usability_pass",
+      "passed": true,
+      "errors": 0,
+      "counts": [
+        "=== RESULTS: 103 passed, 0 failed ==="
+      ],
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\altlasten-fuenf-schritte-20261110\\SternenBuergerchen\\.godot\\altlasten\\portrait-source-gates\\20261110T133014Z-c0e7e6e3\\bugfix_character_team_editor_usability_pass.log"
+    },
+    {
+      "name": "task_511_export_runtime_package_hygiene",
+      "passed": true,
+      "errors": 0,
+      "counts": [
+        "=== RESULTS: 27 passed, 0 failed ==="
+      ],
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\altlasten-fuenf-schritte-20261110\\SternenBuergerchen\\.godot\\altlasten\\portrait-source-gates\\20261110T133014Z-c0e7e6e3\\task_511_export_runtime_package_hygiene.log"
+    },
+    {
+      "name": "character_identity_consistency_verifier",
+      "passed": true,
+      "errors": 0,
+      "counts": [
+        "CHARACTER_IDENTITY_CONSISTENCY passed=152 failed=0"
+      ],
+      "log": "C:\\Users\\bjoer\\.codex\\worktrees\\altlasten-fuenf-schritte-20261110\\SternenBuergerchen\\.godot\\altlasten\\portrait-source-gates\\20261110T133014Z-c0e7e6e3\\character_identity_consistency_verifier.log"
+    }
+  ],
+  "asset_guard_count": 264,
+  "asset_guard_changed": [],
+  "protected_rosters_unchanged": true,
+  "owned_file_sha256": {
+    "data/export_runtime_package_contract.json": "a625d1542dc1ed527180f749d323e6406ff3c4fe1a5e9c44dd15efe119778f3e",
+    "docs/dev/export_runtime_package_contract.md": "11860a98afba3e805e9ff3577bed2b5b7bae27fb8d579b3c669a68e73abf7ace",
+    "scripts/meta/fob_screen.gd": "c500e5ee893df24dde4917685012a9dcb7e57656cf2b27828225901497cfd556",
+    "scripts/meta/portrait_identity_catalog.gd": "6d2e23780a65f05d2ce9b7b6b3ed3154c302eb63a9fb1a716c263d400d2465f4",
+    "scripts/meta/start_roster_generator.gd": "58c770b6c2992370378baeeb77fe0f762f2ce85d57c155105d8dcf1329671eb6",
+    "scripts/tests/mission_tactical_sandbox_controller.gd": "837e6c6754ebcbff4a729e5ad27beab79c5f81ef78b9cc43cedac055fad25e3c",
+    "scripts/ui/main_menu_screen.gd": "c5f8b203d28f9f912e46010fba65447c0a04a728ac15d4a19eb63f311ed03782",
+    "scripts/tests/altlasten_portrait_export_probe.py": "ef7524ff76294e20d3654e8b3d924f1a39f0fb43afff74f28636499187eead69",
+    "scripts/tests/altlasten_portrait_pack_builder.gd": "912e6eb440bbeff2cfe2a4944f9b1331537e12811b3e97eb7c79569ff315ff33",
+    "scripts/tests/altlasten_portrait_pack_verifier.gd.txt": "c294d6260a6e32b21b4aece7d5c69f44252cb531ca5be80b2fff221c559223c0"
+  }
+}

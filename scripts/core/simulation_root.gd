@@ -1,6 +1,33 @@
 class_name SimulationRoot
 extends Node
 
+const PERSONNEL_LOADOUT_STATE = preload("res://scripts/core/personnel_loadout_state.gd")
+var _personnel_loadout_owner: RefCounted = PERSONNEL_LOADOUT_STATE.new()
+
+
+func get_personnel_loadout_state() -> RefCounted:
+	return _personnel_loadout_owner
+
+
+func configure_personnel_loadouts(owner: RefCounted) -> void:
+	_personnel_loadout_owner = owner
+
+
+func request_personnel_loadout_command(operation: String, payload: Dictionary) -> void:
+	match operation:
+		"configure_roster":
+			_personnel_loadout_owner.call("configure_roster", Array(payload.get("roster", [])))
+		"restore":
+			_personnel_loadout_owner.call("restore_snapshot", Dictionary(payload.get("loadouts", {})))
+		"import_fireteam_loadouts":
+			_personnel_loadout_owner.call("import_fireteam_loadouts", Array(payload.get("definitions", [])), Dictionary(payload.get("members", {})))
+		"reconcile_context":
+			_personnel_loadout_owner.call("reconcile_context", Dictionary(payload.get("defaults", {})), Array(payload.get("definitions", [])), Dictionary(payload.get("members", {})), PackedStringArray(payload.get("retained_unit_ids", [])))
+		"set_loadout":
+			_personnel_loadout_owner.call("set_loadout", String(payload.get("unit_id", "")), Dictionary(payload.get("loadout", {})))
+		"set_slot":
+			_personnel_loadout_owner.call("set_slot", String(payload.get("unit_id", "")), String(payload.get("key", "")), String(payload.get("value", "")))
+
 var _base_personnel_owner: Node
 
 func configure_base_personnel(owner: Node) -> void:
@@ -44,7 +71,18 @@ func request_singleplayer_command(command: Dictionary, authority_context: Dictio
 			return {"ok": false, "reason": "unknown_singleplayer_contract"}
 	if owner == null:
 		return {"ok": false, "reason": "singleplayer_owner_unavailable"}
-	var result: Dictionary = owner.call("apply_command", command.duplicate(true), authority_context.duplicate(true))
+	var context: Dictionary = authority_context.duplicate(true)
+	var equipment_commit: bool = String(command.get("contract_category", "")) == "singleplayer_supply" and String(command.get("operation", "")) == "inventory_equip"
+	var unit_id: String = String(Dictionary(command.get("payload", {})).get("unit_id", ""))
+	if equipment_commit:
+		if not bool(_personnel_loadout_owner.call("has_unit", unit_id)):
+			return {"ok": false, "reason": "inventory_access", "message": "Person ist hier nicht erreichbar"}
+		context["loadout"] = _personnel_loadout_owner.call("get_loadout", unit_id)
+	var result: Dictionary = owner.call("apply_command", command.duplicate(true), context)
+	if equipment_commit and bool(result.get("ok", false)) and not bool(result.get("replayed", false)):
+		# The Supply owner has validated the complete slot change. Publish both
+		# sides synchronously before listeners can observe a committed command.
+		_personnel_loadout_owner.call("set_loadout", unit_id, Dictionary(result.loadout))
 	singleplayer_command_committed.emit(command.duplicate(true), result.duplicate(true))
 	return result
 signal damage_effect_resolved(result: Dictionary)

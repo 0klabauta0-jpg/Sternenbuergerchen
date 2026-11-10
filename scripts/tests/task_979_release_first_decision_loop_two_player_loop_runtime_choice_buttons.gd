@@ -48,6 +48,7 @@ func _test_docs_and_static_hooks() -> void:
 	var clarity_contract_text: String = _read_text(CLARITY_CONTRACT_PATH)
 	var service_text: String = _read_text(SERVICE_PATH)
 	var controller_text: String = _read_text(CONTROLLER_PATH)
+	var feedback_source_text: String = _read_text("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_979 task file exists")
 	_assert(FileAccess.file_exists(SERVICE_PATH), "TASK_979 runtime choice buttons service exists")
 	_assert(task_text.contains("TASK_979 - Release First Decision Loop Two Player Loop Runtime Choice Buttons"), "Task names TASK_979")
@@ -68,7 +69,7 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(service_text.contains("\"sets_multiplayer_truth\": false"), "Runtime buttons create no multiplayer truth")
 	_assert(controller_text.contains("RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_RUNTIME_CHOICE_BUTTONS_SCRIPT"), "Controller preloads TASK_979 service")
 	_assert(controller_text.contains("get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot"), "Controller exposes TASK_979 snapshot")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_runtime_choice_buttons_line"), "Command feedback exports TASK_979 line")
+	_assert(feedback_source_text.contains("release_first_decision_loop_two_player_loop_runtime_choice_buttons_line"), "Command feedback exports TASK_979 line")
 
 
 func _test_missing_source_blocks() -> void:

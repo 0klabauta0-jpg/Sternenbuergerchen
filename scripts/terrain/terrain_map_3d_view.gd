@@ -1216,6 +1216,9 @@ var _dynamic_signature_unit_scan_count: int = 0
 var _dynamic_order_rebuild_count: int = 0
 var _dynamic_order_skip_count: int = 0
 var _dynamic_unit_source_signatures: Dictionary = {}
+const FIRE_SECTOR_LOS_SCRIPT = preload("res://scripts/core/los_system.gd")
+var _fire_sector_los_reader = FIRE_SECTOR_LOS_SCRIPT.new()
+var _runtime_terrain_registry: WeakRef
 var _fire_sector_los_cache: Dictionary = {}
 var _fire_sector_los_cache_signature: String = ""
 var _frontier_art_enabled: bool = false
@@ -1434,6 +1437,26 @@ func _sync_authored_visual_layout() -> void:
 			var grid: Vector2i = tile.grid_position
 			_external_terrain_object_visuals[grid] = weakref(_authored_visual_layout_root)
 			_authored_visual_owned_grids.append(grid)
+
+
+func set_runtime_terrain_registry(registry: Node) -> void:
+	_runtime_terrain_registry = weakref(registry) if registry != null else null
+	_fire_sector_los_cache_signature = ""
+	_fire_sector_los_cache.clear()
+	_dynamic_sources_dirty = true
+
+
+func _get_runtime_terrain_registry() -> Node:
+	return _runtime_terrain_registry.get_ref() if _runtime_terrain_registry != null else null
+
+
+func _sync_fire_sector_los_revision() -> void:
+	var registry = _get_runtime_terrain_registry()
+	var signature: String = "%d:%d" % [registry.get_instance_id(), int(registry.call("get_revision"))] if registry != null else ""
+	if signature != _fire_sector_los_cache_signature:
+		_fire_sector_los_cache.clear()
+		_fire_sector_los_cache_signature = signature
+		_dynamic_sources_dirty = true
 
 
 func configure_from_map(terrain_map_data) -> void:
@@ -1823,6 +1846,8 @@ func _slice_last_dictionary_entries(entries: Array, limit: int) -> Array:
 
 
 func _refresh_dynamic_order_visuals_if_needed() -> void:
+	if bool(_order_payload.get("fire_sector_overlay_enabled", false)):
+		_sync_fire_sector_los_revision()
 	if _order_payload.is_empty() or _order_root == null:
 		return
 	if not _dynamic_sources_dirty:
@@ -1861,6 +1886,7 @@ func _build_order_dynamic_visual_signature() -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	if not selected_fireteam_ids.is_empty():
 		parts.append("selected:%s" % ",".join(selected_fireteam_ids))
+	parts.append("terrain_los:%s" % _fire_sector_los_cache_signature)
 	parts.append("fire:%s:%s" % [str(bool(_order_payload.get("fire_sector_overlay_enabled", false))), _get_fire_sector_visual_mode()])
 	parts.append("los_debug:%s:%d" % [str(bool(_order_payload.get("los_debug_overlay_enabled", false))), _contact_payload_apply_count])
 	var orientation_position_sums: Dictionary = {}
@@ -13953,6 +13979,10 @@ func _add_fire_sector_tile_visuals(parent: Node3D, origin_world: Vector2, center
 
 
 func _find_fire_sector_los_blocker_grid_cached(start_grid: Vector2i, end_grid: Vector2i) -> Vector2i:
+	_sync_fire_sector_los_revision()
+	# MapData is mutable authoring data without revision notifications.
+	if _get_runtime_terrain_registry() == null:
+		return _find_fire_sector_los_blocker_grid(start_grid, end_grid)
 	var cache_key: String = "%d,%d>%d,%d" % [start_grid.x, start_grid.y, end_grid.x, end_grid.y]
 	if _fire_sector_los_cache.has(cache_key):
 		return Vector2i(_fire_sector_los_cache[cache_key])
@@ -14001,42 +14031,9 @@ func _add_tile_fill_batch(parent: Node3D, grid_positions: Array, color: Color, n
 
 
 func _find_fire_sector_los_blocker_grid(start_grid: Vector2i, end_grid: Vector2i) -> Vector2i:
-	var sentinel := Vector2i(2147483647, 2147483647)
-	if _terrain_map_data == null:
-		return sentinel
-	var start_tile = _terrain_map_data.call("get_tile_at_grid", start_grid)
-	var end_tile = _terrain_map_data.call("get_tile_at_grid", end_grid)
-	if start_tile == null or end_tile == null:
-		return sentinel
-	var eye_height: float = float(start_tile.height_level) + 1.0
-	var target_height: float = float(end_tile.height_level) + 1.0
-	var line_grids: Array = _build_grid_line(start_grid, end_grid)
-	for index in range(1, line_grids.size()):
-		var grid_position: Vector2i = line_grids[index]
-		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
-		if tile_data == null:
-			continue
-		var progress: float = float(index) / float(maxi(line_grids.size() - 1, 1))
-		var ray_height: float = lerpf(eye_height, target_height, progress)
-		var blocker_height: float = float(tile_data.height_level) + float(tile_data.object_height)
-		if bool(tile_data.blocks_los) and blocker_height >= ray_height - 0.05:
-			if _tile_uses_wall_segment_los(tile_data):
-				var crosses_segment: bool = bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call(
-					"does_tile_wall_block_los",
-					tile_data,
-					Vector2(float(start_grid.x), float(start_grid.y)),
-					Vector2(float(end_grid.x), float(end_grid.y))
-				))
-				if not crosses_segment:
-					continue
-			return grid_position
-	return sentinel
-
-
-func _tile_uses_wall_segment_los(tile_data) -> bool:
-	if tile_data == null:
-		return false
-	return bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call("is_wall_type_id", String(tile_data.type_id))) or bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call("is_wall_type_id", String(tile_data.object_type_id)))
+	var reader = _get_runtime_terrain_registry()
+	if reader == null: reader = _terrain_map_data
+	return _fire_sector_los_reader.find_first_blocker_grid(start_grid, end_grid, reader, Vector2.INF, Vector2.INF, true)
 
 
 func _build_grid_line(start_grid: Vector2i, end_grid: Vector2i) -> Array:

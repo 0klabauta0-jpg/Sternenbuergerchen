@@ -50,7 +50,7 @@ func configure(flow: Node, request: Dictionary) -> void:
 	flow.call("_ensure_singleplayer_release_homebase_direct_drop_source")
 	flow.get_node("HomebaseScreen").set_meta("campaign_base_map_path", BASE_MAP)
 	if not checkpoint.is_empty():
-		flow.get_node("HomebaseScreen").set("_member_loadout_by_unit_id", Dictionary(craft_state.get("member_loadouts", {})).duplicate(true))
+		flow.get_node("HomebaseScreen").call("restore_personnel_loadouts", Dictionary(craft_state.get("member_loadouts", {})))
 
 func _initial_roster() -> Array:
 	var presets: Array = PRESETS.get_homebase_roster()
@@ -96,7 +96,7 @@ func save_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
 		"staged_unit_ids": Array(flow.get("_homebase_staged_unit_ids")),
 		"staged_fireteam_ids": Array(flow.get("_homebase_staged_fireteam_ids")),
 		"fireteam_definitions": flow.get_node("HomebaseScreen").call("_get_fireteam_definitions_snapshot"),
-		"member_loadouts": flow.get_node("HomebaseScreen").get("_member_loadout_by_unit_id"),
+		"member_loadouts": runtime.get("_simulation").call("get_personnel_loadout_state").call("get_snapshot"),
 		"selected_cargo": flow.get("_selected_aircraft_cargo_by_craft"),
 		"loaded_cargo": flow.get("_loaded_aircraft_cargo_by_craft")
 	}

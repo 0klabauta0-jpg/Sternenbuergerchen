@@ -1046,6 +1046,8 @@ func _configure_primary_3d_view(view: Node, unit_nodes: Array) -> void:
 	if not view.is_inside_tree():
 		call_deferred("_configure_primary_3d_view", view, unit_nodes)
 		return
+	if view.has_method("set_runtime_terrain_registry"):
+		view.call("set_runtime_terrain_registry", get_node_or_null(terrain_registry_path))
 	if view.has_method("set_authoring_markers_visible"): view.call("set_authoring_markers_visible",false)
 	if _loaded_terrain_map_data != null and view.has_method("configure_from_map"):
 		view.call("configure_from_map", _loaded_terrain_map_data)

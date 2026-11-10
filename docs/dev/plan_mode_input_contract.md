@@ -7,3 +7,7 @@ Rechtsklick auf gueltigen Boden einen unmittelbar bestaetigten Move fuer den
 ausgewaehlten aktiven Trupp ueber die bestehende Command-/Authoritykette.
 UI, LZ-Picker und Zielwahl haben Vorrang; kein Durchklicken, keine Einzel-NPC-
 Befehle und keine Simulationspause. Ungueltige/gesperrte Ziele bleiben abgelehnt.
+
+Die historischen R/F-Bindings fuer den fest deaktivierten Mehrphasenwechsel
+werden nicht mehr angeboten. Der aktuelle Plan-Schalter, Vorschau, GO und die
+internen Phasen-/Wegpunktdaten bleiben unveraendert.

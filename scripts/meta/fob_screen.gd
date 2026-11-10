@@ -4816,6 +4816,9 @@ func _build_overlay_loadout_text(unit_id: String, profile) -> String:
 
 
 func _load_portrait_texture(portrait_path: String) -> Texture2D:
-	if portrait_path.is_empty() or not ResourceLoader.exists(portrait_path):
+	if portrait_path.is_empty():
 		return null
-	return PORTRAIT_IDENTITY_CATALOG_SCRIPT.load_texture("", portrait_path)
+	var resource_path: String = PORTRAIT_IDENTITY_CATALOG_SCRIPT.resolve_legacy_path(portrait_path)
+	if not ResourceLoader.exists(resource_path):
+		return null
+	return PORTRAIT_IDENTITY_CATALOG_SCRIPT.load_texture("", resource_path)

@@ -1,0 +1,81 @@
+{
+  "baseline_commit": "fbb7f52be6a04f266605e4fe7e7ab0eefc4c61cb",
+  "checks": [
+    {
+      "name": "task381",
+      "baseline": {
+        "report": ".godot/altlasten/baseline381/20261110T131011Z-c679dcb4/report.json",
+        "exit_code": 1,
+        "error_count": 0,
+        "isolation_verified": true,
+        "failures": [
+          "FAIL: Homebase character popup uses the editor-style two-column sheet",
+          "FAIL: Character popup keeps values and context in separate columns"
+        ]
+      },
+      "task": {
+        "report": ".godot/altlasten/loadout/20261110T130718Z-341ac5fd/report.json",
+        "exit_code": 1,
+        "error_count": 0,
+        "isolation_verified": true,
+        "failures": [
+          "FAIL: Homebase character popup uses the editor-style two-column sheet",
+          "FAIL: Character popup keeps values and context in separate columns"
+        ]
+      },
+      "identical_failures": true
+    },
+    {
+      "name": "base_personnel",
+      "baseline": {
+        "report": ".godot/altlasten/baseline-base-personnel/20261110T131054Z-e02ba419/report.json",
+        "exit_code": 1,
+        "error_count": 0,
+        "isolation_verified": true,
+        "failures": [
+          "FAIL: sleep blocks incompatible movement",
+          "FAIL: continue restores actual sleeping person and exclusive bed",
+          "FAIL: wake frees sleeping person"
+        ]
+      },
+      "task": {
+        "report": ".godot/altlasten/loadout/20261110T130901Z-5a0a19ab/report.json",
+        "exit_code": 1,
+        "error_count": 0,
+        "isolation_verified": true,
+        "failures": [
+          "FAIL: sleep blocks incompatible movement",
+          "FAIL: continue restores actual sleeping person and exclusive bed",
+          "FAIL: wake frees sleeping person"
+        ]
+      },
+      "identical_failures": true
+    },
+    {
+      "name": "homebase_operations",
+      "baseline": {
+        "report": ".godot/altlasten/baseline-operations/20261110T131511Z-0973a51c/report.json",
+        "exit_code": 1,
+        "error_count": 3,
+        "isolation_verified": true,
+        "failures": [
+          "ERROR: FAIL: 1280 roster has full row width and never wraps role or status by letter",
+          "ERROR: FAIL: 1600-wide squad keeps all four columns",
+          "ERROR: FAIL: 1920-wide squad keeps all four columns"
+        ]
+      },
+      "task": {
+        "report": ".godot/altlasten/controls-final/20261110T131414Z-f46b47e6/report.json",
+        "exit_code": 1,
+        "error_count": 3,
+        "isolation_verified": true,
+        "failures": [
+          "ERROR: FAIL: 1280 roster has full row width and never wraps role or status by letter",
+          "ERROR: FAIL: 1600-wide squad keeps all four columns",
+          "ERROR: FAIL: 1920-wide squad keeps all four columns"
+        ]
+      },
+      "identical_failures": true
+    }
+  ]
+}

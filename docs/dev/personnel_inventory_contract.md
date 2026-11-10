@@ -3,10 +3,17 @@
 ## Besitzer und Zugriff
 
 SimulationRoot bestaetigt Supply-Commands. SingleplayerSupplyState besitzt endliche
-Bestandscontainer. Das vorhandene Personal-Loadout bleibt beim bisherigen
-Personalowner; ein Ausruestungstausch prueft dessen aktuellen Slot und gibt den
-neuen Slot erst nach erfolgreichem Bestandscommit synchron an denselben Owner.
-UI zeichnet Snapshots und sendet Requests, ohne eigene Bestaende zu fuehren.
+Bestandscontainer. `PersonnelLoadoutState` am selben SimulationRoot besitzt die
+angelegte Personenausruestung. Ein Ausruestungstausch liest dessen aktuellen Slot
+und bestaetigt Bestand und neuen Slot synchron vor dem Committed-Signal.
+Replays liefern ihren Beleg, ohne ein inzwischen neueres Loadout zurueckzusetzen.
+UI zeichnet kopierte Snapshots und sendet Requests, ohne eigene Bestaende oder
+eine zweite Loadout-Wahrheit zu fuehren. Alte Homebase-Getter/-Setter delegieren
+an denselben Owner; Fireteam-Loadouts sind Exportprojektionen. Die eigenstaendige
+Homebase bindet ihn zunaechst an einen lokalen SimulationRoot; der Kampagnenroot
+uebernimmt genau denselben Owner, einschliesslich frueh restaurierter Daten.
+Unzugewiesene Piloten behalten ihre Ausruestung auch bei versteckten Ansichten.
+Das Checkpointfeld `craft.member_loadouts` und das Format bleiben unveraendert.
 
 IDs: `base:homebase`, `craft:<craft_id>`, `unit:<unit_id>:backpack`.
 Basislager fasst 200, Schiff 48, Rucksack 12 Gegenstandseinheiten. Das sind

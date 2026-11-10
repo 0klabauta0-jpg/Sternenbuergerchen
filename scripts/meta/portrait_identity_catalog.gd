@@ -202,6 +202,17 @@ static func select_generated_entry(preferred: Dictionary, presentation_group: St
 	return selected
 
 
+static func resolve_legacy_path(portrait_path: String, catalog_path: String = CATALOG_PATH) -> String:
+	# Compatibility loads must resolve aliases before checking physical files.
+	# Unknown paths keep their caller's whitespace and missing-file semantics.
+	var loaded: Dictionary = _default_catalog_cache if catalog_path == CATALOG_PATH and not _default_catalog_cache.is_empty() else load_catalog(catalog_path)
+	var aliases: Dictionary = Dictionary(loaded.get("entries_by_legacy_path", {}))
+	var normalized_path: String = portrait_path.strip_edges()
+	if aliases.has(normalized_path):
+		return String(Dictionary(aliases[normalized_path]).get("path", ""))
+	return portrait_path
+
+
 static func resolve_path(portrait_id: String = "", portrait_path: String = "", catalog_path: String = CATALOG_PATH) -> String:
 	# Resolution only reads the snapshot; avoid copying all 42 entries per face.
 	var loaded: Dictionary = _default_catalog_cache if catalog_path == CATALOG_PATH and not _default_catalog_cache.is_empty() else load_catalog(catalog_path)

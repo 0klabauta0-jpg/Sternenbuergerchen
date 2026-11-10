@@ -1,5 +1,54 @@
 # IMPLEMENTATION_STATUS
 
+### Altlastenbereinigung abgeschlossen — 10.11.2026
+Fuenf getrennte Schritte auf Taskbranch/Mainbasis fbb7f52be: gemeinsamer
+LOS-Lesepfad, Runtime-Loadoutowner, tote Controls entfernt,803-Zeilen-
+Diagnostikhelper und42 gezielte Portraetausschluesse mit Alias-Kompatibilitaet.
+Finaler Code95e4b9625:26/26 gemeinsame Gates, frischer Import0Fehler,
+PCK-Filter-/Kompatibilitaetsprobe750/0, unabhaengiger Review ohne Befunde.
+Drei alte Sammelgates mit exakt baselinegleichen Abweichungen dokumentiert;
+keine pauschale Gesamt-/FPS-/Releasefreigabe. Original-WIP unangetastet, kein
+Mainmerge/neue Spiele-EXE. QA: docs/qa/altlasten_20261110/README.md.
+
+### Altlasten — Schritt5 Portraetexport, 10.11.2026
+Alias-only-Aufloesung in vier Ladepfaden,42 kommasichere Ausschluesse;
+57 andere Originale und gespeicherte Emblemauswahl erhalten. Echter isolierter
+Godot-Testexport mit Produktionsfiltern750/0 nach168 reproduzierten Fehlern;
+sieben Quellgates gruen.264 Ressourcenhashes unveraendert, keine Assetloeschung.
+Keine Release-EXE oder gemessene Gesamtpaketersparnis. Gemeinsame Schlusspruefung
+folgt; QA: docs/qa/altlasten_20261110/README.md.
+
+### Altlasten — Schritt4 Diagnostik, 10.11.2026
+803-Zeilen-Reportbuilder stateless ausgelagert; oeffentliche API,439Felder
+und Probe-Overrides erhalten. Typedparitaet42/0 plus sieben HUD-/Report-/
+Exportnachbarn gruen.67 historische Source-Guards mechanisch auf den
+tatsaechlichen Besitzer umgestellt, zwei freistehende Reportfixtures an
+echten Missionskontext gebunden. LOS-Reviewraender28/0. Kein FPSanspruch.
+QA: docs/qa/altlasten_20261110/README.md. Portraetexport folgt.
+
+### Altlasten — Schritt3 Bedienreste, 10.11.2026
+Wirkungslose R/F-Phasenbindings und unerreichbarer Legacy-Rueckkehrbutton
+entfernt; GO/Plan/Kamera/Auswahl und benoetigte alte Panels erhalten.
+Inputgate114/0, Weltbedienung9/0. Breites Operationsgate60/3 mit exakt
+identischen drei Layoutannahmen auf sauberem Main fbb7f52be bestaetigt.
+Belege: docs/qa/altlasten_20261110/README.md und baseline_failures.json.
+
+### Altlasten — Schritt2 Loadoutowner, 10.11.2026
+SimulationRoot-gebundener Personenloadoutowner statt UI-Wahrheit, gleicher
+Checkpointvertrag und atomarer Erfolgssignalzustand. Neue Regression13/0;
+neun gezielte Gates gruen. TASK38119/2 und BasePersonnel62/3 auf sauberem
+Main fbb7f52be exakt baselinegleich, keine Runtimefehler; keine Gesamtfreigabe.
+QA: docs/qa/altlasten_20261110/README.md. Weitere Schritte folgen seriell.
+
+### Altlasten in fuenf Schritten — 10.11.2026, Schritt1
+Eigener Taskbranch auf sauberem Main fbb7f52be. Gemeinsamer LOS-Lesepfad,
+Registry-/Revisionscache und stationaere Invalidierung; Runtime-Hoehenregeln
+erhalten. Neue Regression23/0 nach reproduziertem11/9 und Sparse-Randfall22/1.
+Drei gezielte Wand-/Tuer-/LOS-Nachbarn bestanden. Weitere Schritte folgen
+seriell; kein Mainmerge/Export oder allgemeiner Leistungsanspruch.
+Task: docs/tasks/ALTLASTEN_FUENF_SCHRITTE_2026_11_10.md.
+QA: docs/qa/altlasten_20261110/README.md.
+
 ### Main gepusht und aktueller Gebaeudeeditor — 10.11.2026
 Main92b20f106 ist auf origin/main verifiziert. Editorarbeit separat auf
 task/editor-buildings-20261110, direkt auf diesem Main. Habitat/Freihafenhalle

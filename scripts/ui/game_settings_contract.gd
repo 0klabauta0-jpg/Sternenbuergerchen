@@ -195,8 +195,6 @@ static func get_input_action_descriptors() -> Array:
 		{"action": "tactical_toggle_fire_sector", "label": "Fire Arc", "prompt": "C"},
 		{"action": "tactical_toggle_los", "label": "LOS", "prompt": "L"},
 		{"action": "tactical_sort_fireteam", "label": "Fireteam sortieren", "prompt": "T"},
-		{"action": "tactical_phase_previous", "label": "Phase zurueck", "prompt": "R (Planning)"},
-		{"action": "tactical_phase_next", "label": "Phase vor", "prompt": "F (Planning)"},
 		{"action": "show_npc_thoughts", "label": "Gedanken halten", "prompt": "V halten"},
 		{"action": "ui_cancel", "label": "Zurueck", "prompt": "Escape"},
 	]

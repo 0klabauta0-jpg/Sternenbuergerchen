@@ -40,6 +40,7 @@ func _test_docs_contract_and_report() -> void:
 	var roadmap_text: String = _read_text(ROADMAP_PATH)
 	var report_text: String = _read_text(REPORT_PATH)
 	var controller_text: String = _read_text(CONTROLLER_PATH)
+	var feedback_source_text: String = _read_text("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_743 task file exists")
 	_assert(task_text.contains("Station Scenario Debrief Handoff Cue"), "Task documents Station Scenario Debrief Handoff Cue")
 	_assert(contract_text.contains("Station Scenario Debrief Handoff Cue"), "Interaction contract documents TASK_743")
@@ -48,7 +49,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(report_text.contains("TASK_743 - Station Scenario Debrief Handoff Cue"), "Current handbook references TASK_743")
 	_assert(report_text.contains("station_scenario_debrief_handoff_cue"), "Current handbook exports TASK_743 fields")
 	_assert(controller_text.contains("get_station_scenario_debrief_handoff_cue_snapshot"), "Controller exposes TASK_743 snapshot")
-	_assert(controller_text.contains("station_scenario_debrief_handoff_line"), "Command feedback exports station handoff line")
+	_assert(feedback_source_text.contains("station_scenario_debrief_handoff_line"), "Command feedback exports station handoff line")
 
 
 func _test_station_scenario_debrief_handoff_cue() -> void:

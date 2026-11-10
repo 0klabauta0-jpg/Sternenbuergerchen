@@ -1,6 +1,6 @@
 extends SceneTree
 
-const ControllerScript := preload("res://scripts/tests/mission_tactical_sandbox_controller.gd")
+const MISSION_SCENE := preload("res://scenes/tests/mission_reactivity_test.tscn")
 
 const TASK_PATH := "res://docs/tasks/TASK_1008_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest.md"
 const STATUS_PATH := "res://docs/IMPLEMENTATION_STATUS.md"
@@ -9,6 +9,7 @@ const COMMAND_CONTRACT_PATH := "res://docs/dev/mission_command_feedback_contract
 const CLARITY_CONTRACT_PATH := "res://docs/dev/tactical_decision_clarity_contract.md"
 const SERVICE_PATH := "res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest.gd"
 const CONTROLLER_PATH := "res://scripts/tests/mission_tactical_sandbox_controller.gd"
+const FEEDBACK_SOURCE_PATH := "res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd"
 const OUTPUT_PATH := "res://tmp/release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_acceptance.json"
 const SCHEMA := "sternenbuergerchen.release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest.v1"
 const SOURCE_SCHEMA := "sternenbuergerchen.release_first_decision_loop_two_player_loop_micro_objective_round_loop_playability_slice.v1"
@@ -29,7 +30,7 @@ func _run_tests() -> void:
 	_test_ready_source_without_trace_needs_trace()
 	_test_failed_trace_reports_regression()
 	_test_good_trace_passes_round_loop_integrated_playtest()
-	_test_controller_exports_round_loop_integrated_playtest()
+	await _test_controller_exports_round_loop_integrated_playtest()
 	_test_round_loop_integrated_playtest_roundtrip()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
@@ -48,6 +49,7 @@ func _test_docs_and_static_hooks() -> void:
 	var clarity_contract_text: String = _read_text(CLARITY_CONTRACT_PATH)
 	var service_text: String = _read_text(SERVICE_PATH)
 	var controller_text: String = _read_text(CONTROLLER_PATH)
+	var feedback_text: String = _read_text(FEEDBACK_SOURCE_PATH)
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_1008 task file exists")
 	_assert(FileAccess.file_exists(SERVICE_PATH), "TASK_1008 integrated playtest service exists")
 	_assert(task_text.contains("TASK_1008 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Integrated Playtest"), "Task names TASK_1008")
@@ -66,8 +68,8 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(service_text.contains("\"sets_multiplayer_truth\": false"), "Round-loop integrated playtest creates no multiplayer truth")
 	_assert(controller_text.contains("RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_ROUND_LOOP_INTEGRATED_PLAYTEST_SCRIPT"), "Controller preloads TASK_1008 service")
 	_assert(controller_text.contains("get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_snapshot"), "Controller exposes TASK_1008 snapshot")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_line"), "Command feedback exports TASK_1008 line")
-	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_status"), "Command feedback exports TASK_1008 status")
+	_assert(feedback_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_line"), "Command feedback exports TASK_1008 line")
+	_assert(feedback_text.contains("release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_status"), "Command feedback exports TASK_1008 status")
 
 
 func _test_missing_source_blocks() -> void:
@@ -130,10 +132,17 @@ func _test_good_trace_passes_round_loop_integrated_playtest() -> void:
 
 
 func _test_controller_exports_round_loop_integrated_playtest() -> void:
-	var controller := ControllerScript.new()
-	if not controller.has_method("get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_snapshot"):
+	# The complete report reads mission siblings and parent metadata. Use the
+	# real scene boundary rather than a detached controller with no owners.
+	var scene := MISSION_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(12):
+		await process_frame
+	var controller: Node = scene.get_node_or_null("TacticalController")
+	if controller == null or not controller.has_method("get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_snapshot"):
 		_assert(false, "Controller exposes TASK_1008 snapshot")
-		controller.queue_free()
+		scene.queue_free()
+		await process_frame
 		return
 	var snapshot: Dictionary = controller.get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_snapshot(_source_playability_slice(), _good_trace())
 	var feedback: Dictionary = controller.get_command_feedback_snapshot()
@@ -145,7 +154,9 @@ func _test_controller_exports_round_loop_integrated_playtest() -> void:
 	_assert(feedback.has("release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_line"), "Command feedback exports TASK_1008 line")
 	_assert(feedback.has("release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_status"), "Command feedback exports TASK_1008 status")
 	_assert(feedback.has("release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_gate"), "Command feedback exports TASK_1008 gate")
-	controller.queue_free()
+	scene.queue_free()
+	for _frame in range(3):
+		await process_frame
 
 
 func _test_round_loop_integrated_playtest_roundtrip() -> void:

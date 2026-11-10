@@ -41,6 +41,7 @@ func _test_docs_contract_and_report() -> void:
 	var roadmap_text: String = _read_text(ROADMAP_PATH)
 	var report_text: String = _read_text(REPORT_PATH)
 	var controller_text: String = _read_text("res://scripts/tests/mission_tactical_sandbox_controller.gd")
+	var feedback_source_text: String = _read_text("res://scripts/mission/diagnostics/mission_command_feedback_diagnostics.gd")
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_730 task file exists")
 	_assert(task_text.contains("Station Scenario Targeted Playtest Polish"), "Task documents targeted polish")
 	_assert(contract_text.contains("Station Scenario Targeted Playtest Polish"), "Interaction contract documents TASK_730")
@@ -51,7 +52,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(report_text.contains("tmp/host_client_two_window_host_review.png"), "Current handbook records host crop path")
 	_assert(report_text.contains("tmp/host_client_two_window_client_review.png"), "Current handbook records client crop path")
 	_assert(controller_text.contains("build_station_scenario_identity_body_snapshot"), "Controller exposes identity body snapshot")
-	_assert(controller_text.contains("station_scenario_identity_body_route_visible"), "Command feedback exports identity route visibility")
+	_assert(feedback_source_text.contains("station_scenario_identity_body_route_visible"), "Command feedback exports identity route visibility")
 
 
 func _test_identity_body_snapshot_contract() -> void:

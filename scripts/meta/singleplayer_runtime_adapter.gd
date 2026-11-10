@@ -46,6 +46,7 @@ func configure(flow: Node, screen: Control) -> void:
 	# Synchronous meta commands have no movement/combat tick workload.
 	_simulation.set_physics_process(false)
 	_simulation.configure_singleplayer_owners(_campaign, _supply, _onboarding, _travel)
+	_screen.call("bind_personnel_loadout_simulation", _simulation, Array(_flow.get("_all_team_units")))
 	if _campaign_mode:
 		var checkpoint: Dictionary = Dictionary(_flow.get("_campaign_start").get("checkpoint"))
 		if not checkpoint.is_empty():
@@ -186,8 +187,7 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 		var result := _commit("singleplayer_supply",operation,data,request_id,context)
 		if bool(result.get("ok",false)) and operation=="inventory_equip" and not bool(result.get("replayed",false)):
 			if _base_personnel!=null: _base_personnel.call("claim_manual_control",unit_id)
-			for key in ["armor","weapon_1","weapon_2"]:
-				_screen.call("_set_homebase_member_loadout_value",unit_id,key,String(result.loadout[key]))
+			_screen.call("_refresh_personnel_loadout_projection")
 			_screen.call("_emit_homebase_fireteam_context_changed")
 		return result
 	if operation in ["buy", "refuel"]:
@@ -542,7 +542,7 @@ func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
 		if not found: return {}
 	var access: Array = ["base:homebase","unit:"+unit_id+":backpack"]
 	if not craft_id.is_empty() and String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,""))=="homebase" and not _service_context(craft_id).is_empty(): access.append("craft:"+craft_id)
-	return {"accessible_containers":access,"unit_id":unit_id,"loadout":Dictionary(unit.get("loadout",{})).duplicate(true)}
+	return {"accessible_containers":access,"unit_id":unit_id}
 
 func get_world_checkpoint_guard() -> Dictionary:
 	if not _travel.all_grounded(): return _reject("world_active","Speichern gesperrt: mindestens ein Schiff ist noch unterwegs oder an einem anderen Ort")

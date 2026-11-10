@@ -1,0 +1,121 @@
+extends SceneTree
+
+const CATALOG: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
+const FOB: GDScript = preload("res://probe/fob.gd")
+const TACTICAL: GDScript = preload("res://probe/tactical.gd")
+const MENU: GDScript = preload("res://probe/menu.gd")
+const EMBLEM: GDScript = preload("res://probe/emblem.gd")
+
+var _passed: int = 0
+var _failures: Array = []
+var _compatibility_failures: Array = []
+
+
+func _initialize() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
+	var input: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://probe/input.json"))
+	var loaded: Dictionary = CATALOG.load_catalog()
+	var entries: Array = loaded.entries
+	var by_alias: Dictionary = loaded.entries_by_legacy_path
+	_check(not FileAccess.file_exists("res://AGENTS.md"), "Source AGENTS.md unavailable through res://")
+	_check(not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path("res://Assets")), "No loose source Assets directory under runtime resource root")
+	_check(entries.size() == 42 and by_alias.size() == 42, "All 42 catalog identities and aliases available")
+	_check(CATALOG.resolve_legacy_path("") == "", "Alias-only resolver preserves an empty path")
+	_check(CATALOG.resolve_legacy_path("res://missing_custom_portrait.png") == "res://missing_custom_portrait.png", "Alias-only resolver does not fabricate a missing custom identity")
+	_check(CATALOG.resolve_legacy_path("  res://missing_custom_portrait.png  ") == "  res://missing_custom_portrait.png  ", "Alias-only resolver preserves unknown path whitespace")
+	var matched: Dictionary = {}
+	var raw_paths: Array = input.aliases + input.retained
+	for pattern: String in input.patterns:
+		var hits: Array = []
+		for res_path: String in raw_paths:
+			if res_path.trim_prefix("res://").matchn(pattern):
+				hits.append(res_path)
+				matched[res_path] = true
+		var exact_alias_hit: bool = hits.size() == 1
+		if exact_alias_hit:
+			exact_alias_hit = by_alias.has(hits[0])
+		_check(exact_alias_hit, "Godot exclusion wildcard matches one known alias: %s" % pattern)
+	_check(matched.size() == 42, "Exclusion patterns match exactly all 42 aliases")
+	for raw_path: String in raw_paths:
+		var production_excluded: bool = false
+		for pattern: String in input.effective_export_patterns:
+			production_excluded = production_excluded or raw_path.trim_prefix("res://").matchn(pattern)
+		_check(production_excluded == by_alias.has(raw_path), "Effective export policy isolates mapped originals: %s" % raw_path)
+	for imported: String in input.excluded_import_payloads:
+		_check(not FileAccess.file_exists(imported), "Excluded raw texture payload absent: %s" % imported)
+	for alias: String in input.aliases:
+		var entry: Dictionary = by_alias[alias]
+		var expected: String = String(entry.path)
+		_check(not ResourceLoader.exists(alias), "Excluded raw alias not loadable: %s" % alias)
+		_check(not FileAccess.file_exists(alias + ".import"), "Excluded alias import sidecar absent: %s" % alias)
+		for portrait_id: String in ["", "missing_id", String(entry.id)]:
+			var texture: Texture2D = CATALOG.load_texture(portrait_id, alias)
+			_check(texture is AtlasTexture and texture.resource_path == expected, "Catalog loads expected alias identity %s / %s" % [portrait_id, alias])
+	for retained: String in input.retained:
+		_check(CATALOG.resolve_legacy_path(retained) == retained, "Alias-only resolver preserves retained custom path: %s" % retained)
+		_check(ResourceLoader.exists(retained), "Retained custom portrait still exists: %s" % retained)
+		var texture: Texture2D = CATALOG.load_texture("", retained)
+		_check(texture is Texture2D and texture.resource_path == retained, "Retained custom portrait still loads without substitution: %s" % retained)
+	_check(CATALOG.resolve_path("missing_id", "res://missing_custom_portrait.png") == String(Dictionary(entries[0]).path), "Unknown missing custom path retains existing catalog fallback")
+	var fob: RefCounted = FOB.new()
+	var tactical: RefCounted = TACTICAL.new()
+	var menu: RefCounted = MENU.new()
+	var sample_count: int = 1 if String(input.phase) == "baseline" else input.aliases.size()
+	for index in range(sample_count):
+		var alias: String = String(input.aliases[index])
+		var entry: Dictionary = by_alias[alias]
+		var expected: String = String(entry.path)
+		_compatibility_check(_is_expected_texture(fob.call("_load_portrait_texture", alias), expected), "FOB saved alias loads: %s" % alias)
+		_compatibility_check(_is_expected_texture(tactical.call("_load_portrait_texture", alias), expected), "Mission passenger saved alias loads: %s" % alias)
+		_compatibility_check(_is_expected_texture(menu.call("_load_res_texture", alias), expected), "Team emblem saved alias loads: %s" % alias)
+		var saved: Dictionary = {"emblem_id": String(entry.id), "emblem_path": alias}
+		var before: Dictionary = saved.duplicate(true)
+		var normalized: Dictionary = EMBLEM.call("_resolve_team_emblem", saved, "portrait_pack_probe", "probe_profile")
+		_compatibility_check(String(normalized.get("id", "")) == String(entry.id) and String(normalized.get("path", "")) == alias and saved == before, "Saved emblem ID/path preserved: %s" % alias)
+	_check(fob.call("_load_portrait_texture", "") == null, "FOB empty portrait remains null")
+	_check(tactical.call("_load_portrait_texture", "") == null, "Mission empty portrait remains null")
+	_check(menu.call("_load_res_texture", "") == null, "Menu empty texture remains null")
+	_check(fob.call("_load_portrait_texture", "res://missing_custom_portrait.png") == null, "FOB absent custom portrait remains null")
+	_check(menu.call("_load_res_texture", "res://missing_custom_portrait.png") == null, "Menu absent custom texture remains null")
+	var retained_sample: String = String(input.retained[0])
+	_check(_is_expected_texture(fob.call("_load_portrait_texture", retained_sample), retained_sample), "FOB retained custom source unchanged")
+	_check(_is_expected_texture(tactical.call("_load_portrait_texture", retained_sample), retained_sample), "Mission retained custom source unchanged")
+	_check(_is_expected_texture(menu.call("_load_res_texture", retained_sample), retained_sample), "Menu retained custom source unchanged")
+	var custom_saved: Dictionary = {"emblem_id": "custom_saved_emblem", "emblem_path": retained_sample}
+	var custom_result: Dictionary = EMBLEM.call("_resolve_team_emblem", custom_saved, "portrait_pack_probe", "probe_profile")
+	_check(String(custom_result.id) == "custom_saved_emblem" and String(custom_result.path) == retained_sample, "Retained custom emblem ID/path unchanged")
+	var expected_failures: int = 4 if String(input.phase) == "baseline" else 0
+	_check(_compatibility_failures.size() == expected_failures, "Compatibility failures match phase expectation %d" % expected_failures)
+	var result: Dictionary = {"phase": input.phase, "backend": input.backend, "export_filter_source": input.export_filter_source, "export_contract_sha256": input.export_contract_sha256, "passed": _passed, "failures": _failures, "compatibility_failures": _compatibility_failures, "expected_compatibility_failures": expected_failures, "source_consumers": input.consumers, "catalog_sha256": input.catalog_sha256, "catalog_script_sha256": input.catalog_script_sha256, "resource_root": ProjectSettings.globalize_path("res://"), "limitation": input.limitation}
+	var output := FileAccess.open(String(input.report_path), FileAccess.WRITE)
+	if output == null:
+		push_error("Cannot write packaged portrait report")
+		quit(1)
+		return
+	output.store_string(JSON.stringify(result, "\t"))
+	output.close()
+	print("PORTRAIT_ISOLATED_PACK %s passed=%d structural_failures=%d compatibility_failures=%d" % [input.phase, _passed, _failures.size(), _compatibility_failures.size()])
+	quit(0 if _failures.is_empty() else 1)
+
+
+func _is_expected_texture(value: Variant, expected: String) -> bool:
+	return value is Texture2D and value.resource_path == expected
+
+
+func _compatibility_check(ok: bool, message: String) -> void:
+	if ok:
+		_passed += 1
+	else:
+		_compatibility_failures.append(message)
+		print("COMPATIBILITY_FAILURE ", message)
+
+
+func _check(ok: bool, message: String) -> void:
+	if ok:
+		_passed += 1
+	else:
+		_failures.append(message)
+		push_error(message)

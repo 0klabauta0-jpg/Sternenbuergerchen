@@ -3157,7 +3157,10 @@ func _format_emblem_label(emblem_id: String) -> String:
 
 func _load_res_texture(path: String) -> Texture2D:
 	var normalized_path: String = path.strip_edges()
-	if normalized_path.is_empty() or not ResourceLoader.exists(normalized_path):
+	if normalized_path.is_empty():
+		return null
+	normalized_path = PORTRAIT_IDENTITY_CATALOG_SCRIPT.resolve_legacy_path(normalized_path)
+	if not ResourceLoader.exists(normalized_path):
 		return null
 	return load(normalized_path) as Texture2D
 
