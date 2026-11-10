@@ -1,5 +1,45 @@
 # IMPLEMENTATION_STATUS
 
+### Kampagne/Skirmish: Main-Integration für neue EXE — 10.11.2026
+Fünf-Missionen-Stand e4b407fe mit aktuellem Main1023d11c3 zusammengeführt.
+Konflikte bei Supply/Ressourcen, Loadouts und automatischer Ruhe geprüft; genau
+ein dauerhafter Ressourcenbestand. Reproduzierte M3-Höhenrücken-Sackgasse durch
+begehbare Böschungen korrigiert und echte TerrainPathfinder-Traversierbarkeit
+im Kartengate abgesichert (RED68/1 → GREEN69/0). Tatsächlicher erster Ausflug55/0,
+weitere Missionsabschnitte/finales Continue123/0; Skirmishstarts97/0; native
+D3D12-Menü-/Ersetzen-/Continue-Prüfung81/0, keine unsicheren SSAO-Ziele.
+QA: docs/qa/campaign_main_exe_20261110/README.md. Beauftragter Main-/Push-/Export-
+Abschluss aus diesem sauberen Stand; EXE-Belege im neuen Paket
+C:/dev/SternenBuergerchen-builds/2026-11-10-campaign-skirmish-main-r03/.
+Fremdes WIP erhalten; spätere Modelle/Spezialfähigkeiten weiterhin Platzhalter.
+
+
+### Fünf Kampagnenaufträge und drei Skirmish-Starts — 10.11.2026
+Auf eigenem Branch task/campaign-skirmish-rebuild-20261110, bewusst auf dem noch
+nicht integrierten Orts-/Gebäudestand e765f507c. Fünf Aufträge mit tatsächlicher
+Heimkehr/Chip-Upload, Fracht, Blueprints/Herstellung, Rekruten2→3→4, feindlicher
+Cutlass/neutrale Buccaneer und zweitem Schiff/Pad. Drei große Bodenorte, freie
+Skirmish-Starts8/20/30 Personen mit3/5/6 Schiffen und erreichbaren Betten/Pads.
+Fehlende Modelle/Spezialfunktionen bleiben bezeichnete Platzhalter. Sichtbares
+Inventar, Namen, Quellenabbau und datengesteuerte Sternkartenorte angebunden.
+Echter erster Ausflug55/0; letzter Missions-/Save-/Continue-Lauf77/0 mit4echten
+Basispersonen/2Schiffen/Pad2;54/0 Domainkette,21/0 Interaktion/Rückkehr,
+10/0 Ankunft,209/0 Presets,97/0 echter Skirmish-Flow und weitere gezielte Gates.
+24 finale Logs ohne Script-/Runtimefehler. Ein alter echter Kampagnenstand
+entfernt,61 Profildateien hashgleich erhalten. Fremdes WIP nicht übernommen.
+Keine Mainintegration, neue EXE, native Stil-/Spielspaß- oder allgemeine
+Performance-/MP-Freigabe. QA: docs/qa/campaign_skirmish_rebuild_20261110/README.md.
+
+
+### Kampagnenziel: fünf Missionen dokumentiert — 10.11.2026
+Plan in `docs/tasks/CAMPAIGN_FIVE_MISSIONS_2026_11_10_PLAN.md`:
+Satellit -> leichter Außenposten/Rekrut -> Rücklieferung/Mining-Blueprint ->
+Chipbergung/Sturmgewehr -> Raumhilfe. Cutlass feindlich, Buccaneer neutral;
+Team 2 -> 3 -> 4, anschließend zweites Landepad. Grafischer Baum und offene
+Punkte enthalten. Reine Zielplanung auf eigenem Doku-Branch, bewusst auf dem
+noch nicht integrierten Orts-/Gebäudetaskstand e765f507c. Keine Umsetzung,
+keine neue Laufzeitabnahme; bestehende Einführung bleibt im Code unverändert.
+
 ### Altlastenbereinigung auf Main integriert — 10.11.2026
 Freigegebenen Task c21f89c23 auf Mainbasis fbb7f52be konfliktfrei integriert,
 Maincode b8d3cdc77 frisch geprueft: Import0Fehler,26/26 isolierte Gates und

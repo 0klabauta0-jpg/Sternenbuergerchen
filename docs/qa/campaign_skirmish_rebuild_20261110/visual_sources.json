@@ -1,0 +1,32 @@
+{
+  "status": "Vorläufige SVG-Inventarsymbole; keine persönliche Stilabnahme",
+  "sources": [
+    {
+      "path": "Assets/curated/ui/campaign_inventory/armor_heavy.svg",
+      "sha256": "a438438f10bb601416bfc2e7333846199f81a64f70d3cfd22b881fb103c26769",
+      "origin": "Programmatically authored SVG in this task, no external images"
+    },
+    {
+      "path": "Assets/curated/ui/campaign_inventory/armor_light.svg",
+      "sha256": "c81315f630259e438f9aaa2c1b6be0f01b98be8ada848e05ff3f3f558f486f3d",
+      "origin": "Programmatically authored SVG in this task, no external images"
+    },
+    {
+      "path": "Assets/curated/ui/campaign_inventory/armor_medium.svg",
+      "sha256": "34720838b56f433778a6441def6ecb9b1c0c8fa3b3c46349ad5fc014a81bafb2",
+      "origin": "Programmatically authored SVG in this task, no external images"
+    },
+    {
+      "path": "Assets/curated/ui/campaign_inventory/benit.svg",
+      "sha256": "c791c0384a3858ef7ca48a79b6a8cdd1e09be1a46258a1e0528f1949a3d8b6a6",
+      "origin": "Programmatically authored SVG in this task, no external images"
+    },
+    {
+      "path": "Assets/curated/ui/campaign_inventory/chip.svg",
+      "sha256": "3d4b89b32ce56fa842fa48967dfde4fe0261b5a78b645a7b068f5013125230dd",
+      "origin": "Programmatically authored SVG in this task, no external images"
+    }
+  ],
+  "unchanged_ship_models": "Vorhandene Quellen aus data/frontier_ship_visual_catalog.json; keine Modellrevision",
+  "placeholders": "Zusätzliche Feldbetten sind prozedurale Funktionsplatzhalter; spätere Schiff-/Fahrzeugmodelle wählt der Nutzer."
+}

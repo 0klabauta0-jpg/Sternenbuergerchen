@@ -64,7 +64,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true)}
+	return {"credits": _credits, "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true), "blueprints": _blueprints()}
 
 func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
 	if not COMMANDS.validate_command(command) or _definitions.is_empty():
@@ -87,6 +87,10 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"refuel": result = _refuel(payload, authority_context)
 		"consume_route_fuel": result = _consume_route(payload, authority_context)
 		"apply_reward": result = _reward(payload, authority_context)
+		"campaign_cargo": result = _campaign_cargo(payload, authority_context)
+		"campaign_fabricate": result = _campaign_fabricate(payload, authority_context)
+		"campaign_build": result = _campaign_build(payload, authority_context)
+		"sell": result = _sell(payload, authority_context)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
 	if bool(result.get("ok", false)):
 		result["request_id"] = request_id
@@ -377,3 +381,78 @@ func _compatible_definitions(saved: Dictionary,current: Dictionary) -> bool:
 		if not Dictionary(right.get("offers",{})).has(id) or JSON.stringify(old_offers[id],"",true)!=JSON.stringify(right.offers[id],"",true): return false
 	left.erase("offers"); right.erase("offers")
 	return JSON.stringify(left,"",true)==JSON.stringify(right,"",true)
+
+
+func configure_start_inventory(mode: String) -> void:
+	if mode != "campaign": return
+	_item_quantities.clear()
+	_item_quantities.merge({"armor_light":2,"pistol":2,"medictool":1})
+	if _inventory.has("base:homebase"): _inventory["base:homebase"].items = _item_quantities
+	_revision += 1
+
+func configure_preset_supply(preset: Dictionary) -> void:
+	_credits = int(preset.get("credits", 10000))
+	var stock: Dictionary = Dictionary(preset.get("stock", {"armor_heavy":16,"armor_medium":16,"rifle":32,"medictool":8,"mining_tool":8,"salvage_tool":8}))
+	_item_quantities.clear()
+	_item_quantities.merge(stock)
+	_inventory["base:homebase"].capacity = maxi(200, INVENTORY.used(stock)+64)
+	_inventory["base:homebase"].items = _item_quantities
+	_revision += 1
+
+func _blueprints() -> Array:
+	var result: Array = []
+	for receipt: Dictionary in _reward_receipts.values():
+		var id := String(Dictionary(receipt.get("reward",{})).get("blueprint_id",""))
+		if not id.is_empty() and not result.has(id): result.append(id)
+	return result
+
+func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if not bool(context.get("campaign_authorized",false)): return _reject("untrusted_cargo","Kein bestaetigter Bergungs-/Lieferbeleg")
+	var container := String(payload.get("container_id",""))
+	var item := String(payload.get("item_id",""))
+	var raw: Variant = payload.get("amount",0)
+	if not _inventory.has(container) or not INVENTORY.known(item) or typeof(raw) not in [TYPE_INT,TYPE_FLOAT] or not is_finite(float(raw)) or float(raw)!=floor(float(raw)) or abs(float(raw))<1 or abs(float(raw))>1000000: return _reject("invalid_cargo","Fracht oder Container ungueltig")
+	var amount := int(raw)
+	var items: Dictionary = _inventory[container].items
+	if int(items.get(item,0))+amount<0: return _reject("missing_cargo","Benoetigte Fracht fehlt")
+	if INVENTORY.RESERVED_QUEST_ITEMS.has(item):
+		if int(items.get(item,0))+amount>1: return _reject("duplicate_quest_cargo","Auftragsfracht bereits vorhanden")
+	elif INVENTORY.used(items)+amount>int(_inventory[container].capacity): return _reject("container_full","Kein Platz fuer Fracht")
+	items[item]=int(items.get(item,0))+amount
+	if items[item]==0: items.erase(item)
+	_revision+=1
+	return {"ok":true,"message":"Fracht bestaetigt","item_id":item,"amount":amount}
+
+func _campaign_fabricate(payload: Dictionary, context: Dictionary) -> Dictionary:
+	if not bool(context.get("at_home",false)): return _reject("home_required","Herstellung nur an der Heimatbasis")
+	var blueprint := String(payload.get("blueprint_id",""))
+	var recipes := {"light_armor":{"item":"armor_light","cost":20},"mining_tool":{"item":"mining_tool","cost":30},"assault_rifle":{"item":"rifle","cost":60}}
+	if not _blueprints().has(blueprint) or not recipes.has(blueprint): return _reject("blueprint_locked","Blueprint noch nicht freigeschaltet")
+	var recipe: Dictionary = recipes[blueprint]
+	if _credits<int(recipe.cost): return _reject("insufficient_credits","Credits reichen nicht")
+	if INVENTORY.used(_item_quantities)>=int(_inventory["base:homebase"].capacity): return _reject("container_full","Basislager voll")
+	_credits-=int(recipe.cost)
+	_item_quantities[recipe.item]=int(_item_quantities.get(recipe.item,0))+1
+	_revision+=1
+	return {"ok":true,"message":"Gegenstand hergestellt","item_id":recipe.item}
+
+func _campaign_build(_payload: Dictionary, context: Dictionary) -> Dictionary:
+	if not bool(context.get("campaign_authorized",false)) or not bool(context.get("at_home",false)): return _reject("home_required","Ausbau nur an der Heimatbasis")
+	if _credits<100: return _reject("insufficient_credits","Landepad kostet 100 Credits")
+	_credits-=100; _revision+=1
+	return {"ok":true,"message":"Landepad gebaut"}
+
+func _sell(payload: Dictionary, context: Dictionary) -> Dictionary:
+	var location := String(context.get("location_id",""))
+	if not _has_service(location,"trade") or bool(context.get("craft_busy",true)): return _reject("trade_unavailable","Handel nicht erreichbar")
+	var wanted := "c_benit" if location=="satellite_crash" else "b_benit"
+	var item := String(payload.get("item_id",""))
+	var container := "craft:"+String(context.get("craft_id",""))
+	if item!=wanted or not _inventory.has(container) or not INVENTORY.positive_integer(payload.get("quantity",0)): return _reject("not_purchased","Dieser Haendler kauft diesen Rohstoff nicht")
+	var quantity := int(payload.quantity)
+	var items: Dictionary = _inventory[container].items
+	if int(items.get(item,0))<quantity: return _reject("insufficient_items","Bestand reicht nicht")
+	items[item]-=quantity
+	if items[item]==0: items.erase(item)
+	_credits+=quantity*15; _revision+=1
+	return {"ok":true,"message":"Rohstoff verkauft"}

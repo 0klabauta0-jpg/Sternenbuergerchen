@@ -47,9 +47,9 @@ func _run() -> void:
 	var flow: Node = current_scene
 	await _settle_and_check_base(flow, "first_new")
 	var screen: Control = flow.get_node("HomebaseScreen")
-	var default_loadout: String = String(Dictionary(screen.get("_member_loadout_by_unit_id")).get("campaign_leader", {}).get("weapon_1", ""))
-	var sentinel_loadout: String = "smg" if default_loadout != "smg" else "rifle"
-	var changed: Dictionary = screen.call("request_operation", "loadout", {"unit_id": "campaign_leader", "key": "weapon_1", "value": sentinel_loadout})
+	var default_loadout: String = String(Dictionary(screen.get("_member_loadout_by_unit_id")).get("campaign_leader", {}).get("weapon_2", ""))
+	var sentinel_loadout: String = "none" if default_loadout != "none" else "medictool"
+	var changed: Dictionary = screen.call("request_operation", "loadout", {"unit_id": "campaign_leader", "key": "weapon_2", "value": sentinel_loadout})
 	_check(bool(changed.get("ok", false)), "Existing equipment owner creates a distinct valid checkpoint fixture")
 	var saved: Dictionary = flow.get("_campaign_start").call("save_home_checkpoint", flow, flow.get("_singleplayer_runtime"))
 	if not _check(bool(saved.get("ok", false)) and bool(STORE.load_checkpoint().get("ok", false)), "First campaign writes a valid home checkpoint through its real owner"):
@@ -87,7 +87,7 @@ func _run() -> void:
 	flow = current_scene
 	await _settle_and_check_base(flow, "replaced")
 	screen = flow.get_node("HomebaseScreen")
-	var replaced_loadout: String = String(Dictionary(screen.get("_member_loadout_by_unit_id")).get("campaign_leader", {}).get("weapon_1", ""))
+	var replaced_loadout: String = String(Dictionary(screen.get("_member_loadout_by_unit_id")).get("campaign_leader", {}).get("weapon_2", ""))
 	_check(replaced_loadout == default_loadout and replaced_loadout != sentinel_loadout, "Confirmed replacement creates the fresh roster rather than restoring the old equipment")
 	saved = flow.get("_campaign_start").call("save_home_checkpoint", flow, flow.get("_singleplayer_runtime"))
 	_check(bool(saved.get("ok", false)) and bool(STORE.load_checkpoint().get("ok", false)), "Replacement allows a valid new grounded home checkpoint")
@@ -134,6 +134,9 @@ func _wait_scene(path: String, label: String) -> bool:
 
 func _settle_and_check_base(flow: Node, stage_name: String) -> void:
 	_stage = stage_name + "_settling"
+	var presenter: Node=flow.get_node("HomebaseScreen").get("_operations_presenter")
+	var base_button: Button=presenter.find_child("Navigate_base",true,false)
+	base_button.pressed.emit()
 	await _frames(12)
 	_check(flow == current_scene and bool(flow.call("is_campaign_start")), stage_name + " is the actual live campaign scene")
 	var units: Array = flow.get("_all_team_units")
@@ -153,7 +156,7 @@ func _exercise_view_switches(flow: Node) -> void:
 		nav.pressed.emit()
 		await _frames(12)
 		_check(String(presenter.get("_mode")) == mode, "Actual navigation selects " + mode)
-		if mode in ["base", "squad", "mission"]:
+		if mode == "base" or (mode in ["squad","mission"] and presenter.get("_base").is_visible_in_tree()):
 			_check_base_target_sizes(flow, "settled_" + mode)
 
 func _check_base_target_sizes(flow: Node, label: String) -> void:

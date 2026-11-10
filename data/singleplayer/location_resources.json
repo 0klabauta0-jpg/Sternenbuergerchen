@@ -1,9 +1,9 @@
 {
   "satellite_crash": {
     "iron_ridge_01": {
-      "name": "Erzader abbauen",
-      "item_id": "ore",
-      "quantity": 4,
+      "name": "A-Benit abbauen",
+      "item_id": "a_benit",
+      "quantity": 8,
       "required_tool": "mining_tool",
       "duration_seconds": 4.0,
       "radius_world": 96.0,
@@ -29,6 +29,55 @@
       ],
       "kind": "wreck",
       "id": "freighter_wreck_01"
+    },
+    "b_benit_01": {
+      "name": "B-Benit abbauen",
+      "item_id": "b_benit",
+      "quantity": 8,
+      "required_tool": "mining_tool",
+      "duration_seconds": 4.0,
+      "radius_world": 96.0,
+      "discovery_radius_world": 384.0,
+      "grid": [
+        31,
+        25
+      ],
+      "kind": "ore",
+      "id": "b_benit_01"
     }
-  }
+  },
+  "trade_outpost": {
+    "a_benit_01": {
+      "name": "A-Benit abbauen",
+      "item_id": "a_benit",
+      "quantity": 8,
+      "required_tool": "mining_tool",
+      "duration_seconds": 4.0,
+      "radius_world": 96.0,
+      "discovery_radius_world": 384.0,
+      "grid": [
+        18,
+        29
+      ],
+      "kind": "ore",
+      "id": "a_benit_01"
+    },
+    "c_benit_01": {
+      "name": "C-Benit abbauen",
+      "item_id": "c_benit",
+      "quantity": 8,
+      "required_tool": "mining_tool",
+      "duration_seconds": 4.0,
+      "radius_world": 96.0,
+      "discovery_radius_world": 384.0,
+      "grid": [
+        29,
+        10
+      ],
+      "kind": "ore",
+      "id": "c_benit_01"
+    }
+  },
+  "fortified_outpost": {},
+  "distress_orbit": {}
 }

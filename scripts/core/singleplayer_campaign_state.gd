@@ -14,8 +14,11 @@ var _departures_by_craft_id: Dictionary = {}
 var _completion_receipts: Dictionary = {}
 var _requests: Dictionary = {}
 var _revision: int = 0
+var _progress: Dictionary = {"recruited_outpost":false,"recruited_pilot":false,"crate_loaded":false,"crate_delivered":false,"second_pad_built":false}
+var _enforce_sequence := true
 
-func configure(locations: Dictionary = {}, jobs: Dictionary = {}) -> Dictionary:
+func configure(locations: Dictionary = {}, jobs: Dictionary = {}, enforce_sequence: bool = true) -> Dictionary:
+	_enforce_sequence = enforce_sequence
 	var raw_locations: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/locations.json")) if locations.is_empty() else locations
 	var raw_jobs: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/jobs.json")) if jobs.is_empty() else jobs
 	if typeof(raw_locations) != TYPE_DICTIONARY or typeof(raw_jobs) != TYPE_DICTIONARY:
@@ -47,6 +50,7 @@ func configure(locations: Dictionary = {}, jobs: Dictionary = {}) -> Dictionary:
 	_completion_receipts.clear()
 	_requests.clear()
 	_revision = 0
+	_progress = {"recruited_outpost":false,"recruited_pilot":false,"crate_loaded":false,"crate_delivered":false,"second_pad_built":false}
 	return {"ok": true}
 
 func get_campaign_snapshot() -> Dictionary:
@@ -55,7 +59,11 @@ func get_campaign_snapshot() -> Dictionary:
 		if String(_jobs[id].status) in ["accepted", "active"]:
 			accepted.append(String(id))
 	accepted.sort()
-	return {"locations": _locations.duplicate(true), "jobs": _jobs.duplicate(true), "accepted_job_ids": accepted, "selected_job_id": _selected_job_id, "selected_location_id": _selected_location_id, "departures_by_craft_id": _departures_by_craft_id.duplicate(true), "completion_receipts": _completion_receipts.duplicate(true), "revision": _revision}
+	var snapshot := {"locations": _locations.duplicate(true), "jobs": _jobs.duplicate(true), "accepted_job_ids": accepted, "selected_job_id": _selected_job_id, "selected_location_id": _selected_location_id, "departures_by_craft_id": _departures_by_craft_id.duplicate(true), "completion_receipts": _completion_receipts.duplicate(true), "progress":_progress.duplicate(true), "revision": _revision}
+	for id in snapshot.jobs:
+		var prior := String(snapshot.jobs[id].get("prerequisite_job_id",""))
+		snapshot.jobs[id]["locked"] = _enforce_sequence and not prior.is_empty() and String(Dictionary(_jobs.get(prior,{})).get("status","")) != "completed"
+	return snapshot
 
 func get_completion_receipt(completion_id: String) -> Dictionary:
 	return Dictionary(_completion_receipts.get(completion_id, {})).duplicate(true)
@@ -81,6 +89,8 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 		"complete_job": result = _complete(payload, authority_context)
 		"fail_job": result = _fail(payload, authority_context)
 		"retry_failed_job": result = _retry_failed(payload)
+		"upload_job": result = _upload(payload, authority_context)
+		"claim_recruit", "load_crate", "deliver_crate", "build_pad": result = _progress_action(String(command.operation),payload,authority_context)
 		_: result = _reject("unknown_operation", "Aktion unbekannt")
 	if bool(result.get("ok", false)):
 		result["request_id"] = request_id
@@ -92,6 +102,11 @@ func _accept(payload: Dictionary) -> Dictionary:
 	var job_id: String = String(payload.get("job_id", ""))
 	if not _jobs.has(job_id):
 		return _reject("unknown_job", "Auftrag unbekannt")
+	var prior := String(_jobs[job_id].get("prerequisite_job_id",""))
+	if _enforce_sequence and not prior.is_empty() and String(Dictionary(_jobs.get(prior,{})).get("status","")) != "completed":
+		return _reject("previous_job_required", "Zuerst den vorherigen Kampagnenauftrag abschließen")
+	if _enforce_sequence and job_id == "benit_delivery" and not (bool(_progress.recruited_outpost) and bool(_progress.crate_loaded)):
+		return _reject("outpost_preparation_required","Zuerst die Person am Handelsposten aufnehmen und die Kiste bergen")
 	var status: String = String(_jobs[job_id].status)
 	if status in ["accepted", "active"]:
 		return {"ok": true, "job_id": job_id, "already_accepted": true}
@@ -173,12 +188,64 @@ func _complete(payload: Dictionary, context: Dictionary) -> Dictionary:
 			return _reject("incomplete_objectives", "Bergung oder Rueckkehr noch offen")
 	if payload.has("craft_id") and String(payload.craft_id) != String(job.get("craft_id", "")):
 		return _reject("wrong_craft", "Abschluss gehoert zu anderem Schiff")
+	if _enforce_sequence and String(job.id) == "benit_delivery" and not bool(_progress.crate_delivered):
+		return _reject("crate_not_delivered", "Transportkiste am Handelsposten abgeben")
+	if _enforce_sequence and bool(job.get("home_upload",false)):
+		_jobs[job_id].status = "pending_upload"
+		if _selected_job_id == job_id:
+			_selected_job_id = ""
+		_revision += 1
+		return {"ok":true,"job_id":job_id,"pending_upload":true,"message":"Chip gesichert. Zur Basis bringen und am Terminal hochladen."}
+	return _finalize(job_id)
+
+func _finalize(job_id: String) -> Dictionary:
+	var job: Dictionary = _jobs[job_id]
 	var completion_id: String = job_id + ":completed"
 	var receipt := {"completion_id": completion_id, "job_id": job_id, "scenario_id": String(job.scenario_id), "craft_id": String(job.get("craft_id", "")), "reward": Dictionary(job.reward).duplicate(true), "runtime_verified": true}
 	_completion_receipts[completion_id] = receipt
 	_jobs[job_id].status = "completed"
+	if _selected_job_id == job_id:
+		_selected_job_id = ""
 	_revision += 1
 	return {"ok": true, "job_id": job_id, "completion_receipt": receipt.duplicate(true), "message": "Auftrag abgeschlossen"}
+
+func _upload(payload: Dictionary, context: Dictionary) -> Dictionary:
+	var id := String(payload.get("job_id",""))
+	if not bool(context.get("at_home",false)):
+		return _reject("upload_requires_home","Chip-Upload nur am Terminal der Heimatbasis")
+	if not _jobs.has(id) or String(_jobs[id].status) != "pending_upload":
+		return _reject("no_chip","Kein geborgener Chip zum Hochladen")
+	return _finalize(id)
+
+func _progress_action(operation: String, payload: Dictionary, context: Dictionary) -> Dictionary:
+	if not bool(context.get("runtime_authorized",false)):
+		return _reject("runtime_required","Bestätigte Ortsinteraktion fehlt")
+	var key := ""
+	match operation:
+		"claim_recruit":
+			var rescue := String(payload.get("kind","outpost")) == "pilot"
+			var job := "buccaneer_rescue" if rescue else "outpost_recovery"
+			var verified_outpost := not rescue and bool(context.get("outpost_cleared",false)) and String(Dictionary(_jobs.get(job,{})).get("status","")) == "active"
+			if String(Dictionary(_jobs.get(job,{})).get("status","")) != "completed" and not verified_outpost:
+				return _reject("recruit_not_ready","Zuerst den zugehörigen Auftrag gewinnen")
+			key = "recruited_pilot" if rescue else "recruited_outpost"
+		"load_crate":
+			if String(Dictionary(_jobs.get("outpost_recovery",{})).get("status","")) != "completed":
+				return _reject("crate_not_ready","Zuerst den Außenposten sichern")
+			key = "crate_loaded"
+		"deliver_crate":
+			if not _progress.crate_loaded or String(Dictionary(_jobs.get("benit_delivery",{})).get("status","")) != "active":
+				return _reject("crate_not_loaded","Lieferauftrag aktivieren und C-Benit-Kiste mitbringen")
+			key = "crate_delivered"
+		"build_pad":
+			if not _progress.recruited_pilot or not bool(context.get("at_home",false)):
+				return _reject("pad_not_ready","Zuerst den Buccaneer-Piloten retten und zur Basis zurückkehren")
+			key = "second_pad_built"
+	if bool(_progress[key]):
+		return {"ok":true,"changed":false}
+	_progress[key] = true
+	_revision += 1
+	return {"ok":true,"changed":true,"progress_key":key}
 
 func _fail(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var job_id: String = String(payload.get("job_id", ""))
@@ -211,18 +278,20 @@ func _retry_failed(payload: Dictionary) -> Dictionary:
 func export_state() -> Dictionary:
 	var state := get_campaign_snapshot()
 	state["schema_version"] = 1
+	state["enforce_sequence"] = _enforce_sequence
 	state["requests"] = _requests.duplicate(true)
 	return state
 
 func restore_state(data: Dictionary) -> Dictionary:
 	# Rebuild definitions from current content, never trust persisted mission/reward definitions.
 	var fresh = get_script().new()
-	if not fresh.configure().get("ok", false):
+	if typeof(data.get("enforce_sequence",true)) != TYPE_BOOL or not fresh.configure({}, {}, bool(data.get("enforce_sequence",true))).get("ok", false):
 		return _reject("invalid_definitions", "Aktuelle Auftragsdaten fehlen")
 	var result: Dictionary = fresh._validate_saved_state(data)
 	if not result.ok:
 		return result
 	_locations = fresh._locations.duplicate(true)
+	_enforce_sequence = fresh._enforce_sequence
 	_jobs = fresh._jobs.duplicate(true)
 	for job_id in _jobs:
 		_jobs[job_id].status = String(data.jobs[job_id].status)
@@ -233,6 +302,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_departures_by_craft_id = data.departures_by_craft_id.duplicate(true)
 	_completion_receipts = data.completion_receipts.duplicate(true)
 	_requests = data.requests.duplicate(true)
+	_progress = Dictionary(data.get("progress",_progress)).duplicate(true)
 	_revision = int(data.revision)
 	return {"ok":true}
 
@@ -242,15 +312,27 @@ func _validate_saved_state(data: Dictionary) -> Dictionary:
 	for field in ["locations", "jobs", "departures_by_craft_id", "completion_receipts", "requests"]:
 		if typeof(data.get(field)) != TYPE_DICTIONARY:
 			return _reject("invalid_campaign_state", "Kampagnenfelder fehlen")
+	if typeof(data.get("progress")) != TYPE_DICTIONARY or data.progress.size() != _progress.size():
+		return _reject("invalid_progress","Kampagnenfortschritt fehlt")
+	for key in _progress:
+		if typeof(data.progress.get(key)) != TYPE_BOOL: return _reject("invalid_progress","Kampagnenfortschritt ungültig")
+	for pair in [["recruited_outpost","outpost_recovery"],["crate_loaded","outpost_recovery"],["crate_delivered","outpost_recovery"],["recruited_pilot","buccaneer_rescue"],["second_pad_built","buccaneer_rescue"]]:
+		var allowed := ["active","completed"] if pair[0] == "recruited_outpost" else ["completed"]
+		if bool(data.progress.get(pair[0],false)) and String(Dictionary(data.jobs.get(pair[1],{})).get("status","")) not in allowed: return _reject("invalid_progress","Fortschritt ohne Missionsabschluss")
+	if bool(data.progress.second_pad_built) and not bool(data.progress.recruited_pilot): return _reject("invalid_progress","Pad ohne geretteten Piloten")
 	if JSON.stringify(data.locations, "", true) != JSON.stringify(_locations, "", true) or data.jobs.size() != _jobs.size() or not _locations.has(data.get("selected_location_id", "")):
 		return _reject("stale_campaign_definitions", "Ortsdaten geaendert")
 	for job_id in _jobs:
 		if typeof(data.jobs.get(job_id)) != TYPE_DICTIONARY:
 			return _reject("invalid_job_state", "Auftrag fehlt")
 		var saved: Dictionary = data.jobs[job_id].duplicate(true)
-		if String(saved.get("status", "")) not in ["offered", "accepted", "active", "completed", "failed"]:
+		saved.erase("locked")
+		if String(saved.get("status", "")) not in ["offered", "accepted", "active", "completed", "failed", "pending_upload"]:
 			return _reject("invalid_job_status", "Auftragsstatus ungueltig")
 		var status := String(saved.status)
+		var prior := String(_jobs[job_id].get("prerequisite_job_id",""))
+		if _enforce_sequence and status != "offered" and not prior.is_empty() and String(Dictionary(data.jobs.get(prior,{})).get("status","")) != "completed": return _reject("invalid_job_order","Auftragsreihenfolge ungültig")
+		if status == "pending_upload" and not bool(_jobs[job_id].get("home_upload",false)): return _reject("invalid_upload","Auftrag enthält keinen hochzuladenden Chip")
 		saved["status"] = "offered"
 		saved.erase("craft_id")
 		if JSON.stringify(JSON.parse_string(JSON.stringify(saved)), "", true) != JSON.stringify(JSON.parse_string(JSON.stringify(_jobs[job_id])), "", true):

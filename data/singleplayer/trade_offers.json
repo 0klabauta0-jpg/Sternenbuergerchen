@@ -43,7 +43,12 @@
       "trade",
       "refuel"
     ],
-    "satellite_crash": []
+    "satellite_crash": [
+      "trade",
+      "refuel"
+    ],
+    "fortified_outpost": [],
+    "distress_orbit": []
   },
   "route_fuel_costs": {
     "homebase>satellite_crash": 12.0,
@@ -51,6 +56,18 @@
     "homebase>trade_outpost": 8.0,
     "trade_outpost>homebase": 8.0,
     "satellite_crash>trade_outpost": 10.0,
-    "trade_outpost>satellite_crash": 10.0
+    "trade_outpost>satellite_crash": 10.0,
+    "homebase>fortified_outpost": 10.0,
+    "fortified_outpost>homebase": 10.0,
+    "homebase>distress_orbit": 10.0,
+    "distress_orbit>homebase": 10.0
+  },
+  "benit_buy_orders": {
+    "satellite_crash": {
+      "c_benit": 12
+    },
+    "trade_outpost": {
+      "b_benit": 12
+    }
   }
 }

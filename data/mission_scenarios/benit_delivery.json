@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "scenario_id": "benit_delivery",
+  "display_name": "C-Benit zum Satelliten-Handelsposten liefern",
+  "map_file_path": "res://maps/satellite_crash_site.json",
+  "time_limit_seconds": 2400.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 0,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 1
+  },
+  "patrol_bindings": [],
+  "briefing": {
+    "summary": "C-Benit zum Satelliten-Handelsposten liefern; Fracht und Personen sicher zurückbringen.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "trade_service",
+        "text": "Transportkiste am Handelsposten abgeben"
+      },
+      {
+        "target_id": "ship_return",
+        "text": "Nach der Lieferung zum Schiff zurückkehren"
+      }
+    ],
+    "title": "C-Benit zum Satelliten-Handelsposten liefern"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_job",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": [
+      "singleplayer"
+    ],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "deliver_benit",
+        "step_id": "deliver_benit",
+        "duration_seconds": 3.0,
+        "required_state": "deliver_benit_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Transportkiste am Handelsposten abgeben",
+        "interaction_id": "trade_service",
+        "marker_id": "trade_service"
+      },
+      {
+        "gate_id": "return_to_ship",
+        "step_id": "return_to_ship",
+        "duration_seconds": 3.0,
+        "required_state": "return_to_ship_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Nach der Lieferung zum Schiff zurückkehren",
+        "interaction_id": "ship_return",
+        "marker_id": "ship_return",
+        "requires_step_id": "deliver_benit"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "deliver_benit",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "deliver_benit_done",
+        "target_marker_id": "trade_service"
+      },
+      {
+        "step_id": "return_to_ship",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "return_to_ship_done",
+        "target_marker_id": "ship_return",
+        "requires_step_id": "deliver_benit"
+      }
+    ]
+  },
+  "notes": [
+    "Authored chapter-one content. Runtime gates, not UI clicks, determine completion."
+  ]
+}

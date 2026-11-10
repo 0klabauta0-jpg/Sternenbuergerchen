@@ -1,0 +1,27 @@
+{
+  "label": "source_native",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 6,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen\\output\\campaign_rebuild_20261110\\campaign_replace_main_gpu\\source_native",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "7803986",
+    "--path",
+    "C:/dev/SternenBuergerchen-worktrees/campaign-main-exe-20261110",
+    "--script",
+    "res://scripts/tests/campaign_replace_render_verifier.gd"
+  ]
+}

@@ -5,15 +5,17 @@ const HELP_POPUP = preload("res://scripts/ui/contextual_help_popup.gd")
 const SETTINGS = preload("res://scripts/ui/game_settings_contract.gd")
 const THEME = preload("res://scripts/ui/tactical_ui_theme.gd")
 const STEPS := {
-	"base_ready": ["campaign.boarding", "Mondbasis vorbereiten: einen der beiden NPCs anklicken. Ausrüstung, Ein-/Aussteigen und Betten stehen in der Aktionsleiste. Satellitenauftrag annehmen, beide zum Schiff schicken und zum Mondorbit abheben."],
-	"satellite_completed": ["campaign.movement", "Auf der Sternkarte den Planeten anklicken. Im Planetenorbit Satelliten-Absturzstelle wählen und Anflug starten. Landen und beide NPCs absetzen, Bewegung/GO und Satelliten-Interaktion ausführen; danach zum Schiff zurück."],
-	"satellite_home": ["campaign.return", "Bergung bestaetigt: Leader und Pilot fuer den Heimflug bereitstellen und zur Heimatbasis zurueckkehren. Erst die Heimkehr schaltet den Versorgungsauftrag frei."],
-	"trade_departed": ["campaign.trade", "Versorgung sichern: Pilot/Leader an Bord nehmen, zum Mondorbit abheben und zum Planeten springen. Im Planetenorbit Handelsposten waehlen und den Anflug starten."],
-	"trade_used": ["campaign.use", "Am Handelsposten landen, Leader absetzen und zum Haendler bewegen. Use oeffnet den echten Handel."],
-	"bought": ["campaign.trade", "Beim Haendler einen passenden verfuegbaren Gegenstand kaufen. Ein bestaetigter Kauf zaehlt; das Oeffnen des Handels allein reicht nicht."],
-	"refueled": ["campaign.trade", "Treibstoff beim Haendler nachfuellen. Die erfolgreiche Tankaktion wird bestaetigt; bei fehlenden Mitteln den sichtbaren Sperrgrund pruefen."],
-	"trade_home": ["campaign.return", "Kauf und Tanken sind bestaetigt. Beide zum Schiff zurueckbringen und einsteigen lassen. Eine echte Person muss den Pilotenplatz besetzen; dann zur Heimatbasis fliegen."],
-	"completed": ["campaign.complete", "Einfuehrung abgeschlossen. Die vorhandenen Orte bleiben frei besuchbar. Dein Stand wird an sicheren Basis-Meilensteinen gespeichert."]
+	"base_ready":["campaign.boarding","Mondbasis vorbereiten: zwei Personen ausrüsten, Satellitenauftrag im Smart Mobile annehmen, Pilot und Trupp an Bord nehmen, abheben."],
+	"satellite_uploaded":["campaign.return","Mission 1: Satellitenchip bergen, zum Schiff zurückbringen und wirklich heimfliegen. An der Basis im Versorgungsfenster den Chip hochladen."],
+	"outpost_completed":["campaign.movement","Mission 2: Außenpostenauftrag annehmen, auf Karte B einen Gegner besiegen und die C-Benit-Kiste bergen."],
+	"outpost_recruited":["campaign.trade","Den Handelsposten auf Karte B erreichen und ansprechen. Im Versorgungsfenster die neue Person aufnehmen; das Team wächst auf drei."],
+	"crate_loaded":["campaign.use","C-Benit-Kiste am gesicherten Außenposten bergen und ins Schiff bringen."],
+	"delivery_completed":["campaign.trade","Mission 3: Lieferauftrag annehmen, mit der Kiste zur Satellitenkarte zurückkehren und am dortigen Händler abgeben. Belohnung: Hand-Mining-Blueprint."],
+	"outpost_chip_uploaded":["campaign.return","Mission 4: Auf Karte C zwei Gegner besiegen, Chip bergen, heimbringen und am Basisterminal hochladen. Belohnung: Sturmgewehr-Blueprint."],
+	"rescue_completed":["campaign.movement","Mission 5: Notruf annehmen und im Planetenorbit anfliegen. Feindliche Cutlass bekämpfen; neutrale Buccaneer retten."],
+	"pilot_recruited":["campaign.use","Nach dem Sieg den Buccaneer-Piloten retten. Er schließt sich mit seinem Schiff an; das Team wächst auf vier."],
+	"second_pad_built":["campaign.return","Zur Basis heimkehren: Kein freies Landepad für die Buccaneer. Im Versorgungsfenster das zweite Landepad für 100 Credits bauen."],
+	"completed":["campaign.complete","Erstes Kampagnenkapitel abgeschlossen: vier Personen, zwei Schiffe und zwei Landepads. Orte bleiben besuchbar; sichere Basisstände können fortgesetzt werden."]
 }
 var _runtime: Node
 var _flow: Node
@@ -152,7 +154,7 @@ func refresh() -> void:
 	_step_id = String(onboarding.get("next_step_id", "base_ready"))
 	var step: Array = STEPS.get(_step_id, ["campaign.job", "Aktuellen Auftrag und den Sperrgrund im Operationsfenster pruefen. Ein abgebrochener Ausflug kann erneut begonnen werden."])
 	_help_id = String(step[0])
-	_title.text = "Kampagne: Einfuehrung abgeschlossen" if int(onboarding.get("stage_index", 0)) >= 3 else "Kampagne: Etappe %d / 3" % (int(onboarding.get("stage_index", 0)) + 1)
+	_title.text = "Kampagne: Kapitel abgeschlossen" if bool(onboarding.get("completed",false)) else "Kampagne: Schritt %d / %d" % [int(onboarding.get("stage_index",0))+1,int(onboarding.get("stage_count",7))]
 	_guidance.text = String(step[1])
 	_checkpoint_label.text = "Speichert an Basis-Meilensteinen." if checkpoint.is_empty() else ("Basisstand gespeichert." if bool(checkpoint.get("ok", false)) else "Speichern fehlgeschlagen. Der letzte Basisstand bleibt erhalten.")
 	if not bool(checkpoint_guard.get("ok",true)): _checkpoint_label.text=String(checkpoint_guard.get("message","Speichern wartet auf die Rueckkehr aller Schiffe"))

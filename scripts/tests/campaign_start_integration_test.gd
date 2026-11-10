@@ -21,6 +21,9 @@ func _run() -> void:
 	_check(not Dictionary(state.get("onboarding", {})).is_empty(), "Actual SimulationRoot has onboarding owner")
 	var screen: Control = flow.get_node("HomebaseScreen")
 	var operations: Dictionary = screen.call("get_operations_snapshot")
+	for id in ["campaign_leader","campaign_pilot"]:
+		var actual_loadout: Dictionary=screen.call("_get_member_loadout",id)
+		_check(String(actual_loadout.weapon_1)=="pistol" and String(actual_loadout.armor)=="light","Campaign actually equips starter pistol/light on "+id)
 	var craft: Dictionary = operations.get("selected_craft", {})
 	_check(not String(craft.get("pilot_id", "")).is_empty(), "Campaign has a real assigned pilot")
 	_check(Array(flow.get("_selected_unit_ids")).size() == 1, "Exactly one deployable leader selected")
@@ -35,7 +38,7 @@ func _run() -> void:
 	var base: Control = screen.get("_operations_presenter").get("_base")
 	base.call("set_transport_snapshot", state)
 	_check(String(base.get("_map_path")) == "res://maps/campaign_intro_base.json", "Campaign uses its full-size homebase map")
-	_check(Array(flow.get("_mission_catalog")).size() == 2, "Campaign offers only its two authored external scenarios")
+	_check(Array(flow.get("_mission_catalog")).size() == 6, "Campaign offers five jobs plus free trader visit")
 	flow.queue_free()
 	await process_frame
 	print("CAMPAIGN_START_RESULTS passed=%d failed=%d" % [passed, failed])

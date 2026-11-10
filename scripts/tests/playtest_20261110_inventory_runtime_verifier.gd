@@ -14,7 +14,7 @@ func _run() -> void:
 	var gear: Dictionary=screen.call("request_operation","loadout",{"unit_id":"campaign_pilot","key":"weapon_1","value":"medictool"})
 	check(gear.get("ok",false),"outside pilot equips real finite medictool through original control")
 	check(screen.call("_get_member_loadout","campaign_pilot").weapon_1=="medictool","original loadout owner receives confirmed gear")
-	var command: Dictionary={"unit_id":"campaign_pilot","craft_id":craft,"item_id":"rifle","amount":1,"source_container_id":"base:homebase","destination_container_id":"unit:campaign_pilot:backpack","request_id":"runtime-transfer"}
+	var command: Dictionary={"unit_id":"campaign_pilot","craft_id":craft,"item_id":"pistol","amount":1,"source_container_id":"base:homebase","destination_container_id":"unit:campaign_pilot:backpack","request_id":"runtime-transfer"}
 	var moved: Dictionary=screen.call("request_operation","inventory_transfer",command)
 	check(moved.get("ok",false),"visible inventory operation reaches authoritative owner")
 	check(screen.call("request_operation","inventory_transfer",command).get("replayed",false),"visible retry does not duplicate transfer")

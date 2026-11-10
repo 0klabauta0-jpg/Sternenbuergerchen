@@ -241,6 +241,7 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 			enemy_assignment_slot_index += 1
 
 		_apply_unit_identity_preset(unit, unit_id, unit_team_id)
+		_apply_authored_enemy_loadout(unit,unit_id,unit_team_id)
 		_apply_fob_loadout_override(unit, unit_id, unit_team_id)
 		if unit.has_method("get_unit_id"):
 			unit_id = String(unit.call("get_unit_id"))
@@ -1541,3 +1542,16 @@ func _apply_terrain_tile_visual(tile_sprite: Sprite2D, tile_data) -> void:
 		tile_color = tile_color.darkened(0.14)
 
 	tile_sprite.modulate = tile_color
+
+
+func _apply_authored_enemy_loadout(unit: Node, unit_id: String, unit_team_id: String) -> void:
+	if unit_team_id==team_id or not unit.has_method("apply_identity_config"):return
+	# This chapter authors finite defenders; keep historical scenario equipment unchanged.
+	if _mission_scenario==null or not bool(Dictionary(_mission_scenario.call("get_vertical_slice")).get("finite_enemy_roster",false)):return
+	var group: Dictionary=_find_scenario_enemy_group_for_unit(unit_id)
+	var tactics: Dictionary=Dictionary(group.get("tactics",{}))
+	var weapon:=String(tactics.get("weapon_id",""))
+	if weapon.is_empty():return
+	var weapons=load("res://scripts/core/weapon_data.gd")
+	if not weapons.WEAPON_CATALOG.has(weapon):return
+	unit.call("apply_identity_config",{"weapon_1_id":weapon,"weapon_2_id":"none"})

@@ -6,7 +6,7 @@ den Satellitenauftrag; Ressourcenentnahme erfuellt keinen dieser Steps.
 
 `data/singleplayer/location_resources.json` definiert stabile site_id, Ertrag,
 Werkzeug, Dauer, Interaktionsradius und Entdeckungsradius. Erster Inhalt:
-Erzader mit vier Erz, vier Sekunden und Miningwerkzeug; groesseres Wrack mit acht
+A-Benit-Ader mit acht Benit, vier Sekunden und Miningwerkzeug; groesseres Wrack mit acht
 Bergungsgut, sechs Sekunden und Bergungswerkzeug. Eine Entnahme leert jeweils
 diese kleine Quelle. Das ist keine vollstaendige Berufssimulation.
 
@@ -28,7 +28,7 @@ Anwendung benutzt den vorhandenen zeitgesteuerten Use-Befehl. Der Runtimepfad
 prueft Person, lokalen Ort, Entdeckung, Distanz96, abgeschlossene Dauer und ein
 echtes Werkzeug in ihrem Rucksack erneut vor dem Commit. Miningwerkzeug und
 Bergungswerkzeug sind konkrete Inventaritems ohne eigene Kampf-/Ruestungswirkung.
-Je eines liegt in der endlichen neuen Startausstattung; Nachkauf am Handel.
+Kampagne beginnt ohne Miningwerkzeug; der Blueprint folgt nach Mission 3. Der freie Skirmish besitzt Werkzeugbestand. Nachkauf im Kampagnenmodus erst nach Freischaltung.
 
 Ertrag geht in den Rucksack der ausfuehrenden Person. Vor Entnahme werden freie
 Kapazitaet und Bestand geprueft. Volles Inventar, fehlendes Werkzeug oder Abbruch
@@ -41,3 +41,6 @@ der aktive Unit-Loadoutowner dafuer nicht angebunden ist; Transfers sind erlaubt
 Pruefung: Ertrag/Bestand zusammen erhalten, Retry und zweiter Besucher duplizieren
 nichts, Kapazitaetsfehler unveraendert, Job unabhaengig, sicherer Checkpoint behaelt
 Restbestand. Native getrennte Routen zeigen die drei Besuchsgruende.
+
+## Integration der Fünf-Missionen-Kampagne
+Benit A/B auf Satellitenkarte, A/C am Außenposten; Wrack bleibt eine zusätzliche Salvagequelle. Genau ein dauerhafter LocationRuntimeState je Ort gehört Supply. Der lokale LocationResourceRuntime und die vorhandenen Welt-Use-/GO-Targets verwenden denselben Bestand; das Ressourcenpanel ist ein weiterer Commandzugang. Beide Wege prüfen lebende lokale Personen, Sichtlinie, Werkzeug, Dauer und Kapazität. Beide entnehmen aus demselben Vorrat. Checkpoint-Projektionen dürfen keinen zweiten Vorrat initialisieren. Die gespeicherten aktuellen Wrackkollisionen bleiben erhalten.

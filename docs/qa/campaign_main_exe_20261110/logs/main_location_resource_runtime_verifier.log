@@ -1,0 +1,25 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: real resource owner configured
+PASS: embarked or undeployed unit cannot discover resources
+PASS: terrain occlusion hides a nearby resource
+PASS: physically deployed living unit discovers nearby source
+PASS: missing tool blocks mining
+PASS: tool in real backpack enables use
+PASS: partial duration grants no ore
+PASS: leaving source interrupts work
+PASS: insufficient backpack capacity consumes neither ore nor site
+PASS: incapacitated unit cannot harvest
+PASS: full nearby use yields eight finite A-Benit
+PASS: depleted source cannot be harvested twice
+PASS: resource checkpoint roundtrip
+PASS: discovery and depletion retained across reload
+PASS: panel and world Use share the durable Supply stock
+PASS: discovered Benit has an actual world Use binding
+PASS: world Use cannot finish before real duration
+PASS: completed local world Use collects through Supply
+PASS: world Use yield and depletion agree with panel snapshot
+PASS: panel cannot collect world-Use-depleted stock a second time
+PASS: durable Supply restore retains the common depleted stock
+LOCATION_RESOURCE_RUNTIME passed=21 failed=0

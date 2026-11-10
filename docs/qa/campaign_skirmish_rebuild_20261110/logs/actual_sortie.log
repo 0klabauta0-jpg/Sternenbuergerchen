@@ -1,0 +1,62 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Both base people receive real boarding walk
+PASS: Both real people arrive, embark and complete the existing transport payload before launch
+PASS: first accepted
+PASS: first destination selected
+PASS: Both actual base people and transport payload already agree on boarding
+PASS: satellite_recovery launches actual boarded craft
+PASS: satellite_recovery takeoff loads no mission and starts no mission timer
+PASS: Takeoff alone activates no campaign job
+PASS: Takeoff alone debits no destination fuel
+PASS: satellite_recovery actual takeoff reaches moon orbit
+PASS: Moon orbit cannot be saved as a home checkpoint
+PASS: Planet map approach is blocked from moon orbit
+PASS: satellite_recovery actual target click begins quantum
+PASS: Quantum visibly progresses through normal runtime ticks
+PASS: Actual abort holds the reached midpoint without teleport
+PASS: Aborted runtime trip remains still on subsequent tick
+PASS: Restart begins at the actual stopped position
+PASS: satellite_recovery short real quantum reaches planet orbit
+PASS: Quantum arrival still loads no mission and starts no timer
+PASS: Quantum, abort and restart activate no job and debit no route fuel
+PASS: satellite_recovery explicit approach accepts from planet orbit
+PASS: Explicit approach shows departure from star map before map instantiation
+PASS: satellite_recovery actual mission instance exists
+PASS: satellite_recovery actual outbound transit reaches waiting craft
+PASS: satellite_recovery actual map click places selected safe LZ
+PASS: GO is held until actual deploy effects and automatic insertion security finish
+PASS: satellite_recovery real landing unloads all original crew into authoritative simulation
+PASS: Selected location loads exact intended scenario satellite_recovery
+PASS: satellite_data actual move GO accepts
+PASS: satellite_data becomes usable after real simulated approach
+PASS: satellite_data real Use intent accepts
+PASS: satellite_data Use GO accepts
+PASS: satellite_data actual timed Use commits required runtime step
+PASS: ship_return actual move GO accepts
+PASS: ship_return becomes usable after real simulated approach
+PASS: ship_return real Use intent accepts
+PASS: ship_return Use GO accepts
+PASS: ship_return actual timed Use commits required runtime step
+PASS: real chip recovered awaits upload
+PASS: pending status
+PASS: no reward before physical home upload
+PASS: Actual surface exit returns original craft to planet orbit
+PASS: Planet orbit is not physical home arrival
+PASS: Real homeward target click begins moon quantum
+PASS: Real homeward quantum reaches moon orbit
+PASS: Moon orbit still requires an explicit home landing
+PASS: Explicit moonbase landing accepts after actual homeward travel
+PASS: Actual reverse transit restores original craft to homebase
+UPLOAD_RESULT { "ok": true, "job_id": "satellite_recovery", "completion_receipt": { "completion_id": "satellite_recovery:completed", "job_id": "satellite_recovery", "scenario_id": "satellite_recovery", "craft_id": "dropship_1", "reward": { "credits": 150, "blueprint_id": "light_armor" }, "runtime_verified": true }, "message": "Auftrag abgeschlossen", "request_id": "upload:satellite_recovery", "operation": "upload_job" }
+PASS: real home upload accepted
+PASS: upload completes first mission
+PASS: one exact reward
+SAVE_RESULT ok
+PASS: real home checkpoint saves new campaign
+PASS: new checkpoint loads
+PASS: Actual transient insertion guard was exercised
+PASS: Campaign never writes the menu-built Skirmish team
+CAMPAIGN_INTRO_LOOP returns=0
+SINGLEPLAYER_LOOP_RESULTS passed=55 failed=0

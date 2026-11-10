@@ -1,5 +1,37 @@
 # TASK_ROADMAP
 
+### Kampagnen-/Skirmish-Mainabschluss — 10.11.2026
+Fünf-Missionen-Stand e4b407fe mit aktuellem Main1023d11c3 zusammengeführt.
+Konflikte bei Supply/Ressourcen, Loadouts und automatischer Ruhe geprüft; genau
+ein dauerhafter Ressourcenbestand. Reproduzierte M3-Höhenrücken-Sackgasse durch
+begehbare Böschungen korrigiert und echte TerrainPathfinder-Traversierbarkeit
+im Kartengate abgesichert (RED68/1 → GREEN69/0). Tatsächlicher erster Ausflug55/0,
+weitere Missionsabschnitte/finales Continue123/0; Skirmishstarts97/0; native
+D3D12-Menü-/Ersetzen-/Continue-Prüfung81/0, keine unsicheren SSAO-Ziele.
+QA: docs/qa/campaign_main_exe_20261110/README.md. Beauftragter Main-/Push-/Export-
+Abschluss aus diesem sauberen Stand; EXE-Belege im neuen Paket
+C:/dev/SternenBuergerchen-builds/2026-11-10-campaign-skirmish-main-r03/.
+Fremdes WIP erhalten; spätere Modelle/Spezialfähigkeiten weiterhin Platzhalter.
+
+
+### Kampagnenumbau / Skirmish-Startstände umgesetzt — 10.11.2026
+Fünf Aufträge, Wachstum2→3→4, zweites Schiff/Pad und drei freie Skirmish-Starts
+(Early8, Mid20, Late30) im eigenen Taskbranch implementiert und gezielt geprüft.
+Fehlende spätere Modelle und Träger-/Fahrzeug-Spezialfunktionen bleiben offen.
+Arbeitsplan: docs/tasks/CAMPAIGN_SKIRMISH_REBUILD_2026_11_10.md.
+QA mit24 fehlerfreien finalen Logs, echten Ausflügen und4-Personen-/2-Schiff-
+Continue: docs/qa/campaign_skirmish_rebuild_20261110/README.md.
+Kein Main-/EXE-Abschluss oder allgemeine Performance-/Multiplayerfreigabe.
+
+
+### Kampagnenausbau: fünf Missionen geplant — 10.11.2026
+Zielplan: `docs/tasks/CAMPAIGN_FIVE_MISSIONS_2026_11_10_PLAN.md`.
+Drei Bodenkarten mit Rücklieferung zur Satellitenkarte, danach Raumhilfe
+gegen feindliche Cutlass für neutrale Buccaneer und zweites Landepad.
+Dokumentiert, noch nicht implementiert; offene Punkte vor Umsetzung klären.
+Die bisherigen Einführungsnachweise unten betreffen den kleineren Altumfang.
+
+
 ### Altlasten — Mainintegration10.11.2026
 Fuenf gepruefte Schritte unveraendert nach Main uebernommen. Main b8d3cdc77:
 frischer Import,26/26 Gates und isolierter Produktionsfilter-PCK750/0.
