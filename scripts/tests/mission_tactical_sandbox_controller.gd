@@ -3564,13 +3564,12 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 		_update_ui()
 		return false
 	var candidate_lz_position: Vector2 = Vector2(tile_context.get("world_position", _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position))))) if not tile_context.is_empty() else _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))
-	var campaign_pad: Variant = _get_authored_campaign_pad_position()
-	if typeof(campaign_pad) == TYPE_VECTOR2:
-		if not candidate_lz_position.is_equal_approx(Vector2(campaign_pad)):
-			_last_command_text = "LZ BLOCKIERT: Das markierte Landepad dieses Ortes auswaehlen"
+	if _should_keep_campaign_dropship_landed():
+		var validation: Dictionary = _validate_campaign_field_lz(candidate_lz_position)
+		if not bool(validation.ok):
+			_last_command_text = String(validation.get("message", "Landezone ist blockiert"))
 			_update_ui()
 			return false
-		candidate_lz_position = Vector2(campaign_pad)
 	if not tile_context.is_empty():
 		_set_selected_tile_context(tile_context, "", false, false)
 	if _should_route_dropship_command_through_network_authority():
@@ -13774,16 +13773,8 @@ func _is_authored_campaign_pad_occupied(craft_id: String) -> bool:
 
 
 func is_campaign_return_craft_at_authored_pad(craft_id: String) -> bool:
-	if not _is_parked_campaign_dropship(craft_id):
-		return false
-	var map = _get_active_mission_terrain_map_data_for_readability()
-	if map == null or not bool(map.call("has_marker", "ship_return")):
-		return false
-	var return_position: Vector2 = map.call("get_marker_position", "ship_return")
-	if _is_active_drop_sequence_for_craft(craft_id):
-		return _drop_sequence_position.is_equal_approx(return_position) and _drop_sequence_lz_position.is_equal_approx(return_position)
-	var sequence: Dictionary = Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {}))
-	return _coerce_vector2_value(sequence.get("position", Vector2.INF), Vector2.INF).is_equal_approx(return_position) and _coerce_vector2_value(sequence.get("lz_position", Vector2.INF), Vector2.INF).is_equal_approx(return_position)
+	# Compatibility name retained; return truth follows the actual bound craft.
+	return _is_parked_campaign_dropship(craft_id)
 
 
 func _can_request_mission_dropship_card_lz(card: Dictionary) -> bool:
@@ -15723,6 +15714,9 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 		"state": state,
 		"dropship_visible": body_visible,
 		"dropship_position": ship_position,
+		"touchdown_progress": clampf(_drop_sequence_timer / 1.25, 0.0, 1.0) if _is_active_drop_sequence_for_craft(craft_id) else clampf(float(Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {})).get("timer", 0.0)) / 1.25, 0.0, 1.0),
+		"requested_lz_position": Dictionary(_field_landing_by_craft.get(craft_id, {})).get("requested_lz_position", lz_position),
+		"resolved_lz_position": Dictionary(_field_landing_by_craft.get(craft_id, {})).get("resolved_lz_position", lz_position),
 		"dropship_target_position": target_position,
 		"approach_origin_position": approach_origin_position,
 		"approach_vector_origin_position": approach_origin_position,
@@ -29403,6 +29397,11 @@ func _build_mission_interaction_runtime_use_state_snapshot_uncached() -> Diction
 	var terrain_map_data = _get_active_mission_terrain_map_data_for_readability()
 	var binding_snapshot: Dictionary = get_mission_interaction_point_binding_snapshot()
 	var runtime_context: Dictionary = _build_mission_interaction_runtime_use_context_for_readability()
+	if _should_keep_campaign_dropship_landed():
+		var identity := Dictionary(get_parent().get_meta("singleplayer_mission_identity", {}))
+		var craft_id := String(identity.get("craft_id", _mission_drop_craft_id))
+		if _is_parked_campaign_dropship(craft_id):
+			runtime_context["marker_positions"] = {"ship_return": _campaign_landed_craft_position(craft_id)}
 	return Dictionary(MISSION_INTERACTION_RUNTIME_USE_STATE_SCRIPT.call("build_snapshot", binding_snapshot, terrain_map_data, runtime_context)).duplicate(true)
 
 
@@ -35978,14 +35977,13 @@ func _maybe_bootstrap_live_drop() -> void:
 
 
 func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
-	var campaign_pad: Variant = _get_authored_campaign_pad_position()
-	if typeof(campaign_pad) == TYPE_VECTOR2:
-		if not _has_lz_position or not _lz_position.is_equal_approx(Vector2(campaign_pad)):
-			_last_command_text = "DROP BLOCKIERT: Das markierte Landepad dieses Ortes verwenden"
+	if _should_keep_campaign_dropship_landed():
+		if not _has_lz_position: return false
+		var validation: Dictionary = _resolve_campaign_field_lz()
+		if not bool(validation.ok):
+			_last_command_text = String(validation.get("message", "Landeflaeche ist nicht frei"))
 			return false
-		if _is_authored_campaign_pad_occupied(_mission_drop_craft_id):
-			_last_command_text = "DROP BLOCKIERT: Landepad belegt; ersten Rueckflug abwarten"
-			return false
+		_field_landing_by_craft[_mission_drop_craft_id] = validation
 	if _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
 		_handoff_active_drop_sequence_to_card()
 	if _has_live_drop_sequence_for_craft(_mission_drop_craft_id):
@@ -36078,11 +36076,14 @@ func _update_drop_sequence(delta: float) -> void:
 func _update_primary_drop_sequence(delta: float) -> void:
 	match _drop_sequence_phase:
 		DROP_SEQUENCE_INBOUND:
-			_drop_sequence_position = _drop_sequence_position.move_toward(_drop_sequence_lz_position, DROP_SHIP_SPEED * delta)
+			var arrival_speed: float = FLIGHT_MOTION.normal_arrival_speed(_drop_sequence_position.distance_to(_drop_sequence_lz_position)) if _should_keep_campaign_dropship_landed() else DROP_SHIP_SPEED
+			_drop_sequence_position = _drop_sequence_position.move_toward(_drop_sequence_lz_position, arrival_speed * delta)
+			if _should_keep_campaign_dropship_landed() and _drop_sequence_position.distance_to(_drop_sequence_lz_position) <= 2.0:
+				_drop_sequence_timer += delta
 			if _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
 				_mission_drop_progress = _build_active_drop_sequence_progress_value()
 			_store_active_drop_sequence_card()
-			if _drop_sequence_position.distance_to(_drop_sequence_lz_position) <= 2.0:
+			if _drop_sequence_position.distance_to(_drop_sequence_lz_position) <= 2.0 and (not _should_keep_campaign_dropship_landed() or _drop_sequence_timer >= 1.25):
 				_drop_sequence_position = _drop_sequence_lz_position
 				_drop_sequence_phase = DROP_SEQUENCE_LANDED
 				_drop_sequence_timer = 0.0
@@ -36205,9 +36206,12 @@ func _update_drop_sequence_dict(sequence: Dictionary, delta: float) -> bool:
 		DROP_SEQUENCE_INBOUND:
 			var lz_position: Vector2 = _coerce_vector2_value(sequence.get("lz_position", Vector2.ZERO), Vector2.ZERO)
 			var position: Vector2 = _coerce_vector2_value(sequence.get("position", Vector2.ZERO), Vector2.ZERO)
-			position = position.move_toward(lz_position, DROP_SHIP_SPEED * delta)
+			var arrival_speed: float = FLIGHT_MOTION.normal_arrival_speed(position.distance_to(lz_position)) if _should_keep_campaign_dropship_landed() else DROP_SHIP_SPEED
+			position = position.move_toward(lz_position, arrival_speed * delta)
 			sequence["position"] = position
-			if position.distance_to(lz_position) <= 2.0:
+			if _should_keep_campaign_dropship_landed() and position.distance_to(lz_position) <= 2.0:
+				sequence["timer"] = float(sequence.get("timer",0.0)) + delta
+			if position.distance_to(lz_position) <= 2.0 and (not _should_keep_campaign_dropship_landed() or float(sequence.get("timer",0.0)) >= 1.25):
 				sequence["position"] = lz_position
 				sequence["phase"] = DROP_SEQUENCE_LANDED
 				sequence["timer"] = 0.0
@@ -36573,7 +36577,7 @@ func _prepare_drop_sequence_context() -> void:
 	if _drop_sequence_craft_id.is_empty():
 		_drop_sequence_craft_id = "mission_drop_sequence"
 	_drop_sequence_display_name = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship"
-	_drop_sequence_lz_position = _lz_position
+	_drop_sequence_lz_position = Vector2(Dictionary(_field_landing_by_craft.get(_mission_drop_craft_id, {})).get("resolved_lz_position", _lz_position))
 	_drop_sequence_approach_angle = _get_approach_angle_name()
 	_drop_sequence_embarked_unit_ids = _build_drop_unit_state_dict(_build_sorted_drop_unit_id_array(_embarked_unit_ids))
 
@@ -37258,3 +37262,31 @@ func request_immediate_move_from_screen(screen_position: Vector2) -> bool:
 	var targets: Array = _create_waypoints_for_selected_fireteams(Vector2(tile.world_position), true, true)
 	if targets.is_empty(): return false
 	return execute_selected_fireteam_orders()
+
+
+var _field_landing_by_craft: Dictionary = {}
+const FIELD_LANDING = preload("res://scripts/mission/field_landing_contract.gd")
+
+func _campaign_occupied_landing_positions() -> Array:
+	var result: Array = []
+	for card: Dictionary in _get_mission_dropship_card_entries():
+		var id := String(card.get("craft_id", ""))
+		if id != _mission_drop_craft_id and _is_parked_campaign_dropship(id):
+			result.append(_campaign_landed_craft_position(id))
+	return result
+
+func _validate_campaign_field_lz(position: Vector2) -> Dictionary:
+	var registry = _get_terrain_registry()
+	if registry == null: return {"ok":false, "reason":"terrain_unavailable"}
+	return FIELD_LANDING.validate(registry, registry.call("world_to_grid", position), _campaign_occupied_landing_positions())
+
+func _resolve_campaign_field_lz() -> Dictionary:
+	var pilot_id := String(_find_mission_dropship_card_entry(_mission_drop_craft_id).get("pilot_unit_id", ""))
+	var pilot = _get_campaign_sortie_unit(pilot_id)
+	var skill: float = 0.5
+	if pilot != null:
+		var value: Variant = pilot.get("dropship_piloting")
+		if typeof(value) in [TYPE_FLOAT, TYPE_INT] and float(value) >= 0.0: skill = clampf(float(value),0.0,1.0)
+	return FIELD_LANDING.resolve(_get_terrain_registry(), _lz_position, _mission_drop_craft_id + str(_lz_position), skill,0.5, _campaign_occupied_landing_positions())
+
+const FLIGHT_MOTION = preload("res://scripts/terrain/mission_flight_visual.gd")

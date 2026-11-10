@@ -22,7 +22,7 @@ static func build_snapshot(binding_snapshot: Dictionary, terrain_map_data = null
 	for binding_variant in binding_entries:
 		if typeof(binding_variant) != TYPE_DICTIONARY:
 			continue
-		var entry: Dictionary = _build_interaction_entry(Dictionary(binding_variant), terrain_map_data, fireteam_positions, current_team_id, interaction_states)
+		var entry: Dictionary = _build_interaction_entry(Dictionary(binding_variant), terrain_map_data, fireteam_positions, current_team_id, interaction_states, Dictionary(runtime_context.get("marker_positions", {})))
 		var status: String = String(entry.get("runtime_use_status", STATUS_UNKNOWN)).strip_edges().to_lower()
 		status_counts[status] = int(status_counts.get(status, 0)) + 1
 		if next_usable_interaction_id.is_empty() and bool(entry.get("can_use_now", false)):
@@ -50,9 +50,9 @@ static func build_snapshot(binding_snapshot: Dictionary, terrain_map_data = null
 	}
 
 
-static func _build_interaction_entry(binding: Dictionary, terrain_map_data, fireteam_positions: Array, current_team_id: String, interaction_states: Dictionary) -> Dictionary:
+static func _build_interaction_entry(binding: Dictionary, terrain_map_data, fireteam_positions: Array, current_team_id: String, interaction_states: Dictionary, marker_positions: Dictionary = {}) -> Dictionary:
 	var interaction_id: String = String(binding.get("interaction_id", "")).strip_edges()
-	var marker_data: Dictionary = _resolve_marker_position(binding, terrain_map_data)
+	var marker_data: Dictionary = {"has_position":true, "position":marker_positions[interaction_id]} if typeof(marker_positions.get(interaction_id)) == TYPE_VECTOR2 else _resolve_marker_position(binding, terrain_map_data)
 	var marker_position: Vector2 = Vector2(marker_data.get("position", Vector2.ZERO))
 	var radius_world: float = maxf(float(binding.get("radius_world", 0.0)), 1.0)
 	var required_team: String = String(binding.get("required_team", "")).strip_edges().to_lower()

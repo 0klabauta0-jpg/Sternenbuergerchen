@@ -68,6 +68,16 @@ static func ensure(controller: Node) -> Control:
 		actions.name = "Actions"
 		actions.add_theme_constant_override("separation", 4)
 		box.add_child(actions)
+		var direction_row := HBoxContainer.new()
+		direction_row.name = "ApproachRow"
+		var heading := Label.new()
+		heading.text = "Anflugrichtung"
+		direction_row.add_child(heading)
+		var dial: Control = preload("res://scripts/ui/components/approach_dial.gd").new()
+		dial.name = "ApproachDial"
+		dial.direction_selected.connect(func(direction: String): controller.call("_on_mission_dropship_card_approach_pressed", String(controller.get("_mission_drop_craft_id")), direction))
+		direction_row.add_child(dial)
+		box.add_child(direction_row)
 		for action in ["set_lz", "drop", "board", "return"]:
 			var button := Button.new()
 			button.name = action
@@ -234,6 +244,9 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 			"drop": button.visible = not landed and bool(selected_card.get("has_lz_position", false)) and bool(selected_card.get("has_embarked_payload", false))
 			"board": button.visible = landed
 			"return": button.visible = allowed or landed
+	var approach_row := card.get_node("Contents/ApproachRow") as Control
+	approach_row.visible = not landed and not selected_card.is_empty()
+	approach_row.get_node("ApproachDial").call("set_direction", String(selected_card.get("approach_angle", "NW")))
 	_style_primary_action(card, int(hud_layout.body_font_size))
 	var feedback := card.get_node("Contents/MissionDropshipCardFeedbackLabel") as Label
 	feedback.text = "" if selected_card.is_empty() else String(controller.call("_get_mission_dropship_card_feedback_text", selected_card))

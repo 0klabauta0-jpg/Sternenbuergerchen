@@ -28,3 +28,18 @@ func _prepare_visit_return(mission: Node) -> bool:
 	var depart := mission.get_node("TacticalUI/MissionDropshipPanel/CompactCard/Contents/Actions/return") as Button
 	_check(depart.visible and not depart.disabled, "Explicit takeoff enables only after boarding commits")
 	return true
+
+
+func _landing_target(map) -> Vector2:
+	var registry: Node = load("res://scripts/terrain/terrain_registry.gd").new()
+	registry.configure_iso_grid(map.get_grid_origin(),64,32,map.get_grid_topology())
+	for tile in map.get_tiles(): registry.register_tile(tile)
+	var spawn: Vector2 = map.get_marker_position("spawn_alpha")
+	for tile in map.get_tiles():
+		if tile.world_position.distance_to(spawn) >= 256.0 and tile.world_position.distance_to(spawn) <= 512.0 and bool(load("res://scripts/mission/field_landing_contract.gd").validate(registry,tile.grid_position,[]).ok):
+			var position: Vector2 = tile.world_position
+			registry.free()
+			return position
+	registry.free()
+	_check(false, "Authored map offers a safe free field landing away from spawn")
+	return spawn

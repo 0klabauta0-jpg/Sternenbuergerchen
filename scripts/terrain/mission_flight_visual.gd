@@ -37,7 +37,7 @@ func configure_cutlass_ref03() -> void:
 	# This helper is only attached to the unchanged Ref03 Cutlass source.
 	_visual_time = fmod(float(Time.get_ticks_msec()) / 1000.0, 1000.0)
 	for side in [-1.0, 1.0]:
-		_add_plume(Vector3(side * 4.8617345, 2.8004422, -8.0), 0.72, 2.8, true)
+		_add_plume(Vector3(side * 4.8617345, 2.8004422, -8.0), 0.72, 4.0, true)
 		_add_plume(Vector3(side * 4.6327021, 2.7067473, 2.8481226), 0.34, 1.35, true)
 
 
@@ -117,7 +117,7 @@ func _add_plume(anchor: Vector3, radius: float, length_value: float, rearward: b
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.48, 0.87, 1.0, 0.54)
+	material.albedo_color = Color(0.48, 0.87, 1.0, 0.80)
 	material.emission_enabled = true
 	material.emission = Color(0.14, 0.64, 0.94)
 	material.emission_energy_multiplier = 1.25
@@ -133,3 +133,14 @@ func _add_plume(anchor: Vector3, radius: float, length_value: float, rearward: b
 	_plumes.append(plume)
 	_plume_base_scales.append(plume.scale)
 	_plume_base_positions.append(plume.position)
+
+
+static func normal_arrival_speed(distance_world: float) -> float:
+	return lerpf(160.0, 1200.0, clampf(distance_world / 700.0, 0.0, 1.0))
+
+static func arrival_clearance(distance_from_lz: float, touchdown_progress: float) -> float:
+	if distance_from_lz <= 0.1:
+		var t := clampf(touchdown_progress, 0.0, 1.0)
+		return lerpf(2.0, TOUCHDOWN_CLEARANCE, t * t * (3.0 - 2.0*t))
+	var fraction := clampf(distance_from_lz / APPROACH_DISTANCE, 0.0, 1.0)
+	return lerpf(2.0, CRUISE_CLEARANCE, fraction*fraction*(3.0-2.0*fraction)) + sin(fraction*PI)*0.35

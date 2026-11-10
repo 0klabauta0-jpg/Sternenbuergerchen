@@ -28,10 +28,10 @@ ausdrueckliche Anflug bindet Ort/Job und startet die zugehoerige Karteninstanz.
   Szenenladen, Naehe, Kartenwahl oder UI-Button allein.
 - Abbruch/Fehlschlag vergibt keine Erfolgsbelohnung; Ergebnis erneut anzeigen
   erzeugt keinen zweiten Abschlussbeleg.
-- Die beiden neuen friedlichen Einzelspielerorte verwenden das gespeicherte
-  Landepad. LZ-Klick und Runtime-Drop validieren dieselbe gespeicherte Position;
-  ein belegtes Pad bleibt fuer ein zweites Schiff gesperrt, dessen Vorbereitung
-  und Wartezustand bleiben unabhaengig. Legacy-/verbundene freie LZ bleiben erhalten.
+- Playtestrevision 10.11.: Friedliche Einzelspielerorte erlauben freie sichere
+  Feldlandungen. Bestehende Pads bleiben waehlbar. Gemeinsame Footprintpruefung
+  schuetzt Ziel und skillabhaengigen Aufsetzpunkt vor Rand, Hindernis und fremdem
+  Schiff; die Rueckkehrinteraktion folgt dem tatsaechlich gebundenen Schiff.
 - Rueckkehr am Schiff bestaetigt nur das tatsaechlich geparkte Schiff des aktiven
   Auftrags. MissionSetup erhaelt dessen unveraenderliche Craft-/Job-/Szenario-IDs
   vom Runtime-Handoff. Ein fehlendes, fremdes oder abgeflogenes Schiff kann keinen

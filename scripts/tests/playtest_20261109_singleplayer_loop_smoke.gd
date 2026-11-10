@@ -253,11 +253,11 @@ func _launch_and_land(scenario_id: String, map_path: String) -> bool:
 		return false
 	var map = MAP.load_from_file(map_path)
 	var view: Node = mission.get_node("Primary3DView")
-	var lz: Vector2 = map.get_marker_position("spawn_alpha")
+	var lz: Vector2 = _landing_target(map)
 	view.call("focus_world_position", lz)
 	controller.call("_on_mission_dropship_card_set_lz_pressed", _craft_id)
 	var placed: bool = bool(controller.call("_place_lz_from_screen_position", view.call("world_to_screen_position", lz)))
-	if not _check(placed, scenario_id + " actual map click places LZ on saved reachable pad"):
+	if not _check(placed, scenario_id + " actual map click places selected safe LZ"):
 		_dump("lz_pick")
 		return false
 	controller.call("_on_mission_dropship_card_drop_pressed", _craft_id)
@@ -292,7 +292,10 @@ func _move_and_use(mission: Node, interaction: String, step: String, map_path: S
 	var controller: Node = mission.get_node("TacticalController")
 	var driver: Node = mission.get_node("CombatLoopDriver")
 	var map = MAP.load_from_file(map_path)
-	controller.call("_create_waypoints_for_selected_fireteams", map.get_marker_position(interaction), true)
+	var target: Vector2 = map.get_marker_position(interaction)
+	if interaction == "ship_return" and controller.has_method("_campaign_landed_craft_position"):
+		target = controller.call("_campaign_landed_craft_position", _craft_id)
+	controller.call("_create_waypoints_for_selected_fireteams", target, true)
 	if not _check(bool(controller.call("execute_selected_fireteam_orders")), interaction + " actual move GO accepts"):
 		_dump("move_go")
 		return false
@@ -417,3 +420,6 @@ func _finish() -> void:
 	await process_frame
 	print("SINGLEPLAYER_LOOP_RESULTS passed=%d failed=%d" % [_passed, _failed])
 	quit(1 if _failed else 0)
+
+func _landing_target(map) -> Vector2:
+	return map.get_marker_position("spawn_alpha")

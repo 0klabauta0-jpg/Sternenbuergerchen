@@ -10538,6 +10538,8 @@ func _world_to_air_layer_3d_position_for_payload(payload: Dictionary, world_posi
 		var lz_plane: Vector3 = _world_to_3d_position(Vector2(lz_variant), 0.0)
 		distance_from_lz = ship_plane.distance_to(lz_plane)
 	var visual_clearance: float = MISSION_FLIGHT_VISUAL_SCRIPT.clearance_for_phase(phase, distance_from_lz, legacy_clearance)
+	if phase == "inbound" and payload.has("touchdown_progress"):
+		visual_clearance = MISSION_FLIGHT_VISUAL_SCRIPT.arrival_clearance(distance_from_lz, float(payload.touchdown_progress))
 	var minimum: float = 0.0 if MISSION_FLIGHT_VISUAL_SCRIPT.AIR_PHASES.has(phase) or MISSION_FLIGHT_VISUAL_SCRIPT.GROUND_PHASES.has(phase) else AIR_LAYER_MIN_CLEARANCE
 	_dropship_air_clearance = maxf(visual_clearance + extra_y_offset, minimum)
 	_dropship_air_y = _dropship_surface_y + _dropship_air_clearance

@@ -7,3 +7,5 @@ Historischer Baseline-Quelllauf mit privatem APPDATA: 152/0, aber zwei fehlende 
 AP1 Regression RED 5 Fehler fuer fehlende produktive Boarding-/Abflugcontrols, Karten-Schiffsauswahl und lesbare Zielnamen. Struktur-GREEN 6/0. Echter Kampagnen-Zweiausflug ueber die neue sichtbare Einsteigen-Schaltflaeche: 151/0, Exit 0, keine Engine-/Scriptfehler. Beide Personen laufen physisch; kein Teleport, genau zwei Payload-IDs; expliziter Abflug erst nach Runtimebestaetigung. Zweimal Continue geprueft. Script: scripts/tests/playtest_20261110_extraction_loop.gd. Rohlogs lokal unter output/playtest_20261110.
 
 Native Gestaltung, Karten-Picking und Aufloesungskollisionen werden im gemeinsamen nativen Abschluss geprueft; der Headlesslauf ist keine Stilabnahme. AP2..AP10 bleiben offen.
+
+AP2 mode verifier 6/0. AP3 shared field footprint/skill/hover/dynamic-anchor verifier 11/0; real combined loop with landing away from spawn and immediate RMB path 152/0, Exit0/errors0. Historical TASK311 rotation check is 7/1 both here and on untouched source 046b6d91a (separate private profile); not a new regression or green gate. Native final comparison still outstanding.
