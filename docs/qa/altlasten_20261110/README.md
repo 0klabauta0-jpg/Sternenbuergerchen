@@ -112,8 +112,29 @@ Die Consumer-Methoden werden automatisch unveraendert extrahiert. Das ist ein
 realer Filter-/Ressourcenbeleg, keine vollstaendige gepackte Spielszenen- oder
 Releaseabnahme. Eine gesamte Buildgroessenersparnis wurde nicht gemessen.
 
-## Fortschritt
-Alle fuenf fachlichen Schritte implementiert und einzeln geprueft.
-Gemeinsame Abschlussmatrix und letzter unabhaengiger Review folgen.
+## Abschluss
+Alle fuenf Schritte in eigener Reihenfolge und eigenen Commits abgeschlossen.
+Gemeinsame26er-Matrix auf Code95e4b9625:26/26, Exit0, keine Script-/Runtime-
+oder Leakfehler,26 getrennte user://-Profile und unveraenderter Default-Roster.
+Frischer Import ebenfalls Exit0 ohne Fehler. Unabhaengiger ganzer Branchreview
+ohne actionable Befunde: REVIEW.md. Maschinenbeleg: final_verification.json.
+
+Die drei alten Sammelgates bleiben exakt mit ihren nachgewiesenen Baseline-
+Abweichungen dokumentiert. Daraus wird keine gruene Gesamtsuite gemacht.
+Der803-Zeilen-Diagnoseschnitt ist eine abgegrenzte Extraktion; der uebrige
+Controller bleibt gross. Kein breiter Rewrite, Mainmerge oder neuer Spiele-
+Releaseexport. Die laufenden Aenderungen im urspruenglichen Checkout wurden
+von dieser Arbeit nicht angefasst.
+
+Reproduktion der positiven Matrix:
+`python scripts/tests/run_review2_isolated.py --project . --manifest scripts/tests/altlasten_regression_manifest.json --baseline .godot/altlasten/roster_default_baseline.json --output .godot/altlasten/recheck-matrix --timeout 150`
+Der lokale Baselinepin enthaelt vor dem Lauf den Pfad, SHA256, Laenge und mtime
+von user://profiles/local_player/roster_v1.json; er ist absichtlich nicht im
+Repository. Der bestehende Runner verweigert abweichende Baselines, statt
+reale Profildaten automatisch zu restaurieren. Rohlogs bleiben lokal unter
+.godot/altlasten; neue Werkzeuge und Manifest liegen versioniert vor.
+
+Taskbranch: task/altlasten-fuenf-schritte-20261110 auf Mainbasis fbb7f52be.
+Der finale Commit-/Pushstatus wird nach dem Gitabschluss im Chat gemeldet.
 Keine Mainintegration oder neue Release-EXE. Allgemeine Performance und native
 Gestaltungsabnahme sind kein Ergebnis dieser Komponentenregressionen.

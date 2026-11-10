@@ -56,5 +56,5 @@ zur Ausfuehrung liegt vor; kein erneuter Planfreigabehalt.
       pruefen; Quelldateien erhalten; dokumentieren und committen.
 
 ## Abschluss
-- [ ] Gezielte gemeinsame Regressionen, git diff --check, unabhaengiges Review.
-- [ ] Statusbericht mit verbleibenden Grenzen und Commit-/Pushstatus.
+- [x] Gezielte gemeinsame Regressionen, git diff --check, unabhaengiges Review.
+- [x] Statusbericht mit verbleibenden Grenzen und Commit-/Pushstatus.

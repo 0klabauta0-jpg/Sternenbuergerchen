@@ -1,5 +1,15 @@
 # IMPLEMENTATION_STATUS
 
+### Altlastenbereinigung abgeschlossen — 10.11.2026
+Fuenf getrennte Schritte auf Taskbranch/Mainbasis fbb7f52be: gemeinsamer
+LOS-Lesepfad, Runtime-Loadoutowner, tote Controls entfernt,803-Zeilen-
+Diagnostikhelper und42 gezielte Portraetausschluesse mit Alias-Kompatibilitaet.
+Finaler Code95e4b9625:26/26 gemeinsame Gates, frischer Import0Fehler,
+PCK-Filter-/Kompatibilitaetsprobe750/0, unabhaengiger Review ohne Befunde.
+Drei alte Sammelgates mit exakt baselinegleichen Abweichungen dokumentiert;
+keine pauschale Gesamt-/FPS-/Releasefreigabe. Original-WIP unangetastet, kein
+Mainmerge/neue Spiele-EXE. QA: docs/qa/altlasten_20261110/README.md.
+
 ### Altlasten — Schritt5 Portraetexport, 10.11.2026
 Alias-only-Aufloesung in vier Ladepfaden,42 kommasichere Ausschluesse;
 57 andere Originale und gespeicherte Emblemauswahl erhalten. Echter isolierter
