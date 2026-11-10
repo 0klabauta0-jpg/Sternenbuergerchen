@@ -807,6 +807,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_ensure_plan_mode_switch()
 	_advance_campaign_extraction(delta)
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var frame_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
@@ -35390,6 +35391,8 @@ func _finish_right_order_context_interaction(screen_position: Vector2, append_pr
 			return true
 		_open_area_order_command_menu(screen_position, area_order_targets, false, append_mode)
 		return true
+	if not _planning_enabled:
+		return request_immediate_move_from_screen(screen_position)
 	return _try_open_waypoint_menu_at_position(screen_position, append_mode)
 
 
@@ -37212,3 +37215,46 @@ func _advance_campaign_extraction(delta: float) -> void:
 	elif reason not in ["pilot_not_at_ship", "crew_not_at_ship", "pilot_boarding_pending"] or _campaign_extraction_elapsed > 180.0:
 		_campaign_extraction_craft_id = ""
 		_set_mission_dropship_card_feedback(craft_id, String(result.get("message", "Rueckweg unterbrochen")))
+
+
+var _planning_enabled: bool = true
+var _plan_mode_switch: CheckButton
+
+func is_planning_enabled() -> bool:
+	return _planning_enabled
+
+func set_planning_enabled(enabled: bool) -> void:
+	_planning_enabled = enabled
+	if is_instance_valid(_plan_mode_switch):
+		_plan_mode_switch.set_pressed_no_signal(enabled)
+		_plan_mode_switch.tooltip_text = "Planmodus an: Vorschau und GO" if enabled else "Planmodus aus: Rechtsklick bewegt sofort"
+
+func _ensure_plan_mode_switch() -> void:
+	if is_instance_valid(_plan_mode_switch): return
+	var go := get_node_or_null(COMMAND_GRID_PATH + "/GoCommandMatrixButton") as Button
+	if go == null: return
+	_plan_mode_switch = CheckButton.new()
+	_plan_mode_switch.name = "PlanModeSwitch"
+	_plan_mode_switch.text = ""
+	_plan_mode_switch.button_pressed = _planning_enabled
+	_plan_mode_switch.tooltip_text = "Plan an: erst planen, dann ausfuehren. Plan aus: Rechtsklick bewegt den Trupp sofort."
+	_plan_mode_switch.mouse_filter = Control.MOUSE_FILTER_STOP
+	_plan_mode_switch.add_theme_font_size_override("font_size", 10)
+	_plan_mode_switch.scale = Vector2(0.65, 0.65)
+	go.add_child(_plan_mode_switch)
+	_plan_mode_switch.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_plan_mode_switch.position = Vector2(1,1)
+	_plan_mode_switch.toggled.connect(set_planning_enabled)
+	go.tooltip_text = "Planmodus oben umschalten. Die Hauptflaeche fuehrt vorhandene Plaene aus."
+
+func request_immediate_move_from_screen(screen_position: Vector2) -> bool:
+	if _planning_enabled or not _can_edit_planning() or _selected_fireteam_ids.is_empty(): return false
+	if _is_lz_placement_armed or _is_target_placement_armed or _is_pointer_over_control(screen_position): return false
+	for team in _selected_fireteam_ids:
+		if not _is_fireteam_runtime_active(String(team)): return false
+	var tile: Dictionary = _build_tile_context_from_screen_position(screen_position)
+	if tile.is_empty(): return false
+	_set_selected_tile_context(tile, "", false, false)
+	var targets: Array = _create_waypoints_for_selected_fireteams(Vector2(tile.world_position), true, true)
+	if targets.is_empty(): return false
+	return execute_selected_fireteam_orders()

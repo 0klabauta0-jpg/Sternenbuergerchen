@@ -2,6 +2,13 @@ extends "res://scripts/tests/campaign_pilot_ground_loop_test.gd"
 ## Real two-sortie campaign; trader return uses the visible extraction button.
 func _prepare_visit_return(mission: Node) -> bool:
 	var controller: Node = mission.get_node("TacticalController")
+	var map = MAP.load_from_file("res://maps/trade_outpost.json")
+	var view: Node = mission.get_node("Primary3DView")
+	var target: Vector2 = map.get_marker_position("ship_return")
+	view.call("focus_world_position", target)
+	controller.call("set_planning_enabled", false)
+	_check(bool(controller.call("request_immediate_move_from_screen", view.call("world_to_screen_position", target))), "Plan off accepts real immediate move without GO")
+	controller.call("set_planning_enabled", true)
 	var ids := PackedStringArray(["campaign_leader", "campaign_pilot"])
 	var before := {}
 	for id in ids:
