@@ -16,6 +16,7 @@ const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.g
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const LOADOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/command/loadout_contract.gd")
+const LOADOUT_SIMULATION_SCRIPT: GDScript = preload("res://scripts/core/simulation_root.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const AIRCRAFT_MANAGER_SCRIPT: GDScript = preload("res://scripts/meta/aircraft_manager.gd")
 const HOMEBASE_CARD_POOL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_card_pool.gd")
@@ -112,7 +113,14 @@ var _homebase_direct_boarding_refresh_seconds: float = 0.0
 var _homebase_direct_boarding_force_refresh: bool = false
 var _homebase_direct_boarding_refresh_deferred_for_drag: bool = false
 var _pending_homebase_direct_mission_craft_id: String = ""
-var _member_loadout_by_unit_id: Dictionary = {}
+var _personnel_loadout_simulation: Node
+# Legacy callers may inspect/restore the old field, but never receive the
+# canonical Dictionary. The same core owner is adopted by CampaignSimulationRoot.
+var _member_loadout_by_unit_id: Dictionary:
+	get:
+		return get_personnel_loadout_state().call("get_snapshot")
+	set(value):
+		restore_personnel_loadouts(value)
 var _homebase_loadout_preview_texture_cache: Dictionary = {}
 var _selected_briefing_loadout_recommendation_id: String = ""
 var _selected_briefing_loadout_recommendation: Dictionary = {}
@@ -240,6 +248,7 @@ func _process(delta: float) -> void:
 
 func setup_roster(available_units: Array, selected_unit_ids: PackedStringArray = []) -> void:
 	_available_units = available_units.duplicate(true)
+	_ensure_personnel_loadout_simulation().call("request_personnel_loadout_command", "configure_roster", {"roster": available_units})
 	_selected_unit_ids = _normalize_selected_unit_ids(selected_unit_ids)
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
 	_sanitize_homebase_direct_staging_state()
@@ -249,9 +258,12 @@ func setup_roster(available_units: Array, selected_unit_ids: PackedStringArray =
 		_rebuild_ui()
 
 
-func set_fireteam_context(selected_fireteam_ids: PackedStringArray = [], fireteam_definitions: Array = []) -> void:
+func set_fireteam_context(selected_fireteam_ids: PackedStringArray = [], fireteam_definitions: Array = [], import_loadouts: bool = true) -> void:
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(selected_fireteam_ids)
 	_fireteam_definitions = _merge_fireteam_definitions(_fireteam_definitions, fireteam_definitions)
+	if import_loadouts:
+		_ensure_personnel_loadout_simulation().call("request_personnel_loadout_command", "import_fireteam_loadouts", {
+			"definitions": _normalize_fireteam_definitions(fireteam_definitions), "members": _personnel_loadout_members_by_fireteam()})
 	_sanitize_homebase_direct_staging_state()
 	if is_inside_tree():
 		_render_homebase_fireteams()
@@ -6939,52 +6951,61 @@ func _normalize_member_loadout_dictionary(member_loadouts: Dictionary, default_a
 
 
 func _sync_homebase_member_loadouts_into_fireteam_definitions() -> void:
-	var existing_cache: Dictionary = _normalize_member_loadout_dictionary(_member_loadout_by_unit_id)
-	var next_cache: Dictionary = {}
-	# Campaign pilots can equip while outside without joining a fireteam.
-	# Keep their existing canonical loadout through ordinary team refreshes.
+	var owner: RefCounted = get_personnel_loadout_state()
+	var retained: PackedStringArray = PackedStringArray()
 	if has_meta("campaign_base_map_path"):
 		var personnel: Node = get_base_personnel_runtime()
-		for unit_id in existing_cache:
-			# A boarded person may be absent from a transient UI profile cache.
-			# Before runtime binding, this cache comes from validated checkpoint
-			# data; afterwards the actual roster registry validates the identity.
+		for unit_id in Dictionary(owner.call("get_snapshot")):
 			if personnel == null or personnel.call("get_actor", unit_id) != null:
-				next_cache[unit_id] = existing_cache[unit_id]
-	for definition_index in range(_fireteam_definitions.size()):
-		if typeof(_fireteam_definitions[definition_index]) != TYPE_DICTIONARY:
-			continue
-		var definition: Dictionary = Dictionary(_fireteam_definitions[definition_index]).duplicate(true)
-		var fireteam_id: String = _normalize_fireteam_id(String(definition.get("id", "")))
-		if fireteam_id.is_empty():
-			continue
-		var default_armor_id: String = _normalize_loadout_id(String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)))
-		var existing_member_loadouts: Dictionary = definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {}
-		var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(fireteam_id)
-		var sanitized_member_loadouts: Dictionary = {}
-		for member_unit_id in member_ids:
-			var unit_id: String = String(member_unit_id).strip_edges()
-			var profile_default_loadout: Dictionary = _get_profile_default_member_loadout(unit_id, default_armor_id)
-			var source_loadout: Dictionary = {}
-			if existing_member_loadouts.has(unit_id) and typeof(existing_member_loadouts.get(unit_id)) == TYPE_DICTIONARY:
-				source_loadout = Dictionary(existing_member_loadouts.get(unit_id, {}))
-			elif existing_cache.has(unit_id):
-				source_loadout = Dictionary(existing_cache.get(unit_id, {}))
-			else:
-				source_loadout = profile_default_loadout
-			var normalized_loadout: Dictionary = _normalize_member_loadout(
-				source_loadout,
-				String(profile_default_loadout.get("armor", default_armor_id)),
-				String(profile_default_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)),
-				String(profile_default_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON))
-			)
-			sanitized_member_loadouts[unit_id] = normalized_loadout
-			next_cache[unit_id] = normalized_loadout
-		definition["loadout"] = default_armor_id
-		definition["member_unit_ids"] = member_ids.duplicate()
-		definition["member_loadouts"] = sanitized_member_loadouts
-		_fireteam_definitions[definition_index] = definition
-	_member_loadout_by_unit_id = next_cache
+				retained.append(String(unit_id))
+	var defaults: Dictionary = {}
+	var members: Dictionary = _personnel_loadout_members_by_fireteam()
+	for definition: Dictionary in _fireteam_definitions:
+		var id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+		var armor: String = _normalize_loadout_id(String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)))
+		for unit_id in PackedStringArray(members.get(id, [])):
+			defaults[unit_id] = _get_profile_default_member_loadout(String(unit_id), armor)
+	_ensure_personnel_loadout_simulation().call("request_personnel_loadout_command", "reconcile_context", {
+		"defaults": defaults, "definitions": _fireteam_definitions, "members": members, "retained_unit_ids": retained})
+	_refresh_personnel_loadout_projection()
+
+
+func _personnel_loadout_members_by_fireteam() -> Dictionary:
+	var members: Dictionary = {}
+	for definition: Dictionary in _fireteam_definitions:
+		var id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+		members[id] = _get_member_unit_ids_for_fireteam(id)
+	return members
+
+
+func _refresh_personnel_loadout_projection() -> void:
+	_fireteam_definitions = get_personnel_loadout_state().call("project_fireteam_definitions", _fireteam_definitions, _personnel_loadout_members_by_fireteam())
+
+
+func _ensure_personnel_loadout_simulation() -> Node:
+	if not is_instance_valid(_personnel_loadout_simulation):
+		_personnel_loadout_simulation = LOADOUT_SIMULATION_SCRIPT.new()
+		_personnel_loadout_simulation.name = "HomebaseLoadoutSimulationRoot"
+		_personnel_loadout_simulation.set_physics_process(false)
+		add_child(_personnel_loadout_simulation)
+	return _personnel_loadout_simulation
+
+
+func get_personnel_loadout_state() -> RefCounted:
+	return _ensure_personnel_loadout_simulation().call("get_personnel_loadout_state")
+
+
+func bind_personnel_loadout_simulation(simulation: Node, full_roster: Array) -> void:
+	var previous: Node = _ensure_personnel_loadout_simulation()
+	simulation.call("configure_personnel_loadouts", get_personnel_loadout_state())
+	_personnel_loadout_simulation = simulation
+	simulation.call("request_personnel_loadout_command", "configure_roster", {"roster": full_roster})
+	if previous != simulation and previous.get_parent() == self:
+		previous.queue_free()
+
+
+func restore_personnel_loadouts(loadouts: Dictionary) -> void:
+	_ensure_personnel_loadout_simulation().call("request_personnel_loadout_command", "restore", {"loadouts": loadouts})
 
 
 func _get_fireteam_id_for_unit(unit_id: String) -> String:
@@ -7009,8 +7030,7 @@ func _set_homebase_member_loadout(fireteam_id: String, unit_id: String, armor_id
 	if normalized_fireteam_id.is_empty():
 		return
 	var member_loadout: Dictionary = _make_member_loadout(armor_id, weapon_1_id, weapon_2_id)
-	_member_loadout_by_unit_id[normalized_unit_id] = member_loadout
-	_write_member_loadout_to_fireteam_definition(normalized_fireteam_id, normalized_unit_id, member_loadout)
+	_ensure_personnel_loadout_simulation().call("request_personnel_loadout_command", "set_loadout", {"unit_id": normalized_unit_id, "loadout": member_loadout})
 	_sync_homebase_member_loadouts_into_fireteam_definitions()
 
 
@@ -7018,19 +7038,7 @@ func _set_homebase_member_loadout_value(unit_id: String, key: String, value: Str
 	var normalized_unit_id: String = unit_id.strip_edges()
 	if normalized_unit_id.is_empty():
 		return
-	var member_loadout: Dictionary = _get_member_loadout(normalized_unit_id)
-	match key.strip_edges().to_lower():
-		"armor", "kit":
-			member_loadout["armor"] = _normalize_loadout_id(value)
-		"weapon_1", "primary":
-			member_loadout["weapon_1"] = _normalize_weapon_id(value, HOMEBASE_DEFAULT_PRIMARY_WEAPON)
-		"weapon_2", "sidearm", "secondary":
-			member_loadout["weapon_2"] = _normalize_weapon_id(value, HOMEBASE_DEFAULT_SECONDARY_WEAPON)
-		_:
-			return
-	var fireteam_id: String = _get_fireteam_id_for_unit(normalized_unit_id)
-	_member_loadout_by_unit_id[normalized_unit_id] = member_loadout
-	_write_member_loadout_to_fireteam_definition(fireteam_id, normalized_unit_id, member_loadout)
+	_ensure_personnel_loadout_simulation().call("request_personnel_loadout_command", "set_slot", {"unit_id": normalized_unit_id, "key": key, "value": value})
 	_sync_homebase_member_loadouts_into_fireteam_definitions()
 
 
@@ -7039,23 +7047,8 @@ func _write_member_loadout_to_fireteam_definition(fireteam_id: String, unit_id: 
 	var normalized_unit_id: String = unit_id.strip_edges()
 	if normalized_fireteam_id.is_empty() or normalized_unit_id.is_empty():
 		return
-	for definition_index in range(_fireteam_definitions.size()):
-		if typeof(_fireteam_definitions[definition_index]) != TYPE_DICTIONARY:
-			continue
-		var definition: Dictionary = Dictionary(_fireteam_definitions[definition_index]).duplicate(true)
-		if _normalize_fireteam_id(String(definition.get("id", ""))) != normalized_fireteam_id:
-			continue
-		var member_loadouts: Dictionary = definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {}
-		var default_loadout: Dictionary = _get_profile_default_member_loadout(normalized_unit_id, String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)))
-		member_loadouts[normalized_unit_id] = _normalize_member_loadout(
-			member_loadout,
-			String(default_loadout.get("armor", HOMEBASE_DEFAULT_LOADOUT_ID)),
-			String(default_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)),
-			String(default_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON))
-		)
-		definition["member_loadouts"] = member_loadouts
-		_fireteam_definitions[definition_index] = definition
-		return
+	_ensure_personnel_loadout_simulation().call("request_personnel_loadout_command", "set_loadout", {"unit_id": normalized_unit_id, "loadout": member_loadout})
+	_refresh_personnel_loadout_projection()
 
 
 func _get_homebase_direct_staging_craft_gate() -> Dictionary:
@@ -7116,12 +7109,7 @@ func _build_unit_ids_for_fireteams(fireteam_ids: PackedStringArray) -> PackedStr
 
 
 func _get_fireteam_definitions_snapshot() -> Array:
-	_sync_homebase_member_loadouts_into_fireteam_definitions()
-	var snapshot: Array = []
-	for definition_variant in _fireteam_definitions:
-		if typeof(definition_variant) == TYPE_DICTIONARY:
-			snapshot.append(Dictionary(definition_variant).duplicate(true))
-	return snapshot
+	return get_personnel_loadout_state().call("project_fireteam_definitions", _fireteam_definitions, _personnel_loadout_members_by_fireteam())
 
 
 func _filter_fireteam_definitions_for_ids(fireteam_definitions: Array, fireteam_ids: PackedStringArray) -> Array:
@@ -7144,7 +7132,6 @@ func _filter_fireteam_definitions_for_ids(fireteam_definitions: Array, fireteam_
 
 
 func _build_homebase_member_loadouts(fireteam_ids: PackedStringArray) -> Dictionary:
-	_sync_homebase_member_loadouts_into_fireteam_definitions()
 	var result: Dictionary = {}
 	for fireteam_id_variant in fireteam_ids:
 		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
@@ -7216,22 +7203,7 @@ func _get_member_loadout(unit_id: String) -> Dictionary:
 	var definition: Dictionary = _get_fireteam_definition(fireteam_id)
 	var default_armor_id: String = String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID))
 	var profile_default_loadout: Dictionary = _get_profile_default_member_loadout(normalized_unit_id, default_armor_id)
-	var member_loadouts: Dictionary = definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {}
-	if member_loadouts.has(normalized_unit_id):
-		return _normalize_member_loadout(
-			member_loadouts.get(normalized_unit_id, {}),
-			String(profile_default_loadout.get("armor", default_armor_id)),
-			String(profile_default_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)),
-			String(profile_default_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON))
-		)
-	if _member_loadout_by_unit_id.has(normalized_unit_id):
-		return _normalize_member_loadout(
-			_member_loadout_by_unit_id.get(normalized_unit_id, {}),
-			String(profile_default_loadout.get("armor", default_armor_id)),
-			String(profile_default_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)),
-			String(profile_default_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON))
-		)
-	return profile_default_loadout
+	return get_personnel_loadout_state().call("get_loadout", normalized_unit_id, profile_default_loadout)
 
 
 func _get_profile_default_member_loadout(unit_id: String, default_armor_id: String = HOMEBASE_DEFAULT_LOADOUT_ID) -> Dictionary:

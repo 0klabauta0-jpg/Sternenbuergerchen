@@ -24,7 +24,32 @@ ohne Revisionsquelle benutzt keinen langlebigen LOS-Cache.
 Reproduktion (pro Skript, success-marker passend setzen):
 `python scripts/tests/run_review2_isolated.py --project . --script res://scripts/tests/altlasten_los_runtime_verifier.gd --success-marker 'ALTLASTEN_LOS passed=' --baseline .godot/altlasten/roster_baseline.json --output .godot/altlasten/recheck --timeout 150`
 
+## 2. Loadoutowner
+Ein gemeinsamer PersonnelLoadoutState ist am SimulationRoot gebunden. Die
+Homebase adoptiert denselben Owner aus dem Standalone-/Restorepfad; sie besitzt
+keine kanonische Equipmentdictionary mehr. Supply und Loadout werden vor dem
+Erfolgssignal synchron bestaetigt. Replay rollt kein spaeteres Loadout zurueck.
+Checkpointfelder und bestehende UI-Methoden bleiben kompatibel. Bewusste
+set_fireteam_context-Importe bleiben moeglich; reine Flow-Refreshes importieren
+keine veralteten Loadouts.
+
+Neue Regression zuerst4/4, Importabgrenzung11/2, final13/0. Neun bestandene
+isolierte Gates: Owner13/0, TASK35014/0, TASK35214/0, TASK35436/0,
+TASK53330/0, Inventartransfer17/0, reales Inventar7/0, Vorbereitung/Continue13/0,
+Basis-Weltbedienung9/0. Unabhaengiger Source-Review ohne weitere Blocker.
+
+Zwei breitere Altgates sind ausdruecklich nicht gruen:
+- TASK38119/2: editor-style two-column sheet / separate values-context columns.
+- BasePersonnel62/3: sleep blocks incompatible movement; continue restores
+  actual sleeping person and exclusive bed; wake frees sleeping person.
+Beide auf sauberem unveraendertem Main fbb7f52be mit identischen Fehlernamen
+reproduziert, jeweils keine Script-/Runtimefehler. Die bestehenden manuellen
+Schlaf-/Layoutregeln werden hier nicht zurueckgedreht. Insbesondere alle
+Loadout-, Boarding- und zweiten Continueassertionen bestehen auch im breiten
+BasePersonnel-Gate. Belege lokal unter .godot/altlasten/baseline381 und
+baseline-base-personnel; Vergleich im versionierten baseline_failures.json.
+
 ## Fortschritt
-2 Loadoutowner, 3 Controls, 4 Diagnostik, 5 Portraetexport folgen seriell.
+3 Controls, 4 Diagnostik, 5 Portraetexport folgen seriell.
 Keine Mainintegration oder neue Release-EXE. Allgemeine Performance und native
 Gestaltungsabnahme sind kein Ergebnis dieser Komponentenregressionen.

@@ -27,13 +27,13 @@ zur Ausfuehrung liegt vor; kein erneuter Planfreigabehalt.
 - [x] Befehle/Ergebnisse dokumentieren und Schritt committen.
 
 ## Task 2: Loadoutowner
-- [ ] Bestehende Defaults/Inventar/Continue als Baseline; UI-Snapshotmutation und
+- [x] Bestehende Defaults/Inventar/Continue als Baseline; UI-Snapshotmutation und
       transaktionalen Ownercommit mit einer Regression absichern.
-- [ ] Ein core/personnel_loadout_state.gd am SimulationRoot; UI-Kompatibilitaet
+- [x] Ein core/personnel_loadout_state.gd am SimulationRoot; UI-Kompatibilitaet
       delegiert. Supply und Loadout vor Erfolgssignal gemeinsam bestaetigen.
-- [ ] Checkpointformat und FOB-/Standalone-Adapter erhalten; Defaults,
+- [x] Checkpointformat und FOB-/Standalone-Adapter erhalten; Defaults,
       Empfehlung, Inventar-Replay und Continue pruefen.
-- [ ] Dokumentieren und committen.
+- [x] Dokumentieren und committen.
 
 ## Task 3: Unerreichbare Controls
 - [ ] R/F-Deskriptoren/InputMap und unerreichbare Handler entfernen; TASK1185

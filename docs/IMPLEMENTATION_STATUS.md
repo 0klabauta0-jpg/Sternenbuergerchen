@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### Altlasten — Schritt2 Loadoutowner, 10.11.2026
+SimulationRoot-gebundener Personenloadoutowner statt UI-Wahrheit, gleicher
+Checkpointvertrag und atomarer Erfolgssignalzustand. Neue Regression13/0;
+neun gezielte Gates gruen. TASK38119/2 und BasePersonnel62/3 auf sauberem
+Main fbb7f52be exakt baselinegleich, keine Runtimefehler; keine Gesamtfreigabe.
+QA: docs/qa/altlasten_20261110/README.md. Weitere Schritte folgen seriell.
+
 ### Altlasten in fuenf Schritten — 10.11.2026, Schritt1
 Eigener Taskbranch auf sauberem Main fbb7f52be. Gemeinsamer LOS-Lesepfad,
 Registry-/Revisionscache und stationaere Invalidierung; Runtime-Hoehenregeln
