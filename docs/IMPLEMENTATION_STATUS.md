@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### Altlasten in fuenf Schritten — 10.11.2026, Schritt1
+Eigener Taskbranch auf sauberem Main fbb7f52be. Gemeinsamer LOS-Lesepfad,
+Registry-/Revisionscache und stationaere Invalidierung; Runtime-Hoehenregeln
+erhalten. Neue Regression23/0 nach reproduziertem11/9 und Sparse-Randfall22/1.
+Drei gezielte Wand-/Tuer-/LOS-Nachbarn bestanden. Weitere Schritte folgen
+seriell; kein Mainmerge/Export oder allgemeiner Leistungsanspruch.
+Task: docs/tasks/ALTLASTEN_FUENF_SCHRITTE_2026_11_10.md.
+QA: docs/qa/altlasten_20261110/README.md.
+
 ### Main gepusht und aktueller Gebaeudeeditor — 10.11.2026
 Main92b20f106 ist auf origin/main verifiziert. Editorarbeit separat auf
 task/editor-buildings-20261110, direkt auf diesem Main. Habitat/Freihafenhalle

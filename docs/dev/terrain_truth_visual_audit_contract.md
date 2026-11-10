@@ -8,6 +8,14 @@ Dieser Contract beschreibt die Terrain-Wahrheit, Dev-UI-Diagnose und Mauer-/Kant
 - `TerrainMap3DView`, MapEditor-Overlays und HTML-Reports sind Leseschichten.
 - Terrain3D darf spaeter als Visual-/Authoring-Prototyp gegen eine Kopie der Drillmap getestet werden, aber nicht als zweite Pathing-/LOS-/Cover-Wahrheit.
 
+Die Feuersektor-Vorschau verwendet die gemeinsame Blockersuche des
+`LineOfSightSystem` mit wirksamen Registry-Overrides (einschliesslich Tueren).
+Ihr abgeleiteter Cache ist an Registryidentitaet und Revision gebunden;
+stationaere Linien werden bei Revision dirty. Ohne Runtime-Registry liest der
+Editor die mutable Map ohne langlebigen Cache. Runtime-Reichweite, Welthoehen
+und ausgeschlossene eigene Quell-/Zielzelle bleiben unveraendert; eine
+Vorschaulinie darf auch an ihrer unbesetzten Endzelle abgeschnitten werden.
+
 ## Dauerhafte Dev-UI-Felder
 Terrain-Debugansichten sollen diese Werte aus der Tile-Wahrheit anzeigen koennen:
 
