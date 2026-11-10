@@ -20,6 +20,8 @@ const FRONTIER_REFERENCE_DRESSING_SCRIPT: GDScript = preload("res://scripts/terr
 
 const VIEWPORT_CONTAINER_NAME: String = "ViewportContainer"
 const VIEWPORT_NAME: String = "SubViewport"
+## SSAO/SSR build five mips of a half-size buffer (32 -> 16 -> ... -> 1).
+const MIN_RENDER_TARGET_SIZE := Vector2i(32, 32)
 const WORLD_ROOT_NAME: String = "WorldRoot"
 const MAP_ROOT_NAME: String = "MapRoot3D"
 const MARKER_ROOT_NAME: String = "MarkerRoot3D"
@@ -1239,6 +1241,9 @@ func _ready() -> void:
 	layer = -100
 	_update_frontier_art_profile()
 	_ensure_nodes()
+	var parent_viewport := get_viewport()
+	if parent_viewport != null and not parent_viewport.size_changed.is_connected(_on_parent_viewport_size_changed):
+		parent_viewport.size_changed.connect(_on_parent_viewport_size_changed)
 	_resize_subviewport()
 	_update_camera_transform()
 	_request_viewport_redraw(true, CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC)
@@ -3678,9 +3683,15 @@ func _ensure_nodes() -> void:
 		_viewport_container = SubViewportContainer.new()
 		_viewport_container.name = VIEWPORT_CONTAINER_NAME
 		_viewport_container.stretch = true
+		_viewport_container.stretch_shrink = 1
+		_viewport_container.custom_minimum_size = Vector2(MIN_RENDER_TARGET_SIZE)
+		_viewport_container.size = Vector2(_get_viewport_size())
 		_viewport_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_viewport_container.set_anchors_preset(Control.PRESET_FULL_RECT)
 		add_child(_viewport_container)
+	# A scene-authored container has the same size ownership as a new one.
+	_viewport_container.custom_minimum_size = Vector2(MIN_RENDER_TARGET_SIZE)
+	_viewport_container.stretch_shrink = 1
 
 	if _subviewport == null:
 		_subviewport = _viewport_container.get_node_or_null(VIEWPORT_NAME) as SubViewport
@@ -3804,13 +3815,21 @@ func _ensure_node3d(parent: Node, node_name: String) -> Node3D:
 	return node
 
 
+func _on_parent_viewport_size_changed() -> void:
+	_resize_subviewport()
+	# Native anchors may already have resized the container before this signal.
+	# Still redraw once when a static preview's process loop is disabled.
+	_request_viewport_redraw(can_process(), CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC)
+
+
 func _resize_subviewport() -> void:
 	if _subviewport == null or _viewport_container == null:
 		return
 	var viewport_size: Vector2i = _get_viewport_size()
-	if _subviewport.size != viewport_size:
-		_subviewport.size = viewport_size
-		_request_viewport_redraw(true, CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC)
+	# With stretch enabled the container, not SubViewport.size, owns allocation.
+	if _viewport_container.size != Vector2(viewport_size):
+		_viewport_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_request_viewport_redraw(can_process(), CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC)
 	_viewport_container.offset_left = 0.0
 	_viewport_container.offset_top = 0.0
 	_viewport_container.offset_right = 0.0
@@ -3825,7 +3844,7 @@ func _resize_subviewport() -> void:
 func _request_viewport_redraw(continuous: bool = false, duration_msec: int = CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC) -> void:
 	if _subviewport == null:
 		return
-	if continuous:
+	if continuous and can_process():
 		_continuous_redraw_until_msec = maxi(_continuous_redraw_until_msec, Time.get_ticks_msec() + maxi(duration_msec, 1))
 		_subviewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		return
@@ -3837,7 +3856,7 @@ func _get_viewport_size() -> Vector2i:
 	if viewport == null:
 		return Vector2i(1280, 720)
 	var visible_size: Vector2 = viewport.get_visible_rect().size
-	return Vector2i(maxi(roundi(visible_size.x), 1), maxi(roundi(visible_size.y), 1))
+	return Vector2i(maxi(roundi(visible_size.x), MIN_RENDER_TARGET_SIZE.x), maxi(roundi(visible_size.y), MIN_RENDER_TARGET_SIZE.y))
 
 
 func _screen_to_viewport_position(screen_position: Vector2) -> Vector2:

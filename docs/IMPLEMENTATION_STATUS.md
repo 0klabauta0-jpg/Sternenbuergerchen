@@ -1,5 +1,24 @@
 # IMPLEMENTATION_STATUS
 
+### Kampagnenersatz-Absturz: Quellfix geprueft, neue EXE offen — 10.11.2026
+Auf Mainbasis ee0591cfedb4d28a01788defdcf23d98439d49ad im Taskbranch
+task/campaign-replace-crash-20261110. Tatsaechliche alte r01-EXE reproduziert
+D3D12-Absturz0xc0000005 mit7Rendererfehlern. Ursache: fruehes leeres
+Vorschaurechteck wird als Panel-Mindestmass16x12 zur aktiven SSAO-Flaeche;
+Layout-/Stretchowner und deaktivierter lokaler Prozess fuehren das Ziel nicht
+rechtzeitig nach. Reales Layoutrechteck synchronisiert, Container vor
+Attachment mindestens32x32 fuer fuenf halbierte Mipstufen; danach volle
+1:1-Aufloesung, Parent-size_changed auch ohne Prozess und statisch UPDATE_ONCE.
+SSAO bleibt aktiv. Echte Menue-/OK-/Cancel-/Ersatz-/Continue-Quelle nativ89/0
+und headless88/0; Renderowner18/0; finale Vorschau37/0, Weltbedienung9/0,
+Abflug-/Overlaybedienbarkeit42/0. Alle finalen Laeufe Exit0/errors0; GPU117
+PreDraw-Signale/219aktiveSSAO-Samples/0unsichereZiele,6bekannteUID-Warnungen.
+QA: docs/qa/campaign_replace_crash_20261110/QA.md. Commit/Main-/Push, neuer
+Export und native Probe der neuen EXE bleiben ausstehend; deren Belege folgen
+im externen Paket
+C:/dev/SternenBuergerchen-builds/2026-11-10-campaign-replace-fix-main-r02/PRUEFBERICHT.md.
+Keine Release-/Gesamtperformancefreigabe.
+
 ### Gemeinsame Basis-/Orbit-/Charakterintegration — 10.11.2026
 Fertiger Main43b1f153b und Orbit-/Charakterstand0f2425aa7 gemeinsam geprueft.
 Physischer Pilot am Mondabflug, Grounded-Grenze fuer Basis/Checkpoint,

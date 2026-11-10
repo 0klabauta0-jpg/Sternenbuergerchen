@@ -76,6 +76,7 @@ var _stage_name: Label
 var _stage_caption: Label
 var _ship_backdrop: Control
 var _ship_preview_context: Dictionary = {}
+var _preview_layout_rect := Rect2()
 var _workflow: HBoxContainer
 var _workflow_labels: Dictionary = {}
 var _job_board: Control
@@ -939,11 +940,13 @@ func _layout_columns() -> void:
 			var rect: Rect2 = rects[key]
 			panel.position = rect.position
 			panel.size = rect.size
+	_preview_layout_rect = scene_rect
 	if _reference_stage != null:
 		_reference_stage.visible = scene_rect.size.x > 0 and scene_rect.size.y > 0
 		_reference_stage.position = scene_rect.position
 		_reference_stage.size = scene_rect.size
 		_layout_reference_stage()
+	_layout_base_surface()
 	if _identity_row != null:
 		var equipment_panel: Control = _columns.equipment
 		_identity_row.vertical = equipment_panel.size.x < 310.0
@@ -952,8 +955,6 @@ func _layout_columns() -> void:
 		var identity_size: int = 30 if available.x > 2200.0 else (23 if narrow else 26)
 		if _focused_name.get_theme_font_size("font_size") != identity_size:
 			_focused_name.add_theme_font_size_override("font_size", identity_size)
-	if _base != null:
-		_base.visible = _mode == "base" or (String(_ship_preview_context.get("kind", "")) == "base_pad" and scene_rect.has_area())
 
 
 func _terminal_requested(id: String) -> void:
@@ -987,15 +988,23 @@ func _update_base_surface(snapshot: Dictionary) -> void:
 	_stage_caption.text = caption
 	_ship_backdrop.call("set_context", _ship_preview_context)
 	_craft_image.visible = String(_ship_preview_context.get("kind", "")) == "space"
-	var has_preview: bool = _mode in ["squad", "mission"] and _reference_stage.size.x > 0 and _reference_stage.size.y > 0 and is_visible_in_tree()
+	_layout_base_surface()
+
+
+func _layout_base_surface() -> void:
+	if _base == null or _reference_stage == null:
+		return
+	# PanelContainer clamps an empty rectangle to its 16x12 style minimum.
+	# Only the actual computed workspace rectangle authorizes a 3D preview.
+	var has_preview: bool = _mode in ["squad", "mission"] and _preview_layout_rect.size.x >= 32.0 and _preview_layout_rect.size.y >= 32.0 and is_visible_in_tree()
 	if _mode == "base" and is_visible_in_tree():
 		_reference_stage.hide()
 		_base.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_base.call("set_active", true)
 	elif has_preview and String(_ship_preview_context.get("kind", "")) == "base_pad":
 		_base.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-		_base.position = _reference_stage.position
-		_base.size = _reference_stage.size
+		_base.position = _preview_layout_rect.position
+		_base.size = _preview_layout_rect.size
 		_reference_stage.hide()
 		_base.call("set_pad_preview", true, _craft_id)
 	else:

@@ -1,0 +1,16 @@
+[
+  {
+    "script": "terrain_render_target_size_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\campaign_replace_final_green\\terrain_render_target_size_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\campaign_replace_final_green\\terrain_render_target_size_verifier"
+  },
+  {
+    "script": "campaign_replace_render_verifier.gd",
+    "exit_code": 0,
+    "errors": 0,
+    "log": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\docs\\qa\\orbit_quantum_20261109\\raw\\campaign_replace_final_green\\campaign_replace_render_verifier.log",
+    "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\orbit_quantum_20261109\\profiles\\campaign_replace_final_green\\campaign_replace_render_verifier"
+  }
+]

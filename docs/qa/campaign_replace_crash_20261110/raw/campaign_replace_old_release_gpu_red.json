@@ -1,0 +1,27 @@
+{
+  "label": "campaign_replace_old_release_gpu_red",
+  "exit_code": -1073741819,
+  "errors": 7,
+  "warnings": 0,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen-worktrees\\orbit-quantum-build-20261110\\output\\campaign_replace_crash_20261110\\profiles\\campaign_replace_old_release_gpu_red",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "11867440",
+    "--quit-after",
+    "240",
+    "--",
+    "--release-singleplayer"
+  ]
+}

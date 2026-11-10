@@ -1,0 +1,18 @@
+[
+  {
+    "path": "scripts/meta/homebase_operations_presenter.gd",
+    "sha256": "9955a34b13c180d9def4ad09529c00b5008b134c11b6c228d51f6e3c8d39d88a"
+  },
+  {
+    "path": "scripts/terrain/terrain_map_3d_view.gd",
+    "sha256": "f1f21b655827a8601b5c083dd2cd779c843f5835618c1f8e100b26598ea1b35a"
+  },
+  {
+    "path": "scripts/tests/campaign_replace_render_verifier.gd",
+    "sha256": "3464f70841b7bad8f09ac5340e55915e5ec2a493b84d51e5ec351c9a7a528901"
+  },
+  {
+    "path": "scripts/tests/terrain_render_target_size_verifier.gd",
+    "sha256": "e37a302f3048b620ee5a53a0270077468f0ae2da6b6a4102bacd95bafc895c3f"
+  }
+]

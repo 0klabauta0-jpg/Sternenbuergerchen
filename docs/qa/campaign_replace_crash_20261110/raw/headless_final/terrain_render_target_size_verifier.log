@@ -1,0 +1,28 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: Fixture uses the real TerrainMap3DView camera
+PASS: The shipped Frontier SSAO remains enabled
+PASS: Initial 16x16 parent allocates a safe 32x32 terrain render target before any frame
+TERRAIN_RENDER_SIZE initial outer=(16, 16) inner=(32, 32)
+PASS: Ancestor disables the real view's process loop
+TERRAIN_RENDER_SIZE 1280x720 parent=(1280, 720) visible=(1280.0, 720.0) inner=(1280, 720) update=1 can_process=false
+PASS: 1280x720 synchronously sizes the real inner target to the full visible area or safe minimum
+PASS: 1280x720 requests exactly one redraw while the view's process loop is disabled
+PASS: Disabled view does not resume continuous drawing after the resize
+TERRAIN_RENDER_SIZE 1920x1080 parent=(1920, 1080) visible=(1920.0, 1080.0) inner=(1920, 1080) update=1 can_process=false
+PASS: 1920x1080 synchronously sizes the real inner target to the full visible area or safe minimum
+PASS: 1920x1080 requests exactly one redraw while the view's process loop is disabled
+TERRAIN_RENDER_SIZE narrow parent parent=(16, 720) visible=(16.0, 720.0) inner=(32, 720) update=1 can_process=false
+PASS: narrow parent synchronously sizes the real inner target to the full visible area or safe minimum
+PASS: narrow parent requests exactly one redraw while the view's process loop is disabled
+TERRAIN_RENDER_SIZE short parent parent=(1280, 16) visible=(1280.0, 16.0) inner=(1280, 32) update=1 can_process=false
+PASS: short parent synchronously sizes the real inner target to the full visible area or safe minimum
+PASS: short parent requests exactly one redraw while the view's process loop is disabled
+TERRAIN_RENDER_SIZE back to 16x16 parent=(16, 16) visible=(16.0, 16.0) inner=(32, 32) update=1 can_process=false
+PASS: back to 16x16 synchronously sizes the real inner target to the full visible area or safe minimum
+PASS: back to 16x16 requests exactly one redraw while the view's process loop is disabled
+PASS: The safe minimum survives the next frame with processing disabled
+PASS: Static resized preview stays static and its ancestor stays disabled
+PASS: Resize safety preserves SSAO instead of disabling graphics effects
+TERRAIN_RENDER_TARGET_SIZE_RESULTS passed=18 failed=0

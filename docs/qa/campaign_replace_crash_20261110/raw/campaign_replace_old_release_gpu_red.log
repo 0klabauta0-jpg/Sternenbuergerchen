@@ -1,0 +1,18 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance disabled
+ERROR: Too many mipmaps requested for texture format and dimensions (5), maximum allowed: (4).
+   at: texture_create (servers/rendering/rendering_device.cpp:977)
+ERROR: Attempted to name invalid ID: 0
+   at: set_resource_name (servers/rendering/rendering_device.cpp:6471)
+ERROR: Condition "p_named_texture.texture.is_null()" is true.
+   at: update_sizes (servers/rendering/renderer_rd/storage_rd/render_scene_buffers_rd.cpp:82)
+ERROR: Condition "named_texture.texture.is_null()" is true. Returning: RID()
+   at: get_texture_slice_view (servers/rendering/renderer_rd/storage_rd/render_scene_buffers_rd.cpp:431)
+ERROR: Image (binding: 0, index 0) is not a valid texture.
+   at: uniform_set_create (servers/rendering/rendering_device.cpp:3875)
+ERROR: Condition "rid.is_null()" is true. Returning: rid
+   at: _allocate_from_uniforms (./servers/rendering/renderer_rd/uniform_set_cache_rd.h:120)
+ERROR: Parameter "uniform_set" is null.
+   at: compute_list_bind_uniform_set (servers/rendering/rendering_device.cpp:5473)
