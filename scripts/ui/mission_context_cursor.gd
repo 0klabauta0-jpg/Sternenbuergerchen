@@ -82,7 +82,7 @@ func queue_interaction(id: String) -> Dictionary:
 func update_objective_feedback() -> void:
 	if _objective_panel==null:return
 	_objective_panel.hide()
-	if not bool(_controller.get("_tactical_ui_visible")):return
+	if not bool(_controller.get("_tactical_ui_visible")) or bool(_controller.get("_character_overlay_open")):return
 	var satellite:Dictionary={}
 	for entry:Dictionary in _controller.call("get_mission_interaction_runtime_use_state_snapshot").get("interactions",[]):
 		if String(entry.get("interaction_id",""))=="satellite_data":satellite=entry;break

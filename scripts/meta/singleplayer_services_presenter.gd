@@ -134,12 +134,12 @@ func _build() -> void:
 		var button := _button(String(action[1]),key)
 		button.visible = false
 		var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;SKIN.panel(card,true);_cards.add_child(card)
-		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",12);card.add_child(body)
+		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",8);card.add_child(body)
 		var title_text:String=String(action[1]).trim_suffix(" herstellen")
 		if String(action[0])=="campaign_upload":title_text="Missionsdaten"
 		if String(action[0])=="campaign_build_pad":title_text="Zweites Landepad"
 		body.add_child(_label(title_text,18))
-		var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(80,100);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;body.add_child(icon)
+		var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(80,80);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;body.add_child(icon)
 		var blueprint:String=String(Dictionary(action[2]).get("blueprint_id",""))
 		var paths:Dictionary={"light_armor":"res://Assets/curated/ui/campaign_inventory/armor_light.svg","mining_tool":"res://Assets/curated/ui/campaign_inventory/benit.svg","assault_rifle":"res://Assets/used/npc/blaster_kit/previews/blaster-a.png"}
 		var path:String=String(paths.get(blueprint,"res://Assets/curated/ui/campaign_inventory/chip.svg"))
@@ -147,6 +147,7 @@ func _build() -> void:
 		if ResourceLoader.exists(path):icon.texture=load(path)
 		var menu_item:String={"light_armor":"armor_light","mining_tool":"mining_tool","assault_rifle":"rifle"}.get(blueprint,"satellite_chip")
 		if String(action[0])!="campaign_build_pad":icon.texture=MENU_ICONS.get_icon(menu_item)
+		if not blueprint.is_empty():body.add_child(_label(get_blueprint_details(blueprint),14))
 		var state:=_label("",15);state.custom_minimum_size.y=42;body.add_child(state)
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(button);SKIN.button(button,true)
 		if String(action[0])=="campaign_fabricate":button.text="Herstellen"
@@ -336,9 +337,23 @@ func _apply_section() -> void:
 		action.card.visible=action.button.visible
 		action.state_label.text=String(action.button.tooltip_text) if action.button.disabled else ("Blueprint freigeschaltet" if String(action.operation)=="campaign_fabricate" else "Aktion verfügbar")
 		if action.button.disabled and action.state_label.text.is_empty():action.state_label.text="Derzeit nicht verfügbar"
+		if String(action.operation)=="campaign_fabricate" and action.button.disabled:action.state_label.text="Gesperrt · Blueprint fehlt" if not Array(_snapshot.get("supply",{}).get("blueprints",[])).has(String(action.payload.blueprint_id)) else "Herstellung derzeit nicht möglich"
 	for craft:Dictionary in _snapshot.get("crafts",[]):
 		if String(craft.get("craft_id",""))==_selected_craft_id:_ship_image.texture=SHIP_VISUALS.get_ui_preview_texture(craft)
 	_layout_cards()
+
+static func get_blueprint_details(blueprint_id:String)->String:
+	var recipe:Dictionary=load("res://scripts/core/singleplayer_supply_state.gd").get_campaign_recipe(blueprint_id)
+	if recipe.is_empty():return ""
+	var lines:PackedStringArray=PackedStringArray()
+	if String(recipe.item)=="rifle":
+		var weapons=load("res://scripts/core/weapon_data.gd")
+		lines.append("Basisschaden: %d"%weapons.get_damage_per_hit("rifle"))
+		lines.append("Reichweite: %d Felder"%weapons.get_effective_tile_range("rifle"))
+	elif String(recipe.item)=="mining_tool":lines.append("Werkzeug zum Abbau\nmarkierter Vorkommen")
+	elif String(recipe.item)=="armor_light":lines.append("Rüstungsklasse: Leicht")
+	lines.append("Herstellung: %d Cr"%int(recipe.cost))
+	return "\n".join(lines)
 
 func set_selected_craft(craft_id: String) -> bool:
 	if not _pending.is_empty():

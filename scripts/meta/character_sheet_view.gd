@@ -49,14 +49,42 @@ const SECTION_HELP_IDS: Dictionary = {
 static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> void:
 	if host == null:
 		return
+	var compact:bool=not _metric_controls_are_editable(options) and bool(options.get("compact_read_only",true))
+	var signature:String=""
+	if compact:
+		var context:Dictionary=options.duplicate(true)
+		if context.has("inventory_request"):context.inventory_request=str(context.inventory_request)
+		if context.has("inventory_view"):
+			var actor:Node=context.inventory_view.get("actor")
+			context.inventory_view.actor=actor.get_instance_id() if actor!=null else 0
+		var data:Variant=profile.to_dict() if typeof(profile)==TYPE_OBJECT and profile!=null and profile.has_method("to_dict") else profile
+		signature=JSON.stringify([data,context,host.get_viewport_rect().size])
+		if host.get_child_count()>0 and String(host.get_meta("character_sheet_render_signature",""))==signature:return
+	host.remove_meta("character_sheet_render_signature")
 	TACTICAL_UI_THEME_SCRIPT.apply_screen(host)
 	host.set_meta("native_ui_screen_family", "character_sheet")
 	_clear_container(host)
 	host.add_theme_constant_override("separation", 0)
 
 	var model: Dictionary = CHARACTER_SHEET_FORMATTER_SCRIPT.build_sheet_view_model(profile, options)
-	if not _metric_controls_are_editable(options) and bool(options.get("compact_read_only", true)):
+	if compact:
+		if options.has("inventory_view"):
+			var columns:=HBoxContainer.new();columns.name="SharedCharacterColumns";columns.add_theme_constant_override("separation",14);host.add_child(columns)
+			var values:=VBoxContainer.new();values.size_flags_horizontal=Control.SIZE_EXPAND_FILL;columns.add_child(values)
+			var shared_options:=options.duplicate();shared_options["hide_identity_overview"]=true;shared_options["compact_sheet_width"]=0
+			_render_compact_read_only(values,model,profile,shared_options)
+			var equipment:VBoxContainer=load("res://scripts/ui/components/personnel_inventory_panel.gd").new();equipment.name="SharedCharacterEquipment";equipment.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			equipment.custom_minimum_size.x=780 if host.get_viewport_rect().size.x>=1500 else 520
+			columns.add_child(equipment)
+			var view:Dictionary=options.inventory_view
+			equipment.call("update_snapshot",view.inventory,view.unit,view.craft_id,view.accessible,view.equipment_allowed,view.actor)
+			equipment.call("update_rest_snapshot",{})
+			var handler:Callable=options.get("inventory_request",Callable())
+			if handler.is_valid():equipment.connect("operation_requested",handler)
+			host.set_meta("character_sheet_render_signature",signature)
+			return
 		_render_compact_read_only(host, model, profile, options)
+		host.set_meta("character_sheet_render_signature",signature)
 		return
 	var group_editable_metrics: bool = bool(options.get("group_editable_metrics", false))
 	var two_column_layout: bool = bool(options.get("two_column_layout", group_editable_metrics))
@@ -137,8 +165,8 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	var compact_options := options.duplicate()
 	compact_options["compact_sheet"] = true
 	compact_options["show_badge_progress"] = false
-	_add_compact_identity_overview(sheet, model, profile, compact_options)
-	_add_carried_inventory(sheet,options)
+	if not bool(options.get("hide_identity_overview",false)):_add_compact_identity_overview(sheet, model, profile, compact_options)
+	if not options.has("inventory_view"):_add_carried_inventory(sheet,options)
 	_add_post_mission_award_alert(sheet, model, profile, options)
 	var suitability: Array = Array(model.get("suitability_rows", []))
 	var overview:=HBoxContainer.new();overview.add_theme_constant_override("separation",10);sheet.add_child(overview)
@@ -146,8 +174,6 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	var primary: Dictionary = Dictionary(suitability[0]) if not suitability.is_empty() else {}
 	_overview_label(suitability_host, "PrimarySuitability", "%s · %s" % [String(primary.get("label", "Noch offen")), String(primary.get("value_text", "—"))], 16)
 	_overview_label(suitability_host, "PrimarySuitabilityReason", String(model.get("primary_suitability_reason", "Noch keine Eignung berechnet.")), 13)
-	var guide:=_overview_section(overview,"HERKUNFT DER WERTE","CharacterDerivationOverview")
-	_overview_label(guide, "CharacterDerivationGuide", "Eigenschaften\n↓ gespeicherte Kernwerte\n↓ Verhalten und Fahrzeuge\n↓ Arbeitsweise und Einsatzeignung\n↓ Spezialisierung im Rollenrahmen", 13, true)
 	var social := HBoxContainer.new()
 	social.name = "CharacterTraitsAndRelationships"
 	social.add_theme_constant_override("separation", 10)
@@ -286,8 +312,8 @@ static func _add_compact_identity_overview(host: VBoxContainer, model: Dictionar
 	facts.add_theme_constant_override("separation", 3)
 	row.add_child(facts)
 	_overview_label(facts, "CharacterIdentityName", String(model.get("name", "Unbekannte Person")), 22)
-	_overview_label(facts, "CharacterStartRole", "Startrolle: " + String(model.get("start_role_text", "Im Profil nicht belegt")), 14)
-	_overview_label(facts, "CharacterAssignment", "Aufgabe: " + String(model.get("current_assignment_text", "Im Profil nicht belegt")), 14)
+	_overview_label(facts, "CharacterStartRole", "Hauptrolle: " + COPY.text(String(profile.role_name)) if profile!=null else "Hauptrolle: —", 14)
+	_overview_label(facts, "CharacterAssignment", "Nebenrolle: " + COPY.text(String(profile.secondary_specialty)) if profile!=null and not String(profile.secondary_specialty).is_empty() else "Nebenrolle: —", 14)
 	_overview_label(facts, "CharacterStatus", "Status: " + String(model.get("overview_status_text", "Im Profil nicht belegt")), 14, true)
 	_add_badge_row(facts, profile, options)
 

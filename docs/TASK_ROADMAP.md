@@ -1,5 +1,14 @@
 # TASK_ROADMAP
 
+### Gemeinsame Charakterkarte, Ausrüstung und Auftragsdetails — 10.11.2026
+Task/shared-personnel-equipment-view-20261110 auf e004843e7, Mainbasis1e3cca237.
+Größere Figur mit seitlichen Slots/Linien, Porträt/Rollen/echte Badges und
+Rucksack gemeinsam in Basis- und Einsatzdetails. Kompakter Ruheschalter,
+klappbarer Wertebaum, Blueprintwerte/Kosten und aufklappbare Aufträge.
+Native UI107/0 und35/0, tatsächlicher Kampagnenausflug102/0; Headless111/0,
+Compact25/0, Icons19/0. QA: docs/qa/shared_personnel_equipment_20261110/README.md.
+Stand auf Taskbranch, noch keine Mainintegration/EXE.
+
 ### Basis-Seitenfenster, KI-Gestaltung und sichtbare Kampagnenfolge — 10.11.2026
 Aufbau auf9c87a06ef/5df2d3b6f, Mainbasis1e3cca237. Gestaltungsentwurf der Bilder-KI
 als Referenz erhalten und in echte Aktionskarten/Seitenfenster übertragen.

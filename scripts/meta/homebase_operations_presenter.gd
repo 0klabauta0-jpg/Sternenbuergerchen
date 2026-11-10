@@ -765,6 +765,7 @@ func refresh() -> void:
 	var singleplayer: Dictionary=snapshot.get("singleplayer",{})
 	var inventory: Dictionary=Dictionary(singleplayer.get("supply",{})).get("inventory",{})
 	_inventory_panel.visible=not inventory.is_empty()
+	_identity_row.visible=inventory.is_empty()
 	for slot in _equipment_slots.values(): slot.visible=inventory.is_empty()
 	_equipment_palette_toggle.visible=inventory.is_empty()
 	if not inventory.is_empty():

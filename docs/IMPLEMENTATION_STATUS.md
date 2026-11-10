@@ -1,5 +1,15 @@
 # IMPLEMENTATION_STATUS
 
+### Gemeinsame Charakterkarte, Ausrüstung und Auftragsdetails — 10.11.2026
+Task/shared-personnel-equipment-view-20261110 auf e004843e7, Mainbasis1e3cca237.
+Porträt/Name/Rollen/Badges, größere Figur, seitliche Ausrüstung mit Linien und
+echter Rucksack in gemeinsamem Panel für Basis und Einsatzkarte. Kurzer
+Ruhe-Schalter, klappbarer Wertebaum ohne Herkunftsbox, unveränderte Controls
+bei gleichen Projektionen. Blueprintwerte/Kosten aus bestehenden Ownern,
+Auftragsdetails aufklappbar. Native Seitenfenster107/0, Charakter35/0, realer
+Kampagnenausflug102/0; Headless Layout111/0, Compact25/0, Icons19/0.
+QA: docs/qa/shared_personnel_equipment_20261110/README.md. Kein Main/EXE-Schritt.
+
 ### Basis-Seitenfenster, KI-Gestaltung und sichtbare Kampagnenfolge — 10.11.2026
 Aufbau auf9c87a06ef/5df2d3b6f, Mainbasis1e3cca237. Gestaltungsentwurf der Bilder-KI
 als Referenz erhalten und in echte Aktionskarten/Seitenfenster übertragen.

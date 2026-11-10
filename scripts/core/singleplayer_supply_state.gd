@@ -7,6 +7,10 @@ var _inventory: Dictionary = {}
 var _location_resources: Dictionary = {}
 
 const DATA_PATH := "res://data/singleplayer/trade_offers.json"
+const CAMPAIGN_RECIPES:Dictionary={"light_armor":{"item":"armor_light","cost":20},"mining_tool":{"item":"mining_tool","cost":30},"assault_rifle":{"item":"rifle","cost":60}}
+
+static func get_campaign_recipe(blueprint_id:String)->Dictionary:
+	return Dictionary(CAMPAIGN_RECIPES.get(blueprint_id,{})).duplicate(true)
 
 var _definitions: Dictionary = {}
 var _credits: int = 0
@@ -426,9 +430,8 @@ func _campaign_cargo(payload: Dictionary, context: Dictionary) -> Dictionary:
 func _campaign_fabricate(payload: Dictionary, context: Dictionary) -> Dictionary:
 	if not bool(context.get("at_home",false)): return _reject("home_required","Herstellung nur an der Heimatbasis")
 	var blueprint := String(payload.get("blueprint_id",""))
-	var recipes := {"light_armor":{"item":"armor_light","cost":20},"mining_tool":{"item":"mining_tool","cost":30},"assault_rifle":{"item":"rifle","cost":60}}
-	if not _blueprints().has(blueprint) or not recipes.has(blueprint): return _reject("blueprint_locked","Blueprint noch nicht freigeschaltet")
-	var recipe: Dictionary = recipes[blueprint]
+	var recipe:Dictionary=get_campaign_recipe(blueprint)
+	if not _blueprints().has(blueprint) or recipe.is_empty(): return _reject("blueprint_locked","Blueprint noch nicht freigeschaltet")
 	if _credits<int(recipe.cost): return _reject("insufficient_credits","Credits reichen nicht")
 	if INVENTORY.used(_item_quantities)>=int(_inventory["base:homebase"].capacity): return _reject("container_full","Basislager voll")
 	_credits-=int(recipe.cost)

@@ -98,7 +98,7 @@ nachfolgenden bisherigen Send-Vertrag.
 - Tankservice ist Unterpunkt des Flugdecks, kein zweiter Schiff-Eintrag in der
   Basisverwaltung. Derselbe vorhandene Serviceowner bleibt zuständig.
 - Ursprüngliches Porträt neben dem Namen erhalten. Größere Figur in bestehender
-  Idle-Pose: 180×300 im breiten Ausrüstungsfenster, responsive kleiner in engen
+  Idle-Pose: bis 300×450 im breiten Ausrüstungsfenster, responsive schmaler in engen
   Spalten. Rüstung/Primär/Sekundär liegen seitlich, ohne die Figur zu überdecken. Bestand bleibt frei
   und wird nicht erneut um bereits getragene Gegenstände verringert.
 - Smart Mobile projiziert die vorhandenen autoritativen `locked`-Flags. Verborgene
@@ -124,3 +124,20 @@ nachfolgenden bisherigen Send-Vertrag.
   Pistole, Sanitätsgerät, gelbes Hand-Mining-Tool und Datenträger bleiben erkennbar.
 - Heimat-Tankservice zeigt keine Handelskäufe oder Verkäufe. Vorhandene
   Handelsfunktionen bleiben am tatsächlichen Handelsposten verfügbar.
+
+## Gemeinsame Charakterkarte — 10.11.2026
+- Truppausrüstung und Charakterdetails an Basis und Einsatzort verwenden dieselbe
+  PersonnelInventoryPanel-Projektion: Porträt, Name, Hauptrolle, Nebenrolle,
+  tatsächliche Eignungsbadges/Status, Figur, Ausrüstung und Rucksack. Hauptrolle
+  liest role_name, Nebenrolle secondary_specialty; keine zusätzliche Rollenwahrheit.
+- Ausrüstungsfelder liegen links der Figur. Dünne Linien ordnen Rüstung dem Torso
+  und Primär/Sekundär den seitlichen Positionen zu. Keine Fläche verdeckt die Figur.
+  Rechts liegt bei ausreichender Breite der echte Rucksack mit Itemicons, sonst
+  darunter. Dieselben Inventarcommands und Zugriffsregeln bleiben maßgeblich.
+- Automatisch ruhen ist ein einzeiliger kompakter Schalter direkt links am Text.
+  Herkunftsübersichtsbox entfällt, genaue Ableitungen bleiben im einklappbaren Baum.
+  Unveränderte Projektionen erhalten Controls, aufgeklappte Äste und Modellvorschau.
+- Blueprintkarten zeigen tatsächliche Herstellkosten aus dem SupplyOwner und
+  vorhandene Waffenwerte bzw. Werkzeug-/Rüstungsklasse. Keine eigene UI-Balance.
+- Smart Mobile klappt Auftragsdetails über den Titel auf/zu. Auswahl und Aufklappen
+  sind UI-Zustand; Freischaltung, Annahme, Kartenbefehl und Belohnung bleiben beim Owner.

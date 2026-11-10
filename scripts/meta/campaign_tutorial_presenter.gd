@@ -139,7 +139,9 @@ func refresh() -> void:
 	var detail_popup: Control = homebase.get_node_or_null("CharacterSheetPopup") if homebase != null else null
 	var operations:Node=homebase.get("_operations_presenter") if homebase!=null else null
 	var flyout_open:bool=operations!=null and operations.has_method("is_workspace_flyout_open") and bool(operations.call("is_workspace_flyout_open"))
-	if flyout_open or (detail_popup != null and detail_popup.is_visible_in_tree()) or (homebase != null and String(homebase.get("_operations_mode")) in ["services","jobs"]) or (is_instance_valid(_flow) and String(_flow.get("_current_meta_view")) == "star_map"):
+	var mission:Node=_flow.get("_active_mission") if is_instance_valid(_flow) else null
+	var mission_details:Control=mission.get_node_or_null("TacticalUI/CharacterOverlay") if is_instance_valid(mission) else null
+	if flyout_open or (mission_details!=null and mission_details.is_visible_in_tree()) or (detail_popup != null and detail_popup.is_visible_in_tree()) or (homebase != null and String(homebase.get("_operations_mode")) in ["services","jobs"]) or (is_instance_valid(_flow) and String(_flow.get("_current_meta_view")) == "star_map"):
 		# These views already carry their own instructions. Keep the global
 		# floating guidance clear of identity, map headings and close actions.
 		visible = false

@@ -19,7 +19,13 @@ func _run()->void:
  for resolution:Vector2i in [Vector2i(1280,720),Vector2i(1920,1080)]:
   root.size=resolution;root.content_scale_size=resolution
   for section:String in ["jobs","build","workshop","data","ship","inventory"]:
-   if section=="jobs":presenter.call("_navigate_from_sidebar","jobs")
+   if section=="jobs":
+    presenter.call("_navigate_from_sidebar","jobs")
+    var board:Node=presenter.get("_job_board")
+    if bool(board.get("_details_expanded")):board.call("_toggle_job_details","satellite_recovery")
+    check(not board.get("_detail_card").visible,"mission details can remain compact and collapsed")
+    board.get("_card_buttons").satellite_recovery.pressed.emit()
+    check(board.get("_detail_card").visible,"mission title expands its real details")
    else:presenter.call("_open_base_management",section)
    await create_timer(0.22).timeout
    for i in 16:await process_frame
@@ -56,8 +62,11 @@ func _run()->void:
     check(root.get_visible_rect().encloses(board.get("_accept").get_global_rect()),"first mission acceptance is visible without scrolling")
     check(String(board.get("_details").text).contains("Glut (Planet)") and String(board.get("_objectives").text).contains("Absturzstelle finden"),"body destination and actual objective are distinct in briefing")
    if section=="inventory":
-    check(presenter.get("_focused_portrait").is_visible_in_tree(),"original portrait is restored beside inventory character name")
+    check(presenter.get("_inventory_panel").get("_identity_portrait").is_visible_in_tree(),"original portrait is shown in shared identity and equipment card")
     check(drawer.size.x>=800,"equipment drawer is wider for the enlarged figure and slots")
+    var rest_row:Control=presenter.get("_inventory_panel").get("_rest_row")
+    check(rest_row.size.y<=45 and rest_row.size.x<300,"rest label remains one compact line and does not displace equipment")
+    check(presenter.get("_inventory_panel").get("_slots").get_global_rect().position.y<rest_row.get_global_rect().end.y+20,"equipment follows the rest switch without a blank vertical gap")
    if DisplayServer.get_name()!="headless":
     await RenderingServer.frame_post_draw
     DirAccess.make_dir_recursive_absolute("C:/dev/SternenBuergerchen/output/base_management_visuals_20261110")

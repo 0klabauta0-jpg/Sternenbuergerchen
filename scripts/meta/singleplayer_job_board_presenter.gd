@@ -20,6 +20,8 @@ var _body:GridContainer
 var _card_buttons:Dictionary={}
 var _visible_job_ids:PackedStringArray=PackedStringArray()
 var _objectives:Label
+var _detail_card:PanelContainer
+var _details_expanded:bool=false
 
 func configure(screen: Control) -> void:
 	_screen = weakref(screen)
@@ -57,10 +59,11 @@ func configure(screen: Control) -> void:
 	selector_column.add_child(_jobs)
 	_job_cards=VBoxContainer.new();_job_cards.add_theme_constant_override("separation",8);selector_column.add_child(_job_cards)
 	_objectives=Label.new();SKIN.label(_objectives,16);selector_column.add_child(_objectives)
-	_jobs.item_selected.connect(func(index: int): _job_id = String(_jobs.get_item_metadata(index)); refresh())
+	_jobs.item_selected.connect(func(index: int): _job_id = String(_jobs.get_item_metadata(index));_details_expanded=true; refresh())
 	_details = Label.new()
 	_details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var detail_card:=PanelContainer.new();detail_card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;SKIN.panel(detail_card,true);_body.add_child(detail_card)
+	_detail_card=detail_card
 	SKIN.label(_details,16);_details.custom_minimum_size=Vector2(250,180);detail_card.add_child(_details)
 	SKIN.rule(_content)
 	_actions = HFlowContainer.new()
@@ -81,9 +84,9 @@ func configure(screen: Control) -> void:
 func _layout_device() -> void:
 	if _device != null:
 		_device.custom_minimum_size.x = clampf(size.x-16, 280.0, 1040.0)
-		if _body!=null:_body.columns=2 if size.x>=640 else 1
-		if _job_cards!=null:_job_cards.visible=size.x>=640
-		if _jobs!=null:_jobs.visible=size.x<640
+		if _body!=null:_body.columns=2 if size.x>=640 and _details_expanded else 1
+		if _job_cards!=null:_job_cards.visible=size.x>=640 or not _details_expanded
+		if _jobs!=null:_jobs.visible=size.x<640 and _details_expanded
 
 func _button(node_name: String, text: String) -> Button:
 	var button := Button.new()
@@ -134,7 +137,7 @@ func refresh() -> void:
 			var card:=Button.new();card.text=String(jobs[id].title);card.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;card.custom_minimum_size=Vector2(230,66);SKIN.button(card);_job_cards.add_child(card)
 			card.alignment=HORIZONTAL_ALIGNMENT_LEFT;card.icon=MENU_ICONS.get_icon("satellite_chip");card.expand_icon=true;card.add_theme_constant_override("icon_max_width",48)
 			var target_id:String=String(id)
-			card.pressed.connect(func():_job_id=target_id;refresh())
+			card.pressed.connect(_toggle_job_details.bind(target_id))
 			_card_buttons[target_id]=card
 		if not _visible_job_ids.has(_job_id):
 			_job_id = String(_visible_job_ids[0]) if not _visible_job_ids.is_empty() else ""
@@ -144,6 +147,7 @@ func refresh() -> void:
 	var job: Dictionary = jobs.get(_job_id, {})
 	for id:String in _card_buttons:
 		_card_buttons[id].modulate=Color.WHITE if id==_job_id else Color("b0c1c3")
+		_card_buttons[id].text=("▾  " if id==_job_id and _details_expanded else "▸  ")+String(jobs[id].title)
 	var status: String = String(job.get("status", "offered"))
 	var locations: Dictionary = campaign.get("locations", {})
 	var location: Dictionary = locations.get(String(job.get("location_id", "")), {})
@@ -165,3 +169,10 @@ func refresh() -> void:
 	_accept.text = "Erneut annehmen" if campaign_mode and status == "failed" else "Auftrag annehmen"
 	_show_map.disabled = not status in ["accepted", "active"]
 	_abandon.disabled = not status in ["accepted", "active"]
+	_detail_card.visible=_details_expanded;_objectives.visible=_details_expanded;_actions.visible=_details_expanded
+	_layout_device()
+
+func _toggle_job_details(id:String)->void:
+	_details_expanded=not _details_expanded if id==_job_id else true
+	_job_id=id
+	refresh()

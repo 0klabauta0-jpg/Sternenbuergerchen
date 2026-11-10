@@ -76,6 +76,14 @@ func _run() -> void:
 	var trait_label := host.find_child("TraitLabel_calm", true, false) as Label
 	_check(trait_label != null and trait_label.tooltip_text.contains("Führung"), "Trait effect remains accessible on hover")
 	_check(pilot.to_dict() == before, "Rendering and revealing details mutate no profile or assignment data")
+	VIEW.render(host,pilot,{"editable_metrics":false,"two_column_layout":true,"current_assignment_text":"Pilot · Mondfähre 1","hide_loadout_dropdowns":true})
+	_check(host.find_child("CharacterSheetDetails_values",true,false)==values and values.visible,"unchanged read-only refresh preserves expanded branches and controls")
+	VIEW.render(host,pilot,{"editable_metrics":true,"two_column_layout":true})
+	await process_frame
+	_check(host.find_child("MetricSlider_accuracy",true,false)!=null,"editable character mode still renders its own controls")
+	VIEW.render(host,pilot,{"editable_metrics":false,"two_column_layout":true,"current_assignment_text":"Pilot · Mondfähre 1","hide_loadout_dropdowns":true})
+	await process_frame
+	_check(host.find_child("MetricSlider_accuracy",true,false)==null and host.find_child("ReadOnlyMetricBar_accuracy",true,false)!=null,"return from editor invalidates old read-only cache")
 	host.queue_free()
 	await process_frame
 	print("CHARACTER_SHEET_COMPACT passed=%d failed=%d" % [_passed, _failed])

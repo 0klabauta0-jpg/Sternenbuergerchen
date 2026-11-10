@@ -30,6 +30,7 @@ const TEXT := {
 	"Generalist": "Allrounder", "Roadscouting": "Routenaufklärung", "Silent Routefinding": "Leise Wegfindung",
 	"Silent Overwatch": "Verdeckte Feuersicherung", "Precision Overwatch": "Präzise Feuersicherung",
 	"Advance Recon": "Vorausaufklärung", "Line Sentinel": "Stellungssicherung", "Field Coordinator": "Einsatzkoordination",
+	"Steady Coordinator": "Beständige Koordination",
 	"Silent Infiltration": "Verdecktes Eindringen", "Hot Drop Pilot": "Schneller Anflug", "Low-Signature Drop": "Verdeckter Anflug",
 	"Stable Lift Pilot": "Ruhiger Personentransport", "Blockade Runner": "Blockadedurchbruch", "Route Master": "Routenführung",
 	"Interceptor": "Abfangen", "Precision Strike Pilot": "Präziser Luftangriff", "Flight Lead": "Flugführung",

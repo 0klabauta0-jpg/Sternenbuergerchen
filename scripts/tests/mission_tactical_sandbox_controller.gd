@@ -7901,8 +7901,20 @@ func _update_character_overlay() -> void:
 				var snapshot:Dictionary=ancestor.call("get_singleplayer_snapshot")
 				var inventory:Dictionary=Dictionary(snapshot.get("supply",{})).get("inventory",{})
 				render_options["carried_items"]=Dictionary(inventory.get("unit:"+_character_overlay_unit_id+":backpack",{})).get("items",{})
+				var adapter:Node=ancestor.get("_singleplayer_runtime")
+				if adapter!=null:
+					var craft:String=String(Dictionary(get_parent().get_meta("singleplayer_mission_identity",{})).get("craft_id",""))
+					var context:Dictionary=adapter.call("get_inventory_context",_character_overlay_unit_id,craft)
+					var member:Dictionary={"id":_character_overlay_unit_id,"name":String(profile.display_name),"role":String(profile.role_name),"secondary_role":String(profile.secondary_specialty),"condition":String(profile.status_text),"badges":load("res://scripts/meta/npc_rank_badge_resolver.gd").get_badges_for_profile(profile),"portrait_id":String(profile.portrait_id),"portrait_path":String(profile.portrait_path),"loadout":{"armor":String(profile.armor_id),"weapon_1":String(profile.weapon_1_id),"weapon_2":String(profile.weapon_2_id)}}
+					render_options["inventory_view"]={"inventory":inventory,"unit":member,"craft_id":craft,"accessible":context.get("accessible_containers",[]),"equipment_allowed":false,"actor":unit}
+					render_options["inventory_request"]=Callable(adapter,"request_operation")
 				break
 			ancestor=ancestor.get_parent()
+	var overlay_panel:=get_node_or_null("../TacticalUI/CharacterOverlay/OverlayPanel") as Control
+	if overlay_panel!=null:
+		var viewport_size:=get_viewport().get_visible_rect().size
+		var wanted:=Vector2(minf(1500,viewport_size.x-24),viewport_size.y-24)
+		overlay_panel.set_anchors_preset(Control.PRESET_TOP_LEFT);overlay_panel.position=(viewport_size-wanted)*.5;overlay_panel.size=wanted
 	CHARACTER_SHEET_VIEW_SCRIPT.render(host, profile, render_options)
 	if unit != null and character_overlay_dev_editor_enabled:
 		_append_character_overlay_dev_editor(host, unit)

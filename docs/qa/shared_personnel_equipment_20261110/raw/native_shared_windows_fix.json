@@ -1,0 +1,27 @@
+{
+  "label": "native_shared_windows_fix",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 2,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen\\output\\shared_equipment_20261110\\profiles\\native_shared_windows_fix",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "26677432",
+    "--path",
+    "C:\\dev\\SternenBuergerchen-worktrees\\campaign-main-exe-20261110",
+    "--script",
+    "res://scripts/tests/base_management_visuals_verifier.gd"
+  ]
+}

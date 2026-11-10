@@ -12,16 +12,28 @@ func _move_and_use(mission:Node,interaction_id:String,step_id:String,map_path:St
   _check(String(_campaign().jobs.satellite_recovery.status)=="active","chip pickup alone does not complete or reward the mission")
   var forged:Dictionary=_runtime.request_operation("campaign_cargo",{"container_id":"unit:"+carrier_id+":backpack","item_id":"satellite_chip","amount":1})
   _check(not forged.get("ok",false),"UI cannot mint a campaign chip by command")
+  if DisplayServer.get_name()!="headless":
+   root.content_scale_aspect=Window.CONTENT_SCALE_ASPECT_IGNORE;root.size=Vector2i(1920,1080);root.content_scale_size=Vector2i(1920,1080)
   controller.call("_open_character_overlay",carrier_id)
+  var cursor:Node=controller.get_node("MissionContextCursor")
+  var tutorial:Node=_flow.get("_campaign_tutorial")
+  cursor.call("update_objective_feedback");tutorial.call("refresh")
+  _check(not cursor.get("_objective_panel").visible and not tutorial.visible,"mission feedback stays behind the open character equipment sheet")
   var host:Node=controller.call("_get_character_overlay_host")
-  var icon:TextureRect=host.find_child("CarriedInventoryItem_satellite_chip",true,false)
-  _check(icon!=null and icon.texture!=null,"real lead details show carried satellite data with its menu icon")
+  var icon:Button=host.find_child("BackpackItem_satellite_chip",true,false)
+  _check(icon!=null and icon.icon!=null,"shared lead equipment view contains the actual carried data item")
+  var shared:Node=host.find_child("SharedCharacterEquipment",true,false)
+  var shared_id:int=shared.get_instance_id() if shared!=null else 0
+  for i in 3:controller.call("_update_character_overlay")
+  _check(shared!=null and host.find_child("SharedCharacterEquipment",true,false).get_instance_id()==shared_id,"unchanged mission overlay reuses the shared model and inventory controls")
   if DisplayServer.get_name()!="headless":
    for i in 8:await process_frame
    await RenderingServer.frame_post_draw
    DirAccess.make_dir_recursive_absolute("C:/dev/SternenBuergerchen/output/equipment_icons_20261110")
    root.get_texture().get_image().save_png("C:/dev/SternenBuergerchen/output/equipment_icons_20261110/satellite_carried_on_map.png")
   controller.call("_close_character_overlay")
+  cursor.call("update_objective_feedback");tutorial.call("refresh")
+  _check(cursor.get("_objective_panel").visible and tutorial.visible,"mission feedback returns after closing character equipment")
  return true
 func _wait_homebase()->bool:
  if not await super._wait_homebase():return false

@@ -2764,6 +2764,8 @@ func _apply_character_popup_rect() -> void:
 	var rect: Rect2i = get_native_r2_layout_snapshot().character_popup
 	_apply_fixed_window_contract("CharacterSheetPopup", rect)
 	popup.set_meta("homebase_character_popup_rect", rect)
+	var inventory_scroll:=popup.find_child("CharacterInventoryScroll",true,false) as Control
+	if inventory_scroll!=null:inventory_scroll.custom_minimum_size.x=780 if get_viewport_rect().size.x>=1500 else 520
 
 
 func _disable_legacy_homebase_window(path: String, meta_key: String) -> void:
@@ -5969,6 +5971,7 @@ func _update_character_sheet() -> void:
 			"two_column_layout": true,
 			"show_badge_progress": true,
 			"hide_loadout_dropdowns": true,
+			"hide_identity_overview":_singleplayer_snapshot_provider.is_valid(),
 		}
 	)
 
@@ -9126,6 +9129,8 @@ func _operations_unit_entry(unit_data: Dictionary) -> Dictionary:
 		"sort_metrics": _build_homebase_roster_sort_metrics(id, profile),
 		"portrait_id": String(profile.portrait_id) if profile != null else String(unit_data.get("portrait_id", "")),
 		"portrait_path": String(profile.portrait_path) if profile != null else String(unit_data.get("portrait_path", "")),
+		"secondary_role":String(profile.secondary_specialty) if profile!=null else "",
+		"condition":String(profile.status_text) if profile!=null else "",
 		"fireteam_id": fireteam_id, "busy": busy, "in_transit": in_transit,
 		"can_assign": not busy and not target_busy and fireteam_id != _focused_fireteam_id and focused_members.size() < 4 and capacity_available,
 		"can_remove": not busy and not fireteam_id.is_empty(),
