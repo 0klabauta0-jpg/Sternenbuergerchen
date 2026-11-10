@@ -49,10 +49,10 @@ zur Ausfuehrung liegt vor; kein erneuter Planfreigabehalt.
 - [x] Paritaet/Probe-Overrides/HUD-/Snapshotgates pruefen und committen.
 
 ## Task 5: Portraetexport
-- [ ] Fehlende bekannte Aliasdatei und vorhandenen unbekannten Pfad als Regression.
-- [ ] Alias-only-Normalisierung vor direkten Load/exists-Verbrauchern; keine
+- [x] Fehlende bekannte Aliasdatei und vorhandenen unbekannten Pfad als Regression.
+- [x] Alias-only-Normalisierung vor direkten Load/exists-Verbrauchern; keine
       gespeicherten Pfade umschreiben. Exakt42 sichere Filter ohne Kommatrennung.
-- [ ] Filtermenge, reale Ressourcenaufloesung und vorhandene Portraet-/Savegates
+- [x] Filtermenge, reale Ressourcenaufloesung und vorhandene Portraet-/Savegates
       pruefen; Quelldateien erhalten; dokumentieren und committen.
 
 ## Abschluss

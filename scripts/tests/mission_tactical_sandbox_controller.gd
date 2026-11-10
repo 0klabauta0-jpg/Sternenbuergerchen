@@ -11947,7 +11947,8 @@ func _is_mission_drop_available() -> bool:
 func _load_portrait_texture(portrait_path: String) -> Texture2D:
 	if portrait_path.strip_edges().is_empty():
 		return null
-	var resource: Resource = load(portrait_path)
+	var resource_path: String = PORTRAIT_IDENTITY_CATALOG_SCRIPT.resolve_legacy_path(portrait_path)
+	var resource: Resource = load(resource_path)
 	return resource as Texture2D
 
 

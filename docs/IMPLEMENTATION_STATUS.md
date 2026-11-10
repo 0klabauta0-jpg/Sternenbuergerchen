@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### Altlasten — Schritt5 Portraetexport, 10.11.2026
+Alias-only-Aufloesung in vier Ladepfaden,42 kommasichere Ausschluesse;
+57 andere Originale und gespeicherte Emblemauswahl erhalten. Echter isolierter
+Godot-Testexport mit Produktionsfiltern750/0 nach168 reproduzierten Fehlern;
+sieben Quellgates gruen.264 Ressourcenhashes unveraendert, keine Assetloeschung.
+Keine Release-EXE oder gemessene Gesamtpaketersparnis. Gemeinsame Schlusspruefung
+folgt; QA: docs/qa/altlasten_20261110/README.md.
+
 ### Altlasten — Schritt4 Diagnostik, 10.11.2026
 803-Zeilen-Reportbuilder stateless ausgelagert; oeffentliche API,439Felder
 und Probe-Overrides erhalten. Typedparitaet42/0 plus sieben HUD-/Report-/

@@ -88,7 +88,32 @@ vollstaendige aktuelle Reportparitaet sind separat nachgewiesen.
 Zusaetzliche LOS-Reviewfaelle pruefen WeakRef-Ablauf sowie Runtime-
 Zielausschluss/Same-Cell gegen Preview-Endpoint: aktuell28/0.
 
+## 5. Portraetexport
+Alias-only-Aufloesung vor den vier direkten Lade-/Existenzpruefungen; unbekannte
+Pfade erhalten ihre bisherige Leer-/Fehler-/Whitespacebehandlung. Gespeicherte
+Emblem-ID und Pfad werden nicht umgeschrieben. Exakt42 bereits umgeleitete
+Originale sind mit kommasicheren Filtern ausgeschlossen;57 weitere Originale
+bleiben nutzbar. Keine Quelldatei geloescht, keine Katalogidentitaet migriert.
+
+Echter Godot-Exporter gegen ein eigenstaendiges Portraetprojekt mit allen99
+Originalen,11 Atlasquellen und realen Importcaches: vor dem Fix168 echte
+Kompatibilitaetsfehler, danach750/0 mit Produktionsfiltern. Kein loser
+Quellpfad als Fallback. Alle42 alten Sidecars und.ctex-Payloads fehlen; alle42
+Aliasse ueber vier Verbraucher,57 sonstige Bilder und gespeicherte Embleme
+funktionieren.264 Bild-/Atlas-/Cachehashes unveraendert.
+
+Sieben isolierte Quellgates gruen: Atlas872/0, Consumer/Return8/0,
+TASK233491/0, TASK23442/0, Charaktereditor103/0, TASK51127/0,
+Identitaetskonsistenz152/0. Beleg: portrait_export_verification.json.
+
+Reproduzierbarer Packagecheck (nur temporaeres Testpaket, keine Release-EXE):
+`python scripts/tests/altlasten_portrait_export_probe.py --backend exporter --phase final --filters production --label recheck --run`
+Die Consumer-Methoden werden automatisch unveraendert extrahiert. Das ist ein
+realer Filter-/Ressourcenbeleg, keine vollstaendige gepackte Spielszenen- oder
+Releaseabnahme. Eine gesamte Buildgroessenersparnis wurde nicht gemessen.
+
 ## Fortschritt
-5 Portraetexport folgt.
+Alle fuenf fachlichen Schritte implementiert und einzeln geprueft.
+Gemeinsame Abschlussmatrix und letzter unabhaengiger Review folgen.
 Keine Mainintegration oder neue Release-EXE. Allgemeine Performance und native
 Gestaltungsabnahme sind kein Ergebnis dieser Komponentenregressionen.

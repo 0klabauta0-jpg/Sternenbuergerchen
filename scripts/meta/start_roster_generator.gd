@@ -532,7 +532,8 @@ static func _validate_team_editor(team_editor: Dictionary, warnings: PackedStrin
 static func _resolve_team_emblem(team_editor: Dictionary, seed: String, player_profile_id: String) -> Dictionary:
 	var emblem_id: String = String(team_editor.get("emblem_id", "")).strip_edges()
 	var emblem_path: String = String(team_editor.get("emblem_path", "")).strip_edges()
-	if not emblem_id.is_empty() and emblem_path.begins_with("res://") and ResourceLoader.exists(emblem_path):
+	var resource_path: String = PORTRAIT_IDENTITY_CATALOG_SCRIPT.resolve_legacy_path(emblem_path)
+	if not emblem_id.is_empty() and emblem_path.begins_with("res://") and ResourceLoader.exists(resource_path):
 		return {"id": emblem_id, "path": emblem_path}
 	var assignment: Array = Array(PORTRAIT_IDENTITY_CATALOG_SCRIPT.call("build_deterministic_assignment", "%s:team_emblem:%s" % [seed, player_profile_id], 1))
 	if not assignment.is_empty():

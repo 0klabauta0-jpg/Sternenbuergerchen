@@ -24,6 +24,29 @@ Bis ein eigener Extraction-Task diesen Legacy-Bridge-Pfad migriert, ist
 `scripts/tests/` deshalb als explizite Runtime-Script-Abhaengigkeit im
 Exportvertrag dokumentiert und darf nicht pauschal ausgeschlossen werden.
 
+## Kompatible Originalportraets
+Die 42 `legacy_paths` des Portraetkatalogs sind vom Runtimeexport ausgeschlossen;
+ihre Quellen bleiben im Repository erhalten. Die uebrigen 57 Originale unter
+`Assets/Char` bleiben fuer alte individuelle Auswahlen verfuegbar. Kein
+pauschaler Ordnerausschluss und keine Umschreibung gespeicherter IDs/Pfade.
+
+Direkte Portraet- und Emblemverbraucher loesen ausschliesslich bekannte Aliasse
+vor einer Existenzpruefung oder einem Load auf. Unbekannte Pfade und deren
+bisherige Leer-/Fehlerbehandlung bleiben erhalten. Da der Godot-Exportfilter
+Kommas als Trenner verwendet, stehen in den 40 betroffenen Dateinamen einzelne
+`?` anstelle der Kommas. Alle 42 Filter muessen gemeinsam genau diese 42
+Originale und keines der 57 weiteren Bilder treffen.
+
+`python scripts/tests/altlasten_portrait_export_probe.py --backend exporter
+--phase final --filters production --label final --run` prueft diese Grenze
+mit dem echten Godot-Exporter in einem isolierten Mini-Projekt. Es startet mit
+allen 99 Originalen, ihren kopierten Importdateien und den aktuellen Atlanten;
+der anschliessende PCK-Lauf darf keine losen Quelldateien finden. Alte
+Import-Sidecars und Texturpayloads muessen fehlen, waehrend 42 Aliasidentitaeten,
+57 weitere Originale und gespeicherte Emblemauswahlen weiter funktionieren.
+Die Verbrauchermethoden werden unveraendert aus dem aktuellen Code extrahiert;
+vollstaendige Szenenregressionen und eine Releasefreigabe bleiben getrennt.
+
 ## Workflow
 1. Das Script liest den lokalen `export_presets.cfg`.
 2. Es schreibt einen Backup-Snapshot.

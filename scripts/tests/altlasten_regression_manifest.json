@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "los",
+      "script": "res://scripts/tests/altlasten_los_runtime_verifier.gd",
+      "success_marker": "ALTLASTEN_LOS passed=",
+      "timeout": 150
+    },
+    {
+      "name": "loadout_owner",
+      "script": "res://scripts/tests/altlasten_personnel_loadout_owner_verifier.gd",
+      "success_marker": "PERSONNEL_LOADOUT_OWNER passed=",
+      "timeout": 150
+    },
+    {
+      "name": "input",
+      "script": "res://scripts/tests/task_1185_tactical_input_ownership.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "diagnostics",
+      "script": "res://scripts/tests/altlasten_diagnostics_parity_verifier.gd",
+      "success_marker": "ALTLASTEN_DIAGNOSTICS_PARITY passed=",
+      "timeout": 150
+    },
+    {
+      "name": "wall_los",
+      "script": "res://scripts/tests/task_456_wall_segment_los_and_tile_truth_inspector.gd",
+      "success_marker": "TASK_456: ALL PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "door_runtime",
+      "script": "res://scripts/tests/hud_architecture_20261106_door_runtime_authority_verifier.gd",
+      "success_marker": "HUD_DOOR_RUNTIME_AUTHORITY_VERIFY_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "hud_projection",
+      "script": "res://scripts/tests/hud_architecture_20261106_live_projection_verifier.gd",
+      "success_marker": "HUD_LIVE_PROJECTION_VERIFY_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "hud_hotpath",
+      "script": "res://scripts/tests/task_1043_mission_hud_hotpath_event_log_guard.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 150
+    },
+    {
+      "name": "hud_light",
+      "script": "res://scripts/tests/task_1153_mission_hud_light_path_snapshot_consolidation.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 150
+    },
+    {
+      "name": "recapture",
+      "script": "res://scripts/tests/task_1174_mission_release_recapture_extraction.gd",
+      "success_marker": "TASK_1174: ALL PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "report_1008",
+      "script": "res://scripts/tests/task_1008_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 150
+    },
+    {
+      "name": "report_1042",
+      "script": "res://scripts/tests/task_1042_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 150
+    },
+    {
+      "name": "inventory",
+      "script": "res://scripts/tests/playtest_20261110_inventory_transfer_verifier.gd",
+      "success_marker": "INVENTORY failures=0",
+      "timeout": 150
+    },
+    {
+      "name": "inventory_runtime",
+      "script": "res://scripts/tests/playtest_20261110_inventory_runtime_verifier.gd",
+      "success_marker": "INVENTORY_RUNTIME failures=0",
+      "timeout": 150
+    },
+    {
+      "name": "continue",
+      "script": "res://scripts/tests/campaign_preparation_continue_test.gd",
+      "success_marker": "CAMPAIGN_PREPARATION failed=0",
+      "timeout": 150
+    },
+    {
+      "name": "world_ui",
+      "script": "res://scripts/tests/base_personnel_world_ui_test.gd",
+      "success_marker": "BASE_PERSONNEL_WORLD_UI passed=9 failed=0",
+      "timeout": 150
+    },
+    {
+      "name": "profile_defaults",
+      "script": "res://scripts/tests/task_352_homebase_loadout_defaults_preserve_unit_profiles.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 150
+    },
+    {
+      "name": "loadout_matrix",
+      "script": "res://scripts/tests/task_354_homebase_direct_loadout_regression_matrix.gd",
+      "success_marker": "TASK_354: ALL PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "recommendation",
+      "script": "res://scripts/tests/task_533_recommended_loadout_selection_bridge.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 150
+    },
+    {
+      "name": "portraits_atlas",
+      "script": "res://scripts/tests/playtest_20261105_portrait_atlas_verifier.gd",
+      "success_marker": "PORTRAIT_ATLAS_VERIFY_PASS",
+      "timeout": 150
+    },
+    {
+      "name": "portraits_consumers",
+      "script": "res://scripts/tests/playtest_20261105_portrait_consumers_and_return_verifier.gd",
+      "success_marker": "PORTRAIT_CONSUMERS_RETURN:",
+      "timeout": 150
+    },
+    {
+      "name": "portraits_catalog",
+      "script": "res://scripts/tests/task_233_portrait_identity_catalog_and_roster_presentation.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "roster_save",
+      "script": "res://scripts/tests/task_234_persistent_player_roster_save_and_reset.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "character_editor",
+      "script": "res://scripts/tests/bugfix_character_team_editor_usability_pass.gd",
+      "success_marker": "=== RESULTS:",
+      "timeout": 150
+    },
+    {
+      "name": "export_hygiene",
+      "script": "res://scripts/tests/task_511_export_runtime_package_hygiene.gd",
+      "success_marker": "ALL TESTS PASSED",
+      "timeout": 150
+    },
+    {
+      "name": "identity_consistency",
+      "script": "res://scripts/tests/character_identity_consistency_verifier.gd",
+      "success_marker": "CHARACTER_IDENTITY_CONSISTENCY passed=",
+      "timeout": 150
+    }
+  ]
+}
