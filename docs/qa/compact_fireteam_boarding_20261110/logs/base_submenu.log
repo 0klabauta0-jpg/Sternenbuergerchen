@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/base_management_access_verifier.gd:12)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/base_management_access_verifier.gd:12)
+PASS: base submenu starts folded instead of covering the map
+PASS: hover opens management directly below Basis erkunden
+PASS: expanded submenu stays within the 1280 viewport
+PASS: leaving the navigation folds submenu
+PASS: keyboard focus can reopen the submenu
+PASS: base exposes build workshop and upload directly
+PASS: choosing a submenu entry folds navigation
+PASS: actual data-terminal button opens canonical upload view
+PASS: upload location stays discoverable without a chip
+PASS: empty data terminal cannot fake upload
+PASS: empty terminal explains missing data without requiring tooltip
+PASS: failed mission projection explains empty terminal and real retry route
+PASS: full management page does not also show duplicate floating supply panel
+PASS: upload page keeps global tutorial clear of actual upload action
+PASS: locked blueprint visible and disabled
+PASS: locked blueprint visible and disabled
+PASS: locked blueprint visible and disabled
+PASS: canonical request reaches owner blueprint gate
+PASS: unearned second pad remains explained and locked
+PASS: warehouse route opens actual finite inventory and equipment
+PASS: navigation and locked actions create no items or money
+BASE_MANAGEMENT checks=21 failures=0

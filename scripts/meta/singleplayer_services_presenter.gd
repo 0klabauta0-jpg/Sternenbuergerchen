@@ -280,6 +280,14 @@ func _apply_section() -> void:
 			has_data=has_data or String(job.get("status",""))=="pending_upload"
 		if not has_data:
 			_section_note.text="Keine geborgenen Missionsdaten vorhanden. Erst am Einsatzort sichern, zum Schiff zurückbringen und heimkehren."
+			var jobs:Dictionary=_snapshot.get("campaign",{}).get("jobs",{})
+			for id:String in ["satellite_recovery","outpost_chip_recovery"]:
+				var job:Dictionary=jobs.get(id,{})
+				if String(job.get("status",""))=="failed":
+					_section_note.text="Auftrag fehlgeschlagen: %s. Kein Chip zum Hochladen vorhanden. Im Smart Mobile den Auftrag erneut annehmen und die Daten am Einsatzort bergen; anschließend zum Schiff zurückbringen und heimkehren."%String(job.get("title",id))
+					break
+				if String(job.get("status",""))=="completed":
+					_section_note.text="%s: Daten bereits hochgeladen und Belohnung erhalten. Keine weiteren Missionsdaten zum Hochladen vorhanden."%String(job.get("title",id))
 		elif _campaign_buttons.campaign_upload.button.disabled:
 			_section_note.text="Missionsdaten geborgen. Zuerst wieder an der Heimatbasis landen."
 		else:

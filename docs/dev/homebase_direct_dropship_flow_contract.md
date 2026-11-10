@@ -70,3 +70,22 @@ nachfolgenden bisherigen Send-Vertrag.
 - Beim Anzeigen der Homebase darf der MetaLayer den bestehenden Singleplayer-Actionability-Guard erneut ausfuehren, damit lokale Save-/UI-Fragmente nicht als sichtbares `Start blockiert` stehenbleiben.
 - Erwarteter Sichtzustand: Flightdeck mit Schiff, Payload mit Operatoren, Payload geboardet, Readiness `ready`, Button `Start Mission` aktiv.
 - Der Guard gehoert in den MetaLayer-Startvertrag. HUD, HomebaseScreen und Snapshots duerfen den Zustand anzeigen, aber keine zweite Gameplay-Wahrheit speichern.
+
+## Truppkarte und Basisnavigation — 10.11.2026
+- Der einzelne ausgewählte Trupp erscheint einmal als gemeinsame Karte mit
+  quadratischen Porträts, Status, Haltung, Feuerregel, Details und Aufsitzen.
+  Weitere Trupps bleiben in der scrollbaren Übersicht auswählbar.
+- Aufsitzen gehört zum Trupp. Es befiehlt dem ausgewählten Trupp den realen
+  Rückweg zum eigenen gelandeten Kampagnenschiff und verwendet die vorhandenen
+  Boardingeffekte. Andere Trupps werden dabei nicht ausgewählt; kein Abheben.
+  Ohne Schiff/Berechtigung/boardingfähige Mitglieder bleibt ein Sperrgrund sichtbar.
+- UI-Karten und deren zwischengespeicherte Porträts sind Projektionen.
+  Doppelklick nach Truppwechsel muss die aktuelle Person öffnen. Unveränderte
+  Projektionen erhalten Controls und Signalverbindungen.
+- Basis erkunden bietet ein Hover-Untermenü: Bauen, Werkstatt/Blueprints,
+  Lager/Ausrüstung, Datenterminal/Hochladen und Schiff. Die Einträge liegen in der
+  linken Navigation; beim Verlassen wird zugeklappt. Tastaturfokus öffnet ebenfalls.
+- Das Datenterminal unterscheidet fehlende Daten, fehlgeschlagene Aufträge,
+  bereits hochgeladene Daten und einen tatsächlich vorhandenen Upload.
+  Schlafen erzeugt/verbraucht keine Missionschips. Upload bleibt der vorhandene
+  autoritative Heimatbasis-Command, kein UI-generierter Ersatzchip.

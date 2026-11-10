@@ -7,23 +7,46 @@ func check(ok:bool,label:String)->void:
 	if not ok:failures+=1;printerr("FAIL: ",label)
 	else:print("PASS: ",label)
 func _run()->void:
+	root.size=Vector2i(1280,720)
 	load("res://scripts/meta/game_start_contract.gd").request_start(self,"campaign","new")
 	var flow:Node=load("res://scenes/meta/meta_layer_test.tscn").instantiate();root.add_child(flow);await process_frame
 	var screen:Node=flow.get_node("HomebaseScreen")
 	screen.request_operation("navigate",{"mode":"base"})
 	var presenter:Node=screen.get("_operations_presenter")
 	var bar:Control=presenter.get("_base_management_bar")
-	check(bar.is_visible_in_tree(),"base management actions visible while exploring")
+	check(not bar.is_visible_in_tree(),"base submenu starts folded instead of covering the map")
+	presenter.get("_nav").base.mouse_entered.emit()
+	check(bar.is_visible_in_tree() and bar.get_parent()==presenter.get("_base_navigation_group"),"hover opens management directly below Basis erkunden")
+	for i in 12:await process_frame
+	check(Rect2(Vector2.ZERO,Vector2(root.size)).encloses(bar.get_global_rect()),"expanded submenu stays within the 1280 viewport")
+	if DisplayServer.get_name()!="headless":
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("C:/dev/SternenBuergerchen/output/compact_team_20261110/base_submenu.png")
+	var motion:=InputEventMouseMotion.new()
+	motion.position=Vector2(1100,300)
+	root.push_input(motion)
+	presenter.call("_close_base_navigation_after_exit")
+	await create_timer(0.2).timeout
+	check(not bar.visible,"leaving the navigation folds submenu")
+	presenter.get("_nav").base.focus_entered.emit()
+	check(bar.visible,"keyboard focus can reopen the submenu")
 	var actions:Dictionary={}
 	for button:Button in bar.get_children():actions[button.text]=button
 	check(actions.has("Bauen") and actions.has("Werkstatt / Blueprints") and actions.has("Datenterminal / Hochladen"),"base exposes build workshop and upload directly")
 	var before:Dictionary=flow.get("_singleplayer_runtime").get("_supply").export_state()
 	actions["Datenterminal / Hochladen"].pressed.emit()
+	check(not bar.visible,"choosing a submenu entry folds navigation")
 	var services:Node=presenter.get("_services_view")
 	check(services.is_visible_in_tree() and services.get("_section")=="data","actual data-terminal button opens canonical upload view")
 	check(services.get("_campaign_buttons").campaign_upload.button.is_visible_in_tree(),"upload location stays discoverable without a chip")
 	check(services.get("_campaign_buttons").campaign_upload.button.disabled,"empty data terminal cannot fake upload")
 	check(services.get("_section_note").text.contains("Keine geborgenen"),"empty terminal explains missing data without requiring tooltip")
+	var snapshot:Dictionary=services.get("_snapshot").duplicate(true)
+	var display_snapshot:Dictionary=snapshot.duplicate(true)
+	display_snapshot.campaign.jobs.satellite_recovery.status="failed"
+	services.set("_snapshot",display_snapshot);services.call("_apply_section")
+	check(services.get("_section_note").text.contains("fehlgeschlagen") and services.get("_section_note").text.contains("Smart Mobile"),"failed mission projection explains empty terminal and real retry route")
+	services.set("_snapshot",snapshot);services.call("_apply_section")
 	flow.call("_refresh_singleplayer_services")
 	check(not flow.get("_singleplayer_services").visible,"full management page does not also show duplicate floating supply panel")
 	flow.get("_campaign_tutorial").refresh()

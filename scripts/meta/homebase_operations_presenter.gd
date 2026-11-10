@@ -89,7 +89,8 @@ var _workflow: HBoxContainer
 var _workflow_labels: Dictionary = {}
 var _job_board: Control
 var _region_map: Control
-var _base_management_bar: HFlowContainer
+var _base_management_bar: VBoxContainer
+var _base_navigation_group: VBoxContainer
 var _services_view: Control
 
 
@@ -194,7 +195,17 @@ func _build() -> void:
 		button.name = "Navigate_" + key
 		button.custom_minimum_size.y = 46
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		nav.add_child(button)
+		if key == "base":
+			_base_navigation_group = VBoxContainer.new()
+			_base_navigation_group.name = "BaseNavigationGroup"
+			_base_navigation_group.add_theme_constant_override("separation", 3)
+			nav.add_child(_base_navigation_group)
+			_base_navigation_group.add_child(button)
+			button.mouse_entered.connect(func(): _base_management_bar.show())
+			button.focus_entered.connect(func(): _base_management_bar.show())
+			_base_navigation_group.mouse_exited.connect(_close_base_navigation_after_exit)
+		else:
+			nav.add_child(button)
 		button.pressed.connect(func(): _act("navigate", {"mode": key}))
 		button.disabled = key in ["jobs", "map"]
 		if button.disabled:
@@ -244,14 +255,15 @@ func _build() -> void:
 	_services_view.call("configure", _singleplayer_snapshot, _singleplayer_request)
 	_services_view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_services_view.hide()
-	_base_management_bar = HFlowContainer.new()
+	_base_management_bar = VBoxContainer.new()
 	_base_management_bar.name = "BaseManagementActions"
-	_base_management_bar.position = Vector2(16, 16)
-	_base_management_bar.add_theme_constant_override("h_separation", 8)
-	_workspace.add_child(_base_management_bar)
+	_base_management_bar.add_theme_constant_override("separation", 3)
+	_base_navigation_group.add_child(_base_management_bar)
 	for entry in [["Bauen", "build"], ["Werkstatt / Blueprints", "workshop"], ["Lager & Ausrüstung", "inventory"], ["Datenterminal / Hochladen", "data"], ["Schiff", "ship"]]:
 		var action := _button(String(entry[0]), false)
-		action.add_theme_font_size_override("font_size", 15)
+		action.add_theme_font_size_override("font_size", 13)
+		action.custom_minimum_size.y = 29
+		action.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_base_management_bar.add_child(action)
 		action.pressed.connect(_open_base_management.bind(String(entry[1])))
 	_base_management_bar.hide()
@@ -693,7 +705,6 @@ func refresh() -> void:
 	var mode: String = String(snapshot.get("mode", "squad"))
 	var changed_mode: bool = mode != _mode
 	_mode = mode
-	_base_management_bar.visible = _mode == "base"
 	var campaign_ready: bool = not Dictionary(snapshot.get("singleplayer", {})).is_empty()
 	for key in ["jobs", "map"]:
 		_nav[key].disabled = not campaign_ready
@@ -1009,7 +1020,6 @@ func _layout_columns() -> void:
 	if _workspace == null or _columns.size() != 4:
 		return
 	var available: Vector2 = _workspace.size
-	if _base_management_bar != null: _base_management_bar.size.x = maxf(available.x - 190, 0)
 	var gap: float = 12.0
 	var narrow: bool = available.x < 1450.0 and size.x < 1600.0
 	var rects: Dictionary = {}
@@ -1072,11 +1082,19 @@ func _layout_columns() -> void:
 
 
 func _open_base_management(section: String) -> void:
+	_base_management_bar.hide()
 	if section == "inventory":
 		_act("navigate", {"mode":"squad"})
 		return
 	_act("navigate", {"mode":"services"})
 	_services_view.call("set_section", section)
+
+
+func _close_base_navigation_after_exit() -> void:
+	# Allow pointer travel from the heading into its submenu before folding.
+	await get_tree().create_timer(0.12).timeout
+	if not _base_navigation_group.get_global_rect().has_point(get_global_mouse_position()):
+		_base_management_bar.hide()
 
 
 func _terminal_requested(id: String) -> void:

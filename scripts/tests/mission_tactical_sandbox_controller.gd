@@ -5278,7 +5278,7 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	if box == null or header == null:
 		return
 	var metrics: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get_mission_hud_layout(Vector2i(get_viewport().get_visible_rect().size))
-	card.custom_minimum_size = Vector2(metrics.card_width, int(metrics.portrait_height) + int(metrics.body_font_size) * 3 + 32)
+	card.custom_minimum_size = Vector2(metrics.card_width, int(metrics.portrait_height) + int(metrics.body_font_size) * 2 + 34)
 	card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	card.set_meta("native_a5_portrait_team_card", true)
 	TACTICAL_UI_THEME_SCRIPT._override_stylebox(card, "panel", TACTICAL_UI_THEME_SCRIPT.build_flat_stylebox(
@@ -5353,6 +5353,7 @@ func _apply_native_a5_fireteam_card(card: Control, fireteam_id: String, units: A
 	if selected and not bool(card.get_meta("native_a5_selected_scroll_seen", false)):
 		call_deferred("_ensure_native_a5_selected_card_visible", weakref(card), fireteam_id)
 	card.set_meta("native_a5_selected_scroll_seen", selected)
+	card.visible = not (selected and _selected_fireteam_ids.size() == 1)
 
 
 func _ensure_native_a5_selected_card_visible(card_reference: WeakRef, fireteam_id: String) -> bool:
@@ -5389,7 +5390,7 @@ func _resize_native_a5_fireteam_card(card: Control) -> void:
 	if String(card.get_meta("native_a5_readable_geometry", "")) == signature:
 		return
 	card.set_meta("native_a5_readable_geometry", signature)
-	card.custom_minimum_size = Vector2(metrics.card_width, int(metrics.portrait_height) + int(metrics.body_font_size) * 3 + 32)
+	card.custom_minimum_size = Vector2(metrics.card_width, int(metrics.portrait_height) + int(metrics.body_font_size) * 2 + 34)
 	card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	var margin := card.get_node_or_null("Margin") as MarginContainer
 	if margin != null:
@@ -5409,7 +5410,7 @@ func _resize_native_a5_fireteam_card(card: Control) -> void:
 		strip.custom_minimum_size.y = float(metrics.portrait_height)
 		for portrait in strip.get_children():
 			if portrait is TextureRect:
-				portrait.custom_minimum_size = Vector2(edge, metrics.portrait_height)
+				portrait.custom_minimum_size = Vector2(minf(edge, float(metrics.portrait_height)), metrics.portrait_height)
 
 
 func _native_a5_team_status(snapshot: Dictionary, inactive: bool) -> String:
@@ -6378,7 +6379,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		var portrait := TextureRect.new()
 		portrait.name = "MemberPortrait%02d" % (strip.get_child_count() + 1)
 		portrait.mouse_filter = Control.MOUSE_FILTER_STOP
-		portrait.custom_minimum_size = Vector2(portrait_edge, metrics.portrait_height)
+		portrait.custom_minimum_size = Vector2(minf(portrait_edge, float(metrics.portrait_height)), metrics.portrait_height)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		strip.add_child(portrait)
@@ -6387,7 +6388,7 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		var portrait_rect := strip.get_child(index) as TextureRect
 		if unit == null or portrait_rect == null:
 			continue
-		portrait_rect.custom_minimum_size = Vector2(portrait_edge, metrics.portrait_height)
+		portrait_rect.custom_minimum_size = Vector2(minf(portrait_edge, float(metrics.portrait_height)), metrics.portrait_height)
 		var profile_variant: Variant = _build_profile_from_unit(unit)
 		var profile: Dictionary = Dictionary(profile_variant) if typeof(profile_variant) == TYPE_DICTIONARY else {}
 		var portrait_id: String = String(profile.get("portrait_id", "")).strip_edges()
@@ -13683,20 +13684,28 @@ func _refresh_campaign_pilot_selector(card_panel: Control, card: Dictionary) -> 
 	selector.mouse_filter = Control.MOUSE_FILTER_STOP
 
 
-func request_campaign_crew_boarding(craft_id: String) -> Dictionary:
+func request_campaign_crew_boarding(craft_id: String, boarding_fireteam_id: String = "") -> Dictionary:
 	if not get_parent().has_meta("campaign_ground_pilot_id"): return {"ok": true}
 	var pilot_id: String = String(_find_mission_dropship_card_entry(craft_id).get("pilot_unit_id", ""))
 	var flight_guard: Dictionary = get_campaign_pilot_flight_guard(craft_id)
 	if String(flight_guard.get("reason", "")) == "pilot_unavailable": return flight_guard
+	var relevant_crew:Array=_get_campaign_sortie_units()
+	if not boarding_fireteam_id.is_empty():
+		relevant_crew=relevant_crew.filter(func(unit:Node):return String(unit.call("get_fireteam_id"))==boarding_fireteam_id)
+		if relevant_crew.is_empty():return {"ok":false,"reason":"unknown_team","message":"Trupp gehört nicht zu diesem Schiff"}
 	var has_ground_crew := false
-	for unit in _get_campaign_sortie_units():
+	for unit in relevant_crew:
 		has_ground_crew = has_ground_crew or _deployed_unit_ids.has(String(unit.call("get_unit_id")))
+	if not has_ground_crew and not boarding_fireteam_id.is_empty():
+		if relevant_crew.all(func(unit:Node):return _embarked_unit_ids.has(String(unit.call("get_unit_id")))):
+			return {"ok":true,"message":"Trupp an Bord"}
+		return {"ok":false,"reason":"crew_unavailable","message":"Trupp ist nicht am Schiff verfügbar"}
 	if bool(flight_guard.get("ok", false)) and not has_ground_crew: return flight_guard
 	if not _is_parked_campaign_dropship(craft_id):
 		return {"ok": false, "reason": "craft_not_landed", "message": "Schiff muss zum Einsteigen gelandet sein"}
 	var ship_position: Vector2 = _drop_sequence_position if _is_active_drop_sequence_for_craft(craft_id) else _coerce_vector2_value(Dictionary(_parallel_drop_sequences_by_craft.get(craft_id, {})).get("position", Vector2.INF), Vector2.INF)
 	var crew: Array = []
-	for unit in _get_campaign_sortie_units():
+	for unit in relevant_crew:
 		if unit == null or not unit.has_method("get_unit_id"): continue
 		var id: String = String(unit.call("get_unit_id"))
 		if not _deployed_unit_ids.has(id): continue
@@ -36639,6 +36648,7 @@ func _on_campaign_extraction_pressed(craft_id: String) -> void:
 	_refresh_mission_dropship_panel()
 
 func _advance_campaign_extraction(delta: float) -> void:
+	_advance_selected_team_boarding(delta)
 	if _campaign_extraction_craft_id.is_empty(): return
 	_campaign_extraction_elapsed += delta
 	_campaign_extraction_poll -= delta
@@ -36653,6 +36663,49 @@ func _advance_campaign_extraction(delta: float) -> void:
 	elif reason not in ["pilot_not_at_ship", "crew_not_at_ship", "pilot_boarding_pending"] or _campaign_extraction_elapsed > 180.0:
 		_campaign_extraction_craft_id = ""
 		_set_mission_dropship_card_feedback(craft_id, String(result.get("message", "Rueckweg unterbrochen")))
+
+
+var _selected_team_boarding_requests:Dictionary={}
+
+func get_selected_team_boarding_snapshot() -> Dictionary:
+	var team:=String(_get_selected_fireteam_id())
+	var craft:=String(Dictionary(get_parent().get_meta("singleplayer_mission_identity",{})).get("craft_id",_mission_drop_craft_id))
+	var result:Dictionary={"can_board":false,"craft_id":craft,"fireteam_id":team,"message":"Einen Trupp auswählen"}
+	if _selected_fireteam_ids.size()!=1:return result
+	if not _can_issue_local_commands():result.message="Keine Befehlsberechtigung";return result
+	if not _is_parked_campaign_dropship(craft):result.message="Kein eigenes gelandetes Truppschiff verfügbar";return result
+	var units:Array=_get_campaign_sortie_units().filter(func(unit:Node):return String(unit.call("get_fireteam_id"))==team)
+	if units.is_empty():result.message="Trupp gehört nicht zu diesem Schiff";return result
+	if _selected_team_boarding_requests.has(team):result.message="Trupp geht zum Schiff / steigt ein";return result
+	if units.all(func(unit:Node):return _embarked_unit_ids.has(String(unit.call("get_unit_id")))):result.message="Trupp an Bord";return result
+	if units.any(func(unit:Node):return int(unit.call("get_health"))<=0):result.message="Nicht alle Truppmitglieder sind boardingbereit";return result
+	result.can_board=true;result.message="Zum Truppschiff gehen und aufsitzen"
+	return result
+
+func request_selected_team_boarding() -> Dictionary:
+	var state:=get_selected_team_boarding_snapshot()
+	if not bool(state.can_board):return {"ok":false,"message":state.message}
+	_create_waypoints_for_selected_fireteams(_campaign_landed_craft_position(String(state.craft_id)),true)
+	if not execute_selected_fireteam_orders():return {"ok":false,"message":"Trupp zuerst absetzen oder laufende Landung beenden"}
+	_selected_team_boarding_requests[String(state.fireteam_id)]={"craft_id":String(state.craft_id),"elapsed":0.0,"poll":0.0}
+	_last_command_text="Aufsitzen: "+String(state.fireteam_id).to_upper()
+	_update_ui()
+	return {"ok":true,"pending":true,"message":"Trupp geht zum Schiff und steigt ein"}
+
+func _advance_selected_team_boarding(delta:float) -> void:
+	for team:String in _selected_team_boarding_requests.keys():
+		var request:Dictionary=_selected_team_boarding_requests[team]
+		request.elapsed+=delta;request.poll-=delta
+		if float(request.poll)>0:continue
+		request.poll=.25
+		var result:=request_campaign_crew_boarding(String(request.craft_id),team)
+		var reason:=String(result.get("reason",""))
+		if bool(result.get("ok",false)):
+			_selected_team_boarding_requests.erase(team)
+			_last_command_text=team.to_upper()+" an Bord"
+		elif reason not in ["pilot_not_at_ship","crew_not_at_ship","pilot_boarding_pending"] or float(request.elapsed)>180:
+			_selected_team_boarding_requests.erase(team)
+			_last_command_text=String(result.get("message","Aufsitzen unterbrochen"))
 
 
 var _planning_enabled: bool = true

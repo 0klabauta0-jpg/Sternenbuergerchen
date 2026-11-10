@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### Kompakte Truppkarte, Aufsitzen und Basis-Untermenü — 10.11.2026
+Taskbranch auf Main1e3cca237: gemeinsame FT-Karte, quadratische kleinere Porträts,
+Aufsitzen am Trupp, bestätigter Boardingstatus; Basisverwaltung als Hover-Untermenü.
+Terminal zeigt fehlgeschlagene Aufträge verständlich. Vollständiger echter
+Kampagnenausflug mit Schlafen vor Upload84/0; native Karte41/0, Basisnavigation21/0,
+Flugdeck34/0, Kontextcursor12/0. Details und Grenzen:
+docs/qa/compact_fireteam_boarding_20261110/README.md. Noch keine Mainintegration/EXE.
+
 ### Flugdeck/Basis/Daten: Mainintegration und neue EXE — 10.11.2026
 Task befc157a9 konfliktfrei auf Main b92808399 integriert (b9c9b4b2d).
 Produktbaum identisch; nur Integrationsdokumentation ergänzt. Frische Prüfung:

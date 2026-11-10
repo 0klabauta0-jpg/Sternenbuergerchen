@@ -136,11 +136,11 @@ static func configure(controller: Node, state: Dictionary = {}) -> void:
 	_place_context_tool(controller, "WaypointEraseButton", _context_tool_rect(layout, 1), false)
 	var all_button := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton") as Button
 	if all_button != null:
-		_place(all_button, Rect2(Vector2(team.position + Vector2i(team.size.x - 64, 8)), Vector2(52, 32)))
+		_place(all_button, Rect2(Vector2(team.position + Vector2i(team.size.x - 64, 8)), Vector2(52, 24)))
 	var stance_panel := controller.get_node_or_null(INFO + "/TacticalStancePanel") as Control
 	if stance_panel != null:
 		stance_panel.clip_contents = false
-		_place(stance_panel, Rect2(Vector2(team.position) + Vector2(8, team.size.y * 0.40), Vector2(team.size.x - 16, team.size.y * 0.28)))
+		_place(stance_panel, Rect2(Vector2(team.position) + Vector2(8, float(layout.portrait_height)+60), Vector2(team.size.x - 16, 28)))
 		_refresh_stance_buttons(stance_panel)
 	var info_scroll := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll") as ScrollContainer
 	if info_scroll != null:
@@ -374,7 +374,7 @@ static func _refresh_stance_buttons(stance: Control) -> void:
 			if button.get_theme_font_size("font_size") != font_size:
 				button.add_theme_font_size_override("font_size", font_size)
 			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			button.custom_minimum_size = Vector2(0, 40 if height >= 1260 else (34 if height >= 900 else 28))
+			button.custom_minimum_size = Vector2(0, 28 if height >= 1260 else (26 if height >= 900 else 24))
 
 
 static func refresh(controller: Node, view_model: Dictionary) -> void:
@@ -399,6 +399,36 @@ static func refresh(controller: Node, view_model: Dictionary) -> void:
 		_set_text(summary, String(view_model.get("team_summary", "")))
 	_refresh_fire_rule_selector(controller, view_model)
 	_refresh_details_text(controller)
+	_refresh_combined_team_card(controller)
+
+
+static func _refresh_combined_team_card(controller:Node) -> void:
+	var team:=controller.get_node_or_null(BASE+"FireteamPanel") as Control
+	if team==null or not team.has_node("A5TeamPortraits"):return
+	var id:=String(controller.call("_get_selected_fireteam_id"))
+	var source:Node=controller.get_node_or_null("../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox/FireteamMiniCard_"+id.capitalize()+"/Margin/VBox/FireteamMemberPortraitStrip")
+	var row:=team.get_node("A5TeamPortraits") as HBoxContainer
+	var sources:Array=source.get_children() if source!=null else []
+	while row.get_child_count()>sources.size():row.get_child(-1).free()
+	while row.get_child_count()<sources.size():
+		var portrait:=TextureRect.new();portrait.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;portrait.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;portrait.mouse_filter=Control.MOUSE_FILTER_STOP;row.add_child(portrait)
+	var edge:float=float(LAYOUT.get_mission_hud_layout(Vector2i(controller.get_viewport().get_visible_rect().size)).portrait_height)
+	for i in sources.size():
+		var portrait:=row.get_child(i) as TextureRect
+		var original:=sources[i] as TextureRect
+		portrait.texture=original.texture;portrait.modulate=original.modulate;portrait.tooltip_text=original.tooltip_text;portrait.custom_minimum_size=Vector2(edge,edge)
+		var unit_id:=String(original.get_meta("mission_member_unit_id",""))
+		var callback:=Callable(controller,"_on_native_member_portrait_gui_input").bind(unit_id,id)
+		var route_key:=id+":"+unit_id
+		if String(portrait.get_meta("combined_member_route",""))!=route_key:
+			for connection in portrait.get_signal_connection_list("gui_input"):portrait.gui_input.disconnect(connection.callable)
+			portrait.gui_input.connect(callback)
+			portrait.set_meta("combined_member_route",route_key)
+	var boarding:Dictionary=controller.call("get_selected_team_boarding_snapshot")
+	var board:=team.get_node("A5TeamBoard") as Button
+	board.disabled=not bool(boarding.can_board);board.tooltip_text=String(boarding.message)
+	var status:=team.get_node("A5BoardStatus") as Label
+	_set_text(status,String(boarding.message))
 
 
 static func build_player_readout(context: Dictionary) -> Dictionary:
@@ -630,15 +660,15 @@ static func _layout_selected_team_controls(controller: Node, team: PanelContaine
 	_place(identity, Rect2(rect.position + Vector2(10, 8), Vector2(rect.size.x - 164, 30)))
 	var summary := _ensure_label(team, "A5TeamSummary", font_size - 1)
 	summary.max_lines_visible = 1
-	_place(summary, Rect2(rect.position + Vector2(10, rect.size.y * 0.23), Vector2(rect.size.x - 20, rect.size.y * 0.15)))
+	_place(summary, Rect2(rect.position + Vector2(10, float(metrics.portrait_height)+38), Vector2(rect.size.x - 20, 20)))
 	var fire_heading := _ensure_label(team, "A5FireRuleHeading", font_size - 1)
 	fire_heading.text = "Feuerregel"
 	fire_heading.max_lines_visible = 1
 	fire_heading.clip_text = true
 	fire_heading.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	fire_heading.visible = true
-	var row_y: float = rect.size.y * 0.76
-	var row_height: float = rect.size.y * 0.19
+	var row_y: float = float(metrics.portrait_height)+94
+	var row_height: float = 26
 	_place(fire_heading, Rect2(rect.position + Vector2(10, row_y), Vector2(88, row_height)))
 	fire_heading.z_index = 12
 	var selector := team.get_node("A5FireRuleSelector") as OptionButton
@@ -646,10 +676,17 @@ static func _layout_selected_team_controls(controller: Node, team: PanelContaine
 	_place(selector, Rect2(rect.position + Vector2(100, row_y), Vector2(rect.size.x - 110, row_height)))
 	var details := team.get_node("A5DetailsButton") as Button
 	details.add_theme_font_size_override("font_size", font_size - 1)
-	_place(details, Rect2(rect.position + Vector2(rect.size.x - 144, 8), Vector2(76, 32)))
+	_place(details, Rect2(rect.position + Vector2(rect.size.x - 144, 8), Vector2(76, 24)))
 	var all := controller.get_node_or_null(BASE + "FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton") as Button
 	if all != null:
 		all.add_theme_font_size_override("font_size", font_size - 1)
+	var portraits:=team.get_node("A5TeamPortraits") as HBoxContainer
+	_place(portraits,Rect2(rect.position+Vector2(10,34),Vector2(rect.size.x-20,metrics.portrait_height)))
+	var board:=team.get_node("A5TeamBoard") as Button
+	board.add_theme_font_size_override("font_size",font_size)
+	_place(board,Rect2(rect.position+Vector2(10,float(metrics.portrait_height)+126),Vector2(104,28)))
+	var status:=team.get_node("A5BoardStatus") as Label
+	_place(status,Rect2(rect.position+Vector2(122,float(metrics.portrait_height)+124),Vector2(rect.size.x-132,36)))
 	team.mouse_filter = Control.MOUSE_FILTER_STOP
 	THEME.style_card(team, true)
 	team.set_meta("native_a5_parameter_group_left", true)
@@ -704,6 +741,10 @@ static func _style_protocol(controller: Node, metrics: Dictionary) -> void:
 
 
 static func _ensure_team_controls(controller: Node, team: PanelContainer, layer: CanvasLayer) -> void:
+	if team.get_node_or_null("A5TeamPortraits") == null:
+		var portraits:=HBoxContainer.new();portraits.name="A5TeamPortraits";portraits.add_theme_constant_override("separation",4);team.add_child(portraits)
+		var board:=Button.new();board.name="A5TeamBoard";board.text="Aufsitzen";board.pressed.connect(Callable(controller,"request_selected_team_boarding"));team.add_child(board);THEME.style_command_button(board)
+		var status:=Label.new();status.name="A5BoardStatus";status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;status.add_theme_font_size_override("font_size",13);team.add_child(status)
 	if team.get_node_or_null("A5FireRuleSelector") == null:
 		var selector := OptionButton.new()
 		selector.name = "A5FireRuleSelector"

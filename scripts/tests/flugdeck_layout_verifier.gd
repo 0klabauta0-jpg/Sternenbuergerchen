@@ -54,6 +54,8 @@ func _run()->void:
 	screen.request_operation("navigate",{"mode":"base"})
 	for i in 12:await process_frame
 	flow.get("_campaign_tutorial").refresh()
+	presenter.get("_nav").base.mouse_entered.emit()
+	for i in 3:await process_frame
 	check(not flow.get("_campaign_tutorial").get("_strip").get_global_rect().intersects(presenter.get("_base_management_bar").get_global_rect()),"campaign help leaves base management buttons unobscured")
 	var base_view:Node=presenter.get("_base")
 	var terrain_view:Node=base_view.get("_view")

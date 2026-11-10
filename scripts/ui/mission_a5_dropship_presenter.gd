@@ -242,7 +242,7 @@ static func refresh(controller: Node, entries: Array, tactical_visible: bool) ->
 		match action:
 			"set_lz": button.visible = not landed
 			"drop": button.visible = landed or (bool(selected_card.get("has_lz_position", false)) and bool(selected_card.get("has_embarked_payload", false)))
-			"board": button.visible = landed
+			"board": button.visible = false # Aufsitzen belongs to the selected troop card.
 			"return": button.visible = allowed or landed
 	var approach_row := card.get_node("Contents/ApproachRow") as Control
 	approach_row.visible = not landed and not selected_card.is_empty()
