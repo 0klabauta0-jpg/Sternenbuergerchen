@@ -31,6 +31,8 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 			return not String(payload.get("unit_id", "")).strip_edges().is_empty()
 		"fob_fireteam_card":
 			return not String(payload.get("fireteam_id", "")).strip_edges().is_empty()
+		"inventory_item":
+			return not String(payload.get("source_container_id", "")).is_empty() and not String(payload.get("item_id", "")).is_empty()
 		"homebase_loadout_item":
 			return String(payload.get("key", "")) == equipment_key and not String(payload.get("item_id", "")).strip_edges().is_empty()
 	return false

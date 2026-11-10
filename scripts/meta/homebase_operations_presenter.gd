@@ -34,6 +34,7 @@ var _sort_selector: OptionButton
 var _roster_return_target: PanelContainer
 var _team_drag_source: PanelContainer
 var _craft_drop_target: PanelContainer
+var _inventory_panel: VBoxContainer
 var _equipment_slots: Dictionary = {}
 var _equipment_palette: VBoxContainer
 var _equipment_palette_toggle: Button
@@ -378,6 +379,10 @@ func _build_equipment() -> void:
 		slot.call("forward_drag_from", selector)
 		_selectors[key] = selector
 	_build_equipment_palette(list)
+	_inventory_panel=load("res://scripts/ui/components/personnel_inventory_panel.gd").new()
+	_inventory_panel.name="PersonnelInventory"
+	list.add_child(_inventory_panel)
+	_inventory_panel.operation_requested.connect(_act)
 	_remove_member = _button("Aus Trupp entfernen", false)
 	list.add_child(_remove_member)
 	_remove_member.pressed.connect(func(): _act("remove", {"unit_id": _focused_id}))
@@ -676,6 +681,20 @@ func refresh() -> void:
 	var team: Dictionary = Dictionary(snapshot.get("focused_fireteam", {}))
 	_update_team(team, Array(snapshot.get("fireteams", [])))
 	_update_equipment(focused, Dictionary(snapshot.get("loadout_options", {})))
+	var singleplayer: Dictionary=snapshot.get("singleplayer",{})
+	var inventory: Dictionary=Dictionary(singleplayer.get("supply",{})).get("inventory",{})
+	_inventory_panel.visible=not inventory.is_empty()
+	for slot in _equipment_slots.values(): slot.visible=inventory.is_empty()
+	_equipment_palette_toggle.visible=inventory.is_empty()
+	if not inventory.is_empty():
+		_equipment_palette.visible=false
+		var accessible: Array=[]
+		if not bool(focused.get("busy",true)) or bool(focused.get("can_edit",false)):
+			accessible=["base:homebase","unit:"+_focused_id+":backpack"]
+			var selected_id:=String(Dictionary(snapshot.get("selected_craft",{})).get("id",""))
+			for ship in Array(singleplayer.get("crafts",[])):
+				if String(ship.get("craft_id",""))==selected_id and bool(ship.get("visible_on_pad",false)): accessible.append("craft:"+selected_id)
+		_inventory_panel.update_snapshot(inventory,focused,String(Dictionary(snapshot.get("selected_craft",{})).get("id","")),accessible)
 	_update_flight(Dictionary(snapshot.get("selected_craft", {})), snapshot)
 	if changed_mode:
 		_layout_columns()
@@ -835,7 +854,7 @@ func _update_flight(craft: Dictionary, snapshot: Dictionary) -> void:
 
 func get_launch_action_rects() -> Array[Rect2]:
 	var result: Array[Rect2] = []
-	for control in [_start, _board, _unboard, _launch_reason]:
+	for control in [_start, _board, _unboard, _launch_reason]+_nav.values():
 		if control != null and control.is_visible_in_tree():
 			result.append(control.get_global_rect())
 	return result

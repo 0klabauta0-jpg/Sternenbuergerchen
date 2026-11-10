@@ -58,6 +58,11 @@ func configure(flow: Node, screen: Control) -> void:
 		add_child(_base_personnel)
 		_base_personnel.configure(_flow, _screen, _simulation, Dictionary(_flow.get("_campaign_start").get("checkpoint")))
 		_screen.call("configure_base_personnel_bridge", _base_personnel)
+	var inventory_units: Array = []
+	var inventory_crafts: Array = []
+	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
+	for craft in Array(_flow.get("_homebase_aircraft_definitions")): inventory_crafts.append(String(craft.get("craft_id","")))
+	_supply.configure_inventory(inventory_units,inventory_crafts)
 	sync_crafts()
 	if _screen.has_method("configure_singleplayer_bridge"):
 		_screen.call("configure_singleplayer_bridge", get_snapshot, request_operation)
@@ -114,6 +119,9 @@ func sync_crafts() -> void:
 		if not actual.has(craft_id):
 			_pad_by_craft.erase(craft_id)
 			_departure_token_by_craft.erase(craft_id)
+	var inventory_units: Array=[]
+	for unit in Array(_flow.get("_all_team_units")): inventory_units.append(String(unit.get("unit_id","")))
+	_supply.configure_inventory(inventory_units,actual.keys())
 	for craft_id in actual:
 		_supply.register_craft(String(craft_id))
 		if _pad_by_craft.has(craft_id):
@@ -171,11 +179,22 @@ func request_operation(operation: String, payload: Dictionary = {}) -> Dictionar
 			if location_id != "homebase":
 				_flow.call("_on_homebase_mission_selection_changed", "satellite_recovery" if location_id == "satellite_crash" else "trade_outpost_visit")
 		return result
+	if operation in ["inventory_transfer","inventory_equip"]:
+		var unit_id := String(data.get("unit_id",""))
+		var context := _inventory_context(unit_id,String(data.get("craft_id","")))
+		if context.is_empty(): return _reject("inventory_access","Person muss an der Basis verfuegbar sein")
+		var result := _commit("singleplayer_supply",operation,data,request_id,context)
+		if bool(result.get("ok",false)) and operation=="inventory_equip" and not bool(result.get("replayed",false)):
+			for key in ["armor","weapon_1","weapon_2"]:
+				_screen.call("_set_homebase_member_loadout_value",unit_id,key,String(result.loadout[key]))
+			_screen.call("_emit_homebase_fireteam_context_changed")
+		return result
 	if operation in ["buy", "refuel"]:
 		var craft_id: String = String(data.get("craft_id", ""))
 		var context: Dictionary = _service_context(craft_id)
 		if context.is_empty():
 			return _reject("service_unavailable", "Schiff und Trupp muessen am Serviceort bereit sein")
+		context["craft_id"]=craft_id
 		var result: Dictionary = _commit("singleplayer_supply", operation, data, request_id, context)
 		if result.get("ok", false) and _campaign_mode and String(context.get("location_id", "")) == "trade_outpost":
 			_observe({"trade_used": true, "bought": operation == "buy", "refueled": operation == "refuel"})
@@ -502,3 +521,19 @@ func export_campaign_checkpoint() -> Dictionary:
 
 func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
+
+func _inventory_context(unit_id: String, craft_id: String) -> Dictionary:
+	var snapshot: Dictionary = _screen.call("get_operations_snapshot",false)
+	var unit: Dictionary = {}
+	for entry in Array(snapshot.get("roster",[])):
+		if String(entry.id)==unit_id: unit=entry
+	if unit.is_empty() or (bool(unit.get("busy",true)) and not bool(unit.get("can_edit",false))): return {}
+	if _base_personnel!=null:
+		var found := false
+		for actor in Array(_base_personnel.get_snapshot().get("units",[])):
+			if String(actor.get("unit_id",""))==unit_id:
+				found=String(actor.get("status","")) in ["outside","idle"]
+		if not found: return {}
+	var access: Array = ["base:homebase","unit:"+unit_id+":backpack"]
+	if not craft_id.is_empty() and String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(craft_id,""))=="homebase" and not _service_context(craft_id).is_empty(): access.append("craft:"+craft_id)
+	return {"accessible_containers":access,"unit_id":unit_id,"loadout":Dictionary(unit.get("loadout",{})).duplicate(true)}

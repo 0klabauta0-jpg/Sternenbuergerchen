@@ -2,6 +2,9 @@ extends RefCounted
 ## Long-lived domain owner. SimulationRoot supplies trusted service/runtime context.
 
 const COMMANDS: GDScript = preload("res://scripts/mission/singleplayer_supply_command_contract.gd")
+const INVENTORY = preload("res://scripts/mission/inventory_transfer_contract.gd")
+var _inventory: Dictionary = {}
+
 const DATA_PATH := "res://data/singleplayer/trade_offers.json"
 
 var _definitions: Dictionary = {}
@@ -31,6 +34,7 @@ func configure(crafts: Array = [], definitions: Dictionary = {}) -> Dictionary:
 	_definitions = data
 	_credits = int(data.initial_credits)
 	_item_quantities.clear()
+	_inventory.clear()
 	_fuel_by_craft_id.clear()
 	_stock_by_offer_id.clear()
 	_requests.clear()
@@ -54,7 +58,7 @@ func register_craft(craft_id: String, initial_fuel: float = -1.0) -> bool:
 	return true
 
 func get_supply_snapshot() -> Dictionary:
-	return {"credits": _credits, "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision}
+	return {"credits": _credits, "item_quantities": _item_quantities.duplicate(true), "fuel_by_craft_id": _fuel_by_craft_id.duplicate(true), "stock_by_offer_id": _stock_by_offer_id.duplicate(true), "offers": Dictionary(_definitions.get("offers", {})).duplicate(true), "fuel_capacity": float(_definitions.get("fuel_capacity", 0.0)), "fuel_price_per_unit": float(_definitions.get("fuel_price_per_unit", 0.0)), "route_fuel_costs": Dictionary(_definitions.get("route_fuel_costs", {})).duplicate(true), "reward_completion_ids": _reward_receipts.keys().duplicate(), "revision": _revision, "inventory": _inventory.duplicate(true)}
 
 func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
 	if not COMMANDS.validate_command(command) or _definitions.is_empty():
@@ -70,6 +74,8 @@ func apply_command(command: Dictionary, authority_context: Dictionary = {}) -> D
 	var payload: Dictionary = command.payload
 	var result: Dictionary
 	match String(command.operation):
+		"inventory_transfer": result = _inventory_transfer(payload, authority_context)
+		"inventory_equip": result = _inventory_equip(payload, authority_context)
 		"buy": result = _buy(payload, authority_context)
 		"refuel": result = _refuel(payload, authority_context)
 		"consume_route_fuel": result = _consume_route(payload, authority_context)
@@ -99,12 +105,18 @@ func _buy(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var price: int = int(offer.get("unit_price", 0))
 	if price <= 0 or quantity > _credits / price:
 		return _reject("insufficient_credits", "Credits reichen nicht")
+	var destination := "craft:"+String(context.get("craft_id",""))
+	var purchased_items: Dictionary = _item_quantities
+	if not _inventory.is_empty():
+		if not _inventory.has(destination): return _reject("inventory_access","Lieferziel fehlt")
+		purchased_items=_inventory[destination].items
+		if INVENTORY.used(purchased_items)+quantity>int(_inventory[destination].capacity): return _reject("container_full","Schiffsfracht ist voll")
 	_credits -= quantity * price
 	_stock_by_offer_id[offer_id] = int(_stock_by_offer_id[offer_id]) - quantity
 	var item_id: String = String(offer.item_id)
-	_item_quantities[item_id] = int(_item_quantities.get(item_id, 0)) + quantity
+	purchased_items[item_id] = int(purchased_items.get(item_id, 0)) + quantity
 	_revision += 1
-	return {"ok": true, "item_id": item_id, "quantity": quantity, "cost": quantity * price, "message": "Kauf bestaetigt"}
+	return {"ok": true, "item_id": item_id, "quantity": quantity, "cost": quantity * price, "container_id":destination if not _inventory.is_empty() else "base:homebase", "message": "Kauf bestaetigt"}
 
 func _refuel(payload: Dictionary, context: Dictionary) -> Dictionary:
 	var craft_id: String = String(payload.get("craft_id", ""))
@@ -191,7 +203,7 @@ func _reject(reason: String, message: String) -> Dictionary:
 	return {"ok": false, "reason": reason, "message": message}
 
 func export_state() -> Dictionary:
-	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision}
+	return {"schema_version":1,"definitions":_definitions.duplicate(true),"credits":_credits,"item_quantities":_item_quantities.duplicate(true),"fuel_by_craft_id":_fuel_by_craft_id.duplicate(true),"stock_by_offer_id":_stock_by_offer_id.duplicate(true),"requests":_requests.duplicate(true),"reward_receipts":_reward_receipts.duplicate(true),"revision":_revision,"inventory":_inventory.duplicate(true)}
 
 func restore_state(data: Dictionary) -> Dictionary:
 	var fresh = get_script().new()
@@ -208,7 +220,7 @@ func restore_state(data: Dictionary) -> Dictionary:
 	for offer in fresh._definitions.offers.values():
 		items.append(String(offer.item_id))
 	for item_id in data.item_quantities:
-		if not items.has(String(item_id)) or not _valid_nonnegative_integer(data.item_quantities[item_id]):
+		if not (items.has(String(item_id)) or INVENTORY.known(String(item_id))) or not _valid_nonnegative_integer(data.item_quantities[item_id]):
 			return _reject("invalid_inventory", "Inventar ungueltig")
 	if data.stock_by_offer_id.size() != fresh._stock_by_offer_id.size():
 		return _reject("invalid_stock", "Angebotsbestand ungueltig")
@@ -235,9 +247,19 @@ func restore_state(data: Dictionary) -> Dictionary:
 		var signature: Variant = JSON.parse_string(request.signature)
 		if typeof(signature) != TYPE_DICTIONARY or typeof(signature.get("payload")) != TYPE_DICTIONARY or typeof(signature.get("operation")) != TYPE_STRING or not COMMANDS.validate_command(COMMANDS.build_command(signature.operation, signature.payload, request_id)) or request.result.get("request_id") != request_id or request.result.get("operation") != signature.operation:
 			return _reject("invalid_requests", "Anfragebeleg widerspricht Signatur")
+	var containers: Variant = data.get("inventory", {})
+	if typeof(containers)!=TYPE_DICTIONARY:
+		return _reject("invalid_inventory", "Container fehlen")
+	for id in containers:
+		if not (String(id)=="base:homebase" or String(id).begins_with("craft:") or (String(id).begins_with("unit:") and String(id).ends_with(":backpack"))) or not INVENTORY.valid_container(containers[id]):
+			return _reject("invalid_inventory", "Container ungueltig")
+	if containers.has("base:homebase") and Dictionary(containers["base:homebase"].items)!=Dictionary(data.item_quantities):
+		return _reject("invalid_inventory", "Basislager widerspricht Kaufbestand")
 	_definitions = fresh._definitions.duplicate(true)
 	_credits = int(data.credits)
 	_item_quantities = data.item_quantities.duplicate(true)
+	_inventory = containers.duplicate(true)
+	if _inventory.has("base:homebase"): _inventory["base:homebase"].items = _item_quantities
 	_fuel_by_craft_id = data.fuel_by_craft_id.duplicate(true)
 	_stock_by_offer_id = data.stock_by_offer_id.duplicate(true)
 	for item_id in _item_quantities:
@@ -248,3 +270,59 @@ func restore_state(data: Dictionary) -> Dictionary:
 	_reward_receipts = data.reward_receipts.duplicate(true)
 	_revision = int(data.revision)
 	return {"ok":true}
+
+func configure_inventory(unit_ids: Array, craft_ids: Array) -> void:
+	if not _inventory.has("base:homebase"):
+		_inventory["base:homebase"]={"capacity":200,"items":_item_quantities}
+		for item in INVENTORY.START_STOCK:
+			_item_quantities[item]=int(_item_quantities.get(item,0))+int(INVENTORY.START_STOCK[item])
+	for id in craft_ids:
+		var key := "craft:"+String(id)
+		if not _inventory.has(key): _inventory[key]={"capacity":48,"items":{}}
+	for id in unit_ids:
+		var key := "unit:"+String(id)+":backpack"
+		if not _inventory.has(key): _inventory[key]={"capacity":12,"items":{}}
+
+func _inventory_access(id: String, context: Dictionary) -> bool:
+	return _inventory.has(id) and Array(context.get("accessible_containers",[])).has(id)
+
+func _inventory_transfer(payload: Dictionary, context: Dictionary) -> Dictionary:
+	var source := String(payload.get("source_container_id",""))
+	var target := String(payload.get("destination_container_id",""))
+	var item := String(payload.get("item_id",""))
+	if source==target or not _inventory_access(source,context) or not _inventory_access(target,context):
+		return _reject("inventory_access", "Container ist hier nicht erreichbar")
+	if not INVENTORY.known(item) or not INVENTORY.positive_integer(payload.get("amount")):
+		return _reject("invalid_item_amount", "Gegenstand oder Menge ungueltig")
+	var amount := int(payload.amount)
+	var from: Dictionary = _inventory[source].items
+	var to: Dictionary = _inventory[target].items
+	if int(from.get(item,0))<amount: return _reject("insufficient_items", "Bestand reicht nicht")
+	if INVENTORY.used(to)+amount>int(_inventory[target].capacity): return _reject("container_full", "Zielcontainer ist voll")
+	from[item]=int(from[item])-amount
+	if from[item]==0: from.erase(item)
+	to[item]=int(to.get(item,0))+amount
+	_revision+=1
+	return {"ok":true,"message":"Gegenstand verschoben"}
+
+func _inventory_equip(payload: Dictionary, context: Dictionary) -> Dictionary:
+	var source := String(payload.get("source_container_id",""))
+	var slot := String(payload.get("slot",""))
+	var item := String(payload.get("item_id",""))
+	if String(payload.get("unit_id",""))!=String(context.get("unit_id","")) or not context.has("loadout") or not _inventory_access(source,context):
+		return _reject("inventory_access", "Person und Ausruestung sind hier nicht erreichbar")
+	var unequip := item=="none" and slot=="weapon_2"
+	if not unequip and not INVENTORY.compatible(item,slot): return _reject("incompatible_slot", "Gegenstand passt nicht in diesen Slot")
+	var from: Dictionary = _inventory[source].items
+	if not unequip and int(from.get(item,0))<1: return _reject("insufficient_items", "Gegenstand nicht vorhanden")
+	var loadout: Dictionary = Dictionary(context.loadout).duplicate(true)
+	var previous: String = INVENTORY.item_from_slot(slot,String(loadout.get(slot,"none")))
+	var returns_item := previous!="none" and INVENTORY.known(previous)
+	if INVENTORY.used(from)-(0 if unequip else 1)+(1 if returns_item else 0)>int(_inventory[source].capacity): return _reject("container_full", "Kein Platz fuer abgelegte Ausruestung")
+	if not unequip:
+		from[item]=int(from[item])-1
+		if from[item]==0: from.erase(item)
+	if returns_item: from[previous]=int(from.get(previous,0))+1
+	loadout[slot]=item.trim_prefix("armor_") if slot=="armor" else item
+	_revision+=1
+	return {"ok":true,"loadout":loadout,"message":"Ausruestung angelegt"}

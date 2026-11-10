@@ -9232,7 +9232,7 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 		var gate: Dictionary = base_runtime.call("validate_operation", operation, gate_payload)
 		if not bool(gate.get("ok", false)):
 			return gate
-	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase"]:
+	if operation in ["accept_job", "select_destination", "abandon_job", "buy", "refuel", "return_homebase", "inventory_transfer", "inventory_equip"]:
 		if not _singleplayer_command_handler.is_valid():
 			return _operations_rejected("singleplayer_unavailable", "Diese Funktion ist noch nicht verfügbar")
 		var result: Dictionary = _singleplayer_command_handler.call(operation, payload.duplicate(true))
@@ -9306,6 +9306,11 @@ func _request_operation_from_base(operation: String, payload: Dictionary = {}) -
 						allowed = true
 				if not allowed:
 					return _operations_rejected("invalid_equipment", "Ausrüstung nicht verfügbar")
+				if _singleplayer_command_handler.is_valid():
+					var item: String = "armor_"+value if key=="armor" else value
+					var result: Dictionary = _singleplayer_command_handler.call("inventory_equip",{"unit_id":unit_id,"craft_id":craft_id,"source_container_id":"base:homebase","slot":key,"item_id":item})
+					if _operations_presenter!=null: _operations_presenter.call("refresh")
+					return result
 				_set_homebase_member_loadout_value(unit_id, key, value)
 				_emit_homebase_fireteam_context_changed()
 		"craft":

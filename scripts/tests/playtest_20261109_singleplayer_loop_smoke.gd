@@ -119,7 +119,7 @@ func _run() -> void:
 	fuel.pressed.emit()
 	var paid: Dictionary = _supply()
 	_check(int(paid.credits) == int(service_supply.credits) - 70, "Real service double-clicks debit one purchase and one ten-unit refuel")
-	_check(int(Dictionary(paid.item_quantities).get("medictool", 0)) == int(Dictionary(service_supply.item_quantities).get("medictool", 0)) + 1, "Second sortie grants one real purchased item")
+	_check(int(Dictionary(Dictionary(paid.get("inventory",{})).get("craft:"+_craft_id,{})).get("items",paid.item_quantities).get("medictool",0)) == int(Dictionary(Dictionary(service_supply.get("inventory",{})).get("craft:"+_craft_id,{})).get("items",service_supply.item_quantities).get("medictool",0)) + 1, "Second sortie grants one real purchased item")
 	_check(float(paid.fuel_by_craft_id[_craft_id]) == float(service_supply.fuel_by_craft_id[_craft_id]) + 10.0, "Confirmed actual craft gains exactly ten fuel")
 	if not await _prepare_visit_return(mission):
 		await _finish()
