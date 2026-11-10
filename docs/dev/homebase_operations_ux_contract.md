@@ -83,3 +83,22 @@ denselben Kameratransform und dieselben Freigaben/Selection-Commands wie die rec
 Liste. Auswahl allein startet keinen Anflug. Der Schiffsmarker benutzt die
 vorhandene hashgebundene isometrische Cutlass-Projektion aus dem Visualkatalog.
 Keine neuen Referenzorte werden als erfundener Spielinhalt eingefuehrt.
+
+## Flugdeck und Pilotenfunktion — 10.11.2026
+Die Navigationsfolge lautet Basis erkunden, Personal, Trupp & Ausrüstung,
+Flugdeck, Sternkarte; Smart Mobile bleibt unten. Schritt03 und Startbereich
+heißen Flugdeck. Rechts steht die reale Pad-/Schiffsvorschau; darunter
+Padwahl und Schiffsselektion rechts, kompakte Pilot-/Statusfelder und eine
+horizontale Boarding-/Abflugzeile. Keine zweite Schiffskarte links im Flugdeck.
+Padwahl liest nur gebaute Runtimepads und fokussiert deren zugeordnetes Schiff.
+Freies gebautes Pad bleibt ohne erfundenes Schiff inspizierbar. Die äußere
+2D-Vorschau bleibt sichtbar aktualisiert, während die innere 3D-Projektion ihre
+Dirty-Updates abschließt. Reiseansichten zeigen weiterhin den echten Standort.
+Pilotenfunktion und FT-Mitgliedschaft dürfen im physischen Einzelspielerpfad
+zusammenfallen. Ein ausgestiegener zugewiesener Pilot darf per bestehendem
+Assign-/Dragcommand FT1 beitreten, auch wenn FT1 auf genau seinem geerdeten
+Schiff bereits geboardet ist. Keine Erlaubnis für fremde Schiffe/Transit/volle
+Teams. Individualausstieg des Piloten entfernt weder FT-Mitgliedschaft noch
+Anjas Boarding. Physische Anwesenheit wird separat als An Bord/Nicht an Bord
+angezeigt; tatsächlicher Wiedereinstieg bleibt Voraussetzung des Abhebens.
+Legacyansichten ohne physischen Basisowner behalten ihre bisherige Exklusivität.

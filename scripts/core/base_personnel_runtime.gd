@@ -154,6 +154,15 @@ func export_state() -> Dictionary:
 func is_pilot_aboard(craft_id: String) -> bool:
 	var id := String(_screen.call("_get_assigned_pilot_id", craft_id))
 	return _states.has(id) and _states[id].status == "aboard" and _states[id].craft_id == craft_id
+func get_payload_presence(craft_id: String) -> Dictionary:
+	var members:Dictionary={}
+	for team in _screen.call("_get_homebase_direct_payload_fireteam_ids_for_craft_raw",craft_id):
+		for id in _screen.call("_get_member_unit_ids_for_fireteam",String(team)):members[String(id)]=true
+	var aboard:=0
+	for id in members:
+		if _states.has(id) and String(_states[id].status)=="aboard" and String(_states[id].craft_id)==craft_id:aboard+=1
+	return {"member_count":members.size(),"aboard_count":aboard,"all_aboard":not members.is_empty() and aboard==members.size()}
+
 func request_operation(operation: String, payload: Dictionary = {}) -> Dictionary:
 	return _sim.request_base_personnel_command(operation, payload)
 func apply_operation(operation: String, payload: Dictionary) -> Dictionary:
@@ -352,7 +361,7 @@ func _unboard(id: String, craft: String, payload: Dictionary) -> Dictionary:
 		return _reject("craft_mismatch", "Person ist in einem anderen Schiff")
 	if bool(_screen.call("_operations_craft_busy", craft)):
 		return _reject("craft_busy", "Schiff ist unterwegs")
-	if not String(_screen.call("_operations_payload_craft_for_team", String(_screen.call("_get_fireteam_id_for_unit", id)))).is_empty():
+	if String(_screen.call("_get_assigned_pilot_id", craft)) != id and not String(_screen.call("_operations_payload_craft_for_team", String(_screen.call("_get_fireteam_id_for_unit", id)))).is_empty():
 		var data: Dictionary = payload.duplicate(true)
 		data.fireteam_id = String(_screen.call("_get_fireteam_id_for_unit", id))
 		data.craft_id = craft

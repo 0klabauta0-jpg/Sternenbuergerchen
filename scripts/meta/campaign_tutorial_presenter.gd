@@ -6,15 +6,15 @@ const SETTINGS = preload("res://scripts/ui/game_settings_contract.gd")
 const THEME = preload("res://scripts/ui/tactical_ui_theme.gd")
 const STEPS := {
 	"base_ready":["campaign.boarding","Mondbasis vorbereiten: zwei Personen ausrüsten, Satellitenauftrag im Smart Mobile annehmen, Pilot und Trupp an Bord nehmen, abheben."],
-	"satellite_uploaded":["campaign.return","Mission 1: Satellitenchip bergen, zum Schiff zurückbringen und wirklich heimfliegen. An der Basis im Versorgungsfenster den Chip hochladen."],
+	"satellite_uploaded":["campaign.return","Mission 1: Satellitenchip bergen, zum Schiff zurückbringen und wirklich heimfliegen. An der Basis unter Basis erkunden → Datenterminal / Hochladen den Chip hochladen."],
 	"outpost_completed":["campaign.movement","Mission 2: Außenpostenauftrag annehmen, auf Karte B einen Gegner besiegen und die C-Benit-Kiste bergen."],
 	"outpost_recruited":["campaign.trade","Den Handelsposten auf Karte B erreichen und ansprechen. Im Versorgungsfenster die neue Person aufnehmen; das Team wächst auf drei."],
 	"crate_loaded":["campaign.use","C-Benit-Kiste am gesicherten Außenposten bergen und ins Schiff bringen."],
 	"delivery_completed":["campaign.trade","Mission 3: Lieferauftrag annehmen, mit der Kiste zur Satellitenkarte zurückkehren und am dortigen Händler abgeben. Belohnung: Hand-Mining-Blueprint."],
-	"outpost_chip_uploaded":["campaign.return","Mission 4: Auf Karte C zwei Gegner besiegen, Chip bergen, heimbringen und am Basisterminal hochladen. Belohnung: Sturmgewehr-Blueprint."],
+	"outpost_chip_uploaded":["campaign.return","Mission 4: Auf Karte C zwei Gegner besiegen, Chip bergen, heimbringen und unter Basis erkunden → Datenterminal / Hochladen abgeben. Belohnung: Sturmgewehr-Blueprint."],
 	"rescue_completed":["campaign.movement","Mission 5: Notruf annehmen und im Planetenorbit anfliegen. Feindliche Cutlass bekämpfen; neutrale Buccaneer retten."],
 	"pilot_recruited":["campaign.use","Nach dem Sieg den Buccaneer-Piloten retten. Er schließt sich mit seinem Schiff an; das Team wächst auf vier."],
-	"second_pad_built":["campaign.return","Zur Basis heimkehren: Kein freies Landepad für die Buccaneer. Im Versorgungsfenster das zweite Landepad für 100 Credits bauen."],
+	"second_pad_built":["campaign.return","Zur Basis heimkehren: Kein freies Landepad für die Buccaneer. Unter Basis erkunden → Bauen das zweite Landepad für 100 Credits bauen."],
 	"completed":["campaign.complete","Erstes Kampagnenkapitel abgeschlossen: vier Personen, zwei Schiffe und zwei Landepads. Orte bleiben besuchbar; sichere Basisstände können fortgesetzt werden."]
 }
 var _runtime: Node
@@ -137,7 +137,7 @@ func refresh() -> void:
 		return
 	var homebase: Node = _flow.get_node_or_null("HomebaseScreen") if is_instance_valid(_flow) else null
 	var detail_popup: Control = homebase.get_node_or_null("CharacterSheetPopup") if homebase != null else null
-	if (detail_popup != null and detail_popup.is_visible_in_tree()) or (is_instance_valid(_flow) and String(_flow.get("_current_meta_view")) == "star_map"):
+	if (detail_popup != null and detail_popup.is_visible_in_tree()) or (homebase != null and String(homebase.get("_operations_mode")) == "services") or (is_instance_valid(_flow) and String(_flow.get("_current_meta_view")) == "star_map"):
 		# These views already carry their own instructions. Keep the global
 		# floating guidance clear of identity, map headings and close actions.
 		visible = false
@@ -146,7 +146,7 @@ func refresh() -> void:
 	var onboarding: Dictionary = snapshot.get("onboarding", {})
 	var checkpoint: Dictionary = _flow.get_meta("campaign_checkpoint_result", {}) if is_instance_valid(_flow) else {}
 	var checkpoint_guard: Dictionary=Dictionary(_runtime.call("get_snapshot").get("checkpoint_guard",{}))
-	var signature := JSON.stringify({"checkpoint_guard":checkpoint_guard,"onboarding": onboarding, "checkpoint_ok": checkpoint.get("ok", true), "has_checkpoint": not checkpoint.is_empty()})
+	var signature := JSON.stringify({"view_mode":String(homebase.get("_operations_mode")) if homebase != null else "", "checkpoint_guard":checkpoint_guard,"onboarding": onboarding, "checkpoint_ok": checkpoint.get("ok", true), "has_checkpoint": not checkpoint.is_empty()})
 	if signature == _signature:
 		return
 	_signature = signature
@@ -238,7 +238,7 @@ func _layout() -> void:
 	_strip.reset_size()
 	for protected in ([] if _guidance_moved else _launch_action_rects()):
 		if _strip.get_global_rect().intersects(protected):
-			_strip.position = Vector2(210, 88)
+			_strip.position = Vector2(maxf(210, get_viewport_rect().size.x-_strip.size.x-16), protected.end.y+12)
 			break
 	if _popup_host.visible:
 		_place_popup_host()

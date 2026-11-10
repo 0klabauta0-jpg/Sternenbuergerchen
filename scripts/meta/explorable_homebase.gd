@@ -317,22 +317,25 @@ var _screen_labels_host: Control
 const CONTEXT_ACTIONS = preload("res://scripts/mission/world_context_action_contract.gd")
 var _pad_preview: bool = false
 var _preview_surface_size: Vector2 = Vector2.ZERO
+var _preview_pad_id: String = ""
 
 
-func set_pad_preview(active: bool, craft_id: String = "") -> void:
+func set_pad_preview(active: bool, craft_id: String = "", pad_id: String = "") -> void:
 	_clear_base_context()
 	if _screen_labels_host!=null: _screen_labels_host.visible=not active
 	if not active:
 		set_active(false)
 		return
+	var changed_pad := pad_id != _preview_pad_id
+	_preview_pad_id = pad_id
 	if _pad_preview and _active and _initialized:
-		if _focused_craft_id != craft_id:
-			focus_craft_pad(craft_id)
+		if changed_pad or _focused_craft_id != craft_id:
+			_focus_preview_pad(craft_id)
 		if size != _preview_surface_size:
 			_preview_surface_size = size
 			_view.call("_resize_subviewport")
 			_view.call("_request_viewport_redraw")
-			_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+			_viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
 		return
 	set_active(true)
 	_pad_preview = true
@@ -360,9 +363,9 @@ func set_pad_preview(active: bool, craft_id: String = "") -> void:
 	set_process(true)
 	set_physics_process(false)
 	set_process_unhandled_key_input(false)
-	focus_craft_pad(craft_id)
+	_focus_preview_pad(craft_id)
 	_view.call("_request_viewport_redraw")
-	_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	_viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
 
 
 func set_transport_snapshot(snapshot: Dictionary) -> void:
@@ -396,8 +399,20 @@ func focus_craft_pad(craft_id: String) -> bool:
 	_view.call("focus_world_position", _world_at_grid(pad.grid))
 	_view.call("_request_viewport_redraw")
 	if _pad_preview:
-		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		_viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
 	return true
+
+
+func _focus_preview_pad(craft_id: String) -> void:
+	if _preview_pad_id.is_empty():
+		focus_craft_pad(craft_id)
+		return
+	var pad := _pad_definition(_preview_pad_id)
+	if pad.is_empty(): return
+	_focused_craft_id = craft_id
+	_view.set("_camera_size", 8.5)
+	_view.call("focus_world_position", _world_at_grid(pad.grid))
+	_view.call("_request_viewport_redraw")
 
 
 func _pad_definition(pad_id: String) -> Dictionary:
@@ -459,7 +474,7 @@ func _update_craft_projection() -> void:
 		_focused_craft_id = ""
 	_view.call("_request_viewport_redraw")
 	if _pad_preview:
-		_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+		_viewport.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
 
 
 func _ready() -> void:
@@ -742,7 +757,7 @@ func _on_world_gui_input(event: InputEvent) -> void:
 		_host.grab_focus()
 		if event.button_index == MOUSE_BUTTON_MIDDLE:
 			_camera_dragging = true
-			_camera_drag_last = get_viewport().get_mouse_position()
+			_camera_drag_last = _host.get_global_transform_with_canvas() * event.position
 			_manual_camera = true
 			_host.accept_event()
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
@@ -868,6 +883,7 @@ func _update_avatar_visual() -> void:
 func _build_terminals(stage: Node3D) -> void:
 	for raw_terminal in Array(_layout.get("terminals", [])):
 		var terminal: Dictionary = Dictionary(raw_terminal).duplicate(true)
+		if String(terminal.get("id", "")) == "flightdeck": terminal["title"] = "Flugdeck"
 		if String(terminal.get("id", "")) == "refuel":
 			terminal["enabled"] = _refuel_service_available
 		terminal["world_position"] = _world_at_grid(terminal["grid"])
@@ -1246,7 +1262,7 @@ func _refresh_screen_world_labels() -> void:
 
 	if removed_world_text:
 		_view.call("_request_viewport_redraw")
-		_viewport.render_target_update_mode=SubViewport.UPDATE_ONCE
+		_viewport.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE
 
 func _find_projected_craft(id: String) -> Dictionary:
 	for craft: Dictionary in _transport_projection:
@@ -1283,4 +1299,4 @@ func _advance_pad_flight_effects(delta: float) -> void:
 			if helper!=null: changed=bool(helper.call("advance_visual",delta)) or changed
 	if changed:
 		_view.call("_request_viewport_redraw")
-		_viewport.render_target_update_mode=SubViewport.UPDATE_ONCE
+		_viewport.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE

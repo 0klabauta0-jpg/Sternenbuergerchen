@@ -1,0 +1,106 @@
+[
+  {
+    "log": "pilot_membership.log",
+    "errors": 0,
+    "warnings": 4,
+    "summary": [
+      "FLUGDECK_PILOT checks=28 failures=0"
+    ]
+  },
+  {
+    "log": "actual_sortie_upload_workshop.log",
+    "errors": 0,
+    "warnings": 2,
+    "summary": [
+      "SINGLEPLAYER_LOOP_RESULTS passed=70 failed=0"
+    ]
+  },
+  {
+    "log": "camera.log",
+    "errors": 0,
+    "warnings": 0,
+    "summary": [
+      "CURSOR_CAMERA checks=52 failures=0"
+    ]
+  },
+  {
+    "log": "details_inventory.log",
+    "errors": 0,
+    "warnings": 2,
+    "summary": [
+      "PLAYTEST_DETAILS_INVENTORY passed=28 failed=0"
+    ]
+  },
+  {
+    "log": "service_selection.log",
+    "errors": 0,
+    "warnings": 2,
+    "summary": [
+      "SERVICE_WORLD_SELECTION failures=0"
+    ]
+  },
+  {
+    "log": "stationary_use.log",
+    "errors": 0,
+    "warnings": 0,
+    "summary": [
+      "STATIONARY_USE checks=21 failures=0 displacement=0.0 elapsed=3.01666666666666"
+    ]
+  },
+  {
+    "log": "satellite_neighbor_mouse.log",
+    "errors": 0,
+    "warnings": 0,
+    "summary": [
+      "SATELLITE_MOUSE_USE checks=17 failures=0"
+    ]
+  },
+  {
+    "log": "satellite_approach_mouse.log",
+    "errors": 0,
+    "warnings": 0,
+    "summary": [
+      "SATELLITE_MOUSE_USE checks=17 failures=0"
+    ]
+  },
+  {
+    "log": "campaign_start.log",
+    "errors": 0,
+    "warnings": 2,
+    "summary": [
+      "CAMPAIGN_START_RESULTS passed=13 failed=0"
+    ]
+  },
+  {
+    "log": "context_cursor.log",
+    "errors": 0,
+    "warnings": 0,
+    "summary": [
+      "MISSION_CONTEXT_CURSOR checks=12 failures=0"
+    ]
+  },
+  {
+    "log": "native_layout.log",
+    "errors": 0,
+    "warnings": 4,
+    "summary": [
+      "FLUGDECK_LAYOUT checks=40 failures=0"
+    ]
+  },
+  {
+    "log": "native_management.log",
+    "errors": 0,
+    "warnings": 2,
+    "summary": [
+      "BASE_MANAGEMENT checks=15 failures=0"
+    ]
+  },
+  {
+    "log": "native_satellite.log",
+    "errors": 0,
+    "warnings": 0,
+    "summary": [
+      "SATELLITE_MOUSE_USE checks=17 failures=0"
+    ]
+  }
+]

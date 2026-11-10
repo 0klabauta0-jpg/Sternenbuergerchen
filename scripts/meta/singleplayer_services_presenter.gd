@@ -27,6 +27,9 @@ var _availability_feedback:=false
 
 var _sell: Button
 var _campaign_buttons: Dictionary = {}
+var _section: String = "all"
+var _heading: Label
+var _section_note: Label
 
 func configure(snapshot_provider: Callable, command_handler: Callable) -> void:
 	_snapshot_provider = snapshot_provider
@@ -58,9 +61,11 @@ func _build() -> void:
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation", 6)
 	scroll.add_child(content)
-	var heading: Label = _label("Versorgung", 21)
-	THEME.style_section_heading(heading, 23)
-	content.add_child(heading)
+	_heading = _label("Versorgung", 21)
+	THEME.style_section_heading(_heading, 23)
+	content.add_child(_heading)
+	_section_note = _label("", 16)
+	content.add_child(_section_note)
 	_credits = _label("Kredite: —", 18)
 	_credits.name = "SupplyCredits"
 	content.add_child(_credits)
@@ -109,7 +114,7 @@ func _build() -> void:
 	content.add_child(_return)
 	_return.pressed.connect(func(): _submit("return_homebase"))
 	for action in [
-		["campaign_upload","Chip am Basisterminal hochladen",{}],
+		["campaign_upload","Missionsdaten hochladen",{}],
 		["campaign_recruit","Person am Handelsposten aufnehmen",{"kind":"outpost"}],
 		["campaign_load_crate","Geborgene C-Benit-Kiste übernehmen",{}],
 		["campaign_build_pad","Zweites Landepad bauen · 100 Cr",{}],
@@ -236,6 +241,50 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		_feedback.text = buy_reason + " · " + fuel_reason; _availability_feedback=true
 	elif _availability_feedback:
 		_feedback.text = "Versorgung bereit"; _availability_feedback=false
+
+	_apply_section()
+
+func set_section(section: String) -> void:
+	_section = section if section in ["all","build","workshop","data","ship"] else "all"
+	refresh()
+
+func _apply_section() -> void:
+	var ship := _section in ["all", "ship"]
+	_heading.text = {"all":"Versorgung", "build":"Basis · Bauen", "workshop":"Werkstatt · Blueprints", "data":"Datenterminal · Hochladen", "ship":"Schiff · Versorgung"}.get(_section,"Versorgung")
+	_section_note.text = {"all":"", "build":"Vorhandener Ausbau: zweites Landepad. Weitere Gebäude sind noch nicht freigeschaltet.", "workshop":"Blueprint auswählen und herstellen. Fertige Waffen und Rüstung liegen anschließend im Basislager.", "data":"Geborgene Missionsdaten nach der Landung hier hochladen. Erst dadurch wird der Auftrag abgeschlossen.", "ship":"Pilot, Besatzung und Ausrüstung über Flugdeck / Trupp verwalten. Austauschbare Schiffskomponenten sind als Ausbau geplant."}.get(_section, "")
+	_section_note.visible = not _section_note.text.is_empty()
+	for control in [_craft_selector,_fuel,_buy,_sell,_amount.get_parent(),_refuel,_return]+_tool_buttons.values():
+		control.visible = ship
+	_items.visible = ship or _section == "workshop"
+	_return.visible = false
+	if ship:
+		for craft:Dictionary in _snapshot.get("crafts",[]):
+			if String(craft.get("craft_id","")) == _selected_craft_id:
+				_return.visible = String(craft.get("location_id","homebase")) != "homebase"
+
+	for action:Dictionary in _campaign_buttons.values():
+		var button:Button=action.button
+		if _section == "all": continue
+		var wanted:bool=(_section=="build" and String(action.operation)=="campaign_build_pad") or (_section=="workshop" and String(action.operation)=="campaign_fabricate") or (_section=="data" and String(action.operation)=="campaign_upload")
+		if not wanted:
+			button.hide()
+			continue
+		var available:bool=button.visible
+		button.show()
+		if not available:
+			button.disabled=true
+			button.tooltip_text={"build":"Nach der Pilotenrettung verfügbar; bereits gebaute Pads bleiben erhalten.","workshop":"Passenden Blueprint zuerst in den Kampagnenaufträgen freischalten.","data":"Keine geborgenen Missionsdaten zum Hochladen vorhanden."}.get(_section,"")
+	if _section == "data":
+		var has_data:bool=false
+		for job:Dictionary in _snapshot.get("campaign",{}).get("jobs",{}).values():
+			has_data=has_data or String(job.get("status",""))=="pending_upload"
+		if not has_data:
+			_section_note.text="Keine geborgenen Missionsdaten vorhanden. Erst am Einsatzort sichern, zum Schiff zurückbringen und heimkehren."
+		elif _campaign_buttons.campaign_upload.button.disabled:
+			_section_note.text="Missionsdaten geborgen. Zuerst wieder an der Heimatbasis landen."
+		else:
+			_section_note.text="Missionsdaten vorhanden. Mit dem Button unten hochladen."
+	_feedback.visible = ship or (not _availability_feedback and _feedback.text != "Versorgung bereit")
 
 func set_selected_craft(craft_id: String) -> bool:
 	if not _pending.is_empty():

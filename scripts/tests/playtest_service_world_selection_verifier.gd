@@ -11,7 +11,7 @@ func _run() -> void:
 	base.select_world_craft(String(ships[0].craft_id))
 	screen.request_operation("navigate",{"mode":"services"})
 	flow.call("_refresh_singleplayer_services")
-	var service: Node=flow.get("_singleplayer_services")
+	var service: Node=screen.get("_operations_presenter").get("_services_view")
 	var selector: OptionButton=service.get("_craft_selector")
 	var target_index: int=-1
 	for i in selector.item_count:

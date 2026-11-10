@@ -740,4 +740,17 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.
 
 ## Kontextcursor — 10.11.2026
-Bei ausgewähltem Trupp projiziert ein getakteter Cursor die bestehende gebundene Weltaktion unter dem Zeiger: Daten sichern, Einsammeln, Abbauen/Bergen oder beim eigenen gelandeten Schiff Einsteigen/Rückflug. Kein unbekanntes Vorkommen oder neuer Lootowner entsteht dadurch. Hover verändert keine Befehle oder Missionsgates. Rechtsklick erstellt bei benutzbarem Ziel den vorhandenen Use-Intent; GO und tatsächliche Bedienzeit bleiben nötig. Außerhalb der Reichweite wird zunächst der gewöhnliche Bewegungs-Intent erstellt. Schiffs-Extraktion benutzt den bestehenden autoritativen Sammel-/Boardingpfad. Versteckte Missionen, Abwahl und UI-Flächen dürfen weder Hinweise noch Kontextaktionen behalten.
+Bei ausgewähltem Trupp projiziert ein getakteter Cursor die bestehende gebundene Weltaktion unter dem Zeiger: Daten sichern, Einsammeln, Abbauen/Bergen oder beim eigenen gelandeten Schiff Einsteigen/Rückflug. Kein unbekanntes Vorkommen oder neuer Lootowner entsteht dadurch. Hover verändert keine Befehle oder Missionsgates. Rechtsklick erstellt bei benutzbarem Ziel den vorhandenen Use-Intent; GO und tatsächliche Bedienzeit bleiben nötig. Revision des Daten-Bedienwegs siehe folgenden Abschnitt. Schiffs-Extraktion benutzt den bestehenden autoritativen Sammel-/Boardingpfad. Versteckte Missionen, Abwahl und UI-Flächen dürfen weder Hinweise noch Kontextaktionen behalten.
+
+## Datenaufnahme: Annäherung und sichtbares Ergebnis — 10.11.2026
+Ein ausdrücklich über Cursor/Datenbutton angeforderter Computer-Use darf
+außer Reichweite als vollständiger Use-Auftrag vorbereitet werden. GO bleibt
+im Planmodus nötig; ohne Plan führt derselbe bestehende GO-Pfad sofort aus.
+Der Trupp nähert sich mit tatsächlicher Navigation; sobald reale Mitglieder
+in gültiger Reichweite sind, stoppt derselbe Use die Annäherung und läuft mit
+autoritativer Dauer weiter. Wrackfeld muss nicht betreten werden. Keine
+Kontakt-/Radius-/Hostgates umgehen. Bestehende direkten Use-Aufrufer behalten
+standardmäßig die bisherige In-Reichweite-Bedingung. Satelliten-Feedback liest
+Runtimezustände getaktet: Trupp wählen, vorbereitet/GO, Annäherung, prozentuale
+Aufnahme und dauerhaft Daten gesichert mit Heimtransport-/Uploadhinweis.
+Abschluss ist kein erfundener Ausrüstungsgegenstand im Inventar.

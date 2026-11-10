@@ -1,0 +1,11 @@
+{
+  "baseline_commit": "b9280839954b208146fe3c724d7ee5c07aa680cc",
+  "same_assertions": [
+    "FAIL: sleep blocks incompatible movement",
+    "FAIL: continue restores actual sleeping person and exclusive bed",
+    "FAIL: wake frees sleeping person",
+    "FAIL: checkpoint accepts any actual roster person as pilot and other person as leader"
+  ],
+  "current_engine_errors": 0,
+  "baseline_engine_errors": 0
+}
