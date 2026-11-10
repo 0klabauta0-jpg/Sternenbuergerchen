@@ -1,29 +1,26 @@
-# Mainintegration Playtestplan –10.11.2026
+# Mainintegration Playtest-Nachtrag — 10.11.2026
 
-Auftrag: Mainmerge und regulaerer GitHub-Push. Mainbasis046b6d91a,
-Produktstand401c4a049. Keine Codekonflikte und keine neuen Gameplayaenderungen.
-Die Integration erfolgt in der sauberen separaten Git-Kopie; fremder WIP im
-Originalcheckout bleibt unberuehrt. Native Funktions-/Grafiknachweise siehe
-../playtest_20261110_acceptance/README.md; das ist keine neue Exportabnahme.
+## Auftrag und Umfang
+Vom Nutzer beauftragte Mainintegration von Task256923431 (Details/Inventar,
+Weltwahl/Kontextcursor, Kamera/Lesbarkeit, Cutlass-Pad-/Flugdarstellung).
+Mainbasis80938bf7b; konfliktfreier Merge37e51225c auf Integrationsbranch.
+Produktbaum direkt nach Merge exakt identisch mit dem geprüften Task.
+Danach ausschließlich diese Integrationsdokumentation ergänzt.
 
-## Frische Main-Pruefung
+## Prüfung
+Frische gezielte Quellgates und native D3D12-Prüfung im isolierten Testprofil.
+Ergebnisse und Logs werden nach Abschluss hier festgehalten.
 
-Gepruefter Maincommit c10db590f8b65cc22c990edc8a3b66136e158b88; Produktquellen
-sind bytegleich401c4a049. Danach nur dieser Abschlussbeleg, keine Codeaenderung.
+## Grenzen
+Kein EXE-Export. Bestehende EXE bleibt unverändert. Engere Gebäudeanordnung
+bleibt eigener Authoringtask. Vorhandene ältere Auditabweichungen und begrenzte
+Grafik-/Performanceaussagen siehe ../playtest_details_cursor_camera_20261110/README.md.
+Originalarbeitsbaum und fremdes WIP nicht verändert; keine Benutzerprofile als
+Testprofil verwendet.
 
-- Gezielte Quellsuite17/17, alle Prozesse Exit0.
-- Basisruhe19/0: echte Bettwege, beide Schalter, manuelle Ausruestung/Bewegung,
-  Save/Continue und physisches Boarding schlafender Besatzung.
-- Vollstaendiger Kampagnenlauf152/0 mit zwei echten Ausfluegen, sichtbarem
-  Wiedereinsteigen, zwei Heimkehrten und zweimal echtem Continue, Exit0.
-- Kein FAIL, SCRIPT ERROR oder ERROR in diesen Integrationslogs.
-- Git diff --check sauber; kein fremder WIP aufgenommen.
-
-Rohbelege lokal output/playtest_main_integration_20261110/; jede Probe mit eigenem
-APPDATA. Native175/0 und62/0 aus der vorherigen Taskabnahme wurden hier nicht
-wiederholt und bleiben als solche ausgewiesen. Kein neuer Export.
-
-Uebernahme per Fast-forward auf Main und normaler Push nach GitHub, kein Force.
-Der finale Remote-Main-SHA wird nach dem Push direkt mit HEAD abgeglichen.
-Der nicht ausgecheckte Mainref des Originalrepos wird ebenfalls aktualisiert;
-dessen aktiver fremder Taskbranch und seine Arbeitsdateien bleiben erhalten.
+## Ergebnis
+Alle acht frischen Läufe Exit0: Kamera52/0, Details/Inventar28/0,
+Lesbarkeit22/0, Manöver412/0, Missionskontext12/0, Serviceauswahl1/0,
+Kampagnenstart13/0, native Weltwahl/Padansicht36/0. Keine Script-/Enginefehler.
+Native D3D12-Prüfung mit zwei bekannten UID-Pfadfallback-Warnungen.
+Belege unter logs/. Keine pauschale Gesamtsuite-/Performancefreigabe.

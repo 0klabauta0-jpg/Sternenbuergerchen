@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### Playtest-Nachtrag: Mainintegration — 10.11.2026
+Task256923431 konfliktfrei auf Main80938bf7b integriert (Merge37e51225c).
+Produktbaum identisch mit geprüftem Task, danach nur Integrationsdokumentation.
+Acht frische gezielte Läufe grün, darunter Kamera52/0, Details28/0,
+Manöver412/0, Kontext12/0, Kampagnenstart13/0 und native D3D12-Weltwahl36/0.
+Keine Script-/Enginefehler; zwei bekannte UID-Pfadfallback-Warnungen.
+QA: docs/qa/playtest_main_integration_20261110/README.md.
+Kein neuer EXE-Export; engere Gebäudeanordnung bleibt offen.
+
 ### Playtest: NPC-Details, Kontextcursor und Kamera — 10.11.2026
 Taskbranch auf Main80938bf7b. Echtes Inventar rechts, lesbare vertikale Werte
 links; Weltwahl/Abwahl und NPC-Doppelklick, Schiffsdetails nur bei Auswahl.

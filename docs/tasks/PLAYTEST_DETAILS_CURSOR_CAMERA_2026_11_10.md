@@ -29,3 +29,13 @@ Vorhandenes Cutlass-Ref03-Mesh unverändert, vier an realen Düsen verankerte zw
 
 ## Abschlussbefund
 Umsetzung und gezielte Quellprüfungen abgeschlossen; QA unter docs/qa/playtest_details_cursor_camera_20261110/. Unabhängige Reviewbefunde zu unsichtbarer Eingabe, Previewbeschriftung und Service-Schiffsauswahl korrigiert. Gebäudeabstand ausdrücklich eigener offener Authoring-Nachtrag. Kein neuer EXE-Export/Mainmerge im Folgeauftrag. Abschließend eigene Taskdateien committen/pushen, fremdes WIP erhalten.
+
+## Mainintegration — 10.11.2026
+Vom Nutzer ausdrücklich beauftragt. Umfang: geprüften Task256923431 auf aktuellem
+Main80938bf7b integrieren und pushen; keine weiteren Produktänderungen, kein
+EXE-Export. Integrationsbranch task/playtest-main-integration-20261110.
+Akzeptanz: konfliktfreier Merge, identischer Produktbaum, frische gezielte Gates
+für Kamera, Details, Kontextaktionen, Serviceauswahl und Kampagnenstart; Main
+und origin/main anschließend identisch. Risiken und offene Punkte entsprechen
+dem Abschlussbefund oben; fremdes WIP und Spielprofile werden nicht übernommen.
+Prüfbelege: docs/qa/playtest_main_integration_20261110/README.md.
