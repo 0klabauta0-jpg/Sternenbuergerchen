@@ -16312,6 +16312,8 @@ func _build_native_player_readout_context() -> Dictionary:
 			active_order_labels.append(_get_waypoint_command_display_name(active_command_type) if active_command_type in ["move", "take", "defend", "flank", "engage"] else "")
 	return {
 		"objective": _build_mission_objective_state_snapshot(),
+		"singleplayer_scenario_id":String(Dictionary(get_parent().get_meta("singleplayer_mission_identity",{})).get("scenario_id","")) if _should_keep_campaign_dropship_landed() else "",
+		"confirmed_interactions":_get_combat_loop_driver().call("get_mission_interaction_runtime_states") if _should_keep_campaign_dropship_landed() and _get_combat_loop_driver()!=null else {},
 		"local_team_id": get_local_command_team_id(),
 		# Literal false selects only this existing helper's completed-return
 		# branch; contact-focus hiding of active departures is never applied.

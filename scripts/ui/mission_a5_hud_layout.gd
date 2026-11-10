@@ -427,6 +427,17 @@ static func build_player_readout(context: Dictionary) -> Dictionary:
 		if not route_text.is_empty():
 			mission_heading = "EINSATZROUTE"
 			mission_text = route_text
+	var scenario_id:=String(context.get("singleplayer_scenario_id",""))
+	var confirmed: Dictionary=context.get("confirmed_interactions",{})
+	if scenario_id=="satellite_recovery":
+		mission_heading="SATELLITENBERGUNG"
+		mission_text="Satellitendaten sichern"
+		if bool(Dictionary(confirmed.get("satellite_data",{})).get("complete",false)): mission_text="Daten gesichert · zum Schiff zurückkehren"
+		if bool(Dictionary(confirmed.get("ship_return",{})).get("complete",false)): mission_text="Rückkehr bestätigt · Einsteigen und abheben"
+	elif scenario_id=="trade_outpost_visit":
+		mission_heading="HANDELSBESUCH"
+		mission_text="Händler aufsuchen"
+		if bool(Dictionary(confirmed.get("trade_service",{})).get("complete",false)): mission_text="Handel freigeschaltet · Versorgung / Rückflug"
 	var cards: Array = Array(context.get("transport_cards", []))
 	var transport_text := "Kein Dropship im Einsatz"
 	if cards.size() > 1:

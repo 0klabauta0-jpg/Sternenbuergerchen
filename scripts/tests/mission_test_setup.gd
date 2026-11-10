@@ -1056,6 +1056,18 @@ func _frame_reference_mission_camera(view: Node) -> bool:
 	# subsequent manual navigation; no actor or enemy lookup is needed.
 	if view == null or not is_instance_valid(view) or _loaded_terrain_map_data == null:
 		return false
+	var presentation: Dictionary=_loaded_terrain_map_data.call("get_place_presentation")
+	var initial_size: float=float(presentation.get("initial_camera_size",0.0))
+	if initial_size>0.0 and is_finite(initial_size):
+		if bool(view.get_meta("place_initial_camera",false)): return true
+		var points: Array=[]
+		for path in [spawn_alpha_path,objective_point_path]:
+			var marker:=_resolve_marker(path)
+			if marker!=null: points.append(marker.global_position)
+		if not points.is_empty():
+			view.call("frame_world_positions",points,6.0,clampf(initial_size,5.5,120.0),clampf(initial_size,5.5,120.0))
+			view.set_meta("place_initial_camera",true)
+			return true
 	if not _loaded_terrain_map_data.has_method("get_authored_visual_layout_id") or String(_loaded_terrain_map_data.call("get_authored_visual_layout_id")) != "gm01_frontier_outpost_v1":
 		return false
 	if bool(view.get_meta("gm01_reference_initial_camera", false)):

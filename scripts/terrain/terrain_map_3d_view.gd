@@ -137,7 +137,7 @@ const ROUTE_CALLOUT_ROUTE_LINE_WIDTH: float = 0.18
 const ROUTE_CALLOUT_ROUTE_LINE_HEIGHT: float = 0.92
 const MISSION_INTERACTION_VISUAL_STATE_STYLE_ID: String = "task_686_mission_interaction_visual_state"
 const MISSION_INTERACTION_VISUAL_STATE_LABEL_FONT_SIZE: int = 19
-const MISSION_INTERACTION_VISUAL_STATE_LABEL_PIXEL_SIZE: float = 0.026
+const MISSION_INTERACTION_VISUAL_STATE_LABEL_PIXEL_SIZE: float = 0.018
 const MISSION_INTERACTION_VISUAL_STATE_LABEL_OUTLINE_SIZE: int = 8
 const MISSION_INTERACTION_VISUAL_STATE_LABEL_BACKPLATE_STYLE_ID: String = "task_722_station_route_label_backplate"
 const MISSION_INTERACTION_VISUAL_STATE_LABEL_HEIGHT: float = 2.36
@@ -1231,6 +1231,9 @@ var _authored_visual_owned_grids: Array[Vector2i] = []
 var _authored_visual_grid_visible: bool = true
 var _map_plane_bounds: Rect2 = Rect2()
 var _map_axial_bounds: Rect2i = Rect2i()
+var _place_dressing_root: Node3D
+var _place_dressing_signature := ""
+var _place_dressing_grids: Array[Vector2i]=[]
 var _frontier_art_profile = FRONTIER_ART_PROFILE_SCRIPT.new()
 var _active_grid_topology: String = "square8"
 var _hex_ground_batch = HEX_GROUND_BATCH_SCRIPT.new()
@@ -1461,6 +1464,7 @@ func render_map(terrain_map_data = null) -> void:
 		var r_axis := _grid_to_3d_position(Vector2(0,1),0)
 		_frontier_art_profile.configure_surface_blend(Array(_terrain_map_data.call("get_tiles")),Vector2(q_axis.x,q_axis.z),Vector2(r_axis.x,r_axis.z))
 	_sync_authored_visual_layout()
+	_sync_place_reference_dressing()
 	_clear_children(_map_root)
 	_clear_children(_marker_root)
 	_clear_children(_fow_root)
@@ -11091,6 +11095,7 @@ func _add_mission_interaction_visual_state_visuals() -> void:
 		var color: Color = _get_mission_interaction_visual_state_color(tone)
 		var state_id: String = String(state.get("id", state.get("interaction_id", "interaction_state_%d" % _mission_interaction_visual_state_count))).strip_edges()
 		var short_label: String = String(state.get("player_label", state.get("short_label", state.get("label", state_id)))).strip_edges()
+		if state.has("player_label"): short_label=short_label.replace(" · ","\n")
 		if short_label.is_empty():
 			short_label = state_id
 		_add_marker3d(
@@ -11194,6 +11199,8 @@ func _apply_mission_interaction_visual_state_label_style(label: Label3D) -> void
 	if label == null:
 		return
 	label.pixel_size = MISSION_INTERACTION_VISUAL_STATE_LABEL_PIXEL_SIZE
+	label.width=180.0
+	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	label.outline_size = MISSION_INTERACTION_VISUAL_STATE_LABEL_OUTLINE_SIZE
 	label.outline_modulate = Color(0.0, 0.0, 0.0, 0.96)
 	label.set_meta("mission_interaction_visual_state_style_id", MISSION_INTERACTION_VISUAL_STATE_STYLE_ID)
@@ -15360,3 +15367,24 @@ func _clear_children(node: Node) -> void:
 		return
 	for child in node.get_children():
 		child.free()
+
+func _sync_place_reference_dressing() -> void:
+	var presentation: Dictionary=_terrain_map_data.call("get_place_presentation") if _terrain_map_data!=null and _terrain_map_data.has_method("get_place_presentation") else {}
+	var signature:=JSON.stringify(presentation)
+	for grid in _place_dressing_grids:
+		var owner: WeakRef=_external_terrain_object_visuals.get(grid)
+		if owner!=null and owner.get_ref()==_place_dressing_root: _external_terrain_object_visuals.erase(grid)
+	_place_dressing_grids.clear()
+	if signature!=_place_dressing_signature:
+		if is_instance_valid(_place_dressing_root):
+			_place_dressing_root.get_parent().remove_child(_place_dressing_root)
+			_place_dressing_root.queue_free()
+		_place_dressing_root=null
+		_place_dressing_signature=signature
+	if Array(presentation.get("structures",[])).is_empty(): return
+	if not is_instance_valid(_place_dressing_root):
+		_place_dressing_root=load("res://scripts/terrain/place_reference_dressing.gd").build(_world_root,presentation).root
+	for tile in _terrain_map_data.call("get_tiles"):
+		if String(tile.object_type_id)=="frontier_scene_solid":
+			_external_terrain_object_visuals[tile.grid_position]=weakref(_place_dressing_root)
+			_place_dressing_grids.append(tile.grid_position)

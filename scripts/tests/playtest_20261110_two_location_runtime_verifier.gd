@@ -5,7 +5,7 @@ var same_place := false
 var native_probe := false
 func _run() -> void:
 	same_place=OS.get_cmdline_user_args().has("same_place")
-	native_probe=OS.get_cmdline_user_args().has("native_probe")
+	native_probe=OS.get_cmdline_user_args().has("native_probe") or OS.get_cmdline_user_args().has("capture_only")
 	_flow=FLOW.instantiate(); root.add_child(_flow); await process_frame
 	_screen=_flow.get_node("HomebaseScreen"); _runtime=_flow.get("_singleplayer_runtime")
 	if native_probe:
@@ -127,7 +127,7 @@ func _profile_world(label: String, instance: Node) -> void:
 	if instance!=null: _flow.call("focus_location",String(instance.get_meta("location_id","")))
 	var view: Node=instance.get_node("Primary3DView") if instance!=null else null
 	var samples: Array[float]=[]
-	var deadline:=Time.get_ticks_msec()+30000
+	var deadline:=Time.get_ticks_msec()+(1000 if OS.get_cmdline_user_args().has("capture_only") else 30000)
 	var previous:=Time.get_ticks_usec()
 	while Time.get_ticks_msec()<deadline:
 		await process_frame

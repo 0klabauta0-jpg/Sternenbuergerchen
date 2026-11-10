@@ -10,6 +10,7 @@ const HEX_GRID_SCRIPT: GDScript = preload("res://scripts/terrain/hex_grid.gd")
 var _map_name: String = ""
 var _terrain_visual_theme_id: String = ""
 var _authored_visual_layout_id: String = ""
+var _place_presentation: Dictionary = {}
 var _grid_topology: String = "square8"
 var _mission_slot_count: int = 3
 var _grid_size: Vector2i = Vector2i.ZERO
@@ -57,6 +58,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 	terrain_map_data._map_name = String(root_dict.get("map_name", path.get_file().get_basename()))
 	terrain_map_data._terrain_visual_theme_id = _normalize_optional_id(String(root_dict.get("terrain_visual_theme_id", root_dict.get("surface_visual_theme_id", ""))))
 	terrain_map_data._authored_visual_layout_id = _normalize_optional_id(String(root_dict.get("authored_visual_layout_id", "")))
+	if typeof(root_dict.get("place_presentation",{}))==TYPE_DICTIONARY: terrain_map_data._place_presentation=Dictionary(root_dict.get("place_presentation",{})).duplicate(true)
 	terrain_map_data._mission_slot_count = maxi(int(root_dict.get("mission_slot_count", 3)), 1)
 	terrain_map_data._grid_size = _coerce_vector2i(root_dict.get("grid_size", Vector2i.ZERO))
 
@@ -214,6 +216,7 @@ func save_to_file(path: String) -> Error:
 	}
 	if not _terrain_visual_theme_id.is_empty():
 		json_root["terrain_visual_theme_id"] = _terrain_visual_theme_id
+	if not _place_presentation.is_empty(): json_root["place_presentation"]=_place_presentation.duplicate(true)
 	if not _authored_visual_layout_id.is_empty():
 		json_root["authored_visual_layout_id"] = _authored_visual_layout_id
 
@@ -712,3 +715,6 @@ func _serialize_enemy_team_configs() -> Dictionary:
 	if not serialized_configs.has("default"):
 		serialized_configs["default"] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", _grid_size), _grid_size)
 	return serialized_configs
+
+func get_place_presentation() -> Dictionary:
+	return _place_presentation.duplicate(true)
