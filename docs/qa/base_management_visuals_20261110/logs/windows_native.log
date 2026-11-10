@@ -1,0 +1,100 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+D3D12 12_0 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: workspace fits jobs(1280, 720)
+PASS: drawer keeps base visible behind jobs
+PASS: drawer remains narrower than base workspace
+PASS: Smart Mobile initially shows only the unlocked satellite mission
+PASS: selected mission retains readable detail column
+PASS: first mission acceptance is visible without scrolling
+PASS: workspace fits build(1280, 720)
+PASS: drawer keeps base visible behind build
+PASS: drawer remains narrower than base workspace
+PASS: real styled build page is shown
+PASS: visible action has visible card
+PASS: real action fits visible viewport
+PASS: existing action count preserved for build
+PASS: unchanged snapshots preserve service cards
+PASS: workspace fits workshop(1280, 720)
+PASS: drawer keeps base visible behind workshop
+PASS: drawer remains narrower than base workspace
+PASS: real styled workshop page is shown
+PASS: visible action has visible card
+PASS: real action fits visible viewport
+PASS: visible action has visible card
+PASS: real action fits visible viewport
+PASS: visible action has visible card
+PASS: real action fits visible viewport
+PASS: existing action count preserved for workshop
+PASS: unchanged snapshots preserve service cards
+PASS: workspace fits data(1280, 720)
+PASS: drawer keeps base visible behind data
+PASS: drawer remains narrower than base workspace
+PASS: real styled data page is shown
+PASS: visible action has visible card
+PASS: real action fits visible viewport
+PASS: existing action count preserved for data
+PASS: unchanged snapshots preserve service cards
+PASS: workspace fits ship(1280, 720)
+PASS: drawer keeps base visible behind ship
+PASS: drawer remains narrower than base workspace
+PASS: real styled ship page is shown
+PASS: unchanged snapshots preserve service cards
+PASS: workspace fits inventory(1280, 720)
+PASS: drawer keeps base visible behind inventory
+PASS: drawer remains narrower than base workspace
+PASS: workspace fits jobs(1920, 1080)
+PASS: drawer keeps base visible behind jobs
+PASS: drawer remains narrower than base workspace
+PASS: Smart Mobile initially shows only the unlocked satellite mission
+PASS: selected mission retains readable detail column
+PASS: first mission acceptance is visible without scrolling
+PASS: workspace fits build(1920, 1080)
+PASS: drawer keeps base visible behind build
+PASS: drawer remains narrower than base workspace
+PASS: real styled build page is shown
+PASS: visible action has visible card
+PASS: real action fits visible viewport
+PASS: existing action count preserved for build
+PASS: unchanged snapshots preserve service cards
+PASS: workspace fits workshop(1920, 1080)
+PASS: drawer keeps base visible behind workshop
+PASS: drawer remains narrower than base workspace
+PASS: real styled workshop page is shown
+PASS: visible action has visible card
+PASS: real action fits visible viewport
+PASS: visible action has visible card
+PASS: real action fits visible viewport
+PASS: visible action has visible card
+PASS: real action fits visible viewport
+PASS: existing action count preserved for workshop
+PASS: unchanged snapshots preserve service cards
+PASS: workspace fits data(1920, 1080)
+PASS: drawer keeps base visible behind data
+PASS: drawer remains narrower than base workspace
+PASS: real styled data page is shown
+PASS: visible action has visible card
+PASS: real action fits visible viewport
+PASS: existing action count preserved for data
+PASS: unchanged snapshots preserve service cards
+PASS: workspace fits ship(1920, 1080)
+PASS: drawer keeps base visible behind ship
+PASS: drawer remains narrower than base workspace
+PASS: real styled ship page is shown
+PASS: unchanged snapshots preserve service cards
+PASS: workspace fits inventory(1920, 1080)
+PASS: drawer keeps base visible behind inventory
+PASS: drawer remains narrower than base workspace
+PASS: visual navigation changes no supply or cargo
+PASS: drawer closes back to the base
+PASS: compact floating service view retains narrow width
+MANAGEMENT_VISUALS checks=87 failures=0
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/base_management_visuals_verifier.gd:12)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/base_management_visuals_verifier.gd:12)

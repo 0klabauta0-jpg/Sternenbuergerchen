@@ -137,7 +137,9 @@ func refresh() -> void:
 		return
 	var homebase: Node = _flow.get_node_or_null("HomebaseScreen") if is_instance_valid(_flow) else null
 	var detail_popup: Control = homebase.get_node_or_null("CharacterSheetPopup") if homebase != null else null
-	if (detail_popup != null and detail_popup.is_visible_in_tree()) or (homebase != null and String(homebase.get("_operations_mode")) == "services") or (is_instance_valid(_flow) and String(_flow.get("_current_meta_view")) == "star_map"):
+	var operations:Node=homebase.get("_operations_presenter") if homebase!=null else null
+	var flyout_open:bool=operations!=null and operations.has_method("is_workspace_flyout_open") and bool(operations.call("is_workspace_flyout_open"))
+	if flyout_open or (detail_popup != null and detail_popup.is_visible_in_tree()) or (homebase != null and String(homebase.get("_operations_mode")) in ["services","jobs"]) or (is_instance_valid(_flow) and String(_flow.get("_current_meta_view")) == "star_map"):
 		# These views already carry their own instructions. Keep the global
 		# floating guidance clear of identity, map headings and close actions.
 		visible = false

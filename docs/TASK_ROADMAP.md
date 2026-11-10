@@ -1,5 +1,16 @@
 # TASK_ROADMAP
 
+### Basis-Seitenfenster, KI-Gestaltung und sichtbare Kampagnenfolge — 10.11.2026
+Aufbau auf9c87a06ef/5df2d3b6f, Mainbasis1e3cca237. Gestaltungsentwurf der Bilder-KI
+als Referenz erhalten und in echte Aktionskarten/Seitenfenster übertragen.
+Kleine Figur/Porträt mit Slots daneben, Tankservice unter Flugdeck. Anfangs nur
+Satellitendaten von Fragwürdigen Geschäftsleuten; echter Heim-Upload öffnet
+Außenposten. Auftraggeber-Inhaltskatalog, Rufsystem bleibt geplant.
+Kampagnenausflug88/0, native Seitenfenster87/0, native Charakteransicht32/0,
+Compact22/0, Basisverwaltung21/0, Kampagnenstate15/0. QA samt Prompt, SHA,
+Grenzen und nativen Bildern: docs/qa/base_management_visuals_20261110/README.md.
+Taskbranch task/base-management-visuals-20261110, noch keine Mainintegration/EXE.
+
 ### Charakterdetails und Navigation — 10.11.2026
 Task auf5df2d3b6f: Doppelbutton entfernt, Tankservice unter Flugdeck, volle
 Detailsfensterhöhe, vorhandenes NPC-Modell mit Körper-Slots, kompakte Werte und

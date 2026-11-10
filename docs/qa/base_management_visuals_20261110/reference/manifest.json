@@ -1,0 +1,97 @@
+{
+  "main_basis": "1e3cca237604d3b293097585e19953ac08c11c7b",
+  "original_generated_output": "C:/Users/bjoer/.codex/generated_images/01a1c588-e0d6-7701-8130-9518de8ff277/exec-a3bec3e9-5d76-499b-b4a1-8408e56da02b.png",
+  "reference_status": "2D design target, not runtime",
+  "tool": "image_gen.imagegen",
+  "native_status": "Godot D3D12 captures",
+  "task_basis": "9c87a06ef",
+  "files": [
+    {
+      "sha256": "567517b685af947aa87f972ab7c0eaa4b8b467e793f4834472369ee71ff9723c",
+      "path": "docs/qa/base_management_visuals_20261110/reference/input_base_navigation.png"
+    },
+    {
+      "sha256": "dc083d88c4c4ef6f438568fa39c3bc76018ff2be3eb010dba1c433e5f14f9ea5",
+      "path": "docs/qa/base_management_visuals_20261110/reference/input_character_details.png"
+    },
+    {
+      "sha256": "70ad7e4cc5e9bdabd497fcc92387970244888c9e1468ead5914237536c4bb45f",
+      "path": "docs/qa/base_management_visuals_20261110/reference/management_concept_01.png"
+    },
+    {
+      "sha256": "3d6e02da18b67a9756f1b42250f27371f56742ebb555a34925c03fcdff1229e9",
+      "path": "docs/qa/base_management_visuals_20261110/images/build_1280.png"
+    },
+    {
+      "sha256": "ed8c2623317b57d4130b5e4897a5fe7f8750f6dcf10ad2a9108698c7129879ef",
+      "path": "docs/qa/base_management_visuals_20261110/images/build_1920.png"
+    },
+    {
+      "sha256": "4307186a94b1929e74a0bd59e383eb15b633c1f31d76fe8fa2cd36d035b81fe0",
+      "path": "docs/qa/base_management_visuals_20261110/images/data_1280.png"
+    },
+    {
+      "sha256": "718f95515e49d0c1d4e39b128c7205b458ff0f5c7eaf6edc423a3bdc00e2e8fe",
+      "path": "docs/qa/base_management_visuals_20261110/images/data_1920.png"
+    },
+    {
+      "sha256": "906701d31b21807fa8045621f86d72b9e290c5b06f13b16a023454c7a1ac7e78",
+      "path": "docs/qa/base_management_visuals_20261110/images/details_1280.png"
+    },
+    {
+      "sha256": "2cb2e0634f42b904ccec74b9f2b0b242f05c30eee65a92a5e37ddd4473dce3a5",
+      "path": "docs/qa/base_management_visuals_20261110/images/details_1920.png"
+    },
+    {
+      "sha256": "ae67bcf876e979268c852ce9ae54f1dfc6571cfebc63e6bfab121c8da565408a",
+      "path": "docs/qa/base_management_visuals_20261110/images/details_3440.png"
+    },
+    {
+      "sha256": "d7e274ded17ceac1d3618bc983ece53a2dfa42f57eb22bae23a92b52934369b0",
+      "path": "docs/qa/base_management_visuals_20261110/images/inventory_1280.png"
+    },
+    {
+      "sha256": "7c4d33261f457b119c5ee672a22ab69629fff37b9de98ef5dd9acce6f1f24b44",
+      "path": "docs/qa/base_management_visuals_20261110/images/inventory_1920.png"
+    },
+    {
+      "sha256": "09eb90811182d5905e30ab5379e19bc8d163fe558e55682d40bddd6d988e751a",
+      "path": "docs/qa/base_management_visuals_20261110/images/jobs_1280.png"
+    },
+    {
+      "sha256": "e70f98bb7b5969f5f7fb0a90d54c31f477ea223499822568edae6bed927c96c4",
+      "path": "docs/qa/base_management_visuals_20261110/images/jobs_1920.png"
+    },
+    {
+      "sha256": "0976cebb63a43d2894a2dd699670f6969f827ccefecfb428bf64dbeaec91e883",
+      "path": "docs/qa/base_management_visuals_20261110/images/ship_1280.png"
+    },
+    {
+      "sha256": "99d5a39e201836f11502df429c59ea70c0e5653eab912ed329bb2f6fb53f71f9",
+      "path": "docs/qa/base_management_visuals_20261110/images/ship_1920.png"
+    },
+    {
+      "sha256": "3b69a76a05d29ca3ca7a1469e1e483ce957c64724a7fd141061232a7581a9558",
+      "path": "docs/qa/base_management_visuals_20261110/images/workshop_1280.png"
+    },
+    {
+      "sha256": "47e5dd59076cc0c33d327e7f8cf95cd2e4a633bb31d3f5081be4946fb2297080",
+      "path": "docs/qa/base_management_visuals_20261110/images/workshop_1920.png"
+    },
+    {
+      "path": "Assets/used/npc/animated_characters/models/characterMedium.fbx",
+      "status": "existing, geometry unchanged",
+      "sha256": "18835fef534eede635b081ee7fe647d01a885550a591d2e6bf071010906167d8"
+    },
+    {
+      "path": "Assets/used/npc/animated_characters/skins/astroMaleA.png",
+      "status": "existing, geometry unchanged",
+      "sha256": "7e65fdc4976ec34281204f53b4990ad39c3f4135dc7c7a583ac64c0b9b03defe"
+    },
+    {
+      "path": "data/npc_unit_visual_mapping.json",
+      "status": "existing, geometry unchanged",
+      "sha256": "a7d133cdc510b71eedf4d3e7fdd08d68dc49252d0377ff9e56315bfcb6c70159"
+    }
+  ]
+}

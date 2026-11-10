@@ -1,5 +1,13 @@
 extends RefCounted
 ## Pure definition normalization; status is held only in CampaignState.
+static var _issuer_catalog:Dictionary={}
+
+static func get_issuer_for_job(job_id:String)->Dictionary:
+	if _issuer_catalog.is_empty():
+		var value:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://data/singleplayer/job_issuers.json"))
+		if typeof(value)==TYPE_DICTIONARY:_issuer_catalog=value
+	var issuer_id:String=String(Dictionary(_issuer_catalog.get("jobs",{})).get(job_id,""))
+	return Dictionary(Dictionary(_issuer_catalog.get("issuers",{})).get(issuer_id,{})).duplicate(true)
 
 static func normalize_job(raw: Dictionary, locations: Dictionary) -> Dictionary:
 	var id: String = String(raw.get("id", raw.get("job_id", ""))).strip_edges()

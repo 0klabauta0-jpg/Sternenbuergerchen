@@ -89,3 +89,20 @@ nachfolgenden bisherigen Send-Vertrag.
   bereits hochgeladene Daten und einen tatsächlich vorhandenen Upload.
   Schlafen erzeugt/verbraucht keine Missionschips. Upload bleibt der vorhandene
   autoritative Heimatbasis-Command, kein UI-generierter Ersatzchip.
+
+## Basis-Seitenfenster und Aufträge — 10.11.2026
+- Bauen, Werkstatt/Blueprints, Lager/Ausrüstung, Datenterminal und Smart Mobile
+  öffnen rechts neben der Navigation schließbare Seitenfenster. Die Basis
+  bleibt sichtbar; ein Hintergrundfang verhindert unbeabsichtigte Kartenbefehle.
+  Öffnen animiert nur die UI-Position/Deckkraft, keine Simulation oder Ladung.
+- Tankservice ist Unterpunkt des Flugdecks, kein zweiter Schiff-Eintrag in der
+  Basisverwaltung. Derselbe vorhandene Serviceowner bleibt zuständig.
+- Kleine Figur in bestehender Idle-Pose mit Porträt daneben. Rüstung/Primär/
+  Sekundär liegen seitlich, ohne die Figur zu überdecken. Bestand bleibt frei
+  und wird nicht erneut um bereits getragene Gegenstände verringert.
+- Smart Mobile projiziert die vorhandenen autoritativen `locked`-Flags. Verborgene
+  spätere Missionen bleiben auch gegen direkte Commands gesperrt. Anfangs nur
+  Satellitendaten; erst der reale Abschluss mit Heim-Upload öffnet Außenposten.
+- Unveränderliche Auftraggeber-Inhaltsidentität kommt aus job_issuers.json über
+  den Jobcontract. Satellitendaten: Fragwürdige Geschäftsleute. Kein Rufstand in
+  UI/Saves hinzugefügt; Rufskala und Wirkung bleiben als Zukunftsplanung offen.

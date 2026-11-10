@@ -3,6 +3,7 @@ extends PanelContainer
 
 const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const SHIP_VISUALS: GDScript = preload("res://scripts/terrain/frontier_ship_visuals.gd")
+const SKIN=preload("res://scripts/ui/base_management_skin.gd")
 const OFFER_ID := "medictool_supply"
 const DEBOUNCE_SECONDS := 0.35
 
@@ -30,6 +31,10 @@ var _campaign_buttons: Dictionary = {}
 var _section: String = "all"
 var _heading: Label
 var _section_note: Label
+var _eyebrow:Label
+var _cards:GridContainer
+var _ship_panel:PanelContainer
+var _ship_image:TextureRect
 
 func configure(snapshot_provider: Callable, command_handler: Callable) -> void:
 	_snapshot_provider = snapshot_provider
@@ -46,52 +51,53 @@ func _build() -> void:
 	if _built:
 		return
 	_built = true
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("102f3b")
-	style.border_color = Color("29e1e7")
-	style.set_border_width_all(1)
-	style.set_content_margin_all(12)
-	add_theme_stylebox_override("panel", style)
+	SKIN.panel(self)
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(300,240)
+	scroll.custom_minimum_size = Vector2(270,240)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_child(scroll)
 	var content := VBoxContainer.new()
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	content.add_theme_constant_override("separation", 6)
+	content.add_theme_constant_override("separation", 14)
 	scroll.add_child(content)
+	_eyebrow=_label("SC-06  /  TRANSPORT",14);SKIN.eyebrow(_eyebrow);content.add_child(_eyebrow)
 	_heading = _label("Versorgung", 21)
-	THEME.style_section_heading(_heading, 23)
+	THEME.style_section_heading(_heading, 30)
 	content.add_child(_heading)
 	_section_note = _label("", 16)
 	content.add_child(_section_note)
 	_credits = _label("Kredite: —", 18)
 	_credits.name = "SupplyCredits"
 	content.add_child(_credits)
+	SKIN.rule(content)
+	_ship_panel=PanelContainer.new();_ship_panel.name="ShipServiceCard";SKIN.panel(_ship_panel,true);content.add_child(_ship_panel)
+	var ship_row:=HBoxContainer.new();ship_row.add_theme_constant_override("separation",22);_ship_panel.add_child(ship_row)
+	_ship_image=TextureRect.new();_ship_image.custom_minimum_size=Vector2(210,180);_ship_image.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;_ship_image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;_ship_image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;ship_row.add_child(_ship_image)
+	var ship_content:=VBoxContainer.new();ship_content.size_flags_horizontal=Control.SIZE_EXPAND_FILL;ship_content.add_theme_constant_override("separation",10);ship_row.add_child(ship_content)
 	_items = _label("Bestand: —", 14)
-	content.add_child(_items)
+	ship_content.add_child(_items)
 	_craft_selector = OptionButton.new()
 	_craft_selector.name = "ServiceCraftSelector"
 	_craft_selector.custom_minimum_size.y = 38
 	_craft_selector.fit_to_longest_item = false
 	_craft_selector.add_theme_font_size_override("font_size", 15)
-	content.add_child(_craft_selector)
+	ship_content.add_child(_craft_selector)
 	_craft_selector.item_selected.connect(func(index: int): set_selected_craft(String(_craft_selector.get_item_metadata(index))))
 	_fuel = _label("Treibstoff: —", 16)
-	content.add_child(_fuel)
+	ship_content.add_child(_fuel)
 	_buy = _button("Sanitätswerkzeug kaufen", "BuySupply")
-	content.add_child(_buy)
+	ship_content.add_child(_buy)
 	_buy.pressed.connect(func(): _submit("buy"))
 	for id in ["mining_tool_supply","salvage_tool_supply"]:
-		var tool:=_button("",id); content.add_child(tool); _tool_buttons[id]=tool
+		var tool:=_button("",id); ship_content.add_child(tool); _tool_buttons[id]=tool
 		tool.pressed.connect(func(): _submit("buy",id))
 
 	_sell = _button("Rohstoff aus Schiffsfracht verkaufen", "SellBenit")
-	content.add_child(_sell)
+	ship_content.add_child(_sell)
 	_sell.pressed.connect(_submit_sell)
 	var fuel_row := HBoxContainer.new()
-	content.add_child(fuel_row)
+	ship_content.add_child(fuel_row)
 	var amount_label: Label = _label("Tankmenge", 14)
 	amount_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	amount_label.custom_minimum_size.x = 80.0
@@ -108,11 +114,13 @@ func _build() -> void:
 	fuel_row.add_child(_amount)
 	_amount.value_changed.connect(func(_value: float): refresh())
 	_refuel = _button("Auftanken", "RefuelCraft")
-	content.add_child(_refuel)
+	ship_content.add_child(_refuel);SKIN.button(_refuel,true)
 	_refuel.pressed.connect(func(): _submit("refuel"))
 	_return = _button("Zur Heimatbasis", "ServiceReturnHomebase")
-	content.add_child(_return)
+	ship_content.add_child(_return)
+	ship_content.move_child(_craft_selector,0);ship_content.move_child(_fuel,1);ship_content.move_child(fuel_row,2);ship_content.move_child(_refuel,3)
 	_return.pressed.connect(func(): _submit("return_homebase"))
+	_cards=GridContainer.new();_cards.name="ServiceActionCards";_cards.add_theme_constant_override("h_separation",14);_cards.add_theme_constant_override("v_separation",14);content.add_child(_cards)
 	for action in [
 		["campaign_upload","Missionsdaten hochladen",{}],
 		["campaign_recruit","Person am Handelsposten aufnehmen",{"kind":"outpost"}],
@@ -124,13 +132,34 @@ func _build() -> void:
 		var key := String(action[0])+String(Dictionary(action[2]).get("blueprint_id",""))
 		var button := _button(String(action[1]),key)
 		button.visible = false
-		content.add_child(button)
-		_campaign_buttons[key] = {"button":button,"operation":action[0],"payload":action[2]}
+		var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;SKIN.panel(card,true);_cards.add_child(card)
+		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",12);card.add_child(body)
+		var title_text:String=String(action[1]).trim_suffix(" herstellen")
+		if String(action[0])=="campaign_upload":title_text="Missionsdaten"
+		if String(action[0])=="campaign_build_pad":title_text="Zweites Landepad"
+		body.add_child(_label(title_text,18))
+		var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(80,100);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;body.add_child(icon)
+		var blueprint:String=String(Dictionary(action[2]).get("blueprint_id",""))
+		var paths:Dictionary={"light_armor":"res://Assets/curated/ui/campaign_inventory/armor_light.svg","mining_tool":"res://Assets/curated/ui/campaign_inventory/benit.svg","assault_rifle":"res://Assets/used/npc/blaster_kit/previews/blaster-a.png"}
+		var path:String=String(paths.get(blueprint,"res://Assets/curated/ui/campaign_inventory/chip.svg"))
+		if String(action[0])=="campaign_build_pad":path="res://Assets/kenney_space-kit/Isometric/platform_center_SE.png"
+		if ResourceLoader.exists(path):icon.texture=load(path)
+		var state:=_label("",15);state.custom_minimum_size.y=42;body.add_child(state)
+		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(button);SKIN.button(button,true)
+		if String(action[0])=="campaign_fabricate":button.text="Herstellen"
+		_campaign_buttons[key] = {"button":button,"operation":action[0],"payload":action[2],"card":card,"state_label":state}
 		button.pressed.connect(_submit_campaign.bind(key))
 	_feedback = _label("", 14)
 	_feedback.name = "ServiceFeedback"
 	_feedback.custom_minimum_size.y = 32
 	content.add_child(_feedback)
+	resized.connect(_layout_cards)
+	_layout_cards()
+
+func _layout_cards()->void:
+	if _cards==null:return
+	_cards.columns=(3 if size.x>=720 else (2 if size.x>=500 else 1)) if _section=="workshop" else 1
+	_ship_image.visible=size.x>=650 and _ship_image.texture!=null
 
 func refresh(snapshot: Dictionary = {}) -> void:
 	if not _built:
@@ -250,6 +279,8 @@ func set_section(section: String) -> void:
 
 func _apply_section() -> void:
 	var ship := _section in ["all", "ship"]
+	_ship_panel.visible=ship
+	_eyebrow.text={"all":"SC-06  /  VERSORGUNG","ship":"SC-06  /  TRANSPORT","build":"BAU-02  /  INFRASTRUKTUR","workshop":"WB-03  /  FERTIGUNG","data":"DT-05  /  INFORMATION"}.get(_section,"")
 	_heading.text = {"all":"Versorgung", "build":"Basis · Bauen", "workshop":"Werkstatt · Blueprints", "data":"Datenterminal · Hochladen", "ship":"Schiff · Versorgung"}.get(_section,"Versorgung")
 	_section_note.text = {"all":"", "build":"Vorhandener Ausbau: zweites Landepad. Weitere Gebäude sind noch nicht freigeschaltet.", "workshop":"Blueprint auswählen und herstellen. Fertige Waffen und Rüstung liegen anschließend im Basislager.", "data":"Geborgene Missionsdaten nach der Landung hier hochladen. Erst dadurch wird der Auftrag abgeschlossen.", "ship":"Pilot, Besatzung und Ausrüstung über Flugdeck / Trupp verwalten. Austauschbare Schiffskomponenten sind als Ausbau geplant."}.get(_section, "")
 	_section_note.visible = not _section_note.text.is_empty()
@@ -293,6 +324,13 @@ func _apply_section() -> void:
 		else:
 			_section_note.text="Missionsdaten vorhanden. Mit dem Button unten hochladen."
 	_feedback.visible = ship or (not _availability_feedback and _feedback.text != "Versorgung bereit")
+	for action:Dictionary in _campaign_buttons.values():
+		action.card.visible=action.button.visible
+		action.state_label.text=String(action.button.tooltip_text) if action.button.disabled else ("Blueprint freigeschaltet" if String(action.operation)=="campaign_fabricate" else "Aktion verfügbar")
+		if action.button.disabled and action.state_label.text.is_empty():action.state_label.text="Derzeit nicht verfügbar"
+	for craft:Dictionary in _snapshot.get("crafts",[]):
+		if String(craft.get("craft_id",""))==_selected_craft_id:_ship_image.texture=SHIP_VISUALS.get_ui_preview_texture(craft)
+	_layout_cards()
 
 func set_selected_craft(craft_id: String) -> bool:
 	if not _pending.is_empty():
@@ -401,6 +439,7 @@ func _label(value: String, font_size: int) -> Label:
 	label.add_theme_color_override("font_color", Color("f4f2e9"))
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	SKIN.label(label,font_size)
 	return label
 
 func _button(value: String, node_name: String) -> Button:
@@ -408,8 +447,10 @@ func _button(value: String, node_name: String) -> Button:
 	button.name = node_name
 	button.text = value
 	button.custom_minimum_size.y = 42
-	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	button.add_theme_font_size_override("font_size", 15)
+	SKIN.button(button)
 	return button
 
 func fit_to_viewport() -> void:

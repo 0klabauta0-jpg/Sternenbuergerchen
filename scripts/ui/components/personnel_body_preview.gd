@@ -9,7 +9,7 @@ var _signature:String=""
 
 func _ready()->void:
 	name="PersonnelBodyPreview"
-	custom_minimum_size=Vector2(180,300)
+	custom_minimum_size=Vector2(90,150)
 	stretch=true
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
 	_view=SubViewport.new();_view.size=Vector2i(320,480);_view.own_world_3d=true;_view.transparent_bg=true
@@ -36,6 +36,10 @@ func update_actor(actor:Node,loadout:Dictionary)->void:
 	_scene.add_child(_model)
 	_model.process_mode=Node.PROCESS_MODE_DISABLED
 	_model.rotation_degrees.y=90
+	var idle:=_model.find_child("UnitVisualAnimationPlayer",true,false) as AnimationPlayer
+	if idle!=null and idle.has_animation("idle"):
+		idle.play("idle");idle.advance(0);idle.pause()
+		set_meta("preview_idle_pose",true)
 	var boxes:Array[AABB]=[]
 	_collect_bounds(_model,boxes)
 	if boxes.is_empty():return

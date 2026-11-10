@@ -93,6 +93,11 @@ var _base_management_bar: VBoxContainer
 var _base_navigation_group: VBoxContainer
 var _flight_navigation_group: VBoxContainer
 var _flight_management_bar: VBoxContainer
+var _right_flyout_active:=false
+var _flyout_kind:String=""
+var _flyout_scrim:ColorRect
+var _flyout_close:Button
+var _flyout_tween:Tween
 var _services_view: Control
 
 
@@ -129,7 +134,7 @@ func _notification(what: int) -> void:
 func _visibility_changed() -> void:
 	set_process(is_visible_in_tree())
 	if _base != null:
-		_base.call("set_active", is_visible_in_tree() and _mode == "base")
+		_base.call("set_active", is_visible_in_tree() and (_mode == "base" or _right_flyout_active))
 	if is_visible_in_tree():
 		refresh()
 
@@ -216,7 +221,7 @@ func _build() -> void:
 			_flight_navigation_group.mouse_exited.connect(_close_flight_navigation_after_exit)
 		else:
 			nav.add_child(button)
-		button.pressed.connect(func(): _act("navigate", {"mode": key}))
+		button.pressed.connect(_navigate_from_sidebar.bind(key))
 		button.disabled = key in ["jobs", "map"]
 		if button.disabled:
 			button.tooltip_text = "Noch nicht verfügbar"
@@ -273,7 +278,7 @@ func _build() -> void:
 	_base_management_bar.name = "BaseManagementActions"
 	_base_management_bar.add_theme_constant_override("separation", 3)
 	_base_navigation_group.add_child(_base_management_bar)
-	for entry in [["Bauen", "build"], ["Werkstatt / Blueprints", "workshop"], ["Lager & Ausrüstung", "inventory"], ["Datenterminal / Hochladen", "data"], ["Schiff", "ship"]]:
+	for entry in [["Bauen", "build"], ["Werkstatt / Blueprints", "workshop"], ["Lager & Ausrüstung", "inventory"], ["Datenterminal / Hochladen", "data"]]:
 		var action := _button(String(entry[0]), false)
 		action.add_theme_font_size_override("font_size", 13)
 		action.custom_minimum_size.y = 29
@@ -281,6 +286,10 @@ func _build() -> void:
 		_base_management_bar.add_child(action)
 		action.pressed.connect(_open_base_management.bind(String(entry[1])))
 	_base_management_bar.hide()
+	_flyout_scrim=ColorRect.new();_flyout_scrim.name="BaseFlyoutBackdrop";_flyout_scrim.color=Color(0.015,0.05,0.07,.16);_flyout_scrim.z_index=1;_workspace.add_child(_flyout_scrim);_flyout_scrim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);_flyout_scrim.hide()
+	_flyout_scrim.gui_input.connect(func(event:InputEvent):
+		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:_close_workspace_flyout())
+	_flyout_close=_button("×",false);_flyout_close.name="CloseBaseFlyout";_flyout_close.tooltip_text="Seitenfenster schließen";_flyout_close.z_index=3;_workspace.add_child(_flyout_close);_flyout_close.hide();_flyout_close.pressed.connect(_close_workspace_flyout)
 
 	_feedback = _label("", 15, GOLD)
 	_feedback.custom_minimum_size.y = 24
@@ -380,7 +389,7 @@ func _build_squad() -> void:
 
 
 func _build_equipment() -> void:
-	var content: VBoxContainer = _column("equipment", "Ausrüstung · Fokus")
+	var content: VBoxContainer = _column("equipment", "Lager & Ausrüstung")
 	var list: VBoxContainer = _scroll(content)
 	_identity_row = BoxContainer.new()
 	_identity_row.vertical = false
@@ -719,6 +728,9 @@ func refresh() -> void:
 	var mode: String = String(snapshot.get("mode", "squad"))
 	var changed_mode: bool = mode != _mode
 	_mode = mode
+	if _right_flyout_active:
+		var expected:String="squad" if _flyout_kind=="inventory" else ("jobs" if _flyout_kind=="jobs" else "services")
+		if _mode!=expected:_right_flyout_active=false
 	var campaign_ready: bool = not Dictionary(snapshot.get("singleplayer", {})).is_empty()
 	for key in ["jobs", "map"]:
 		_nav[key].disabled = not campaign_ready
@@ -744,7 +756,7 @@ func refresh() -> void:
 			button.add_theme_stylebox_override("normal", _style(Color("15505d") if key == _mode else PANEL, CYAN if key == _mode else Color("2b5361")))
 		for key in _workflow_labels:
 			(_workflow_labels[key] as Label).add_theme_color_override("font_color", GOLD if key == _mode else MUTED)
-		_workflow.visible = _mode != "base"
+		_workflow.visible = _mode != "base" and not _right_flyout_active
 	_set_options(_sort_selector, Array(snapshot.get("roster_sort_options", [])), String(snapshot.get("roster_sort_mode", "name_asc")))
 	_update_roster(Array(snapshot.get("roster", [])))
 	var team: Dictionary = Dictionary(snapshot.get("focused_fireteam", {}))
@@ -1064,7 +1076,7 @@ func _layout_columns() -> void:
 		var right_width: float = maxf(available.x - start_x, 0.0)
 		var footer_height: float = minf(250.0, available.y)
 		var top_height: float = maxf(available.y - footer_height - gap, 0.0)
-		var equipment_width: float = clampf(right_width * 0.38, 300.0, 520.0)
+		var equipment_width: float = clampf(right_width * 0.38, 380.0, 520.0)
 		rects["equipment"] = Rect2(start_x, 0, equipment_width, available.y)
 		scene_rect = Rect2(start_x + equipment_width + gap, 0, maxf(right_width - equipment_width - gap, 0.0), top_height)
 		rects["flight"] = Rect2(scene_rect.position.x, top_height + gap, scene_rect.size.x, footer_height)
@@ -1085,6 +1097,7 @@ func _layout_columns() -> void:
 		_reference_stage.size = scene_rect.size
 		_layout_reference_stage()
 	_layout_base_surface()
+	_layout_workspace_flyout()
 	if _identity_row != null:
 		var equipment_panel: Control = _columns.equipment
 		_identity_row.vertical = equipment_panel.size.x < 310.0
@@ -1097,11 +1110,61 @@ func _layout_columns() -> void:
 
 func _open_base_management(section: String) -> void:
 	_base_management_bar.hide()
+	_right_flyout_active=true;_flyout_kind=section
 	if section == "inventory":
 		_act("navigate", {"mode":"squad"})
+		_start_workspace_flyout_animation()
 		return
 	_act("navigate", {"mode":"services"})
 	_services_view.call("set_section", section)
+	_start_workspace_flyout_animation()
+
+
+func _navigate_from_sidebar(mode:String)->void:
+	_right_flyout_active=mode=="jobs"
+	_flyout_kind=mode if _right_flyout_active else ""
+	_act("navigate",{"mode":mode})
+	if _right_flyout_active:_start_workspace_flyout_animation()
+
+
+func _close_workspace_flyout()->void:
+	_right_flyout_active=false
+	_act("navigate",{"mode":"base"})
+
+
+func _workspace_flyout_panel()->Control:
+	if _flyout_kind=="inventory":return _columns.equipment
+	return _job_board if _flyout_kind=="jobs" else _services_view
+
+func is_workspace_flyout_open()->bool:
+	return _right_flyout_active
+
+
+func _layout_workspace_flyout()->void:
+	if _flyout_scrim==null:return
+	_flyout_scrim.visible=_right_flyout_active;_flyout_close.visible=_right_flyout_active
+	_focused_portrait.visible=not (_right_flyout_active and _flyout_kind=="inventory")
+	for node:Control in [_services_view,_job_board,_columns.equipment]:node.z_index=0
+	if not _right_flyout_active:
+		for node:Control in [_services_view,_job_board]:node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		return
+	var panel:=_workspace_flyout_panel()
+	var width:float=minf(_workspace.size.x,clampf(_workspace.size.x*.72,720,1040))
+	if _flyout_kind=="inventory":width=minf(_workspace.size.x,560)
+	for column:Control in _columns.values():column.visible=column==panel
+	_reference_stage.hide()
+	panel.z_index=2;panel.set_anchors_preset(Control.PRESET_TOP_LEFT);panel.size=Vector2(width,_workspace.size.y)
+	if _flyout_tween==null or not _flyout_tween.is_running():panel.position=Vector2.ZERO
+	_flyout_close.position=Vector2(width-44,8);_flyout_close.size=Vector2(34,30)
+
+
+func _start_workspace_flyout_animation()->void:
+	_layout_workspace_flyout()
+	if _flyout_tween!=null:_flyout_tween.kill()
+	var panel:=_workspace_flyout_panel();panel.position.x=-36;panel.modulate.a=.3
+	_flyout_tween=create_tween().set_parallel(true)
+	_flyout_tween.tween_property(panel,"position:x",0.0,.18).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_flyout_tween.tween_property(panel,"modulate:a",1.0,.18)
 
 
 func _close_base_navigation_after_exit() -> void:
@@ -1118,6 +1181,8 @@ func _close_flight_navigation_after_exit() -> void:
 
 
 func _terminal_requested(id: String) -> void:
+	if id=="refuel":_open_base_management("ship");return
+	if id=="jobs":_navigate_from_sidebar("jobs");return
 	var target: String = "personnel" if id == "personnel" else ("squad" if id == "team" else ("jobs" if id == "jobs" else ("services" if id == "refuel" else "mission")))
 	_act("navigate", {"mode": target})
 
@@ -1140,7 +1205,7 @@ func _update_base_surface(snapshot: Dictionary) -> void:
 		_base.call("configure_personnel_runtime", screen.call("get_base_personnel_runtime"), Callable(screen, "request_operation"))
 	var runtime: Dictionary = snapshot.get("singleplayer", {})
 	if runtime.is_empty():
-		_base.call("set_active", _mode == "base" and is_visible_in_tree())
+		_base.call("set_active", (_mode == "base" or _right_flyout_active) and is_visible_in_tree())
 		return
 	_base.call("set_transport_snapshot", runtime)
 	_ship_preview_context = _project_ship_context(runtime)
@@ -1157,7 +1222,7 @@ func _layout_base_surface() -> void:
 	# PanelContainer clamps an empty rectangle to its 16x12 style minimum.
 	# Only the actual computed workspace rectangle authorizes a 3D preview.
 	var has_preview: bool = _mode in ["squad", "mission"] and _preview_layout_rect.size.x >= 32.0 and _preview_layout_rect.size.y >= 32.0 and is_visible_in_tree()
-	if _mode == "base" and is_visible_in_tree():
+	if (_mode == "base" or _right_flyout_active) and is_visible_in_tree():
 		_reference_stage.hide()
 		_base.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_base.call("set_active", true)

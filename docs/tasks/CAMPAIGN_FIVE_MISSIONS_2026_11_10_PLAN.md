@@ -3,6 +3,13 @@
 Stand: 10.11.2026. Nutzerauftrag: Ablauf mit fünf Missionen, grafischem Baum und offenen Punkten festhalten. **Zielplanung, keine implementierte oder spielerisch abgenommene Kampagne.**
 
 **Folgeauftrag:** Die Umsetzung wurde anschließend vom Nutzer beauftragt.
+**Playtest-Ergänzung:** Anfangs ist nur Satellitendaten bergen sichtbar. Der
+erfolgreiche Abschluss einschließlich Heim-Upload schaltet jeweils den nächsten
+Auftrag frei und macht ihn sichtbar. Erster Auftraggeber: **Fragwürdige Geschäftsleute**.
+Auftraggeber werden als eigene Inhaltsidentitäten geführt. Ein späterer Ruf pro
+Auftraggeber ist vorgesehen; Skala, Zuwachs/Verlust, Schwellen und Auswirkungen
+sind offen und noch keine implementierten Spielregeln. Keine erfundenen Rufpunkte
+für bestehende Abschlüsse vergeben; künftiger State gehört zum Kampagnenowner.
 Aktueller Arbeitsstand und Prüfbelege: [Umbau-Arbeitsplan](CAMPAIGN_SKIRMISH_REBUILD_2026_11_10.md).
 Die nachfolgenden Doku-Grenzen beschreiben den ursprünglichen Planungsauftrag.
 

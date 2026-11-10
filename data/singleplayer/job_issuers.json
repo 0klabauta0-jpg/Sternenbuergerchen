@@ -1,0 +1,11 @@
+{
+  "issuers": {
+    "questionable_businesspeople": {
+      "id": "questionable_businesspeople",
+      "display_name": "Fragwürdige Geschäftsleute"
+    }
+  },
+  "jobs": {
+    "satellite_recovery": "questionable_businesspeople"
+  }
+}
