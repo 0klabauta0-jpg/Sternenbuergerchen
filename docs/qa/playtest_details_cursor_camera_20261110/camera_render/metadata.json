@@ -1,0 +1,103 @@
+{
+	"base_host_size": "(1920.0, 1080.0)",
+	"base_viewport_size": "(1920, 1080)",
+	"baseline_shader_path": "C:/tmp/sb-camera-render-quality/baseline_frontier_ground.gdshader",
+	"baseline_shader_sha256": "b60fef78ab33566425a2b1a31975245942109e733c47000f4859adc73f6f7ce3",
+	"camera_pitch": 40.0,
+	"camera_size": 60.0,
+	"candidate_shader_sha256": "0f32261d7e026e3b2c4a85ae47d8fea52ed8191ca1cd77a5abecb83fa05c96d9",
+	"captures": [
+		{
+			"camera_size": 60.0,
+			"frame_p50_ms": 1.041,
+			"frame_p95_ms": 1.74,
+			"msaa_3d": 0,
+			"path": "C:/tmp/sb-camera-render-quality/shader_comparison/baseline_size60_aa_off.png",
+			"save_error": 0,
+			"sha256": "a5091c9c8ff63a756691361d9fb5037be25d045456e67a1e790587f3864e7f34",
+			"shader_version": "baseline"
+		},
+		{
+			"camera_size": 60.0,
+			"frame_p50_ms": 0.959,
+			"frame_p95_ms": 8.754,
+			"msaa_3d": 1,
+			"path": "C:/tmp/sb-camera-render-quality/shader_comparison/baseline_size60_msaa_2x.png",
+			"save_error": 0,
+			"sha256": "c6e21d279f2bcc0495988b346c2b3dae2effaba7ccc22f05ea3f27d860410f5c",
+			"shader_version": "baseline"
+		},
+		{
+			"camera_size": 16.0,
+			"frame_p50_ms": 1.015,
+			"frame_p95_ms": 9.555,
+			"msaa_3d": 0,
+			"path": "C:/tmp/sb-camera-render-quality/shader_comparison/baseline_size16_aa_off.png",
+			"save_error": 0,
+			"sha256": "b6be6c3364743db5e22e95019062ed949408060dcabfbf936ac7cc8d4c97e6e5",
+			"shader_version": "baseline"
+		},
+		{
+			"camera_size": 16.0,
+			"frame_p50_ms": 0.931,
+			"frame_p95_ms": 1.775,
+			"msaa_3d": 1,
+			"path": "C:/tmp/sb-camera-render-quality/shader_comparison/baseline_size16_msaa_2x.png",
+			"save_error": 0,
+			"sha256": "0fdfba3a95c6fc1c65e7b08d89ac823c72dc5b98afa29bfa96f382e85eaaa22e",
+			"shader_version": "baseline"
+		},
+		{
+			"camera_size": 60.0,
+			"frame_p50_ms": 0.948,
+			"frame_p95_ms": 1.545,
+			"msaa_3d": 0,
+			"path": "C:/tmp/sb-camera-render-quality/shader_comparison/candidate_size60_aa_off.png",
+			"save_error": 0,
+			"sha256": "dbd7734a7dcbc6ea4d62fc8bdba3a40597c9045c9e69f465d036917405ae9486",
+			"shader_version": "candidate"
+		},
+		{
+			"camera_size": 60.0,
+			"frame_p50_ms": 0.95,
+			"frame_p95_ms": 4.676,
+			"msaa_3d": 1,
+			"path": "C:/tmp/sb-camera-render-quality/shader_comparison/candidate_size60_msaa_2x.png",
+			"save_error": 0,
+			"sha256": "ddc141860eae559198dd63e2de235cbc2cddc23a2e444857a454f98d98025288",
+			"shader_version": "candidate"
+		},
+		{
+			"camera_size": 16.0,
+			"frame_p50_ms": 0.96,
+			"frame_p95_ms": 1.459,
+			"msaa_3d": 0,
+			"path": "C:/tmp/sb-camera-render-quality/shader_comparison/candidate_size16_aa_off.png",
+			"save_error": 0,
+			"sha256": "984c1a2cb2e8bc40a06d7b37eacabcfc36f134a527e0a7982714d973898344bb",
+			"shader_version": "candidate"
+		},
+		{
+			"camera_size": 16.0,
+			"frame_p50_ms": 0.873,
+			"frame_p95_ms": 2.27,
+			"msaa_3d": 1,
+			"path": "C:/tmp/sb-camera-render-quality/shader_comparison/candidate_size16_msaa_2x.png",
+			"save_error": 0,
+			"sha256": "5bb65cf472cb36ff28ad301cc8d9e1e43984feb3b8d9d37c356d4cab5efe1604",
+			"shader_version": "candidate"
+		}
+	],
+	"display_server": "Windows",
+	"driver": "d3d12",
+	"gpu_name": "NVIDIA GeForce RTX 4070 Ti SUPER",
+	"original_msaa_3d": 1,
+	"render_container_size": "(1920.0, 1080.0)",
+	"render_viewport_size": "(1920, 1080)",
+	"renderer": "forward_plus",
+	"root_size": "(1920, 1080)",
+	"scaling_3d_scale": 1.0,
+	"screen_space_aa": 0,
+	"stretch_shrink": 1,
+	"taa": false
+}

@@ -7,7 +7,7 @@ const STORE: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const THEME: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const FIXTURE_PROFILE_ID := "ui_native_shell_fixture"
 const LIBRARY_PATH := "MenuRail/MenuMargin/MenuVBox/MenuButtons/TeamLibraryPanel"
-const SHEET_PATH := "CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll/GeneratedSheetContent"
+const SHEET_PATH := "CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/CharacterDetailsColumns/PopupScroll/GeneratedSheetContent"
 
 var _passed := 0
 var _failed := 0

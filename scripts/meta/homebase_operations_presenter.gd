@@ -694,22 +694,11 @@ func refresh() -> void:
 	_equipment_palette_toggle.visible=inventory.is_empty()
 	if not inventory.is_empty():
 		_equipment_palette.visible=false
-		var accessible: Array=[]
-		if not bool(focused.get("busy",true)) or bool(focused.get("can_edit",false)):
-			accessible=["base:homebase","unit:"+_focused_id+":backpack"]
-			var selected_id:=String(Dictionary(snapshot.get("selected_craft",{})).get("id",""))
-			for ship in Array(singleplayer.get("crafts",[])):
-				if String(ship.get("craft_id",""))==selected_id and bool(ship.get("visible_on_pad",false)): accessible.append("craft:"+selected_id)
-		var adapter: Node=_owner_screen().get_parent().get("_singleplayer_runtime")
-		var access_context: Dictionary=adapter.call("get_inventory_context",_focused_id,String(Dictionary(snapshot.get("selected_craft",{})).get("id",""))) if adapter!=null else {}
-		accessible=Array(access_context.get("accessible_containers",[]))
-		_inventory_panel.update_snapshot(inventory,focused,String(Dictionary(snapshot.get("selected_craft",{})).get("id","")),accessible,bool(access_context.get("equipment_allowed",true)))
-		var rest_person: Dictionary={}
-		var owner: Node=_screen.get_ref().call("get_base_personnel_runtime") if _screen!=null and _screen.get_ref()!=null else null
-		if owner!=null:
-			for person: Dictionary in owner.call("get_snapshot").get("units",[]):
-				if String(person.unit_id)==_focused_id: rest_person=person; break
-		_inventory_panel.update_rest_snapshot(rest_person)
+		var view: Dictionary = screen.call("get_personnel_inventory_view", _focused_id, snapshot)
+		_inventory_panel.update_snapshot(view.inventory, view.unit, view.craft_id, view.accessible, view.equipment_allowed)
+		_inventory_panel.update_rest_snapshot(view.person)
+	if bool(screen.get("_character_sheet_open")):
+		screen.call("_update_character_inventory", snapshot)
 	_update_flight(Dictionary(snapshot.get("selected_craft", {})), snapshot)
 	if changed_mode:
 		_layout_columns()
@@ -1063,7 +1052,9 @@ func _project_ship_context(runtime: Dictionary) -> Dictionary:
 			"stopped": context["caption"] = "Im Weltraum · Sprung abgebrochen, Position gehalten"
 			"approach": context["caption"] = "Ortsanflug · Planetenorbit wird verlassen"
 		return context
-	if not craft.is_empty() and bool(craft.get("visible_on_pad", false)) and String(craft.get("location_id", "")) == "homebase" and not bool(craft.get("busy", false)):
+	if not Dictionary(craft.get("pad_visual",{})).is_empty():
+		return {"kind":"base_pad","phase":String(craft.pad_visual.phase),"craft_id":_craft_id,"landing_pad_id":String(craft.get("landing_pad_id","")),"caption":"Mondbasis · An-/Abflug am tatsächlichen Landepad"}
+	if not craft.is_empty() and bool(craft.get("visible_on_pad", false)) and String(craft.get("location_id", "")) == "homebase":
 		return {"kind": "base_pad", "phase": "grounded", "craft_id": _craft_id, "landing_pad_id": String(craft.get("landing_pad_id", "")), "caption": "Mondbasis · Schiff auf seinem Landepad"}
 	var location_id: String = String(craft.get("location_id", ""))
 	var location: Dictionary = Dictionary(Dictionary(runtime.get("campaign", {})).get("locations", {})).get(location_id, {})

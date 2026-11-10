@@ -60,3 +60,6 @@ im Kampagneninventar.
 
 Verifier prueft Erhaltung, falschen Slot, vollen Container, unberechtigten Zugriff,
 ungueltige Menge/Item-ID, Replay/Konflikt und Export/Restore ohne Duplikation.
+
+## Playtest-Revision: Details und Weltwahl — 10.11.2026
+Doppelklick auf NPC-Karten und echte Basis-NPCs öffnet dasselbe Charakterblatt. Links sind Eigenschaften/Kernwerte und Herleitungen mit einzelnen Faktoren untereinander, rechts liest das bestehende Inventarpanel den endlichen Supply-/Loadoutbestand derselben Person. Kompakte Lesedarstellung verwendet mindestens15px-Schrift. Wechselnde Person oder Zugriffsgrenze verwirft nur UI-Gegenstandsauswahl; Commands und Ablehnungsgründe bleiben beim vorhandenen Owner. Linksklick auf ein Basisschiff wählt seine Detailansicht und löst kein Boarding aus. Leerer Linksklick wählt ab. Das schwebende Servicepanel erscheint im Basismodus nur für ein ausgewähltes Schiff; die explizite Serviceseite besitzt weiterhin ihre eigene Schiffs-Auswahl.

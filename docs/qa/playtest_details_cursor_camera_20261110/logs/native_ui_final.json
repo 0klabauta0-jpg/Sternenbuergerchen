@@ -1,0 +1,27 @@
+{
+  "label": "native_ui_r06",
+  "exit_code": 0,
+  "errors": 0,
+  "warnings": 2,
+  "hidden_parent_visible": false,
+  "profile": "C:\\dev\\SternenBuergerchen\\output\\playtest_details_cursor_camera_20261110\\profiles\\native_ui_r06",
+  "arguments": [
+    "--display-driver",
+    "windows",
+    "--rendering-driver",
+    "d3d12",
+    "--rendering-method",
+    "forward_plus",
+    "--audio-driver",
+    "Dummy",
+    "--single-window",
+    "--resolution",
+    "1280x720",
+    "--wid",
+    "3346644",
+    "--path",
+    "C:/dev/SternenBuergerchen-worktrees/campaign-main-exe-20261110",
+    "--script",
+    "res://scripts/tests/playtest_world_selection_context_verifier.gd"
+  ]
+}

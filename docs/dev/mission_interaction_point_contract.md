@@ -738,3 +738,6 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.
+
+## Kontextcursor — 10.11.2026
+Bei ausgewähltem Trupp projiziert ein getakteter Cursor die bestehende gebundene Weltaktion unter dem Zeiger: Daten sichern, Einsammeln, Abbauen/Bergen oder beim eigenen gelandeten Schiff Einsteigen/Rückflug. Kein unbekanntes Vorkommen oder neuer Lootowner entsteht dadurch. Hover verändert keine Befehle oder Missionsgates. Rechtsklick erstellt bei benutzbarem Ziel den vorhandenen Use-Intent; GO und tatsächliche Bedienzeit bleiben nötig. Außerhalb der Reichweite wird zunächst der gewöhnliche Bewegungs-Intent erstellt. Schiffs-Extraktion benutzt den bestehenden autoritativen Sammel-/Boardingpfad. Versteckte Missionen, Abwahl und UI-Flächen dürfen weder Hinweise noch Kontextaktionen behalten.

@@ -43,7 +43,14 @@ func _ready() -> void:
 	var future:=Label.new(); future.text="Helm / Aufsatz: später verfügbar"; future.add_theme_font_size_override("font_size",13); future.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; add_child(future)
 
 func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, accessible: Array, equipment_allowed: bool=true) -> void:
-	_unit_id=String(unit.get("id","")); _craft_id=craft_id
+	var next_id := String(unit.get("id",""))
+	var selected_source := String(_selection.get("source_container_id",""))
+	var selected_item := String(_selection.get("item_id",""))
+	var selected_stock: Dictionary = Dictionary(Dictionary(inventory.get(selected_source,{})).get("items",{}))
+	if next_id != _unit_id or not accessible.has(selected_source) or int(selected_stock.get(selected_item,0)) <= 0:
+		_selection.clear()
+		if _selected != null: _selected.text = "Gegenstand anklicken oder ziehen"
+	_unit_id=next_id; _craft_id=craft_id
 	var signature:=JSON.stringify([inventory,unit.get("loadout",{}),_unit_id,craft_id,accessible,equipment_allowed])
 	if signature==_signature: return
 	_signature=signature

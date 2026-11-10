@@ -64,6 +64,15 @@ func _run() -> void:
 		toggle.pressed.emit()
 		_check(values.visible and host.find_child("ReadOnlyMetricBar_accuracy", true, false) != null, "Values action reveals the real read-only stat bars")
 		_check(toggle.size_flags_horizontal == Control.SIZE_SHRINK_BEGIN, "Details action keeps its intrinsic width")
+	var readable := true
+	for label: Label in host.find_children("*", "Label", true, false):
+		if not label.text.is_empty() and label.get_theme_font_size("font_size") < 15:
+			readable = false
+	_check(readable, "Compact read-only body and derivation labels use at least 15px fonts")
+	var suitability := host.find_child("CharacterSheetDetails_suitability", true, false) as Control
+	_check(values.get_index() < suitability.get_index(), "Core values precede all role derivations")
+	var awareness_label := host.find_child("ReadOnlyMetricLabel_awareness", true, false) as Label
+	_check(awareness_label != null and not awareness_label.clip_text and awareness_label.autowrap_mode != TextServer.AUTOWRAP_OFF, "Larger compact metric labels wrap instead of clipping")
 	var trait_label := host.find_child("TraitLabel_calm", true, false) as Label
 	_check(trait_label != null and trait_label.tooltip_text.contains("Führung"), "Trait effect remains accessible on hover")
 	_check(pilot.to_dict() == before, "Rendering and revealing details mutate no profile or assignment data")

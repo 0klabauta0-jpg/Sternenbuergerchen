@@ -738,6 +738,9 @@ var _last_planning_state_issue: String = ""
 
 
 func _ready() -> void:
+	var context_cursor := preload("res://scripts/ui/mission_context_cursor.gd").new()
+	context_cursor.name = "MissionContextCursor"
+	add_child(context_cursor)
 	set_process(true)
 	set_process_unhandled_input(true)
 	_ensure_mission_runtime_read_models()

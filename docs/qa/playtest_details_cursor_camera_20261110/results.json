@@ -1,0 +1,79 @@
+[
+  {
+    "test": "actual_sortie.log",
+    "errors": 0,
+    "summary": [
+      "SINGLEPLAYER_LOOP_RESULTS passed=55 failed=0"
+    ]
+  },
+  {
+    "test": "campaign_start_integration_test.log",
+    "errors": 0,
+    "summary": [
+      "CAMPAIGN_START_RESULTS passed=13 failed=0"
+    ]
+  },
+  {
+    "test": "campaign_stationary_use_verifier.log",
+    "errors": 0,
+    "summary": [
+      "STATIONARY_USE checks=21 failures=0 displacement=0.0 elapsed=3.01666666666666"
+    ]
+  },
+  {
+    "test": "character_sheet_compact_verifier.log",
+    "errors": 0,
+    "summary": [
+      "CHARACTER_SHEET_COMPACT passed=22 failed=0"
+    ]
+  },
+  {
+    "test": "playtest_20261110_inventory_runtime_verifier.log",
+    "errors": 0,
+    "summary": [
+      "INVENTORY_RUNTIME failures=0"
+    ]
+  },
+  {
+    "test": "playtest_cursor_camera_verifier.log",
+    "errors": 0,
+    "summary": [
+      "CURSOR_CAMERA checks=52 failures=0"
+    ]
+  },
+  {
+    "test": "playtest_details_inventory_verifier.log",
+    "errors": 0,
+    "summary": [
+      "PLAYTEST_DETAILS_INVENTORY passed=28 failed=0"
+    ]
+  },
+  {
+    "test": "playtest_flight_polish_verifier.log",
+    "errors": 0,
+    "summary": [
+      "FLIGHT_POLISH 412 checks, 0 failures"
+    ]
+  },
+  {
+    "test": "playtest_mission_context_cursor_verifier.log",
+    "errors": 0,
+    "summary": [
+      "MISSION_CONTEXT_CURSOR checks=12 failures=0"
+    ]
+  },
+  {
+    "test": "service_selection.log",
+    "errors": 0,
+    "summary": [
+      "SERVICE_WORLD_SELECTION failures=0"
+    ]
+  },
+  {
+    "test": "native_ui_final",
+    "exit": 0,
+    "errors": 0,
+    "checks": 36,
+    "failures": 0
+  }
+]

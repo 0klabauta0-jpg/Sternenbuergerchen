@@ -2,6 +2,7 @@ extends Control
 ## Base presentation. Real personnel state and actions remain with runtime owners.
 
 signal terminal_open_requested(id: String)
+signal world_selection_changed(kind: String, id: String)
 signal exploration_exit_requested
 
 const MAP_PATH: String = "res://maps/homebase_frontier_exploration.json"
@@ -110,6 +111,9 @@ func _select_person(id: String) -> bool:
 	if owner == null or owner.call("get_actor", id) == null:
 		return false
 	_selected_person_id = id
+	_selected_world_craft_id = ""
+	world_selection_changed.emit("person",id)
+	_manual_camera = false
 	_avatar = owner.call("get_actor", id)
 	if _person_visuals.has(id):
 		_model = _person_visuals[id].model
@@ -120,6 +124,9 @@ func _select_person(id: String) -> bool:
 
 
 func _select_person_at(point: Vector2) -> bool:
+	for key in _screen_world_labels:
+		var label: Label=_screen_world_labels[key]
+		if String(key).begins_with("person:") and label.visible and Rect2(label.position,label.size).has_point(point): return _select_person(String(key).trim_prefix("person:"))
 	var nearest: String = ""
 	var distance: float = 30.0
 	for id: String in _person_visuals:
@@ -190,7 +197,7 @@ func _build_personnel_controls() -> void:
 func _update_personnel_controls() -> void:
 	if _person_panel == null or _personnel_runtime() == null:
 		return
-	_person_panel.visible = _active and not _pad_preview
+	_person_panel.visible = _active and not _pad_preview and not _selected_person_id.is_empty()
 	var units: Array = _personnel_runtime().call("get_snapshot").get("units", [])
 	if _person_selector.item_count != units.size():
 		_person_selector.clear()
@@ -221,7 +228,8 @@ func _update_personnel_visuals() -> void:
 		if not _person_visuals.has(id):
 			continue
 		var entry: Dictionary = _person_visuals[id]
-		(entry.label as Label3D).text=String(person.get("name",person.get("display_name",id)))
+		entry["display_name"]=String(person.get("name",person.get("display_name",id)))
+		(entry.label as Label3D).text="" if _screen_labels_host!=null else String(entry.display_name)
 		var model: Node3D = entry.model
 		var actor: Node2D = _personnel_runtime().call("get_actor", id)
 		var status: String = String(person.get("status", "outside"))
@@ -244,7 +252,7 @@ func _update_personnel_visuals() -> void:
 			model.rotation.y = sleeping_rotation
 		if moving:
 			model.rotation.y = atan2(displacement.x, displacement.z)
-			if id == _selected_person_id:
+			if id == _selected_person_id and not _manual_camera:
 				_view.call("focus_world_position", actor.position)
 		(entry.marker as Node3D).position = position_3d
 		(entry.label as Label3D).modulate = Color("ffe08b") if id == _selected_person_id else Color("eaf2df")
@@ -297,11 +305,23 @@ var _transport_projection: Array = []
 var _transport_signature: String = ""
 var _craft_visuals: Dictionary = {}
 var _focused_craft_id: String = ""
+var _camera_dragging := false
+var _camera_drag_last := Vector2.ZERO
+var _manual_camera := false
+var _context_elapsed := 0.0
+var _world_context_hint: Label
+var _base_owns_cursor := false
+var _selected_world_craft_id := ""
+var _screen_world_labels: Dictionary = {}
+var _screen_labels_host: Control
+const CONTEXT_ACTIONS = preload("res://scripts/mission/world_context_action_contract.gd")
 var _pad_preview: bool = false
 var _preview_surface_size: Vector2 = Vector2.ZERO
 
 
 func set_pad_preview(active: bool, craft_id: String = "") -> void:
+	_clear_base_context()
+	if _screen_labels_host!=null: _screen_labels_host.visible=not active
 	if not active:
 		set_active(false)
 		return
@@ -316,6 +336,8 @@ func set_pad_preview(active: bool, craft_id: String = "") -> void:
 		return
 	set_active(true)
 	_pad_preview = true
+	if _screen_labels_host!=null: _screen_labels_host.hide()
+	_clear_base_context()
 	_preview_surface_size = size
 	_clear_keyboard_input()
 	if _personnel_runtime() == null:
@@ -335,7 +357,7 @@ func set_pad_preview(active: bool, craft_id: String = "") -> void:
 	get_node("ExitExploration").visible = false
 	if _drone_helper != null:
 		_drone_helper.call("set_operating_visual", false)
-	set_process(false)
+	set_process(true)
 	set_physics_process(false)
 	set_process_unhandled_key_input(false)
 	focus_craft_pad(craft_id)
@@ -370,6 +392,7 @@ func focus_craft_pad(craft_id: String) -> bool:
 	if pad.is_empty():
 		return false
 	_focused_craft_id = craft_id
+	if _pad_preview: _view.set("_camera_size",8.5)
 	_view.call("focus_world_position", _world_at_grid(pad.grid))
 	_view.call("_request_viewport_redraw")
 	if _pad_preview:
@@ -394,7 +417,7 @@ func _update_craft_projection() -> void:
 		var craft_id: String = String(craft.get("craft_id", ""))
 		var pad_id: String = String(craft.get("landing_pad_id", ""))
 		var pad: Dictionary = _pad_definition(pad_id)
-		if craft_id.is_empty() or pad.is_empty() or not bool(craft.get("visible_on_pad", false)) or String(craft.get("location_id", "")) != "homebase" or bool(craft.get("busy", false)) or occupied_pads.has(pad_id):
+		if craft_id.is_empty() or pad.is_empty() or (Dictionary(craft.get("pad_visual",{})).is_empty() and (not bool(craft.get("visible_on_pad", false)) or String(craft.get("location_id", "")) != "homebase")) or occupied_pads.has(pad_id):
 			continue
 		present[craft_id] = true
 		occupied_pads[pad_id] = craft_id
@@ -403,6 +426,7 @@ func _update_craft_projection() -> void:
 		if _craft_visuals.has(craft_id):
 			var previous: Dictionary = _craft_visuals[craft_id]
 			if String(previous.model_path) == model_path and String(previous.landing_pad_id) == pad_id:
+				_apply_pad_flight_display(previous,craft)
 				continue
 			(previous.node as Node3D).queue_free()
 		var owner := Node3D.new()
@@ -416,6 +440,8 @@ func _update_craft_projection() -> void:
 			if model != null:
 				owner.add_child(model)
 				model.rotation_degrees.y = float(identity.get("root_rotation_y_degrees", 0.0))
+				if String(identity.get("asset_id",""))=="cutlass_01" or String(identity.get("model_id","")).contains("cutlass") or model_path.to_lower().contains("cutlass"):
+					var exhaust: Node3D=FLIGHT_VISUAL_SCRIPT.new(); exhaust.name="ReadOnlyFlightVisual"; model.add_child(exhaust); exhaust.configure_cutlass_ref03()
 		var label := Label3D.new()
 		label.text = SHIP_VISUALS.get_ui_display_name(craft) + " · " + craft_id
 		label.font_size = 38
@@ -424,6 +450,7 @@ func _update_craft_projection() -> void:
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		owner.add_child(label)
 		_craft_visuals[craft_id] = {"node": owner, "landing_pad_id": pad_id, "model_path": model_path}
+		_apply_pad_flight_display(_craft_visuals[craft_id],craft)
 	for craft_id in _craft_visuals.keys():
 		if not present.has(craft_id):
 			(_craft_visuals[craft_id].node as Node3D).queue_free()
@@ -465,6 +492,7 @@ func set_active(active: bool) -> void:
 	if not is_node_ready():
 		return
 	visible = active
+	if _screen_labels_host!=null: _screen_labels_host.visible=active
 	if active and not _initialized:
 		_initialize_runtime()
 	if active and was_preview and _view != null:
@@ -484,6 +512,8 @@ func set_active(active: bool) -> void:
 	if _drone_helper != null:
 		_drone_helper.call("set_operating_visual", active)
 	if not active:
+		_camera_dragging = false
+		_clear_base_context()
 		_clear_keyboard_input()
 		if _sim != null and _personnel_runtime() == null:
 			_sim.call("clear_queues")
@@ -561,7 +591,7 @@ func _initialize_runtime() -> void:
 	_view.call("configure_from_map", _map_data)
 	_view.set("_camera_size", 16.0)
 	_view.set("_camera_yaw_degrees", 24.0)
-	_view.set("_camera_pitch_degrees", 50.0)
+	_view.set("_camera_pitch_degrees", VIEW_SCRIPT.DEFAULT_CAMERA_PITCH_DEGREES)
 	_view.call("focus_world_position", _avatar.position)
 	var world: Node3D = _view.get_node("ViewportContainer/SubViewport/WorldRoot") as Node3D
 	var stage := Node3D.new()
@@ -710,7 +740,17 @@ func _on_world_gui_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseButton and event.pressed:
 		_host.grab_focus()
-		if event.button_index == MOUSE_BUTTON_RIGHT:
+		if event.button_index == MOUSE_BUTTON_MIDDLE:
+			_camera_dragging = true
+			_camera_drag_last = get_viewport().get_mouse_position()
+			_manual_camera = true
+			_host.accept_event()
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			var context := get_base_world_context(event.position)
+			if not context.is_empty():
+				activate_base_world_context(event.position)
+				_host.accept_event()
+				return
 			var local: Vector2 = event.position * Vector2(_viewport.size) / _host.size.max(Vector2.ONE)
 			var target: Variant = _view.call("screen_to_world_plane_position", local)
 			if typeof(target) == TYPE_VECTOR2:
@@ -719,18 +759,22 @@ func _on_world_gui_input(event: InputEvent) -> void:
 				request_walk_to(Vector2(target))
 			_host.accept_event()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_view.call("zoom_camera", 1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1.0)
+			_manual_camera = true
+			_view.call("zoom_camera_at_screen_position", 1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else -1.0, event.position * Vector2(_viewport.size) / _host.size.max(Vector2.ONE))
 			_host.accept_event()
 		elif event.button_index == MOUSE_BUTTON_LEFT:
 			if _select_person_at(event.position):
+				if event.double_click: _personnel_action("details")
 				_host.accept_event()
 				return
-			for terminal in _terminals:
-				var point: Vector2 = _view.call("world_to_screen_position", terminal["world_position"])
-				if point.distance_to(event.position) <= 38.0:
-					request_terminal(String(terminal["id"]))
-					_host.accept_event()
-					break
+			var context := get_base_world_context(event.position)
+			if not context.is_empty() and context.kind=="ship":
+				select_world_craft(String(context.id))
+				_host.accept_event()
+				return
+			clear_world_selection()
+			_host.accept_event()
+			return
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -780,8 +824,14 @@ func _clear_keyboard_input() -> void:
 
 
 func _process(delta: float) -> void:
-	if _pad_preview or not _active or not _initialized:
-		return
+	if not _active or not _initialized: return
+	_advance_pad_flight_effects(delta)
+	if _pad_preview: return
+	_context_elapsed += delta
+	if _context_elapsed >= .1:
+		_context_elapsed = 0.0
+		_refresh_base_context()
+		_refresh_screen_world_labels()
 	_update_avatar_visual()
 	_personnel_ui_elapsed -= delta
 	if _personnel_runtime() != null and _personnel_ui_elapsed <= 0.0:
@@ -805,7 +855,7 @@ func _update_avatar_visual() -> void:
 	if moving:
 		_focused_craft_id = ""
 		_model.rotation.y = atan2(displacement.x, displacement.z)
-		_view.call("focus_world_position", _avatar.position)
+		if not _manual_camera: _view.call("focus_world_position", _avatar.position)
 	if moving != _walking and _player != null:
 		var clip: String = _walk_clip if moving else _idle_clip
 		if not clip.is_empty():
@@ -1070,3 +1120,167 @@ func _sync_capacity_visuals(stage: Node3D) -> void:
 		visual.set_meta("landing_pad_id",String(pad.id))
 		visual.call("build",Vector2(float(pad.plane[0]),float(pad.plane[1])),Vector2(float(pad.size[0]),float(pad.size[1])),String(pad.designation))
 		visual.position.y=float(pad.get("surface_y",0))-PAD_SCRIPT.DECK_HEIGHT
+
+func _input(event: InputEvent) -> void:
+	if not _active or _pad_preview or not is_visible_in_tree(): _camera_dragging=false; return
+	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_MIDDLE and not event.pressed:
+		_camera_dragging=false
+	elif event is InputEventMouseMotion and _camera_dragging:
+		var transform := _host.get_global_transform_with_canvas().affine_inverse()
+		var scale := Vector2(_viewport.size)/_host.size.max(Vector2.ONE)
+		_view.call("pan_camera_between_screen_positions",(transform*_camera_drag_last)*scale,(transform*event.position)*scale)
+		_camera_drag_last=event.position
+		get_viewport().set_input_as_handled()
+
+func _notification(what: int) -> void:
+	if what in [NOTIFICATION_WM_WINDOW_FOCUS_OUT,NOTIFICATION_EXIT_TREE]:
+		_camera_dragging=false
+		_clear_base_context()
+
+func get_base_world_context(point: Vector2) -> Dictionary:
+	if not _active or _pad_preview or _personnel_runtime()==null: return {}
+	var scale := _host.size.max(Vector2.ONE)/Vector2(_viewport.size).max(Vector2.ONE)
+	for key in _screen_world_labels:
+		var label: Label=_screen_world_labels[key]
+		if not label.visible or not Rect2(label.position,label.size).has_point(point): continue
+		if String(key).begins_with("ship:"): return {"id":String(key).trim_prefix("ship:"),"kind":"ship","label":"Einsteigen"}
+	var candidates: Array=[]
+	for id in _craft_visuals:
+		var entry: Dictionary=_craft_visuals[id]
+		var pad: Dictionary=_pad_definition(String(entry.landing_pad_id))
+		if pad.is_empty(): continue
+		candidates.append({"id":id,"kind":"ship","label":"Einsteigen","screen_position":Vector2(_view.call("world_to_screen_position",_world_at_grid(pad.grid)))*scale})
+	for terminal: Dictionary in _terminals:
+		candidates.append({"id":terminal.id,"kind":"terminal","label":String(terminal.get("title","Benutzen")),"blocked":not bool(terminal.get("enabled",true)),"screen_position":Vector2(_view.call("world_to_screen_position",terminal.world_position))*scale})
+	return CONTEXT_ACTIONS.choose(point,candidates)
+
+func activate_base_world_context(point: Vector2) -> Dictionary:
+	var action:=get_base_world_context(point)
+	if action.is_empty(): return {"ok":false,"reason":"no_target"}
+	if action.get("blocked",false): return {"ok":false,"reason":"unavailable"}
+	if action.kind=="ship" and _selected_person_id.is_empty(): return {"ok":false,"message":"Zuerst eine Person auswählen"}
+	if action.kind=="ship": return _personnel_action("base_board",{"craft_id":String(action.id)})
+	return {"ok":request_terminal(String(action.id))}
+
+func _refresh_base_context() -> void:
+	if _world_context_hint==null:
+		_world_context_hint=Label.new(); _world_context_hint.name="BaseWorldContextHint"; _world_context_hint.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		_world_context_hint.add_theme_font_size_override("font_size",16); add_child(_world_context_hint)
+	var point := _host.get_local_mouse_position()
+	var action:=get_base_world_context(point) if Rect2(Vector2.ZERO,_host.size).has_point(point) and get_viewport().gui_get_hovered_control()==_host and not _camera_dragging else {}
+	if action.is_empty(): _clear_base_context(); return
+	_world_context_hint.text="Schiffdetails · Linksklick" if action.kind=="ship" and _selected_person_id.is_empty() else String(action.label)+(" · nicht verfügbar" if action.get("blocked",false) else " · Rechtsklick")
+	_world_context_hint.position=get_local_mouse_position()+Vector2(18,22); _world_context_hint.show()
+	Input.set_default_cursor_shape(Input.CURSOR_FORBIDDEN if action.get("blocked",false) else Input.CURSOR_POINTING_HAND); _base_owns_cursor=true
+
+func _clear_base_context() -> void:
+	if _world_context_hint!=null: _world_context_hint.hide()
+	if _base_owns_cursor: Input.set_default_cursor_shape(Input.CURSOR_ARROW); _base_owns_cursor=false
+
+func get_selected_world_craft_id() -> String:
+	return _selected_world_craft_id
+
+func select_world_craft(craft_id: String) -> bool:
+	if not _craft_visuals.has(craft_id): return false
+	_selected_world_craft_id=craft_id
+	_selected_person_id=""
+	world_selection_changed.emit("ship",craft_id)
+	_update_personnel_controls()
+	return true
+
+func clear_world_selection() -> void:
+	_selected_person_id=""
+	_selected_world_craft_id=""
+	world_selection_changed.emit("","")
+	_update_personnel_controls()
+
+func _refresh_screen_world_labels() -> void:
+	if _screen_labels_host==null:
+		_screen_labels_host=Control.new(); _screen_labels_host.name="ScreenWorldLabels"; _screen_labels_host.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		add_child(_screen_labels_host)
+	var entries: Array=[]
+	var removed_world_text := false
+	var overview_labels := float(_view.call("get_camera_size"))>32.0
+	for id in _person_visuals:
+		var actor: Node2D=_personnel_runtime().call("get_actor",id)
+		var entry: Dictionary=_person_visuals[id]
+		removed_world_text = (entry.label as Label3D).visible or removed_world_text
+		(entry.label as Label3D).hide()
+		if actor!=null and (entry.model as Node3D).visible and (not overview_labels or id==_selected_person_id):
+			entries.append({"id":"person:"+id,"text":String(entry.get("display_name",(entry.label as Label3D).text)),"position":actor.position})
+	for id in _terminal_labels:
+		removed_world_text = (_terminal_labels[id] as Label3D).visible or removed_world_text
+		(_terminal_labels[id] as Label3D).text=""
+		(_terminal_labels[id] as Label3D).hide()
+	for terminal: Dictionary in _terminals:
+		if overview_labels and String(terminal.id) not in ["personnel","team","flightdeck"]: continue
+		entries.append({"id":"terminal:"+String(terminal.id),"text":String(terminal.title),"position":terminal.world_position})
+	for id in _craft_visuals:
+		var craft: Dictionary=_craft_visuals[id]
+		for child in (craft.node as Node3D).get_children():
+			if child is Label3D:
+				removed_world_text=child.visible or removed_world_text
+				child.text=""
+				child.hide()
+		if overview_labels and id!=_selected_world_craft_id: continue
+		entries.append({"id":"ship:"+id,"text":SHIP_VISUALS.get_ui_display_name(_find_projected_craft(id)),"position":_world_at_grid(_pad_definition(String(craft.landing_pad_id)).grid)})
+	var shown: Dictionary={}
+	var occupied: Array[Rect2]=[]
+	var scale := _host.size.max(Vector2.ONE)/Vector2(_viewport.size).max(Vector2.ONE)
+	for entry: Dictionary in entries:
+		var point: Vector2=Vector2(_view.call("world_to_screen_position",entry.position))*scale+_host.position
+		if not Rect2(_host.position,_host.size).has_point(point): continue
+		var label: Label=_screen_world_labels.get(entry.id)
+		if label==null:
+			label=Label.new(); label.name="WorldLabel_"+String(entry.id).validate_node_name(); label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+			label.add_theme_font_size_override("font_size",16); label.add_theme_color_override("font_shadow_color",Color.BLACK); label.add_theme_constant_override("shadow_outline_size",3)
+			_screen_labels_host.add_child(label); _screen_world_labels[entry.id]=label
+		label.text=String(entry.text); label.reset_size(); label.size=label.get_combined_minimum_size()
+		var rect:=Rect2(point-Vector2(label.size.x*.5,label.size.y+10),label.size)
+		for attempt in range(mini(entries.size()+1,48)):
+			if not occupied.any(func(other:Rect2):return other.grow(3).intersects(rect)): break
+			rect.position.y-=maxf(label.size.y+6,22.0)
+		label.position=rect.position; label.show(); shown[entry.id]=true; occupied.append(rect)
+	for id in _screen_world_labels:
+		if not shown.has(id): (_screen_world_labels[id] as Label).hide()
+
+	if removed_world_text:
+		_view.call("_request_viewport_redraw")
+		_viewport.render_target_update_mode=SubViewport.UPDATE_ONCE
+
+func _find_projected_craft(id: String) -> Dictionary:
+	for craft: Dictionary in _transport_projection:
+		if String(craft.get("craft_id",""))==id: return craft
+	return {}
+
+func _apply_pad_flight_display(entry: Dictionary, craft: Dictionary) -> void:
+	var node: Node3D=entry.node
+	var pad: Dictionary=_pad_definition(String(entry.landing_pad_id))
+	var anchor:=_plane_position(pad.plane)
+	var motion: Dictionary=craft.get("pad_visual",{})
+	var phase:=String(motion.get("phase","landed"))
+	node.position=anchor; node.rotation=Vector3.ZERO
+	var thrust:=0.0
+	if not motion.is_empty():
+		var sample: Dictionary=FLIGHT_VISUAL_SCRIPT.sample_maneuver(phase,float(motion.progress))
+		var departure:=phase=="departing"
+		var offset:=float(sample.route_fraction) if departure else 1.0-float(sample.route_fraction)
+		var identity: Dictionary=SHIP_VISUALS.get_ui_identity(craft)
+		var forward:=Vector3(0,0,1).rotated(Vector3.UP,deg_to_rad(float(identity.get("root_rotation_y_degrees",0.0))))
+		node.position=anchor+forward*(8.0*offset*(1.0 if departure else -1.0))+Vector3.UP*float(sample.clearance)
+		node.basis=Basis(Vector3.UP.cross(forward).normalized(),-deg_to_rad(float(sample.pitch_degrees)))
+		thrust=float(sample.thrust_fraction)
+	for child in node.get_children():
+		if not child is Node3D: continue
+		var helper: Node=child.get_node_or_null("ReadOnlyFlightVisual")
+		if helper!=null: helper.call("set_flight_response",phase,thrust)
+
+func _advance_pad_flight_effects(delta: float) -> void:
+	var changed:=false
+	for entry: Dictionary in _craft_visuals.values():
+		for child in (entry.node as Node3D).get_children():
+			var helper: Node=child.get_node_or_null("ReadOnlyFlightVisual")
+			if helper!=null: changed=bool(helper.call("advance_visual",delta)) or changed
+	if changed:
+		_view.call("_request_viewport_redraw")
+		_viewport.render_target_update_mode=SubViewport.UPDATE_ONCE

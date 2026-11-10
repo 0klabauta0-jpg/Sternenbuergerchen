@@ -1,0 +1,16 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: satellite semantic action
+PASS: loot/crate semantic action
+PASS: overlapping targets resolve deterministically
+PASS: far geometry is not clickable
+PASS: actual projected satellite hover identifies correct target
+PASS: actual cursor advertises the real data action
+PASS: hover never completes objective or submits gameplay
+PASS: context rightclick queues existing actual Use intent
+PASS: queued Use still requires GO and real duration
+PASS: hidden live mission clears hints and cannot accept contextual rightclick
+PASS: hidden mission cannot consume another view rightclick
+PASS: deselection clears intelligent cursor
+MISSION_CONTEXT_CURSOR checks=12 failures=0

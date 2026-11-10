@@ -9,7 +9,8 @@ const GROUND_PHASES: Array[String] = ["landed", "unloading", "complete"]
 
 var _plumes: Array[MeshInstance3D] = []
 var _plume_base_scales: Array[Vector3] = []
-var _plume_base_positions: Array[Vector3] = []
+var _nozzle_count: int = 0
+var _thrust_fraction: float = 1.0
 var _operating_visual: bool = false
 var _phase: String = ""
 var _visual_time: float = 0.0
@@ -33,6 +34,8 @@ static func clearance_for_phase(phase: String, distance_from_lz: float, legacy_c
 
 
 func configure_cutlass_ref03() -> void:
+	if _nozzle_count > 0:
+		return
 	# Ref03 evaluated nozzle bounds, converted Blender XYZ -> Godot XZ-Y.
 	# This helper is only attached to the unchanged Ref03 Cutlass source.
 	_visual_time = fmod(float(Time.get_ticks_msec()) / 1000.0, 1000.0)
@@ -57,6 +60,11 @@ func configure_service_drone(model: Node3D, nozzle_local_positions: Array[Vector
 func set_flight_phase(phase: String) -> void:
 	_phase = phase.strip_edges().to_lower()
 	set_operating_visual(AIR_PHASES.has(_phase))
+
+
+func set_flight_response(phase: String, thrust_fraction: float = 1.0) -> void:
+	set_flight_phase(phase)
+	_thrust_fraction = clampf(thrust_fraction, 0.0, 1.0)
 
 
 func set_operating_visual(active: bool) -> void:
@@ -86,8 +94,11 @@ func advance_visual(delta: float) -> bool:
 		model.rotation = _service_base_rotation + Vector3(sin(_visual_time * 1.7) * 0.018, 0.0, sin(_visual_time * 1.3) * 0.025)
 	for index in range(_plumes.size()):
 		var pulse: float = 0.94 + 0.06 * sin(_visual_time * 16.0 + float(index) * 1.7)
-		_plumes[index].scale = _plume_base_scales[index] * Vector3(1.0, pulse, 1.0)
-		_plumes[index].position = _plume_base_positions[index] + hover_offset
+		var plume := _plumes[index]
+		var length_scale: float = pulse * lerpf(0.42, 1.0, _thrust_fraction)
+		plume.scale = _plume_base_scales[index] * Vector3(1.0, length_scale, 1.0)
+		# Reposition the center after scaling: the cylinder top stays at the mouth.
+		plume.position = Vector3(plume.get_meta("nozzle_anchor")) - plume.basis.y * ((plume.mesh as CylinderMesh).height * 0.5) + hover_offset
 	return true
 
 
@@ -95,7 +106,9 @@ func get_visual_snapshot() -> Dictionary:
 	return {
 		"phase": _phase,
 		"operating": _operating_visual,
-		"plume_count": _plumes.size(),
+		"plume_count": _nozzle_count,
+		"exhaust_mesh_count": _plumes.size(),
+		"thrust_fraction": _thrust_fraction,
 		"service_drone_visual": _service_model != null,
 		"read_only": true,
 		"sets_gameplay_truth": false,
@@ -103,36 +116,72 @@ func get_visual_snapshot() -> Dictionary:
 
 
 func _add_plume(anchor: Vector3, radius: float, length_value: float, rearward: bool) -> void:
+	_nozzle_count += 1
+	_add_jet_layer(anchor, radius, length_value, rearward, false)
+	_add_jet_layer(anchor, radius * 0.58, length_value * 0.62, rearward, true)
+
+
+func _add_jet_layer(anchor: Vector3, radius: float, length_value: float, rearward: bool, core: bool) -> void:
 	var plume := MeshInstance3D.new()
 	plume.name = "ReadOnlyThruster_%d" % _plumes.size()
 	var cone := CylinderMesh.new()
 	cone.top_radius = radius
-	cone.bottom_radius = 0.0
+	cone.bottom_radius = 0.015 * radius
 	cone.height = length_value
-	cone.radial_segments = 8
-	cone.rings = 1
+	cone.radial_segments = 16
+	cone.rings = 4
 	cone.cap_top = false
 	cone.cap_bottom = false
 	plume.mesh = cone
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.48, 0.87, 1.0, 0.80)
-	material.emission_enabled = true
-	material.emission = Color(0.14, 0.64, 0.94)
-	material.emission_energy_multiplier = 1.25
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	var material := ShaderMaterial.new()
+	var shader := Shader.new()
+	shader.code = """shader_type spatial;
+render_mode unshaded, blend_add, cull_disabled, depth_draw_never;
+uniform vec3 jet_color = vec3(0.24, 0.65, 1.0);
+uniform float intensity = 0.7;
+void fragment() {
+	// Cylinder UV.y=0 at mouth, 1 at tip: feather both ends and sides.
+	float along = (1.0 - smoothstep(0.0, 1.0, UV.y)) * smoothstep(0.0, 0.045, UV.y);
+	float facing = 0.35 + 0.65 * abs(dot(normalize(NORMAL), normalize(VIEW)));
+	ALBEDO = jet_color;
+	EMISSION = jet_color * 1.8;
+	ALPHA = along * facing * intensity;
+}
+"""
+	material.shader = shader
+	material.set_shader_parameter("jet_color", Vector3(0.70, 0.91, 1.0) if core else Vector3(0.16, 0.50, 0.92))
+	material.set_shader_parameter("intensity", 0.86 if core else 0.46)
 	plume.material_override = material
 	plume.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	plume.position = anchor + (Vector3(0.0, 0.0, -length_value * 0.5) if rearward else Vector3(0.0, -length_value * 0.5, 0.0))
 	if rearward:
 		plume.rotation_degrees.x = 90.0
+	plume.position = anchor - plume.basis.y * length_value * 0.5
+	plume.set_meta("nozzle_anchor", anchor)
 	plume.visible = _operating_visual
 	add_child(plume)
 	_plumes.append(plume)
 	_plume_base_scales.append(plume.scale)
-	_plume_base_positions.append(plume.position)
+
+
+static func _ease(value: float) -> float:
+	var t: float = clampf(value, 0.0, 1.0)
+	return t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
+
+
+static func sample_maneuver(phase: String, progress: float) -> Dictionary:
+	# Pure presentation curve. Caller supplies authoritative phase/progress and
+	# applies route_fraction between its existing display-only route anchors.
+	var t: float = clampf(progress, 0.0, 1.0)
+	var departing: bool = phase.strip_edges().to_lower() in ["departing", "outbound", "takeoff"]
+	var route_fraction: float = _ease((t - 0.28) / 0.72) if departing else _ease(t / 0.72)
+	var height_fraction: float = _ease(t / 0.72) if departing else 1.0 - _ease((t - 0.28) / 0.72)
+	var attitude: float = sin(route_fraction * PI) * (5.0 if departing else -4.0)
+	return {
+		"route_fraction": route_fraction,
+		"clearance": lerpf(TOUCHDOWN_CLEARANCE, CRUISE_CLEARANCE, height_fraction),
+		"pitch_degrees": attitude,
+		"thrust_fraction": lerpf(0.55, 1.0, sin(t * PI)),
+	}
 
 
 static func normal_arrival_speed(distance_world: float) -> float:

@@ -18,6 +18,7 @@ const ACTION_ZOOM_OUT: StringName = &"tactical_camera_zoom_out"
 @export var focus_marker_path: NodePath
 
 var _is_panning: bool = false
+var _pan_previous_position := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -35,7 +36,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view != null:
-		_deactivate_camera()
+		enabled = false
+		if not is_visible_in_tree():
+			_is_panning = false
+			return
 		var primary_direction := Vector2.ZERO
 		if Input.is_action_pressed(ACTION_PAN_UP):
 			primary_direction.y -= 1.0
@@ -68,57 +72,63 @@ func _process(delta: float) -> void:
 	position += direction.normalized() * CAMERA_PAN_SPEED * delta / zoom.x
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
+	# Continue an established map drag before GUI handling; press/wheel below
+	# still wait for unhandled input so panels retain their normal capture.
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE and not event.pressed:
+		_is_panning = false
+		return
+	if not _is_panning or not event is InputEventMouseMotion:
+		return
+	if not is_visible_in_tree() or (event.button_mask & MOUSE_BUTTON_MASK_MIDDLE) == 0:
+		_is_panning = false
+		return
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view != null:
-		if event is InputEventMouseButton:
-			var mouse_button_event := event as InputEventMouseButton
-			if mouse_button_event.is_action_pressed(ACTION_ZOOM_IN) and not _is_pointer_over_control():
-				primary_3d_view.call("zoom_camera", 1.0)
-				get_viewport().set_input_as_handled()
-				return
-			if mouse_button_event.is_action_pressed(ACTION_ZOOM_OUT) and not _is_pointer_over_control():
-				primary_3d_view.call("zoom_camera", -1.0)
-				get_viewport().set_input_as_handled()
-				return
-			if mouse_button_event.is_action_pressed(ACTION_ROTATE_DRAG) or mouse_button_event.is_action_released(ACTION_ROTATE_DRAG):
-				_is_panning = mouse_button_event.is_action_pressed(ACTION_ROTATE_DRAG) and not _is_pointer_over_control()
-				if _is_panning:
-					get_viewport().set_input_as_handled()
-				return
-		if event is InputEventMouseMotion and _is_panning:
-			var mouse_motion := event as InputEventMouseMotion
-			primary_3d_view.call("rotate_camera", -mouse_motion.relative.x * 0.28)
-			get_viewport().set_input_as_handled()
-			return
-		return
-	if not _is_camera_active():
-		return
-	if event is InputEventMouseButton:
-		var mouse_button_event := event as InputEventMouseButton
-		if mouse_button_event.is_action_pressed(ACTION_ZOOM_IN) and not _is_pointer_over_control():
-			_adjust_camera_zoom(CAMERA_ZOOM_STEP)
-			get_viewport().set_input_as_handled()
-			return
-		if mouse_button_event.is_action_pressed(ACTION_ZOOM_OUT) and not _is_pointer_over_control():
-			_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
-			get_viewport().set_input_as_handled()
-			return
-		if mouse_button_event.is_action_pressed(ACTION_ROTATE_DRAG) or mouse_button_event.is_action_released(ACTION_ROTATE_DRAG):
-			_is_panning = mouse_button_event.is_action_pressed(ACTION_ROTATE_DRAG) and not _is_pointer_over_control()
-			if _is_panning:
-				get_viewport().set_input_as_handled()
-			return
+		primary_3d_view.call("pan_camera_between_screen_positions", _pan_previous_position, event.position)
+	elif _is_camera_active():
+		position += (_pan_previous_position - event.position) / zoom
+	_pan_previous_position = event.position
+	get_viewport().set_input_as_handled()
 
-	if event is InputEventMouseMotion and _is_panning:
-		var mouse_motion := event as InputEventMouseMotion
-		position -= mouse_motion.relative * zoom
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_visible_in_tree() or not event is InputEventMouseButton:
+		return
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null and not _is_camera_active():
+		return
+	if _is_pointer_over_control():
+		return
+	var mouse_event := event as InputEventMouseButton
+	if mouse_event.button_index == MOUSE_BUTTON_MIDDLE:
+		_is_panning = mouse_event.pressed
+		_pan_previous_position = mouse_event.position
 		get_viewport().set_input_as_handled()
+		return
+	var zoom_steps: float = 0.0
+	if mouse_event.is_action_pressed(ACTION_ZOOM_IN):
+		zoom_steps = 1.0
+	elif mouse_event.is_action_pressed(ACTION_ZOOM_OUT):
+		zoom_steps = -1.0
+	if is_zero_approx(zoom_steps):
+		return
+	if primary_3d_view != null:
+		primary_3d_view.call("zoom_camera_at_screen_position", zoom_steps, mouse_event.position)
+	else:
+		var before: Vector2 = get_canvas_transform().affine_inverse() * mouse_event.position
+		_adjust_camera_zoom(zoom_steps * CAMERA_ZOOM_STEP)
+		force_update_scroll()
+		var after: Vector2 = get_canvas_transform().affine_inverse() * mouse_event.position
+		global_position += before - after
+	get_viewport().set_input_as_handled()
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_VISIBILITY_CHANGED:
 		_refresh_camera_activity()
+	elif what == NOTIFICATION_WM_WINDOW_FOCUS_OUT or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		_is_panning = false
 	elif what == NOTIFICATION_EXIT_TREE:
 		_deactivate_camera()
 

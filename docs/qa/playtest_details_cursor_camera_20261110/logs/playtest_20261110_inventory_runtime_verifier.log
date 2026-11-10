@@ -1,0 +1,19 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+WARNING: res://scenes/meta/homebase_test_screen.tscn:3 - ext_resource, invalid UID: uid://dye1ybjacy442 - using text path instead: res://scripts/meta/homebase_screen.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/playtest_20261110_inventory_runtime_verifier.gd:9)
+WARNING: res://scenes/meta/homebase_test_screen.tscn:4 - ext_resource, invalid UID: uid://va7te1c15i3j - using text path instead: res://scripts/meta/homebase_team_drop_panel.gd
+   at: load (scene/resources/resource_format_text.cpp:500)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://scripts/tests/playtest_20261110_inventory_runtime_verifier.gd:9)
+PASS: outside pilot equips real finite medictool through original control
+PASS: original loadout owner receives confirmed gear
+PASS: visible inventory operation reaches authoritative owner
+PASS: visible retry does not duplicate transfer
+PASS: adapter denies remote craft access
+PASS: real campaign supply checkpoint accepts containers and receipts
+PASS: real checkpoint roundtrip preserves quantities
+INVENTORY_RUNTIME failures=0

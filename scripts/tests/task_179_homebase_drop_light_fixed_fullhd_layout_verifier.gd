@@ -59,7 +59,7 @@ func _test_homebase_fixed_window_positions() -> void:
 	_assert(not popup.visible and _node_rect_matches_actual(popup, layout.get("character_popup")), "Character popup starts closed and keeps its floating rect")
 	_assert(screen.get_node("Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll") is ScrollContainer, "Roster keeps long content in a targeted scroll area")
 	_assert(screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll") is ScrollContainer, "Fireteams keeps long content in a targeted scroll area")
-	_assert(screen.get_node("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll") is ScrollContainer, "Character popup keeps long content in a targeted scroll area")
+	_assert(screen.get_node("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/CharacterDetailsColumns/PopupScroll") is ScrollContainer, "Character popup keeps long content in a targeted scroll area")
 
 	screen.queue_free()
 	await process_frame
