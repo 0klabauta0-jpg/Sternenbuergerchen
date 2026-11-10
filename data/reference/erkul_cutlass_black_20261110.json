@@ -1,0 +1,34 @@
+{
+  "source_url": "https://erkul.games/s/85yjk7o5",
+  "resolved_page": "https://erkul.games/calculator",
+  "observed_date": "2026-11-10",
+  "data_version": "4.10.2-LIVE.12913470",
+  "ship": "Drake Cutlass Black",
+  "status": "reference_only_not_runtime_balance",
+  "mass_kg": 242177,
+  "dimensions_m": [
+    37.5,
+    26.5,
+    11.5
+  ],
+  "scm_speed_m_s": 217,
+  "boosted_speed_m_s": 465,
+  "pitch_deg_s": 39,
+  "yaw_deg_s": 35,
+  "roll_deg_s": 110,
+  "main_thrusters": {
+    "count": 2,
+    "size": 4,
+    "displayed_group_thrust_MN": 18.83
+  },
+  "retro_thrusters": {
+    "count": 2,
+    "size": 4,
+    "displayed_group_thrust_MN": 2.92
+  },
+  "notes": [
+    "Visible calculator state after opening the supplied share URL; custom-loadout preservation not independently established.",
+    "Use as a dated external reference for relative maneuverability, ship roles and later balancing.",
+    "No claim that these figures are real-world spacecraft physics or already applied gameplay values."
+  ]
+}

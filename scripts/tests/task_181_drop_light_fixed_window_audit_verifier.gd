@@ -102,9 +102,9 @@ func _test_homebase_windows_are_actual_fixed_rects() -> void:
 	# before checking the current sheet scroll, rather than hidden legacy nodes.
 	screen.call("_on_compact_card_open_requested", "unit_alpha", null, "roster")
 	await _wait_frames(3)
-	var popup_scroll := screen.get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll") as ScrollContainer
+	var popup_scroll := screen.get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/CharacterDetailsColumns/PopupScroll") as ScrollContainer
 	_assert(popup != null and popup.is_visible_in_tree() and popup_scroll != null and popup_scroll.is_visible_in_tree(), "Homebase card-open request shows the actual character popup and scroll")
-	_assert_inside(screen, "CharacterSheetPopup", "CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll", "Homebase visible character scroll stays inside the current popup")
+	_assert_inside(screen, "CharacterSheetPopup", "CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/CharacterDetailsColumns/PopupScroll", "Homebase visible character scroll stays inside the current popup")
 	screen.call("_on_close_sheet_button_pressed")
 	await _wait_frames(2)
 	_assert(popup != null and not popup.visible, "Homebase character popup closes through its existing callback")

@@ -1,5 +1,16 @@
 # TASK_ROADMAP
 
+### Playtest: NPC-Details, Kontextcursor und Kamera — 10.11.2026
+Taskbranch auf Main80938bf7b. Echtes Inventar rechts, lesbare vertikale Werte
+links; Weltwahl/Abwahl und NPC-Doppelklick, Schiffsdetails nur bei Auswahl.
+Cursorzoom/MMB-Pan, flacherer Winkel, Bildschirmbeschriftung und begrenzte
+Renderverbesserung; Pad-Nahaufnahme und Cutlass-Abgasdarstellung. Kamera52/0,
+Details28/0, Lesbarkeit22/0, Missionkontext12/0, Manöver412/0, erster echter
+Ausflug55/0 sowie gezielte Regressionen. Kein Main-/EXE-Folgeabschluss oder
+allgemeine Performance-/Stilfreigabe. Engere Gebäudeanordnung offen als eigener
+Authoringtask. QA: docs/qa/playtest_details_cursor_camera_20261110/README.md.
+
+
 ### Kampagnen-/Skirmish-Mainabschluss — 10.11.2026
 Fünf-Missionen-Stand e4b407fe mit aktuellem Main1023d11c3 zusammengeführt.
 Konflikte bei Supply/Ressourcen, Loadouts und automatischer Ruhe geprüft; genau

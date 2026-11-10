@@ -71,6 +71,7 @@ const TILE_THICKNESS: float = 0.035
 const HEIGHT_STEP: float = 0.5
 const OBJECT_HEIGHT_STEP: float = 0.42
 const CAMERA_DEFAULT_SIZE: float = 34.0
+const DEFAULT_CAMERA_PITCH_DEGREES: float = 40.0 # Approximately 35 degrees elevation in the existing offset projection.
 const CAMERA_MIN_SIZE: float = 5.5
 const CAMERA_MAX_SIZE: float = 120.0
 const CAMERA_ZOOM_STEP: float = 2.2
@@ -962,7 +963,7 @@ var _half_tile_height: float = DEFAULT_HALF_TILE_HEIGHT
 var _focus_grid_position: Vector2 = Vector2.ZERO
 var _camera_size: float = CAMERA_DEFAULT_SIZE
 var _camera_yaw_degrees: float = 45.0
-var _camera_pitch_degrees: float = 58.0
+var _camera_pitch_degrees: float = DEFAULT_CAMERA_PITCH_DEGREES
 var _map_total_tile_count: int = 0
 var _map_tile_count: int = 0
 var _visual_streaming_active: bool = false
@@ -2287,6 +2288,30 @@ func rotate_camera(delta_degrees: float) -> void:
 
 func zoom_camera(delta_steps: float) -> void:
 	_camera_size = clampf(_camera_size - (delta_steps * CAMERA_ZOOM_STEP), CAMERA_MIN_SIZE, CAMERA_MAX_SIZE)
+	_update_camera_transform()
+	_request_viewport_redraw(true)
+
+
+func zoom_camera_at_screen_position(delta_steps: float, screen_position: Vector2, plane_height: float = 0.0) -> void:
+	var before: Variant = screen_to_world_plane_position(screen_position, plane_height)
+	zoom_camera(delta_steps)
+	var after: Variant = screen_to_world_plane_position(screen_position, plane_height)
+	if before is Vector2 and after is Vector2:
+		_translate_camera_world_delta(Vector2(before) - Vector2(after))
+
+
+func pan_camera_between_screen_positions(previous_position: Vector2, current_position: Vector2, plane_height: float = 0.0) -> void:
+	# Both intersections use the same continuous plane, even beyond map tiles or HUD.
+	var before: Variant = screen_to_world_plane_position(previous_position, plane_height)
+	var after: Variant = screen_to_world_plane_position(current_position, plane_height)
+	if before is Vector2 and after is Vector2:
+		_translate_camera_world_delta(Vector2(before) - Vector2(after))
+
+
+func _translate_camera_world_delta(world_delta: Vector2) -> void:
+	var focus_world: Vector2 = _grid_float_to_world(_focus_grid_position)
+	_focus_grid_position = _world_to_grid_float(focus_world + world_delta)
+	_clamp_focus_to_map()
 	_update_camera_transform()
 	_request_viewport_redraw(true)
 
@@ -3737,6 +3762,9 @@ func _ensure_nodes() -> void:
 		_subviewport.name = VIEWPORT_NAME
 		_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 		_subviewport.transparent_bg = false
+		# Smooth small world geometry at native render resolution without a
+		# full-screen blur pass or supersampling the entire map.
+		_subviewport.msaa_3d = Viewport.MSAA_2X
 		_subviewport.size = _get_viewport_size()
 		_viewport_container.add_child(_subviewport)
 	_subviewport.own_world_3d = true
@@ -3897,10 +3925,11 @@ func _get_viewport_size() -> Vector2i:
 
 
 func _screen_to_viewport_position(screen_position: Vector2) -> Vector2:
-	return Vector2(
-		clampf(screen_position.x, 0.0, float(_get_viewport_size().x)),
-		clampf(screen_position.y, 0.0, float(_get_viewport_size().y))
-	)
+	if _viewport_container == null or _subviewport == null:
+		return screen_position
+	var local_position: Vector2 = _viewport_container.get_global_transform_with_canvas().affine_inverse() * screen_position
+	var container_size: Vector2 = _viewport_container.size.max(Vector2.ONE)
+	return local_position * Vector2(_subviewport.size) / container_size
 
 
 func _read_map_transform() -> void:
@@ -10598,7 +10627,14 @@ func _update_dropship_flight_visual(node: Node3D, payload: Dictionary, world_pos
 	node.set_meta("flight_visual_clearance", node.position.y - _get_world_surface_y(world_position))
 	var helper := node.get_node_or_null("ReadOnlyFlightVisual")
 	if helper != null:
-		helper.call("set_flight_phase", phase)
+		var distance: float=float(payload.get("distance_from_lz",-1.0))
+		var target: Variant=payload.get("resolved_lz_position",payload.get("actual_landing_position",payload.get("lz_position",null)))
+		if typeof(target)==TYPE_VECTOR2:
+			distance=_world_to_3d_position(world_position,0.0).distance_to(_world_to_3d_position(Vector2(target),0.0))
+		var progress: float=clampf(1.0-distance/MISSION_FLIGHT_VISUAL_SCRIPT.APPROACH_DISTANCE,0.0,1.0) if distance>=0.0 else 0.5
+		var response: Dictionary=MISSION_FLIGHT_VISUAL_SCRIPT.sample_maneuver(phase,progress)
+		node.rotation.x=deg_to_rad(float(response.pitch_degrees)) if phase in ["inbound","outbound","departing"] else 0.0
+		helper.call("set_flight_response",phase,float(response.thrust_fraction))
 
 
 func _update_air_visual_animation(delta: float) -> void:

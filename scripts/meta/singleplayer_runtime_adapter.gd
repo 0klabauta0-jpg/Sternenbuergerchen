@@ -118,6 +118,12 @@ func get_snapshot() -> Dictionary:
 		var location: String = String(Dictionary(_flow.get("_aircraft_location_by_craft")).get(id, "homebase"))
 		var projected: Dictionary = definition.duplicate(true)
 		projected.merge({"craft_id": id, "landing_pad_id": _home_pad_for(id), "location_id": String(departure.get("destination_location_id", "")) if location == "mission" else location, "busy": not transfer.is_empty() or (String(Dictionary(Dictionary(travel.get("routes",{})).get(id,{})).get("phase","grounded")) in ["orbit", "quantum", "stopped", "approach"]), "departure": departure, "visible_on_pad": location == "homebase" and transfer.is_empty() and not _home_pad_for(id).is_empty()}, true)
+		var pad_visual: Dictionary = {}
+		var transfer_phase := String(transfer.get("phase",""))
+		if (transfer_phase=="to_mission" and location=="homebase") or transfer_phase=="to_homebase":
+			var duration := maxf(float(transfer.get("duration_seconds",1.0)),.001)
+			pad_visual={"phase":"departing" if transfer_phase=="to_mission" else "inbound","progress":clampf(float(transfer.get("elapsed_seconds",0.0))/duration,0.0,1.0),"duration_seconds":duration}
+		projected["pad_visual"]=pad_visual
 		crafts.append(projected)
 		launch_readiness[id] = validate_space_launch(id, false)
 		var context: Dictionary = _service_context(id)

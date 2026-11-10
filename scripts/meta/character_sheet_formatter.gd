@@ -225,7 +225,7 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 		"start_role_text": _start_role_text(profile),
 		"current_assignment_text": _optional_text(String(options.get("current_assignment_text", "")), "Im Profil nicht belegt"),
 		"suitability_rows": suitability_rows,
-		"primary_suitability_reason": String(suitability_rows[0].get("reason", "")) if not suitability_rows.is_empty() else "Noch keine Eignung berechnet.",
+		"primary_suitability_reason": _vertical_suitability_text(String(suitability_rows[0].get("reason", ""))) if not suitability_rows.is_empty() else "Noch keine Eignung berechnet.",
 		"relationship_entries": relationship_entries,
 		"relationship_overview_rows": _relationship_highlights(relationship_entries),
 		"relationship_empty_text": "Noch keine Beziehung bekannt.",
@@ -290,8 +290,15 @@ static func _build_suitability_rows(profile) -> Array:
 		var key: String = String(badge.get("badge_key", ""))
 		if key == "enemy":
 			continue
-		rows.append({"label": COPY.label(key), "value_text": "%s / %s" % [COPY.decimal(float(badge.get("score", 0.0))), COPY.decimal(NPC_RANK_BADGE_RESOLVER_SCRIPT.MIN_SCORE)], "badge_key": key, "reason": String(badge.get("reason", "")), "help_id": String(badge.get("help_id", "character_sheet.role")), "detail_text": _build_pilot_explanation(profile) if key == "pilot" else "%s\n%s" % [String(badge.get("reason", "")), String(badge.get("detail_text", ""))]})
+		rows.append({"label": COPY.label(key), "value_text": "%s / %s" % [COPY.decimal(float(badge.get("score", 0.0))), COPY.decimal(NPC_RANK_BADGE_RESOLVER_SCRIPT.MIN_SCORE)], "badge_key": key, "reason": String(badge.get("reason", "")), "help_id": String(badge.get("help_id", "character_sheet.role")), "detail_text": _build_pilot_explanation(profile) if key == "pilot" else "%s\n%s" % [_vertical_suitability_text(String(badge.get("reason", ""))), _vertical_suitability_text(String(badge.get("detail_text", "")))]})
 	return rows
+
+
+static func _vertical_suitability_text(value: String) -> String:
+	# Generated explanatory copy only. Decimal commas never match this delimiter.
+	var separators := RegEx.new()
+	separators.compile(", (?=[A-Za-zÄÖÜäöü])| und (?=[A-Za-zÄÖÜäöü])")
+	return separators.sub(value.replace(": ", ":\n"), "\n", true)
 
 
 static func _build_pilot_explanation(profile) -> String:
@@ -300,7 +307,7 @@ static func _build_pilot_explanation(profile) -> String:
 	for factor: Dictionary in breakdown.factors:
 		parts.append("%s %s × %d %%" % [COPY.label(String(factor.value_key)), COPY.decimal(float(factor.value)), roundi(float(factor.weight) * 100.0)])
 	parts.append("Rollen-/Beschreibungskontext: +%s" % COPY.decimal(float(breakdown.role_bonus)))
-	return "Piloteneignung %s; Schwelle %s.\n%s\nDer beste Fahrzeugwert schließt Bodenfahrzeuge ein. Eignung weist niemanden einem Schiff zu. Eine Berufslaufbahn ist im Profil nicht belegt." % [COPY.decimal(float(breakdown.score)), COPY.decimal(float(breakdown.threshold)), "; ".join(parts)]
+	return "Piloteneignung %s; Schwelle %s.\n%s\nDer beste Fahrzeugwert schließt Bodenfahrzeuge ein. Eignung weist niemanden einem Schiff zu. Eine Berufslaufbahn ist im Profil nicht belegt." % [COPY.decimal(float(breakdown.score)), COPY.decimal(float(breakdown.threshold)), "\n".join(parts)]
 
 
 static func _build_role_fit_text(profile) -> String:
@@ -319,9 +326,9 @@ static func _build_role_fit_text(profile) -> String:
 		elif next_parts.size() < 2:
 			next_parts.append(part)
 	if not achieved_parts.is_empty():
-		return " | ".join(achieved_parts)
+		return "\n".join(achieved_parts)
 	if not next_parts.is_empty():
-		return "Noch offen; nahe dran: %s" % " | ".join(next_parts)
+		return "Noch offen; nahe dran: %s" % "\n".join(next_parts)
 	return "Noch kein Rollen-Fit"
 
 
@@ -744,7 +751,7 @@ static func _format_score_summary(scores: Dictionary, fallback: String) -> Strin
 	for key_variant in sorted_keys:
 		var key: String = String(key_variant)
 		summary_parts.append("%s %s" % [_humanize_key(key), _format_decimal_comma(float(scores.get(key_variant, 0.0)))])
-	return " | ".join(summary_parts)
+	return "\n".join(summary_parts)
 
 
 static func _format_recovery_state(recovery_state: Dictionary) -> String:

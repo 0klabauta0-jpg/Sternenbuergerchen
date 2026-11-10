@@ -1037,7 +1037,7 @@ func get_post_mission_skill_delta_snapshot() -> Dictionary:
 func get_homebase_progression_f6_evidence_snapshot() -> Dictionary:
 	var bridge_snapshot: Dictionary = get_post_mission_skill_delta_snapshot()
 	var popup := get_node_or_null("CharacterSheetPopup") as Control
-	var sheet_content := get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll/GeneratedSheetContent") as Control
+	var sheet_content := get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/CharacterDetailsColumns/PopupScroll/GeneratedSheetContent") as Control
 	var award_highlight: Control = null
 	var award_value_row: Control = null
 	var award_label: Label = null
@@ -2047,7 +2047,7 @@ func get_native_r2_layout_snapshot() -> Dictionary:
 		"roster": Rect2i(16, work_top, roster_width, work_height),
 		"fireteams": Rect2i(32 + roster_width, work_top, team_width, team_height),
 		"flightdeck": Rect2i(48 + roster_width + team_width, work_top, usable_width - roster_width - team_width, transport_height),
-		"character_popup": Rect2i(viewport_size.x - mini(736, viewport_size.x - 32) - 16, 32, mini(736, viewport_size.x - 32), mini(760, viewport_size.y - 64)),
+		"character_popup": Rect2i(viewport_size.x - mini(1240, viewport_size.x - 32) - 16, 32, mini(1240, viewport_size.x - 32), mini(760, viewport_size.y - 64)),
 		"briefing_details_open": _r2_briefing_details_open,
 		"ui_sets_gameplay_truth": false,
 	}
@@ -2717,7 +2717,37 @@ func _ensure_character_sheet_popup() -> void:
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	vbox.add_child(scroll)
+	var columns := HBoxContainer.new()
+	columns.name = "CharacterDetailsColumns"
+	columns.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	columns.add_theme_constant_override("separation", 14)
+	vbox.add_child(columns)
+	scroll.size_flags_stretch_ratio = 1.4
+	columns.add_child(scroll)
+
+	var inventory_scroll := ScrollContainer.new()
+	inventory_scroll.name = "CharacterInventoryScroll"
+	inventory_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	inventory_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	inventory_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	columns.add_child(inventory_scroll)
+	var inventory_column := VBoxContainer.new()
+	inventory_column.name = "CharacterInventoryColumn"
+	inventory_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	inventory_scroll.add_child(inventory_column)
+	var inventory_heading := Label.new()
+	inventory_heading.text = "AUSRÜSTUNG & INVENTAR"
+	META_UI_SKIN_SCRIPT.style_header_label(inventory_heading, 14)
+	inventory_column.add_child(inventory_heading)
+	var feedback := Label.new()
+	feedback.name = "CharacterInventoryFeedback"
+	feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	inventory_column.add_child(feedback)
+	var inventory_panel: VBoxContainer = preload("res://scripts/ui/components/personnel_inventory_panel.gd").new()
+	inventory_panel.name = "CharacterInventoryPanel"
+	inventory_column.add_child(inventory_panel)
+	inventory_panel.operation_requested.connect(_on_character_inventory_operation)
 
 	var content := VBoxContainer.new()
 	content.name = "GeneratedSheetContent"
@@ -5934,15 +5964,59 @@ func _update_character_sheet() -> void:
 			"post_mission_skill_delta_text": _format_post_mission_skill_delta_text(post_mission_delta),
 			"editable_metrics": false,
 			"compact_read_only": true,
+			"compact_sheet_width": 0.0,
+			"expand_details": true,
 			"two_column_layout": true,
 			"show_badge_progress": true,
 			"hide_loadout_dropdowns": true,
 		}
 	)
 
+	_update_character_inventory()
+
+
+func _on_character_inventory_operation(operation: String, payload: Dictionary) -> void:
+	var result: Dictionary = request_operation(operation, payload)
+	var feedback := get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/CharacterDetailsColumns/CharacterInventoryScroll/CharacterInventoryColumn/CharacterInventoryFeedback") as Label
+	if feedback != null:
+		feedback.text = String(result.get("message", result.get("reason", ""))) if not bool(result.get("ok", false)) else "Bestand aktualisiert"
+	_update_character_inventory()
+
+
+func get_personnel_inventory_view(unit_id: String, operations_snapshot: Dictionary = {}) -> Dictionary:
+	var snapshot := operations_snapshot if not operations_snapshot.is_empty() else get_operations_snapshot(false)
+	if operations_snapshot.is_empty() and _singleplayer_snapshot_provider.is_valid():
+		snapshot["singleplayer"] = _singleplayer_snapshot_provider.call()
+	var unit: Dictionary = {}
+	for entry: Dictionary in Array(snapshot.get("roster", [])):
+		if String(entry.get("id", "")) == unit_id:
+			unit = entry
+			break
+	var singleplayer: Dictionary = snapshot.get("singleplayer", {})
+	var craft_id: String = String(Dictionary(snapshot.get("selected_craft", {})).get("id", ""))
+	var adapter: Node = get_parent().get("_singleplayer_runtime") if get_parent() != null and get_parent().get_script() != null else null
+	var context: Dictionary = adapter.call("get_inventory_context", unit_id, craft_id) if adapter != null and adapter.has_method("get_inventory_context") else {}
+	var person: Dictionary = {}
+	var personnel := get_base_personnel_runtime()
+	if personnel != null:
+		for entry: Dictionary in Array(personnel.call("get_snapshot").get("units", [])):
+			if String(entry.get("unit_id", "")) == unit_id:
+				person = entry
+				break
+	return {"inventory": Dictionary(Dictionary(singleplayer.get("supply", {})).get("inventory", {})), "unit": unit, "craft_id": craft_id, "accessible": Array(context.get("accessible_containers", [])), "equipment_allowed": bool(context.get("equipment_allowed", not context.is_empty())), "person": person}
+
+
+func _update_character_inventory(operations_snapshot: Dictionary = {}) -> void:
+	var panel := get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/CharacterDetailsColumns/CharacterInventoryScroll/CharacterInventoryColumn/CharacterInventoryPanel") as VBoxContainer
+	if panel == null: return
+	var view := get_personnel_inventory_view(_focused_unit_id, operations_snapshot)
+	panel.visible = not Dictionary(view.inventory).is_empty()
+	panel.call("update_snapshot", view.inventory, view.unit, view.craft_id, view.accessible, view.equipment_allowed)
+	panel.call("update_rest_snapshot", view.person)
+
 
 func _get_character_sheet_content_host() -> VBoxContainer:
-	var popup_host := get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll/GeneratedSheetContent") as VBoxContainer
+	var popup_host := get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/CharacterDetailsColumns/PopupScroll/GeneratedSheetContent") as VBoxContainer
 	if popup_host != null:
 		return popup_host
 	return get_node_or_null("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/GeneratedSheetContent") as VBoxContainer

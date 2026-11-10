@@ -130,7 +130,7 @@ static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> vo
 static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, profile, options: Dictionary) -> void:
 	var sheet := VBoxContainer.new()
 	sheet.name = "SheetRoot"
-	sheet.custom_minimum_size = Vector2(COMPACT_SHEET_WIDTH, 0.0)
+	sheet.custom_minimum_size = Vector2(float(options.get("compact_sheet_width", COMPACT_SHEET_WIDTH)), 0.0)
 	sheet.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sheet.add_theme_constant_override("separation", 8)
 	host.add_child(sheet)
@@ -159,20 +159,20 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 		_overview_label(relationships, "NoKnownRelationships", String(model.get("relationship_empty_text", "Noch keine Beziehung bekannt.")), 14)
 	else:
 		_overview_label(relationships, "RelationshipSource", "Gespeicherte Affinität · −1 bis +1", 12, true)
-	var why := _add_foldout(sheet, "suitability", "Alle Eignungen & genaue Herleitung")
-	_add_value_rows(why, suitability, profile, options)
-	_add_text_section(why, "ROLLE / LOADOUT:", "Die Startrolle ist gespeichert. Die aktuelle Aufgabe kommt aus der Zuteilung. Eignung ist eine Berechnung; sie ändert weder Rolle noch Aufgabe.")
-	var all_relationships: Array = Array(model.get("relationship_entries", []))
-	if all_relationships.size() > 2:
-		var relationship_details := _add_foldout(sheet, "relationships", "Alle %d Beziehungen" % all_relationships.size())
-		_add_value_rows(relationship_details, all_relationships, profile, options)
-	var values := _add_foldout(sheet, "values", "Werte & Zusammenhänge")
+	var values := _add_foldout(sheet, "values", "Werte & Zusammenhänge", bool(options.get("expand_details", false)))
 	_add_text_section(values, "WERTE:", "Gezeigt werden wirksame Profilwerte. Eigenschaften sind bereits berücksichtigt. Frühere Basiswerte und spätere Vorgaben sind nicht vollständig protokolliert.")
 	_add_bar_section(values, "KERNWERTE (0,00 - 1,00):", Array(model.get("core_rows", [])), profile, options)
 	_add_value_section(values, "KOMMUNIKATION:", Array(model.get("communication_rows", [])), profile, options)
 	_add_value_section(values, "VERHALTENSPROFIL:", Array(model.get("behavior_rows", [])), profile, options)
 	_add_value_section(values, "PLATTFORM-SKILLS (nur falls relevant):", Array(model.get("platform_rows", [])), profile, options)
 	_add_value_section(values, "ABGELEITET:", Array(model.get("derived_rows", [])), profile, options)
+	var why := _add_foldout(sheet, "suitability", "Alle Eignungen & genaue Herleitung", bool(options.get("expand_details", false)))
+	_add_value_rows(why, suitability, profile, options)
+	_add_text_section(why, "ROLLE / LOADOUT:", "Die Startrolle ist gespeichert. Die aktuelle Aufgabe kommt aus der Zuteilung. Eignung ist eine Berechnung; sie ändert weder Rolle noch Aufgabe.")
+	var all_relationships: Array = Array(model.get("relationship_entries", []))
+	if all_relationships.size() > 2:
+		var relationship_details := _add_foldout(sheet, "relationships", "Alle %d Beziehungen" % all_relationships.size())
+		_add_value_rows(relationship_details, all_relationships, profile, options)
 	var history := _add_foldout(sheet, "history", "Status, Ausrüstung & Verlauf")
 	_add_value_section(history, "ROLLE / LOADOUT:", Array(model.get("role_loadout_rows", [])), profile, options)
 	_add_value_section(history, "STATUS / RECOVERY:", Array(model.get("status_rows", [])), profile, options)
@@ -181,6 +181,28 @@ static func _render_compact_read_only(host: VBoxContainer, model: Dictionary, pr
 	if not bool(options.get("hide_short_description", false)):
 		var background := _add_foldout(sheet, "background", "Hintergrund")
 		_add_text_section(background, "KURZBESCHREIBUNG:", String(model.get("short_description", "Keine Angaben hinterlegt.")))
+	_apply_compact_readability(sheet)
+
+
+static func _apply_compact_readability(node: Node) -> void:
+	# One pass after construction, scoped to the read-only sheet. Editor rows
+	# retain their own sizing; no traversal runs in frame/update callbacks.
+	if node is Label:
+		var label := node as Label
+		label.add_theme_font_size_override("font_size", maxi(15, label.get_theme_font_size("font_size")))
+		if String(label.name).begins_with("RankBadgeLabel_"):
+			label.custom_minimum_size.x=74.0
+			label.autowrap_mode=TextServer.AUTOWRAP_OFF
+		label.clip_text = false
+		label.text_overrun_behavior = TextServer.OVERRUN_NO_TRIMMING
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if String(label.name).begins_with("ReadOnlyMetricLabel_") or String(label.name).begins_with("ValueLabel_"):
+			label.custom_minimum_size.x = maxf(label.custom_minimum_size.x, 160.0)
+	elif node is Button:
+		var button := node as Button
+		button.add_theme_font_size_override("font_size", maxi(15, button.get_theme_font_size("font_size")))
+	for child: Node in node.get_children():
+		_apply_compact_readability(child)
 
 
 static func _overview_label(host: Control, node_name: String, value: String, font_size: int, muted: bool = false) -> Label:
@@ -257,10 +279,10 @@ static func _add_overview_relationship(host: VBoxContainer, row: Dictionary) -> 
 	_overview_label(host, "RelationshipReason_" + id, String(row.get("detail_text", "")), 13, true)
 
 
-static func _add_foldout(host: VBoxContainer, key: String, title: String) -> VBoxContainer:
+static func _add_foldout(host: VBoxContainer, key: String, title: String, expanded: bool = false) -> VBoxContainer:
 	var button := Button.new()
 	button.name = "CharacterSheetToggle_" + key
-	button.text = "▸  " + title
+	button.text = ("▾  " if expanded else "▸  ") + title
 	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	button.custom_minimum_size = Vector2(0, 32)
 	META_UI_SKIN_SCRIPT.style_secondary_button(button)
@@ -268,7 +290,7 @@ static func _add_foldout(host: VBoxContainer, key: String, title: String) -> VBo
 	var details := VBoxContainer.new()
 	details.name = "CharacterSheetDetails_" + key
 	details.add_theme_constant_override("separation", 6)
-	details.hide()
+	details.visible = expanded
 	host.add_child(details)
 	button.pressed.connect(func():
 		details.visible = not details.visible

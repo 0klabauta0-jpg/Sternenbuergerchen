@@ -7639,9 +7639,15 @@ func _campaign_load_failed() -> void:
 
 
 func _refresh_singleplayer_services() -> void:
+	if _campaign_tutorial!=null: _campaign_tutorial.visible=not bool(get_node("HomebaseScreen").get("_character_sheet_open"))
 	if _singleplayer_services == null or _singleplayer_runtime == null: return
 	var snapshot: Dictionary = _singleplayer_runtime.call("get_snapshot")
-	var at_home := _current_meta_view == "homebase"
+	var presenter: Node=get_node("HomebaseScreen").get("_operations_presenter")
+	var base: Node=presenter.get("_base") if presenter!=null else null
+	if base!=null and not base.is_connected("world_selection_changed",_on_base_world_selection_changed): base.connect("world_selection_changed",_on_base_world_selection_changed)
+	var selected_ship := String(base.call("get_selected_world_craft_id")) if base!=null else ""
+	var at_home := _current_meta_view == "homebase" and presenter!=null and (String(presenter.get("_mode"))=="services" or (String(presenter.get("_mode"))=="base" and not selected_ship.is_empty()))
+	if at_home and String(presenter.get("_mode"))=="base" and not selected_ship.is_empty(): _singleplayer_services.set("_selected_craft_id",selected_ship)
 	var remote := _current_meta_view == "mission" and not Dictionary(snapshot.get("service_contexts_by_craft_id",{})).is_empty()
 	_singleplayer_services.visible = at_home or remote
 	if _singleplayer_services.visible:
@@ -7881,3 +7887,7 @@ func rename_campaign_person(unit_id: String, display_name: String) -> Dictionary
 			if String(unit.get("unit_id",""))==unit_id: unit["display_name"]=display_name
 	_refresh_homebase_screen()
 	return {"ok":true,"message":"Name geändert"}
+
+func _on_base_world_selection_changed(kind: String, id: String) -> void:
+	if kind=="ship": get_node("HomebaseScreen").call("request_operation","craft",{"craft_id":id})
+	_refresh_singleplayer_services()
