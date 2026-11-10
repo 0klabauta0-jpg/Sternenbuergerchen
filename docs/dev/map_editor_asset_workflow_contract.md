@@ -63,6 +63,12 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Rotierbare Assets speichern Rotation pro Tile in `object_rotation_degrees`.
 - Rotation ist visuell und authoring-relevant, aber keine zweite Gameplay-Wahrheit.
 
+## Aktuelle Gebaeude
+- Habitat und Freihafenhalle verwenden den [Mehrzellen-Vertrag](editor_building_authoring_contract.md).
+- Ihre Platzierung, Rotation, Verschiebung und Entfernung veraendern Modell und alle reservierten Tiles atomar; jeweils ein vorhandener Undo-Schritt.
+- Kategorie `gebaeude` zeigt diese beiden aktuellen Vorlagen. Modulare Kit-Strukturen bleiben unter `space_station` verfuegbar.
+- Der MapData-Prop speichert Rotation/Scale fuer diese Gebaeude; die Tile-Objektwerte markieren nur ihre Hinderniszellen.
+
 ## Runtime Builder Workbench
 - Der primaere Zielworkflow ist der Sternenbuergerchen-Map-Editor, nicht ein Godot-Editor-Dock.
 - `scenes/editor/map_builder_workbench.tscn` dient als F6-Einstieg fuer Sichttests und startet im sichtbaren Spielmodus den Runtime-Map-Editor `scenes/editor/map_editor.tscn`.

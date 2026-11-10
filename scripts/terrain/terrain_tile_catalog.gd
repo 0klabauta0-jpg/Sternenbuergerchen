@@ -164,7 +164,9 @@ static func _resolve_palette_group_for_entry(entry: Dictionary) -> String:
 		return "plattformen"
 	if searchable.contains("computer") or searchable.contains("console") or searchable.contains("display") or searchable.contains("generator") or searchable.contains("chimney") or searchable.contains("crane") or searchable.contains("tank"):
 		return "technik"
-	if searchable.contains("building") or searchable.contains("hangar") or searchable.contains("structure"):
+	if searchable.contains("structure"):
+		return "space_station" # Modular kit parts are not complete current buildings.
+	if searchable.contains("building") or searchable.contains("hangar"):
 		return "gebaeude"
 	if searchable.contains("barrel") or searchable.contains("box") or searchable.contains("crate") or searchable.contains("container") or searchable.contains("bed") or searchable.contains("chair") or searchable.contains("table") or searchable.contains("banner"):
 		return "deko"

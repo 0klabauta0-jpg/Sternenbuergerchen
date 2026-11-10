@@ -1,0 +1,39 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_494 Station Outpost 64x64 Map ===
+  PASS: TASK_494 task file exists
+  PASS: Station outpost generator exists
+  PASS: Task documents the 64x64 map goal
+  PASS: Implementation status tracks TASK_494
+  PASS: Roadmap lists TASK_494
+  PASS: Station outpost map loads
+  PASS: Station outpost map has no load issue
+  PASS: Station outpost map is exactly 64x64
+  PASS: Station outpost map contains 4096 tiles
+  PASS: Station outpost map exposes eight mission slots
+  PASS: Station outpost uses the current Frontier visual theme
+  PASS: Station outpost has marker spawn_alpha
+  PASS: Station outpost has marker spawn_bravo
+  PASS: Station outpost has marker objective_point
+  PASS: Station outpost has marker rally_southwest
+  PASS: Station outpost has marker factory_danger_zone
+  PASS: Station outpost has marker ridge_recon_note
+  PASS: Factory watch route is authored
+  PASS: Station loop route is authored
+  PASS: Terrain tile catalog loads for map validation
+  PASS: All map type ids exist in the terrain catalog
+  PASS: Map has a large station floor footprint
+  PASS: Map has station walls, doors and interior assets
+  PASS: Map has multiple station door states/assets
+  PASS: Map retains the five factory yard props
+  PASS: Yard has two authored current building models
+  PASS: Yard building uses current family
+  PASS: Yard building uses current family
+  PASS: Map has pipe runs between station and factory
+  PASS: Map has hills and raised terrain
+  PASS: Map has level-two ridge tops
+  PASS: Map has explicit cliff assets
+  PASS: Map has natural cover outside the outpost
+=== RESULTS: 33 passed, 0 failed ===
+ALL TESTS PASSED

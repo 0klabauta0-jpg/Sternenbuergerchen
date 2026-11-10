@@ -1,0 +1,90 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== Bugfix Map Editor Station Floor Structure Undo ===
+  PASS: Tile catalog loads
+  PASS: Station floor panel is not an object-layer prop
+  PASS: Station floor panel behaves as a hill-preserving floor paint
+  PASS: Station wall is a structure layer
+  PASS: Station door wall is a structure layer
+  PASS: Placing a station prop after a wall keeps the wall structure
+  PASS: Placing a station prop after a wall stores the prop separately
+  PASS: Layered wall and prop keep wall blocking gameplay
+  PASS: Layered wall and prop use the stronger gameplay values
+  PASS: Placing a wall after a station prop stores the wall as structure
+  PASS: Placing a wall after a station prop preserves the prop
+  PASS: Station floor panel 3D mapping is terrain surface
+  PASS: Station floor panel mapping is lowered for legacy object fallback
+  PASS: Map editor scene instantiates
+  PASS: Palette group has preview icons: terrain
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: nature_ground
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: nature_props
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: waende
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: cliffs
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: rampen
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: felsen
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: space_station
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: deko
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: technik
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: gebaeude
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: plattformen
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: pipes
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: rails
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: crater
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: fahrzeuge
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: space_kit_full
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: space_station_full
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: modular_space
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: factory
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Palette group has preview icons: missionsmarker
+  FAIL: Palette preview icons stay compact and readable
+  PASS: Station wall palette icon is a shaped preview, not a flat color square
+  PASS: Station floor palette icon is a shaped preview
+  PASS: Generator palette thumbnail crops transparent margins
+  PASS: Renaming default New Map routes normal Save to Save As
+  PASS: Save As suggests a file name from the edited map ID
+  PASS: Saving preserves edited map name instead of overwriting it with the file stem
+  PASS: Object rotation persists through map save/load
+  PASS: Undo fixture has two editable tiles
+  PASS: Undo stack records more than one step
+  PASS: First undo restores the latest tile
+  PASS: Second undo restores the previous tile
+  PASS: Patrol authoring ignores outside-map clicks
+  PASS: Patrol authoring still adds waypoints on map tiles
+  PASS: Patrol waypoint snaps to the tile center
+  PASS: Patrol drag ignores outside-map positions
+  PASS: Eraser clears the top object on a layered station tile
+  PASS: Eraser leaves the station wall when removing the prop
+  PASS: Eraser restores station wall gameplay after prop removal
+  PASS: Eraser can clear the remaining station wall structure
+  PASS: Second eraser pass resets the station wall to ground
+  PASS: 3D view renders station floor, wall and prop layers
+  PASS: Layered station fixture has no missing 3D asset mappings
+  PASS: Tile object rotation turns the station bed model
+  PASS: Station floor panel renders with the mapped floor-top offset
+  PASS: Station wall tiles use the station floor panel underneath
+  PASS: Standalone station floors and wall-underlay floors share the same visual top height
+  PASS: Legacy wall_* tiles with station road surface render the station floor underneath
+  PASS: Station floor under legacy walls is not covered by road tint
+=== RESULTS: 63 passed, 21 failed ===
+FAIL

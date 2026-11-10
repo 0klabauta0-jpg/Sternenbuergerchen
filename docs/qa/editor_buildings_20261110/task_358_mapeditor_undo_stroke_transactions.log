@@ -1,0 +1,23 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_358 MapEditor Undo Stroke Transactions ===
+  PASS: Brush stroke creates one undo transaction
+  PASS: Brush transaction records all changed radius tiles
+  PASS: Brush stroke paints the whole radius
+  PASS: One undo restores the whole brush stroke
+  PASS: Brush undo consumes one transaction
+  PASS: Height stroke creates one undo transaction
+  PASS: Height transaction includes changed and auto-reconciled tiles
+  PASS: Height stroke raises the center tile
+  PASS: Height stroke creates auto cliff visuals
+  PASS: Height undo restores center height
+  PASS: Height undo removes auto cliff visuals in the same transaction
+  PASS: Eraser creates one undo transaction
+  PASS: Eraser removes the structure layer
+  PASS: Eraser undo restores the structure layer
+  PASS: Empty transaction creates no undo entry
+  PASS: Undo stack limit is applied to transactions
+  PASS: Stack limit keeps transaction entries intact
+=== RESULTS: 17 passed, 0 failed ===
+TASK_358: ALL PASSED

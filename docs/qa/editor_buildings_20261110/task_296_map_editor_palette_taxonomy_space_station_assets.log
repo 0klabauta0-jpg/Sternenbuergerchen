@@ -1,0 +1,58 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_296 Map Editor Palette Taxonomy Space Station Assets ===
+  PASS: Terrain tile catalog loads
+  PASS: Terrain 3D mapping parses
+  PASS: Space setpiece catalog parses
+  PASS: Palette group order starts with authoring taxonomy
+  PASS: Tile catalog has Space Station type: station_wall
+  PASS: Mapping uses Space Station source: station_wall
+  PASS: Mapping path is project-local: station_wall
+  PASS: Mapping path has no absolute source path: station_wall
+  PASS: Mapping resource loads: station_wall
+  PASS: Tile catalog has Space Station type: station_wall_door
+  PASS: Mapping uses Space Station source: station_wall_door
+  PASS: Mapping path is project-local: station_wall_door
+  PASS: Mapping path has no absolute source path: station_wall_door
+  PASS: Mapping resource loads: station_wall_door
+  PASS: Tile catalog has Space Station type: station_computer
+  PASS: Mapping uses Space Station source: station_computer
+  PASS: Mapping path is project-local: station_computer
+  PASS: Mapping path has no absolute source path: station_computer
+  PASS: Mapping resource loads: station_computer
+  PASS: Tile catalog has Space Station type: station_table_display
+  PASS: Mapping uses Space Station source: station_table_display
+  PASS: Mapping path is project-local: station_table_display
+  PASS: Mapping path has no absolute source path: station_table_display
+  PASS: Mapping resource loads: station_table_display
+  PASS: Tile catalog has Space Station type: station_container_wide
+  PASS: Mapping uses Space Station source: station_container_wide
+  PASS: Mapping path is project-local: station_container_wide
+  PASS: Mapping path has no absolute source path: station_container_wide
+  PASS: Mapping resource loads: station_container_wide
+  PASS: Tile catalog has Space Station type: station_bed_single
+  PASS: Mapping uses Space Station source: station_bed_single
+  PASS: Mapping path is project-local: station_bed_single
+  PASS: Mapping path has no absolute source path: station_bed_single
+  PASS: Mapping resource loads: station_bed_single
+  PASS: Tile catalog has Space Station type: station_floor_panel
+  PASS: Mapping uses Space Station source: station_floor_panel
+  PASS: Mapping path is project-local: station_floor_panel
+  PASS: Mapping path has no absolute source path: station_floor_panel
+  PASS: Mapping resource loads: station_floor_panel
+  PASS: Editor palette can filter Space Station group
+  PASS: Filtered palette exposes station type: station_wall
+  PASS: Filtered palette exposes station type: station_wall_door
+  PASS: Filtered palette exposes station type: station_computer
+  PASS: Filtered palette exposes station type: station_table_display
+  PASS: Filtered palette exposes station type: station_container_wide
+  PASS: Filtered palette exposes station type: station_bed_single
+  PASS: Filtered palette exposes station type: station_floor_panel
+  PASS: 3D view renders Space Station models
+  PASS: 3D view applies Space Station colormap texture
+  PASS: Space Station fixture has no missing 3D mappings
+  PASS: Space Station palette inventory exists
+  PASS: Space Station palette checklist exists
+=== RESULTS: 52 passed, 0 failed ===
+ALL TESTS PASSED

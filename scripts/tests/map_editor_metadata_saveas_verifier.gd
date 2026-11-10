@@ -25,7 +25,7 @@ func _run() -> void:
 	var tile = map_data.get_tiles()[0]
 	var state: String = JSON.stringify(tile.to_dict())
 	editor.call("_apply_brush_at_world_position", tile.world_position)
-	_check(JSON.stringify(tile.to_dict()) == state, "multi-cell asset cannot be painted as a single blocking cell")
+	_check(JSON.stringify(tile.to_dict()) == state, "building outside map boundary rejected atomically")
 	var target := "user://editor_metadata_%d/trade_saved.json" % OS.get_process_id()
 	editor.call("_on_save_as_file_selected", target)
 	_check(FileAccess.file_exists(target), "real SaveAs callback writes scratch file")
@@ -36,7 +36,7 @@ func _run() -> void:
 	_check(editor.get("_terrain_map_data").get_place_presentation() == original.place_presentation, "real editor reload retains place models")
 	_check(FileAccess.get_sha256(source) == before, "source map untouched by SaveAs")
 	editor.call("_load_map", "res://maps/station_outpost_64x64.json")
-	_check(bool(editor.call("_is_fixed_authored_layout")), "migrated multi-cell layout protected until layout tools exist")
+	_check(not bool(editor.call("_is_fixed_authored_layout")), "migrated station supports whole-building authoring")
 	var view = editor.get_node("Primary3DView")
 	var snapshot: Dictionary = view.call("get_render_snapshot")
 	_check(bool(snapshot.get("frontier_art_enabled", false)), "migrated station uses Frontier profile")

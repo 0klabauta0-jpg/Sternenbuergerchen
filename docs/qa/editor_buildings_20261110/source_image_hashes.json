@@ -1,0 +1,42 @@
+[
+  {
+    "path": "scripts/editor/building_layout_authoring.gd",
+    "sha256": "299457e7088ebe8d2ad6356326f417bc7f6983d1bc93620b6720bd04c98bfcb8"
+  },
+  {
+    "path": "scripts/editor/map_editor.gd",
+    "sha256": "90707107c406206337dd74726a7746d12813fdb530500dd5f9f6ddbc2586e09b"
+  },
+  {
+    "path": "scenes/terrain/frontier_habitat_exterior.tscn",
+    "sha256": "1b0de6c3a4765b92c696b1f88855ee3a30940e9db8e729ccb35b6f3af766a5fd"
+  },
+  {
+    "path": "scenes/terrain/frontier_hall_exterior.tscn",
+    "sha256": "98cff9bf44169feddf5f95a0ba9f8c73195b67e724e82d25c0d2a0a867fdc196"
+  },
+  {
+    "path": "data/frontier_building_visual_catalog.json",
+    "sha256": "1ce946e2937092ab48d067e93dd0369ecfe7a72ddfb3a3eb71c0ae3cba456895"
+  },
+  {
+    "path": "maps/station_outpost_64x64.json",
+    "sha256": "bb65314ae4eeffc2e281c5172f195bd217744107b0561bc866fccc49798ba43f"
+  },
+  {
+    "path": "maps/station_outpost_192x192.json",
+    "sha256": "9aeb79f5b5a942d4bc27789b7a70450c84347faba3c671eccdb687e467781f3d"
+  },
+  {
+    "path": "docs/qa/editor_buildings_20261110/01_placed.png",
+    "sha256": "0dd062cc462f96e538a8de9736a5259f8c665373338b1a8554983f1c7d4e6b97"
+  },
+  {
+    "path": "docs/qa/editor_buildings_20261110/02_reloaded.png",
+    "sha256": "ef6564d7915f1240fa36aebb9f9f9dba59ad79bb2aeb2f1656ba1bd3fa79a527"
+  },
+  {
+    "path": "docs/qa/editor_buildings_20261110/03_existing_station.png",
+    "sha256": "8b5c9f26af1077a2769dd2aa734a5e9971d7174fab84a0cb308262f1c7b53b78"
+  }
+]

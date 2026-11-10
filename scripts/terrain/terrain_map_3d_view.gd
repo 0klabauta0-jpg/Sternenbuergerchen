@@ -6020,6 +6020,7 @@ func _rebuild_selection_visuals() -> void:
 	_clear_children(_selection_root)
 	if _terrain_map_data == null or _selection_root == null:
 		return
+	var managed_buildings: bool=int(Dictionary(_terrain_map_data.get_place_presentation().get("building_authoring",{})).get("schema_version",0))==1
 	for grid_variant in _selected_grid_positions:
 		var grid_position := Vector2i(grid_variant)
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
@@ -6032,17 +6033,18 @@ func _rebuild_selection_visuals() -> void:
 		selection.mesh = mesh
 		if _uses_hex_grid():
 			selection.mesh = _hex_ground_batch.mesh_for(0.018, cell_size * 0.98 / sqrt(3.0))
-		selection.material_override = _make_editor_selection_material(false)
+		var depth_test: bool=managed_buildings and String(tile_data.object_type_id)=="frontier_scene_solid"
+		selection.material_override = _make_editor_selection_material(false,depth_test)
 		var selection_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_SELECTION_SURFACE_Y_OFFSET
 		selection.position = _grid_to_3d_position(Vector2(grid_position), selection_y)
 		_selection_root.add_child(selection)
-		_add_selection_border(grid_position, selection_y + 0.035)
+		_add_selection_border(grid_position, selection_y + 0.035,depth_test)
 
 
-func _add_selection_border(grid_position: Vector2i, y_position: float) -> void:
+func _add_selection_border(grid_position: Vector2i, y_position: float, depth_test: bool = false) -> void:
 	if _selection_root == null:
 		return
-	var material := _make_editor_selection_material(true)
+	var material := _make_editor_selection_material(true,depth_test)
 	var mesh := ImmediateMesh.new()
 	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
 	var cell_size: float = _get_3d_cell_size()
@@ -14331,8 +14333,9 @@ func _refresh_tile_grid_materials_for_release_polish() -> void:
 		shadow_material.albedo_color = _get_tile_grid_line_color_for_release_polish(false)
 
 
-func _make_editor_selection_material(is_border: bool) -> StandardMaterial3D:
+func _make_editor_selection_material(is_border: bool, depth_test: bool = false) -> StandardMaterial3D:
 	var key: String = TILE_SELECTION_BORDER_MATERIAL_KEY if is_border else TILE_SELECTION_FILL_MATERIAL_KEY
+	if depth_test: key+="_building_ground"
 	if _material_cache.has(key):
 		return _material_cache[key] as StandardMaterial3D
 	var material := StandardMaterial3D.new()
@@ -14341,8 +14344,8 @@ func _make_editor_selection_material(is_border: bool) -> StandardMaterial3D:
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	material.no_depth_test = true
-	material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_ALWAYS
+	material.no_depth_test = not depth_test
+	material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_OPAQUE_ONLY if depth_test else BaseMaterial3D.DEPTH_DRAW_ALWAYS
 	material.disable_receive_shadows = true
 	_material_cache[key] = material
 	return material

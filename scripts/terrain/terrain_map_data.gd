@@ -733,5 +733,9 @@ func get_place_presentation() -> Dictionary:
 	return _place_presentation.duplicate(true)
 
 
+func has_authoring_metadata(key: String) -> bool:
+	return _extension_metadata.has(key)
+
+
 func set_place_presentation(presentation: Dictionary) -> void:
 	_place_presentation = presentation.duplicate(true)

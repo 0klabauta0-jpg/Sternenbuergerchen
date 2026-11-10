@@ -1,0 +1,21 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: old building cannot be selected through authoring API
+PASS: current habitat can be inspected in palette
+PASS: Asset quick tool selects current model
+PASS: Asset quick tool has current habitat
+PASS: Factory quick tool selects current model
+PASS: Factory quick tool has current hall
+PASS: building outside map boundary rejected atomically
+PASS: real SaveAs callback writes scratch file
+PASS: real editor SaveAs preserves singleplayer_site
+PASS: real editor SaveAs preserves place_world
+PASS: real editor SaveAs preserves place_presentation
+PASS: real editor reload retains place models
+PASS: source map untouched by SaveAs
+PASS: migrated station supports whole-building authoring
+PASS: migrated station uses Frontier profile
+PASS: migrated station has no missing-model boxes
+PASS: actual renderer installs both current building scenes
+MAP_EDITOR_METADATA passed=17 failed=0

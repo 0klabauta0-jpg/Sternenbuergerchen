@@ -4,6 +4,7 @@ extends RefCounted
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const BUILDINGS = preload("res://scripts/editor/building_layout_authoring.gd")
 
 const DEFAULT_MAP_NAME: String = "map_builder_import"
 const DEFAULT_GRID_SIZE: Vector2i = Vector2i(8, 8)
@@ -120,6 +121,7 @@ func _apply_placements_to_map(map_data, placements: Array, catalog) -> Dictionar
 		"warning_count": 0,
 	}
 	var transform_owner_by_grid: Dictionary = {}
+	var building_placements: Array=[]
 	placements.sort_custom(_sort_placements)
 	for placement_variant in placements:
 		var placement: Dictionary = Dictionary(placement_variant)
@@ -135,9 +137,12 @@ func _apply_placements_to_map(map_data, placements: Array, catalog) -> Dictionar
 			issues.append("Unknown map builder type_id: %s" % type_id)
 			stats["skipped_count"] = int(stats.get("skipped_count", 0)) + 1
 			continue
-		if type_id in ["frontier_habitat_exterior", "frontier_hall_exterior"] or not bool(Dictionary(catalog.get_type(type_id)).get("palette_visible", true)):
+		if not bool(Dictionary(catalog.get_type(type_id)).get("palette_visible", true)):
 			issues.append("Building %s requires multi-cell layout authoring; single-cell compilation is unavailable." % type_id)
 			stats["skipped_count"] = int(stats.get("skipped_count", 0)) + 1
+			continue
+		if BUILDINGS.supported(type_id):
+			building_placements.append(placement)
 			continue
 		var grid_position: Vector2i = _coerce_grid_position(placement.get("grid_position", Vector2i(-1, -1)))
 		var tile_data = map_data.call("get_tile_at_grid", grid_position) if map_data != null else null
@@ -152,6 +157,14 @@ func _apply_placements_to_map(map_data, placements: Array, catalog) -> Dictionar
 		_apply_authoring_overrides(tile_data, placement, type_id, transform_owner_by_grid, warnings)
 		_increment_layer_stat(stats, type_id, catalog)
 		stats["applied_count"] = int(stats.get("applied_count", 0)) + 1
+	for placement in building_placements:
+		var request: Dictionary=BUILDINGS.plan(map_data,"place",{"asset_id":String(placement.type_id),"grid":Vector2i(placement.grid_position),"scale":_normalize_object_scale(_coerce_scale_value(placement.get("object_scale",placement.get("scale",1.0)))),"rotation_degrees":placement.get("rotation_degrees",placement.get("object_rotation_degrees",0.0))})
+		if not bool(request.get("ok",false)):
+			issues.append(String(request.get("error","Building placement rejected")))
+			stats.skipped_count+=1
+			continue
+		BUILDINGS.apply(map_data,request)
+		stats.applied_count+=1; stats.object_count+=1
 	stats["warning_count"] = warnings.size()
 	return _make_result(issues.is_empty(), map_data, issues, warnings, stats)
 

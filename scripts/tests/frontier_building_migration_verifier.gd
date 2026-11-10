@@ -32,15 +32,19 @@ func _run() -> void:
 		_check(old_count == 0, name + " has no obsolete buildings")
 		_check(new_count == (2 if name.ends_with("64x64") else 18), name + " preserves building placement count")
 	var editor := FileAccess.get_file_as_string("res://scripts/editor/map_editor.gd")
-	_check(editor.contains('const DEFAULT_MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"'), "editor opens current authored map")
+	_check(editor.contains('const DEFAULT_MAP_PATH: String = "res://maps/station_outpost_64x64.json"'), "editor opens editable current station")
 	for script in ["mission_map_3d_calibration", "mission_map_3d_render_spike"]:
 		var source := FileAccess.get_file_as_string("res://scripts/tests/%s.gd" % script)
 		_check(source.contains('"res://maps/Ground_Mission01_32x32.json"'), script + " opens current authored map")
 	var importer = preload("res://scripts/editor/map_builder_scene_importer.gd").new()
 	for id in ["frontier_habitat_exterior", "factory_building_a"]:
 		var result: Dictionary = importer.build_map_from_authoring({"grid_size":Vector2i(8,8), "placements":[{"type_id":id,"grid_position":Vector2i(3,3)}]})
-		_check(not bool(result.get("ok", true)), "compiler rejects unsafe single-cell building: " + id)
-		_check(not Array(result.get("issues",[])).is_empty(), "compiler explains missing multi-cell authoring: " + id)
+		if id == "frontier_habitat_exterior":
+			_check(bool(result.get("ok", false)), "compiler accepts current building with footprint")
+			_check(Array(result.map_data.get_place_presentation().get("props", [])).size() == 1, "compiler persists current building")
+		else:
+			_check(not bool(result.get("ok", true)), "compiler rejects retired building")
+			_check(not Array(result.get("issues",[])).is_empty(), "compiler explains retired building rejection")
 	var view = preload("res://scripts/terrain/terrain_map_3d_view.gd").new()
 	var old: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://docs/qa/map_save_building_migration_20261110/old_building_bounds.json"))
 	for id in old:

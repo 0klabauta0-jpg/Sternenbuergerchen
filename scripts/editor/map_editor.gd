@@ -1,5 +1,9 @@
 extends Node2D
 
+const BUILDING_AUTHORING = preload("res://scripts/editor/building_layout_authoring.gd")
+var _building_move_id := ""
+var _building_feedback_text := "Gebäude: Vorlage in der Palette wählen oder ein Gebäude auswählen."
+
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
@@ -23,7 +27,7 @@ const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/ma
 const MAP_EDITOR_MISSION_SCENARIO_PANEL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_mission_scenario_panel.gd")
 const MULTIPLAYER_MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
-const DEFAULT_MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"
+const DEFAULT_MAP_PATH: String = "res://maps/station_outpost_64x64.json"
 const DEFAULT_NEW_MAP_PATH: String = "res://maps/new_map.json"
 const DEFAULT_NEW_MAP_NAME: String = "new_map"
 const DEFAULT_FALLBACK_GRID_SIZE: Vector2i = Vector2i(64, 64)
@@ -158,6 +162,7 @@ const RIGHT_CONTEXT_DRAG_THRESHOLD_PX: float = 6.0
 const CONTEXT_MENU_ROTATE_LEFT_ID: int = 101
 const CONTEXT_MENU_ROTATE_RIGHT_ID: int = 102
 const CONTEXT_MENU_ERASE_OBJECT_ID: int = 103
+const CONTEXT_MENU_MOVE_BUILDING_ID: int = 104
 const INSPECTOR_SECTION_MAP_SETTINGS: String = "map_settings"
 const INSPECTOR_SECTION_MARKERS: String = "markers"
 const INSPECTOR_SECTION_MISSION_SCENARIO: String = "mission_scenario"
@@ -323,6 +328,7 @@ func _ready() -> void:
 	_ensure_marker_editor_controls()
 	_ensure_mission_authoring_controls()
 	_ensure_authoring_status_controls()
+	_ensure_building_controls()
 	_ensure_inspector_section_controls()
 	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
 	_apply_contextual_help_ids()
@@ -421,9 +427,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			_undo_last_change()
 			return
 		if key_event.pressed and not key_event.echo and key_event.physical_keycode == KEY_DELETE:
+			if not _building_id_at_selected().is_empty():
+				request_building_operation("remove", {"building_id":_building_id_at_selected()})
+				return
 			if _delete_selected_marker():
 				return
 		if key_event.pressed and not key_event.echo and key_event.physical_keycode == KEY_ESCAPE:
+			_building_move_id=""
+			_building_feedback("Verschieben abgebrochen.")
 			_clear_marker_selection()
 			_on_tile_type_deselected()
 			return
@@ -469,6 +480,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				_last_painted_grid = Vector2i(-1, -1)
 				return
 			if _is_pointer_over_control():
+				return
+			if not _building_move_id.is_empty():
+				var moved:=request_building_operation("move",{"building_id":_building_move_id,"grid":_terrain_registry.world_to_grid(world_position)})
+				if bool(moved.get("ok",false)): _building_move_id=""
 				return
 			if _network_drag_tool_enabled:
 				_begin_network_drag_at_world_position(world_position)
@@ -615,10 +630,13 @@ func _refresh_editor_context_menu_actions() -> void:
 		return
 	var has_selected_tile: bool = _get_selected_tile() != null
 	var has_rotatable_object: bool = _tile_has_rotatable_object(_get_selected_tile())
+	var building_selected: bool = not _building_id_at_selected().is_empty()
+	has_rotatable_object = has_rotatable_object or building_selected
 	var can_erase_object: bool = has_selected_tile and _selected_tile_has_erasable_object()
 	_set_context_menu_item_disabled(menu, CONTEXT_MENU_ROTATE_LEFT_ID, not has_rotatable_object)
 	_set_context_menu_item_disabled(menu, CONTEXT_MENU_ROTATE_RIGHT_ID, not has_rotatable_object)
 	_set_context_menu_item_disabled(menu, CONTEXT_MENU_ERASE_OBJECT_ID, not can_erase_object)
+	_set_context_menu_item_disabled(menu, CONTEXT_MENU_MOVE_BUILDING_ID, not building_selected)
 
 
 func _set_context_menu_item_disabled(menu: PopupMenu, item_id: int, disabled: bool) -> void:
@@ -631,6 +649,8 @@ func _set_context_menu_item_disabled(menu: PopupMenu, item_id: int, disabled: bo
 
 func _on_editor_context_menu_id_pressed(id: int) -> void:
 	match id:
+		CONTEXT_MENU_MOVE_BUILDING_ID:
+			_begin_building_move()
 		CONTEXT_MENU_ROTATE_LEFT_ID:
 			_rotate_selected_object(-90.0)
 		CONTEXT_MENU_ROTATE_RIGHT_ID:
@@ -640,6 +660,7 @@ func _on_editor_context_menu_id_pressed(id: int) -> void:
 
 
 func _selected_tile_has_erasable_object() -> bool:
+	if not _building_id_at_selected().is_empty(): return true
 	var tile_data = _get_selected_tile()
 	if tile_data == null:
 		return false
@@ -657,6 +678,8 @@ func _selected_tile_has_erasable_object() -> bool:
 
 
 func _erase_selected_tile_object() -> bool:
+	if not _building_id_at_selected().is_empty():
+		return bool(request_building_operation("remove",{"building_id":_building_id_at_selected()}).get("ok",false))
 	var tile_data = _get_selected_tile()
 	if tile_data == null or not _erase_object_layer_from_tile(tile_data):
 		return false
@@ -669,8 +692,10 @@ func _erase_selected_tile_object() -> bool:
 func _is_fixed_authored_layout() -> bool:
 	if _terrain_map_data == null:
 		return false
-	if _terrain_map_data.has_method("get_place_presentation") and not Dictionary(_terrain_map_data.call("get_place_presentation")).get("migration_id", "").is_empty():
-		return true # Multi-cell scene and stored footprints must be edited together.
+	if _terrain_map_data.has_authoring_metadata("homebase_exploration"): return true
+	var presentation: Dictionary=_terrain_map_data.get_place_presentation()
+	if not String(presentation.get("migration_id","")).is_empty() and int(Dictionary(presentation.get("building_authoring",{})).get("schema_version",0))!=1:
+		return true # Unknown legacy layouts cannot release guessed substrate.
 	return _terrain_map_data.has_method("get_authored_visual_layout_id") and String(_terrain_map_data.call("get_authored_visual_layout_id")) == FIXED_AUTHORED_LAYOUT_ID
 
 
@@ -686,6 +711,7 @@ func _reject_fixed_authored_layout_edit() -> bool:
 
 
 func _load_map(path: String) -> void:
+	_building_move_id=""
 	_current_map_path = path
 	_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", path)
 	var has_load_issue: bool = _terrain_map_data != null and _terrain_map_data.has_method("has_load_issue") and bool(_terrain_map_data.call("has_load_issue"))
@@ -735,7 +761,95 @@ func _load_map(path: String) -> void:
 	_refresh_mission_authoring_controls()
 
 
+func _building_id_at_selected() -> String:
+	return BUILDING_AUTHORING.id_at_grid(_terrain_map_data,_selected_grid_position) if _terrain_map_data!=null else ""
+
+
+func _building_owns_grid(grid: Vector2i) -> bool:
+	return _terrain_map_data!=null and not BUILDING_AUTHORING.id_at_grid(_terrain_map_data,grid).is_empty()
+
+
+func _building_feedback(message: String) -> void:
+	_building_feedback_text=message
+	_refresh_building_controls()
+
+
+func _cancel_building_move() -> void:
+	if _building_move_id.is_empty(): return
+	_building_move_id=""
+	_building_feedback("Verschieben beendet. Gebäude auswählen oder eine Vorlage platzieren.")
+
+
+func _ensure_building_controls() -> void:
+	var parent:=get_node_or_null("UI/PropertyPanel/Margin/VBox")
+	if parent==null or parent.has_node("BuildingActions"): return
+	var panel:=VBoxContainer.new(); panel.name="BuildingActions"; parent.add_child(panel); parent.move_child(panel,0)
+	var heading:=Label.new(); heading.text="Gebäude"; panel.add_child(heading)
+	var status:=Label.new(); status.name="Status"; status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; panel.add_child(status)
+	var buttons:=GridContainer.new(); buttons.name="Buttons"; buttons.columns=2; panel.add_child(buttons)
+	for action in ["move","remove","left","right"]:
+		var button:=Button.new(); button.name=action; button.text={"move":"Verschieben","remove":"Entfernen","left":"-90°","right":"+90°"}[action]
+		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL; buttons.add_child(button)
+		match action:
+			"move": button.pressed.connect(_begin_building_move)
+			"remove": button.pressed.connect(func(): request_building_operation("remove",{"building_id":_building_id_at_selected()}))
+			"left": button.pressed.connect(func(): _rotate_selected_object(-90.0))
+			"right": button.pressed.connect(func(): _rotate_selected_object(90.0))
+	_refresh_building_controls()
+
+
+func _refresh_building_controls() -> void:
+	var panel:=get_node_or_null("UI/PropertyPanel/Margin/VBox/BuildingActions")
+	if panel==null: return
+	panel.get_node("Status").text=_building_feedback_text
+	var selected: bool=not _building_id_at_selected().is_empty()
+	for button in panel.get_node("Buttons").get_children(): button.disabled=not selected
+
+
+func _begin_building_move() -> void:
+	var id:=_building_id_at_selected()
+	if id.is_empty(): return
+	set_authoring_tool(AUTHORING_TOOL_SELECT)
+	_building_move_id=id
+	_building_feedback("Verschieben: Ziel auf der Karte anklicken. Esc bricht ab.")
+
+
+func request_building_operation(action: String, payload: Dictionary) -> Dictionary:
+	var transaction: Dictionary=BUILDING_AUTHORING.plan(_terrain_map_data,action,payload)
+	if not bool(transaction.get("ok",false)):
+		_building_feedback(String(transaction.get("error","Gebäudeaktion abgelehnt.")))
+		return transaction
+	if not _active_undo_transaction.is_empty(): commit_undo_transaction()
+	_is_painting=false
+	var undo: Dictionary={"transaction":true,"action_name":"building_"+action,"tile_states":[],"place_presentation_before":transaction.before,"building_selection_before":_selected_grid_position}
+	for change in transaction.changes:
+		var tile=_terrain_map_data.get_tile_at_grid(change.grid)
+		undo.tile_states.append({"grid_position":change.grid,"tile_dict":tile.to_dict()})
+	BUILDING_AUTHORING.apply(_terrain_map_data,transaction)
+	_building_move_id=""
+	_push_undo_entry(undo)
+	var grids: Array[Vector2i]=[]
+	for change in transaction.changes:
+		var tile=_terrain_map_data.get_tile_at_grid(change.grid)
+		_terrain_registry.register_tile(tile)
+		grids.append(change.grid)
+		_refresh_tile_visual(tile,false)
+	_refresh_dirty_visual_neighborhoods(grids)
+	for prop in Array(transaction.after.get("props",[])):
+		if String(prop.get("building_id",""))==String(transaction.building_id):
+			var center:=Vector2(prop.center[0],prop.center[1])
+			var grid: Vector2i=preload("res://scripts/terrain/hex_grid.gd").round_axial(preload("res://scripts/terrain/hex_grid.gd").plane_to_axial(center)) if _terrain_map_data.get_grid_topology()=="hex_axial_v1" else Vector2i(roundi(center.x),roundi(center.y))
+			_set_selected_grid_position(grid)
+			break
+	_building_feedback({"place":"Gebäude platziert.","move":"Gebäude verschoben.","rotate":"Gebäude gedreht.","remove":"Gebäude entfernt."}.get(action,"Gebäude geändert.")+" Strg+Z: rückgängig.")
+	_mark_dirty(true)
+	_queue_3d_map_refresh()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION|EDITOR_UI_REFRESH_PROPERTIES|EDITOR_UI_REFRESH_TOOL_STATE)
+	return {"ok":true,"building_id":transaction.building_id}
+
+
 func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
+	_cancel_building_move()
 	var normalized_grid_size := Vector2i(
 		clampi(grid_size.x, MIN_NEW_MAP_GRID_DIMENSION, MAX_NEW_MAP_GRID_DIMENSION),
 		clampi(grid_size.y, MIN_NEW_MAP_GRID_DIMENSION, MAX_NEW_MAP_GRID_DIMENSION)
@@ -1005,6 +1119,13 @@ func _set_selected_grid_position(grid_position: Vector2i) -> void:
 	_selected_grids.clear()
 	if grid_position != Vector2i(-1, -1):
 		_selected_grids.append(grid_position)
+		var id:=_building_id_at_selected()
+		if not id.is_empty():
+			for prop in Array(_terrain_map_data.get_place_presentation().get("props",[])):
+				if String(prop.get("building_id",""))==id:
+					_selected_grids.clear()
+					for cell in prop.reserved_grids: _selected_grids.append(Vector2i(cell[0],cell[1]))
+	_refresh_building_controls()
 
 
 func _select_grid_with_selection_tool(grid_position: Vector2i, additive: bool = false) -> bool:
@@ -1013,6 +1134,10 @@ func _select_grid_with_selection_tool(grid_position: Vector2i, additive: bool = 
 	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
 	if tile_data == null:
 		return false
+	if not additive and _building_owns_grid(grid_position):
+		_set_selected_grid_position(grid_position)
+		_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION|EDITOR_UI_REFRESH_PROPERTIES|EDITOR_UI_REFRESH_TOOL_STATE)
+		return true
 	if additive:
 		if _selected_grids.has(grid_position):
 			_selected_grids.erase(grid_position)
@@ -1067,7 +1192,9 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	if _reject_fixed_authored_layout_edit():
 		return
 	if _selected_type_id in ["frontier_habitat_exterior", "frontier_hall_exterior"]:
-		_set_marker_feedback("Mehrzellen-Gebäude: aktuelle Layoutvorlage. Freies Platzieren folgt mit dem Ortseditor; Einzelzellen-Pinsel bleibt gesperrt.")
+		var target=_resolve_tile_at_world_position(world_position)
+		if target!=null:
+			request_building_operation("place",{"asset_id":_selected_type_id,"grid":Vector2i(target.grid_position),"scale":_placement_object_scale,"rotation_degrees":_placement_object_rotation_degrees})
 		return
 	var tile_data = _resolve_tile_at_world_position(world_position)
 	if tile_data == null:
@@ -1088,6 +1215,9 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 			var target_grid: Vector2i = center_grid + Vector2i(dx, dy)
 			var target_tile = _terrain_map_data.call("get_tile_at_grid", target_grid) if _terrain_map_data != null else null
 			if target_tile == null:
+				continue
+			if _building_owns_grid(target_grid):
+				_building_feedback("Belegtes Gebäudefeld: Gebäude als Ganzes bearbeiten.")
 				continue
 
 			if not _selected_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(_selected_type_id):
@@ -1195,6 +1325,9 @@ func _apply_eraser_at_world_position(world_position: Vector2) -> void:
 
 
 func _erase_object_layer_from_tile(tile_data) -> bool:
+	if tile_data!=null:
+		var building_id:=BUILDING_AUTHORING.id_at_grid(_terrain_map_data,Vector2i(tile_data.grid_position))
+		if not building_id.is_empty(): return bool(request_building_operation("remove",{"building_id":building_id}).get("ok",false))
 	if _reject_fixed_authored_layout_edit():
 		return false
 	if tile_data == null:
@@ -1661,7 +1794,7 @@ func _activate_runtime_builder_palette_brush(type_id: String) -> bool:
 	if not set_palette_type_for_authoring(normalized_type_id):
 		return false
 	if normalized_type_id in ["frontier_habitat_exterior", "frontier_hall_exterior"]:
-		_set_marker_feedback("Aktuelle Gebäudefamilie als Layoutvorlage. Mehrzellen-Platzierung folgt mit dem Ortseditor.")
+		_building_feedback("Gebäude platzieren: freie, ebene Fläche anklicken.")
 	return set_authoring_tool(AUTHORING_TOOL_BRUSH)
 
 
@@ -1958,6 +2091,7 @@ func _apply_network_path(kind: String, path: Array[Vector2i]) -> bool:
 
 
 func _apply_network_piece_to_tile(tile_data, piece: Dictionary) -> bool:
+	if tile_data!=null and _building_owns_grid(Vector2i(tile_data.grid_position)): return false
 	if _reject_fixed_authored_layout_edit():
 		return false
 	if tile_data == null or piece.is_empty() or _tile_catalog == null:
@@ -2876,6 +3010,7 @@ func _ensure_editor_context_menu() -> PopupMenu:
 	_editor_context_menu.clear()
 	_editor_context_menu.add_item("Drehen links", CONTEXT_MENU_ROTATE_LEFT_ID)
 	_editor_context_menu.add_item("Drehen rechts", CONTEXT_MENU_ROTATE_RIGHT_ID)
+	_editor_context_menu.add_item("Gebäude verschieben", CONTEXT_MENU_MOVE_BUILDING_ID)
 	_editor_context_menu.add_separator()
 	_editor_context_menu.add_item("Objekt entfernen", CONTEXT_MENU_ERASE_OBJECT_ID)
 	if not _editor_context_menu.id_pressed.is_connected(_on_editor_context_menu_id_pressed):
@@ -2995,6 +3130,7 @@ func _add_adjacency_debug_overlay_controls() -> void:
 
 
 func _on_selection_tool_toggled(pressed: bool) -> void:
+	if pressed: _cancel_building_move()
 	_selection_tool_enabled = pressed
 	if pressed:
 		_clear_height_tool()
@@ -3025,6 +3161,7 @@ func _on_selection_tool_toggled(pressed: bool) -> void:
 
 
 func _on_brush_tool_toggled(pressed: bool) -> void:
+	if pressed: _cancel_building_move()
 	if pressed:
 		_clear_height_tool()
 		_network_drag_tool_enabled = false
@@ -3056,6 +3193,7 @@ func _on_brush_tool_toggled(pressed: bool) -> void:
 
 
 func _on_eraser_tool_toggled(pressed: bool) -> void:
+	if pressed: _cancel_building_move()
 	_eraser_tool_enabled = pressed
 	if pressed:
 		_clear_height_tool()
@@ -3087,6 +3225,7 @@ func _on_eraser_tool_toggled(pressed: bool) -> void:
 
 
 func _on_patrol_tool_toggled(pressed: bool) -> void:
+	if pressed: _cancel_building_move()
 	_patrol_tool_enabled = pressed
 	if pressed:
 		_clear_height_tool()
@@ -3144,6 +3283,7 @@ func _on_clear_patrol_pressed() -> void:
 
 
 func _refresh_property_panel() -> void:
+	_refresh_building_controls()
 	var tile_data = _get_selected_tile()
 	var tile_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/TileLabel") as Label
 	var type_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/TypeLabel") as Label
@@ -4532,6 +4672,7 @@ func set_authoring_tool(tool_id: String) -> bool:
 	var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
 	if not ["select", "selection", "terrain_brush", "brush", "eraser", "erase", "height", "marker", "patrol", "network", "network_drag"].has(normalized_tool_id):
 		return false
+	_cancel_building_move()
 
 	_selection_tool_enabled = normalized_tool_id == AUTHORING_TOOL_SELECT or normalized_tool_id == "selection"
 	_eraser_tool_enabled = normalized_tool_id == AUTHORING_TOOL_ERASER or normalized_tool_id == "erase"
@@ -6184,6 +6325,7 @@ func _on_remove_marker_button_pressed() -> void:
 
 
 func _on_height_tool_toggled(pressed: bool) -> void:
+	if pressed: _cancel_building_move()
 	_height_tool_enabled = pressed
 	if pressed:
 		_network_drag_tool_enabled = false
@@ -6241,6 +6383,7 @@ func _on_height_edge_selected(index: int) -> void:
 
 
 func _on_marker_tool_toggled(pressed: bool) -> void:
+	if pressed: _cancel_building_move()
 	_marker_tool_enabled = pressed
 	if not pressed:
 		_is_dragging_marker = false
@@ -6750,6 +6893,7 @@ func _tile_has_rotatable_object(tile_data) -> bool:
 
 
 func _tile_has_scalable_object(tile_data) -> bool:
+	if tile_data!=null and _building_owns_grid(Vector2i(tile_data.grid_position)): return false
 	return _tile_has_rotatable_object(tile_data)
 
 
@@ -6783,12 +6927,20 @@ func _palette_type_uses_object_rotation(type_id: String) -> bool:
 func _get_tile_object_rotation_degrees(tile_data) -> float:
 	if tile_data == null:
 		return 0.0
+	var building_id:=BUILDING_AUTHORING.id_at_grid(_terrain_map_data,Vector2i(tile_data.grid_position))
+	if not building_id.is_empty():
+		for prop in Array(_terrain_map_data.get_place_presentation().get("props",[])):
+			if String(prop.get("building_id",""))==building_id: return float(prop.get("rotation_degrees",0.0))
 	return fposmod(float(tile_data.object_rotation_degrees), 360.0)
 
 
 func _get_tile_object_scale(tile_data) -> float:
 	if tile_data == null:
 		return OBJECT_SCALE_DEFAULT
+	var building_id:=BUILDING_AUTHORING.id_at_grid(_terrain_map_data,Vector2i(tile_data.grid_position))
+	if not building_id.is_empty():
+		for prop in Array(_terrain_map_data.get_place_presentation().get("props",[])):
+			if String(prop.get("building_id",""))==building_id: return float(prop.get("scale",1.0))
 	return _normalize_object_scale(float(tile_data.object_scale))
 
 
@@ -6805,6 +6957,8 @@ func _normalize_object_rotation_degrees(value: float) -> float:
 
 
 func _rotate_selected_object(delta_degrees: float) -> bool:
+	if not _building_id_at_selected().is_empty():
+		return bool(request_building_operation("rotate",{"building_id":_building_id_at_selected(),"delta_degrees":delta_degrees}).get("ok",false))
 	if _reject_fixed_authored_layout_edit():
 		return false
 	var tile_data = _get_selected_tile()
@@ -6822,6 +6976,9 @@ func _rotate_selected_object(delta_degrees: float) -> bool:
 
 
 func set_selected_object_scale(value: float) -> bool:
+	if not _building_id_at_selected().is_empty():
+		_building_feedback("Gebäudemaßstab beim Platzieren wählen. Bestehendes Gebäude verschieben oder drehen.")
+		return false
 	if _reject_fixed_authored_layout_edit():
 		return false
 	var tile_data = _get_selected_tile()
@@ -7375,6 +7532,9 @@ func _apply_property_controls_to_selected_tile() -> void:
 
 
 func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
+	if tile_data!=null and _building_owns_grid(Vector2i(tile_data.grid_position)):
+		_building_feedback("Gebäudefelder werden gemeinsam mit dem Gebäude geändert.")
+		return false
 	if _reject_fixed_authored_layout_edit():
 		return false
 	if tile_data == null or patch.is_empty():
@@ -7473,6 +7633,7 @@ func _reconcile_height_edges_around(grid_position: Vector2i, preferred_edge_type
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
 		if tile_data == null:
 			continue
+		if _building_owns_grid(pos): continue
 		var next_edge_type: String = _resolve_auto_height_edge_type(tile_data, preferred_edge_type)
 		if String(tile_data.edge_type) == next_edge_type:
 			continue
@@ -7597,6 +7758,7 @@ func _get_auto_cliff_straight_type_id(edge_offset: Vector2i) -> String:
 
 
 func _apply_auto_cliff_visual_tile(tile_data, type_id: String) -> bool:
+	if tile_data!=null and _building_owns_grid(Vector2i(tile_data.grid_position)): return false
 	if tile_data == null or type_id.is_empty() or not _can_rewrite_auto_cliff_visual_tile(tile_data):
 		return false
 
@@ -7745,6 +7907,9 @@ func _store_undo_state(tile_data) -> void:
 
 
 func _restore_tile_from_undo_state(undo_state: Dictionary) -> Array[Vector2i]:
+	if undo_state.has("place_presentation_before"):
+		_terrain_map_data.set_place_presentation(undo_state.place_presentation_before)
+		_building_move_id=""
 	var restored_grids: Array[Vector2i] = []
 	var tile_states: Array = Array(undo_state.get("tile_states", []))
 	if tile_states.is_empty() and undo_state.has("tile_dict"):
@@ -7775,6 +7940,7 @@ func _restore_tile_from_undo_state(undo_state: Dictionary) -> Array[Vector2i]:
 		tile_data.object_height = restored_tile.object_height
 		tile_data.object_rotation_degrees = restored_tile.object_rotation_degrees
 		tile_data.object_scale = restored_tile.object_scale
+		if undo_state.has("place_presentation_before"): _terrain_registry.register_tile(tile_data)
 		restored_grids.append(grid_position)
 	return restored_grids
 
@@ -7810,6 +7976,7 @@ func _undo_last_change() -> void:
 			_refresh_tile_visual(tile_data, false)
 	_refresh_dirty_visual_neighborhoods(restored_grids)
 	var grid_position: Vector2i = Vector2i(restored_grids[restored_grids.size() - 1])
+	if undo_state.has("building_selection_before"): grid_position=undo_state.building_selection_before
 	_set_selected_grid_position(grid_position)
 	_mark_dirty(true)
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
@@ -8820,6 +8987,7 @@ func _on_edge_type_selected(_index: int) -> void:
 
 
 func _on_tile_type_selected(index: int) -> void:
+	_cancel_building_move()
 	var tile_type_list := _get_tile_type_list()
 	if tile_type_list == null or _tile_catalog == null:
 		return
@@ -8866,6 +9034,7 @@ func _on_tile_type_selected(index: int) -> void:
 
 
 func set_palette_type_for_authoring(type_id: String) -> bool:
+	_cancel_building_move()
 	var normalized_type_id: String = type_id.strip_edges().to_lower()
 	if normalized_type_id == FIXED_AUTHORED_SOLID_TYPE:
 		return false

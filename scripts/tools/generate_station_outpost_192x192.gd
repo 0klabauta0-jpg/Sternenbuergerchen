@@ -110,12 +110,14 @@ func _copy_tile(source_tile, target_tile, target_grid: Vector2i, rotation_degree
 
 func _copy_building_presentations(source_map, target_map) -> void:
 	var props: Array = []
+	var baselines: Dictionary = {}
 	for sector_x in range(3):
 		for sector_y in range(3):
 			var sector := Vector2i(sector_x, sector_y)
 			var yaw: float = float(SECTOR_ROTATIONS.get(sector, 0.0))
 			for source in Array(source_map.get_place_presentation().get("props", [])):
 				var prop: Dictionary = Dictionary(source).duplicate(true)
+				prop.building_id=String(prop.get("building_id","station_building"))+"_%d_%d"%[sector_x,sector_y]
 				var center: Array = prop.center
 				var grid := Vector2i(int(center[0]), int(center[1]))
 				grid = _rotate_local_grid(grid, yaw) + sector * SOURCE_SIZE
@@ -127,7 +129,18 @@ func _copy_building_presentations(source_map, target_map) -> void:
 					reserved.append([moved.x,moved.y])
 				prop.reserved_grids = reserved
 				props.append(prop)
-	target_map.set_place_presentation({"props":props,"migration_id":"frontier_buildings_20261110"})
+			var source_base: Dictionary=source_map.get_place_presentation().get("building_authoring",{}).get("base_tiles",{})
+			for key in source_base:
+				var cell: Vector2i=preload("res://scripts/editor/building_layout_authoring.gd").grid_at(key)
+				var moved:=_rotate_local_grid(cell,yaw)+sector*SOURCE_SIZE
+				var source_tile=source_map.get_tile_at_grid(cell)
+				var baseline_source=TERRAIN_TILE_DATA_SCRIPT.from_dict(source_tile.to_dict())
+				preload("res://scripts/editor/building_layout_authoring.gd").set_fields(baseline_source,source_base[key])
+				var baseline_target=TERRAIN_TILE_DATA_SCRIPT.from_dict(source_tile.to_dict())
+				_copy_tile(baseline_source,baseline_target,moved,yaw)
+				if sector!=CENTER_SECTOR: _apply_sector_variation(baseline_target,moved,sector)
+				baselines["%d,%d"%[moved.x,moved.y]]=preload("res://scripts/editor/building_layout_authoring.gd").fields(baseline_target)
+	target_map.set_place_presentation({"props":props,"migration_id":"frontier_buildings_20261110","building_authoring":{"schema_version":1,"next_id":1,"base_tiles":baselines}})
 
 
 func _apply_sector_variation(tile_data, grid: Vector2i, sector: Vector2i) -> void:

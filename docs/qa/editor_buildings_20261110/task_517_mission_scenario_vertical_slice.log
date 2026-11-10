@@ -1,0 +1,44 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+=== TASK_517 Mission Scenario Vertical Slice ===
+PASS: TASK_517 task file exists
+PASS: TASK_517 task file marks implementation
+PASS: Implementation status tracks TASK_517
+PASS: Roadmap lists TASK_517
+PASS: Meta flow defines the vertical slice scenario path
+PASS: Homebase catalog exposes the vertical slice mission
+PASS: Homebase catalog routes the slice through scenario data
+PASS: Original frontier_probe stays map-only for existing contracts
+PASS: Vertical slice scenario file exists
+PASS: Vertical slice scenario validates through MissionScenarioData
+PASS: Scenario id is stable
+PASS: Scenario references the expanded frontier map
+PASS: Scenario references terrain instead of duplicating tiles
+PASS: Scenario serialization does not store a player landing zone
+PASS: Scenario serialization does not store a player LZ position
+PASS: Briefing uses terrain-only minimap
+PASS: Briefing background asset exists
+PASS: Briefing names AA, computer and cargo objectives
+PASS: Briefing contains solo and fireteam loadout recommendations
+PASS: Briefing recommends sniper where useful
+PASS: sniper is a valid gameplay weapon id
+PASS: Briefing recommends rocket_launcher where useful
+PASS: rocket_launcher is a valid gameplay weapon id
+PASS: Briefing recommends rail_gun where useful
+PASS: rail_gun is a valid gameplay weapon id
+PASS: Briefing recommends medictool where useful
+PASS: medictool is a valid gameplay weapon id
+PASS: Scenario marks air-asset risk as a warning gate
+PASS: Air-risk gate points at the AA enemy group
+PASS: Air-risk zone references an existing map marker
+PASS: Expanded frontier map loads for slice validation
+PASS: Vertical slice payload validates against map markers
+PASS: Slice is ready for solo and PvP/MP authoring
+PASS: Alpha team uses the alpha map spawn
+PASS: Bravo team uses the bravo map spawn
+PASS: AA step targets the danger-zone marker
+PASS: Computer step requires a timed hold
+PASS: Cargo step depends on AA shutdown
+=== RESULTS: 38 passed, 0 failed ===
+TASK_517: ALL PASSED

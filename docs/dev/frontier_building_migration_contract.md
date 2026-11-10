@@ -40,18 +40,19 @@ damit vorhandene Patrouillenpunkte begehbar bleiben. Grobe Reservierungen
 duerfen sich in einer Zelle beruehren; die sichtbaren Huelen ueberlappen nicht.
 Karten-/Szenarioidentitaeten, Marker und Patrouillen bleiben erhalten.
 
-## Grenze bis zum Editor-Nachzug
-Aktuelle Mehrzellen-Gebaeude sind Layoutvorlagen, kein freier Einzelzellen-
-Pinsel. Die Palette/Schnellbuttons zeigen sie, erklaeren aber diese Grenze.
-Brush und Compiler verweigern falsche Einzelzellen-Platzierung. Das Workbench-
-Demo setzt kein solches Gebaeude. Bestehende migrierte Stationsensembles sind
-gegen getrennte Terrain-/Objekt-/Markerbearbeitung geschuetzt; SaveAs bleibt
-moeglich. Freies Verschieben, Drehen, Entfernen samt Footprint und Undo gehoert
-in den anschliessenden Editorauftrag.
+## Mehrzellen-Authoring
+Der Editor-Nachzug vom10.11.2026 ersetzt die temporaere Stationssperre.
+Palette und Compiler verwenden denselben atomaren Gebaeudehelper statt eines
+Einzelzellen-Pinsels. Stabile Gebaeude-IDs und gespeicherte Untergrundfelder
+erlauben Verschieben, Drehen und Entfernen mit korrekter Freigabe und Undo.
+Details: [editor_building_authoring_contract.md](editor_building_authoring_contract.md).
+Festes GM01-Ensemble, Basis-Feinnavigation und unbekannte Alt-Layouts ohne
+zuverlaessige Untergrunddaten bleiben geschuetzt.
 
 ## Render-Einstiege
-Editor-Default, 3D-Kalibrierung, Render-Spike und der Menuehintergrund-Generator
-verwenden die gespeicherte GM01. Der Hintergrund-Generator laedt keine
+Der Editor startet mit der bearbeitbaren64er-Station. 3D-Kalibrierung,
+Render-Spike und Menuehintergrund-Generator verwenden die gespeicherte GM01.
+Der Hintergrund-Generator laedt keine
 synthetische Testsimulation mehr. Die alte Grafikvergleichsszene bleibt
 explizite historische Probe; sie ist kein aktueller Kampagnen-Render-Einstieg.
 Bereits vorhandene Hintergrund-PNGs werden durch einen Quellfix nicht neu

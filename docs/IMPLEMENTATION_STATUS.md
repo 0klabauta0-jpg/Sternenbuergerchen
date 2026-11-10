@@ -1,5 +1,22 @@
 # IMPLEMENTATION_STATUS
 
+### Main gepusht und aktueller Gebaeudeeditor — 10.11.2026
+Main92b20f106 ist auf origin/main verifiziert. Editorarbeit separat auf
+task/editor-buildings-20261110, direkt auf diesem Main. Habitat/Freihafenhalle
+ueber Palette platzieren, ganz auswaehlen, per Zielklick verschieben, +/-90
+drehen, entfernen und jeweils mit einem Strg+Z inklusive Untergrund rueckgaengig
+machen. SaveAs/Reload und gemischte Terrain-/Gebaeudehistorie erhalten.
+Stationskarten2/18 stabile Gebaeude-IDs mit21/189 Untergrunddatensaetzen;
+gemeinsame Zellen erst nach letztem Besitzer freigeben. Compiler gleicher Pfad.
+Editor startet mit bearbeitbarer64er-Station; GM01/Basis-Feinnavigation bleiben
+geschuetzt. Kein neues Modell, kein Release-/Gesamtperformanceanspruch.
+Service49/0, Editor29/0 headless und nativ Vulkan, Generator189/0,
+Speichern41/0, Editor-Metadaten17/0, Migration110/0, GM01-Schutz24/0,
+Station33/0, Mission38/0, Palette52/0, Terrain-Stroke-Undo17/0.
+Altes Floor-/Undo-Sammelgate63/21 wegen alter16..24px-Iconannahme;
+aktueller Browservertrag>=64px. Belege: docs/qa/editor_buildings_20261110/README.md.
+Die folgenden Eintraege dokumentieren ihre jeweiligen historischen Staende.
+
 ### Speicher-/Gebaeudestand auf gemeinsamem Main — 10.11.2026
 Feature e765f507c mit dem sechs Commits neueren Main2a213d0d4 lokal gemergt.
 Beide Status-Ergaenzungen erhalten; kein Runtime-Mergekonflikt. Auf gemeinsamem

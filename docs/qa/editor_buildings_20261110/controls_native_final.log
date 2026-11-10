@@ -1,0 +1,34 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+Vulkan 1.4.357 - Forward+ - Using Device #0: NVIDIA - NVIDIA GeForce RTX 4070 Ti SUPER
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: visible building controls installed
+PASS: normal palette brush places whole building
+PASS: placement is one undo step
+PASS: selection highlights complete footprint
+PASS: Select tool enables whole-building controls
+PASS: selecting ground disables building actions
+PASS: footprint selection cannot paint over the building model
+PASS: generic inspector cannot break footprint
+PASS: network tool cannot break footprint
+PASS: visible move button starts target-pick
+PASS: target click finishes move mode
+PASS: move releases old cells and reserves target
+PASS: move creates exactly one undo step
+PASS: visible rotation button rotates building data
+PASS: inspector reads building yaw
+PASS: rejected placement leaves undo untouched
+PASS: ordinary terrain undo interleaves with building history
+PASS: undo restores pre-rotation building and footprint
+PASS: undo restores pre-move building and terrain
+PASS: undo placement removes model and restores substrate
+PASS: real SaveAs and reload preserve stable building identity
+PASS: Escape cancels move without mutation
+PASS: palette selection cancels pending move
+PASS: switching authoring tool cancels pending move
+PASS: removing building cancels its pending move
+PASS: visible remove restores persisted substrate
+PASS: loaded building removal is a new undo transaction
+PASS: undo restores removed saved building
+PASS: current renderer has no missing asset boxes
+EDITOR_BUILDING_CONTROLS passed=29 failed=0

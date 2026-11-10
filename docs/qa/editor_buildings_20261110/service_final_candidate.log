@@ -1,0 +1,53 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+
+[DBG][@0][#1][_][netfox::NetworkPerformance] Network performance enabled, registering performance monitors
+PASS: building authoring service exists
+PASS: square8 full building placement plans
+PASS: square8 planning never mutates source
+PASS: square8 footprint covers multiple real cells
+PASS: square8 building can be picked by footprint
+PASS: square8 placement blocks navigation
+PASS: square8 move plans
+PASS: square8 old footprint released
+PASS: square8 rotate plans
+PASS: square8 intersecting hulls rejected
+PASS: square8 rejection leaves metadata unchanged
+PASS: square8 map-edge overflow rejected
+PASS: square8 saves authoring data
+PASS: square8 picking survives JSON number types
+PASS: square8 loaded building can be removed
+PASS: square8 reload/remove restores substrate
+PASS: square8 unrelated terrain untouched
+PASS: square8 marker remains reachable
+PASS: square8 patrol remains reachable
+PASS: square8 water rejected
+PASS: square8 uneven ground rejected
+PASS: hex_axial_v1 full building placement plans
+PASS: hex_axial_v1 planning never mutates source
+PASS: hex_axial_v1 footprint covers multiple real cells
+PASS: hex_axial_v1 building can be picked by footprint
+PASS: hex_axial_v1 placement blocks navigation
+PASS: hex_axial_v1 move plans
+PASS: hex_axial_v1 old footprint released
+PASS: hex_axial_v1 rotate plans
+PASS: hex_axial_v1 intersecting hulls rejected
+PASS: hex_axial_v1 rejection leaves metadata unchanged
+PASS: hex_axial_v1 map-edge overflow rejected
+PASS: hex_axial_v1 saves authoring data
+PASS: hex_axial_v1 picking survives JSON number types
+PASS: hex_axial_v1 loaded building can be removed
+PASS: hex_axial_v1 reload/remove restores substrate
+PASS: hex_axial_v1 unrelated terrain untouched
+PASS: hex_axial_v1 marker remains reachable
+PASS: hex_axial_v1 patrol remains reachable
+PASS: hex_axial_v1 water rejected
+PASS: hex_axial_v1 uneven ground rejected
+PASS: separate hulls may share a coarse reservation cell
+PASS: shared cell stays blocked for remaining owner
+PASS: last owner releases shared cell
+PASS: station_outpost_64x64 persisted building is editable
+PASS: station_outpost_64x64 removal preserves other buildings
+PASS: station_outpost_192x192 persisted building is editable
+PASS: station_outpost_192x192 removal preserves other buildings
+PASS: separate base fine navigation protected
+EDITOR_BUILDING_AUTHORING passed=49 failed=0
