@@ -1,5 +1,22 @@
 # TASK_ROADMAP
 
+### Kampagnenumbau / Skirmish-Startstände umgesetzt — 10.11.2026
+Fünf Aufträge, Wachstum2→3→4, zweites Schiff/Pad und drei freie Skirmish-Starts
+(Early8, Mid20, Late30) im eigenen Taskbranch implementiert und gezielt geprüft.
+Fehlende spätere Modelle und Träger-/Fahrzeug-Spezialfunktionen bleiben offen.
+Arbeitsplan: docs/tasks/CAMPAIGN_SKIRMISH_REBUILD_2026_11_10.md.
+QA mit24 fehlerfreien finalen Logs, echten Ausflügen und4-Personen-/2-Schiff-
+Continue: docs/qa/campaign_skirmish_rebuild_20261110/README.md.
+Kein Main-/EXE-Abschluss oder allgemeine Performance-/Multiplayerfreigabe.
+
+
+### Kampagnenausbau: fünf Missionen geplant — 10.11.2026
+Zielplan: `docs/tasks/CAMPAIGN_FIVE_MISSIONS_2026_11_10_PLAN.md`.
+Drei Bodenkarten mit Rücklieferung zur Satellitenkarte, danach Raumhilfe
+gegen feindliche Cutlass für neutrale Buccaneer und zweites Landepad.
+Dokumentiert, noch nicht implementiert; offene Punkte vor Umsetzung klären.
+Die bisherigen Einführungsnachweise unten betreffen den kleineren Altumfang.
+
 ### Gemeinsamer Basis-/Orbit-/Charakterabschluss — 10.11.2026
 Beide fertigen Arbeiten im Integrationsbranch zusammengefuehrt und geprueft:
 Kampagne152/0, Skirmish105/0, Verlustfaelle159/0 und gezielte UI-/Ownergates.

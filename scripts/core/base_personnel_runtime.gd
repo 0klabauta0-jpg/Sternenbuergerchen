@@ -19,6 +19,8 @@ var _board_groups: Dictionary = {}
 var _poll_seconds: float = 0.0
 var _navigation_graph: RefCounted
 var _committing_transport: bool = false
+var _source_layout: Dictionary = {}
+const CAPACITY_LAYOUT = preload("res://scripts/meta/base_capacity_layout.gd")
 
 func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionary = {}) -> void:
 	_flow = flow
@@ -28,6 +30,7 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 	var base_path := "res://maps/campaign_intro_base.json"
 	var map_data = navigation.load_map(base_path)
 	_layout = navigation.layout(base_path)
+	_source_layout = _layout.duplicate(true)
 	_terrain = load("res://scripts/terrain/terrain_registry.gd").new()
 	_terrain.name = "BaseTerrainRegistry"
 	_sim.get_parent().add_child(_terrain)
@@ -37,6 +40,7 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 		_terrain.register_tile(tile)
 	_navigation_graph = navigation.new()
 	_navigation_graph.call("configure_graph", _terrain)
+	_refresh_capacity()
 	_registry = load("res://scripts/registries/unit_registry.gd").new()
 	_registry.name = "BaseUnitRegistry"
 	_sim.get_parent().add_child(_registry)
@@ -75,6 +79,48 @@ func configure(flow: Node, screen: Node, simulation: Node, checkpoint: Dictionar
 				_beds[bed.id] = id
 	_sim.tick_processed.connect(_on_tick)
 	_sim.set_physics_process(true)
+
+func _refresh_capacity() -> void:
+	if _flow == null or _terrain == null or _navigation_graph == null: return
+	_layout = CAPACITY_LAYOUT.expand(_source_layout, _terrain, _navigation_graph, Array(_flow.get("_all_team_units")).size(), Dictionary(_flow.get_meta("skirmish_infrastructure", {})))
+	if _flow.call("is_campaign_start") and Array(_layout.get("landing_pads",[])).size()>1:
+		_layout.landing_pads[1]["built"]=bool(_flow.get_meta("campaign_pad2_built",false))
+
+func sync_roster() -> void:
+	# Recruitment does not recreate existing actors, cancel paths or wake sleepers.
+	_refresh_capacity()
+	for profile: Dictionary in Array(_flow.get("_all_team_units")):
+		var id := String(profile.get("unit_id", ""))
+		if id.is_empty(): continue
+		if _states.has(id):
+			_states[id].name = String(profile.get("display_name", id))
+			_states[id].role = String(profile.get("role_name", ""))
+			continue
+		var actor: Node2D = ACTOR.new()
+		actor.unit_id = id
+		actor.name = id.validate_node_name()
+		add_child(actor)
+		var raw: Array = _layout.get("avatar_spawn_grid", [36,40])
+		var spawn := Vector2i(int(raw[0]),int(raw[1]))
+		var index := _states.size()
+		var target := spawn + Vector2i((index % 8) * 2, (index / 8) * 2)
+		actor.position = _terrain.grid_to_world(target if _terrain.is_walkable(target) else spawn)
+		_registry.register_unit(id, actor)
+		_sim.register_known_unit(id, actor)
+		_states[id] = {"unit_id":id,"name":String(profile.get("display_name",id)),"role":String(profile.get("role_name","")),"status":"outside","craft_id":"","bed_id":"","action":{},"last_result":{}}
+	state_changed.emit()
+
+func mark_recruit_remote(unit_id: String, craft_id: String) -> Dictionary:
+	# Trusted recruitment lifecycle: the local encounter/trader has already
+	# verified pickup. Represent arrival aboard the actual ship, not a second
+	# visible person teleported to the home pad; no fireteam payload is invented.
+	if not _states.has(unit_id) or Dictionary(_flow.call("_find_homebase_aircraft_definition", craft_id)).is_empty():
+		return _reject("invalid_recruit_craft", "Rekrut oder Aufnahmeschiff fehlt")
+	_cancel(unit_id)
+	_states[unit_id].status = "aboard"
+	_states[unit_id].craft_id = craft_id
+	state_changed.emit()
+	return {"ok":true,"unit_id":unit_id,"craft_id":craft_id}
 
 func get_unit_registry() -> Node:
 	return _registry
@@ -120,6 +166,12 @@ func apply_operation(operation: String, payload: Dictionary) -> Dictionary:
 	if not _states.has(id):
 		return _reject("unknown_unit", "Person nicht verfuegbar")
 	var state: Dictionary = _states[id]
+	if operation == "base_rename":
+		var next_name:=String(payload.get("display_name","")).strip_edges()
+		if next_name.is_empty() or next_name.length()>48 or next_name.contains("\n") or next_name.contains("\r"): return _reject("invalid_name","Name muss 1 bis 48 Zeichen lang sein")
+		var renamed: Dictionary=_flow.call("rename_campaign_person",id,next_name)
+		if bool(renamed.get("ok",false)): state.name=next_name; state_changed.emit()
+		return renamed
 	if operation == "base_wake":
 		if state.status != "sleeping":
 			return _reject("not_sleeping", "Person schlaeft nicht")
@@ -326,7 +378,7 @@ func _on_tick(_tick: int) -> void:
 				state.status = "boarding"
 				state.craft_id = action.craft_id
 		state_changed.emit()
-	# Only two base actors; owner polling throttled, no SceneTree search.
+	# Owner polling is throttled and iterates only known actors, no SceneTree search.
 	_poll_seconds += 1.0 / float(Engine.physics_ticks_per_second)
 	if _poll_seconds < 0.2:
 		return

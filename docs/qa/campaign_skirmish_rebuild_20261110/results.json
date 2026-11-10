@@ -1,0 +1,122 @@
+[
+  {
+    "test": "campaign_five_missions_state_test",
+    "errors": 0,
+    "summary": "CAMPAIGN_FIVE_STATE: 15/0"
+  },
+  {
+    "test": "campaign_five_missions_chain_test",
+    "errors": 0,
+    "summary": "CAMPAIGN_FIVE_CHAIN: 54/0"
+  },
+  {
+    "test": "campaign_supply_progression_verifier",
+    "errors": 0,
+    "summary": "CAMPAIGN_SUPPLY failures=0"
+  },
+  {
+    "test": "campaign_space_encounter_verifier",
+    "errors": 0,
+    "summary": "SPACE_ENCOUNTER failures=0"
+  },
+  {
+    "test": "campaign_maps_content_verifier",
+    "errors": 0,
+    "summary": "CAMPAIGN_MAPS_CONTENT passed=68 failed=0"
+  },
+  {
+    "test": "location_resource_runtime_verifier",
+    "errors": 0,
+    "summary": "LOCATION_RESOURCE_RUNTIME passed=14 failed=0"
+  },
+  {
+    "test": "skirmish_prepared_starts_test",
+    "errors": 0,
+    "summary": "Prepared Skirmish: 209 checks, 0 failures"
+  },
+  {
+    "test": "skirmish_prepared_flow_test",
+    "errors": 0,
+    "summary": "Prepared Skirmish flow: 97 checks, 0 failures"
+  },
+  {
+    "test": "base_capacity_layout_test",
+    "errors": 0,
+    "summary": "Base capacity: 169 checks, 0 failures"
+  },
+  {
+    "test": "base_personnel_expansion_test",
+    "errors": 0,
+    "summary": "Base expansion: 41 checks, 0 failures"
+  },
+  {
+    "test": "campaign_menu_start_test",
+    "errors": 0,
+    "summary": "Campaign menu: 29 checks, 0 failures"
+  },
+  {
+    "test": "campaign_start_integration_test",
+    "errors": 0,
+    "summary": "CAMPAIGN_START_RESULTS passed=13 failed=0"
+  },
+  {
+    "test": "playtest_20261110_inventory_transfer_verifier",
+    "errors": 0,
+    "summary": "INVENTORY failures=0"
+  },
+  {
+    "test": "playtest_20261110_inventory_runtime_verifier",
+    "errors": 0,
+    "summary": "INVENTORY_RUNTIME failures=0"
+  },
+  {
+    "test": "space_travel_state_verifier",
+    "errors": 0,
+    "summary": "SPACE_TRAVEL_STATE passed=67 failed=0"
+  },
+  {
+    "test": "star_map_campaign_locations_test",
+    "errors": 0,
+    "summary": "Campaign star map: 26 checks, 0 failures"
+  },
+  {
+    "test": "star_map_ui_verifier",
+    "errors": 0,
+    "summary": "STAR_MAP_UI checks=91 failed=0"
+  },
+  {
+    "test": "star_map_camera_verifier",
+    "errors": 0,
+    "summary": "STAR_MAP_CAMERA checks=18 failed=0"
+  },
+  {
+    "test": "stationary_return_final",
+    "errors": 0,
+    "summary": "STATIONARY_USE checks=21 failures=0 displacement=0.0 elapsed=3.01666666666666"
+  },
+  {
+    "test": "arrival_hold_final",
+    "errors": 0,
+    "summary": "INTERACTION_ARRIVAL_HOLD_RESULTS passed=10 failed=0"
+  },
+  {
+    "test": "skirmish_blueprint_services_final",
+    "errors": 0,
+    "summary": "SKIRMISH_BLUEPRINT_SERVICES checks=12 failures=0"
+  },
+  {
+    "test": "campaign_guard_vital_gate_verifier",
+    "errors": 0,
+    "summary": "GUARD_VITAL_GATE failures=0"
+  },
+  {
+    "test": "actual_sortie",
+    "errors": 0,
+    "summary": "SINGLEPLAYER_LOOP_RESULTS passed=55 failed=0"
+  },
+  {
+    "test": "remaining_actual_sorties",
+    "errors": 0,
+    "summary": "SINGLEPLAYER_LOOP_RESULTS passed=77 failed=0"
+  }
+]

@@ -1,5 +1,57 @@
 # Kampagneneinfuehrung und Modusgrenze
 
+## Revision: fünf Missionen, 10.11.2026
+
+Der neue Ziel-/Umsetzungsumfang steht in
+`docs/tasks/CAMPAIGN_FIVE_MISSIONS_2026_11_10_PLAN.md` und
+`docs/tasks/CAMPAIGN_SKIRMISH_REBUILD_2026_11_10.md`.
+Die folgenden früheren Drei-Etappen-Regeln werden durch diese Revision ersetzt,
+soweit sie Reihenfolge, Teamgröße, Schiffszahl und Belohnungszeitpunkt betreffen.
+
+- Basisvorbereitung mit zwei echten Personen und einem Schiff, leichter Rüstung,
+  Pistole und Medgun. Danach fünf echte Aufträge: Satellit → Außenposten →
+  C-Benit-Lieferung zur Satellitenkarte → befestigter Außenposten → Raumrettung.
+- `singleplayer_campaign_state.gd` besitzt Auftragssperren, `pending_upload`,
+  Fortschrittsflags und einmalige Abschlussbelege. Vorgängerabschluss ist vor
+  Annahme erforderlich. Skirmish konfiguriert denselben Owner ohne diese
+  Kampagnenreihenfolge; ein Skirmish-Save darf die Kampagne nicht entsperren.
+- Die bestätigten Missionsgates erzeugen bei Mission 1/4 einen physischen Chip
+  im beteiligten Schiff. Erst echte Heimkehr und `campaign_upload` am Basisterminal
+  konsumieren ihn und lösen Credits/Blueprint aus. Ein Erfolg im Bodenszenario
+  allein zahlt diese Aufträge nicht aus. Chip und Lieferkiste besitzen reservierte,
+  begrenzte Frachtplätze; volle reguläre Fracht darf keinen Auftrag zerstören.
+- Nach bestätigtem Sichern des ersten Außenpostens und tatsächlicher Händler-
+  Interaktion kann `campaign_recruit` den dritten NPC aufnehmen. Dies geschieht
+  vor der letzten Rückkehrinteraktion, damit automatische Extraktion die
+  Rekrutierung nicht unerreichbar macht. Ein erneuter Klick erzeugt keinen NPC.
+- Bestätigte Bergung auf Karte B übernimmt eine C-Benit-Kiste ins Schiff.
+  Mission 3 darf nur mit der tatsächlichen Kiste im gewählten Schiff anfliegen;
+  der bestätigte Liefer-Use konsumiert sie vor Abschluss. Der Mining-Blueprint
+  schaltet Herstellung frei; das Werkzeug ist kein Kampagnen-Startgegenstand.
+- Mission 5 beginnt erst beim ausdrücklichen Anflug auf `distress_orbit`.
+  `campaign_space_encounter.gd` wird an `SimulationRoot` gebunden. Feindliche
+  Cutlass und neutrale Buccaneer sind getrennte Ziele. Simulationstick und
+  bestätigte Rettungsaktion erzeugen echte Ergebnisbelege; kein UI-Siegknopf.
+- Der gerettete Pilot tritt einmalig mit seiner Buccaneer bei: Team 3→4.
+  Ein fehlendes zweites Pad bleibt ein konkreter Ausbaugrund; `campaign_build_pad`
+  kostet derzeit 100 Credits und schaltet Pad 2 frei. Diese Startwerte sind
+  Implementierungsannahmen, keine nachgewiesene finale Balance.
+- Onboarding speichert sieben geordnete Schritte als Schema 2: Vorbereitung,
+  fünf Missionen und Padbau. Die UI liest diesen Owner. Blueprints befinden sich
+  ausschließlich in bestätigten Supply-Belohnungsbelegen.
+- Basischeckpoints enthalten vollständigen Roster (2–4), Flotte (1–2),
+  Piloten/Standorte, Inventare, Ortsressourcen, Fortschritt und Belege.
+  Mehrschiffstände sind nur bei geerdeter Reise und sicherem Basiszustand erlaubt.
+  Restore validiert Auftragssperren, Belohnungsdaten, Flottenzuordnung und
+  Ressourcenmengen vor Anwendung. Alte Drei-Etappen-Saves sind kein kompatibler
+  fünf-Missionen-Fortschritt und werden nicht still migriert.
+
+Technische Domainprüfungen und native Spiel-/Gestaltungsabnahme bleiben getrennt.
+Der Raumkampf ist ein begrenzter erster deterministischer Begegnungsslice,
+keine allgemeine Abnahme einer Flotten-/Trägersimulation.
+
+## Historischer Drei-Etappen-Vertrag (vor dieser Revision)
+
 Freigegebener Entwurf: `docs/tasks/CAMPAIGN_START_2026_11_09_DESIGN.md`.
 
 ## Einstieg und Team

@@ -1,0 +1,43 @@
+{
+  "early": {
+    "title": "Early Game — Pionierbasis",
+    "description": "8 Personen, Cutlass und zwei Buccaneer. Sturmgewehre, mittlere und schwere Rüstung. Vollständige Schlafplätze und offene Ortswahl.",
+    "roster_size": 8,
+    "credits": 3000,
+    "infrastructure": {"beds": 8, "pads": 3, "services": ["personnel", "equipment", "trade", "refuel"], "reserved_assets": []},
+    "crafts": [
+      {"name": "Cutlass", "model_id": "cutlass", "type": "dropship", "placeholder": false},
+      {"name": "Buccaneer 1", "model_id": "buccaneer", "type": "fighter", "placeholder": false},
+      {"name": "Buccaneer 2", "model_id": "buccaneer", "type": "fighter", "placeholder": false}
+    ]
+  },
+  "mid": {
+    "title": "Mid Game — Expeditionsstützpunkt",
+    "description": "20 Personen. Vanguard, zwei Hornet, Valkyrie und Hercules sind bezeichnete Modellplatzhalter. Jeep- und Panzertransport sind vorgemerkt und noch nicht bedienbar.",
+    "roster_size": 20,
+    "credits": 15000,
+    "infrastructure": {"beds": 20, "pads": 5, "services": ["personnel", "equipment", "trade", "refuel"], "reserved_assets": ["Jeep — Modell und Fahrzeugtransport offen", "Panzer — Modell und Fahrzeugtransport offen"]},
+    "crafts": [
+      {"name": "Vanguard — Platzhalter", "model_id": "vanguard", "type": "dropship", "placeholder": true},
+      {"name": "Hornet 1 — Platzhalter", "model_id": "hornet", "type": "fighter", "placeholder": true},
+      {"name": "Hornet 2 — Platzhalter", "model_id": "hornet", "type": "fighter", "placeholder": true},
+      {"name": "Valkyrie — Platzhalter", "model_id": "valkyrie", "type": "dropship", "placeholder": true},
+      {"name": "Hercules — Platzhalter", "model_id": "hercules", "type": "craft_cargoB", "placeholder": true}
+    ]
+  },
+  "late": {
+    "title": "Late Game — Trägerverband",
+    "description": "30 Personen und kleine Flotte. Idris als vorgesehene mobile FOB; Trägerhangar, Wiederbewaffnung und Medic Bed sind noch gesperrte Ausbauziele. Fehlende Modelle sind Platzhalter.",
+    "roster_size": 30,
+    "credits": 50000,
+    "infrastructure": {"beds": 30, "pads": 6, "services": ["personnel", "equipment", "trade", "refuel"], "reserved_assets": ["Idris-Hangar / mobile FOB — Runtimefunktion offen", "Wiederbewaffnung — Runtimefunktion offen", "Medic Bed — Modell und Behandlung offen"]},
+    "crafts": [
+      {"name": "Idris — Platzhalter / Hangar gesperrt", "model_id": "idris", "type": "craft_cargoB", "placeholder": true},
+      {"name": "Valkyrie — Platzhalter", "model_id": "valkyrie", "type": "dropship", "placeholder": true},
+      {"name": "Hercules — Platzhalter", "model_id": "hercules", "type": "craft_cargoB", "placeholder": true},
+      {"name": "Hornet 1 — Platzhalter", "model_id": "hornet", "type": "fighter", "placeholder": true},
+      {"name": "Hornet 2 — Platzhalter", "model_id": "hornet", "type": "fighter", "placeholder": true},
+      {"name": "Jagdbomber — Platzhalter", "model_id": "fighter_bomber", "type": "fighter", "placeholder": true}
+    ]
+  }
+}

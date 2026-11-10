@@ -17,7 +17,7 @@ var _runtime: Dictionary = {
 	"campaign": {
 		"selected_location_id": "homebase", "selected_job_id": "",
 		"locations": {"homebase": {"name": "Mondbasis"}, "satellite_crash": {"name": "Satelliten-Absturzstelle"}, "trade_outpost": {"name": "Handelsposten"}},
-		"jobs": {"satellite_recovery": {"location_id": "satellite_crash", "status": "accepted", "title": "Satellitenbergung"}}
+		"jobs": {"satellite_recovery": {"location_id": "satellite_crash", "status": "accepted", "title": "Satellitenbergung"},"outpost_recovery":{"location_id":"trade_outpost","status":"offered","title":"Außenposten","prerequisite_job_id":"satellite_recovery"}}
 	},
 	"space_travel": {"phase": "grounded", "craft_id": "dropship_1", "orbit_id": "moon_orbit", "position": [0.25, 0.62], "target_orbit_id": "", "origin_position": [0.25, 0.62], "progress": 0.0, "elapsed_seconds": 0.0, "duration_seconds": 3.0}
 }
@@ -108,11 +108,13 @@ func _run() -> void:
 	view.refresh()
 	_check(String(view.get_ui_snapshot().error).contains("Landepad"), "Periodic refresh does not erase action rejection")
 	_runtime.onboarding.stage_index = 3
+	_runtime.campaign.jobs.satellite_recovery.status = "completed"
 	view.refresh()
 	_check(not trade.disabled, "Completed introduction permits both planet sites")
 	trade.pressed.emit()
 	_check(_calls.back().payload.job_id == "", "Trade visit does not invent a combat job")
 	_runtime.onboarding.stage_index = 1
+	_runtime.campaign.jobs.satellite_recovery.status = "accepted"
 	_runtime.campaign.selected_location_id = "satellite_crash"
 	_runtime.campaign.selected_job_id = "satellite_recovery"
 	view.refresh()

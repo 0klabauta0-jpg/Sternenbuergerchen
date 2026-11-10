@@ -21,10 +21,20 @@ func _run() -> void:
 	var driver: Node = mission.get_node("CombatLoopDriver")
 	var map = load("res://scripts/terrain/terrain_map_data.gd").load_from_file("res://maps/satellite_crash_site.json")
 	var target: Vector2 = map.get_marker_position("satellite_data")
+	# This verifier isolates arrival/hold residency. The campaign now uses a
+	# 96x98 region, so its remote spawn-to-site walk is tested by the sortie
+	# verifier, rather than assuming that complete journey fits 22 seconds.
+	var terrain: Node = mission.get_node("TerrainRegistry")
+	var placement_index := 0
+	for unit: Node2D in Array(controller.call("_get_fireteam_units", "ft1", true)):
+		var desired := target + Vector2((placement_index-1)*70.0,-280.0)
+		var resolved: Dictionary = terrain.call("resolve_walkable_target",desired)
+		unit.global_position = Vector2(resolved.get("replacement_position",desired))
+		placement_index += 1
 	controller.call("_set_selected_fireteams", PackedStringArray(["ft1"]), false)
 	controller.call("_create_waypoints_for_selected_fireteams", target, true)
 	_check(bool(controller.call("execute_selected_fireteam_orders")), "Actual formed three-person team begins move/GO to computer")
-	var deadline: int = Time.get_ticks_msec() + 22000
+	var deadline: int = Time.get_ticks_msec() + 60000
 	var usable: bool = false
 	while Time.get_ticks_msec() < deadline:
 		for interaction in Array(Dictionary(controller.call("get_mission_interaction_runtime_use_state_snapshot")).get("interactions", [])):

@@ -72,6 +72,7 @@ func _personnel_action(operation: String, payload: Dictionary = {}) -> Dictionar
 func _build_personnel_visuals(stage: Node3D) -> void:
 	for person: Dictionary in _personnel_runtime().call("get_snapshot").get("units", []):
 		var id: String = String(person.unit_id)
+		if _person_visuals.has(id):continue
 		var visual: Node3D = _load_visual(Dictionary(_layout.get("avatar_visual", {})))
 		if visual == null:
 			continue
@@ -147,6 +148,10 @@ func _build_personnel_controls() -> void:
 	_person_selector.tooltip_text = "Person auswählen – auch Besatzung an Bord"
 	_person_selector.item_selected.connect(func(index: int): _select_person(String(_person_selector.get_item_metadata(index))))
 	_person_panel.add_child(_person_selector)
+	var name_row:=HBoxContainer.new(); _person_panel.add_child(name_row)
+	var name_input:=LineEdit.new(); name_input.name="RenamePerson"; name_input.placeholder_text="Neuer Name"; name_input.max_length=48; name_input.size_flags_horizontal=Control.SIZE_EXPAND_FILL; name_row.add_child(name_input)
+	var rename:=Button.new(); rename.text="Umbenennen"; name_row.add_child(rename)
+	rename.pressed.connect(func(): _personnel_action("base_rename",{"display_name":name_input.text}); name_input.clear())
 	_person_state = Label.new()
 	_person_panel.add_child(_person_state)
 	var actions := GridContainer.new()
@@ -187,6 +192,7 @@ func _update_personnel_controls() -> void:
 			_person_selector.set_item_metadata(_person_selector.item_count - 1, String(person.unit_id))
 	for index in units.size():
 		var person: Dictionary = units[index]
+		_person_selector.set_item_text(index,String(person.get("name",person.get("display_name",person.unit_id))))
 		if String(person.unit_id) != _selected_person_id:
 			continue
 		_person_selector.select(index)
@@ -201,11 +207,13 @@ func _update_personnel_controls() -> void:
 
 func _update_personnel_visuals() -> void:
 	var units: Array = _personnel_runtime().call("get_snapshot").get("units", [])
+	if _authored_stage!=null and units.size()>_person_visuals.size():_build_personnel_visuals(_authored_stage)
 	for person: Dictionary in units:
 		var id: String = String(person.unit_id)
 		if not _person_visuals.has(id):
 			continue
 		var entry: Dictionary = _person_visuals[id]
+		(entry.label as Label3D).text=String(person.get("name",person.get("display_name",id)))
 		var model: Node3D = entry.model
 		var actor: Node2D = _personnel_runtime().call("get_actor", id)
 		var status: String = String(person.get("status", "outside"))
@@ -371,6 +379,7 @@ func _pad_definition(pad_id: String) -> Dictionary:
 func _update_craft_projection() -> void:
 	if _authored_stage == null:
 		return
+	_sync_capacity_visuals(_authored_stage)
 	var present: Dictionary = {}
 	var occupied_pads: Dictionary = {}
 	for craft in _transport_projection:
@@ -487,6 +496,7 @@ func _initialize_runtime() -> void:
 	_layout = BASE_NAV.layout(_map_path)
 	_map_data = MAP_SCRIPT.load_from_file(_map_path)
 	var personnel: Node = _personnel_runtime()
+	if personnel != null: _layout = Dictionary(personnel.call("get_snapshot").get("layout",_layout)).duplicate(true)
 	# The campaign owner already loaded its fine movement map. The view only
 	# needs coarse render extents and borrows that owner's registry below.
 	_navigation_data = BASE_NAV.load_map(_map_path) if personnel == null else _map_data
@@ -566,6 +576,7 @@ func _initialize_runtime() -> void:
 				_structure_visual_nodes[id] = visual
 				_structure_visual_records[id] = {"source_path": String(asset.path), "actual_sha256": String(_asset_sources.back().get("actual_sha256", "")), "route": String(asset.get("visual_route", "original_furnished_cutaway_glb")), "original_path": String(asset.get("original_path", asset.path))}
 	_build_landing_pads(stage)
+	_sync_capacity_visuals(stage)
 	# Natural authored geology replaces the former decorative block fence.
 	var avatar_visual: Dictionary = Dictionary(_layout.get("avatar_visual", {}))
 	_model = _load_visual(avatar_visual) if personnel == null else null
@@ -864,7 +875,8 @@ func _build_landing_pads(stage: Node3D) -> void:
 		stage.add_child(visual)
 		var center: Array = Array(pad["plane"])
 		var pad_size: Array = Array(pad["size"])
-		visual.call("build", Vector2(float(center[0]), float(center[1])), Vector2(float(pad_size[0]), float(pad_size[1])), String(pad["designation"]))
+		visual.call("build", Vector2(float(center[0]), float(center[1])), Vector2(float(pad_size[0]), float(pad_size[1])), String(pad["designation"]) if bool(pad.get("built",true)) else "BAUPLATZ · PAD 02")
+		if not bool(pad.get("built",true)): visual.scale.y=0.15
 		# Deck top coincides with authored ground height; no hidden visual step.
 		visual.position.y = float(pad.get("surface_y", 0.0)) - PAD_SCRIPT.DECK_HEIGHT
 
@@ -1018,3 +1030,34 @@ func _get_structure_visual_snapshot() -> Dictionary:
 			record["visible"] = visual.visible
 			result[id] = record
 	return result
+
+
+var _capacity_visual_count: int = -1
+func _sync_capacity_visuals(stage: Node3D) -> void:
+	var personnel: Node = _personnel_runtime()
+	if personnel == null: return
+	var layout: Dictionary = personnel.call("get_snapshot").get("layout",{})
+	var count := Array(layout.get("beds",[])).size()*100+Array(layout.get("landing_pads",[])).size()
+	if Array(layout.get("landing_pads",[])).size()>1 and bool(layout.landing_pads[1].get("built",true)):count+=10000
+	if count==_capacity_visual_count:return
+	_capacity_visual_count=count
+	_layout=layout.duplicate(true)
+	for bed: Dictionary in Array(layout.get("beds",[])):
+		if String(bed.get("visual_kind",""))!="field_bunk" or stage.has_node(String(bed.id)):continue
+		var owner:=Node3D.new(); owner.name=String(bed.id); stage.add_child(owner)
+		var plane: Array=bed.get("sleep_plane",bed.get("rest_plane",[0,0]))
+		owner.position=Vector3(float(plane[0]),0,float(plane[1]))
+		var mesh:=BoxMesh.new(); mesh.size=Vector3(0.65,0.22,1.8)
+		var cot:=MeshInstance3D.new(); cot.mesh=mesh; cot.position.y=0.3; owner.add_child(cot)
+		var material:=StandardMaterial3D.new(); material.albedo_color=Color(0.25,0.37,0.32); cot.material_override=material
+		var pillow:=MeshInstance3D.new(); var pillow_mesh:=BoxMesh.new(); pillow_mesh.size=Vector3(0.56,0.12,0.34); pillow.mesh=pillow_mesh; pillow.position=Vector3(0,0.47,-0.65); owner.add_child(pillow)
+	for pad: Dictionary in Array(layout.get("landing_pads",[])):
+		if stage.has_node(String(pad.id)):
+			stage.get_node(String(pad.id)).scale.y=1.0 if bool(pad.get("built",true)) else 0.15
+			var designation: Node=stage.get_node(String(pad.id)).get_node_or_null("PadDesignation")
+			if designation!=null:designation.text=String(pad.designation) if bool(pad.get("built",true)) else "BAUPLATZ · PAD 02"
+			continue
+		var visual: Node3D=PAD_SCRIPT.new(); visual.name=String(pad.id); stage.add_child(visual)
+		visual.set_meta("landing_pad_id",String(pad.id))
+		visual.call("build",Vector2(float(pad.plane[0]),float(pad.plane[1])),Vector2(float(pad.size[0]),float(pad.size[1])),String(pad.designation))
+		visual.position.y=float(pad.get("surface_y",0))-PAD_SCRIPT.DECK_HEIGHT

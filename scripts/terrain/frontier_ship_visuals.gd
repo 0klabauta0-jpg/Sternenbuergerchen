@@ -18,6 +18,9 @@ static func get_catalog_snapshot() -> Dictionary:
 
 static func get_ui_identity(craft: Dictionary, role: String = "") -> Dictionary:
 	# The declared visual identity or existing 3D role wins, never a name guess.
+	if bool(craft.get("visual_placeholder",false)): return {}
+	var model_id := String(craft.get("model_id",""))
+	if model_id in ["cutlass","buccaneer"]: return get_ship(model_id+"_01")
 	var visual_id: String = String(craft.get("visual_asset_id", "")).strip_edges()
 	if not visual_id.is_empty():
 		return get_ship(visual_id)

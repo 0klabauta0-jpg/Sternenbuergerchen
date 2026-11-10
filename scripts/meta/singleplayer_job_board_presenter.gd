@@ -118,11 +118,11 @@ func refresh() -> void:
 	var status: String = String(job.get("status", "offered"))
 	var locations: Dictionary = campaign.get("locations", {})
 	var location: Dictionary = locations.get(String(job.get("location_id", "")), {})
-	var labels := {"offered": "Angeboten", "accepted": "Angenommen", "active": "Im Einsatz", "completed": "Abgeschlossen", "failed": "Abgebrochen / fehlgeschlagen"}
-	_details.text = "%s\nZielort: %s\nStatus: %s\nBelohnung: %d Kredite\n\nDaten sichern, anschließend zum Schiff zurückkehren. Annahme startet keinen Flug." % [String(job.get("title", "Keine Aufträge")), String(location.get("name", "—")), String(labels.get(status, status)), int(Dictionary(job.get("reward", {})).get("credits", 0))]
+	var labels := {"offered": "Angeboten", "accepted": "Angenommen", "active": "Im Einsatz", "completed": "Abgeschlossen", "failed": "Abgebrochen / fehlgeschlagen", "pending_upload":"Chip geborgen · zuhause hochladen"}
+	_details.text = "%s\nZielort: %s\nStatus: %s\nBelohnung: %d Kredite\n\n%s" % [String(job.get("title", "Keine Aufträge")), String(location.get("name", "—")), "Vorherigen Auftrag abschließen" if bool(job.get("locked",false)) else String(labels.get(status, status)), int(Dictionary(job.get("reward", {})).get("credits", 0)),String(job.get("description","Annahme startet keinen Flug."))]
 	var screen: Control = _screen.get_ref()
 	var campaign_mode := String(Dictionary(screen.call("get_operations_snapshot").get("singleplayer", {})).get("mode", "")) == "campaign"
-	_accept.disabled = (status != "offered" and not (campaign_mode and status == "failed")) or job.is_empty()
+	_accept.disabled = (status != "offered" and not (campaign_mode and status == "failed")) or job.is_empty() or (campaign_mode and bool(job.get("locked",false)))
 	_accept.text = "Erneut annehmen" if campaign_mode and status == "failed" else "Auftrag annehmen"
 	_show_map.disabled = not status in ["accepted", "active"]
 	_abandon.disabled = not status in ["accepted", "active"]

@@ -3,7 +3,7 @@ extends VBoxContainer
 signal operation_requested(operation: String, payload: Dictionary)
 const SURFACE = preload("res://scripts/meta/operations_drag_surface.gd")
 const ITEMS = preload("res://scripts/mission/inventory_transfer_contract.gd")
-const LABELS := {"armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","none":"Leer"}
+const LABELS := {"armor_light":"Leichte Rüstung","armor_medium":"Mittlere Rüstung","armor_heavy":"Schwere Rüstung","rifle":"Sturmgewehr","smg":"Maschinenpistole","sniper":"Scharfschützengewehr","rail_gun":"Railgun","rocket_launcher":"Raketenwerfer","medictool":"Sanitätsgerät","ore":"Erz","salvage":"Bergungsgut","pistol":"Pistole","a_benit":"A-Benit","b_benit":"B-Benit","c_benit":"C-Benit","satellite_chip":"Satellitenchip","outpost_chip":"Außenpostenchip","c_benit_crate":"C-Benit-Kiste","mining_tool":"Hand-Mining-Tool","salvage_tool":"Bergungswerkzeug","none":"Leer"}
 var _signature := ""
 var _unit_id := ""
 var _craft_id := ""
@@ -52,7 +52,9 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		var item: String=ITEMS.item_from_slot(key,String(loadout.get(key,"none")))
 		var slot: PanelContainer=SURFACE.new(); slot.name="InventorySlot_"+key
 		slot.accepted_type="inventory_item"; slot.custom_minimum_size=Vector2(146,60); _slots.add_child(slot)
-		var label:=Label.new(); label.text=spec[1]+"\n"+String(LABELS.get(item,item)); label.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot.add_child(label)
+		var slot_body:=HBoxContainer.new(); slot_body.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot.add_child(slot_body)
+		var icon:=TextureRect.new(); icon.texture=_item_icon(item); icon.custom_minimum_size=Vector2(48,60); icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; icon.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(icon)
+		var label:=Label.new(); label.text=spec[1]+"\n"+String(LABELS.get(item,item)); label.mouse_filter=Control.MOUSE_FILTER_IGNORE; slot_body.add_child(label)
 		slot.payload_dropped.connect(func(data:Dictionary): _wear(data,key))
 	for spec in [["base:homebase","Basislager"],["craft:"+craft_id,"Schiffsfracht"],["unit:"+_unit_id+":backpack","Rucksack"]]:
 		var id: String=spec[0]
@@ -70,7 +72,7 @@ func update_snapshot(inventory: Dictionary, unit: Dictionary, craft_id: String, 
 		var grid:=GridContainer.new(); grid.columns=2; body.add_child(grid)
 		for item in Dictionary(data.get("items",{})):
 			var source: PanelContainer=SURFACE.new(); source.drag_payload={"type":"inventory_item","source_container_id":id,"item_id":item,"label":String(LABELS.get(item,item))} if allowed else {}; grid.add_child(source)
-			var button:=Button.new(); button.text="%s\n× %d" % [String(LABELS.get(item,item)).replace("Maschinenpistole","Maschinen-\npistole"),int(data.items[item])]; button.custom_minimum_size=Vector2(126,66); button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; button.disabled=not allowed; source.add_child(button); source.forward_drag_from(button)
+			var button:=Button.new(); button.text="%s\n× %d" % [String(LABELS.get(item,item)).replace("Maschinenpistole","Maschinen-\npistole"),int(data.items[item])]; button.icon=_item_icon(String(item)); button.expand_icon=true; button.add_theme_constant_override("icon_max_width",42); button.custom_minimum_size=Vector2(126,78); button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; button.disabled=not allowed; source.add_child(button); source.forward_drag_from(button)
 			button.pressed.connect(func(): _selection={"source_container_id":id,"item_id":item}; _selected.text=String(LABELS.get(item,item))+" · "+String(spec[1]))
 		if Dictionary(data.get("items",{})).is_empty():
 			var empty:=Label.new(); empty.text="Leer · Gegenstand hierher ziehen"; empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; body.add_child(empty)
@@ -80,3 +82,13 @@ func _move(source: String, item: String, target: String, amount: int) -> void:
 	operation_requested.emit("inventory_transfer",{"unit_id":_unit_id,"craft_id":_craft_id,"source_container_id":source,"destination_container_id":target,"item_id":item,"amount":amount})
 func _wear(data: Dictionary, slot: String) -> void:
 	operation_requested.emit("inventory_equip",{"unit_id":_unit_id,"craft_id":_craft_id,"source_container_id":String(data.get("source_container_id","")),"item_id":String(data.get("item_id","")),"slot":slot})
+
+
+func _item_icon(item: String) -> Texture2D:
+	if item in ["armor_light","armor_medium","armor_heavy"]: return load("res://Assets/curated/ui/campaign_inventory/"+item+".svg")
+	if item.ends_with("_benit"): return load("res://Assets/curated/ui/campaign_inventory/benit.svg")
+	if item.ends_with("_chip") or item.ends_with("_crate"): return load("res://Assets/curated/ui/campaign_inventory/chip.svg")
+	var weapons=load("res://scripts/core/weapon_data.gd")
+	var entry: Dictionary=Dictionary(weapons.WEAPON_CATALOG.get(item,{}))
+	var path:=String(entry.get("preview_path",""))
+	return load(path) if not path.is_empty() and ResourceLoader.exists(path) else null

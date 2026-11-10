@@ -27,11 +27,18 @@ func configure_singleplayer_owners(campaign: RefCounted, supply: RefCounted, onb
 	_singleplayer_space_travel_owner = travel
 
 
+var _space_encounter_owner: RefCounted
+
+func configure_space_encounter(owner: RefCounted) -> void:
+	_space_encounter_owner = owner
+
 func request_singleplayer_command(command: Dictionary, authority_context: Dictionary = {}) -> Dictionary:
 	# Only the owning runtime adapter supplies authority_context. UI payload is
 	# never interpreted as runtime evidence, service location or departure proof.
 	var owner: RefCounted
 	match String(command.get("contract_category", "")):
+		"campaign_space":
+			owner = _space_encounter_owner
 		"singleplayer_campaign":
 			owner = _singleplayer_campaign_owner
 		"singleplayer_supply":
@@ -3892,3 +3899,11 @@ func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:
 		return Vector2(value.x, value.y)
 
 	return fallback
+
+
+var _location_resource_owner: Node
+func configure_location_resources(owner: Node) -> void:
+	_location_resource_owner=owner
+func request_location_resource_command(operation: String, payload: Dictionary) -> Dictionary:
+	if not is_instance_valid(_location_resource_owner): return {"ok":false,"reason":"resource_owner_missing"}
+	return _location_resource_owner.call("apply_operation",operation,payload)

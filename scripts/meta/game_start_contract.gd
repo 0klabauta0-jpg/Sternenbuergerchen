@@ -6,13 +6,17 @@ static func clear_start(tree: SceneTree) -> void:
 	if tree != null and tree.root != null and tree.root.has_meta(META_KEY):
 		tree.root.remove_meta(META_KEY)
 
-static func request_start(tree: SceneTree, mode: String, action: String = "new") -> Dictionary:
+static func request_start(tree: SceneTree, mode: String, action: String = "new", preset_id: String = "") -> Dictionary:
 	clear_start(tree)
 	if tree == null or tree.root == null:
 		return {"ok": false, "reason": "missing_tree"}
 	if mode not in ["campaign", "skirmish"] or action not in ["new", "continue"] or (mode == "skirmish" and action != "new"):
 		return {"ok": false, "reason": "invalid_start"}
-	tree.root.set_meta(META_KEY, {"mode": mode, "action": action})
+	if not preset_id.is_empty() and (mode != "skirmish" or preset_id not in ["early", "mid", "late"]):
+		return {"ok":false,"reason":"invalid_skirmish_preset"}
+	var request := {"mode": mode, "action": action}
+	if not preset_id.is_empty(): request["preset_id"] = preset_id
+	tree.root.set_meta(META_KEY, request)
 	return {"ok": true}
 
 static func consume_start(tree: SceneTree) -> Dictionary:
@@ -29,4 +33,9 @@ static func consume_start(tree: SceneTree) -> Dictionary:
 		return fallback
 	if mode not in ["campaign", "skirmish"] or action not in ["new", "continue"] or (mode == "skirmish" and action != "new"):
 		return fallback
-	return {"mode": mode, "action": action}
+	var result := {"mode": mode, "action": action}
+	if value.has("preset_id"):
+		if mode != "skirmish" or typeof(value.preset_id) != TYPE_STRING or value.preset_id not in ["early", "mid", "late"]:
+			return fallback
+		result["preset_id"] = value.preset_id
+	return result

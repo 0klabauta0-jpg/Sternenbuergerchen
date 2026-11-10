@@ -9,9 +9,9 @@ const DEFAULT_SECONDARY_WEAPON_ID := "none"
 const DEFAULT_FOB_WEAPON_ID := "smg"
 
 const ARMOR_IDS: Array = ["light", "medium", "heavy"]
-const HOMEBASE_PRIMARY_WEAPON_IDS: Array = ["smg", "rifle", "sniper", "rail_gun", "rocket_launcher", "medictool"]
-const HOMEBASE_SECONDARY_WEAPON_IDS: Array = ["none", "smg", "rifle", "sniper", "rail_gun", "rocket_launcher", "medictool"]
-const FOB_WEAPON_IDS: Array = ["smg", "rifle", "sniper", "rail_gun", "rocket_launcher", "medictool", "none"]
+const HOMEBASE_PRIMARY_WEAPON_IDS: Array = ["pistol", "smg", "rifle", "sniper", "rail_gun", "rocket_launcher", "medictool"]
+const HOMEBASE_SECONDARY_WEAPON_IDS: Array = ["none", "pistol", "smg", "rifle", "sniper", "rail_gun", "rocket_launcher", "medictool"]
+const FOB_WEAPON_IDS: Array = ["pistol", "smg", "rifle", "sniper", "rail_gun", "rocket_launcher", "medictool", "none"]
 
 const ARMOR_LABELS: Dictionary = {
 	"light": "Light",
@@ -27,6 +27,7 @@ const COMPACT_ARMOR_LABELS: Dictionary = {
 
 const WEAPON_LABELS: Dictionary = {
 	"none": "None",
+	"pistol": "Pistole",
 	"smg": "SMG",
 	"rifle": "Rifle",
 	"sniper": "Scharf",
@@ -37,6 +38,7 @@ const WEAPON_LABELS: Dictionary = {
 
 const COMPACT_WEAPON_LABELS: Dictionary = {
 	"none": "-",
+	"pistol": "Pistole",
 	"smg": "SMG",
 	"rifle": "Rifle",
 	"sniper": "Scharf",

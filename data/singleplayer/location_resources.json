@@ -1,0 +1,78 @@
+{
+  "satellite_crash": {
+    "iron_ridge_01": {
+      "name": "A-Benit abbauen",
+      "item_id": "a_benit",
+      "quantity": 8,
+      "required_tool": "mining_tool",
+      "duration_seconds": 4.0,
+      "radius_world": 96.0,
+      "discovery_radius_world": 384.0,
+      "grid": [
+        -8,
+        14
+      ],
+      "kind": "ore"
+    },
+    "freighter_wreck_01": {
+      "name": "Transporterwrack bergen",
+      "item_id": "salvage",
+      "quantity": 8,
+      "required_tool": "salvage_tool",
+      "duration_seconds": 6.0,
+      "radius_world": 96.0,
+      "discovery_radius_world": 384.0,
+      "grid": [
+        31,
+        15
+      ],
+      "kind": "wreck"
+    },
+    "b_benit_01": {
+      "name": "B-Benit abbauen",
+      "item_id": "b_benit",
+      "quantity": 8,
+      "required_tool": "mining_tool",
+      "duration_seconds": 4.0,
+      "radius_world": 96.0,
+      "discovery_radius_world": 384.0,
+      "grid": [
+        31,
+        25
+      ],
+      "kind": "ore"
+    }
+  },
+  "trade_outpost": {
+    "a_benit_01": {
+      "name": "A-Benit abbauen",
+      "item_id": "a_benit",
+      "quantity": 8,
+      "required_tool": "mining_tool",
+      "duration_seconds": 4.0,
+      "radius_world": 96.0,
+      "discovery_radius_world": 384.0,
+      "grid": [
+        18,
+        29
+      ],
+      "kind": "ore"
+    },
+    "c_benit_01": {
+      "name": "C-Benit abbauen",
+      "item_id": "c_benit",
+      "quantity": 8,
+      "required_tool": "mining_tool",
+      "duration_seconds": 4.0,
+      "radius_world": 96.0,
+      "discovery_radius_world": 384.0,
+      "grid": [
+        29,
+        10
+      ],
+      "kind": "ore"
+    }
+  },
+  "fortified_outpost": {},
+  "distress_orbit": {}
+}

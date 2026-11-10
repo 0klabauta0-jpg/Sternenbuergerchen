@@ -2,23 +2,72 @@
   "id": "starter_system",
   "jump_duration_seconds": 3.0,
   "bodies": {
-    "moon": {"id": "moon", "name": "Glut I · Mondbasis", "orbit_id": "moon_orbit", "position": [0.18, 0.70], "radius": 0.04},
-    "planet": {"id": "planet", "name": "Glut", "orbit_id": "planet_orbit", "position": [0.80, 0.28], "radius": 0.09}
+    "moon": {
+      "id": "moon",
+      "name": "Glut I · Mondbasis",
+      "orbit_id": "moon_orbit",
+      "position": [
+        0.18,
+        0.7
+      ],
+      "radius": 0.04
+    },
+    "planet": {
+      "id": "planet",
+      "name": "Glut",
+      "orbit_id": "planet_orbit",
+      "position": [
+        0.8,
+        0.28
+      ],
+      "radius": 0.09
+    }
   },
   "orbits": {
-    "moon_orbit": {"id": "moon_orbit", "name": "Glut I · Mondorbit", "body_id": "moon", "position": [0.18, 0.70]},
+    "moon_orbit": {
+      "id": "moon_orbit",
+      "name": "Glut I · Mondorbit",
+      "body_id": "moon",
+      "position": [
+        0.18,
+        0.7
+      ]
+    },
     "planet_orbit": {
-      "id": "planet_orbit", "name": "Glut · Planetenorbit", "body_id": "planet", "position": [0.80, 0.28],
+      "id": "planet_orbit",
+      "name": "Glut · Planetenorbit",
+      "body_id": "planet",
+      "position": [
+        0.8,
+        0.28
+      ],
       "encounter_slots": [
-        {"id": "planet_orbit_sector_01", "name": "Orbitbereich 1", "angle_degrees": 30, "available": false},
-        {"id": "planet_orbit_sector_02", "name": "Orbitbereich 2", "angle_degrees": 150, "available": false},
-        {"id": "planet_orbit_sector_03", "name": "Orbitbereich 3", "angle_degrees": 270, "available": false}
+        {
+          "id": "planet_orbit_sector_01",
+          "name": "Orbitbereich 1",
+          "angle_degrees": 30,
+          "available": false
+        },
+        {
+          "id": "planet_orbit_sector_02",
+          "name": "Orbitbereich 2",
+          "angle_degrees": 150,
+          "available": false
+        },
+        {
+          "id": "planet_orbit_sector_03",
+          "name": "Orbitbereich 3",
+          "angle_degrees": 270,
+          "available": false
+        }
       ]
     }
   },
   "location_orbits": {
     "homebase": "moon_orbit",
     "satellite_crash": "planet_orbit",
-    "trade_outpost": "planet_orbit"
+    "trade_outpost": "planet_orbit",
+    "fortified_outpost": "planet_orbit",
+    "distress_orbit": "planet_orbit"
   }
 }

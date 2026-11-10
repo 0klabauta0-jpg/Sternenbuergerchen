@@ -1,0 +1,162 @@
+{
+  "version": 1,
+  "scenario_id": "outpost_recovery",
+  "display_name": "Ersten Außenposten sichern",
+  "map_file_path": "res://maps/trade_outpost.json",
+  "time_limit_seconds": 2400.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [
+    {
+      "group_id": "outpost_guards",
+      "display_name": "Außenpostenwache",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_enemy_defense",
+      "enemy_ids": [
+        "outpost_recovery_guard_01"
+      ],
+      "tactics": {
+        "profile_id": "defensive_cover",
+        "stance": "defend",
+        "cover_behavior": "hold_best_cover",
+        "security_mode": "cover_arc",
+        "facing": "east",
+        "advance_style": "hold",
+        "allowed_weapon_roles": [
+          "sidearm"
+        ],
+        "sight_behavior": "cover_arc",
+        "contact_behavior": "suppress_from_cover",
+        "weapon_profile": "standard_close",
+        "visual_archetype": "enemy_space_suit_orange",
+        "movement_posture_policy": "hold_ready",
+        "ready_distance_world": 320.0,
+        "travel_speed_factor": 0.3,
+        "ready_speed_factor": 0.2,
+        "aim_move_speed_factor": 0.15,
+        "heavy_weapon_role": "none",
+        "anti_armor_threat": false,
+        "air_asset_risk_profile": "none",
+        "communication_intensity": "low",
+        "weapon_id": "pistol"
+      }
+    }
+  ],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 1,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 1
+  },
+  "patrol_bindings": [],
+  "briefing": {
+    "summary": "Ersten Außenposten sichern; Fracht und Personen sicher zurückbringen.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "recover_crate",
+        "text": "C-Benit-Transportkiste sichern"
+      },
+      {
+        "target_id": "ship_return",
+        "text": "Fracht zum Schiff zurückbringen"
+      }
+    ],
+    "title": "Ersten Außenposten sichern"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_job",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": [
+      "singleplayer"
+    ],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "recover_crate",
+        "step_id": "recover_crate",
+        "duration_seconds": 3.0,
+        "required_state": "recover_crate_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "C-Benit-Transportkiste sichern",
+        "interaction_id": "recover_crate",
+        "marker_id": "recover_crate",
+        "requires_step_id": "clear_outpost"
+      },
+      {
+        "gate_id": "return_to_ship",
+        "step_id": "return_to_ship",
+        "duration_seconds": 3.0,
+        "required_state": "return_to_ship_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Fracht zum Schiff zurückbringen",
+        "interaction_id": "ship_return",
+        "marker_id": "ship_return",
+        "requires_step_id": "recover_crate"
+      },
+      {
+        "gate_id": "trade_service",
+        "step_id": "trade_service",
+        "duration_seconds": 2.0,
+        "required_state": "trade_service_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Händler / Tankservice",
+        "interaction_id": "trade_service",
+        "marker_id": "trade_service"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "clear_outpost",
+        "objective_type": "air_defense_shutdown",
+        "enemy_group_id": "outpost_guards",
+        "required_state": "outpost_cleared",
+        "target_marker_id": "spawn_enemy_defense",
+        "min_hold_seconds": 0.0
+      },
+      {
+        "step_id": "recover_crate",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "recover_crate_done",
+        "target_marker_id": "recover_crate",
+        "requires_step_id": "clear_outpost"
+      },
+      {
+        "step_id": "return_to_ship",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "return_to_ship_done",
+        "target_marker_id": "ship_return",
+        "requires_step_id": "recover_crate"
+      }
+    ],
+    "finite_enemy_roster": true
+  },
+  "notes": [
+    "Authored chapter-one content. Runtime gates, not UI clicks, determine completion."
+  ]
+}

@@ -8874,7 +8874,7 @@ func _build_weapon_fire_feedback_anchor(fire_event: Dictionary) -> Dictionary:
 	var weapon: Node3D = runtime.get("weapon_node") as Node3D
 	if not is_instance_valid(weapon):
 		return result
-	var muzzle: Variant = weapon.get_meta("unit_muzzle_socket", null)
+	var muzzle: Variant = weapon.get_meta("unit_muzzle_socket") if weapon.has_meta("unit_muzzle_socket") else null
 	if is_instance_valid(muzzle):
 		result.kind = "weapon_mesh_muzzle"
 		result.muzzle_node = muzzle

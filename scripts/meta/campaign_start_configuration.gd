@@ -30,9 +30,18 @@ func configure(flow: Node, request: Dictionary) -> void:
 	var leader: String = String(roster[0].unit_id)
 	var staged_units := PackedStringArray(craft_state.get("staged_unit_ids", [leader]))
 	var staged_teams := PackedStringArray(craft_state.get("staged_fireteam_ids", ["ft1"]))
-	flow.set("_homebase_aircraft_definitions", [definition])
-	flow.set("_assigned_aircraft_pilot_by_craft", {craft_id: pilot})
-	flow.set("_aircraft_location_by_craft", {craft_id: "homebase"})
+	var fleet: Array = Array(checkpoint.get("fleet",[{"definition":definition,"pilot_id":pilot,"location":"homebase"}])).duplicate(true)
+	var fleet_definitions: Array = []
+	var pilots: Dictionary = {}
+	var locations: Dictionary = {}
+	for ship: Dictionary in fleet:
+		var ship_id := String(ship.definition.craft_id)
+		fleet_definitions.append(ship.definition)
+		pilots[ship_id] = String(ship.get("pilot_id",""))
+		locations[ship_id] = String(ship.get("location","homebase"))
+	flow.set("_homebase_aircraft_definitions", fleet_definitions)
+	flow.set("_assigned_aircraft_pilot_by_craft", pilots)
+	flow.set("_aircraft_location_by_craft", locations)
 	flow.set("_homebase_staged_unit_ids", staged_units)
 	flow.set("_homebase_staged_fireteam_ids", staged_teams)
 	flow.set("_selected_unit_ids", staged_units.duplicate())
@@ -43,19 +52,22 @@ func configure(flow: Node, request: Dictionary) -> void:
 	flow.set_meta("singleplayer_bootstrap_fireteam_id", String(staged_teams[0]) if not staged_teams.is_empty() else "")
 	flow.set_meta("singleplayer_bootstrap_enabled", true)
 	var fob: Node = flow.call("_get_fob_screen")
-	var definitions: Array = Array(craft_state.get("fireteam_definitions", [{"id": "ft1", "lead_unit_id": leader, "name": "Pioniertrupp", "loadout_id": "medium"}])).duplicate(true)
+	var definitions: Array = Array(craft_state.get("fireteam_definitions", [{"id": "ft1", "lead_unit_id": leader, "name": "Pioniertrupp", "loadout_id": "light", "member_unit_ids":[leader], "member_loadouts":{leader:{"armor":"light","weapon_1":"pistol","weapon_2":"medictool"}}}])).duplicate(true)
 	fob.call("set_team", staged_units, staged_teams, definitions)
 	flow.set("_selected_mission_id", "satellite_recovery")
 	flow.set("_selected_mission_map_path", "res://maps/satellite_crash_site.json")
 	flow.call("_ensure_singleplayer_release_homebase_direct_drop_source")
 	flow.get_node("HomebaseScreen").set_meta("campaign_base_map_path", BASE_MAP)
-	if not checkpoint.is_empty():
-		flow.get_node("HomebaseScreen").set("_member_loadout_by_unit_id", Dictionary(craft_state.get("member_loadouts", {})).duplicate(true))
+	var loadouts: Dictionary = Dictionary(craft_state.get("member_loadouts", {})).duplicate(true)
+	if checkpoint.is_empty():
+		for person: Dictionary in roster:
+			loadouts[String(person.unit_id)] = {"armor":"light","weapon_1":"pistol","weapon_2":"medictool"}
+	flow.get_node("HomebaseScreen").set("_member_loadout_by_unit_id", loadouts)
 
 func _initial_roster() -> Array:
 	var presets: Array = PRESETS.get_homebase_roster()
 	var leader: Dictionary = Dictionary(presets[0]).duplicate(true)
-	leader.merge({"unit_id": "campaign_leader", "display_name": "Anja Voss", "roster_role_category": "operator", "role_name": "Fireteam Leader", "fireteam_id": "ft1"}, true)
+	leader.merge({"unit_id": "campaign_leader", "display_name": "Anja Voss", "roster_role_category": "operator", "role_name": "Fireteam Leader", "fireteam_id": "ft1", "armor":"light", "armor_id":"light", "weapon_1":"pistol", "weapon_1_id":"pistol", "weapon_2":"medictool", "weapon_2_id":"medictool"}, true)
 	# The dedicated pilot preset already carries the canonical piloting values.
 	var pilot: Dictionary = {}
 	for unit: Dictionary in presets:
@@ -64,7 +76,7 @@ func _initial_roster() -> Array:
 			break
 	if pilot.is_empty():
 		pilot = Dictionary(presets.back()).duplicate(true)
-	pilot.merge({"unit_id": "campaign_pilot", "roster_role_category": "pilot", "role_name": "Dropship Pilot", "dropship_piloting": 0.7, "fireteam_id": ""}, true)
+	pilot.merge({"unit_id": "campaign_pilot", "roster_role_category": "pilot", "role_name": "Dropship Pilot", "dropship_piloting": 0.7, "fireteam_id": "", "armor":"light", "armor_id":"light", "weapon_1":"pistol", "weapon_1_id":"pistol", "weapon_2":"medictool", "weapon_2_id":"medictool"}, true)
 	return [leader, pilot]
 
 func save_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
@@ -81,11 +93,12 @@ func save_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
 		if not Array(flow.get(field)).is_empty():
 			return {"ok": false, "reason": "preparation_in_progress"}
 	var crafts: Array = flow.get("_homebase_aircraft_definitions")
-	if crafts.size() != 1:
+	if crafts.is_empty():
 		return {"ok": false, "reason": "campaign_craft_count"}
 	var id: String = String(crafts[0].craft_id)
-	if String(Dictionary(flow.get("_aircraft_location_by_craft")).get(id, "")) != "homebase":
-		return {"ok": false, "reason": "away_from_checkpoint"}
+	for ship: Dictionary in crafts:
+		if String(Dictionary(flow.get("_aircraft_location_by_craft")).get(String(ship.craft_id),"")) not in ["homebase","waiting_pad"]:
+			return {"ok":false,"reason":"away_from_checkpoint"}
 	var payload: Dictionary = runtime.call("export_campaign_checkpoint")
 	if payload.is_empty():
 		return {"ok": false, "reason": "runtime_unavailable"}
@@ -100,6 +113,9 @@ func save_home_checkpoint(flow: Node, runtime: Node) -> Dictionary:
 		"selected_cargo": flow.get("_selected_aircraft_cargo_by_craft"),
 		"loaded_cargo": flow.get("_loaded_aircraft_cargo_by_craft")
 	}
+	payload["fleet"] = []
+	for ship: Dictionary in crafts:
+		payload.fleet.append({"definition":ship.duplicate(true),"pilot_id":String(Dictionary(flow.get("_assigned_aircraft_pilot_by_craft")).get(String(ship.craft_id),"")),"location":String(Dictionary(flow.get("_aircraft_location_by_craft")).get(String(ship.craft_id),"homebase"))})
 	var signature: String = JSON.stringify(payload, "", true).sha256_text()
 	if signature == last_save_signature:
 		return {"ok": true, "unchanged": true}

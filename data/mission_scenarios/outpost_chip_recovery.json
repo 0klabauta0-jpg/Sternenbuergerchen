@@ -1,0 +1,151 @@
+{
+  "version": 1,
+  "scenario_id": "outpost_chip_recovery",
+  "display_name": "Chip aus gesichertem Außenposten bergen",
+  "map_file_path": "res://maps/fortified_outpost.json",
+  "time_limit_seconds": 2400.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [
+    {
+      "group_id": "outpost_guards",
+      "display_name": "Außenpostenwache",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_enemy_defense",
+      "enemy_ids": [
+        "outpost_chip_recovery_guard_01",
+        "outpost_chip_recovery_guard_02"
+      ],
+      "tactics": {
+        "profile_id": "defensive_cover",
+        "stance": "defend",
+        "cover_behavior": "hold_best_cover",
+        "security_mode": "cover_arc",
+        "facing": "east",
+        "advance_style": "hold",
+        "allowed_weapon_roles": [
+          "sidearm",
+          "smg"
+        ],
+        "sight_behavior": "cover_arc",
+        "contact_behavior": "suppress_from_cover",
+        "weapon_profile": "standard_close",
+        "visual_archetype": "enemy_space_suit_orange",
+        "movement_posture_policy": "hold_ready",
+        "ready_distance_world": 320.0,
+        "travel_speed_factor": 0.3,
+        "ready_speed_factor": 0.2,
+        "aim_move_speed_factor": 0.15,
+        "heavy_weapon_role": "none",
+        "anti_armor_threat": false,
+        "air_asset_risk_profile": "none",
+        "communication_intensity": "low",
+        "weapon_id": "smg"
+      }
+    }
+  ],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 1,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 2
+  },
+  "patrol_bindings": [],
+  "briefing": {
+    "summary": "Chip aus gesichertem Außenposten bergen; Fracht und Personen sicher zurückbringen.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "outpost_chip",
+        "text": "Außenposten-Chip sichern"
+      },
+      {
+        "target_id": "ship_return",
+        "text": "Mit dem Chip zum Schiff zurückkehren"
+      }
+    ],
+    "title": "Chip aus gesichertem Außenposten bergen"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_job",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": [
+      "singleplayer"
+    ],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "secure_outpost_chip",
+        "step_id": "secure_outpost_chip",
+        "duration_seconds": 3.0,
+        "required_state": "secure_outpost_chip_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Außenposten-Chip sichern",
+        "interaction_id": "outpost_chip",
+        "marker_id": "outpost_chip",
+        "requires_step_id": "clear_outpost"
+      },
+      {
+        "gate_id": "return_to_ship",
+        "step_id": "return_to_ship",
+        "duration_seconds": 3.0,
+        "required_state": "return_to_ship_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Mit dem Chip zum Schiff zurückkehren",
+        "interaction_id": "ship_return",
+        "marker_id": "ship_return",
+        "requires_step_id": "secure_outpost_chip"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "clear_outpost",
+        "objective_type": "air_defense_shutdown",
+        "enemy_group_id": "outpost_guards",
+        "required_state": "outpost_cleared",
+        "target_marker_id": "spawn_enemy_defense",
+        "min_hold_seconds": 0.0
+      },
+      {
+        "step_id": "secure_outpost_chip",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "secure_outpost_chip_done",
+        "target_marker_id": "outpost_chip",
+        "requires_step_id": "clear_outpost"
+      },
+      {
+        "step_id": "return_to_ship",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "return_to_ship_done",
+        "target_marker_id": "ship_return",
+        "requires_step_id": "secure_outpost_chip"
+      }
+    ],
+    "finite_enemy_roster": true
+  },
+  "notes": [
+    "Authored chapter-one content. Runtime gates, not UI clicks, determine completion."
+  ]
+}

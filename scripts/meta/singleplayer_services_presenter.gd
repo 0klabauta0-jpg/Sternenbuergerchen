@@ -22,6 +22,8 @@ var _amount: SpinBox
 var _refuel: Button
 var _return: Button
 var _feedback: Label
+var _sell: Button
+var _campaign_buttons: Dictionary = {}
 
 func configure(snapshot_provider: Callable, command_handler: Callable) -> void:
 	_snapshot_provider = snapshot_provider
@@ -44,9 +46,15 @@ func _build() -> void:
 	style.set_border_width_all(1)
 	style.set_content_margin_all(12)
 	add_theme_stylebox_override("panel", style)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(300,240)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	add_child(scroll)
 	var content := VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation", 6)
-	add_child(content)
+	scroll.add_child(content)
 	var heading: Label = _label("Versorgung", 21)
 	THEME.style_section_heading(heading, 23)
 	content.add_child(heading)
@@ -67,6 +75,9 @@ func _build() -> void:
 	_buy = _button("Sanitätswerkzeug kaufen", "BuySupply")
 	content.add_child(_buy)
 	_buy.pressed.connect(func(): _submit("buy"))
+	_sell = _button("Rohstoff aus Schiffsfracht verkaufen", "SellBenit")
+	content.add_child(_sell)
+	_sell.pressed.connect(_submit_sell)
 	var fuel_row := HBoxContainer.new()
 	content.add_child(fuel_row)
 	var amount_label: Label = _label("Tankmenge", 14)
@@ -90,6 +101,20 @@ func _build() -> void:
 	_return = _button("Zur Heimatbasis", "ServiceReturnHomebase")
 	content.add_child(_return)
 	_return.pressed.connect(func(): _submit("return_homebase"))
+	for action in [
+		["campaign_upload","Chip am Basisterminal hochladen",{}],
+		["campaign_recruit","Person am Handelsposten aufnehmen",{"kind":"outpost"}],
+		["campaign_load_crate","Geborgene C-Benit-Kiste übernehmen",{}],
+		["campaign_build_pad","Zweites Landepad bauen · 100 Cr",{}],
+		["campaign_fabricate","Hand-Mining-Tool herstellen",{"blueprint_id":"mining_tool"}],
+		["campaign_fabricate","Sturmgewehr herstellen",{"blueprint_id":"assault_rifle"}],
+		["campaign_fabricate","Leichte Rüstung herstellen",{"blueprint_id":"light_armor"}]]:
+		var key := String(action[0])+String(Dictionary(action[2]).get("blueprint_id",""))
+		var button := _button(String(action[1]),key)
+		button.visible = false
+		content.add_child(button)
+		_campaign_buttons[key] = {"button":button,"operation":action[0],"payload":action[2]}
+		button.pressed.connect(_submit_campaign.bind(key))
 	_feedback = _label("", 14)
 	_feedback.name = "ServiceFeedback"
 	_feedback.custom_minimum_size.y = 32
@@ -103,6 +128,7 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		incoming = _snapshot_provider.call()
 	_snapshot = Dictionary(incoming.get("singleplayer", incoming)).duplicate(true)
 	var supply: Dictionary = Dictionary(_snapshot.get("supply", {}))
+	_refresh_campaign_actions(supply)
 	_release_acknowledged(int(supply.get("revision", -1)))
 	var crafts: Array = Array(_snapshot.get("crafts", []))
 	var ids: Array[String] = []
@@ -155,13 +181,19 @@ func refresh(snapshot: Dictionary = {}) -> void:
 		buy_reason = "Kredite reichen für den Kauf nicht"
 	_buy.disabled = not buy_reason.is_empty() or _pending.has("buy")
 	_buy.tooltip_text = buy_reason if not buy_reason.is_empty() else "Ein Sanitätswerkzeug kaufen"
+	var purchased_item := "c_benit" if location == "satellite_crash" else "b_benit"
+	var cargo: Dictionary = Dictionary(Dictionary(supply.get("inventory",{})).get("craft:"+_selected_craft_id,{})).get("items",{})
+	_sell.visible = location in ["satellite_crash","trade_outpost"]
+	_sell.text = "1 × %s verkaufen · 15 Cr" % ("C-Benit" if purchased_item == "c_benit" else "B-Benit")
+	_sell.disabled = not available or int(cargo.get(purchased_item,0)) < 1
+	_sell.tooltip_text = "Dieser Händler kauft nur diesen Rohstoff aus der Schiffsfracht"
 	var amount: float = _amount.value
 	var cost: float = amount * float(supply.get("fuel_price_per_unit", 0.0))
 	_refuel.text = "+%s Treibstoff · %s Cr" % [str(amount), str(cost)]
 	var fuel_reason: String = ""
 	if not available:
 		fuel_reason = unavailable_reason
-	elif not location in ["homebase", "trade_outpost"]:
+	elif not location in ["homebase", "trade_outpost", "satellite_crash"]:
 		fuel_reason = "An diesem Ort gibt es keine Tankstelle"
 	elif not has_fuel:
 		fuel_reason = "Schiff hat keinen registrierten Treibstofftank"
@@ -198,6 +230,53 @@ func set_selected_craft(craft_id: String) -> bool:
 			refresh()
 			return true
 	return false
+
+func _refresh_campaign_actions(supply: Dictionary) -> void:
+	var campaign: Dictionary = _snapshot.get("campaign",{})
+	var jobs: Dictionary = campaign.get("jobs",{})
+	var progress: Dictionary = campaign.get("progress",{})
+	var home := true
+	for craft: Dictionary in Array(_snapshot.get("crafts",[])):
+		home = home and String(craft.get("location_id","")) in ["homebase","waiting_pad"] and not bool(craft.get("busy",false))
+	var has_chip := false
+	for job: Dictionary in jobs.values(): has_chip = has_chip or String(job.get("status","")) == "pending_upload"
+	for key in _campaign_buttons:
+		var action: Dictionary = _campaign_buttons[key]
+		var button: Button = action.button
+		var show := String(_snapshot.get("mode","")) == "campaign"
+		var enabled := home
+		match String(action.operation):
+			"campaign_upload": show = has_chip
+			"campaign_recruit":
+				show = show and String(Dictionary(jobs.get("outpost_recovery",{})).get("status","")) in ["active","completed"] and not bool(progress.get("recruited_outpost",false))
+				enabled = not Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).is_empty()
+			"campaign_load_crate": show = show and String(Dictionary(jobs.get("outpost_recovery",{})).get("status","")) == "completed" and not bool(progress.get("crate_loaded",false))
+			"campaign_build_pad": show = show and bool(progress.get("recruited_pilot",false)) and not bool(progress.get("second_pad_built",false))
+			"campaign_fabricate":
+				show = Array(supply.get("blueprints",[])).has(String(action.payload.blueprint_id))
+		button.visible = show
+		button.disabled = not enabled or not _command_handler.is_valid()
+		button.tooltip_text = "Zur Basis zurückkehren" if not enabled else ""
+
+func _submit_campaign(key: String) -> void:
+	var action: Dictionary = _campaign_buttons.get(key,{})
+	if action.is_empty() or action.button.disabled or not _command_handler.is_valid(): return
+	var payload: Dictionary = Dictionary(action.payload).duplicate(true)
+	payload["craft_id"] = _selected_craft_id
+	_sequence += 1
+	payload["request_id"] = "campaign-service:%d:%d" % [get_instance_id(),_sequence]
+	var result: Dictionary = _command_handler.call(String(action.operation),payload)
+	_feedback.text = String(result.get("message",result.get("reason","Aktion bestätigt")))
+	refresh()
+
+func _submit_sell() -> void:
+	if _sell.disabled or not _command_handler.is_valid(): return
+	var context: Dictionary = Dictionary(_snapshot.get("service_contexts_by_craft_id",{})).get(_selected_craft_id,{})
+	var item := "c_benit" if String(context.get("location_id","")) == "satellite_crash" else "b_benit"
+	_sequence += 1
+	var result: Dictionary = _command_handler.call("sell",{"craft_id":_selected_craft_id,"item_id":item,"quantity":1,"request_id":"services-sell:%d:%d" % [get_instance_id(),_sequence]})
+	_feedback.text = String(result.get("message",result.get("reason","Verkauf bestätigt")))
+	refresh()
 
 func _submit(operation: String) -> void:
 	if _pending.has(operation):

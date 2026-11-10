@@ -2,10 +2,86 @@
   "satellite_recovery": {
     "id": "satellite_recovery",
     "title": "Satellitendaten bergen",
-    "description": "An der Absturzstelle die Satellitendaten sichern und mit dem Trupp zum Schiff zurueckkehren.",
+    "description": "Satellitendaten bergen. Bestätigten Fortschritt im Auftrag verfolgen.",
     "location_id": "satellite_crash",
     "scenario_id": "satellite_recovery",
-    "required_step_ids": ["secure_satellite", "return_to_ship"],
-    "reward": {"credits": 150}
+    "prerequisite_job_id": "",
+    "home_upload": true,
+    "required_step_ids": [
+      "secure_satellite",
+      "return_to_ship"
+    ],
+    "reward": {
+      "credits": 150,
+      "blueprint_id": "light_armor"
+    }
+  },
+  "outpost_recovery": {
+    "id": "outpost_recovery",
+    "title": "Ersten Außenposten sichern",
+    "description": "Ersten Außenposten sichern. Bestätigten Fortschritt im Auftrag verfolgen.",
+    "location_id": "trade_outpost",
+    "scenario_id": "outpost_recovery",
+    "prerequisite_job_id": "satellite_recovery",
+    "home_upload": false,
+    "required_step_ids": [
+      "clear_outpost",
+      "recover_crate",
+      "return_to_ship"
+    ],
+    "reward": {
+      "credits": 100
+    }
+  },
+  "benit_delivery": {
+    "id": "benit_delivery",
+    "title": "C-Benit zum Satelliten-Handelsposten liefern",
+    "description": "C-Benit zum Satelliten-Handelsposten liefern. Bestätigten Fortschritt im Auftrag verfolgen.",
+    "location_id": "satellite_crash",
+    "scenario_id": "benit_delivery",
+    "prerequisite_job_id": "outpost_recovery",
+    "home_upload": false,
+    "required_step_ids": [
+      "deliver_benit",
+      "return_to_ship"
+    ],
+    "reward": {
+      "credits": 100,
+      "blueprint_id": "mining_tool"
+    }
+  },
+  "outpost_chip_recovery": {
+    "id": "outpost_chip_recovery",
+    "title": "Chip aus gesichertem Außenposten bergen",
+    "description": "Chip aus gesichertem Außenposten bergen. Bestätigten Fortschritt im Auftrag verfolgen.",
+    "location_id": "fortified_outpost",
+    "scenario_id": "outpost_chip_recovery",
+    "prerequisite_job_id": "benit_delivery",
+    "home_upload": true,
+    "required_step_ids": [
+      "clear_outpost",
+      "secure_outpost_chip",
+      "return_to_ship"
+    ],
+    "reward": {
+      "credits": 250,
+      "blueprint_id": "assault_rifle"
+    }
+  },
+  "buccaneer_rescue": {
+    "id": "buccaneer_rescue",
+    "title": "Buccaneer im Weltraum retten",
+    "description": "Buccaneer im Weltraum retten. Bestätigten Fortschritt im Auftrag verfolgen.",
+    "location_id": "distress_orbit",
+    "scenario_id": "buccaneer_rescue",
+    "prerequisite_job_id": "outpost_chip_recovery",
+    "home_upload": false,
+    "required_step_ids": [
+      "enemy_cutlass_destroyed",
+      "rescue_buccaneer"
+    ],
+    "reward": {
+      "credits": 300
+    }
   }
 }

@@ -1,7 +1,6 @@
 extends PanelContainer
 ## Read-only system map. Requests never move ships or load missions locally.
 const CANVAS = preload("res://scripts/ui/star_map_canvas.gd")
-const LOCATION_IDS := ["satellite_crash", "trade_outpost"]
 var _provider: Callable
 var _commands: Callable
 var _runtime: Dictionary = {}
@@ -19,6 +18,7 @@ var _approach: Button
 var _land: Button
 var _close: Button
 var _sites: Dictionary = {}
+var _sites_row: VBoxContainer
 var _fleet_selector: OptionButton
 var _visit_list: VBoxContainer
 var _visit_buttons: Dictionary={}
@@ -125,16 +125,10 @@ func _build() -> void:
 	_progress.show_percentage = false
 	information.add_child(_progress)
 	information.add_child(_label("ORTE AM PLANETEN", 11, Color("789baa")))
-	var sites_row := VBoxContainer.new()
-	sites_row.add_theme_constant_override("separation", 10)
-	information.add_child(sites_row)
-	for id in LOCATION_IDS:
-		var button := _button("SatelliteDestination" if id == "satellite_crash" else "TradeDestination", "", _select.bind(id))
-		button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		button.custom_minimum_size.y = 34
-		button.add_theme_font_size_override("font_size", 13)
-		sites_row.add_child(button)
-		_sites[id] = button
+	_sites_row = VBoxContainer.new()
+	_sites_row.name = "DestinationRows"
+	_sites_row.add_theme_constant_override("separation", 10)
+	information.add_child(_sites_row)
 	_locks = _label("", 13, Color("f2ca86"))
 	_locks.name = "LocationLocks"
 	information.add_child(_locks)
@@ -181,7 +175,7 @@ func _button(node_name: String, text: String, action: Callable) -> Button:
 	return button
 
 func _style_buttons() -> void:
-	for button in [_abort, _approach, _land, _close, _sites.satellite_crash, _sites.trade_outpost, _canvas.get("_moon"), _canvas.get("_planet")]:
+	for button in [_abort, _approach, _land, _close, _canvas.get("_moon"), _canvas.get("_planet")] + _sites.values():
 		if button == null:
 			continue
 		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
@@ -195,6 +189,27 @@ func _style_buttons() -> void:
 			button.add_theme_stylebox_override(state, style)
 		button.add_theme_color_override("font_color", Color("e5f0f3"))
 		button.add_theme_color_override("font_disabled_color", Color("85929f"))
+
+func _sync_sites(locations: Dictionary) -> void:
+	var changed := false
+	for id in _sites.keys():
+		if not locations.has(id) or String(id) == "homebase":
+			_sites[id].queue_free()
+			_sites.erase(id)
+			changed = true
+	for key in locations:
+		var id := String(key)
+		if id == "homebase" or _sites.has(id): continue
+		var names := {"satellite_crash":"SatelliteDestination","trade_outpost":"TradeDestination","fortified_outpost":"FortifiedDestination","distress_orbit":"DistressDestination"}
+		var button := _button(String(names.get(id,"Destination_" + id.validate_node_name())),"",_select.bind(id))
+		button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		button.custom_minimum_size = Vector2(220,34)
+		button.add_theme_font_size_override("font_size", 13)
+		button.clip_text = true
+		_sites_row.add_child(button)
+		_sites[id] = button
+		changed = true
+	if changed: _style_buttons()
 
 func refresh(snapshot: Dictionary = {}) -> void:
 	if not _built:
@@ -231,17 +246,18 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_close.text = "Abflug zur Sternkarte vorbereiten" if phase == "grounded" else "Trupp & Ausrüstung"
 	var campaign: Dictionary = _runtime.get("campaign", {})
 	var locations: Dictionary = campaign.get("locations", {})
+	_sync_sites(locations)
 	var selected: String = String(campaign.get("selected_location_id", ""))
 	var at_planet := phase == "orbit" and orbit == "planet_orbit"
 	var marker_locations: Dictionary={}
 	var reasons: PackedStringArray = []
-	for id in LOCATION_IDS:
+	for id in _sites:
 		var button: Button = _sites[id]
 		var location: Dictionary = locations.get(id, {})
 		button.text = ("◆  " if selected == id else "◇  ") + String(location.get("name", "Satelliten-Absturzstelle" if id == "satellite_crash" else "Handelsposten"))
 		var reason := _lock_reason(id)
 		button.disabled = not at_planet or not reason.is_empty()
-		marker_locations[id]={"name":String(location.get("name",id)),"available":not button.disabled,"selected":selected==id,"reason":reason}
+		marker_locations[id]={"name":String(location.get("name",id)),"available":not button.disabled,"selected":selected==id,"reason":reason,"region_position":location.get("region_position",[])}
 		button.tooltip_text = reason if not reason.is_empty() else ("Zielort auswaehlen. Erst der Anflug laedt die Karte." if at_planet else "Zielorte werden im Planetenorbit waehlbar.")
 		if not reason.is_empty():
 			reasons.append(String(location.get("name", id)) + ": " + reason)
@@ -250,8 +266,8 @@ func refresh(snapshot: Dictionary = {}) -> void:
 	_locks.visible = not reasons.is_empty()
 	var selected_location: Dictionary = locations.get(selected, {})
 	var job: Dictionary = Dictionary(campaign.get("jobs", {})).get(String(campaign.get("selected_job_id", "")), {})
-	_selection.text = "Ziel: %s  ·  Auftrag: %s" % [String(selected_location.get("name", "Noch keinen Zielort ausgewaehlt")), String(job.get("title", "Ortsbesuch"))] if selected in LOCATION_IDS else "Handelsposten und Satellitenzone liegen am Planeten. Zielwahl im Planetenorbit."
-	_approach.visible = at_planet and selected in LOCATION_IDS
+	_selection.text = "Ziel: %s  ·  Auftrag: %s" % [String(selected_location.get("name", "Noch keinen Zielort ausgewaehlt")), String(job.get("title", "Ortsbesuch"))] if _sites.has(selected) else "Zielort im Planetenorbit auswählen."
+	_approach.visible = at_planet and _sites.has(selected)
 	_approach.disabled = not _lock_reason(selected).is_empty() or not at_planet
 	_approach.text = "Anflug starten"
 	_land.visible = phase == "orbit" and orbit == "moon_orbit"
@@ -278,12 +294,14 @@ func _orbit_name(id: String) -> String:
 func _lock_reason(location_id: String) -> String:
 	if String(_runtime.get("mode", "")) != "campaign":
 		return ""
-	var stage: int = int(Dictionary(_runtime.get("onboarding", {})).get("stage_index", 3))
-	if stage < 2 and location_id == "trade_outpost":
-		return "Erst Satellit bergen und zur Mondbasis heimkehren."
-	if stage == 2 and location_id == "satellite_crash":
-		return "Jetzt Versorgung am Handelsposten sichern."
-	return ""
+	var campaign: Dictionary = _runtime.get("campaign", {})
+	var jobs: Dictionary = campaign.get("jobs", {})
+	for job: Dictionary in jobs.values():
+		if String(job.get("location_id", "")) != location_id: continue
+		var prior := String(job.get("prerequisite_job_id", ""))
+		var locked: bool = bool(job.get("locked", not prior.is_empty() and String(Dictionary(jobs.get(prior,{})).get("status", "")) != "completed"))
+		if not locked: return ""
+	return "Zuerst den vorherigen Kampagnenauftrag abschließen und Chips zuhause hochladen."
 
 func _craft_id() -> String:
 	var runtime: Dictionary = _provider.call() if _provider.is_valid() else _runtime

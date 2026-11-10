@@ -3,7 +3,7 @@ extends RefCounted
 const PAYLOAD_VALIDATOR: GDScript = preload("res://scripts/mission/singleplayer_supply_command_contract.gd")
 
 const CATEGORY := "singleplayer_campaign"
-const OPERATIONS := ["accept_job", "select_destination", "bind_departure", "activate_job", "complete_job", "fail_job", "retry_failed_job"]
+const OPERATIONS := ["accept_job", "select_destination", "bind_departure", "activate_job", "complete_job", "fail_job", "retry_failed_job", "upload_job", "claim_recruit", "load_crate", "deliver_crate", "build_pad"]
 
 static func build_command(operation: String, payload: Dictionary, request_id: String) -> Dictionary:
 	if not OPERATIONS.has(operation) or request_id.strip_edges().is_empty():

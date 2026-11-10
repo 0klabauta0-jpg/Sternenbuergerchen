@@ -65,6 +65,7 @@ var _campaign_button: Button
 var _campaign_dialog: ConfirmationDialog
 var _campaign_continue_button: Button
 var _campaign_replace_dialog: ConfirmationDialog
+var _skirmish_dialog: AcceptDialog
 
 var _settings_config_path: String = COMIC_BUBBLE_SETTINGS_SCRIPT.CONFIG_PATH
 var _comic_bubble_settings: Dictionary = {}
@@ -172,6 +173,7 @@ func _ready() -> void:
 	_ensure_mission_save_load_buttons()
 	_apply_release_first_play_polish()
 	_ensure_campaign_entry()
+	_ensure_skirmish_entry()
 	_ensure_contextual_help_ui()
 	ensure_start_roster_exists()
 	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
@@ -300,7 +302,7 @@ func _apply_release_singleplayer_deeplink() -> void:
 	set_meta("release_singleplayer_deeplink_requested", true)
 	set_meta("release_singleplayer_deeplink_target", SINGLEPLAYER_SCENE_PATH)
 	_status_label.text = "Singleplayer wird gestartet"
-	_on_singleplayer_pressed()
+	_start_skirmish("")
 
 
 func _apply_release_deeplink() -> void:
@@ -3807,7 +3809,54 @@ func _start_campaign(action: String) -> void:
 
 
 func _on_singleplayer_pressed() -> void:
-	GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "skirmish")
+	_skirmish_dialog.popup_centered(Vector2i(680, 520))
+
+
+func _ensure_skirmish_entry() -> void:
+	_skirmish_dialog = AcceptDialog.new()
+	_skirmish_dialog.name = "SkirmishStartDialog"
+	_skirmish_dialog.title = "Skirmish — vorbereiteten Start laden"
+	_skirmish_dialog.ok_button_text = "Zurück"
+	add_child(_skirmish_dialog)
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 12)
+	_skirmish_dialog.add_child(content)
+	var heading := Label.new()
+	heading.text = "Offene Ortswahl ohne Kampagnenführung. Jeder Start beginnt frisch."
+	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	heading.custom_minimum_size.x = 620
+	content.add_child(heading)
+	var presets: Dictionary = load("res://scripts/meta/skirmish_start_configuration.gd").get_presets()
+	for id: String in ["early", "mid", "late"]:
+		var data: Dictionary = presets.get(id, {})
+		var button := Button.new()
+		button.name = "SkirmishPreset_" + id
+		button.text = String(data.get("title", id))
+		button.custom_minimum_size.y = 42
+		button.tooltip_text = String(data.get("description", ""))
+		TACTICAL_UI_THEME_SCRIPT.style_command_button(button, "accent" if id == "early" else "default")
+		content.add_child(button)
+		button.pressed.connect(_start_skirmish.bind(id))
+		var description := Label.new()
+		description.text = String(data.get("description", ""))
+		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		content.add_child(description)
+	var own := Button.new()
+	own.name = "SkirmishOwnTeam"
+	own.text = "Mit eigenem gespeicherten Team starten"
+	own.custom_minimum_size.y = 42
+	content.add_child(own)
+	own.pressed.connect(_start_skirmish.bind(""))
+	var note := Label.new()
+	note.text = "Gespeicherte Teams bleiben erhalten. Fahrzeugtransport, Trägerhangar, Wiederbewaffnung und Medic Bed sind vorgemerkt; derzeit nicht bedienbar."
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(note)
+
+
+func _start_skirmish(preset_id: String = "") -> void:
+	var result: Dictionary = GAME_START_CONTRACT_SCRIPT.request_start(get_tree(), "skirmish", "new", preset_id)
+	if not result.get("ok", false): return
+	if _skirmish_dialog != null: _skirmish_dialog.hide()
 	_play_ui_sfx("confirm", "singleplayer")
 	_change_scene(SINGLEPLAYER_SCENE_PATH)
 

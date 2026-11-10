@@ -3,6 +3,7 @@ extends Control
 signal orbit_requested(orbit_id: String)
 signal location_selected(location_id: String)
 var _location_buttons: Dictionary={}
+var _locations: Dictionary={}
 var _ship_texture: Texture2D
 var _travel: Dictionary = {}
 var _moon: Button
@@ -294,6 +295,11 @@ func _draw_planet(center: Vector2) -> void:
 	draw_arc(center, 51, PI * 0.85, PI * 1.65, 36, Color("f2c992"), 1.5, true)
 
 func set_location_snapshot(locations: Dictionary) -> void:
+	_locations = locations.duplicate(true)
+	for id in _location_buttons.keys():
+		if not locations.has(id):
+			_location_buttons[id].queue_free()
+			_location_buttons.erase(id)
 	for id in locations:
 		if not _location_buttons.has(id):
 			var created:=Button.new()
@@ -312,7 +318,14 @@ func set_location_snapshot(locations: Dictionary) -> void:
 
 func location_map_point(id: String) -> Vector2:
 	var coordinates: Array=Dictionary(Dictionary(_travel.get("orbits",{})).get("planet_orbit",{})).get("position",[0.80,0.28])
-	return Vector2(float(coordinates[0]),float(coordinates[1]))+(Vector2(-0.028,0.075) if id=="satellite_crash" else Vector2(0.028,0.12))
+	var center := Vector2(float(coordinates[0]),float(coordinates[1]))
+	var authored: Variant = Dictionary(_locations.get(id,{})).get("region_position",[])
+	if authored is Array and authored.size() == 2:
+		# Planet-local authored geography, spread across the lower/right hemisphere.
+		return center + Vector2((float(authored[0]) - 0.8) * 0.7, float(authored[1]) * 0.65 + 0.05)
+	var index := maxi(_locations.keys().find(id),0)
+	var columns := maxi(2,ceili(sqrt(float(maxi(_locations.size(),1)))))
+	return center + Vector2(-0.18 + float(index % columns) * 0.14, 0.16 + float(index / columns) * 0.2)
 
 func _layout_location_buttons() -> void:
 	for id in _location_buttons:

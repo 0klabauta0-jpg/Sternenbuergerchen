@@ -33,6 +33,29 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `asset_hint`: optionaler Hinweis auf Tile-/Object-Asset, etwa Door-Closed/Open-Familie.
 
 ## Runtime-Regeln
+- Revision 10.11.2026: Bereits benutzbare Computerinteraktionen starten bei GO keine
+  neue TAKE-Formationsbewegung im Bedienradius. Tatsächliche Positionen der
+  fitten Truppmitglieder werden an denselben Use-Wegpunkt gebunden und über
+  `SimulationRoot` gehalten; der gewöhnliche Runtime-Timer bleibt erforderlich.
+  Angreifbarer Kontakt, Kontaktunterbrechung, anderer Wegpunkt/Ziel und
+  verschobene/abgewanderte Mitglieder machen diese stationäre Ankunft ungültig.
+  Normale TAKE-/MOVE-Befehle sowie Tür-/Breach-Pfade behalten ihre Bewegungsdoktrin.
+  Wartet der Use-Wegpunkt noch hinter einem aktiven MOVE zum selben Computer,
+  ersetzt erst das ausdrückliche GO diese bereits im Bedienradius angekommene
+  Annäherung. Die MOVE-Formation wird abgebrochen, nicht als abgeschlossen
+  vorgetäuscht. Andere Bewegungsziele, aktive Kampf-/Flächenbefehle und das
+  bloße Erstellen eines Use-Intents bleiben davon unberührt.
+  Für `ship_return` gilt zusätzlich die tatsächliche Boardingnähe aller
+  lebenden ausgebrachten Kampagnenpersonen zum real gelandeten Schiff (128 Welteinheiten).
+  Eine Person außerhalb dieser Grenze wird durch echte einzelne Move-Commands
+  zu begehbaren Punkten nahe dem Schiff geführt. Erst wenn alle innerhalb
+  112 Welteinheiten angekommen sind, beginnt der unveränderte Use-Timer;
+  der Abstandspuffer verhindert eine sofortige erneute Grenzüberschreitung.
+  Der Ankunftsbeleg prüft die Boardinggrenze während des Haltens weiter.
+  Es muss mindestens eine lebende Person vorhanden sein. Ausgefallene Personen
+  werden nicht zu unmöglichen Laufwegen gezwungen: Der bestehende autoritative
+  Boardingpfad lehnt die Extraktion weiterhin als `crew_unavailable` ab und
+  führt in den Fehlschlag-/Checkpoint-Debrief, ohne Heimflug oder Erfolgsbelohnung.
 - Naehe, Bedienzeit, Ownership und Fehlschlag werden nicht im Editor entschieden.
 - Ein Fireteam darf einen Interaction Point nur ueber einen echten Command oder ein Scenario-Gate benutzen.
 - Door-Animationen duerfen aus Closed/Half/Open-Assetfamilien abgeleitet werden, brauchen aber einen Runtime-State ausserhalb der Tile-Wahrheit.

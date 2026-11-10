@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "scenario_id": "buccaneer_rescue",
+  "display_name": "Buccaneer im Weltraum retten",
+  "map_file_path": "res://maps/distress_orbit.json",
+  "time_limit_seconds": 2400.0,
+  "mission_slot_count_override": 4,
+  "win_condition": "objective_capture",
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 80.0
+  },
+  "enemy_groups": [],
+  "wave_config": {
+    "wave_delay_seconds": 0.0,
+    "wave_count": 0,
+    "first_wave_delay_seconds": 0.0,
+    "units_per_wave": 1
+  },
+  "patrol_bindings": [],
+  "briefing": {
+    "summary": "Buccaneer im Weltraum retten; Fracht und Personen sicher zurückbringen.",
+    "minimap_mode": "terrain_only",
+    "objectives": [
+      {
+        "target_id": "cutlass_contact",
+        "text": "Feindliche Cutlass besiegen"
+      },
+      {
+        "target_id": "buccaneer_contact",
+        "text": "Neutrale Buccaneer retten"
+      }
+    ],
+    "title": "Buccaneer im Weltraum retten"
+  },
+  "vertical_slice": {
+    "scenario_kind": "singleplayer_job",
+    "team_slots": [
+      {
+        "role": "recovery",
+        "player_assignable_modes": [
+          "singleplayer"
+        ],
+        "spawn_marker_id": "spawn_alpha",
+        "team_id": "team_alpha",
+        "npc_owned": false
+      }
+    ],
+    "play_modes": [
+      "singleplayer"
+    ],
+    "contract_version": 1,
+    "interaction_points": [
+      {
+        "gate_id": "enemy_cutlass_destroyed",
+        "step_id": "enemy_cutlass_destroyed",
+        "duration_seconds": 3.0,
+        "required_state": "enemy_cutlass_destroyed_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Feindliche Cutlass besiegen",
+        "interaction_id": "cutlass_contact",
+        "marker_id": "cutlass_contact"
+      },
+      {
+        "gate_id": "rescue_buccaneer",
+        "step_id": "rescue_buccaneer",
+        "duration_seconds": 3.0,
+        "required_state": "rescue_buccaneer_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Neutrale Buccaneer retten",
+        "interaction_id": "buccaneer_contact",
+        "marker_id": "buccaneer_contact",
+        "requires_step_id": "enemy_cutlass_destroyed"
+      }
+    ],
+    "flow_steps": [
+      {
+        "step_id": "enemy_cutlass_destroyed",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "enemy_cutlass_destroyed_done",
+        "target_marker_id": "cutlass_contact"
+      },
+      {
+        "step_id": "rescue_buccaneer",
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "rescue_buccaneer_done",
+        "target_marker_id": "buccaneer_contact",
+        "requires_step_id": "enemy_cutlass_destroyed"
+      }
+    ]
+  },
+  "notes": [
+    "Authored chapter-one content. Runtime gates, not UI clicks, determine completion.",
+    "Dedicated ship-combat runtime owns combat and verified completion; ground Use cannot resolve this encounter."
+  ],
+  "space_encounter": {
+    "id": "buccaneer_rescue",
+    "hostile": {
+      "craft_id": "hostile_cutlass",
+      "model_id": "cutlass",
+      "faction": "hostile"
+    },
+    "neutral": {
+      "craft_id": "neutral_buccaneer",
+      "model_id": "buccaneer",
+      "faction": "neutral"
+    }
+  }
+}

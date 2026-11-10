@@ -1,9 +1,9 @@
 {
   "version": 1,
   "scenario_id": "satellite_recovery",
-  "display_name": "Satellitenbergung",
+  "display_name": "Satellitendaten bergen",
   "map_file_path": "res://maps/satellite_crash_site.json",
-  "time_limit_seconds": 1200.0,
+  "time_limit_seconds": 2400.0,
   "mission_slot_count_override": 4,
   "win_condition": "objective_capture",
   "objective": {
@@ -19,7 +19,7 @@
   },
   "patrol_bindings": [],
   "briefing": {
-    "summary": "Satellit aufsuchen, Daten sichern und zum Schiff zurückkehren.",
+    "summary": "Satellitendaten bergen; Fracht und Personen sicher zurückbringen.",
     "minimap_mode": "terrain_only",
     "objectives": [
       {
@@ -28,10 +28,10 @@
       },
       {
         "target_id": "ship_return",
-        "text": "Mit den Daten zum Schiff zurückkehren"
+        "text": "Mit dem Chip zum Schiff zurückkehren"
       }
     ],
-    "title": "Satellitenbergung"
+    "title": "Satellitendaten bergen"
   },
   "vertical_slice": {
     "scenario_kind": "singleplayer_job",
@@ -55,10 +55,9 @@
         "gate_id": "secure_satellite",
         "step_id": "secure_satellite",
         "duration_seconds": 3.0,
-        "required_state": "satellite_secured",
+        "required_state": "secure_satellite_done",
         "interaction_type": "computer",
         "required_order": "take",
-        "asset_hint": "spacekit_satellite_dish_detailed",
         "radius_world": 96.0,
         "required_team": "team_alpha",
         "display_name": "Satellitendaten sichern",
@@ -66,19 +65,31 @@
         "marker_id": "satellite_data"
       },
       {
-        "required_team": "team_alpha",
         "gate_id": "return_to_ship",
-        "asset_hint": "ship_boarding_console",
-        "required_order": "operate",
-        "duration_seconds": 2.0,
-        "marker_id": "ship_return",
-        "requires_step_id": "secure_satellite",
-        "required_state": "crew_returned",
         "step_id": "return_to_ship",
-        "display_name": "Rückkehr am Schiff bestätigen",
+        "duration_seconds": 3.0,
+        "required_state": "return_to_ship_done",
         "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Mit dem Chip zum Schiff zurückkehren",
         "interaction_id": "ship_return",
-        "radius_world": 96.0
+        "marker_id": "ship_return",
+        "requires_step_id": "secure_satellite"
+      },
+      {
+        "gate_id": "trade_service",
+        "step_id": "trade_service",
+        "duration_seconds": 2.0,
+        "required_state": "trade_service_done",
+        "interaction_type": "computer",
+        "required_order": "take",
+        "radius_world": 96.0,
+        "required_team": "team_alpha",
+        "display_name": "Händler / Tankservice",
+        "interaction_id": "trade_service",
+        "marker_id": "trade_service"
       }
     ],
     "flow_steps": [
@@ -86,22 +97,20 @@
         "step_id": "secure_satellite",
         "min_hold_seconds": 3.0,
         "objective_type": "interaction_use",
-        "required_state": "satellite_secured",
+        "required_state": "secure_satellite_done",
         "target_marker_id": "satellite_data"
       },
       {
-        "objective_type": "interaction_use",
-        "requires_step_id": "secure_satellite",
         "step_id": "return_to_ship",
-        "required_state": "crew_returned",
-        "min_hold_seconds": 2.0,
-        "target_marker_id": "ship_return"
+        "min_hold_seconds": 3.0,
+        "objective_type": "interaction_use",
+        "required_state": "return_to_ship_done",
+        "target_marker_id": "ship_return",
+        "requires_step_id": "secure_satellite"
       }
     ]
   },
   "notes": [
-    "Authored hex recovery map using existing native assets.",
-    "No enemy elimination, objective proximity or mission loading grants completion.",
-    "The campaign owner consumes the two verified runtime steps once."
+    "Authored chapter-one content. Runtime gates, not UI clicks, determine completion."
   ]
 }

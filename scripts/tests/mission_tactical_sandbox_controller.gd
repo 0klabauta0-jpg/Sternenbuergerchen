@@ -358,6 +358,7 @@ const AREA_ORDER_ISO_TILE_HALF_HEIGHT: float = 32.0
 const PHASE_WAYPOINT_COMPLETE_RADIUS: float = 26.0
 const PHASE_WAYPOINT_SOFT_MEMBER_REACHED_RADIUS: float = 30.0
 const PHASE_WAYPOINT_SOFT_CENTER_REACHED_RADIUS: float = 48.0
+const CAMPAIGN_BOARDING_RADIUS: float = 128.0
 const PHASE_WAYPOINT_SOFT_RELEASE_MIN_MSEC: int = 2500
 const AREA_DEFENSE_POSITION_REACHED_RADIUS: float = 24.0
 const AREA_ATTACK_APPROACH_REACHED_RADIUS: float = 30.0
@@ -1610,6 +1611,9 @@ func execute_selected_fireteam_orders() -> bool:
 			else:
 				already_active_fireteams.append(fireteam_id.to_upper())
 				continue
+		if _try_replace_arrived_computer_approach(fireteam_id, target_phase_index):
+			issued_fireteams.append(fireteam_id.to_upper())
+			continue
 		if _phase_execution_by_fireteam.has(fireteam_id):
 			if _try_continue_active_fireteam_order(fireteam_id):
 				continued_fireteams.append(fireteam_id.to_upper())
@@ -13701,7 +13705,7 @@ func request_campaign_crew_boarding(craft_id: String) -> Dictionary:
 		if not _deployed_unit_ids.has(id): continue
 		if not unit is Node2D or int(unit.call("get_health")) <= 0:
 			return {"ok": false, "reason": "crew_unavailable", "message": "Bodenteam ist nicht boardingbereit"}
-		if (unit as Node2D).global_position.distance_to(ship_position) > 128.0:
+		if (unit as Node2D).global_position.distance_to(ship_position) > CAMPAIGN_BOARDING_RADIUS:
 			return {"ok": false, "reason": "pilot_not_at_ship" if id == pilot_id else "crew_not_at_ship", "message": "Alle Bodenpersonen muessen zuerst zum Schiff zuruecklaufen"}
 		crew.append(unit)
 	if crew.is_empty(): return flight_guard
@@ -32844,6 +32848,10 @@ func _is_interaction_arrival_receipt_valid(fireteam_id: String, target: Vector2,
 	var receipt: Dictionary = Dictionary(execution_state.get("interaction_arrival_receipt", {}))
 	if receipt.is_empty() or bool(execution_state.get("contact_halt_active", false)):
 		return false
+	if bool(receipt.get("stationary_use", false)) and not _build_fireteam_engage_contact_halt_context(fireteam_id).is_empty():
+		return false
+	if String(execution_state.get("interaction_id","")) == "ship_return" and not _campaign_return_crew_near(_campaign_return_context(),CAMPAIGN_BOARDING_RADIUS):
+		return false
 	if String(receipt.get("waypoint_id", "")) != String(execution_state.get("interaction_waypoint_id", "")) or not Vector2(receipt.get("target_position", Vector2.INF)).is_equal_approx(target):
 		return false
 	var radius: float = float(execution_state.get("interaction_hold_radius", 0.0))
@@ -32860,6 +32868,140 @@ func _is_interaction_arrival_receipt_valid(fireteam_id: String, target: Vector2,
 			return false
 		checked_count += 1
 	return checked_count > 0
+
+
+func _try_start_stationary_interaction(fireteam_id: String, waypoint, phase_index: int, execution_state: Dictionary) -> bool:
+	# A usable object already has an actual in-radius runtime team. Starting a
+	# fresh TAKE formation can send a buddy team behind an adjacent structure.
+	# Retain its physical arrival, stop through SimulationRoot and still run the
+	# ordinary timed interaction. Ordinary TAKE/MOVE orders keep their doctrine.
+	if String(Dictionary(waypoint.metadata).get("source", "")) != "mission_interaction_use_intent":
+		return false
+	if String(Dictionary(waypoint.metadata).get("interaction_type", "")) != "computer":
+		return false
+	var interaction_id := String(Dictionary(waypoint.metadata).get("interaction_id", ""))
+	var feedback := _resolve_mission_interaction_feedback_for_intent(get_mission_interaction_use_feedback_snapshot(), interaction_id)
+	if String(feedback.get("status", "")) != "usable" or not bool(feedback.get("can_prompt_use", false)):
+		return false
+	if not _build_fireteam_engage_contact_halt_context(fireteam_id).is_empty():
+		return false
+	if String(Dictionary(waypoint.metadata).get("interaction_id","")) == "ship_return" and not _campaign_return_crew_near(_campaign_return_context(),CAMPAIGN_BOARDING_RADIUS):
+		return false
+	var positions: Dictionary = {}
+	for member in _get_fireteam_units(fireteam_id, true):
+		if member is Node2D and member.has_method("get_unit_id") and (not member.has_method("get_vital_state") or String(member.call("get_vital_state")) == "fit"):
+			positions[String(member.call("get_unit_id"))] = (member as Node2D).global_position
+	var candidate := execution_state.duplicate(true)
+	candidate["interaction_arrival_receipt"] = {"waypoint_id":String(waypoint.waypoint_id),"target_position":candidate.resolved_target_position,"member_positions":positions,"stationary_use":true}
+	if not _is_interaction_arrival_receipt_valid(fireteam_id, Vector2(candidate.resolved_target_position), candidate):
+		return false
+	if not _issue_fireteam_hold_current_positions(fireteam_id, phase_index, "mission-use:"+String(waypoint.waypoint_id)):
+		return false
+	_ensure_fireteam_movement_controller()
+	if _fireteam_movement_controller != null:
+		_fireteam_movement_controller.call("reset_fireteam", fireteam_id)
+	execution_state["interaction_arrival_receipt"] = candidate.interaction_arrival_receipt
+	return true
+
+
+func _campaign_return_context() -> Dictionary:
+	if not get_parent().has_meta("campaign_ground_pilot_id"): return {}
+	var identity: Dictionary = get_parent().get_meta("singleplayer_mission_identity",{})
+	var craft_id := String(identity.get("craft_id",_mission_drop_craft_id))
+	if not _is_parked_campaign_dropship(craft_id): return {}
+	var position := _campaign_landed_craft_position(craft_id)
+	if not is_finite(position.x) or not is_finite(position.y): return {}
+	var crew: Array = []
+	for unit in _get_campaign_sortie_units():
+		if unit is Node2D and _deployed_unit_ids.has(String(unit.call("get_unit_id"))): crew.append(unit)
+	return {"craft_id":craft_id,"position":position,"crew":crew}
+
+
+func _campaign_return_crew_near(context: Dictionary, radius: float) -> bool:
+	# Non-campaign uses keep their existing interaction contract.
+	if context.is_empty(): return not get_parent().has_meta("campaign_ground_pilot_id")
+	if Array(context.crew).is_empty(): return false
+	var living := 0
+	for unit: Node2D in Array(context.crew):
+		# Terminal casualties are handled by the existing authoritative boarding
+		# failure/debrief path, not by an impossible walk towards the craft.
+		if int(unit.call("get_health")) <= 0: continue
+		living += 1
+		if unit.global_position.distance_to(Vector2(context.position)) > radius: return false
+	return living > 0
+
+
+func _start_campaign_return_gather(waypoint, execution_state: Dictionary) -> bool:
+	if String(Dictionary(waypoint.metadata).get("interaction_id","")) != "ship_return": return false
+	var context := _campaign_return_context()
+	if context.is_empty() or _campaign_return_crew_near(context,112.0): return false
+	var simulation := get_node_or_null("../SimulationRoot")
+	var terrain: Node = _get_terrain_registry()
+	if simulation == null or terrain == null: return false
+	var commands: Array = []
+	for unit: Node2D in Array(context.crew):
+		if int(unit.call("get_health")) <= 0: continue
+		var command = UNIT_COMMAND_SCRIPT.new()
+		command.unit_id = String(unit.call("get_unit_id"))
+		command.team_id = String(unit.call("get_team_id"))
+		command.priority = 12
+		command.phase = int(execution_state.get("phase",-1))
+		command.source_command_type = "move"
+		command.target_position = unit.global_position
+		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
+		if unit.global_position.distance_to(Vector2(context.position)) > 112.0:
+			var direction := Vector2(context.position).direction_to(unit.global_position)
+			var found := false
+			for angle in [0.0,60.0,-60.0,120.0,-120.0,180.0]:
+				var desired := Vector2(context.position)+direction.rotated(deg_to_rad(angle))*56.0
+				var resolved: Dictionary = terrain.call("resolve_walkable_target",desired)
+				var target := Vector2(resolved.get("replacement_position",desired))
+				if target.distance_to(Vector2(context.position)) > 88.0: continue
+				command.target_position = target
+				found = true
+				break
+			if not found: return false
+			command.command_type = UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
+			command.move_speed_factor = 1.0
+		if not bool(command.call("is_valid")): return false
+		var data: Dictionary = command.to_dict()
+		data["command_token"] = "campaign-return-gather:%s:%s" % [String(waypoint.waypoint_id),String(command.unit_id)]
+		data["requeue_until_target"] = command.command_type == UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
+		commands.append(data)
+	if commands.is_empty(): return false
+	for command: Dictionary in commands: simulation.call("enqueue_command",command)
+	execution_state["campaign_return_gather"] = true
+	return true
+
+
+func _try_replace_arrived_computer_approach(fireteam_id: String, phase_index: int) -> bool:
+	# Use is queued while the previous MOVE may still be dressing its formation.
+	# On explicit GO only, a usable computer can replace that same-target approach;
+	# it does not complete the MOVE or change ordinary queued order semantics.
+	var execution: Dictionary = _phase_execution_by_fireteam.get(fireteam_id,{})
+	if execution.is_empty() or int(execution.get("phase",-1)) != phase_index or execution.has("interaction_waypoint_id"):
+		return false
+	var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id,phase_index),null)
+	var active_index := int(execution.get("waypoint_index",-1))
+	if plan == null or active_index < 0 or active_index >= plan.waypoints.size(): return false
+	var approach = plan.waypoints[active_index]
+	if String(approach.command_type) != FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_MOVE: return false
+	for index in range(active_index+1,plan.waypoints.size()):
+		var waypoint = plan.waypoints[index]
+		var metadata: Dictionary = waypoint.metadata
+		if String(waypoint.status) != FIRETEAM_WAYPOINT_SCRIPT.STATUS_PENDING or String(metadata.get("source","")) != "mission_interaction_use_intent" or String(metadata.get("interaction_type","")) != "computer": continue
+		var radius := float(metadata.get("interaction_radius_world",0.0))
+		if radius <= 0 or Vector2(approach.target_position).distance_to(Vector2(waypoint.target_position)) > radius: return false
+		var feedback := _resolve_mission_interaction_feedback_for_intent(get_mission_interaction_use_feedback_snapshot(),String(metadata.get("interaction_id","")))
+		if String(feedback.get("status","")) != "usable" or not bool(feedback.get("can_prompt_use",false)) or not _build_fireteam_engage_contact_halt_context(fireteam_id).is_empty(): return false
+		# Remove the superseded approach rather than marking physical movement done.
+		approach.status = FIRETEAM_WAYPOINT_SCRIPT.STATUS_CANCELLED
+		plan.waypoints.remove_at(active_index)
+		_phase_execution_by_fireteam.erase(fireteam_id)
+		_ensure_fireteam_movement_controller()
+		if _fireteam_movement_controller != null: _fireteam_movement_controller.call("reset_fireteam",fireteam_id)
+		return _activate_next_waypoint_for_plan(plan,fireteam_id,index-1)
+	return false
 
 
 func _is_phase_waypoint_soft_completion_allowed(execution_state: Dictionary) -> bool:
@@ -33978,7 +34120,7 @@ func _clear_fireteam_security_facing_meta(fireteam_id: String) -> void:
 			(unit as Node).remove_meta("security_facing_active")
 
 
-func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: int) -> bool:
+func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: int, token_prefix: String = "") -> bool:
 	var simulation_root = get_node_or_null("../SimulationRoot")
 	if simulation_root == null:
 		return false
@@ -34020,6 +34162,7 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 		command.source_command_type = "defend"
 		command.source_task_type = "auto_defend"
 		command.phase = phase_index
+		if not token_prefix.is_empty(): command.command_token = token_prefix+":"+String(command.unit_id)
 		command.movement_posture = String(modifiers.get("movement_posture", UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE))
 		command.weapon_posture = String(modifiers.get("weapon_posture", UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED))
 		command.posture_policy_id = String(modifiers.get("posture_policy_id", ""))
@@ -34395,11 +34538,16 @@ func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index:
 	if String(Dictionary(waypoint.metadata).get("source", "")) == "mission_interaction_use_intent":
 		var interaction_state: Dictionary = _phase_execution_by_fireteam[fireteam_id]
 		interaction_state["interaction_waypoint_id"] = String(waypoint.waypoint_id)
+		interaction_state["interaction_id"] = String(Dictionary(waypoint.metadata).get("interaction_id",""))
 		interaction_state["interaction_hold_radius"] = float(Dictionary(waypoint.metadata).get("interaction_radius_world", 0.0))
 		interaction_state["interaction_marker_position"] = waypoint.target_position
 	_record_command_commit_timing_scope(timing, "activation_profile_and_plan_commit_usec", scope_started_usec, true)
 	scope_started_usec = _command_commit_timing_clock(timing)
-	var issued: bool = _issue_waypoint_for_fireteam(fireteam_id, waypoint, int(plan.phase), behavior_profile)
+	var issued: bool = _start_campaign_return_gather(waypoint,_phase_execution_by_fireteam[fireteam_id])
+	if not issued:
+		issued = _try_start_stationary_interaction(fireteam_id, waypoint, int(plan.phase), _phase_execution_by_fireteam[fireteam_id])
+	if not issued:
+		issued = _issue_waypoint_for_fireteam(fireteam_id, waypoint, int(plan.phase), behavior_profile)
 	_record_command_commit_timing_scope(timing, "activation_issue_waypoint_usec", scope_started_usec, true)
 	return issued
 
@@ -34962,6 +35110,24 @@ func _update_active_phase_execution(delta: float) -> void:
 				_fireteam_movement_controller.call("reset_fireteam", String(fireteam_id))
 			continue
 		var waypoint = plan.waypoints[waypoint_index]
+		if bool(execution_state.get("campaign_return_gather",false)):
+			var return_context := _campaign_return_context()
+			if not _campaign_return_crew_near(return_context,112.0):
+				# A previously queued automatic security Hold can commit after the
+				# first gathering Move. Reclaim only the explicit return intention
+				# when its actual navigation command was superseded, without timers.
+				for member: Node2D in Array(return_context.get("crew",[])):
+					if member.global_position.distance_to(Vector2(return_context.position)) <= 112.0: continue
+					var current: Variant = member.call("get_current_unit_command")
+					var token := String(current.get("command_token")) if current != null else ""
+					var expected := "campaign-return-gather:%s:%s" % [String(waypoint.waypoint_id),String(member.call("get_unit_id"))]
+					if token != expected:
+						_start_campaign_return_gather(waypoint,execution_state)
+						break
+				continue
+			if not _try_start_stationary_interaction(String(fireteam_id),waypoint,phase_index,execution_state): continue
+			execution_state.erase("campaign_return_gather")
+			_phase_execution_by_fireteam[fireteam_id] = execution_state
 		var anchor := _get_selection_anchor_for_fireteam(String(fireteam_id))
 		var resolved_target_position: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
 		_ensure_fireteam_movement_controller()

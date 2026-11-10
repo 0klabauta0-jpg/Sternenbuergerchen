@@ -37,7 +37,7 @@ func _run() -> void:
 	_check(initial.phase == "grounded" and initial.location_id == "homebase", "Initial ship is on moon homebase")
 	_check(Dictionary(initial.bodies).size() == 2 and initial.bodies.has("moon") and initial.bodies.has("planet"), "Exactly moon and planet are present")
 	_check(initial.orbits.moon_orbit.position == [0.18, 0.70] and initial.orbits.planet_orbit.position == [0.80, 0.28], "Orbit positions are data-owned")
-	_check(initial.location_orbits == {"homebase": "moon_orbit", "satellite_crash": "planet_orbit", "trade_outpost": "planet_orbit"}, "Both visit maps belong to planet; base to moon")
+	_check(initial.location_orbits == {"homebase": "moon_orbit", "satellite_crash": "planet_orbit", "trade_outpost": "planet_orbit", "fortified_outpost":"planet_orbit", "distress_orbit":"planet_orbit"}, "All four authored away locations belong to planet; base to moon")
 	_check(float(initial.duration_seconds) == 3.0, "Quantum jumps take three seconds")
 	_check(not _command("start_quantum", {"craft_id": "ship", "target_orbit_id": "planet_orbit"}).ok, "Cannot quantum from ground")
 	_check(not _command("launch_to_orbit", {"craft_id": "ship"}).ok, "UI cannot authorize takeoff")

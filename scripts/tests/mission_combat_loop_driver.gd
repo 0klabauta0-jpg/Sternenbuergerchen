@@ -418,15 +418,20 @@ func request_mission_evacuation() -> Dictionary:
 	}
 
 
+var _finite_enemy_roster: bool = false
+var _known_enemy_gate_groups: Dictionary = {}
+
 func configure_scenario_runtime_gates_from_file(path: String) -> bool:
 	if _mission_scenario_runtime_gates == null:
 		return false
 	_reset_scenario_gate_inputs()
+	_known_enemy_gate_groups.clear()
 	var scenario: Dictionary = {}
 	if not path.strip_edges().is_empty() and FileAccess.file_exists(path):
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 		if typeof(parsed) == TYPE_DICTIONARY:
 			scenario = Dictionary(parsed)
+	_finite_enemy_roster = Dictionary(scenario.get("vertical_slice",{})).get("finite_enemy_roster",false) == true
 	_configure_mission_interaction_door_runtime_bindings(scenario)
 	_mission_scenario_runtime_gates.call("configure_from_file", path)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
@@ -443,6 +448,8 @@ func configure_scenario_runtime_gates(slice: Dictionary) -> bool:
 	if _mission_scenario_runtime_gates == null:
 		return false
 	_reset_scenario_gate_inputs()
+	_known_enemy_gate_groups.clear()
+	_finite_enemy_roster = slice.get("finite_enemy_roster",false) == true
 	_configure_mission_interaction_door_runtime_bindings({"vertical_slice": slice})
 	_mission_scenario_runtime_gates.call("configure_from_slice", slice)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
@@ -1870,6 +1877,8 @@ func _request_respawn_for_unit(unit, unit_id: String) -> void:
 
 	if unit_team_id.is_empty():
 		return
+	if _finite_enemy_roster and unit_team_id != friendly_team_id:
+		return
 
 	respawn_manager.call("request_respawn", unit_id, unit_team_id)
 
@@ -2324,11 +2333,15 @@ func _build_mission_scenario_runtime_gate_context() -> Dictionary:
 
 
 func _build_enemy_group_fit_counts() -> Dictionary:
+	# A defeated final defender drops out of live tactics. Retain the group
+	# identity once actually observed, so zero is distinct from not yet spawned.
 	var result: Dictionary = {}
+	for known_group in _known_enemy_gate_groups: result[known_group]=0
 	for group_id_variant in _enemy_team_tactics_states_by_group_id.keys():
 		var group_id: String = String(group_id_variant).strip_edges()
 		if group_id.is_empty():
 			continue
+		_known_enemy_gate_groups[group_id]=true
 		var state: Dictionary = Dictionary(_enemy_team_tactics_states_by_group_id.get(group_id_variant, {}))
 		var fit_count: int = 0
 		var candidate_units: Array = _get_active_enemy_units()
@@ -2347,7 +2360,7 @@ func _is_unit_fit_for_gate_count(unit) -> bool:
 		return bool(unit.call("is_fit_for_combat"))
 	if unit.has_method("get_vital_state"):
 		var vital_state: String = String(unit.call("get_vital_state")).strip_edges().to_lower()
-		return vital_state != "downed" and vital_state != "dead"
+		return vital_state == "fit"
 	return true
 
 

@@ -220,9 +220,12 @@ func _ready() -> void:
 		if not String(_campaign_start.get("error_message")).is_empty():
 			call_deferred("_campaign_load_failed")
 			return
+	elif not String(_game_start_request.get("preset_id", "")).is_empty():
+		load("res://scripts/meta/skirmish_start_configuration.gd").new().configure(self, _game_start_request)
 	else:
 		_load_persistent_player_roster()
-	_ensure_singleplayer_release_start_bootstrap()
+	if not has_meta("skirmish_preset_id"):
+		_ensure_singleplayer_release_start_bootstrap()
 	META_UI_SKIN_SCRIPT.apply_meta_navigation(self)
 	_connect_navigation_buttons()
 	_ensure_homebase_aircraft_locations()
@@ -230,6 +233,13 @@ func _ready() -> void:
 	_singleplayer_runtime.name = "SingleplayerRuntime"
 	add_child(_singleplayer_runtime)
 	_singleplayer_runtime.call("configure", self, homebase_screen)
+	var encounter_layer := CanvasLayer.new()
+	encounter_layer.layer=95
+	encounter_layer.name="CampaignSpaceEncounterLayer"
+	add_child(encounter_layer)
+	var encounter_panel=load("res://scripts/meta/campaign_space_encounter_presenter.gd").new()
+	encounter_layer.add_child(encounter_panel)
+	encounter_panel.configure(_singleplayer_runtime)
 	if is_campaign_start():
 		_campaign_tutorial = load("res://scripts/meta/campaign_tutorial_presenter.gd").new()
 		var tutorial_layer := CanvasLayer.new()
@@ -4100,9 +4110,21 @@ func _start_mission() -> void:
 	if not location_id.is_empty():
 		var existing: Node=_location_registry.get_location(location_id)
 		if existing!=null:
-			_admit_existing_location(existing)
-			_show_mission()
-			return
+			var previous_scenario := String(Dictionary(existing.get_meta("singleplayer_mission_identity",{})).get("scenario_id",""))
+			var incoming_scenario := String(_active_singleplayer_identity.get("scenario_id",""))
+			var prior_driver: Node=existing.get_node_or_null("CombatLoopDriver")
+			var resolved_retry := prior_driver != null and bool(prior_driver.get("_combat_finished")) and not String(_active_singleplayer_identity.get("job_id","")).is_empty()
+			if is_campaign_start() and (previous_scenario != incoming_scenario or resolved_retry):
+				# A new job at the same place gets fresh scenario gates while finite
+				# discoveries/depletion remain with the persistent resource owner.
+				_singleplayer_runtime.call("release_location_resources",location_id)
+				_location_contexts.erase(location_id)
+				if _active_mission==existing: _active_mission=null
+				existing.free()
+			else:
+				_admit_existing_location(existing)
+				_show_mission()
+				return
 	if _active_mission != null:
 		if String(_active_mission.get_meta("location_id","")).is_empty(): _active_mission.queue_free()
 		else: _remember_location(_active_mission)
@@ -4116,6 +4138,8 @@ func _start_mission() -> void:
 		mission_instance.set_meta("location_id",location_id)
 		_location_registry.register_location(location_id,mission_instance)
 		_remember_location(mission_instance)
+		if _singleplayer_runtime.has_method("register_location_resources"):
+			_singleplayer_runtime.call("register_location_resources", mission_instance, location_id)
 	_sync_active_homebase_direct_selection_from_mission_setup()
 	_connect_planning_state_bridge(_active_mission)
 	_connect_mission_end(_active_mission)
@@ -4552,8 +4576,8 @@ func _apply_mission_progression_to_roster(mission_result: Dictionary) -> Diction
 	updated_roster = Dictionary(personnel_result.get("updated_roster", updated_roster)).duplicate(true)
 	result["personnel_events"] = Array(personnel_result.get("events", [])).duplicate(true)
 	result["personnel_notifications"] = PackedStringArray(personnel_result.get("notifications", PackedStringArray()))
-	if is_campaign_start():
-		# Campaign persistence is one coherent home checkpoint, never local_player.
+	if is_campaign_start() or has_meta("skirmish_preset_id"):
+		# Campaign/preset progress never overwrites the saved team library. is one coherent home checkpoint, never local_player.
 		result["progression_save_ok"] = true
 		result["progression_save_path"] = "user://campaigns/introduction/checkpoint_v1.json"
 		_replace_roster_units(Array(updated_roster.get("units", [])))
@@ -4566,7 +4590,7 @@ func _apply_mission_progression_to_roster(mission_result: Dictionary) -> Diction
 
 
 func _build_progression_roster_payload() -> Dictionary:
-	var load_result: Dictionary = {} if is_campaign_start() else Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("load_roster", PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID))
+	var load_result: Dictionary = {} if is_campaign_start() or has_meta("skirmish_preset_id") else Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("load_roster", PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID))
 	var roster: Dictionary = Dictionary(load_result.get("roster", {})).duplicate(true) if bool(load_result.get("ok", false)) else {}
 	if roster.is_empty():
 		roster = {
@@ -7604,17 +7628,14 @@ func _campaign_load_failed() -> void:
 
 
 func _refresh_singleplayer_services() -> void:
-	if _singleplayer_services == null or _singleplayer_runtime == null:
-		return
+	if _singleplayer_services == null or _singleplayer_runtime == null: return
 	var snapshot: Dictionary = _singleplayer_runtime.call("get_snapshot")
-	var has_remote_service: bool = false
-	for context in Dictionary(snapshot.get("service_contexts_by_craft_id", {})).values():
-		if String(context.get("location_id", "")) == "trade_outpost":
-			has_remote_service = true
-	_singleplayer_services.visible = _current_meta_view == "mission" and has_remote_service
+	var at_home := _current_meta_view == "homebase"
+	var remote := _current_meta_view == "mission" and not Dictionary(snapshot.get("service_contexts_by_craft_id",{})).is_empty()
+	_singleplayer_services.visible = at_home or remote
 	if _singleplayer_services.visible:
-		_singleplayer_services.position = Vector2(get_viewport().get_visible_rect().size.x - 350, 80)
-		_singleplayer_services.call("refresh", snapshot)
+		_singleplayer_services.position=Vector2(get_viewport().get_visible_rect().size.x-350,80)
+		_singleplayer_services.call("refresh",snapshot)
 
 
 func _request_singleplayer_return(craft_id: String) -> Dictionary:
@@ -7780,3 +7801,32 @@ func _planning_for_location(planning: Dictionary, location_id: String) -> Dictio
 		if String(_craft_location_runtime.get(active_id,""))!=location_id:
 			result["mission_drop_craft_id"]=String(cards[0].get("craft_id",""))
 	return result
+
+
+func register_campaign_recruit(profile: Dictionary, craft_definition: Dictionary = {}) -> Dictionary:
+	var id := String(profile.get("unit_id",""))
+	if id.is_empty(): return {"ok":false,"reason":"invalid_recruit"}
+	for unit: Dictionary in _all_team_units:
+		if String(unit.get("unit_id",""))==id: return {"ok":true,"already_registered":true}
+	_all_team_units.append(profile.duplicate(true))
+	_available_team_units.append(profile.duplicate(true))
+	if not craft_definition.is_empty():
+		var craft_id := String(craft_definition.get("craft_id",""))
+		if craft_id.is_empty(): return {"ok":false,"reason":"invalid_craft"}
+		if _find_homebase_aircraft_definition(craft_id).is_empty(): _homebase_aircraft_definitions.append(craft_definition.duplicate(true))
+		_assigned_aircraft_pilot_by_craft[craft_id]=id
+		_aircraft_location_by_craft[craft_id]="homebase"
+	if _singleplayer_runtime != null:
+		_singleplayer_runtime.call("sync_crafts")
+		var personnel: Node = _singleplayer_runtime.call("get_base_personnel_runtime")
+		if personnel!=null: personnel.call("sync_roster")
+	_refresh_homebase_screen()
+	return {"ok":true,"unit_id":id}
+
+
+func rename_campaign_person(unit_id: String, display_name: String) -> Dictionary:
+	for units in [_all_team_units,_available_team_units]:
+		for unit: Dictionary in units:
+			if String(unit.get("unit_id",""))==unit_id: unit["display_name"]=display_name
+	_refresh_homebase_screen()
+	return {"ok":true,"message":"Name geändert"}

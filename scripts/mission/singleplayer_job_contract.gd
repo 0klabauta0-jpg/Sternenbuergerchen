@@ -21,4 +21,8 @@ static func normalize_job(raw: Dictionary, locations: Dictionary) -> Dictionary:
 	var credits: float = float(reward.get("credits", 0))
 	if not is_finite(credits) or credits < 0.0 or credits != floor(credits) or credits > 1000000.0:
 		return {}
-	return {"id": id, "title": String(raw.title), "description": String(raw.get("description", "")), "location_id": location_id, "scenario_id": scenario_id, "required_step_ids": steps, "reward": {"credits": int(credits)}}
+	var prerequisite := String(raw.get("prerequisite_job_id", ""))
+	var blueprint := String(reward.get("blueprint_id", ""))
+	if prerequisite == id or typeof(raw.get("home_upload", false)) != TYPE_BOOL:
+		return {}
+	return {"id": id, "title": String(raw.title), "description": String(raw.get("description", "")), "location_id": location_id, "scenario_id": scenario_id, "required_step_ids": steps, "prerequisite_job_id":prerequisite, "home_upload":bool(raw.get("home_upload", false)), "reward": {"credits": int(credits), "blueprint_id":blueprint}}
